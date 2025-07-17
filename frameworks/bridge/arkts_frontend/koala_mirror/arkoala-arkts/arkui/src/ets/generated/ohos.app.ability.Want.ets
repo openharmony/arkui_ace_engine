@@ -42,7 +42,7 @@ export class Want_serializer {
         let value_bundleName_type : int32 = RuntimeType.UNDEFINED
         value_bundleName_type = runtimeType(value_bundleName)
         valueSerializer.writeInt8((value_bundleName_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_bundleName_type)) {
+        if ((value_bundleName_type) != (RuntimeType.UNDEFINED)) {
             const value_bundleName_value  = value_bundleName!
             valueSerializer.writeString(value_bundleName_value)
         }
@@ -50,7 +50,7 @@ export class Want_serializer {
         let value_abilityName_type : int32 = RuntimeType.UNDEFINED
         value_abilityName_type = runtimeType(value_abilityName)
         valueSerializer.writeInt8((value_abilityName_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_abilityName_type)) {
+        if ((value_abilityName_type) != (RuntimeType.UNDEFINED)) {
             const value_abilityName_value  = value_abilityName!
             valueSerializer.writeString(value_abilityName_value)
         }
@@ -58,7 +58,7 @@ export class Want_serializer {
         let value_deviceId_type : int32 = RuntimeType.UNDEFINED
         value_deviceId_type = runtimeType(value_deviceId)
         valueSerializer.writeInt8((value_deviceId_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_deviceId_type)) {
+        if ((value_deviceId_type) != (RuntimeType.UNDEFINED)) {
             const value_deviceId_value  = value_deviceId!
             valueSerializer.writeString(value_deviceId_value)
         }
@@ -66,7 +66,7 @@ export class Want_serializer {
         let value_uri_type : int32 = RuntimeType.UNDEFINED
         value_uri_type = runtimeType(value_uri)
         valueSerializer.writeInt8((value_uri_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_uri_type)) {
+        if ((value_uri_type) != (RuntimeType.UNDEFINED)) {
             const value_uri_value  = value_uri!
             valueSerializer.writeString(value_uri_value)
         }
@@ -74,7 +74,7 @@ export class Want_serializer {
         let value_type_type : int32 = RuntimeType.UNDEFINED
         value_type_type = runtimeType(value_type)
         valueSerializer.writeInt8((value_type_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type_type)) {
+        if ((value_type_type) != (RuntimeType.UNDEFINED)) {
             const value_type_value  = value_type!
             valueSerializer.writeString(value_type_value)
         }
@@ -82,7 +82,7 @@ export class Want_serializer {
         let value_flags_type : int32 = RuntimeType.UNDEFINED
         value_flags_type = runtimeType(value_flags)
         valueSerializer.writeInt8((value_flags_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_flags_type)) {
+        if ((value_flags_type) != (RuntimeType.UNDEFINED)) {
             const value_flags_value  = value_flags!
             valueSerializer.writeNumber(value_flags_value)
         }
@@ -90,7 +90,7 @@ export class Want_serializer {
         let value_action_type : int32 = RuntimeType.UNDEFINED
         value_action_type = runtimeType(value_action)
         valueSerializer.writeInt8((value_action_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_action_type)) {
+        if ((value_action_type) != (RuntimeType.UNDEFINED)) {
             const value_action_value  = value_action!
             valueSerializer.writeString(value_action_value)
         }
@@ -98,7 +98,7 @@ export class Want_serializer {
         let value_parameters_type : int32 = RuntimeType.UNDEFINED
         value_parameters_type = runtimeType(value_parameters)
         valueSerializer.writeInt8((value_parameters_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_parameters_type)) {
+        if ((value_parameters_type) != (RuntimeType.UNDEFINED)) {
             const value_parameters_value  = value_parameters!
             valueSerializer.writeInt32((value_parameters_value.size).toInt())
             for (const pair of value_parameters_value) {
@@ -112,11 +112,11 @@ export class Want_serializer {
         let value_entities_type : int32 = RuntimeType.UNDEFINED
         value_entities_type = runtimeType(value_entities)
         valueSerializer.writeInt8((value_entities_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_entities_type)) {
+        if ((value_entities_type) != (RuntimeType.UNDEFINED)) {
             const value_entities_value  = value_entities!
             valueSerializer.writeInt32((value_entities_value.length).toInt())
-            for (let i = 0; i < value_entities_value.length; i++) {
-                const value_entities_value_element : string = value_entities_value[i]
+            for (let value_entities_value_counter_i = 0; value_entities_value_counter_i < value_entities_value.length; value_entities_value_counter_i++) {
+                const value_entities_value_element : string = value_entities_value[value_entities_value_counter_i]
                 valueSerializer.writeString(value_entities_value_element)
             }
         }
@@ -124,7 +124,7 @@ export class Want_serializer {
         let value_moduleName_type : int32 = RuntimeType.UNDEFINED
         value_moduleName_type = runtimeType(value_moduleName)
         valueSerializer.writeInt8((value_moduleName_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_moduleName_type)) {
+        if ((value_moduleName_type) != (RuntimeType.UNDEFINED)) {
             const value_moduleName_value  = value_moduleName!
             valueSerializer.writeString(value_moduleName_value)
         }
@@ -133,56 +133,56 @@ export class Want_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const bundleName_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let bundleName_buf : string | undefined
-        if ((RuntimeType.UNDEFINED) != (bundleName_buf_runtimeType))
+        if ((bundleName_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             bundleName_buf = (valueDeserializer.readString() as string)
         }
         const bundleName_result : string | undefined = bundleName_buf
         const abilityName_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let abilityName_buf : string | undefined
-        if ((RuntimeType.UNDEFINED) != (abilityName_buf_runtimeType))
+        if ((abilityName_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             abilityName_buf = (valueDeserializer.readString() as string)
         }
         const abilityName_result : string | undefined = abilityName_buf
         const deviceId_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let deviceId_buf : string | undefined
-        if ((RuntimeType.UNDEFINED) != (deviceId_buf_runtimeType))
+        if ((deviceId_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             deviceId_buf = (valueDeserializer.readString() as string)
         }
         const deviceId_result : string | undefined = deviceId_buf
         const uri_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let uri_buf : string | undefined
-        if ((RuntimeType.UNDEFINED) != (uri_buf_runtimeType))
+        if ((uri_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             uri_buf = (valueDeserializer.readString() as string)
         }
         const uri_result : string | undefined = uri_buf
         const type_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let type_buf : string | undefined
-        if ((RuntimeType.UNDEFINED) != (type_buf_runtimeType))
+        if ((type_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             type_buf = (valueDeserializer.readString() as string)
         }
         const type_result : string | undefined = type_buf
         const flags_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let flags_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (flags_buf_runtimeType))
+        if ((flags_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             flags_buf = (valueDeserializer.readNumber() as number)
         }
         const flags_result : number | undefined = flags_buf
         const action_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let action_buf : string | undefined
-        if ((RuntimeType.UNDEFINED) != (action_buf_runtimeType))
+        if ((action_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             action_buf = (valueDeserializer.readString() as string)
         }
         const action_result : string | undefined = action_buf
         const parameters_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let parameters_buf : Map<string, Object> | undefined
-        if ((RuntimeType.UNDEFINED) != (parameters_buf_runtimeType))
+        if ((parameters_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const parameters_buf__size : int32 = valueDeserializer.readInt32()
             let parameters_buf_ : Map<string, Object> = new Map<string, Object>()
@@ -197,7 +197,7 @@ export class Want_serializer {
         const parameters_result : Map<string, Object> | undefined = parameters_buf
         const entities_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let entities_buf : Array<string> | undefined
-        if ((RuntimeType.UNDEFINED) != (entities_buf_runtimeType))
+        if ((entities_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const entities_buf__length : int32 = valueDeserializer.readInt32()
             let entities_buf_ : Array<string> = new Array<string>(entities_buf__length)
@@ -209,7 +209,7 @@ export class Want_serializer {
         const entities_result : Array<string> | undefined = entities_buf
         const moduleName_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let moduleName_buf : string | undefined
-        if ((RuntimeType.UNDEFINED) != (moduleName_buf_runtimeType))
+        if ((moduleName_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             moduleName_buf = (valueDeserializer.readString() as string)
         }

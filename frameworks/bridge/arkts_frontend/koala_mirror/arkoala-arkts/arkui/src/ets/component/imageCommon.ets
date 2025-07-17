@@ -91,11 +91,11 @@ export class ImageAIOptions_serializer {
         let value_types_type : int32 = RuntimeType.UNDEFINED
         value_types_type = runtimeType(value_types)
         valueSerializer.writeInt8((value_types_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_types_type)) {
+        if ((value_types_type) != (RuntimeType.UNDEFINED)) {
             const value_types_value  = value_types!
             valueSerializer.writeInt32((value_types_value.length).toInt())
-            for (let i = 0; i < value_types_value.length; i++) {
-                const value_types_value_element : ImageAnalyzerType = value_types_value[i]
+            for (let value_types_value_counter_i = 0; value_types_value_counter_i < value_types_value.length; value_types_value_counter_i++) {
+                const value_types_value_element : ImageAnalyzerType = value_types_value[value_types_value_counter_i]
                 valueSerializer.writeInt32(TypeChecker.ImageAnalyzerType_ToNumeric(value_types_value_element))
             }
         }
@@ -103,7 +103,7 @@ export class ImageAIOptions_serializer {
         let value_aiController_type : int32 = RuntimeType.UNDEFINED
         value_aiController_type = runtimeType(value_aiController)
         valueSerializer.writeInt8((value_aiController_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_aiController_type)) {
+        if ((value_aiController_type) != (RuntimeType.UNDEFINED)) {
             const value_aiController_value  = value_aiController!
             ImageAnalyzerController_serializer.write(valueSerializer, value_aiController_value)
         }
@@ -112,7 +112,7 @@ export class ImageAIOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const types_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let types_buf : Array<ImageAnalyzerType> | undefined
-        if ((RuntimeType.UNDEFINED) != (types_buf_runtimeType))
+        if ((types_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const types_buf__length : int32 = valueDeserializer.readInt32()
             let types_buf_ : Array<ImageAnalyzerType> = new Array<ImageAnalyzerType>(types_buf__length)
@@ -124,7 +124,7 @@ export class ImageAIOptions_serializer {
         const types_result : Array<ImageAnalyzerType> | undefined = types_buf
         const aiController_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let aiController_buf : ImageAnalyzerController | undefined
-        if ((RuntimeType.UNDEFINED) != (aiController_buf_runtimeType))
+        if ((aiController_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             aiController_buf = (ImageAnalyzerController_serializer.read(valueDeserializer) as ImageAnalyzerController)
         }
@@ -138,8 +138,8 @@ export class ImageAnalyzerConfig_serializer {
         let valueSerializer : SerializerBase = buffer
         const value_types  = value.types
         valueSerializer.writeInt32((value_types.length).toInt())
-        for (let i = 0; i < value_types.length; i++) {
-            const value_types_element : ImageAnalyzerType = value_types[i]
+        for (let value_types_counter_i = 0; value_types_counter_i < value_types.length; value_types_counter_i++) {
+            const value_types_element : ImageAnalyzerType = value_types[value_types_counter_i]
             valueSerializer.writeInt32(TypeChecker.ImageAnalyzerType_ToNumeric(value_types_element))
         }
     }

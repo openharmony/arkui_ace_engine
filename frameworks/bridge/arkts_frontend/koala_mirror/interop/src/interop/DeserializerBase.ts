@@ -54,7 +54,7 @@ export class DeserializerBase {
         factory: (args: Uint8Array, length: int32) => T,
         args: Uint8Array, length: int32): T {
 
-        // TBD: Use cache
+        // Improve: Use cache
         return factory(args, length);
     }
 
@@ -123,7 +123,7 @@ export class DeserializerBase {
     }
 
     readFunction(): any {
-        // TODO: not exactly correct.
+        // Improve: not exactly correct.
         const id = this.readInt32()
         return id
     }

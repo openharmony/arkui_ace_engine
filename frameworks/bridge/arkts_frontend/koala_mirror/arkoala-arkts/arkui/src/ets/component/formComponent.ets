@@ -53,7 +53,7 @@ export class ArkFormComponentPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             FormSize_serializer.write(thisSerializer, value_value)
         }
@@ -65,7 +65,7 @@ export class ArkFormComponentPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeString(value_value)
         }
@@ -77,7 +77,7 @@ export class ArkFormComponentPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = (value as FormDimension)
             thisSerializer.writeInt32(TypeChecker.FormDimension_ToNumeric(value_value))
         }
@@ -89,7 +89,7 @@ export class ArkFormComponentPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -101,7 +101,7 @@ export class ArkFormComponentPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = (value as Visibility)
             thisSerializer.writeInt32(TypeChecker.Visibility_ToNumeric(value_value))
         }
@@ -113,7 +113,7 @@ export class ArkFormComponentPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -125,7 +125,7 @@ export class ArkFormComponentPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -137,7 +137,7 @@ export class ArkFormComponentPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -149,7 +149,7 @@ export class ArkFormComponentPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -161,7 +161,7 @@ export class ArkFormComponentPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -617,7 +617,7 @@ export class FormInfo_serializer {
         let value_dimension_type : int32 = RuntimeType.UNDEFINED
         value_dimension_type = runtimeType(value_dimension)
         valueSerializer.writeInt8((value_dimension_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_dimension_type)) {
+        if ((value_dimension_type) != (RuntimeType.UNDEFINED)) {
             const value_dimension_value  = (value_dimension as FormDimension)
             valueSerializer.writeInt32(TypeChecker.FormDimension_ToNumeric(value_dimension_value))
         }
@@ -625,7 +625,7 @@ export class FormInfo_serializer {
         let value_temporary_type : int32 = RuntimeType.UNDEFINED
         value_temporary_type = runtimeType(value_temporary)
         valueSerializer.writeInt8((value_temporary_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_temporary_type)) {
+        if ((value_temporary_type) != (RuntimeType.UNDEFINED)) {
             const value_temporary_value  = value_temporary!
             valueSerializer.writeBoolean(value_temporary_value)
         }
@@ -633,7 +633,7 @@ export class FormInfo_serializer {
         let value_want_type : int32 = RuntimeType.UNDEFINED
         value_want_type = runtimeType(value_want)
         valueSerializer.writeInt8((value_want_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_want_type)) {
+        if ((value_want_type) != (RuntimeType.UNDEFINED)) {
             const value_want_value  = value_want!
             Want_serializer.write(valueSerializer, value_want_value)
         }
@@ -641,7 +641,7 @@ export class FormInfo_serializer {
         let value_renderingMode_type : int32 = RuntimeType.UNDEFINED
         value_renderingMode_type = runtimeType(value_renderingMode)
         valueSerializer.writeInt8((value_renderingMode_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_renderingMode_type)) {
+        if ((value_renderingMode_type) != (RuntimeType.UNDEFINED)) {
             const value_renderingMode_value  = (value_renderingMode as FormRenderingMode)
             valueSerializer.writeInt32(TypeChecker.FormRenderingMode_ToNumeric(value_renderingMode_value))
         }
@@ -649,7 +649,7 @@ export class FormInfo_serializer {
         let value_shape_type : int32 = RuntimeType.UNDEFINED
         value_shape_type = runtimeType(value_shape)
         valueSerializer.writeInt8((value_shape_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_shape_type)) {
+        if ((value_shape_type) != (RuntimeType.UNDEFINED)) {
             const value_shape_value  = (value_shape as FormShape)
             valueSerializer.writeInt32(TypeChecker.FormShape_ToNumeric(value_shape_value))
         }
@@ -674,35 +674,35 @@ export class FormInfo_serializer {
         const module_result : string = (valueDeserializer.readString() as string)
         const dimension_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let dimension_buf : FormDimension | undefined
-        if ((RuntimeType.UNDEFINED) != (dimension_buf_runtimeType))
+        if ((dimension_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             dimension_buf = TypeChecker.FormDimension_FromNumeric(valueDeserializer.readInt32())
         }
         const dimension_result : FormDimension | undefined = dimension_buf
         const temporary_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let temporary_buf : boolean | undefined
-        if ((RuntimeType.UNDEFINED) != (temporary_buf_runtimeType))
+        if ((temporary_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             temporary_buf = valueDeserializer.readBoolean()
         }
         const temporary_result : boolean | undefined = temporary_buf
         const want_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let want_buf : Want | undefined
-        if ((RuntimeType.UNDEFINED) != (want_buf_runtimeType))
+        if ((want_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             want_buf = Want_serializer.read(valueDeserializer)
         }
         const want_result : Want | undefined = want_buf
         const renderingMode_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let renderingMode_buf : FormRenderingMode | undefined
-        if ((RuntimeType.UNDEFINED) != (renderingMode_buf_runtimeType))
+        if ((renderingMode_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             renderingMode_buf = TypeChecker.FormRenderingMode_FromNumeric(valueDeserializer.readInt32())
         }
         const renderingMode_result : FormRenderingMode | undefined = renderingMode_buf
         const shape_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let shape_buf : FormShape | undefined
-        if ((RuntimeType.UNDEFINED) != (shape_buf_runtimeType))
+        if ((shape_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             shape_buf = TypeChecker.FormShape_FromNumeric(valueDeserializer.readInt32())
         }

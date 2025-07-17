@@ -376,7 +376,7 @@ function generateDeclFromCurrentContext(filePath: string) {
 
 function loadPlugin(configDir: string, jsonPlugin: any) {
     const pluginPath = jsonPlugin.transform ?? throwError(`arktsconfig plugins objects should specify transform`)
-    /** TODO: read and pass plugin options */
+    /** Improve: read and pass plugin options */
     const plugin = (pluginPath.startsWith(".") || pluginPath.startsWith("/")) ?
         path.resolve(configDir, pluginPath) : pluginPath
     const pluginFunction: (config?: any) => any = require(plugin)(jsonPlugin)

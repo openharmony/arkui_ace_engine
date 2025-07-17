@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,7 @@
 package arkui.stateManagement.decorator
 
 import { int32, observableProxy, propDeepCopy } from "@koalaui/common"
-import { mutableState, scheduleCallback, MutableState, GlobalStateManager, InternalScope } from "@koalaui/runtime"
+import { mutableState, scheduleCallback, MutableState, GlobalStateManager } from "@koalaui/runtime"
 import { SubscribedAbstractProperty } from "./ArkState"
 import { AppStorage, LocalStorage } from "./Storage"
 
@@ -74,7 +74,7 @@ export class LinkDecoratorProperty<Value> implements SubscribedAbstractProperty<
 
     linkTo(maybeProperty: SubscribedAbstractProperty<Value> | Value | undefined): void {
         if (!maybeProperty) throw new Error(`${this.name} must be linked with another property`)
-        const property = maybeProperty! // TODO: this is to workaround Any considered non-nulish
+        const property = maybeProperty! // Improve: this is to workaround Any considered non-nulish
         if (!(property instanceof SubscribedAbstractProperty<Value>)) throw new Error('Property must be passed, got')
         if (this.property) throw new Error(`${this.name} is already linked with some property`)
         this.property = property

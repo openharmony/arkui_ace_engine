@@ -35,11 +35,11 @@ export class InteropNativeModule {
     native static _IncrementNumber(value: number): number
     native static _GetPtrVectorElement(ptr1: KPointer, arg: int32): KPointer
     native static _StringLength(ptr1: KPointer): int32
-    native static _StringData(ptr1: KPointer, arr: KUint8ArrayPtr, i: int32): void
+    native static _StringData(ptr1: KPointer, array: KUint8ArrayPtr, arrayLength: int32): void
     native static _StringMake(str1: string): KPointer
     native static _GetPtrVectorSize(ptr1: KPointer): int32
     @ani.unsafe.Quick
-    native static _ManagedStringWrite(str1: string, arr: KPointer, arg: int32): int32
+    native static _ManagedStringWrite(str1: string, array: KPointer, arrayLength: int32, arg: int32): int32
     native static _NativeLog(str1: string): void
     @ani.unsafe.Quick
     native static _Utf8ToString(data: KPointer, offset: int32, length: int32): string

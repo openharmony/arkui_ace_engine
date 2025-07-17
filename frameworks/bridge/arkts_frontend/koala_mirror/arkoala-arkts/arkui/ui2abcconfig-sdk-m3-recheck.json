@@ -4,7 +4,6 @@
         "outDir": "build-m3-sdk/recheck",
         "baseUrl": "./sdk",
         "paths": {
-            "@koalaui/arkui-common": ["../../arkui-common/src"],
             "@koalaui/interop": ["../../../interop/src/arkts"],
             "@koalaui/common": ["../../../incremental/common/src"],
             "@koalaui/compat": ["../../../incremental/compat/src/arkts"],
@@ -34,7 +33,6 @@
         "./sdk/**/*.ets"
     ],
     "dependencies": {
-        "@koalaui/arkui-common": ["../arkui-common/ui2abcconfig.json"],
         "@koalaui/runtime": ["../../incremental/runtime/ui2abcconfig.json"]
     }
 }

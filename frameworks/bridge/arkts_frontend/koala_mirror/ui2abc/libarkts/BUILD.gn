@@ -185,12 +185,13 @@ action("es2panda_copy_lib") {
         "$target_out_dir/es2panda.node"
     ]
     deps = [
-        ":es2panda_lib(${host_toolchain})"
+        ":es2panda_lib"
     ]
     args = [
         "--from-path", rebase_path(root_out_dir),
         "--to-path", rebase_path("."),
-        #"--current_os", current_os,
+        "--current-os", current_os,
+        "--current-cpu", current_cpu
     ]
 }
 

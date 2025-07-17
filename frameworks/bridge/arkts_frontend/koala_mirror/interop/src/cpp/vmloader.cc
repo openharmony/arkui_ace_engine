@@ -22,6 +22,7 @@
 #include "interop-logging.h"
 #include "dynamic-loader.h"
 #include "koala-types.h"
+#include "interop-utils.h"
 
 // DO NOT USE KOALA INTEROP MECHANISMS IN THIS FILE!
 
@@ -751,7 +752,7 @@ extern "C" DLL_EXPORT KNativePointer StartApplication(const char* appUrl, const 
                 return nullptr;
             }
         }
-        // TODO: pass app entry point!
+        // Improve: pass app entry point!
         return reinterpret_cast<KNativePointer>(etsEnv->CallLongMethod((ets_object)(app), start, &g_vmEntry.foreignVMContext));
     }
 #endif
@@ -776,7 +777,7 @@ extern "C" DLL_EXPORT KNativePointer StartApplication(const char* appUrl, const 
 
         ani_boolean useNativeLog = ANI_FALSE;
         ani_string appUrlString {};
-        status = env->String_NewUTF8(appUrl, strlen(appUrl), &appUrlString);
+        status = env->String_NewUTF8(appUrl, interop_strlen(appUrl), &appUrlString);
         if (status != ANI_OK) {
             ResetErrorIfExists(env);
             return nullptr;
@@ -790,7 +791,7 @@ extern "C" DLL_EXPORT KNativePointer StartApplication(const char* appUrl, const 
         }
 
         ani_string appParamsString {};
-        status = env->String_NewUTF8(appParams, strlen(appParams), &appParamsString);
+        status = env->String_NewUTF8(appParams, interop_strlen(appParams), &appParamsString);
         if (status != ANI_OK) {
             ResetErrorIfExists(env);
             return nullptr;
@@ -856,7 +857,7 @@ extern "C" DLL_EXPORT KNativePointer StartApplication(const char* appUrl, const 
         }
 
         ani_long ptr = 0;
-        // TODO: pass app entry point!
+        // Improve: pass app entry point!
         status = env->Object_CallMethod_Long(static_cast<ani_object>(appInstance), start, &ptr,
             reinterpret_cast<ani_long>(&g_vmEntry.foreignVMContext), loopIterations);
         if (status != ANI_OK) {
@@ -1096,7 +1097,7 @@ extern "C" DLL_EXPORT void RestartWith(const char* page)
             return;
         }
         ani_string pageString {};
-        auto status = env->String_NewUTF8(page, strlen(page), &pageString);
+        auto status = env->String_NewUTF8(page, interop_strlen(page), &pageString);
         if (status != ANI_OK) {
             ResetErrorIfExists(env);
             return;
@@ -1120,12 +1121,12 @@ extern "C" DLL_EXPORT const char* LoadView(const char* className, const char* pa
             return strdup("Cannot find loadView() method");
         }
         ani_string classNameString {};
-        auto status = env->String_NewUTF8(className, strlen(className), &classNameString);
+        auto status = env->String_NewUTF8(className, interop_strlen(className), &classNameString);
         if (status != ANI_OK) {
             return strdup("Cannot make ANI string");
         }
         ani_string paramsString {};
-        status = env->String_NewUTF8(params, strlen(params), &paramsString);
+        status = env->String_NewUTF8(params, interop_strlen(params), &paramsString);
         if (status != ANI_OK) {
             ResetErrorIfExists(env);
             return strdup("Cannot make ANI string");

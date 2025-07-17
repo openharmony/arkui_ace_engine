@@ -132,7 +132,7 @@ export class CustomDialogControllerOptions_serializer {
         let value_cancel_type : int32 = RuntimeType.UNDEFINED
         value_cancel_type = runtimeType(value_cancel)
         valueSerializer.writeInt8((value_cancel_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_cancel_type)) {
+        if ((value_cancel_type) != (RuntimeType.UNDEFINED)) {
             const value_cancel_value  = value_cancel!
             valueSerializer.holdAndWriteCallback(value_cancel_value)
         }
@@ -140,7 +140,7 @@ export class CustomDialogControllerOptions_serializer {
         let value_autoCancel_type : int32 = RuntimeType.UNDEFINED
         value_autoCancel_type = runtimeType(value_autoCancel)
         valueSerializer.writeInt8((value_autoCancel_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_autoCancel_type)) {
+        if ((value_autoCancel_type) != (RuntimeType.UNDEFINED)) {
             const value_autoCancel_value  = value_autoCancel!
             valueSerializer.writeBoolean(value_autoCancel_value)
         }
@@ -148,7 +148,7 @@ export class CustomDialogControllerOptions_serializer {
         let value_alignment_type : int32 = RuntimeType.UNDEFINED
         value_alignment_type = runtimeType(value_alignment)
         valueSerializer.writeInt8((value_alignment_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_alignment_type)) {
+        if ((value_alignment_type) != (RuntimeType.UNDEFINED)) {
             const value_alignment_value  = (value_alignment as DialogAlignment)
             valueSerializer.writeInt32(TypeChecker.DialogAlignment_ToNumeric(value_alignment_value))
         }
@@ -156,7 +156,7 @@ export class CustomDialogControllerOptions_serializer {
         let value_offset_type : int32 = RuntimeType.UNDEFINED
         value_offset_type = runtimeType(value_offset)
         valueSerializer.writeInt8((value_offset_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_offset_type)) {
+        if ((value_offset_type) != (RuntimeType.UNDEFINED)) {
             const value_offset_value  = value_offset!
             Offset_serializer.write(valueSerializer, value_offset_value)
         }
@@ -164,7 +164,7 @@ export class CustomDialogControllerOptions_serializer {
         let value_customStyle_type : int32 = RuntimeType.UNDEFINED
         value_customStyle_type = runtimeType(value_customStyle)
         valueSerializer.writeInt8((value_customStyle_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_customStyle_type)) {
+        if ((value_customStyle_type) != (RuntimeType.UNDEFINED)) {
             const value_customStyle_value  = value_customStyle!
             valueSerializer.writeBoolean(value_customStyle_value)
         }
@@ -172,7 +172,7 @@ export class CustomDialogControllerOptions_serializer {
         let value_gridCount_type : int32 = RuntimeType.UNDEFINED
         value_gridCount_type = runtimeType(value_gridCount)
         valueSerializer.writeInt8((value_gridCount_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_gridCount_type)) {
+        if ((value_gridCount_type) != (RuntimeType.UNDEFINED)) {
             const value_gridCount_value  = value_gridCount!
             valueSerializer.writeNumber(value_gridCount_value)
         }
@@ -180,7 +180,7 @@ export class CustomDialogControllerOptions_serializer {
         let value_maskColor_type : int32 = RuntimeType.UNDEFINED
         value_maskColor_type = runtimeType(value_maskColor)
         valueSerializer.writeInt8((value_maskColor_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_maskColor_type)) {
+        if ((value_maskColor_type) != (RuntimeType.UNDEFINED)) {
             const value_maskColor_value  = value_maskColor!
             let value_maskColor_value_type : int32 = RuntimeType.UNDEFINED
             value_maskColor_value_type = runtimeType(value_maskColor_value)
@@ -209,7 +209,7 @@ export class CustomDialogControllerOptions_serializer {
         let value_maskRect_type : int32 = RuntimeType.UNDEFINED
         value_maskRect_type = runtimeType(value_maskRect)
         valueSerializer.writeInt8((value_maskRect_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_maskRect_type)) {
+        if ((value_maskRect_type) != (RuntimeType.UNDEFINED)) {
             const value_maskRect_value  = value_maskRect!
             Rectangle_serializer.write(valueSerializer, value_maskRect_value)
         }
@@ -217,7 +217,7 @@ export class CustomDialogControllerOptions_serializer {
         let value_openAnimation_type : int32 = RuntimeType.UNDEFINED
         value_openAnimation_type = runtimeType(value_openAnimation)
         valueSerializer.writeInt8((value_openAnimation_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_openAnimation_type)) {
+        if ((value_openAnimation_type) != (RuntimeType.UNDEFINED)) {
             const value_openAnimation_value  = value_openAnimation!
             AnimateParam_serializer.write(valueSerializer, value_openAnimation_value)
         }
@@ -225,7 +225,7 @@ export class CustomDialogControllerOptions_serializer {
         let value_closeAnimation_type : int32 = RuntimeType.UNDEFINED
         value_closeAnimation_type = runtimeType(value_closeAnimation)
         valueSerializer.writeInt8((value_closeAnimation_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_closeAnimation_type)) {
+        if ((value_closeAnimation_type) != (RuntimeType.UNDEFINED)) {
             const value_closeAnimation_value  = value_closeAnimation!
             AnimateParam_serializer.write(valueSerializer, value_closeAnimation_value)
         }
@@ -233,7 +233,7 @@ export class CustomDialogControllerOptions_serializer {
         let value_showInSubWindow_type : int32 = RuntimeType.UNDEFINED
         value_showInSubWindow_type = runtimeType(value_showInSubWindow)
         valueSerializer.writeInt8((value_showInSubWindow_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_showInSubWindow_type)) {
+        if ((value_showInSubWindow_type) != (RuntimeType.UNDEFINED)) {
             const value_showInSubWindow_value  = value_showInSubWindow!
             valueSerializer.writeBoolean(value_showInSubWindow_value)
         }
@@ -241,7 +241,7 @@ export class CustomDialogControllerOptions_serializer {
         let value_backgroundColor_type : int32 = RuntimeType.UNDEFINED
         value_backgroundColor_type = runtimeType(value_backgroundColor)
         valueSerializer.writeInt8((value_backgroundColor_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_backgroundColor_type)) {
+        if ((value_backgroundColor_type) != (RuntimeType.UNDEFINED)) {
             const value_backgroundColor_value  = value_backgroundColor!
             let value_backgroundColor_value_type : int32 = RuntimeType.UNDEFINED
             value_backgroundColor_value_type = runtimeType(value_backgroundColor_value)
@@ -270,7 +270,7 @@ export class CustomDialogControllerOptions_serializer {
         let value_cornerRadius_type : int32 = RuntimeType.UNDEFINED
         value_cornerRadius_type = runtimeType(value_cornerRadius)
         valueSerializer.writeInt8((value_cornerRadius_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_cornerRadius_type)) {
+        if ((value_cornerRadius_type) != (RuntimeType.UNDEFINED)) {
             const value_cornerRadius_value  = value_cornerRadius!
             let value_cornerRadius_value_type : int32 = RuntimeType.UNDEFINED
             value_cornerRadius_value_type = runtimeType(value_cornerRadius_value)
@@ -305,7 +305,7 @@ export class CustomDialogControllerOptions_serializer {
         let value_isModal_type : int32 = RuntimeType.UNDEFINED
         value_isModal_type = runtimeType(value_isModal)
         valueSerializer.writeInt8((value_isModal_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_isModal_type)) {
+        if ((value_isModal_type) != (RuntimeType.UNDEFINED)) {
             const value_isModal_value  = value_isModal!
             valueSerializer.writeBoolean(value_isModal_value)
         }
@@ -313,7 +313,7 @@ export class CustomDialogControllerOptions_serializer {
         let value_onWillDismiss_type : int32 = RuntimeType.UNDEFINED
         value_onWillDismiss_type = runtimeType(value_onWillDismiss)
         valueSerializer.writeInt8((value_onWillDismiss_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_onWillDismiss_type)) {
+        if ((value_onWillDismiss_type) != (RuntimeType.UNDEFINED)) {
             const value_onWillDismiss_value  = value_onWillDismiss!
             valueSerializer.holdAndWriteCallback(value_onWillDismiss_value)
         }
@@ -321,7 +321,7 @@ export class CustomDialogControllerOptions_serializer {
         let value_width_type : int32 = RuntimeType.UNDEFINED
         value_width_type = runtimeType(value_width)
         valueSerializer.writeInt8((value_width_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_width_type)) {
+        if ((value_width_type) != (RuntimeType.UNDEFINED)) {
             const value_width_value  = value_width!
             let value_width_value_type : int32 = RuntimeType.UNDEFINED
             value_width_value_type = runtimeType(value_width_value)
@@ -345,7 +345,7 @@ export class CustomDialogControllerOptions_serializer {
         let value_height_type : int32 = RuntimeType.UNDEFINED
         value_height_type = runtimeType(value_height)
         valueSerializer.writeInt8((value_height_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_height_type)) {
+        if ((value_height_type) != (RuntimeType.UNDEFINED)) {
             const value_height_value  = value_height!
             let value_height_value_type : int32 = RuntimeType.UNDEFINED
             value_height_value_type = runtimeType(value_height_value)
@@ -369,7 +369,7 @@ export class CustomDialogControllerOptions_serializer {
         let value_borderWidth_type : int32 = RuntimeType.UNDEFINED
         value_borderWidth_type = runtimeType(value_borderWidth)
         valueSerializer.writeInt8((value_borderWidth_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_borderWidth_type)) {
+        if ((value_borderWidth_type) != (RuntimeType.UNDEFINED)) {
             const value_borderWidth_value  = value_borderWidth!
             let value_borderWidth_value_type : int32 = RuntimeType.UNDEFINED
             value_borderWidth_value_type = runtimeType(value_borderWidth_value)
@@ -404,7 +404,7 @@ export class CustomDialogControllerOptions_serializer {
         let value_borderColor_type : int32 = RuntimeType.UNDEFINED
         value_borderColor_type = runtimeType(value_borderColor)
         valueSerializer.writeInt8((value_borderColor_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_borderColor_type)) {
+        if ((value_borderColor_type) != (RuntimeType.UNDEFINED)) {
             const value_borderColor_value  = value_borderColor!
             let value_borderColor_value_type : int32 = RuntimeType.UNDEFINED
             value_borderColor_value_type = runtimeType(value_borderColor_value)
@@ -444,7 +444,7 @@ export class CustomDialogControllerOptions_serializer {
         let value_borderStyle_type : int32 = RuntimeType.UNDEFINED
         value_borderStyle_type = runtimeType(value_borderStyle)
         valueSerializer.writeInt8((value_borderStyle_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_borderStyle_type)) {
+        if ((value_borderStyle_type) != (RuntimeType.UNDEFINED)) {
             const value_borderStyle_value  = value_borderStyle!
             let value_borderStyle_value_type : int32 = RuntimeType.UNDEFINED
             value_borderStyle_value_type = runtimeType(value_borderStyle_value)
@@ -463,7 +463,7 @@ export class CustomDialogControllerOptions_serializer {
         let value_shadow_type : int32 = RuntimeType.UNDEFINED
         value_shadow_type = runtimeType(value_shadow)
         valueSerializer.writeInt8((value_shadow_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_shadow_type)) {
+        if ((value_shadow_type) != (RuntimeType.UNDEFINED)) {
             const value_shadow_value  = value_shadow!
             let value_shadow_value_type : int32 = RuntimeType.UNDEFINED
             value_shadow_value_type = runtimeType(value_shadow_value)
@@ -482,7 +482,7 @@ export class CustomDialogControllerOptions_serializer {
         let value_backgroundBlurStyle_type : int32 = RuntimeType.UNDEFINED
         value_backgroundBlurStyle_type = runtimeType(value_backgroundBlurStyle)
         valueSerializer.writeInt8((value_backgroundBlurStyle_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_backgroundBlurStyle_type)) {
+        if ((value_backgroundBlurStyle_type) != (RuntimeType.UNDEFINED)) {
             const value_backgroundBlurStyle_value  = (value_backgroundBlurStyle as BlurStyle)
             valueSerializer.writeInt32(TypeChecker.BlurStyle_ToNumeric(value_backgroundBlurStyle_value))
         }
@@ -490,7 +490,7 @@ export class CustomDialogControllerOptions_serializer {
         let value_backgroundBlurStyleOptions_type : int32 = RuntimeType.UNDEFINED
         value_backgroundBlurStyleOptions_type = runtimeType(value_backgroundBlurStyleOptions)
         valueSerializer.writeInt8((value_backgroundBlurStyleOptions_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_backgroundBlurStyleOptions_type)) {
+        if ((value_backgroundBlurStyleOptions_type) != (RuntimeType.UNDEFINED)) {
             const value_backgroundBlurStyleOptions_value  = value_backgroundBlurStyleOptions!
             BackgroundBlurStyleOptions_serializer.write(valueSerializer, value_backgroundBlurStyleOptions_value)
         }
@@ -498,7 +498,7 @@ export class CustomDialogControllerOptions_serializer {
         let value_backgroundEffect_type : int32 = RuntimeType.UNDEFINED
         value_backgroundEffect_type = runtimeType(value_backgroundEffect)
         valueSerializer.writeInt8((value_backgroundEffect_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_backgroundEffect_type)) {
+        if ((value_backgroundEffect_type) != (RuntimeType.UNDEFINED)) {
             const value_backgroundEffect_value  = value_backgroundEffect!
             BackgroundEffectOptions_serializer.write(valueSerializer, value_backgroundEffect_value)
         }
@@ -506,7 +506,7 @@ export class CustomDialogControllerOptions_serializer {
         let value_keyboardAvoidMode_type : int32 = RuntimeType.UNDEFINED
         value_keyboardAvoidMode_type = runtimeType(value_keyboardAvoidMode)
         valueSerializer.writeInt8((value_keyboardAvoidMode_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_keyboardAvoidMode_type)) {
+        if ((value_keyboardAvoidMode_type) != (RuntimeType.UNDEFINED)) {
             const value_keyboardAvoidMode_value  = (value_keyboardAvoidMode as KeyboardAvoidMode)
             valueSerializer.writeInt32(TypeChecker.KeyboardAvoidMode_ToNumeric(value_keyboardAvoidMode_value))
         }
@@ -514,7 +514,7 @@ export class CustomDialogControllerOptions_serializer {
         let value_enableHoverMode_type : int32 = RuntimeType.UNDEFINED
         value_enableHoverMode_type = runtimeType(value_enableHoverMode)
         valueSerializer.writeInt8((value_enableHoverMode_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_enableHoverMode_type)) {
+        if ((value_enableHoverMode_type) != (RuntimeType.UNDEFINED)) {
             const value_enableHoverMode_value  = value_enableHoverMode!
             valueSerializer.writeBoolean(value_enableHoverMode_value)
         }
@@ -522,7 +522,7 @@ export class CustomDialogControllerOptions_serializer {
         let value_hoverModeArea_type : int32 = RuntimeType.UNDEFINED
         value_hoverModeArea_type = runtimeType(value_hoverModeArea)
         valueSerializer.writeInt8((value_hoverModeArea_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_hoverModeArea_type)) {
+        if ((value_hoverModeArea_type) != (RuntimeType.UNDEFINED)) {
             const value_hoverModeArea_value  = (value_hoverModeArea as HoverModeAreaType)
             valueSerializer.writeInt32(TypeChecker.HoverModeAreaType_ToNumeric(value_hoverModeArea_value))
         }
@@ -530,7 +530,7 @@ export class CustomDialogControllerOptions_serializer {
         let value_onDidAppear_type : int32 = RuntimeType.UNDEFINED
         value_onDidAppear_type = runtimeType(value_onDidAppear)
         valueSerializer.writeInt8((value_onDidAppear_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_onDidAppear_type)) {
+        if ((value_onDidAppear_type) != (RuntimeType.UNDEFINED)) {
             const value_onDidAppear_value  = value_onDidAppear!
             valueSerializer.holdAndWriteCallback(value_onDidAppear_value)
         }
@@ -538,7 +538,7 @@ export class CustomDialogControllerOptions_serializer {
         let value_onDidDisappear_type : int32 = RuntimeType.UNDEFINED
         value_onDidDisappear_type = runtimeType(value_onDidDisappear)
         valueSerializer.writeInt8((value_onDidDisappear_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_onDidDisappear_type)) {
+        if ((value_onDidDisappear_type) != (RuntimeType.UNDEFINED)) {
             const value_onDidDisappear_value  = value_onDidDisappear!
             valueSerializer.holdAndWriteCallback(value_onDidDisappear_value)
         }
@@ -546,7 +546,7 @@ export class CustomDialogControllerOptions_serializer {
         let value_onWillAppear_type : int32 = RuntimeType.UNDEFINED
         value_onWillAppear_type = runtimeType(value_onWillAppear)
         valueSerializer.writeInt8((value_onWillAppear_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_onWillAppear_type)) {
+        if ((value_onWillAppear_type) != (RuntimeType.UNDEFINED)) {
             const value_onWillAppear_value  = value_onWillAppear!
             valueSerializer.holdAndWriteCallback(value_onWillAppear_value)
         }
@@ -554,7 +554,7 @@ export class CustomDialogControllerOptions_serializer {
         let value_onWillDisappear_type : int32 = RuntimeType.UNDEFINED
         value_onWillDisappear_type = runtimeType(value_onWillDisappear)
         valueSerializer.writeInt8((value_onWillDisappear_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_onWillDisappear_type)) {
+        if ((value_onWillDisappear_type) != (RuntimeType.UNDEFINED)) {
             const value_onWillDisappear_value  = value_onWillDisappear!
             valueSerializer.holdAndWriteCallback(value_onWillDisappear_value)
         }
@@ -562,7 +562,7 @@ export class CustomDialogControllerOptions_serializer {
         let value_keyboardAvoidDistance_type : int32 = RuntimeType.UNDEFINED
         value_keyboardAvoidDistance_type = runtimeType(value_keyboardAvoidDistance)
         valueSerializer.writeInt8((value_keyboardAvoidDistance_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_keyboardAvoidDistance_type)) {
+        if ((value_keyboardAvoidDistance_type) != (RuntimeType.UNDEFINED)) {
             const value_keyboardAvoidDistance_value  = value_keyboardAvoidDistance!
             LengthMetrics_serializer.write(valueSerializer, value_keyboardAvoidDistance_value)
         }
@@ -570,7 +570,7 @@ export class CustomDialogControllerOptions_serializer {
         let value_levelMode_type : int32 = RuntimeType.UNDEFINED
         value_levelMode_type = runtimeType(value_levelMode)
         valueSerializer.writeInt8((value_levelMode_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_levelMode_type)) {
+        if ((value_levelMode_type) != (RuntimeType.UNDEFINED)) {
             const value_levelMode_value  = (value_levelMode as LevelMode)
             valueSerializer.writeInt32(TypeChecker.LevelMode_ToNumeric(value_levelMode_value))
         }
@@ -578,7 +578,7 @@ export class CustomDialogControllerOptions_serializer {
         let value_levelUniqueId_type : int32 = RuntimeType.UNDEFINED
         value_levelUniqueId_type = runtimeType(value_levelUniqueId)
         valueSerializer.writeInt8((value_levelUniqueId_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_levelUniqueId_type)) {
+        if ((value_levelUniqueId_type) != (RuntimeType.UNDEFINED)) {
             const value_levelUniqueId_value  = value_levelUniqueId!
             valueSerializer.writeNumber(value_levelUniqueId_value)
         }
@@ -586,7 +586,7 @@ export class CustomDialogControllerOptions_serializer {
         let value_immersiveMode_type : int32 = RuntimeType.UNDEFINED
         value_immersiveMode_type = runtimeType(value_immersiveMode)
         valueSerializer.writeInt8((value_immersiveMode_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_immersiveMode_type)) {
+        if ((value_immersiveMode_type) != (RuntimeType.UNDEFINED)) {
             const value_immersiveMode_value  = (value_immersiveMode as ImmersiveMode)
             valueSerializer.writeInt32(TypeChecker.ImmersiveMode_ToNumeric(value_immersiveMode_value))
         }
@@ -594,7 +594,7 @@ export class CustomDialogControllerOptions_serializer {
         let value_levelOrder_type : int32 = RuntimeType.UNDEFINED
         value_levelOrder_type = runtimeType(value_levelOrder)
         valueSerializer.writeInt8((value_levelOrder_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_levelOrder_type)) {
+        if ((value_levelOrder_type) != (RuntimeType.UNDEFINED)) {
             const value_levelOrder_value  = value_levelOrder!
             LevelOrder_serializer.write(valueSerializer, value_levelOrder_value)
         }
@@ -602,7 +602,7 @@ export class CustomDialogControllerOptions_serializer {
         let value_focusable_type : int32 = RuntimeType.UNDEFINED
         value_focusable_type = runtimeType(value_focusable)
         valueSerializer.writeInt8((value_focusable_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_focusable_type)) {
+        if ((value_focusable_type) != (RuntimeType.UNDEFINED)) {
             const value_focusable_value  = value_focusable!
             valueSerializer.writeBoolean(value_focusable_value)
         }
@@ -622,7 +622,7 @@ export class CustomDialogControllerOptions_serializer {
     return; }
         const cancel_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let cancel_buf : (() => void) | undefined
-        if ((RuntimeType.UNDEFINED) != (cancel_buf_runtimeType))
+        if ((cancel_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const cancel_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
             const cancel_buf__call : KPointer = valueDeserializer.readPointer()
@@ -639,42 +639,42 @@ export class CustomDialogControllerOptions_serializer {
         const cancel_result : (() => void) | undefined = cancel_buf
         const autoCancel_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let autoCancel_buf : boolean | undefined
-        if ((RuntimeType.UNDEFINED) != (autoCancel_buf_runtimeType))
+        if ((autoCancel_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             autoCancel_buf = valueDeserializer.readBoolean()
         }
         const autoCancel_result : boolean | undefined = autoCancel_buf
         const alignment_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let alignment_buf : DialogAlignment | undefined
-        if ((RuntimeType.UNDEFINED) != (alignment_buf_runtimeType))
+        if ((alignment_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             alignment_buf = TypeChecker.DialogAlignment_FromNumeric(valueDeserializer.readInt32())
         }
         const alignment_result : DialogAlignment | undefined = alignment_buf
         const offset_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let offset_buf : Offset | undefined
-        if ((RuntimeType.UNDEFINED) != (offset_buf_runtimeType))
+        if ((offset_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             offset_buf = Offset_serializer.read(valueDeserializer)
         }
         const offset_result : Offset | undefined = offset_buf
         const customStyle_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let customStyle_buf : boolean | undefined
-        if ((RuntimeType.UNDEFINED) != (customStyle_buf_runtimeType))
+        if ((customStyle_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             customStyle_buf = valueDeserializer.readBoolean()
         }
         const customStyle_result : boolean | undefined = customStyle_buf
         const gridCount_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let gridCount_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (gridCount_buf_runtimeType))
+        if ((gridCount_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             gridCount_buf = (valueDeserializer.readNumber() as number)
         }
         const gridCount_result : number | undefined = gridCount_buf
         const maskColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let maskColor_buf : ResourceColor | undefined
-        if ((RuntimeType.UNDEFINED) != (maskColor_buf_runtimeType))
+        if ((maskColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const maskColor_buf__selector : int32 = valueDeserializer.readInt8()
             let maskColor_buf_ : Color | number | string | Resource | undefined
@@ -698,35 +698,35 @@ export class CustomDialogControllerOptions_serializer {
         const maskColor_result : ResourceColor | undefined = maskColor_buf
         const maskRect_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let maskRect_buf : Rectangle | undefined
-        if ((RuntimeType.UNDEFINED) != (maskRect_buf_runtimeType))
+        if ((maskRect_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             maskRect_buf = Rectangle_serializer.read(valueDeserializer)
         }
         const maskRect_result : Rectangle | undefined = maskRect_buf
         const openAnimation_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let openAnimation_buf : AnimateParam | undefined
-        if ((RuntimeType.UNDEFINED) != (openAnimation_buf_runtimeType))
+        if ((openAnimation_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             openAnimation_buf = AnimateParam_serializer.read(valueDeserializer)
         }
         const openAnimation_result : AnimateParam | undefined = openAnimation_buf
         const closeAnimation_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let closeAnimation_buf : AnimateParam | undefined
-        if ((RuntimeType.UNDEFINED) != (closeAnimation_buf_runtimeType))
+        if ((closeAnimation_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             closeAnimation_buf = AnimateParam_serializer.read(valueDeserializer)
         }
         const closeAnimation_result : AnimateParam | undefined = closeAnimation_buf
         const showInSubWindow_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let showInSubWindow_buf : boolean | undefined
-        if ((RuntimeType.UNDEFINED) != (showInSubWindow_buf_runtimeType))
+        if ((showInSubWindow_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             showInSubWindow_buf = valueDeserializer.readBoolean()
         }
         const showInSubWindow_result : boolean | undefined = showInSubWindow_buf
         const backgroundColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let backgroundColor_buf : ResourceColor | undefined
-        if ((RuntimeType.UNDEFINED) != (backgroundColor_buf_runtimeType))
+        if ((backgroundColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const backgroundColor_buf__selector : int32 = valueDeserializer.readInt8()
             let backgroundColor_buf_ : Color | number | string | Resource | undefined
@@ -750,7 +750,7 @@ export class CustomDialogControllerOptions_serializer {
         const backgroundColor_result : ResourceColor | undefined = backgroundColor_buf
         const cornerRadius_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let cornerRadius_buf : Dimension | BorderRadiuses | undefined
-        if ((RuntimeType.UNDEFINED) != (cornerRadius_buf_runtimeType))
+        if ((cornerRadius_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const cornerRadius_buf__selector : int32 = valueDeserializer.readInt8()
             let cornerRadius_buf_ : Dimension | BorderRadiuses | undefined
@@ -782,14 +782,14 @@ export class CustomDialogControllerOptions_serializer {
         const cornerRadius_result : Dimension | BorderRadiuses | undefined = cornerRadius_buf
         const isModal_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let isModal_buf : boolean | undefined
-        if ((RuntimeType.UNDEFINED) != (isModal_buf_runtimeType))
+        if ((isModal_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             isModal_buf = valueDeserializer.readBoolean()
         }
         const isModal_result : boolean | undefined = isModal_buf
         const onWillDismiss_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let onWillDismiss_buf : ((value0: DismissDialogAction) => void) | undefined
-        if ((RuntimeType.UNDEFINED) != (onWillDismiss_buf_runtimeType))
+        if ((onWillDismiss_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const onWillDismiss_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
             const onWillDismiss_buf__call : KPointer = valueDeserializer.readPointer()
@@ -807,7 +807,7 @@ export class CustomDialogControllerOptions_serializer {
         const onWillDismiss_result : ((value0: DismissDialogAction) => void) | undefined = onWillDismiss_buf
         const width_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let width_buf : Dimension | undefined
-        if ((RuntimeType.UNDEFINED) != (width_buf_runtimeType))
+        if ((width_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const width_buf__selector : int32 = valueDeserializer.readInt8()
             let width_buf_ : string | number | Resource | undefined
@@ -828,7 +828,7 @@ export class CustomDialogControllerOptions_serializer {
         const width_result : Dimension | undefined = width_buf
         const height_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let height_buf : Dimension | undefined
-        if ((RuntimeType.UNDEFINED) != (height_buf_runtimeType))
+        if ((height_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const height_buf__selector : int32 = valueDeserializer.readInt8()
             let height_buf_ : string | number | Resource | undefined
@@ -849,7 +849,7 @@ export class CustomDialogControllerOptions_serializer {
         const height_result : Dimension | undefined = height_buf
         const borderWidth_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let borderWidth_buf : Dimension | EdgeWidths | undefined
-        if ((RuntimeType.UNDEFINED) != (borderWidth_buf_runtimeType))
+        if ((borderWidth_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const borderWidth_buf__selector : int32 = valueDeserializer.readInt8()
             let borderWidth_buf_ : Dimension | EdgeWidths | undefined
@@ -881,7 +881,7 @@ export class CustomDialogControllerOptions_serializer {
         const borderWidth_result : Dimension | EdgeWidths | undefined = borderWidth_buf
         const borderColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let borderColor_buf : ResourceColor | EdgeColors | undefined
-        if ((RuntimeType.UNDEFINED) != (borderColor_buf_runtimeType))
+        if ((borderColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const borderColor_buf__selector : int32 = valueDeserializer.readInt8()
             let borderColor_buf_ : ResourceColor | EdgeColors | undefined
@@ -916,7 +916,7 @@ export class CustomDialogControllerOptions_serializer {
         const borderColor_result : ResourceColor | EdgeColors | undefined = borderColor_buf
         const borderStyle_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let borderStyle_buf : BorderStyle | EdgeStyles | undefined
-        if ((RuntimeType.UNDEFINED) != (borderStyle_buf_runtimeType))
+        if ((borderStyle_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const borderStyle_buf__selector : int32 = valueDeserializer.readInt8()
             let borderStyle_buf_ : BorderStyle | EdgeStyles | undefined
@@ -934,7 +934,7 @@ export class CustomDialogControllerOptions_serializer {
         const borderStyle_result : BorderStyle | EdgeStyles | undefined = borderStyle_buf
         const shadow_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let shadow_buf : ShadowOptions | ShadowStyle | undefined
-        if ((RuntimeType.UNDEFINED) != (shadow_buf_runtimeType))
+        if ((shadow_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const shadow_buf__selector : int32 = valueDeserializer.readInt8()
             let shadow_buf_ : ShadowOptions | ShadowStyle | undefined
@@ -952,49 +952,49 @@ export class CustomDialogControllerOptions_serializer {
         const shadow_result : ShadowOptions | ShadowStyle | undefined = shadow_buf
         const backgroundBlurStyle_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let backgroundBlurStyle_buf : BlurStyle | undefined
-        if ((RuntimeType.UNDEFINED) != (backgroundBlurStyle_buf_runtimeType))
+        if ((backgroundBlurStyle_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             backgroundBlurStyle_buf = TypeChecker.BlurStyle_FromNumeric(valueDeserializer.readInt32())
         }
         const backgroundBlurStyle_result : BlurStyle | undefined = backgroundBlurStyle_buf
         const backgroundBlurStyleOptions_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let backgroundBlurStyleOptions_buf : BackgroundBlurStyleOptions | undefined
-        if ((RuntimeType.UNDEFINED) != (backgroundBlurStyleOptions_buf_runtimeType))
+        if ((backgroundBlurStyleOptions_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             backgroundBlurStyleOptions_buf = BackgroundBlurStyleOptions_serializer.read(valueDeserializer)
         }
         const backgroundBlurStyleOptions_result : BackgroundBlurStyleOptions | undefined = backgroundBlurStyleOptions_buf
         const backgroundEffect_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let backgroundEffect_buf : BackgroundEffectOptions | undefined
-        if ((RuntimeType.UNDEFINED) != (backgroundEffect_buf_runtimeType))
+        if ((backgroundEffect_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             backgroundEffect_buf = BackgroundEffectOptions_serializer.read(valueDeserializer)
         }
         const backgroundEffect_result : BackgroundEffectOptions | undefined = backgroundEffect_buf
         const keyboardAvoidMode_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let keyboardAvoidMode_buf : KeyboardAvoidMode | undefined
-        if ((RuntimeType.UNDEFINED) != (keyboardAvoidMode_buf_runtimeType))
+        if ((keyboardAvoidMode_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             keyboardAvoidMode_buf = TypeChecker.KeyboardAvoidMode_FromNumeric(valueDeserializer.readInt32())
         }
         const keyboardAvoidMode_result : KeyboardAvoidMode | undefined = keyboardAvoidMode_buf
         const enableHoverMode_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let enableHoverMode_buf : boolean | undefined
-        if ((RuntimeType.UNDEFINED) != (enableHoverMode_buf_runtimeType))
+        if ((enableHoverMode_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             enableHoverMode_buf = valueDeserializer.readBoolean()
         }
         const enableHoverMode_result : boolean | undefined = enableHoverMode_buf
         const hoverModeArea_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let hoverModeArea_buf : HoverModeAreaType | undefined
-        if ((RuntimeType.UNDEFINED) != (hoverModeArea_buf_runtimeType))
+        if ((hoverModeArea_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             hoverModeArea_buf = TypeChecker.HoverModeAreaType_FromNumeric(valueDeserializer.readInt32())
         }
         const hoverModeArea_result : HoverModeAreaType | undefined = hoverModeArea_buf
         const onDidAppear_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let onDidAppear_buf : (() => void) | undefined
-        if ((RuntimeType.UNDEFINED) != (onDidAppear_buf_runtimeType))
+        if ((onDidAppear_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const onDidAppear_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
             const onDidAppear_buf__call : KPointer = valueDeserializer.readPointer()
@@ -1011,7 +1011,7 @@ export class CustomDialogControllerOptions_serializer {
         const onDidAppear_result : (() => void) | undefined = onDidAppear_buf
         const onDidDisappear_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let onDidDisappear_buf : (() => void) | undefined
-        if ((RuntimeType.UNDEFINED) != (onDidDisappear_buf_runtimeType))
+        if ((onDidDisappear_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const onDidDisappear_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
             const onDidDisappear_buf__call : KPointer = valueDeserializer.readPointer()
@@ -1028,7 +1028,7 @@ export class CustomDialogControllerOptions_serializer {
         const onDidDisappear_result : (() => void) | undefined = onDidDisappear_buf
         const onWillAppear_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let onWillAppear_buf : (() => void) | undefined
-        if ((RuntimeType.UNDEFINED) != (onWillAppear_buf_runtimeType))
+        if ((onWillAppear_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const onWillAppear_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
             const onWillAppear_buf__call : KPointer = valueDeserializer.readPointer()
@@ -1045,7 +1045,7 @@ export class CustomDialogControllerOptions_serializer {
         const onWillAppear_result : (() => void) | undefined = onWillAppear_buf
         const onWillDisappear_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let onWillDisappear_buf : (() => void) | undefined
-        if ((RuntimeType.UNDEFINED) != (onWillDisappear_buf_runtimeType))
+        if ((onWillDisappear_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const onWillDisappear_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
             const onWillDisappear_buf__call : KPointer = valueDeserializer.readPointer()
@@ -1062,42 +1062,42 @@ export class CustomDialogControllerOptions_serializer {
         const onWillDisappear_result : (() => void) | undefined = onWillDisappear_buf
         const keyboardAvoidDistance_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let keyboardAvoidDistance_buf : LengthMetrics | undefined
-        if ((RuntimeType.UNDEFINED) != (keyboardAvoidDistance_buf_runtimeType))
+        if ((keyboardAvoidDistance_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             keyboardAvoidDistance_buf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
         }
         const keyboardAvoidDistance_result : LengthMetrics | undefined = keyboardAvoidDistance_buf
         const levelMode_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let levelMode_buf : LevelMode | undefined
-        if ((RuntimeType.UNDEFINED) != (levelMode_buf_runtimeType))
+        if ((levelMode_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             levelMode_buf = TypeChecker.LevelMode_FromNumeric(valueDeserializer.readInt32())
         }
         const levelMode_result : LevelMode | undefined = levelMode_buf
         const levelUniqueId_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let levelUniqueId_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (levelUniqueId_buf_runtimeType))
+        if ((levelUniqueId_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             levelUniqueId_buf = (valueDeserializer.readNumber() as number)
         }
         const levelUniqueId_result : number | undefined = levelUniqueId_buf
         const immersiveMode_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let immersiveMode_buf : ImmersiveMode | undefined
-        if ((RuntimeType.UNDEFINED) != (immersiveMode_buf_runtimeType))
+        if ((immersiveMode_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             immersiveMode_buf = TypeChecker.ImmersiveMode_FromNumeric(valueDeserializer.readInt32())
         }
         const immersiveMode_result : ImmersiveMode | undefined = immersiveMode_buf
         const levelOrder_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let levelOrder_buf : LevelOrder | undefined
-        if ((RuntimeType.UNDEFINED) != (levelOrder_buf_runtimeType))
+        if ((levelOrder_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             levelOrder_buf = (LevelOrder_serializer.read(valueDeserializer) as LevelOrder)
         }
         const levelOrder_result : LevelOrder | undefined = levelOrder_buf
         const focusable_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let focusable_buf : boolean | undefined
-        if ((RuntimeType.UNDEFINED) != (focusable_buf_runtimeType))
+        if ((focusable_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             focusable_buf = valueDeserializer.readBoolean()
         }

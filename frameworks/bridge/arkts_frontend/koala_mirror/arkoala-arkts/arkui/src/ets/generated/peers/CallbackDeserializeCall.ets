@@ -19,7 +19,7 @@
 import { AccessibilityHoverEvent_serializer, TouchTestInfo_serializer, TouchResult_serializer, AxisEvent_serializer, HoverEvent_serializer, ClickEvent_serializer, CrownEvent_serializer, DismissContentCoverAction_serializer, DismissPopupAction_serializer, DismissSheetAction_serializer, DragEvent_serializer, FocusAxisEvent_serializer, ItemDragInfo_serializer, KeyEvent_serializer, MouseEvent_serializer, GeometryInfo_serializer, Measurable_serializer, SizeResult_serializer, Layoutable_serializer, ScrollResult_serializer, SheetDismiss_serializer, SpringBackAction_serializer, TerminationInfo_serializer, TouchEvent_serializer, DragItemInfo_serializer, PopupStateChangeParam_serializer, AccessibilityCallback, AccessibilityHoverEvent, AccessibilityFocusCallback, TouchTestInfo, TouchResult, AxisEvent, HoverEvent, ClickEvent, CrownEvent, DismissContentCoverAction, DismissPopupAction, DismissSheetAction, DragEvent, FocusAxisEvent, ItemDragInfo, KeyEvent, MouseEvent, GeometryInfo, Measurable, SizeResult, Layoutable, ScrollResult, PreDragStatus, SheetDismiss, SheetType, SpringBackAction, TerminationInfo, TouchEvent, DragItemInfo, CustomStyles, GestureRecognizerJudgeBeginCallback, HoverCallback, ModifierKeyStateGetter, OnDragEventCallback, OnItemDragStartCallback, OnMoveHandler, OnScrollCallback, OnWillScrollCallback, PopupStateChangeCallback, PopupStateChangeParam, ReuseIdCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TransitionFinishCallback, VisibleAreaChangeCallback } from "./../../component/common"
 import { image_PixelMap_serializer, image } from "./../ohos.multimedia.image"
 import { ButtonConfiguration_serializer, ButtonConfiguration, ButtonTriggerClickCallback } from "./../../component/button"
-import { Area_serializer, ConstraintSizeOptions_serializer, SizeOptions_serializer, Area, ConstraintSizeOptions, SizeOptions, ResourceStr, VoidCallback } from "./../../component/units"
+import { Area_serializer, ConstraintSizeOptions_serializer, SizeOptions_serializer, Area, ConstraintSizeOptions, ResourceStr, SizeOptions, VoidCallback } from "./../../component/units"
 import { TextMenuItem_serializer, DeleteValue_serializer, EditableTextChangeValue_serializer, InsertValue_serializer, StyledStringChangeValue_serializer, TextRange_serializer, PreviewText_serializer, TextChangeOptions_serializer, TextMenuItem, DeleteValue, EditableTextChangeValue, InsertValue, StyledStringChangeValue, TextRange, EditableTextOnChangeCallback, PreviewText, TextChangeOptions, OnCreateMenuCallback, OnDidChangeCallback, OnMenuItemClickCallback } from "./../../component/textCommon"
 import { CalendarRequestedData_serializer, CalendarSelectedDate_serializer, CalendarRequestedData, CalendarSelectedDate } from "./../../component/calendar"
 import { CompatibleComponentInfo_serializer, CompatibleComponentInfo, CompatibleInitCallback, CompatibleUpdateCallback } from "./../../component/interop"
@@ -31,11 +31,13 @@ import { DrawContext_serializer, DrawContext } from "./../arkui.Graphics"
 import { ErrorInformation_serializer, FormCallbackInfo_serializer, ErrorInformation, FormCallbackInfo } from "./../../component/formComponent"
 import { FullscreenInfo_serializer, PlaybackInfo_serializer, PreparedInfo_serializer, FullscreenInfo, PlaybackInfo, PreparedInfo } from "./../../component/video"
 import { GestureEvent_serializer, GestureInfo_serializer, BaseGestureEvent_serializer, GestureRecognizer_serializer, RotationGesture_serializer, SwipeGesture_serializer, GestureEvent, GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureRecognizer, RotationGesture, SwipeGesture } from "./../../component/gesture"
+import { NativeEmbedDataInfo_serializer, NativeEmbedTouchInfo_serializer, OnAlertEvent_serializer, OnAudioStateChangedEvent_serializer, OnBeforeUnloadEvent_serializer, OnClientAuthenticationEvent_serializer, OnConfirmEvent_serializer, OnConsoleEvent_serializer, OnContextMenuShowEvent_serializer, OnDataResubmittedEvent_serializer, OnDownloadStartEvent_serializer, OnErrorReceiveEvent_serializer, OnFaviconReceivedEvent_serializer, OnFirstContentfulPaintEvent_serializer, OnGeolocationShowEvent_serializer, OnHttpAuthRequestEvent_serializer, OnHttpErrorReceiveEvent_serializer, OnInterceptRequestEvent_serializer, WebResourceResponse_serializer, OnLoadInterceptEvent_serializer, OnOverScrollEvent_serializer, OnPageBeginEvent_serializer, OnPageEndEvent_serializer, OnPageVisibleEvent_serializer, OnPermissionRequestEvent_serializer, OnProgressChangeEvent_serializer, OnPromptEvent_serializer, OnRefreshAccessedHistoryEvent_serializer, OnRenderExitedEvent_serializer, OnResourceLoadEvent_serializer, OnScaleChangeEvent_serializer, OnScreenCaptureRequestEvent_serializer, OnScrollEvent_serializer, OnSearchResultReceiveEvent_serializer, OnShowFileSelectorEvent_serializer, OnSslErrorEventReceiveEvent_serializer, OnTitleReceiveEvent_serializer, OnTouchIconUrlReceivedEvent_serializer, OnWindowNewEvent_serializer, WebKeyboardOptions_serializer, AdsBlockedDetails_serializer, FirstMeaningfulPaint_serializer, FullScreenEnterEvent_serializer, IntelligentTrackingPreventionDetails_serializer, LargestContentfulPaint_serializer, NativeEmbedVisibilityInfo_serializer, LoadCommittedDetails_serializer, WebResourceRequest_serializer, RenderProcessNotRespondingData_serializer, SslErrorEvent_serializer, WebKeyboardCallbackInfo_serializer, NativeEmbedDataInfo, NativeEmbedTouchInfo, OnAlertEvent, OnAudioStateChangedEvent, OnBeforeUnloadEvent, OnClientAuthenticationEvent, OnConfirmEvent, OnConsoleEvent, OnContextMenuShowEvent, OnDataResubmittedEvent, OnDownloadStartEvent, OnErrorReceiveEvent, OnFaviconReceivedEvent, OnFirstContentfulPaintEvent, OnGeolocationShowEvent, OnHttpAuthRequestEvent, OnHttpErrorReceiveEvent, OnInterceptRequestEvent, WebResourceResponse, OnLoadInterceptEvent, OnOverScrollEvent, OnPageBeginEvent, OnPageEndEvent, OnPageVisibleEvent, OnPermissionRequestEvent, OnProgressChangeEvent, OnPromptEvent, OnRefreshAccessedHistoryEvent, OnRenderExitedEvent, OnResourceLoadEvent, OnScaleChangeEvent, OnScreenCaptureRequestEvent, OnScrollEvent, OnSearchResultReceiveEvent, OnShowFileSelectorEvent, OnSslErrorEventReceiveEvent, OnTitleReceiveEvent, OnTouchIconUrlReceivedEvent, OnWindowNewEvent, WebKeyboardOptions, OnAdsBlockedCallback, AdsBlockedDetails, OnContextMenuHideCallback, OnFirstMeaningfulPaintCallback, FirstMeaningfulPaint, OnFullScreenEnterCallback, FullScreenEnterEvent, OnIntelligentTrackingPreventionCallback, IntelligentTrackingPreventionDetails, OnLargestContentfulPaintCallback, LargestContentfulPaint, OnNativeEmbedVisibilityChangeCallback, NativeEmbedVisibilityInfo, OnNavigationEntryCommittedCallback, LoadCommittedDetails, OnOverrideUrlLoadingCallback, WebResourceRequest, OnRenderProcessNotRespondingCallback, RenderProcessNotRespondingData, OnRenderProcessRespondingCallback, OnSafeBrowsingCheckResultCallback, ThreatType, OnSslErrorEventCallback, SslErrorEvent, OnViewportFitChangedCallback, ViewportFit, WebKeyboardCallback, WebKeyboardCallbackInfo } from "./../../component/web"
 import { NavDestinationContext_serializer, NavDestinationTransition_serializer, NavDestinationActiveReason, NavDestinationContext, NavDestinationTransition, NavDestinationTransitionDelegate } from "./../../component/navDestination"
 import { NavigationTransitionProxy_serializer, NavigationAnimatedTransition_serializer, PopInfo_serializer, NavContentInfo_serializer, NavigationMode, NavigationTitleMode, NavigationTransitionProxy, NavigationAnimatedTransition, PopInfo, InterceptionModeCallback, InterceptionShowCallback, NavBar, NavigationOperation, NavContentInfo, UpdateTransitionCallback } from "./../../component/navigation"
 import { OnScrollFrameBeginHandlerResult_serializer, OffsetResult_serializer, OnScrollFrameBeginHandlerResult, OffsetResult, OnScrollEdgeCallback, OnScrollFrameBeginCallback, ScrollOnScrollCallback, ScrollOnWillScrollCallback } from "./../../component/scroll"
 import { Scene_serializer, ErrorEvent_serializer, MessageEvents_serializer, Callback_CreateItem, Callback_Extender_OnFinish, Callback_Extender_OnProgress, Callback_onMeasureSize_SizeResult, Callback_onPlaceChildren_Void, Scene, Callback_RangeUpdate, Callback_StateStylesChange, CustomNodeBuilder, NavExtender_OnUpdateStack, RestrictedWorker_onerror_Callback, ErrorEvent, RestrictedWorker_onexit_Callback, RestrictedWorker_onmessage_Callback, MessageEvents } from "./../../component/idlize"
 import { TabContentAnimatedTransition_serializer, TabContentTransitionProxy_serializer, TabsAnimationEvent_serializer, TabContentAnimatedTransition, TabContentTransitionProxy, OnTabsAnimationEndCallback, TabsAnimationEvent, OnTabsAnimationStartCallback, OnTabsContentWillChangeCallback, OnTabsGestureSwipeCallback, TabsCustomContentTransitionCallback } from "./../../component/tabs"
+import { Resource_serializer, Resource } from "./../resource"
 import { SurfaceRect_serializer, SurfaceRect, OnNativeLoadCallback } from "./../../component/xcomponent"
 import { SwiperContentTransitionProxy_serializer, SwiperContentWillScrollResult_serializer, SwiperAnimationEvent_serializer, SwiperContentTransitionProxy, ContentDidScrollCallback, ContentWillScrollCallback, SwiperContentWillScrollResult, OnSwiperAnimationEndCallback, SwiperAnimationEvent, OnSwiperAnimationStartCallback, OnSwiperGestureSwipeCallback } from "./../../component/swiper"
 import { TextPickerResult_serializer, TextPickerResult, OnTextPickerChangeCallback, TextPickerEnterSelectedAreaCallback, TextPickerScrollStopCallback } from "./../../component/textPicker"
@@ -59,7 +61,6 @@ import { RadioConfiguration_serializer, OnRadioChangeCallback, RadioConfiguratio
 import { RatingConfiguration_serializer, OnRatingChangeCallback, RatingConfiguration } from "./../../component/rating"
 import { SliderConfiguration_serializer, SliderChangeMode, SliderConfiguration, SliderTriggerChangeCallback } from "./../../component/slider"
 import { TextClockConfiguration_serializer, TextClockConfiguration } from "./../../component/textClock"
-import { Resource_serializer, Resource } from "./../resource"
 import { TextTimerConfiguration_serializer, TextTimerConfiguration } from "./../../component/textTimer"
 import { ToggleConfiguration_serializer, ToggleConfiguration } from "./../../component/toggle"
 import { CallbackKind } from "./CallbackKind"
@@ -68,13 +69,13 @@ import { ResourceHolder, KInt, KStringPtr, wrapSystemCallback, DeserializerBase,
 import { CallbackTransformer } from "./../../CallbackTransformer"
 import { HitTestMode, Edge, ScrollSource } from "./../../component/enums"
 import { MarqueeState } from "./../../component/text"
-import { CustomBuilder, CustomBuilderT, PageMapBuilder } from "./../../component/builder"
+import { CustomBuilder, PageMapBuilder } from "./../../component/builder"
 import { RefreshStatus } from "./../../component/refresh"
 import { SwipeActionState } from "./../../component/listItem"
 import { Context_getGroupDir_Callback } from "./../ohos.app.ability.common"
 import { GetItemMainSizeByIndex } from "./../../component/waterFlow"
-import { KeyGeneratorFunc, OnLazyLoadingFunc, OnTotalCountFunc } from "./../../component/repeat"
 import { OnAlphabetIndexerPopupSelectCallback, OnAlphabetIndexerRequestPopupDataCallback, OnAlphabetIndexerSelectCallback } from "./../../component/alphabetIndexer"
+import { OnLazyLoadingFunc, OnTotalCountFunc } from "./../../component/repeat"
 import { OnLinearIndicatorChangeCallback } from "./../../component/linearindicator"
 import { PageTransitionCallback, RouteType } from "./../../component/pageTransition"
 import { PasteButtonCallback, PasteButtonOnClickResult } from "./../../component/pasteButton"
@@ -390,7 +391,7 @@ export function deserializeAndCallCallback_DragEvent_Opt_String_Void(thisDeseria
     let event : DragEvent = (DragEvent_serializer.read(thisDeserializer) as DragEvent)
     const extraParams_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let extraParams_buf : string | undefined
-    if ((RuntimeType.UNDEFINED) != (extraParams_buf_runtimeType))
+    if ((extraParams_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         extraParams_buf = (thisDeserializer.readString() as string)
     }
@@ -626,6 +627,18 @@ export function deserializeAndCallCallback_MouseEvent_Void(thisDeserializer: Des
     let event : MouseEvent = (MouseEvent_serializer.read(thisDeserializer) as MouseEvent)
     _call(event)
 }
+export function deserializeAndCallCallback_NativeEmbedDataInfo_Void(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((event: NativeEmbedDataInfo) => void))
+    let event : NativeEmbedDataInfo = NativeEmbedDataInfo_serializer.read(thisDeserializer)
+    _call(event)
+}
+export function deserializeAndCallCallback_NativeEmbedTouchInfo_Void(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((event: NativeEmbedTouchInfo) => void))
+    let event : NativeEmbedTouchInfo = NativeEmbedTouchInfo_serializer.read(thisDeserializer)
+    _call(event)
+}
 export function deserializeAndCallCallback_NavDestinationActiveReason_Void(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: NavDestinationActiveReason) => void))
@@ -799,6 +812,212 @@ export function deserializeAndCallCallback_Object_Void(thisDeserializer: Deseria
     let value0 : Object = (thisDeserializer.readObject() as object)
     _call(value0)
 }
+export function deserializeAndCallCallback_OnAlertEvent_Boolean(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: OnAlertEvent) => boolean))
+    let value0 : OnAlertEvent = OnAlertEvent_serializer.read(thisDeserializer)
+    const _continuation_buf_resource : CallbackResource = thisDeserializer.readCallbackResource()
+    const _continuation_buf_call : KPointer = thisDeserializer.readPointer()
+    const _continuation_buf_callSync : KPointer = thisDeserializer.readPointer()
+    let _continuation : ((value0: boolean) => void) = (value0: boolean):void => { 
+    const _continuation_buf_argsSerializer : SerializerBase = SerializerBase.hold();
+    _continuation_buf_argsSerializer.writeInt32(_continuation_buf_resource.resourceId);
+    _continuation_buf_argsSerializer.writePointer(_continuation_buf_call);
+    _continuation_buf_argsSerializer.writePointer(_continuation_buf_callSync);
+    _continuation_buf_argsSerializer.writeBoolean(value0);
+    InteropNativeModule._CallCallbackSync(313269291, _continuation_buf_argsSerializer.asBuffer(), _continuation_buf_argsSerializer.length());
+    _continuation_buf_argsSerializer.release();
+    return; }
+    const _callResult  = _call(value0)
+    _continuation(_callResult)
+}
+export function deserializeAndCallCallback_OnAudioStateChangedEvent_Void(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: OnAudioStateChangedEvent) => void))
+    let value0 : OnAudioStateChangedEvent = OnAudioStateChangedEvent_serializer.read(thisDeserializer)
+    _call(value0)
+}
+export function deserializeAndCallCallback_OnBeforeUnloadEvent_Boolean(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: OnBeforeUnloadEvent) => boolean))
+    let value0 : OnBeforeUnloadEvent = OnBeforeUnloadEvent_serializer.read(thisDeserializer)
+    const _continuation_buf_resource : CallbackResource = thisDeserializer.readCallbackResource()
+    const _continuation_buf_call : KPointer = thisDeserializer.readPointer()
+    const _continuation_buf_callSync : KPointer = thisDeserializer.readPointer()
+    let _continuation : ((value0: boolean) => void) = (value0: boolean):void => { 
+    const _continuation_buf_argsSerializer : SerializerBase = SerializerBase.hold();
+    _continuation_buf_argsSerializer.writeInt32(_continuation_buf_resource.resourceId);
+    _continuation_buf_argsSerializer.writePointer(_continuation_buf_call);
+    _continuation_buf_argsSerializer.writePointer(_continuation_buf_callSync);
+    _continuation_buf_argsSerializer.writeBoolean(value0);
+    InteropNativeModule._CallCallbackSync(313269291, _continuation_buf_argsSerializer.asBuffer(), _continuation_buf_argsSerializer.length());
+    _continuation_buf_argsSerializer.release();
+    return; }
+    const _callResult  = _call(value0)
+    _continuation(_callResult)
+}
+export function deserializeAndCallCallback_OnClientAuthenticationEvent_Void(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: OnClientAuthenticationEvent) => void))
+    let value0 : OnClientAuthenticationEvent = OnClientAuthenticationEvent_serializer.read(thisDeserializer)
+    _call(value0)
+}
+export function deserializeAndCallCallback_OnConfirmEvent_Boolean(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: OnConfirmEvent) => boolean))
+    let value0 : OnConfirmEvent = OnConfirmEvent_serializer.read(thisDeserializer)
+    const _continuation_buf_resource : CallbackResource = thisDeserializer.readCallbackResource()
+    const _continuation_buf_call : KPointer = thisDeserializer.readPointer()
+    const _continuation_buf_callSync : KPointer = thisDeserializer.readPointer()
+    let _continuation : ((value0: boolean) => void) = (value0: boolean):void => { 
+    const _continuation_buf_argsSerializer : SerializerBase = SerializerBase.hold();
+    _continuation_buf_argsSerializer.writeInt32(_continuation_buf_resource.resourceId);
+    _continuation_buf_argsSerializer.writePointer(_continuation_buf_call);
+    _continuation_buf_argsSerializer.writePointer(_continuation_buf_callSync);
+    _continuation_buf_argsSerializer.writeBoolean(value0);
+    InteropNativeModule._CallCallbackSync(313269291, _continuation_buf_argsSerializer.asBuffer(), _continuation_buf_argsSerializer.length());
+    _continuation_buf_argsSerializer.release();
+    return; }
+    const _callResult  = _call(value0)
+    _continuation(_callResult)
+}
+export function deserializeAndCallCallback_OnConsoleEvent_Boolean(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: OnConsoleEvent) => boolean))
+    let value0 : OnConsoleEvent = OnConsoleEvent_serializer.read(thisDeserializer)
+    const _continuation_buf_resource : CallbackResource = thisDeserializer.readCallbackResource()
+    const _continuation_buf_call : KPointer = thisDeserializer.readPointer()
+    const _continuation_buf_callSync : KPointer = thisDeserializer.readPointer()
+    let _continuation : ((value0: boolean) => void) = (value0: boolean):void => { 
+    const _continuation_buf_argsSerializer : SerializerBase = SerializerBase.hold();
+    _continuation_buf_argsSerializer.writeInt32(_continuation_buf_resource.resourceId);
+    _continuation_buf_argsSerializer.writePointer(_continuation_buf_call);
+    _continuation_buf_argsSerializer.writePointer(_continuation_buf_callSync);
+    _continuation_buf_argsSerializer.writeBoolean(value0);
+    InteropNativeModule._CallCallbackSync(313269291, _continuation_buf_argsSerializer.asBuffer(), _continuation_buf_argsSerializer.length());
+    _continuation_buf_argsSerializer.release();
+    return; }
+    const _callResult  = _call(value0)
+    _continuation(_callResult)
+}
+export function deserializeAndCallCallback_OnContextMenuShowEvent_Boolean(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: OnContextMenuShowEvent) => boolean))
+    let value0 : OnContextMenuShowEvent = OnContextMenuShowEvent_serializer.read(thisDeserializer)
+    const _continuation_buf_resource : CallbackResource = thisDeserializer.readCallbackResource()
+    const _continuation_buf_call : KPointer = thisDeserializer.readPointer()
+    const _continuation_buf_callSync : KPointer = thisDeserializer.readPointer()
+    let _continuation : ((value0: boolean) => void) = (value0: boolean):void => { 
+    const _continuation_buf_argsSerializer : SerializerBase = SerializerBase.hold();
+    _continuation_buf_argsSerializer.writeInt32(_continuation_buf_resource.resourceId);
+    _continuation_buf_argsSerializer.writePointer(_continuation_buf_call);
+    _continuation_buf_argsSerializer.writePointer(_continuation_buf_callSync);
+    _continuation_buf_argsSerializer.writeBoolean(value0);
+    InteropNativeModule._CallCallbackSync(313269291, _continuation_buf_argsSerializer.asBuffer(), _continuation_buf_argsSerializer.length());
+    _continuation_buf_argsSerializer.release();
+    return; }
+    const _callResult  = _call(value0)
+    _continuation(_callResult)
+}
+export function deserializeAndCallCallback_OnDataResubmittedEvent_Void(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: OnDataResubmittedEvent) => void))
+    let value0 : OnDataResubmittedEvent = OnDataResubmittedEvent_serializer.read(thisDeserializer)
+    _call(value0)
+}
+export function deserializeAndCallCallback_OnDownloadStartEvent_Void(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: OnDownloadStartEvent) => void))
+    let value0 : OnDownloadStartEvent = OnDownloadStartEvent_serializer.read(thisDeserializer)
+    _call(value0)
+}
+export function deserializeAndCallCallback_OnErrorReceiveEvent_Void(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: OnErrorReceiveEvent) => void))
+    let value0 : OnErrorReceiveEvent = OnErrorReceiveEvent_serializer.read(thisDeserializer)
+    _call(value0)
+}
+export function deserializeAndCallCallback_OnFaviconReceivedEvent_Void(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: OnFaviconReceivedEvent) => void))
+    let value0 : OnFaviconReceivedEvent = OnFaviconReceivedEvent_serializer.read(thisDeserializer)
+    _call(value0)
+}
+export function deserializeAndCallCallback_OnFirstContentfulPaintEvent_Void(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: OnFirstContentfulPaintEvent) => void))
+    let value0 : OnFirstContentfulPaintEvent = OnFirstContentfulPaintEvent_serializer.read(thisDeserializer)
+    _call(value0)
+}
+export function deserializeAndCallCallback_OnGeolocationShowEvent_Void(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: OnGeolocationShowEvent) => void))
+    let value0 : OnGeolocationShowEvent = OnGeolocationShowEvent_serializer.read(thisDeserializer)
+    _call(value0)
+}
+export function deserializeAndCallCallback_OnHttpAuthRequestEvent_Boolean(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: OnHttpAuthRequestEvent) => boolean))
+    let value0 : OnHttpAuthRequestEvent = OnHttpAuthRequestEvent_serializer.read(thisDeserializer)
+    const _continuation_buf_resource : CallbackResource = thisDeserializer.readCallbackResource()
+    const _continuation_buf_call : KPointer = thisDeserializer.readPointer()
+    const _continuation_buf_callSync : KPointer = thisDeserializer.readPointer()
+    let _continuation : ((value0: boolean) => void) = (value0: boolean):void => { 
+    const _continuation_buf_argsSerializer : SerializerBase = SerializerBase.hold();
+    _continuation_buf_argsSerializer.writeInt32(_continuation_buf_resource.resourceId);
+    _continuation_buf_argsSerializer.writePointer(_continuation_buf_call);
+    _continuation_buf_argsSerializer.writePointer(_continuation_buf_callSync);
+    _continuation_buf_argsSerializer.writeBoolean(value0);
+    InteropNativeModule._CallCallbackSync(313269291, _continuation_buf_argsSerializer.asBuffer(), _continuation_buf_argsSerializer.length());
+    _continuation_buf_argsSerializer.release();
+    return; }
+    const _callResult  = _call(value0)
+    _continuation(_callResult)
+}
+export function deserializeAndCallCallback_OnHttpErrorReceiveEvent_Void(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: OnHttpErrorReceiveEvent) => void))
+    let value0 : OnHttpErrorReceiveEvent = OnHttpErrorReceiveEvent_serializer.read(thisDeserializer)
+    _call(value0)
+}
+export function deserializeAndCallCallback_OnInterceptRequestEvent_WebResourceResponse(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: OnInterceptRequestEvent) => WebResourceResponse))
+    let value0 : OnInterceptRequestEvent = OnInterceptRequestEvent_serializer.read(thisDeserializer)
+    const _continuation_buf_resource : CallbackResource = thisDeserializer.readCallbackResource()
+    const _continuation_buf_call : KPointer = thisDeserializer.readPointer()
+    const _continuation_buf_callSync : KPointer = thisDeserializer.readPointer()
+    let _continuation : ((value: WebResourceResponse) => void) = (value: WebResourceResponse):void => { 
+    const _continuation_buf_argsSerializer : SerializerBase = SerializerBase.hold();
+    _continuation_buf_argsSerializer.writeInt32(_continuation_buf_resource.resourceId);
+    _continuation_buf_argsSerializer.writePointer(_continuation_buf_call);
+    _continuation_buf_argsSerializer.writePointer(_continuation_buf_callSync);
+    WebResourceResponse_serializer.write(_continuation_buf_argsSerializer, value);
+    InteropNativeModule._CallCallbackSync(831645046, _continuation_buf_argsSerializer.asBuffer(), _continuation_buf_argsSerializer.length());
+    _continuation_buf_argsSerializer.release();
+    return; }
+    const _callResult  = _call(value0)
+    _continuation(_callResult)
+}
+export function deserializeAndCallCallback_OnLoadInterceptEvent_Boolean(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: OnLoadInterceptEvent) => boolean))
+    let value0 : OnLoadInterceptEvent = OnLoadInterceptEvent_serializer.read(thisDeserializer)
+    const _continuation_buf_resource : CallbackResource = thisDeserializer.readCallbackResource()
+    const _continuation_buf_call : KPointer = thisDeserializer.readPointer()
+    const _continuation_buf_callSync : KPointer = thisDeserializer.readPointer()
+    let _continuation : ((value0: boolean) => void) = (value0: boolean):void => { 
+    const _continuation_buf_argsSerializer : SerializerBase = SerializerBase.hold();
+    _continuation_buf_argsSerializer.writeInt32(_continuation_buf_resource.resourceId);
+    _continuation_buf_argsSerializer.writePointer(_continuation_buf_call);
+    _continuation_buf_argsSerializer.writePointer(_continuation_buf_callSync);
+    _continuation_buf_argsSerializer.writeBoolean(value0);
+    InteropNativeModule._CallCallbackSync(313269291, _continuation_buf_argsSerializer.asBuffer(), _continuation_buf_argsSerializer.length());
+    _continuation_buf_argsSerializer.release();
+    return; }
+    const _callResult  = _call(value0)
+    _continuation(_callResult)
+}
 export function deserializeAndCallCallback_onMeasureSize_SizeResult(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as Callback_onMeasureSize_SizeResult)
@@ -825,6 +1044,36 @@ export function deserializeAndCallCallback_onMeasureSize_SizeResult(thisDeserial
     const _callResult  = _call(selfLayoutInfo, children, constraint)
     _continuation(_callResult)
 }
+export function deserializeAndCallCallback_OnOverScrollEvent_Void(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: OnOverScrollEvent) => void))
+    let value0 : OnOverScrollEvent = OnOverScrollEvent_serializer.read(thisDeserializer)
+    _call(value0)
+}
+export function deserializeAndCallCallback_OnPageBeginEvent_Void(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: OnPageBeginEvent) => void))
+    let value0 : OnPageBeginEvent = OnPageBeginEvent_serializer.read(thisDeserializer)
+    _call(value0)
+}
+export function deserializeAndCallCallback_OnPageEndEvent_Void(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: OnPageEndEvent) => void))
+    let value0 : OnPageEndEvent = OnPageEndEvent_serializer.read(thisDeserializer)
+    _call(value0)
+}
+export function deserializeAndCallCallback_OnPageVisibleEvent_Void(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: OnPageVisibleEvent) => void))
+    let value0 : OnPageVisibleEvent = OnPageVisibleEvent_serializer.read(thisDeserializer)
+    _call(value0)
+}
+export function deserializeAndCallCallback_OnPermissionRequestEvent_Void(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: OnPermissionRequestEvent) => void))
+    let value0 : OnPermissionRequestEvent = OnPermissionRequestEvent_serializer.read(thisDeserializer)
+    _call(value0)
+}
 export function deserializeAndCallCallback_onPlaceChildren_Void(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as Callback_onPlaceChildren_Void)
@@ -838,18 +1087,128 @@ export function deserializeAndCallCallback_onPlaceChildren_Void(thisDeserializer
     let constraint : ConstraintSizeOptions = ConstraintSizeOptions_serializer.read(thisDeserializer)
     _call(selfLayoutInfo, children, constraint)
 }
+export function deserializeAndCallCallback_OnProgressChangeEvent_Void(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: OnProgressChangeEvent) => void))
+    let value0 : OnProgressChangeEvent = OnProgressChangeEvent_serializer.read(thisDeserializer)
+    _call(value0)
+}
+export function deserializeAndCallCallback_OnPromptEvent_Boolean(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: OnPromptEvent) => boolean))
+    let value0 : OnPromptEvent = OnPromptEvent_serializer.read(thisDeserializer)
+    const _continuation_buf_resource : CallbackResource = thisDeserializer.readCallbackResource()
+    const _continuation_buf_call : KPointer = thisDeserializer.readPointer()
+    const _continuation_buf_callSync : KPointer = thisDeserializer.readPointer()
+    let _continuation : ((value0: boolean) => void) = (value0: boolean):void => { 
+    const _continuation_buf_argsSerializer : SerializerBase = SerializerBase.hold();
+    _continuation_buf_argsSerializer.writeInt32(_continuation_buf_resource.resourceId);
+    _continuation_buf_argsSerializer.writePointer(_continuation_buf_call);
+    _continuation_buf_argsSerializer.writePointer(_continuation_buf_callSync);
+    _continuation_buf_argsSerializer.writeBoolean(value0);
+    InteropNativeModule._CallCallbackSync(313269291, _continuation_buf_argsSerializer.asBuffer(), _continuation_buf_argsSerializer.length());
+    _continuation_buf_argsSerializer.release();
+    return; }
+    const _callResult  = _call(value0)
+    _continuation(_callResult)
+}
+export function deserializeAndCallCallback_OnRefreshAccessedHistoryEvent_Void(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: OnRefreshAccessedHistoryEvent) => void))
+    let value0 : OnRefreshAccessedHistoryEvent = OnRefreshAccessedHistoryEvent_serializer.read(thisDeserializer)
+    _call(value0)
+}
+export function deserializeAndCallCallback_OnRenderExitedEvent_Void(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: OnRenderExitedEvent) => void))
+    let value0 : OnRenderExitedEvent = OnRenderExitedEvent_serializer.read(thisDeserializer)
+    _call(value0)
+}
+export function deserializeAndCallCallback_OnResourceLoadEvent_Void(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: OnResourceLoadEvent) => void))
+    let value0 : OnResourceLoadEvent = OnResourceLoadEvent_serializer.read(thisDeserializer)
+    _call(value0)
+}
+export function deserializeAndCallCallback_OnScaleChangeEvent_Void(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: OnScaleChangeEvent) => void))
+    let value0 : OnScaleChangeEvent = OnScaleChangeEvent_serializer.read(thisDeserializer)
+    _call(value0)
+}
+export function deserializeAndCallCallback_OnScreenCaptureRequestEvent_Void(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: OnScreenCaptureRequestEvent) => void))
+    let value0 : OnScreenCaptureRequestEvent = OnScreenCaptureRequestEvent_serializer.read(thisDeserializer)
+    _call(value0)
+}
+export function deserializeAndCallCallback_OnScrollEvent_Void(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: OnScrollEvent) => void))
+    let value0 : OnScrollEvent = OnScrollEvent_serializer.read(thisDeserializer)
+    _call(value0)
+}
 export function deserializeAndCallCallback_OnScrollFrameBeginHandlerResult_Void(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((value: OnScrollFrameBeginHandlerResult) => void))
     let value : OnScrollFrameBeginHandlerResult = OnScrollFrameBeginHandlerResult_serializer.read(thisDeserializer)
     _call(value)
 }
+export function deserializeAndCallCallback_OnSearchResultReceiveEvent_Void(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: OnSearchResultReceiveEvent) => void))
+    let value0 : OnSearchResultReceiveEvent = OnSearchResultReceiveEvent_serializer.read(thisDeserializer)
+    _call(value0)
+}
+export function deserializeAndCallCallback_OnShowFileSelectorEvent_Boolean(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: OnShowFileSelectorEvent) => boolean))
+    let value0 : OnShowFileSelectorEvent = OnShowFileSelectorEvent_serializer.read(thisDeserializer)
+    const _continuation_buf_resource : CallbackResource = thisDeserializer.readCallbackResource()
+    const _continuation_buf_call : KPointer = thisDeserializer.readPointer()
+    const _continuation_buf_callSync : KPointer = thisDeserializer.readPointer()
+    let _continuation : ((value0: boolean) => void) = (value0: boolean):void => { 
+    const _continuation_buf_argsSerializer : SerializerBase = SerializerBase.hold();
+    _continuation_buf_argsSerializer.writeInt32(_continuation_buf_resource.resourceId);
+    _continuation_buf_argsSerializer.writePointer(_continuation_buf_call);
+    _continuation_buf_argsSerializer.writePointer(_continuation_buf_callSync);
+    _continuation_buf_argsSerializer.writeBoolean(value0);
+    InteropNativeModule._CallCallbackSync(313269291, _continuation_buf_argsSerializer.asBuffer(), _continuation_buf_argsSerializer.length());
+    _continuation_buf_argsSerializer.release();
+    return; }
+    const _callResult  = _call(value0)
+    _continuation(_callResult)
+}
+export function deserializeAndCallCallback_OnSslErrorEventReceiveEvent_Void(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: OnSslErrorEventReceiveEvent) => void))
+    let value0 : OnSslErrorEventReceiveEvent = OnSslErrorEventReceiveEvent_serializer.read(thisDeserializer)
+    _call(value0)
+}
+export function deserializeAndCallCallback_OnTitleReceiveEvent_Void(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: OnTitleReceiveEvent) => void))
+    let value0 : OnTitleReceiveEvent = OnTitleReceiveEvent_serializer.read(thisDeserializer)
+    _call(value0)
+}
+export function deserializeAndCallCallback_OnTouchIconUrlReceivedEvent_Void(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: OnTouchIconUrlReceivedEvent) => void))
+    let value0 : OnTouchIconUrlReceivedEvent = OnTouchIconUrlReceivedEvent_serializer.read(thisDeserializer)
+    _call(value0)
+}
+export function deserializeAndCallCallback_OnWindowNewEvent_Void(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: OnWindowNewEvent) => void))
+    let value0 : OnWindowNewEvent = OnWindowNewEvent_serializer.read(thisDeserializer)
+    _call(value0)
+}
 export function deserializeAndCallCallback_Opt_Array_FontDescriptor_Opt_Array_String_Void(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((value?: Array<object> | undefined,error?: Array<string> | undefined) => void))
     const value_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let value_buf : Array<object> | undefined
-    if ((RuntimeType.UNDEFINED) != (value_buf_runtimeType))
+    if ((value_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         const value_buf__length : int32 = thisDeserializer.readInt32()
         let value_buf_ : Array<object> = new Array<object>(value_buf__length)
@@ -861,7 +1220,7 @@ export function deserializeAndCallCallback_Opt_Array_FontDescriptor_Opt_Array_St
     let value : Array<object> | undefined = value_buf
     const error_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let error_buf : Array<string> | undefined
-    if ((RuntimeType.UNDEFINED) != (error_buf_runtimeType))
+    if ((error_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         const error_buf__length : int32 = thisDeserializer.readInt32()
         let error_buf_ : Array<string> = new Array<string>(error_buf__length)
@@ -878,7 +1237,7 @@ export function deserializeAndCallCallback_Opt_Array_NavDestinationTransition_Vo
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((value: Array<NavDestinationTransition> | undefined) => void))
     const value_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let value_buf : Array<NavDestinationTransition> | undefined
-    if ((RuntimeType.UNDEFINED) != (value_buf_runtimeType))
+    if ((value_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         const value_buf__length : int32 = thisDeserializer.readInt32()
         let value_buf_ : Array<NavDestinationTransition> = new Array<NavDestinationTransition>(value_buf__length)
@@ -895,7 +1254,7 @@ export function deserializeAndCallCallback_Opt_Array_String_Opt_Array_String_Voi
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((value?: Array<string> | undefined,error?: Array<string> | undefined) => void))
     const value_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let value_buf : Array<string> | undefined
-    if ((RuntimeType.UNDEFINED) != (value_buf_runtimeType))
+    if ((value_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         const value_buf__length : int32 = thisDeserializer.readInt32()
         let value_buf_ : Array<string> = new Array<string>(value_buf__length)
@@ -907,7 +1266,7 @@ export function deserializeAndCallCallback_Opt_Array_String_Opt_Array_String_Voi
     let value : Array<string> | undefined = value_buf
     const error_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let error_buf : Array<string> | undefined
-    if ((RuntimeType.UNDEFINED) != (error_buf_runtimeType))
+    if ((error_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         const error_buf__length : int32 = thisDeserializer.readInt32()
         let error_buf_ : Array<string> = new Array<string>(error_buf__length)
@@ -924,7 +1283,7 @@ export function deserializeAndCallCallback_Opt_Array_String_Void(thisDeserialize
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((error?: Array<string> | undefined) => void))
     const error_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let error_buf : Array<string> | undefined
-    if ((RuntimeType.UNDEFINED) != (error_buf_runtimeType))
+    if ((error_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         const error_buf__length : int32 = thisDeserializer.readInt32()
         let error_buf_ : Array<string> = new Array<string>(error_buf__length)
@@ -936,12 +1295,24 @@ export function deserializeAndCallCallback_Opt_Array_String_Void(thisDeserialize
     let error : Array<string> | undefined = error_buf
     _call(error)
 }
+export function deserializeAndCallCallback_Opt_Boolean_Void(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((select: boolean | undefined) => void))
+    const select_buf_runtimeType  = thisDeserializer.readInt8().toInt()
+    let select_buf : boolean | undefined
+    if ((select_buf_runtimeType) != (RuntimeType.UNDEFINED))
+    {
+        select_buf = thisDeserializer.readBoolean()
+    }
+    let select : boolean | undefined = select_buf
+    _call(select)
+}
 export function deserializeAndCallCallback_Opt_CustomBuilder_Void(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((value: CustomBuilder | undefined) => void))
     const value_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let value_buf : CustomBuilder | undefined
-    if ((RuntimeType.UNDEFINED) != (value_buf_runtimeType))
+    if ((value_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         const value_buf__resource : CallbackResource = thisDeserializer.readCallbackResource()
         const value_buf__call : KPointer = thisDeserializer.readPointer()
@@ -963,14 +1334,14 @@ export function deserializeAndCallCallback_Opt_FontDescriptor_Opt_Array_String_V
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((value?: object | undefined,error?: Array<string> | undefined) => void))
     const value_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let value_buf : object | undefined
-    if ((RuntimeType.UNDEFINED) != (value_buf_runtimeType))
+    if ((value_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         value_buf = (thisDeserializer.readCustomObject("object") as object)
     }
     let value : object | undefined = value_buf
     const error_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let error_buf : Array<string> | undefined
-    if ((RuntimeType.UNDEFINED) != (error_buf_runtimeType))
+    if ((error_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         const error_buf__length : int32 = thisDeserializer.readInt32()
         let error_buf_ : Array<string> = new Array<string>(error_buf__length)
@@ -987,19 +1358,43 @@ export function deserializeAndCallCallback_Opt_NavigationAnimatedTransition_Void
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((value: NavigationAnimatedTransition | undefined) => void))
     const value_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let value_buf : NavigationAnimatedTransition | undefined
-    if ((RuntimeType.UNDEFINED) != (value_buf_runtimeType))
+    if ((value_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         value_buf = NavigationAnimatedTransition_serializer.read(thisDeserializer)
     }
     let value : NavigationAnimatedTransition | undefined = value_buf
     _call(value)
 }
+export function deserializeAndCallCallback_Opt_Number_Void(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((selected: number | undefined) => void))
+    const selected_buf_runtimeType  = thisDeserializer.readInt8().toInt()
+    let selected_buf : number | undefined
+    if ((selected_buf_runtimeType) != (RuntimeType.UNDEFINED))
+    {
+        selected_buf = (thisDeserializer.readNumber() as number)
+    }
+    let selected : number | undefined = selected_buf
+    _call(selected)
+}
+export function deserializeAndCallCallback_Opt_Object_Void(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: Object | undefined) => void))
+    const value0_buf_runtimeType  = thisDeserializer.readInt8().toInt()
+    let value0_buf : Object | undefined
+    if ((value0_buf_runtimeType) != (RuntimeType.UNDEFINED))
+    {
+        value0_buf = (thisDeserializer.readObject() as object)
+    }
+    let value0 : Object | undefined = value0_buf
+    _call(value0)
+}
 export function deserializeAndCallCallback_Opt_OffsetResult_Void(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((value: OffsetResult | undefined) => void))
     const value_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let value_buf : OffsetResult | undefined
-    if ((RuntimeType.UNDEFINED) != (value_buf_runtimeType))
+    if ((value_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         value_buf = OffsetResult_serializer.read(thisDeserializer)
     }
@@ -1011,14 +1406,14 @@ export function deserializeAndCallCallback_Opt_Scene_Opt_Array_String_Void(thisD
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((value?: Scene | undefined,error?: Array<string> | undefined) => void))
     const value_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let value_buf : Scene | undefined
-    if ((RuntimeType.UNDEFINED) != (value_buf_runtimeType))
+    if ((value_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         value_buf = (Scene_serializer.read(thisDeserializer) as Scene)
     }
     let value : Scene | undefined = value_buf
     const error_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let error_buf : Array<string> | undefined
-    if ((RuntimeType.UNDEFINED) != (error_buf_runtimeType))
+    if ((error_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         const error_buf__length : int32 = thisDeserializer.readInt32()
         let error_buf_ : Array<string> = new Array<string>(error_buf__length)
@@ -1035,7 +1430,7 @@ export function deserializeAndCallCallback_Opt_ScrollResult_Void(thisDeserialize
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((value: ScrollResult | undefined) => void))
     const value_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let value_buf : ScrollResult | undefined
-    if ((RuntimeType.UNDEFINED) != (value_buf_runtimeType))
+    if ((value_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         value_buf = (ScrollResult_serializer.read(thisDeserializer) as ScrollResult)
     }
@@ -1047,14 +1442,14 @@ export function deserializeAndCallCallback_Opt_String_Opt_Array_String_Void(this
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((value?: string | undefined,error?: Array<string> | undefined) => void))
     const value_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let value_buf : string | undefined
-    if ((RuntimeType.UNDEFINED) != (value_buf_runtimeType))
+    if ((value_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         value_buf = (thisDeserializer.readString() as string)
     }
     let value : string | undefined = value_buf
     const error_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let error_buf : Array<string> | undefined
-    if ((RuntimeType.UNDEFINED) != (error_buf_runtimeType))
+    if ((error_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         const error_buf__length : int32 = thisDeserializer.readInt32()
         let error_buf_ : Array<string> = new Array<string>(error_buf__length)
@@ -1071,14 +1466,14 @@ export function deserializeAndCallCallback_Opt_StyledString_Opt_Array_String_Voi
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((value?: StyledString | undefined,error?: Array<string> | undefined) => void))
     const value_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let value_buf : StyledString | undefined
-    if ((RuntimeType.UNDEFINED) != (value_buf_runtimeType))
+    if ((value_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         value_buf = (StyledString_serializer.read(thisDeserializer) as StyledString)
     }
     let value : StyledString | undefined = value_buf
     const error_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let error_buf : Array<string> | undefined
-    if ((RuntimeType.UNDEFINED) != (error_buf_runtimeType))
+    if ((error_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         const error_buf__length : int32 = thisDeserializer.readInt32()
         let error_buf_ : Array<string> = new Array<string>(error_buf__length)
@@ -1095,11 +1490,71 @@ export function deserializeAndCallCallback_Opt_TabContentAnimatedTransition_Void
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((value: TabContentAnimatedTransition | undefined) => void))
     const value_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let value_buf : TabContentAnimatedTransition | undefined
-    if ((RuntimeType.UNDEFINED) != (value_buf_runtimeType))
+    if ((value_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         value_buf = TabContentAnimatedTransition_serializer.read(thisDeserializer)
     }
     let value : TabContentAnimatedTransition | undefined = value_buf
+    _call(value)
+}
+export function deserializeAndCallCallback_Opt_Union_Number_Resource_Void(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((selected: number | Resource | undefined) => void))
+    const selected_buf_runtimeType  = thisDeserializer.readInt8().toInt()
+    let selected_buf : number | Resource | undefined
+    if ((selected_buf_runtimeType) != (RuntimeType.UNDEFINED))
+    {
+        const selected_buf__selector : int32 = thisDeserializer.readInt8()
+        let selected_buf_ : number | Resource | undefined
+        if (selected_buf__selector == (0).toChar()) {
+            selected_buf_ = (thisDeserializer.readNumber() as number)
+        }
+        else if (selected_buf__selector == (1).toChar()) {
+            selected_buf_ = Resource_serializer.read(thisDeserializer)
+        }
+        else {
+            throw new Error("One of the branches for selected_buf_ has to be chosen through deserialisation.")
+        }
+        selected_buf = (selected_buf_ as number | Resource)
+    }
+    let selected : number | Resource | undefined = selected_buf
+    _call(selected)
+}
+export function deserializeAndCallCallback_Opt_Union_ResourceStr_String_Resource_Void(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value: ResourceStr | string | Resource | undefined) => void))
+    const value_buf_runtimeType  = thisDeserializer.readInt8().toInt()
+    let value_buf : ResourceStr | string | Resource | undefined
+    if ((value_buf_runtimeType) != (RuntimeType.UNDEFINED))
+    {
+        const value_buf__selector : int32 = thisDeserializer.readInt8()
+        let value_buf_ : ResourceStr | string | Resource | undefined
+        if (value_buf__selector == (0).toChar()) {
+            const value_buf__u_selector : int32 = thisDeserializer.readInt8()
+            let value_buf__u : string | Resource | undefined
+            if (value_buf__u_selector == (0).toChar()) {
+                value_buf__u = (thisDeserializer.readString() as string)
+            }
+            else if (value_buf__u_selector == (1).toChar()) {
+                value_buf__u = Resource_serializer.read(thisDeserializer)
+            }
+            else {
+                throw new Error("One of the branches for value_buf__u has to be chosen through deserialisation.")
+            }
+            value_buf_ = (value_buf__u as string | Resource)
+        }
+        else if (value_buf__selector == (1).toChar()) {
+            value_buf_ = (thisDeserializer.readString() as string)
+        }
+        else if (value_buf__selector == (2).toChar()) {
+            value_buf_ = Resource_serializer.read(thisDeserializer)
+        }
+        else {
+            throw new Error("One of the branches for value_buf_ has to be chosen through deserialisation.")
+        }
+        value_buf = (value_buf_ as ResourceStr | string | Resource)
+    }
+    let value : ResourceStr | string | Resource | undefined = value_buf
     _call(value)
 }
 export function deserializeAndCallCallback_PlaybackInfo_Void(thisDeserializer: DeserializerBase): void {
@@ -1467,22 +1922,119 @@ export function deserializeAndCallCallback_Union_CustomBuilder_DragItemInfo_Void
     let value : CustomBuilder | DragItemInfo = (value_buf as CustomBuilder | DragItemInfo)
     _call(value)
 }
-export function deserializeAndCallCallback_Union_Object_Undefined_Void(thisDeserializer: DeserializerBase): void {
+export function deserializeAndCallCallback_Union_Number_Array_Number_Void(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
-    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: Object | undefined) => void))
-    const value0_buf_runtimeType  = thisDeserializer.readInt8().toInt()
-    let value0_buf : Object | undefined
-    if ((RuntimeType.UNDEFINED) != (value0_buf_runtimeType))
-    {
-        value0_buf = (thisDeserializer.readObject() as object)
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((selected: number | Array<number>) => void))
+    const selected_buf_selector : int32 = thisDeserializer.readInt8()
+    let selected_buf : number | Array<number> | undefined
+    if (selected_buf_selector == (0).toChar()) {
+        selected_buf = (thisDeserializer.readNumber() as number)
     }
-    let value0 : Object | undefined = value0_buf
-    _call(value0)
+    else if (selected_buf_selector == (1).toChar()) {
+        const selected_buf_u_length : int32 = thisDeserializer.readInt32()
+        let selected_buf_u : Array<number> = new Array<number>(selected_buf_u_length)
+        for (let selected_buf_u_i = 0; selected_buf_u_i < selected_buf_u_length; selected_buf_u_i++) {
+            selected_buf_u[selected_buf_u_i] = (thisDeserializer.readNumber() as number)
+        }
+        selected_buf = selected_buf_u
+    }
+    else {
+        throw new Error("One of the branches for selected_buf has to be chosen through deserialisation.")
+    }
+    let selected : number | Array<number> = (selected_buf as number | Array<number>)
+    _call(selected)
+}
+export function deserializeAndCallCallback_Union_ResourceStr_Array_ResourceStr_Void(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value: ResourceStr | Array<ResourceStr>) => void))
+    const value_buf_selector : int32 = thisDeserializer.readInt8()
+    let value_buf : ResourceStr | Array<ResourceStr> | undefined
+    if (value_buf_selector == (0).toChar()) {
+        const value_buf_u_selector : int32 = thisDeserializer.readInt8()
+        let value_buf_u : string | Resource | undefined
+        if (value_buf_u_selector == (0).toChar()) {
+            value_buf_u = (thisDeserializer.readString() as string)
+        }
+        else if (value_buf_u_selector == (1).toChar()) {
+            value_buf_u = Resource_serializer.read(thisDeserializer)
+        }
+        else {
+            throw new Error("One of the branches for value_buf_u has to be chosen through deserialisation.")
+        }
+        value_buf = (value_buf_u as string | Resource)
+    }
+    else if (value_buf_selector == (1).toChar()) {
+        const value_buf_u_length : int32 = thisDeserializer.readInt32()
+        let value_buf_u : Array<ResourceStr> = new Array<ResourceStr>(value_buf_u_length)
+        for (let value_buf_u_i = 0; value_buf_u_i < value_buf_u_length; value_buf_u_i++) {
+            const value_buf_u_buf_selector : int32 = thisDeserializer.readInt8()
+            let value_buf_u_buf : string | Resource | undefined
+            if (value_buf_u_buf_selector == (0).toChar()) {
+                value_buf_u_buf = (thisDeserializer.readString() as string)
+            }
+            else if (value_buf_u_buf_selector == (1).toChar()) {
+                value_buf_u_buf = Resource_serializer.read(thisDeserializer)
+            }
+            else {
+                throw new Error("One of the branches for value_buf_u_buf has to be chosen through deserialisation.")
+            }
+            value_buf_u[value_buf_u_i] = (value_buf_u_buf as string | Resource)
+        }
+        value_buf = value_buf_u
+    }
+    else {
+        throw new Error("One of the branches for value_buf has to be chosen through deserialisation.")
+    }
+    let value : ResourceStr | Array<ResourceStr> = (value_buf as ResourceStr | Array<ResourceStr>)
+    _call(value)
+}
+export function deserializeAndCallCallback_Union_ResourceStr_Resource_String_Void(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((text: ResourceStr | Resource | string) => void))
+    const text_buf_selector : int32 = thisDeserializer.readInt8()
+    let text_buf : ResourceStr | Resource | string | undefined
+    if (text_buf_selector == (0).toChar()) {
+        const text_buf_u_selector : int32 = thisDeserializer.readInt8()
+        let text_buf_u : string | Resource | undefined
+        if (text_buf_u_selector == (0).toChar()) {
+            text_buf_u = (thisDeserializer.readString() as string)
+        }
+        else if (text_buf_u_selector == (1).toChar()) {
+            text_buf_u = Resource_serializer.read(thisDeserializer)
+        }
+        else {
+            throw new Error("One of the branches for text_buf_u has to be chosen through deserialisation.")
+        }
+        text_buf = (text_buf_u as string | Resource)
+    }
+    else if (text_buf_selector == (1).toChar()) {
+        text_buf = Resource_serializer.read(thisDeserializer)
+    }
+    else if (text_buf_selector == (2).toChar()) {
+        text_buf = (thisDeserializer.readString() as string)
+    }
+    else {
+        throw new Error("One of the branches for text_buf has to be chosen through deserialisation.")
+    }
+    let text : ResourceStr | Resource | string = (text_buf as ResourceStr | Resource | string)
+    _call(text)
 }
 export function deserializeAndCallCallback_Void(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as (() => void))
     _call()
+}
+export function deserializeAndCallCallback_WebKeyboardOptions_Void(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value: WebKeyboardOptions) => void))
+    let value : WebKeyboardOptions = WebKeyboardOptions_serializer.read(thisDeserializer)
+    _call(value)
+}
+export function deserializeAndCallCallback_WebResourceResponse_Void(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((value: WebResourceResponse) => void))
+    let value : WebResourceResponse = (WebResourceResponse_serializer.read(thisDeserializer) as WebResourceResponse)
+    _call(value)
 }
 export function deserializeAndCallCheckBoxModifierBuilder(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
@@ -1613,14 +2165,14 @@ export function deserializeAndCallEditableTextOnChangeCallback(thisDeserializer:
     let value : string = (thisDeserializer.readString() as string)
     const previewText_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let previewText_buf : PreviewText | undefined
-    if ((RuntimeType.UNDEFINED) != (previewText_buf_runtimeType))
+    if ((previewText_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         previewText_buf = PreviewText_serializer.read(thisDeserializer)
     }
     let previewText : PreviewText | undefined = previewText_buf
     const options_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let options_buf : TextChangeOptions | undefined
-    if ((RuntimeType.UNDEFINED) != (options_buf_runtimeType))
+    if ((options_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         options_buf = TextChangeOptions_serializer.read(thisDeserializer)
     }
@@ -1722,7 +2274,7 @@ export function deserializeAndCallImageOnCompleteCallback(thisDeserializer: Dese
     const _call  = (ResourceHolder.instance().get(_resourceId) as ImageOnCompleteCallback)
     const loadEvent_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let loadEvent_buf : ImageCompleteEvent | undefined
-    if ((RuntimeType.UNDEFINED) != (loadEvent_buf_runtimeType))
+    if ((loadEvent_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         loadEvent_buf = ImageCompleteEvent_serializer.read(thisDeserializer)
     }
@@ -1860,11 +2412,11 @@ export function deserializeAndCallNavDestinationTransitionDelegate(thisDeseriali
     let value_type : int32 = RuntimeType.UNDEFINED;
     value_type = runtimeType(value);
     _continuation_buf_argsSerializer.writeInt8((value_type).toChar());
-    if ((RuntimeType.UNDEFINED) != (value_type)) {
+    if ((value_type) != (RuntimeType.UNDEFINED)) {
         const value_value  = value!;
         _continuation_buf_argsSerializer.writeInt32((value_value.length).toInt());
-        for (let i = 0; i < value_value.length; i++) {
-            const value_value_element : NavDestinationTransition = value_value[i];
+        for (let value_value_counter_i = 0; value_value_counter_i < value_value.length; value_value_counter_i++) {
+            const value_value_element : NavDestinationTransition = value_value[value_value_counter_i];
             NavDestinationTransition_serializer.write(_continuation_buf_argsSerializer, value_value_element);
         }
     }
@@ -1878,6 +2430,12 @@ export function deserializeAndCallNavExtender_OnUpdateStack(thisDeserializer: De
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as NavExtender_OnUpdateStack)
     _call()
+}
+export function deserializeAndCallOnAdsBlockedCallback(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as OnAdsBlockedCallback)
+    let details : AdsBlockedDetails = AdsBlockedDetails_serializer.read(thisDeserializer)
+    _call(details)
 }
 export function deserializeAndCallOnAlphabetIndexerPopupSelectCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
@@ -1898,8 +2456,8 @@ export function deserializeAndCallOnAlphabetIndexerRequestPopupDataCallback(this
     _continuation_buf_argsSerializer.writePointer(_continuation_buf_call);
     _continuation_buf_argsSerializer.writePointer(_continuation_buf_callSync);
     _continuation_buf_argsSerializer.writeInt32((value.length).toInt());
-    for (let i = 0; i < value.length; i++) {
-        const value_element : string = value[i];
+    for (let value_counter_i = 0; value_counter_i < value.length; value_counter_i++) {
+        const value_element : string = value[value_counter_i];
         _continuation_buf_argsSerializer.writeString(value_element);
     }
     InteropNativeModule._CallCallbackSync(-440782244, _continuation_buf_argsSerializer.asBuffer(), _continuation_buf_argsSerializer.length());
@@ -1933,6 +2491,11 @@ export function deserializeAndCallOnContentScrollCallback(thisDeserializer: Dese
     let totalOffsetY : number = (thisDeserializer.readNumber() as number)
     _call(totalOffsetX, totalOffsetY)
 }
+export function deserializeAndCallOnContextMenuHideCallback(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as OnContextMenuHideCallback)
+    _call()
+}
 export function deserializeAndCallOnCreateMenuCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as OnCreateMenuCallback)
@@ -1951,8 +2514,8 @@ export function deserializeAndCallOnCreateMenuCallback(thisDeserializer: Deseria
     _continuation_buf_argsSerializer.writePointer(_continuation_buf_call);
     _continuation_buf_argsSerializer.writePointer(_continuation_buf_callSync);
     _continuation_buf_argsSerializer.writeInt32((value.length).toInt());
-    for (let i = 0; i < value.length; i++) {
-        const value_element : TextMenuItem = value[i];
+    for (let value_counter_i = 0; value_counter_i < value.length; value_counter_i++) {
+        const value_element : TextMenuItem = value[value_counter_i];
         TextMenuItem_serializer.write(_continuation_buf_argsSerializer, value_element);
     }
     InteropNativeModule._CallCallbackSync(528588498, _continuation_buf_argsSerializer.asBuffer(), _continuation_buf_argsSerializer.length());
@@ -1974,17 +2537,29 @@ export function deserializeAndCallOnDragEventCallback(thisDeserializer: Deserial
     let event : DragEvent = (DragEvent_serializer.read(thisDeserializer) as DragEvent)
     const extraParams_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let extraParams_buf : string | undefined
-    if ((RuntimeType.UNDEFINED) != (extraParams_buf_runtimeType))
+    if ((extraParams_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         extraParams_buf = (thisDeserializer.readString() as string)
     }
     let extraParams : string | undefined = extraParams_buf
     _call(event, extraParams)
 }
+export function deserializeAndCallOnFirstMeaningfulPaintCallback(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as OnFirstMeaningfulPaintCallback)
+    let firstMeaningfulPaint : FirstMeaningfulPaint = FirstMeaningfulPaint_serializer.read(thisDeserializer)
+    _call(firstMeaningfulPaint)
+}
 export function deserializeAndCallOnFoldStatusChangeCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as OnFoldStatusChangeCallback)
     let event : OnFoldStatusChangeInfo = OnFoldStatusChangeInfo_serializer.read(thisDeserializer)
+    _call(event)
+}
+export function deserializeAndCallOnFullScreenEnterCallback(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as OnFullScreenEnterCallback)
+    let event : FullScreenEnterEvent = FullScreenEnterEvent_serializer.read(thisDeserializer)
     _call(event)
 }
 export function deserializeAndCallOnHoverCallback(thisDeserializer: DeserializerBase): void {
@@ -1999,6 +2574,12 @@ export function deserializeAndCallOnHoverStatusChangeCallback(thisDeserializer: 
     const _call  = (ResourceHolder.instance().get(_resourceId) as OnHoverStatusChangeCallback)
     let param : HoverEventParam = HoverEventParam_serializer.read(thisDeserializer)
     _call(param)
+}
+export function deserializeAndCallOnIntelligentTrackingPreventionCallback(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as OnIntelligentTrackingPreventionCallback)
+    let details : IntelligentTrackingPreventionDetails = IntelligentTrackingPreventionDetails_serializer.read(thisDeserializer)
+    _call(details)
 }
 export function deserializeAndCallOnItemDragStartCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
@@ -2016,7 +2597,7 @@ export function deserializeAndCallOnItemDragStartCallback(thisDeserializer: Dese
     let value_type : int32 = RuntimeType.UNDEFINED;
     value_type = runtimeType(value);
     _continuation_buf_argsSerializer.writeInt8((value_type).toChar());
-    if ((RuntimeType.UNDEFINED) != (value_type)) {
+    if ((value_type) != (RuntimeType.UNDEFINED)) {
         const value_value  = value!;
         _continuation_buf_argsSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(value_value));
     }
@@ -2025,6 +2606,12 @@ export function deserializeAndCallOnItemDragStartCallback(thisDeserializer: Dese
     return; }
     const _callResult  = _call(event, itemIndex)
     _continuation(_callResult)
+}
+export function deserializeAndCallOnLargestContentfulPaintCallback(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as OnLargestContentfulPaintCallback)
+    let largestContentfulPaint : LargestContentfulPaint = LargestContentfulPaint_serializer.read(thisDeserializer)
+    _call(largestContentfulPaint)
 }
 export function deserializeAndCallOnLazyLoadingFunc(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
@@ -2066,17 +2653,48 @@ export function deserializeAndCallOnMoveHandler(thisDeserializer: DeserializerBa
     let to : number = (thisDeserializer.readNumber() as number)
     _call(from, to)
 }
+export function deserializeAndCallOnNativeEmbedVisibilityChangeCallback(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as OnNativeEmbedVisibilityChangeCallback)
+    let nativeEmbedVisibilityInfo : NativeEmbedVisibilityInfo = NativeEmbedVisibilityInfo_serializer.read(thisDeserializer)
+    _call(nativeEmbedVisibilityInfo)
+}
 export function deserializeAndCallOnNativeLoadCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as OnNativeLoadCallback)
     const event_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let event_buf : Object | undefined
-    if ((RuntimeType.UNDEFINED) != (event_buf_runtimeType))
+    if ((event_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         event_buf = (thisDeserializer.readObject() as object)
     }
     let event : Object | undefined = event_buf
     _call(event)
+}
+export function deserializeAndCallOnNavigationEntryCommittedCallback(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as OnNavigationEntryCommittedCallback)
+    let loadCommittedDetails : LoadCommittedDetails = LoadCommittedDetails_serializer.read(thisDeserializer)
+    _call(loadCommittedDetails)
+}
+export function deserializeAndCallOnOverrideUrlLoadingCallback(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as OnOverrideUrlLoadingCallback)
+    let webResourceRequest : WebResourceRequest = (WebResourceRequest_serializer.read(thisDeserializer) as WebResourceRequest)
+    const _continuation_buf_resource : CallbackResource = thisDeserializer.readCallbackResource()
+    const _continuation_buf_call : KPointer = thisDeserializer.readPointer()
+    const _continuation_buf_callSync : KPointer = thisDeserializer.readPointer()
+    let _continuation : ((value0: boolean) => void) = (value0: boolean):void => { 
+    const _continuation_buf_argsSerializer : SerializerBase = SerializerBase.hold();
+    _continuation_buf_argsSerializer.writeInt32(_continuation_buf_resource.resourceId);
+    _continuation_buf_argsSerializer.writePointer(_continuation_buf_call);
+    _continuation_buf_argsSerializer.writePointer(_continuation_buf_callSync);
+    _continuation_buf_argsSerializer.writeBoolean(value0);
+    InteropNativeModule._CallCallbackSync(313269291, _continuation_buf_argsSerializer.asBuffer(), _continuation_buf_argsSerializer.length());
+    _continuation_buf_argsSerializer.release();
+    return; }
+    const _callResult  = _call(webResourceRequest)
+    _continuation(_callResult)
 }
 export function deserializeAndCallOnPasteCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
@@ -2096,6 +2714,23 @@ export function deserializeAndCallOnRatingChangeCallback(thisDeserializer: Deser
     const _call  = (ResourceHolder.instance().get(_resourceId) as OnRatingChangeCallback)
     let rating : number = (thisDeserializer.readNumber() as number)
     _call(rating)
+}
+export function deserializeAndCallOnRenderProcessNotRespondingCallback(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as OnRenderProcessNotRespondingCallback)
+    let data : RenderProcessNotRespondingData = RenderProcessNotRespondingData_serializer.read(thisDeserializer)
+    _call(data)
+}
+export function deserializeAndCallOnRenderProcessRespondingCallback(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as OnRenderProcessRespondingCallback)
+    _call()
+}
+export function deserializeAndCallOnSafeBrowsingCheckResultCallback(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as OnSafeBrowsingCheckResultCallback)
+    let threatType : ThreatType = TypeChecker.ThreatType_FromNumeric(thisDeserializer.readInt32())
+    _call(threatType)
 }
 export function deserializeAndCallOnScrollCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
@@ -2143,6 +2778,12 @@ export function deserializeAndCallOnSelectCallback(thisDeserializer: Deserialize
     let index : number = (thisDeserializer.readNumber() as number)
     let selectStr : string = (thisDeserializer.readString() as string)
     _call(index, selectStr)
+}
+export function deserializeAndCallOnSslErrorEventCallback(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as OnSslErrorEventCallback)
+    let sslErrorEvent : SslErrorEvent = SslErrorEvent_serializer.read(thisDeserializer)
+    _call(sslErrorEvent)
 }
 export function deserializeAndCallOnSubmitCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
@@ -2285,6 +2926,12 @@ export function deserializeAndCallOnTotalCountFunc(thisDeserializer: Deserialize
     const _callResult  = _call()
     _continuation(_callResult)
 }
+export function deserializeAndCallOnViewportFitChangedCallback(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as OnViewportFitChangedCallback)
+    let viewportFit : ViewportFit = TypeChecker.ViewportFit_FromNumeric(thisDeserializer.readInt32())
+    _call(viewportFit)
+}
 export function deserializeAndCallOnWillScrollCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as OnWillScrollCallback)
@@ -2302,7 +2949,7 @@ export function deserializeAndCallOnWillScrollCallback(thisDeserializer: Deseria
     let value_type : int32 = RuntimeType.UNDEFINED;
     value_type = runtimeType(value);
     _continuation_buf_argsSerializer.writeInt8((value_type).toChar());
-    if ((RuntimeType.UNDEFINED) != (value_type)) {
+    if ((value_type) != (RuntimeType.UNDEFINED)) {
         const value_value  = value!;
         ScrollResult_serializer.write(_continuation_buf_argsSerializer, value_value);
     }
@@ -2318,7 +2965,7 @@ export function deserializeAndCallPageMapBuilder(thisDeserializer: DeserializerB
     let name : string = (thisDeserializer.readString() as string)
     const param_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let param_buf : Object | undefined
-    if ((RuntimeType.UNDEFINED) != (param_buf_runtimeType))
+    if ((param_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         param_buf = (thisDeserializer.readObject() as object)
     }
@@ -2339,7 +2986,7 @@ export function deserializeAndCallPasteButtonCallback(thisDeserializer: Deserial
     let result : PasteButtonOnClickResult = TypeChecker.PasteButtonOnClickResult_FromNumeric(thisDeserializer.readInt32())
     const error_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let error_buf : BusinessError | undefined
-    if ((RuntimeType.UNDEFINED) != (error_buf_runtimeType))
+    if ((error_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         error_buf = BusinessError_serializer.read(thisDeserializer)
     }
@@ -2351,7 +2998,7 @@ export function deserializeAndCallPasteEventCallback(thisDeserializer: Deseriali
     const _call  = (ResourceHolder.instance().get(_resourceId) as PasteEventCallback)
     const event_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let event_buf : PasteEvent | undefined
-    if ((RuntimeType.UNDEFINED) != (event_buf_runtimeType))
+    if ((event_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         event_buf = PasteEvent_serializer.read(thisDeserializer)
     }
@@ -2473,7 +3120,7 @@ export function deserializeAndCallSaveButtonCallback(thisDeserializer: Deseriali
     let result : SaveButtonOnClickResult = TypeChecker.SaveButtonOnClickResult_FromNumeric(thisDeserializer.readInt32())
     const error_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let error_buf : BusinessError | undefined
-    if ((RuntimeType.UNDEFINED) != (error_buf_runtimeType))
+    if ((error_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         error_buf = BusinessError_serializer.read(thisDeserializer)
     }
@@ -2506,7 +3153,7 @@ export function deserializeAndCallScrollOnWillScrollCallback(thisDeserializer: D
     let value_type : int32 = RuntimeType.UNDEFINED;
     value_type = runtimeType(value);
     _continuation_buf_argsSerializer.writeInt8((value_type).toChar());
-    if ((RuntimeType.UNDEFINED) != (value_type)) {
+    if ((value_type) != (RuntimeType.UNDEFINED)) {
         const value_value  = value!;
         OffsetResult_serializer.write(_continuation_buf_argsSerializer, value_value);
     }
@@ -2522,7 +3169,7 @@ export function deserializeAndCallSearchSubmitCallback(thisDeserializer: Deseria
     let searchContent : string = (thisDeserializer.readString() as string)
     const event_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let event_buf : SubmitEvent | undefined
-    if ((RuntimeType.UNDEFINED) != (event_buf_runtimeType))
+    if ((event_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         event_buf = (SubmitEvent_serializer.read(thisDeserializer) as SubmitEvent)
     }
@@ -2655,7 +3302,7 @@ export function deserializeAndCallTabsCustomContentTransitionCallback(thisDeseri
     let value_type : int32 = RuntimeType.UNDEFINED;
     value_type = runtimeType(value);
     _continuation_buf_argsSerializer.writeInt8((value_type).toChar());
-    if ((RuntimeType.UNDEFINED) != (value_type)) {
+    if ((value_type) != (RuntimeType.UNDEFINED)) {
         const value_value  = value!;
         TabContentAnimatedTransition_serializer.write(_continuation_buf_argsSerializer, value_value);
     }
@@ -2671,7 +3318,7 @@ export function deserializeAndCallTextAreaSubmitCallback(thisDeserializer: Deser
     let enterKeyType : EnterKeyType = TypeChecker.EnterKeyType_FromNumeric(thisDeserializer.readInt32())
     const event_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let event_buf : SubmitEvent | undefined
-    if ((RuntimeType.UNDEFINED) != (event_buf_runtimeType))
+    if ((event_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         event_buf = (SubmitEvent_serializer.read(thisDeserializer) as SubmitEvent)
     }
@@ -2845,7 +3492,7 @@ export function deserializeAndCallType_CommonMethod_onDragStart(thisDeserializer
     let event : DragEvent = (DragEvent_serializer.read(thisDeserializer) as DragEvent)
     const extraParams_buf_runtimeType  = thisDeserializer.readInt8().toInt()
     let extraParams_buf : string | undefined
-    if ((RuntimeType.UNDEFINED) != (extraParams_buf_runtimeType))
+    if ((extraParams_buf_runtimeType) != (RuntimeType.UNDEFINED))
     {
         extraParams_buf = (thisDeserializer.readString() as string)
     }
@@ -2893,7 +3540,7 @@ export function deserializeAndCallType_NavigationAttribute_customNavContentTrans
     let value_type : int32 = RuntimeType.UNDEFINED;
     value_type = runtimeType(value);
     _continuation_buf_argsSerializer.writeInt8((value_type).toChar());
-    if ((RuntimeType.UNDEFINED) != (value_type)) {
+    if ((value_type) != (RuntimeType.UNDEFINED)) {
         const value_value  = value!;
         NavigationAnimatedTransition_serializer.write(_continuation_buf_argsSerializer, value_value);
     }
@@ -2921,249 +3568,330 @@ export function deserializeAndCallVoidCallback(thisDeserializer: DeserializerBas
     const _call  = (ResourceHolder.instance().get(_resourceId) as VoidCallback)
     _call()
 }
+export function deserializeAndCallWebKeyboardCallback(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as WebKeyboardCallback)
+    let keyboardCallbackInfo : WebKeyboardCallbackInfo = WebKeyboardCallbackInfo_serializer.read(thisDeserializer)
+    const _continuation_buf_resource : CallbackResource = thisDeserializer.readCallbackResource()
+    const _continuation_buf_call : KPointer = thisDeserializer.readPointer()
+    const _continuation_buf_callSync : KPointer = thisDeserializer.readPointer()
+    let _continuation : ((value: WebKeyboardOptions) => void) = (value: WebKeyboardOptions):void => { 
+    const _continuation_buf_argsSerializer : SerializerBase = SerializerBase.hold();
+    _continuation_buf_argsSerializer.writeInt32(_continuation_buf_resource.resourceId);
+    _continuation_buf_argsSerializer.writePointer(_continuation_buf_call);
+    _continuation_buf_argsSerializer.writePointer(_continuation_buf_callSync);
+    WebKeyboardOptions_serializer.write(_continuation_buf_argsSerializer, value);
+    InteropNativeModule._CallCallbackSync(-1376223390, _continuation_buf_argsSerializer.asBuffer(), _continuation_buf_argsSerializer.length());
+    _continuation_buf_argsSerializer.release();
+    return; }
+    const _callResult  = _call(keyboardCallbackInfo)
+    _continuation(_callResult)
+}
 export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): void {
     const kind : int32 = thisDeserializer.readInt32()
-    switch (kind) {
-        case 589030517/*CallbackKind.Kind_AccessibilityCallback*/: return deserializeAndCallAccessibilityCallback(thisDeserializer);
-        case 1715445305/*CallbackKind.Kind_AccessibilityFocusCallback*/: return deserializeAndCallAccessibilityFocusCallback(thisDeserializer);
-        case 1289587365/*CallbackKind.Kind_AsyncCallback_image_PixelMap_Void*/: return deserializeAndCallAsyncCallback_image_PixelMap_Void(thisDeserializer);
-        case -2004118094/*CallbackKind.Kind_ButtonModifierBuilder*/: return deserializeAndCallButtonModifierBuilder(thisDeserializer);
-        case -1964292933/*CallbackKind.Kind_ButtonTriggerClickCallback*/: return deserializeAndCallButtonTriggerClickCallback(thisDeserializer);
-        case -2024393616/*CallbackKind.Kind_Callback_Area_Area_Void*/: return deserializeAndCallCallback_Area_Area_Void(thisDeserializer);
-        case 582384234/*CallbackKind.Kind_Callback_Array_Number_Void*/: return deserializeAndCallCallback_Array_Number_Void(thisDeserializer);
-        case -440782244/*CallbackKind.Kind_Callback_Array_String_Void*/: return deserializeAndCallCallback_Array_String_Void(thisDeserializer);
-        case 528588498/*CallbackKind.Kind_Callback_Array_TextMenuItem_Void*/: return deserializeAndCallCallback_Array_TextMenuItem_Void(thisDeserializer);
-        case -547276916/*CallbackKind.Kind_Callback_Array_TouchTestInfo_TouchResult*/: return deserializeAndCallCallback_Array_TouchTestInfo_TouchResult(thisDeserializer);
-        case 109087936/*CallbackKind.Kind_Callback_AxisEvent_Void*/: return deserializeAndCallCallback_AxisEvent_Void(thisDeserializer);
-        case -1541107680/*CallbackKind.Kind_Callback_Boolean*/: return deserializeAndCallCallback_Boolean(thisDeserializer);
-        case -916602978/*CallbackKind.Kind_Callback_Boolean_HoverEvent_Void*/: return deserializeAndCallCallback_Boolean_HoverEvent_Void(thisDeserializer);
-        case 313269291/*CallbackKind.Kind_Callback_Boolean_Void*/: return deserializeAndCallCallback_Boolean_Void(thisDeserializer);
-        case 908731311/*CallbackKind.Kind_Callback_Buffer_Void*/: return deserializeAndCallCallback_Buffer_Void(thisDeserializer);
-        case 1074619005/*CallbackKind.Kind_Callback_CalendarRequestedData_Void*/: return deserializeAndCallCallback_CalendarRequestedData_Void(thisDeserializer);
-        case -289198976/*CallbackKind.Kind_Callback_CalendarSelectedDate_Void*/: return deserializeAndCallCallback_CalendarSelectedDate_Void(thisDeserializer);
-        case 1097178637/*CallbackKind.Kind_Callback_ClickEvent_Void*/: return deserializeAndCallCallback_ClickEvent_Void(thisDeserializer);
-        case -494015096/*CallbackKind.Kind_Callback_CompatibleComponentInfo_Void*/: return deserializeAndCallCallback_CompatibleComponentInfo_Void(thisDeserializer);
-        case -1270343661/*CallbackKind.Kind_Callback_ComputedBarAttribute_Void*/: return deserializeAndCallCallback_ComputedBarAttribute_Void(thisDeserializer);
-        case -120437466/*CallbackKind.Kind_Callback_CopyEvent_Void*/: return deserializeAndCallCallback_CopyEvent_Void(thisDeserializer);
-        case -2019730059/*CallbackKind.Kind_Callback_CreateItem*/: return deserializeAndCallCallback_CreateItem(thisDeserializer);
-        case -827253372/*CallbackKind.Kind_Callback_CrownEvent_Void*/: return deserializeAndCallCallback_CrownEvent_Void(thisDeserializer);
-        case -378918566/*CallbackKind.Kind_Callback_CustomSpanMeasureInfo_CustomSpanMetrics*/: return deserializeAndCallCallback_CustomSpanMeasureInfo_CustomSpanMetrics(thisDeserializer);
-        case 1362306791/*CallbackKind.Kind_Callback_CustomSpanMetrics_Void*/: return deserializeAndCallCallback_CustomSpanMetrics_Void(thisDeserializer);
-        case -1875695871/*CallbackKind.Kind_Callback_CutEvent_Void*/: return deserializeAndCallCallback_CutEvent_Void(thisDeserializer);
-        case 1405382363/*CallbackKind.Kind_Callback_Date_Void*/: return deserializeAndCallCallback_Date_Void(thisDeserializer);
-        case -1357792883/*CallbackKind.Kind_Callback_DeleteValue_Boolean*/: return deserializeAndCallCallback_DeleteValue_Boolean(thisDeserializer);
-        case -126251459/*CallbackKind.Kind_Callback_DeleteValue_Void*/: return deserializeAndCallCallback_DeleteValue_Void(thisDeserializer);
-        case -1283506641/*CallbackKind.Kind_Callback_DismissContentCoverAction_Void*/: return deserializeAndCallCallback_DismissContentCoverAction_Void(thisDeserializer);
-        case -2095828093/*CallbackKind.Kind_Callback_DismissDialogAction_Void*/: return deserializeAndCallCallback_DismissDialogAction_Void(thisDeserializer);
-        case -2004166751/*CallbackKind.Kind_Callback_DismissPopupAction_Void*/: return deserializeAndCallCallback_DismissPopupAction_Void(thisDeserializer);
-        case 889549796/*CallbackKind.Kind_Callback_DismissSheetAction_Void*/: return deserializeAndCallCallback_DismissSheetAction_Void(thisDeserializer);
-        case -2091703923/*CallbackKind.Kind_Callback_DragEvent_Opt_String_Void*/: return deserializeAndCallCallback_DragEvent_Opt_String_Void(thisDeserializer);
-        case -2106022018/*CallbackKind.Kind_Callback_DrawContext_CustomSpanDrawInfo_Void*/: return deserializeAndCallCallback_DrawContext_CustomSpanDrawInfo_Void(thisDeserializer);
-        case 38085488/*CallbackKind.Kind_Callback_DrawContext_Void*/: return deserializeAndCallCallback_DrawContext_Void(thisDeserializer);
-        case -602545319/*CallbackKind.Kind_Callback_EditableTextChangeValue_Boolean*/: return deserializeAndCallCallback_EditableTextChangeValue_Boolean(thisDeserializer);
-        case -1802605016/*CallbackKind.Kind_Callback_EnterKeyType_Void*/: return deserializeAndCallCallback_EnterKeyType_Void(thisDeserializer);
-        case 1187455675/*CallbackKind.Kind_Callback_ErrorInformation_Void*/: return deserializeAndCallCallback_ErrorInformation_Void(thisDeserializer);
-        case -733525640/*CallbackKind.Kind_Callback_Extender_OnFinish*/: return deserializeAndCallCallback_Extender_OnFinish(thisDeserializer);
-        case 1264236374/*CallbackKind.Kind_Callback_Extender_OnProgress*/: return deserializeAndCallCallback_Extender_OnProgress(thisDeserializer);
-        case 394781580/*CallbackKind.Kind_Callback_FocusAxisEvent_Void*/: return deserializeAndCallCallback_FocusAxisEvent_Void(thisDeserializer);
-        case 758395742/*CallbackKind.Kind_Callback_FormCallbackInfo_Void*/: return deserializeAndCallCallback_FormCallbackInfo_Void(thisDeserializer);
-        case 583294398/*CallbackKind.Kind_Callback_FullscreenInfo_Void*/: return deserializeAndCallCallback_FullscreenInfo_Void(thisDeserializer);
-        case -1143194492/*CallbackKind.Kind_Callback_GestureEvent_Void*/: return deserializeAndCallCallback_GestureEvent_Void(thisDeserializer);
-        case 1319043556/*CallbackKind.Kind_Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult*/: return deserializeAndCallCallback_GestureInfo_BaseGestureEvent_GestureJudgeResult(thisDeserializer);
-        case -684588584/*CallbackKind.Kind_Callback_GestureJudgeResult_Void*/: return deserializeAndCallCallback_GestureJudgeResult_Void(thisDeserializer);
-        case 776202910/*CallbackKind.Kind_Callback_GestureRecognizer_Void*/: return deserializeAndCallCallback_GestureRecognizer_Void(thisDeserializer);
-        case -1755111025/*CallbackKind.Kind_Callback_HitTestMode_Void*/: return deserializeAndCallCallback_HitTestMode_Void(thisDeserializer);
-        case -1576788379/*CallbackKind.Kind_Callback_HoverEvent_Void*/: return deserializeAndCallCallback_HoverEvent_Void(thisDeserializer);
-        case -383025085/*CallbackKind.Kind_Callback_InsertValue_Boolean*/: return deserializeAndCallCallback_InsertValue_Boolean(thisDeserializer);
-        case -1121207885/*CallbackKind.Kind_Callback_InsertValue_Void*/: return deserializeAndCallCallback_InsertValue_Void(thisDeserializer);
-        case -1627362945/*CallbackKind.Kind_Callback_ItemDragInfo_Number_Number_Boolean_Void*/: return deserializeAndCallCallback_ItemDragInfo_Number_Number_Boolean_Void(thisDeserializer);
-        case -918805852/*CallbackKind.Kind_Callback_ItemDragInfo_Number_Number_Void*/: return deserializeAndCallCallback_ItemDragInfo_Number_Number_Void(thisDeserializer);
-        case 296908152/*CallbackKind.Kind_Callback_ItemDragInfo_Number_Void*/: return deserializeAndCallCallback_ItemDragInfo_Number_Void(thisDeserializer);
-        case 137353252/*CallbackKind.Kind_Callback_ItemDragInfo_Void*/: return deserializeAndCallCallback_ItemDragInfo_Void(thisDeserializer);
-        case -2061548092/*CallbackKind.Kind_Callback_KeyEvent_Boolean*/: return deserializeAndCallCallback_KeyEvent_Boolean(thisDeserializer);
-        case 707696468/*CallbackKind.Kind_Callback_KeyEvent_Void*/: return deserializeAndCallCallback_KeyEvent_Void(thisDeserializer);
-        case -1146723341/*CallbackKind.Kind_Callback_Map_String_Object_Void*/: return deserializeAndCallCallback_Map_String_Object_Void(thisDeserializer);
-        case -716263454/*CallbackKind.Kind_Callback_MarqueeState_Void*/: return deserializeAndCallCallback_MarqueeState_Void(thisDeserializer);
-        case -1382640094/*CallbackKind.Kind_Callback_MouseEvent_Void*/: return deserializeAndCallCallback_MouseEvent_Void(thisDeserializer);
-        case 634825762/*CallbackKind.Kind_Callback_NavDestinationActiveReason_Void*/: return deserializeAndCallCallback_NavDestinationActiveReason_Void(thisDeserializer);
-        case -1642725259/*CallbackKind.Kind_Callback_NavDestinationContext_Void*/: return deserializeAndCallCallback_NavDestinationContext_Void(thisDeserializer);
-        case 960690982/*CallbackKind.Kind_Callback_NavigationMode_Void*/: return deserializeAndCallCallback_NavigationMode_Void(thisDeserializer);
-        case 1685437830/*CallbackKind.Kind_Callback_NavigationTitleMode_Void*/: return deserializeAndCallCallback_NavigationTitleMode_Void(thisDeserializer);
-        case -1375731066/*CallbackKind.Kind_Callback_NavigationTransitionProxy_Void*/: return deserializeAndCallCallback_NavigationTransitionProxy_Void(thisDeserializer);
-        case -1427334496/*CallbackKind.Kind_Callback_Number_Number_Boolean*/: return deserializeAndCallCallback_Number_Number_Boolean(thisDeserializer);
-        case -1923888037/*CallbackKind.Kind_Callback_Number_Number_Boolean_Boolean*/: return deserializeAndCallCallback_Number_Number_Boolean_Boolean(thisDeserializer);
-        case -3987624/*CallbackKind.Kind_Callback_Number_Number_ComputedBarAttribute*/: return deserializeAndCallCallback_Number_Number_ComputedBarAttribute(thisDeserializer);
-        case -352942292/*CallbackKind.Kind_Callback_Number_Number_Number_Void*/: return deserializeAndCallCallback_Number_Number_Number_Void(thisDeserializer);
-        case 1894574320/*CallbackKind.Kind_Callback_Number_Number_Void*/: return deserializeAndCallCallback_Number_Number_Void(thisDeserializer);
-        case 88697971/*CallbackKind.Kind_Callback_Number_SliderChangeMode_Void*/: return deserializeAndCallCallback_Number_SliderChangeMode_Void(thisDeserializer);
-        case 1602877440/*CallbackKind.Kind_Callback_Number_Tuple_Number_Number*/: return deserializeAndCallCallback_Number_Tuple_Number_Number(thisDeserializer);
-        case 1618565120/*CallbackKind.Kind_Callback_Number_Tuple_Number_Number_Number_Number*/: return deserializeAndCallCallback_Number_Tuple_Number_Number_Number_Number(thisDeserializer);
-        case 36519084/*CallbackKind.Kind_Callback_Number_Void*/: return deserializeAndCallCallback_Number_Void(thisDeserializer);
-        case -1782529222/*CallbackKind.Kind_Callback_Object_Void*/: return deserializeAndCallCallback_Object_Void(thisDeserializer);
-        case -1356285653/*CallbackKind.Kind_Callback_onMeasureSize_SizeResult*/: return deserializeAndCallCallback_onMeasureSize_SizeResult(thisDeserializer);
-        case -738620506/*CallbackKind.Kind_Callback_onPlaceChildren_Void*/: return deserializeAndCallCallback_onPlaceChildren_Void(thisDeserializer);
-        case 1637092936/*CallbackKind.Kind_Callback_OnScrollFrameBeginHandlerResult_Void*/: return deserializeAndCallCallback_OnScrollFrameBeginHandlerResult_Void(thisDeserializer);
-        case -296989211/*CallbackKind.Kind_Callback_Opt_Array_FontDescriptor_Opt_Array_String_Void*/: return deserializeAndCallCallback_Opt_Array_FontDescriptor_Opt_Array_String_Void(thisDeserializer);
-        case 406871767/*CallbackKind.Kind_Callback_Opt_Array_NavDestinationTransition_Void*/: return deserializeAndCallCallback_Opt_Array_NavDestinationTransition_Void(thisDeserializer);
-        case 287839344/*CallbackKind.Kind_Callback_Opt_Array_String_Opt_Array_String_Void*/: return deserializeAndCallCallback_Opt_Array_String_Opt_Array_String_Void(thisDeserializer);
-        case -543655128/*CallbackKind.Kind_Callback_Opt_Array_String_Void*/: return deserializeAndCallCallback_Opt_Array_String_Void(thisDeserializer);
-        case 859020393/*CallbackKind.Kind_Callback_Opt_CustomBuilder_Void*/: return deserializeAndCallCallback_Opt_CustomBuilder_Void(thisDeserializer);
-        case 11877731/*CallbackKind.Kind_Callback_Opt_FontDescriptor_Opt_Array_String_Void*/: return deserializeAndCallCallback_Opt_FontDescriptor_Opt_Array_String_Void(thisDeserializer);
-        case -2035339519/*CallbackKind.Kind_Callback_Opt_NavigationAnimatedTransition_Void*/: return deserializeAndCallCallback_Opt_NavigationAnimatedTransition_Void(thisDeserializer);
-        case 1321949695/*CallbackKind.Kind_Callback_Opt_OffsetResult_Void*/: return deserializeAndCallCallback_Opt_OffsetResult_Void(thisDeserializer);
-        case 514173789/*CallbackKind.Kind_Callback_Opt_Scene_Opt_Array_String_Void*/: return deserializeAndCallCallback_Opt_Scene_Opt_Array_String_Void(thisDeserializer);
-        case 648568223/*CallbackKind.Kind_Callback_Opt_ScrollResult_Void*/: return deserializeAndCallCallback_Opt_ScrollResult_Void(thisDeserializer);
-        case 1813490422/*CallbackKind.Kind_Callback_Opt_String_Opt_Array_String_Void*/: return deserializeAndCallCallback_Opt_String_Opt_Array_String_Void(thisDeserializer);
-        case -756319131/*CallbackKind.Kind_Callback_Opt_StyledString_Opt_Array_String_Void*/: return deserializeAndCallCallback_Opt_StyledString_Opt_Array_String_Void(thisDeserializer);
-        case -143931627/*CallbackKind.Kind_Callback_Opt_TabContentAnimatedTransition_Void*/: return deserializeAndCallCallback_Opt_TabContentAnimatedTransition_Void(thisDeserializer);
-        case -2058966418/*CallbackKind.Kind_Callback_PlaybackInfo_Void*/: return deserializeAndCallCallback_PlaybackInfo_Void(thisDeserializer);
-        case 721562324/*CallbackKind.Kind_Callback_Pointer_Void*/: return deserializeAndCallCallback_Pointer_Void(thisDeserializer);
-        case 624053870/*CallbackKind.Kind_Callback_PopInfo_Void*/: return deserializeAndCallCallback_PopInfo_Void(thisDeserializer);
-        case 463894668/*CallbackKind.Kind_Callback_PreDragStatus_Void*/: return deserializeAndCallCallback_PreDragStatus_Void(thisDeserializer);
-        case 1300890372/*CallbackKind.Kind_Callback_PreparedInfo_Void*/: return deserializeAndCallCallback_PreparedInfo_Void(thisDeserializer);
-        case 797834474/*CallbackKind.Kind_Callback_RangeUpdate*/: return deserializeAndCallCallback_RangeUpdate(thisDeserializer);
-        case 934309126/*CallbackKind.Kind_Callback_RefreshStatus_Void*/: return deserializeAndCallCallback_RefreshStatus_Void(thisDeserializer);
-        case 1465860515/*CallbackKind.Kind_Callback_RichEditorChangeValue_Boolean*/: return deserializeAndCallCallback_RichEditorChangeValue_Boolean(thisDeserializer);
-        case 667698748/*CallbackKind.Kind_Callback_RichEditorDeleteValue_Boolean*/: return deserializeAndCallCallback_RichEditorDeleteValue_Boolean(thisDeserializer);
-        case -319221262/*CallbackKind.Kind_Callback_RichEditorInsertValue_Boolean*/: return deserializeAndCallCallback_RichEditorInsertValue_Boolean(thisDeserializer);
-        case -62253375/*CallbackKind.Kind_Callback_RichEditorRange_Void*/: return deserializeAndCallCallback_RichEditorRange_Void(thisDeserializer);
-        case -963852514/*CallbackKind.Kind_Callback_RichEditorSelection_Void*/: return deserializeAndCallCallback_RichEditorSelection_Void(thisDeserializer);
-        case 1980824326/*CallbackKind.Kind_Callback_RichEditorTextSpanResult_Void*/: return deserializeAndCallCallback_RichEditorTextSpanResult_Void(thisDeserializer);
-        case 1688035159/*CallbackKind.Kind_Callback_RotationGesture*/: return deserializeAndCallCallback_RotationGesture(thisDeserializer);
-        case 924806076/*CallbackKind.Kind_Callback_RotationGesture_Void*/: return deserializeAndCallCallback_RotationGesture_Void(thisDeserializer);
-        case 22609082/*CallbackKind.Kind_Callback_SheetDismiss_Void*/: return deserializeAndCallCallback_SheetDismiss_Void(thisDeserializer);
-        case -224451112/*CallbackKind.Kind_Callback_SheetType_Void*/: return deserializeAndCallCallback_SheetType_Void(thisDeserializer);
-        case 1318865891/*CallbackKind.Kind_Callback_SizeResult_Void*/: return deserializeAndCallCallback_SizeResult_Void(thisDeserializer);
-        case 1536231691/*CallbackKind.Kind_Callback_SpringBackAction_Void*/: return deserializeAndCallCallback_SpringBackAction_Void(thisDeserializer);
-        case -1872286415/*CallbackKind.Kind_Callback_StateStylesChange*/: return deserializeAndCallCallback_StateStylesChange(thisDeserializer);
-        case -683652998/*CallbackKind.Kind_Callback_String_PasteEvent_Void*/: return deserializeAndCallCallback_String_PasteEvent_Void(thisDeserializer);
-        case -1736208400/*CallbackKind.Kind_Callback_String_SurfaceRect_Void*/: return deserializeAndCallCallback_String_SurfaceRect_Void(thisDeserializer);
-        case 814634522/*CallbackKind.Kind_Callback_String_Void*/: return deserializeAndCallCallback_String_Void(thisDeserializer);
-        case 2116745428/*CallbackKind.Kind_Callback_StyledStringChangeValue_Boolean*/: return deserializeAndCallCallback_StyledStringChangeValue_Boolean(thisDeserializer);
-        case -1198150682/*CallbackKind.Kind_Callback_StyledStringMarshallingValue_Void*/: return deserializeAndCallCallback_StyledStringMarshallingValue_Void(thisDeserializer);
-        case -301561698/*CallbackKind.Kind_Callback_SwipeActionState_Void*/: return deserializeAndCallCallback_SwipeActionState_Void(thisDeserializer);
-        case 1824461051/*CallbackKind.Kind_Callback_SwipeGesture*/: return deserializeAndCallCallback_SwipeGesture(thisDeserializer);
-        case -768726640/*CallbackKind.Kind_Callback_SwipeGesture_Void*/: return deserializeAndCallCallback_SwipeGesture_Void(thisDeserializer);
-        case -416053361/*CallbackKind.Kind_Callback_SwiperContentTransitionProxy_Void*/: return deserializeAndCallCallback_SwiperContentTransitionProxy_Void(thisDeserializer);
-        case -1223938478/*CallbackKind.Kind_Callback_TabContentTransitionProxy_Void*/: return deserializeAndCallCallback_TabContentTransitionProxy_Void(thisDeserializer);
-        case 691098197/*CallbackKind.Kind_Callback_TerminationInfo_Void*/: return deserializeAndCallCallback_TerminationInfo_Void(thisDeserializer);
-        case 1290504509/*CallbackKind.Kind_Callback_TextPickerResult_Void*/: return deserializeAndCallCallback_TextPickerResult_Void(thisDeserializer);
-        case 811915501/*CallbackKind.Kind_Callback_TextRange_Void*/: return deserializeAndCallCallback_TextRange_Void(thisDeserializer);
-        case 1557859605/*CallbackKind.Kind_Callback_TimePickerResult_Void*/: return deserializeAndCallCallback_TimePickerResult_Void(thisDeserializer);
-        case -274419246/*CallbackKind.Kind_Callback_TouchEvent_HitTestMode*/: return deserializeAndCallCallback_TouchEvent_HitTestMode(thisDeserializer);
-        case -1676021850/*CallbackKind.Kind_Callback_TouchEvent_Void*/: return deserializeAndCallCallback_TouchEvent_Void(thisDeserializer);
-        case 1943507619/*CallbackKind.Kind_Callback_TouchResult_Void*/: return deserializeAndCallCallback_TouchResult_Void(thisDeserializer);
-        case 148489367/*CallbackKind.Kind_Callback_Tuple_Number_Number_Number_Number_Void*/: return deserializeAndCallCallback_Tuple_Number_Number_Number_Number_Void(thisDeserializer);
-        case -607365481/*CallbackKind.Kind_Callback_Tuple_Number_Number_Void*/: return deserializeAndCallCallback_Tuple_Number_Number_Void(thisDeserializer);
-        case -1063506522/*CallbackKind.Kind_Callback_UIExtensionProxy_Void*/: return deserializeAndCallCallback_UIExtensionProxy_Void(thisDeserializer);
-        case -620935067/*CallbackKind.Kind_Callback_Union_CustomBuilder_DragItemInfo_Void*/: return deserializeAndCallCallback_Union_CustomBuilder_DragItemInfo_Void(thisDeserializer);
-        case 411311059/*CallbackKind.Kind_Callback_Union_Object_Undefined_Void*/: return deserializeAndCallCallback_Union_Object_Undefined_Void(thisDeserializer);
-        case -1867723152/*CallbackKind.Kind_Callback_Void*/: return deserializeAndCallCallback_Void(thisDeserializer);
-        case 1317697111/*CallbackKind.Kind_CheckBoxModifierBuilder*/: return deserializeAndCallCheckBoxModifierBuilder(thisDeserializer);
-        case 1482532871/*CallbackKind.Kind_CompatibleInitCallback*/: return deserializeAndCallCompatibleInitCallback(thisDeserializer);
-        case 434420460/*CallbackKind.Kind_CompatibleUpdateCallback*/: return deserializeAndCallCompatibleUpdateCallback(thisDeserializer);
-        case 1532328438/*CallbackKind.Kind_ContentDidScrollCallback*/: return deserializeAndCallContentDidScrollCallback(thisDeserializer);
-        case -2146044511/*CallbackKind.Kind_ContentWillScrollCallback*/: return deserializeAndCallContentWillScrollCallback(thisDeserializer);
-        case 260483890/*CallbackKind.Kind_Context_getGroupDir_Callback*/: return deserializeAndCallContext_getGroupDir_Callback(thisDeserializer);
-        case 1766817632/*CallbackKind.Kind_CustomNodeBuilder*/: return deserializeAndCallCustomNodeBuilder(thisDeserializer);
-        case -1565709723/*CallbackKind.Kind_CustomStyles*/: return deserializeAndCallCustomStyles(thisDeserializer);
-        case -238036926/*CallbackKind.Kind_DataPanelModifierBuilder*/: return deserializeAndCallDataPanelModifierBuilder(thisDeserializer);
-        case -1729563209/*CallbackKind.Kind_EditableTextOnChangeCallback*/: return deserializeAndCallEditableTextOnChangeCallback(thisDeserializer);
-        case -1936519453/*CallbackKind.Kind_ErrorCallback*/: return deserializeAndCallErrorCallback(thisDeserializer);
-        case 255469205/*CallbackKind.Kind_GaugeModifierBuilder*/: return deserializeAndCallGaugeModifierBuilder(thisDeserializer);
-        case -2119548940/*CallbackKind.Kind_GestureRecognizerJudgeBeginCallback*/: return deserializeAndCallGestureRecognizerJudgeBeginCallback(thisDeserializer);
-        case -2076995110/*CallbackKind.Kind_GetItemMainSizeByIndex*/: return deserializeAndCallGetItemMainSizeByIndex(thisDeserializer);
-        case 68560477/*CallbackKind.Kind_HoverCallback*/: return deserializeAndCallHoverCallback(thisDeserializer);
-        case -1180567691/*CallbackKind.Kind_ImageCompleteCallback*/: return deserializeAndCallImageCompleteCallback(thisDeserializer);
-        case 1906248580/*CallbackKind.Kind_ImageErrorCallback*/: return deserializeAndCallImageErrorCallback(thisDeserializer);
-        case 541056756/*CallbackKind.Kind_ImageOnCompleteCallback*/: return deserializeAndCallImageOnCompleteCallback(thisDeserializer);
-        case 1502213270/*CallbackKind.Kind_InterceptionModeCallback*/: return deserializeAndCallInterceptionModeCallback(thisDeserializer);
-        case 1852781814/*CallbackKind.Kind_InterceptionShowCallback*/: return deserializeAndCallInterceptionShowCallback(thisDeserializer);
-        case 56854815/*CallbackKind.Kind_LoadingProgressModifierBuilder*/: return deserializeAndCallLoadingProgressModifierBuilder(thisDeserializer);
-        case 810927048/*CallbackKind.Kind_MenuCallback*/: return deserializeAndCallMenuCallback(thisDeserializer);
-        case -1928323454/*CallbackKind.Kind_MenuItemModifierBuilder*/: return deserializeAndCallMenuItemModifierBuilder(thisDeserializer);
-        case -614475458/*CallbackKind.Kind_MenuOnAppearCallback*/: return deserializeAndCallMenuOnAppearCallback(thisDeserializer);
-        case -1026503952/*CallbackKind.Kind_ModifierKeyStateGetter*/: return deserializeAndCallModifierKeyStateGetter(thisDeserializer);
-        case -1066063065/*CallbackKind.Kind_NavDestinationTransitionDelegate*/: return deserializeAndCallNavDestinationTransitionDelegate(thisDeserializer);
-        case -588228933/*CallbackKind.Kind_NavExtender_OnUpdateStack*/: return deserializeAndCallNavExtender_OnUpdateStack(thisDeserializer);
-        case 726938390/*CallbackKind.Kind_OnAlphabetIndexerPopupSelectCallback*/: return deserializeAndCallOnAlphabetIndexerPopupSelectCallback(thisDeserializer);
-        case -1956514817/*CallbackKind.Kind_OnAlphabetIndexerRequestPopupDataCallback*/: return deserializeAndCallOnAlphabetIndexerRequestPopupDataCallback(thisDeserializer);
-        case -1189721220/*CallbackKind.Kind_OnAlphabetIndexerSelectCallback*/: return deserializeAndCallOnAlphabetIndexerSelectCallback(thisDeserializer);
-        case -1198592337/*CallbackKind.Kind_OnCheckboxChangeCallback*/: return deserializeAndCallOnCheckboxChangeCallback(thisDeserializer);
-        case -1053064240/*CallbackKind.Kind_OnCheckboxGroupChangeCallback*/: return deserializeAndCallOnCheckboxGroupChangeCallback(thisDeserializer);
-        case -419979106/*CallbackKind.Kind_OnContentScrollCallback*/: return deserializeAndCallOnContentScrollCallback(thisDeserializer);
-        case 312701677/*CallbackKind.Kind_OnCreateMenuCallback*/: return deserializeAndCallOnCreateMenuCallback(thisDeserializer);
-        case 1648184341/*CallbackKind.Kind_OnDidChangeCallback*/: return deserializeAndCallOnDidChangeCallback(thisDeserializer);
-        case 1451593190/*CallbackKind.Kind_OnDragEventCallback*/: return deserializeAndCallOnDragEventCallback(thisDeserializer);
-        case 2050387049/*CallbackKind.Kind_OnFoldStatusChangeCallback*/: return deserializeAndCallOnFoldStatusChangeCallback(thisDeserializer);
-        case -2025767812/*CallbackKind.Kind_OnHoverCallback*/: return deserializeAndCallOnHoverCallback(thisDeserializer);
-        case 9040430/*CallbackKind.Kind_OnHoverStatusChangeCallback*/: return deserializeAndCallOnHoverStatusChangeCallback(thisDeserializer);
-        case 949409727/*CallbackKind.Kind_OnItemDragStartCallback*/: return deserializeAndCallOnItemDragStartCallback(thisDeserializer);
-        case -405536347/*CallbackKind.Kind_OnLazyLoadingFunc*/: return deserializeAndCallOnLazyLoadingFunc(thisDeserializer);
-        case -968773856/*CallbackKind.Kind_OnLinearIndicatorChangeCallback*/: return deserializeAndCallOnLinearIndicatorChangeCallback(thisDeserializer);
-        case -1106041422/*CallbackKind.Kind_OnMenuItemClickCallback*/: return deserializeAndCallOnMenuItemClickCallback(thisDeserializer);
-        case -1200281222/*CallbackKind.Kind_OnMoveHandler*/: return deserializeAndCallOnMoveHandler(thisDeserializer);
-        case -823037763/*CallbackKind.Kind_OnNativeLoadCallback*/: return deserializeAndCallOnNativeLoadCallback(thisDeserializer);
-        case 1738363337/*CallbackKind.Kind_OnPasteCallback*/: return deserializeAndCallOnPasteCallback(thisDeserializer);
-        case 511412333/*CallbackKind.Kind_OnRadioChangeCallback*/: return deserializeAndCallOnRadioChangeCallback(thisDeserializer);
-        case -551895045/*CallbackKind.Kind_OnRatingChangeCallback*/: return deserializeAndCallOnRatingChangeCallback(thisDeserializer);
-        case -160015401/*CallbackKind.Kind_OnScrollCallback*/: return deserializeAndCallOnScrollCallback(thisDeserializer);
-        case -1259214476/*CallbackKind.Kind_OnScrollEdgeCallback*/: return deserializeAndCallOnScrollEdgeCallback(thisDeserializer);
-        case -2133791987/*CallbackKind.Kind_OnScrollFrameBeginCallback*/: return deserializeAndCallOnScrollFrameBeginCallback(thisDeserializer);
-        case 625641334/*CallbackKind.Kind_OnScrollVisibleContentChangeCallback*/: return deserializeAndCallOnScrollVisibleContentChangeCallback(thisDeserializer);
-        case -1486869198/*CallbackKind.Kind_OnSelectCallback*/: return deserializeAndCallOnSelectCallback(thisDeserializer);
-        case -1961646162/*CallbackKind.Kind_OnSubmitCallback*/: return deserializeAndCallOnSubmitCallback(thisDeserializer);
-        case -143686583/*CallbackKind.Kind_OnSwiperAnimationEndCallback*/: return deserializeAndCallOnSwiperAnimationEndCallback(thisDeserializer);
-        case 876602502/*CallbackKind.Kind_OnSwiperAnimationStartCallback*/: return deserializeAndCallOnSwiperAnimationStartCallback(thisDeserializer);
-        case 606029871/*CallbackKind.Kind_OnSwiperGestureSwipeCallback*/: return deserializeAndCallOnSwiperGestureSwipeCallback(thisDeserializer);
-        case 1942856551/*CallbackKind.Kind_OnTabsAnimationEndCallback*/: return deserializeAndCallOnTabsAnimationEndCallback(thisDeserializer);
-        case -147408344/*CallbackKind.Kind_OnTabsAnimationStartCallback*/: return deserializeAndCallOnTabsAnimationStartCallback(thisDeserializer);
-        case -349727249/*CallbackKind.Kind_OnTabsContentWillChangeCallback*/: return deserializeAndCallOnTabsContentWillChangeCallback(thisDeserializer);
-        case 253696833/*CallbackKind.Kind_OnTabsGestureSwipeCallback*/: return deserializeAndCallOnTabsGestureSwipeCallback(thisDeserializer);
-        case -1902343417/*CallbackKind.Kind_OnTextPickerChangeCallback*/: return deserializeAndCallOnTextPickerChangeCallback(thisDeserializer);
-        case 695228737/*CallbackKind.Kind_OnTextSelectionChangeCallback*/: return deserializeAndCallOnTextSelectionChangeCallback(thisDeserializer);
-        case 994429103/*CallbackKind.Kind_OnTimePickerChangeCallback*/: return deserializeAndCallOnTimePickerChangeCallback(thisDeserializer);
-        case 782080172/*CallbackKind.Kind_OnTotalCountFunc*/: return deserializeAndCallOnTotalCountFunc(thisDeserializer);
-        case 1483622345/*CallbackKind.Kind_OnWillScrollCallback*/: return deserializeAndCallOnWillScrollCallback(thisDeserializer);
-        case 256377244/*CallbackKind.Kind_PageMapBuilder*/: return deserializeAndCallPageMapBuilder(thisDeserializer);
-        case 1627123591/*CallbackKind.Kind_PageTransitionCallback*/: return deserializeAndCallPageTransitionCallback(thisDeserializer);
-        case 1501373374/*CallbackKind.Kind_PasteButtonCallback*/: return deserializeAndCallPasteButtonCallback(thisDeserializer);
-        case 919057028/*CallbackKind.Kind_PasteEventCallback*/: return deserializeAndCallPasteEventCallback(thisDeserializer);
-        case -1992671958/*CallbackKind.Kind_PluginErrorCallback*/: return deserializeAndCallPluginErrorCallback(thisDeserializer);
-        case -1444325632/*CallbackKind.Kind_PopupStateChangeCallback*/: return deserializeAndCallPopupStateChangeCallback(thisDeserializer);
-        case -2049749383/*CallbackKind.Kind_ProgressModifierBuilder*/: return deserializeAndCallProgressModifierBuilder(thisDeserializer);
-        case -327322091/*CallbackKind.Kind_RadioModifierBuilder*/: return deserializeAndCallRadioModifierBuilder(thisDeserializer);
-        case 1013330403/*CallbackKind.Kind_RatingModifierBuilder*/: return deserializeAndCallRatingModifierBuilder(thisDeserializer);
-        case -1213708823/*CallbackKind.Kind_RestrictedWorker_onerror_Callback*/: return deserializeAndCallRestrictedWorker_onerror_Callback(thisDeserializer);
-        case -2095497263/*CallbackKind.Kind_RestrictedWorker_onexit_Callback*/: return deserializeAndCallRestrictedWorker_onexit_Callback(thisDeserializer);
-        case 1614214490/*CallbackKind.Kind_RestrictedWorker_onmessage_Callback*/: return deserializeAndCallRestrictedWorker_onmessage_Callback(thisDeserializer);
-        case 1110529154/*CallbackKind.Kind_ReuseIdCallback*/: return deserializeAndCallReuseIdCallback(thisDeserializer);
-        case -1634474996/*CallbackKind.Kind_SaveButtonCallback*/: return deserializeAndCallSaveButtonCallback(thisDeserializer);
-        case -1265626662/*CallbackKind.Kind_ScrollOnScrollCallback*/: return deserializeAndCallScrollOnScrollCallback(thisDeserializer);
-        case -721521596/*CallbackKind.Kind_ScrollOnWillScrollCallback*/: return deserializeAndCallScrollOnWillScrollCallback(thisDeserializer);
-        case 1717691617/*CallbackKind.Kind_SearchSubmitCallback*/: return deserializeAndCallSearchSubmitCallback(thisDeserializer);
-        case 2049289694/*CallbackKind.Kind_SearchValueCallback*/: return deserializeAndCallSearchValueCallback(thisDeserializer);
-        case -250780276/*CallbackKind.Kind_ShouldBuiltInRecognizerParallelWithCallback*/: return deserializeAndCallShouldBuiltInRecognizerParallelWithCallback(thisDeserializer);
-        case -1716637992/*CallbackKind.Kind_SizeChangeCallback*/: return deserializeAndCallSizeChangeCallback(thisDeserializer);
-        case 553138561/*CallbackKind.Kind_SliderModifierBuilder*/: return deserializeAndCallSliderModifierBuilder(thisDeserializer);
-        case 711649376/*CallbackKind.Kind_SliderTriggerChangeCallback*/: return deserializeAndCallSliderTriggerChangeCallback(thisDeserializer);
-        case 1095217433/*CallbackKind.Kind_StyledStringMarshallCallback*/: return deserializeAndCallStyledStringMarshallCallback(thisDeserializer);
-        case 1359717794/*CallbackKind.Kind_StyledStringUnmarshallCallback*/: return deserializeAndCallStyledStringUnmarshallCallback(thisDeserializer);
-        case -712186065/*CallbackKind.Kind_SubmitCallback*/: return deserializeAndCallSubmitCallback(thisDeserializer);
-        case 221706282/*CallbackKind.Kind_TabsCustomContentTransitionCallback*/: return deserializeAndCallTabsCustomContentTransitionCallback(thisDeserializer);
-        case -401980571/*CallbackKind.Kind_TextAreaSubmitCallback*/: return deserializeAndCallTextAreaSubmitCallback(thisDeserializer);
-        case -987272911/*CallbackKind.Kind_TextClockModifierBuilder*/: return deserializeAndCallTextClockModifierBuilder(thisDeserializer);
-        case 18061455/*CallbackKind.Kind_TextFieldValueCallback*/: return deserializeAndCallTextFieldValueCallback(thisDeserializer);
-        case -202014218/*CallbackKind.Kind_TextPickerEnterSelectedAreaCallback*/: return deserializeAndCallTextPickerEnterSelectedAreaCallback(thisDeserializer);
-        case -1928298699/*CallbackKind.Kind_TextPickerScrollStopCallback*/: return deserializeAndCallTextPickerScrollStopCallback(thisDeserializer);
-        case 505330174/*CallbackKind.Kind_TextTimerModifierBuilder*/: return deserializeAndCallTextTimerModifierBuilder(thisDeserializer);
-        case -879751946/*CallbackKind.Kind_ToggleModifierBuilder*/: return deserializeAndCallToggleModifierBuilder(thisDeserializer);
-        case -1878458553/*CallbackKind.Kind_TransitionFinishCallback*/: return deserializeAndCallTransitionFinishCallback(thisDeserializer);
-        case -201932855/*CallbackKind.Kind_Type_CommonMethod_onDragStart*/: return deserializeAndCallType_CommonMethod_onDragStart(thisDeserializer);
-        case -1209910992/*CallbackKind.Kind_Type_NavigationAttribute_customNavContentTransition*/: return deserializeAndCallType_NavigationAttribute_customNavContentTransition(thisDeserializer);
-        case -448105339/*CallbackKind.Kind_UpdateTransitionCallback*/: return deserializeAndCallUpdateTransitionCallback(thisDeserializer);
-        case 541663396/*CallbackKind.Kind_VisibleAreaChangeCallback*/: return deserializeAndCallVisibleAreaChangeCallback(thisDeserializer);
-        case -2038961969/*CallbackKind.Kind_VoidCallback*/: return deserializeAndCallVoidCallback(thisDeserializer);
+    switch ((kind as CallbackKind)) {
+        case CallbackKind.Kind_AccessibilityCallback: return deserializeAndCallAccessibilityCallback(thisDeserializer);
+        case CallbackKind.Kind_AccessibilityFocusCallback: return deserializeAndCallAccessibilityFocusCallback(thisDeserializer);
+        case CallbackKind.Kind_AsyncCallback_image_PixelMap_Void: return deserializeAndCallAsyncCallback_image_PixelMap_Void(thisDeserializer);
+        case CallbackKind.Kind_ButtonModifierBuilder: return deserializeAndCallButtonModifierBuilder(thisDeserializer);
+        case CallbackKind.Kind_ButtonTriggerClickCallback: return deserializeAndCallButtonTriggerClickCallback(thisDeserializer);
+        case CallbackKind.Kind_Callback_Area_Area_Void: return deserializeAndCallCallback_Area_Area_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_Array_Number_Void: return deserializeAndCallCallback_Array_Number_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_Array_String_Void: return deserializeAndCallCallback_Array_String_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_Array_TextMenuItem_Void: return deserializeAndCallCallback_Array_TextMenuItem_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_Array_TouchTestInfo_TouchResult: return deserializeAndCallCallback_Array_TouchTestInfo_TouchResult(thisDeserializer);
+        case CallbackKind.Kind_Callback_AxisEvent_Void: return deserializeAndCallCallback_AxisEvent_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_Boolean: return deserializeAndCallCallback_Boolean(thisDeserializer);
+        case CallbackKind.Kind_Callback_Boolean_HoverEvent_Void: return deserializeAndCallCallback_Boolean_HoverEvent_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_Boolean_Void: return deserializeAndCallCallback_Boolean_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_Buffer_Void: return deserializeAndCallCallback_Buffer_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_CalendarRequestedData_Void: return deserializeAndCallCallback_CalendarRequestedData_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_CalendarSelectedDate_Void: return deserializeAndCallCallback_CalendarSelectedDate_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_ClickEvent_Void: return deserializeAndCallCallback_ClickEvent_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_CompatibleComponentInfo_Void: return deserializeAndCallCallback_CompatibleComponentInfo_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_ComputedBarAttribute_Void: return deserializeAndCallCallback_ComputedBarAttribute_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_CopyEvent_Void: return deserializeAndCallCallback_CopyEvent_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_CreateItem: return deserializeAndCallCallback_CreateItem(thisDeserializer);
+        case CallbackKind.Kind_Callback_CrownEvent_Void: return deserializeAndCallCallback_CrownEvent_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_CustomSpanMeasureInfo_CustomSpanMetrics: return deserializeAndCallCallback_CustomSpanMeasureInfo_CustomSpanMetrics(thisDeserializer);
+        case CallbackKind.Kind_Callback_CustomSpanMetrics_Void: return deserializeAndCallCallback_CustomSpanMetrics_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_CutEvent_Void: return deserializeAndCallCallback_CutEvent_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_Date_Void: return deserializeAndCallCallback_Date_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_DeleteValue_Boolean: return deserializeAndCallCallback_DeleteValue_Boolean(thisDeserializer);
+        case CallbackKind.Kind_Callback_DeleteValue_Void: return deserializeAndCallCallback_DeleteValue_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_DismissContentCoverAction_Void: return deserializeAndCallCallback_DismissContentCoverAction_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_DismissDialogAction_Void: return deserializeAndCallCallback_DismissDialogAction_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_DismissPopupAction_Void: return deserializeAndCallCallback_DismissPopupAction_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_DismissSheetAction_Void: return deserializeAndCallCallback_DismissSheetAction_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_DragEvent_Opt_String_Void: return deserializeAndCallCallback_DragEvent_Opt_String_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_DrawContext_CustomSpanDrawInfo_Void: return deserializeAndCallCallback_DrawContext_CustomSpanDrawInfo_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_DrawContext_Void: return deserializeAndCallCallback_DrawContext_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_EditableTextChangeValue_Boolean: return deserializeAndCallCallback_EditableTextChangeValue_Boolean(thisDeserializer);
+        case CallbackKind.Kind_Callback_EnterKeyType_Void: return deserializeAndCallCallback_EnterKeyType_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_ErrorInformation_Void: return deserializeAndCallCallback_ErrorInformation_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_Extender_OnFinish: return deserializeAndCallCallback_Extender_OnFinish(thisDeserializer);
+        case CallbackKind.Kind_Callback_Extender_OnProgress: return deserializeAndCallCallback_Extender_OnProgress(thisDeserializer);
+        case CallbackKind.Kind_Callback_FocusAxisEvent_Void: return deserializeAndCallCallback_FocusAxisEvent_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_FormCallbackInfo_Void: return deserializeAndCallCallback_FormCallbackInfo_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_FullscreenInfo_Void: return deserializeAndCallCallback_FullscreenInfo_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_GestureEvent_Void: return deserializeAndCallCallback_GestureEvent_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult: return deserializeAndCallCallback_GestureInfo_BaseGestureEvent_GestureJudgeResult(thisDeserializer);
+        case CallbackKind.Kind_Callback_GestureJudgeResult_Void: return deserializeAndCallCallback_GestureJudgeResult_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_GestureRecognizer_Void: return deserializeAndCallCallback_GestureRecognizer_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_HitTestMode_Void: return deserializeAndCallCallback_HitTestMode_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_HoverEvent_Void: return deserializeAndCallCallback_HoverEvent_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_InsertValue_Boolean: return deserializeAndCallCallback_InsertValue_Boolean(thisDeserializer);
+        case CallbackKind.Kind_Callback_InsertValue_Void: return deserializeAndCallCallback_InsertValue_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_ItemDragInfo_Number_Number_Boolean_Void: return deserializeAndCallCallback_ItemDragInfo_Number_Number_Boolean_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_ItemDragInfo_Number_Number_Void: return deserializeAndCallCallback_ItemDragInfo_Number_Number_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_ItemDragInfo_Number_Void: return deserializeAndCallCallback_ItemDragInfo_Number_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_ItemDragInfo_Void: return deserializeAndCallCallback_ItemDragInfo_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_KeyEvent_Boolean: return deserializeAndCallCallback_KeyEvent_Boolean(thisDeserializer);
+        case CallbackKind.Kind_Callback_KeyEvent_Void: return deserializeAndCallCallback_KeyEvent_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_Map_String_Object_Void: return deserializeAndCallCallback_Map_String_Object_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_MarqueeState_Void: return deserializeAndCallCallback_MarqueeState_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_MouseEvent_Void: return deserializeAndCallCallback_MouseEvent_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_NativeEmbedDataInfo_Void: return deserializeAndCallCallback_NativeEmbedDataInfo_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_NativeEmbedTouchInfo_Void: return deserializeAndCallCallback_NativeEmbedTouchInfo_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_NavDestinationActiveReason_Void: return deserializeAndCallCallback_NavDestinationActiveReason_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_NavDestinationContext_Void: return deserializeAndCallCallback_NavDestinationContext_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_NavigationMode_Void: return deserializeAndCallCallback_NavigationMode_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_NavigationTitleMode_Void: return deserializeAndCallCallback_NavigationTitleMode_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_NavigationTransitionProxy_Void: return deserializeAndCallCallback_NavigationTransitionProxy_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_Number_Number_Boolean: return deserializeAndCallCallback_Number_Number_Boolean(thisDeserializer);
+        case CallbackKind.Kind_Callback_Number_Number_Boolean_Boolean: return deserializeAndCallCallback_Number_Number_Boolean_Boolean(thisDeserializer);
+        case CallbackKind.Kind_Callback_Number_Number_ComputedBarAttribute: return deserializeAndCallCallback_Number_Number_ComputedBarAttribute(thisDeserializer);
+        case CallbackKind.Kind_Callback_Number_Number_Number_Void: return deserializeAndCallCallback_Number_Number_Number_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_Number_Number_Void: return deserializeAndCallCallback_Number_Number_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_Number_SliderChangeMode_Void: return deserializeAndCallCallback_Number_SliderChangeMode_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_Number_Tuple_Number_Number: return deserializeAndCallCallback_Number_Tuple_Number_Number(thisDeserializer);
+        case CallbackKind.Kind_Callback_Number_Tuple_Number_Number_Number_Number: return deserializeAndCallCallback_Number_Tuple_Number_Number_Number_Number(thisDeserializer);
+        case CallbackKind.Kind_Callback_Number_Void: return deserializeAndCallCallback_Number_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_Object_Void: return deserializeAndCallCallback_Object_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_OnAlertEvent_Boolean: return deserializeAndCallCallback_OnAlertEvent_Boolean(thisDeserializer);
+        case CallbackKind.Kind_Callback_OnAudioStateChangedEvent_Void: return deserializeAndCallCallback_OnAudioStateChangedEvent_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_OnBeforeUnloadEvent_Boolean: return deserializeAndCallCallback_OnBeforeUnloadEvent_Boolean(thisDeserializer);
+        case CallbackKind.Kind_Callback_OnClientAuthenticationEvent_Void: return deserializeAndCallCallback_OnClientAuthenticationEvent_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_OnConfirmEvent_Boolean: return deserializeAndCallCallback_OnConfirmEvent_Boolean(thisDeserializer);
+        case CallbackKind.Kind_Callback_OnConsoleEvent_Boolean: return deserializeAndCallCallback_OnConsoleEvent_Boolean(thisDeserializer);
+        case CallbackKind.Kind_Callback_OnContextMenuShowEvent_Boolean: return deserializeAndCallCallback_OnContextMenuShowEvent_Boolean(thisDeserializer);
+        case CallbackKind.Kind_Callback_OnDataResubmittedEvent_Void: return deserializeAndCallCallback_OnDataResubmittedEvent_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_OnDownloadStartEvent_Void: return deserializeAndCallCallback_OnDownloadStartEvent_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_OnErrorReceiveEvent_Void: return deserializeAndCallCallback_OnErrorReceiveEvent_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_OnFaviconReceivedEvent_Void: return deserializeAndCallCallback_OnFaviconReceivedEvent_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_OnFirstContentfulPaintEvent_Void: return deserializeAndCallCallback_OnFirstContentfulPaintEvent_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_OnGeolocationShowEvent_Void: return deserializeAndCallCallback_OnGeolocationShowEvent_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_OnHttpAuthRequestEvent_Boolean: return deserializeAndCallCallback_OnHttpAuthRequestEvent_Boolean(thisDeserializer);
+        case CallbackKind.Kind_Callback_OnHttpErrorReceiveEvent_Void: return deserializeAndCallCallback_OnHttpErrorReceiveEvent_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_OnInterceptRequestEvent_WebResourceResponse: return deserializeAndCallCallback_OnInterceptRequestEvent_WebResourceResponse(thisDeserializer);
+        case CallbackKind.Kind_Callback_OnLoadInterceptEvent_Boolean: return deserializeAndCallCallback_OnLoadInterceptEvent_Boolean(thisDeserializer);
+        case CallbackKind.Kind_Callback_onMeasureSize_SizeResult: return deserializeAndCallCallback_onMeasureSize_SizeResult(thisDeserializer);
+        case CallbackKind.Kind_Callback_OnOverScrollEvent_Void: return deserializeAndCallCallback_OnOverScrollEvent_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_OnPageBeginEvent_Void: return deserializeAndCallCallback_OnPageBeginEvent_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_OnPageEndEvent_Void: return deserializeAndCallCallback_OnPageEndEvent_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_OnPageVisibleEvent_Void: return deserializeAndCallCallback_OnPageVisibleEvent_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_OnPermissionRequestEvent_Void: return deserializeAndCallCallback_OnPermissionRequestEvent_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_onPlaceChildren_Void: return deserializeAndCallCallback_onPlaceChildren_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_OnProgressChangeEvent_Void: return deserializeAndCallCallback_OnProgressChangeEvent_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_OnPromptEvent_Boolean: return deserializeAndCallCallback_OnPromptEvent_Boolean(thisDeserializer);
+        case CallbackKind.Kind_Callback_OnRefreshAccessedHistoryEvent_Void: return deserializeAndCallCallback_OnRefreshAccessedHistoryEvent_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_OnRenderExitedEvent_Void: return deserializeAndCallCallback_OnRenderExitedEvent_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_OnResourceLoadEvent_Void: return deserializeAndCallCallback_OnResourceLoadEvent_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_OnScaleChangeEvent_Void: return deserializeAndCallCallback_OnScaleChangeEvent_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_OnScreenCaptureRequestEvent_Void: return deserializeAndCallCallback_OnScreenCaptureRequestEvent_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_OnScrollEvent_Void: return deserializeAndCallCallback_OnScrollEvent_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_OnScrollFrameBeginHandlerResult_Void: return deserializeAndCallCallback_OnScrollFrameBeginHandlerResult_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_OnSearchResultReceiveEvent_Void: return deserializeAndCallCallback_OnSearchResultReceiveEvent_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_OnShowFileSelectorEvent_Boolean: return deserializeAndCallCallback_OnShowFileSelectorEvent_Boolean(thisDeserializer);
+        case CallbackKind.Kind_Callback_OnSslErrorEventReceiveEvent_Void: return deserializeAndCallCallback_OnSslErrorEventReceiveEvent_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_OnTitleReceiveEvent_Void: return deserializeAndCallCallback_OnTitleReceiveEvent_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_OnTouchIconUrlReceivedEvent_Void: return deserializeAndCallCallback_OnTouchIconUrlReceivedEvent_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_OnWindowNewEvent_Void: return deserializeAndCallCallback_OnWindowNewEvent_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_Opt_Array_FontDescriptor_Opt_Array_String_Void: return deserializeAndCallCallback_Opt_Array_FontDescriptor_Opt_Array_String_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_Opt_Array_NavDestinationTransition_Void: return deserializeAndCallCallback_Opt_Array_NavDestinationTransition_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_Opt_Array_String_Opt_Array_String_Void: return deserializeAndCallCallback_Opt_Array_String_Opt_Array_String_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_Opt_Array_String_Void: return deserializeAndCallCallback_Opt_Array_String_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_Opt_Boolean_Void: return deserializeAndCallCallback_Opt_Boolean_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_Opt_CustomBuilder_Void: return deserializeAndCallCallback_Opt_CustomBuilder_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_Opt_FontDescriptor_Opt_Array_String_Void: return deserializeAndCallCallback_Opt_FontDescriptor_Opt_Array_String_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_Opt_NavigationAnimatedTransition_Void: return deserializeAndCallCallback_Opt_NavigationAnimatedTransition_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_Opt_Number_Void: return deserializeAndCallCallback_Opt_Number_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_Opt_Object_Void: return deserializeAndCallCallback_Opt_Object_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_Opt_OffsetResult_Void: return deserializeAndCallCallback_Opt_OffsetResult_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_Opt_Scene_Opt_Array_String_Void: return deserializeAndCallCallback_Opt_Scene_Opt_Array_String_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_Opt_ScrollResult_Void: return deserializeAndCallCallback_Opt_ScrollResult_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_Opt_String_Opt_Array_String_Void: return deserializeAndCallCallback_Opt_String_Opt_Array_String_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_Opt_StyledString_Opt_Array_String_Void: return deserializeAndCallCallback_Opt_StyledString_Opt_Array_String_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_Opt_TabContentAnimatedTransition_Void: return deserializeAndCallCallback_Opt_TabContentAnimatedTransition_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_Opt_Union_Number_Resource_Void: return deserializeAndCallCallback_Opt_Union_Number_Resource_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_Opt_Union_ResourceStr_String_Resource_Void: return deserializeAndCallCallback_Opt_Union_ResourceStr_String_Resource_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_PlaybackInfo_Void: return deserializeAndCallCallback_PlaybackInfo_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_Pointer_Void: return deserializeAndCallCallback_Pointer_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_PopInfo_Void: return deserializeAndCallCallback_PopInfo_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_PreDragStatus_Void: return deserializeAndCallCallback_PreDragStatus_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_PreparedInfo_Void: return deserializeAndCallCallback_PreparedInfo_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_RangeUpdate: return deserializeAndCallCallback_RangeUpdate(thisDeserializer);
+        case CallbackKind.Kind_Callback_RefreshStatus_Void: return deserializeAndCallCallback_RefreshStatus_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_RichEditorChangeValue_Boolean: return deserializeAndCallCallback_RichEditorChangeValue_Boolean(thisDeserializer);
+        case CallbackKind.Kind_Callback_RichEditorDeleteValue_Boolean: return deserializeAndCallCallback_RichEditorDeleteValue_Boolean(thisDeserializer);
+        case CallbackKind.Kind_Callback_RichEditorInsertValue_Boolean: return deserializeAndCallCallback_RichEditorInsertValue_Boolean(thisDeserializer);
+        case CallbackKind.Kind_Callback_RichEditorRange_Void: return deserializeAndCallCallback_RichEditorRange_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_RichEditorSelection_Void: return deserializeAndCallCallback_RichEditorSelection_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_RichEditorTextSpanResult_Void: return deserializeAndCallCallback_RichEditorTextSpanResult_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_RotationGesture: return deserializeAndCallCallback_RotationGesture(thisDeserializer);
+        case CallbackKind.Kind_Callback_RotationGesture_Void: return deserializeAndCallCallback_RotationGesture_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_SheetDismiss_Void: return deserializeAndCallCallback_SheetDismiss_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_SheetType_Void: return deserializeAndCallCallback_SheetType_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_SizeResult_Void: return deserializeAndCallCallback_SizeResult_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_SpringBackAction_Void: return deserializeAndCallCallback_SpringBackAction_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_StateStylesChange: return deserializeAndCallCallback_StateStylesChange(thisDeserializer);
+        case CallbackKind.Kind_Callback_String_PasteEvent_Void: return deserializeAndCallCallback_String_PasteEvent_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_String_SurfaceRect_Void: return deserializeAndCallCallback_String_SurfaceRect_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_String_Void: return deserializeAndCallCallback_String_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_StyledStringChangeValue_Boolean: return deserializeAndCallCallback_StyledStringChangeValue_Boolean(thisDeserializer);
+        case CallbackKind.Kind_Callback_StyledStringMarshallingValue_Void: return deserializeAndCallCallback_StyledStringMarshallingValue_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_SwipeActionState_Void: return deserializeAndCallCallback_SwipeActionState_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_SwipeGesture: return deserializeAndCallCallback_SwipeGesture(thisDeserializer);
+        case CallbackKind.Kind_Callback_SwipeGesture_Void: return deserializeAndCallCallback_SwipeGesture_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_SwiperContentTransitionProxy_Void: return deserializeAndCallCallback_SwiperContentTransitionProxy_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_TabContentTransitionProxy_Void: return deserializeAndCallCallback_TabContentTransitionProxy_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_TerminationInfo_Void: return deserializeAndCallCallback_TerminationInfo_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_TextPickerResult_Void: return deserializeAndCallCallback_TextPickerResult_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_TextRange_Void: return deserializeAndCallCallback_TextRange_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_TimePickerResult_Void: return deserializeAndCallCallback_TimePickerResult_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_TouchEvent_HitTestMode: return deserializeAndCallCallback_TouchEvent_HitTestMode(thisDeserializer);
+        case CallbackKind.Kind_Callback_TouchEvent_Void: return deserializeAndCallCallback_TouchEvent_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_TouchResult_Void: return deserializeAndCallCallback_TouchResult_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_Tuple_Number_Number_Number_Number_Void: return deserializeAndCallCallback_Tuple_Number_Number_Number_Number_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_Tuple_Number_Number_Void: return deserializeAndCallCallback_Tuple_Number_Number_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_UIExtensionProxy_Void: return deserializeAndCallCallback_UIExtensionProxy_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_Union_CustomBuilder_DragItemInfo_Void: return deserializeAndCallCallback_Union_CustomBuilder_DragItemInfo_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_Union_Number_Array_Number_Void: return deserializeAndCallCallback_Union_Number_Array_Number_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_Union_ResourceStr_Array_ResourceStr_Void: return deserializeAndCallCallback_Union_ResourceStr_Array_ResourceStr_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_Union_ResourceStr_Resource_String_Void: return deserializeAndCallCallback_Union_ResourceStr_Resource_String_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_Void: return deserializeAndCallCallback_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_WebKeyboardOptions_Void: return deserializeAndCallCallback_WebKeyboardOptions_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_WebResourceResponse_Void: return deserializeAndCallCallback_WebResourceResponse_Void(thisDeserializer);
+        case CallbackKind.Kind_CheckBoxModifierBuilder: return deserializeAndCallCheckBoxModifierBuilder(thisDeserializer);
+        case CallbackKind.Kind_CompatibleInitCallback: return deserializeAndCallCompatibleInitCallback(thisDeserializer);
+        case CallbackKind.Kind_CompatibleUpdateCallback: return deserializeAndCallCompatibleUpdateCallback(thisDeserializer);
+        case CallbackKind.Kind_ContentDidScrollCallback: return deserializeAndCallContentDidScrollCallback(thisDeserializer);
+        case CallbackKind.Kind_ContentWillScrollCallback: return deserializeAndCallContentWillScrollCallback(thisDeserializer);
+        case CallbackKind.Kind_Context_getGroupDir_Callback: return deserializeAndCallContext_getGroupDir_Callback(thisDeserializer);
+        case CallbackKind.Kind_CustomNodeBuilder: return deserializeAndCallCustomNodeBuilder(thisDeserializer);
+        case CallbackKind.Kind_CustomStyles: return deserializeAndCallCustomStyles(thisDeserializer);
+        case CallbackKind.Kind_DataPanelModifierBuilder: return deserializeAndCallDataPanelModifierBuilder(thisDeserializer);
+        case CallbackKind.Kind_EditableTextOnChangeCallback: return deserializeAndCallEditableTextOnChangeCallback(thisDeserializer);
+        case CallbackKind.Kind_ErrorCallback: return deserializeAndCallErrorCallback(thisDeserializer);
+        case CallbackKind.Kind_GaugeModifierBuilder: return deserializeAndCallGaugeModifierBuilder(thisDeserializer);
+        case CallbackKind.Kind_GestureRecognizerJudgeBeginCallback: return deserializeAndCallGestureRecognizerJudgeBeginCallback(thisDeserializer);
+        case CallbackKind.Kind_GetItemMainSizeByIndex: return deserializeAndCallGetItemMainSizeByIndex(thisDeserializer);
+        case CallbackKind.Kind_HoverCallback: return deserializeAndCallHoverCallback(thisDeserializer);
+        case CallbackKind.Kind_ImageCompleteCallback: return deserializeAndCallImageCompleteCallback(thisDeserializer);
+        case CallbackKind.Kind_ImageErrorCallback: return deserializeAndCallImageErrorCallback(thisDeserializer);
+        case CallbackKind.Kind_ImageOnCompleteCallback: return deserializeAndCallImageOnCompleteCallback(thisDeserializer);
+        case CallbackKind.Kind_InterceptionModeCallback: return deserializeAndCallInterceptionModeCallback(thisDeserializer);
+        case CallbackKind.Kind_InterceptionShowCallback: return deserializeAndCallInterceptionShowCallback(thisDeserializer);
+        case CallbackKind.Kind_LoadingProgressModifierBuilder: return deserializeAndCallLoadingProgressModifierBuilder(thisDeserializer);
+        case CallbackKind.Kind_MenuCallback: return deserializeAndCallMenuCallback(thisDeserializer);
+        case CallbackKind.Kind_MenuItemModifierBuilder: return deserializeAndCallMenuItemModifierBuilder(thisDeserializer);
+        case CallbackKind.Kind_MenuOnAppearCallback: return deserializeAndCallMenuOnAppearCallback(thisDeserializer);
+        case CallbackKind.Kind_ModifierKeyStateGetter: return deserializeAndCallModifierKeyStateGetter(thisDeserializer);
+        case CallbackKind.Kind_NavDestinationTransitionDelegate: return deserializeAndCallNavDestinationTransitionDelegate(thisDeserializer);
+        case CallbackKind.Kind_NavExtender_OnUpdateStack: return deserializeAndCallNavExtender_OnUpdateStack(thisDeserializer);
+        case CallbackKind.Kind_OnAdsBlockedCallback: return deserializeAndCallOnAdsBlockedCallback(thisDeserializer);
+        case CallbackKind.Kind_OnAlphabetIndexerPopupSelectCallback: return deserializeAndCallOnAlphabetIndexerPopupSelectCallback(thisDeserializer);
+        case CallbackKind.Kind_OnAlphabetIndexerRequestPopupDataCallback: return deserializeAndCallOnAlphabetIndexerRequestPopupDataCallback(thisDeserializer);
+        case CallbackKind.Kind_OnAlphabetIndexerSelectCallback: return deserializeAndCallOnAlphabetIndexerSelectCallback(thisDeserializer);
+        case CallbackKind.Kind_OnCheckboxChangeCallback: return deserializeAndCallOnCheckboxChangeCallback(thisDeserializer);
+        case CallbackKind.Kind_OnCheckboxGroupChangeCallback: return deserializeAndCallOnCheckboxGroupChangeCallback(thisDeserializer);
+        case CallbackKind.Kind_OnContentScrollCallback: return deserializeAndCallOnContentScrollCallback(thisDeserializer);
+        case CallbackKind.Kind_OnContextMenuHideCallback: return deserializeAndCallOnContextMenuHideCallback(thisDeserializer);
+        case CallbackKind.Kind_OnCreateMenuCallback: return deserializeAndCallOnCreateMenuCallback(thisDeserializer);
+        case CallbackKind.Kind_OnDidChangeCallback: return deserializeAndCallOnDidChangeCallback(thisDeserializer);
+        case CallbackKind.Kind_OnDragEventCallback: return deserializeAndCallOnDragEventCallback(thisDeserializer);
+        case CallbackKind.Kind_OnFirstMeaningfulPaintCallback: return deserializeAndCallOnFirstMeaningfulPaintCallback(thisDeserializer);
+        case CallbackKind.Kind_OnFoldStatusChangeCallback: return deserializeAndCallOnFoldStatusChangeCallback(thisDeserializer);
+        case CallbackKind.Kind_OnFullScreenEnterCallback: return deserializeAndCallOnFullScreenEnterCallback(thisDeserializer);
+        case CallbackKind.Kind_OnHoverCallback: return deserializeAndCallOnHoverCallback(thisDeserializer);
+        case CallbackKind.Kind_OnHoverStatusChangeCallback: return deserializeAndCallOnHoverStatusChangeCallback(thisDeserializer);
+        case CallbackKind.Kind_OnIntelligentTrackingPreventionCallback: return deserializeAndCallOnIntelligentTrackingPreventionCallback(thisDeserializer);
+        case CallbackKind.Kind_OnItemDragStartCallback: return deserializeAndCallOnItemDragStartCallback(thisDeserializer);
+        case CallbackKind.Kind_OnLargestContentfulPaintCallback: return deserializeAndCallOnLargestContentfulPaintCallback(thisDeserializer);
+        case CallbackKind.Kind_OnLazyLoadingFunc: return deserializeAndCallOnLazyLoadingFunc(thisDeserializer);
+        case CallbackKind.Kind_OnLinearIndicatorChangeCallback: return deserializeAndCallOnLinearIndicatorChangeCallback(thisDeserializer);
+        case CallbackKind.Kind_OnMenuItemClickCallback: return deserializeAndCallOnMenuItemClickCallback(thisDeserializer);
+        case CallbackKind.Kind_OnMoveHandler: return deserializeAndCallOnMoveHandler(thisDeserializer);
+        case CallbackKind.Kind_OnNativeEmbedVisibilityChangeCallback: return deserializeAndCallOnNativeEmbedVisibilityChangeCallback(thisDeserializer);
+        case CallbackKind.Kind_OnNativeLoadCallback: return deserializeAndCallOnNativeLoadCallback(thisDeserializer);
+        case CallbackKind.Kind_OnNavigationEntryCommittedCallback: return deserializeAndCallOnNavigationEntryCommittedCallback(thisDeserializer);
+        case CallbackKind.Kind_OnOverrideUrlLoadingCallback: return deserializeAndCallOnOverrideUrlLoadingCallback(thisDeserializer);
+        case CallbackKind.Kind_OnPasteCallback: return deserializeAndCallOnPasteCallback(thisDeserializer);
+        case CallbackKind.Kind_OnRadioChangeCallback: return deserializeAndCallOnRadioChangeCallback(thisDeserializer);
+        case CallbackKind.Kind_OnRatingChangeCallback: return deserializeAndCallOnRatingChangeCallback(thisDeserializer);
+        case CallbackKind.Kind_OnRenderProcessNotRespondingCallback: return deserializeAndCallOnRenderProcessNotRespondingCallback(thisDeserializer);
+        case CallbackKind.Kind_OnRenderProcessRespondingCallback: return deserializeAndCallOnRenderProcessRespondingCallback(thisDeserializer);
+        case CallbackKind.Kind_OnSafeBrowsingCheckResultCallback: return deserializeAndCallOnSafeBrowsingCheckResultCallback(thisDeserializer);
+        case CallbackKind.Kind_OnScrollCallback: return deserializeAndCallOnScrollCallback(thisDeserializer);
+        case CallbackKind.Kind_OnScrollEdgeCallback: return deserializeAndCallOnScrollEdgeCallback(thisDeserializer);
+        case CallbackKind.Kind_OnScrollFrameBeginCallback: return deserializeAndCallOnScrollFrameBeginCallback(thisDeserializer);
+        case CallbackKind.Kind_OnScrollVisibleContentChangeCallback: return deserializeAndCallOnScrollVisibleContentChangeCallback(thisDeserializer);
+        case CallbackKind.Kind_OnSelectCallback: return deserializeAndCallOnSelectCallback(thisDeserializer);
+        case CallbackKind.Kind_OnSslErrorEventCallback: return deserializeAndCallOnSslErrorEventCallback(thisDeserializer);
+        case CallbackKind.Kind_OnSubmitCallback: return deserializeAndCallOnSubmitCallback(thisDeserializer);
+        case CallbackKind.Kind_OnSwiperAnimationEndCallback: return deserializeAndCallOnSwiperAnimationEndCallback(thisDeserializer);
+        case CallbackKind.Kind_OnSwiperAnimationStartCallback: return deserializeAndCallOnSwiperAnimationStartCallback(thisDeserializer);
+        case CallbackKind.Kind_OnSwiperGestureSwipeCallback: return deserializeAndCallOnSwiperGestureSwipeCallback(thisDeserializer);
+        case CallbackKind.Kind_OnTabsAnimationEndCallback: return deserializeAndCallOnTabsAnimationEndCallback(thisDeserializer);
+        case CallbackKind.Kind_OnTabsAnimationStartCallback: return deserializeAndCallOnTabsAnimationStartCallback(thisDeserializer);
+        case CallbackKind.Kind_OnTabsContentWillChangeCallback: return deserializeAndCallOnTabsContentWillChangeCallback(thisDeserializer);
+        case CallbackKind.Kind_OnTabsGestureSwipeCallback: return deserializeAndCallOnTabsGestureSwipeCallback(thisDeserializer);
+        case CallbackKind.Kind_OnTextPickerChangeCallback: return deserializeAndCallOnTextPickerChangeCallback(thisDeserializer);
+        case CallbackKind.Kind_OnTextSelectionChangeCallback: return deserializeAndCallOnTextSelectionChangeCallback(thisDeserializer);
+        case CallbackKind.Kind_OnTimePickerChangeCallback: return deserializeAndCallOnTimePickerChangeCallback(thisDeserializer);
+        case CallbackKind.Kind_OnTotalCountFunc: return deserializeAndCallOnTotalCountFunc(thisDeserializer);
+        case CallbackKind.Kind_OnViewportFitChangedCallback: return deserializeAndCallOnViewportFitChangedCallback(thisDeserializer);
+        case CallbackKind.Kind_OnWillScrollCallback: return deserializeAndCallOnWillScrollCallback(thisDeserializer);
+        case CallbackKind.Kind_PageMapBuilder: return deserializeAndCallPageMapBuilder(thisDeserializer);
+        case CallbackKind.Kind_PageTransitionCallback: return deserializeAndCallPageTransitionCallback(thisDeserializer);
+        case CallbackKind.Kind_PasteButtonCallback: return deserializeAndCallPasteButtonCallback(thisDeserializer);
+        case CallbackKind.Kind_PasteEventCallback: return deserializeAndCallPasteEventCallback(thisDeserializer);
+        case CallbackKind.Kind_PluginErrorCallback: return deserializeAndCallPluginErrorCallback(thisDeserializer);
+        case CallbackKind.Kind_PopupStateChangeCallback: return deserializeAndCallPopupStateChangeCallback(thisDeserializer);
+        case CallbackKind.Kind_ProgressModifierBuilder: return deserializeAndCallProgressModifierBuilder(thisDeserializer);
+        case CallbackKind.Kind_RadioModifierBuilder: return deserializeAndCallRadioModifierBuilder(thisDeserializer);
+        case CallbackKind.Kind_RatingModifierBuilder: return deserializeAndCallRatingModifierBuilder(thisDeserializer);
+        case CallbackKind.Kind_RestrictedWorker_onerror_Callback: return deserializeAndCallRestrictedWorker_onerror_Callback(thisDeserializer);
+        case CallbackKind.Kind_RestrictedWorker_onexit_Callback: return deserializeAndCallRestrictedWorker_onexit_Callback(thisDeserializer);
+        case CallbackKind.Kind_RestrictedWorker_onmessage_Callback: return deserializeAndCallRestrictedWorker_onmessage_Callback(thisDeserializer);
+        case CallbackKind.Kind_ReuseIdCallback: return deserializeAndCallReuseIdCallback(thisDeserializer);
+        case CallbackKind.Kind_SaveButtonCallback: return deserializeAndCallSaveButtonCallback(thisDeserializer);
+        case CallbackKind.Kind_ScrollOnScrollCallback: return deserializeAndCallScrollOnScrollCallback(thisDeserializer);
+        case CallbackKind.Kind_ScrollOnWillScrollCallback: return deserializeAndCallScrollOnWillScrollCallback(thisDeserializer);
+        case CallbackKind.Kind_SearchSubmitCallback: return deserializeAndCallSearchSubmitCallback(thisDeserializer);
+        case CallbackKind.Kind_SearchValueCallback: return deserializeAndCallSearchValueCallback(thisDeserializer);
+        case CallbackKind.Kind_ShouldBuiltInRecognizerParallelWithCallback: return deserializeAndCallShouldBuiltInRecognizerParallelWithCallback(thisDeserializer);
+        case CallbackKind.Kind_SizeChangeCallback: return deserializeAndCallSizeChangeCallback(thisDeserializer);
+        case CallbackKind.Kind_SliderModifierBuilder: return deserializeAndCallSliderModifierBuilder(thisDeserializer);
+        case CallbackKind.Kind_SliderTriggerChangeCallback: return deserializeAndCallSliderTriggerChangeCallback(thisDeserializer);
+        case CallbackKind.Kind_StyledStringMarshallCallback: return deserializeAndCallStyledStringMarshallCallback(thisDeserializer);
+        case CallbackKind.Kind_StyledStringUnmarshallCallback: return deserializeAndCallStyledStringUnmarshallCallback(thisDeserializer);
+        case CallbackKind.Kind_SubmitCallback: return deserializeAndCallSubmitCallback(thisDeserializer);
+        case CallbackKind.Kind_TabsCustomContentTransitionCallback: return deserializeAndCallTabsCustomContentTransitionCallback(thisDeserializer);
+        case CallbackKind.Kind_TextAreaSubmitCallback: return deserializeAndCallTextAreaSubmitCallback(thisDeserializer);
+        case CallbackKind.Kind_TextClockModifierBuilder: return deserializeAndCallTextClockModifierBuilder(thisDeserializer);
+        case CallbackKind.Kind_TextFieldValueCallback: return deserializeAndCallTextFieldValueCallback(thisDeserializer);
+        case CallbackKind.Kind_TextPickerEnterSelectedAreaCallback: return deserializeAndCallTextPickerEnterSelectedAreaCallback(thisDeserializer);
+        case CallbackKind.Kind_TextPickerScrollStopCallback: return deserializeAndCallTextPickerScrollStopCallback(thisDeserializer);
+        case CallbackKind.Kind_TextTimerModifierBuilder: return deserializeAndCallTextTimerModifierBuilder(thisDeserializer);
+        case CallbackKind.Kind_ToggleModifierBuilder: return deserializeAndCallToggleModifierBuilder(thisDeserializer);
+        case CallbackKind.Kind_TransitionFinishCallback: return deserializeAndCallTransitionFinishCallback(thisDeserializer);
+        case CallbackKind.Kind_Type_CommonMethod_onDragStart: return deserializeAndCallType_CommonMethod_onDragStart(thisDeserializer);
+        case CallbackKind.Kind_Type_NavigationAttribute_customNavContentTransition: return deserializeAndCallType_NavigationAttribute_customNavContentTransition(thisDeserializer);
+        case CallbackKind.Kind_UpdateTransitionCallback: return deserializeAndCallUpdateTransitionCallback(thisDeserializer);
+        case CallbackKind.Kind_VisibleAreaChangeCallback: return deserializeAndCallVisibleAreaChangeCallback(thisDeserializer);
+        case CallbackKind.Kind_VoidCallback: return deserializeAndCallVoidCallback(thisDeserializer);
+        case CallbackKind.Kind_WebKeyboardCallback: return deserializeAndCallWebKeyboardCallback(thisDeserializer);
     }
     console.log("Unknown callback kind")
 }

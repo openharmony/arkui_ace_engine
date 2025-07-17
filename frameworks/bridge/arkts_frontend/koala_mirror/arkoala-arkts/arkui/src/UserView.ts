@@ -24,7 +24,7 @@ export class UserView {
         throw new Error("User must override this method");
     }
 
-    // TODO: these native functions are here temporary.
+    // Improve: these native functions are here temporary.
     static startNativeLog(group: int32) {
         NativeLog.Default.startNativeLog(group)
     }

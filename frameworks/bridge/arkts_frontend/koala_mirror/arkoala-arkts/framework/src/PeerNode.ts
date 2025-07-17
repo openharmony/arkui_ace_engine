@@ -49,7 +49,7 @@ export class PeerCanvas extends Wrapper {
     constructor(ptr: pointer) {
         super(ptr)
     }
-    // TODO: commonize with Skoala!
+    // Improve: commonize with Skoala!
     drawRect(left: float32, top: float32, right: float32, botton: float32, paint: PeerPaint) {
         console.log("drawRect: method not implemented")
     }
@@ -60,7 +60,7 @@ export class PeerPaint extends Finalizable {
     private constructor(ptr: pointer) {
         super(ptr, 0)
     }
-    // TODO: commonize with Skoala!
+    // Improve: commonize with Skoala!
     static make(): PeerPaint {
         console.log("make: method not implemented")
         return new PeerPaint(0)
@@ -315,7 +315,7 @@ export class PeerNode extends IncrementalNode implements CustomizableNode {
                 }
 
                 // Find the closest peer node backward.
-                // TODO: rework to avoid search
+                // Improve: rework to avoid search
                 let sibling: PeerNode | undefined = undefined
                 for (let node = child.previousSibling; node; node = node.previousSibling) {
                     if (node.isKind(PeerNodeType)) {
@@ -456,7 +456,7 @@ export class PeerNode extends IncrementalNode implements CustomizableNode {
     }
 
     get childrenCountOfPeer(): number {
-        // TODO: add some cache for it.
+        // Improve: add some cache for it.
         let totalCount = 0
         let inLazyRange = false
         for (let child = this.firstChild; child; child = child.nextSibling) {
@@ -543,7 +543,7 @@ export class PeerNode extends IncrementalNode implements CustomizableNode {
                 let nativeEndIndex = args[1]
                 let inLazyRange = false
                 let currentNativeIndex = 0
-                // TODO: we may want some caching here.
+                // Improve: we may want some caching here.
                 for (let child = this.firstChild; child; child = child.nextSibling) {
                     if (child.isKind(PeerNodeType)) {
                         if (!inLazyRange) currentNativeIndex++

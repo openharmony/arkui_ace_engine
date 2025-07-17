@@ -55,7 +55,7 @@ export class ArkGaugePeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeNumber(value_value)
         }
@@ -67,7 +67,7 @@ export class ArkGaugePeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeNumber(value_value)
         }
@@ -79,7 +79,7 @@ export class ArkGaugePeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeNumber(value_value)
         }
@@ -91,7 +91,7 @@ export class ArkGaugePeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -130,8 +130,8 @@ export class ArkGaugePeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((2).toChar())
                 const value_value_2  = value_value as Array<[ ResourceColor | LinearGradient, number ]>
                 thisSerializer.writeInt32((value_value_2.length).toInt())
-                for (let i = 0; i < value_value_2.length; i++) {
-                    const value_value_2_element : [ ResourceColor | LinearGradient, number ] = value_value_2[i]
+                for (let value_value_2_counter_i = 0; value_value_2_counter_i < value_value_2.length; value_value_2_counter_i++) {
+                    const value_value_2_element : [ ResourceColor | LinearGradient, number ] = value_value_2[value_value_2_counter_i]
                     const value_value_2_element_0  = value_value_2_element[0]
                     let value_value_2_element_0_type : int32 = RuntimeType.UNDEFINED
                     value_value_2_element_0_type = runtimeType(value_value_2_element_0)
@@ -179,7 +179,7 @@ export class ArkGaugePeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -207,7 +207,7 @@ export class ArkGaugePeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(value_value))
         }
@@ -219,7 +219,7 @@ export class ArkGaugePeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             GaugeShadowOptions_serializer.write(thisSerializer, value_value)
         }
@@ -231,7 +231,7 @@ export class ArkGaugePeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             GaugeIndicatorOptions_serializer.write(thisSerializer, value_value)
         }
@@ -243,7 +243,7 @@ export class ArkGaugePeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -255,7 +255,7 @@ export class ArkGaugePeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteObject(value_value)
         }
@@ -639,7 +639,7 @@ export class GaugeOptions_serializer {
         let value_min_type : int32 = RuntimeType.UNDEFINED
         value_min_type = runtimeType(value_min)
         valueSerializer.writeInt8((value_min_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_min_type)) {
+        if ((value_min_type) != (RuntimeType.UNDEFINED)) {
             const value_min_value  = value_min!
             valueSerializer.writeNumber(value_min_value)
         }
@@ -647,7 +647,7 @@ export class GaugeOptions_serializer {
         let value_max_type : int32 = RuntimeType.UNDEFINED
         value_max_type = runtimeType(value_max)
         valueSerializer.writeInt8((value_max_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_max_type)) {
+        if ((value_max_type) != (RuntimeType.UNDEFINED)) {
             const value_max_value  = value_max!
             valueSerializer.writeNumber(value_max_value)
         }
@@ -657,14 +657,14 @@ export class GaugeOptions_serializer {
         const value_result : number = (valueDeserializer.readNumber() as number)
         const min_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let min_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (min_buf_runtimeType))
+        if ((min_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             min_buf = (valueDeserializer.readNumber() as number)
         }
         const min_result : number | undefined = min_buf
         const max_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let max_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (max_buf_runtimeType))
+        if ((max_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             max_buf = (valueDeserializer.readNumber() as number)
         }
@@ -680,7 +680,7 @@ export class GaugeShadowOptions_serializer {
         let value_radius_type : int32 = RuntimeType.UNDEFINED
         value_radius_type = runtimeType(value_radius)
         valueSerializer.writeInt8((value_radius_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_radius_type)) {
+        if ((value_radius_type) != (RuntimeType.UNDEFINED)) {
             const value_radius_value  = value_radius!
             let value_radius_value_type : int32 = RuntimeType.UNDEFINED
             value_radius_value_type = runtimeType(value_radius_value)
@@ -699,7 +699,7 @@ export class GaugeShadowOptions_serializer {
         let value_offsetX_type : int32 = RuntimeType.UNDEFINED
         value_offsetX_type = runtimeType(value_offsetX)
         valueSerializer.writeInt8((value_offsetX_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_offsetX_type)) {
+        if ((value_offsetX_type) != (RuntimeType.UNDEFINED)) {
             const value_offsetX_value  = value_offsetX!
             let value_offsetX_value_type : int32 = RuntimeType.UNDEFINED
             value_offsetX_value_type = runtimeType(value_offsetX_value)
@@ -718,7 +718,7 @@ export class GaugeShadowOptions_serializer {
         let value_offsetY_type : int32 = RuntimeType.UNDEFINED
         value_offsetY_type = runtimeType(value_offsetY)
         valueSerializer.writeInt8((value_offsetY_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_offsetY_type)) {
+        if ((value_offsetY_type) != (RuntimeType.UNDEFINED)) {
             const value_offsetY_value  = value_offsetY!
             let value_offsetY_value_type : int32 = RuntimeType.UNDEFINED
             value_offsetY_value_type = runtimeType(value_offsetY_value)
@@ -738,7 +738,7 @@ export class GaugeShadowOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const radius_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let radius_buf : number | Resource | undefined
-        if ((RuntimeType.UNDEFINED) != (radius_buf_runtimeType))
+        if ((radius_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const radius_buf__selector : int32 = valueDeserializer.readInt8()
             let radius_buf_ : number | Resource | undefined
@@ -756,7 +756,7 @@ export class GaugeShadowOptions_serializer {
         const radius_result : number | Resource | undefined = radius_buf
         const offsetX_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let offsetX_buf : number | Resource | undefined
-        if ((RuntimeType.UNDEFINED) != (offsetX_buf_runtimeType))
+        if ((offsetX_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const offsetX_buf__selector : int32 = valueDeserializer.readInt8()
             let offsetX_buf_ : number | Resource | undefined
@@ -774,7 +774,7 @@ export class GaugeShadowOptions_serializer {
         const offsetX_result : number | Resource | undefined = offsetX_buf
         const offsetY_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let offsetY_buf : number | Resource | undefined
-        if ((RuntimeType.UNDEFINED) != (offsetY_buf_runtimeType))
+        if ((offsetY_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const offsetY_buf__selector : int32 = valueDeserializer.readInt8()
             let offsetY_buf_ : number | Resource | undefined
@@ -801,7 +801,7 @@ export class GaugeIndicatorOptions_serializer {
         let value_icon_type : int32 = RuntimeType.UNDEFINED
         value_icon_type = runtimeType(value_icon)
         valueSerializer.writeInt8((value_icon_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_icon_type)) {
+        if ((value_icon_type) != (RuntimeType.UNDEFINED)) {
             const value_icon_value  = value_icon!
             let value_icon_value_type : int32 = RuntimeType.UNDEFINED
             value_icon_value_type = runtimeType(value_icon_value)
@@ -820,7 +820,7 @@ export class GaugeIndicatorOptions_serializer {
         let value_space_type : int32 = RuntimeType.UNDEFINED
         value_space_type = runtimeType(value_space)
         valueSerializer.writeInt8((value_space_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_space_type)) {
+        if ((value_space_type) != (RuntimeType.UNDEFINED)) {
             const value_space_value  = value_space!
             let value_space_value_type : int32 = RuntimeType.UNDEFINED
             value_space_value_type = runtimeType(value_space_value)
@@ -845,7 +845,7 @@ export class GaugeIndicatorOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const icon_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let icon_buf : ResourceStr | undefined
-        if ((RuntimeType.UNDEFINED) != (icon_buf_runtimeType))
+        if ((icon_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const icon_buf__selector : int32 = valueDeserializer.readInt8()
             let icon_buf_ : string | Resource | undefined
@@ -863,7 +863,7 @@ export class GaugeIndicatorOptions_serializer {
         const icon_result : ResourceStr | undefined = icon_buf
         const space_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let space_buf : Dimension | undefined
-        if ((RuntimeType.UNDEFINED) != (space_buf_runtimeType))
+        if ((space_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const space_buf__selector : int32 = valueDeserializer.readInt8()
             let space_buf_ : string | number | Resource | undefined

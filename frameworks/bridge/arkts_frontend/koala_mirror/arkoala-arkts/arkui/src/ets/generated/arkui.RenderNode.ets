@@ -488,7 +488,7 @@ export class RenderNodeInternal implements MaterializedBase,RenderNode {
         let sibling_type : int32 = RuntimeType.UNDEFINED
         sibling_type = runtimeType(sibling)
         thisSerializer.writeInt8((sibling_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (sibling_type)) {
+        if ((sibling_type) != (RuntimeType.UNDEFINED)) {
             const sibling_value  = sibling!
             RenderNode_serializer.write(thisSerializer, sibling_value)
         }
@@ -506,7 +506,7 @@ export class RenderNodeInternal implements MaterializedBase,RenderNode {
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : RenderNode | undefined
-        if ((RuntimeType.UNDEFINED) != (buffer_runtimeType))
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
         {
             buffer = (RenderNode_serializer.read(retvalDeserializer) as RenderNode)
         }
@@ -518,7 +518,7 @@ export class RenderNodeInternal implements MaterializedBase,RenderNode {
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : RenderNode | undefined
-        if ((RuntimeType.UNDEFINED) != (buffer_runtimeType))
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
         {
             buffer = (RenderNode_serializer.read(retvalDeserializer) as RenderNode)
         }
@@ -530,7 +530,7 @@ export class RenderNodeInternal implements MaterializedBase,RenderNode {
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : RenderNode | undefined
-        if ((RuntimeType.UNDEFINED) != (buffer_runtimeType))
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
         {
             buffer = (RenderNode_serializer.read(retvalDeserializer) as RenderNode)
         }
@@ -542,7 +542,7 @@ export class RenderNodeInternal implements MaterializedBase,RenderNode {
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : RenderNode | undefined
-        if ((RuntimeType.UNDEFINED) != (buffer_runtimeType))
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
         {
             buffer = (RenderNode_serializer.read(retvalDeserializer) as RenderNode)
         }

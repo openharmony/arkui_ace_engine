@@ -124,7 +124,7 @@ export class GlobalInfo {
     }
 }
 
-// TODO: rethink (remove as)
+// Improve: rethink (remove as)
 function nodeVisitor<T extends AstNode | undefined>(node: T, visitor: Visitor): T {
     if (node === undefined) {
         return node
@@ -132,7 +132,7 @@ function nodeVisitor<T extends AstNode | undefined>(node: T, visitor: Visitor): 
     return visitor(node) as T
 }
 
-// TODO: rethink (remove as)
+// Improve: rethink (remove as)
 function nodesVisitor<T extends AstNode, TIn extends readonly T[] | undefined>(nodes: TIn, visitor: Visitor): T[] | TIn {
     if (nodes === undefined) {
         return nodes
@@ -430,7 +430,7 @@ export function visitEachChild(
             nodeVisitor(node.typeParams, visitor),
             nodesVisitor(node.params, visitor),
             nodeVisitor(node.returnType, visitor),
-            false, // TODO: how to get it?
+            false, // Improve: how to get it?
             node.flags,
             nodesVisitor(node.annotations, visitor),
         )
@@ -566,7 +566,7 @@ export function visitEachChild(
             node.requiredParams,
         )
     }
-    /** TODO: fix this case!
+    /** Improve: fix this case!
     if (isClassStaticBlock(node)) {
         return factory.updateClassStaticBlock(
 

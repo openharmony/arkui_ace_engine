@@ -29,6 +29,6 @@ export class ImportPathManager extends ArktsObject {
     }
 
     resolvePath(currentModulePath: string, importPath: string): string {
-        return ''; // TODO: no longer support this.
+        return ''; // Improve: no longer support this.
     }
 }

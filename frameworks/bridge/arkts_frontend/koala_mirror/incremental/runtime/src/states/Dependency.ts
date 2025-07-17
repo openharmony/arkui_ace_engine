@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { UID, Unique, UniqueMap, UniqueSet } from "@koalaui/common"
+import { UID, Unique, UniqueMap, UniqueSet } from "../common/Unique"
 
 let uidCounter: UID = 0
 

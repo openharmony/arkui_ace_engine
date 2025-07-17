@@ -27,6 +27,7 @@
 
 #include "etsapi.h"
 #include "koala-types.h"
+#include "interop-utils.h"
 
 template<class T>
 struct InteropTypeConverter {
@@ -113,11 +114,7 @@ struct InteropTypeConverter<KInteropBuffer> {
       int bufferLength = value.length;
       ets_byteArray array = env->NewByteArray(bufferLength);
       KByte* data = (KByte*)env->PinByteArray(array);
-      #ifdef __STDC_LIB_EXT1__
-        memcpy_s(data, bufferLength, (KByte*)value.data, bufferLength);
-      #else
-        memcpy(data, (KByte*)value.data, bufferLength);
-      #endif
+      interop_memcpy(data, bufferLength, (KByte*)value.data, bufferLength);
       env->UnpinByteArray(array);
       value.dispose(value.resourceId);
       return array;
@@ -215,11 +212,7 @@ struct InteropTypeConverter<KInteropReturnBuffer> {
       int bufferLength = value.length;
       ets_byteArray array = env->NewByteArray(bufferLength);
       KByte* data = (KByte*)env->PinByteArray(array);
-      #ifdef __STDC_LIB_EXT1__
-        memcpy_s(data, bufferLength, (KByte*)value.data, bufferLength);
-      #else
-        memcpy(data, (KByte*)value.data, bufferLength);
-      #endif
+      interop_memcpy(data, bufferLength, (KByte*)value.data, bufferLength);
       env->UnpinByteArray(array);
       value.dispose(value.data, bufferLength);
       return array;

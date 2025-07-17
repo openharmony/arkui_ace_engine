@@ -43,11 +43,11 @@ export class Resource_serializer {
         let value_params_type : int32 = RuntimeType.UNDEFINED
         value_params_type = runtimeType(value_params)
         valueSerializer.writeInt8((value_params_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_params_type)) {
+        if ((value_params_type) != (RuntimeType.UNDEFINED)) {
             const value_params_value  = value_params!
             valueSerializer.writeInt32((value_params_value.length).toInt())
-            for (let i = 0; i < value_params_value.length; i++) {
-                const value_params_value_element : string = value_params_value[i]
+            for (let value_params_value_counter_i = 0; value_params_value_counter_i < value_params_value.length; value_params_value_counter_i++) {
+                const value_params_value_element : string = value_params_value[value_params_value_counter_i]
                 valueSerializer.writeString(value_params_value_element)
             }
         }
@@ -55,7 +55,7 @@ export class Resource_serializer {
         let value_type_type : int32 = RuntimeType.UNDEFINED
         value_type_type = runtimeType(value_type)
         valueSerializer.writeInt8((value_type_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type_type)) {
+        if ((value_type_type) != (RuntimeType.UNDEFINED)) {
             const value_type_value  = value_type!
             valueSerializer.writeNumber(value_type_value)
         }
@@ -67,7 +67,7 @@ export class Resource_serializer {
         const id_result : number = (valueDeserializer.readNumber() as number)
         const params_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let params_buf : Array<string> | undefined
-        if ((RuntimeType.UNDEFINED) != (params_buf_runtimeType))
+        if ((params_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const params_buf__length : int32 = valueDeserializer.readInt32()
             let params_buf_ : Array<string> = new Array<string>(params_buf__length)
@@ -79,7 +79,7 @@ export class Resource_serializer {
         const params_result : Array<string> | undefined = params_buf
         const type_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let type_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (type_buf_runtimeType))
+        if ((type_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             type_buf = (valueDeserializer.readNumber() as number)
         }

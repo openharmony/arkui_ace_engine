@@ -216,7 +216,7 @@ export class BadgeStyle_serializer {
         let value_color_type : int32 = RuntimeType.UNDEFINED
         value_color_type = runtimeType(value_color)
         valueSerializer.writeInt8((value_color_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_color_type)) {
+        if ((value_color_type) != (RuntimeType.UNDEFINED)) {
             const value_color_value  = value_color!
             let value_color_value_type : int32 = RuntimeType.UNDEFINED
             value_color_value_type = runtimeType(value_color_value)
@@ -245,7 +245,7 @@ export class BadgeStyle_serializer {
         let value_fontSize_type : int32 = RuntimeType.UNDEFINED
         value_fontSize_type = runtimeType(value_fontSize)
         valueSerializer.writeInt8((value_fontSize_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_fontSize_type)) {
+        if ((value_fontSize_type) != (RuntimeType.UNDEFINED)) {
             const value_fontSize_value  = value_fontSize!
             let value_fontSize_value_type : int32 = RuntimeType.UNDEFINED
             value_fontSize_value_type = runtimeType(value_fontSize_value)
@@ -275,7 +275,7 @@ export class BadgeStyle_serializer {
         let value_badgeSize_type : int32 = RuntimeType.UNDEFINED
         value_badgeSize_type = runtimeType(value_badgeSize)
         valueSerializer.writeInt8((value_badgeSize_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_badgeSize_type)) {
+        if ((value_badgeSize_type) != (RuntimeType.UNDEFINED)) {
             const value_badgeSize_value  = value_badgeSize!
             let value_badgeSize_value_type : int32 = RuntimeType.UNDEFINED
             value_badgeSize_value_type = runtimeType(value_badgeSize_value)
@@ -305,7 +305,7 @@ export class BadgeStyle_serializer {
         let value_badgeColor_type : int32 = RuntimeType.UNDEFINED
         value_badgeColor_type = runtimeType(value_badgeColor)
         valueSerializer.writeInt8((value_badgeColor_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_badgeColor_type)) {
+        if ((value_badgeColor_type) != (RuntimeType.UNDEFINED)) {
             const value_badgeColor_value  = value_badgeColor!
             let value_badgeColor_value_type : int32 = RuntimeType.UNDEFINED
             value_badgeColor_value_type = runtimeType(value_badgeColor_value)
@@ -334,7 +334,7 @@ export class BadgeStyle_serializer {
         let value_borderColor_type : int32 = RuntimeType.UNDEFINED
         value_borderColor_type = runtimeType(value_borderColor)
         valueSerializer.writeInt8((value_borderColor_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_borderColor_type)) {
+        if ((value_borderColor_type) != (RuntimeType.UNDEFINED)) {
             const value_borderColor_value  = value_borderColor!
             let value_borderColor_value_type : int32 = RuntimeType.UNDEFINED
             value_borderColor_value_type = runtimeType(value_borderColor_value)
@@ -363,7 +363,7 @@ export class BadgeStyle_serializer {
         let value_borderWidth_type : int32 = RuntimeType.UNDEFINED
         value_borderWidth_type = runtimeType(value_borderWidth)
         valueSerializer.writeInt8((value_borderWidth_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_borderWidth_type)) {
+        if ((value_borderWidth_type) != (RuntimeType.UNDEFINED)) {
             const value_borderWidth_value  = value_borderWidth!
             let value_borderWidth_value_type : int32 = RuntimeType.UNDEFINED
             value_borderWidth_value_type = runtimeType(value_borderWidth_value)
@@ -387,7 +387,7 @@ export class BadgeStyle_serializer {
         let value_fontWeight_type : int32 = RuntimeType.UNDEFINED
         value_fontWeight_type = runtimeType(value_fontWeight)
         valueSerializer.writeInt8((value_fontWeight_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_fontWeight_type)) {
+        if ((value_fontWeight_type) != (RuntimeType.UNDEFINED)) {
             const value_fontWeight_value  = value_fontWeight!
             let value_fontWeight_value_type : int32 = RuntimeType.UNDEFINED
             value_fontWeight_value_type = runtimeType(value_fontWeight_value)
@@ -423,7 +423,7 @@ export class BadgeStyle_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const color_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let color_buf : ResourceColor | undefined
-        if ((RuntimeType.UNDEFINED) != (color_buf_runtimeType))
+        if ((color_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const color_buf__selector : int32 = valueDeserializer.readInt8()
             let color_buf_ : Color | number | string | Resource | undefined
@@ -447,7 +447,7 @@ export class BadgeStyle_serializer {
         const color_result : ResourceColor | undefined = color_buf
         const fontSize_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let fontSize_buf : number | ResourceStr | undefined
-        if ((RuntimeType.UNDEFINED) != (fontSize_buf_runtimeType))
+        if ((fontSize_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const fontSize_buf__selector : int32 = valueDeserializer.readInt8()
             let fontSize_buf_ : number | ResourceStr | undefined
@@ -476,7 +476,7 @@ export class BadgeStyle_serializer {
         const fontSize_result : number | ResourceStr | undefined = fontSize_buf
         const badgeSize_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let badgeSize_buf : number | ResourceStr | undefined
-        if ((RuntimeType.UNDEFINED) != (badgeSize_buf_runtimeType))
+        if ((badgeSize_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const badgeSize_buf__selector : int32 = valueDeserializer.readInt8()
             let badgeSize_buf_ : number | ResourceStr | undefined
@@ -505,7 +505,7 @@ export class BadgeStyle_serializer {
         const badgeSize_result : number | ResourceStr | undefined = badgeSize_buf
         const badgeColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let badgeColor_buf : ResourceColor | undefined
-        if ((RuntimeType.UNDEFINED) != (badgeColor_buf_runtimeType))
+        if ((badgeColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const badgeColor_buf__selector : int32 = valueDeserializer.readInt8()
             let badgeColor_buf_ : Color | number | string | Resource | undefined
@@ -529,7 +529,7 @@ export class BadgeStyle_serializer {
         const badgeColor_result : ResourceColor | undefined = badgeColor_buf
         const borderColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let borderColor_buf : ResourceColor | undefined
-        if ((RuntimeType.UNDEFINED) != (borderColor_buf_runtimeType))
+        if ((borderColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const borderColor_buf__selector : int32 = valueDeserializer.readInt8()
             let borderColor_buf_ : Color | number | string | Resource | undefined
@@ -553,7 +553,7 @@ export class BadgeStyle_serializer {
         const borderColor_result : ResourceColor | undefined = borderColor_buf
         const borderWidth_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let borderWidth_buf : Length | undefined
-        if ((RuntimeType.UNDEFINED) != (borderWidth_buf_runtimeType))
+        if ((borderWidth_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const borderWidth_buf__selector : int32 = valueDeserializer.readInt8()
             let borderWidth_buf_ : string | number | Resource | undefined
@@ -574,7 +574,7 @@ export class BadgeStyle_serializer {
         const borderWidth_result : Length | undefined = borderWidth_buf
         const fontWeight_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let fontWeight_buf : number | FontWeight | ResourceStr | undefined
-        if ((RuntimeType.UNDEFINED) != (fontWeight_buf_runtimeType))
+        if ((fontWeight_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const fontWeight_buf__selector : int32 = valueDeserializer.readInt8()
             let fontWeight_buf_ : number | FontWeight | ResourceStr | undefined
@@ -615,7 +615,7 @@ export class BadgeParamWithNumber_serializer {
         let value_position_type : int32 = RuntimeType.UNDEFINED
         value_position_type = runtimeType(value_position)
         valueSerializer.writeInt8((value_position_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_position_type)) {
+        if ((value_position_type) != (RuntimeType.UNDEFINED)) {
             const value_position_value  = value_position!
             let value_position_value_type : int32 = RuntimeType.UNDEFINED
             value_position_value_type = runtimeType(value_position_value)
@@ -638,7 +638,7 @@ export class BadgeParamWithNumber_serializer {
         let value_maxCount_type : int32 = RuntimeType.UNDEFINED
         value_maxCount_type = runtimeType(value_maxCount)
         valueSerializer.writeInt8((value_maxCount_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_maxCount_type)) {
+        if ((value_maxCount_type) != (RuntimeType.UNDEFINED)) {
             const value_maxCount_value  = value_maxCount!
             valueSerializer.writeNumber(value_maxCount_value)
         }
@@ -647,7 +647,7 @@ export class BadgeParamWithNumber_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const position_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let position_buf : BadgePosition | Position | undefined
-        if ((RuntimeType.UNDEFINED) != (position_buf_runtimeType))
+        if ((position_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const position_buf__selector : int32 = valueDeserializer.readInt8()
             let position_buf_ : BadgePosition | Position | undefined
@@ -667,7 +667,7 @@ export class BadgeParamWithNumber_serializer {
         const count_result : number = (valueDeserializer.readNumber() as number)
         const maxCount_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let maxCount_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (maxCount_buf_runtimeType))
+        if ((maxCount_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             maxCount_buf = (valueDeserializer.readNumber() as number)
         }
@@ -683,7 +683,7 @@ export class BadgeParamWithString_serializer {
         let value_position_type : int32 = RuntimeType.UNDEFINED
         value_position_type = runtimeType(value_position)
         valueSerializer.writeInt8((value_position_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_position_type)) {
+        if ((value_position_type) != (RuntimeType.UNDEFINED)) {
             const value_position_value  = value_position!
             let value_position_value_type : int32 = RuntimeType.UNDEFINED
             value_position_value_type = runtimeType(value_position_value)
@@ -718,7 +718,7 @@ export class BadgeParamWithString_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const position_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let position_buf : BadgePosition | Position | undefined
-        if ((RuntimeType.UNDEFINED) != (position_buf_runtimeType))
+        if ((position_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const position_buf__selector : int32 = valueDeserializer.readInt8()
             let position_buf_ : BadgePosition | Position | undefined

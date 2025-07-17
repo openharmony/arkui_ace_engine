@@ -61,18 +61,6 @@ function isKoalaWorkspace() {
     return process.env.KOALA_WORKSPACE == "1"
 }
 
-/**
- * TODO: migrate imports to runtime
- * @deprecated
- */
-export function getCompatPackage(): string {
-    if (isKoalaWorkspace()) {
-        return '@koalaui/compat'
-    } else {
-        return 'arkui.stateManagement.runtime'
-    }
-}
-
 export function getRuntimePackage(): string {
     if (isKoalaWorkspace()) {
         return '@koalaui/runtime'

@@ -21,18 +21,13 @@
 #include <cstdarg>
 #include <memory>
 #include "oh_sk_log.h"
+#include "interop-utils.h"
 
 static const char* KOALAUI_OHOS_LOG_ROOT = "/data/storage/el2/base/files/logs";
 
-#ifdef __STDC_LIB_EXT1__
 #define APPLY_LOG_FILE_PATTERN(buf, bufLen, t, ms, pid) \
-    sprintf_s(buf, bufLen, "%s/%d_%d_%d_%lld.pid%d.log", \
+    interop_sprintf(buf, bufLen, "%s/%d_%d_%d_%lld.pid%d.log", \
     KOALAUI_OHOS_LOG_ROOT, (t).tm_year + 1900, (t).tm_mon + 1, (t).tm_mday, (ms).tv_sec, pid)
-#else
-#define APPLY_LOG_FILE_PATTERN(buf, bufLen, t, ms, pid) \
-    sprintf(buf, "%s/%d_%d_%d_%lld.pid%d.log", \
-    KOALAUI_OHOS_LOG_ROOT, (t).tm_year + 1900, (t).tm_mon + 1, (t).tm_mday, (ms).tv_sec, pid)
-#endif
 
 const char* oh_sk_log_type_str(oh_sk_log_type type) {
     switch (type) {
@@ -52,7 +47,7 @@ void oh_sk_file_log(oh_sk_log_type type, const char* msg, ...) {
 
     static char* path = nullptr;
     if (!path) {
-        size_t len = strlen(KOALAUI_OHOS_LOG_ROOT) + 100;
+        size_t len = interop_strlen(KOALAUI_OHOS_LOG_ROOT) + 100;
         path = new char[len];
         APPLY_LOG_FILE_PATTERN(path, len, lt, ms, getpid());
         mkdir(KOALAUI_OHOS_LOG_ROOT, 0777);

@@ -34,7 +34,7 @@ export function updateMethodDefinition(
         isSameNativeObject(key, original.name) &&
         isSameNativeObject(value, original.scriptFunction) &&
         isSameNativeObject(modifiers, original.modifiers)
-        /* TODO: no getter for isComputed */
+        /* Improve: no getter for isComputed */
     ) {
         return original;
     }

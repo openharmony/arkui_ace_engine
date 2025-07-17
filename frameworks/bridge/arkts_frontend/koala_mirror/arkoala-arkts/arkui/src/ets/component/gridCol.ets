@@ -44,7 +44,7 @@ export class ArkGridColPeer extends ArkCommonMethodPeer {
         let option_type : int32 = RuntimeType.UNDEFINED
         option_type = runtimeType(option)
         thisSerializer.writeInt8((option_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (option_type)) {
+        if ((option_type) != (RuntimeType.UNDEFINED)) {
             const option_value  = option!
             GridColOptions_serializer.write(thisSerializer, option_value)
         }
@@ -56,7 +56,7 @@ export class ArkGridColPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -79,7 +79,7 @@ export class ArkGridColPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -102,7 +102,7 @@ export class ArkGridColPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -299,7 +299,7 @@ export class GridColColumnOption_serializer {
         let value_xs_type : int32 = RuntimeType.UNDEFINED
         value_xs_type = runtimeType(value_xs)
         valueSerializer.writeInt8((value_xs_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_xs_type)) {
+        if ((value_xs_type) != (RuntimeType.UNDEFINED)) {
             const value_xs_value  = value_xs!
             valueSerializer.writeNumber(value_xs_value)
         }
@@ -307,7 +307,7 @@ export class GridColColumnOption_serializer {
         let value_sm_type : int32 = RuntimeType.UNDEFINED
         value_sm_type = runtimeType(value_sm)
         valueSerializer.writeInt8((value_sm_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_sm_type)) {
+        if ((value_sm_type) != (RuntimeType.UNDEFINED)) {
             const value_sm_value  = value_sm!
             valueSerializer.writeNumber(value_sm_value)
         }
@@ -315,7 +315,7 @@ export class GridColColumnOption_serializer {
         let value_md_type : int32 = RuntimeType.UNDEFINED
         value_md_type = runtimeType(value_md)
         valueSerializer.writeInt8((value_md_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_md_type)) {
+        if ((value_md_type) != (RuntimeType.UNDEFINED)) {
             const value_md_value  = value_md!
             valueSerializer.writeNumber(value_md_value)
         }
@@ -323,7 +323,7 @@ export class GridColColumnOption_serializer {
         let value_lg_type : int32 = RuntimeType.UNDEFINED
         value_lg_type = runtimeType(value_lg)
         valueSerializer.writeInt8((value_lg_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_lg_type)) {
+        if ((value_lg_type) != (RuntimeType.UNDEFINED)) {
             const value_lg_value  = value_lg!
             valueSerializer.writeNumber(value_lg_value)
         }
@@ -331,7 +331,7 @@ export class GridColColumnOption_serializer {
         let value_xl_type : int32 = RuntimeType.UNDEFINED
         value_xl_type = runtimeType(value_xl)
         valueSerializer.writeInt8((value_xl_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_xl_type)) {
+        if ((value_xl_type) != (RuntimeType.UNDEFINED)) {
             const value_xl_value  = value_xl!
             valueSerializer.writeNumber(value_xl_value)
         }
@@ -339,7 +339,7 @@ export class GridColColumnOption_serializer {
         let value_xxl_type : int32 = RuntimeType.UNDEFINED
         value_xxl_type = runtimeType(value_xxl)
         valueSerializer.writeInt8((value_xxl_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_xxl_type)) {
+        if ((value_xxl_type) != (RuntimeType.UNDEFINED)) {
             const value_xxl_value  = value_xxl!
             valueSerializer.writeNumber(value_xxl_value)
         }
@@ -348,42 +348,42 @@ export class GridColColumnOption_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const xs_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let xs_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (xs_buf_runtimeType))
+        if ((xs_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             xs_buf = (valueDeserializer.readNumber() as number)
         }
         const xs_result : number | undefined = xs_buf
         const sm_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let sm_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (sm_buf_runtimeType))
+        if ((sm_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             sm_buf = (valueDeserializer.readNumber() as number)
         }
         const sm_result : number | undefined = sm_buf
         const md_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let md_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (md_buf_runtimeType))
+        if ((md_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             md_buf = (valueDeserializer.readNumber() as number)
         }
         const md_result : number | undefined = md_buf
         const lg_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let lg_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (lg_buf_runtimeType))
+        if ((lg_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             lg_buf = (valueDeserializer.readNumber() as number)
         }
         const lg_result : number | undefined = lg_buf
         const xl_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let xl_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (xl_buf_runtimeType))
+        if ((xl_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             xl_buf = (valueDeserializer.readNumber() as number)
         }
         const xl_result : number | undefined = xl_buf
         const xxl_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let xxl_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (xxl_buf_runtimeType))
+        if ((xxl_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             xxl_buf = (valueDeserializer.readNumber() as number)
         }
@@ -399,7 +399,7 @@ export class GridColOptions_serializer {
         let value_span_type : int32 = RuntimeType.UNDEFINED
         value_span_type = runtimeType(value_span)
         valueSerializer.writeInt8((value_span_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_span_type)) {
+        if ((value_span_type) != (RuntimeType.UNDEFINED)) {
             const value_span_value  = value_span!
             let value_span_value_type : int32 = RuntimeType.UNDEFINED
             value_span_value_type = runtimeType(value_span_value)
@@ -418,7 +418,7 @@ export class GridColOptions_serializer {
         let value_offset_type : int32 = RuntimeType.UNDEFINED
         value_offset_type = runtimeType(value_offset)
         valueSerializer.writeInt8((value_offset_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_offset_type)) {
+        if ((value_offset_type) != (RuntimeType.UNDEFINED)) {
             const value_offset_value  = value_offset!
             let value_offset_value_type : int32 = RuntimeType.UNDEFINED
             value_offset_value_type = runtimeType(value_offset_value)
@@ -437,7 +437,7 @@ export class GridColOptions_serializer {
         let value_order_type : int32 = RuntimeType.UNDEFINED
         value_order_type = runtimeType(value_order)
         valueSerializer.writeInt8((value_order_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_order_type)) {
+        if ((value_order_type) != (RuntimeType.UNDEFINED)) {
             const value_order_value  = value_order!
             let value_order_value_type : int32 = RuntimeType.UNDEFINED
             value_order_value_type = runtimeType(value_order_value)
@@ -457,7 +457,7 @@ export class GridColOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const span_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let span_buf : number | GridColColumnOption | undefined
-        if ((RuntimeType.UNDEFINED) != (span_buf_runtimeType))
+        if ((span_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const span_buf__selector : int32 = valueDeserializer.readInt8()
             let span_buf_ : number | GridColColumnOption | undefined
@@ -475,7 +475,7 @@ export class GridColOptions_serializer {
         const span_result : number | GridColColumnOption | undefined = span_buf
         const offset_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let offset_buf : number | GridColColumnOption | undefined
-        if ((RuntimeType.UNDEFINED) != (offset_buf_runtimeType))
+        if ((offset_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const offset_buf__selector : int32 = valueDeserializer.readInt8()
             let offset_buf_ : number | GridColColumnOption | undefined
@@ -493,7 +493,7 @@ export class GridColOptions_serializer {
         const offset_result : number | GridColColumnOption | undefined = offset_buf
         const order_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let order_buf : number | GridColColumnOption | undefined
-        if ((RuntimeType.UNDEFINED) != (order_buf_runtimeType))
+        if ((order_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const order_buf__selector : int32 = valueDeserializer.readInt8()
             let order_buf_ : number | GridColColumnOption | undefined

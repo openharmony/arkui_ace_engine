@@ -179,14 +179,14 @@ export class Matrix2D implements MaterializedBase {
         let rx_type : int32 = RuntimeType.UNDEFINED
         rx_type = runtimeType(rx)
         thisSerializer.writeInt8((rx_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (rx_type)) {
+        if ((rx_type) != (RuntimeType.UNDEFINED)) {
             const rx_value  = rx!
             thisSerializer.writeNumber(rx_value)
         }
         let ry_type : int32 = RuntimeType.UNDEFINED
         ry_type = runtimeType(ry)
         thisSerializer.writeInt8((ry_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (ry_type)) {
+        if ((ry_type) != (RuntimeType.UNDEFINED)) {
             const ry_value  = ry!
             thisSerializer.writeNumber(ry_value)
         }
@@ -200,14 +200,14 @@ export class Matrix2D implements MaterializedBase {
         let tx_type : int32 = RuntimeType.UNDEFINED
         tx_type = runtimeType(tx)
         thisSerializer.writeInt8((tx_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (tx_type)) {
+        if ((tx_type) != (RuntimeType.UNDEFINED)) {
             const tx_value  = tx!
             thisSerializer.writeNumber(tx_value)
         }
         let ty_type : int32 = RuntimeType.UNDEFINED
         ty_type = runtimeType(ty)
         thisSerializer.writeInt8((ty_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (ty_type)) {
+        if ((ty_type) != (RuntimeType.UNDEFINED)) {
             const ty_value  = ty!
             thisSerializer.writeNumber(ty_value)
         }
@@ -221,14 +221,14 @@ export class Matrix2D implements MaterializedBase {
         let sx_type : int32 = RuntimeType.UNDEFINED
         sx_type = runtimeType(sx)
         thisSerializer.writeInt8((sx_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (sx_type)) {
+        if ((sx_type) != (RuntimeType.UNDEFINED)) {
             const sx_value  = sx!
             thisSerializer.writeNumber(sx_value)
         }
         let sy_type : int32 = RuntimeType.UNDEFINED
         sy_type = runtimeType(sy)
         thisSerializer.writeInt8((sy_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (sy_type)) {
+        if ((sy_type) != (RuntimeType.UNDEFINED)) {
             const sy_value  = sy!
             thisSerializer.writeNumber(sy_value)
         }
@@ -242,7 +242,7 @@ export class Matrix2D implements MaterializedBase {
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : number | undefined
-        if ((RuntimeType.UNDEFINED) != (buffer_runtimeType))
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
         {
             buffer = (retvalDeserializer.readNumber() as number)
         }
@@ -254,7 +254,7 @@ export class Matrix2D implements MaterializedBase {
         let scaleX_type : int32 = RuntimeType.UNDEFINED
         scaleX_type = runtimeType(scaleX)
         thisSerializer.writeInt8((scaleX_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (scaleX_type)) {
+        if ((scaleX_type) != (RuntimeType.UNDEFINED)) {
             const scaleX_value  = scaleX!
             thisSerializer.writeNumber(scaleX_value)
         }
@@ -266,7 +266,7 @@ export class Matrix2D implements MaterializedBase {
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : number | undefined
-        if ((RuntimeType.UNDEFINED) != (buffer_runtimeType))
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
         {
             buffer = (retvalDeserializer.readNumber() as number)
         }
@@ -278,7 +278,7 @@ export class Matrix2D implements MaterializedBase {
         let rotateY_type : int32 = RuntimeType.UNDEFINED
         rotateY_type = runtimeType(rotateY)
         thisSerializer.writeInt8((rotateY_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (rotateY_type)) {
+        if ((rotateY_type) != (RuntimeType.UNDEFINED)) {
             const rotateY_value  = rotateY!
             thisSerializer.writeNumber(rotateY_value)
         }
@@ -290,7 +290,7 @@ export class Matrix2D implements MaterializedBase {
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : number | undefined
-        if ((RuntimeType.UNDEFINED) != (buffer_runtimeType))
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
         {
             buffer = (retvalDeserializer.readNumber() as number)
         }
@@ -302,7 +302,7 @@ export class Matrix2D implements MaterializedBase {
         let rotateX_type : int32 = RuntimeType.UNDEFINED
         rotateX_type = runtimeType(rotateX)
         thisSerializer.writeInt8((rotateX_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (rotateX_type)) {
+        if ((rotateX_type) != (RuntimeType.UNDEFINED)) {
             const rotateX_value  = rotateX!
             thisSerializer.writeNumber(rotateX_value)
         }
@@ -314,7 +314,7 @@ export class Matrix2D implements MaterializedBase {
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : number | undefined
-        if ((RuntimeType.UNDEFINED) != (buffer_runtimeType))
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
         {
             buffer = (retvalDeserializer.readNumber() as number)
         }
@@ -326,7 +326,7 @@ export class Matrix2D implements MaterializedBase {
         let scaleY_type : int32 = RuntimeType.UNDEFINED
         scaleY_type = runtimeType(scaleY)
         thisSerializer.writeInt8((scaleY_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (scaleY_type)) {
+        if ((scaleY_type) != (RuntimeType.UNDEFINED)) {
             const scaleY_value  = scaleY!
             thisSerializer.writeNumber(scaleY_value)
         }
@@ -338,7 +338,7 @@ export class Matrix2D implements MaterializedBase {
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : number | undefined
-        if ((RuntimeType.UNDEFINED) != (buffer_runtimeType))
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
         {
             buffer = (retvalDeserializer.readNumber() as number)
         }
@@ -350,7 +350,7 @@ export class Matrix2D implements MaterializedBase {
         let translateX_type : int32 = RuntimeType.UNDEFINED
         translateX_type = runtimeType(translateX)
         thisSerializer.writeInt8((translateX_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (translateX_type)) {
+        if ((translateX_type) != (RuntimeType.UNDEFINED)) {
             const translateX_value  = translateX!
             thisSerializer.writeNumber(translateX_value)
         }
@@ -362,7 +362,7 @@ export class Matrix2D implements MaterializedBase {
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : number | undefined
-        if ((RuntimeType.UNDEFINED) != (buffer_runtimeType))
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
         {
             buffer = (retvalDeserializer.readNumber() as number)
         }
@@ -374,7 +374,7 @@ export class Matrix2D implements MaterializedBase {
         let translateY_type : int32 = RuntimeType.UNDEFINED
         translateY_type = runtimeType(translateY)
         thisSerializer.writeInt8((translateY_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (translateY_type)) {
+        if ((translateY_type) != (RuntimeType.UNDEFINED)) {
             const translateY_value  = translateY!
             thisSerializer.writeNumber(translateY_value)
         }

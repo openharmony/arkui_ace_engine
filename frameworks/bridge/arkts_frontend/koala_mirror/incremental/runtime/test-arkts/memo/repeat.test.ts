@@ -15,7 +15,7 @@
 
 // TODO: the real chai exports 'assert', but 'assert' is still a keyword in ArkTS
 import { Assert, suite, test } from "@koalaui/harness"
-import { asArray, int32, KoalaCallsiteKey, toKoalaCallsiteKey as key } from "@koalaui/common"
+import { asArray, int32, KoalaCallsiteKey, hashCodeFromString as key } from "@koalaui/common"
 import {
     GlobalStateManager,
     Repeat,

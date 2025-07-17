@@ -30,7 +30,7 @@ export function updateETSImportDeclaration(
         isSameNativeObject(specifiers, original.specifiers) &&
         isSameNativeObject(importKind, Number(original.isTypeKind))
     ) {
-        /* TODO: probably should set importMetadata, but no getter provided yet */
+        /* Improve: probably should set importMetadata, but no getter provided yet */
         return original;
     }
 

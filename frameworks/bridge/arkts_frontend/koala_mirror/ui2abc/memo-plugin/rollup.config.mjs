@@ -97,7 +97,7 @@ function APACHE_LICENSE_HEADER() {
 
 /** @returns {import("rollup").OutputPlugin} */
 function replaceLibarktsImport() {
-    const REQUIRE_PATTERN = `require("@koalaui/libarkts");`
+    const REQUIRE_PATTERN = `require('@koalaui/libarkts');`
     return {
         name: "replace-librkts-import",
         generateBundle(options, bundle) {

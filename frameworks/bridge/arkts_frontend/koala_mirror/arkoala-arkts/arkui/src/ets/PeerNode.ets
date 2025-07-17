@@ -142,7 +142,7 @@ export class PeerNode extends IncrementalNode {
         this.peer = NativePeerNode.create(this, peerPtr, flags)
         PeerNode.peerNodeRawTail.push(this)
         this.onChildInserted = (child: IncrementalNode) => {
-            // TODO: rework to avoid search
+            // Improve: rework to avoid search
             let peer = findPeerNode(child)
             if (peer) {
                 peer._reusable ? peer!.onReuse() : peer._reusable = true // becomes reusable after initial mount

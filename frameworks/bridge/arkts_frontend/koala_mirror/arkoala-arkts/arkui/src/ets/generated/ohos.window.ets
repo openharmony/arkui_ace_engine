@@ -30,7 +30,7 @@ export class window_SystemBarStyle_serializer {
         let value_statusBarContentColor_type : int32 = RuntimeType.UNDEFINED
         value_statusBarContentColor_type = runtimeType(value_statusBarContentColor)
         valueSerializer.writeInt8((value_statusBarContentColor_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_statusBarContentColor_type)) {
+        if ((value_statusBarContentColor_type) != (RuntimeType.UNDEFINED)) {
             const value_statusBarContentColor_value  = value_statusBarContentColor!
             valueSerializer.writeString(value_statusBarContentColor_value)
         }
@@ -39,7 +39,7 @@ export class window_SystemBarStyle_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const statusBarContentColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let statusBarContentColor_buf : string | undefined
-        if ((RuntimeType.UNDEFINED) != (statusBarContentColor_buf_runtimeType))
+        if ((statusBarContentColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             statusBarContentColor_buf = (valueDeserializer.readString() as string)
         }

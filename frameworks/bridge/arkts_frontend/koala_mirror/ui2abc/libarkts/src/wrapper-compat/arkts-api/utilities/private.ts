@@ -128,8 +128,8 @@ export function scriptFunctionHasBody(peer: KNativePointer): boolean {
     );
 }
 
-// TODO: remove this
-// TODO: update scopes and other data
+// Improve: remove this
+// Improve: update scopes and other data
 export function updatePeerByNode<T extends AstNode>(peer: KNativePointer, original: T | undefined): KNativePointer {
     if (peer === nullptr) {
         throwError('updatePeerByNode called on NULLPTR');
@@ -150,7 +150,7 @@ export function updatePeerByNode<T extends AstNode>(peer: KNativePointer, origin
     return peer;
 }
 
-// TODO: update scopes and other data
+// Improve: update scopes and other data
 export function updateNodeByNode<T extends AstNode>(node: T, original: AstNode): T {
     if (original.peer === nullptr) {
         throwError('update called on NULLPTR');

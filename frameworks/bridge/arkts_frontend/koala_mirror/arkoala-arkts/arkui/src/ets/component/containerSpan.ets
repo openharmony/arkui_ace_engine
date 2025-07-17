@@ -47,7 +47,7 @@ export class ArkContainerSpanPeer extends PeerNode {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             TextBackgroundStyle_serializer.write(thisSerializer, value_value)
         }

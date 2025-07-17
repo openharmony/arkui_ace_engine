@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { int32 } from "@koalaui/compat"
+import { int32 } from "@koalaui/common"
 
 /**
  * Adds statistics for constructing/disposing of the TreeNode instances.
@@ -21,29 +21,29 @@ import { int32 } from "@koalaui/compat"
  */
 const DEBUG_WITH_NODE_STATS = false
 
-export class KoalaProfiler {
+export class RuntimeProfiler {
     private static readonly map: Map<int32, Set<Object> > | undefined = DEBUG_WITH_NODE_STATS
         ? new Map<int32, Set<Object>>()
         : undefined
 
     static nodeCreated(nodeType: int32, node: Object) {
-        if (KoalaProfiler.map === undefined) return
-        let set = KoalaProfiler.map!.get(nodeType)
+        if (RuntimeProfiler.map === undefined) return
+        let set = RuntimeProfiler.map!.get(nodeType)
         if (set === undefined) {
             set = new Set<Object>()
-            KoalaProfiler.map!.set(nodeType, set)
+            RuntimeProfiler.map!.set(nodeType, set)
         }
         set.add(node)
     }
 
     static nodeDisposed(nodeType: int32, node: Object) {
-        if (KoalaProfiler.map === undefined) return
-        let set = KoalaProfiler.map!.get(nodeType)
+        if (RuntimeProfiler.map === undefined) return
+        let set = RuntimeProfiler.map!.get(nodeType)
         if (set === undefined) throw new Error("node never existed")
         if (!set.delete(node)) console.log("node is already disposed")
     }
 
-    public static counters: KoalaProfiler | undefined = undefined
+    public static instance: RuntimeProfiler | undefined = undefined
 
     private invalidations = 0
     private computes = 0
@@ -73,15 +73,15 @@ export class KoalaProfiler {
     private computableValues = 0
 
     static enable() {
-        KoalaProfiler.counters = new KoalaProfiler()
+        RuntimeProfiler.instance = new RuntimeProfiler()
     }
 
     static disable() {
-        KoalaProfiler.counters = undefined
+        RuntimeProfiler.instance = undefined
     }
 
     static enabled(): boolean {
-        return KoalaProfiler.counters != undefined
+        return RuntimeProfiler.instance != undefined
     }
 
     reset() {
@@ -114,7 +114,7 @@ export class KoalaProfiler {
         if (this.layoutTime < layoutTime) this.layoutTime = layoutTime
         if (this.drawTime < drawTime) this.drawTime = drawTime
 
-        // TODO: OHOS does not properly handle \n in template literals
+        // Improve: OHOS does not properly handle \n in template literals
         const array = Array.of<string>(
             `invalidations: ${this.invalidations}`,
             `modified states: ${this.mutableStates}/${this.updatableStates} + ${this.computableValues}`,
@@ -131,7 +131,7 @@ export class KoalaProfiler {
             `layouts: ${this.layouts}`,
             `FPS: ${this.lastFPS}`,
         )
-        KoalaProfiler.map?.forEach((set:Set<Object>, kind:int32) => {
+        RuntimeProfiler.map?.forEach((set:Set<Object>, kind:int32) => {
             if (set.size > 0) array.push(kind + ":" + set.size)
         })
         return array.join("\n")

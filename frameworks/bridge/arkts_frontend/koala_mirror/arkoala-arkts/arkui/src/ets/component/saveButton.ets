@@ -56,7 +56,7 @@ export class ArkSaveButtonPeer extends ArkSecurityComponentMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -248,7 +248,7 @@ export class SaveButtonOptions_serializer {
         let value_icon_type : int32 = RuntimeType.UNDEFINED
         value_icon_type = runtimeType(value_icon)
         valueSerializer.writeInt8((value_icon_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_icon_type)) {
+        if ((value_icon_type) != (RuntimeType.UNDEFINED)) {
             const value_icon_value  = (value_icon as SaveIconStyle)
             valueSerializer.writeInt32(TypeChecker.SaveIconStyle_ToNumeric(value_icon_value))
         }
@@ -256,7 +256,7 @@ export class SaveButtonOptions_serializer {
         let value_text_type : int32 = RuntimeType.UNDEFINED
         value_text_type = runtimeType(value_text)
         valueSerializer.writeInt8((value_text_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_text_type)) {
+        if ((value_text_type) != (RuntimeType.UNDEFINED)) {
             const value_text_value  = (value_text as SaveDescription)
             valueSerializer.writeInt32(TypeChecker.SaveDescription_ToNumeric(value_text_value))
         }
@@ -264,7 +264,7 @@ export class SaveButtonOptions_serializer {
         let value_buttonType_type : int32 = RuntimeType.UNDEFINED
         value_buttonType_type = runtimeType(value_buttonType)
         valueSerializer.writeInt8((value_buttonType_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_buttonType_type)) {
+        if ((value_buttonType_type) != (RuntimeType.UNDEFINED)) {
             const value_buttonType_value  = (value_buttonType as ButtonType)
             valueSerializer.writeInt32(TypeChecker.ButtonType_ToNumeric(value_buttonType_value))
         }
@@ -273,21 +273,21 @@ export class SaveButtonOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const icon_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let icon_buf : SaveIconStyle | undefined
-        if ((RuntimeType.UNDEFINED) != (icon_buf_runtimeType))
+        if ((icon_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             icon_buf = TypeChecker.SaveIconStyle_FromNumeric(valueDeserializer.readInt32())
         }
         const icon_result : SaveIconStyle | undefined = icon_buf
         const text_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let text_buf : SaveDescription | undefined
-        if ((RuntimeType.UNDEFINED) != (text_buf_runtimeType))
+        if ((text_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             text_buf = TypeChecker.SaveDescription_FromNumeric(valueDeserializer.readInt32())
         }
         const text_result : SaveDescription | undefined = text_buf
         const buttonType_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let buttonType_buf : ButtonType | undefined
-        if ((RuntimeType.UNDEFINED) != (buttonType_buf_runtimeType))
+        if ((buttonType_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             buttonType_buf = TypeChecker.ButtonType_FromNumeric(valueDeserializer.readInt32())
         }

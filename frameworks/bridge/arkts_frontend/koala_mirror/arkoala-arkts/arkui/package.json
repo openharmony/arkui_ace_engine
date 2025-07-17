@@ -5,6 +5,7 @@
   "main": "build/ts/src/index.js",
   "types": "build/ts/src/index.d.ts",
   "scripts": {
+    "interface-sdk:download": "node scripts/download-interface-sdk.mjs",
     "clean": "rimraf build build-m3 build-m3-sdk build-m3-impl",
     "clean:arkui-no-common": "npm run clean",
     "build:arkui-no-common": "npm run build:m3:recheck",

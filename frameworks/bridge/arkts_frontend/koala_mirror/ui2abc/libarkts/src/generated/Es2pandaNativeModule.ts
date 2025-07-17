@@ -29,7 +29,7 @@ import {
     KLong
 } from "@koalaui/interop"
 
-// TODO: this type should be in interop
+// Improve: this type should be in interop
 export type KNativePointerArray = BigUint64Array
 
 export class Es2pandaNativeModule {

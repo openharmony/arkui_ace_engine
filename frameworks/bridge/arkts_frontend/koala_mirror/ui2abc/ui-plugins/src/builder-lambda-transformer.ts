@@ -116,7 +116,7 @@ export function builderLambdaFunctionName(node: arkts.CallExpression): string | 
     return builderLambdaArgumentName(annotation)
 }
 /*
- TODO: remove this once compiler is capable of inferring type on it's own
+ Improve: remove this once compiler is capable of inferring type on it's own
   whole function is a couple of hacks
  */
 function inferType(node: arkts.CallExpression): arkts.Identifier | undefined {
@@ -179,7 +179,7 @@ function builderLambdaCallee(name: string) {
     if (!name.includes('.')) {
         return arkts.factory.createIdentifier(name)
     }
-    // TODO: What are the restrictions on builderLambda name?
+    // Improve: What are the restrictions on builderLambda name?
     return arkts.factory.createMemberExpression(
         arkts.factory.createIdentifier(name.split('.')[0]),
         arkts.factory.createIdentifier(name.split('.')[1]),
@@ -290,7 +290,7 @@ function transformBuilderLambdaCall(resolver: StructsResolver | undefined, node:
     )
 }
 
-// TODO: for now it all works, but it is unclear
+// Improve: for now it all works, but it is unclear
 // if it will keep working under Recheck.
 // in theory we don't add new files to import here,
 // only the new names from the same file,
@@ -308,7 +308,7 @@ function transformETSImportDeclaration(resolver: StructsResolver | undefined, no
             if (scriptFunction) {
                 const target = builderLambdaTargetFunctionName(scriptFunction)
                 if (target) {
-                    // TODO: The type name here should not be explicitly manipulated
+                    // Improve: The type name here should not be explicitly manipulated
                     // but the type checker of the compiler is still incapable
                     // to infer the proper lambda argument types
                     additionalNames.push(uiAttributeName(name?.name!))
@@ -354,7 +354,7 @@ function createStyleParameter(
         arkts.factory.createETSPrimitiveType(arkts.Es2pandaPrimitiveType.PRIMITIVE_TYPE_VOID),
         false,
         arkts.Es2pandaScriptFunctionFlags.SCRIPT_FUNCTION_FLAGS_ARROW,
-        // TODO: get dealt with @memo on type of param in memo-plugin to put MEMO here
+        // Improve: get dealt with @memo on type of param in memo-plugin to put MEMO here
     )
 
     let parameter: arkts.ETSParameterExpression;

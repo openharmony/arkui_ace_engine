@@ -29,7 +29,7 @@ export function updateVariableDeclarator(
     if (
         isSameNativeObject(name, original.name) &&
         isSameNativeObject(initializer, original.initializer)
-        /* TODO: no getter for flag */
+        /* Improve: no getter for flag */
     ) {
         return original;
     }

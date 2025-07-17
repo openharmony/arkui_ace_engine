@@ -59,7 +59,7 @@ export class CalendarPickerDialog implements MaterializedBase {
         let options_type : int32 = RuntimeType.UNDEFINED
         options_type = runtimeType(options)
         thisSerializer.writeInt8((options_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (options_type)) {
+        if ((options_type) != (RuntimeType.UNDEFINED)) {
             const options_value  = options!
             CalendarDialogOptions_serializer.write(thisSerializer, options_value)
         }
@@ -88,7 +88,7 @@ export class ArkCalendarPickerPeer extends ArkCommonMethodPeer {
         let options_type : int32 = RuntimeType.UNDEFINED
         options_type = runtimeType(options)
         thisSerializer.writeInt8((options_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (options_type)) {
+        if ((options_type) != (RuntimeType.UNDEFINED)) {
             const options_value  = options!
             CalendarOptions_serializer.write(thisSerializer, options_value)
         }
@@ -100,7 +100,7 @@ export class ArkCalendarPickerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             PickerTextStyle_serializer.write(thisSerializer, value_value)
         }
@@ -112,7 +112,7 @@ export class ArkCalendarPickerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -124,7 +124,7 @@ export class ArkCalendarPickerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -136,14 +136,14 @@ export class ArkCalendarPickerPeer extends ArkCommonMethodPeer {
         let alignType_type : int32 = RuntimeType.UNDEFINED
         alignType_type = runtimeType(alignType)
         thisSerializer.writeInt8((alignType_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (alignType_type)) {
+        if ((alignType_type) != (RuntimeType.UNDEFINED)) {
             const alignType_value  = (alignType as CalendarAlign)
             thisSerializer.writeInt32(TypeChecker.CalendarAlign_ToNumeric(alignType_value))
         }
         let offset_type : int32 = RuntimeType.UNDEFINED
         offset_type = runtimeType(offset)
         thisSerializer.writeInt8((offset_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (offset_type)) {
+        if ((offset_type) != (RuntimeType.UNDEFINED)) {
             const offset_value  = offset!
             Offset_serializer.write(thisSerializer, offset_value)
         }
@@ -382,7 +382,7 @@ export class CalendarOptions_serializer {
         let value_hintRadius_type : int32 = RuntimeType.UNDEFINED
         value_hintRadius_type = runtimeType(value_hintRadius)
         valueSerializer.writeInt8((value_hintRadius_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_hintRadius_type)) {
+        if ((value_hintRadius_type) != (RuntimeType.UNDEFINED)) {
             const value_hintRadius_value  = value_hintRadius!
             let value_hintRadius_value_type : int32 = RuntimeType.UNDEFINED
             value_hintRadius_value_type = runtimeType(value_hintRadius_value)
@@ -401,7 +401,7 @@ export class CalendarOptions_serializer {
         let value_selected_type : int32 = RuntimeType.UNDEFINED
         value_selected_type = runtimeType(value_selected)
         valueSerializer.writeInt8((value_selected_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_selected_type)) {
+        if ((value_selected_type) != (RuntimeType.UNDEFINED)) {
             const value_selected_value  = value_selected!
             valueSerializer.writeInt64(value_selected_value.getTime().toLong())
         }
@@ -409,7 +409,7 @@ export class CalendarOptions_serializer {
         let value_start_type : int32 = RuntimeType.UNDEFINED
         value_start_type = runtimeType(value_start)
         valueSerializer.writeInt8((value_start_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_start_type)) {
+        if ((value_start_type) != (RuntimeType.UNDEFINED)) {
             const value_start_value  = value_start!
             valueSerializer.writeInt64(value_start_value.getTime().toLong())
         }
@@ -417,7 +417,7 @@ export class CalendarOptions_serializer {
         let value_end_type : int32 = RuntimeType.UNDEFINED
         value_end_type = runtimeType(value_end)
         valueSerializer.writeInt8((value_end_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_end_type)) {
+        if ((value_end_type) != (RuntimeType.UNDEFINED)) {
             const value_end_value  = value_end!
             valueSerializer.writeInt64(value_end_value.getTime().toLong())
         }
@@ -425,11 +425,11 @@ export class CalendarOptions_serializer {
         let value_disabledDateRange_type : int32 = RuntimeType.UNDEFINED
         value_disabledDateRange_type = runtimeType(value_disabledDateRange)
         valueSerializer.writeInt8((value_disabledDateRange_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_disabledDateRange_type)) {
+        if ((value_disabledDateRange_type) != (RuntimeType.UNDEFINED)) {
             const value_disabledDateRange_value  = value_disabledDateRange!
             valueSerializer.writeInt32((value_disabledDateRange_value.length).toInt())
-            for (let i = 0; i < value_disabledDateRange_value.length; i++) {
-                const value_disabledDateRange_value_element : DateRange = value_disabledDateRange_value[i]
+            for (let value_disabledDateRange_value_counter_i = 0; value_disabledDateRange_value_counter_i < value_disabledDateRange_value.length; value_disabledDateRange_value_counter_i++) {
+                const value_disabledDateRange_value_element : DateRange = value_disabledDateRange_value[value_disabledDateRange_value_counter_i]
                 DateRange_serializer.write(valueSerializer, value_disabledDateRange_value_element)
             }
         }
@@ -438,7 +438,7 @@ export class CalendarOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const hintRadius_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let hintRadius_buf : number | Resource | undefined
-        if ((RuntimeType.UNDEFINED) != (hintRadius_buf_runtimeType))
+        if ((hintRadius_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const hintRadius_buf__selector : int32 = valueDeserializer.readInt8()
             let hintRadius_buf_ : number | Resource | undefined
@@ -456,28 +456,28 @@ export class CalendarOptions_serializer {
         const hintRadius_result : number | Resource | undefined = hintRadius_buf
         const selected_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let selected_buf : Date | undefined
-        if ((RuntimeType.UNDEFINED) != (selected_buf_runtimeType))
+        if ((selected_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             selected_buf = new Date(valueDeserializer.readInt64())
         }
         const selected_result : Date | undefined = selected_buf
         const start_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let start_buf : Date | undefined
-        if ((RuntimeType.UNDEFINED) != (start_buf_runtimeType))
+        if ((start_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             start_buf = new Date(valueDeserializer.readInt64())
         }
         const start_result : Date | undefined = start_buf
         const end_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let end_buf : Date | undefined
-        if ((RuntimeType.UNDEFINED) != (end_buf_runtimeType))
+        if ((end_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             end_buf = new Date(valueDeserializer.readInt64())
         }
         const end_result : Date | undefined = end_buf
         const disabledDateRange_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let disabledDateRange_buf : Array<DateRange> | undefined
-        if ((RuntimeType.UNDEFINED) != (disabledDateRange_buf_runtimeType))
+        if ((disabledDateRange_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const disabledDateRange_buf__length : int32 = valueDeserializer.readInt32()
             let disabledDateRange_buf_ : Array<DateRange> = new Array<DateRange>(disabledDateRange_buf__length)
@@ -498,7 +498,7 @@ export class CalendarDialogOptions_serializer {
         let value_hintRadius_type : int32 = RuntimeType.UNDEFINED
         value_hintRadius_type = runtimeType(value_hintRadius)
         valueSerializer.writeInt8((value_hintRadius_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_hintRadius_type)) {
+        if ((value_hintRadius_type) != (RuntimeType.UNDEFINED)) {
             const value_hintRadius_value  = value_hintRadius!
             let value_hintRadius_value_type : int32 = RuntimeType.UNDEFINED
             value_hintRadius_value_type = runtimeType(value_hintRadius_value)
@@ -517,7 +517,7 @@ export class CalendarDialogOptions_serializer {
         let value_selected_type : int32 = RuntimeType.UNDEFINED
         value_selected_type = runtimeType(value_selected)
         valueSerializer.writeInt8((value_selected_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_selected_type)) {
+        if ((value_selected_type) != (RuntimeType.UNDEFINED)) {
             const value_selected_value  = value_selected!
             valueSerializer.writeInt64(value_selected_value.getTime().toLong())
         }
@@ -525,7 +525,7 @@ export class CalendarDialogOptions_serializer {
         let value_start_type : int32 = RuntimeType.UNDEFINED
         value_start_type = runtimeType(value_start)
         valueSerializer.writeInt8((value_start_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_start_type)) {
+        if ((value_start_type) != (RuntimeType.UNDEFINED)) {
             const value_start_value  = value_start!
             valueSerializer.writeInt64(value_start_value.getTime().toLong())
         }
@@ -533,7 +533,7 @@ export class CalendarDialogOptions_serializer {
         let value_end_type : int32 = RuntimeType.UNDEFINED
         value_end_type = runtimeType(value_end)
         valueSerializer.writeInt8((value_end_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_end_type)) {
+        if ((value_end_type) != (RuntimeType.UNDEFINED)) {
             const value_end_value  = value_end!
             valueSerializer.writeInt64(value_end_value.getTime().toLong())
         }
@@ -541,11 +541,11 @@ export class CalendarDialogOptions_serializer {
         let value_disabledDateRange_type : int32 = RuntimeType.UNDEFINED
         value_disabledDateRange_type = runtimeType(value_disabledDateRange)
         valueSerializer.writeInt8((value_disabledDateRange_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_disabledDateRange_type)) {
+        if ((value_disabledDateRange_type) != (RuntimeType.UNDEFINED)) {
             const value_disabledDateRange_value  = value_disabledDateRange!
             valueSerializer.writeInt32((value_disabledDateRange_value.length).toInt())
-            for (let i = 0; i < value_disabledDateRange_value.length; i++) {
-                const value_disabledDateRange_value_element : DateRange = value_disabledDateRange_value[i]
+            for (let value_disabledDateRange_value_counter_i = 0; value_disabledDateRange_value_counter_i < value_disabledDateRange_value.length; value_disabledDateRange_value_counter_i++) {
+                const value_disabledDateRange_value_element : DateRange = value_disabledDateRange_value[value_disabledDateRange_value_counter_i]
                 DateRange_serializer.write(valueSerializer, value_disabledDateRange_value_element)
             }
         }
@@ -553,7 +553,7 @@ export class CalendarDialogOptions_serializer {
         let value_onAccept_type : int32 = RuntimeType.UNDEFINED
         value_onAccept_type = runtimeType(value_onAccept)
         valueSerializer.writeInt8((value_onAccept_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_onAccept_type)) {
+        if ((value_onAccept_type) != (RuntimeType.UNDEFINED)) {
             const value_onAccept_value  = value_onAccept!
             valueSerializer.holdAndWriteCallback(value_onAccept_value)
         }
@@ -561,7 +561,7 @@ export class CalendarDialogOptions_serializer {
         let value_onCancel_type : int32 = RuntimeType.UNDEFINED
         value_onCancel_type = runtimeType(value_onCancel)
         valueSerializer.writeInt8((value_onCancel_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_onCancel_type)) {
+        if ((value_onCancel_type) != (RuntimeType.UNDEFINED)) {
             const value_onCancel_value  = value_onCancel!
             valueSerializer.holdAndWriteCallback(value_onCancel_value)
         }
@@ -569,7 +569,7 @@ export class CalendarDialogOptions_serializer {
         let value_onChange_type : int32 = RuntimeType.UNDEFINED
         value_onChange_type = runtimeType(value_onChange)
         valueSerializer.writeInt8((value_onChange_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_onChange_type)) {
+        if ((value_onChange_type) != (RuntimeType.UNDEFINED)) {
             const value_onChange_value  = value_onChange!
             valueSerializer.holdAndWriteCallback(value_onChange_value)
         }
@@ -577,7 +577,7 @@ export class CalendarDialogOptions_serializer {
         let value_backgroundColor_type : int32 = RuntimeType.UNDEFINED
         value_backgroundColor_type = runtimeType(value_backgroundColor)
         valueSerializer.writeInt8((value_backgroundColor_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_backgroundColor_type)) {
+        if ((value_backgroundColor_type) != (RuntimeType.UNDEFINED)) {
             const value_backgroundColor_value  = value_backgroundColor!
             let value_backgroundColor_value_type : int32 = RuntimeType.UNDEFINED
             value_backgroundColor_value_type = runtimeType(value_backgroundColor_value)
@@ -606,7 +606,7 @@ export class CalendarDialogOptions_serializer {
         let value_backgroundBlurStyle_type : int32 = RuntimeType.UNDEFINED
         value_backgroundBlurStyle_type = runtimeType(value_backgroundBlurStyle)
         valueSerializer.writeInt8((value_backgroundBlurStyle_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_backgroundBlurStyle_type)) {
+        if ((value_backgroundBlurStyle_type) != (RuntimeType.UNDEFINED)) {
             const value_backgroundBlurStyle_value  = (value_backgroundBlurStyle as BlurStyle)
             valueSerializer.writeInt32(TypeChecker.BlurStyle_ToNumeric(value_backgroundBlurStyle_value))
         }
@@ -614,7 +614,7 @@ export class CalendarDialogOptions_serializer {
         let value_backgroundBlurStyleOptions_type : int32 = RuntimeType.UNDEFINED
         value_backgroundBlurStyleOptions_type = runtimeType(value_backgroundBlurStyleOptions)
         valueSerializer.writeInt8((value_backgroundBlurStyleOptions_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_backgroundBlurStyleOptions_type)) {
+        if ((value_backgroundBlurStyleOptions_type) != (RuntimeType.UNDEFINED)) {
             const value_backgroundBlurStyleOptions_value  = value_backgroundBlurStyleOptions!
             BackgroundBlurStyleOptions_serializer.write(valueSerializer, value_backgroundBlurStyleOptions_value)
         }
@@ -622,7 +622,7 @@ export class CalendarDialogOptions_serializer {
         let value_backgroundEffect_type : int32 = RuntimeType.UNDEFINED
         value_backgroundEffect_type = runtimeType(value_backgroundEffect)
         valueSerializer.writeInt8((value_backgroundEffect_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_backgroundEffect_type)) {
+        if ((value_backgroundEffect_type) != (RuntimeType.UNDEFINED)) {
             const value_backgroundEffect_value  = value_backgroundEffect!
             BackgroundEffectOptions_serializer.write(valueSerializer, value_backgroundEffect_value)
         }
@@ -630,7 +630,7 @@ export class CalendarDialogOptions_serializer {
         let value_acceptButtonStyle_type : int32 = RuntimeType.UNDEFINED
         value_acceptButtonStyle_type = runtimeType(value_acceptButtonStyle)
         valueSerializer.writeInt8((value_acceptButtonStyle_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_acceptButtonStyle_type)) {
+        if ((value_acceptButtonStyle_type) != (RuntimeType.UNDEFINED)) {
             const value_acceptButtonStyle_value  = value_acceptButtonStyle!
             PickerDialogButtonStyle_serializer.write(valueSerializer, value_acceptButtonStyle_value)
         }
@@ -638,7 +638,7 @@ export class CalendarDialogOptions_serializer {
         let value_cancelButtonStyle_type : int32 = RuntimeType.UNDEFINED
         value_cancelButtonStyle_type = runtimeType(value_cancelButtonStyle)
         valueSerializer.writeInt8((value_cancelButtonStyle_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_cancelButtonStyle_type)) {
+        if ((value_cancelButtonStyle_type) != (RuntimeType.UNDEFINED)) {
             const value_cancelButtonStyle_value  = value_cancelButtonStyle!
             PickerDialogButtonStyle_serializer.write(valueSerializer, value_cancelButtonStyle_value)
         }
@@ -646,7 +646,7 @@ export class CalendarDialogOptions_serializer {
         let value_onDidAppear_type : int32 = RuntimeType.UNDEFINED
         value_onDidAppear_type = runtimeType(value_onDidAppear)
         valueSerializer.writeInt8((value_onDidAppear_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_onDidAppear_type)) {
+        if ((value_onDidAppear_type) != (RuntimeType.UNDEFINED)) {
             const value_onDidAppear_value  = value_onDidAppear!
             valueSerializer.holdAndWriteCallback(value_onDidAppear_value)
         }
@@ -654,7 +654,7 @@ export class CalendarDialogOptions_serializer {
         let value_onDidDisappear_type : int32 = RuntimeType.UNDEFINED
         value_onDidDisappear_type = runtimeType(value_onDidDisappear)
         valueSerializer.writeInt8((value_onDidDisappear_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_onDidDisappear_type)) {
+        if ((value_onDidDisappear_type) != (RuntimeType.UNDEFINED)) {
             const value_onDidDisappear_value  = value_onDidDisappear!
             valueSerializer.holdAndWriteCallback(value_onDidDisappear_value)
         }
@@ -662,7 +662,7 @@ export class CalendarDialogOptions_serializer {
         let value_onWillAppear_type : int32 = RuntimeType.UNDEFINED
         value_onWillAppear_type = runtimeType(value_onWillAppear)
         valueSerializer.writeInt8((value_onWillAppear_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_onWillAppear_type)) {
+        if ((value_onWillAppear_type) != (RuntimeType.UNDEFINED)) {
             const value_onWillAppear_value  = value_onWillAppear!
             valueSerializer.holdAndWriteCallback(value_onWillAppear_value)
         }
@@ -670,7 +670,7 @@ export class CalendarDialogOptions_serializer {
         let value_onWillDisappear_type : int32 = RuntimeType.UNDEFINED
         value_onWillDisappear_type = runtimeType(value_onWillDisappear)
         valueSerializer.writeInt8((value_onWillDisappear_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_onWillDisappear_type)) {
+        if ((value_onWillDisappear_type) != (RuntimeType.UNDEFINED)) {
             const value_onWillDisappear_value  = value_onWillDisappear!
             valueSerializer.holdAndWriteCallback(value_onWillDisappear_value)
         }
@@ -678,7 +678,7 @@ export class CalendarDialogOptions_serializer {
         let value_shadow_type : int32 = RuntimeType.UNDEFINED
         value_shadow_type = runtimeType(value_shadow)
         valueSerializer.writeInt8((value_shadow_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_shadow_type)) {
+        if ((value_shadow_type) != (RuntimeType.UNDEFINED)) {
             const value_shadow_value  = value_shadow!
             let value_shadow_value_type : int32 = RuntimeType.UNDEFINED
             value_shadow_value_type = runtimeType(value_shadow_value)
@@ -697,7 +697,7 @@ export class CalendarDialogOptions_serializer {
         let value_enableHoverMode_type : int32 = RuntimeType.UNDEFINED
         value_enableHoverMode_type = runtimeType(value_enableHoverMode)
         valueSerializer.writeInt8((value_enableHoverMode_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_enableHoverMode_type)) {
+        if ((value_enableHoverMode_type) != (RuntimeType.UNDEFINED)) {
             const value_enableHoverMode_value  = value_enableHoverMode!
             valueSerializer.writeBoolean(value_enableHoverMode_value)
         }
@@ -705,7 +705,7 @@ export class CalendarDialogOptions_serializer {
         let value_hoverModeArea_type : int32 = RuntimeType.UNDEFINED
         value_hoverModeArea_type = runtimeType(value_hoverModeArea)
         valueSerializer.writeInt8((value_hoverModeArea_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_hoverModeArea_type)) {
+        if ((value_hoverModeArea_type) != (RuntimeType.UNDEFINED)) {
             const value_hoverModeArea_value  = (value_hoverModeArea as HoverModeAreaType)
             valueSerializer.writeInt32(TypeChecker.HoverModeAreaType_ToNumeric(value_hoverModeArea_value))
         }
@@ -713,7 +713,7 @@ export class CalendarDialogOptions_serializer {
         let value_markToday_type : int32 = RuntimeType.UNDEFINED
         value_markToday_type = runtimeType(value_markToday)
         valueSerializer.writeInt8((value_markToday_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_markToday_type)) {
+        if ((value_markToday_type) != (RuntimeType.UNDEFINED)) {
             const value_markToday_value  = value_markToday!
             valueSerializer.writeBoolean(value_markToday_value)
         }
@@ -722,7 +722,7 @@ export class CalendarDialogOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const hintRadius_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let hintRadius_buf : number | Resource | undefined
-        if ((RuntimeType.UNDEFINED) != (hintRadius_buf_runtimeType))
+        if ((hintRadius_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const hintRadius_buf__selector : int32 = valueDeserializer.readInt8()
             let hintRadius_buf_ : number | Resource | undefined
@@ -740,28 +740,28 @@ export class CalendarDialogOptions_serializer {
         const hintRadius_result : number | Resource | undefined = hintRadius_buf
         const selected_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let selected_buf : Date | undefined
-        if ((RuntimeType.UNDEFINED) != (selected_buf_runtimeType))
+        if ((selected_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             selected_buf = new Date(valueDeserializer.readInt64())
         }
         const selected_result : Date | undefined = selected_buf
         const start_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let start_buf : Date | undefined
-        if ((RuntimeType.UNDEFINED) != (start_buf_runtimeType))
+        if ((start_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             start_buf = new Date(valueDeserializer.readInt64())
         }
         const start_result : Date | undefined = start_buf
         const end_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let end_buf : Date | undefined
-        if ((RuntimeType.UNDEFINED) != (end_buf_runtimeType))
+        if ((end_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             end_buf = new Date(valueDeserializer.readInt64())
         }
         const end_result : Date | undefined = end_buf
         const disabledDateRange_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let disabledDateRange_buf : Array<DateRange> | undefined
-        if ((RuntimeType.UNDEFINED) != (disabledDateRange_buf_runtimeType))
+        if ((disabledDateRange_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const disabledDateRange_buf__length : int32 = valueDeserializer.readInt32()
             let disabledDateRange_buf_ : Array<DateRange> = new Array<DateRange>(disabledDateRange_buf__length)
@@ -773,7 +773,7 @@ export class CalendarDialogOptions_serializer {
         const disabledDateRange_result : Array<DateRange> | undefined = disabledDateRange_buf
         const onAccept_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let onAccept_buf : ((value0: Date) => void) | undefined
-        if ((RuntimeType.UNDEFINED) != (onAccept_buf_runtimeType))
+        if ((onAccept_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const onAccept_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
             const onAccept_buf__call : KPointer = valueDeserializer.readPointer()
@@ -791,7 +791,7 @@ export class CalendarDialogOptions_serializer {
         const onAccept_result : ((value0: Date) => void) | undefined = onAccept_buf
         const onCancel_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let onCancel_buf : VoidCallback | undefined
-        if ((RuntimeType.UNDEFINED) != (onCancel_buf_runtimeType))
+        if ((onCancel_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const onCancel_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
             const onCancel_buf__call : KPointer = valueDeserializer.readPointer()
@@ -808,7 +808,7 @@ export class CalendarDialogOptions_serializer {
         const onCancel_result : VoidCallback | undefined = onCancel_buf
         const onChange_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let onChange_buf : ((value0: Date) => void) | undefined
-        if ((RuntimeType.UNDEFINED) != (onChange_buf_runtimeType))
+        if ((onChange_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const onChange_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
             const onChange_buf__call : KPointer = valueDeserializer.readPointer()
@@ -826,7 +826,7 @@ export class CalendarDialogOptions_serializer {
         const onChange_result : ((value0: Date) => void) | undefined = onChange_buf
         const backgroundColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let backgroundColor_buf : ResourceColor | undefined
-        if ((RuntimeType.UNDEFINED) != (backgroundColor_buf_runtimeType))
+        if ((backgroundColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const backgroundColor_buf__selector : int32 = valueDeserializer.readInt8()
             let backgroundColor_buf_ : Color | number | string | Resource | undefined
@@ -850,42 +850,42 @@ export class CalendarDialogOptions_serializer {
         const backgroundColor_result : ResourceColor | undefined = backgroundColor_buf
         const backgroundBlurStyle_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let backgroundBlurStyle_buf : BlurStyle | undefined
-        if ((RuntimeType.UNDEFINED) != (backgroundBlurStyle_buf_runtimeType))
+        if ((backgroundBlurStyle_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             backgroundBlurStyle_buf = TypeChecker.BlurStyle_FromNumeric(valueDeserializer.readInt32())
         }
         const backgroundBlurStyle_result : BlurStyle | undefined = backgroundBlurStyle_buf
         const backgroundBlurStyleOptions_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let backgroundBlurStyleOptions_buf : BackgroundBlurStyleOptions | undefined
-        if ((RuntimeType.UNDEFINED) != (backgroundBlurStyleOptions_buf_runtimeType))
+        if ((backgroundBlurStyleOptions_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             backgroundBlurStyleOptions_buf = BackgroundBlurStyleOptions_serializer.read(valueDeserializer)
         }
         const backgroundBlurStyleOptions_result : BackgroundBlurStyleOptions | undefined = backgroundBlurStyleOptions_buf
         const backgroundEffect_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let backgroundEffect_buf : BackgroundEffectOptions | undefined
-        if ((RuntimeType.UNDEFINED) != (backgroundEffect_buf_runtimeType))
+        if ((backgroundEffect_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             backgroundEffect_buf = BackgroundEffectOptions_serializer.read(valueDeserializer)
         }
         const backgroundEffect_result : BackgroundEffectOptions | undefined = backgroundEffect_buf
         const acceptButtonStyle_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let acceptButtonStyle_buf : PickerDialogButtonStyle | undefined
-        if ((RuntimeType.UNDEFINED) != (acceptButtonStyle_buf_runtimeType))
+        if ((acceptButtonStyle_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             acceptButtonStyle_buf = PickerDialogButtonStyle_serializer.read(valueDeserializer)
         }
         const acceptButtonStyle_result : PickerDialogButtonStyle | undefined = acceptButtonStyle_buf
         const cancelButtonStyle_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let cancelButtonStyle_buf : PickerDialogButtonStyle | undefined
-        if ((RuntimeType.UNDEFINED) != (cancelButtonStyle_buf_runtimeType))
+        if ((cancelButtonStyle_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             cancelButtonStyle_buf = PickerDialogButtonStyle_serializer.read(valueDeserializer)
         }
         const cancelButtonStyle_result : PickerDialogButtonStyle | undefined = cancelButtonStyle_buf
         const onDidAppear_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let onDidAppear_buf : VoidCallback | undefined
-        if ((RuntimeType.UNDEFINED) != (onDidAppear_buf_runtimeType))
+        if ((onDidAppear_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const onDidAppear_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
             const onDidAppear_buf__call : KPointer = valueDeserializer.readPointer()
@@ -902,7 +902,7 @@ export class CalendarDialogOptions_serializer {
         const onDidAppear_result : VoidCallback | undefined = onDidAppear_buf
         const onDidDisappear_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let onDidDisappear_buf : VoidCallback | undefined
-        if ((RuntimeType.UNDEFINED) != (onDidDisappear_buf_runtimeType))
+        if ((onDidDisappear_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const onDidDisappear_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
             const onDidDisappear_buf__call : KPointer = valueDeserializer.readPointer()
@@ -919,7 +919,7 @@ export class CalendarDialogOptions_serializer {
         const onDidDisappear_result : VoidCallback | undefined = onDidDisappear_buf
         const onWillAppear_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let onWillAppear_buf : VoidCallback | undefined
-        if ((RuntimeType.UNDEFINED) != (onWillAppear_buf_runtimeType))
+        if ((onWillAppear_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const onWillAppear_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
             const onWillAppear_buf__call : KPointer = valueDeserializer.readPointer()
@@ -936,7 +936,7 @@ export class CalendarDialogOptions_serializer {
         const onWillAppear_result : VoidCallback | undefined = onWillAppear_buf
         const onWillDisappear_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let onWillDisappear_buf : VoidCallback | undefined
-        if ((RuntimeType.UNDEFINED) != (onWillDisappear_buf_runtimeType))
+        if ((onWillDisappear_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const onWillDisappear_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
             const onWillDisappear_buf__call : KPointer = valueDeserializer.readPointer()
@@ -953,7 +953,7 @@ export class CalendarDialogOptions_serializer {
         const onWillDisappear_result : VoidCallback | undefined = onWillDisappear_buf
         const shadow_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let shadow_buf : ShadowOptions | ShadowStyle | undefined
-        if ((RuntimeType.UNDEFINED) != (shadow_buf_runtimeType))
+        if ((shadow_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const shadow_buf__selector : int32 = valueDeserializer.readInt8()
             let shadow_buf_ : ShadowOptions | ShadowStyle | undefined
@@ -971,21 +971,21 @@ export class CalendarDialogOptions_serializer {
         const shadow_result : ShadowOptions | ShadowStyle | undefined = shadow_buf
         const enableHoverMode_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let enableHoverMode_buf : boolean | undefined
-        if ((RuntimeType.UNDEFINED) != (enableHoverMode_buf_runtimeType))
+        if ((enableHoverMode_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             enableHoverMode_buf = valueDeserializer.readBoolean()
         }
         const enableHoverMode_result : boolean | undefined = enableHoverMode_buf
         const hoverModeArea_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let hoverModeArea_buf : HoverModeAreaType | undefined
-        if ((RuntimeType.UNDEFINED) != (hoverModeArea_buf_runtimeType))
+        if ((hoverModeArea_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             hoverModeArea_buf = TypeChecker.HoverModeAreaType_FromNumeric(valueDeserializer.readInt32())
         }
         const hoverModeArea_result : HoverModeAreaType | undefined = hoverModeArea_buf
         const markToday_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let markToday_buf : boolean | undefined
-        if ((RuntimeType.UNDEFINED) != (markToday_buf_runtimeType))
+        if ((markToday_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             markToday_buf = valueDeserializer.readBoolean()
         }

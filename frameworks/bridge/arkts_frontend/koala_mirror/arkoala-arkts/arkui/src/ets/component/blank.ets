@@ -47,7 +47,7 @@ export class ArkBlankPeer extends ArkCommonMethodPeer {
         let min_type : int32 = RuntimeType.UNDEFINED
         min_type = runtimeType(min)
         thisSerializer.writeInt8((min_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (min_type)) {
+        if ((min_type) != (RuntimeType.UNDEFINED)) {
             const min_value  = min!
             let min_value_type : int32 = RuntimeType.UNDEFINED
             min_value_type = runtimeType(min_value)
@@ -70,7 +70,7 @@ export class ArkBlankPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)

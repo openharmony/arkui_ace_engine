@@ -419,7 +419,7 @@ export class CrossLanguageOptions_serializer {
         let value_attributeSetting_type : int32 = RuntimeType.UNDEFINED
         value_attributeSetting_type = runtimeType(value_attributeSetting)
         valueSerializer.writeInt8((value_attributeSetting_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_attributeSetting_type)) {
+        if ((value_attributeSetting_type) != (RuntimeType.UNDEFINED)) {
             const value_attributeSetting_value  = value_attributeSetting!
             valueSerializer.writeBoolean(value_attributeSetting_value)
         }
@@ -428,7 +428,7 @@ export class CrossLanguageOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const attributeSetting_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let attributeSetting_buf : boolean | undefined
-        if ((RuntimeType.UNDEFINED) != (attributeSetting_buf_runtimeType))
+        if ((attributeSetting_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             attributeSetting_buf = valueDeserializer.readBoolean()
         }

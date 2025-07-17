@@ -73,7 +73,7 @@ export class ArkDatePickerPeer extends ArkCommonMethodPeer {
         let options_type : int32 = RuntimeType.UNDEFINED
         options_type = runtimeType(options)
         thisSerializer.writeInt8((options_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (options_type)) {
+        if ((options_type) != (RuntimeType.UNDEFINED)) {
             const options_value  = options!
             DatePickerOptions_serializer.write(thisSerializer, options_value)
         }
@@ -85,7 +85,7 @@ export class ArkDatePickerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -97,7 +97,7 @@ export class ArkDatePickerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             PickerTextStyle_serializer.write(thisSerializer, value_value)
         }
@@ -109,7 +109,7 @@ export class ArkDatePickerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             PickerTextStyle_serializer.write(thisSerializer, value_value)
         }
@@ -121,7 +121,7 @@ export class ArkDatePickerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             PickerTextStyle_serializer.write(thisSerializer, value_value)
         }
@@ -133,7 +133,7 @@ export class ArkDatePickerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -145,7 +145,7 @@ export class ArkDatePickerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = (value as CrownSensitivity)
             thisSerializer.writeInt32(TypeChecker.CrownSensitivity_ToNumeric(value_value))
         }
@@ -157,11 +157,17 @@ export class ArkDatePickerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
         ArkUIGeneratedNativeModule._DatePickerAttribute_setEnableHapticFeedback(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    set_onChangeEvent_selectedAttribute(callback_: ((value0: Date) => void)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(callback_)
+        ArkUIGeneratedNativeModule._DatePickerAttribute_set_onChangeEvent_selected(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }
@@ -189,6 +195,7 @@ export interface DatePickerAttribute extends CommonMethod {
     onDateChange(value: ((value0: Date) => void) | undefined): this
     digitalCrownSensitivity(value: CrownSensitivity | undefined): this
     enableHapticFeedback(value: boolean | undefined): this
+    _onChangeEvent_selected(callback_: ((value0: Date) => void)): void
     attributeModifier(value: AttributeModifier<DatePickerAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkDatePickerStyle extends ArkCommonMethodStyle implements DatePickerAttribute {
@@ -220,6 +227,9 @@ export class ArkDatePickerStyle extends ArkCommonMethodStyle implements DatePick
     }
     public enableHapticFeedback(value: boolean | undefined): this {
         return this
+    }
+    public _onChangeEvent_selected(callback_: ((value0: Date) => void)): void {
+        throw new Error("Unimplemented")
     }
     public attributeModifier(value: AttributeModifier<DatePickerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
@@ -347,6 +357,14 @@ export class ArkDatePickerComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
+    public _onChangeEvent_selected(callback_: ((value0: Date) => void)): void {
+        if (this.checkPriority("_onChangeEvent_selected")) {
+            const callback__casted = callback_ as (((value0: Date) => void))
+            this.getPeer()?.set_onChangeEvent_selectedAttribute(callback__casted)
+            return
+        }
+        return
+    }
     public attributeModifier(value: AttributeModifier<DatePickerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         this._modifier = value as AttributeModifier<CommonMethod>
         return this
@@ -416,6 +434,8 @@ export class ArkDatePickerSet extends ArkCommonMethodSet implements DatePickerAt
     _digitalCrownSensitivity0_value?: CrownSensitivity | undefined
     _enableHapticFeedback_flag?: boolean
     _enableHapticFeedback0_value?: boolean | undefined
+    __onChangeEvent_selected_flag?: boolean
+    __onChangeEvent_selected0_value?: ((value0: Date) => void)
     applyModifierPatch(component: DatePickerAttribute): void {
         if (this._lunar_flag)
             component.lunar((this._lunar0_value as boolean | undefined))
@@ -467,6 +487,8 @@ export class ArkDatePickerSet extends ArkCommonMethodSet implements DatePickerAt
         this._enableHapticFeedback0_value = value
         return this
     }
+    public _onChangeEvent_selected(callback_: ((value0: Date) => void)): void {
+    }
     public attributeModifier(value: AttributeModifier<DatePickerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
     }
@@ -489,7 +511,7 @@ export class DatePickerOptions_serializer {
         let value_start_type : int32 = RuntimeType.UNDEFINED
         value_start_type = runtimeType(value_start)
         valueSerializer.writeInt8((value_start_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_start_type)) {
+        if ((value_start_type) != (RuntimeType.UNDEFINED)) {
             const value_start_value  = value_start!
             valueSerializer.writeInt64(value_start_value.getTime().toLong())
         }
@@ -497,7 +519,7 @@ export class DatePickerOptions_serializer {
         let value_end_type : int32 = RuntimeType.UNDEFINED
         value_end_type = runtimeType(value_end)
         valueSerializer.writeInt8((value_end_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_end_type)) {
+        if ((value_end_type) != (RuntimeType.UNDEFINED)) {
             const value_end_value  = value_end!
             valueSerializer.writeInt64(value_end_value.getTime().toLong())
         }
@@ -505,7 +527,7 @@ export class DatePickerOptions_serializer {
         let value_selected_type : int32 = RuntimeType.UNDEFINED
         value_selected_type = runtimeType(value_selected)
         valueSerializer.writeInt8((value_selected_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_selected_type)) {
+        if ((value_selected_type) != (RuntimeType.UNDEFINED)) {
             const value_selected_value  = value_selected!
             valueSerializer.writeInt64(value_selected_value.getTime().toLong())
         }
@@ -513,7 +535,7 @@ export class DatePickerOptions_serializer {
         let value_mode_type : int32 = RuntimeType.UNDEFINED
         value_mode_type = runtimeType(value_mode)
         valueSerializer.writeInt8((value_mode_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_mode_type)) {
+        if ((value_mode_type) != (RuntimeType.UNDEFINED)) {
             const value_mode_value  = (value_mode as DatePickerMode)
             valueSerializer.writeInt32(TypeChecker.DatePickerMode_ToNumeric(value_mode_value))
         }
@@ -522,28 +544,28 @@ export class DatePickerOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const start_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let start_buf : Date | undefined
-        if ((RuntimeType.UNDEFINED) != (start_buf_runtimeType))
+        if ((start_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             start_buf = new Date(valueDeserializer.readInt64())
         }
         const start_result : Date | undefined = start_buf
         const end_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let end_buf : Date | undefined
-        if ((RuntimeType.UNDEFINED) != (end_buf_runtimeType))
+        if ((end_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             end_buf = new Date(valueDeserializer.readInt64())
         }
         const end_result : Date | undefined = end_buf
         const selected_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let selected_buf : Date | undefined
-        if ((RuntimeType.UNDEFINED) != (selected_buf_runtimeType))
+        if ((selected_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             selected_buf = new Date(valueDeserializer.readInt64())
         }
         const selected_result : Date | undefined = selected_buf
         const mode_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let mode_buf : DatePickerMode | undefined
-        if ((RuntimeType.UNDEFINED) != (mode_buf_runtimeType))
+        if ((mode_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             mode_buf = TypeChecker.DatePickerMode_FromNumeric(valueDeserializer.readInt32())
         }

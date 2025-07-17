@@ -10,6 +10,7 @@
         "./tests-memo",
         "../incremental/build-common",
         "../interop",
+        "../incremental/runtime",
         "../incremental/harness",
         "../incremental/common",
         "../incremental/compat"

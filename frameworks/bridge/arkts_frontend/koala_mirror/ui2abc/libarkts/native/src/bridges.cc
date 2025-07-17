@@ -395,7 +395,7 @@ void impl_DestroyGlobalContext(KNativePointer globalContextPtr) {
 KOALA_INTEROP_V1(DestroyGlobalContext, KNativePointer)
 
 // From koala-wrapper
-// TODO check if some code should be generated
+// Improve: check if some code should be generated
 
 std::set<std::string> globalStructInfo;
 std::mutex g_structMutex;
@@ -595,7 +595,7 @@ KInt impl_GenerateTsDeclarationsFromContext(KNativePointer contextPtr, KStringPt
 }
 KOALA_INTEROP_5(GenerateTsDeclarationsFromContext, KInt, KNativePointer, KStringPtr, KStringPtr, KBoolean, KBoolean)
 
-// TODO: simplify
+// Improve: simplify
 KNativePointer impl_CreateContextGenerateAbcForExternalSourceFiles(
     KNativePointer configPtr, KInt fileNamesCount, KStringArray fileNames)
 {

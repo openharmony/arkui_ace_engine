@@ -158,11 +158,11 @@ export class TabsController implements MaterializedBase {
         let indices_type : int32 = RuntimeType.UNDEFINED
         indices_type = runtimeType(indices)
         thisSerializer.writeInt8((indices_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (indices_type)) {
+        if ((indices_type) != (RuntimeType.UNDEFINED)) {
             const indices_value  = indices!
             thisSerializer.writeInt32((indices_value.length).toInt())
-            for (let i = 0; i < indices_value.length; i++) {
-                const indices_value_element : number = indices_value[i]
+            for (let indices_value_counter_i = 0; indices_value_counter_i < indices_value.length; indices_value_counter_i++) {
+                const indices_value_element : number = indices_value[indices_value_counter_i]
                 thisSerializer.writeNumber(indices_value_element)
             }
         }
@@ -197,7 +197,7 @@ export class ArkTabsPeer extends ArkCommonMethodPeer {
         let options_type : int32 = RuntimeType.UNDEFINED
         options_type = runtimeType(options)
         thisSerializer.writeInt8((options_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (options_type)) {
+        if ((options_type) != (RuntimeType.UNDEFINED)) {
             const options_value  = options!
             TabsOptions_serializer.write(thisSerializer, options_value)
         }
@@ -209,7 +209,7 @@ export class ArkTabsPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -221,7 +221,7 @@ export class ArkTabsPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = (value as BarPosition)
             thisSerializer.writeInt32(TypeChecker.BarPosition_ToNumeric(value_value))
         }
@@ -233,7 +233,7 @@ export class ArkTabsPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -245,7 +245,7 @@ export class ArkTabsPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -273,7 +273,7 @@ export class ArkTabsPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -301,7 +301,7 @@ export class ArkTabsPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeNumber(value_value)
         }
@@ -313,7 +313,7 @@ export class ArkTabsPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = (value as AnimationMode)
             thisSerializer.writeInt32(TypeChecker.AnimationMode_ToNumeric(value_value))
         }
@@ -325,7 +325,7 @@ export class ArkTabsPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = (value as EdgeEffect)
             thisSerializer.writeInt32(TypeChecker.EdgeEffect_ToNumeric(value_value))
         }
@@ -337,7 +337,7 @@ export class ArkTabsPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -349,7 +349,7 @@ export class ArkTabsPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -361,7 +361,7 @@ export class ArkTabsPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -373,7 +373,7 @@ export class ArkTabsPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -385,7 +385,7 @@ export class ArkTabsPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -397,7 +397,7 @@ export class ArkTabsPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -409,7 +409,7 @@ export class ArkTabsPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -421,7 +421,7 @@ export class ArkTabsPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -433,7 +433,7 @@ export class ArkTabsPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             DividerStyle_serializer.write(thisSerializer, value_value)
         }
@@ -445,7 +445,7 @@ export class ArkTabsPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -457,7 +457,7 @@ export class ArkTabsPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -490,7 +490,7 @@ export class ArkTabsPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             BarGridColumnOptions_serializer.write(thisSerializer, value_value)
         }
@@ -502,7 +502,7 @@ export class ArkTabsPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -514,7 +514,7 @@ export class ArkTabsPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = (value as BlurStyle)
             thisSerializer.writeInt32(TypeChecker.BlurStyle_ToNumeric(value_value))
         }
@@ -526,7 +526,7 @@ export class ArkTabsPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             BackgroundEffectOptions_serializer.write(thisSerializer, value_value)
         }
@@ -538,7 +538,7 @@ export class ArkTabsPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = (value as PageFlipMode)
             thisSerializer.writeInt32(TypeChecker.PageFlipMode_ToNumeric(value_value))
         }
@@ -550,7 +550,7 @@ export class ArkTabsPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -562,14 +562,14 @@ export class ArkTabsPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = (value as BarMode)
             thisSerializer.writeInt32(TypeChecker.BarMode_ToNumeric(value_value))
         }
         let options_type : int32 = RuntimeType.UNDEFINED
         options_type = runtimeType(options)
         thisSerializer.writeInt8((options_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (options_type)) {
+        if ((options_type) != (RuntimeType.UNDEFINED)) {
             const options_value  = options!
             ScrollableBarModeOptions_serializer.write(thisSerializer, options_value)
         }
@@ -581,14 +581,14 @@ export class ArkTabsPeer extends ArkCommonMethodPeer {
         let style_type : int32 = RuntimeType.UNDEFINED
         style_type = runtimeType(style)
         thisSerializer.writeInt8((style_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (style_type)) {
+        if ((style_type) != (RuntimeType.UNDEFINED)) {
             const style_value  = (style as BlurStyle)
             thisSerializer.writeInt32(TypeChecker.BlurStyle_ToNumeric(style_value))
         }
         let options_type : int32 = RuntimeType.UNDEFINED
         options_type = runtimeType(options)
         thisSerializer.writeInt8((options_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (options_type)) {
+        if ((options_type) != (RuntimeType.UNDEFINED)) {
             const options_value  = options!
             BackgroundBlurStyleOptions_serializer.write(thisSerializer, options_value)
         }
@@ -600,18 +600,24 @@ export class ArkTabsPeer extends ArkCommonMethodPeer {
         let count_type : int32 = RuntimeType.UNDEFINED
         count_type = runtimeType(count)
         thisSerializer.writeInt8((count_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (count_type)) {
+        if ((count_type) != (RuntimeType.UNDEFINED)) {
             const count_value  = count!
             thisSerializer.writeNumber(count_value)
         }
         let mode_type : int32 = RuntimeType.UNDEFINED
         mode_type = runtimeType(mode)
         thisSerializer.writeInt8((mode_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (mode_type)) {
+        if ((mode_type) != (RuntimeType.UNDEFINED)) {
             const mode_value  = (mode as TabsCacheMode)
             thisSerializer.writeInt32(TypeChecker.TabsCacheMode_ToNumeric(mode_value))
         }
         ArkUIGeneratedNativeModule._TabsAttribute_setCachedMaxCount(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    set_onChangeEvent_indexAttribute(callback_: ((value0: number) => void)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(callback_)
+        ArkUIGeneratedNativeModule._TabsAttribute_set_onChangeEvent_index(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }
@@ -699,6 +705,7 @@ export interface TabsAttribute extends CommonMethod {
     barMode(value: BarMode | undefined, options?: ScrollableBarModeOptions): this
     barBackgroundBlurStyle(style: BlurStyle | undefined, options: BackgroundBlurStyleOptions | undefined): this
     cachedMaxCount(count: number | undefined, mode: TabsCacheMode | undefined): this
+    _onChangeEvent_index(callback_: ((value0: number) => void)): void
     attributeModifier(value: AttributeModifier<TabsAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkTabsStyle extends ArkCommonMethodStyle implements TabsAttribute {
@@ -811,6 +818,9 @@ export class ArkTabsStyle extends ArkCommonMethodStyle implements TabsAttribute 
     }
     public cachedMaxCount(count: number | undefined, mode: TabsCacheMode | undefined): this {
         return this
+    }
+    public _onChangeEvent_index(callback_: ((value0: number) => void)): void {
+        throw new Error("Unimplemented")
     }
     public attributeModifier(value: AttributeModifier<TabsAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
@@ -1113,6 +1123,14 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements TabsAt
         }
         return this
     }
+    public _onChangeEvent_index(callback_: ((value0: number) => void)): void {
+        if (this.checkPriority("_onChangeEvent_index")) {
+            const callback__casted = callback_ as (((value0: number) => void))
+            this.getPeer()?.set_onChangeEvent_indexAttribute(callback__casted)
+            return
+        }
+        return
+    }
     public attributeModifier(value: AttributeModifier<TabsAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         this._modifier = value as AttributeModifier<CommonMethod>
         return this
@@ -1225,6 +1243,8 @@ export class ArkTabsSet extends ArkCommonMethodSet implements TabsAttribute {
     _cachedMaxCount_flag?: boolean
     _cachedMaxCount0_value?: number | undefined
     _cachedMaxCount1_value?: TabsCacheMode | undefined
+    __onChangeEvent_index_flag?: boolean
+    __onChangeEvent_index0_value?: ((value0: number) => void)
     applyModifierPatch(component: TabsAttribute): void {
         if (this._vertical_flag)
             component.vertical((this._vertical0_value as boolean | undefined))
@@ -1419,6 +1439,8 @@ export class ArkTabsSet extends ArkCommonMethodSet implements TabsAttribute {
         this._cachedMaxCount1_value = mode
         return this
     }
+    public _onChangeEvent_index(callback_: ((value0: number) => void)): void {
+    }
     public attributeModifier(value: AttributeModifier<TabsAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
     }
@@ -1471,7 +1493,7 @@ export class TabContentAnimatedTransition_serializer {
         let value_timeout_type : int32 = RuntimeType.UNDEFINED
         value_timeout_type = runtimeType(value_timeout)
         valueSerializer.writeInt8((value_timeout_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_timeout_type)) {
+        if ((value_timeout_type) != (RuntimeType.UNDEFINED)) {
             const value_timeout_value  = value_timeout!
             valueSerializer.writeNumber(value_timeout_value)
         }
@@ -1482,7 +1504,7 @@ export class TabContentAnimatedTransition_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const timeout_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let timeout_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (timeout_buf_runtimeType))
+        if ((timeout_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             timeout_buf = (valueDeserializer.readNumber() as number)
         }
@@ -1510,7 +1532,7 @@ export class TabsOptions_serializer {
         let value_barPosition_type : int32 = RuntimeType.UNDEFINED
         value_barPosition_type = runtimeType(value_barPosition)
         valueSerializer.writeInt8((value_barPosition_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_barPosition_type)) {
+        if ((value_barPosition_type) != (RuntimeType.UNDEFINED)) {
             const value_barPosition_value  = (value_barPosition as BarPosition)
             valueSerializer.writeInt32(TypeChecker.BarPosition_ToNumeric(value_barPosition_value))
         }
@@ -1518,7 +1540,7 @@ export class TabsOptions_serializer {
         let value_index_type : int32 = RuntimeType.UNDEFINED
         value_index_type = runtimeType(value_index)
         valueSerializer.writeInt8((value_index_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_index_type)) {
+        if ((value_index_type) != (RuntimeType.UNDEFINED)) {
             const value_index_value  = value_index!
             valueSerializer.writeNumber(value_index_value)
         }
@@ -1526,7 +1548,7 @@ export class TabsOptions_serializer {
         let value_controller_type : int32 = RuntimeType.UNDEFINED
         value_controller_type = runtimeType(value_controller)
         valueSerializer.writeInt8((value_controller_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_controller_type)) {
+        if ((value_controller_type) != (RuntimeType.UNDEFINED)) {
             const value_controller_value  = value_controller!
             TabsController_serializer.write(valueSerializer, value_controller_value)
         }
@@ -1534,7 +1556,7 @@ export class TabsOptions_serializer {
         let value_barModifier_type : int32 = RuntimeType.UNDEFINED
         value_barModifier_type = runtimeType(value_barModifier)
         valueSerializer.writeInt8((value_barModifier_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_barModifier_type)) {
+        if ((value_barModifier_type) != (RuntimeType.UNDEFINED)) {
             const value_barModifier_value  = value_barModifier!
             CommonModifier_serializer.write(valueSerializer, value_barModifier_value)
         }
@@ -1543,28 +1565,28 @@ export class TabsOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const barPosition_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let barPosition_buf : BarPosition | undefined
-        if ((RuntimeType.UNDEFINED) != (barPosition_buf_runtimeType))
+        if ((barPosition_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             barPosition_buf = TypeChecker.BarPosition_FromNumeric(valueDeserializer.readInt32())
         }
         const barPosition_result : BarPosition | undefined = barPosition_buf
         const index_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let index_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (index_buf_runtimeType))
+        if ((index_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             index_buf = (valueDeserializer.readNumber() as number)
         }
         const index_result : number | undefined = index_buf
         const controller_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let controller_buf : TabsController | undefined
-        if ((RuntimeType.UNDEFINED) != (controller_buf_runtimeType))
+        if ((controller_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             controller_buf = (TabsController_serializer.read(valueDeserializer) as TabsController)
         }
         const controller_result : TabsController | undefined = controller_buf
         const barModifier_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let barModifier_buf : CommonModifier | undefined
-        if ((RuntimeType.UNDEFINED) != (barModifier_buf_runtimeType))
+        if ((barModifier_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             barModifier_buf = CommonModifier_serializer.read(valueDeserializer)
         }
@@ -1580,7 +1602,7 @@ export class BarGridColumnOptions_serializer {
         let value_sm_type : int32 = RuntimeType.UNDEFINED
         value_sm_type = runtimeType(value_sm)
         valueSerializer.writeInt8((value_sm_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_sm_type)) {
+        if ((value_sm_type) != (RuntimeType.UNDEFINED)) {
             const value_sm_value  = value_sm!
             valueSerializer.writeNumber(value_sm_value)
         }
@@ -1588,7 +1610,7 @@ export class BarGridColumnOptions_serializer {
         let value_md_type : int32 = RuntimeType.UNDEFINED
         value_md_type = runtimeType(value_md)
         valueSerializer.writeInt8((value_md_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_md_type)) {
+        if ((value_md_type) != (RuntimeType.UNDEFINED)) {
             const value_md_value  = value_md!
             valueSerializer.writeNumber(value_md_value)
         }
@@ -1596,7 +1618,7 @@ export class BarGridColumnOptions_serializer {
         let value_lg_type : int32 = RuntimeType.UNDEFINED
         value_lg_type = runtimeType(value_lg)
         valueSerializer.writeInt8((value_lg_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_lg_type)) {
+        if ((value_lg_type) != (RuntimeType.UNDEFINED)) {
             const value_lg_value  = value_lg!
             valueSerializer.writeNumber(value_lg_value)
         }
@@ -1604,7 +1626,7 @@ export class BarGridColumnOptions_serializer {
         let value_margin_type : int32 = RuntimeType.UNDEFINED
         value_margin_type = runtimeType(value_margin)
         valueSerializer.writeInt8((value_margin_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_margin_type)) {
+        if ((value_margin_type) != (RuntimeType.UNDEFINED)) {
             const value_margin_value  = value_margin!
             let value_margin_value_type : int32 = RuntimeType.UNDEFINED
             value_margin_value_type = runtimeType(value_margin_value)
@@ -1628,7 +1650,7 @@ export class BarGridColumnOptions_serializer {
         let value_gutter_type : int32 = RuntimeType.UNDEFINED
         value_gutter_type = runtimeType(value_gutter)
         valueSerializer.writeInt8((value_gutter_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_gutter_type)) {
+        if ((value_gutter_type) != (RuntimeType.UNDEFINED)) {
             const value_gutter_value  = value_gutter!
             let value_gutter_value_type : int32 = RuntimeType.UNDEFINED
             value_gutter_value_type = runtimeType(value_gutter_value)
@@ -1653,28 +1675,28 @@ export class BarGridColumnOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const sm_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let sm_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (sm_buf_runtimeType))
+        if ((sm_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             sm_buf = (valueDeserializer.readNumber() as number)
         }
         const sm_result : number | undefined = sm_buf
         const md_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let md_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (md_buf_runtimeType))
+        if ((md_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             md_buf = (valueDeserializer.readNumber() as number)
         }
         const md_result : number | undefined = md_buf
         const lg_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let lg_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (lg_buf_runtimeType))
+        if ((lg_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             lg_buf = (valueDeserializer.readNumber() as number)
         }
         const lg_result : number | undefined = lg_buf
         const margin_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let margin_buf : Dimension | undefined
-        if ((RuntimeType.UNDEFINED) != (margin_buf_runtimeType))
+        if ((margin_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const margin_buf__selector : int32 = valueDeserializer.readInt8()
             let margin_buf_ : string | number | Resource | undefined
@@ -1695,7 +1717,7 @@ export class BarGridColumnOptions_serializer {
         const margin_result : Dimension | undefined = margin_buf
         const gutter_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let gutter_buf : Dimension | undefined
-        if ((RuntimeType.UNDEFINED) != (gutter_buf_runtimeType))
+        if ((gutter_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const gutter_buf__selector : int32 = valueDeserializer.readInt8()
             let gutter_buf_ : string | number | Resource | undefined
@@ -1725,7 +1747,7 @@ export class ScrollableBarModeOptions_serializer {
         let value_margin_type : int32 = RuntimeType.UNDEFINED
         value_margin_type = runtimeType(value_margin)
         valueSerializer.writeInt8((value_margin_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_margin_type)) {
+        if ((value_margin_type) != (RuntimeType.UNDEFINED)) {
             const value_margin_value  = value_margin!
             let value_margin_value_type : int32 = RuntimeType.UNDEFINED
             value_margin_value_type = runtimeType(value_margin_value)
@@ -1749,7 +1771,7 @@ export class ScrollableBarModeOptions_serializer {
         let value_nonScrollableLayoutStyle_type : int32 = RuntimeType.UNDEFINED
         value_nonScrollableLayoutStyle_type = runtimeType(value_nonScrollableLayoutStyle)
         valueSerializer.writeInt8((value_nonScrollableLayoutStyle_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_nonScrollableLayoutStyle_type)) {
+        if ((value_nonScrollableLayoutStyle_type) != (RuntimeType.UNDEFINED)) {
             const value_nonScrollableLayoutStyle_value  = (value_nonScrollableLayoutStyle as LayoutStyle)
             valueSerializer.writeInt32(TypeChecker.LayoutStyle_ToNumeric(value_nonScrollableLayoutStyle_value))
         }
@@ -1758,7 +1780,7 @@ export class ScrollableBarModeOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const margin_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let margin_buf : Dimension | undefined
-        if ((RuntimeType.UNDEFINED) != (margin_buf_runtimeType))
+        if ((margin_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const margin_buf__selector : int32 = valueDeserializer.readInt8()
             let margin_buf_ : string | number | Resource | undefined
@@ -1779,7 +1801,7 @@ export class ScrollableBarModeOptions_serializer {
         const margin_result : Dimension | undefined = margin_buf
         const nonScrollableLayoutStyle_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let nonScrollableLayoutStyle_buf : LayoutStyle | undefined
-        if ((RuntimeType.UNDEFINED) != (nonScrollableLayoutStyle_buf_runtimeType))
+        if ((nonScrollableLayoutStyle_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             nonScrollableLayoutStyle_buf = TypeChecker.LayoutStyle_FromNumeric(valueDeserializer.readInt32())
         }

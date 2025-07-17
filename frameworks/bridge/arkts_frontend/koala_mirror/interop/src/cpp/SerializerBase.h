@@ -28,6 +28,7 @@
 #include "interop-types.h"
 #include "koala-types.h"
 #include "interop-logging.h"
+#include "interop-utils.h"
 
 #ifdef __arm__
 #define KOALA_NO_UNALIGNED_ACCESS 1
@@ -75,7 +76,7 @@ private:
         ASSERT(ownData);
         ASSERT(newLength > dataLength);
         auto* newData = reinterpret_cast<uint8_t*>(malloc(newLength));
-        memcpy(newData, data, position);
+        interop_memcpy(newData, newLength, data, position);
         free(data);
         data = newData;
     }
@@ -128,69 +129,49 @@ public:
     }
 
     void writeInt32(InteropInt32 value) {
-        check(4);
+        check(sizeof(value));
 #ifdef KOALA_NO_UNALIGNED_ACCESS
-        #ifdef __STDC_LIB_EXT1__
-            memcpy_s(data + position, dataLength, &value, 4);
-        #else
-            memcpy(data + position, &value, 4);
-        #endif
+        interop_memcpy(data + position, dataLength, &value, sizeof(value));
 #else
         *((InteropInt32*)(data + position)) = value;
 #endif
-        position += 4;
+        position += sizeof(value);
     }
 
     void writeInt64(InteropInt64 value) {
-        check(8);
+        check(sizeof(value));
 #ifdef KOALA_NO_UNALIGNED_ACCESS
-        #ifdef __STDC_LIB_EXT1__
-            memcpy_s(data + position, dataLength, &value, 8);
-        #else
-            memcpy(data + position, &value, 8);
-        #endif
+        interop_memcpy(data + position, dataLength, &value, sizeof(value));
 #else
         *((InteropInt64*)(data + position)) = value;
 #endif
-        position += 8;
+        position += sizeof(value);
     }
 
     void writeUInt64(InteropUInt64 value) {
-        check(8);
+        check(sizeof(value));
 #ifdef KOALA_NO_UNALIGNED_ACCESS
-        #ifdef __STDC_LIB_EXT1__
-            memcpy_s(data + position, dataLength, &value, 8);
-        #else
-            memcpy(data + position, &value, 8);
-        #endif
+        interop_memcpy(data + position, dataLength, &value, sizeof(value));
 #else
         *((InteropUInt64*)(data + position)) = value;
 #endif
-        position += 8;
+        position += sizeof(value);
     }
 
     void writeFloat32(InteropFloat32 value) {
-        check(4);
+        check(sizeof(value));
 #ifdef KOALA_NO_UNALIGNED_ACCESS
-        #ifdef __STDC_LIB_EXT1__
-            memcpy_s(data + position, dataLength, &value, 4);
-        #else
-            memcpy(data + position, &value, 4);
-        #endif
+        interop_memcpy(data + position, dataLength, &value, sizeof(value));
 #else
         *((InteropFloat32*)(data + position)) = value;
 #endif
-        position += 4;
+        position += sizeof(value);
     }
 
     void writeFloat64(InteropFloat64 value) {
-        check(8);
+        check(sizeof(value));
 #ifdef KOALA_NO_UNALIGNED_ACCESS
-        #ifdef __STDC_LIB_EXT1__
-            memcpy_s(data + position, dataLength, &value, 8);
-        #else
-            memcpy(data + position, &value, 8);
-        #endif
+        interop_memcpy(data + position, dataLength, &value, sizeof(value));
 #else
         *((InteropFloat64*)(data + position)) = value;
 #endif
@@ -198,23 +179,14 @@ public:
     }
 
     void writePointer(InteropNativePointer value) {
-        check(8);
         int64_t value64 = static_cast<int64_t>(reinterpret_cast<uintptr_t>(value));
+        check(sizeof(value64));
 #ifdef KOALA_NO_UNALIGNED_ACCESS
-        #ifdef __STDC_LIB_EXT1__
-            memcpy_s(data + position, dataLength, &value64, 8);
-        #else
-            memcpy(data + position, &value64, 8);
-        #endif
+        interop_memcpy(data + position, dataLength, &value64, sizeof(value64));
 #else
         *((int64_t*)(data + position)) = value64;
 #endif
-        position += 8;
-    }
-
-    void writeFunction(InteropFunction value) {
-        // TODO: ignored, remove!
-        writeInt32(0x666);
+        position += sizeof(value64);
     }
 
     void writeNumber(InteropNumber value) {
@@ -231,7 +203,7 @@ public:
     void writeString(InteropString value) {
         writeInt32(value.length + 1);
         check(value.length + 1);
-        strcpy((char*)(data + position), value.chars);
+        interop_strcpy((char*)(data + position), dataLength, value.chars);
         position += value.length + 1;
     }
 
@@ -259,12 +231,8 @@ public:
                     case 3: suffix = "%"; break;
                     case 4: suffix = "lpx"; break;
                 }
-                #ifdef __STDC_LIB_EXT1__ 
-                    snprintf_s(buf, 64, "%.8f%s", value.value, suffix.c_str());
-                #else
-                    snprintf(buf, 64, "%.8f%s", value.value, suffix.c_str());
-                #endif
-                InteropString str =  { buf, (InteropInt32) strlen(buf) };
+                interop_snprintf(buf, 64, "%.8f%s", value.value, suffix.c_str());
+                InteropString str =  { buf, (InteropInt32) interop_strlen(buf) };
                 writeString(str);
                 break;
             }
@@ -287,7 +255,7 @@ public:
     }
 
     void writeCustomObject(std::string type, InteropCustomObject value) {
-        // TODO implement
+        // Improve: implement
     }
 
     void writeBuffer(InteropBuffer buffer) {
@@ -299,7 +267,7 @@ public:
     KInteropReturnBuffer toReturnBuffer() {
         if (this->ownData) {
             KInteropReturnBuffer buffer {this->length(), this->release(), [](KNativePointer data, KInt length) { free(data); }};
-            // TODO fix memory issues
+            // Improve: fix memory issues
             return buffer;
         } else {
             return {this->length(), this->data, nullptr};

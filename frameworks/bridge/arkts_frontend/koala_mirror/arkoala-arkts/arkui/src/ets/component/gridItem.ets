@@ -44,7 +44,7 @@ export class ArkGridItemPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             GridItemOptions_serializer.write(thisSerializer, value_value)
         }
@@ -56,7 +56,7 @@ export class ArkGridItemPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeNumber(value_value)
         }
@@ -68,7 +68,7 @@ export class ArkGridItemPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeNumber(value_value)
         }
@@ -80,7 +80,7 @@ export class ArkGridItemPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeNumber(value_value)
         }
@@ -92,7 +92,7 @@ export class ArkGridItemPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeNumber(value_value)
         }
@@ -104,7 +104,7 @@ export class ArkGridItemPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -116,7 +116,7 @@ export class ArkGridItemPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -128,11 +128,17 @@ export class ArkGridItemPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
         ArkUIGeneratedNativeModule._GridItemAttribute_setOnSelect(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    set_onChangeEvent_selectedAttribute(callback_: ((selected: boolean | undefined) => void)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(callback_)
+        ArkUIGeneratedNativeModule._GridItemAttribute_set_onChangeEvent_selected(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }
@@ -151,6 +157,7 @@ export interface GridItemAttribute extends CommonMethod {
     selectable(value: boolean | undefined): this
     selected(value: boolean | undefined): this
     onSelect(value: ((isSelected: boolean) => void) | undefined): this
+    _onChangeEvent_selected(callback_: ((selected: boolean | undefined) => void)): void
     attributeModifier(value: AttributeModifier<GridItemAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkGridItemStyle extends ArkCommonMethodStyle implements GridItemAttribute {
@@ -182,6 +189,9 @@ export class ArkGridItemStyle extends ArkCommonMethodStyle implements GridItemAt
     }
     public onSelect(value: ((isSelected: boolean) => void) | undefined): this {
         return this
+    }
+    public _onChangeEvent_selected(callback_: ((selected: boolean | undefined) => void)): void {
+        throw new Error("Unimplemented")
     }
     public attributeModifier(value: AttributeModifier<GridItemAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
@@ -273,6 +283,14 @@ export class ArkGridItemComponent extends ArkCommonMethodComponent implements Gr
         }
         return this
     }
+    public _onChangeEvent_selected(callback_: ((selected: boolean | undefined) => void)): void {
+        if (this.checkPriority("_onChangeEvent_selected")) {
+            const callback__casted = callback_ as (((selected: boolean | undefined) => void))
+            this.getPeer()?.set_onChangeEvent_selectedAttribute(callback__casted)
+            return
+        }
+        return
+    }
     public attributeModifier(value: AttributeModifier<GridItemAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         this._modifier = value as AttributeModifier<CommonMethod>
         return this
@@ -342,6 +360,8 @@ export class ArkGridItemSet extends ArkCommonMethodSet implements GridItemAttrib
     _selected0_value?: boolean | undefined
     _onSelect_flag?: boolean
     _onSelect0_value?: ((isSelected: boolean) => void) | undefined
+    __onChangeEvent_selected_flag?: boolean
+    __onChangeEvent_selected0_value?: ((selected: boolean | undefined) => void)
     applyModifierPatch(component: GridItemAttribute): void {
         if (this._rowStart_flag)
             component.rowStart((this._rowStart0_value as number | undefined))
@@ -393,6 +413,8 @@ export class ArkGridItemSet extends ArkCommonMethodSet implements GridItemAttrib
         this._onSelect0_value = value
         return this
     }
+    public _onChangeEvent_selected(callback_: ((selected: boolean | undefined) => void)): void {
+    }
     public attributeModifier(value: AttributeModifier<GridItemAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
     }
@@ -404,7 +426,7 @@ export class GridItemOptions_serializer {
         let value_style_type : int32 = RuntimeType.UNDEFINED
         value_style_type = runtimeType(value_style)
         valueSerializer.writeInt8((value_style_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_style_type)) {
+        if ((value_style_type) != (RuntimeType.UNDEFINED)) {
             const value_style_value  = (value_style as GridItemStyle)
             valueSerializer.writeInt32(TypeChecker.GridItemStyle_ToNumeric(value_style_value))
         }
@@ -413,7 +435,7 @@ export class GridItemOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const style_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let style_buf : GridItemStyle | undefined
-        if ((RuntimeType.UNDEFINED) != (style_buf_runtimeType))
+        if ((style_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             style_buf = TypeChecker.GridItemStyle_FromNumeric(valueDeserializer.readInt32())
         }

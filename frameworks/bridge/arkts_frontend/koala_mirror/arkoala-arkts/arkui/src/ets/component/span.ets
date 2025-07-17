@@ -49,7 +49,7 @@ export class ArkBaseSpanPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             TextBackgroundStyle_serializer.write(thisSerializer, value_value)
         }
@@ -61,7 +61,7 @@ export class ArkBaseSpanPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             LengthMetrics_serializer.write(thisSerializer, value_value)
         }
@@ -102,7 +102,7 @@ export class ArkSpanPeer extends ArkBaseSpanPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             Font_serializer.write(thisSerializer, value_value)
         }
@@ -114,7 +114,7 @@ export class ArkSpanPeer extends ArkBaseSpanPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -147,7 +147,7 @@ export class ArkSpanPeer extends ArkBaseSpanPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -175,7 +175,7 @@ export class ArkSpanPeer extends ArkBaseSpanPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = (value as FontStyle)
             thisSerializer.writeInt32(TypeChecker.FontStyle_ToNumeric(value_value))
         }
@@ -187,7 +187,7 @@ export class ArkSpanPeer extends ArkBaseSpanPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -215,7 +215,7 @@ export class ArkSpanPeer extends ArkBaseSpanPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -238,7 +238,7 @@ export class ArkSpanPeer extends ArkBaseSpanPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             DecorationStyleInterface_serializer.write(thisSerializer, value_value)
         }
@@ -250,7 +250,7 @@ export class ArkSpanPeer extends ArkBaseSpanPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -273,7 +273,7 @@ export class ArkSpanPeer extends ArkBaseSpanPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = (value as TextCase)
             thisSerializer.writeInt32(TypeChecker.TextCase_ToNumeric(value_value))
         }
@@ -285,7 +285,7 @@ export class ArkSpanPeer extends ArkBaseSpanPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -313,7 +313,7 @@ export class ArkSpanPeer extends ArkBaseSpanPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -326,8 +326,8 @@ export class ArkSpanPeer extends ArkBaseSpanPeer {
                 thisSerializer.writeInt8((1).toChar())
                 const value_value_1  = value_value as Array<ShadowOptions>
                 thisSerializer.writeInt32((value_value_1.length).toInt())
-                for (let i = 0; i < value_value_1.length; i++) {
-                    const value_value_1_element : ShadowOptions = value_value_1[i]
+                for (let value_value_1_counter_i = 0; value_value_1_counter_i < value_value_1.length; value_value_1_counter_i++) {
+                    const value_value_1_element : ShadowOptions = value_value_1[value_value_1_counter_i]
                     ShadowOptions_serializer.write(thisSerializer, value_value_1_element)
                 }
             }
@@ -791,7 +791,7 @@ export class TextBackgroundStyle_serializer {
         let value_color_type : int32 = RuntimeType.UNDEFINED
         value_color_type = runtimeType(value_color)
         valueSerializer.writeInt8((value_color_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_color_type)) {
+        if ((value_color_type) != (RuntimeType.UNDEFINED)) {
             const value_color_value  = value_color!
             let value_color_value_type : int32 = RuntimeType.UNDEFINED
             value_color_value_type = runtimeType(value_color_value)
@@ -820,7 +820,7 @@ export class TextBackgroundStyle_serializer {
         let value_radius_type : int32 = RuntimeType.UNDEFINED
         value_radius_type = runtimeType(value_radius)
         valueSerializer.writeInt8((value_radius_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_radius_type)) {
+        if ((value_radius_type) != (RuntimeType.UNDEFINED)) {
             const value_radius_value  = value_radius!
             let value_radius_value_type : int32 = RuntimeType.UNDEFINED
             value_radius_value_type = runtimeType(value_radius_value)
@@ -856,7 +856,7 @@ export class TextBackgroundStyle_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const color_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let color_buf : ResourceColor | undefined
-        if ((RuntimeType.UNDEFINED) != (color_buf_runtimeType))
+        if ((color_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const color_buf__selector : int32 = valueDeserializer.readInt8()
             let color_buf_ : Color | number | string | Resource | undefined
@@ -880,7 +880,7 @@ export class TextBackgroundStyle_serializer {
         const color_result : ResourceColor | undefined = color_buf
         const radius_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let radius_buf : Dimension | BorderRadiuses | undefined
-        if ((RuntimeType.UNDEFINED) != (radius_buf_runtimeType))
+        if ((radius_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const radius_buf__selector : int32 = valueDeserializer.readInt8()
             let radius_buf_ : Dimension | BorderRadiuses | undefined

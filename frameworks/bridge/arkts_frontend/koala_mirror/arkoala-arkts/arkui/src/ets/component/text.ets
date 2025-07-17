@@ -99,7 +99,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         let content_type : int32 = RuntimeType.UNDEFINED
         content_type = runtimeType(content)
         thisSerializer.writeInt8((content_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (content_type)) {
+        if ((content_type) != (RuntimeType.UNDEFINED)) {
             const content_value  = content!
             let content_value_type : int32 = RuntimeType.UNDEFINED
             content_value_type = runtimeType(content_value)
@@ -117,7 +117,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             TextOptions_serializer.write(thisSerializer, value_value)
         }
@@ -129,7 +129,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -162,7 +162,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -190,7 +190,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -218,7 +218,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -246,7 +246,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -269,7 +269,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -292,7 +292,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = (value as FontStyle)
             thisSerializer.writeInt32(TypeChecker.FontStyle_ToNumeric(value_value))
         }
@@ -304,7 +304,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             LengthMetrics_serializer.write(thisSerializer, value_value)
         }
@@ -316,7 +316,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = (value as TextAlign)
             thisSerializer.writeInt32(TypeChecker.TextAlign_ToNumeric(value_value))
         }
@@ -328,7 +328,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -356,7 +356,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             TextOverflowOptions_serializer.write(thisSerializer, value_value)
         }
@@ -368,7 +368,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -391,7 +391,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeNumber(value_value)
         }
@@ -403,7 +403,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             DecorationStyleInterface_serializer.write(thisSerializer, value_value)
         }
@@ -415,7 +415,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -438,7 +438,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = (value as TextCase)
             thisSerializer.writeInt32(TypeChecker.TextCase_ToNumeric(value_value))
         }
@@ -450,7 +450,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -473,7 +473,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = (value as CopyOptions)
             thisSerializer.writeInt32(TypeChecker.CopyOptions_ToNumeric(value_value))
         }
@@ -485,7 +485,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -497,7 +497,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -510,8 +510,8 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((1).toChar())
                 const value_value_1  = value_value as Array<ShadowOptions>
                 thisSerializer.writeInt32((value_value_1.length).toInt())
-                for (let i = 0; i < value_value_1.length; i++) {
-                    const value_value_1_element : ShadowOptions = value_value_1[i]
+                for (let value_value_1_counter_i = 0; value_value_1_counter_i < value_value_1.length; value_value_1_counter_i++) {
+                    const value_value_1_element : ShadowOptions = value_value_1[value_value_1_counter_i]
                     ShadowOptions_serializer.write(thisSerializer, value_value_1_element)
                 }
             }
@@ -524,7 +524,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = (value as TextHeightAdaptivePolicy)
             thisSerializer.writeInt32(TypeChecker.TextHeightAdaptivePolicy_ToNumeric(value_value))
         }
@@ -536,7 +536,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -564,7 +564,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = (value as WordBreak)
             thisSerializer.writeInt32(TypeChecker.WordBreak_ToNumeric(value_value))
         }
@@ -576,7 +576,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = (value as LineBreakStrategy)
             thisSerializer.writeInt32(TypeChecker.LineBreakStrategy_ToNumeric(value_value))
         }
@@ -588,7 +588,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -600,7 +600,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -633,7 +633,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -666,7 +666,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = (value as EllipsisMode)
             thisSerializer.writeInt32(TypeChecker.EllipsisMode_ToNumeric(value_value))
         }
@@ -678,7 +678,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -690,7 +690,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             TextDataDetectorConfig_serializer.write(thisSerializer, value_value)
         }
@@ -702,7 +702,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -714,7 +714,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeString(value_value)
         }
@@ -726,7 +726,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             TextMarqueeOptions_serializer.write(thisSerializer, value_value)
         }
@@ -738,7 +738,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -750,7 +750,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -762,7 +762,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = (value as TextSelectableMode)
             thisSerializer.writeInt32(TypeChecker.TextSelectableMode_ToNumeric(value_value))
         }
@@ -774,7 +774,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             EditMenuOptions_serializer.write(thisSerializer, value_value)
         }
@@ -786,7 +786,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -798,7 +798,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -810,14 +810,14 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         let fontValue_type : int32 = RuntimeType.UNDEFINED
         fontValue_type = runtimeType(fontValue)
         thisSerializer.writeInt8((fontValue_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (fontValue_type)) {
+        if ((fontValue_type) != (RuntimeType.UNDEFINED)) {
             const fontValue_value  = fontValue!
             Font_serializer.write(thisSerializer, fontValue_value)
         }
         let options_type : int32 = RuntimeType.UNDEFINED
         options_type = runtimeType(options)
         thisSerializer.writeInt8((options_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (options_type)) {
+        if ((options_type) != (RuntimeType.UNDEFINED)) {
             const options_value  = options!
             FontSettingOptions_serializer.write(thisSerializer, options_value)
         }
@@ -829,7 +829,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         let weight_type : int32 = RuntimeType.UNDEFINED
         weight_type = runtimeType(weight)
         thisSerializer.writeInt8((weight_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (weight_type)) {
+        if ((weight_type) != (RuntimeType.UNDEFINED)) {
             const weight_value  = weight!
             let weight_value_type : int32 = RuntimeType.UNDEFINED
             weight_value_type = runtimeType(weight_value)
@@ -852,7 +852,7 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         let options_type : int32 = RuntimeType.UNDEFINED
         options_type = runtimeType(options)
         thisSerializer.writeInt8((options_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (options_type)) {
+        if ((options_type) != (RuntimeType.UNDEFINED)) {
             const options_value  = options!
             FontSettingOptions_serializer.write(thisSerializer, options_value)
         }
@@ -864,14 +864,14 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         let selectionStart_type : int32 = RuntimeType.UNDEFINED
         selectionStart_type = runtimeType(selectionStart)
         thisSerializer.writeInt8((selectionStart_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (selectionStart_type)) {
+        if ((selectionStart_type) != (RuntimeType.UNDEFINED)) {
             const selectionStart_value  = selectionStart!
             thisSerializer.writeNumber(selectionStart_value)
         }
         let selectionEnd_type : int32 = RuntimeType.UNDEFINED
         selectionEnd_type = runtimeType(selectionEnd)
         thisSerializer.writeInt8((selectionEnd_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (selectionEnd_type)) {
+        if ((selectionEnd_type) != (RuntimeType.UNDEFINED)) {
             const selectionEnd_value  = selectionEnd!
             thisSerializer.writeNumber(selectionEnd_value)
         }
@@ -883,28 +883,28 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         let spanType_type : int32 = RuntimeType.UNDEFINED
         spanType_type = runtimeType(spanType)
         thisSerializer.writeInt8((spanType_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (spanType_type)) {
+        if ((spanType_type) != (RuntimeType.UNDEFINED)) {
             const spanType_value  = (spanType as TextSpanType)
             thisSerializer.writeInt32(TypeChecker.TextSpanType_ToNumeric(spanType_value))
         }
         let content_type : int32 = RuntimeType.UNDEFINED
         content_type = runtimeType(content)
         thisSerializer.writeInt8((content_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (content_type)) {
+        if ((content_type) != (RuntimeType.UNDEFINED)) {
             const content_value  = content!
             thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(content_value))
         }
         let responseType_type : int32 = RuntimeType.UNDEFINED
         responseType_type = runtimeType(responseType)
         thisSerializer.writeInt8((responseType_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (responseType_type)) {
+        if ((responseType_type) != (RuntimeType.UNDEFINED)) {
             const responseType_value  = (responseType as TextResponseType)
             thisSerializer.writeInt32(TypeChecker.TextResponseType_ToNumeric(responseType_value))
         }
         let options_type : int32 = RuntimeType.UNDEFINED
         options_type = runtimeType(options)
         thisSerializer.writeInt8((options_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (options_type)) {
+        if ((options_type) != (RuntimeType.UNDEFINED)) {
             const options_value  = options!
             SelectionMenuOptions_serializer.write(thisSerializer, options_value)
         }
@@ -2119,7 +2119,7 @@ export class TextMarqueeOptions_serializer {
         let value_step_type : int32 = RuntimeType.UNDEFINED
         value_step_type = runtimeType(value_step)
         valueSerializer.writeInt8((value_step_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_step_type)) {
+        if ((value_step_type) != (RuntimeType.UNDEFINED)) {
             const value_step_value  = value_step!
             valueSerializer.writeNumber(value_step_value)
         }
@@ -2127,7 +2127,7 @@ export class TextMarqueeOptions_serializer {
         let value_loop_type : int32 = RuntimeType.UNDEFINED
         value_loop_type = runtimeType(value_loop)
         valueSerializer.writeInt8((value_loop_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_loop_type)) {
+        if ((value_loop_type) != (RuntimeType.UNDEFINED)) {
             const value_loop_value  = value_loop!
             valueSerializer.writeNumber(value_loop_value)
         }
@@ -2135,7 +2135,7 @@ export class TextMarqueeOptions_serializer {
         let value_fromStart_type : int32 = RuntimeType.UNDEFINED
         value_fromStart_type = runtimeType(value_fromStart)
         valueSerializer.writeInt8((value_fromStart_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_fromStart_type)) {
+        if ((value_fromStart_type) != (RuntimeType.UNDEFINED)) {
             const value_fromStart_value  = value_fromStart!
             valueSerializer.writeBoolean(value_fromStart_value)
         }
@@ -2143,7 +2143,7 @@ export class TextMarqueeOptions_serializer {
         let value_delay_type : int32 = RuntimeType.UNDEFINED
         value_delay_type = runtimeType(value_delay)
         valueSerializer.writeInt8((value_delay_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_delay_type)) {
+        if ((value_delay_type) != (RuntimeType.UNDEFINED)) {
             const value_delay_value  = value_delay!
             valueSerializer.writeNumber(value_delay_value)
         }
@@ -2151,7 +2151,7 @@ export class TextMarqueeOptions_serializer {
         let value_fadeout_type : int32 = RuntimeType.UNDEFINED
         value_fadeout_type = runtimeType(value_fadeout)
         valueSerializer.writeInt8((value_fadeout_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_fadeout_type)) {
+        if ((value_fadeout_type) != (RuntimeType.UNDEFINED)) {
             const value_fadeout_value  = value_fadeout!
             valueSerializer.writeBoolean(value_fadeout_value)
         }
@@ -2159,7 +2159,7 @@ export class TextMarqueeOptions_serializer {
         let value_marqueeStartPolicy_type : int32 = RuntimeType.UNDEFINED
         value_marqueeStartPolicy_type = runtimeType(value_marqueeStartPolicy)
         valueSerializer.writeInt8((value_marqueeStartPolicy_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_marqueeStartPolicy_type)) {
+        if ((value_marqueeStartPolicy_type) != (RuntimeType.UNDEFINED)) {
             const value_marqueeStartPolicy_value  = (value_marqueeStartPolicy as MarqueeStartPolicy)
             valueSerializer.writeInt32(TypeChecker.MarqueeStartPolicy_ToNumeric(value_marqueeStartPolicy_value))
         }
@@ -2169,42 +2169,42 @@ export class TextMarqueeOptions_serializer {
         const start_result : boolean = valueDeserializer.readBoolean()
         const step_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let step_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (step_buf_runtimeType))
+        if ((step_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             step_buf = (valueDeserializer.readNumber() as number)
         }
         const step_result : number | undefined = step_buf
         const loop_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let loop_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (loop_buf_runtimeType))
+        if ((loop_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             loop_buf = (valueDeserializer.readNumber() as number)
         }
         const loop_result : number | undefined = loop_buf
         const fromStart_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let fromStart_buf : boolean | undefined
-        if ((RuntimeType.UNDEFINED) != (fromStart_buf_runtimeType))
+        if ((fromStart_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             fromStart_buf = valueDeserializer.readBoolean()
         }
         const fromStart_result : boolean | undefined = fromStart_buf
         const delay_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let delay_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (delay_buf_runtimeType))
+        if ((delay_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             delay_buf = (valueDeserializer.readNumber() as number)
         }
         const delay_result : number | undefined = delay_buf
         const fadeout_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let fadeout_buf : boolean | undefined
-        if ((RuntimeType.UNDEFINED) != (fadeout_buf_runtimeType))
+        if ((fadeout_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             fadeout_buf = valueDeserializer.readBoolean()
         }
         const fadeout_result : boolean | undefined = fadeout_buf
         const marqueeStartPolicy_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let marqueeStartPolicy_buf : MarqueeStartPolicy | undefined
-        if ((RuntimeType.UNDEFINED) != (marqueeStartPolicy_buf_runtimeType))
+        if ((marqueeStartPolicy_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             marqueeStartPolicy_buf = TypeChecker.MarqueeStartPolicy_FromNumeric(valueDeserializer.readInt32())
         }

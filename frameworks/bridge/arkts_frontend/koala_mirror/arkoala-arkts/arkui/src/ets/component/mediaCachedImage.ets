@@ -178,8 +178,8 @@ export class ASTCResource_serializer {
         let valueSerializer : SerializerBase = buffer
         const value_sources  = value.sources
         valueSerializer.writeInt32((value_sources.length).toInt())
-        for (let i = 0; i < value_sources.length; i++) {
-            const value_sources_element : string = value_sources[i]
+        for (let value_sources_counter_i = 0; value_sources_counter_i < value_sources.length; value_sources_counter_i++) {
+            const value_sources_element : string = value_sources[value_sources_counter_i]
             valueSerializer.writeString(value_sources_element)
         }
         const value_column  = value.column

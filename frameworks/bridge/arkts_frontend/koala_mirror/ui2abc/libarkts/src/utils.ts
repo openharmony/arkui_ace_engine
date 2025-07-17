@@ -124,7 +124,7 @@ function addExports(code: string): string {
             code = code.replaceAll(`\n${astNodeText}`, `\nexport ${astNodeText}`)
         }
     )
-    // TODO this is a temporary workaround and should be replaced with a proper import/export handling in future
+    // Improve: this is a temporary workaround and should be replaced with a proper import/export handling in future
     code = code.replaceAll(/\n(@memo\(\) @BuilderLambda\(\{value:"\w+"\}\)) function/g, '\n$1 export function')
     const fix = [
         ["export @memo() function", "@memo() export function"],
@@ -194,7 +194,7 @@ function fixEmptyDeclareNamespace(code: string): string {
 }
 
 /*
-    TODO:
+    Improve:
      The lowerings insert %% and other special symbols into names of temporary variables.
      Until we keep feeding ast dumps back to the parser this function is needed.
  */

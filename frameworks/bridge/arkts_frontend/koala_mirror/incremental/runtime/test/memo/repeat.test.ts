@@ -14,7 +14,7 @@
  */
 
 import { assert, suite, test } from "@koalaui/harness"
-import { KoalaCallsiteKey, toKoalaCallsiteKey as key } from "@koalaui/common"
+import { KoalaCallsiteKey, hashCodeFromString as key } from "@koalaui/common"
 import {
     GlobalStateManager,
     Repeat,

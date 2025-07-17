@@ -55,7 +55,7 @@ export class ArkProgressPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeNumber(value_value)
         }
@@ -67,7 +67,7 @@ export class ArkProgressPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -111,7 +111,7 @@ export class ArkProgressPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -144,7 +144,7 @@ export class ArkProgressPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -156,7 +156,7 @@ export class ArkProgressPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteObject(value_value)
         }
@@ -476,7 +476,7 @@ export class ProgressOptions_serializer {
         let value_total_type : int32 = RuntimeType.UNDEFINED
         value_total_type = runtimeType(value_total)
         valueSerializer.writeInt8((value_total_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_total_type)) {
+        if ((value_total_type) != (RuntimeType.UNDEFINED)) {
             const value_total_value  = value_total!
             valueSerializer.writeNumber(value_total_value)
         }
@@ -484,7 +484,7 @@ export class ProgressOptions_serializer {
         let value_type_type : int32 = RuntimeType.UNDEFINED
         value_type_type = runtimeType(value_type)
         valueSerializer.writeInt8((value_type_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type_type)) {
+        if ((value_type_type) != (RuntimeType.UNDEFINED)) {
             const value_type_value  = (value_type as ProgressType)
             valueSerializer.writeInt32(TypeChecker.ProgressType_ToNumeric(value_type_value))
         }
@@ -494,14 +494,14 @@ export class ProgressOptions_serializer {
         const value_result : number = (valueDeserializer.readNumber() as number)
         const total_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let total_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (total_buf_runtimeType))
+        if ((total_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             total_buf = (valueDeserializer.readNumber() as number)
         }
         const total_result : number | undefined = total_buf
         const type_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let type_buf : ProgressType | undefined
-        if ((RuntimeType.UNDEFINED) != (type_buf_runtimeType))
+        if ((type_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             type_buf = TypeChecker.ProgressType_FromNumeric(valueDeserializer.readInt32())
         }
@@ -517,7 +517,7 @@ export class LinearStyleOptions_serializer {
         let value_enableScanEffect_type : int32 = RuntimeType.UNDEFINED
         value_enableScanEffect_type = runtimeType(value_enableScanEffect)
         valueSerializer.writeInt8((value_enableScanEffect_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_enableScanEffect_type)) {
+        if ((value_enableScanEffect_type) != (RuntimeType.UNDEFINED)) {
             const value_enableScanEffect_value  = value_enableScanEffect!
             valueSerializer.writeBoolean(value_enableScanEffect_value)
         }
@@ -525,7 +525,7 @@ export class LinearStyleOptions_serializer {
         let value_strokeWidth_type : int32 = RuntimeType.UNDEFINED
         value_strokeWidth_type = runtimeType(value_strokeWidth)
         valueSerializer.writeInt8((value_strokeWidth_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_strokeWidth_type)) {
+        if ((value_strokeWidth_type) != (RuntimeType.UNDEFINED)) {
             const value_strokeWidth_value  = value_strokeWidth!
             let value_strokeWidth_value_type : int32 = RuntimeType.UNDEFINED
             value_strokeWidth_value_type = runtimeType(value_strokeWidth_value)
@@ -549,7 +549,7 @@ export class LinearStyleOptions_serializer {
         let value_strokeRadius_type : int32 = RuntimeType.UNDEFINED
         value_strokeRadius_type = runtimeType(value_strokeRadius)
         valueSerializer.writeInt8((value_strokeRadius_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_strokeRadius_type)) {
+        if ((value_strokeRadius_type) != (RuntimeType.UNDEFINED)) {
             const value_strokeRadius_value  = value_strokeRadius!
             let value_strokeRadius_value_type : int32 = RuntimeType.UNDEFINED
             value_strokeRadius_value_type = runtimeType(value_strokeRadius_value)
@@ -574,14 +574,14 @@ export class LinearStyleOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const enableScanEffect_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let enableScanEffect_buf : boolean | undefined
-        if ((RuntimeType.UNDEFINED) != (enableScanEffect_buf_runtimeType))
+        if ((enableScanEffect_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             enableScanEffect_buf = valueDeserializer.readBoolean()
         }
         const enableScanEffect_result : boolean | undefined = enableScanEffect_buf
         const strokeWidth_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let strokeWidth_buf : Length | undefined
-        if ((RuntimeType.UNDEFINED) != (strokeWidth_buf_runtimeType))
+        if ((strokeWidth_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const strokeWidth_buf__selector : int32 = valueDeserializer.readInt8()
             let strokeWidth_buf_ : string | number | Resource | undefined
@@ -602,7 +602,7 @@ export class LinearStyleOptions_serializer {
         const strokeWidth_result : Length | undefined = strokeWidth_buf
         const strokeRadius_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let strokeRadius_buf : string | number | Resource | undefined
-        if ((RuntimeType.UNDEFINED) != (strokeRadius_buf_runtimeType))
+        if ((strokeRadius_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const strokeRadius_buf__selector : int32 = valueDeserializer.readInt8()
             let strokeRadius_buf_ : string | number | Resource | undefined
@@ -632,7 +632,7 @@ export class ProgressStyleOptions_serializer {
         let value_enableSmoothEffect_type : int32 = RuntimeType.UNDEFINED
         value_enableSmoothEffect_type = runtimeType(value_enableSmoothEffect)
         valueSerializer.writeInt8((value_enableSmoothEffect_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_enableSmoothEffect_type)) {
+        if ((value_enableSmoothEffect_type) != (RuntimeType.UNDEFINED)) {
             const value_enableSmoothEffect_value  = value_enableSmoothEffect!
             valueSerializer.writeBoolean(value_enableSmoothEffect_value)
         }
@@ -640,7 +640,7 @@ export class ProgressStyleOptions_serializer {
         let value_strokeWidth_type : int32 = RuntimeType.UNDEFINED
         value_strokeWidth_type = runtimeType(value_strokeWidth)
         valueSerializer.writeInt8((value_strokeWidth_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_strokeWidth_type)) {
+        if ((value_strokeWidth_type) != (RuntimeType.UNDEFINED)) {
             const value_strokeWidth_value  = value_strokeWidth!
             let value_strokeWidth_value_type : int32 = RuntimeType.UNDEFINED
             value_strokeWidth_value_type = runtimeType(value_strokeWidth_value)
@@ -664,7 +664,7 @@ export class ProgressStyleOptions_serializer {
         let value_scaleCount_type : int32 = RuntimeType.UNDEFINED
         value_scaleCount_type = runtimeType(value_scaleCount)
         valueSerializer.writeInt8((value_scaleCount_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_scaleCount_type)) {
+        if ((value_scaleCount_type) != (RuntimeType.UNDEFINED)) {
             const value_scaleCount_value  = value_scaleCount!
             valueSerializer.writeNumber(value_scaleCount_value)
         }
@@ -672,7 +672,7 @@ export class ProgressStyleOptions_serializer {
         let value_scaleWidth_type : int32 = RuntimeType.UNDEFINED
         value_scaleWidth_type = runtimeType(value_scaleWidth)
         valueSerializer.writeInt8((value_scaleWidth_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_scaleWidth_type)) {
+        if ((value_scaleWidth_type) != (RuntimeType.UNDEFINED)) {
             const value_scaleWidth_value  = value_scaleWidth!
             let value_scaleWidth_value_type : int32 = RuntimeType.UNDEFINED
             value_scaleWidth_value_type = runtimeType(value_scaleWidth_value)
@@ -697,14 +697,14 @@ export class ProgressStyleOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const enableSmoothEffect_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let enableSmoothEffect_buf : boolean | undefined
-        if ((RuntimeType.UNDEFINED) != (enableSmoothEffect_buf_runtimeType))
+        if ((enableSmoothEffect_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             enableSmoothEffect_buf = valueDeserializer.readBoolean()
         }
         const enableSmoothEffect_result : boolean | undefined = enableSmoothEffect_buf
         const strokeWidth_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let strokeWidth_buf : Length | undefined
-        if ((RuntimeType.UNDEFINED) != (strokeWidth_buf_runtimeType))
+        if ((strokeWidth_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const strokeWidth_buf__selector : int32 = valueDeserializer.readInt8()
             let strokeWidth_buf_ : string | number | Resource | undefined
@@ -725,14 +725,14 @@ export class ProgressStyleOptions_serializer {
         const strokeWidth_result : Length | undefined = strokeWidth_buf
         const scaleCount_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let scaleCount_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (scaleCount_buf_runtimeType))
+        if ((scaleCount_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             scaleCount_buf = (valueDeserializer.readNumber() as number)
         }
         const scaleCount_result : number | undefined = scaleCount_buf
         const scaleWidth_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let scaleWidth_buf : Length | undefined
-        if ((RuntimeType.UNDEFINED) != (scaleWidth_buf_runtimeType))
+        if ((scaleWidth_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const scaleWidth_buf__selector : int32 = valueDeserializer.readInt8()
             let scaleWidth_buf_ : string | number | Resource | undefined
@@ -762,7 +762,7 @@ export class RingStyleOptions_serializer {
         let value_enableScanEffect_type : int32 = RuntimeType.UNDEFINED
         value_enableScanEffect_type = runtimeType(value_enableScanEffect)
         valueSerializer.writeInt8((value_enableScanEffect_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_enableScanEffect_type)) {
+        if ((value_enableScanEffect_type) != (RuntimeType.UNDEFINED)) {
             const value_enableScanEffect_value  = value_enableScanEffect!
             valueSerializer.writeBoolean(value_enableScanEffect_value)
         }
@@ -770,7 +770,7 @@ export class RingStyleOptions_serializer {
         let value_strokeWidth_type : int32 = RuntimeType.UNDEFINED
         value_strokeWidth_type = runtimeType(value_strokeWidth)
         valueSerializer.writeInt8((value_strokeWidth_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_strokeWidth_type)) {
+        if ((value_strokeWidth_type) != (RuntimeType.UNDEFINED)) {
             const value_strokeWidth_value  = value_strokeWidth!
             let value_strokeWidth_value_type : int32 = RuntimeType.UNDEFINED
             value_strokeWidth_value_type = runtimeType(value_strokeWidth_value)
@@ -794,7 +794,7 @@ export class RingStyleOptions_serializer {
         let value_shadow_type : int32 = RuntimeType.UNDEFINED
         value_shadow_type = runtimeType(value_shadow)
         valueSerializer.writeInt8((value_shadow_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_shadow_type)) {
+        if ((value_shadow_type) != (RuntimeType.UNDEFINED)) {
             const value_shadow_value  = value_shadow!
             valueSerializer.writeBoolean(value_shadow_value)
         }
@@ -802,7 +802,7 @@ export class RingStyleOptions_serializer {
         let value_status_type : int32 = RuntimeType.UNDEFINED
         value_status_type = runtimeType(value_status)
         valueSerializer.writeInt8((value_status_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_status_type)) {
+        if ((value_status_type) != (RuntimeType.UNDEFINED)) {
             const value_status_value  = (value_status as ProgressStatus)
             valueSerializer.writeInt32(TypeChecker.ProgressStatus_ToNumeric(value_status_value))
         }
@@ -811,14 +811,14 @@ export class RingStyleOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const enableScanEffect_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let enableScanEffect_buf : boolean | undefined
-        if ((RuntimeType.UNDEFINED) != (enableScanEffect_buf_runtimeType))
+        if ((enableScanEffect_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             enableScanEffect_buf = valueDeserializer.readBoolean()
         }
         const enableScanEffect_result : boolean | undefined = enableScanEffect_buf
         const strokeWidth_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let strokeWidth_buf : Length | undefined
-        if ((RuntimeType.UNDEFINED) != (strokeWidth_buf_runtimeType))
+        if ((strokeWidth_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const strokeWidth_buf__selector : int32 = valueDeserializer.readInt8()
             let strokeWidth_buf_ : string | number | Resource | undefined
@@ -839,14 +839,14 @@ export class RingStyleOptions_serializer {
         const strokeWidth_result : Length | undefined = strokeWidth_buf
         const shadow_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let shadow_buf : boolean | undefined
-        if ((RuntimeType.UNDEFINED) != (shadow_buf_runtimeType))
+        if ((shadow_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             shadow_buf = valueDeserializer.readBoolean()
         }
         const shadow_result : boolean | undefined = shadow_buf
         const status_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let status_buf : ProgressStatus | undefined
-        if ((RuntimeType.UNDEFINED) != (status_buf_runtimeType))
+        if ((status_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             status_buf = TypeChecker.ProgressStatus_FromNumeric(valueDeserializer.readInt32())
         }
@@ -862,7 +862,7 @@ export class CapsuleStyleOptions_serializer {
         let value_enableScanEffect_type : int32 = RuntimeType.UNDEFINED
         value_enableScanEffect_type = runtimeType(value_enableScanEffect)
         valueSerializer.writeInt8((value_enableScanEffect_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_enableScanEffect_type)) {
+        if ((value_enableScanEffect_type) != (RuntimeType.UNDEFINED)) {
             const value_enableScanEffect_value  = value_enableScanEffect!
             valueSerializer.writeBoolean(value_enableScanEffect_value)
         }
@@ -870,7 +870,7 @@ export class CapsuleStyleOptions_serializer {
         let value_borderColor_type : int32 = RuntimeType.UNDEFINED
         value_borderColor_type = runtimeType(value_borderColor)
         valueSerializer.writeInt8((value_borderColor_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_borderColor_type)) {
+        if ((value_borderColor_type) != (RuntimeType.UNDEFINED)) {
             const value_borderColor_value  = value_borderColor!
             let value_borderColor_value_type : int32 = RuntimeType.UNDEFINED
             value_borderColor_value_type = runtimeType(value_borderColor_value)
@@ -899,7 +899,7 @@ export class CapsuleStyleOptions_serializer {
         let value_borderWidth_type : int32 = RuntimeType.UNDEFINED
         value_borderWidth_type = runtimeType(value_borderWidth)
         valueSerializer.writeInt8((value_borderWidth_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_borderWidth_type)) {
+        if ((value_borderWidth_type) != (RuntimeType.UNDEFINED)) {
             const value_borderWidth_value  = value_borderWidth!
             let value_borderWidth_value_type : int32 = RuntimeType.UNDEFINED
             value_borderWidth_value_type = runtimeType(value_borderWidth_value)
@@ -923,7 +923,7 @@ export class CapsuleStyleOptions_serializer {
         let value_content_type : int32 = RuntimeType.UNDEFINED
         value_content_type = runtimeType(value_content)
         valueSerializer.writeInt8((value_content_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_content_type)) {
+        if ((value_content_type) != (RuntimeType.UNDEFINED)) {
             const value_content_value  = value_content!
             valueSerializer.writeString(value_content_value)
         }
@@ -931,7 +931,7 @@ export class CapsuleStyleOptions_serializer {
         let value_font_type : int32 = RuntimeType.UNDEFINED
         value_font_type = runtimeType(value_font)
         valueSerializer.writeInt8((value_font_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_font_type)) {
+        if ((value_font_type) != (RuntimeType.UNDEFINED)) {
             const value_font_value  = value_font!
             Font_serializer.write(valueSerializer, value_font_value)
         }
@@ -939,7 +939,7 @@ export class CapsuleStyleOptions_serializer {
         let value_fontColor_type : int32 = RuntimeType.UNDEFINED
         value_fontColor_type = runtimeType(value_fontColor)
         valueSerializer.writeInt8((value_fontColor_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_fontColor_type)) {
+        if ((value_fontColor_type) != (RuntimeType.UNDEFINED)) {
             const value_fontColor_value  = value_fontColor!
             let value_fontColor_value_type : int32 = RuntimeType.UNDEFINED
             value_fontColor_value_type = runtimeType(value_fontColor_value)
@@ -968,7 +968,7 @@ export class CapsuleStyleOptions_serializer {
         let value_showDefaultPercentage_type : int32 = RuntimeType.UNDEFINED
         value_showDefaultPercentage_type = runtimeType(value_showDefaultPercentage)
         valueSerializer.writeInt8((value_showDefaultPercentage_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_showDefaultPercentage_type)) {
+        if ((value_showDefaultPercentage_type) != (RuntimeType.UNDEFINED)) {
             const value_showDefaultPercentage_value  = value_showDefaultPercentage!
             valueSerializer.writeBoolean(value_showDefaultPercentage_value)
         }
@@ -976,7 +976,7 @@ export class CapsuleStyleOptions_serializer {
         let value_borderRadius_type : int32 = RuntimeType.UNDEFINED
         value_borderRadius_type = runtimeType(value_borderRadius)
         valueSerializer.writeInt8((value_borderRadius_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_borderRadius_type)) {
+        if ((value_borderRadius_type) != (RuntimeType.UNDEFINED)) {
             const value_borderRadius_value  = value_borderRadius!
             LengthMetrics_serializer.write(valueSerializer, value_borderRadius_value)
         }
@@ -985,14 +985,14 @@ export class CapsuleStyleOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const enableScanEffect_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let enableScanEffect_buf : boolean | undefined
-        if ((RuntimeType.UNDEFINED) != (enableScanEffect_buf_runtimeType))
+        if ((enableScanEffect_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             enableScanEffect_buf = valueDeserializer.readBoolean()
         }
         const enableScanEffect_result : boolean | undefined = enableScanEffect_buf
         const borderColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let borderColor_buf : ResourceColor | undefined
-        if ((RuntimeType.UNDEFINED) != (borderColor_buf_runtimeType))
+        if ((borderColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const borderColor_buf__selector : int32 = valueDeserializer.readInt8()
             let borderColor_buf_ : Color | number | string | Resource | undefined
@@ -1016,7 +1016,7 @@ export class CapsuleStyleOptions_serializer {
         const borderColor_result : ResourceColor | undefined = borderColor_buf
         const borderWidth_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let borderWidth_buf : Length | undefined
-        if ((RuntimeType.UNDEFINED) != (borderWidth_buf_runtimeType))
+        if ((borderWidth_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const borderWidth_buf__selector : int32 = valueDeserializer.readInt8()
             let borderWidth_buf_ : string | number | Resource | undefined
@@ -1037,21 +1037,21 @@ export class CapsuleStyleOptions_serializer {
         const borderWidth_result : Length | undefined = borderWidth_buf
         const content_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let content_buf : string | undefined
-        if ((RuntimeType.UNDEFINED) != (content_buf_runtimeType))
+        if ((content_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             content_buf = (valueDeserializer.readString() as string)
         }
         const content_result : string | undefined = content_buf
         const font_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let font_buf : Font | undefined
-        if ((RuntimeType.UNDEFINED) != (font_buf_runtimeType))
+        if ((font_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             font_buf = Font_serializer.read(valueDeserializer)
         }
         const font_result : Font | undefined = font_buf
         const fontColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let fontColor_buf : ResourceColor | undefined
-        if ((RuntimeType.UNDEFINED) != (fontColor_buf_runtimeType))
+        if ((fontColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const fontColor_buf__selector : int32 = valueDeserializer.readInt8()
             let fontColor_buf_ : Color | number | string | Resource | undefined
@@ -1075,14 +1075,14 @@ export class CapsuleStyleOptions_serializer {
         const fontColor_result : ResourceColor | undefined = fontColor_buf
         const showDefaultPercentage_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let showDefaultPercentage_buf : boolean | undefined
-        if ((RuntimeType.UNDEFINED) != (showDefaultPercentage_buf_runtimeType))
+        if ((showDefaultPercentage_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             showDefaultPercentage_buf = valueDeserializer.readBoolean()
         }
         const showDefaultPercentage_result : boolean | undefined = showDefaultPercentage_buf
         const borderRadius_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let borderRadius_buf : LengthMetrics | undefined
-        if ((RuntimeType.UNDEFINED) != (borderRadius_buf_runtimeType))
+        if ((borderRadius_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             borderRadius_buf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
         }

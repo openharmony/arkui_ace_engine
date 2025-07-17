@@ -47,7 +47,7 @@ export class ArkSideBarContainerPeer extends ArkCommonMethodPeer {
         let type_type : int32 = RuntimeType.UNDEFINED
         type_type = runtimeType(type)
         thisSerializer.writeInt8((type_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (type_type)) {
+        if ((type_type) != (RuntimeType.UNDEFINED)) {
             const type_value  = (type as SideBarContainerType)
             thisSerializer.writeInt32(TypeChecker.SideBarContainerType_ToNumeric(type_value))
         }
@@ -59,7 +59,7 @@ export class ArkSideBarContainerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -71,7 +71,7 @@ export class ArkSideBarContainerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             ButtonStyle_serializer.write(thisSerializer, value_value)
         }
@@ -83,7 +83,7 @@ export class ArkSideBarContainerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -95,7 +95,7 @@ export class ArkSideBarContainerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -107,7 +107,7 @@ export class ArkSideBarContainerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeNumber(value_value)
         }
@@ -119,7 +119,7 @@ export class ArkSideBarContainerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeNumber(value_value)
         }
@@ -131,7 +131,7 @@ export class ArkSideBarContainerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeNumber(value_value)
         }
@@ -143,7 +143,7 @@ export class ArkSideBarContainerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -171,7 +171,7 @@ export class ArkSideBarContainerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -199,7 +199,7 @@ export class ArkSideBarContainerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -227,7 +227,7 @@ export class ArkSideBarContainerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -239,7 +239,7 @@ export class ArkSideBarContainerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = (value as SideBarPosition)
             thisSerializer.writeInt32(TypeChecker.SideBarPosition_ToNumeric(value_value))
         }
@@ -251,7 +251,7 @@ export class ArkSideBarContainerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             DividerStyle_serializer.write(thisSerializer, value_value)
         }
@@ -263,7 +263,7 @@ export class ArkSideBarContainerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -284,6 +284,12 @@ export class ArkSideBarContainerPeer extends ArkCommonMethodPeer {
             }
         }
         ArkUIGeneratedNativeModule._SideBarContainerAttribute_setMinContentWidth(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    set_onChangeEvent_showSideBarAttribute(callback_: ((showSideBar: boolean | undefined) => void)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(callback_)
+        ArkUIGeneratedNativeModule._SideBarContainerAttribute_set_onChangeEvent_showSideBar(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }
@@ -327,6 +333,7 @@ export interface SideBarContainerAttribute extends CommonMethod {
     sideBarPosition(value: SideBarPosition | undefined): this
     divider(value: DividerStyle | undefined): this
     minContentWidth(value: Dimension | undefined): this
+    _onChangeEvent_showSideBar(callback_: ((showSideBar: boolean | undefined) => void)): void
     attributeModifier(value: AttributeModifier<SideBarContainerAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkSideBarContainerStyle extends ArkCommonMethodStyle implements SideBarContainerAttribute {
@@ -383,6 +390,9 @@ export class ArkSideBarContainerStyle extends ArkCommonMethodStyle implements Si
     }
     public minContentWidth(value: Dimension | undefined): this {
         return this
+    }
+    public _onChangeEvent_showSideBar(callback_: ((showSideBar: boolean | undefined) => void)): void {
+        throw new Error("Unimplemented")
     }
     public attributeModifier(value: AttributeModifier<SideBarContainerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
@@ -538,6 +548,14 @@ export class ArkSideBarContainerComponent extends ArkCommonMethodComponent imple
         }
         return this
     }
+    public _onChangeEvent_showSideBar(callback_: ((showSideBar: boolean | undefined) => void)): void {
+        if (this.checkPriority("_onChangeEvent_showSideBar")) {
+            const callback__casted = callback_ as (((showSideBar: boolean | undefined) => void))
+            this.getPeer()?.set_onChangeEvent_showSideBarAttribute(callback__casted)
+            return
+        }
+        return
+    }
     public attributeModifier(value: AttributeModifier<SideBarContainerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         this._modifier = value as AttributeModifier<CommonMethod>
         return this
@@ -615,6 +633,8 @@ export class ArkSideBarContainerSet extends ArkCommonMethodSet implements SideBa
     _divider0_value?: DividerStyle | undefined
     _minContentWidth_flag?: boolean
     _minContentWidth0_value?: Dimension | undefined
+    __onChangeEvent_showSideBar_flag?: boolean
+    __onChangeEvent_showSideBar0_value?: ((showSideBar: boolean | undefined) => void)
     applyModifierPatch(component: SideBarContainerAttribute): void {
         if (this._showSideBar_flag)
             component.showSideBar((this._showSideBar0_value as boolean | undefined))
@@ -694,6 +714,8 @@ export class ArkSideBarContainerSet extends ArkCommonMethodSet implements SideBa
         this._minContentWidth0_value = value
         return this
     }
+    public _onChangeEvent_showSideBar(callback_: ((showSideBar: boolean | undefined) => void)): void {
+    }
     public attributeModifier(value: AttributeModifier<SideBarContainerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
     }
@@ -741,7 +763,7 @@ export class ButtonIconOptions_serializer {
         let value_switching_type : int32 = RuntimeType.UNDEFINED
         value_switching_type = runtimeType(value_switching)
         valueSerializer.writeInt8((value_switching_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_switching_type)) {
+        if ((value_switching_type) != (RuntimeType.UNDEFINED)) {
             const value_switching_value  = value_switching!
             let value_switching_value_type : int32 = RuntimeType.UNDEFINED
             value_switching_value_type = runtimeType(value_switching_value)
@@ -796,7 +818,7 @@ export class ButtonIconOptions_serializer {
         const hidden_result : string | image.PixelMap | Resource = (hidden_buf as string | image.PixelMap | Resource)
         const switching_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let switching_buf : string | image.PixelMap | Resource | undefined
-        if ((RuntimeType.UNDEFINED) != (switching_buf_runtimeType))
+        if ((switching_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const switching_buf__selector : int32 = valueDeserializer.readInt8()
             let switching_buf_ : string | image.PixelMap | Resource | undefined
@@ -826,7 +848,7 @@ export class ButtonStyle_serializer {
         let value_left_type : int32 = RuntimeType.UNDEFINED
         value_left_type = runtimeType(value_left)
         valueSerializer.writeInt8((value_left_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_left_type)) {
+        if ((value_left_type) != (RuntimeType.UNDEFINED)) {
             const value_left_value  = value_left!
             valueSerializer.writeNumber(value_left_value)
         }
@@ -834,7 +856,7 @@ export class ButtonStyle_serializer {
         let value_top_type : int32 = RuntimeType.UNDEFINED
         value_top_type = runtimeType(value_top)
         valueSerializer.writeInt8((value_top_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_top_type)) {
+        if ((value_top_type) != (RuntimeType.UNDEFINED)) {
             const value_top_value  = value_top!
             valueSerializer.writeNumber(value_top_value)
         }
@@ -842,7 +864,7 @@ export class ButtonStyle_serializer {
         let value_width_type : int32 = RuntimeType.UNDEFINED
         value_width_type = runtimeType(value_width)
         valueSerializer.writeInt8((value_width_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_width_type)) {
+        if ((value_width_type) != (RuntimeType.UNDEFINED)) {
             const value_width_value  = value_width!
             valueSerializer.writeNumber(value_width_value)
         }
@@ -850,7 +872,7 @@ export class ButtonStyle_serializer {
         let value_height_type : int32 = RuntimeType.UNDEFINED
         value_height_type = runtimeType(value_height)
         valueSerializer.writeInt8((value_height_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_height_type)) {
+        if ((value_height_type) != (RuntimeType.UNDEFINED)) {
             const value_height_value  = value_height!
             valueSerializer.writeNumber(value_height_value)
         }
@@ -858,7 +880,7 @@ export class ButtonStyle_serializer {
         let value_icons_type : int32 = RuntimeType.UNDEFINED
         value_icons_type = runtimeType(value_icons)
         valueSerializer.writeInt8((value_icons_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_icons_type)) {
+        if ((value_icons_type) != (RuntimeType.UNDEFINED)) {
             const value_icons_value  = value_icons!
             ButtonIconOptions_serializer.write(valueSerializer, value_icons_value)
         }
@@ -867,35 +889,35 @@ export class ButtonStyle_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const left_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let left_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (left_buf_runtimeType))
+        if ((left_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             left_buf = (valueDeserializer.readNumber() as number)
         }
         const left_result : number | undefined = left_buf
         const top_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let top_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (top_buf_runtimeType))
+        if ((top_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             top_buf = (valueDeserializer.readNumber() as number)
         }
         const top_result : number | undefined = top_buf
         const width_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let width_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (width_buf_runtimeType))
+        if ((width_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             width_buf = (valueDeserializer.readNumber() as number)
         }
         const width_result : number | undefined = width_buf
         const height_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let height_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (height_buf_runtimeType))
+        if ((height_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             height_buf = (valueDeserializer.readNumber() as number)
         }
         const height_result : number | undefined = height_buf
         const icons_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let icons_buf : ButtonIconOptions | undefined
-        if ((RuntimeType.UNDEFINED) != (icons_buf_runtimeType))
+        if ((icons_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             icons_buf = ButtonIconOptions_serializer.read(valueDeserializer)
         }

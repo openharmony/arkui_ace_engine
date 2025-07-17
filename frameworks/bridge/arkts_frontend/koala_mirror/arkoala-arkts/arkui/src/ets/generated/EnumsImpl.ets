@@ -1,3 +1,18 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import { int32, float32 } from "@koalaui/common"
 export namespace uniformTypeDescriptor {
     export enum UniformDataType {
@@ -2680,6 +2695,195 @@ export enum PlaybackSpeed {
 export enum WaterFlowLayoutMode {
     ALWAYS_TOP_DOWN = 0,
     SLIDING_WINDOW = 1
+}
+export enum MessageLevel {
+    DEBUG = 0,
+    Debug = 0,
+    ERROR = 1,
+    Error = 1,
+    INFO = 2,
+    Info = 2,
+    LOG = 3,
+    Log = 3,
+    WARN = 4,
+    Warn = 4
+}
+export enum MixedMode {
+    ALL = 0,
+    All = 0,
+    COMPATIBLE = 1,
+    Compatible = 1,
+    NONE = 2,
+    None = 2
+}
+export enum HitTestType {
+    EDIT_TEXT = 0,
+    EditText = 0,
+    EMAIL = 1,
+    Email = 1,
+    HTTP_ANCHOR = 2,
+    HttpAnchor = 2,
+    HTTP_ANCHOR_IMG = 3,
+    HttpAnchorImg = 3,
+    IMG = 4,
+    Img = 4,
+    MAP = 5,
+    Map = 5,
+    PHONE = 6,
+    Phone = 6,
+    UNKNOWN = 7,
+    Unknown = 7
+}
+export enum CacheMode {
+    DEFAULT = 0,
+    Default = 0,
+    NONE = 1,
+    None = 1,
+    ONLINE = 2,
+    Online = 2,
+    ONLY = 3,
+    Only = 3
+}
+export enum OverScrollMode {
+    NEVER = 0,
+    ALWAYS = 1
+}
+export enum BlurOnKeyboardHideMode {
+    SILENT = 0,
+    BLUR = 1
+}
+export enum WebDarkMode {
+    OFF = 0,
+    Off = 0,
+    ON = 1,
+    On = 1,
+    AUTO = 2,
+    Auto = 2
+}
+export enum WebCaptureMode {
+    HOME_SCREEN = 0
+}
+export enum ThreatType {
+    THREAT_ILLEGAL = 0,
+    THREAT_FRAUD = 1,
+    THREAT_RISK = 2,
+    THREAT_WARNING = 3
+}
+export enum RenderExitReason {
+    PROCESS_ABNORMAL_TERMINATION = 0,
+    ProcessAbnormalTermination = 0,
+    PROCESS_WAS_KILLED = 1,
+    ProcessWasKilled = 1,
+    PROCESS_CRASHED = 2,
+    ProcessCrashed = 2,
+    PROCESS_OOM = 3,
+    ProcessOom = 3,
+    PROCESS_EXIT_UNKNOWN = 4,
+    ProcessExitUnknown = 4
+}
+export enum SslError {
+    INVALID = 0,
+    Invalid = 0,
+    HOST_MISMATCH = 1,
+    HostMismatch = 1,
+    DATE_INVALID = 2,
+    DateInvalid = 2,
+    UNTRUSTED = 3,
+    Untrusted = 3
+}
+export enum FileSelectorMode {
+    FILE_OPEN_MODE = 0,
+    FileOpenMode = 0,
+    FILE_OPEN_MULTIPLE_MODE = 1,
+    FileOpenMultipleMode = 1,
+    FILE_OPEN_FOLDER_MODE = 2,
+    FileOpenFolderMode = 2,
+    FILE_SAVE_MODE = 3,
+    FileSaveMode = 3
+}
+export enum WebLayoutMode {
+    NONE = 0,
+    FIT_CONTENT = 1
+}
+export enum RenderProcessNotRespondingReason {
+    INPUT_TIMEOUT = 0,
+    NAVIGATION_COMMIT_TIMEOUT = 1
+}
+export enum ProtectedResourceType {
+    MIDI_SYSEX = "'TYPE_MIDI_SYSEX'",
+    MidiSysex = "'TYPE_MIDI_SYSEX'",
+    VIDEO_CAPTURE = "'TYPE_VIDEO_CAPTURE'",
+    AUDIO_CAPTURE = "'TYPE_AUDIO_CAPTURE'",
+    SENSOR = "'TYPE_SENSOR'"
+}
+export enum ContextMenuSourceType {
+    NONE = 0,
+    None = 0,
+    MOUSE = 1,
+    Mouse = 1,
+    LONG_PRESS = 2,
+    LongPress = 2
+}
+export enum ContextMenuMediaType {
+    NONE = 0,
+    None = 0,
+    IMAGE = 1,
+    Image = 1
+}
+export enum ContextMenuInputFieldType {
+    NONE = 0,
+    None = 0,
+    PLAIN_TEXT = 1,
+    PlainText = 1,
+    PASSWORD = 2,
+    Password = 2,
+    NUMBER = 3,
+    Number = 3,
+    TELEPHONE = 4,
+    Telephone = 4,
+    OTHER = 5,
+    Other = 5
+}
+export enum NativeEmbedStatus {
+    CREATE = 0,
+    UPDATE = 1,
+    DESTROY = 2,
+    ENTER_BFCACHE = 3,
+    LEAVE_BFCACHE = 4
+}
+export enum ContextMenuEditStateFlags {
+    NONE = 0,
+    CAN_CUT = 1,
+    CAN_COPY = 2,
+    CAN_PASTE = 3,
+    CAN_SELECT_ALL = 4
+}
+export enum WebNavigationType {
+    UNKNOWN = 0,
+    MAIN_FRAME_NEW_ENTRY = 1,
+    MAIN_FRAME_EXISTING_ENTRY = 2,
+    NAVIGATION_TYPE_NEW_SUBFRAME = 4,
+    NAVIGATION_TYPE_AUTO_SUBFRAME = 5
+}
+export enum RenderMode {
+    ASYNC_RENDER = 0,
+    SYNC_RENDER = 1
+}
+export enum ViewportFit {
+    AUTO = 0,
+    CONTAINS = 1,
+    COVER = 2
+}
+export enum WebKeyboardAvoidMode {
+    RESIZE_VISUAL = 0,
+    RESIZE_CONTENT = 1,
+    OVERLAYS_CONTENT = 2
+}
+export enum WebElementType {
+    IMAGE = 1
+}
+export enum WebResponseType {
+    LONG_PRESS = 1
 }
 export enum PerfMonitorActionType {
     LAST_DOWN = 0,

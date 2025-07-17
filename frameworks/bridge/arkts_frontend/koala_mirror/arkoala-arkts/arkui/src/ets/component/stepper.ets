@@ -44,7 +44,7 @@ export class ArkStepperPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             StepperOptions_serializer.write(thisSerializer, value_value)
         }
@@ -56,7 +56,7 @@ export class ArkStepperPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -68,7 +68,7 @@ export class ArkStepperPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -80,7 +80,7 @@ export class ArkStepperPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -92,7 +92,7 @@ export class ArkStepperPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -104,11 +104,17 @@ export class ArkStepperPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
         ArkUIGeneratedNativeModule._StepperAttribute_setOnPrevious(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    set_onChangeEvent_indexAttribute(callback_: ((index: number) => void)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(callback_)
+        ArkUIGeneratedNativeModule._StepperAttribute_set_onChangeEvent_index(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }
@@ -121,6 +127,7 @@ export interface StepperAttribute extends CommonMethod {
     onChange(value: ((prevIndex: number,index: number) => void) | undefined): this
     onNext(value: ((prevIndex: number,index: number) => void) | undefined): this
     onPrevious(value: ((prevIndex: number,index: number) => void) | undefined): this
+    _onChangeEvent_index(callback_: ((index: number) => void)): void
     attributeModifier(value: AttributeModifier<StepperAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkStepperStyle extends ArkCommonMethodStyle implements StepperAttribute {
@@ -144,6 +151,9 @@ export class ArkStepperStyle extends ArkCommonMethodStyle implements StepperAttr
     }
     public onPrevious(value: ((prevIndex: number,index: number) => void) | undefined): this {
         return this
+    }
+    public _onChangeEvent_index(callback_: ((index: number) => void)): void {
+        throw new Error("Unimplemented")
     }
     public attributeModifier(value: AttributeModifier<StepperAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
@@ -215,6 +225,14 @@ export class ArkStepperComponent extends ArkCommonMethodComponent implements Ste
         }
         return this
     }
+    public _onChangeEvent_index(callback_: ((index: number) => void)): void {
+        if (this.checkPriority("_onChangeEvent_index")) {
+            const callback__casted = callback_ as (((index: number) => void))
+            this.getPeer()?.set_onChangeEvent_indexAttribute(callback__casted)
+            return
+        }
+        return
+    }
     public attributeModifier(value: AttributeModifier<StepperAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         this._modifier = value as AttributeModifier<CommonMethod>
         return this
@@ -280,6 +298,8 @@ export class ArkStepperSet extends ArkCommonMethodSet implements StepperAttribut
     _onNext0_value?: ((prevIndex: number,index: number) => void) | undefined
     _onPrevious_flag?: boolean
     _onPrevious0_value?: ((prevIndex: number,index: number) => void) | undefined
+    __onChangeEvent_index_flag?: boolean
+    __onChangeEvent_index0_value?: ((index: number) => void)
     applyModifierPatch(component: StepperAttribute): void {
         if (this._onFinish_flag)
             component.onFinish((this._onFinish0_value as (() => void) | undefined))
@@ -317,6 +337,8 @@ export class ArkStepperSet extends ArkCommonMethodSet implements StepperAttribut
         this._onPrevious0_value = value
         return this
     }
+    public _onChangeEvent_index(callback_: ((index: number) => void)): void {
+    }
     public attributeModifier(value: AttributeModifier<StepperAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
     }
@@ -328,7 +350,7 @@ export class StepperOptions_serializer {
         let value_index_type : int32 = RuntimeType.UNDEFINED
         value_index_type = runtimeType(value_index)
         valueSerializer.writeInt8((value_index_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_index_type)) {
+        if ((value_index_type) != (RuntimeType.UNDEFINED)) {
             const value_index_value  = value_index!
             valueSerializer.writeNumber(value_index_value)
         }
@@ -337,7 +359,7 @@ export class StepperOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const index_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let index_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (index_buf_runtimeType))
+        if ((index_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             index_buf = (valueDeserializer.readNumber() as number)
         }

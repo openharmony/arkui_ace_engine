@@ -32,6 +32,7 @@ import { ExtendableComponent, LifeCycle } from "./../../component/extendableComp
 import { BaseShape, BuilderNodeOps, BuilderNodeOptions, CommonShape, Offset_componentutils, PerfMonitorActionType, PerfMonitorSourceType, RotateResult, ScaleResult, Scene, TranslateResult, WorkerEventListener, Event, DoubleAnimationParam, Callback_Extender_OnProgress, Callback_Extender_OnFinish, ErrorEvent, FontInfo, MessageEvents, PostMessageOptions, SnapshotOptions, WorkerOptions, ComponentInfo, Matrix4Result, FontOptions, MeasureOptions, RestrictedWorker, RestrictedWorker_onexit_Callback, RestrictedWorker_onerror_Callback, RestrictedWorker_onmessage_Callback } from "./../../component/idlize"
 import { Length, SizeOptions, Position, ResourceColor, ColorFilter, ConstraintSizeOptions, ResourceStr, VoidCallback, AccessibilityOptions, Bias, ChainWeightOptions, DirectionalEdgesT, EdgeOutlineStyles, EdgeStyles, VP, DividerStyleOptions, EdgeColors, LengthConstrain, Dimension, LocalizedBorderRadiuses, LocalizedEdgeColors, LocalizedEdges, LocalizedEdgeWidths, LocalizedPadding, LocalizedPosition, Offset, BorderRadiuses, EdgeOutlineWidths, Edges, EdgeWidths, Font, PX, LPX, MarkStyle, OutlineRadiuses, Padding, Area, BorderOptions, OutlineOptions } from "./../../component/units"
 import { Resource } from "./../resource"
+import { BlurOnKeyboardHideMode, CacheMode, ClientAuthenticationHandler, ConsoleMessage, MessageLevel, ContextMenuEditStateFlags, ContextMenuInputFieldType, ContextMenuMediaType, ContextMenuSourceType, ControllerHandler, DataResubmissionHandler, EventResult, FileSelectorMode, FileSelectorParam, FileSelectorResult, FullScreenExitHandler, HitTestType, HttpAuthHandler, JsGeolocation, JsResult, MixedMode, NativeEmbedStatus, NativeMediaPlayerConfig, OnAudioStateChangedEvent, OnConsoleEvent, OnDataResubmittedEvent, OnFaviconReceivedEvent, OnFirstContentfulPaintEvent, OnOverScrollEvent, OnProgressChangeEvent, OnScaleChangeEvent, OnScrollEvent, OnSearchResultReceiveEvent, OnShowFileSelectorEvent, OverScrollMode, PermissionRequest, ProtectedResourceType, RenderExitReason, RenderMode, RenderProcessNotRespondingReason, ScreenCaptureHandler, ScreenCaptureConfig, SslError, SslErrorHandler, ThreatType, ViewportFit, WebCaptureMode, WebContextMenuParam, WebContextMenuResult, WebCookie, WebDarkMode, WebElementType, WebKeyboardAvoidMode, WebKeyboardController, WebLayoutMode, WebNavigationType, WebResourceError, Header, WebResourceRequest, WebResourceResponse, WebResponseType, AdsBlockedDetails, EmbedOptions, FirstMeaningfulPaint, FullScreenEnterEvent, IntelligentTrackingPreventionDetails, JavaScriptProxy, LargestContentfulPaint, LoadCommittedDetails, NativeEmbedVisibilityInfo, NestedScrollOptionsExt, OnAlertEvent, OnBeforeUnloadEvent, OnClientAuthenticationEvent, OnConfirmEvent, OnContextMenuShowEvent, OnDownloadStartEvent, OnErrorReceiveEvent, OnGeolocationShowEvent, OnHttpAuthRequestEvent, OnHttpErrorReceiveEvent, OnInterceptRequestEvent, OnLoadInterceptEvent, OnPageBeginEvent, OnPageEndEvent, OnPageVisibleEvent, OnPermissionRequestEvent, OnPromptEvent, OnRefreshAccessedHistoryEvent, OnRenderExitedEvent, OnResourceLoadEvent, OnScreenCaptureRequestEvent, OnSslErrorEventReceiveEvent, OnTitleReceiveEvent, OnTouchIconUrlReceivedEvent, OnWindowNewEvent, RenderProcessNotRespondingData, ScriptItem, SelectionMenuOptionsExt, SslErrorEvent, WebKeyboardCallbackInfo, WebKeyboardOptions, WebMediaOptions, WebOptions, NativeEmbedInfo, NativeEmbedDataInfo, NativeEmbedTouchInfo } from "./../../component/web"
 import { BreakpointsReference, GridRowDirection, BreakPoints, GridRowColumnOption, GridRowSizeOption, GutterOption, GridRowOptions } from "./../../component/gridRow"
 import { ButtonRole, ButtonStyleMode, ButtonType, ControlSize, ButtonConfiguration, ButtonTriggerClickCallback, ButtonOptions, ButtonLabelStyle } from "./../../component/button"
 import { CalendarAlign, CalendarPickerDialog, CalendarDialogOptions, CalendarOptions } from "./../../component/calendarPicker"
@@ -48,6 +49,7 @@ import { CommonModifier } from "./../arkui.CommonModifier"
 import { ComponentContent } from "./../arkui.ComponentContent"
 import { ContentType, EnterKeyType, InputType, SubmitEvent, TextInputController, TextInputStyle, PasswordIcon, TextInputOptions, UnderlineColor } from "./../../component/textInput"
 import { Context } from "./../application.Context"
+import { webview } from "./../ohos.web.webview"
 import { CustomDialogController, CustomDialogControllerOptions } from "./../../component/customDialogController"
 import { DataOperationType } from "./../../component/lazyForEach"
 import { DataPanelType, ColorStop, LinearGradient, DataPanelConfiguration, DataPanelOptions, DataPanelShadowOptions } from "./../../component/dataPanel"
@@ -127,7 +129,6 @@ import { uiEffect } from "./../ohos.graphics.uiEffect"
 import { unifiedDataChannel } from "./../ohos.data.unifiedDataChannel"
 import { uniformTypeDescriptor } from "./../ohos.data.uniformTypeDescriptor"
 import { WaterFlowLayoutMode, SectionOptions, WaterFlowSections, WaterFlowOptions, GetItemMainSizeByIndex } from "./../../component/waterFlow"
-import { WebCookie } from "./../../component/web"
 import { window } from "./../ohos.window"
 import { ASTCResource } from "./../../component/mediaCachedImage"
 import { BorderRadiuses_graphics, RenderNode } from "./../arkui.RenderNode"
@@ -624,6 +625,17 @@ export class TypeChecker {
         }
         else {
             throw new Error("Can not discriminate value typeof AdaptiveColor")
+        }
+    }
+    static isAdsBlockedDetails(value: Object | string | number | undefined | boolean, duplicated_url: boolean, duplicated_adsBlocked: boolean): boolean {
+        if ((!duplicated_url) && (value?.hasOwnProperty("url"))) {
+            return true
+        }
+        else if ((!duplicated_adsBlocked) && (value?.hasOwnProperty("adsBlocked"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof AdsBlockedDetails")
         }
     }
     static isAlignment(value: Object | string | number | undefined | boolean): boolean {
@@ -1410,6 +1422,17 @@ export class TypeChecker {
             throw new Error("Can not discriminate value typeof BlendMode")
         }
     }
+    static isBlurOnKeyboardHideMode(value: Object | string | number | undefined | boolean): boolean {
+        if ((value) === (BlurOnKeyboardHideMode.SILENT)) {
+            return true
+        }
+        else if ((value) === (BlurOnKeyboardHideMode.BLUR)) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof BlurOnKeyboardHideMode")
+        }
+    }
     static isBlurOptions(value: Object | string | number | undefined | boolean, duplicated_grayscale: boolean): boolean {
         if ((!duplicated_grayscale) && (value?.hasOwnProperty("grayscale"))) {
             return true
@@ -1779,6 +1802,23 @@ export class TypeChecker {
         }
         else {
             throw new Error("Can not discriminate value typeof ButtonType")
+        }
+    }
+    static isCacheMode(value: Object | string | number | undefined | boolean): boolean {
+        if ((value) === (CacheMode.Default)) {
+            return true
+        }
+        else if ((value) === (CacheMode.None)) {
+            return true
+        }
+        else if ((value) === (CacheMode.Online)) {
+            return true
+        }
+        else if ((value) === (CacheMode.Only)) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof CacheMode")
         }
     }
     static isCalendarAlign(value: Object | string | number | undefined | boolean): boolean {
@@ -2374,6 +2414,9 @@ export class TypeChecker {
             throw new Error("Can not discriminate value typeof ClickEvent")
         }
     }
+    static isClientAuthenticationHandler(value: Object | string | number | undefined | boolean): boolean {
+        throw new Error("Can not discriminate value typeof ClientAuthenticationHandler")
+    }
     static isCloseSwipeActionOptions(value: Object | string | number | undefined | boolean, duplicated_onFinish: boolean): boolean {
         if ((!duplicated_onFinish) && (value?.hasOwnProperty("onFinish"))) {
             return true
@@ -2806,6 +2849,9 @@ export class TypeChecker {
             throw new Error("Can not discriminate value typeof ComputedBarAttribute")
         }
     }
+    static isConsoleMessage(value: Object | string | number | undefined | boolean): boolean {
+        throw new Error("Can not discriminate value typeof ConsoleMessage")
+    }
     static isConstraintSizeOptions(value: Object | string | number | undefined | boolean, duplicated_minWidth: boolean, duplicated_maxWidth: boolean, duplicated_minHeight: boolean, duplicated_maxHeight: boolean): boolean {
         if ((!duplicated_minWidth) && (value?.hasOwnProperty("minWidth"))) {
             return true
@@ -2975,6 +3021,60 @@ export class TypeChecker {
             throw new Error("Can not discriminate value typeof ContextMenuAnimationOptions")
         }
     }
+    static isContextMenuEditStateFlags(value: Object | string | number | undefined | boolean): boolean {
+        if ((value) === (ContextMenuEditStateFlags.NONE)) {
+            return true
+        }
+        else if ((value) === (ContextMenuEditStateFlags.CAN_CUT)) {
+            return true
+        }
+        else if ((value) === (ContextMenuEditStateFlags.CAN_COPY)) {
+            return true
+        }
+        else if ((value) === (ContextMenuEditStateFlags.CAN_PASTE)) {
+            return true
+        }
+        else if ((value) === (ContextMenuEditStateFlags.CAN_SELECT_ALL)) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof ContextMenuEditStateFlags")
+        }
+    }
+    static isContextMenuInputFieldType(value: Object | string | number | undefined | boolean): boolean {
+        if ((value) === (ContextMenuInputFieldType.None)) {
+            return true
+        }
+        else if ((value) === (ContextMenuInputFieldType.PlainText)) {
+            return true
+        }
+        else if ((value) === (ContextMenuInputFieldType.Password)) {
+            return true
+        }
+        else if ((value) === (ContextMenuInputFieldType.Number)) {
+            return true
+        }
+        else if ((value) === (ContextMenuInputFieldType.Telephone)) {
+            return true
+        }
+        else if ((value) === (ContextMenuInputFieldType.Other)) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof ContextMenuInputFieldType")
+        }
+    }
+    static isContextMenuMediaType(value: Object | string | number | undefined | boolean): boolean {
+        if ((value) === (ContextMenuMediaType.None)) {
+            return true
+        }
+        else if ((value) === (ContextMenuMediaType.Image)) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof ContextMenuMediaType")
+        }
+    }
     static isContextMenuOptions(value: Object | string | number | undefined | boolean, duplicated_offset: boolean, duplicated_placement: boolean, duplicated_enableArrow: boolean, duplicated_arrowOffset: boolean, duplicated_preview: boolean, duplicated_previewBorderRadius: boolean, duplicated_borderRadius: boolean, duplicated_onAppear: boolean, duplicated_onDisappear: boolean, duplicated_aboutToAppear: boolean, duplicated_aboutToDisappear: boolean, duplicated_layoutRegionMargin: boolean, duplicated_previewAnimationOptions: boolean, duplicated_backgroundColor: boolean, duplicated_backgroundBlurStyle: boolean, duplicated_backgroundBlurStyleOptions: boolean, duplicated_backgroundEffect: boolean, duplicated_transition: boolean, duplicated_enableHoverMode: boolean, duplicated_outlineColor: boolean, duplicated_outlineWidth: boolean, duplicated_hapticFeedbackMode: boolean): boolean {
         if ((!duplicated_offset) && (value?.hasOwnProperty("offset"))) {
             return true
@@ -3045,6 +3145,23 @@ export class TypeChecker {
         else {
             throw new Error("Can not discriminate value typeof ContextMenuOptions")
         }
+    }
+    static isContextMenuSourceType(value: Object | string | number | undefined | boolean): boolean {
+        if ((value) === (ContextMenuSourceType.None)) {
+            return true
+        }
+        else if ((value) === (ContextMenuSourceType.Mouse)) {
+            return true
+        }
+        else if ((value) === (ContextMenuSourceType.LongPress)) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof ContextMenuSourceType")
+        }
+    }
+    static isControllerHandler(value: Object | string | number | undefined | boolean): boolean {
+        throw new Error("Can not discriminate value typeof ControllerHandler")
     }
     static isControlSize(value: Object | string | number | undefined | boolean): boolean {
         if ((value) === (ControlSize.SMALL)) {
@@ -3587,6 +3704,9 @@ export class TypeChecker {
         else {
             throw new Error("Can not discriminate value typeof DataPanelType")
         }
+    }
+    static isDataResubmissionHandler(value: Object | string | number | undefined | boolean): boolean {
+        throw new Error("Can not discriminate value typeof DataResubmissionHandler")
     }
     static isDatePickerDialog(value: Object | string | number | undefined | boolean): boolean {
         throw new Error("Can not discriminate value typeof DatePickerDialog")
@@ -4971,6 +5091,14 @@ export class TypeChecker {
             throw new Error("Can not discriminate value typeof EmbeddedType")
         }
     }
+    static isEmbedOptions(value: Object | string | number | undefined | boolean, duplicated_supportDefaultIntrinsicSize: boolean): boolean {
+        if ((!duplicated_supportDefaultIntrinsicSize) && (value?.hasOwnProperty("supportDefaultIntrinsicSize"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof EmbedOptions")
+        }
+    }
     static isEnterKeyType(value: Object | string | number | undefined | boolean): boolean {
         if ((value) === (EnterKeyType.Go)) {
             return true
@@ -5039,6 +5167,9 @@ export class TypeChecker {
             throw new Error("Can not discriminate value typeof Event")
         }
     }
+    static isEventResult(value: Object | string | number | undefined | boolean): boolean {
+        throw new Error("Can not discriminate value typeof EventResult")
+    }
     static isEventTarget(value: Object | string | number | undefined | boolean, duplicated_area: boolean, duplicated_id: boolean): boolean {
         if ((!duplicated_area) && (value?.hasOwnProperty("area"))) {
             return true
@@ -5077,6 +5208,29 @@ export class TypeChecker {
         else {
             throw new Error("Can not discriminate value typeof FadingEdgeOptions")
         }
+    }
+    static isFileSelectorMode(value: Object | string | number | undefined | boolean): boolean {
+        if ((value) === (FileSelectorMode.FileOpenMode)) {
+            return true
+        }
+        else if ((value) === (FileSelectorMode.FileOpenMultipleMode)) {
+            return true
+        }
+        else if ((value) === (FileSelectorMode.FileOpenFolderMode)) {
+            return true
+        }
+        else if ((value) === (FileSelectorMode.FileSaveMode)) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof FileSelectorMode")
+        }
+    }
+    static isFileSelectorParam(value: Object | string | number | undefined | boolean): boolean {
+        throw new Error("Can not discriminate value typeof FileSelectorParam")
+    }
+    static isFileSelectorResult(value: Object | string | number | undefined | boolean): boolean {
+        throw new Error("Can not discriminate value typeof FileSelectorResult")
     }
     static isFillMode(value: Object | string | number | undefined | boolean): boolean {
         if ((value) === (FillMode.None)) {
@@ -5133,6 +5287,17 @@ export class TypeChecker {
         }
         else {
             throw new Error("Can not discriminate value typeof FinishCallbackType")
+        }
+    }
+    static isFirstMeaningfulPaint(value: Object | string | number | undefined | boolean, duplicated_navigationStartTime: boolean, duplicated_firstMeaningfulPaintTime: boolean): boolean {
+        if ((!duplicated_navigationStartTime) && (value?.hasOwnProperty("navigationStartTime"))) {
+            return true
+        }
+        else if ((!duplicated_firstMeaningfulPaintTime) && (value?.hasOwnProperty("firstMeaningfulPaintTime"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof FirstMeaningfulPaint")
         }
     }
     static isFlexAlign(value: Object | string | number | undefined | boolean): boolean {
@@ -5662,6 +5827,23 @@ export class TypeChecker {
     }
     static isFrictionMotion(value: Object | string | number | undefined | boolean): boolean {
         throw new Error("Can not discriminate value typeof FrictionMotion")
+    }
+    static isFullScreenEnterEvent(value: Object | string | number | undefined | boolean, duplicated_handler: boolean, duplicated_videoWidth: boolean, duplicated_videoHeight: boolean): boolean {
+        if ((!duplicated_handler) && (value?.hasOwnProperty("handler"))) {
+            return true
+        }
+        else if ((!duplicated_videoWidth) && (value?.hasOwnProperty("videoWidth"))) {
+            return true
+        }
+        else if ((!duplicated_videoHeight) && (value?.hasOwnProperty("videoHeight"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof FullScreenEnterEvent")
+        }
+    }
+    static isFullScreenExitHandler(value: Object | string | number | undefined | boolean): boolean {
+        throw new Error("Can not discriminate value typeof FullScreenExitHandler")
     }
     static isFullscreenInfo(value: Object | string | number | undefined | boolean, duplicated_fullscreen: boolean): boolean {
         if ((!duplicated_fullscreen) && (value?.hasOwnProperty("fullscreen"))) {
@@ -6234,6 +6416,17 @@ export class TypeChecker {
             throw new Error("Can not discriminate value typeof HapticFeedbackMode")
         }
     }
+    static isHeader(value: Object | string | number | undefined | boolean, duplicated_headerKey: boolean, duplicated_headerValue: boolean): boolean {
+        if ((!duplicated_headerKey) && (value?.hasOwnProperty("headerKey"))) {
+            return true
+        }
+        else if ((!duplicated_headerValue) && (value?.hasOwnProperty("headerValue"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof Header")
+        }
+    }
     static isHeightBreakpoint(value: Object | string | number | undefined | boolean): boolean {
         if ((value) === (HeightBreakpoint.HEIGHT_SM)) {
             return true
@@ -6288,6 +6481,35 @@ export class TypeChecker {
         }
         else {
             throw new Error("Can not discriminate value typeof HitTestMode")
+        }
+    }
+    static isHitTestType(value: Object | string | number | undefined | boolean): boolean {
+        if ((value) === (HitTestType.EditText)) {
+            return true
+        }
+        else if ((value) === (HitTestType.Email)) {
+            return true
+        }
+        else if ((value) === (HitTestType.HttpAnchor)) {
+            return true
+        }
+        else if ((value) === (HitTestType.HttpAnchorImg)) {
+            return true
+        }
+        else if ((value) === (HitTestType.Img)) {
+            return true
+        }
+        else if ((value) === (HitTestType.Map)) {
+            return true
+        }
+        else if ((value) === (HitTestType.Phone)) {
+            return true
+        }
+        else if ((value) === (HitTestType.Unknown)) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof HitTestType")
         }
     }
     static isHorizontalAlign(value: Object | string | number | undefined | boolean): boolean {
@@ -6374,6 +6596,9 @@ export class TypeChecker {
         else {
             throw new Error("Can not discriminate value typeof HoverModeAreaType")
         }
+    }
+    static isHttpAuthHandler(value: Object | string | number | undefined | boolean): boolean {
+        throw new Error("Can not discriminate value typeof HttpAuthHandler")
     }
     static isIconOptions(value: Object | string | number | undefined | boolean, duplicated_size: boolean, duplicated_color: boolean, duplicated_src: boolean): boolean {
         if ((!duplicated_size) && (value?.hasOwnProperty("size"))) {
@@ -6939,6 +7164,17 @@ export class TypeChecker {
             throw new Error("Can not discriminate value typeof InsertValue")
         }
     }
+    static isIntelligentTrackingPreventionDetails(value: Object | string | number | undefined | boolean, duplicated_host: boolean, duplicated_trackerHost: boolean): boolean {
+        if ((!duplicated_host) && (value?.hasOwnProperty("host"))) {
+            return true
+        }
+        else if ((!duplicated_trackerHost) && (value?.hasOwnProperty("trackerHost"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof IntelligentTrackingPreventionDetails")
+        }
+    }
     static isIntentionCode(value: Object | string | number | undefined | boolean): boolean {
         if ((value) === (IntentionCode.INTENTION_UNKNOWN)) {
             return true
@@ -7130,6 +7366,35 @@ export class TypeChecker {
             throw new Error("Can not discriminate value typeof ItemState")
         }
     }
+    static isJavaScriptProxy(value: Object | string | number | undefined | boolean, duplicated_object_: boolean, duplicated_name: boolean, duplicated_methodList: boolean, duplicated_controller: boolean, duplicated_asyncMethodList: boolean, duplicated_permission: boolean): boolean {
+        if ((!duplicated_object_) && (value?.hasOwnProperty("object_"))) {
+            return true
+        }
+        else if ((!duplicated_name) && (value?.hasOwnProperty("name"))) {
+            return true
+        }
+        else if ((!duplicated_methodList) && (value?.hasOwnProperty("methodList"))) {
+            return true
+        }
+        else if ((!duplicated_controller) && (value?.hasOwnProperty("controller"))) {
+            return true
+        }
+        else if ((!duplicated_asyncMethodList) && (value?.hasOwnProperty("asyncMethodList"))) {
+            return true
+        }
+        else if ((!duplicated_permission) && (value?.hasOwnProperty("permission"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof JavaScriptProxy")
+        }
+    }
+    static isJsGeolocation(value: Object | string | number | undefined | boolean): boolean {
+        throw new Error("Can not discriminate value typeof JsGeolocation")
+    }
+    static isJsResult(value: Object | string | number | undefined | boolean): boolean {
+        throw new Error("Can not discriminate value typeof JsResult")
+    }
     static isKeyboardAppearance(value: Object | string | number | undefined | boolean): boolean {
         if ((value) === (KeyboardAppearance.NONE_IMMERSIVE)) {
             return true
@@ -7238,6 +7503,29 @@ export class TypeChecker {
         }
         else {
             throw new Error("Can not discriminate value typeof KeyType")
+        }
+    }
+    static isLargestContentfulPaint(value: Object | string | number | undefined | boolean, duplicated_navigationStartTime: boolean, duplicated_largestImagePaintTime: boolean, duplicated_largestTextPaintTime: boolean, duplicated_imageBPP: boolean, duplicated_largestImageLoadStartTime: boolean, duplicated_largestImageLoadEndTime: boolean): boolean {
+        if ((!duplicated_navigationStartTime) && (value?.hasOwnProperty("navigationStartTime"))) {
+            return true
+        }
+        else if ((!duplicated_largestImagePaintTime) && (value?.hasOwnProperty("largestImagePaintTime"))) {
+            return true
+        }
+        else if ((!duplicated_largestTextPaintTime) && (value?.hasOwnProperty("largestTextPaintTime"))) {
+            return true
+        }
+        else if ((!duplicated_imageBPP) && (value?.hasOwnProperty("imageBPP"))) {
+            return true
+        }
+        else if ((!duplicated_largestImageLoadStartTime) && (value?.hasOwnProperty("largestImageLoadStartTime"))) {
+            return true
+        }
+        else if ((!duplicated_largestImageLoadEndTime) && (value?.hasOwnProperty("largestImageLoadEndTime"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof LargestContentfulPaint")
         }
     }
     static isLaunchMode(value: Object | string | number | undefined | boolean): boolean {
@@ -7729,6 +8017,26 @@ export class TypeChecker {
     }
     static isListScroller(value: Object | string | number | undefined | boolean): boolean {
         throw new Error("Can not discriminate value typeof ListScroller")
+    }
+    static isLoadCommittedDetails(value: Object | string | number | undefined | boolean, duplicated_isMainFrame: boolean, duplicated_isSameDocument: boolean, duplicated_didReplaceEntry: boolean, duplicated_navigationType: boolean, duplicated_url: boolean): boolean {
+        if ((!duplicated_isMainFrame) && (value?.hasOwnProperty("isMainFrame"))) {
+            return true
+        }
+        else if ((!duplicated_isSameDocument) && (value?.hasOwnProperty("isSameDocument"))) {
+            return true
+        }
+        else if ((!duplicated_didReplaceEntry) && (value?.hasOwnProperty("didReplaceEntry"))) {
+            return true
+        }
+        else if ((!duplicated_navigationType) && (value?.hasOwnProperty("navigationType"))) {
+            return true
+        }
+        else if ((!duplicated_url) && (value?.hasOwnProperty("url"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof LoadCommittedDetails")
+        }
     }
     static isLoadingProgressConfiguration(value: Object | string | number | undefined | boolean, duplicated_enableLoading: boolean): boolean {
         if ((!duplicated_enableLoading) && (value?.hasOwnProperty("enableLoading"))) {
@@ -8289,6 +8597,40 @@ export class TypeChecker {
             throw new Error("Can not discriminate value typeof MessageEvents")
         }
     }
+    static isMessageLevel(value: Object | string | number | undefined | boolean): boolean {
+        if ((value) === (MessageLevel.Debug)) {
+            return true
+        }
+        else if ((value) === (MessageLevel.Error)) {
+            return true
+        }
+        else if ((value) === (MessageLevel.Info)) {
+            return true
+        }
+        else if ((value) === (MessageLevel.Log)) {
+            return true
+        }
+        else if ((value) === (MessageLevel.Warn)) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof MessageLevel")
+        }
+    }
+    static isMixedMode(value: Object | string | number | undefined | boolean): boolean {
+        if ((value) === (MixedMode.All)) {
+            return true
+        }
+        else if ((value) === (MixedMode.Compatible)) {
+            return true
+        }
+        else if ((value) === (MixedMode.None)) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof MixedMode")
+        }
+    }
     static isModalTransition(value: Object | string | number | undefined | boolean): boolean {
         if ((value) === (ModalTransition.DEFAULT)) {
             return true
@@ -8470,6 +8812,111 @@ export class TypeChecker {
     }
     static isMutableStyledString(value: Object | string | number | undefined | boolean): boolean {
         throw new Error("Can not discriminate value typeof MutableStyledString")
+    }
+    static isNativeEmbedDataInfo(value: Object | string | number | undefined | boolean, duplicated_status: boolean, duplicated_surfaceId: boolean, duplicated_embedId: boolean, duplicated_info: boolean): boolean {
+        if ((!duplicated_status) && (value?.hasOwnProperty("status"))) {
+            return true
+        }
+        else if ((!duplicated_surfaceId) && (value?.hasOwnProperty("surfaceId"))) {
+            return true
+        }
+        else if ((!duplicated_embedId) && (value?.hasOwnProperty("embedId"))) {
+            return true
+        }
+        else if ((!duplicated_info) && (value?.hasOwnProperty("info"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof NativeEmbedDataInfo")
+        }
+    }
+    static isNativeEmbedInfo(value: Object | string | number | undefined | boolean, duplicated_id: boolean, duplicated_type: boolean, duplicated_src: boolean, duplicated_position: boolean, duplicated_width: boolean, duplicated_height: boolean, duplicated_url: boolean, duplicated_tag: boolean, duplicated_params: boolean): boolean {
+        if ((!duplicated_id) && (value?.hasOwnProperty("id"))) {
+            return true
+        }
+        else if ((!duplicated_type) && (value?.hasOwnProperty("type"))) {
+            return true
+        }
+        else if ((!duplicated_src) && (value?.hasOwnProperty("src"))) {
+            return true
+        }
+        else if ((!duplicated_position) && (value?.hasOwnProperty("position"))) {
+            return true
+        }
+        else if ((!duplicated_width) && (value?.hasOwnProperty("width"))) {
+            return true
+        }
+        else if ((!duplicated_height) && (value?.hasOwnProperty("height"))) {
+            return true
+        }
+        else if ((!duplicated_url) && (value?.hasOwnProperty("url"))) {
+            return true
+        }
+        else if ((!duplicated_tag) && (value?.hasOwnProperty("tag"))) {
+            return true
+        }
+        else if ((!duplicated_params) && (value?.hasOwnProperty("params"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof NativeEmbedInfo")
+        }
+    }
+    static isNativeEmbedStatus(value: Object | string | number | undefined | boolean): boolean {
+        if ((value) === (NativeEmbedStatus.CREATE)) {
+            return true
+        }
+        else if ((value) === (NativeEmbedStatus.UPDATE)) {
+            return true
+        }
+        else if ((value) === (NativeEmbedStatus.DESTROY)) {
+            return true
+        }
+        else if ((value) === (NativeEmbedStatus.ENTER_BFCACHE)) {
+            return true
+        }
+        else if ((value) === (NativeEmbedStatus.LEAVE_BFCACHE)) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof NativeEmbedStatus")
+        }
+    }
+    static isNativeEmbedTouchInfo(value: Object | string | number | undefined | boolean, duplicated_embedId: boolean, duplicated_touchEvent: boolean, duplicated_result: boolean): boolean {
+        if ((!duplicated_embedId) && (value?.hasOwnProperty("embedId"))) {
+            return true
+        }
+        else if ((!duplicated_touchEvent) && (value?.hasOwnProperty("touchEvent"))) {
+            return true
+        }
+        else if ((!duplicated_result) && (value?.hasOwnProperty("result"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof NativeEmbedTouchInfo")
+        }
+    }
+    static isNativeEmbedVisibilityInfo(value: Object | string | number | undefined | boolean, duplicated_visibility: boolean, duplicated_embedId: boolean): boolean {
+        if ((!duplicated_visibility) && (value?.hasOwnProperty("visibility"))) {
+            return true
+        }
+        else if ((!duplicated_embedId) && (value?.hasOwnProperty("embedId"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof NativeEmbedVisibilityInfo")
+        }
+    }
+    static isNativeMediaPlayerConfig(value: Object | string | number | undefined | boolean, duplicated_enable: boolean, duplicated_shouldOverlay: boolean): boolean {
+        if ((!duplicated_enable) && (value?.hasOwnProperty("enable"))) {
+            return true
+        }
+        else if ((!duplicated_shouldOverlay) && (value?.hasOwnProperty("shouldOverlay"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof NativeMediaPlayerConfig")
+        }
     }
     static isNativeXComponentParameters(value: Object | string | number | undefined | boolean, duplicated_type: boolean, duplicated_imageAIOptions: boolean): boolean {
         if ((!duplicated_type) && (value?.hasOwnProperty("type"))) {
@@ -8923,6 +9370,23 @@ export class TypeChecker {
             throw new Error("Can not discriminate value typeof NestedScrollOptions")
         }
     }
+    static isNestedScrollOptionsExt(value: Object | string | number | undefined | boolean, duplicated_scrollUp: boolean, duplicated_scrollDown: boolean, duplicated_scrollRight: boolean, duplicated_scrollLeft: boolean): boolean {
+        if ((!duplicated_scrollUp) && (value?.hasOwnProperty("scrollUp"))) {
+            return true
+        }
+        else if ((!duplicated_scrollDown) && (value?.hasOwnProperty("scrollDown"))) {
+            return true
+        }
+        else if ((!duplicated_scrollRight) && (value?.hasOwnProperty("scrollRight"))) {
+            return true
+        }
+        else if ((!duplicated_scrollLeft) && (value?.hasOwnProperty("scrollLeft"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof NestedScrollOptionsExt")
+        }
+    }
     static isNodeContent(value: Object | string | number | undefined | boolean): boolean {
         throw new Error("Can not discriminate value typeof NodeContent")
     }
@@ -9012,6 +9476,153 @@ export class TypeChecker {
             throw new Error("Can not discriminate value typeof OffsetResult")
         }
     }
+    static isOnAlertEvent(value: Object | string | number | undefined | boolean, duplicated_url: boolean, duplicated_message: boolean, duplicated_result: boolean): boolean {
+        if ((!duplicated_url) && (value?.hasOwnProperty("url"))) {
+            return true
+        }
+        else if ((!duplicated_message) && (value?.hasOwnProperty("message"))) {
+            return true
+        }
+        else if ((!duplicated_result) && (value?.hasOwnProperty("result"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof OnAlertEvent")
+        }
+    }
+    static isOnAudioStateChangedEvent(value: Object | string | number | undefined | boolean, duplicated_playing: boolean): boolean {
+        if ((!duplicated_playing) && (value?.hasOwnProperty("playing"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof OnAudioStateChangedEvent")
+        }
+    }
+    static isOnBeforeUnloadEvent(value: Object | string | number | undefined | boolean, duplicated_url: boolean, duplicated_message: boolean, duplicated_result: boolean): boolean {
+        if ((!duplicated_url) && (value?.hasOwnProperty("url"))) {
+            return true
+        }
+        else if ((!duplicated_message) && (value?.hasOwnProperty("message"))) {
+            return true
+        }
+        else if ((!duplicated_result) && (value?.hasOwnProperty("result"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof OnBeforeUnloadEvent")
+        }
+    }
+    static isOnClientAuthenticationEvent(value: Object | string | number | undefined | boolean, duplicated_handler: boolean, duplicated_host: boolean, duplicated_port: boolean, duplicated_keyTypes: boolean, duplicated_issuers: boolean): boolean {
+        if ((!duplicated_handler) && (value?.hasOwnProperty("handler"))) {
+            return true
+        }
+        else if ((!duplicated_host) && (value?.hasOwnProperty("host"))) {
+            return true
+        }
+        else if ((!duplicated_port) && (value?.hasOwnProperty("port"))) {
+            return true
+        }
+        else if ((!duplicated_keyTypes) && (value?.hasOwnProperty("keyTypes"))) {
+            return true
+        }
+        else if ((!duplicated_issuers) && (value?.hasOwnProperty("issuers"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof OnClientAuthenticationEvent")
+        }
+    }
+    static isOnConfirmEvent(value: Object | string | number | undefined | boolean, duplicated_url: boolean, duplicated_message: boolean, duplicated_result: boolean): boolean {
+        if ((!duplicated_url) && (value?.hasOwnProperty("url"))) {
+            return true
+        }
+        else if ((!duplicated_message) && (value?.hasOwnProperty("message"))) {
+            return true
+        }
+        else if ((!duplicated_result) && (value?.hasOwnProperty("result"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof OnConfirmEvent")
+        }
+    }
+    static isOnConsoleEvent(value: Object | string | number | undefined | boolean, duplicated_message: boolean): boolean {
+        if ((!duplicated_message) && (value?.hasOwnProperty("message"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof OnConsoleEvent")
+        }
+    }
+    static isOnContextMenuShowEvent(value: Object | string | number | undefined | boolean, duplicated_param: boolean, duplicated_result: boolean): boolean {
+        if ((!duplicated_param) && (value?.hasOwnProperty("param"))) {
+            return true
+        }
+        else if ((!duplicated_result) && (value?.hasOwnProperty("result"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof OnContextMenuShowEvent")
+        }
+    }
+    static isOnDataResubmittedEvent(value: Object | string | number | undefined | boolean, duplicated_handler: boolean): boolean {
+        if ((!duplicated_handler) && (value?.hasOwnProperty("handler"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof OnDataResubmittedEvent")
+        }
+    }
+    static isOnDownloadStartEvent(value: Object | string | number | undefined | boolean, duplicated_url: boolean, duplicated_userAgent: boolean, duplicated_contentDisposition: boolean, duplicated_mimetype: boolean, duplicated_contentLength: boolean): boolean {
+        if ((!duplicated_url) && (value?.hasOwnProperty("url"))) {
+            return true
+        }
+        else if ((!duplicated_userAgent) && (value?.hasOwnProperty("userAgent"))) {
+            return true
+        }
+        else if ((!duplicated_contentDisposition) && (value?.hasOwnProperty("contentDisposition"))) {
+            return true
+        }
+        else if ((!duplicated_mimetype) && (value?.hasOwnProperty("mimetype"))) {
+            return true
+        }
+        else if ((!duplicated_contentLength) && (value?.hasOwnProperty("contentLength"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof OnDownloadStartEvent")
+        }
+    }
+    static isOnErrorReceiveEvent(value: Object | string | number | undefined | boolean, duplicated_request: boolean, duplicated_error: boolean): boolean {
+        if ((!duplicated_request) && (value?.hasOwnProperty("request"))) {
+            return true
+        }
+        else if ((!duplicated_error) && (value?.hasOwnProperty("error"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof OnErrorReceiveEvent")
+        }
+    }
+    static isOnFaviconReceivedEvent(value: Object | string | number | undefined | boolean, duplicated_favicon: boolean): boolean {
+        if ((!duplicated_favicon) && (value?.hasOwnProperty("favicon"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof OnFaviconReceivedEvent")
+        }
+    }
+    static isOnFirstContentfulPaintEvent(value: Object | string | number | undefined | boolean, duplicated_navigationStartTick: boolean, duplicated_firstContentfulPaintMs: boolean): boolean {
+        if ((!duplicated_navigationStartTick) && (value?.hasOwnProperty("navigationStartTick"))) {
+            return true
+        }
+        else if ((!duplicated_firstContentfulPaintMs) && (value?.hasOwnProperty("firstContentfulPaintMs"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof OnFirstContentfulPaintEvent")
+        }
+    }
     static isOnFoldStatusChangeInfo(value: Object | string | number | undefined | boolean, duplicated_foldStatus: boolean): boolean {
         if ((!duplicated_foldStatus) && (value?.hasOwnProperty("foldStatus"))) {
             return true
@@ -9020,12 +9631,264 @@ export class TypeChecker {
             throw new Error("Can not discriminate value typeof OnFoldStatusChangeInfo")
         }
     }
+    static isOnGeolocationShowEvent(value: Object | string | number | undefined | boolean, duplicated_origin: boolean, duplicated_geolocation: boolean): boolean {
+        if ((!duplicated_origin) && (value?.hasOwnProperty("origin"))) {
+            return true
+        }
+        else if ((!duplicated_geolocation) && (value?.hasOwnProperty("geolocation"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof OnGeolocationShowEvent")
+        }
+    }
+    static isOnHttpAuthRequestEvent(value: Object | string | number | undefined | boolean, duplicated_handler: boolean, duplicated_host: boolean, duplicated_realm: boolean): boolean {
+        if ((!duplicated_handler) && (value?.hasOwnProperty("handler"))) {
+            return true
+        }
+        else if ((!duplicated_host) && (value?.hasOwnProperty("host"))) {
+            return true
+        }
+        else if ((!duplicated_realm) && (value?.hasOwnProperty("realm"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof OnHttpAuthRequestEvent")
+        }
+    }
+    static isOnHttpErrorReceiveEvent(value: Object | string | number | undefined | boolean, duplicated_request: boolean, duplicated_response: boolean): boolean {
+        if ((!duplicated_request) && (value?.hasOwnProperty("request"))) {
+            return true
+        }
+        else if ((!duplicated_response) && (value?.hasOwnProperty("response"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof OnHttpErrorReceiveEvent")
+        }
+    }
+    static isOnInterceptRequestEvent(value: Object | string | number | undefined | boolean, duplicated_request: boolean): boolean {
+        if ((!duplicated_request) && (value?.hasOwnProperty("request"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof OnInterceptRequestEvent")
+        }
+    }
+    static isOnLoadInterceptEvent(value: Object | string | number | undefined | boolean, duplicated_data: boolean): boolean {
+        if ((!duplicated_data) && (value?.hasOwnProperty("data"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof OnLoadInterceptEvent")
+        }
+    }
+    static isOnOverScrollEvent(value: Object | string | number | undefined | boolean, duplicated_xOffset: boolean, duplicated_yOffset: boolean): boolean {
+        if ((!duplicated_xOffset) && (value?.hasOwnProperty("xOffset"))) {
+            return true
+        }
+        else if ((!duplicated_yOffset) && (value?.hasOwnProperty("yOffset"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof OnOverScrollEvent")
+        }
+    }
+    static isOnPageBeginEvent(value: Object | string | number | undefined | boolean, duplicated_url: boolean): boolean {
+        if ((!duplicated_url) && (value?.hasOwnProperty("url"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof OnPageBeginEvent")
+        }
+    }
+    static isOnPageEndEvent(value: Object | string | number | undefined | boolean, duplicated_url: boolean): boolean {
+        if ((!duplicated_url) && (value?.hasOwnProperty("url"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof OnPageEndEvent")
+        }
+    }
+    static isOnPageVisibleEvent(value: Object | string | number | undefined | boolean, duplicated_url: boolean): boolean {
+        if ((!duplicated_url) && (value?.hasOwnProperty("url"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof OnPageVisibleEvent")
+        }
+    }
+    static isOnPermissionRequestEvent(value: Object | string | number | undefined | boolean, duplicated_request: boolean): boolean {
+        if ((!duplicated_request) && (value?.hasOwnProperty("request"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof OnPermissionRequestEvent")
+        }
+    }
+    static isOnProgressChangeEvent(value: Object | string | number | undefined | boolean, duplicated_newProgress: boolean): boolean {
+        if ((!duplicated_newProgress) && (value?.hasOwnProperty("newProgress"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof OnProgressChangeEvent")
+        }
+    }
+    static isOnPromptEvent(value: Object | string | number | undefined | boolean, duplicated_url: boolean, duplicated_message: boolean, duplicated_value: boolean, duplicated_result: boolean): boolean {
+        if ((!duplicated_url) && (value?.hasOwnProperty("url"))) {
+            return true
+        }
+        else if ((!duplicated_message) && (value?.hasOwnProperty("message"))) {
+            return true
+        }
+        else if ((!duplicated_value) && (value?.hasOwnProperty("value"))) {
+            return true
+        }
+        else if ((!duplicated_result) && (value?.hasOwnProperty("result"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof OnPromptEvent")
+        }
+    }
+    static isOnRefreshAccessedHistoryEvent(value: Object | string | number | undefined | boolean, duplicated_url: boolean, duplicated_isRefreshed: boolean): boolean {
+        if ((!duplicated_url) && (value?.hasOwnProperty("url"))) {
+            return true
+        }
+        else if ((!duplicated_isRefreshed) && (value?.hasOwnProperty("isRefreshed"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof OnRefreshAccessedHistoryEvent")
+        }
+    }
+    static isOnRenderExitedEvent(value: Object | string | number | undefined | boolean, duplicated_renderExitReason: boolean): boolean {
+        if ((!duplicated_renderExitReason) && (value?.hasOwnProperty("renderExitReason"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof OnRenderExitedEvent")
+        }
+    }
+    static isOnResourceLoadEvent(value: Object | string | number | undefined | boolean, duplicated_url: boolean): boolean {
+        if ((!duplicated_url) && (value?.hasOwnProperty("url"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof OnResourceLoadEvent")
+        }
+    }
+    static isOnScaleChangeEvent(value: Object | string | number | undefined | boolean, duplicated_oldScale: boolean, duplicated_newScale: boolean): boolean {
+        if ((!duplicated_oldScale) && (value?.hasOwnProperty("oldScale"))) {
+            return true
+        }
+        else if ((!duplicated_newScale) && (value?.hasOwnProperty("newScale"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof OnScaleChangeEvent")
+        }
+    }
+    static isOnScreenCaptureRequestEvent(value: Object | string | number | undefined | boolean, duplicated_handler: boolean): boolean {
+        if ((!duplicated_handler) && (value?.hasOwnProperty("handler"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof OnScreenCaptureRequestEvent")
+        }
+    }
+    static isOnScrollEvent(value: Object | string | number | undefined | boolean, duplicated_xOffset: boolean, duplicated_yOffset: boolean): boolean {
+        if ((!duplicated_xOffset) && (value?.hasOwnProperty("xOffset"))) {
+            return true
+        }
+        else if ((!duplicated_yOffset) && (value?.hasOwnProperty("yOffset"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof OnScrollEvent")
+        }
+    }
     static isOnScrollFrameBeginHandlerResult(value: Object | string | number | undefined | boolean, duplicated_offsetRemain: boolean): boolean {
         if ((!duplicated_offsetRemain) && (value?.hasOwnProperty("offsetRemain"))) {
             return true
         }
         else {
             throw new Error("Can not discriminate value typeof OnScrollFrameBeginHandlerResult")
+        }
+    }
+    static isOnSearchResultReceiveEvent(value: Object | string | number | undefined | boolean, duplicated_activeMatchOrdinal: boolean, duplicated_numberOfMatches: boolean, duplicated_isDoneCounting: boolean): boolean {
+        if ((!duplicated_activeMatchOrdinal) && (value?.hasOwnProperty("activeMatchOrdinal"))) {
+            return true
+        }
+        else if ((!duplicated_numberOfMatches) && (value?.hasOwnProperty("numberOfMatches"))) {
+            return true
+        }
+        else if ((!duplicated_isDoneCounting) && (value?.hasOwnProperty("isDoneCounting"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof OnSearchResultReceiveEvent")
+        }
+    }
+    static isOnShowFileSelectorEvent(value: Object | string | number | undefined | boolean, duplicated_result: boolean, duplicated_fileSelector: boolean): boolean {
+        if ((!duplicated_result) && (value?.hasOwnProperty("result"))) {
+            return true
+        }
+        else if ((!duplicated_fileSelector) && (value?.hasOwnProperty("fileSelector"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof OnShowFileSelectorEvent")
+        }
+    }
+    static isOnSslErrorEventReceiveEvent(value: Object | string | number | undefined | boolean, duplicated_handler: boolean, duplicated_error: boolean, duplicated_certChainData: boolean): boolean {
+        if ((!duplicated_handler) && (value?.hasOwnProperty("handler"))) {
+            return true
+        }
+        else if ((!duplicated_error) && (value?.hasOwnProperty("error"))) {
+            return true
+        }
+        else if ((!duplicated_certChainData) && (value?.hasOwnProperty("certChainData"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof OnSslErrorEventReceiveEvent")
+        }
+    }
+    static isOnTitleReceiveEvent(value: Object | string | number | undefined | boolean, duplicated_title: boolean): boolean {
+        if ((!duplicated_title) && (value?.hasOwnProperty("title"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof OnTitleReceiveEvent")
+        }
+    }
+    static isOnTouchIconUrlReceivedEvent(value: Object | string | number | undefined | boolean, duplicated_url: boolean, duplicated_precomposed: boolean): boolean {
+        if ((!duplicated_url) && (value?.hasOwnProperty("url"))) {
+            return true
+        }
+        else if ((!duplicated_precomposed) && (value?.hasOwnProperty("precomposed"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof OnTouchIconUrlReceivedEvent")
+        }
+    }
+    static isOnWindowNewEvent(value: Object | string | number | undefined | boolean, duplicated_isAlert: boolean, duplicated_isUserTrigger: boolean, duplicated_targetUrl: boolean, duplicated_handler: boolean): boolean {
+        if ((!duplicated_isAlert) && (value?.hasOwnProperty("isAlert"))) {
+            return true
+        }
+        else if ((!duplicated_isUserTrigger) && (value?.hasOwnProperty("isUserTrigger"))) {
+            return true
+        }
+        else if ((!duplicated_targetUrl) && (value?.hasOwnProperty("targetUrl"))) {
+            return true
+        }
+        else if ((!duplicated_handler) && (value?.hasOwnProperty("handler"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof OnWindowNewEvent")
         }
     }
     static isOptionWidthMode(value: Object | string | number | undefined | boolean): boolean {
@@ -9107,6 +9970,17 @@ export class TypeChecker {
         }
         else {
             throw new Error("Can not discriminate value typeof OverlayOptions")
+        }
+    }
+    static isOverScrollMode(value: Object | string | number | undefined | boolean): boolean {
+        if ((value) === (OverScrollMode.NEVER)) {
+            return true
+        }
+        else if ((value) === (OverScrollMode.ALWAYS)) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof OverScrollMode")
         }
     }
     static isPadding(value: Object | string | number | undefined | boolean, duplicated_top: boolean, duplicated_right: boolean, duplicated_bottom: boolean, duplicated_left: boolean): boolean {
@@ -9455,6 +10329,9 @@ export class TypeChecker {
         else {
             throw new Error("Can not discriminate value typeof PerfMonitorSourceType")
         }
+    }
+    static isPermissionRequest(value: Object | string | number | undefined | boolean): boolean {
+        throw new Error("Can not discriminate value typeof PermissionRequest")
     }
     static isPickerDialogButtonStyle(value: Object | string | number | undefined | boolean, duplicated_type: boolean, duplicated_style: boolean, duplicated_role: boolean, duplicated_fontSize: boolean, duplicated_fontColor: boolean, duplicated_fontWeight: boolean, duplicated_fontStyle: boolean, duplicated_fontFamily: boolean, duplicated_backgroundColor: boolean, duplicated_borderRadius: boolean, duplicated_primary: boolean): boolean {
         if ((!duplicated_type) && (value?.hasOwnProperty("type"))) {
@@ -10313,6 +11190,23 @@ export class TypeChecker {
     static isPromptAction(value: Object | string | number | undefined | boolean): boolean {
         throw new Error("Can not discriminate value typeof PromptAction")
     }
+    static isProtectedResourceType(value: Object | string | number | undefined | boolean): boolean {
+        if ((value) === (ProtectedResourceType.MidiSysex)) {
+            return true
+        }
+        else if ((value) === (ProtectedResourceType.VIDEO_CAPTURE)) {
+            return true
+        }
+        else if ((value) === (ProtectedResourceType.AUDIO_CAPTURE)) {
+            return true
+        }
+        else if ((value) === (ProtectedResourceType.SENSOR)) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof ProtectedResourceType")
+        }
+    }
     static isPulseSymbolEffect(value: Object | string | number | undefined | boolean): boolean {
         throw new Error("Can not discriminate value typeof PulseSymbolEffect")
     }
@@ -10530,6 +11424,26 @@ export class TypeChecker {
             throw new Error("Can not discriminate value typeof RelateType")
         }
     }
+    static isRenderExitReason(value: Object | string | number | undefined | boolean): boolean {
+        if ((value) === (RenderExitReason.ProcessAbnormalTermination)) {
+            return true
+        }
+        else if ((value) === (RenderExitReason.ProcessWasKilled)) {
+            return true
+        }
+        else if ((value) === (RenderExitReason.ProcessCrashed)) {
+            return true
+        }
+        else if ((value) === (RenderExitReason.ProcessOom)) {
+            return true
+        }
+        else if ((value) === (RenderExitReason.ProcessExitUnknown)) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof RenderExitReason")
+        }
+    }
     static isRenderFit(value: Object | string | number | undefined | boolean): boolean {
         if ((value) === (RenderFit.CENTER)) {
             return true
@@ -10589,6 +11503,17 @@ export class TypeChecker {
         }
         else {
             throw new Error("Can not discriminate value typeof RenderingContextSettings")
+        }
+    }
+    static isRenderMode(value: Object | string | number | undefined | boolean): boolean {
+        if ((value) === (RenderMode.ASYNC_RENDER)) {
+            return true
+        }
+        else if ((value) === (RenderMode.SYNC_RENDER)) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof RenderMode")
         }
     }
     static isRenderNode(value: Object | string | number | undefined | boolean, duplicated_backgroundColor: boolean, duplicated_clipToFrame: boolean, duplicated_opacity: boolean, duplicated_size: boolean, duplicated_position: boolean, duplicated_frame: boolean, duplicated_pivot: boolean, duplicated_scale: boolean, duplicated_translation: boolean, duplicated_rotation: boolean, duplicated_transform: boolean, duplicated_shadowColor: boolean, duplicated_shadowOffset: boolean, duplicated_label: boolean, duplicated_shadowAlpha: boolean, duplicated_shadowElevation: boolean, duplicated_shadowRadius: boolean, duplicated_borderStyle: boolean, duplicated_borderWidth: boolean, duplicated_borderColor: boolean, duplicated_borderRadius: boolean, duplicated_shapeMask: boolean, duplicated_shapeClip: boolean, duplicated_markNodeGroup: boolean, duplicated_lengthMetricsUnit: boolean): boolean {
@@ -10669,6 +11594,31 @@ export class TypeChecker {
         }
         else {
             throw new Error("Can not discriminate value typeof RenderNode")
+        }
+    }
+    static isRenderProcessNotRespondingData(value: Object | string | number | undefined | boolean, duplicated_jsStack: boolean, duplicated_pid: boolean, duplicated_reason: boolean): boolean {
+        if ((!duplicated_jsStack) && (value?.hasOwnProperty("jsStack"))) {
+            return true
+        }
+        else if ((!duplicated_pid) && (value?.hasOwnProperty("pid"))) {
+            return true
+        }
+        else if ((!duplicated_reason) && (value?.hasOwnProperty("reason"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof RenderProcessNotRespondingData")
+        }
+    }
+    static isRenderProcessNotRespondingReason(value: Object | string | number | undefined | boolean): boolean {
+        if ((value) === (RenderProcessNotRespondingReason.INPUT_TIMEOUT)) {
+            return true
+        }
+        else if ((value) === (RenderProcessNotRespondingReason.NAVIGATION_COMMIT_TIMEOUT)) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof RenderProcessNotRespondingReason")
         }
     }
     static isRepeatMode(value: Object | string | number | undefined | boolean): boolean {
@@ -11657,6 +12607,28 @@ export class TypeChecker {
     static isScene(value: Object | string | number | undefined | boolean): boolean {
         throw new Error("Can not discriminate value typeof Scene")
     }
+    static isScreenCaptureConfig(value: Object | string | number | undefined | boolean, duplicated_captureMode: boolean): boolean {
+        if ((!duplicated_captureMode) && (value?.hasOwnProperty("captureMode"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof ScreenCaptureConfig")
+        }
+    }
+    static isScreenCaptureHandler(value: Object | string | number | undefined | boolean): boolean {
+        throw new Error("Can not discriminate value typeof ScreenCaptureHandler")
+    }
+    static isScriptItem(value: Object | string | number | undefined | boolean, duplicated_script: boolean, duplicated_scriptRules: boolean): boolean {
+        if ((!duplicated_script) && (value?.hasOwnProperty("script"))) {
+            return true
+        }
+        else if ((!duplicated_scriptRules) && (value?.hasOwnProperty("scriptRules"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof ScriptItem")
+        }
+    }
     static isScrollableBarModeOptions(value: Object | string | number | undefined | boolean, duplicated_margin: boolean, duplicated_nonScrollableLayoutStyle: boolean): boolean {
         if ((!duplicated_margin) && (value?.hasOwnProperty("margin"))) {
             return true
@@ -12024,6 +12996,23 @@ export class TypeChecker {
         }
         else {
             throw new Error("Can not discriminate value typeof SelectionMenuOptions")
+        }
+    }
+    static isSelectionMenuOptionsExt(value: Object | string | number | undefined | boolean, duplicated_onAppear: boolean, duplicated_onDisappear: boolean, duplicated_preview: boolean, duplicated_menuType: boolean): boolean {
+        if ((!duplicated_onAppear) && (value?.hasOwnProperty("onAppear"))) {
+            return true
+        }
+        else if ((!duplicated_onDisappear) && (value?.hasOwnProperty("onDisappear"))) {
+            return true
+        }
+        else if ((!duplicated_preview) && (value?.hasOwnProperty("preview"))) {
+            return true
+        }
+        else if ((!duplicated_menuType) && (value?.hasOwnProperty("menuType"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof SelectionMenuOptionsExt")
         }
     }
     static isSelectionOptions(value: Object | string | number | undefined | boolean, duplicated_menuPolicy: boolean): boolean {
@@ -12649,6 +13638,52 @@ export class TypeChecker {
     }
     static isSpringProp(value: Object | string | number | undefined | boolean): boolean {
         throw new Error("Can not discriminate value typeof SpringProp")
+    }
+    static isSslError(value: Object | string | number | undefined | boolean): boolean {
+        if ((value) === (SslError.Invalid)) {
+            return true
+        }
+        else if ((value) === (SslError.HostMismatch)) {
+            return true
+        }
+        else if ((value) === (SslError.DateInvalid)) {
+            return true
+        }
+        else if ((value) === (SslError.Untrusted)) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof SslError")
+        }
+    }
+    static isSslErrorEvent(value: Object | string | number | undefined | boolean, duplicated_handler: boolean, duplicated_error: boolean, duplicated_url: boolean, duplicated_originalUrl: boolean, duplicated_referrer: boolean, duplicated_isFatalError: boolean, duplicated_isMainFrame: boolean): boolean {
+        if ((!duplicated_handler) && (value?.hasOwnProperty("handler"))) {
+            return true
+        }
+        else if ((!duplicated_error) && (value?.hasOwnProperty("error"))) {
+            return true
+        }
+        else if ((!duplicated_url) && (value?.hasOwnProperty("url"))) {
+            return true
+        }
+        else if ((!duplicated_originalUrl) && (value?.hasOwnProperty("originalUrl"))) {
+            return true
+        }
+        else if ((!duplicated_referrer) && (value?.hasOwnProperty("referrer"))) {
+            return true
+        }
+        else if ((!duplicated_isFatalError) && (value?.hasOwnProperty("isFatalError"))) {
+            return true
+        }
+        else if ((!duplicated_isMainFrame) && (value?.hasOwnProperty("isMainFrame"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof SslErrorEvent")
+        }
+    }
+    static isSslErrorHandler(value: Object | string | number | undefined | boolean): boolean {
+        throw new Error("Can not discriminate value typeof SslErrorHandler")
     }
     static isStackOptions(value: Object | string | number | undefined | boolean, duplicated_alignContent: boolean): boolean {
         if ((!duplicated_alignContent) && (value?.hasOwnProperty("alignContent"))) {
@@ -14815,6 +15850,23 @@ export class TypeChecker {
     static isThemeControl(value: Object | string | number | undefined | boolean): boolean {
         throw new Error("Can not discriminate value typeof ThemeControl")
     }
+    static isThreatType(value: Object | string | number | undefined | boolean): boolean {
+        if ((value) === (ThreatType.THREAT_ILLEGAL)) {
+            return true
+        }
+        else if ((value) === (ThreatType.THREAT_FRAUD)) {
+            return true
+        }
+        else if ((value) === (ThreatType.THREAT_RISK)) {
+            return true
+        }
+        else if ((value) === (ThreatType.THREAT_WARNING)) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof ThreatType")
+        }
+    }
     static isTimePickerDialog(value: Object | string | number | undefined | boolean): boolean {
         throw new Error("Can not discriminate value typeof TimePickerDialog")
     }
@@ -15937,6 +16989,20 @@ export class TypeChecker {
             throw new Error("Can not discriminate value typeof VideoOptions")
         }
     }
+    static isViewportFit(value: Object | string | number | undefined | boolean): boolean {
+        if ((value) === (ViewportFit.AUTO)) {
+            return true
+        }
+        else if ((value) === (ViewportFit.CONTAINS)) {
+            return true
+        }
+        else if ((value) === (ViewportFit.COVER)) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof ViewportFit")
+        }
+    }
     static isViewportRect(value: Object | string | number | undefined | boolean, duplicated_x: boolean, duplicated_y: boolean, duplicated_width: boolean, duplicated_height: boolean): boolean {
         if ((!duplicated_x) && (value?.hasOwnProperty("x"))) {
             return true
@@ -16062,8 +17128,179 @@ export class TypeChecker {
     static isWaterFlowSections(value: Object | string | number | undefined | boolean): boolean {
         throw new Error("Can not discriminate value typeof WaterFlowSections")
     }
+    static isWebCaptureMode(value: Object | string | number | undefined | boolean): boolean {
+        if ((value) === (WebCaptureMode.HOME_SCREEN)) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof WebCaptureMode")
+        }
+    }
+    static isWebContextMenuParam(value: Object | string | number | undefined | boolean): boolean {
+        throw new Error("Can not discriminate value typeof WebContextMenuParam")
+    }
+    static isWebContextMenuResult(value: Object | string | number | undefined | boolean): boolean {
+        throw new Error("Can not discriminate value typeof WebContextMenuResult")
+    }
     static isWebCookie(value: Object | string | number | undefined | boolean): boolean {
         throw new Error("Can not discriminate value typeof WebCookie")
+    }
+    static isWebDarkMode(value: Object | string | number | undefined | boolean): boolean {
+        if ((value) === (WebDarkMode.Off)) {
+            return true
+        }
+        else if ((value) === (WebDarkMode.On)) {
+            return true
+        }
+        else if ((value) === (WebDarkMode.Auto)) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof WebDarkMode")
+        }
+    }
+    static isWebElementType(value: Object | string | number | undefined | boolean): boolean {
+        if ((value) === (WebElementType.IMAGE)) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof WebElementType")
+        }
+    }
+    static isWebKeyboardAvoidMode(value: Object | string | number | undefined | boolean): boolean {
+        if ((value) === (WebKeyboardAvoidMode.RESIZE_VISUAL)) {
+            return true
+        }
+        else if ((value) === (WebKeyboardAvoidMode.RESIZE_CONTENT)) {
+            return true
+        }
+        else if ((value) === (WebKeyboardAvoidMode.OVERLAYS_CONTENT)) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof WebKeyboardAvoidMode")
+        }
+    }
+    static isWebKeyboardCallbackInfo(value: Object | string | number | undefined | boolean, duplicated_controller: boolean, duplicated_attributes: boolean): boolean {
+        if ((!duplicated_controller) && (value?.hasOwnProperty("controller"))) {
+            return true
+        }
+        else if ((!duplicated_attributes) && (value?.hasOwnProperty("attributes"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof WebKeyboardCallbackInfo")
+        }
+    }
+    static isWebKeyboardController(value: Object | string | number | undefined | boolean): boolean {
+        throw new Error("Can not discriminate value typeof WebKeyboardController")
+    }
+    static isWebKeyboardOptions(value: Object | string | number | undefined | boolean, duplicated_useSystemKeyboard: boolean, duplicated_enterKeyType: boolean, duplicated_customKeyboard: boolean): boolean {
+        if ((!duplicated_useSystemKeyboard) && (value?.hasOwnProperty("useSystemKeyboard"))) {
+            return true
+        }
+        else if ((!duplicated_enterKeyType) && (value?.hasOwnProperty("enterKeyType"))) {
+            return true
+        }
+        else if ((!duplicated_customKeyboard) && (value?.hasOwnProperty("customKeyboard"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof WebKeyboardOptions")
+        }
+    }
+    static isWebLayoutMode(value: Object | string | number | undefined | boolean): boolean {
+        if ((value) === (WebLayoutMode.NONE)) {
+            return true
+        }
+        else if ((value) === (WebLayoutMode.FIT_CONTENT)) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof WebLayoutMode")
+        }
+    }
+    static isWebMediaOptions(value: Object | string | number | undefined | boolean, duplicated_resumeInterval: boolean, duplicated_audioExclusive: boolean): boolean {
+        if ((!duplicated_resumeInterval) && (value?.hasOwnProperty("resumeInterval"))) {
+            return true
+        }
+        else if ((!duplicated_audioExclusive) && (value?.hasOwnProperty("audioExclusive"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof WebMediaOptions")
+        }
+    }
+    static isWebNavigationType(value: Object | string | number | undefined | boolean): boolean {
+        if ((value) === (WebNavigationType.UNKNOWN)) {
+            return true
+        }
+        else if ((value) === (WebNavigationType.MAIN_FRAME_NEW_ENTRY)) {
+            return true
+        }
+        else if ((value) === (WebNavigationType.MAIN_FRAME_EXISTING_ENTRY)) {
+            return true
+        }
+        else if ((value) === (WebNavigationType.NAVIGATION_TYPE_NEW_SUBFRAME)) {
+            return true
+        }
+        else if ((value) === (WebNavigationType.NAVIGATION_TYPE_AUTO_SUBFRAME)) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof WebNavigationType")
+        }
+    }
+    static isWebOptions(value: Object | string | number | undefined | boolean, duplicated_src: boolean, duplicated_controller: boolean, duplicated_renderMode: boolean, duplicated_incognitoMode: boolean, duplicated_sharedRenderProcessToken: boolean): boolean {
+        if ((!duplicated_src) && (value?.hasOwnProperty("src"))) {
+            return true
+        }
+        else if ((!duplicated_controller) && (value?.hasOwnProperty("controller"))) {
+            return true
+        }
+        else if ((!duplicated_renderMode) && (value?.hasOwnProperty("renderMode"))) {
+            return true
+        }
+        else if ((!duplicated_incognitoMode) && (value?.hasOwnProperty("incognitoMode"))) {
+            return true
+        }
+        else if ((!duplicated_sharedRenderProcessToken) && (value?.hasOwnProperty("sharedRenderProcessToken"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof WebOptions")
+        }
+    }
+    static isWebResourceError(value: Object | string | number | undefined | boolean): boolean {
+        throw new Error("Can not discriminate value typeof WebResourceError")
+    }
+    static isWebResourceRequest(value: Object | string | number | undefined | boolean): boolean {
+        throw new Error("Can not discriminate value typeof WebResourceRequest")
+    }
+    static isWebResourceResponse(value: Object | string | number | undefined | boolean): boolean {
+        throw new Error("Can not discriminate value typeof WebResourceResponse")
+    }
+    static isWebResponseType(value: Object | string | number | undefined | boolean): boolean {
+        if ((value) === (WebResponseType.LONG_PRESS)) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof WebResponseType")
+        }
+    }
+    static iswebview_WebHeader(value: Object | string | number | undefined | boolean, duplicated_headerKey: boolean, duplicated_headerValue: boolean): boolean {
+        if ((!duplicated_headerKey) && (value?.hasOwnProperty("headerKey"))) {
+            return true
+        }
+        else if ((!duplicated_headerValue) && (value?.hasOwnProperty("headerValue"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof webview.WebHeader")
+        }
+    }
+    static iswebview_WebviewController(value: Object | string | number | undefined | boolean): boolean {
+        throw new Error("Can not discriminate value typeof webview.WebviewController")
     }
     static isWeek(value: Object | string | number | undefined | boolean): boolean {
         if ((value) === (Week.Mon)) {
@@ -16456,6 +17693,12 @@ export class TypeChecker {
     static BlendMode_FromNumeric(ordinal: int32): BlendMode {
         return ordinal as BlendMode
     }
+    static BlurOnKeyboardHideMode_ToNumeric(value: BlurOnKeyboardHideMode): int32 {
+        return value as int32
+    }
+    static BlurOnKeyboardHideMode_FromNumeric(ordinal: int32): BlurOnKeyboardHideMode {
+        return ordinal as BlurOnKeyboardHideMode
+    }
     static BlurStyle_ToNumeric(value: BlurStyle): int32 {
         return value as int32
     }
@@ -16497,6 +17740,12 @@ export class TypeChecker {
     }
     static ButtonType_FromNumeric(ordinal: int32): ButtonType {
         return ordinal as ButtonType
+    }
+    static CacheMode_ToNumeric(value: CacheMode): int32 {
+        return value as int32
+    }
+    static CacheMode_FromNumeric(ordinal: int32): CacheMode {
+        return ordinal as CacheMode
     }
     static CalendarAlign_ToNumeric(value: CalendarAlign): int32 {
         return value as int32
@@ -16563,6 +17812,30 @@ export class TypeChecker {
     }
     static ContentType_FromNumeric(ordinal: int32): ContentType {
         return ordinal as ContentType
+    }
+    static ContextMenuEditStateFlags_ToNumeric(value: ContextMenuEditStateFlags): int32 {
+        return value as int32
+    }
+    static ContextMenuEditStateFlags_FromNumeric(ordinal: int32): ContextMenuEditStateFlags {
+        return ordinal as ContextMenuEditStateFlags
+    }
+    static ContextMenuInputFieldType_ToNumeric(value: ContextMenuInputFieldType): int32 {
+        return value as int32
+    }
+    static ContextMenuInputFieldType_FromNumeric(ordinal: int32): ContextMenuInputFieldType {
+        return ordinal as ContextMenuInputFieldType
+    }
+    static ContextMenuMediaType_ToNumeric(value: ContextMenuMediaType): int32 {
+        return value as int32
+    }
+    static ContextMenuMediaType_FromNumeric(ordinal: int32): ContextMenuMediaType {
+        return ordinal as ContextMenuMediaType
+    }
+    static ContextMenuSourceType_ToNumeric(value: ContextMenuSourceType): int32 {
+        return value as int32
+    }
+    static ContextMenuSourceType_FromNumeric(ordinal: int32): ContextMenuSourceType {
+        return ordinal as ContextMenuSourceType
     }
     static ControlSize_ToNumeric(value: ControlSize): int32 {
         return value as int32
@@ -16888,6 +18161,12 @@ export class TypeChecker {
     static EnterKeyType_FromNumeric(ordinal: int32): EnterKeyType {
         return ordinal as EnterKeyType
     }
+    static FileSelectorMode_ToNumeric(value: FileSelectorMode): int32 {
+        return value as int32
+    }
+    static FileSelectorMode_FromNumeric(ordinal: int32): FileSelectorMode {
+        return ordinal as FileSelectorMode
+    }
     static FillMode_ToNumeric(value: FillMode): int32 {
         return value as int32
     }
@@ -17055,6 +18334,12 @@ export class TypeChecker {
     }
     static HitTestMode_FromNumeric(ordinal: int32): HitTestMode {
         return ordinal as HitTestMode
+    }
+    static HitTestType_ToNumeric(value: HitTestType): int32 {
+        return value as int32
+    }
+    static HitTestType_FromNumeric(ordinal: int32): HitTestType {
+        return ordinal as HitTestType
     }
     static HorizontalAlign_ToNumeric(value: HorizontalAlign): int32 {
         return value as int32
@@ -17362,6 +18647,18 @@ export class TypeChecker {
     static MenuType_FromNumeric(ordinal: int32): MenuType {
         return ordinal as MenuType
     }
+    static MessageLevel_ToNumeric(value: MessageLevel): int32 {
+        return value as int32
+    }
+    static MessageLevel_FromNumeric(ordinal: int32): MessageLevel {
+        return ordinal as MessageLevel
+    }
+    static MixedMode_ToNumeric(value: MixedMode): int32 {
+        return value as int32
+    }
+    static MixedMode_FromNumeric(ordinal: int32): MixedMode {
+        return ordinal as MixedMode
+    }
     static ModalTransition_ToNumeric(value: ModalTransition): int32 {
         return value as int32
     }
@@ -17385,6 +18682,12 @@ export class TypeChecker {
     }
     static MouseButton_FromNumeric(ordinal: int32): MouseButton {
         return ordinal as MouseButton
+    }
+    static NativeEmbedStatus_ToNumeric(value: NativeEmbedStatus): int32 {
+        return value as int32
+    }
+    static NativeEmbedStatus_FromNumeric(ordinal: int32): NativeEmbedStatus {
+        return ordinal as NativeEmbedStatus
     }
     static NavBarPosition_ToNumeric(value: NavBarPosition): int32 {
         return value as int32
@@ -17457,6 +18760,12 @@ export class TypeChecker {
     }
     static OutlineStyle_FromNumeric(ordinal: int32): OutlineStyle {
         return ordinal as OutlineStyle
+    }
+    static OverScrollMode_ToNumeric(value: OverScrollMode): int32 {
+        return value as int32
+    }
+    static OverScrollMode_FromNumeric(ordinal: int32): OverScrollMode {
+        return ordinal as OverScrollMode
     }
     static PageFlipMode_ToNumeric(value: PageFlipMode): int32 {
         return value as int32
@@ -17584,6 +18893,12 @@ export class TypeChecker {
     static ProgressType_FromNumeric(ordinal: int32): ProgressType {
         return ordinal as ProgressType
     }
+    static ProtectedResourceType_ToNumeric(value: ProtectedResourceType): int32 {
+        return value as int32
+    }
+    static ProtectedResourceType_FromNumeric(ordinal: int32): ProtectedResourceType {
+        return ordinal as ProtectedResourceType
+    }
     static RadioIndicatorType_ToNumeric(value: RadioIndicatorType): int32 {
         return value as int32
     }
@@ -17602,11 +18917,29 @@ export class TypeChecker {
     static RelateType_FromNumeric(ordinal: int32): RelateType {
         return ordinal as RelateType
     }
+    static RenderExitReason_ToNumeric(value: RenderExitReason): int32 {
+        return value as int32
+    }
+    static RenderExitReason_FromNumeric(ordinal: int32): RenderExitReason {
+        return ordinal as RenderExitReason
+    }
     static RenderFit_ToNumeric(value: RenderFit): int32 {
         return value as int32
     }
     static RenderFit_FromNumeric(ordinal: int32): RenderFit {
         return ordinal as RenderFit
+    }
+    static RenderMode_ToNumeric(value: RenderMode): int32 {
+        return value as int32
+    }
+    static RenderMode_FromNumeric(ordinal: int32): RenderMode {
+        return ordinal as RenderMode
+    }
+    static RenderProcessNotRespondingReason_ToNumeric(value: RenderProcessNotRespondingReason): int32 {
+        return value as int32
+    }
+    static RenderProcessNotRespondingReason_FromNumeric(ordinal: int32): RenderProcessNotRespondingReason {
+        return ordinal as RenderProcessNotRespondingReason
     }
     static RepeatMode_ToNumeric(value: RepeatMode): int32 {
         return value as int32
@@ -17841,6 +19174,12 @@ export class TypeChecker {
     }
     static SourceType_FromNumeric(ordinal: int32): SourceType {
         return ordinal as SourceType
+    }
+    static SslError_ToNumeric(value: SslError): int32 {
+        return value as int32
+    }
+    static SslError_FromNumeric(ordinal: int32): SslError {
+        return ordinal as SslError
     }
     static StickyStyle_ToNumeric(value: StickyStyle): int32 {
         return value as int32
@@ -18112,6 +19451,12 @@ export class TypeChecker {
     static ThemeColorMode_FromNumeric(ordinal: int32): ThemeColorMode {
         return ordinal as ThemeColorMode
     }
+    static ThreatType_ToNumeric(value: ThreatType): int32 {
+        return value as int32
+    }
+    static ThreatType_FromNumeric(ordinal: int32): ThreatType {
+        return ordinal as ThreatType
+    }
     static TimePickerFormat_ToNumeric(value: TimePickerFormat): int32 {
         return value as int32
     }
@@ -18178,6 +19523,12 @@ export class TypeChecker {
     static VerticalAlign_FromNumeric(ordinal: int32): VerticalAlign {
         return ordinal as VerticalAlign
     }
+    static ViewportFit_ToNumeric(value: ViewportFit): int32 {
+        return value as int32
+    }
+    static ViewportFit_FromNumeric(ordinal: int32): ViewportFit {
+        return ordinal as ViewportFit
+    }
     static Visibility_ToNumeric(value: Visibility): int32 {
         return value as int32
     }
@@ -18189,6 +19540,48 @@ export class TypeChecker {
     }
     static WaterFlowLayoutMode_FromNumeric(ordinal: int32): WaterFlowLayoutMode {
         return ordinal as WaterFlowLayoutMode
+    }
+    static WebCaptureMode_ToNumeric(value: WebCaptureMode): int32 {
+        return value as int32
+    }
+    static WebCaptureMode_FromNumeric(ordinal: int32): WebCaptureMode {
+        return ordinal as WebCaptureMode
+    }
+    static WebDarkMode_ToNumeric(value: WebDarkMode): int32 {
+        return value as int32
+    }
+    static WebDarkMode_FromNumeric(ordinal: int32): WebDarkMode {
+        return ordinal as WebDarkMode
+    }
+    static WebElementType_ToNumeric(value: WebElementType): int32 {
+        return value as int32
+    }
+    static WebElementType_FromNumeric(ordinal: int32): WebElementType {
+        return ordinal as WebElementType
+    }
+    static WebKeyboardAvoidMode_ToNumeric(value: WebKeyboardAvoidMode): int32 {
+        return value as int32
+    }
+    static WebKeyboardAvoidMode_FromNumeric(ordinal: int32): WebKeyboardAvoidMode {
+        return ordinal as WebKeyboardAvoidMode
+    }
+    static WebLayoutMode_ToNumeric(value: WebLayoutMode): int32 {
+        return value as int32
+    }
+    static WebLayoutMode_FromNumeric(ordinal: int32): WebLayoutMode {
+        return ordinal as WebLayoutMode
+    }
+    static WebNavigationType_ToNumeric(value: WebNavigationType): int32 {
+        return value as int32
+    }
+    static WebNavigationType_FromNumeric(ordinal: int32): WebNavigationType {
+        return ordinal as WebNavigationType
+    }
+    static WebResponseType_ToNumeric(value: WebResponseType): int32 {
+        return value as int32
+    }
+    static WebResponseType_FromNumeric(ordinal: int32): WebResponseType {
+        return ordinal as WebResponseType
     }
     static Week_ToNumeric(value: Week): int32 {
         return value as int32
@@ -18244,6 +19637,9 @@ export class TypeChecker {
     static isArray_drawing_TextBlobRunBuffer(value: Object | string | number | undefined): boolean {
         return Array.isArray(value)
     }
+    static isArray_String(value: Object | string | number | undefined): boolean {
+        return Array.isArray(value)
+    }
     static isArray_SourceTool(value: Object | string | number | undefined): boolean {
         return Array.isArray(value)
     }
@@ -18260,9 +19656,6 @@ export class TypeChecker {
         return Array.isArray(value)
     }
     static isArray_ColorStop(value: Object | string | number | undefined): boolean {
-        return Array.isArray(value)
-    }
-    static isArray_String(value: Object | string | number | undefined): boolean {
         return Array.isArray(value)
     }
     static isArray_Opt_Object(value: Object | string | number | undefined): boolean {
@@ -18304,6 +19697,12 @@ export class TypeChecker {
     static isArray_SectionOptions(value: Object | string | number | undefined): boolean {
         return Array.isArray(value)
     }
+    static isArray_Header(value: Object | string | number | undefined): boolean {
+        return Array.isArray(value)
+    }
+    static isArray_webview_WebHeader(value: Object | string | number | undefined): boolean {
+        return Array.isArray(value)
+    }
     static isArray_TextMenuItem(value: Object | string | number | undefined): boolean {
         return Array.isArray(value)
     }
@@ -18311,6 +19710,9 @@ export class TypeChecker {
         return Array.isArray(value)
     }
     static isArray_NavDestinationTransition(value: Object | string | number | undefined): boolean {
+        return Array.isArray(value)
+    }
+    static isArray_ResourceStr(value: Object | string | number | undefined): boolean {
         return Array.isArray(value)
     }
     static isArray_GestureRecognizer(value: Object | string | number | undefined): boolean {
@@ -18340,6 +19742,9 @@ export class TypeChecker {
     static isArray_CalendarDay(value: Object | string | number | undefined): boolean {
         return Array.isArray(value)
     }
+    static isArray_Buffer(value: Object | string | number | undefined): boolean {
+        return Array.isArray(value)
+    }
     static isArray_Object(value: Object | string | number | undefined): boolean {
         return Array.isArray(value)
     }
@@ -18358,9 +19763,6 @@ export class TypeChecker {
     static isArray_DragPreviewMode(value: Object | string | number | undefined): boolean {
         return Array.isArray(value)
     }
-    static isArray_Buffer(value: Object | string | number | undefined): boolean {
-        return Array.isArray(value)
-    }
     static isArray_RichEditorTextSpanResult(value: Object | string | number | undefined): boolean {
         return Array.isArray(value)
     }
@@ -18377,9 +19779,6 @@ export class TypeChecker {
         return Array.isArray(value)
     }
     static isArray_TextPickerRangeContent(value: Object | string | number | undefined): boolean {
-        return Array.isArray(value)
-    }
-    static isArray_ResourceStr(value: Object | string | number | undefined): boolean {
         return Array.isArray(value)
     }
     static isArray_LengthMetrics(value: Object | string | number | undefined): boolean {
@@ -18482,6 +19881,9 @@ export class TypeChecker {
         return Array.isArray(value)
     }
     static isArray_BarrierStyle(value: Object | string | number | undefined): boolean {
+        return Array.isArray(value)
+    }
+    static isArray_ScriptItem(value: Object | string | number | undefined): boolean {
         return Array.isArray(value)
     }
 }

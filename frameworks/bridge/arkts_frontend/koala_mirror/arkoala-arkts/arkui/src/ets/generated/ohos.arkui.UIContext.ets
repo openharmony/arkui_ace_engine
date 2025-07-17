@@ -92,7 +92,7 @@ export class PromptAction implements MaterializedBase {
         let options_type : int32 = RuntimeType.UNDEFINED
         options_type = runtimeType(options)
         thisSerializer.writeInt8((options_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (options_type)) {
+        if ((options_type) != (RuntimeType.UNDEFINED)) {
             const options_value  = options!
             PopupCommonOptions_serializer.write(thisSerializer, options_value)
         }
@@ -107,7 +107,7 @@ export class PromptAction implements MaterializedBase {
         let partialUpdate_type : int32 = RuntimeType.UNDEFINED
         partialUpdate_type = runtimeType(partialUpdate)
         thisSerializer.writeInt8((partialUpdate_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (partialUpdate_type)) {
+        if ((partialUpdate_type) != (RuntimeType.UNDEFINED)) {
             const partialUpdate_value  = partialUpdate!
             thisSerializer.writeBoolean(partialUpdate_value)
         }
@@ -129,7 +129,7 @@ export class PromptAction implements MaterializedBase {
         let options_type : int32 = RuntimeType.UNDEFINED
         options_type = runtimeType(options)
         thisSerializer.writeInt8((options_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (options_type)) {
+        if ((options_type) != (RuntimeType.UNDEFINED)) {
             const options_value  = options!
             MenuOptions_serializer.write(thisSerializer, options_value)
         }
@@ -144,7 +144,7 @@ export class PromptAction implements MaterializedBase {
         let partialUpdate_type : int32 = RuntimeType.UNDEFINED
         partialUpdate_type = runtimeType(partialUpdate)
         thisSerializer.writeInt8((partialUpdate_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (partialUpdate_type)) {
+        if ((partialUpdate_type) != (RuntimeType.UNDEFINED)) {
             const partialUpdate_value  = partialUpdate!
             thisSerializer.writeBoolean(partialUpdate_value)
         }
@@ -344,11 +344,11 @@ export class UIContext implements MaterializedBase {
         let filters_type : int32 = RuntimeType.UNDEFINED
         filters_type = runtimeType(filters)
         thisSerializer.writeInt8((filters_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (filters_type)) {
+        if ((filters_type) != (RuntimeType.UNDEFINED)) {
             const filters_value  = filters!
             thisSerializer.writeInt32((filters_value.length).toInt())
-            for (let i = 0; i < filters_value.length; i++) {
-                const filters_value_element : string = filters_value[i]
+            for (let filters_value_counter_i = 0; filters_value_counter_i < filters_value.length; filters_value_counter_i++) {
+                const filters_value_element : string = filters_value[filters_value_counter_i]
                 thisSerializer.writeString(filters_value_element)
             }
         }
@@ -361,11 +361,11 @@ export class UIContext implements MaterializedBase {
         let filters_type : int32 = RuntimeType.UNDEFINED
         filters_type = runtimeType(filters)
         thisSerializer.writeInt8((filters_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (filters_type)) {
+        if ((filters_type) != (RuntimeType.UNDEFINED)) {
             const filters_value  = filters!
             thisSerializer.writeInt32((filters_value.length).toInt())
-            for (let i = 0; i < filters_value.length; i++) {
-                const filters_value_element : string = filters_value[i]
+            for (let filters_value_counter_i = 0; filters_value_counter_i < filters_value.length; filters_value_counter_i++) {
+                const filters_value_element : string = filters_value[filters_value_counter_i]
                 thisSerializer.writeString(filters_value_element)
             }
         }
@@ -404,7 +404,7 @@ export class UIContext implements MaterializedBase {
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : FrameNode | undefined
-        if ((RuntimeType.UNDEFINED) != (buffer_runtimeType))
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
         {
             buffer = (FrameNode_serializer.read(retvalDeserializer) as FrameNode)
         }
@@ -416,7 +416,7 @@ export class UIContext implements MaterializedBase {
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : FrameNode | undefined
-        if ((RuntimeType.UNDEFINED) != (buffer_runtimeType))
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
         {
             buffer = (FrameNode_serializer.read(retvalDeserializer) as FrameNode)
         }
@@ -428,7 +428,7 @@ export class UIContext implements MaterializedBase {
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : FrameNode | undefined
-        if ((RuntimeType.UNDEFINED) != (buffer_runtimeType))
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
         {
             buffer = (FrameNode_serializer.read(retvalDeserializer) as FrameNode)
         }
@@ -464,7 +464,7 @@ export class UIContext implements MaterializedBase {
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : common.Context | undefined
-        if ((RuntimeType.UNDEFINED) != (buffer_runtimeType))
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
         {
             buffer = (common_Context_serializer.read(retvalDeserializer) as common.Context)
         }
@@ -479,7 +479,7 @@ export class UIContext implements MaterializedBase {
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : string | undefined
-        if ((RuntimeType.UNDEFINED) != (buffer_runtimeType))
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
         {
             buffer = (retvalDeserializer.readString() as string)
         }
@@ -499,14 +499,14 @@ export class UIContext implements MaterializedBase {
         let sheetOptions_type : int32 = RuntimeType.UNDEFINED
         sheetOptions_type = runtimeType(sheetOptions)
         thisSerializer.writeInt8((sheetOptions_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (sheetOptions_type)) {
+        if ((sheetOptions_type) != (RuntimeType.UNDEFINED)) {
             const sheetOptions_value  = sheetOptions!
             SheetOptions_serializer.write(thisSerializer, sheetOptions_value)
         }
         let targetId_type : int32 = RuntimeType.UNDEFINED
         targetId_type = runtimeType(targetId)
         thisSerializer.writeInt8((targetId_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (targetId_type)) {
+        if ((targetId_type) != (RuntimeType.UNDEFINED)) {
             const targetId_value  = targetId!
             thisSerializer.writeNumber(targetId_value)
         }
@@ -521,7 +521,7 @@ export class UIContext implements MaterializedBase {
         let partialUpdate_type : int32 = RuntimeType.UNDEFINED
         partialUpdate_type = runtimeType(partialUpdate)
         thisSerializer.writeInt8((partialUpdate_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (partialUpdate_type)) {
+        if ((partialUpdate_type) != (RuntimeType.UNDEFINED)) {
             const partialUpdate_value  = partialUpdate!
             thisSerializer.writeBoolean(partialUpdate_value)
         }
@@ -606,7 +606,7 @@ export class TargetInfo_serializer {
         let value_componentId_type : int32 = RuntimeType.UNDEFINED
         value_componentId_type = runtimeType(value_componentId)
         valueSerializer.writeInt8((value_componentId_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_componentId_type)) {
+        if ((value_componentId_type) != (RuntimeType.UNDEFINED)) {
             const value_componentId_value  = value_componentId!
             valueSerializer.writeNumber(value_componentId_value)
         }
@@ -627,7 +627,7 @@ export class TargetInfo_serializer {
         const id_result : string | number = (id_buf as string | number)
         const componentId_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let componentId_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (componentId_buf_runtimeType))
+        if ((componentId_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             componentId_buf = (valueDeserializer.readNumber() as number)
         }

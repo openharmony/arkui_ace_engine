@@ -46,7 +46,7 @@ export class ArkRectPeer extends ArkCommonShapeMethodPeer {
         let options_type : int32 = RuntimeType.UNDEFINED
         options_type = runtimeType(options)
         thisSerializer.writeInt8((options_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (options_type)) {
+        if ((options_type) != (RuntimeType.UNDEFINED)) {
             const options_value  = options!
             let options_value_type : int32 = RuntimeType.UNDEFINED
             options_value_type = runtimeType(options_value)
@@ -69,7 +69,7 @@ export class ArkRectPeer extends ArkCommonShapeMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -92,7 +92,7 @@ export class ArkRectPeer extends ArkCommonShapeMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -115,7 +115,7 @@ export class ArkRectPeer extends ArkCommonShapeMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -133,8 +133,8 @@ export class ArkRectPeer extends ArkCommonShapeMethodPeer {
                 thisSerializer.writeInt8((2).toChar())
                 const value_value_2  = value_value as Array<number | string>
                 thisSerializer.writeInt32((value_value_2.length).toInt())
-                for (let i = 0; i < value_value_2.length; i++) {
-                    const value_value_2_element : number | string = value_value_2[i]
+                for (let value_value_2_counter_i = 0; value_value_2_counter_i < value_value_2.length; value_value_2_counter_i++) {
+                    const value_value_2_element : number | string = value_value_2[value_value_2_counter_i]
                     let value_value_2_element_type : int32 = RuntimeType.UNDEFINED
                     value_value_2_element_type = runtimeType(value_value_2_element)
                     if (RuntimeType.NUMBER == value_value_2_element_type) {
@@ -334,7 +334,7 @@ export class RoundedRectOptions_serializer {
         let value_width_type : int32 = RuntimeType.UNDEFINED
         value_width_type = runtimeType(value_width)
         valueSerializer.writeInt8((value_width_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_width_type)) {
+        if ((value_width_type) != (RuntimeType.UNDEFINED)) {
             const value_width_value  = value_width!
             let value_width_value_type : int32 = RuntimeType.UNDEFINED
             value_width_value_type = runtimeType(value_width_value)
@@ -353,7 +353,7 @@ export class RoundedRectOptions_serializer {
         let value_height_type : int32 = RuntimeType.UNDEFINED
         value_height_type = runtimeType(value_height)
         valueSerializer.writeInt8((value_height_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_height_type)) {
+        if ((value_height_type) != (RuntimeType.UNDEFINED)) {
             const value_height_value  = value_height!
             let value_height_value_type : int32 = RuntimeType.UNDEFINED
             value_height_value_type = runtimeType(value_height_value)
@@ -372,7 +372,7 @@ export class RoundedRectOptions_serializer {
         let value_radiusWidth_type : int32 = RuntimeType.UNDEFINED
         value_radiusWidth_type = runtimeType(value_radiusWidth)
         valueSerializer.writeInt8((value_radiusWidth_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_radiusWidth_type)) {
+        if ((value_radiusWidth_type) != (RuntimeType.UNDEFINED)) {
             const value_radiusWidth_value  = value_radiusWidth!
             let value_radiusWidth_value_type : int32 = RuntimeType.UNDEFINED
             value_radiusWidth_value_type = runtimeType(value_radiusWidth_value)
@@ -391,7 +391,7 @@ export class RoundedRectOptions_serializer {
         let value_radiusHeight_type : int32 = RuntimeType.UNDEFINED
         value_radiusHeight_type = runtimeType(value_radiusHeight)
         valueSerializer.writeInt8((value_radiusHeight_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_radiusHeight_type)) {
+        if ((value_radiusHeight_type) != (RuntimeType.UNDEFINED)) {
             const value_radiusHeight_value  = value_radiusHeight!
             let value_radiusHeight_value_type : int32 = RuntimeType.UNDEFINED
             value_radiusHeight_value_type = runtimeType(value_radiusHeight_value)
@@ -411,7 +411,7 @@ export class RoundedRectOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const width_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let width_buf : number | string | undefined
-        if ((RuntimeType.UNDEFINED) != (width_buf_runtimeType))
+        if ((width_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const width_buf__selector : int32 = valueDeserializer.readInt8()
             let width_buf_ : number | string | undefined
@@ -429,7 +429,7 @@ export class RoundedRectOptions_serializer {
         const width_result : number | string | undefined = width_buf
         const height_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let height_buf : number | string | undefined
-        if ((RuntimeType.UNDEFINED) != (height_buf_runtimeType))
+        if ((height_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const height_buf__selector : int32 = valueDeserializer.readInt8()
             let height_buf_ : number | string | undefined
@@ -447,7 +447,7 @@ export class RoundedRectOptions_serializer {
         const height_result : number | string | undefined = height_buf
         const radiusWidth_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let radiusWidth_buf : number | string | undefined
-        if ((RuntimeType.UNDEFINED) != (radiusWidth_buf_runtimeType))
+        if ((radiusWidth_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const radiusWidth_buf__selector : int32 = valueDeserializer.readInt8()
             let radiusWidth_buf_ : number | string | undefined
@@ -465,7 +465,7 @@ export class RoundedRectOptions_serializer {
         const radiusWidth_result : number | string | undefined = radiusWidth_buf
         const radiusHeight_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let radiusHeight_buf : number | string | undefined
-        if ((RuntimeType.UNDEFINED) != (radiusHeight_buf_runtimeType))
+        if ((radiusHeight_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const radiusHeight_buf__selector : int32 = valueDeserializer.readInt8()
             let radiusHeight_buf_ : number | string | undefined
@@ -492,7 +492,7 @@ export class RectOptions_serializer {
         let value_width_type : int32 = RuntimeType.UNDEFINED
         value_width_type = runtimeType(value_width)
         valueSerializer.writeInt8((value_width_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_width_type)) {
+        if ((value_width_type) != (RuntimeType.UNDEFINED)) {
             const value_width_value  = value_width!
             let value_width_value_type : int32 = RuntimeType.UNDEFINED
             value_width_value_type = runtimeType(value_width_value)
@@ -516,7 +516,7 @@ export class RectOptions_serializer {
         let value_height_type : int32 = RuntimeType.UNDEFINED
         value_height_type = runtimeType(value_height)
         valueSerializer.writeInt8((value_height_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_height_type)) {
+        if ((value_height_type) != (RuntimeType.UNDEFINED)) {
             const value_height_value  = value_height!
             let value_height_value_type : int32 = RuntimeType.UNDEFINED
             value_height_value_type = runtimeType(value_height_value)
@@ -540,7 +540,7 @@ export class RectOptions_serializer {
         let value_radius_type : int32 = RuntimeType.UNDEFINED
         value_radius_type = runtimeType(value_radius)
         valueSerializer.writeInt8((value_radius_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_radius_type)) {
+        if ((value_radius_type) != (RuntimeType.UNDEFINED)) {
             const value_radius_value  = value_radius!
             let value_radius_value_type : int32 = RuntimeType.UNDEFINED
             value_radius_value_type = runtimeType(value_radius_value)
@@ -569,8 +569,8 @@ export class RectOptions_serializer {
                 valueSerializer.writeInt8((1).toChar())
                 const value_radius_value_1  = value_radius_value as Array<RadiusItem>
                 valueSerializer.writeInt32((value_radius_value_1.length).toInt())
-                for (let i = 0; i < value_radius_value_1.length; i++) {
-                    const value_radius_value_1_element : RadiusItem = value_radius_value_1[i]
+                for (let value_radius_value_1_counter_i = 0; value_radius_value_1_counter_i < value_radius_value_1.length; value_radius_value_1_counter_i++) {
+                    const value_radius_value_1_element : RadiusItem = value_radius_value_1[value_radius_value_1_counter_i]
                     const value_radius_value_1_element_0  = value_radius_value_1_element[0]
                     let value_radius_value_1_element_0_type : int32 = RuntimeType.UNDEFINED
                     value_radius_value_1_element_0_type = runtimeType(value_radius_value_1_element_0)
@@ -615,7 +615,7 @@ export class RectOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const width_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let width_buf : Length | undefined
-        if ((RuntimeType.UNDEFINED) != (width_buf_runtimeType))
+        if ((width_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const width_buf__selector : int32 = valueDeserializer.readInt8()
             let width_buf_ : string | number | Resource | undefined
@@ -636,7 +636,7 @@ export class RectOptions_serializer {
         const width_result : Length | undefined = width_buf
         const height_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let height_buf : Length | undefined
-        if ((RuntimeType.UNDEFINED) != (height_buf_runtimeType))
+        if ((height_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const height_buf__selector : int32 = valueDeserializer.readInt8()
             let height_buf_ : string | number | Resource | undefined
@@ -657,7 +657,7 @@ export class RectOptions_serializer {
         const height_result : Length | undefined = height_buf
         const radius_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let radius_buf : Length | Array<RadiusItem> | undefined
-        if ((RuntimeType.UNDEFINED) != (radius_buf_runtimeType))
+        if ((radius_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const radius_buf__selector : int32 = valueDeserializer.readInt8()
             let radius_buf_ : Length | Array<RadiusItem> | undefined

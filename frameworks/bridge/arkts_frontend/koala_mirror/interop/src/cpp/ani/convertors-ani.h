@@ -25,6 +25,7 @@
 #include "ani.h"
 #include "koala-types.h"
 #include "interop-logging.h"
+#include "interop-utils.h"
 
 #define CHECK_ANI_FATAL(result)                                                            \
 do {                                                                                       \
@@ -1876,7 +1877,7 @@ bool setKoalaANICallbackDispatcher(
 );
 void getKoalaANICallbackDispatcher(ani_class* clazz, ani_static_method* method);
 
-// TODO: maybe use CreateArrayBufferExternal here instead, no need for allocations.
+// Improve: maybe use CreateArrayBufferExternal here instead, no need for allocations.
 #define KOALA_INTEROP_CALL_VOID(venv, id, length, args)                                                 \
 {                                                                                                       \
   ani_class clazz = nullptr;                                                                            \
@@ -1919,7 +1920,7 @@ void getKoalaANICallbackDispatcher(ani_class* clazz, ani_static_method* method);
     CHECK_ANI_FATAL(env->Class_FindMethod(errorClass, "<ctor>",                                         \
       "Lstd/core/String;Lescompat/ErrorOptions;:V", &errorCtor));                                       \
     ani_string messageObject{};                                                                         \
-    CHECK_ANI_FATAL(env->String_NewUTF8(message, strlen(message), &messageObject));                     \
+    CHECK_ANI_FATAL(env->String_NewUTF8(message, interop_strlen(message), &messageObject));                     \
     ani_ref undefined{};                                                                                \
     CHECK_ANI_FATAL(env->GetUndefined(&undefined));                                                     \
     ani_object throwObject{};                                                                           \

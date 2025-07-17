@@ -92,7 +92,7 @@ export class ArkTextTimerPeer extends ArkCommonMethodPeer {
         let options_type : int32 = RuntimeType.UNDEFINED
         options_type = runtimeType(options)
         thisSerializer.writeInt8((options_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (options_type)) {
+        if ((options_type) != (RuntimeType.UNDEFINED)) {
             const options_value  = options!
             TextTimerOptions_serializer.write(thisSerializer, options_value)
         }
@@ -104,7 +104,7 @@ export class ArkTextTimerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeString(value_value)
         }
@@ -116,7 +116,7 @@ export class ArkTextTimerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -149,7 +149,7 @@ export class ArkTextTimerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -177,7 +177,7 @@ export class ArkTextTimerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = (value as FontStyle)
             thisSerializer.writeInt32(TypeChecker.FontStyle_ToNumeric(value_value))
         }
@@ -189,7 +189,7 @@ export class ArkTextTimerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -228,7 +228,7 @@ export class ArkTextTimerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -251,7 +251,7 @@ export class ArkTextTimerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -263,7 +263,7 @@ export class ArkTextTimerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -276,8 +276,8 @@ export class ArkTextTimerPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((1).toChar())
                 const value_value_1  = value_value as Array<ShadowOptions>
                 thisSerializer.writeInt32((value_value_1.length).toInt())
-                for (let i = 0; i < value_value_1.length; i++) {
-                    const value_value_1_element : ShadowOptions = value_value_1[i]
+                for (let value_value_1_counter_i = 0; value_value_1_counter_i < value_value_1.length; value_value_1_counter_i++) {
+                    const value_value_1_element : ShadowOptions = value_value_1[value_value_1_counter_i]
                     ShadowOptions_serializer.write(thisSerializer, value_value_1_element)
                 }
             }
@@ -290,7 +290,7 @@ export class ArkTextTimerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteObject(value_value)
         }
@@ -657,7 +657,7 @@ export class TextTimerOptions_serializer {
         let value_isCountDown_type : int32 = RuntimeType.UNDEFINED
         value_isCountDown_type = runtimeType(value_isCountDown)
         valueSerializer.writeInt8((value_isCountDown_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_isCountDown_type)) {
+        if ((value_isCountDown_type) != (RuntimeType.UNDEFINED)) {
             const value_isCountDown_value  = value_isCountDown!
             valueSerializer.writeBoolean(value_isCountDown_value)
         }
@@ -665,7 +665,7 @@ export class TextTimerOptions_serializer {
         let value_count_type : int32 = RuntimeType.UNDEFINED
         value_count_type = runtimeType(value_count)
         valueSerializer.writeInt8((value_count_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_count_type)) {
+        if ((value_count_type) != (RuntimeType.UNDEFINED)) {
             const value_count_value  = value_count!
             valueSerializer.writeNumber(value_count_value)
         }
@@ -673,7 +673,7 @@ export class TextTimerOptions_serializer {
         let value_controller_type : int32 = RuntimeType.UNDEFINED
         value_controller_type = runtimeType(value_controller)
         valueSerializer.writeInt8((value_controller_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_controller_type)) {
+        if ((value_controller_type) != (RuntimeType.UNDEFINED)) {
             const value_controller_value  = value_controller!
             TextTimerController_serializer.write(valueSerializer, value_controller_value)
         }
@@ -682,21 +682,21 @@ export class TextTimerOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const isCountDown_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let isCountDown_buf : boolean | undefined
-        if ((RuntimeType.UNDEFINED) != (isCountDown_buf_runtimeType))
+        if ((isCountDown_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             isCountDown_buf = valueDeserializer.readBoolean()
         }
         const isCountDown_result : boolean | undefined = isCountDown_buf
         const count_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let count_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (count_buf_runtimeType))
+        if ((count_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             count_buf = (valueDeserializer.readNumber() as number)
         }
         const count_result : number | undefined = count_buf
         const controller_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let controller_buf : TextTimerController | undefined
-        if ((RuntimeType.UNDEFINED) != (controller_buf_runtimeType))
+        if ((controller_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             controller_buf = (TextTimerController_serializer.read(valueDeserializer) as TextTimerController)
         }

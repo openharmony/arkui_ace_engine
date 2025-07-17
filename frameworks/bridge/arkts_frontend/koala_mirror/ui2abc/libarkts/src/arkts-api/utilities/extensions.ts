@@ -37,7 +37,7 @@ export function extension_MethodDefinitionSetChildrenParentPtr(this: MethodDefin
 
 export function extension_MethodDefinitionOnUpdate(this: MethodDefinition, original: MethodDefinition): void {
     this.setChildrenParentPtr()
-    // TODO Update modifiers only for specific AST nodes in the generated factory code
+    // Improve: Update modifiers only for specific AST nodes in the generated factory code
     this.modifierFlags = original.modifierFlags
     global.generatedEs2panda._AstNodeSetOriginalNode(global.context, this.peer, original.originalPeer)
     global.generatedEs2panda._AstNodeSetParent(global.context, this.peer, global.generatedEs2panda._AstNodeParent(global.context, original.peer))

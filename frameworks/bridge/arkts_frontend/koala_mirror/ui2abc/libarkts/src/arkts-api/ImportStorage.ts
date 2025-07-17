@@ -21,7 +21,7 @@ import { Es2pandaImportFlags, Es2pandaImportKinds } from "../generated/Es2pandaE
 import { factory } from "./factory/nodeFactory"
 
 export class ImportStorage {
-    // TODO: migrate to wrappers instead of pointers
+    // Improve: migrate to wrappers instead of pointers
     private imports: Set<KNativePointer> = new Set<KNativePointer>()
     private importSources: Set<string | undefined> = new Set<string | undefined>()
 
@@ -30,7 +30,7 @@ export class ImportStorage {
             if (isETSImportDeclaration(statement)) {
                 this.imports.add(statement.peer)
                 if (!isParserStage) {
-                    // TODO: is source non nullable?
+                    // Improve: is source non nullable?
                     this.importSources.add(statement.source?.str)
                 }
             }
@@ -54,12 +54,12 @@ export class ImportStorage {
                     // Note: this call is important, we cannot just pass "statement" to "InsertETSImportDeclarationAndParse"
                     global.es2panda._ETSParserBuildImportDeclaration(
                         global.context,
-                        Es2pandaImportKinds.IMPORT_KINDS_ALL, // TODO: do we use IMPORT_KINDS_TYPES?
+                        Es2pandaImportKinds.IMPORT_KINDS_ALL, // Improve: do we use IMPORT_KINDS_TYPES?
                         passNodeArray(statement.specifiers),
                         statement.specifiers.length,
                         passNode(statement.source),
                         this.program.peer,
-                        Es2pandaImportFlags.IMPORT_FLAGS_NONE, // TODO: where to get it?
+                        Es2pandaImportFlags.IMPORT_FLAGS_NONE, // Improve: where to get it?
                     )
                 )
                 global.es2panda._InsertETSImportDeclarationAndParse(global.context, this.program.peer, importDeclaration.peer)

@@ -28,17 +28,3 @@ export class KoalaCallsiteKeys {
         return new Number(key).toString(16)
     }
 }
-
-/**
- * Utility method to compute a positional id from the string representation.
- * @param str - a string representation of a callsite position
- * @returns a positional id for the given string
- */
-export function toKoalaCallsiteKey(str: string): KoalaCallsiteKey {
-    let key = KoalaCallsiteKeys.empty
-    for (let i = 0; i < str.length; i++) {
-        key = (key << 3) | (key >> 29) ^ str.charCodeAt(i)
-    }
-    // DEBUG: console.log(`KEY: ${KoalaCallsiteKeys.asString(key)} from "${str}"`)
-    return key
-}

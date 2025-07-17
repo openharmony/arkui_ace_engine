@@ -134,7 +134,7 @@ export class RichEditorBaseController implements MaterializedBase {
         let options_type : int32 = RuntimeType.UNDEFINED
         options_type = runtimeType(options)
         thisSerializer.writeInt8((options_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (options_type)) {
+        if ((options_type) != (RuntimeType.UNDEFINED)) {
             const options_value  = options!
             SelectionOptions_serializer.write(thisSerializer, options_value)
         }
@@ -164,7 +164,7 @@ export class RichEditorBaseController implements MaterializedBase {
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : RectResult | undefined
-        if ((RuntimeType.UNDEFINED) != (buffer_runtimeType))
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
         {
             buffer = RectResult_serializer.read(retvalDeserializer)
         }
@@ -200,7 +200,7 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -212,7 +212,7 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -224,7 +224,7 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -236,7 +236,7 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -248,7 +248,7 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -260,7 +260,7 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -272,7 +272,7 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -284,7 +284,7 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -296,7 +296,7 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = (value as CopyOptions)
             thisSerializer.writeInt32(TypeChecker.CopyOptions_ToNumeric(value_value))
         }
@@ -308,7 +308,7 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -320,7 +320,7 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -332,7 +332,7 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -344,7 +344,7 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             TextDataDetectorConfig_serializer.write(thisSerializer, value_value)
         }
@@ -356,7 +356,7 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -389,7 +389,7 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -422,7 +422,7 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -434,7 +434,7 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = (value as EnterKeyType)
             thisSerializer.writeInt32(TypeChecker.EnterKeyType_ToNumeric(value_value))
         }
@@ -446,7 +446,7 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -458,7 +458,7 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -470,7 +470,7 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -482,7 +482,7 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -494,7 +494,7 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -506,7 +506,7 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             EditMenuOptions_serializer.write(thisSerializer, value_value)
         }
@@ -518,7 +518,7 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -530,7 +530,7 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -542,7 +542,7 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = (value as BarState)
             thisSerializer.writeInt32(TypeChecker.BarState_ToNumeric(value_value))
         }
@@ -554,7 +554,7 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeNumber(value_value)
         }
@@ -566,7 +566,7 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeNumber(value_value)
         }
@@ -578,7 +578,7 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = (value as KeyboardAppearance)
             thisSerializer.writeInt32(TypeChecker.KeyboardAppearance_ToNumeric(value_value))
         }
@@ -590,7 +590,7 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -602,21 +602,21 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
         let spanType_type : int32 = RuntimeType.UNDEFINED
         spanType_type = runtimeType(spanType)
         thisSerializer.writeInt8((spanType_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (spanType_type)) {
+        if ((spanType_type) != (RuntimeType.UNDEFINED)) {
             const spanType_value  = (spanType as RichEditorSpanType)
             thisSerializer.writeInt32(TypeChecker.RichEditorSpanType_ToNumeric(spanType_value))
         }
         let content_type : int32 = RuntimeType.UNDEFINED
         content_type = runtimeType(content)
         thisSerializer.writeInt8((content_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (content_type)) {
+        if ((content_type) != (RuntimeType.UNDEFINED)) {
             const content_value  = content!
             thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(content_value))
         }
         let responseType_type : int32 = RuntimeType.UNDEFINED
         responseType_type = runtimeType(responseType)
         thisSerializer.writeInt8((responseType_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (responseType_type)) {
+        if ((responseType_type) != (RuntimeType.UNDEFINED)) {
             const responseType_value  = responseType!
             let responseType_value_type : int32 = RuntimeType.UNDEFINED
             responseType_value_type = runtimeType(responseType_value)
@@ -634,7 +634,7 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
         let options_type : int32 = RuntimeType.UNDEFINED
         options_type = runtimeType(options)
         thisSerializer.writeInt8((options_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (options_type)) {
+        if ((options_type) != (RuntimeType.UNDEFINED)) {
             const options_value  = options!
             SelectionMenuOptions_serializer.write(thisSerializer, options_value)
         }
@@ -646,14 +646,14 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(value_value))
         }
         let options_type : int32 = RuntimeType.UNDEFINED
         options_type = runtimeType(options)
         thisSerializer.writeInt8((options_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (options_type)) {
+        if ((options_type) != (RuntimeType.UNDEFINED)) {
             const options_value  = options!
             KeyboardOptions_serializer.write(thisSerializer, options_value)
         }
@@ -665,7 +665,7 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -683,7 +683,7 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
         let style_type : int32 = RuntimeType.UNDEFINED
         style_type = runtimeType(style)
         thisSerializer.writeInt8((style_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (style_type)) {
+        if ((style_type) != (RuntimeType.UNDEFINED)) {
             const style_value  = style!
             PlaceholderStyle_serializer.write(thisSerializer, style_value)
         }
@@ -1910,7 +1910,7 @@ export class KeyboardOptions_serializer {
         let value_supportAvoidance_type : int32 = RuntimeType.UNDEFINED
         value_supportAvoidance_type = runtimeType(value_supportAvoidance)
         valueSerializer.writeInt8((value_supportAvoidance_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_supportAvoidance_type)) {
+        if ((value_supportAvoidance_type) != (RuntimeType.UNDEFINED)) {
             const value_supportAvoidance_value  = value_supportAvoidance!
             valueSerializer.writeBoolean(value_supportAvoidance_value)
         }
@@ -1919,7 +1919,7 @@ export class KeyboardOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const supportAvoidance_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let supportAvoidance_buf : boolean | undefined
-        if ((RuntimeType.UNDEFINED) != (supportAvoidance_buf_runtimeType))
+        if ((supportAvoidance_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             supportAvoidance_buf = valueDeserializer.readBoolean()
         }
@@ -1935,7 +1935,7 @@ export class PreviewMenuOptions_serializer {
         let value_hapticFeedbackMode_type : int32 = RuntimeType.UNDEFINED
         value_hapticFeedbackMode_type = runtimeType(value_hapticFeedbackMode)
         valueSerializer.writeInt8((value_hapticFeedbackMode_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_hapticFeedbackMode_type)) {
+        if ((value_hapticFeedbackMode_type) != (RuntimeType.UNDEFINED)) {
             const value_hapticFeedbackMode_value  = (value_hapticFeedbackMode as HapticFeedbackMode)
             valueSerializer.writeInt32(TypeChecker.HapticFeedbackMode_ToNumeric(value_hapticFeedbackMode_value))
         }
@@ -1944,7 +1944,7 @@ export class PreviewMenuOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const hapticFeedbackMode_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let hapticFeedbackMode_buf : HapticFeedbackMode | undefined
-        if ((RuntimeType.UNDEFINED) != (hapticFeedbackMode_buf_runtimeType))
+        if ((hapticFeedbackMode_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             hapticFeedbackMode_buf = TypeChecker.HapticFeedbackMode_FromNumeric(valueDeserializer.readInt32())
         }
@@ -1960,7 +1960,7 @@ export class RichEditorBuilderSpanOptions_serializer {
         let value_offset_type : int32 = RuntimeType.UNDEFINED
         value_offset_type = runtimeType(value_offset)
         valueSerializer.writeInt8((value_offset_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_offset_type)) {
+        if ((value_offset_type) != (RuntimeType.UNDEFINED)) {
             const value_offset_value  = value_offset!
             valueSerializer.writeNumber(value_offset_value)
         }
@@ -1968,7 +1968,7 @@ export class RichEditorBuilderSpanOptions_serializer {
         let value_dragBackgroundColor_type : int32 = RuntimeType.UNDEFINED
         value_dragBackgroundColor_type = runtimeType(value_dragBackgroundColor)
         valueSerializer.writeInt8((value_dragBackgroundColor_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_dragBackgroundColor_type)) {
+        if ((value_dragBackgroundColor_type) != (RuntimeType.UNDEFINED)) {
             const value_dragBackgroundColor_value  = value_dragBackgroundColor!
             ColorMetrics_serializer.write(valueSerializer, value_dragBackgroundColor_value)
         }
@@ -1976,7 +1976,7 @@ export class RichEditorBuilderSpanOptions_serializer {
         let value_isDragShadowNeeded_type : int32 = RuntimeType.UNDEFINED
         value_isDragShadowNeeded_type = runtimeType(value_isDragShadowNeeded)
         valueSerializer.writeInt8((value_isDragShadowNeeded_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_isDragShadowNeeded_type)) {
+        if ((value_isDragShadowNeeded_type) != (RuntimeType.UNDEFINED)) {
             const value_isDragShadowNeeded_value  = value_isDragShadowNeeded!
             valueSerializer.writeBoolean(value_isDragShadowNeeded_value)
         }
@@ -1985,21 +1985,21 @@ export class RichEditorBuilderSpanOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const offset_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let offset_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (offset_buf_runtimeType))
+        if ((offset_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             offset_buf = (valueDeserializer.readNumber() as number)
         }
         const offset_result : number | undefined = offset_buf
         const dragBackgroundColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let dragBackgroundColor_buf : ColorMetrics | undefined
-        if ((RuntimeType.UNDEFINED) != (dragBackgroundColor_buf_runtimeType))
+        if ((dragBackgroundColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             dragBackgroundColor_buf = (ColorMetrics_serializer.read(valueDeserializer) as ColorMetrics)
         }
         const dragBackgroundColor_result : ColorMetrics | undefined = dragBackgroundColor_buf
         const isDragShadowNeeded_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let isDragShadowNeeded_buf : boolean | undefined
-        if ((RuntimeType.UNDEFINED) != (isDragShadowNeeded_buf_runtimeType))
+        if ((isDragShadowNeeded_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             isDragShadowNeeded_buf = valueDeserializer.readBoolean()
         }
@@ -2019,8 +2019,8 @@ export class RichEditorDeleteValue_serializer {
         valueSerializer.writeNumber(value_length)
         const value_richEditorDeleteSpans  = value.richEditorDeleteSpans
         valueSerializer.writeInt32((value_richEditorDeleteSpans.length).toInt())
-        for (let i = 0; i < value_richEditorDeleteSpans.length; i++) {
-            const value_richEditorDeleteSpans_element : RichEditorTextSpanResult | RichEditorImageSpanResult = value_richEditorDeleteSpans[i]
+        for (let value_richEditorDeleteSpans_counter_i = 0; value_richEditorDeleteSpans_counter_i < value_richEditorDeleteSpans.length; value_richEditorDeleteSpans_counter_i++) {
+            const value_richEditorDeleteSpans_element : RichEditorTextSpanResult | RichEditorImageSpanResult = value_richEditorDeleteSpans[value_richEditorDeleteSpans_counter_i]
             let value_richEditorDeleteSpans_element_type : int32 = RuntimeType.UNDEFINED
             value_richEditorDeleteSpans_element_type = runtimeType(value_richEditorDeleteSpans_element)
             if (TypeChecker.isRichEditorTextSpanResult(value_richEditorDeleteSpans_element, true, false, false, true, false, false, false, false, false)) {
@@ -2068,7 +2068,7 @@ export class RichEditorGesture_serializer {
         let value_onClick_type : int32 = RuntimeType.UNDEFINED
         value_onClick_type = runtimeType(value_onClick)
         valueSerializer.writeInt8((value_onClick_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_onClick_type)) {
+        if ((value_onClick_type) != (RuntimeType.UNDEFINED)) {
             const value_onClick_value  = value_onClick!
             valueSerializer.holdAndWriteCallback(value_onClick_value)
         }
@@ -2076,7 +2076,7 @@ export class RichEditorGesture_serializer {
         let value_onLongPress_type : int32 = RuntimeType.UNDEFINED
         value_onLongPress_type = runtimeType(value_onLongPress)
         valueSerializer.writeInt8((value_onLongPress_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_onLongPress_type)) {
+        if ((value_onLongPress_type) != (RuntimeType.UNDEFINED)) {
             const value_onLongPress_value  = value_onLongPress!
             valueSerializer.holdAndWriteCallback(value_onLongPress_value)
         }
@@ -2084,7 +2084,7 @@ export class RichEditorGesture_serializer {
         let value_onDoubleClick_type : int32 = RuntimeType.UNDEFINED
         value_onDoubleClick_type = runtimeType(value_onDoubleClick)
         valueSerializer.writeInt8((value_onDoubleClick_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_onDoubleClick_type)) {
+        if ((value_onDoubleClick_type) != (RuntimeType.UNDEFINED)) {
             const value_onDoubleClick_value  = value_onDoubleClick!
             valueSerializer.holdAndWriteCallback(value_onDoubleClick_value)
         }
@@ -2093,7 +2093,7 @@ export class RichEditorGesture_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const onClick_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let onClick_buf : ((value0: ClickEvent) => void) | undefined
-        if ((RuntimeType.UNDEFINED) != (onClick_buf_runtimeType))
+        if ((onClick_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const onClick_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
             const onClick_buf__call : KPointer = valueDeserializer.readPointer()
@@ -2111,7 +2111,7 @@ export class RichEditorGesture_serializer {
         const onClick_result : ((value0: ClickEvent) => void) | undefined = onClick_buf
         const onLongPress_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let onLongPress_buf : ((value0: GestureEvent) => void) | undefined
-        if ((RuntimeType.UNDEFINED) != (onLongPress_buf_runtimeType))
+        if ((onLongPress_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const onLongPress_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
             const onLongPress_buf__call : KPointer = valueDeserializer.readPointer()
@@ -2129,7 +2129,7 @@ export class RichEditorGesture_serializer {
         const onLongPress_result : ((value0: GestureEvent) => void) | undefined = onLongPress_buf
         const onDoubleClick_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let onDoubleClick_buf : ((value0: GestureEvent) => void) | undefined
-        if ((RuntimeType.UNDEFINED) != (onDoubleClick_buf_runtimeType))
+        if ((onDoubleClick_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const onDoubleClick_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
             const onDoubleClick_buf__call : KPointer = valueDeserializer.readPointer()
@@ -2160,7 +2160,7 @@ export class RichEditorInsertValue_serializer {
         let value_previewText_type : int32 = RuntimeType.UNDEFINED
         value_previewText_type = runtimeType(value_previewText)
         valueSerializer.writeInt8((value_previewText_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_previewText_type)) {
+        if ((value_previewText_type) != (RuntimeType.UNDEFINED)) {
             const value_previewText_value  = value_previewText!
             valueSerializer.writeString(value_previewText_value)
         }
@@ -2171,7 +2171,7 @@ export class RichEditorInsertValue_serializer {
         const insertValue_result : string = (valueDeserializer.readString() as string)
         const previewText_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let previewText_buf : string | undefined
-        if ((RuntimeType.UNDEFINED) != (previewText_buf_runtimeType))
+        if ((previewText_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             previewText_buf = (valueDeserializer.readString() as string)
         }
@@ -2187,7 +2187,7 @@ export class RichEditorRange_serializer {
         let value_start_type : int32 = RuntimeType.UNDEFINED
         value_start_type = runtimeType(value_start)
         valueSerializer.writeInt8((value_start_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_start_type)) {
+        if ((value_start_type) != (RuntimeType.UNDEFINED)) {
             const value_start_value  = value_start!
             valueSerializer.writeNumber(value_start_value)
         }
@@ -2195,7 +2195,7 @@ export class RichEditorRange_serializer {
         let value_end_type : int32 = RuntimeType.UNDEFINED
         value_end_type = runtimeType(value_end)
         valueSerializer.writeInt8((value_end_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_end_type)) {
+        if ((value_end_type) != (RuntimeType.UNDEFINED)) {
             const value_end_value  = value_end!
             valueSerializer.writeNumber(value_end_value)
         }
@@ -2204,14 +2204,14 @@ export class RichEditorRange_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const start_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let start_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (start_buf_runtimeType))
+        if ((start_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             start_buf = (valueDeserializer.readNumber() as number)
         }
         const start_result : number | undefined = start_buf
         const end_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let end_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (end_buf_runtimeType))
+        if ((end_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             end_buf = (valueDeserializer.readNumber() as number)
         }
@@ -2230,8 +2230,8 @@ export class RichEditorSelection_serializer {
         valueSerializer.writeNumber(value_selection_1)
         const value_spans  = value.spans
         valueSerializer.writeInt32((value_spans.length).toInt())
-        for (let i = 0; i < value_spans.length; i++) {
-            const value_spans_element : RichEditorTextSpanResult | RichEditorImageSpanResult = value_spans[i]
+        for (let value_spans_counter_i = 0; value_spans_counter_i < value_spans.length; value_spans_counter_i++) {
+            const value_spans_element : RichEditorTextSpanResult | RichEditorImageSpanResult = value_spans[value_spans_counter_i]
             let value_spans_element_type : int32 = RuntimeType.UNDEFINED
             value_spans_element_type = runtimeType(value_spans_element)
             if (TypeChecker.isRichEditorTextSpanResult(value_spans_element, true, false, false, true, false, false, false, false, false)) {
@@ -2300,7 +2300,7 @@ export class CopyEvent_serializer {
         let value_preventDefault_type : int32 = RuntimeType.UNDEFINED
         value_preventDefault_type = runtimeType(value_preventDefault)
         valueSerializer.writeInt8((value_preventDefault_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_preventDefault_type)) {
+        if ((value_preventDefault_type) != (RuntimeType.UNDEFINED)) {
             const value_preventDefault_value  = value_preventDefault!
             valueSerializer.holdAndWriteCallback(value_preventDefault_value)
         }
@@ -2309,7 +2309,7 @@ export class CopyEvent_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const preventDefault_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let preventDefault_buf : VoidCallback | undefined
-        if ((RuntimeType.UNDEFINED) != (preventDefault_buf_runtimeType))
+        if ((preventDefault_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const preventDefault_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
             const preventDefault_buf__call : KPointer = valueDeserializer.readPointer()
@@ -2335,7 +2335,7 @@ export class CutEvent_serializer {
         let value_preventDefault_type : int32 = RuntimeType.UNDEFINED
         value_preventDefault_type = runtimeType(value_preventDefault)
         valueSerializer.writeInt8((value_preventDefault_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_preventDefault_type)) {
+        if ((value_preventDefault_type) != (RuntimeType.UNDEFINED)) {
             const value_preventDefault_value  = value_preventDefault!
             valueSerializer.holdAndWriteCallback(value_preventDefault_value)
         }
@@ -2344,7 +2344,7 @@ export class CutEvent_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const preventDefault_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let preventDefault_buf : VoidCallback | undefined
-        if ((RuntimeType.UNDEFINED) != (preventDefault_buf_runtimeType))
+        if ((preventDefault_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const preventDefault_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
             const preventDefault_buf__call : KPointer = valueDeserializer.readPointer()
@@ -2370,7 +2370,7 @@ export class PasteEvent_serializer {
         let value_preventDefault_type : int32 = RuntimeType.UNDEFINED
         value_preventDefault_type = runtimeType(value_preventDefault)
         valueSerializer.writeInt8((value_preventDefault_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_preventDefault_type)) {
+        if ((value_preventDefault_type) != (RuntimeType.UNDEFINED)) {
             const value_preventDefault_value  = value_preventDefault!
             valueSerializer.holdAndWriteCallback(value_preventDefault_value)
         }
@@ -2379,7 +2379,7 @@ export class PasteEvent_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const preventDefault_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let preventDefault_buf : VoidCallback | undefined
-        if ((RuntimeType.UNDEFINED) != (preventDefault_buf_runtimeType))
+        if ((preventDefault_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const preventDefault_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
             const preventDefault_buf__call : KPointer = valueDeserializer.readPointer()
@@ -2405,20 +2405,20 @@ export class RichEditorChangeValue_serializer {
         TextRange_serializer.write(valueSerializer, value_rangeBefore)
         const value_replacedSpans  = value.replacedSpans
         valueSerializer.writeInt32((value_replacedSpans.length).toInt())
-        for (let i = 0; i < value_replacedSpans.length; i++) {
-            const value_replacedSpans_element : RichEditorTextSpanResult = value_replacedSpans[i]
+        for (let value_replacedSpans_counter_i = 0; value_replacedSpans_counter_i < value_replacedSpans.length; value_replacedSpans_counter_i++) {
+            const value_replacedSpans_element : RichEditorTextSpanResult = value_replacedSpans[value_replacedSpans_counter_i]
             RichEditorTextSpanResult_serializer.write(valueSerializer, value_replacedSpans_element)
         }
         const value_replacedImageSpans  = value.replacedImageSpans
         valueSerializer.writeInt32((value_replacedImageSpans.length).toInt())
-        for (let i = 0; i < value_replacedImageSpans.length; i++) {
-            const value_replacedImageSpans_element : RichEditorImageSpanResult = value_replacedImageSpans[i]
+        for (let value_replacedImageSpans_counter_i = 0; value_replacedImageSpans_counter_i < value_replacedImageSpans.length; value_replacedImageSpans_counter_i++) {
+            const value_replacedImageSpans_element : RichEditorImageSpanResult = value_replacedImageSpans[value_replacedImageSpans_counter_i]
             RichEditorImageSpanResult_serializer.write(valueSerializer, value_replacedImageSpans_element)
         }
         const value_replacedSymbolSpans  = value.replacedSymbolSpans
         valueSerializer.writeInt32((value_replacedSymbolSpans.length).toInt())
-        for (let i = 0; i < value_replacedSymbolSpans.length; i++) {
-            const value_replacedSymbolSpans_element : RichEditorTextSpanResult = value_replacedSymbolSpans[i]
+        for (let value_replacedSymbolSpans_counter_i = 0; value_replacedSymbolSpans_counter_i < value_replacedSymbolSpans.length; value_replacedSymbolSpans_counter_i++) {
+            const value_replacedSymbolSpans_element : RichEditorTextSpanResult = value_replacedSymbolSpans[value_replacedSymbolSpans_counter_i]
             RichEditorTextSpanResult_serializer.write(valueSerializer, value_replacedSymbolSpans_element)
         }
     }
@@ -2454,7 +2454,7 @@ export class RichEditorSymbolSpanStyle_serializer {
         let value_fontSize_type : int32 = RuntimeType.UNDEFINED
         value_fontSize_type = runtimeType(value_fontSize)
         valueSerializer.writeInt8((value_fontSize_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_fontSize_type)) {
+        if ((value_fontSize_type) != (RuntimeType.UNDEFINED)) {
             const value_fontSize_value  = value_fontSize!
             let value_fontSize_value_type : int32 = RuntimeType.UNDEFINED
             value_fontSize_value_type = runtimeType(value_fontSize_value)
@@ -2478,11 +2478,11 @@ export class RichEditorSymbolSpanStyle_serializer {
         let value_fontColor_type : int32 = RuntimeType.UNDEFINED
         value_fontColor_type = runtimeType(value_fontColor)
         valueSerializer.writeInt8((value_fontColor_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_fontColor_type)) {
+        if ((value_fontColor_type) != (RuntimeType.UNDEFINED)) {
             const value_fontColor_value  = value_fontColor!
             valueSerializer.writeInt32((value_fontColor_value.length).toInt())
-            for (let i = 0; i < value_fontColor_value.length; i++) {
-                const value_fontColor_value_element : ResourceColor = value_fontColor_value[i]
+            for (let value_fontColor_value_counter_i = 0; value_fontColor_value_counter_i < value_fontColor_value.length; value_fontColor_value_counter_i++) {
+                const value_fontColor_value_element : ResourceColor = value_fontColor_value[value_fontColor_value_counter_i]
                 let value_fontColor_value_element_type : int32 = RuntimeType.UNDEFINED
                 value_fontColor_value_element_type = runtimeType(value_fontColor_value_element)
                 if (TypeChecker.isColor(value_fontColor_value_element)) {
@@ -2511,7 +2511,7 @@ export class RichEditorSymbolSpanStyle_serializer {
         let value_fontWeight_type : int32 = RuntimeType.UNDEFINED
         value_fontWeight_type = runtimeType(value_fontWeight)
         valueSerializer.writeInt8((value_fontWeight_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_fontWeight_type)) {
+        if ((value_fontWeight_type) != (RuntimeType.UNDEFINED)) {
             const value_fontWeight_value  = value_fontWeight!
             let value_fontWeight_value_type : int32 = RuntimeType.UNDEFINED
             value_fontWeight_value_type = runtimeType(value_fontWeight_value)
@@ -2535,7 +2535,7 @@ export class RichEditorSymbolSpanStyle_serializer {
         let value_effectStrategy_type : int32 = RuntimeType.UNDEFINED
         value_effectStrategy_type = runtimeType(value_effectStrategy)
         valueSerializer.writeInt8((value_effectStrategy_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_effectStrategy_type)) {
+        if ((value_effectStrategy_type) != (RuntimeType.UNDEFINED)) {
             const value_effectStrategy_value  = (value_effectStrategy as SymbolEffectStrategy)
             valueSerializer.writeInt32(TypeChecker.SymbolEffectStrategy_ToNumeric(value_effectStrategy_value))
         }
@@ -2543,7 +2543,7 @@ export class RichEditorSymbolSpanStyle_serializer {
         let value_renderingStrategy_type : int32 = RuntimeType.UNDEFINED
         value_renderingStrategy_type = runtimeType(value_renderingStrategy)
         valueSerializer.writeInt8((value_renderingStrategy_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_renderingStrategy_type)) {
+        if ((value_renderingStrategy_type) != (RuntimeType.UNDEFINED)) {
             const value_renderingStrategy_value  = (value_renderingStrategy as SymbolRenderingStrategy)
             valueSerializer.writeInt32(TypeChecker.SymbolRenderingStrategy_ToNumeric(value_renderingStrategy_value))
         }
@@ -2552,7 +2552,7 @@ export class RichEditorSymbolSpanStyle_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const fontSize_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let fontSize_buf : number | string | Resource | undefined
-        if ((RuntimeType.UNDEFINED) != (fontSize_buf_runtimeType))
+        if ((fontSize_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const fontSize_buf__selector : int32 = valueDeserializer.readInt8()
             let fontSize_buf_ : number | string | Resource | undefined
@@ -2573,7 +2573,7 @@ export class RichEditorSymbolSpanStyle_serializer {
         const fontSize_result : number | string | Resource | undefined = fontSize_buf
         const fontColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let fontColor_buf : Array<ResourceColor> | undefined
-        if ((RuntimeType.UNDEFINED) != (fontColor_buf_runtimeType))
+        if ((fontColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const fontColor_buf__length : int32 = valueDeserializer.readInt32()
             let fontColor_buf_ : Array<ResourceColor> = new Array<ResourceColor>(fontColor_buf__length)
@@ -2602,7 +2602,7 @@ export class RichEditorSymbolSpanStyle_serializer {
         const fontColor_result : Array<ResourceColor> | undefined = fontColor_buf
         const fontWeight_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let fontWeight_buf : number | FontWeight | string | undefined
-        if ((RuntimeType.UNDEFINED) != (fontWeight_buf_runtimeType))
+        if ((fontWeight_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const fontWeight_buf__selector : int32 = valueDeserializer.readInt8()
             let fontWeight_buf_ : number | FontWeight | string | undefined
@@ -2623,14 +2623,14 @@ export class RichEditorSymbolSpanStyle_serializer {
         const fontWeight_result : number | FontWeight | string | undefined = fontWeight_buf
         const effectStrategy_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let effectStrategy_buf : SymbolEffectStrategy | undefined
-        if ((RuntimeType.UNDEFINED) != (effectStrategy_buf_runtimeType))
+        if ((effectStrategy_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             effectStrategy_buf = TypeChecker.SymbolEffectStrategy_FromNumeric(valueDeserializer.readInt32())
         }
         const effectStrategy_result : SymbolEffectStrategy | undefined = effectStrategy_buf
         const renderingStrategy_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let renderingStrategy_buf : SymbolRenderingStrategy | undefined
-        if ((RuntimeType.UNDEFINED) != (renderingStrategy_buf_runtimeType))
+        if ((renderingStrategy_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             renderingStrategy_buf = TypeChecker.SymbolRenderingStrategy_FromNumeric(valueDeserializer.readInt32())
         }
@@ -2646,7 +2646,7 @@ export class RichEditorUpdateSymbolSpanStyleOptions_serializer {
         let value_start_type : int32 = RuntimeType.UNDEFINED
         value_start_type = runtimeType(value_start)
         valueSerializer.writeInt8((value_start_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_start_type)) {
+        if ((value_start_type) != (RuntimeType.UNDEFINED)) {
             const value_start_value  = value_start!
             valueSerializer.writeNumber(value_start_value)
         }
@@ -2654,7 +2654,7 @@ export class RichEditorUpdateSymbolSpanStyleOptions_serializer {
         let value_end_type : int32 = RuntimeType.UNDEFINED
         value_end_type = runtimeType(value_end)
         valueSerializer.writeInt8((value_end_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_end_type)) {
+        if ((value_end_type) != (RuntimeType.UNDEFINED)) {
             const value_end_value  = value_end!
             valueSerializer.writeNumber(value_end_value)
         }
@@ -2665,14 +2665,14 @@ export class RichEditorUpdateSymbolSpanStyleOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const start_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let start_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (start_buf_runtimeType))
+        if ((start_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             start_buf = (valueDeserializer.readNumber() as number)
         }
         const start_result : number | undefined = start_buf
         const end_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let end_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (end_buf_runtimeType))
+        if ((end_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             end_buf = (valueDeserializer.readNumber() as number)
         }
@@ -2689,7 +2689,7 @@ export class RichEditorUrlStyle_serializer {
         let value_url_type : int32 = RuntimeType.UNDEFINED
         value_url_type = runtimeType(value_url)
         valueSerializer.writeInt8((value_url_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_url_type)) {
+        if ((value_url_type) != (RuntimeType.UNDEFINED)) {
             const value_url_value  = value_url!
             let value_url_value_type : int32 = RuntimeType.UNDEFINED
             value_url_value_type = runtimeType(value_url_value)
@@ -2709,7 +2709,7 @@ export class RichEditorUrlStyle_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const url_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let url_buf : ResourceStr | undefined
-        if ((RuntimeType.UNDEFINED) != (url_buf_runtimeType))
+        if ((url_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const url_buf__selector : int32 = valueDeserializer.readInt8()
             let url_buf_ : string | Resource | undefined
@@ -2736,7 +2736,7 @@ export class SelectionMenuOptions_serializer {
         let value_onAppear_type : int32 = RuntimeType.UNDEFINED
         value_onAppear_type = runtimeType(value_onAppear)
         valueSerializer.writeInt8((value_onAppear_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_onAppear_type)) {
+        if ((value_onAppear_type) != (RuntimeType.UNDEFINED)) {
             const value_onAppear_value  = value_onAppear!
             valueSerializer.holdAndWriteCallback(value_onAppear_value)
         }
@@ -2744,7 +2744,7 @@ export class SelectionMenuOptions_serializer {
         let value_onDisappear_type : int32 = RuntimeType.UNDEFINED
         value_onDisappear_type = runtimeType(value_onDisappear)
         valueSerializer.writeInt8((value_onDisappear_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_onDisappear_type)) {
+        if ((value_onDisappear_type) != (RuntimeType.UNDEFINED)) {
             const value_onDisappear_value  = value_onDisappear!
             valueSerializer.holdAndWriteCallback(value_onDisappear_value)
         }
@@ -2752,7 +2752,7 @@ export class SelectionMenuOptions_serializer {
         let value_menuType_type : int32 = RuntimeType.UNDEFINED
         value_menuType_type = runtimeType(value_menuType)
         valueSerializer.writeInt8((value_menuType_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_menuType_type)) {
+        if ((value_menuType_type) != (RuntimeType.UNDEFINED)) {
             const value_menuType_value  = (value_menuType as MenuType)
             valueSerializer.writeInt32(TypeChecker.MenuType_ToNumeric(value_menuType_value))
         }
@@ -2760,7 +2760,7 @@ export class SelectionMenuOptions_serializer {
         let value_onMenuShow_type : int32 = RuntimeType.UNDEFINED
         value_onMenuShow_type = runtimeType(value_onMenuShow)
         valueSerializer.writeInt8((value_onMenuShow_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_onMenuShow_type)) {
+        if ((value_onMenuShow_type) != (RuntimeType.UNDEFINED)) {
             const value_onMenuShow_value  = value_onMenuShow!
             valueSerializer.holdAndWriteCallback(value_onMenuShow_value)
         }
@@ -2768,7 +2768,7 @@ export class SelectionMenuOptions_serializer {
         let value_onMenuHide_type : int32 = RuntimeType.UNDEFINED
         value_onMenuHide_type = runtimeType(value_onMenuHide)
         valueSerializer.writeInt8((value_onMenuHide_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_onMenuHide_type)) {
+        if ((value_onMenuHide_type) != (RuntimeType.UNDEFINED)) {
             const value_onMenuHide_value  = value_onMenuHide!
             valueSerializer.holdAndWriteCallback(value_onMenuHide_value)
         }
@@ -2776,7 +2776,7 @@ export class SelectionMenuOptions_serializer {
         let value_previewMenuOptions_type : int32 = RuntimeType.UNDEFINED
         value_previewMenuOptions_type = runtimeType(value_previewMenuOptions)
         valueSerializer.writeInt8((value_previewMenuOptions_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_previewMenuOptions_type)) {
+        if ((value_previewMenuOptions_type) != (RuntimeType.UNDEFINED)) {
             const value_previewMenuOptions_value  = value_previewMenuOptions!
             PreviewMenuOptions_serializer.write(valueSerializer, value_previewMenuOptions_value)
         }
@@ -2785,7 +2785,7 @@ export class SelectionMenuOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const onAppear_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let onAppear_buf : MenuOnAppearCallback | undefined
-        if ((RuntimeType.UNDEFINED) != (onAppear_buf_runtimeType))
+        if ((onAppear_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const onAppear_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
             const onAppear_buf__call : KPointer = valueDeserializer.readPointer()
@@ -2804,7 +2804,7 @@ export class SelectionMenuOptions_serializer {
         const onAppear_result : MenuOnAppearCallback | undefined = onAppear_buf
         const onDisappear_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let onDisappear_buf : VoidCallback | undefined
-        if ((RuntimeType.UNDEFINED) != (onDisappear_buf_runtimeType))
+        if ((onDisappear_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const onDisappear_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
             const onDisappear_buf__call : KPointer = valueDeserializer.readPointer()
@@ -2821,14 +2821,14 @@ export class SelectionMenuOptions_serializer {
         const onDisappear_result : VoidCallback | undefined = onDisappear_buf
         const menuType_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let menuType_buf : MenuType | undefined
-        if ((RuntimeType.UNDEFINED) != (menuType_buf_runtimeType))
+        if ((menuType_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             menuType_buf = TypeChecker.MenuType_FromNumeric(valueDeserializer.readInt32())
         }
         const menuType_result : MenuType | undefined = menuType_buf
         const onMenuShow_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let onMenuShow_buf : MenuCallback | undefined
-        if ((RuntimeType.UNDEFINED) != (onMenuShow_buf_runtimeType))
+        if ((onMenuShow_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const onMenuShow_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
             const onMenuShow_buf__call : KPointer = valueDeserializer.readPointer()
@@ -2847,7 +2847,7 @@ export class SelectionMenuOptions_serializer {
         const onMenuShow_result : MenuCallback | undefined = onMenuShow_buf
         const onMenuHide_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let onMenuHide_buf : MenuCallback | undefined
-        if ((RuntimeType.UNDEFINED) != (onMenuHide_buf_runtimeType))
+        if ((onMenuHide_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const onMenuHide_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
             const onMenuHide_buf__call : KPointer = valueDeserializer.readPointer()
@@ -2866,7 +2866,7 @@ export class SelectionMenuOptions_serializer {
         const onMenuHide_result : MenuCallback | undefined = onMenuHide_buf
         const previewMenuOptions_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let previewMenuOptions_buf : PreviewMenuOptions | undefined
-        if ((RuntimeType.UNDEFINED) != (previewMenuOptions_buf_runtimeType))
+        if ((previewMenuOptions_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             previewMenuOptions_buf = PreviewMenuOptions_serializer.read(valueDeserializer)
         }
@@ -2963,7 +2963,7 @@ export class RichEditorSymbolSpanOptions_serializer {
         let value_offset_type : int32 = RuntimeType.UNDEFINED
         value_offset_type = runtimeType(value_offset)
         valueSerializer.writeInt8((value_offset_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_offset_type)) {
+        if ((value_offset_type) != (RuntimeType.UNDEFINED)) {
             const value_offset_value  = value_offset!
             valueSerializer.writeNumber(value_offset_value)
         }
@@ -2971,7 +2971,7 @@ export class RichEditorSymbolSpanOptions_serializer {
         let value_style_type : int32 = RuntimeType.UNDEFINED
         value_style_type = runtimeType(value_style)
         valueSerializer.writeInt8((value_style_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_style_type)) {
+        if ((value_style_type) != (RuntimeType.UNDEFINED)) {
             const value_style_value  = value_style!
             RichEditorSymbolSpanStyle_serializer.write(valueSerializer, value_style_value)
         }
@@ -2980,14 +2980,14 @@ export class RichEditorSymbolSpanOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const offset_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let offset_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (offset_buf_runtimeType))
+        if ((offset_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             offset_buf = (valueDeserializer.readNumber() as number)
         }
         const offset_result : number | undefined = offset_buf
         const style_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let style_buf : RichEditorSymbolSpanStyle | undefined
-        if ((RuntimeType.UNDEFINED) != (style_buf_runtimeType))
+        if ((style_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             style_buf = RichEditorSymbolSpanStyle_serializer.read(valueDeserializer)
         }
@@ -3003,7 +3003,7 @@ export class PlaceholderStyle_serializer {
         let value_font_type : int32 = RuntimeType.UNDEFINED
         value_font_type = runtimeType(value_font)
         valueSerializer.writeInt8((value_font_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_font_type)) {
+        if ((value_font_type) != (RuntimeType.UNDEFINED)) {
             const value_font_value  = value_font!
             Font_serializer.write(valueSerializer, value_font_value)
         }
@@ -3011,7 +3011,7 @@ export class PlaceholderStyle_serializer {
         let value_fontColor_type : int32 = RuntimeType.UNDEFINED
         value_fontColor_type = runtimeType(value_fontColor)
         valueSerializer.writeInt8((value_fontColor_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_fontColor_type)) {
+        if ((value_fontColor_type) != (RuntimeType.UNDEFINED)) {
             const value_fontColor_value  = value_fontColor!
             let value_fontColor_value_type : int32 = RuntimeType.UNDEFINED
             value_fontColor_value_type = runtimeType(value_fontColor_value)
@@ -3041,14 +3041,14 @@ export class PlaceholderStyle_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const font_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let font_buf : Font | undefined
-        if ((RuntimeType.UNDEFINED) != (font_buf_runtimeType))
+        if ((font_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             font_buf = Font_serializer.read(valueDeserializer)
         }
         const font_result : Font | undefined = font_buf
         const fontColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let fontColor_buf : ResourceColor | undefined
-        if ((RuntimeType.UNDEFINED) != (fontColor_buf_runtimeType))
+        if ((fontColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const fontColor_buf__selector : int32 = valueDeserializer.readInt8()
             let fontColor_buf_ : Color | number | string | Resource | undefined
@@ -3081,7 +3081,7 @@ export class RichEditorLayoutStyle_serializer {
         let value_margin_type : int32 = RuntimeType.UNDEFINED
         value_margin_type = runtimeType(value_margin)
         valueSerializer.writeInt8((value_margin_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_margin_type)) {
+        if ((value_margin_type) != (RuntimeType.UNDEFINED)) {
             const value_margin_value  = value_margin!
             let value_margin_value_type : int32 = RuntimeType.UNDEFINED
             value_margin_value_type = runtimeType(value_margin_value)
@@ -3116,7 +3116,7 @@ export class RichEditorLayoutStyle_serializer {
         let value_borderRadius_type : int32 = RuntimeType.UNDEFINED
         value_borderRadius_type = runtimeType(value_borderRadius)
         valueSerializer.writeInt8((value_borderRadius_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_borderRadius_type)) {
+        if ((value_borderRadius_type) != (RuntimeType.UNDEFINED)) {
             const value_borderRadius_value  = value_borderRadius!
             let value_borderRadius_value_type : int32 = RuntimeType.UNDEFINED
             value_borderRadius_value_type = runtimeType(value_borderRadius_value)
@@ -3152,7 +3152,7 @@ export class RichEditorLayoutStyle_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const margin_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let margin_buf : Dimension | Padding | undefined
-        if ((RuntimeType.UNDEFINED) != (margin_buf_runtimeType))
+        if ((margin_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const margin_buf__selector : int32 = valueDeserializer.readInt8()
             let margin_buf_ : Dimension | Padding | undefined
@@ -3184,7 +3184,7 @@ export class RichEditorLayoutStyle_serializer {
         const margin_result : Dimension | Padding | undefined = margin_buf
         const borderRadius_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let borderRadius_buf : Dimension | BorderRadiuses | undefined
-        if ((RuntimeType.UNDEFINED) != (borderRadius_buf_runtimeType))
+        if ((borderRadius_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const borderRadius_buf__selector : int32 = valueDeserializer.readInt8()
             let borderRadius_buf_ : Dimension | BorderRadiuses | undefined
@@ -3225,7 +3225,7 @@ export class RichEditorParagraphStyle_serializer {
         let value_textAlign_type : int32 = RuntimeType.UNDEFINED
         value_textAlign_type = runtimeType(value_textAlign)
         valueSerializer.writeInt8((value_textAlign_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_textAlign_type)) {
+        if ((value_textAlign_type) != (RuntimeType.UNDEFINED)) {
             const value_textAlign_value  = (value_textAlign as TextAlign)
             valueSerializer.writeInt32(TypeChecker.TextAlign_ToNumeric(value_textAlign_value))
         }
@@ -3233,7 +3233,7 @@ export class RichEditorParagraphStyle_serializer {
         let value_leadingMargin_type : int32 = RuntimeType.UNDEFINED
         value_leadingMargin_type = runtimeType(value_leadingMargin)
         valueSerializer.writeInt8((value_leadingMargin_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_leadingMargin_type)) {
+        if ((value_leadingMargin_type) != (RuntimeType.UNDEFINED)) {
             const value_leadingMargin_value  = value_leadingMargin!
             let value_leadingMargin_value_type : int32 = RuntimeType.UNDEFINED
             value_leadingMargin_value_type = runtimeType(value_leadingMargin_value)
@@ -3268,7 +3268,7 @@ export class RichEditorParagraphStyle_serializer {
         let value_wordBreak_type : int32 = RuntimeType.UNDEFINED
         value_wordBreak_type = runtimeType(value_wordBreak)
         valueSerializer.writeInt8((value_wordBreak_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_wordBreak_type)) {
+        if ((value_wordBreak_type) != (RuntimeType.UNDEFINED)) {
             const value_wordBreak_value  = (value_wordBreak as WordBreak)
             valueSerializer.writeInt32(TypeChecker.WordBreak_ToNumeric(value_wordBreak_value))
         }
@@ -3276,7 +3276,7 @@ export class RichEditorParagraphStyle_serializer {
         let value_lineBreakStrategy_type : int32 = RuntimeType.UNDEFINED
         value_lineBreakStrategy_type = runtimeType(value_lineBreakStrategy)
         valueSerializer.writeInt8((value_lineBreakStrategy_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_lineBreakStrategy_type)) {
+        if ((value_lineBreakStrategy_type) != (RuntimeType.UNDEFINED)) {
             const value_lineBreakStrategy_value  = (value_lineBreakStrategy as LineBreakStrategy)
             valueSerializer.writeInt32(TypeChecker.LineBreakStrategy_ToNumeric(value_lineBreakStrategy_value))
         }
@@ -3284,7 +3284,7 @@ export class RichEditorParagraphStyle_serializer {
         let value_paragraphSpacing_type : int32 = RuntimeType.UNDEFINED
         value_paragraphSpacing_type = runtimeType(value_paragraphSpacing)
         valueSerializer.writeInt8((value_paragraphSpacing_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_paragraphSpacing_type)) {
+        if ((value_paragraphSpacing_type) != (RuntimeType.UNDEFINED)) {
             const value_paragraphSpacing_value  = value_paragraphSpacing!
             valueSerializer.writeNumber(value_paragraphSpacing_value)
         }
@@ -3293,14 +3293,14 @@ export class RichEditorParagraphStyle_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const textAlign_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let textAlign_buf : TextAlign | undefined
-        if ((RuntimeType.UNDEFINED) != (textAlign_buf_runtimeType))
+        if ((textAlign_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             textAlign_buf = TypeChecker.TextAlign_FromNumeric(valueDeserializer.readInt32())
         }
         const textAlign_result : TextAlign | undefined = textAlign_buf
         const leadingMargin_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let leadingMargin_buf : Dimension | LeadingMarginPlaceholder | undefined
-        if ((RuntimeType.UNDEFINED) != (leadingMargin_buf_runtimeType))
+        if ((leadingMargin_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const leadingMargin_buf__selector : int32 = valueDeserializer.readInt8()
             let leadingMargin_buf_ : Dimension | LeadingMarginPlaceholder | undefined
@@ -3332,21 +3332,21 @@ export class RichEditorParagraphStyle_serializer {
         const leadingMargin_result : Dimension | LeadingMarginPlaceholder | undefined = leadingMargin_buf
         const wordBreak_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let wordBreak_buf : WordBreak | undefined
-        if ((RuntimeType.UNDEFINED) != (wordBreak_buf_runtimeType))
+        if ((wordBreak_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             wordBreak_buf = TypeChecker.WordBreak_FromNumeric(valueDeserializer.readInt32())
         }
         const wordBreak_result : WordBreak | undefined = wordBreak_buf
         const lineBreakStrategy_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let lineBreakStrategy_buf : LineBreakStrategy | undefined
-        if ((RuntimeType.UNDEFINED) != (lineBreakStrategy_buf_runtimeType))
+        if ((lineBreakStrategy_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             lineBreakStrategy_buf = TypeChecker.LineBreakStrategy_FromNumeric(valueDeserializer.readInt32())
         }
         const lineBreakStrategy_result : LineBreakStrategy | undefined = lineBreakStrategy_buf
         const paragraphSpacing_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let paragraphSpacing_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (paragraphSpacing_buf_runtimeType))
+        if ((paragraphSpacing_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             paragraphSpacing_buf = (valueDeserializer.readNumber() as number)
         }
@@ -3362,7 +3362,7 @@ export class RichEditorParagraphStyleOptions_serializer {
         let value_start_type : int32 = RuntimeType.UNDEFINED
         value_start_type = runtimeType(value_start)
         valueSerializer.writeInt8((value_start_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_start_type)) {
+        if ((value_start_type) != (RuntimeType.UNDEFINED)) {
             const value_start_value  = value_start!
             valueSerializer.writeNumber(value_start_value)
         }
@@ -3370,7 +3370,7 @@ export class RichEditorParagraphStyleOptions_serializer {
         let value_end_type : int32 = RuntimeType.UNDEFINED
         value_end_type = runtimeType(value_end)
         valueSerializer.writeInt8((value_end_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_end_type)) {
+        if ((value_end_type) != (RuntimeType.UNDEFINED)) {
             const value_end_value  = value_end!
             valueSerializer.writeNumber(value_end_value)
         }
@@ -3381,14 +3381,14 @@ export class RichEditorParagraphStyleOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const start_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let start_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (start_buf_runtimeType))
+        if ((start_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             start_buf = (valueDeserializer.readNumber() as number)
         }
         const start_result : number | undefined = start_buf
         const end_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let end_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (end_buf_runtimeType))
+        if ((end_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             end_buf = (valueDeserializer.readNumber() as number)
         }
@@ -3405,7 +3405,7 @@ export class RichEditorImageSpanStyle_serializer {
         let value_size_type : int32 = RuntimeType.UNDEFINED
         value_size_type = runtimeType(value_size)
         valueSerializer.writeInt8((value_size_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_size_type)) {
+        if ((value_size_type) != (RuntimeType.UNDEFINED)) {
             const value_size_value  = value_size!
             const value_size_value_0  = value_size_value[0]
             let value_size_value_0_type : int32 = RuntimeType.UNDEFINED
@@ -3448,7 +3448,7 @@ export class RichEditorImageSpanStyle_serializer {
         let value_verticalAlign_type : int32 = RuntimeType.UNDEFINED
         value_verticalAlign_type = runtimeType(value_verticalAlign)
         valueSerializer.writeInt8((value_verticalAlign_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_verticalAlign_type)) {
+        if ((value_verticalAlign_type) != (RuntimeType.UNDEFINED)) {
             const value_verticalAlign_value  = (value_verticalAlign as ImageSpanAlignment)
             valueSerializer.writeInt32(TypeChecker.ImageSpanAlignment_ToNumeric(value_verticalAlign_value))
         }
@@ -3456,7 +3456,7 @@ export class RichEditorImageSpanStyle_serializer {
         let value_objectFit_type : int32 = RuntimeType.UNDEFINED
         value_objectFit_type = runtimeType(value_objectFit)
         valueSerializer.writeInt8((value_objectFit_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_objectFit_type)) {
+        if ((value_objectFit_type) != (RuntimeType.UNDEFINED)) {
             const value_objectFit_value  = (value_objectFit as ImageFit)
             valueSerializer.writeInt32(TypeChecker.ImageFit_ToNumeric(value_objectFit_value))
         }
@@ -3464,7 +3464,7 @@ export class RichEditorImageSpanStyle_serializer {
         let value_layoutStyle_type : int32 = RuntimeType.UNDEFINED
         value_layoutStyle_type = runtimeType(value_layoutStyle)
         valueSerializer.writeInt8((value_layoutStyle_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_layoutStyle_type)) {
+        if ((value_layoutStyle_type) != (RuntimeType.UNDEFINED)) {
             const value_layoutStyle_value  = value_layoutStyle!
             RichEditorLayoutStyle_serializer.write(valueSerializer, value_layoutStyle_value)
         }
@@ -3473,7 +3473,7 @@ export class RichEditorImageSpanStyle_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const size_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let size_buf : [ Dimension, Dimension ] | undefined
-        if ((RuntimeType.UNDEFINED) != (size_buf_runtimeType))
+        if ((size_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const size_buf__value0_buf_selector : int32 = valueDeserializer.readInt8()
             let size_buf__value0_buf : string | number | Resource | undefined
@@ -3510,21 +3510,21 @@ export class RichEditorImageSpanStyle_serializer {
         const size_result : [ Dimension, Dimension ] | undefined = size_buf
         const verticalAlign_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let verticalAlign_buf : ImageSpanAlignment | undefined
-        if ((RuntimeType.UNDEFINED) != (verticalAlign_buf_runtimeType))
+        if ((verticalAlign_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             verticalAlign_buf = TypeChecker.ImageSpanAlignment_FromNumeric(valueDeserializer.readInt32())
         }
         const verticalAlign_result : ImageSpanAlignment | undefined = verticalAlign_buf
         const objectFit_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let objectFit_buf : ImageFit | undefined
-        if ((RuntimeType.UNDEFINED) != (objectFit_buf_runtimeType))
+        if ((objectFit_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             objectFit_buf = TypeChecker.ImageFit_FromNumeric(valueDeserializer.readInt32())
         }
         const objectFit_result : ImageFit | undefined = objectFit_buf
         const layoutStyle_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let layoutStyle_buf : RichEditorLayoutStyle | undefined
-        if ((RuntimeType.UNDEFINED) != (layoutStyle_buf_runtimeType))
+        if ((layoutStyle_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             layoutStyle_buf = RichEditorLayoutStyle_serializer.read(valueDeserializer)
         }
@@ -3549,7 +3549,7 @@ export class RichEditorImageSpanStyleResult_serializer {
         let value_layoutStyle_type : int32 = RuntimeType.UNDEFINED
         value_layoutStyle_type = runtimeType(value_layoutStyle)
         valueSerializer.writeInt8((value_layoutStyle_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_layoutStyle_type)) {
+        if ((value_layoutStyle_type) != (RuntimeType.UNDEFINED)) {
             const value_layoutStyle_value  = value_layoutStyle!
             RichEditorLayoutStyle_serializer.write(valueSerializer, value_layoutStyle_value)
         }
@@ -3563,7 +3563,7 @@ export class RichEditorImageSpanStyleResult_serializer {
         const objectFit_result : ImageFit = TypeChecker.ImageFit_FromNumeric(valueDeserializer.readInt32())
         const layoutStyle_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let layoutStyle_buf : RichEditorLayoutStyle | undefined
-        if ((RuntimeType.UNDEFINED) != (layoutStyle_buf_runtimeType))
+        if ((layoutStyle_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             layoutStyle_buf = RichEditorLayoutStyle_serializer.read(valueDeserializer)
         }
@@ -3600,7 +3600,7 @@ export class RichEditorTextStyle_serializer {
         let value_fontColor_type : int32 = RuntimeType.UNDEFINED
         value_fontColor_type = runtimeType(value_fontColor)
         valueSerializer.writeInt8((value_fontColor_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_fontColor_type)) {
+        if ((value_fontColor_type) != (RuntimeType.UNDEFINED)) {
             const value_fontColor_value  = value_fontColor!
             let value_fontColor_value_type : int32 = RuntimeType.UNDEFINED
             value_fontColor_value_type = runtimeType(value_fontColor_value)
@@ -3629,7 +3629,7 @@ export class RichEditorTextStyle_serializer {
         let value_fontSize_type : int32 = RuntimeType.UNDEFINED
         value_fontSize_type = runtimeType(value_fontSize)
         valueSerializer.writeInt8((value_fontSize_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_fontSize_type)) {
+        if ((value_fontSize_type) != (RuntimeType.UNDEFINED)) {
             const value_fontSize_value  = value_fontSize!
             let value_fontSize_value_type : int32 = RuntimeType.UNDEFINED
             value_fontSize_value_type = runtimeType(value_fontSize_value)
@@ -3653,7 +3653,7 @@ export class RichEditorTextStyle_serializer {
         let value_fontStyle_type : int32 = RuntimeType.UNDEFINED
         value_fontStyle_type = runtimeType(value_fontStyle)
         valueSerializer.writeInt8((value_fontStyle_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_fontStyle_type)) {
+        if ((value_fontStyle_type) != (RuntimeType.UNDEFINED)) {
             const value_fontStyle_value  = (value_fontStyle as FontStyle)
             valueSerializer.writeInt32(TypeChecker.FontStyle_ToNumeric(value_fontStyle_value))
         }
@@ -3661,7 +3661,7 @@ export class RichEditorTextStyle_serializer {
         let value_fontWeight_type : int32 = RuntimeType.UNDEFINED
         value_fontWeight_type = runtimeType(value_fontWeight)
         valueSerializer.writeInt8((value_fontWeight_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_fontWeight_type)) {
+        if ((value_fontWeight_type) != (RuntimeType.UNDEFINED)) {
             const value_fontWeight_value  = value_fontWeight!
             let value_fontWeight_value_type : int32 = RuntimeType.UNDEFINED
             value_fontWeight_value_type = runtimeType(value_fontWeight_value)
@@ -3685,7 +3685,7 @@ export class RichEditorTextStyle_serializer {
         let value_fontFamily_type : int32 = RuntimeType.UNDEFINED
         value_fontFamily_type = runtimeType(value_fontFamily)
         valueSerializer.writeInt8((value_fontFamily_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_fontFamily_type)) {
+        if ((value_fontFamily_type) != (RuntimeType.UNDEFINED)) {
             const value_fontFamily_value  = value_fontFamily!
             let value_fontFamily_value_type : int32 = RuntimeType.UNDEFINED
             value_fontFamily_value_type = runtimeType(value_fontFamily_value)
@@ -3704,7 +3704,7 @@ export class RichEditorTextStyle_serializer {
         let value_decoration_type : int32 = RuntimeType.UNDEFINED
         value_decoration_type = runtimeType(value_decoration)
         valueSerializer.writeInt8((value_decoration_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_decoration_type)) {
+        if ((value_decoration_type) != (RuntimeType.UNDEFINED)) {
             const value_decoration_value  = value_decoration!
             DecorationStyleInterface_serializer.write(valueSerializer, value_decoration_value)
         }
@@ -3712,7 +3712,7 @@ export class RichEditorTextStyle_serializer {
         let value_textShadow_type : int32 = RuntimeType.UNDEFINED
         value_textShadow_type = runtimeType(value_textShadow)
         valueSerializer.writeInt8((value_textShadow_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_textShadow_type)) {
+        if ((value_textShadow_type) != (RuntimeType.UNDEFINED)) {
             const value_textShadow_value  = value_textShadow!
             let value_textShadow_value_type : int32 = RuntimeType.UNDEFINED
             value_textShadow_value_type = runtimeType(value_textShadow_value)
@@ -3725,8 +3725,8 @@ export class RichEditorTextStyle_serializer {
                 valueSerializer.writeInt8((1).toChar())
                 const value_textShadow_value_1  = value_textShadow_value as Array<ShadowOptions>
                 valueSerializer.writeInt32((value_textShadow_value_1.length).toInt())
-                for (let i = 0; i < value_textShadow_value_1.length; i++) {
-                    const value_textShadow_value_1_element : ShadowOptions = value_textShadow_value_1[i]
+                for (let value_textShadow_value_1_counter_i = 0; value_textShadow_value_1_counter_i < value_textShadow_value_1.length; value_textShadow_value_1_counter_i++) {
+                    const value_textShadow_value_1_element : ShadowOptions = value_textShadow_value_1[value_textShadow_value_1_counter_i]
                     ShadowOptions_serializer.write(valueSerializer, value_textShadow_value_1_element)
                 }
             }
@@ -3735,7 +3735,7 @@ export class RichEditorTextStyle_serializer {
         let value_letterSpacing_type : int32 = RuntimeType.UNDEFINED
         value_letterSpacing_type = runtimeType(value_letterSpacing)
         valueSerializer.writeInt8((value_letterSpacing_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_letterSpacing_type)) {
+        if ((value_letterSpacing_type) != (RuntimeType.UNDEFINED)) {
             const value_letterSpacing_value  = value_letterSpacing!
             let value_letterSpacing_value_type : int32 = RuntimeType.UNDEFINED
             value_letterSpacing_value_type = runtimeType(value_letterSpacing_value)
@@ -3754,7 +3754,7 @@ export class RichEditorTextStyle_serializer {
         let value_lineHeight_type : int32 = RuntimeType.UNDEFINED
         value_lineHeight_type = runtimeType(value_lineHeight)
         valueSerializer.writeInt8((value_lineHeight_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_lineHeight_type)) {
+        if ((value_lineHeight_type) != (RuntimeType.UNDEFINED)) {
             const value_lineHeight_value  = value_lineHeight!
             let value_lineHeight_value_type : int32 = RuntimeType.UNDEFINED
             value_lineHeight_value_type = runtimeType(value_lineHeight_value)
@@ -3778,7 +3778,7 @@ export class RichEditorTextStyle_serializer {
         let value_halfLeading_type : int32 = RuntimeType.UNDEFINED
         value_halfLeading_type = runtimeType(value_halfLeading)
         valueSerializer.writeInt8((value_halfLeading_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_halfLeading_type)) {
+        if ((value_halfLeading_type) != (RuntimeType.UNDEFINED)) {
             const value_halfLeading_value  = value_halfLeading!
             valueSerializer.writeBoolean(value_halfLeading_value)
         }
@@ -3786,7 +3786,7 @@ export class RichEditorTextStyle_serializer {
         let value_fontFeature_type : int32 = RuntimeType.UNDEFINED
         value_fontFeature_type = runtimeType(value_fontFeature)
         valueSerializer.writeInt8((value_fontFeature_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_fontFeature_type)) {
+        if ((value_fontFeature_type) != (RuntimeType.UNDEFINED)) {
             const value_fontFeature_value  = value_fontFeature!
             valueSerializer.writeString(value_fontFeature_value)
         }
@@ -3794,7 +3794,7 @@ export class RichEditorTextStyle_serializer {
         let value_textBackgroundStyle_type : int32 = RuntimeType.UNDEFINED
         value_textBackgroundStyle_type = runtimeType(value_textBackgroundStyle)
         valueSerializer.writeInt8((value_textBackgroundStyle_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_textBackgroundStyle_type)) {
+        if ((value_textBackgroundStyle_type) != (RuntimeType.UNDEFINED)) {
             const value_textBackgroundStyle_value  = value_textBackgroundStyle!
             TextBackgroundStyle_serializer.write(valueSerializer, value_textBackgroundStyle_value)
         }
@@ -3803,7 +3803,7 @@ export class RichEditorTextStyle_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const fontColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let fontColor_buf : ResourceColor | undefined
-        if ((RuntimeType.UNDEFINED) != (fontColor_buf_runtimeType))
+        if ((fontColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const fontColor_buf__selector : int32 = valueDeserializer.readInt8()
             let fontColor_buf_ : Color | number | string | Resource | undefined
@@ -3827,7 +3827,7 @@ export class RichEditorTextStyle_serializer {
         const fontColor_result : ResourceColor | undefined = fontColor_buf
         const fontSize_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let fontSize_buf : string | number | Resource | undefined
-        if ((RuntimeType.UNDEFINED) != (fontSize_buf_runtimeType))
+        if ((fontSize_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const fontSize_buf__selector : int32 = valueDeserializer.readInt8()
             let fontSize_buf_ : string | number | Resource | undefined
@@ -3848,14 +3848,14 @@ export class RichEditorTextStyle_serializer {
         const fontSize_result : Length | number | undefined = fontSize_buf
         const fontStyle_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let fontStyle_buf : FontStyle | undefined
-        if ((RuntimeType.UNDEFINED) != (fontStyle_buf_runtimeType))
+        if ((fontStyle_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             fontStyle_buf = TypeChecker.FontStyle_FromNumeric(valueDeserializer.readInt32())
         }
         const fontStyle_result : FontStyle | undefined = fontStyle_buf
         const fontWeight_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let fontWeight_buf : number | FontWeight | string | undefined
-        if ((RuntimeType.UNDEFINED) != (fontWeight_buf_runtimeType))
+        if ((fontWeight_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const fontWeight_buf__selector : int32 = valueDeserializer.readInt8()
             let fontWeight_buf_ : number | FontWeight | string | undefined
@@ -3876,7 +3876,7 @@ export class RichEditorTextStyle_serializer {
         const fontWeight_result : number | FontWeight | string | undefined = fontWeight_buf
         const fontFamily_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let fontFamily_buf : ResourceStr | undefined
-        if ((RuntimeType.UNDEFINED) != (fontFamily_buf_runtimeType))
+        if ((fontFamily_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const fontFamily_buf__selector : int32 = valueDeserializer.readInt8()
             let fontFamily_buf_ : string | Resource | undefined
@@ -3894,14 +3894,14 @@ export class RichEditorTextStyle_serializer {
         const fontFamily_result : ResourceStr | undefined = fontFamily_buf
         const decoration_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let decoration_buf : DecorationStyleInterface | undefined
-        if ((RuntimeType.UNDEFINED) != (decoration_buf_runtimeType))
+        if ((decoration_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             decoration_buf = DecorationStyleInterface_serializer.read(valueDeserializer)
         }
         const decoration_result : DecorationStyleInterface | undefined = decoration_buf
         const textShadow_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let textShadow_buf : ShadowOptions | Array<ShadowOptions> | undefined
-        if ((RuntimeType.UNDEFINED) != (textShadow_buf_runtimeType))
+        if ((textShadow_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const textShadow_buf__selector : int32 = valueDeserializer.readInt8()
             let textShadow_buf_ : ShadowOptions | Array<ShadowOptions> | undefined
@@ -3924,7 +3924,7 @@ export class RichEditorTextStyle_serializer {
         const textShadow_result : ShadowOptions | Array<ShadowOptions> | undefined = textShadow_buf
         const letterSpacing_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let letterSpacing_buf : number | string | undefined
-        if ((RuntimeType.UNDEFINED) != (letterSpacing_buf_runtimeType))
+        if ((letterSpacing_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const letterSpacing_buf__selector : int32 = valueDeserializer.readInt8()
             let letterSpacing_buf_ : number | string | undefined
@@ -3942,7 +3942,7 @@ export class RichEditorTextStyle_serializer {
         const letterSpacing_result : number | string | undefined = letterSpacing_buf
         const lineHeight_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let lineHeight_buf : number | string | Resource | undefined
-        if ((RuntimeType.UNDEFINED) != (lineHeight_buf_runtimeType))
+        if ((lineHeight_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const lineHeight_buf__selector : int32 = valueDeserializer.readInt8()
             let lineHeight_buf_ : number | string | Resource | undefined
@@ -3963,21 +3963,21 @@ export class RichEditorTextStyle_serializer {
         const lineHeight_result : number | string | Resource | undefined = lineHeight_buf
         const halfLeading_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let halfLeading_buf : boolean | undefined
-        if ((RuntimeType.UNDEFINED) != (halfLeading_buf_runtimeType))
+        if ((halfLeading_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             halfLeading_buf = valueDeserializer.readBoolean()
         }
         const halfLeading_result : boolean | undefined = halfLeading_buf
         const fontFeature_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let fontFeature_buf : string | undefined
-        if ((RuntimeType.UNDEFINED) != (fontFeature_buf_runtimeType))
+        if ((fontFeature_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             fontFeature_buf = (valueDeserializer.readString() as string)
         }
         const fontFeature_result : string | undefined = fontFeature_buf
         const textBackgroundStyle_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let textBackgroundStyle_buf : TextBackgroundStyle | undefined
-        if ((RuntimeType.UNDEFINED) != (textBackgroundStyle_buf_runtimeType))
+        if ((textBackgroundStyle_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             textBackgroundStyle_buf = TextBackgroundStyle_serializer.read(valueDeserializer)
         }
@@ -4026,11 +4026,11 @@ export class RichEditorTextStyleResult_serializer {
         let value_textShadow_type : int32 = RuntimeType.UNDEFINED
         value_textShadow_type = runtimeType(value_textShadow)
         valueSerializer.writeInt8((value_textShadow_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_textShadow_type)) {
+        if ((value_textShadow_type) != (RuntimeType.UNDEFINED)) {
             const value_textShadow_value  = value_textShadow!
             valueSerializer.writeInt32((value_textShadow_value.length).toInt())
-            for (let i = 0; i < value_textShadow_value.length; i++) {
-                const value_textShadow_value_element : ShadowOptions = value_textShadow_value[i]
+            for (let value_textShadow_value_counter_i = 0; value_textShadow_value_counter_i < value_textShadow_value.length; value_textShadow_value_counter_i++) {
+                const value_textShadow_value_element : ShadowOptions = value_textShadow_value[value_textShadow_value_counter_i]
                 ShadowOptions_serializer.write(valueSerializer, value_textShadow_value_element)
             }
         }
@@ -4038,7 +4038,7 @@ export class RichEditorTextStyleResult_serializer {
         let value_letterSpacing_type : int32 = RuntimeType.UNDEFINED
         value_letterSpacing_type = runtimeType(value_letterSpacing)
         valueSerializer.writeInt8((value_letterSpacing_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_letterSpacing_type)) {
+        if ((value_letterSpacing_type) != (RuntimeType.UNDEFINED)) {
             const value_letterSpacing_value  = value_letterSpacing!
             valueSerializer.writeNumber(value_letterSpacing_value)
         }
@@ -4046,7 +4046,7 @@ export class RichEditorTextStyleResult_serializer {
         let value_lineHeight_type : int32 = RuntimeType.UNDEFINED
         value_lineHeight_type = runtimeType(value_lineHeight)
         valueSerializer.writeInt8((value_lineHeight_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_lineHeight_type)) {
+        if ((value_lineHeight_type) != (RuntimeType.UNDEFINED)) {
             const value_lineHeight_value  = value_lineHeight!
             valueSerializer.writeNumber(value_lineHeight_value)
         }
@@ -4054,7 +4054,7 @@ export class RichEditorTextStyleResult_serializer {
         let value_halfLeading_type : int32 = RuntimeType.UNDEFINED
         value_halfLeading_type = runtimeType(value_halfLeading)
         valueSerializer.writeInt8((value_halfLeading_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_halfLeading_type)) {
+        if ((value_halfLeading_type) != (RuntimeType.UNDEFINED)) {
             const value_halfLeading_value  = value_halfLeading!
             valueSerializer.writeBoolean(value_halfLeading_value)
         }
@@ -4062,7 +4062,7 @@ export class RichEditorTextStyleResult_serializer {
         let value_fontFeature_type : int32 = RuntimeType.UNDEFINED
         value_fontFeature_type = runtimeType(value_fontFeature)
         valueSerializer.writeInt8((value_fontFeature_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_fontFeature_type)) {
+        if ((value_fontFeature_type) != (RuntimeType.UNDEFINED)) {
             const value_fontFeature_value  = value_fontFeature!
             valueSerializer.writeString(value_fontFeature_value)
         }
@@ -4070,7 +4070,7 @@ export class RichEditorTextStyleResult_serializer {
         let value_textBackgroundStyle_type : int32 = RuntimeType.UNDEFINED
         value_textBackgroundStyle_type = runtimeType(value_textBackgroundStyle)
         valueSerializer.writeInt8((value_textBackgroundStyle_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_textBackgroundStyle_type)) {
+        if ((value_textBackgroundStyle_type) != (RuntimeType.UNDEFINED)) {
             const value_textBackgroundStyle_value  = value_textBackgroundStyle!
             TextBackgroundStyle_serializer.write(valueSerializer, value_textBackgroundStyle_value)
         }
@@ -4102,7 +4102,7 @@ export class RichEditorTextStyleResult_serializer {
         const decoration_result : DecorationStyleResult = DecorationStyleResult_serializer.read(valueDeserializer)
         const textShadow_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let textShadow_buf : Array<ShadowOptions> | undefined
-        if ((RuntimeType.UNDEFINED) != (textShadow_buf_runtimeType))
+        if ((textShadow_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const textShadow_buf__length : int32 = valueDeserializer.readInt32()
             let textShadow_buf_ : Array<ShadowOptions> = new Array<ShadowOptions>(textShadow_buf__length)
@@ -4114,35 +4114,35 @@ export class RichEditorTextStyleResult_serializer {
         const textShadow_result : Array<ShadowOptions> | undefined = textShadow_buf
         const letterSpacing_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let letterSpacing_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (letterSpacing_buf_runtimeType))
+        if ((letterSpacing_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             letterSpacing_buf = (valueDeserializer.readNumber() as number)
         }
         const letterSpacing_result : number | undefined = letterSpacing_buf
         const lineHeight_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let lineHeight_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (lineHeight_buf_runtimeType))
+        if ((lineHeight_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             lineHeight_buf = (valueDeserializer.readNumber() as number)
         }
         const lineHeight_result : number | undefined = lineHeight_buf
         const halfLeading_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let halfLeading_buf : boolean | undefined
-        if ((RuntimeType.UNDEFINED) != (halfLeading_buf_runtimeType))
+        if ((halfLeading_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             halfLeading_buf = valueDeserializer.readBoolean()
         }
         const halfLeading_result : boolean | undefined = halfLeading_buf
         const fontFeature_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let fontFeature_buf : string | undefined
-        if ((RuntimeType.UNDEFINED) != (fontFeature_buf_runtimeType))
+        if ((fontFeature_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             fontFeature_buf = (valueDeserializer.readString() as string)
         }
         const fontFeature_result : string | undefined = fontFeature_buf
         const textBackgroundStyle_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let textBackgroundStyle_buf : TextBackgroundStyle | undefined
-        if ((RuntimeType.UNDEFINED) != (textBackgroundStyle_buf_runtimeType))
+        if ((textBackgroundStyle_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             textBackgroundStyle_buf = TextBackgroundStyle_serializer.read(valueDeserializer)
         }
@@ -4158,7 +4158,7 @@ export class RichEditorUpdateImageSpanStyleOptions_serializer {
         let value_start_type : int32 = RuntimeType.UNDEFINED
         value_start_type = runtimeType(value_start)
         valueSerializer.writeInt8((value_start_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_start_type)) {
+        if ((value_start_type) != (RuntimeType.UNDEFINED)) {
             const value_start_value  = value_start!
             valueSerializer.writeNumber(value_start_value)
         }
@@ -4166,7 +4166,7 @@ export class RichEditorUpdateImageSpanStyleOptions_serializer {
         let value_end_type : int32 = RuntimeType.UNDEFINED
         value_end_type = runtimeType(value_end)
         valueSerializer.writeInt8((value_end_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_end_type)) {
+        if ((value_end_type) != (RuntimeType.UNDEFINED)) {
             const value_end_value  = value_end!
             valueSerializer.writeNumber(value_end_value)
         }
@@ -4177,14 +4177,14 @@ export class RichEditorUpdateImageSpanStyleOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const start_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let start_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (start_buf_runtimeType))
+        if ((start_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             start_buf = (valueDeserializer.readNumber() as number)
         }
         const start_result : number | undefined = start_buf
         const end_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let end_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (end_buf_runtimeType))
+        if ((end_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             end_buf = (valueDeserializer.readNumber() as number)
         }
@@ -4201,7 +4201,7 @@ export class RichEditorUpdateTextSpanStyleOptions_serializer {
         let value_start_type : int32 = RuntimeType.UNDEFINED
         value_start_type = runtimeType(value_start)
         valueSerializer.writeInt8((value_start_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_start_type)) {
+        if ((value_start_type) != (RuntimeType.UNDEFINED)) {
             const value_start_value  = value_start!
             valueSerializer.writeNumber(value_start_value)
         }
@@ -4209,7 +4209,7 @@ export class RichEditorUpdateTextSpanStyleOptions_serializer {
         let value_end_type : int32 = RuntimeType.UNDEFINED
         value_end_type = runtimeType(value_end)
         valueSerializer.writeInt8((value_end_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_end_type)) {
+        if ((value_end_type) != (RuntimeType.UNDEFINED)) {
             const value_end_value  = value_end!
             valueSerializer.writeNumber(value_end_value)
         }
@@ -4219,7 +4219,7 @@ export class RichEditorUpdateTextSpanStyleOptions_serializer {
         let value_urlStyle_type : int32 = RuntimeType.UNDEFINED
         value_urlStyle_type = runtimeType(value_urlStyle)
         valueSerializer.writeInt8((value_urlStyle_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_urlStyle_type)) {
+        if ((value_urlStyle_type) != (RuntimeType.UNDEFINED)) {
             const value_urlStyle_value  = value_urlStyle!
             RichEditorUrlStyle_serializer.write(valueSerializer, value_urlStyle_value)
         }
@@ -4228,14 +4228,14 @@ export class RichEditorUpdateTextSpanStyleOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const start_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let start_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (start_buf_runtimeType))
+        if ((start_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             start_buf = (valueDeserializer.readNumber() as number)
         }
         const start_result : number | undefined = start_buf
         const end_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let end_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (end_buf_runtimeType))
+        if ((end_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             end_buf = (valueDeserializer.readNumber() as number)
         }
@@ -4243,7 +4243,7 @@ export class RichEditorUpdateTextSpanStyleOptions_serializer {
         const textStyle_result : RichEditorTextStyle = RichEditorTextStyle_serializer.read(valueDeserializer)
         const urlStyle_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let urlStyle_buf : RichEditorUrlStyle | undefined
-        if ((RuntimeType.UNDEFINED) != (urlStyle_buf_runtimeType))
+        if ((urlStyle_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             urlStyle_buf = RichEditorUrlStyle_serializer.read(valueDeserializer)
         }
@@ -4259,7 +4259,7 @@ export class RichEditorImageSpanOptions_serializer {
         let value_offset_type : int32 = RuntimeType.UNDEFINED
         value_offset_type = runtimeType(value_offset)
         valueSerializer.writeInt8((value_offset_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_offset_type)) {
+        if ((value_offset_type) != (RuntimeType.UNDEFINED)) {
             const value_offset_value  = value_offset!
             valueSerializer.writeNumber(value_offset_value)
         }
@@ -4267,7 +4267,7 @@ export class RichEditorImageSpanOptions_serializer {
         let value_imageStyle_type : int32 = RuntimeType.UNDEFINED
         value_imageStyle_type = runtimeType(value_imageStyle)
         valueSerializer.writeInt8((value_imageStyle_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_imageStyle_type)) {
+        if ((value_imageStyle_type) != (RuntimeType.UNDEFINED)) {
             const value_imageStyle_value  = value_imageStyle!
             RichEditorImageSpanStyle_serializer.write(valueSerializer, value_imageStyle_value)
         }
@@ -4275,7 +4275,7 @@ export class RichEditorImageSpanOptions_serializer {
         let value_gesture_type : int32 = RuntimeType.UNDEFINED
         value_gesture_type = runtimeType(value_gesture)
         valueSerializer.writeInt8((value_gesture_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_gesture_type)) {
+        if ((value_gesture_type) != (RuntimeType.UNDEFINED)) {
             const value_gesture_value  = value_gesture!
             RichEditorGesture_serializer.write(valueSerializer, value_gesture_value)
         }
@@ -4283,7 +4283,7 @@ export class RichEditorImageSpanOptions_serializer {
         let value_onHover_type : int32 = RuntimeType.UNDEFINED
         value_onHover_type = runtimeType(value_onHover)
         valueSerializer.writeInt8((value_onHover_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_onHover_type)) {
+        if ((value_onHover_type) != (RuntimeType.UNDEFINED)) {
             const value_onHover_value  = value_onHover!
             valueSerializer.holdAndWriteCallback(value_onHover_value)
         }
@@ -4292,28 +4292,28 @@ export class RichEditorImageSpanOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const offset_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let offset_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (offset_buf_runtimeType))
+        if ((offset_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             offset_buf = (valueDeserializer.readNumber() as number)
         }
         const offset_result : number | undefined = offset_buf
         const imageStyle_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let imageStyle_buf : RichEditorImageSpanStyle | undefined
-        if ((RuntimeType.UNDEFINED) != (imageStyle_buf_runtimeType))
+        if ((imageStyle_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             imageStyle_buf = RichEditorImageSpanStyle_serializer.read(valueDeserializer)
         }
         const imageStyle_result : RichEditorImageSpanStyle | undefined = imageStyle_buf
         const gesture_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let gesture_buf : RichEditorGesture | undefined
-        if ((RuntimeType.UNDEFINED) != (gesture_buf_runtimeType))
+        if ((gesture_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             gesture_buf = RichEditorGesture_serializer.read(valueDeserializer)
         }
         const gesture_result : RichEditorGesture | undefined = gesture_buf
         const onHover_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let onHover_buf : OnHoverCallback | undefined
-        if ((RuntimeType.UNDEFINED) != (onHover_buf_runtimeType))
+        if ((onHover_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const onHover_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
             const onHover_buf__call : KPointer = valueDeserializer.readPointer()
@@ -4343,7 +4343,7 @@ export class RichEditorImageSpanResult_serializer {
         let value_valuePixelMap_type : int32 = RuntimeType.UNDEFINED
         value_valuePixelMap_type = runtimeType(value_valuePixelMap)
         valueSerializer.writeInt8((value_valuePixelMap_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_valuePixelMap_type)) {
+        if ((value_valuePixelMap_type) != (RuntimeType.UNDEFINED)) {
             const value_valuePixelMap_value  = value_valuePixelMap!
             image_PixelMap_serializer.write(valueSerializer, value_valuePixelMap_value)
         }
@@ -4351,7 +4351,7 @@ export class RichEditorImageSpanResult_serializer {
         let value_valueResourceStr_type : int32 = RuntimeType.UNDEFINED
         value_valueResourceStr_type = runtimeType(value_valueResourceStr)
         valueSerializer.writeInt8((value_valueResourceStr_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_valueResourceStr_type)) {
+        if ((value_valueResourceStr_type) != (RuntimeType.UNDEFINED)) {
             const value_valueResourceStr_value  = value_valueResourceStr!
             let value_valueResourceStr_value_type : int32 = RuntimeType.UNDEFINED
             value_valueResourceStr_value_type = runtimeType(value_valueResourceStr_value)
@@ -4379,14 +4379,14 @@ export class RichEditorImageSpanResult_serializer {
         const spanPosition_result : RichEditorSpanPosition = RichEditorSpanPosition_serializer.read(valueDeserializer)
         const valuePixelMap_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let valuePixelMap_buf : image.PixelMap | undefined
-        if ((RuntimeType.UNDEFINED) != (valuePixelMap_buf_runtimeType))
+        if ((valuePixelMap_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             valuePixelMap_buf = (image_PixelMap_serializer.read(valueDeserializer) as image.PixelMap)
         }
         const valuePixelMap_result : image.PixelMap | undefined = valuePixelMap_buf
         const valueResourceStr_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let valueResourceStr_buf : ResourceStr | undefined
-        if ((RuntimeType.UNDEFINED) != (valueResourceStr_buf_runtimeType))
+        if ((valueResourceStr_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const valueResourceStr_buf__selector : int32 = valueDeserializer.readInt8()
             let valueResourceStr_buf_ : string | Resource | undefined
@@ -4417,7 +4417,7 @@ export class RichEditorTextSpanOptions_serializer {
         let value_offset_type : int32 = RuntimeType.UNDEFINED
         value_offset_type = runtimeType(value_offset)
         valueSerializer.writeInt8((value_offset_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_offset_type)) {
+        if ((value_offset_type) != (RuntimeType.UNDEFINED)) {
             const value_offset_value  = value_offset!
             valueSerializer.writeNumber(value_offset_value)
         }
@@ -4425,7 +4425,7 @@ export class RichEditorTextSpanOptions_serializer {
         let value_style_type : int32 = RuntimeType.UNDEFINED
         value_style_type = runtimeType(value_style)
         valueSerializer.writeInt8((value_style_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_style_type)) {
+        if ((value_style_type) != (RuntimeType.UNDEFINED)) {
             const value_style_value  = value_style!
             RichEditorTextStyle_serializer.write(valueSerializer, value_style_value)
         }
@@ -4433,7 +4433,7 @@ export class RichEditorTextSpanOptions_serializer {
         let value_paragraphStyle_type : int32 = RuntimeType.UNDEFINED
         value_paragraphStyle_type = runtimeType(value_paragraphStyle)
         valueSerializer.writeInt8((value_paragraphStyle_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_paragraphStyle_type)) {
+        if ((value_paragraphStyle_type) != (RuntimeType.UNDEFINED)) {
             const value_paragraphStyle_value  = value_paragraphStyle!
             RichEditorParagraphStyle_serializer.write(valueSerializer, value_paragraphStyle_value)
         }
@@ -4441,7 +4441,7 @@ export class RichEditorTextSpanOptions_serializer {
         let value_gesture_type : int32 = RuntimeType.UNDEFINED
         value_gesture_type = runtimeType(value_gesture)
         valueSerializer.writeInt8((value_gesture_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_gesture_type)) {
+        if ((value_gesture_type) != (RuntimeType.UNDEFINED)) {
             const value_gesture_value  = value_gesture!
             RichEditorGesture_serializer.write(valueSerializer, value_gesture_value)
         }
@@ -4449,7 +4449,7 @@ export class RichEditorTextSpanOptions_serializer {
         let value_urlStyle_type : int32 = RuntimeType.UNDEFINED
         value_urlStyle_type = runtimeType(value_urlStyle)
         valueSerializer.writeInt8((value_urlStyle_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_urlStyle_type)) {
+        if ((value_urlStyle_type) != (RuntimeType.UNDEFINED)) {
             const value_urlStyle_value  = value_urlStyle!
             RichEditorUrlStyle_serializer.write(valueSerializer, value_urlStyle_value)
         }
@@ -4458,35 +4458,35 @@ export class RichEditorTextSpanOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const offset_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let offset_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (offset_buf_runtimeType))
+        if ((offset_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             offset_buf = (valueDeserializer.readNumber() as number)
         }
         const offset_result : number | undefined = offset_buf
         const style_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let style_buf : RichEditorTextStyle | undefined
-        if ((RuntimeType.UNDEFINED) != (style_buf_runtimeType))
+        if ((style_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             style_buf = RichEditorTextStyle_serializer.read(valueDeserializer)
         }
         const style_result : RichEditorTextStyle | undefined = style_buf
         const paragraphStyle_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let paragraphStyle_buf : RichEditorParagraphStyle | undefined
-        if ((RuntimeType.UNDEFINED) != (paragraphStyle_buf_runtimeType))
+        if ((paragraphStyle_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             paragraphStyle_buf = RichEditorParagraphStyle_serializer.read(valueDeserializer)
         }
         const paragraphStyle_result : RichEditorParagraphStyle | undefined = paragraphStyle_buf
         const gesture_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let gesture_buf : RichEditorGesture | undefined
-        if ((RuntimeType.UNDEFINED) != (gesture_buf_runtimeType))
+        if ((gesture_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             gesture_buf = RichEditorGesture_serializer.read(valueDeserializer)
         }
         const gesture_result : RichEditorGesture | undefined = gesture_buf
         const urlStyle_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let urlStyle_buf : RichEditorUrlStyle | undefined
-        if ((RuntimeType.UNDEFINED) != (urlStyle_buf_runtimeType))
+        if ((urlStyle_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             urlStyle_buf = RichEditorUrlStyle_serializer.read(valueDeserializer)
         }
@@ -4513,7 +4513,7 @@ export class RichEditorTextSpanResult_serializer {
         let value_symbolSpanStyle_type : int32 = RuntimeType.UNDEFINED
         value_symbolSpanStyle_type = runtimeType(value_symbolSpanStyle)
         valueSerializer.writeInt8((value_symbolSpanStyle_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_symbolSpanStyle_type)) {
+        if ((value_symbolSpanStyle_type) != (RuntimeType.UNDEFINED)) {
             const value_symbolSpanStyle_value  = value_symbolSpanStyle!
             RichEditorSymbolSpanStyle_serializer.write(valueSerializer, value_symbolSpanStyle_value)
         }
@@ -4521,7 +4521,7 @@ export class RichEditorTextSpanResult_serializer {
         let value_valueResource_type : int32 = RuntimeType.UNDEFINED
         value_valueResource_type = runtimeType(value_valueResource)
         valueSerializer.writeInt8((value_valueResource_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_valueResource_type)) {
+        if ((value_valueResource_type) != (RuntimeType.UNDEFINED)) {
             const value_valueResource_value  = value_valueResource!
             Resource_serializer.write(valueSerializer, value_valueResource_value)
         }
@@ -4529,7 +4529,7 @@ export class RichEditorTextSpanResult_serializer {
         let value_paragraphStyle_type : int32 = RuntimeType.UNDEFINED
         value_paragraphStyle_type = runtimeType(value_paragraphStyle)
         valueSerializer.writeInt8((value_paragraphStyle_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_paragraphStyle_type)) {
+        if ((value_paragraphStyle_type) != (RuntimeType.UNDEFINED)) {
             const value_paragraphStyle_value  = value_paragraphStyle!
             RichEditorParagraphStyle_serializer.write(valueSerializer, value_paragraphStyle_value)
         }
@@ -4537,7 +4537,7 @@ export class RichEditorTextSpanResult_serializer {
         let value_previewText_type : int32 = RuntimeType.UNDEFINED
         value_previewText_type = runtimeType(value_previewText)
         valueSerializer.writeInt8((value_previewText_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_previewText_type)) {
+        if ((value_previewText_type) != (RuntimeType.UNDEFINED)) {
             const value_previewText_value  = value_previewText!
             valueSerializer.writeString(value_previewText_value)
         }
@@ -4545,7 +4545,7 @@ export class RichEditorTextSpanResult_serializer {
         let value_urlStyle_type : int32 = RuntimeType.UNDEFINED
         value_urlStyle_type = runtimeType(value_urlStyle)
         valueSerializer.writeInt8((value_urlStyle_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_urlStyle_type)) {
+        if ((value_urlStyle_type) != (RuntimeType.UNDEFINED)) {
             const value_urlStyle_value  = value_urlStyle!
             RichEditorUrlStyle_serializer.write(valueSerializer, value_urlStyle_value)
         }
@@ -4560,35 +4560,35 @@ export class RichEditorTextSpanResult_serializer {
         const offsetInSpan_result : [ number, number ] = ([offsetInSpan_buf_value0, offsetInSpan_buf_value1] as [ number, number ])
         const symbolSpanStyle_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let symbolSpanStyle_buf : RichEditorSymbolSpanStyle | undefined
-        if ((RuntimeType.UNDEFINED) != (symbolSpanStyle_buf_runtimeType))
+        if ((symbolSpanStyle_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             symbolSpanStyle_buf = RichEditorSymbolSpanStyle_serializer.read(valueDeserializer)
         }
         const symbolSpanStyle_result : RichEditorSymbolSpanStyle | undefined = symbolSpanStyle_buf
         const valueResource_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let valueResource_buf : Resource | undefined
-        if ((RuntimeType.UNDEFINED) != (valueResource_buf_runtimeType))
+        if ((valueResource_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             valueResource_buf = Resource_serializer.read(valueDeserializer)
         }
         const valueResource_result : Resource | undefined = valueResource_buf
         const paragraphStyle_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let paragraphStyle_buf : RichEditorParagraphStyle | undefined
-        if ((RuntimeType.UNDEFINED) != (paragraphStyle_buf_runtimeType))
+        if ((paragraphStyle_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             paragraphStyle_buf = RichEditorParagraphStyle_serializer.read(valueDeserializer)
         }
         const paragraphStyle_result : RichEditorParagraphStyle | undefined = paragraphStyle_buf
         const previewText_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let previewText_buf : string | undefined
-        if ((RuntimeType.UNDEFINED) != (previewText_buf_runtimeType))
+        if ((previewText_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             previewText_buf = (valueDeserializer.readString() as string)
         }
         const previewText_result : string | undefined = previewText_buf
         const urlStyle_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let urlStyle_buf : RichEditorUrlStyle | undefined
-        if ((RuntimeType.UNDEFINED) != (urlStyle_buf_runtimeType))
+        if ((urlStyle_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             urlStyle_buf = RichEditorUrlStyle_serializer.read(valueDeserializer)
         }
@@ -4675,7 +4675,7 @@ export class RichEditorController extends RichEditorBaseController implements Ma
         let options_type : int32 = RuntimeType.UNDEFINED
         options_type = runtimeType(options)
         thisSerializer.writeInt8((options_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (options_type)) {
+        if ((options_type) != (RuntimeType.UNDEFINED)) {
             const options_value  = options!
             RichEditorTextSpanOptions_serializer.write(thisSerializer, options_value)
         }
@@ -4711,7 +4711,7 @@ export class RichEditorController extends RichEditorBaseController implements Ma
         let options_type : int32 = RuntimeType.UNDEFINED
         options_type = runtimeType(options)
         thisSerializer.writeInt8((options_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (options_type)) {
+        if ((options_type) != (RuntimeType.UNDEFINED)) {
             const options_value  = options!
             RichEditorImageSpanOptions_serializer.write(thisSerializer, options_value)
         }
@@ -4725,7 +4725,7 @@ export class RichEditorController extends RichEditorBaseController implements Ma
         let options_type : int32 = RuntimeType.UNDEFINED
         options_type = runtimeType(options)
         thisSerializer.writeInt8((options_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (options_type)) {
+        if ((options_type) != (RuntimeType.UNDEFINED)) {
             const options_value  = options!
             RichEditorBuilderSpanOptions_serializer.write(thisSerializer, options_value)
         }
@@ -4739,7 +4739,7 @@ export class RichEditorController extends RichEditorBaseController implements Ma
         let options_type : int32 = RuntimeType.UNDEFINED
         options_type = runtimeType(options)
         thisSerializer.writeInt8((options_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (options_type)) {
+        if ((options_type) != (RuntimeType.UNDEFINED)) {
             const options_value  = options!
             RichEditorSymbolSpanOptions_serializer.write(thisSerializer, options_value)
         }
@@ -4780,7 +4780,7 @@ export class RichEditorController extends RichEditorBaseController implements Ma
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             RichEditorRange_serializer.write(thisSerializer, value_value)
         }
@@ -4792,7 +4792,7 @@ export class RichEditorController extends RichEditorBaseController implements Ma
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             RichEditorRange_serializer.write(thisSerializer, value_value)
         }
@@ -4823,7 +4823,7 @@ export class RichEditorController extends RichEditorBaseController implements Ma
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             RichEditorRange_serializer.write(thisSerializer, value_value)
         }

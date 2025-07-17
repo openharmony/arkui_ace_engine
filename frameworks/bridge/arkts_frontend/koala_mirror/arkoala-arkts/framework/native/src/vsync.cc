@@ -22,7 +22,7 @@
 
 #include "arkoala_api_generated.h"
 
-// todo replace to OH_AnyAPI
+// Improve: replace to OH_AnyAPI
 const Ark_AnyAPI* GetAnyImpl(int kind, int version, std::string* result);
 
 static const GENERATED_ArkUIExtendedNodeAPI* GetArkUIExtendedNodeAPI() {
@@ -31,7 +31,7 @@ static const GENERATED_ArkUIExtendedNodeAPI* GetArkUIExtendedNodeAPI() {
         GENERATED_ARKUI_EXTENDED_NODE_API_VERSION, nullptr));
 }
 
-// TODO: concurrent/locked map if multiple pipeline contexts.
+// Improve: concurrent/locked map if multiple pipeline contexts.
 static std::atomic<KVMDeferred*> currentVsyncDeferred(nullptr);
 
 static KVMDeferred* takeCurrent(Ark_NativePointer pipelineContext) {

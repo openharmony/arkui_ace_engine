@@ -48,7 +48,7 @@ export class ArkSliderPeer extends ArkCommonMethodPeer {
         let options_type : int32 = RuntimeType.UNDEFINED
         options_type = runtimeType(options)
         thisSerializer.writeInt8((options_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (options_type)) {
+        if ((options_type) != (RuntimeType.UNDEFINED)) {
             const options_value  = options!
             SliderOptions_serializer.write(thisSerializer, options_value)
         }
@@ -60,7 +60,7 @@ export class ArkSliderPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -93,7 +93,7 @@ export class ArkSliderPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -137,7 +137,7 @@ export class ArkSliderPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -181,7 +181,7 @@ export class ArkSliderPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -193,7 +193,7 @@ export class ArkSliderPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -221,7 +221,7 @@ export class ArkSliderPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -233,7 +233,7 @@ export class ArkSliderPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -266,7 +266,7 @@ export class ArkSliderPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -294,7 +294,7 @@ export class ArkSliderPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -327,7 +327,7 @@ export class ArkSliderPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -355,7 +355,7 @@ export class ArkSliderPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -383,7 +383,7 @@ export class ArkSliderPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             SizeOptions_serializer.write(thisSerializer, value_value)
         }
@@ -395,7 +395,7 @@ export class ArkSliderPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             SliderBlockStyle_serializer.write(thisSerializer, value_value)
         }
@@ -407,7 +407,7 @@ export class ArkSliderPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -435,7 +435,7 @@ export class ArkSliderPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = (value as SliderInteraction)
             thisSerializer.writeInt32(TypeChecker.SliderInteraction_ToNumeric(value_value))
         }
@@ -447,7 +447,7 @@ export class ArkSliderPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeNumber(value_value)
         }
@@ -459,7 +459,7 @@ export class ArkSliderPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteObject(value_value)
         }
@@ -471,7 +471,7 @@ export class ArkSliderPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             SlideRange_serializer.write(thisSerializer, value_value)
         }
@@ -483,7 +483,7 @@ export class ArkSliderPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = (value as CrownSensitivity)
             thisSerializer.writeInt32(TypeChecker.CrownSensitivity_ToNumeric(value_value))
         }
@@ -495,7 +495,7 @@ export class ArkSliderPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -507,14 +507,14 @@ export class ArkSliderPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
         let content_type : int32 = RuntimeType.UNDEFINED
         content_type = runtimeType(content)
         thisSerializer.writeInt8((content_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (content_type)) {
+        if ((content_type) != (RuntimeType.UNDEFINED)) {
             const content_value  = content!
             let content_value_type : int32 = RuntimeType.UNDEFINED
             content_value_type = runtimeType(content_value)
@@ -530,6 +530,12 @@ export class ArkSliderPeer extends ArkCommonMethodPeer {
             }
         }
         ArkUIGeneratedNativeModule._SliderAttribute_setShowTips(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    set_onChangeEvent_valueAttribute(callback_: ((value: number | undefined) => void)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(callback_)
+        ArkUIGeneratedNativeModule._SliderAttribute_set_onChangeEvent_value(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }
@@ -607,6 +613,7 @@ export interface SliderAttribute extends CommonMethod {
     digitalCrownSensitivity(value: CrownSensitivity | undefined): this
     enableHapticFeedback(value: boolean | undefined): this
     showTips(value: boolean | undefined, content?: ResourceStr): this
+    _onChangeEvent_value(callback_: ((value: number | undefined) => void)): void
     attributeModifier(value: AttributeModifier<SliderAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkSliderStyle extends ArkCommonMethodStyle implements SliderAttribute {
@@ -693,6 +700,9 @@ export class ArkSliderStyle extends ArkCommonMethodStyle implements SliderAttrib
     }
     public showTips(value: boolean | undefined, content?: ResourceStr): this {
         return this
+    }
+    public _onChangeEvent_value(callback_: ((value: number | undefined) => void)): void {
+        throw new Error("Unimplemented")
     }
     public attributeModifier(value: AttributeModifier<SliderAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
@@ -923,6 +933,14 @@ export class ArkSliderComponent extends ArkCommonMethodComponent implements Slid
         }
         return this
     }
+    public _onChangeEvent_value(callback_: ((value: number | undefined) => void)): void {
+        if (this.checkPriority("_onChangeEvent_value")) {
+            const callback__casted = callback_ as (((value: number | undefined) => void))
+            this.getPeer()?.set_onChangeEvent_valueAttribute(callback__casted)
+            return
+        }
+        return
+    }
     public attributeModifier(value: AttributeModifier<SliderAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         this._modifier = value as AttributeModifier<CommonMethod>
         return this
@@ -1021,6 +1039,8 @@ export class ArkSliderSet extends ArkCommonMethodSet implements SliderAttribute 
     _showTips_flag?: boolean
     _showTips0_value?: boolean | undefined
     _showTips1_value?: ResourceStr | undefined
+    __onChangeEvent_value_flag?: boolean
+    __onChangeEvent_value0_value?: ((value: number | undefined) => void)
     applyModifierPatch(component: SliderAttribute): void {
         if (this._blockColor_flag)
             component.blockColor((this._blockColor0_value as ResourceColor | undefined))
@@ -1171,6 +1191,8 @@ export class ArkSliderSet extends ArkCommonMethodSet implements SliderAttribute 
         this._showTips1_value = content
         return this
     }
+    public _onChangeEvent_value(callback_: ((value: number | undefined) => void)): void {
+    }
     public attributeModifier(value: AttributeModifier<SliderAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
     }
@@ -1182,7 +1204,7 @@ export class SlideRange_serializer {
         let value_from_type : int32 = RuntimeType.UNDEFINED
         value_from_type = runtimeType(value_from)
         valueSerializer.writeInt8((value_from_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_from_type)) {
+        if ((value_from_type) != (RuntimeType.UNDEFINED)) {
             const value_from_value  = value_from!
             valueSerializer.writeNumber(value_from_value)
         }
@@ -1190,7 +1212,7 @@ export class SlideRange_serializer {
         let value_to_type : int32 = RuntimeType.UNDEFINED
         value_to_type = runtimeType(value_to)
         valueSerializer.writeInt8((value_to_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_to_type)) {
+        if ((value_to_type) != (RuntimeType.UNDEFINED)) {
             const value_to_value  = value_to!
             valueSerializer.writeNumber(value_to_value)
         }
@@ -1199,14 +1221,14 @@ export class SlideRange_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const from_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let from_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (from_buf_runtimeType))
+        if ((from_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             from_buf = (valueDeserializer.readNumber() as number)
         }
         const from_result : number | undefined = from_buf
         const to_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let to_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (to_buf_runtimeType))
+        if ((to_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             to_buf = (valueDeserializer.readNumber() as number)
         }
@@ -1265,7 +1287,7 @@ export class SliderOptions_serializer {
         let value_value_type : int32 = RuntimeType.UNDEFINED
         value_value_type = runtimeType(value_value)
         valueSerializer.writeInt8((value_value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_value_type)) {
+        if ((value_value_type) != (RuntimeType.UNDEFINED)) {
             const value_value_value  = value_value!
             valueSerializer.writeNumber(value_value_value)
         }
@@ -1273,7 +1295,7 @@ export class SliderOptions_serializer {
         let value_min_type : int32 = RuntimeType.UNDEFINED
         value_min_type = runtimeType(value_min)
         valueSerializer.writeInt8((value_min_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_min_type)) {
+        if ((value_min_type) != (RuntimeType.UNDEFINED)) {
             const value_min_value  = value_min!
             valueSerializer.writeNumber(value_min_value)
         }
@@ -1281,7 +1303,7 @@ export class SliderOptions_serializer {
         let value_max_type : int32 = RuntimeType.UNDEFINED
         value_max_type = runtimeType(value_max)
         valueSerializer.writeInt8((value_max_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_max_type)) {
+        if ((value_max_type) != (RuntimeType.UNDEFINED)) {
             const value_max_value  = value_max!
             valueSerializer.writeNumber(value_max_value)
         }
@@ -1289,7 +1311,7 @@ export class SliderOptions_serializer {
         let value_step_type : int32 = RuntimeType.UNDEFINED
         value_step_type = runtimeType(value_step)
         valueSerializer.writeInt8((value_step_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_step_type)) {
+        if ((value_step_type) != (RuntimeType.UNDEFINED)) {
             const value_step_value  = value_step!
             valueSerializer.writeNumber(value_step_value)
         }
@@ -1297,7 +1319,7 @@ export class SliderOptions_serializer {
         let value_style_type : int32 = RuntimeType.UNDEFINED
         value_style_type = runtimeType(value_style)
         valueSerializer.writeInt8((value_style_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_style_type)) {
+        if ((value_style_type) != (RuntimeType.UNDEFINED)) {
             const value_style_value  = (value_style as SliderStyle)
             valueSerializer.writeInt32(TypeChecker.SliderStyle_ToNumeric(value_style_value))
         }
@@ -1305,7 +1327,7 @@ export class SliderOptions_serializer {
         let value_direction_type : int32 = RuntimeType.UNDEFINED
         value_direction_type = runtimeType(value_direction)
         valueSerializer.writeInt8((value_direction_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_direction_type)) {
+        if ((value_direction_type) != (RuntimeType.UNDEFINED)) {
             const value_direction_value  = (value_direction as Axis)
             valueSerializer.writeInt32(TypeChecker.Axis_ToNumeric(value_direction_value))
         }
@@ -1313,7 +1335,7 @@ export class SliderOptions_serializer {
         let value_reverse_type : int32 = RuntimeType.UNDEFINED
         value_reverse_type = runtimeType(value_reverse)
         valueSerializer.writeInt8((value_reverse_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_reverse_type)) {
+        if ((value_reverse_type) != (RuntimeType.UNDEFINED)) {
             const value_reverse_value  = value_reverse!
             valueSerializer.writeBoolean(value_reverse_value)
         }
@@ -1322,49 +1344,49 @@ export class SliderOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const value_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let value_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (value_buf_runtimeType))
+        if ((value_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             value_buf = (valueDeserializer.readNumber() as number)
         }
         const value_result : number | undefined = value_buf
         const min_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let min_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (min_buf_runtimeType))
+        if ((min_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             min_buf = (valueDeserializer.readNumber() as number)
         }
         const min_result : number | undefined = min_buf
         const max_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let max_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (max_buf_runtimeType))
+        if ((max_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             max_buf = (valueDeserializer.readNumber() as number)
         }
         const max_result : number | undefined = max_buf
         const step_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let step_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (step_buf_runtimeType))
+        if ((step_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             step_buf = (valueDeserializer.readNumber() as number)
         }
         const step_result : number | undefined = step_buf
         const style_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let style_buf : SliderStyle | undefined
-        if ((RuntimeType.UNDEFINED) != (style_buf_runtimeType))
+        if ((style_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             style_buf = TypeChecker.SliderStyle_FromNumeric(valueDeserializer.readInt32())
         }
         const style_result : SliderStyle | undefined = style_buf
         const direction_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let direction_buf : Axis | undefined
-        if ((RuntimeType.UNDEFINED) != (direction_buf_runtimeType))
+        if ((direction_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             direction_buf = TypeChecker.Axis_FromNumeric(valueDeserializer.readInt32())
         }
         const direction_result : Axis | undefined = direction_buf
         const reverse_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let reverse_buf : boolean | undefined
-        if ((RuntimeType.UNDEFINED) != (reverse_buf_runtimeType))
+        if ((reverse_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             reverse_buf = valueDeserializer.readBoolean()
         }
@@ -1382,7 +1404,7 @@ export class SliderBlockStyle_serializer {
         let value_image_type : int32 = RuntimeType.UNDEFINED
         value_image_type = runtimeType(value_image)
         valueSerializer.writeInt8((value_image_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_image_type)) {
+        if ((value_image_type) != (RuntimeType.UNDEFINED)) {
             const value_image_value  = value_image!
             let value_image_value_type : int32 = RuntimeType.UNDEFINED
             value_image_value_type = runtimeType(value_image_value)
@@ -1403,7 +1425,7 @@ export class SliderBlockStyle_serializer {
         const type_result : SliderBlockType = TypeChecker.SliderBlockType_FromNumeric(valueDeserializer.readInt32())
         const image_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let image_buf : ResourceStr | undefined
-        if ((RuntimeType.UNDEFINED) != (image_buf_runtimeType))
+        if ((image_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const image_buf__selector : int32 = valueDeserializer.readInt8()
             let image_buf_ : string | Resource | undefined

@@ -277,7 +277,7 @@ class RouterImpl implements Router {
                 break
             }
             case RouteType.Pop.valueOf(): {
-                const index = this.stack.length // TODO: store uid in registry to find a page
+                const index = this.stack.length // Improve: store uid in registry to find a page
                 newVisiblePage = state.visiblePages.value[index]
                 newVisiblePage.setTransitionState(RouterTransitionVisibility.Showing, route)
                 // remove all hidden pages removed from the stack
@@ -290,7 +290,7 @@ class RouterImpl implements Router {
                 break
             }
             case RouteType.None.valueOf(): {
-                // TODO: can/shall we animate replace?
+                // Improve: can/shall we animate replace?
                 newVisiblePage = new VisiblePage(entry.page, state.version.value, RouterTransitionVisibility.Showing, route)
                 state.visiblePages.set(previousVisiblePageIndex, newVisiblePage)
                 break

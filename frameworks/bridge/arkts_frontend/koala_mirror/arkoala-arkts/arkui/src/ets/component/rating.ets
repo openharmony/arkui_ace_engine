@@ -46,7 +46,7 @@ export class ArkRatingPeer extends ArkCommonMethodPeer {
         let options_type : int32 = RuntimeType.UNDEFINED
         options_type = runtimeType(options)
         thisSerializer.writeInt8((options_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (options_type)) {
+        if ((options_type) != (RuntimeType.UNDEFINED)) {
             const options_value  = options!
             RatingOptions_serializer.write(thisSerializer, options_value)
         }
@@ -58,7 +58,7 @@ export class ArkRatingPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeNumber(value_value)
         }
@@ -70,7 +70,7 @@ export class ArkRatingPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeNumber(value_value)
         }
@@ -82,7 +82,7 @@ export class ArkRatingPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             StarStyleOptions_serializer.write(thisSerializer, value_value)
         }
@@ -94,7 +94,7 @@ export class ArkRatingPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -106,11 +106,17 @@ export class ArkRatingPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteObject(value_value)
         }
         ArkUIGeneratedNativeModule._RatingAttribute_setContentModifier(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    set_onChangeEvent_ratingAttribute(callback_: ((rating: number | undefined) => void)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(callback_)
+        ArkUIGeneratedNativeModule._RatingAttribute_set_onChangeEvent_rating(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }
@@ -137,6 +143,7 @@ export interface RatingAttribute extends CommonMethod {
     starStyle(value: StarStyleOptions | undefined): this
     onChange(value: OnRatingChangeCallback | undefined): this
     contentModifier(value: ContentModifier<RatingConfiguration> | undefined): this
+    _onChangeEvent_rating(callback_: ((rating: number | undefined) => void)): void
     attributeModifier(value: AttributeModifier<RatingAttribute> | AttributeModifier<CommonMethod> | undefined): this
 }
 export class ArkRatingStyle extends ArkCommonMethodStyle implements RatingAttribute {
@@ -160,6 +167,9 @@ export class ArkRatingStyle extends ArkCommonMethodStyle implements RatingAttrib
     }
     public contentModifier(value: ContentModifier<RatingConfiguration> | undefined): this {
         return this
+    }
+    public _onChangeEvent_rating(callback_: ((rating: number | undefined) => void)): void {
+        throw new Error("Unimplemented")
     }
     public attributeModifier(value: AttributeModifier<RatingAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
@@ -231,6 +241,14 @@ export class ArkRatingComponent extends ArkCommonMethodComponent implements Rati
         }
         return this
     }
+    public _onChangeEvent_rating(callback_: ((rating: number | undefined) => void)): void {
+        if (this.checkPriority("_onChangeEvent_rating")) {
+            const callback__casted = callback_ as (((rating: number | undefined) => void))
+            this.getPeer()?.set_onChangeEvent_ratingAttribute(callback__casted)
+            return
+        }
+        return
+    }
     public attributeModifier(value: AttributeModifier<RatingAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         this._modifier = value as AttributeModifier<CommonMethod>
         return this
@@ -296,6 +314,8 @@ export class ArkRatingSet extends ArkCommonMethodSet implements RatingAttribute 
     _onChange0_value?: OnRatingChangeCallback | undefined
     _contentModifier_flag?: boolean
     _contentModifier0_value?: ContentModifier<RatingConfiguration> | undefined
+    __onChangeEvent_rating_flag?: boolean
+    __onChangeEvent_rating0_value?: ((rating: number | undefined) => void)
     applyModifierPatch(component: RatingAttribute): void {
         if (this._stars_flag)
             component.stars((this._stars0_value as number | undefined))
@@ -332,6 +352,8 @@ export class ArkRatingSet extends ArkCommonMethodSet implements RatingAttribute 
         this._contentModifier_flag = true
         this._contentModifier0_value = value
         return this
+    }
+    public _onChangeEvent_rating(callback_: ((rating: number | undefined) => void)): void {
     }
     public attributeModifier(value: AttributeModifier<RatingAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
@@ -386,7 +408,7 @@ export class RatingOptions_serializer {
         let value_rating_type : int32 = RuntimeType.UNDEFINED
         value_rating_type = runtimeType(value_rating)
         valueSerializer.writeInt8((value_rating_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_rating_type)) {
+        if ((value_rating_type) != (RuntimeType.UNDEFINED)) {
             const value_rating_value  = value_rating!
             valueSerializer.writeNumber(value_rating_value)
         }
@@ -394,7 +416,7 @@ export class RatingOptions_serializer {
         let value_indicator_type : int32 = RuntimeType.UNDEFINED
         value_indicator_type = runtimeType(value_indicator)
         valueSerializer.writeInt8((value_indicator_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_indicator_type)) {
+        if ((value_indicator_type) != (RuntimeType.UNDEFINED)) {
             const value_indicator_value  = value_indicator!
             valueSerializer.writeBoolean(value_indicator_value)
         }
@@ -403,14 +425,14 @@ export class RatingOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const rating_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let rating_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (rating_buf_runtimeType))
+        if ((rating_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             rating_buf = (valueDeserializer.readNumber() as number)
         }
         const rating_result : number | undefined = rating_buf
         const indicator_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let indicator_buf : boolean | undefined
-        if ((RuntimeType.UNDEFINED) != (indicator_buf_runtimeType))
+        if ((indicator_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             indicator_buf = valueDeserializer.readBoolean()
         }
@@ -452,7 +474,7 @@ export class StarStyleOptions_serializer {
         let value_secondaryUri_type : int32 = RuntimeType.UNDEFINED
         value_secondaryUri_type = runtimeType(value_secondaryUri)
         valueSerializer.writeInt8((value_secondaryUri_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_secondaryUri_type)) {
+        if ((value_secondaryUri_type) != (RuntimeType.UNDEFINED)) {
             const value_secondaryUri_value  = value_secondaryUri!
             let value_secondaryUri_value_type : int32 = RuntimeType.UNDEFINED
             value_secondaryUri_value_type = runtimeType(value_secondaryUri_value)
@@ -496,7 +518,7 @@ export class StarStyleOptions_serializer {
         const foregroundUri_result : ResourceStr = (foregroundUri_buf as string | Resource)
         const secondaryUri_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let secondaryUri_buf : ResourceStr | undefined
-        if ((RuntimeType.UNDEFINED) != (secondaryUri_buf_runtimeType))
+        if ((secondaryUri_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const secondaryUri_buf__selector : int32 = valueDeserializer.readInt8()
             let secondaryUri_buf_ : string | Resource | undefined

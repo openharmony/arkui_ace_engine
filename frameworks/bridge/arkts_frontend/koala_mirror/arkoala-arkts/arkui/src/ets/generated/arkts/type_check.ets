@@ -32,6 +32,7 @@ import { ExtendableComponent, LifeCycle } from "./../../component/extendableComp
 import { BaseShape, BuilderNodeOps, BuilderNodeOptions, CommonShape, Offset_componentutils, PerfMonitorActionType, PerfMonitorSourceType, RotateResult, ScaleResult, Scene, TranslateResult, WorkerEventListener, Event, DoubleAnimationParam, Callback_Extender_OnProgress, Callback_Extender_OnFinish, ErrorEvent, FontInfo, MessageEvents, PostMessageOptions, SnapshotOptions, WorkerOptions, ComponentInfo, Matrix4Result, FontOptions, MeasureOptions, RestrictedWorker, RestrictedWorker_onexit_Callback, RestrictedWorker_onerror_Callback, RestrictedWorker_onmessage_Callback } from "./../../component/idlize"
 import { Length, SizeOptions, Position, ResourceColor, ColorFilter, ConstraintSizeOptions, ResourceStr, VoidCallback, AccessibilityOptions, Bias, ChainWeightOptions, DirectionalEdgesT, EdgeOutlineStyles, EdgeStyles, VP, DividerStyleOptions, EdgeColors, LengthConstrain, Dimension, LocalizedBorderRadiuses, LocalizedEdgeColors, LocalizedEdges, LocalizedEdgeWidths, LocalizedPadding, LocalizedPosition, Offset, BorderRadiuses, EdgeOutlineWidths, Edges, EdgeWidths, Font, PX, LPX, MarkStyle, OutlineRadiuses, Padding, Area, BorderOptions, OutlineOptions } from "./../../component/units"
 import { Resource } from "./../resource"
+import { BlurOnKeyboardHideMode, CacheMode, ClientAuthenticationHandler, ConsoleMessage, MessageLevel, ContextMenuEditStateFlags, ContextMenuInputFieldType, ContextMenuMediaType, ContextMenuSourceType, ControllerHandler, DataResubmissionHandler, EventResult, FileSelectorMode, FileSelectorParam, FileSelectorResult, FullScreenExitHandler, HitTestType, HttpAuthHandler, JsGeolocation, JsResult, MixedMode, NativeEmbedStatus, NativeMediaPlayerConfig, OnAudioStateChangedEvent, OnConsoleEvent, OnDataResubmittedEvent, OnFaviconReceivedEvent, OnFirstContentfulPaintEvent, OnOverScrollEvent, OnProgressChangeEvent, OnScaleChangeEvent, OnScrollEvent, OnSearchResultReceiveEvent, OnShowFileSelectorEvent, OverScrollMode, PermissionRequest, ProtectedResourceType, RenderExitReason, RenderMode, RenderProcessNotRespondingReason, ScreenCaptureHandler, ScreenCaptureConfig, SslError, SslErrorHandler, ThreatType, ViewportFit, WebCaptureMode, WebContextMenuParam, WebContextMenuResult, WebCookie, WebDarkMode, WebElementType, WebKeyboardAvoidMode, WebKeyboardController, WebLayoutMode, WebNavigationType, WebResourceError, Header, WebResourceRequest, WebResourceResponse, WebResponseType, AdsBlockedDetails, EmbedOptions, FirstMeaningfulPaint, FullScreenEnterEvent, IntelligentTrackingPreventionDetails, JavaScriptProxy, LargestContentfulPaint, LoadCommittedDetails, NativeEmbedVisibilityInfo, NestedScrollOptionsExt, OnAlertEvent, OnBeforeUnloadEvent, OnClientAuthenticationEvent, OnConfirmEvent, OnContextMenuShowEvent, OnDownloadStartEvent, OnErrorReceiveEvent, OnGeolocationShowEvent, OnHttpAuthRequestEvent, OnHttpErrorReceiveEvent, OnInterceptRequestEvent, OnLoadInterceptEvent, OnPageBeginEvent, OnPageEndEvent, OnPageVisibleEvent, OnPermissionRequestEvent, OnPromptEvent, OnRefreshAccessedHistoryEvent, OnRenderExitedEvent, OnResourceLoadEvent, OnScreenCaptureRequestEvent, OnSslErrorEventReceiveEvent, OnTitleReceiveEvent, OnTouchIconUrlReceivedEvent, OnWindowNewEvent, RenderProcessNotRespondingData, ScriptItem, SelectionMenuOptionsExt, SslErrorEvent, WebKeyboardCallbackInfo, WebKeyboardOptions, WebMediaOptions, WebOptions, NativeEmbedInfo, NativeEmbedDataInfo, NativeEmbedTouchInfo } from "./../../component/web"
 import { BreakpointsReference, GridRowDirection, BreakPoints, GridRowColumnOption, GridRowSizeOption, GutterOption, GridRowOptions } from "./../../component/gridRow"
 import { ButtonRole, ButtonStyleMode, ButtonType, ControlSize, ButtonConfiguration, ButtonTriggerClickCallback, ButtonOptions, ButtonLabelStyle } from "./../../component/button"
 import { CalendarAlign, CalendarPickerDialog, CalendarDialogOptions, CalendarOptions } from "./../../component/calendarPicker"
@@ -48,6 +49,7 @@ import { CommonModifier } from "./../arkui.CommonModifier"
 import { ComponentContent } from "./../arkui.ComponentContent"
 import { ContentType, EnterKeyType, InputType, SubmitEvent, TextInputController, TextInputStyle, PasswordIcon, TextInputOptions, UnderlineColor } from "./../../component/textInput"
 import { Context } from "./../application.Context"
+import { webview } from "./../ohos.web.webview"
 import { CustomDialogController, CustomDialogControllerOptions } from "./../../component/customDialogController"
 import { DataOperationType } from "./../../component/lazyForEach"
 import { DataPanelType, ColorStop, LinearGradient, DataPanelConfiguration, DataPanelOptions, DataPanelShadowOptions } from "./../../component/dataPanel"
@@ -127,7 +129,6 @@ import { uiEffect } from "./../ohos.graphics.uiEffect"
 import { unifiedDataChannel } from "./../ohos.data.unifiedDataChannel"
 import { uniformTypeDescriptor } from "./../ohos.data.uniformTypeDescriptor"
 import { WaterFlowLayoutMode, SectionOptions, WaterFlowSections, WaterFlowOptions, GetItemMainSizeByIndex } from "./../../component/waterFlow"
-import { WebCookie } from "./../../component/web"
 import { window } from "./../ohos.window"
 import { ASTCResource } from "./../../component/mediaCachedImage"
 import { BorderRadiuses_graphics, RenderNode } from "./../arkui.RenderNode"
@@ -190,6 +191,9 @@ export class TypeChecker {
     }
     static isAdaptiveColor(value: Object | string | number | undefined): boolean {
         return value instanceof AdaptiveColor
+    }
+    static isAdsBlockedDetails(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof AdsBlockedDetails
     }
     static isAlignment(value: Object | string | number | undefined): boolean {
         return value instanceof Alignment
@@ -332,6 +336,9 @@ export class TypeChecker {
     static isBlendMode(value: Object | string | number | undefined): boolean {
         return value instanceof BlendMode
     }
+    static isBlurOnKeyboardHideMode(value: Object | string | number | undefined): boolean {
+        return value instanceof BlurOnKeyboardHideMode
+    }
     static isBlurOptions(value: Object | string | number | undefined, arg0: boolean): boolean {
         return value instanceof BlurOptions
     }
@@ -403,6 +410,9 @@ export class TypeChecker {
     }
     static isButtonType(value: Object | string | number | undefined): boolean {
         return value instanceof ButtonType
+    }
+    static isCacheMode(value: Object | string | number | undefined): boolean {
+        return value instanceof CacheMode
     }
     static isCalendarAlign(value: Object | string | number | undefined): boolean {
         return value instanceof CalendarAlign
@@ -515,6 +525,9 @@ export class TypeChecker {
     static isClickEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean): boolean {
         return value instanceof ClickEvent
     }
+    static isClientAuthenticationHandler(value: Object | string | number | undefined): boolean {
+        return value instanceof ClientAuthenticationHandler
+    }
     static isCloseSwipeActionOptions(value: Object | string | number | undefined, arg0: boolean): boolean {
         return value instanceof CloseSwipeActionOptions
     }
@@ -587,6 +600,9 @@ export class TypeChecker {
     static isComputedBarAttribute(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
         return value instanceof ComputedBarAttribute
     }
+    static isConsoleMessage(value: Object | string | number | undefined): boolean {
+        return value instanceof ConsoleMessage
+    }
     static isConstraintSizeOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean): boolean {
         return value instanceof ConstraintSizeOptions
     }
@@ -608,8 +624,23 @@ export class TypeChecker {
     static isContextMenuAnimationOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
         return value instanceof ContextMenuAnimationOptions
     }
+    static isContextMenuEditStateFlags(value: Object | string | number | undefined): boolean {
+        return value instanceof ContextMenuEditStateFlags
+    }
+    static isContextMenuInputFieldType(value: Object | string | number | undefined): boolean {
+        return value instanceof ContextMenuInputFieldType
+    }
+    static isContextMenuMediaType(value: Object | string | number | undefined): boolean {
+        return value instanceof ContextMenuMediaType
+    }
     static isContextMenuOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean, arg10: boolean, arg11: boolean, arg12: boolean, arg13: boolean, arg14: boolean, arg15: boolean, arg16: boolean, arg17: boolean, arg18: boolean, arg19: boolean, arg20: boolean, arg21: boolean): boolean {
         return value instanceof ContextMenuOptions
+    }
+    static isContextMenuSourceType(value: Object | string | number | undefined): boolean {
+        return value instanceof ContextMenuSourceType
+    }
+    static isControllerHandler(value: Object | string | number | undefined): boolean {
+        return value instanceof ControllerHandler
     }
     static isControlSize(value: Object | string | number | undefined): boolean {
         return value instanceof ControlSize
@@ -685,6 +716,9 @@ export class TypeChecker {
     }
     static isDataPanelType(value: Object | string | number | undefined): boolean {
         return value instanceof DataPanelType
+    }
+    static isDataResubmissionHandler(value: Object | string | number | undefined): boolean {
+        return value instanceof DataResubmissionHandler
     }
     static isDatePickerDialog(value: Object | string | number | undefined): boolean {
         return value instanceof DatePickerDialog
@@ -1001,6 +1035,9 @@ export class TypeChecker {
     static isEmbeddedType(value: Object | string | number | undefined): boolean {
         return value instanceof EmbeddedType
     }
+    static isEmbedOptions(value: Object | string | number | undefined, arg0: boolean): boolean {
+        return value instanceof EmbedOptions
+    }
     static isEnterKeyType(value: Object | string | number | undefined): boolean {
         return value instanceof EnterKeyType
     }
@@ -1012,6 +1049,9 @@ export class TypeChecker {
     }
     static isEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
         return value instanceof Event
+    }
+    static isEventResult(value: Object | string | number | undefined): boolean {
+        return value instanceof EventResult
     }
     static isEventTarget(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
         return value instanceof EventTarget
@@ -1028,6 +1068,15 @@ export class TypeChecker {
     static isFadingEdgeOptions(value: Object | string | number | undefined, arg0: boolean): boolean {
         return value instanceof FadingEdgeOptions
     }
+    static isFileSelectorMode(value: Object | string | number | undefined): boolean {
+        return value instanceof FileSelectorMode
+    }
+    static isFileSelectorParam(value: Object | string | number | undefined): boolean {
+        return value instanceof FileSelectorParam
+    }
+    static isFileSelectorResult(value: Object | string | number | undefined): boolean {
+        return value instanceof FileSelectorResult
+    }
     static isFillMode(value: Object | string | number | undefined): boolean {
         return value instanceof FillMode
     }
@@ -1036,6 +1085,9 @@ export class TypeChecker {
     }
     static isFinishCallbackType(value: Object | string | number | undefined): boolean {
         return value instanceof FinishCallbackType
+    }
+    static isFirstMeaningfulPaint(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof FirstMeaningfulPaint
     }
     static isFlexAlign(value: Object | string | number | undefined): boolean {
         return value instanceof FlexAlign
@@ -1144,6 +1196,12 @@ export class TypeChecker {
     }
     static isFrictionMotion(value: Object | string | number | undefined): boolean {
         return value instanceof FrictionMotion
+    }
+    static isFullScreenEnterEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
+        return value instanceof FullScreenEnterEvent
+    }
+    static isFullScreenExitHandler(value: Object | string | number | undefined): boolean {
+        return value instanceof FullScreenExitHandler
     }
     static isFullscreenInfo(value: Object | string | number | undefined, arg0: boolean): boolean {
         return value instanceof FullscreenInfo
@@ -1259,6 +1317,9 @@ export class TypeChecker {
     static isHapticFeedbackMode(value: Object | string | number | undefined): boolean {
         return value instanceof HapticFeedbackMode
     }
+    static isHeader(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof Header
+    }
     static isHeightBreakpoint(value: Object | string | number | undefined): boolean {
         return value instanceof HeightBreakpoint
     }
@@ -1270,6 +1331,9 @@ export class TypeChecker {
     }
     static isHitTestMode(value: Object | string | number | undefined): boolean {
         return value instanceof HitTestMode
+    }
+    static isHitTestType(value: Object | string | number | undefined): boolean {
+        return value instanceof HitTestType
     }
     static isHorizontalAlign(value: Object | string | number | undefined): boolean {
         return value instanceof HorizontalAlign
@@ -1285,6 +1349,9 @@ export class TypeChecker {
     }
     static isHoverModeAreaType(value: Object | string | number | undefined): boolean {
         return value instanceof HoverModeAreaType
+    }
+    static isHttpAuthHandler(value: Object | string | number | undefined): boolean {
+        return value instanceof HttpAuthHandler
     }
     static isIconOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
         return value instanceof IconOptions
@@ -1385,6 +1452,9 @@ export class TypeChecker {
     static isInsertValue(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
         return value instanceof InsertValue
     }
+    static isIntelligentTrackingPreventionDetails(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof IntelligentTrackingPreventionDetails
+    }
     static isIntentionCode(value: Object | string | number | undefined): boolean {
         return value instanceof IntentionCode
     }
@@ -1406,6 +1476,15 @@ export class TypeChecker {
     static isItemState(value: Object | string | number | undefined): boolean {
         return value instanceof ItemState
     }
+    static isJavaScriptProxy(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean): boolean {
+        return value instanceof JavaScriptProxy
+    }
+    static isJsGeolocation(value: Object | string | number | undefined): boolean {
+        return value instanceof JsGeolocation
+    }
+    static isJsResult(value: Object | string | number | undefined): boolean {
+        return value instanceof JsResult
+    }
     static isKeyboardAppearance(value: Object | string | number | undefined): boolean {
         return value instanceof KeyboardAppearance
     }
@@ -1426,6 +1505,9 @@ export class TypeChecker {
     }
     static isKeyType(value: Object | string | number | undefined): boolean {
         return value instanceof KeyType
+    }
+    static isLargestContentfulPaint(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean): boolean {
+        return value instanceof LargestContentfulPaint
     }
     static isLaunchMode(value: Object | string | number | undefined): boolean {
         return value instanceof LaunchMode
@@ -1556,6 +1638,9 @@ export class TypeChecker {
     static isListScroller(value: Object | string | number | undefined): boolean {
         return value instanceof ListScroller
     }
+    static isLoadCommittedDetails(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean): boolean {
+        return value instanceof LoadCommittedDetails
+    }
     static isLoadingProgressConfiguration(value: Object | string | number | undefined, arg0: boolean): boolean {
         return value instanceof LoadingProgressConfiguration
     }
@@ -1673,6 +1758,12 @@ export class TypeChecker {
     static isMessageEvents(value: Object | string | number | undefined, arg0: boolean): boolean {
         return value instanceof MessageEvents
     }
+    static isMessageLevel(value: Object | string | number | undefined): boolean {
+        return value instanceof MessageLevel
+    }
+    static isMixedMode(value: Object | string | number | undefined): boolean {
+        return value instanceof MixedMode
+    }
     static isModalTransition(value: Object | string | number | undefined): boolean {
         return value instanceof ModalTransition
     }
@@ -1705,6 +1796,24 @@ export class TypeChecker {
     }
     static isMutableStyledString(value: Object | string | number | undefined): boolean {
         return value instanceof MutableStyledString
+    }
+    static isNativeEmbedDataInfo(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean): boolean {
+        return value instanceof NativeEmbedDataInfo
+    }
+    static isNativeEmbedInfo(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean): boolean {
+        return value instanceof NativeEmbedInfo
+    }
+    static isNativeEmbedStatus(value: Object | string | number | undefined): boolean {
+        return value instanceof NativeEmbedStatus
+    }
+    static isNativeEmbedTouchInfo(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
+        return value instanceof NativeEmbedTouchInfo
+    }
+    static isNativeEmbedVisibilityInfo(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof NativeEmbedVisibilityInfo
+    }
+    static isNativeMediaPlayerConfig(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof NativeMediaPlayerConfig
     }
     static isNativeXComponentParameters(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
         return value instanceof NativeXComponentParameters
@@ -1793,6 +1902,9 @@ export class TypeChecker {
     static isNestedScrollOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
         return value instanceof NestedScrollOptions
     }
+    static isNestedScrollOptionsExt(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean): boolean {
+        return value instanceof NestedScrollOptionsExt
+    }
     static isNodeContent(value: Object | string | number | undefined): boolean {
         return value instanceof NodeContent
     }
@@ -1823,11 +1935,119 @@ export class TypeChecker {
     static isOffsetResult(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
         return value instanceof OffsetResult
     }
+    static isOnAlertEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
+        return value instanceof OnAlertEvent
+    }
+    static isOnAudioStateChangedEvent(value: Object | string | number | undefined, arg0: boolean): boolean {
+        return value instanceof OnAudioStateChangedEvent
+    }
+    static isOnBeforeUnloadEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
+        return value instanceof OnBeforeUnloadEvent
+    }
+    static isOnClientAuthenticationEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean): boolean {
+        return value instanceof OnClientAuthenticationEvent
+    }
+    static isOnConfirmEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
+        return value instanceof OnConfirmEvent
+    }
+    static isOnConsoleEvent(value: Object | string | number | undefined, arg0: boolean): boolean {
+        return value instanceof OnConsoleEvent
+    }
+    static isOnContextMenuShowEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof OnContextMenuShowEvent
+    }
+    static isOnDataResubmittedEvent(value: Object | string | number | undefined, arg0: boolean): boolean {
+        return value instanceof OnDataResubmittedEvent
+    }
+    static isOnDownloadStartEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean): boolean {
+        return value instanceof OnDownloadStartEvent
+    }
+    static isOnErrorReceiveEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof OnErrorReceiveEvent
+    }
+    static isOnFaviconReceivedEvent(value: Object | string | number | undefined, arg0: boolean): boolean {
+        return value instanceof OnFaviconReceivedEvent
+    }
+    static isOnFirstContentfulPaintEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof OnFirstContentfulPaintEvent
+    }
     static isOnFoldStatusChangeInfo(value: Object | string | number | undefined, arg0: boolean): boolean {
         return value instanceof OnFoldStatusChangeInfo
     }
+    static isOnGeolocationShowEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof OnGeolocationShowEvent
+    }
+    static isOnHttpAuthRequestEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
+        return value instanceof OnHttpAuthRequestEvent
+    }
+    static isOnHttpErrorReceiveEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof OnHttpErrorReceiveEvent
+    }
+    static isOnInterceptRequestEvent(value: Object | string | number | undefined, arg0: boolean): boolean {
+        return value instanceof OnInterceptRequestEvent
+    }
+    static isOnLoadInterceptEvent(value: Object | string | number | undefined, arg0: boolean): boolean {
+        return value instanceof OnLoadInterceptEvent
+    }
+    static isOnOverScrollEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof OnOverScrollEvent
+    }
+    static isOnPageBeginEvent(value: Object | string | number | undefined, arg0: boolean): boolean {
+        return value instanceof OnPageBeginEvent
+    }
+    static isOnPageEndEvent(value: Object | string | number | undefined, arg0: boolean): boolean {
+        return value instanceof OnPageEndEvent
+    }
+    static isOnPageVisibleEvent(value: Object | string | number | undefined, arg0: boolean): boolean {
+        return value instanceof OnPageVisibleEvent
+    }
+    static isOnPermissionRequestEvent(value: Object | string | number | undefined, arg0: boolean): boolean {
+        return value instanceof OnPermissionRequestEvent
+    }
+    static isOnProgressChangeEvent(value: Object | string | number | undefined, arg0: boolean): boolean {
+        return value instanceof OnProgressChangeEvent
+    }
+    static isOnPromptEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean): boolean {
+        return value instanceof OnPromptEvent
+    }
+    static isOnRefreshAccessedHistoryEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof OnRefreshAccessedHistoryEvent
+    }
+    static isOnRenderExitedEvent(value: Object | string | number | undefined, arg0: boolean): boolean {
+        return value instanceof OnRenderExitedEvent
+    }
+    static isOnResourceLoadEvent(value: Object | string | number | undefined, arg0: boolean): boolean {
+        return value instanceof OnResourceLoadEvent
+    }
+    static isOnScaleChangeEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof OnScaleChangeEvent
+    }
+    static isOnScreenCaptureRequestEvent(value: Object | string | number | undefined, arg0: boolean): boolean {
+        return value instanceof OnScreenCaptureRequestEvent
+    }
+    static isOnScrollEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof OnScrollEvent
+    }
     static isOnScrollFrameBeginHandlerResult(value: Object | string | number | undefined, arg0: boolean): boolean {
         return value instanceof OnScrollFrameBeginHandlerResult
+    }
+    static isOnSearchResultReceiveEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
+        return value instanceof OnSearchResultReceiveEvent
+    }
+    static isOnShowFileSelectorEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof OnShowFileSelectorEvent
+    }
+    static isOnSslErrorEventReceiveEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
+        return value instanceof OnSslErrorEventReceiveEvent
+    }
+    static isOnTitleReceiveEvent(value: Object | string | number | undefined, arg0: boolean): boolean {
+        return value instanceof OnTitleReceiveEvent
+    }
+    static isOnTouchIconUrlReceivedEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof OnTouchIconUrlReceivedEvent
+    }
+    static isOnWindowNewEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean): boolean {
+        return value instanceof OnWindowNewEvent
     }
     static isOptionWidthMode(value: Object | string | number | undefined): boolean {
         return value instanceof OptionWidthMode
@@ -1846,6 +2066,9 @@ export class TypeChecker {
     }
     static isOverlayOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
         return value instanceof OverlayOptions
+    }
+    static isOverScrollMode(value: Object | string | number | undefined): boolean {
+        return value instanceof OverScrollMode
     }
     static isPadding(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean): boolean {
         return value instanceof Padding
@@ -1933,6 +2156,9 @@ export class TypeChecker {
     }
     static isPerfMonitorSourceType(value: Object | string | number | undefined): boolean {
         return value instanceof PerfMonitorSourceType
+    }
+    static isPermissionRequest(value: Object | string | number | undefined): boolean {
+        return value instanceof PermissionRequest
     }
     static isPickerDialogButtonStyle(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean, arg10: boolean): boolean {
         return value instanceof PickerDialogButtonStyle
@@ -2078,6 +2304,9 @@ export class TypeChecker {
     static isPromptAction(value: Object | string | number | undefined): boolean {
         return value instanceof PromptAction
     }
+    static isProtectedResourceType(value: Object | string | number | undefined): boolean {
+        return value instanceof ProtectedResourceType
+    }
     static isPulseSymbolEffect(value: Object | string | number | undefined): boolean {
         return value instanceof PulseSymbolEffect
     }
@@ -2126,14 +2355,26 @@ export class TypeChecker {
     static isRelateType(value: Object | string | number | undefined): boolean {
         return value instanceof RelateType
     }
+    static isRenderExitReason(value: Object | string | number | undefined): boolean {
+        return value instanceof RenderExitReason
+    }
     static isRenderFit(value: Object | string | number | undefined): boolean {
         return value instanceof RenderFit
     }
     static isRenderingContextSettings(value: Object | string | number | undefined, arg0: boolean): boolean {
         return value instanceof RenderingContextSettings
     }
+    static isRenderMode(value: Object | string | number | undefined): boolean {
+        return value instanceof RenderMode
+    }
     static isRenderNode(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean, arg10: boolean, arg11: boolean, arg12: boolean, arg13: boolean, arg14: boolean, arg15: boolean, arg16: boolean, arg17: boolean, arg18: boolean, arg19: boolean, arg20: boolean, arg21: boolean, arg22: boolean, arg23: boolean, arg24: boolean): boolean {
         return value instanceof RenderNode
+    }
+    static isRenderProcessNotRespondingData(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
+        return value instanceof RenderProcessNotRespondingData
+    }
+    static isRenderProcessNotRespondingReason(value: Object | string | number | undefined): boolean {
+        return value instanceof RenderProcessNotRespondingReason
     }
     static isRepeatMode(value: Object | string | number | undefined): boolean {
         return value instanceof RepeatMode
@@ -2339,6 +2580,15 @@ export class TypeChecker {
     static isScene(value: Object | string | number | undefined): boolean {
         return value instanceof Scene
     }
+    static isScreenCaptureConfig(value: Object | string | number | undefined, arg0: boolean): boolean {
+        return value instanceof ScreenCaptureConfig
+    }
+    static isScreenCaptureHandler(value: Object | string | number | undefined): boolean {
+        return value instanceof ScreenCaptureHandler
+    }
+    static isScriptItem(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof ScriptItem
+    }
     static isScrollableBarModeOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
         return value instanceof ScrollableBarModeOptions
     }
@@ -2422,6 +2672,9 @@ export class TypeChecker {
     }
     static isSelectionMenuOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean): boolean {
         return value instanceof SelectionMenuOptions
+    }
+    static isSelectionMenuOptionsExt(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean): boolean {
+        return value instanceof SelectionMenuOptionsExt
     }
     static isSelectionOptions(value: Object | string | number | undefined, arg0: boolean): boolean {
         return value instanceof SelectionOptions
@@ -2539,6 +2792,15 @@ export class TypeChecker {
     }
     static isSpringProp(value: Object | string | number | undefined): boolean {
         return value instanceof SpringProp
+    }
+    static isSslError(value: Object | string | number | undefined): boolean {
+        return value instanceof SslError
+    }
+    static isSslErrorEvent(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean): boolean {
+        return value instanceof SslErrorEvent
+    }
+    static isSslErrorHandler(value: Object | string | number | undefined): boolean {
+        return value instanceof SslErrorHandler
     }
     static isStackOptions(value: Object | string | number | undefined, arg0: boolean): boolean {
         return value instanceof StackOptions
@@ -3002,6 +3264,9 @@ export class TypeChecker {
     static isThemeControl(value: Object | string | number | undefined): boolean {
         return value instanceof ThemeControl
     }
+    static isThreatType(value: Object | string | number | undefined): boolean {
+        return value instanceof ThreatType
+    }
     static isTimePickerDialog(value: Object | string | number | undefined): boolean {
         return value instanceof TimePickerDialog
     }
@@ -3134,6 +3399,9 @@ export class TypeChecker {
     static isVideoOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean): boolean {
         return value instanceof VideoOptions
     }
+    static isViewportFit(value: Object | string | number | undefined): boolean {
+        return value instanceof ViewportFit
+    }
     static isViewportRect(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean): boolean {
         return value instanceof ViewportRect
     }
@@ -3158,8 +3426,65 @@ export class TypeChecker {
     static isWaterFlowSections(value: Object | string | number | undefined): boolean {
         return value instanceof WaterFlowSections
     }
+    static isWebCaptureMode(value: Object | string | number | undefined): boolean {
+        return value instanceof WebCaptureMode
+    }
+    static isWebContextMenuParam(value: Object | string | number | undefined): boolean {
+        return value instanceof WebContextMenuParam
+    }
+    static isWebContextMenuResult(value: Object | string | number | undefined): boolean {
+        return value instanceof WebContextMenuResult
+    }
     static isWebCookie(value: Object | string | number | undefined): boolean {
         return value instanceof WebCookie
+    }
+    static isWebDarkMode(value: Object | string | number | undefined): boolean {
+        return value instanceof WebDarkMode
+    }
+    static isWebElementType(value: Object | string | number | undefined): boolean {
+        return value instanceof WebElementType
+    }
+    static isWebKeyboardAvoidMode(value: Object | string | number | undefined): boolean {
+        return value instanceof WebKeyboardAvoidMode
+    }
+    static isWebKeyboardCallbackInfo(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof WebKeyboardCallbackInfo
+    }
+    static isWebKeyboardController(value: Object | string | number | undefined): boolean {
+        return value instanceof WebKeyboardController
+    }
+    static isWebKeyboardOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
+        return value instanceof WebKeyboardOptions
+    }
+    static isWebLayoutMode(value: Object | string | number | undefined): boolean {
+        return value instanceof WebLayoutMode
+    }
+    static isWebMediaOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof WebMediaOptions
+    }
+    static isWebNavigationType(value: Object | string | number | undefined): boolean {
+        return value instanceof WebNavigationType
+    }
+    static isWebOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean): boolean {
+        return value instanceof WebOptions
+    }
+    static isWebResourceError(value: Object | string | number | undefined): boolean {
+        return value instanceof WebResourceError
+    }
+    static isWebResourceRequest(value: Object | string | number | undefined): boolean {
+        return value instanceof WebResourceRequest
+    }
+    static isWebResourceResponse(value: Object | string | number | undefined): boolean {
+        return value instanceof WebResourceResponse
+    }
+    static isWebResponseType(value: Object | string | number | undefined): boolean {
+        return value instanceof WebResponseType
+    }
+    static iswebview_WebHeader(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof webview.WebHeader
+    }
+    static iswebview_WebviewController(value: Object | string | number | undefined): boolean {
+        return value instanceof webview.WebviewController
     }
     static isWeek(value: Object | string | number | undefined): boolean {
         return value instanceof Week
@@ -3344,6 +3669,12 @@ export class TypeChecker {
     static BlendMode_FromNumeric(ordinal: int32): BlendMode {
         return BlendMode.fromValue(ordinal)
     }
+    static BlurOnKeyboardHideMode_ToNumeric(value: BlurOnKeyboardHideMode): int32 {
+        return value.valueOf()
+    }
+    static BlurOnKeyboardHideMode_FromNumeric(ordinal: int32): BlurOnKeyboardHideMode {
+        return BlurOnKeyboardHideMode.fromValue(ordinal)
+    }
     static BlurStyle_ToNumeric(value: BlurStyle): int32 {
         return value.valueOf()
     }
@@ -3385,6 +3716,12 @@ export class TypeChecker {
     }
     static ButtonType_FromNumeric(ordinal: int32): ButtonType {
         return ButtonType.fromValue(ordinal)
+    }
+    static CacheMode_ToNumeric(value: CacheMode): int32 {
+        return value.valueOf()
+    }
+    static CacheMode_FromNumeric(ordinal: int32): CacheMode {
+        return CacheMode.fromValue(ordinal)
     }
     static CalendarAlign_ToNumeric(value: CalendarAlign): int32 {
         return value.valueOf()
@@ -3451,6 +3788,30 @@ export class TypeChecker {
     }
     static ContentType_FromNumeric(ordinal: int32): ContentType {
         return ContentType.fromValue(ordinal)
+    }
+    static ContextMenuEditStateFlags_ToNumeric(value: ContextMenuEditStateFlags): int32 {
+        return value.valueOf()
+    }
+    static ContextMenuEditStateFlags_FromNumeric(ordinal: int32): ContextMenuEditStateFlags {
+        return ContextMenuEditStateFlags.fromValue(ordinal)
+    }
+    static ContextMenuInputFieldType_ToNumeric(value: ContextMenuInputFieldType): int32 {
+        return value.valueOf()
+    }
+    static ContextMenuInputFieldType_FromNumeric(ordinal: int32): ContextMenuInputFieldType {
+        return ContextMenuInputFieldType.fromValue(ordinal)
+    }
+    static ContextMenuMediaType_ToNumeric(value: ContextMenuMediaType): int32 {
+        return value.valueOf()
+    }
+    static ContextMenuMediaType_FromNumeric(ordinal: int32): ContextMenuMediaType {
+        return ContextMenuMediaType.fromValue(ordinal)
+    }
+    static ContextMenuSourceType_ToNumeric(value: ContextMenuSourceType): int32 {
+        return value.valueOf()
+    }
+    static ContextMenuSourceType_FromNumeric(ordinal: int32): ContextMenuSourceType {
+        return ContextMenuSourceType.fromValue(ordinal)
     }
     static ControlSize_ToNumeric(value: ControlSize): int32 {
         return value.getOrdinal()
@@ -3776,6 +4137,12 @@ export class TypeChecker {
     static EnterKeyType_FromNumeric(ordinal: int32): EnterKeyType {
         return EnterKeyType.fromValue(ordinal)
     }
+    static FileSelectorMode_ToNumeric(value: FileSelectorMode): int32 {
+        return value.valueOf()
+    }
+    static FileSelectorMode_FromNumeric(ordinal: int32): FileSelectorMode {
+        return FileSelectorMode.fromValue(ordinal)
+    }
     static FillMode_ToNumeric(value: FillMode): int32 {
         return value.valueOf()
     }
@@ -3943,6 +4310,12 @@ export class TypeChecker {
     }
     static HitTestMode_FromNumeric(ordinal: int32): HitTestMode {
         return HitTestMode.fromValue(ordinal)
+    }
+    static HitTestType_ToNumeric(value: HitTestType): int32 {
+        return value.valueOf()
+    }
+    static HitTestType_FromNumeric(ordinal: int32): HitTestType {
+        return HitTestType.fromValue(ordinal)
     }
     static HorizontalAlign_ToNumeric(value: HorizontalAlign): int32 {
         return value.valueOf()
@@ -4250,6 +4623,18 @@ export class TypeChecker {
     static MenuType_FromNumeric(ordinal: int32): MenuType {
         return MenuType.fromValue(ordinal)
     }
+    static MessageLevel_ToNumeric(value: MessageLevel): int32 {
+        return value.valueOf()
+    }
+    static MessageLevel_FromNumeric(ordinal: int32): MessageLevel {
+        return MessageLevel.fromValue(ordinal)
+    }
+    static MixedMode_ToNumeric(value: MixedMode): int32 {
+        return value.valueOf()
+    }
+    static MixedMode_FromNumeric(ordinal: int32): MixedMode {
+        return MixedMode.fromValue(ordinal)
+    }
     static ModalTransition_ToNumeric(value: ModalTransition): int32 {
         return value.valueOf()
     }
@@ -4273,6 +4658,12 @@ export class TypeChecker {
     }
     static MouseButton_FromNumeric(ordinal: int32): MouseButton {
         return MouseButton.fromValue(ordinal)
+    }
+    static NativeEmbedStatus_ToNumeric(value: NativeEmbedStatus): int32 {
+        return value.valueOf()
+    }
+    static NativeEmbedStatus_FromNumeric(ordinal: int32): NativeEmbedStatus {
+        return NativeEmbedStatus.fromValue(ordinal)
     }
     static NavBarPosition_ToNumeric(value: NavBarPosition): int32 {
         return value.valueOf()
@@ -4345,6 +4736,12 @@ export class TypeChecker {
     }
     static OutlineStyle_FromNumeric(ordinal: int32): OutlineStyle {
         return OutlineStyle.fromValue(ordinal)
+    }
+    static OverScrollMode_ToNumeric(value: OverScrollMode): int32 {
+        return value.valueOf()
+    }
+    static OverScrollMode_FromNumeric(ordinal: int32): OverScrollMode {
+        return OverScrollMode.fromValue(ordinal)
     }
     static PageFlipMode_ToNumeric(value: PageFlipMode): int32 {
         return value.valueOf()
@@ -4472,6 +4869,12 @@ export class TypeChecker {
     static ProgressType_FromNumeric(ordinal: int32): ProgressType {
         return ProgressType.fromValue(ordinal)
     }
+    static ProtectedResourceType_ToNumeric(value: ProtectedResourceType): int32 {
+        return value.getOrdinal()
+    }
+    static ProtectedResourceType_FromNumeric(ordinal: int32): ProtectedResourceType {
+        return ProtectedResourceType.values()[ordinal]
+    }
     static RadioIndicatorType_ToNumeric(value: RadioIndicatorType): int32 {
         return value.valueOf()
     }
@@ -4490,11 +4893,29 @@ export class TypeChecker {
     static RelateType_FromNumeric(ordinal: int32): RelateType {
         return RelateType.fromValue(ordinal)
     }
+    static RenderExitReason_ToNumeric(value: RenderExitReason): int32 {
+        return value.valueOf()
+    }
+    static RenderExitReason_FromNumeric(ordinal: int32): RenderExitReason {
+        return RenderExitReason.fromValue(ordinal)
+    }
     static RenderFit_ToNumeric(value: RenderFit): int32 {
         return value.valueOf()
     }
     static RenderFit_FromNumeric(ordinal: int32): RenderFit {
         return RenderFit.fromValue(ordinal)
+    }
+    static RenderMode_ToNumeric(value: RenderMode): int32 {
+        return value.valueOf()
+    }
+    static RenderMode_FromNumeric(ordinal: int32): RenderMode {
+        return RenderMode.fromValue(ordinal)
+    }
+    static RenderProcessNotRespondingReason_ToNumeric(value: RenderProcessNotRespondingReason): int32 {
+        return value.valueOf()
+    }
+    static RenderProcessNotRespondingReason_FromNumeric(ordinal: int32): RenderProcessNotRespondingReason {
+        return RenderProcessNotRespondingReason.fromValue(ordinal)
     }
     static RepeatMode_ToNumeric(value: RepeatMode): int32 {
         return value.valueOf()
@@ -4729,6 +5150,12 @@ export class TypeChecker {
     }
     static SourceType_FromNumeric(ordinal: int32): SourceType {
         return SourceType.fromValue(ordinal)
+    }
+    static SslError_ToNumeric(value: SslError): int32 {
+        return value.valueOf()
+    }
+    static SslError_FromNumeric(ordinal: int32): SslError {
+        return SslError.fromValue(ordinal)
     }
     static StickyStyle_ToNumeric(value: StickyStyle): int32 {
         return value.valueOf()
@@ -5000,6 +5427,12 @@ export class TypeChecker {
     static ThemeColorMode_FromNumeric(ordinal: int32): ThemeColorMode {
         return ThemeColorMode.fromValue(ordinal)
     }
+    static ThreatType_ToNumeric(value: ThreatType): int32 {
+        return value.valueOf()
+    }
+    static ThreatType_FromNumeric(ordinal: int32): ThreatType {
+        return ThreatType.fromValue(ordinal)
+    }
     static TimePickerFormat_ToNumeric(value: TimePickerFormat): int32 {
         return value.valueOf()
     }
@@ -5066,6 +5499,12 @@ export class TypeChecker {
     static VerticalAlign_FromNumeric(ordinal: int32): VerticalAlign {
         return VerticalAlign.fromValue(ordinal)
     }
+    static ViewportFit_ToNumeric(value: ViewportFit): int32 {
+        return value.valueOf()
+    }
+    static ViewportFit_FromNumeric(ordinal: int32): ViewportFit {
+        return ViewportFit.fromValue(ordinal)
+    }
     static Visibility_ToNumeric(value: Visibility): int32 {
         return value.valueOf()
     }
@@ -5077,6 +5516,48 @@ export class TypeChecker {
     }
     static WaterFlowLayoutMode_FromNumeric(ordinal: int32): WaterFlowLayoutMode {
         return WaterFlowLayoutMode.fromValue(ordinal)
+    }
+    static WebCaptureMode_ToNumeric(value: WebCaptureMode): int32 {
+        return value.valueOf()
+    }
+    static WebCaptureMode_FromNumeric(ordinal: int32): WebCaptureMode {
+        return WebCaptureMode.fromValue(ordinal)
+    }
+    static WebDarkMode_ToNumeric(value: WebDarkMode): int32 {
+        return value.valueOf()
+    }
+    static WebDarkMode_FromNumeric(ordinal: int32): WebDarkMode {
+        return WebDarkMode.fromValue(ordinal)
+    }
+    static WebElementType_ToNumeric(value: WebElementType): int32 {
+        return value.valueOf()
+    }
+    static WebElementType_FromNumeric(ordinal: int32): WebElementType {
+        return WebElementType.fromValue(ordinal)
+    }
+    static WebKeyboardAvoidMode_ToNumeric(value: WebKeyboardAvoidMode): int32 {
+        return value.valueOf()
+    }
+    static WebKeyboardAvoidMode_FromNumeric(ordinal: int32): WebKeyboardAvoidMode {
+        return WebKeyboardAvoidMode.fromValue(ordinal)
+    }
+    static WebLayoutMode_ToNumeric(value: WebLayoutMode): int32 {
+        return value.valueOf()
+    }
+    static WebLayoutMode_FromNumeric(ordinal: int32): WebLayoutMode {
+        return WebLayoutMode.fromValue(ordinal)
+    }
+    static WebNavigationType_ToNumeric(value: WebNavigationType): int32 {
+        return value.valueOf()
+    }
+    static WebNavigationType_FromNumeric(ordinal: int32): WebNavigationType {
+        return WebNavigationType.fromValue(ordinal)
+    }
+    static WebResponseType_ToNumeric(value: WebResponseType): int32 {
+        return value.valueOf()
+    }
+    static WebResponseType_FromNumeric(ordinal: int32): WebResponseType {
+        return WebResponseType.fromValue(ordinal)
     }
     static Week_ToNumeric(value: Week): int32 {
         return value.valueOf()
@@ -5132,6 +5613,9 @@ export class TypeChecker {
     static isArray_drawing_TextBlobRunBuffer(value: Object | string | number | undefined): boolean {
         return value instanceof Array
     }
+    static isArray_String(value: Object | string | number | undefined): boolean {
+        return value instanceof Array
+    }
     static isArray_SourceTool(value: Object | string | number | undefined): boolean {
         return value instanceof Array
     }
@@ -5148,9 +5632,6 @@ export class TypeChecker {
         return value instanceof Array
     }
     static isArray_ColorStop(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
-    }
-    static isArray_String(value: Object | string | number | undefined): boolean {
         return value instanceof Array
     }
     static isArray_Opt_Object(value: Object | string | number | undefined): boolean {
@@ -5192,6 +5673,12 @@ export class TypeChecker {
     static isArray_SectionOptions(value: Object | string | number | undefined): boolean {
         return value instanceof Array
     }
+    static isArray_Header(value: Object | string | number | undefined): boolean {
+        return value instanceof Array
+    }
+    static isArray_webview_WebHeader(value: Object | string | number | undefined): boolean {
+        return value instanceof Array
+    }
     static isArray_TextMenuItem(value: Object | string | number | undefined): boolean {
         return value instanceof Array
     }
@@ -5199,6 +5686,9 @@ export class TypeChecker {
         return value instanceof Array
     }
     static isArray_NavDestinationTransition(value: Object | string | number | undefined): boolean {
+        return value instanceof Array
+    }
+    static isArray_ResourceStr(value: Object | string | number | undefined): boolean {
         return value instanceof Array
     }
     static isArray_GestureRecognizer(value: Object | string | number | undefined): boolean {
@@ -5228,6 +5718,9 @@ export class TypeChecker {
     static isArray_CalendarDay(value: Object | string | number | undefined): boolean {
         return value instanceof Array
     }
+    static isArray_Buffer(value: Object | string | number | undefined): boolean {
+        return value instanceof Array
+    }
     static isArray_Object(value: Object | string | number | undefined): boolean {
         return value instanceof Array
     }
@@ -5246,9 +5739,6 @@ export class TypeChecker {
     static isArray_DragPreviewMode(value: Object | string | number | undefined): boolean {
         return value instanceof Array
     }
-    static isArray_Buffer(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
-    }
     static isArray_RichEditorTextSpanResult(value: Object | string | number | undefined): boolean {
         return value instanceof Array
     }
@@ -5265,9 +5755,6 @@ export class TypeChecker {
         return value instanceof Array
     }
     static isArray_TextPickerRangeContent(value: Object | string | number | undefined): boolean {
-        return value instanceof Array
-    }
-    static isArray_ResourceStr(value: Object | string | number | undefined): boolean {
         return value instanceof Array
     }
     static isArray_LengthMetrics(value: Object | string | number | undefined): boolean {
@@ -5370,6 +5857,9 @@ export class TypeChecker {
         return value instanceof Array
     }
     static isArray_BarrierStyle(value: Object | string | number | undefined): boolean {
+        return value instanceof Array
+    }
+    static isArray_ScriptItem(value: Object | string | number | undefined): boolean {
         return value instanceof Array
     }
 }

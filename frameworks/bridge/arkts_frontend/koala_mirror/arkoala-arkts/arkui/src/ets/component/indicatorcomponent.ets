@@ -77,7 +77,7 @@ export class IndicatorComponentController implements MaterializedBase {
         let useAnimation_type : int32 = RuntimeType.UNDEFINED
         useAnimation_type = runtimeType(useAnimation)
         thisSerializer.writeInt8((useAnimation_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (useAnimation_type)) {
+        if ((useAnimation_type) != (RuntimeType.UNDEFINED)) {
             const useAnimation_value  = useAnimation!
             thisSerializer.writeBoolean(useAnimation_value)
         }
@@ -101,7 +101,7 @@ export class ArkIndicatorComponentPeer extends ArkCommonMethodPeer {
         let controller_type : int32 = RuntimeType.UNDEFINED
         controller_type = runtimeType(controller)
         thisSerializer.writeInt8((controller_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (controller_type)) {
+        if ((controller_type) != (RuntimeType.UNDEFINED)) {
             const controller_value  = controller!
             IndicatorComponentController_serializer.write(thisSerializer, controller_value)
         }
@@ -113,7 +113,7 @@ export class ArkIndicatorComponentPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeNumber(value_value)
         }
@@ -125,7 +125,7 @@ export class ArkIndicatorComponentPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeNumber(value_value)
         }
@@ -137,7 +137,7 @@ export class ArkIndicatorComponentPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -160,7 +160,7 @@ export class ArkIndicatorComponentPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -172,7 +172,7 @@ export class ArkIndicatorComponentPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -184,7 +184,7 @@ export class ArkIndicatorComponentPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }

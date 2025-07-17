@@ -1,4 +1,3 @@
-import { memo, memo_intrinsic, memo_entry, memo_stable, memo_skip } from "@koalaui/runtime/annotations"
 /*
  * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,12 +13,13 @@ import { memo, memo_intrinsic, memo_entry, memo_stable, memo_skip } from "@koala
  * limitations under the License.
  */
 
+import { memo, memo_intrinsic, memo_entry, memo_stable, memo_skip } from "@koalaui/runtime/annotations"
 import { KPointer } from "@koalaui/interop"
 import { PeerNode } from "./PeerNode"
 import { CustomBuilder } from "./component/builder"
 import { CustomNodeBuilder, ArkComponentRootPeer } from "./generated"
 
-// TODO need invert dependency: createUiDetachedRoot should be imported from @koalaui/arkoala same as in TS
+// Improve: need invert dependency: createUiDetachedRoot should be imported from @koalaui/arkoala same as in TS
 export type UIDetachedRootCreator = (
     peerFactory: () => PeerNode,
     @memo

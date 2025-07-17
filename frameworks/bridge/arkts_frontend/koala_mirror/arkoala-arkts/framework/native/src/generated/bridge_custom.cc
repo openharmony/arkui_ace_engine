@@ -43,7 +43,7 @@ static const GENERATED_ArkUIExtendedNodeAPI* GetArkUIExtendedNodeAPI() {
 
 CustomDeserializer* DeserializerBase::customDeserializers = nullptr;
 
-// TODO: Remove all this.
+// Improve: Remove all this.
 void disposeNode(KNativePointer* ptr) {
     GetArkUIBasicNodeAPI()->disposeNode((Ark_NodeHandle)ptr);
 }

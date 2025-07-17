@@ -69,17 +69,17 @@ export class ParameterTransformer extends arkts.AbstractVisitor {
         }
         if (arkts.isCallExpression(beforeChildren)) {
             if (arkts.isIdentifier(beforeChildren.callee)) {
-                const decl = arkts.getPeerDecl(beforeChildren.callee.originalPeer) // TODO: here should be getDeclResolveGensym, but it would result in code not passing filterSource
+                const decl = arkts.getPeerDecl(beforeChildren.callee.originalPeer) // Improve: here should be getDeclResolveGensym, but it would result in code not passing filterSource
                 if (decl && this.rewriteCalls?.has(decl.originalPeer)) {
                     return this.rewriteCalls.get(decl.originalPeer)!(
-                        beforeChildren.arguments.map((it) => this.visitor(it) as arkts.Expression) // TODO: remove as
+                        beforeChildren.arguments.map((it) => this.visitor(it) as arkts.Expression) // Improve: remove as
                     )
                 }
             }
         }
         const node = this.visitEachChild(beforeChildren)
         if (arkts.isIdentifier(node)) {
-            const decl = arkts.getPeerDecl(node.originalPeer) // TODO: here should be getDeclResolveGensym, but it would result in code not passing filterSource
+            const decl = arkts.getPeerDecl(node.originalPeer) // Improve: here should be getDeclResolveGensym, but it would result in code not passing filterSource
             if (decl && this.rewriteIdentifiers?.has(decl.originalPeer)) {
                 return this.rewriteIdentifiers.get(decl.originalPeer)!()
             }

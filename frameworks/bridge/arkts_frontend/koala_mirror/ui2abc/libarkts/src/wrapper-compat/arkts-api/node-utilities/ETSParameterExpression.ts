@@ -26,7 +26,7 @@ export function updateETSParameterExpression(
 ): ETSParameterExpression {
     if (
         isSameNativeObject(identifier, original.identifier) &&
-        !initializer // TODO: get this from ETSParameterExpression
+        !initializer // Improve: get this from ETSParameterExpression
     ) {
         return original;
     }

@@ -1,6 +1,5 @@
-import { memo, memo_intrinsic, memo_entry, memo_stable, memo_skip } from "@koalaui/runtime/annotations"
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +13,7 @@ import { memo, memo_intrinsic, memo_entry, memo_stable, memo_skip } from "@koala
  * limitations under the License.
  */
 
+import { memo, memo_intrinsic, memo_entry, memo_stable, memo_skip } from "@koalaui/runtime/annotations"
 import {
     LayoutChild,
     ConstraintSizeOptions,
@@ -30,15 +30,6 @@ import { UIContext } from "./ohos.arkui.UIContext"
 
 /**
  * This is basically the CustomComponent, which doesn't extend CommonAttribute
- *
- * memo markup according to arkui-common/config/tsconfig.base.json
- *
- * "render": {
- *     "method": [
- *         "build",
- *         "pageTransition"
- *     ]
- * }
  */
 export interface ArkCustomComponent {
     @memo

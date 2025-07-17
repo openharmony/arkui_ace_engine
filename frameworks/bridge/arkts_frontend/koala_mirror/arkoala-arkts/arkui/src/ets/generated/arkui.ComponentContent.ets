@@ -77,7 +77,7 @@ export class ComponentContent implements MaterializedBase {
         let param_type : int32 = RuntimeType.UNDEFINED
         param_type = runtimeType(param)
         thisSerializer.writeInt8((param_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (param_type)) {
+        if ((param_type) != (RuntimeType.UNDEFINED)) {
             const param_value  = param!
             thisSerializer.holdAndWriteObject(param_value)
         }

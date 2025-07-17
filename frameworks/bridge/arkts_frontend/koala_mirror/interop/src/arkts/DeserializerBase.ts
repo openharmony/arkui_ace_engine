@@ -166,7 +166,7 @@ export class DeserializerBase implements Disposable {
     }
 
     final readFunction(): int32 {
-        // TODO: not exactly correct.
+        // Improve: not exactly correct.
         return this.readInt32()
     }
 

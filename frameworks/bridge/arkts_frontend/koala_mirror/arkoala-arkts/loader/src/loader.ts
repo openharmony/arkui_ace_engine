@@ -62,7 +62,7 @@ export interface NativeControl extends LoaderOps {
 function callCallback(id: int32, args: KUint8ArrayPtr, length: int32): int32 {
     console.log(`callCallback: ${id} data is ${length} bytes`)
     if (id == 3) {
-        // TODO: implement setTimeout here.
+        // Improve: implement setTimeout here.
     }
     return 0
 }
@@ -78,7 +78,7 @@ export function nativeModule(): NativeControl {
     if (!modules)
         throw new Error("Cannot load native module")
     for (const moduleName of Object.keys(modules)) {
-        Object.assign(theModule, modules[moduleName]) // TODO freeze?
+        Object.assign(theModule, modules[moduleName]) // Improve: freeze?
     }
     theModule._SetCallbackDispatcher(callCallback)
     return theModule
@@ -452,7 +452,7 @@ async function navigationChecker(control: AppControl) {
         .click(Targets.GoBack).wait()
         .stop().wait()
 
-    // TODO: Navigation does not work
+    // Improve: Navigation does not work
     const expected: string =
         "### Button 1005: <DETAIL PAGE> push.\n" +
         "### Button 1006: <SEARCH PAGE> push.\n"

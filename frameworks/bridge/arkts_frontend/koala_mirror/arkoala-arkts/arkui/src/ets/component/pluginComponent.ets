@@ -51,7 +51,7 @@ export class ArkPluginComponentPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -63,7 +63,7 @@ export class ArkPluginComponentPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -259,7 +259,7 @@ export class PluginComponentOptions_serializer {
         let value_data_type : int32 = RuntimeType.UNDEFINED
         value_data_type = runtimeType(value_data)
         valueSerializer.writeInt8((value_data_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_data_type)) {
+        if ((value_data_type) != (RuntimeType.UNDEFINED)) {
             const value_data_value  = value_data!
             valueSerializer.holdAndWriteObject(value_data_value)
         }
@@ -269,7 +269,7 @@ export class PluginComponentOptions_serializer {
         const template_result : PluginComponentTemplate = PluginComponentTemplate_serializer.read(valueDeserializer)
         const data_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let data_buf : Object | undefined
-        if ((RuntimeType.UNDEFINED) != (data_buf_runtimeType))
+        if ((data_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             data_buf = (valueDeserializer.readObject() as object)
         }

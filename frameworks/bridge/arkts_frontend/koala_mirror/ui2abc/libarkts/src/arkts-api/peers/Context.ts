@@ -106,7 +106,7 @@ export class Context extends ArktsObject {
         console.log('[TS WRAPPER] DESTROY AND RECREATE');
         const source = filterSource(ast.dumpSrc());
         global.es2panda._DestroyContext(global.context);
-        global.compilerContext = Context.createFromString(source) as any; // TODO commonize Context
+        global.compilerContext = Context.createFromString(source) as any; // Improve: commonize Context
 
         return new Context(global.context);
     }

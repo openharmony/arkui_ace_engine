@@ -103,7 +103,7 @@ export class TabBarSymbol implements MaterializedBase {
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : SymbolGlyphModifier | undefined
-        if ((RuntimeType.UNDEFINED) != (buffer_runtimeType))
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
         {
             buffer = SymbolGlyphModifier_serializer.read(retvalDeserializer)
         }
@@ -115,7 +115,7 @@ export class TabBarSymbol implements MaterializedBase {
         let selected_type : int32 = RuntimeType.UNDEFINED
         selected_type = runtimeType(selected)
         thisSerializer.writeInt8((selected_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (selected_type)) {
+        if ((selected_type) != (RuntimeType.UNDEFINED)) {
             const selected_value  = selected!
             SymbolGlyphModifier_serializer.write(thisSerializer, selected_value)
         }
@@ -142,7 +142,7 @@ export class ArkTabContentPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -190,7 +190,7 @@ export class ArkTabContentPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -202,7 +202,7 @@ export class ArkTabContentPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -507,7 +507,7 @@ export class TabBarIconStyle_serializer {
         let value_selectedColor_type : int32 = RuntimeType.UNDEFINED
         value_selectedColor_type = runtimeType(value_selectedColor)
         valueSerializer.writeInt8((value_selectedColor_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_selectedColor_type)) {
+        if ((value_selectedColor_type) != (RuntimeType.UNDEFINED)) {
             const value_selectedColor_value  = value_selectedColor!
             let value_selectedColor_value_type : int32 = RuntimeType.UNDEFINED
             value_selectedColor_value_type = runtimeType(value_selectedColor_value)
@@ -536,7 +536,7 @@ export class TabBarIconStyle_serializer {
         let value_unselectedColor_type : int32 = RuntimeType.UNDEFINED
         value_unselectedColor_type = runtimeType(value_unselectedColor)
         valueSerializer.writeInt8((value_unselectedColor_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_unselectedColor_type)) {
+        if ((value_unselectedColor_type) != (RuntimeType.UNDEFINED)) {
             const value_unselectedColor_value  = value_unselectedColor!
             let value_unselectedColor_value_type : int32 = RuntimeType.UNDEFINED
             value_unselectedColor_value_type = runtimeType(value_unselectedColor_value)
@@ -566,7 +566,7 @@ export class TabBarIconStyle_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const selectedColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let selectedColor_buf : ResourceColor | undefined
-        if ((RuntimeType.UNDEFINED) != (selectedColor_buf_runtimeType))
+        if ((selectedColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const selectedColor_buf__selector : int32 = valueDeserializer.readInt8()
             let selectedColor_buf_ : Color | number | string | Resource | undefined
@@ -590,7 +590,7 @@ export class TabBarIconStyle_serializer {
         const selectedColor_result : ResourceColor | undefined = selectedColor_buf
         const unselectedColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let unselectedColor_buf : ResourceColor | undefined
-        if ((RuntimeType.UNDEFINED) != (unselectedColor_buf_runtimeType))
+        if ((unselectedColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const unselectedColor_buf__selector : int32 = valueDeserializer.readInt8()
             let unselectedColor_buf_ : Color | number | string | Resource | undefined
@@ -623,7 +623,7 @@ export class TabBarOptions_serializer {
         let value_icon_type : int32 = RuntimeType.UNDEFINED
         value_icon_type = runtimeType(value_icon)
         valueSerializer.writeInt8((value_icon_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_icon_type)) {
+        if ((value_icon_type) != (RuntimeType.UNDEFINED)) {
             const value_icon_value  = value_icon!
             let value_icon_value_type : int32 = RuntimeType.UNDEFINED
             value_icon_value_type = runtimeType(value_icon_value)
@@ -642,7 +642,7 @@ export class TabBarOptions_serializer {
         let value_text_type : int32 = RuntimeType.UNDEFINED
         value_text_type = runtimeType(value_text)
         valueSerializer.writeInt8((value_text_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_text_type)) {
+        if ((value_text_type) != (RuntimeType.UNDEFINED)) {
             const value_text_value  = value_text!
             let value_text_value_type : int32 = RuntimeType.UNDEFINED
             value_text_value_type = runtimeType(value_text_value)
@@ -662,7 +662,7 @@ export class TabBarOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const icon_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let icon_buf : string | Resource | undefined
-        if ((RuntimeType.UNDEFINED) != (icon_buf_runtimeType))
+        if ((icon_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const icon_buf__selector : int32 = valueDeserializer.readInt8()
             let icon_buf_ : string | Resource | undefined
@@ -680,7 +680,7 @@ export class TabBarOptions_serializer {
         const icon_result : string | Resource | undefined = icon_buf
         const text_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let text_buf : string | Resource | undefined
-        if ((RuntimeType.UNDEFINED) != (text_buf_runtimeType))
+        if ((text_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const text_buf__selector : int32 = valueDeserializer.readInt8()
             let text_buf_ : string | Resource | undefined
@@ -707,7 +707,7 @@ export class BoardStyle_serializer {
         let value_borderRadius_type : int32 = RuntimeType.UNDEFINED
         value_borderRadius_type = runtimeType(value_borderRadius)
         valueSerializer.writeInt8((value_borderRadius_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_borderRadius_type)) {
+        if ((value_borderRadius_type) != (RuntimeType.UNDEFINED)) {
             const value_borderRadius_value  = value_borderRadius!
             let value_borderRadius_value_type : int32 = RuntimeType.UNDEFINED
             value_borderRadius_value_type = runtimeType(value_borderRadius_value)
@@ -732,7 +732,7 @@ export class BoardStyle_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const borderRadius_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let borderRadius_buf : Length | undefined
-        if ((RuntimeType.UNDEFINED) != (borderRadius_buf_runtimeType))
+        if ((borderRadius_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const borderRadius_buf__selector : int32 = valueDeserializer.readInt8()
             let borderRadius_buf_ : string | number | Resource | undefined
@@ -762,7 +762,7 @@ export class SubTabBarIndicatorStyle_serializer {
         let value_color_type : int32 = RuntimeType.UNDEFINED
         value_color_type = runtimeType(value_color)
         valueSerializer.writeInt8((value_color_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_color_type)) {
+        if ((value_color_type) != (RuntimeType.UNDEFINED)) {
             const value_color_value  = value_color!
             let value_color_value_type : int32 = RuntimeType.UNDEFINED
             value_color_value_type = runtimeType(value_color_value)
@@ -791,7 +791,7 @@ export class SubTabBarIndicatorStyle_serializer {
         let value_height_type : int32 = RuntimeType.UNDEFINED
         value_height_type = runtimeType(value_height)
         valueSerializer.writeInt8((value_height_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_height_type)) {
+        if ((value_height_type) != (RuntimeType.UNDEFINED)) {
             const value_height_value  = value_height!
             let value_height_value_type : int32 = RuntimeType.UNDEFINED
             value_height_value_type = runtimeType(value_height_value)
@@ -815,7 +815,7 @@ export class SubTabBarIndicatorStyle_serializer {
         let value_width_type : int32 = RuntimeType.UNDEFINED
         value_width_type = runtimeType(value_width)
         valueSerializer.writeInt8((value_width_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_width_type)) {
+        if ((value_width_type) != (RuntimeType.UNDEFINED)) {
             const value_width_value  = value_width!
             let value_width_value_type : int32 = RuntimeType.UNDEFINED
             value_width_value_type = runtimeType(value_width_value)
@@ -839,7 +839,7 @@ export class SubTabBarIndicatorStyle_serializer {
         let value_borderRadius_type : int32 = RuntimeType.UNDEFINED
         value_borderRadius_type = runtimeType(value_borderRadius)
         valueSerializer.writeInt8((value_borderRadius_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_borderRadius_type)) {
+        if ((value_borderRadius_type) != (RuntimeType.UNDEFINED)) {
             const value_borderRadius_value  = value_borderRadius!
             let value_borderRadius_value_type : int32 = RuntimeType.UNDEFINED
             value_borderRadius_value_type = runtimeType(value_borderRadius_value)
@@ -863,7 +863,7 @@ export class SubTabBarIndicatorStyle_serializer {
         let value_marginTop_type : int32 = RuntimeType.UNDEFINED
         value_marginTop_type = runtimeType(value_marginTop)
         valueSerializer.writeInt8((value_marginTop_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_marginTop_type)) {
+        if ((value_marginTop_type) != (RuntimeType.UNDEFINED)) {
             const value_marginTop_value  = value_marginTop!
             let value_marginTop_value_type : int32 = RuntimeType.UNDEFINED
             value_marginTop_value_type = runtimeType(value_marginTop_value)
@@ -888,7 +888,7 @@ export class SubTabBarIndicatorStyle_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const color_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let color_buf : ResourceColor | undefined
-        if ((RuntimeType.UNDEFINED) != (color_buf_runtimeType))
+        if ((color_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const color_buf__selector : int32 = valueDeserializer.readInt8()
             let color_buf_ : Color | number | string | Resource | undefined
@@ -912,7 +912,7 @@ export class SubTabBarIndicatorStyle_serializer {
         const color_result : ResourceColor | undefined = color_buf
         const height_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let height_buf : Length | undefined
-        if ((RuntimeType.UNDEFINED) != (height_buf_runtimeType))
+        if ((height_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const height_buf__selector : int32 = valueDeserializer.readInt8()
             let height_buf_ : string | number | Resource | undefined
@@ -933,7 +933,7 @@ export class SubTabBarIndicatorStyle_serializer {
         const height_result : Length | undefined = height_buf
         const width_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let width_buf : Length | undefined
-        if ((RuntimeType.UNDEFINED) != (width_buf_runtimeType))
+        if ((width_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const width_buf__selector : int32 = valueDeserializer.readInt8()
             let width_buf_ : string | number | Resource | undefined
@@ -954,7 +954,7 @@ export class SubTabBarIndicatorStyle_serializer {
         const width_result : Length | undefined = width_buf
         const borderRadius_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let borderRadius_buf : Length | undefined
-        if ((RuntimeType.UNDEFINED) != (borderRadius_buf_runtimeType))
+        if ((borderRadius_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const borderRadius_buf__selector : int32 = valueDeserializer.readInt8()
             let borderRadius_buf_ : string | number | Resource | undefined
@@ -975,7 +975,7 @@ export class SubTabBarIndicatorStyle_serializer {
         const borderRadius_result : Length | undefined = borderRadius_buf
         const marginTop_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let marginTop_buf : Length | undefined
-        if ((RuntimeType.UNDEFINED) != (marginTop_buf_runtimeType))
+        if ((marginTop_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const marginTop_buf__selector : int32 = valueDeserializer.readInt8()
             let marginTop_buf_ : string | number | Resource | undefined
@@ -1005,7 +1005,7 @@ export class TabBarLabelStyle_serializer {
         let value_overflow_type : int32 = RuntimeType.UNDEFINED
         value_overflow_type = runtimeType(value_overflow)
         valueSerializer.writeInt8((value_overflow_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_overflow_type)) {
+        if ((value_overflow_type) != (RuntimeType.UNDEFINED)) {
             const value_overflow_value  = (value_overflow as TextOverflow)
             valueSerializer.writeInt32(TypeChecker.TextOverflow_ToNumeric(value_overflow_value))
         }
@@ -1013,7 +1013,7 @@ export class TabBarLabelStyle_serializer {
         let value_maxLines_type : int32 = RuntimeType.UNDEFINED
         value_maxLines_type = runtimeType(value_maxLines)
         valueSerializer.writeInt8((value_maxLines_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_maxLines_type)) {
+        if ((value_maxLines_type) != (RuntimeType.UNDEFINED)) {
             const value_maxLines_value  = value_maxLines!
             valueSerializer.writeNumber(value_maxLines_value)
         }
@@ -1021,7 +1021,7 @@ export class TabBarLabelStyle_serializer {
         let value_minFontSize_type : int32 = RuntimeType.UNDEFINED
         value_minFontSize_type = runtimeType(value_minFontSize)
         valueSerializer.writeInt8((value_minFontSize_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_minFontSize_type)) {
+        if ((value_minFontSize_type) != (RuntimeType.UNDEFINED)) {
             const value_minFontSize_value  = value_minFontSize!
             let value_minFontSize_value_type : int32 = RuntimeType.UNDEFINED
             value_minFontSize_value_type = runtimeType(value_minFontSize_value)
@@ -1051,7 +1051,7 @@ export class TabBarLabelStyle_serializer {
         let value_maxFontSize_type : int32 = RuntimeType.UNDEFINED
         value_maxFontSize_type = runtimeType(value_maxFontSize)
         valueSerializer.writeInt8((value_maxFontSize_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_maxFontSize_type)) {
+        if ((value_maxFontSize_type) != (RuntimeType.UNDEFINED)) {
             const value_maxFontSize_value  = value_maxFontSize!
             let value_maxFontSize_value_type : int32 = RuntimeType.UNDEFINED
             value_maxFontSize_value_type = runtimeType(value_maxFontSize_value)
@@ -1081,7 +1081,7 @@ export class TabBarLabelStyle_serializer {
         let value_heightAdaptivePolicy_type : int32 = RuntimeType.UNDEFINED
         value_heightAdaptivePolicy_type = runtimeType(value_heightAdaptivePolicy)
         valueSerializer.writeInt8((value_heightAdaptivePolicy_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_heightAdaptivePolicy_type)) {
+        if ((value_heightAdaptivePolicy_type) != (RuntimeType.UNDEFINED)) {
             const value_heightAdaptivePolicy_value  = (value_heightAdaptivePolicy as TextHeightAdaptivePolicy)
             valueSerializer.writeInt32(TypeChecker.TextHeightAdaptivePolicy_ToNumeric(value_heightAdaptivePolicy_value))
         }
@@ -1089,7 +1089,7 @@ export class TabBarLabelStyle_serializer {
         let value_font_type : int32 = RuntimeType.UNDEFINED
         value_font_type = runtimeType(value_font)
         valueSerializer.writeInt8((value_font_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_font_type)) {
+        if ((value_font_type) != (RuntimeType.UNDEFINED)) {
             const value_font_value  = value_font!
             Font_serializer.write(valueSerializer, value_font_value)
         }
@@ -1097,7 +1097,7 @@ export class TabBarLabelStyle_serializer {
         let value_selectedColor_type : int32 = RuntimeType.UNDEFINED
         value_selectedColor_type = runtimeType(value_selectedColor)
         valueSerializer.writeInt8((value_selectedColor_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_selectedColor_type)) {
+        if ((value_selectedColor_type) != (RuntimeType.UNDEFINED)) {
             const value_selectedColor_value  = value_selectedColor!
             let value_selectedColor_value_type : int32 = RuntimeType.UNDEFINED
             value_selectedColor_value_type = runtimeType(value_selectedColor_value)
@@ -1126,7 +1126,7 @@ export class TabBarLabelStyle_serializer {
         let value_unselectedColor_type : int32 = RuntimeType.UNDEFINED
         value_unselectedColor_type = runtimeType(value_unselectedColor)
         valueSerializer.writeInt8((value_unselectedColor_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_unselectedColor_type)) {
+        if ((value_unselectedColor_type) != (RuntimeType.UNDEFINED)) {
             const value_unselectedColor_value  = value_unselectedColor!
             let value_unselectedColor_value_type : int32 = RuntimeType.UNDEFINED
             value_unselectedColor_value_type = runtimeType(value_unselectedColor_value)
@@ -1156,21 +1156,21 @@ export class TabBarLabelStyle_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const overflow_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let overflow_buf : TextOverflow | undefined
-        if ((RuntimeType.UNDEFINED) != (overflow_buf_runtimeType))
+        if ((overflow_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             overflow_buf = TypeChecker.TextOverflow_FromNumeric(valueDeserializer.readInt32())
         }
         const overflow_result : TextOverflow | undefined = overflow_buf
         const maxLines_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let maxLines_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (maxLines_buf_runtimeType))
+        if ((maxLines_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             maxLines_buf = (valueDeserializer.readNumber() as number)
         }
         const maxLines_result : number | undefined = maxLines_buf
         const minFontSize_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let minFontSize_buf : number | ResourceStr | undefined
-        if ((RuntimeType.UNDEFINED) != (minFontSize_buf_runtimeType))
+        if ((minFontSize_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const minFontSize_buf__selector : int32 = valueDeserializer.readInt8()
             let minFontSize_buf_ : number | ResourceStr | undefined
@@ -1199,7 +1199,7 @@ export class TabBarLabelStyle_serializer {
         const minFontSize_result : number | ResourceStr | undefined = minFontSize_buf
         const maxFontSize_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let maxFontSize_buf : number | ResourceStr | undefined
-        if ((RuntimeType.UNDEFINED) != (maxFontSize_buf_runtimeType))
+        if ((maxFontSize_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const maxFontSize_buf__selector : int32 = valueDeserializer.readInt8()
             let maxFontSize_buf_ : number | ResourceStr | undefined
@@ -1228,21 +1228,21 @@ export class TabBarLabelStyle_serializer {
         const maxFontSize_result : number | ResourceStr | undefined = maxFontSize_buf
         const heightAdaptivePolicy_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let heightAdaptivePolicy_buf : TextHeightAdaptivePolicy | undefined
-        if ((RuntimeType.UNDEFINED) != (heightAdaptivePolicy_buf_runtimeType))
+        if ((heightAdaptivePolicy_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             heightAdaptivePolicy_buf = TypeChecker.TextHeightAdaptivePolicy_FromNumeric(valueDeserializer.readInt32())
         }
         const heightAdaptivePolicy_result : TextHeightAdaptivePolicy | undefined = heightAdaptivePolicy_buf
         const font_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let font_buf : Font | undefined
-        if ((RuntimeType.UNDEFINED) != (font_buf_runtimeType))
+        if ((font_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             font_buf = Font_serializer.read(valueDeserializer)
         }
         const font_result : Font | undefined = font_buf
         const selectedColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let selectedColor_buf : ResourceColor | undefined
-        if ((RuntimeType.UNDEFINED) != (selectedColor_buf_runtimeType))
+        if ((selectedColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const selectedColor_buf__selector : int32 = valueDeserializer.readInt8()
             let selectedColor_buf_ : Color | number | string | Resource | undefined
@@ -1266,7 +1266,7 @@ export class TabBarLabelStyle_serializer {
         const selectedColor_result : ResourceColor | undefined = selectedColor_buf
         const unselectedColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let unselectedColor_buf : ResourceColor | undefined
-        if ((RuntimeType.UNDEFINED) != (unselectedColor_buf_runtimeType))
+        if ((unselectedColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const unselectedColor_buf__selector : int32 = valueDeserializer.readInt8()
             let unselectedColor_buf_ : Color | number | string | Resource | undefined
@@ -1299,7 +1299,7 @@ export class BottomTabBarStyle_serializer {
         let value__icon_type : int32 = RuntimeType.UNDEFINED
         value__icon_type = runtimeType(value__icon)
         valueSerializer.writeInt8((value__icon_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value__icon_type)) {
+        if ((value__icon_type) != (RuntimeType.UNDEFINED)) {
             const value__icon_value  = value__icon!
             let value__icon_value_type : int32 = RuntimeType.UNDEFINED
             value__icon_value_type = runtimeType(value__icon_value)
@@ -1329,7 +1329,7 @@ export class BottomTabBarStyle_serializer {
         let value__text_type : int32 = RuntimeType.UNDEFINED
         value__text_type = runtimeType(value__text)
         valueSerializer.writeInt8((value__text_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value__text_type)) {
+        if ((value__text_type) != (RuntimeType.UNDEFINED)) {
             const value__text_value  = value__text!
             let value__text_value_type : int32 = RuntimeType.UNDEFINED
             value__text_value_type = runtimeType(value__text_value)
@@ -1348,7 +1348,7 @@ export class BottomTabBarStyle_serializer {
         let value__labelStyle_type : int32 = RuntimeType.UNDEFINED
         value__labelStyle_type = runtimeType(value__labelStyle)
         valueSerializer.writeInt8((value__labelStyle_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value__labelStyle_type)) {
+        if ((value__labelStyle_type) != (RuntimeType.UNDEFINED)) {
             const value__labelStyle_value  = value__labelStyle!
             TabBarLabelStyle_serializer.write(valueSerializer, value__labelStyle_value)
         }
@@ -1356,7 +1356,7 @@ export class BottomTabBarStyle_serializer {
         let value__padding_type : int32 = RuntimeType.UNDEFINED
         value__padding_type = runtimeType(value__padding)
         valueSerializer.writeInt8((value__padding_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value__padding_type)) {
+        if ((value__padding_type) != (RuntimeType.UNDEFINED)) {
             const value__padding_value  = value__padding!
             let value__padding_value_type : int32 = RuntimeType.UNDEFINED
             value__padding_value_type = runtimeType(value__padding_value)
@@ -1396,7 +1396,7 @@ export class BottomTabBarStyle_serializer {
         let value__layoutMode_type : int32 = RuntimeType.UNDEFINED
         value__layoutMode_type = runtimeType(value__layoutMode)
         valueSerializer.writeInt8((value__layoutMode_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value__layoutMode_type)) {
+        if ((value__layoutMode_type) != (RuntimeType.UNDEFINED)) {
             const value__layoutMode_value  = (value__layoutMode as LayoutMode)
             valueSerializer.writeInt32(TypeChecker.LayoutMode_ToNumeric(value__layoutMode_value))
         }
@@ -1404,7 +1404,7 @@ export class BottomTabBarStyle_serializer {
         let value__verticalAlign_type : int32 = RuntimeType.UNDEFINED
         value__verticalAlign_type = runtimeType(value__verticalAlign)
         valueSerializer.writeInt8((value__verticalAlign_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value__verticalAlign_type)) {
+        if ((value__verticalAlign_type) != (RuntimeType.UNDEFINED)) {
             const value__verticalAlign_value  = (value__verticalAlign as VerticalAlign)
             valueSerializer.writeInt32(TypeChecker.VerticalAlign_ToNumeric(value__verticalAlign_value))
         }
@@ -1412,7 +1412,7 @@ export class BottomTabBarStyle_serializer {
         let value__symmetricExtensible_type : int32 = RuntimeType.UNDEFINED
         value__symmetricExtensible_type = runtimeType(value__symmetricExtensible)
         valueSerializer.writeInt8((value__symmetricExtensible_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value__symmetricExtensible_type)) {
+        if ((value__symmetricExtensible_type) != (RuntimeType.UNDEFINED)) {
             const value__symmetricExtensible_value  = value__symmetricExtensible!
             valueSerializer.writeBoolean(value__symmetricExtensible_value)
         }
@@ -1420,7 +1420,7 @@ export class BottomTabBarStyle_serializer {
         let value__id_type : int32 = RuntimeType.UNDEFINED
         value__id_type = runtimeType(value__id)
         valueSerializer.writeInt8((value__id_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value__id_type)) {
+        if ((value__id_type) != (RuntimeType.UNDEFINED)) {
             const value__id_value  = value__id!
             valueSerializer.writeString(value__id_value)
         }
@@ -1428,7 +1428,7 @@ export class BottomTabBarStyle_serializer {
         let value__iconStyle_type : int32 = RuntimeType.UNDEFINED
         value__iconStyle_type = runtimeType(value__iconStyle)
         valueSerializer.writeInt8((value__iconStyle_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value__iconStyle_type)) {
+        if ((value__iconStyle_type) != (RuntimeType.UNDEFINED)) {
             const value__iconStyle_value  = value__iconStyle!
             TabBarIconStyle_serializer.write(valueSerializer, value__iconStyle_value)
         }
@@ -1444,7 +1444,7 @@ export class SubTabBarStyle_serializer {
         let value__content_type : int32 = RuntimeType.UNDEFINED
         value__content_type = runtimeType(value__content)
         valueSerializer.writeInt8((value__content_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value__content_type)) {
+        if ((value__content_type) != (RuntimeType.UNDEFINED)) {
             const value__content_value  = value__content!
             let value__content_value_type : int32 = RuntimeType.UNDEFINED
             value__content_value_type = runtimeType(value__content_value)
@@ -1468,7 +1468,7 @@ export class SubTabBarStyle_serializer {
         let value__indicator_type : int32 = RuntimeType.UNDEFINED
         value__indicator_type = runtimeType(value__indicator)
         valueSerializer.writeInt8((value__indicator_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value__indicator_type)) {
+        if ((value__indicator_type) != (RuntimeType.UNDEFINED)) {
             const value__indicator_value  = value__indicator!
             SubTabBarIndicatorStyle_serializer.write(valueSerializer, value__indicator_value)
         }
@@ -1476,7 +1476,7 @@ export class SubTabBarStyle_serializer {
         let value__selectedMode_type : int32 = RuntimeType.UNDEFINED
         value__selectedMode_type = runtimeType(value__selectedMode)
         valueSerializer.writeInt8((value__selectedMode_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value__selectedMode_type)) {
+        if ((value__selectedMode_type) != (RuntimeType.UNDEFINED)) {
             const value__selectedMode_value  = (value__selectedMode as SelectedMode)
             valueSerializer.writeInt32(TypeChecker.SelectedMode_ToNumeric(value__selectedMode_value))
         }
@@ -1484,7 +1484,7 @@ export class SubTabBarStyle_serializer {
         let value__board_type : int32 = RuntimeType.UNDEFINED
         value__board_type = runtimeType(value__board)
         valueSerializer.writeInt8((value__board_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value__board_type)) {
+        if ((value__board_type) != (RuntimeType.UNDEFINED)) {
             const value__board_value  = value__board!
             BoardStyle_serializer.write(valueSerializer, value__board_value)
         }
@@ -1492,7 +1492,7 @@ export class SubTabBarStyle_serializer {
         let value__labelStyle_type : int32 = RuntimeType.UNDEFINED
         value__labelStyle_type = runtimeType(value__labelStyle)
         valueSerializer.writeInt8((value__labelStyle_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value__labelStyle_type)) {
+        if ((value__labelStyle_type) != (RuntimeType.UNDEFINED)) {
             const value__labelStyle_value  = value__labelStyle!
             TabBarLabelStyle_serializer.write(valueSerializer, value__labelStyle_value)
         }
@@ -1500,7 +1500,7 @@ export class SubTabBarStyle_serializer {
         let value__padding_type : int32 = RuntimeType.UNDEFINED
         value__padding_type = runtimeType(value__padding)
         valueSerializer.writeInt8((value__padding_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value__padding_type)) {
+        if ((value__padding_type) != (RuntimeType.UNDEFINED)) {
             const value__padding_value  = value__padding!
             let value__padding_value_type : int32 = RuntimeType.UNDEFINED
             value__padding_value_type = runtimeType(value__padding_value)
@@ -1546,7 +1546,7 @@ export class SubTabBarStyle_serializer {
         let value__id_type : int32 = RuntimeType.UNDEFINED
         value__id_type = runtimeType(value__id)
         valueSerializer.writeInt8((value__id_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value__id_type)) {
+        if ((value__id_type) != (RuntimeType.UNDEFINED)) {
             const value__id_value  = value__id!
             valueSerializer.writeString(value__id_value)
         }

@@ -30,8 +30,8 @@ export function updateTryStatement(
         isSameNativeObject(block, original.block) &&
         isSameNativeObject(catchClauses, original.catchClauses) &&
         isSameNativeObject(finalizer, original.finallyBlock)
-        /* TODO: no getter for finalizerInsertionsLabelPair */
-        /* TODO: no getter for finalizerInsertionsStatement */
+        /* Improve: no getter for finalizerInsertionsLabelPair */
+        /* Improve: no getter for finalizerInsertionsStatement */
     ) {
         return original;
     }

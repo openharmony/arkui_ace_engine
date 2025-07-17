@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -90,10 +90,10 @@ export class UIExtensionProxyInternal implements MaterializedBase,UIExtensionPro
         return
     }
     on(type: string, callback_: ((value0: UIExtensionProxy) => void)): void {
-        throw new Error("TBD")
+        throw new Error("Improve")
     }
     off(type: string, callback_: ((value0: UIExtensionProxy) => void)): void {
-        throw new Error("TBD")
+        throw new Error("Improve")
     }
     private send_serialize(data: Map<string, Object>): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
@@ -147,7 +147,7 @@ export class UIExtensionProxyInternal implements MaterializedBase,UIExtensionPro
         let callback__type : int32 = RuntimeType.UNDEFINED
         callback__type = runtimeType(callback_)
         thisSerializer.writeInt8((callback__type).toChar())
-        if ((RuntimeType.UNDEFINED) != (callback__type)) {
+        if ((callback__type) != (RuntimeType.UNDEFINED)) {
             const callback__value  = callback_!
             thisSerializer.holdAndWriteCallback(callback__value)
         }
@@ -159,7 +159,7 @@ export class UIExtensionProxyInternal implements MaterializedBase,UIExtensionPro
         let callback__type : int32 = RuntimeType.UNDEFINED
         callback__type = runtimeType(callback_)
         thisSerializer.writeInt8((callback__type).toChar())
-        if ((RuntimeType.UNDEFINED) != (callback__type)) {
+        if ((callback__type) != (RuntimeType.UNDEFINED)) {
             const callback__value  = callback_!
             thisSerializer.holdAndWriteCallback(callback__value)
         }
@@ -184,7 +184,7 @@ export class ArkUIExtensionComponentPeer extends ArkCommonMethodPeer {
         let options_type : int32 = RuntimeType.UNDEFINED
         options_type = runtimeType(options)
         thisSerializer.writeInt8((options_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (options_type)) {
+        if ((options_type) != (RuntimeType.UNDEFINED)) {
             const options_value  = options!
             UIExtensionOptions_serializer.write(thisSerializer, options_value)
         }
@@ -196,7 +196,7 @@ export class ArkUIExtensionComponentPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -208,7 +208,7 @@ export class ArkUIExtensionComponentPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -220,7 +220,7 @@ export class ArkUIExtensionComponentPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -232,7 +232,7 @@ export class ArkUIExtensionComponentPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -244,7 +244,7 @@ export class ArkUIExtensionComponentPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -493,7 +493,7 @@ export class UIExtensionOptions_serializer {
         let value_isTransferringCaller_type : int32 = RuntimeType.UNDEFINED
         value_isTransferringCaller_type = runtimeType(value_isTransferringCaller)
         valueSerializer.writeInt8((value_isTransferringCaller_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_isTransferringCaller_type)) {
+        if ((value_isTransferringCaller_type) != (RuntimeType.UNDEFINED)) {
             const value_isTransferringCaller_value  = value_isTransferringCaller!
             valueSerializer.writeBoolean(value_isTransferringCaller_value)
         }
@@ -501,7 +501,7 @@ export class UIExtensionOptions_serializer {
         let value_placeholder_type : int32 = RuntimeType.UNDEFINED
         value_placeholder_type = runtimeType(value_placeholder)
         valueSerializer.writeInt8((value_placeholder_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_placeholder_type)) {
+        if ((value_placeholder_type) != (RuntimeType.UNDEFINED)) {
             const value_placeholder_value  = value_placeholder!
             ComponentContent_serializer.write(valueSerializer, value_placeholder_value)
         }
@@ -509,7 +509,7 @@ export class UIExtensionOptions_serializer {
         let value_areaChangePlaceholder_type : int32 = RuntimeType.UNDEFINED
         value_areaChangePlaceholder_type = runtimeType(value_areaChangePlaceholder)
         valueSerializer.writeInt8((value_areaChangePlaceholder_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_areaChangePlaceholder_type)) {
+        if ((value_areaChangePlaceholder_type) != (RuntimeType.UNDEFINED)) {
             const value_areaChangePlaceholder_value  = value_areaChangePlaceholder!
             valueSerializer.writeInt32((value_areaChangePlaceholder_value.size).toInt())
             for (const pair of value_areaChangePlaceholder_value) {
@@ -523,7 +523,7 @@ export class UIExtensionOptions_serializer {
         let value_dpiFollowStrategy_type : int32 = RuntimeType.UNDEFINED
         value_dpiFollowStrategy_type = runtimeType(value_dpiFollowStrategy)
         valueSerializer.writeInt8((value_dpiFollowStrategy_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_dpiFollowStrategy_type)) {
+        if ((value_dpiFollowStrategy_type) != (RuntimeType.UNDEFINED)) {
             const value_dpiFollowStrategy_value  = (value_dpiFollowStrategy as DpiFollowStrategy)
             valueSerializer.writeInt32(TypeChecker.DpiFollowStrategy_ToNumeric(value_dpiFollowStrategy_value))
         }
@@ -531,7 +531,7 @@ export class UIExtensionOptions_serializer {
         let value_windowModeFollowStrategy_type : int32 = RuntimeType.UNDEFINED
         value_windowModeFollowStrategy_type = runtimeType(value_windowModeFollowStrategy)
         valueSerializer.writeInt8((value_windowModeFollowStrategy_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_windowModeFollowStrategy_type)) {
+        if ((value_windowModeFollowStrategy_type) != (RuntimeType.UNDEFINED)) {
             const value_windowModeFollowStrategy_value  = (value_windowModeFollowStrategy as WindowModeFollowStrategy)
             valueSerializer.writeInt32(TypeChecker.WindowModeFollowStrategy_ToNumeric(value_windowModeFollowStrategy_value))
         }
@@ -540,21 +540,21 @@ export class UIExtensionOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const isTransferringCaller_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let isTransferringCaller_buf : boolean | undefined
-        if ((RuntimeType.UNDEFINED) != (isTransferringCaller_buf_runtimeType))
+        if ((isTransferringCaller_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             isTransferringCaller_buf = valueDeserializer.readBoolean()
         }
         const isTransferringCaller_result : boolean | undefined = isTransferringCaller_buf
         const placeholder_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let placeholder_buf : ComponentContent | undefined
-        if ((RuntimeType.UNDEFINED) != (placeholder_buf_runtimeType))
+        if ((placeholder_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             placeholder_buf = (ComponentContent_serializer.read(valueDeserializer) as ComponentContent)
         }
         const placeholder_result : ComponentContent | undefined = placeholder_buf
         const areaChangePlaceholder_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let areaChangePlaceholder_buf : Map<string, ComponentContent> | undefined
-        if ((RuntimeType.UNDEFINED) != (areaChangePlaceholder_buf_runtimeType))
+        if ((areaChangePlaceholder_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const areaChangePlaceholder_buf__size : int32 = valueDeserializer.readInt32()
             let areaChangePlaceholder_buf_ : Map<string, ComponentContent> = new Map<string, ComponentContent>()
@@ -569,14 +569,14 @@ export class UIExtensionOptions_serializer {
         const areaChangePlaceholder_result : Map<string, ComponentContent> | undefined = areaChangePlaceholder_buf
         const dpiFollowStrategy_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let dpiFollowStrategy_buf : DpiFollowStrategy | undefined
-        if ((RuntimeType.UNDEFINED) != (dpiFollowStrategy_buf_runtimeType))
+        if ((dpiFollowStrategy_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             dpiFollowStrategy_buf = TypeChecker.DpiFollowStrategy_FromNumeric(valueDeserializer.readInt32())
         }
         const dpiFollowStrategy_result : DpiFollowStrategy | undefined = dpiFollowStrategy_buf
         const windowModeFollowStrategy_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let windowModeFollowStrategy_buf : WindowModeFollowStrategy | undefined
-        if ((RuntimeType.UNDEFINED) != (windowModeFollowStrategy_buf_runtimeType))
+        if ((windowModeFollowStrategy_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             windowModeFollowStrategy_buf = TypeChecker.WindowModeFollowStrategy_FromNumeric(valueDeserializer.readInt32())
         }

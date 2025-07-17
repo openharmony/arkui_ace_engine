@@ -146,7 +146,7 @@ void AniExports::setClasspath(const char* module, const char *classpath) {
 
 static std::map<std::string, std::string> g_defaultClasspaths = {
     {"InteropNativeModule", "L@koalaui/interop/InteropNativeModule/InteropNativeModule;"},
-    // todo leave just InteropNativeModule, define others via KOALA_ETS_INTEROP_MODULE_CLASSPATH
+    // Improve: leave just InteropNativeModule, define others via KOALA_ETS_INTEROP_MODULE_CLASSPATH
     {"TestNativeModule", "Larkui/generated/arkts/TestNativeModule/TestNativeModule;"},
     {"ArkUINativeModule", "Larkui/generated/arkts/ArkUINativeModule/ArkUINativeModule;"},
     {"ArkUIGeneratedNativeModule", "Larkui/generated/arkts/ArkUIGeneratedNativeModule/ArkUIGeneratedNativeModule;"},

@@ -46,8 +46,8 @@ export class ColorFilter implements MaterializedBase {
     static construct(value: Array<number>): KPointer {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.writeInt32((value.length).toInt())
-        for (let i = 0; i < value.length; i++) {
-            const value_element : number = value[i]
+        for (let value_counter_i = 0; value_counter_i < value.length; value_counter_i++) {
+            const value_element : number = value[value_counter_i]
             thisSerializer.writeNumber(value_element)
         }
         const retval  = ArkUIGeneratedNativeModule._ColorFilter_construct(thisSerializer.asBuffer(), thisSerializer.length())
@@ -263,7 +263,7 @@ export class AccessibilityOptions_serializer {
         let value_accessibilityPreferred_type : int32 = RuntimeType.UNDEFINED
         value_accessibilityPreferred_type = runtimeType(value_accessibilityPreferred)
         valueSerializer.writeInt8((value_accessibilityPreferred_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_accessibilityPreferred_type)) {
+        if ((value_accessibilityPreferred_type) != (RuntimeType.UNDEFINED)) {
             const value_accessibilityPreferred_value  = value_accessibilityPreferred!
             valueSerializer.writeBoolean(value_accessibilityPreferred_value)
         }
@@ -272,7 +272,7 @@ export class AccessibilityOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const accessibilityPreferred_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let accessibilityPreferred_buf : boolean | undefined
-        if ((RuntimeType.UNDEFINED) != (accessibilityPreferred_buf_runtimeType))
+        if ((accessibilityPreferred_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             accessibilityPreferred_buf = valueDeserializer.readBoolean()
         }
@@ -288,7 +288,7 @@ export class Bias_serializer {
         let value_horizontal_type : int32 = RuntimeType.UNDEFINED
         value_horizontal_type = runtimeType(value_horizontal)
         valueSerializer.writeInt8((value_horizontal_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_horizontal_type)) {
+        if ((value_horizontal_type) != (RuntimeType.UNDEFINED)) {
             const value_horizontal_value  = value_horizontal!
             valueSerializer.writeNumber(value_horizontal_value)
         }
@@ -296,7 +296,7 @@ export class Bias_serializer {
         let value_vertical_type : int32 = RuntimeType.UNDEFINED
         value_vertical_type = runtimeType(value_vertical)
         valueSerializer.writeInt8((value_vertical_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_vertical_type)) {
+        if ((value_vertical_type) != (RuntimeType.UNDEFINED)) {
             const value_vertical_value  = value_vertical!
             valueSerializer.writeNumber(value_vertical_value)
         }
@@ -305,14 +305,14 @@ export class Bias_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const horizontal_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let horizontal_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (horizontal_buf_runtimeType))
+        if ((horizontal_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             horizontal_buf = (valueDeserializer.readNumber() as number)
         }
         const horizontal_result : number | undefined = horizontal_buf
         const vertical_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let vertical_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (vertical_buf_runtimeType))
+        if ((vertical_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             vertical_buf = (valueDeserializer.readNumber() as number)
         }
@@ -328,7 +328,7 @@ export class ChainWeightOptions_serializer {
         let value_horizontal_type : int32 = RuntimeType.UNDEFINED
         value_horizontal_type = runtimeType(value_horizontal)
         valueSerializer.writeInt8((value_horizontal_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_horizontal_type)) {
+        if ((value_horizontal_type) != (RuntimeType.UNDEFINED)) {
             const value_horizontal_value  = value_horizontal!
             valueSerializer.writeNumber(value_horizontal_value)
         }
@@ -336,7 +336,7 @@ export class ChainWeightOptions_serializer {
         let value_vertical_type : int32 = RuntimeType.UNDEFINED
         value_vertical_type = runtimeType(value_vertical)
         valueSerializer.writeInt8((value_vertical_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_vertical_type)) {
+        if ((value_vertical_type) != (RuntimeType.UNDEFINED)) {
             const value_vertical_value  = value_vertical!
             valueSerializer.writeNumber(value_vertical_value)
         }
@@ -345,14 +345,14 @@ export class ChainWeightOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const horizontal_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let horizontal_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (horizontal_buf_runtimeType))
+        if ((horizontal_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             horizontal_buf = (valueDeserializer.readNumber() as number)
         }
         const horizontal_result : number | undefined = horizontal_buf
         const vertical_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let vertical_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (vertical_buf_runtimeType))
+        if ((vertical_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             vertical_buf = (valueDeserializer.readNumber() as number)
         }
@@ -390,7 +390,7 @@ export class EdgeOutlineStyles_serializer {
         let value_top_type : int32 = RuntimeType.UNDEFINED
         value_top_type = runtimeType(value_top)
         valueSerializer.writeInt8((value_top_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_top_type)) {
+        if ((value_top_type) != (RuntimeType.UNDEFINED)) {
             const value_top_value  = (value_top as OutlineStyle)
             valueSerializer.writeInt32(TypeChecker.OutlineStyle_ToNumeric(value_top_value))
         }
@@ -398,7 +398,7 @@ export class EdgeOutlineStyles_serializer {
         let value_right_type : int32 = RuntimeType.UNDEFINED
         value_right_type = runtimeType(value_right)
         valueSerializer.writeInt8((value_right_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_right_type)) {
+        if ((value_right_type) != (RuntimeType.UNDEFINED)) {
             const value_right_value  = (value_right as OutlineStyle)
             valueSerializer.writeInt32(TypeChecker.OutlineStyle_ToNumeric(value_right_value))
         }
@@ -406,7 +406,7 @@ export class EdgeOutlineStyles_serializer {
         let value_bottom_type : int32 = RuntimeType.UNDEFINED
         value_bottom_type = runtimeType(value_bottom)
         valueSerializer.writeInt8((value_bottom_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_bottom_type)) {
+        if ((value_bottom_type) != (RuntimeType.UNDEFINED)) {
             const value_bottom_value  = (value_bottom as OutlineStyle)
             valueSerializer.writeInt32(TypeChecker.OutlineStyle_ToNumeric(value_bottom_value))
         }
@@ -414,7 +414,7 @@ export class EdgeOutlineStyles_serializer {
         let value_left_type : int32 = RuntimeType.UNDEFINED
         value_left_type = runtimeType(value_left)
         valueSerializer.writeInt8((value_left_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_left_type)) {
+        if ((value_left_type) != (RuntimeType.UNDEFINED)) {
             const value_left_value  = (value_left as OutlineStyle)
             valueSerializer.writeInt32(TypeChecker.OutlineStyle_ToNumeric(value_left_value))
         }
@@ -423,28 +423,28 @@ export class EdgeOutlineStyles_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const top_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let top_buf : OutlineStyle | undefined
-        if ((RuntimeType.UNDEFINED) != (top_buf_runtimeType))
+        if ((top_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             top_buf = TypeChecker.OutlineStyle_FromNumeric(valueDeserializer.readInt32())
         }
         const top_result : OutlineStyle | undefined = top_buf
         const right_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let right_buf : OutlineStyle | undefined
-        if ((RuntimeType.UNDEFINED) != (right_buf_runtimeType))
+        if ((right_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             right_buf = TypeChecker.OutlineStyle_FromNumeric(valueDeserializer.readInt32())
         }
         const right_result : OutlineStyle | undefined = right_buf
         const bottom_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let bottom_buf : OutlineStyle | undefined
-        if ((RuntimeType.UNDEFINED) != (bottom_buf_runtimeType))
+        if ((bottom_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             bottom_buf = TypeChecker.OutlineStyle_FromNumeric(valueDeserializer.readInt32())
         }
         const bottom_result : OutlineStyle | undefined = bottom_buf
         const left_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let left_buf : OutlineStyle | undefined
-        if ((RuntimeType.UNDEFINED) != (left_buf_runtimeType))
+        if ((left_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             left_buf = TypeChecker.OutlineStyle_FromNumeric(valueDeserializer.readInt32())
         }
@@ -460,7 +460,7 @@ export class EdgeStyles_serializer {
         let value_top_type : int32 = RuntimeType.UNDEFINED
         value_top_type = runtimeType(value_top)
         valueSerializer.writeInt8((value_top_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_top_type)) {
+        if ((value_top_type) != (RuntimeType.UNDEFINED)) {
             const value_top_value  = (value_top as BorderStyle)
             valueSerializer.writeInt32(TypeChecker.BorderStyle_ToNumeric(value_top_value))
         }
@@ -468,7 +468,7 @@ export class EdgeStyles_serializer {
         let value_right_type : int32 = RuntimeType.UNDEFINED
         value_right_type = runtimeType(value_right)
         valueSerializer.writeInt8((value_right_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_right_type)) {
+        if ((value_right_type) != (RuntimeType.UNDEFINED)) {
             const value_right_value  = (value_right as BorderStyle)
             valueSerializer.writeInt32(TypeChecker.BorderStyle_ToNumeric(value_right_value))
         }
@@ -476,7 +476,7 @@ export class EdgeStyles_serializer {
         let value_bottom_type : int32 = RuntimeType.UNDEFINED
         value_bottom_type = runtimeType(value_bottom)
         valueSerializer.writeInt8((value_bottom_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_bottom_type)) {
+        if ((value_bottom_type) != (RuntimeType.UNDEFINED)) {
             const value_bottom_value  = (value_bottom as BorderStyle)
             valueSerializer.writeInt32(TypeChecker.BorderStyle_ToNumeric(value_bottom_value))
         }
@@ -484,7 +484,7 @@ export class EdgeStyles_serializer {
         let value_left_type : int32 = RuntimeType.UNDEFINED
         value_left_type = runtimeType(value_left)
         valueSerializer.writeInt8((value_left_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_left_type)) {
+        if ((value_left_type) != (RuntimeType.UNDEFINED)) {
             const value_left_value  = (value_left as BorderStyle)
             valueSerializer.writeInt32(TypeChecker.BorderStyle_ToNumeric(value_left_value))
         }
@@ -493,28 +493,28 @@ export class EdgeStyles_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const top_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let top_buf : BorderStyle | undefined
-        if ((RuntimeType.UNDEFINED) != (top_buf_runtimeType))
+        if ((top_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             top_buf = TypeChecker.BorderStyle_FromNumeric(valueDeserializer.readInt32())
         }
         const top_result : BorderStyle | undefined = top_buf
         const right_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let right_buf : BorderStyle | undefined
-        if ((RuntimeType.UNDEFINED) != (right_buf_runtimeType))
+        if ((right_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             right_buf = TypeChecker.BorderStyle_FromNumeric(valueDeserializer.readInt32())
         }
         const right_result : BorderStyle | undefined = right_buf
         const bottom_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let bottom_buf : BorderStyle | undefined
-        if ((RuntimeType.UNDEFINED) != (bottom_buf_runtimeType))
+        if ((bottom_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             bottom_buf = TypeChecker.BorderStyle_FromNumeric(valueDeserializer.readInt32())
         }
         const bottom_result : BorderStyle | undefined = bottom_buf
         const left_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let left_buf : BorderStyle | undefined
-        if ((RuntimeType.UNDEFINED) != (left_buf_runtimeType))
+        if ((left_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             left_buf = TypeChecker.BorderStyle_FromNumeric(valueDeserializer.readInt32())
         }
@@ -530,7 +530,7 @@ export class DividerStyleOptions_serializer {
         let value_strokeWidth_type : int32 = RuntimeType.UNDEFINED
         value_strokeWidth_type = runtimeType(value_strokeWidth)
         valueSerializer.writeInt8((value_strokeWidth_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_strokeWidth_type)) {
+        if ((value_strokeWidth_type) != (RuntimeType.UNDEFINED)) {
             const value_strokeWidth_value  = value_strokeWidth!
             LengthMetrics_serializer.write(valueSerializer, value_strokeWidth_value)
         }
@@ -538,7 +538,7 @@ export class DividerStyleOptions_serializer {
         let value_color_type : int32 = RuntimeType.UNDEFINED
         value_color_type = runtimeType(value_color)
         valueSerializer.writeInt8((value_color_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_color_type)) {
+        if ((value_color_type) != (RuntimeType.UNDEFINED)) {
             const value_color_value  = value_color!
             let value_color_value_type : int32 = RuntimeType.UNDEFINED
             value_color_value_type = runtimeType(value_color_value)
@@ -567,7 +567,7 @@ export class DividerStyleOptions_serializer {
         let value_startMargin_type : int32 = RuntimeType.UNDEFINED
         value_startMargin_type = runtimeType(value_startMargin)
         valueSerializer.writeInt8((value_startMargin_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_startMargin_type)) {
+        if ((value_startMargin_type) != (RuntimeType.UNDEFINED)) {
             const value_startMargin_value  = value_startMargin!
             LengthMetrics_serializer.write(valueSerializer, value_startMargin_value)
         }
@@ -575,7 +575,7 @@ export class DividerStyleOptions_serializer {
         let value_endMargin_type : int32 = RuntimeType.UNDEFINED
         value_endMargin_type = runtimeType(value_endMargin)
         valueSerializer.writeInt8((value_endMargin_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_endMargin_type)) {
+        if ((value_endMargin_type) != (RuntimeType.UNDEFINED)) {
             const value_endMargin_value  = value_endMargin!
             LengthMetrics_serializer.write(valueSerializer, value_endMargin_value)
         }
@@ -583,7 +583,7 @@ export class DividerStyleOptions_serializer {
         let value_mode_type : int32 = RuntimeType.UNDEFINED
         value_mode_type = runtimeType(value_mode)
         valueSerializer.writeInt8((value_mode_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_mode_type)) {
+        if ((value_mode_type) != (RuntimeType.UNDEFINED)) {
             const value_mode_value  = (value_mode as DividerMode)
             valueSerializer.writeInt32(TypeChecker.DividerMode_ToNumeric(value_mode_value))
         }
@@ -592,14 +592,14 @@ export class DividerStyleOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const strokeWidth_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let strokeWidth_buf : LengthMetrics | undefined
-        if ((RuntimeType.UNDEFINED) != (strokeWidth_buf_runtimeType))
+        if ((strokeWidth_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             strokeWidth_buf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
         }
         const strokeWidth_result : LengthMetrics | undefined = strokeWidth_buf
         const color_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let color_buf : ResourceColor | undefined
-        if ((RuntimeType.UNDEFINED) != (color_buf_runtimeType))
+        if ((color_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const color_buf__selector : int32 = valueDeserializer.readInt8()
             let color_buf_ : Color | number | string | Resource | undefined
@@ -623,21 +623,21 @@ export class DividerStyleOptions_serializer {
         const color_result : ResourceColor | undefined = color_buf
         const startMargin_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let startMargin_buf : LengthMetrics | undefined
-        if ((RuntimeType.UNDEFINED) != (startMargin_buf_runtimeType))
+        if ((startMargin_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             startMargin_buf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
         }
         const startMargin_result : LengthMetrics | undefined = startMargin_buf
         const endMargin_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let endMargin_buf : LengthMetrics | undefined
-        if ((RuntimeType.UNDEFINED) != (endMargin_buf_runtimeType))
+        if ((endMargin_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             endMargin_buf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
         }
         const endMargin_result : LengthMetrics | undefined = endMargin_buf
         const mode_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let mode_buf : DividerMode | undefined
-        if ((RuntimeType.UNDEFINED) != (mode_buf_runtimeType))
+        if ((mode_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             mode_buf = TypeChecker.DividerMode_FromNumeric(valueDeserializer.readInt32())
         }
@@ -653,7 +653,7 @@ export class EdgeColors_serializer {
         let value_top_type : int32 = RuntimeType.UNDEFINED
         value_top_type = runtimeType(value_top)
         valueSerializer.writeInt8((value_top_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_top_type)) {
+        if ((value_top_type) != (RuntimeType.UNDEFINED)) {
             const value_top_value  = value_top!
             let value_top_value_type : int32 = RuntimeType.UNDEFINED
             value_top_value_type = runtimeType(value_top_value)
@@ -682,7 +682,7 @@ export class EdgeColors_serializer {
         let value_right_type : int32 = RuntimeType.UNDEFINED
         value_right_type = runtimeType(value_right)
         valueSerializer.writeInt8((value_right_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_right_type)) {
+        if ((value_right_type) != (RuntimeType.UNDEFINED)) {
             const value_right_value  = value_right!
             let value_right_value_type : int32 = RuntimeType.UNDEFINED
             value_right_value_type = runtimeType(value_right_value)
@@ -711,7 +711,7 @@ export class EdgeColors_serializer {
         let value_bottom_type : int32 = RuntimeType.UNDEFINED
         value_bottom_type = runtimeType(value_bottom)
         valueSerializer.writeInt8((value_bottom_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_bottom_type)) {
+        if ((value_bottom_type) != (RuntimeType.UNDEFINED)) {
             const value_bottom_value  = value_bottom!
             let value_bottom_value_type : int32 = RuntimeType.UNDEFINED
             value_bottom_value_type = runtimeType(value_bottom_value)
@@ -740,7 +740,7 @@ export class EdgeColors_serializer {
         let value_left_type : int32 = RuntimeType.UNDEFINED
         value_left_type = runtimeType(value_left)
         valueSerializer.writeInt8((value_left_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_left_type)) {
+        if ((value_left_type) != (RuntimeType.UNDEFINED)) {
             const value_left_value  = value_left!
             let value_left_value_type : int32 = RuntimeType.UNDEFINED
             value_left_value_type = runtimeType(value_left_value)
@@ -770,7 +770,7 @@ export class EdgeColors_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const top_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let top_buf : ResourceColor | undefined
-        if ((RuntimeType.UNDEFINED) != (top_buf_runtimeType))
+        if ((top_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const top_buf__selector : int32 = valueDeserializer.readInt8()
             let top_buf_ : Color | number | string | Resource | undefined
@@ -794,7 +794,7 @@ export class EdgeColors_serializer {
         const top_result : ResourceColor | undefined = top_buf
         const right_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let right_buf : ResourceColor | undefined
-        if ((RuntimeType.UNDEFINED) != (right_buf_runtimeType))
+        if ((right_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const right_buf__selector : int32 = valueDeserializer.readInt8()
             let right_buf_ : Color | number | string | Resource | undefined
@@ -818,7 +818,7 @@ export class EdgeColors_serializer {
         const right_result : ResourceColor | undefined = right_buf
         const bottom_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let bottom_buf : ResourceColor | undefined
-        if ((RuntimeType.UNDEFINED) != (bottom_buf_runtimeType))
+        if ((bottom_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const bottom_buf__selector : int32 = valueDeserializer.readInt8()
             let bottom_buf_ : Color | number | string | Resource | undefined
@@ -842,7 +842,7 @@ export class EdgeColors_serializer {
         const bottom_result : ResourceColor | undefined = bottom_buf
         const left_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let left_buf : ResourceColor | undefined
-        if ((RuntimeType.UNDEFINED) != (left_buf_runtimeType))
+        if ((left_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const left_buf__selector : int32 = valueDeserializer.readInt8()
             let left_buf_ : Color | number | string | Resource | undefined
@@ -951,7 +951,7 @@ export class LocalizedBorderRadiuses_serializer {
         let value_topStart_type : int32 = RuntimeType.UNDEFINED
         value_topStart_type = runtimeType(value_topStart)
         valueSerializer.writeInt8((value_topStart_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_topStart_type)) {
+        if ((value_topStart_type) != (RuntimeType.UNDEFINED)) {
             const value_topStart_value  = value_topStart!
             LengthMetrics_serializer.write(valueSerializer, value_topStart_value)
         }
@@ -959,7 +959,7 @@ export class LocalizedBorderRadiuses_serializer {
         let value_topEnd_type : int32 = RuntimeType.UNDEFINED
         value_topEnd_type = runtimeType(value_topEnd)
         valueSerializer.writeInt8((value_topEnd_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_topEnd_type)) {
+        if ((value_topEnd_type) != (RuntimeType.UNDEFINED)) {
             const value_topEnd_value  = value_topEnd!
             LengthMetrics_serializer.write(valueSerializer, value_topEnd_value)
         }
@@ -967,7 +967,7 @@ export class LocalizedBorderRadiuses_serializer {
         let value_bottomStart_type : int32 = RuntimeType.UNDEFINED
         value_bottomStart_type = runtimeType(value_bottomStart)
         valueSerializer.writeInt8((value_bottomStart_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_bottomStart_type)) {
+        if ((value_bottomStart_type) != (RuntimeType.UNDEFINED)) {
             const value_bottomStart_value  = value_bottomStart!
             LengthMetrics_serializer.write(valueSerializer, value_bottomStart_value)
         }
@@ -975,7 +975,7 @@ export class LocalizedBorderRadiuses_serializer {
         let value_bottomEnd_type : int32 = RuntimeType.UNDEFINED
         value_bottomEnd_type = runtimeType(value_bottomEnd)
         valueSerializer.writeInt8((value_bottomEnd_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_bottomEnd_type)) {
+        if ((value_bottomEnd_type) != (RuntimeType.UNDEFINED)) {
             const value_bottomEnd_value  = value_bottomEnd!
             LengthMetrics_serializer.write(valueSerializer, value_bottomEnd_value)
         }
@@ -984,28 +984,28 @@ export class LocalizedBorderRadiuses_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const topStart_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let topStart_buf : LengthMetrics | undefined
-        if ((RuntimeType.UNDEFINED) != (topStart_buf_runtimeType))
+        if ((topStart_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             topStart_buf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
         }
         const topStart_result : LengthMetrics | undefined = topStart_buf
         const topEnd_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let topEnd_buf : LengthMetrics | undefined
-        if ((RuntimeType.UNDEFINED) != (topEnd_buf_runtimeType))
+        if ((topEnd_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             topEnd_buf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
         }
         const topEnd_result : LengthMetrics | undefined = topEnd_buf
         const bottomStart_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let bottomStart_buf : LengthMetrics | undefined
-        if ((RuntimeType.UNDEFINED) != (bottomStart_buf_runtimeType))
+        if ((bottomStart_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             bottomStart_buf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
         }
         const bottomStart_result : LengthMetrics | undefined = bottomStart_buf
         const bottomEnd_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let bottomEnd_buf : LengthMetrics | undefined
-        if ((RuntimeType.UNDEFINED) != (bottomEnd_buf_runtimeType))
+        if ((bottomEnd_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             bottomEnd_buf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
         }
@@ -1021,7 +1021,7 @@ export class LocalizedEdgeColors_serializer {
         let value_top_type : int32 = RuntimeType.UNDEFINED
         value_top_type = runtimeType(value_top)
         valueSerializer.writeInt8((value_top_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_top_type)) {
+        if ((value_top_type) != (RuntimeType.UNDEFINED)) {
             const value_top_value  = value_top!
             let value_top_value_type : int32 = RuntimeType.UNDEFINED
             value_top_value_type = runtimeType(value_top_value)
@@ -1050,7 +1050,7 @@ export class LocalizedEdgeColors_serializer {
         let value_end_type : int32 = RuntimeType.UNDEFINED
         value_end_type = runtimeType(value_end)
         valueSerializer.writeInt8((value_end_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_end_type)) {
+        if ((value_end_type) != (RuntimeType.UNDEFINED)) {
             const value_end_value  = value_end!
             let value_end_value_type : int32 = RuntimeType.UNDEFINED
             value_end_value_type = runtimeType(value_end_value)
@@ -1079,7 +1079,7 @@ export class LocalizedEdgeColors_serializer {
         let value_bottom_type : int32 = RuntimeType.UNDEFINED
         value_bottom_type = runtimeType(value_bottom)
         valueSerializer.writeInt8((value_bottom_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_bottom_type)) {
+        if ((value_bottom_type) != (RuntimeType.UNDEFINED)) {
             const value_bottom_value  = value_bottom!
             let value_bottom_value_type : int32 = RuntimeType.UNDEFINED
             value_bottom_value_type = runtimeType(value_bottom_value)
@@ -1108,7 +1108,7 @@ export class LocalizedEdgeColors_serializer {
         let value_start_type : int32 = RuntimeType.UNDEFINED
         value_start_type = runtimeType(value_start)
         valueSerializer.writeInt8((value_start_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_start_type)) {
+        if ((value_start_type) != (RuntimeType.UNDEFINED)) {
             const value_start_value  = value_start!
             let value_start_value_type : int32 = RuntimeType.UNDEFINED
             value_start_value_type = runtimeType(value_start_value)
@@ -1138,7 +1138,7 @@ export class LocalizedEdgeColors_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const top_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let top_buf : ResourceColor | undefined
-        if ((RuntimeType.UNDEFINED) != (top_buf_runtimeType))
+        if ((top_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const top_buf__selector : int32 = valueDeserializer.readInt8()
             let top_buf_ : Color | number | string | Resource | undefined
@@ -1162,7 +1162,7 @@ export class LocalizedEdgeColors_serializer {
         const top_result : ResourceColor | undefined = top_buf
         const end_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let end_buf : ResourceColor | undefined
-        if ((RuntimeType.UNDEFINED) != (end_buf_runtimeType))
+        if ((end_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const end_buf__selector : int32 = valueDeserializer.readInt8()
             let end_buf_ : Color | number | string | Resource | undefined
@@ -1186,7 +1186,7 @@ export class LocalizedEdgeColors_serializer {
         const end_result : ResourceColor | undefined = end_buf
         const bottom_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let bottom_buf : ResourceColor | undefined
-        if ((RuntimeType.UNDEFINED) != (bottom_buf_runtimeType))
+        if ((bottom_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const bottom_buf__selector : int32 = valueDeserializer.readInt8()
             let bottom_buf_ : Color | number | string | Resource | undefined
@@ -1210,7 +1210,7 @@ export class LocalizedEdgeColors_serializer {
         const bottom_result : ResourceColor | undefined = bottom_buf
         const start_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let start_buf : ResourceColor | undefined
-        if ((RuntimeType.UNDEFINED) != (start_buf_runtimeType))
+        if ((start_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const start_buf__selector : int32 = valueDeserializer.readInt8()
             let start_buf_ : Color | number | string | Resource | undefined
@@ -1243,7 +1243,7 @@ export class LocalizedEdges_serializer {
         let value_top_type : int32 = RuntimeType.UNDEFINED
         value_top_type = runtimeType(value_top)
         valueSerializer.writeInt8((value_top_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_top_type)) {
+        if ((value_top_type) != (RuntimeType.UNDEFINED)) {
             const value_top_value  = value_top!
             LengthMetrics_serializer.write(valueSerializer, value_top_value)
         }
@@ -1251,7 +1251,7 @@ export class LocalizedEdges_serializer {
         let value_start_type : int32 = RuntimeType.UNDEFINED
         value_start_type = runtimeType(value_start)
         valueSerializer.writeInt8((value_start_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_start_type)) {
+        if ((value_start_type) != (RuntimeType.UNDEFINED)) {
             const value_start_value  = value_start!
             LengthMetrics_serializer.write(valueSerializer, value_start_value)
         }
@@ -1259,7 +1259,7 @@ export class LocalizedEdges_serializer {
         let value_bottom_type : int32 = RuntimeType.UNDEFINED
         value_bottom_type = runtimeType(value_bottom)
         valueSerializer.writeInt8((value_bottom_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_bottom_type)) {
+        if ((value_bottom_type) != (RuntimeType.UNDEFINED)) {
             const value_bottom_value  = value_bottom!
             LengthMetrics_serializer.write(valueSerializer, value_bottom_value)
         }
@@ -1267,7 +1267,7 @@ export class LocalizedEdges_serializer {
         let value_end_type : int32 = RuntimeType.UNDEFINED
         value_end_type = runtimeType(value_end)
         valueSerializer.writeInt8((value_end_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_end_type)) {
+        if ((value_end_type) != (RuntimeType.UNDEFINED)) {
             const value_end_value  = value_end!
             LengthMetrics_serializer.write(valueSerializer, value_end_value)
         }
@@ -1276,28 +1276,28 @@ export class LocalizedEdges_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const top_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let top_buf : LengthMetrics | undefined
-        if ((RuntimeType.UNDEFINED) != (top_buf_runtimeType))
+        if ((top_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             top_buf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
         }
         const top_result : LengthMetrics | undefined = top_buf
         const start_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let start_buf : LengthMetrics | undefined
-        if ((RuntimeType.UNDEFINED) != (start_buf_runtimeType))
+        if ((start_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             start_buf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
         }
         const start_result : LengthMetrics | undefined = start_buf
         const bottom_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let bottom_buf : LengthMetrics | undefined
-        if ((RuntimeType.UNDEFINED) != (bottom_buf_runtimeType))
+        if ((bottom_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             bottom_buf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
         }
         const bottom_result : LengthMetrics | undefined = bottom_buf
         const end_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let end_buf : LengthMetrics | undefined
-        if ((RuntimeType.UNDEFINED) != (end_buf_runtimeType))
+        if ((end_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             end_buf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
         }
@@ -1313,7 +1313,7 @@ export class LocalizedEdgeWidths_serializer {
         let value_top_type : int32 = RuntimeType.UNDEFINED
         value_top_type = runtimeType(value_top)
         valueSerializer.writeInt8((value_top_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_top_type)) {
+        if ((value_top_type) != (RuntimeType.UNDEFINED)) {
             const value_top_value  = value_top!
             LengthMetrics_serializer.write(valueSerializer, value_top_value)
         }
@@ -1321,7 +1321,7 @@ export class LocalizedEdgeWidths_serializer {
         let value_end_type : int32 = RuntimeType.UNDEFINED
         value_end_type = runtimeType(value_end)
         valueSerializer.writeInt8((value_end_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_end_type)) {
+        if ((value_end_type) != (RuntimeType.UNDEFINED)) {
             const value_end_value  = value_end!
             LengthMetrics_serializer.write(valueSerializer, value_end_value)
         }
@@ -1329,7 +1329,7 @@ export class LocalizedEdgeWidths_serializer {
         let value_bottom_type : int32 = RuntimeType.UNDEFINED
         value_bottom_type = runtimeType(value_bottom)
         valueSerializer.writeInt8((value_bottom_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_bottom_type)) {
+        if ((value_bottom_type) != (RuntimeType.UNDEFINED)) {
             const value_bottom_value  = value_bottom!
             LengthMetrics_serializer.write(valueSerializer, value_bottom_value)
         }
@@ -1337,7 +1337,7 @@ export class LocalizedEdgeWidths_serializer {
         let value_start_type : int32 = RuntimeType.UNDEFINED
         value_start_type = runtimeType(value_start)
         valueSerializer.writeInt8((value_start_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_start_type)) {
+        if ((value_start_type) != (RuntimeType.UNDEFINED)) {
             const value_start_value  = value_start!
             LengthMetrics_serializer.write(valueSerializer, value_start_value)
         }
@@ -1346,28 +1346,28 @@ export class LocalizedEdgeWidths_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const top_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let top_buf : LengthMetrics | undefined
-        if ((RuntimeType.UNDEFINED) != (top_buf_runtimeType))
+        if ((top_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             top_buf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
         }
         const top_result : LengthMetrics | undefined = top_buf
         const end_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let end_buf : LengthMetrics | undefined
-        if ((RuntimeType.UNDEFINED) != (end_buf_runtimeType))
+        if ((end_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             end_buf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
         }
         const end_result : LengthMetrics | undefined = end_buf
         const bottom_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let bottom_buf : LengthMetrics | undefined
-        if ((RuntimeType.UNDEFINED) != (bottom_buf_runtimeType))
+        if ((bottom_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             bottom_buf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
         }
         const bottom_result : LengthMetrics | undefined = bottom_buf
         const start_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let start_buf : LengthMetrics | undefined
-        if ((RuntimeType.UNDEFINED) != (start_buf_runtimeType))
+        if ((start_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             start_buf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
         }
@@ -1383,7 +1383,7 @@ export class LocalizedPadding_serializer {
         let value_top_type : int32 = RuntimeType.UNDEFINED
         value_top_type = runtimeType(value_top)
         valueSerializer.writeInt8((value_top_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_top_type)) {
+        if ((value_top_type) != (RuntimeType.UNDEFINED)) {
             const value_top_value  = value_top!
             LengthMetrics_serializer.write(valueSerializer, value_top_value)
         }
@@ -1391,7 +1391,7 @@ export class LocalizedPadding_serializer {
         let value_end_type : int32 = RuntimeType.UNDEFINED
         value_end_type = runtimeType(value_end)
         valueSerializer.writeInt8((value_end_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_end_type)) {
+        if ((value_end_type) != (RuntimeType.UNDEFINED)) {
             const value_end_value  = value_end!
             LengthMetrics_serializer.write(valueSerializer, value_end_value)
         }
@@ -1399,7 +1399,7 @@ export class LocalizedPadding_serializer {
         let value_bottom_type : int32 = RuntimeType.UNDEFINED
         value_bottom_type = runtimeType(value_bottom)
         valueSerializer.writeInt8((value_bottom_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_bottom_type)) {
+        if ((value_bottom_type) != (RuntimeType.UNDEFINED)) {
             const value_bottom_value  = value_bottom!
             LengthMetrics_serializer.write(valueSerializer, value_bottom_value)
         }
@@ -1407,7 +1407,7 @@ export class LocalizedPadding_serializer {
         let value_start_type : int32 = RuntimeType.UNDEFINED
         value_start_type = runtimeType(value_start)
         valueSerializer.writeInt8((value_start_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_start_type)) {
+        if ((value_start_type) != (RuntimeType.UNDEFINED)) {
             const value_start_value  = value_start!
             LengthMetrics_serializer.write(valueSerializer, value_start_value)
         }
@@ -1416,28 +1416,28 @@ export class LocalizedPadding_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const top_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let top_buf : LengthMetrics | undefined
-        if ((RuntimeType.UNDEFINED) != (top_buf_runtimeType))
+        if ((top_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             top_buf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
         }
         const top_result : LengthMetrics | undefined = top_buf
         const end_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let end_buf : LengthMetrics | undefined
-        if ((RuntimeType.UNDEFINED) != (end_buf_runtimeType))
+        if ((end_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             end_buf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
         }
         const end_result : LengthMetrics | undefined = end_buf
         const bottom_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let bottom_buf : LengthMetrics | undefined
-        if ((RuntimeType.UNDEFINED) != (bottom_buf_runtimeType))
+        if ((bottom_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             bottom_buf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
         }
         const bottom_result : LengthMetrics | undefined = bottom_buf
         const start_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let start_buf : LengthMetrics | undefined
-        if ((RuntimeType.UNDEFINED) != (start_buf_runtimeType))
+        if ((start_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             start_buf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
         }
@@ -1453,7 +1453,7 @@ export class LocalizedPosition_serializer {
         let value_start_type : int32 = RuntimeType.UNDEFINED
         value_start_type = runtimeType(value_start)
         valueSerializer.writeInt8((value_start_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_start_type)) {
+        if ((value_start_type) != (RuntimeType.UNDEFINED)) {
             const value_start_value  = value_start!
             LengthMetrics_serializer.write(valueSerializer, value_start_value)
         }
@@ -1461,7 +1461,7 @@ export class LocalizedPosition_serializer {
         let value_top_type : int32 = RuntimeType.UNDEFINED
         value_top_type = runtimeType(value_top)
         valueSerializer.writeInt8((value_top_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_top_type)) {
+        if ((value_top_type) != (RuntimeType.UNDEFINED)) {
             const value_top_value  = value_top!
             LengthMetrics_serializer.write(valueSerializer, value_top_value)
         }
@@ -1470,14 +1470,14 @@ export class LocalizedPosition_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const start_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let start_buf : LengthMetrics | undefined
-        if ((RuntimeType.UNDEFINED) != (start_buf_runtimeType))
+        if ((start_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             start_buf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
         }
         const start_result : LengthMetrics | undefined = start_buf
         const top_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let top_buf : LengthMetrics | undefined
-        if ((RuntimeType.UNDEFINED) != (top_buf_runtimeType))
+        if ((top_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             top_buf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
         }
@@ -1569,7 +1569,7 @@ export class BorderRadiuses_serializer {
         let value_topLeft_type : int32 = RuntimeType.UNDEFINED
         value_topLeft_type = runtimeType(value_topLeft)
         valueSerializer.writeInt8((value_topLeft_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_topLeft_type)) {
+        if ((value_topLeft_type) != (RuntimeType.UNDEFINED)) {
             const value_topLeft_value  = value_topLeft!
             let value_topLeft_value_type : int32 = RuntimeType.UNDEFINED
             value_topLeft_value_type = runtimeType(value_topLeft_value)
@@ -1593,7 +1593,7 @@ export class BorderRadiuses_serializer {
         let value_topRight_type : int32 = RuntimeType.UNDEFINED
         value_topRight_type = runtimeType(value_topRight)
         valueSerializer.writeInt8((value_topRight_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_topRight_type)) {
+        if ((value_topRight_type) != (RuntimeType.UNDEFINED)) {
             const value_topRight_value  = value_topRight!
             let value_topRight_value_type : int32 = RuntimeType.UNDEFINED
             value_topRight_value_type = runtimeType(value_topRight_value)
@@ -1617,7 +1617,7 @@ export class BorderRadiuses_serializer {
         let value_bottomLeft_type : int32 = RuntimeType.UNDEFINED
         value_bottomLeft_type = runtimeType(value_bottomLeft)
         valueSerializer.writeInt8((value_bottomLeft_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_bottomLeft_type)) {
+        if ((value_bottomLeft_type) != (RuntimeType.UNDEFINED)) {
             const value_bottomLeft_value  = value_bottomLeft!
             let value_bottomLeft_value_type : int32 = RuntimeType.UNDEFINED
             value_bottomLeft_value_type = runtimeType(value_bottomLeft_value)
@@ -1641,7 +1641,7 @@ export class BorderRadiuses_serializer {
         let value_bottomRight_type : int32 = RuntimeType.UNDEFINED
         value_bottomRight_type = runtimeType(value_bottomRight)
         valueSerializer.writeInt8((value_bottomRight_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_bottomRight_type)) {
+        if ((value_bottomRight_type) != (RuntimeType.UNDEFINED)) {
             const value_bottomRight_value  = value_bottomRight!
             let value_bottomRight_value_type : int32 = RuntimeType.UNDEFINED
             value_bottomRight_value_type = runtimeType(value_bottomRight_value)
@@ -1666,7 +1666,7 @@ export class BorderRadiuses_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const topLeft_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let topLeft_buf : Length | undefined
-        if ((RuntimeType.UNDEFINED) != (topLeft_buf_runtimeType))
+        if ((topLeft_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const topLeft_buf__selector : int32 = valueDeserializer.readInt8()
             let topLeft_buf_ : string | number | Resource | undefined
@@ -1687,7 +1687,7 @@ export class BorderRadiuses_serializer {
         const topLeft_result : Length | undefined = topLeft_buf
         const topRight_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let topRight_buf : Length | undefined
-        if ((RuntimeType.UNDEFINED) != (topRight_buf_runtimeType))
+        if ((topRight_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const topRight_buf__selector : int32 = valueDeserializer.readInt8()
             let topRight_buf_ : string | number | Resource | undefined
@@ -1708,7 +1708,7 @@ export class BorderRadiuses_serializer {
         const topRight_result : Length | undefined = topRight_buf
         const bottomLeft_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let bottomLeft_buf : Length | undefined
-        if ((RuntimeType.UNDEFINED) != (bottomLeft_buf_runtimeType))
+        if ((bottomLeft_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const bottomLeft_buf__selector : int32 = valueDeserializer.readInt8()
             let bottomLeft_buf_ : string | number | Resource | undefined
@@ -1729,7 +1729,7 @@ export class BorderRadiuses_serializer {
         const bottomLeft_result : Length | undefined = bottomLeft_buf
         const bottomRight_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let bottomRight_buf : Length | undefined
-        if ((RuntimeType.UNDEFINED) != (bottomRight_buf_runtimeType))
+        if ((bottomRight_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const bottomRight_buf__selector : int32 = valueDeserializer.readInt8()
             let bottomRight_buf_ : string | number | Resource | undefined
@@ -1759,7 +1759,7 @@ export class ConstraintSizeOptions_serializer {
         let value_minWidth_type : int32 = RuntimeType.UNDEFINED
         value_minWidth_type = runtimeType(value_minWidth)
         valueSerializer.writeInt8((value_minWidth_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_minWidth_type)) {
+        if ((value_minWidth_type) != (RuntimeType.UNDEFINED)) {
             const value_minWidth_value  = value_minWidth!
             let value_minWidth_value_type : int32 = RuntimeType.UNDEFINED
             value_minWidth_value_type = runtimeType(value_minWidth_value)
@@ -1783,7 +1783,7 @@ export class ConstraintSizeOptions_serializer {
         let value_maxWidth_type : int32 = RuntimeType.UNDEFINED
         value_maxWidth_type = runtimeType(value_maxWidth)
         valueSerializer.writeInt8((value_maxWidth_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_maxWidth_type)) {
+        if ((value_maxWidth_type) != (RuntimeType.UNDEFINED)) {
             const value_maxWidth_value  = value_maxWidth!
             let value_maxWidth_value_type : int32 = RuntimeType.UNDEFINED
             value_maxWidth_value_type = runtimeType(value_maxWidth_value)
@@ -1807,7 +1807,7 @@ export class ConstraintSizeOptions_serializer {
         let value_minHeight_type : int32 = RuntimeType.UNDEFINED
         value_minHeight_type = runtimeType(value_minHeight)
         valueSerializer.writeInt8((value_minHeight_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_minHeight_type)) {
+        if ((value_minHeight_type) != (RuntimeType.UNDEFINED)) {
             const value_minHeight_value  = value_minHeight!
             let value_minHeight_value_type : int32 = RuntimeType.UNDEFINED
             value_minHeight_value_type = runtimeType(value_minHeight_value)
@@ -1831,7 +1831,7 @@ export class ConstraintSizeOptions_serializer {
         let value_maxHeight_type : int32 = RuntimeType.UNDEFINED
         value_maxHeight_type = runtimeType(value_maxHeight)
         valueSerializer.writeInt8((value_maxHeight_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_maxHeight_type)) {
+        if ((value_maxHeight_type) != (RuntimeType.UNDEFINED)) {
             const value_maxHeight_value  = value_maxHeight!
             let value_maxHeight_value_type : int32 = RuntimeType.UNDEFINED
             value_maxHeight_value_type = runtimeType(value_maxHeight_value)
@@ -1856,7 +1856,7 @@ export class ConstraintSizeOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const minWidth_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let minWidth_buf : Length | undefined
-        if ((RuntimeType.UNDEFINED) != (minWidth_buf_runtimeType))
+        if ((minWidth_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const minWidth_buf__selector : int32 = valueDeserializer.readInt8()
             let minWidth_buf_ : string | number | Resource | undefined
@@ -1877,7 +1877,7 @@ export class ConstraintSizeOptions_serializer {
         const minWidth_result : Length | undefined = minWidth_buf
         const maxWidth_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let maxWidth_buf : Length | undefined
-        if ((RuntimeType.UNDEFINED) != (maxWidth_buf_runtimeType))
+        if ((maxWidth_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const maxWidth_buf__selector : int32 = valueDeserializer.readInt8()
             let maxWidth_buf_ : string | number | Resource | undefined
@@ -1898,7 +1898,7 @@ export class ConstraintSizeOptions_serializer {
         const maxWidth_result : Length | undefined = maxWidth_buf
         const minHeight_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let minHeight_buf : Length | undefined
-        if ((RuntimeType.UNDEFINED) != (minHeight_buf_runtimeType))
+        if ((minHeight_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const minHeight_buf__selector : int32 = valueDeserializer.readInt8()
             let minHeight_buf_ : string | number | Resource | undefined
@@ -1919,7 +1919,7 @@ export class ConstraintSizeOptions_serializer {
         const minHeight_result : Length | undefined = minHeight_buf
         const maxHeight_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let maxHeight_buf : Length | undefined
-        if ((RuntimeType.UNDEFINED) != (maxHeight_buf_runtimeType))
+        if ((maxHeight_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const maxHeight_buf__selector : int32 = valueDeserializer.readInt8()
             let maxHeight_buf_ : string | number | Resource | undefined
@@ -1949,7 +1949,7 @@ export class EdgeOutlineWidths_serializer {
         let value_top_type : int32 = RuntimeType.UNDEFINED
         value_top_type = runtimeType(value_top)
         valueSerializer.writeInt8((value_top_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_top_type)) {
+        if ((value_top_type) != (RuntimeType.UNDEFINED)) {
             const value_top_value  = value_top!
             let value_top_value_type : int32 = RuntimeType.UNDEFINED
             value_top_value_type = runtimeType(value_top_value)
@@ -1973,7 +1973,7 @@ export class EdgeOutlineWidths_serializer {
         let value_right_type : int32 = RuntimeType.UNDEFINED
         value_right_type = runtimeType(value_right)
         valueSerializer.writeInt8((value_right_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_right_type)) {
+        if ((value_right_type) != (RuntimeType.UNDEFINED)) {
             const value_right_value  = value_right!
             let value_right_value_type : int32 = RuntimeType.UNDEFINED
             value_right_value_type = runtimeType(value_right_value)
@@ -1997,7 +1997,7 @@ export class EdgeOutlineWidths_serializer {
         let value_bottom_type : int32 = RuntimeType.UNDEFINED
         value_bottom_type = runtimeType(value_bottom)
         valueSerializer.writeInt8((value_bottom_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_bottom_type)) {
+        if ((value_bottom_type) != (RuntimeType.UNDEFINED)) {
             const value_bottom_value  = value_bottom!
             let value_bottom_value_type : int32 = RuntimeType.UNDEFINED
             value_bottom_value_type = runtimeType(value_bottom_value)
@@ -2021,7 +2021,7 @@ export class EdgeOutlineWidths_serializer {
         let value_left_type : int32 = RuntimeType.UNDEFINED
         value_left_type = runtimeType(value_left)
         valueSerializer.writeInt8((value_left_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_left_type)) {
+        if ((value_left_type) != (RuntimeType.UNDEFINED)) {
             const value_left_value  = value_left!
             let value_left_value_type : int32 = RuntimeType.UNDEFINED
             value_left_value_type = runtimeType(value_left_value)
@@ -2046,7 +2046,7 @@ export class EdgeOutlineWidths_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const top_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let top_buf : Dimension | undefined
-        if ((RuntimeType.UNDEFINED) != (top_buf_runtimeType))
+        if ((top_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const top_buf__selector : int32 = valueDeserializer.readInt8()
             let top_buf_ : string | number | Resource | undefined
@@ -2067,7 +2067,7 @@ export class EdgeOutlineWidths_serializer {
         const top_result : Dimension | undefined = top_buf
         const right_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let right_buf : Dimension | undefined
-        if ((RuntimeType.UNDEFINED) != (right_buf_runtimeType))
+        if ((right_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const right_buf__selector : int32 = valueDeserializer.readInt8()
             let right_buf_ : string | number | Resource | undefined
@@ -2088,7 +2088,7 @@ export class EdgeOutlineWidths_serializer {
         const right_result : Dimension | undefined = right_buf
         const bottom_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let bottom_buf : Dimension | undefined
-        if ((RuntimeType.UNDEFINED) != (bottom_buf_runtimeType))
+        if ((bottom_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const bottom_buf__selector : int32 = valueDeserializer.readInt8()
             let bottom_buf_ : string | number | Resource | undefined
@@ -2109,7 +2109,7 @@ export class EdgeOutlineWidths_serializer {
         const bottom_result : Dimension | undefined = bottom_buf
         const left_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let left_buf : Dimension | undefined
-        if ((RuntimeType.UNDEFINED) != (left_buf_runtimeType))
+        if ((left_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const left_buf__selector : int32 = valueDeserializer.readInt8()
             let left_buf_ : string | number | Resource | undefined
@@ -2139,7 +2139,7 @@ export class Edges_serializer {
         let value_top_type : int32 = RuntimeType.UNDEFINED
         value_top_type = runtimeType(value_top)
         valueSerializer.writeInt8((value_top_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_top_type)) {
+        if ((value_top_type) != (RuntimeType.UNDEFINED)) {
             const value_top_value  = value_top!
             let value_top_value_type : int32 = RuntimeType.UNDEFINED
             value_top_value_type = runtimeType(value_top_value)
@@ -2163,7 +2163,7 @@ export class Edges_serializer {
         let value_left_type : int32 = RuntimeType.UNDEFINED
         value_left_type = runtimeType(value_left)
         valueSerializer.writeInt8((value_left_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_left_type)) {
+        if ((value_left_type) != (RuntimeType.UNDEFINED)) {
             const value_left_value  = value_left!
             let value_left_value_type : int32 = RuntimeType.UNDEFINED
             value_left_value_type = runtimeType(value_left_value)
@@ -2187,7 +2187,7 @@ export class Edges_serializer {
         let value_bottom_type : int32 = RuntimeType.UNDEFINED
         value_bottom_type = runtimeType(value_bottom)
         valueSerializer.writeInt8((value_bottom_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_bottom_type)) {
+        if ((value_bottom_type) != (RuntimeType.UNDEFINED)) {
             const value_bottom_value  = value_bottom!
             let value_bottom_value_type : int32 = RuntimeType.UNDEFINED
             value_bottom_value_type = runtimeType(value_bottom_value)
@@ -2211,7 +2211,7 @@ export class Edges_serializer {
         let value_right_type : int32 = RuntimeType.UNDEFINED
         value_right_type = runtimeType(value_right)
         valueSerializer.writeInt8((value_right_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_right_type)) {
+        if ((value_right_type) != (RuntimeType.UNDEFINED)) {
             const value_right_value  = value_right!
             let value_right_value_type : int32 = RuntimeType.UNDEFINED
             value_right_value_type = runtimeType(value_right_value)
@@ -2236,7 +2236,7 @@ export class Edges_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const top_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let top_buf : Dimension | undefined
-        if ((RuntimeType.UNDEFINED) != (top_buf_runtimeType))
+        if ((top_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const top_buf__selector : int32 = valueDeserializer.readInt8()
             let top_buf_ : string | number | Resource | undefined
@@ -2257,7 +2257,7 @@ export class Edges_serializer {
         const top_result : Dimension | undefined = top_buf
         const left_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let left_buf : Dimension | undefined
-        if ((RuntimeType.UNDEFINED) != (left_buf_runtimeType))
+        if ((left_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const left_buf__selector : int32 = valueDeserializer.readInt8()
             let left_buf_ : string | number | Resource | undefined
@@ -2278,7 +2278,7 @@ export class Edges_serializer {
         const left_result : Dimension | undefined = left_buf
         const bottom_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let bottom_buf : Dimension | undefined
-        if ((RuntimeType.UNDEFINED) != (bottom_buf_runtimeType))
+        if ((bottom_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const bottom_buf__selector : int32 = valueDeserializer.readInt8()
             let bottom_buf_ : string | number | Resource | undefined
@@ -2299,7 +2299,7 @@ export class Edges_serializer {
         const bottom_result : Dimension | undefined = bottom_buf
         const right_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let right_buf : Dimension | undefined
-        if ((RuntimeType.UNDEFINED) != (right_buf_runtimeType))
+        if ((right_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const right_buf__selector : int32 = valueDeserializer.readInt8()
             let right_buf_ : string | number | Resource | undefined
@@ -2329,7 +2329,7 @@ export class EdgeWidths_serializer {
         let value_top_type : int32 = RuntimeType.UNDEFINED
         value_top_type = runtimeType(value_top)
         valueSerializer.writeInt8((value_top_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_top_type)) {
+        if ((value_top_type) != (RuntimeType.UNDEFINED)) {
             const value_top_value  = value_top!
             let value_top_value_type : int32 = RuntimeType.UNDEFINED
             value_top_value_type = runtimeType(value_top_value)
@@ -2353,7 +2353,7 @@ export class EdgeWidths_serializer {
         let value_right_type : int32 = RuntimeType.UNDEFINED
         value_right_type = runtimeType(value_right)
         valueSerializer.writeInt8((value_right_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_right_type)) {
+        if ((value_right_type) != (RuntimeType.UNDEFINED)) {
             const value_right_value  = value_right!
             let value_right_value_type : int32 = RuntimeType.UNDEFINED
             value_right_value_type = runtimeType(value_right_value)
@@ -2377,7 +2377,7 @@ export class EdgeWidths_serializer {
         let value_bottom_type : int32 = RuntimeType.UNDEFINED
         value_bottom_type = runtimeType(value_bottom)
         valueSerializer.writeInt8((value_bottom_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_bottom_type)) {
+        if ((value_bottom_type) != (RuntimeType.UNDEFINED)) {
             const value_bottom_value  = value_bottom!
             let value_bottom_value_type : int32 = RuntimeType.UNDEFINED
             value_bottom_value_type = runtimeType(value_bottom_value)
@@ -2401,7 +2401,7 @@ export class EdgeWidths_serializer {
         let value_left_type : int32 = RuntimeType.UNDEFINED
         value_left_type = runtimeType(value_left)
         valueSerializer.writeInt8((value_left_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_left_type)) {
+        if ((value_left_type) != (RuntimeType.UNDEFINED)) {
             const value_left_value  = value_left!
             let value_left_value_type : int32 = RuntimeType.UNDEFINED
             value_left_value_type = runtimeType(value_left_value)
@@ -2426,7 +2426,7 @@ export class EdgeWidths_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const top_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let top_buf : Length | undefined
-        if ((RuntimeType.UNDEFINED) != (top_buf_runtimeType))
+        if ((top_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const top_buf__selector : int32 = valueDeserializer.readInt8()
             let top_buf_ : string | number | Resource | undefined
@@ -2447,7 +2447,7 @@ export class EdgeWidths_serializer {
         const top_result : Length | undefined = top_buf
         const right_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let right_buf : Length | undefined
-        if ((RuntimeType.UNDEFINED) != (right_buf_runtimeType))
+        if ((right_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const right_buf__selector : int32 = valueDeserializer.readInt8()
             let right_buf_ : string | number | Resource | undefined
@@ -2468,7 +2468,7 @@ export class EdgeWidths_serializer {
         const right_result : Length | undefined = right_buf
         const bottom_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let bottom_buf : Length | undefined
-        if ((RuntimeType.UNDEFINED) != (bottom_buf_runtimeType))
+        if ((bottom_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const bottom_buf__selector : int32 = valueDeserializer.readInt8()
             let bottom_buf_ : string | number | Resource | undefined
@@ -2489,7 +2489,7 @@ export class EdgeWidths_serializer {
         const bottom_result : Length | undefined = bottom_buf
         const left_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let left_buf : Length | undefined
-        if ((RuntimeType.UNDEFINED) != (left_buf_runtimeType))
+        if ((left_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const left_buf__selector : int32 = valueDeserializer.readInt8()
             let left_buf_ : string | number | Resource | undefined
@@ -2519,7 +2519,7 @@ export class Font_serializer {
         let value_size_type : int32 = RuntimeType.UNDEFINED
         value_size_type = runtimeType(value_size)
         valueSerializer.writeInt8((value_size_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_size_type)) {
+        if ((value_size_type) != (RuntimeType.UNDEFINED)) {
             const value_size_value  = value_size!
             let value_size_value_type : int32 = RuntimeType.UNDEFINED
             value_size_value_type = runtimeType(value_size_value)
@@ -2543,7 +2543,7 @@ export class Font_serializer {
         let value_weight_type : int32 = RuntimeType.UNDEFINED
         value_weight_type = runtimeType(value_weight)
         valueSerializer.writeInt8((value_weight_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_weight_type)) {
+        if ((value_weight_type) != (RuntimeType.UNDEFINED)) {
             const value_weight_value  = value_weight!
             let value_weight_value_type : int32 = RuntimeType.UNDEFINED
             value_weight_value_type = runtimeType(value_weight_value)
@@ -2567,7 +2567,7 @@ export class Font_serializer {
         let value_family_type : int32 = RuntimeType.UNDEFINED
         value_family_type = runtimeType(value_family)
         valueSerializer.writeInt8((value_family_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_family_type)) {
+        if ((value_family_type) != (RuntimeType.UNDEFINED)) {
             const value_family_value  = value_family!
             let value_family_value_type : int32 = RuntimeType.UNDEFINED
             value_family_value_type = runtimeType(value_family_value)
@@ -2586,7 +2586,7 @@ export class Font_serializer {
         let value_style_type : int32 = RuntimeType.UNDEFINED
         value_style_type = runtimeType(value_style)
         valueSerializer.writeInt8((value_style_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_style_type)) {
+        if ((value_style_type) != (RuntimeType.UNDEFINED)) {
             const value_style_value  = (value_style as FontStyle)
             valueSerializer.writeInt32(TypeChecker.FontStyle_ToNumeric(value_style_value))
         }
@@ -2595,7 +2595,7 @@ export class Font_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const size_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let size_buf : Length | undefined
-        if ((RuntimeType.UNDEFINED) != (size_buf_runtimeType))
+        if ((size_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const size_buf__selector : int32 = valueDeserializer.readInt8()
             let size_buf_ : string | number | Resource | undefined
@@ -2616,7 +2616,7 @@ export class Font_serializer {
         const size_result : Length | undefined = size_buf
         const weight_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let weight_buf : FontWeight | number | string | undefined
-        if ((RuntimeType.UNDEFINED) != (weight_buf_runtimeType))
+        if ((weight_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const weight_buf__selector : int32 = valueDeserializer.readInt8()
             let weight_buf_ : FontWeight | number | string | undefined
@@ -2637,7 +2637,7 @@ export class Font_serializer {
         const weight_result : FontWeight | number | string | undefined = weight_buf
         const family_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let family_buf : string | Resource | undefined
-        if ((RuntimeType.UNDEFINED) != (family_buf_runtimeType))
+        if ((family_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const family_buf__selector : int32 = valueDeserializer.readInt8()
             let family_buf_ : string | Resource | undefined
@@ -2655,7 +2655,7 @@ export class Font_serializer {
         const family_result : string | Resource | undefined = family_buf
         const style_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let style_buf : FontStyle | undefined
-        if ((RuntimeType.UNDEFINED) != (style_buf_runtimeType))
+        if ((style_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             style_buf = TypeChecker.FontStyle_FromNumeric(valueDeserializer.readInt32())
         }
@@ -2671,7 +2671,7 @@ export class MarkStyle_serializer {
         let value_strokeColor_type : int32 = RuntimeType.UNDEFINED
         value_strokeColor_type = runtimeType(value_strokeColor)
         valueSerializer.writeInt8((value_strokeColor_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_strokeColor_type)) {
+        if ((value_strokeColor_type) != (RuntimeType.UNDEFINED)) {
             const value_strokeColor_value  = value_strokeColor!
             let value_strokeColor_value_type : int32 = RuntimeType.UNDEFINED
             value_strokeColor_value_type = runtimeType(value_strokeColor_value)
@@ -2700,7 +2700,7 @@ export class MarkStyle_serializer {
         let value_size_type : int32 = RuntimeType.UNDEFINED
         value_size_type = runtimeType(value_size)
         valueSerializer.writeInt8((value_size_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_size_type)) {
+        if ((value_size_type) != (RuntimeType.UNDEFINED)) {
             const value_size_value  = value_size!
             let value_size_value_type : int32 = RuntimeType.UNDEFINED
             value_size_value_type = runtimeType(value_size_value)
@@ -2724,7 +2724,7 @@ export class MarkStyle_serializer {
         let value_strokeWidth_type : int32 = RuntimeType.UNDEFINED
         value_strokeWidth_type = runtimeType(value_strokeWidth)
         valueSerializer.writeInt8((value_strokeWidth_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_strokeWidth_type)) {
+        if ((value_strokeWidth_type) != (RuntimeType.UNDEFINED)) {
             const value_strokeWidth_value  = value_strokeWidth!
             let value_strokeWidth_value_type : int32 = RuntimeType.UNDEFINED
             value_strokeWidth_value_type = runtimeType(value_strokeWidth_value)
@@ -2749,7 +2749,7 @@ export class MarkStyle_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const strokeColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let strokeColor_buf : ResourceColor | undefined
-        if ((RuntimeType.UNDEFINED) != (strokeColor_buf_runtimeType))
+        if ((strokeColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const strokeColor_buf__selector : int32 = valueDeserializer.readInt8()
             let strokeColor_buf_ : Color | number | string | Resource | undefined
@@ -2773,7 +2773,7 @@ export class MarkStyle_serializer {
         const strokeColor_result : ResourceColor | undefined = strokeColor_buf
         const size_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let size_buf : Length | undefined
-        if ((RuntimeType.UNDEFINED) != (size_buf_runtimeType))
+        if ((size_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const size_buf__selector : int32 = valueDeserializer.readInt8()
             let size_buf_ : string | number | Resource | undefined
@@ -2794,7 +2794,7 @@ export class MarkStyle_serializer {
         const size_result : Length | undefined = size_buf
         const strokeWidth_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let strokeWidth_buf : Length | undefined
-        if ((RuntimeType.UNDEFINED) != (strokeWidth_buf_runtimeType))
+        if ((strokeWidth_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const strokeWidth_buf__selector : int32 = valueDeserializer.readInt8()
             let strokeWidth_buf_ : string | number | Resource | undefined
@@ -2824,7 +2824,7 @@ export class OutlineRadiuses_serializer {
         let value_topLeft_type : int32 = RuntimeType.UNDEFINED
         value_topLeft_type = runtimeType(value_topLeft)
         valueSerializer.writeInt8((value_topLeft_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_topLeft_type)) {
+        if ((value_topLeft_type) != (RuntimeType.UNDEFINED)) {
             const value_topLeft_value  = value_topLeft!
             let value_topLeft_value_type : int32 = RuntimeType.UNDEFINED
             value_topLeft_value_type = runtimeType(value_topLeft_value)
@@ -2848,7 +2848,7 @@ export class OutlineRadiuses_serializer {
         let value_topRight_type : int32 = RuntimeType.UNDEFINED
         value_topRight_type = runtimeType(value_topRight)
         valueSerializer.writeInt8((value_topRight_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_topRight_type)) {
+        if ((value_topRight_type) != (RuntimeType.UNDEFINED)) {
             const value_topRight_value  = value_topRight!
             let value_topRight_value_type : int32 = RuntimeType.UNDEFINED
             value_topRight_value_type = runtimeType(value_topRight_value)
@@ -2872,7 +2872,7 @@ export class OutlineRadiuses_serializer {
         let value_bottomLeft_type : int32 = RuntimeType.UNDEFINED
         value_bottomLeft_type = runtimeType(value_bottomLeft)
         valueSerializer.writeInt8((value_bottomLeft_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_bottomLeft_type)) {
+        if ((value_bottomLeft_type) != (RuntimeType.UNDEFINED)) {
             const value_bottomLeft_value  = value_bottomLeft!
             let value_bottomLeft_value_type : int32 = RuntimeType.UNDEFINED
             value_bottomLeft_value_type = runtimeType(value_bottomLeft_value)
@@ -2896,7 +2896,7 @@ export class OutlineRadiuses_serializer {
         let value_bottomRight_type : int32 = RuntimeType.UNDEFINED
         value_bottomRight_type = runtimeType(value_bottomRight)
         valueSerializer.writeInt8((value_bottomRight_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_bottomRight_type)) {
+        if ((value_bottomRight_type) != (RuntimeType.UNDEFINED)) {
             const value_bottomRight_value  = value_bottomRight!
             let value_bottomRight_value_type : int32 = RuntimeType.UNDEFINED
             value_bottomRight_value_type = runtimeType(value_bottomRight_value)
@@ -2921,7 +2921,7 @@ export class OutlineRadiuses_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const topLeft_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let topLeft_buf : Dimension | undefined
-        if ((RuntimeType.UNDEFINED) != (topLeft_buf_runtimeType))
+        if ((topLeft_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const topLeft_buf__selector : int32 = valueDeserializer.readInt8()
             let topLeft_buf_ : string | number | Resource | undefined
@@ -2942,7 +2942,7 @@ export class OutlineRadiuses_serializer {
         const topLeft_result : Dimension | undefined = topLeft_buf
         const topRight_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let topRight_buf : Dimension | undefined
-        if ((RuntimeType.UNDEFINED) != (topRight_buf_runtimeType))
+        if ((topRight_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const topRight_buf__selector : int32 = valueDeserializer.readInt8()
             let topRight_buf_ : string | number | Resource | undefined
@@ -2963,7 +2963,7 @@ export class OutlineRadiuses_serializer {
         const topRight_result : Dimension | undefined = topRight_buf
         const bottomLeft_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let bottomLeft_buf : Dimension | undefined
-        if ((RuntimeType.UNDEFINED) != (bottomLeft_buf_runtimeType))
+        if ((bottomLeft_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const bottomLeft_buf__selector : int32 = valueDeserializer.readInt8()
             let bottomLeft_buf_ : string | number | Resource | undefined
@@ -2984,7 +2984,7 @@ export class OutlineRadiuses_serializer {
         const bottomLeft_result : Dimension | undefined = bottomLeft_buf
         const bottomRight_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let bottomRight_buf : Dimension | undefined
-        if ((RuntimeType.UNDEFINED) != (bottomRight_buf_runtimeType))
+        if ((bottomRight_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const bottomRight_buf__selector : int32 = valueDeserializer.readInt8()
             let bottomRight_buf_ : string | number | Resource | undefined
@@ -3014,7 +3014,7 @@ export class Padding_serializer {
         let value_top_type : int32 = RuntimeType.UNDEFINED
         value_top_type = runtimeType(value_top)
         valueSerializer.writeInt8((value_top_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_top_type)) {
+        if ((value_top_type) != (RuntimeType.UNDEFINED)) {
             const value_top_value  = value_top!
             let value_top_value_type : int32 = RuntimeType.UNDEFINED
             value_top_value_type = runtimeType(value_top_value)
@@ -3038,7 +3038,7 @@ export class Padding_serializer {
         let value_right_type : int32 = RuntimeType.UNDEFINED
         value_right_type = runtimeType(value_right)
         valueSerializer.writeInt8((value_right_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_right_type)) {
+        if ((value_right_type) != (RuntimeType.UNDEFINED)) {
             const value_right_value  = value_right!
             let value_right_value_type : int32 = RuntimeType.UNDEFINED
             value_right_value_type = runtimeType(value_right_value)
@@ -3062,7 +3062,7 @@ export class Padding_serializer {
         let value_bottom_type : int32 = RuntimeType.UNDEFINED
         value_bottom_type = runtimeType(value_bottom)
         valueSerializer.writeInt8((value_bottom_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_bottom_type)) {
+        if ((value_bottom_type) != (RuntimeType.UNDEFINED)) {
             const value_bottom_value  = value_bottom!
             let value_bottom_value_type : int32 = RuntimeType.UNDEFINED
             value_bottom_value_type = runtimeType(value_bottom_value)
@@ -3086,7 +3086,7 @@ export class Padding_serializer {
         let value_left_type : int32 = RuntimeType.UNDEFINED
         value_left_type = runtimeType(value_left)
         valueSerializer.writeInt8((value_left_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_left_type)) {
+        if ((value_left_type) != (RuntimeType.UNDEFINED)) {
             const value_left_value  = value_left!
             let value_left_value_type : int32 = RuntimeType.UNDEFINED
             value_left_value_type = runtimeType(value_left_value)
@@ -3111,7 +3111,7 @@ export class Padding_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const top_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let top_buf : Length | undefined
-        if ((RuntimeType.UNDEFINED) != (top_buf_runtimeType))
+        if ((top_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const top_buf__selector : int32 = valueDeserializer.readInt8()
             let top_buf_ : string | number | Resource | undefined
@@ -3132,7 +3132,7 @@ export class Padding_serializer {
         const top_result : Length | undefined = top_buf
         const right_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let right_buf : Length | undefined
-        if ((RuntimeType.UNDEFINED) != (right_buf_runtimeType))
+        if ((right_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const right_buf__selector : int32 = valueDeserializer.readInt8()
             let right_buf_ : string | number | Resource | undefined
@@ -3153,7 +3153,7 @@ export class Padding_serializer {
         const right_result : Length | undefined = right_buf
         const bottom_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let bottom_buf : Length | undefined
-        if ((RuntimeType.UNDEFINED) != (bottom_buf_runtimeType))
+        if ((bottom_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const bottom_buf__selector : int32 = valueDeserializer.readInt8()
             let bottom_buf_ : string | number | Resource | undefined
@@ -3174,7 +3174,7 @@ export class Padding_serializer {
         const bottom_result : Length | undefined = bottom_buf
         const left_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let left_buf : Length | undefined
-        if ((RuntimeType.UNDEFINED) != (left_buf_runtimeType))
+        if ((left_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const left_buf__selector : int32 = valueDeserializer.readInt8()
             let left_buf_ : string | number | Resource | undefined
@@ -3204,7 +3204,7 @@ export class Position_serializer {
         let value_x_type : int32 = RuntimeType.UNDEFINED
         value_x_type = runtimeType(value_x)
         valueSerializer.writeInt8((value_x_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_x_type)) {
+        if ((value_x_type) != (RuntimeType.UNDEFINED)) {
             const value_x_value  = value_x!
             let value_x_value_type : int32 = RuntimeType.UNDEFINED
             value_x_value_type = runtimeType(value_x_value)
@@ -3228,7 +3228,7 @@ export class Position_serializer {
         let value_y_type : int32 = RuntimeType.UNDEFINED
         value_y_type = runtimeType(value_y)
         valueSerializer.writeInt8((value_y_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_y_type)) {
+        if ((value_y_type) != (RuntimeType.UNDEFINED)) {
             const value_y_value  = value_y!
             let value_y_value_type : int32 = RuntimeType.UNDEFINED
             value_y_value_type = runtimeType(value_y_value)
@@ -3253,7 +3253,7 @@ export class Position_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const x_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let x_buf : Length | undefined
-        if ((RuntimeType.UNDEFINED) != (x_buf_runtimeType))
+        if ((x_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const x_buf__selector : int32 = valueDeserializer.readInt8()
             let x_buf_ : string | number | Resource | undefined
@@ -3274,7 +3274,7 @@ export class Position_serializer {
         const x_result : Length | undefined = x_buf
         const y_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let y_buf : Length | undefined
-        if ((RuntimeType.UNDEFINED) != (y_buf_runtimeType))
+        if ((y_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const y_buf__selector : int32 = valueDeserializer.readInt8()
             let y_buf_ : string | number | Resource | undefined
@@ -3304,7 +3304,7 @@ export class SizeOptions_serializer {
         let value_width_type : int32 = RuntimeType.UNDEFINED
         value_width_type = runtimeType(value_width)
         valueSerializer.writeInt8((value_width_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_width_type)) {
+        if ((value_width_type) != (RuntimeType.UNDEFINED)) {
             const value_width_value  = value_width!
             let value_width_value_type : int32 = RuntimeType.UNDEFINED
             value_width_value_type = runtimeType(value_width_value)
@@ -3328,7 +3328,7 @@ export class SizeOptions_serializer {
         let value_height_type : int32 = RuntimeType.UNDEFINED
         value_height_type = runtimeType(value_height)
         valueSerializer.writeInt8((value_height_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_height_type)) {
+        if ((value_height_type) != (RuntimeType.UNDEFINED)) {
             const value_height_value  = value_height!
             let value_height_value_type : int32 = RuntimeType.UNDEFINED
             value_height_value_type = runtimeType(value_height_value)
@@ -3353,7 +3353,7 @@ export class SizeOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const width_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let width_buf : Length | undefined
-        if ((RuntimeType.UNDEFINED) != (width_buf_runtimeType))
+        if ((width_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const width_buf__selector : int32 = valueDeserializer.readInt8()
             let width_buf_ : string | number | Resource | undefined
@@ -3374,7 +3374,7 @@ export class SizeOptions_serializer {
         const width_result : Length | undefined = width_buf
         const height_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let height_buf : Length | undefined
-        if ((RuntimeType.UNDEFINED) != (height_buf_runtimeType))
+        if ((height_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const height_buf__selector : int32 = valueDeserializer.readInt8()
             let height_buf_ : string | number | Resource | undefined
@@ -3486,7 +3486,7 @@ export class BorderOptions_serializer {
         let value_width_type : int32 = RuntimeType.UNDEFINED
         value_width_type = runtimeType(value_width)
         valueSerializer.writeInt8((value_width_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_width_type)) {
+        if ((value_width_type) != (RuntimeType.UNDEFINED)) {
             const value_width_value  = value_width!
             let value_width_value_type : int32 = RuntimeType.UNDEFINED
             value_width_value_type = runtimeType(value_width_value)
@@ -3526,7 +3526,7 @@ export class BorderOptions_serializer {
         let value_color_type : int32 = RuntimeType.UNDEFINED
         value_color_type = runtimeType(value_color)
         valueSerializer.writeInt8((value_color_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_color_type)) {
+        if ((value_color_type) != (RuntimeType.UNDEFINED)) {
             const value_color_value  = value_color!
             let value_color_value_type : int32 = RuntimeType.UNDEFINED
             value_color_value_type = runtimeType(value_color_value)
@@ -3571,7 +3571,7 @@ export class BorderOptions_serializer {
         let value_radius_type : int32 = RuntimeType.UNDEFINED
         value_radius_type = runtimeType(value_radius)
         valueSerializer.writeInt8((value_radius_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_radius_type)) {
+        if ((value_radius_type) != (RuntimeType.UNDEFINED)) {
             const value_radius_value  = value_radius!
             let value_radius_value_type : int32 = RuntimeType.UNDEFINED
             value_radius_value_type = runtimeType(value_radius_value)
@@ -3611,7 +3611,7 @@ export class BorderOptions_serializer {
         let value_style_type : int32 = RuntimeType.UNDEFINED
         value_style_type = runtimeType(value_style)
         valueSerializer.writeInt8((value_style_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_style_type)) {
+        if ((value_style_type) != (RuntimeType.UNDEFINED)) {
             const value_style_value  = value_style!
             let value_style_value_type : int32 = RuntimeType.UNDEFINED
             value_style_value_type = runtimeType(value_style_value)
@@ -3630,7 +3630,7 @@ export class BorderOptions_serializer {
         let value_dashGap_type : int32 = RuntimeType.UNDEFINED
         value_dashGap_type = runtimeType(value_dashGap)
         valueSerializer.writeInt8((value_dashGap_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_dashGap_type)) {
+        if ((value_dashGap_type) != (RuntimeType.UNDEFINED)) {
             const value_dashGap_value  = value_dashGap!
             let value_dashGap_value_type : int32 = RuntimeType.UNDEFINED
             value_dashGap_value_type = runtimeType(value_dashGap_value)
@@ -3654,7 +3654,7 @@ export class BorderOptions_serializer {
         let value_dashWidth_type : int32 = RuntimeType.UNDEFINED
         value_dashWidth_type = runtimeType(value_dashWidth)
         valueSerializer.writeInt8((value_dashWidth_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_dashWidth_type)) {
+        if ((value_dashWidth_type) != (RuntimeType.UNDEFINED)) {
             const value_dashWidth_value  = value_dashWidth!
             let value_dashWidth_value_type : int32 = RuntimeType.UNDEFINED
             value_dashWidth_value_type = runtimeType(value_dashWidth_value)
@@ -3679,7 +3679,7 @@ export class BorderOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const width_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let width_buf : EdgeWidths | Length | LocalizedEdgeWidths | undefined
-        if ((RuntimeType.UNDEFINED) != (width_buf_runtimeType))
+        if ((width_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const width_buf__selector : int32 = valueDeserializer.readInt8()
             let width_buf_ : EdgeWidths | Length | LocalizedEdgeWidths | undefined
@@ -3714,7 +3714,7 @@ export class BorderOptions_serializer {
         const width_result : EdgeWidths | Length | LocalizedEdgeWidths | undefined = width_buf
         const color_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let color_buf : EdgeColors | ResourceColor | LocalizedEdgeColors | undefined
-        if ((RuntimeType.UNDEFINED) != (color_buf_runtimeType))
+        if ((color_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const color_buf__selector : int32 = valueDeserializer.readInt8()
             let color_buf_ : EdgeColors | ResourceColor | LocalizedEdgeColors | undefined
@@ -3752,7 +3752,7 @@ export class BorderOptions_serializer {
         const color_result : EdgeColors | ResourceColor | LocalizedEdgeColors | undefined = color_buf
         const radius_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let radius_buf : BorderRadiuses | Length | LocalizedBorderRadiuses | undefined
-        if ((RuntimeType.UNDEFINED) != (radius_buf_runtimeType))
+        if ((radius_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const radius_buf__selector : int32 = valueDeserializer.readInt8()
             let radius_buf_ : BorderRadiuses | Length | LocalizedBorderRadiuses | undefined
@@ -3787,7 +3787,7 @@ export class BorderOptions_serializer {
         const radius_result : BorderRadiuses | Length | LocalizedBorderRadiuses | undefined = radius_buf
         const style_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let style_buf : EdgeStyles | BorderStyle | undefined
-        if ((RuntimeType.UNDEFINED) != (style_buf_runtimeType))
+        if ((style_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const style_buf__selector : int32 = valueDeserializer.readInt8()
             let style_buf_ : EdgeStyles | BorderStyle | undefined
@@ -3805,7 +3805,7 @@ export class BorderOptions_serializer {
         const style_result : EdgeStyles | BorderStyle | undefined = style_buf
         const dashGap_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let dashGap_buf : EdgeWidths | LengthMetrics | LocalizedEdgeWidths | undefined
-        if ((RuntimeType.UNDEFINED) != (dashGap_buf_runtimeType))
+        if ((dashGap_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const dashGap_buf__selector : int32 = valueDeserializer.readInt8()
             let dashGap_buf_ : EdgeWidths | LengthMetrics | LocalizedEdgeWidths | undefined
@@ -3826,7 +3826,7 @@ export class BorderOptions_serializer {
         const dashGap_result : EdgeWidths | LengthMetrics | LocalizedEdgeWidths | undefined = dashGap_buf
         const dashWidth_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let dashWidth_buf : EdgeWidths | LengthMetrics | LocalizedEdgeWidths | undefined
-        if ((RuntimeType.UNDEFINED) != (dashWidth_buf_runtimeType))
+        if ((dashWidth_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const dashWidth_buf__selector : int32 = valueDeserializer.readInt8()
             let dashWidth_buf_ : EdgeWidths | LengthMetrics | LocalizedEdgeWidths | undefined
@@ -3856,7 +3856,7 @@ export class OutlineOptions_serializer {
         let value_width_type : int32 = RuntimeType.UNDEFINED
         value_width_type = runtimeType(value_width)
         valueSerializer.writeInt8((value_width_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_width_type)) {
+        if ((value_width_type) != (RuntimeType.UNDEFINED)) {
             const value_width_value  = value_width!
             let value_width_value_type : int32 = RuntimeType.UNDEFINED
             value_width_value_type = runtimeType(value_width_value)
@@ -3891,7 +3891,7 @@ export class OutlineOptions_serializer {
         let value_color_type : int32 = RuntimeType.UNDEFINED
         value_color_type = runtimeType(value_color)
         valueSerializer.writeInt8((value_color_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_color_type)) {
+        if ((value_color_type) != (RuntimeType.UNDEFINED)) {
             const value_color_value  = value_color!
             let value_color_value_type : int32 = RuntimeType.UNDEFINED
             value_color_value_type = runtimeType(value_color_value)
@@ -3936,7 +3936,7 @@ export class OutlineOptions_serializer {
         let value_radius_type : int32 = RuntimeType.UNDEFINED
         value_radius_type = runtimeType(value_radius)
         valueSerializer.writeInt8((value_radius_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_radius_type)) {
+        if ((value_radius_type) != (RuntimeType.UNDEFINED)) {
             const value_radius_value  = value_radius!
             let value_radius_value_type : int32 = RuntimeType.UNDEFINED
             value_radius_value_type = runtimeType(value_radius_value)
@@ -3971,7 +3971,7 @@ export class OutlineOptions_serializer {
         let value_style_type : int32 = RuntimeType.UNDEFINED
         value_style_type = runtimeType(value_style)
         valueSerializer.writeInt8((value_style_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_style_type)) {
+        if ((value_style_type) != (RuntimeType.UNDEFINED)) {
             const value_style_value  = value_style!
             let value_style_value_type : int32 = RuntimeType.UNDEFINED
             value_style_value_type = runtimeType(value_style_value)
@@ -3991,7 +3991,7 @@ export class OutlineOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const width_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let width_buf : EdgeOutlineWidths | Dimension | undefined
-        if ((RuntimeType.UNDEFINED) != (width_buf_runtimeType))
+        if ((width_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const width_buf__selector : int32 = valueDeserializer.readInt8()
             let width_buf_ : EdgeOutlineWidths | Dimension | undefined
@@ -4023,7 +4023,7 @@ export class OutlineOptions_serializer {
         const width_result : EdgeOutlineWidths | Dimension | undefined = width_buf
         const color_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let color_buf : EdgeColors | ResourceColor | LocalizedEdgeColors | undefined
-        if ((RuntimeType.UNDEFINED) != (color_buf_runtimeType))
+        if ((color_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const color_buf__selector : int32 = valueDeserializer.readInt8()
             let color_buf_ : EdgeColors | ResourceColor | LocalizedEdgeColors | undefined
@@ -4061,7 +4061,7 @@ export class OutlineOptions_serializer {
         const color_result : EdgeColors | ResourceColor | LocalizedEdgeColors | undefined = color_buf
         const radius_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let radius_buf : OutlineRadiuses | Dimension | undefined
-        if ((RuntimeType.UNDEFINED) != (radius_buf_runtimeType))
+        if ((radius_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const radius_buf__selector : int32 = valueDeserializer.readInt8()
             let radius_buf_ : OutlineRadiuses | Dimension | undefined
@@ -4093,7 +4093,7 @@ export class OutlineOptions_serializer {
         const radius_result : OutlineRadiuses | Dimension | undefined = radius_buf
         const style_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let style_buf : EdgeOutlineStyles | OutlineStyle | undefined
-        if ((RuntimeType.UNDEFINED) != (style_buf_runtimeType))
+        if ((style_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const style_buf__selector : int32 = valueDeserializer.readInt8()
             let style_buf_ : EdgeOutlineStyles | OutlineStyle | undefined

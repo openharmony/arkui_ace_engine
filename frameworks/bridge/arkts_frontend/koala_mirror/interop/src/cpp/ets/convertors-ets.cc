@@ -131,7 +131,7 @@ void EtsExports::setClasspath(const char* module, const char *classpath) {
 
 static std::map<std::string, std::string> g_defaultClasspaths = {    
     {"InteropNativeModule", "@koalaui/interop/InteropNativeModule/InteropNativeModule"},
-    // todo leave just InteropNativeModule, define others via KOALA_ETS_INTEROP_MODULE_CLASSPATH
+    // Improve: leave just InteropNativeModule, define others via KOALA_ETS_INTEROP_MODULE_CLASSPATH
     {"TestNativeModule", "@ohos/arkui/generated/arkts/TestNativeModule/TestNativeModule"},
     {"ArkUINativeModule", "@ohos/arkui/generated/arkts/ArkUINativeModule/ArkUINativeModule"},
     {"ArkUIGeneratedNativeModule", "@ohos/arkui/generated/arkts/ArkUIGeneratedNativeModule/ArkUIGeneratedNativeModule"},

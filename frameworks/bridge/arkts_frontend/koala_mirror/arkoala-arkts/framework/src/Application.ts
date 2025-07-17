@@ -66,7 +66,7 @@ export function CurrentControl(): ArkoalaControl | undefined {
  * state change transition and associated update context. Essentially idea is that
  * we perform state update, recompute new UI state and then let backend to perform
  * associated operation, i.e. implicit animation.
- * TODO: consider moving these functions to StateManager.
+ * Improve: consider moving these functions to StateManager.
  */
 class PartialUpdateRecord {
     public update: () => void
@@ -97,7 +97,7 @@ let detachedRoots: Map<KPointer, ComputableState<PeerNode>> = new Map()
 
 export function createUiDetachedRoot(
     nodeFactory: () => PeerNode,
-    /** TODO make this memo when CustomBuilder become memo function in TS */
+    /** Improve: make this memo when CustomBuilder become memo function in TS */
     builder: () => void
 ): PeerNode {
     const root: ComputableState<PeerNode> = memoRoot(nodeFactory(), builder)
@@ -210,7 +210,7 @@ async function eventLoopRun(
     ArkUINativeModule._SetVsyncCallback(pipelineContext)
     const waitVsyncFunc = (() => ArkUINativeModule._VSyncAwait(pipelineContext))
     let unlocker = setInterval(() => {
-        // TODO: uncomment this code to enable Koala animations.
+        // Improve: uncomment this code to enable Koala animations.
         // timer.value = Date.now()
         if (GlobalStateManager.instance.isUpdateNeeded())
             ArkUINativeModule._UnblockVsyncWait(pipelineContext)
@@ -221,11 +221,11 @@ async function eventLoopRun(
     let skipFrames = 0
     control.addListener("arkoala.press", (args: Object) => {
         let event = args as Partial<ApplicationEmulatedEvent>
-        // TODO: Call emulate click
+        // Improve: Call emulate click
     })
     control.addListener("arkoala.text.input", (args: Object) => {
         let event = args as Partial<ApplicationEmulatedEvent>
-        // TODO: Call emulate text input
+        // Improve: Call emulate text input
     })
     control.addListener("arkoala.app.exit", (args: Object) => {
         console.log("Got app exit request")
@@ -286,7 +286,7 @@ function eventLoopStart(
     ui: () => void
 ): void {
     // Start periodic job to check if there's dirty state and unblock vsync wait.
-    // TODO: think of better solution!
+    // Improve: think of better solution!
     setTimeout(async () => {
         await eventLoopRun(host, onStart, onError, currentDevice, ui)
     }, 1)

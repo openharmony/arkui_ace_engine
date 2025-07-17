@@ -230,7 +230,7 @@ export class drawing_FontMetrics_serializer {
         let value_flags_type : int32 = RuntimeType.UNDEFINED
         value_flags_type = runtimeType(value_flags)
         valueSerializer.writeInt8((value_flags_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_flags_type)) {
+        if ((value_flags_type) != (RuntimeType.UNDEFINED)) {
             const value_flags_value  = (value_flags as drawing.FontMetricsFlags)
             valueSerializer.writeInt32(TypeChecker.drawing_FontMetricsFlags_ToNumeric(value_flags_value))
         }
@@ -248,7 +248,7 @@ export class drawing_FontMetrics_serializer {
         let value_avgCharWidth_type : int32 = RuntimeType.UNDEFINED
         value_avgCharWidth_type = runtimeType(value_avgCharWidth)
         valueSerializer.writeInt8((value_avgCharWidth_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_avgCharWidth_type)) {
+        if ((value_avgCharWidth_type) != (RuntimeType.UNDEFINED)) {
             const value_avgCharWidth_value  = value_avgCharWidth!
             valueSerializer.writeNumber(value_avgCharWidth_value)
         }
@@ -256,7 +256,7 @@ export class drawing_FontMetrics_serializer {
         let value_maxCharWidth_type : int32 = RuntimeType.UNDEFINED
         value_maxCharWidth_type = runtimeType(value_maxCharWidth)
         valueSerializer.writeInt8((value_maxCharWidth_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_maxCharWidth_type)) {
+        if ((value_maxCharWidth_type) != (RuntimeType.UNDEFINED)) {
             const value_maxCharWidth_value  = value_maxCharWidth!
             valueSerializer.writeNumber(value_maxCharWidth_value)
         }
@@ -264,7 +264,7 @@ export class drawing_FontMetrics_serializer {
         let value_xMin_type : int32 = RuntimeType.UNDEFINED
         value_xMin_type = runtimeType(value_xMin)
         valueSerializer.writeInt8((value_xMin_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_xMin_type)) {
+        if ((value_xMin_type) != (RuntimeType.UNDEFINED)) {
             const value_xMin_value  = value_xMin!
             valueSerializer.writeNumber(value_xMin_value)
         }
@@ -272,7 +272,7 @@ export class drawing_FontMetrics_serializer {
         let value_xMax_type : int32 = RuntimeType.UNDEFINED
         value_xMax_type = runtimeType(value_xMax)
         valueSerializer.writeInt8((value_xMax_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_xMax_type)) {
+        if ((value_xMax_type) != (RuntimeType.UNDEFINED)) {
             const value_xMax_value  = value_xMax!
             valueSerializer.writeNumber(value_xMax_value)
         }
@@ -280,7 +280,7 @@ export class drawing_FontMetrics_serializer {
         let value_xHeight_type : int32 = RuntimeType.UNDEFINED
         value_xHeight_type = runtimeType(value_xHeight)
         valueSerializer.writeInt8((value_xHeight_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_xHeight_type)) {
+        if ((value_xHeight_type) != (RuntimeType.UNDEFINED)) {
             const value_xHeight_value  = value_xHeight!
             valueSerializer.writeNumber(value_xHeight_value)
         }
@@ -288,7 +288,7 @@ export class drawing_FontMetrics_serializer {
         let value_capHeight_type : int32 = RuntimeType.UNDEFINED
         value_capHeight_type = runtimeType(value_capHeight)
         valueSerializer.writeInt8((value_capHeight_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_capHeight_type)) {
+        if ((value_capHeight_type) != (RuntimeType.UNDEFINED)) {
             const value_capHeight_value  = value_capHeight!
             valueSerializer.writeNumber(value_capHeight_value)
         }
@@ -296,7 +296,7 @@ export class drawing_FontMetrics_serializer {
         let value_underlineThickness_type : int32 = RuntimeType.UNDEFINED
         value_underlineThickness_type = runtimeType(value_underlineThickness)
         valueSerializer.writeInt8((value_underlineThickness_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_underlineThickness_type)) {
+        if ((value_underlineThickness_type) != (RuntimeType.UNDEFINED)) {
             const value_underlineThickness_value  = value_underlineThickness!
             valueSerializer.writeNumber(value_underlineThickness_value)
         }
@@ -304,7 +304,7 @@ export class drawing_FontMetrics_serializer {
         let value_underlinePosition_type : int32 = RuntimeType.UNDEFINED
         value_underlinePosition_type = runtimeType(value_underlinePosition)
         valueSerializer.writeInt8((value_underlinePosition_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_underlinePosition_type)) {
+        if ((value_underlinePosition_type) != (RuntimeType.UNDEFINED)) {
             const value_underlinePosition_value  = value_underlinePosition!
             valueSerializer.writeNumber(value_underlinePosition_value)
         }
@@ -312,7 +312,7 @@ export class drawing_FontMetrics_serializer {
         let value_strikethroughThickness_type : int32 = RuntimeType.UNDEFINED
         value_strikethroughThickness_type = runtimeType(value_strikethroughThickness)
         valueSerializer.writeInt8((value_strikethroughThickness_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_strikethroughThickness_type)) {
+        if ((value_strikethroughThickness_type) != (RuntimeType.UNDEFINED)) {
             const value_strikethroughThickness_value  = value_strikethroughThickness!
             valueSerializer.writeNumber(value_strikethroughThickness_value)
         }
@@ -320,7 +320,7 @@ export class drawing_FontMetrics_serializer {
         let value_strikethroughPosition_type : int32 = RuntimeType.UNDEFINED
         value_strikethroughPosition_type = runtimeType(value_strikethroughPosition)
         valueSerializer.writeInt8((value_strikethroughPosition_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_strikethroughPosition_type)) {
+        if ((value_strikethroughPosition_type) != (RuntimeType.UNDEFINED)) {
             const value_strikethroughPosition_value  = value_strikethroughPosition!
             valueSerializer.writeNumber(value_strikethroughPosition_value)
         }
@@ -329,7 +329,7 @@ export class drawing_FontMetrics_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const flags_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let flags_buf : drawing.FontMetricsFlags | undefined
-        if ((RuntimeType.UNDEFINED) != (flags_buf_runtimeType))
+        if ((flags_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             flags_buf = TypeChecker.drawing_FontMetricsFlags_FromNumeric(valueDeserializer.readInt32())
         }
@@ -341,70 +341,70 @@ export class drawing_FontMetrics_serializer {
         const leading_result : number = (valueDeserializer.readNumber() as number)
         const avgCharWidth_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let avgCharWidth_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (avgCharWidth_buf_runtimeType))
+        if ((avgCharWidth_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             avgCharWidth_buf = (valueDeserializer.readNumber() as number)
         }
         const avgCharWidth_result : number | undefined = avgCharWidth_buf
         const maxCharWidth_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let maxCharWidth_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (maxCharWidth_buf_runtimeType))
+        if ((maxCharWidth_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             maxCharWidth_buf = (valueDeserializer.readNumber() as number)
         }
         const maxCharWidth_result : number | undefined = maxCharWidth_buf
         const xMin_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let xMin_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (xMin_buf_runtimeType))
+        if ((xMin_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             xMin_buf = (valueDeserializer.readNumber() as number)
         }
         const xMin_result : number | undefined = xMin_buf
         const xMax_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let xMax_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (xMax_buf_runtimeType))
+        if ((xMax_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             xMax_buf = (valueDeserializer.readNumber() as number)
         }
         const xMax_result : number | undefined = xMax_buf
         const xHeight_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let xHeight_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (xHeight_buf_runtimeType))
+        if ((xHeight_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             xHeight_buf = (valueDeserializer.readNumber() as number)
         }
         const xHeight_result : number | undefined = xHeight_buf
         const capHeight_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let capHeight_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (capHeight_buf_runtimeType))
+        if ((capHeight_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             capHeight_buf = (valueDeserializer.readNumber() as number)
         }
         const capHeight_result : number | undefined = capHeight_buf
         const underlineThickness_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let underlineThickness_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (underlineThickness_buf_runtimeType))
+        if ((underlineThickness_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             underlineThickness_buf = (valueDeserializer.readNumber() as number)
         }
         const underlineThickness_result : number | undefined = underlineThickness_buf
         const underlinePosition_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let underlinePosition_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (underlinePosition_buf_runtimeType))
+        if ((underlinePosition_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             underlinePosition_buf = (valueDeserializer.readNumber() as number)
         }
         const underlinePosition_result : number | undefined = underlinePosition_buf
         const strikethroughThickness_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let strikethroughThickness_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (strikethroughThickness_buf_runtimeType))
+        if ((strikethroughThickness_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             strikethroughThickness_buf = (valueDeserializer.readNumber() as number)
         }
         const strikethroughThickness_result : number | undefined = strikethroughThickness_buf
         const strikethroughPosition_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let strikethroughPosition_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (strikethroughPosition_buf_runtimeType))
+        if ((strikethroughPosition_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             strikethroughPosition_buf = (valueDeserializer.readNumber() as number)
         }
@@ -589,7 +589,7 @@ export namespace drawing {
             let filter_type : int32 = RuntimeType.UNDEFINED
             filter_type = runtimeType(filter)
             thisSerializer.writeInt8((filter_type).toChar())
-            if ((RuntimeType.UNDEFINED) != (filter_type)) {
+            if ((filter_type) != (RuntimeType.UNDEFINED)) {
                 const filter_value  = filter!
                 drawing_ImageFilter_serializer.write(thisSerializer, filter_value)
             }
@@ -1018,8 +1018,8 @@ export namespace drawing {
         private drawPoints_serialize(points: Array<common2D.Point>, mode: PointMode): void {
             const thisSerializer : SerializerBase = SerializerBase.hold()
             thisSerializer.writeInt32((points.length).toInt())
-            for (let i = 0; i < points.length; i++) {
-                const points_element : common2D.Point = points[i]
+            for (let points_counter_i = 0; points_counter_i < points.length; points_counter_i++) {
+                const points_element : common2D.Point = points[points_counter_i]
                 common2D_Point_serializer.write(thisSerializer, points_element)
             }
             ArkUIGeneratedNativeModule._drawing_Canvas_drawPoints(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length(), TypeChecker.drawing_PointMode_ToNumeric(mode))
@@ -1040,13 +1040,13 @@ export namespace drawing {
         private drawPixelMapMesh_serialize(pixelmap: image.PixelMap, meshWidth: number, meshHeight: number, vertices: Array<number>, vertOffset: number, colors: Array<number>, colorOffset: number): void {
             const thisSerializer : SerializerBase = SerializerBase.hold()
             thisSerializer.writeInt32((vertices.length).toInt())
-            for (let i = 0; i < vertices.length; i++) {
-                const vertices_element : number = vertices[i]
+            for (let vertices_counter_i = 0; vertices_counter_i < vertices.length; vertices_counter_i++) {
+                const vertices_element : number = vertices[vertices_counter_i]
                 thisSerializer.writeNumber(vertices_element)
             }
             thisSerializer.writeInt32((colors.length).toInt())
-            for (let i = 0; i < colors.length; i++) {
-                const colors_element : number = colors[i]
+            for (let colors_counter_i = 0; colors_counter_i < colors.length; colors_counter_i++) {
+                const colors_element : number = colors[colors_counter_i]
                 thisSerializer.writeNumber(colors_element)
             }
             ArkUIGeneratedNativeModule._drawing_Canvas_drawPixelMapMesh(this.peer!.ptr, toPeerPtr(pixelmap), meshWidth, meshHeight, thisSerializer.asBuffer(), thisSerializer.length(), vertOffset, colorOffset)
@@ -1076,14 +1076,14 @@ export namespace drawing {
             let rect_type : int32 = RuntimeType.UNDEFINED
             rect_type = runtimeType(rect)
             thisSerializer.writeInt8((rect_type).toChar())
-            if ((RuntimeType.UNDEFINED) != (rect_type)) {
+            if ((rect_type) != (RuntimeType.UNDEFINED)) {
                 const rect_value  = rect!
                 common2D_Rect_serializer.write(thisSerializer, rect_value)
             }
             let brush_type : int32 = RuntimeType.UNDEFINED
             brush_type = runtimeType(brush)
             thisSerializer.writeInt8((brush_type).toChar())
-            if ((RuntimeType.UNDEFINED) != (brush_type)) {
+            if ((brush_type) != (RuntimeType.UNDEFINED)) {
                 const brush_value  = brush!
                 drawing_Brush_serializer.write(thisSerializer, brush_value)
             }
@@ -1229,8 +1229,8 @@ export namespace drawing {
         private static createMatrixColorFilter_serialize(matrix: Array<number>): ColorFilter {
             const thisSerializer : SerializerBase = SerializerBase.hold()
             thisSerializer.writeInt32((matrix.length).toInt())
-            for (let i = 0; i < matrix.length; i++) {
-                const matrix_element : number = matrix[i]
+            for (let matrix_counter_i = 0; matrix_counter_i < matrix.length; matrix_counter_i++) {
+                const matrix_element : number = matrix[matrix_counter_i]
                 thisSerializer.writeNumber(matrix_element)
             }
             const retval  = ArkUIGeneratedNativeModule._drawing_ColorFilter_createMatrixColorFilter(thisSerializer.asBuffer(), thisSerializer.length())
@@ -1504,8 +1504,8 @@ export namespace drawing {
         private getWidths_serialize(glyphs: Array<number>): Array<number> {
             const thisSerializer : SerializerBase = SerializerBase.hold()
             thisSerializer.writeInt32((glyphs.length).toInt())
-            for (let i = 0; i < glyphs.length; i++) {
-                const glyphs_element : number = glyphs[i]
+            for (let glyphs_counter_i = 0; glyphs_counter_i < glyphs.length; glyphs_counter_i++) {
+                const glyphs_element : number = glyphs[glyphs_counter_i]
                 thisSerializer.writeNumber(glyphs_element)
             }
             const retval  = ArkUIGeneratedNativeModule._drawing_Font_getWidths(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
@@ -1566,8 +1566,8 @@ export namespace drawing {
         private getBounds_serialize(glyphs: Array<number>): Array<common2D.Rect> {
             const thisSerializer : SerializerBase = SerializerBase.hold()
             thisSerializer.writeInt32((glyphs.length).toInt())
-            for (let i = 0; i < glyphs.length; i++) {
-                const glyphs_element : number = glyphs[i]
+            for (let glyphs_counter_i = 0; glyphs_counter_i < glyphs.length; glyphs_counter_i++) {
+                const glyphs_element : number = glyphs[glyphs_counter_i]
                 thisSerializer.writeNumber(glyphs_element)
             }
             const retval  = ArkUIGeneratedNativeModule._drawing_Font_getBounds(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
@@ -1615,7 +1615,7 @@ export namespace drawing {
             let imageFilter_type : int32 = RuntimeType.UNDEFINED
             imageFilter_type = runtimeType(imageFilter)
             thisSerializer.writeInt8((imageFilter_type).toChar())
-            if ((RuntimeType.UNDEFINED) != (imageFilter_type)) {
+            if ((imageFilter_type) != (RuntimeType.UNDEFINED)) {
                 const imageFilter_value  = imageFilter!
                 drawing_ImageFilter_serializer.write(thisSerializer, imageFilter_value)
             }
@@ -1629,7 +1629,7 @@ export namespace drawing {
             let imageFilter_type : int32 = RuntimeType.UNDEFINED
             imageFilter_type = runtimeType(imageFilter)
             thisSerializer.writeInt8((imageFilter_type).toChar())
-            if ((RuntimeType.UNDEFINED) != (imageFilter_type)) {
+            if ((imageFilter_type) != (RuntimeType.UNDEFINED)) {
                 const imageFilter_value  = imageFilter!
                 drawing_ImageFilter_serializer.write(thisSerializer, imageFilter_value)
             }
@@ -1677,41 +1677,41 @@ export namespace drawing {
         private static createImageLattice_serialize<T>(xDivs: Array<number>, yDivs: Array<number>, fXCount: number, fYCount: number, fBounds: common2D.Rect | undefined, fRectTypes: Array<RectType> | undefined, fColors: Array<T> | undefined): Lattice {
             const thisSerializer : SerializerBase = SerializerBase.hold()
             thisSerializer.writeInt32((xDivs.length).toInt())
-            for (let i = 0; i < xDivs.length; i++) {
-                const xDivs_element : number = xDivs[i]
+            for (let xDivs_counter_i = 0; xDivs_counter_i < xDivs.length; xDivs_counter_i++) {
+                const xDivs_element : number = xDivs[xDivs_counter_i]
                 thisSerializer.writeNumber(xDivs_element)
             }
             thisSerializer.writeInt32((yDivs.length).toInt())
-            for (let i = 0; i < yDivs.length; i++) {
-                const yDivs_element : number = yDivs[i]
+            for (let yDivs_counter_i = 0; yDivs_counter_i < yDivs.length; yDivs_counter_i++) {
+                const yDivs_element : number = yDivs[yDivs_counter_i]
                 thisSerializer.writeNumber(yDivs_element)
             }
             let fBounds_type : int32 = RuntimeType.UNDEFINED
             fBounds_type = runtimeType(fBounds)
             thisSerializer.writeInt8((fBounds_type).toChar())
-            if ((RuntimeType.UNDEFINED) != (fBounds_type)) {
+            if ((fBounds_type) != (RuntimeType.UNDEFINED)) {
                 const fBounds_value  = fBounds!
                 common2D_Rect_serializer.write(thisSerializer, fBounds_value)
             }
             let fRectTypes_type : int32 = RuntimeType.UNDEFINED
             fRectTypes_type = runtimeType(fRectTypes)
             thisSerializer.writeInt8((fRectTypes_type).toChar())
-            if ((RuntimeType.UNDEFINED) != (fRectTypes_type)) {
+            if ((fRectTypes_type) != (RuntimeType.UNDEFINED)) {
                 const fRectTypes_value  = fRectTypes!
                 thisSerializer.writeInt32((fRectTypes_value.length).toInt())
-                for (let i = 0; i < fRectTypes_value.length; i++) {
-                    const fRectTypes_value_element : RectType = fRectTypes_value[i]
+                for (let fRectTypes_value_counter_i = 0; fRectTypes_value_counter_i < fRectTypes_value.length; fRectTypes_value_counter_i++) {
+                    const fRectTypes_value_element : RectType = fRectTypes_value[fRectTypes_value_counter_i]
                     thisSerializer.writeInt32(TypeChecker.drawing_RectType_ToNumeric(fRectTypes_value_element))
                 }
             }
             let fColors_type : int32 = RuntimeType.UNDEFINED
             fColors_type = runtimeType(fColors)
             thisSerializer.writeInt8((fColors_type).toChar())
-            if ((RuntimeType.UNDEFINED) != (fColors_type)) {
+            if ((fColors_type) != (RuntimeType.UNDEFINED)) {
                 const fColors_value  = fColors!
                 thisSerializer.writeInt32((fColors_value.length).toInt())
-                for (let i = 0; i < fColors_value.length; i++) {
-                    const fColors_value_element : T = fColors_value[i]
+                for (let fColors_value_counter_i = 0; fColors_value_counter_i < fColors_value.length; fColors_value_counter_i++) {
+                    const fColors_value_element : T = fColors_value[fColors_value_counter_i]
                     thisSerializer.writeCustomObject("T", (fColors_value_element as Object))
                 }
             }
@@ -1916,8 +1916,8 @@ export namespace drawing {
         private setMatrix_serialize(values: Array<number>): void {
             const thisSerializer : SerializerBase = SerializerBase.hold()
             thisSerializer.writeInt32((values.length).toInt())
-            for (let i = 0; i < values.length; i++) {
-                const values_element : number = values[i]
+            for (let values_counter_i = 0; values_counter_i < values.length; values_counter_i++) {
+                const values_element : number = values[values_counter_i]
                 thisSerializer.writeNumber(values_element)
             }
             ArkUIGeneratedNativeModule._drawing_Matrix_setMatrix(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
@@ -1966,8 +1966,8 @@ export namespace drawing {
         private mapPoints_serialize(src: Array<common2D.Point>): Array<common2D.Point> {
             const thisSerializer : SerializerBase = SerializerBase.hold()
             thisSerializer.writeInt32((src.length).toInt())
-            for (let i = 0; i < src.length; i++) {
-                const src_element : common2D.Point = src[i]
+            for (let src_counter_i = 0; src_counter_i < src.length; src_counter_i++) {
+                const src_element : common2D.Point = src[src_counter_i]
                 common2D_Point_serializer.write(thisSerializer, src_element)
             }
             const retval  = ArkUIGeneratedNativeModule._drawing_Matrix_mapPoints(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
@@ -2011,13 +2011,13 @@ export namespace drawing {
         private setPolyToPoly_serialize(src: Array<common2D.Point>, dst: Array<common2D.Point>, count: number): boolean {
             const thisSerializer : SerializerBase = SerializerBase.hold()
             thisSerializer.writeInt32((src.length).toInt())
-            for (let i = 0; i < src.length; i++) {
-                const src_element : common2D.Point = src[i]
+            for (let src_counter_i = 0; src_counter_i < src.length; src_counter_i++) {
+                const src_element : common2D.Point = src[src_counter_i]
                 common2D_Point_serializer.write(thisSerializer, src_element)
             }
             thisSerializer.writeInt32((dst.length).toInt())
-            for (let i = 0; i < dst.length; i++) {
-                const dst_element : common2D.Point = dst[i]
+            for (let dst_counter_i = 0; dst_counter_i < dst.length; dst_counter_i++) {
+                const dst_element : common2D.Point = dst[dst_counter_i]
                 common2D_Point_serializer.write(thisSerializer, dst_element)
             }
             const retval  = ArkUIGeneratedNativeModule._drawing_Matrix_setPolyToPoly(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length(), count)
@@ -2286,8 +2286,8 @@ export namespace drawing {
         private addPolygon_serialize(points: Array<common2D.Point>, close: boolean): void {
             const thisSerializer : SerializerBase = SerializerBase.hold()
             thisSerializer.writeInt32((points.length).toInt())
-            for (let i = 0; i < points.length; i++) {
-                const points_element : common2D.Point = points[i]
+            for (let points_counter_i = 0; points_counter_i < points.length; points_counter_i++) {
+                const points_element : common2D.Point = points[points_counter_i]
                 common2D_Point_serializer.write(thisSerializer, points_element)
             }
             ArkUIGeneratedNativeModule._drawing_Path_addPolygon(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length(), close ? 1 : 0)
@@ -2326,7 +2326,7 @@ export namespace drawing {
             let matrix_type : int32 = RuntimeType.UNDEFINED
             matrix_type = runtimeType(matrix)
             thisSerializer.writeInt8((matrix_type).toChar())
-            if ((RuntimeType.UNDEFINED) != (matrix_type)) {
+            if ((matrix_type) != (RuntimeType.UNDEFINED)) {
                 const matrix_value  = matrix!
                 drawing_Matrix_serializer.write(thisSerializer, matrix_value)
             }
@@ -2411,8 +2411,8 @@ export namespace drawing {
         private static createDashPathEffect_serialize(intervals: Array<number>, phase: number): PathEffect {
             const thisSerializer : SerializerBase = SerializerBase.hold()
             thisSerializer.writeInt32((intervals.length).toInt())
-            for (let i = 0; i < intervals.length; i++) {
-                const intervals_element : number = intervals[i]
+            for (let intervals_counter_i = 0; intervals_counter_i < intervals.length; intervals_counter_i++) {
+                const intervals_element : number = intervals[intervals_counter_i]
                 thisSerializer.writeNumber(intervals_element)
             }
             const retval  = ArkUIGeneratedNativeModule._drawing_PathEffect_createDashPathEffect(thisSerializer.asBuffer(), thisSerializer.length(), phase)
@@ -2655,7 +2655,7 @@ export namespace drawing {
             let filter_type : int32 = RuntimeType.UNDEFINED
             filter_type = runtimeType(filter)
             thisSerializer.writeInt8((filter_type).toChar())
-            if ((RuntimeType.UNDEFINED) != (filter_type)) {
+            if ((filter_type) != (RuntimeType.UNDEFINED)) {
                 const filter_value  = filter!
                 drawing_ImageFilter_serializer.write(thisSerializer, filter_value)
             }
@@ -2900,25 +2900,25 @@ export namespace drawing {
             common2D_Point_serializer.write(thisSerializer, startPt)
             common2D_Point_serializer.write(thisSerializer, endPt)
             thisSerializer.writeInt32((colors.length).toInt())
-            for (let i = 0; i < colors.length; i++) {
-                const colors_element : number = colors[i]
+            for (let colors_counter_i = 0; colors_counter_i < colors.length; colors_counter_i++) {
+                const colors_element : number = colors[colors_counter_i]
                 thisSerializer.writeNumber(colors_element)
             }
             let pos_type : int32 = RuntimeType.UNDEFINED
             pos_type = runtimeType(pos)
             thisSerializer.writeInt8((pos_type).toChar())
-            if ((RuntimeType.UNDEFINED) != (pos_type)) {
+            if ((pos_type) != (RuntimeType.UNDEFINED)) {
                 const pos_value  = pos!
                 thisSerializer.writeInt32((pos_value.length).toInt())
-                for (let i = 0; i < pos_value.length; i++) {
-                    const pos_value_element : number = pos_value[i]
+                for (let pos_value_counter_i = 0; pos_value_counter_i < pos_value.length; pos_value_counter_i++) {
+                    const pos_value_element : number = pos_value[pos_value_counter_i]
                     thisSerializer.writeNumber(pos_value_element)
                 }
             }
             let matrix_type : int32 = RuntimeType.UNDEFINED
             matrix_type = runtimeType(matrix)
             thisSerializer.writeInt8((matrix_type).toChar())
-            if ((RuntimeType.UNDEFINED) != (matrix_type)) {
+            if ((matrix_type) != (RuntimeType.UNDEFINED)) {
                 const matrix_value  = matrix!
                 drawing_Matrix_serializer.write(thisSerializer, matrix_value)
             }
@@ -2931,25 +2931,25 @@ export namespace drawing {
             const thisSerializer : SerializerBase = SerializerBase.hold()
             common2D_Point_serializer.write(thisSerializer, centerPt)
             thisSerializer.writeInt32((colors.length).toInt())
-            for (let i = 0; i < colors.length; i++) {
-                const colors_element : number = colors[i]
+            for (let colors_counter_i = 0; colors_counter_i < colors.length; colors_counter_i++) {
+                const colors_element : number = colors[colors_counter_i]
                 thisSerializer.writeNumber(colors_element)
             }
             let pos_type : int32 = RuntimeType.UNDEFINED
             pos_type = runtimeType(pos)
             thisSerializer.writeInt8((pos_type).toChar())
-            if ((RuntimeType.UNDEFINED) != (pos_type)) {
+            if ((pos_type) != (RuntimeType.UNDEFINED)) {
                 const pos_value  = pos!
                 thisSerializer.writeInt32((pos_value.length).toInt())
-                for (let i = 0; i < pos_value.length; i++) {
-                    const pos_value_element : number = pos_value[i]
+                for (let pos_value_counter_i = 0; pos_value_counter_i < pos_value.length; pos_value_counter_i++) {
+                    const pos_value_element : number = pos_value[pos_value_counter_i]
                     thisSerializer.writeNumber(pos_value_element)
                 }
             }
             let matrix_type : int32 = RuntimeType.UNDEFINED
             matrix_type = runtimeType(matrix)
             thisSerializer.writeInt8((matrix_type).toChar())
-            if ((RuntimeType.UNDEFINED) != (matrix_type)) {
+            if ((matrix_type) != (RuntimeType.UNDEFINED)) {
                 const matrix_value  = matrix!
                 drawing_Matrix_serializer.write(thisSerializer, matrix_value)
             }
@@ -2962,25 +2962,25 @@ export namespace drawing {
             const thisSerializer : SerializerBase = SerializerBase.hold()
             common2D_Point_serializer.write(thisSerializer, centerPt)
             thisSerializer.writeInt32((colors.length).toInt())
-            for (let i = 0; i < colors.length; i++) {
-                const colors_element : number = colors[i]
+            for (let colors_counter_i = 0; colors_counter_i < colors.length; colors_counter_i++) {
+                const colors_element : number = colors[colors_counter_i]
                 thisSerializer.writeNumber(colors_element)
             }
             let pos_type : int32 = RuntimeType.UNDEFINED
             pos_type = runtimeType(pos)
             thisSerializer.writeInt8((pos_type).toChar())
-            if ((RuntimeType.UNDEFINED) != (pos_type)) {
+            if ((pos_type) != (RuntimeType.UNDEFINED)) {
                 const pos_value  = pos!
                 thisSerializer.writeInt32((pos_value.length).toInt())
-                for (let i = 0; i < pos_value.length; i++) {
-                    const pos_value_element : number = pos_value[i]
+                for (let pos_value_counter_i = 0; pos_value_counter_i < pos_value.length; pos_value_counter_i++) {
+                    const pos_value_element : number = pos_value[pos_value_counter_i]
                     thisSerializer.writeNumber(pos_value_element)
                 }
             }
             let matrix_type : int32 = RuntimeType.UNDEFINED
             matrix_type = runtimeType(matrix)
             thisSerializer.writeInt8((matrix_type).toChar())
-            if ((RuntimeType.UNDEFINED) != (matrix_type)) {
+            if ((matrix_type) != (RuntimeType.UNDEFINED)) {
                 const matrix_value  = matrix!
                 drawing_Matrix_serializer.write(thisSerializer, matrix_value)
             }
@@ -2994,25 +2994,25 @@ export namespace drawing {
             common2D_Point_serializer.write(thisSerializer, startPt)
             common2D_Point_serializer.write(thisSerializer, endPt)
             thisSerializer.writeInt32((colors.length).toInt())
-            for (let i = 0; i < colors.length; i++) {
-                const colors_element : number = colors[i]
+            for (let colors_counter_i = 0; colors_counter_i < colors.length; colors_counter_i++) {
+                const colors_element : number = colors[colors_counter_i]
                 thisSerializer.writeNumber(colors_element)
             }
             let pos_type : int32 = RuntimeType.UNDEFINED
             pos_type = runtimeType(pos)
             thisSerializer.writeInt8((pos_type).toChar())
-            if ((RuntimeType.UNDEFINED) != (pos_type)) {
+            if ((pos_type) != (RuntimeType.UNDEFINED)) {
                 const pos_value  = pos!
                 thisSerializer.writeInt32((pos_value.length).toInt())
-                for (let i = 0; i < pos_value.length; i++) {
-                    const pos_value_element : number = pos_value[i]
+                for (let pos_value_counter_i = 0; pos_value_counter_i < pos_value.length; pos_value_counter_i++) {
+                    const pos_value_element : number = pos_value[pos_value_counter_i]
                     thisSerializer.writeNumber(pos_value_element)
                 }
             }
             let matrix_type : int32 = RuntimeType.UNDEFINED
             matrix_type = runtimeType(matrix)
             thisSerializer.writeInt8((matrix_type).toChar())
-            if ((RuntimeType.UNDEFINED) != (matrix_type)) {
+            if ((matrix_type) != (RuntimeType.UNDEFINED)) {
                 const matrix_value  = matrix!
                 drawing_Matrix_serializer.write(thisSerializer, matrix_value)
             }
@@ -3147,8 +3147,8 @@ export namespace drawing {
         private static makeFromPosText_serialize(text: string, len: number, points: Array<common2D.Point>, font: Font): TextBlob {
             const thisSerializer : SerializerBase = SerializerBase.hold()
             thisSerializer.writeInt32((points.length).toInt())
-            for (let i = 0; i < points.length; i++) {
-                const points_element : common2D.Point = points[i]
+            for (let points_counter_i = 0; points_counter_i < points.length; points_counter_i++) {
+                const points_element : common2D.Point = points[points_counter_i]
                 common2D_Point_serializer.write(thisSerializer, points_element)
             }
             const retval  = ArkUIGeneratedNativeModule._drawing_TextBlob_makeFromPosText(text, len, thisSerializer.asBuffer(), thisSerializer.length(), toPeerPtr(font))
@@ -3159,8 +3159,8 @@ export namespace drawing {
         private static makeFromRunBuffer_serialize(pos: Array<TextBlobRunBuffer>, font: Font, bounds: common2D.Rect): TextBlob {
             const thisSerializer : SerializerBase = SerializerBase.hold()
             thisSerializer.writeInt32((pos.length).toInt())
-            for (let i = 0; i < pos.length; i++) {
-                const pos_element : TextBlobRunBuffer = pos[i]
+            for (let pos_counter_i = 0; pos_counter_i < pos.length; pos_counter_i++) {
+                const pos_element : TextBlobRunBuffer = pos[pos_counter_i]
                 drawing_TextBlobRunBuffer_serializer.write(thisSerializer, pos_element)
             }
             common2D_Rect_serializer.write(thisSerializer, bounds)

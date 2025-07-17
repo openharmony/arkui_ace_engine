@@ -32,7 +32,7 @@ export class ArkNavigationPeer extends ArkCommonMethodPeer {
 
     public static create(component?: ComponentBase, flags: int32 = 0): ArkNavigationPeer {
         const peerId = PeerNode.nextId()
-        // TODO: use Stack instead
+        // Improve: use Stack instead
         const _peerPtr = ArkUIGeneratedNativeModule._Stack_construct(peerId, flags)
         const _peer = new ArkNavigationPeer(_peerPtr, peerId, "Navigation", flags)
         component?.setPeer(_peer)

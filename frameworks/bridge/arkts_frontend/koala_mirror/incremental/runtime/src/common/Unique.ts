@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { int32 } from "@koalaui/compat"
+import { int32 } from "@koalaui/common"
 
 export type UID = int32
 

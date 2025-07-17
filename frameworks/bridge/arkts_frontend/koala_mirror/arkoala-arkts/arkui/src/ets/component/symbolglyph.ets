@@ -71,7 +71,7 @@ export class ArkSymbolGlyphPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             Resource_serializer.write(thisSerializer, value_value)
         }
@@ -83,7 +83,7 @@ export class ArkSymbolGlyphPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -111,11 +111,11 @@ export class ArkSymbolGlyphPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeInt32((value_value.length).toInt())
-            for (let i = 0; i < value_value.length; i++) {
-                const value_value_element : ResourceColor = value_value[i]
+            for (let value_value_counter_i = 0; value_value_counter_i < value_value.length; value_value_counter_i++) {
+                const value_value_element : ResourceColor = value_value[value_value_counter_i]
                 let value_value_element_type : int32 = RuntimeType.UNDEFINED
                 value_value_element_type = runtimeType(value_value_element)
                 if (TypeChecker.isColor(value_value_element)) {
@@ -148,7 +148,7 @@ export class ArkSymbolGlyphPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -176,7 +176,7 @@ export class ArkSymbolGlyphPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = (value as SymbolEffectStrategy)
             thisSerializer.writeInt32(TypeChecker.SymbolEffectStrategy_ToNumeric(value_value))
         }
@@ -188,7 +188,7 @@ export class ArkSymbolGlyphPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = (value as SymbolRenderingStrategy)
             thisSerializer.writeInt32(TypeChecker.SymbolRenderingStrategy_ToNumeric(value_value))
         }
@@ -200,7 +200,7 @@ export class ArkSymbolGlyphPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -223,7 +223,7 @@ export class ArkSymbolGlyphPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -246,14 +246,14 @@ export class ArkSymbolGlyphPeer extends ArkCommonMethodPeer {
         let symbolEffect_type : int32 = RuntimeType.UNDEFINED
         symbolEffect_type = runtimeType(symbolEffect)
         thisSerializer.writeInt8((symbolEffect_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (symbolEffect_type)) {
+        if ((symbolEffect_type) != (RuntimeType.UNDEFINED)) {
             const symbolEffect_value  = symbolEffect!
             SymbolEffect_serializer.write(thisSerializer, symbolEffect_value)
         }
         let triggerValue_type : int32 = RuntimeType.UNDEFINED
         triggerValue_type = runtimeType(triggerValue)
         thisSerializer.writeInt8((triggerValue_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (triggerValue_type)) {
+        if ((triggerValue_type) != (RuntimeType.UNDEFINED)) {
             const triggerValue_value  = triggerValue!
             let triggerValue_value_type : int32 = RuntimeType.UNDEFINED
             triggerValue_value_type = runtimeType(triggerValue_value)
@@ -684,7 +684,7 @@ export class AppearSymbolEffect extends SymbolEffect implements MaterializedBase
         let scope_type : int32 = RuntimeType.UNDEFINED
         scope_type = runtimeType(scope)
         thisSerializer.writeInt8((scope_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (scope_type)) {
+        if ((scope_type) != (RuntimeType.UNDEFINED)) {
             const scope_value  = (scope as EffectScope)
             thisSerializer.writeInt32(TypeChecker.EffectScope_ToNumeric(scope_value))
         }
@@ -708,7 +708,7 @@ export class AppearSymbolEffect extends SymbolEffect implements MaterializedBase
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : EffectScope | undefined
-        if ((RuntimeType.UNDEFINED) != (buffer_runtimeType))
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
         {
             buffer = TypeChecker.EffectScope_FromNumeric(retvalDeserializer.readInt32())
         }
@@ -720,7 +720,7 @@ export class AppearSymbolEffect extends SymbolEffect implements MaterializedBase
         let scope_type : int32 = RuntimeType.UNDEFINED
         scope_type = runtimeType(scope)
         thisSerializer.writeInt8((scope_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (scope_type)) {
+        if ((scope_type) != (RuntimeType.UNDEFINED)) {
             const scope_value  = (scope as EffectScope)
             thisSerializer.writeInt32(TypeChecker.EffectScope_ToNumeric(scope_value))
         }
@@ -759,14 +759,14 @@ export class BounceSymbolEffect extends SymbolEffect implements MaterializedBase
         let scope_type : int32 = RuntimeType.UNDEFINED
         scope_type = runtimeType(scope)
         thisSerializer.writeInt8((scope_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (scope_type)) {
+        if ((scope_type) != (RuntimeType.UNDEFINED)) {
             const scope_value  = (scope as EffectScope)
             thisSerializer.writeInt32(TypeChecker.EffectScope_ToNumeric(scope_value))
         }
         let direction_type : int32 = RuntimeType.UNDEFINED
         direction_type = runtimeType(direction)
         thisSerializer.writeInt8((direction_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (direction_type)) {
+        if ((direction_type) != (RuntimeType.UNDEFINED)) {
             const direction_value  = (direction as EffectDirection)
             thisSerializer.writeInt32(TypeChecker.EffectDirection_ToNumeric(direction_value))
         }
@@ -798,7 +798,7 @@ export class BounceSymbolEffect extends SymbolEffect implements MaterializedBase
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : EffectScope | undefined
-        if ((RuntimeType.UNDEFINED) != (buffer_runtimeType))
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
         {
             buffer = TypeChecker.EffectScope_FromNumeric(retvalDeserializer.readInt32())
         }
@@ -810,7 +810,7 @@ export class BounceSymbolEffect extends SymbolEffect implements MaterializedBase
         let scope_type : int32 = RuntimeType.UNDEFINED
         scope_type = runtimeType(scope)
         thisSerializer.writeInt8((scope_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (scope_type)) {
+        if ((scope_type) != (RuntimeType.UNDEFINED)) {
             const scope_value  = (scope as EffectScope)
             thisSerializer.writeInt32(TypeChecker.EffectScope_ToNumeric(scope_value))
         }
@@ -822,7 +822,7 @@ export class BounceSymbolEffect extends SymbolEffect implements MaterializedBase
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : EffectDirection | undefined
-        if ((RuntimeType.UNDEFINED) != (buffer_runtimeType))
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
         {
             buffer = TypeChecker.EffectDirection_FromNumeric(retvalDeserializer.readInt32())
         }
@@ -834,7 +834,7 @@ export class BounceSymbolEffect extends SymbolEffect implements MaterializedBase
         let direction_type : int32 = RuntimeType.UNDEFINED
         direction_type = runtimeType(direction)
         thisSerializer.writeInt8((direction_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (direction_type)) {
+        if ((direction_type) != (RuntimeType.UNDEFINED)) {
             const direction_value  = (direction as EffectDirection)
             thisSerializer.writeInt32(TypeChecker.EffectDirection_ToNumeric(direction_value))
         }
@@ -866,7 +866,7 @@ export class DisappearSymbolEffect extends SymbolEffect implements MaterializedB
         let scope_type : int32 = RuntimeType.UNDEFINED
         scope_type = runtimeType(scope)
         thisSerializer.writeInt8((scope_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (scope_type)) {
+        if ((scope_type) != (RuntimeType.UNDEFINED)) {
             const scope_value  = (scope as EffectScope)
             thisSerializer.writeInt32(TypeChecker.EffectScope_ToNumeric(scope_value))
         }
@@ -890,7 +890,7 @@ export class DisappearSymbolEffect extends SymbolEffect implements MaterializedB
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : EffectScope | undefined
-        if ((RuntimeType.UNDEFINED) != (buffer_runtimeType))
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
         {
             buffer = TypeChecker.EffectScope_FromNumeric(retvalDeserializer.readInt32())
         }
@@ -902,7 +902,7 @@ export class DisappearSymbolEffect extends SymbolEffect implements MaterializedB
         let scope_type : int32 = RuntimeType.UNDEFINED
         scope_type = runtimeType(scope)
         thisSerializer.writeInt8((scope_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (scope_type)) {
+        if ((scope_type) != (RuntimeType.UNDEFINED)) {
             const scope_value  = (scope as EffectScope)
             thisSerializer.writeInt32(TypeChecker.EffectScope_ToNumeric(scope_value))
         }
@@ -934,7 +934,7 @@ export class HierarchicalSymbolEffect extends SymbolEffect implements Materializ
         let fillStyle_type : int32 = RuntimeType.UNDEFINED
         fillStyle_type = runtimeType(fillStyle)
         thisSerializer.writeInt8((fillStyle_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (fillStyle_type)) {
+        if ((fillStyle_type) != (RuntimeType.UNDEFINED)) {
             const fillStyle_value  = (fillStyle as EffectFillStyle)
             thisSerializer.writeInt32(TypeChecker.EffectFillStyle_ToNumeric(fillStyle_value))
         }
@@ -958,7 +958,7 @@ export class HierarchicalSymbolEffect extends SymbolEffect implements Materializ
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : EffectFillStyle | undefined
-        if ((RuntimeType.UNDEFINED) != (buffer_runtimeType))
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
         {
             buffer = TypeChecker.EffectFillStyle_FromNumeric(retvalDeserializer.readInt32())
         }
@@ -970,7 +970,7 @@ export class HierarchicalSymbolEffect extends SymbolEffect implements Materializ
         let fillStyle_type : int32 = RuntimeType.UNDEFINED
         fillStyle_type = runtimeType(fillStyle)
         thisSerializer.writeInt8((fillStyle_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (fillStyle_type)) {
+        if ((fillStyle_type) != (RuntimeType.UNDEFINED)) {
             const fillStyle_value  = (fillStyle as EffectFillStyle)
             thisSerializer.writeInt32(TypeChecker.EffectFillStyle_ToNumeric(fillStyle_value))
         }
@@ -1022,7 +1022,7 @@ export class ReplaceSymbolEffect extends SymbolEffect implements MaterializedBas
         let scope_type : int32 = RuntimeType.UNDEFINED
         scope_type = runtimeType(scope)
         thisSerializer.writeInt8((scope_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (scope_type)) {
+        if ((scope_type) != (RuntimeType.UNDEFINED)) {
             const scope_value  = (scope as EffectScope)
             thisSerializer.writeInt32(TypeChecker.EffectScope_ToNumeric(scope_value))
         }
@@ -1046,7 +1046,7 @@ export class ReplaceSymbolEffect extends SymbolEffect implements MaterializedBas
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : EffectScope | undefined
-        if ((RuntimeType.UNDEFINED) != (buffer_runtimeType))
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
         {
             buffer = TypeChecker.EffectScope_FromNumeric(retvalDeserializer.readInt32())
         }
@@ -1058,7 +1058,7 @@ export class ReplaceSymbolEffect extends SymbolEffect implements MaterializedBas
         let scope_type : int32 = RuntimeType.UNDEFINED
         scope_type = runtimeType(scope)
         thisSerializer.writeInt8((scope_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (scope_type)) {
+        if ((scope_type) != (RuntimeType.UNDEFINED)) {
             const scope_value  = (scope as EffectScope)
             thisSerializer.writeInt32(TypeChecker.EffectScope_ToNumeric(scope_value))
         }
@@ -1097,14 +1097,14 @@ export class ScaleSymbolEffect extends SymbolEffect implements MaterializedBase 
         let scope_type : int32 = RuntimeType.UNDEFINED
         scope_type = runtimeType(scope)
         thisSerializer.writeInt8((scope_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (scope_type)) {
+        if ((scope_type) != (RuntimeType.UNDEFINED)) {
             const scope_value  = (scope as EffectScope)
             thisSerializer.writeInt32(TypeChecker.EffectScope_ToNumeric(scope_value))
         }
         let direction_type : int32 = RuntimeType.UNDEFINED
         direction_type = runtimeType(direction)
         thisSerializer.writeInt8((direction_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (direction_type)) {
+        if ((direction_type) != (RuntimeType.UNDEFINED)) {
             const direction_value  = (direction as EffectDirection)
             thisSerializer.writeInt32(TypeChecker.EffectDirection_ToNumeric(direction_value))
         }
@@ -1136,7 +1136,7 @@ export class ScaleSymbolEffect extends SymbolEffect implements MaterializedBase 
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : EffectScope | undefined
-        if ((RuntimeType.UNDEFINED) != (buffer_runtimeType))
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
         {
             buffer = TypeChecker.EffectScope_FromNumeric(retvalDeserializer.readInt32())
         }
@@ -1148,7 +1148,7 @@ export class ScaleSymbolEffect extends SymbolEffect implements MaterializedBase 
         let scope_type : int32 = RuntimeType.UNDEFINED
         scope_type = runtimeType(scope)
         thisSerializer.writeInt8((scope_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (scope_type)) {
+        if ((scope_type) != (RuntimeType.UNDEFINED)) {
             const scope_value  = (scope as EffectScope)
             thisSerializer.writeInt32(TypeChecker.EffectScope_ToNumeric(scope_value))
         }
@@ -1160,7 +1160,7 @@ export class ScaleSymbolEffect extends SymbolEffect implements MaterializedBase 
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
         let buffer : EffectDirection | undefined
-        if ((RuntimeType.UNDEFINED) != (buffer_runtimeType))
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED))
         {
             buffer = TypeChecker.EffectDirection_FromNumeric(retvalDeserializer.readInt32())
         }
@@ -1172,7 +1172,7 @@ export class ScaleSymbolEffect extends SymbolEffect implements MaterializedBase 
         let direction_type : int32 = RuntimeType.UNDEFINED
         direction_type = runtimeType(direction)
         thisSerializer.writeInt8((direction_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (direction_type)) {
+        if ((direction_type) != (RuntimeType.UNDEFINED)) {
             const direction_value  = (direction as EffectDirection)
             thisSerializer.writeInt32(TypeChecker.EffectDirection_ToNumeric(direction_value))
         }

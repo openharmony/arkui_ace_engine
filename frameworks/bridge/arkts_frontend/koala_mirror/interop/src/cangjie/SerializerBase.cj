@@ -76,7 +76,7 @@ public open class SerializerBase {
 
     private static var customSerializers: ?CustomSerializer = Option.None
     static func registerCustomSerializer(serializer: CustomSerializer) {
-        //TODO
+        // Improve:
     }
 
     public init() {
@@ -132,7 +132,7 @@ public open class SerializerBase {
     }
     public func writeCustomObject(kind: String, value: Any): Unit {
         var current = SerializerBase.customSerializers
-        // TODO
+        // Improve:
         println("Unsupported custom serialization for ${kind}, write undefined")
         this.writeInt8(Tag.UNDEFINED.value)
     }
@@ -186,7 +186,7 @@ public open class SerializerBase {
         return PromiseAndResourceId<T>(promise, resourceId)
     }
     public func writeFunction(value: Any): Unit {
-        // TODO
+        // Improve:
     }
     public func writeTag(tag: Int32): Unit {
         this.checkCapacity(1)
@@ -304,7 +304,7 @@ public open class SerializerBase {
         this.position++
     }
     public func writeMaterialized(value: Object): Unit {
-        // TODO
+        // Improve:
     }
     public func writeCallbackResource(resource: CallbackResource) {
         this.writeInt32(resource.resourceId)
@@ -313,7 +313,7 @@ public open class SerializerBase {
     }
     public func writeString(value: String): Unit {
         this.checkCapacity(Int32(4 + value.size * 4 + 1)) // length, data
-        let encodedLength = InteropNativeModule._ManagedStringWrite(value, this.asBuffer(), this.position + 4)
+        let encodedLength = InteropNativeModule._ManagedStringWrite(value, this.asBuffer(), this._length, this.position + 4)
         this.writeInt32(encodedLength)
         this.position += encodedLength
     }

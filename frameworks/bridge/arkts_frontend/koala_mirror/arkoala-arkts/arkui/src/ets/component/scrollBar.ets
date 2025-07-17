@@ -52,7 +52,7 @@ export class ArkScrollBarPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -190,7 +190,7 @@ export class ScrollBarOptions_serializer {
         let value_direction_type : int32 = RuntimeType.UNDEFINED
         value_direction_type = runtimeType(value_direction)
         valueSerializer.writeInt8((value_direction_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_direction_type)) {
+        if ((value_direction_type) != (RuntimeType.UNDEFINED)) {
             const value_direction_value  = (value_direction as ScrollBarDirection)
             valueSerializer.writeInt32(TypeChecker.ScrollBarDirection_ToNumeric(value_direction_value))
         }
@@ -198,7 +198,7 @@ export class ScrollBarOptions_serializer {
         let value_state_type : int32 = RuntimeType.UNDEFINED
         value_state_type = runtimeType(value_state)
         valueSerializer.writeInt8((value_state_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_state_type)) {
+        if ((value_state_type) != (RuntimeType.UNDEFINED)) {
             const value_state_value  = (value_state as BarState)
             valueSerializer.writeInt32(TypeChecker.BarState_ToNumeric(value_state_value))
         }
@@ -208,14 +208,14 @@ export class ScrollBarOptions_serializer {
         const scroller_result : Scroller = (Scroller_serializer.read(valueDeserializer) as Scroller)
         const direction_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let direction_buf : ScrollBarDirection | undefined
-        if ((RuntimeType.UNDEFINED) != (direction_buf_runtimeType))
+        if ((direction_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             direction_buf = TypeChecker.ScrollBarDirection_FromNumeric(valueDeserializer.readInt32())
         }
         const direction_result : ScrollBarDirection | undefined = direction_buf
         const state_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let state_buf : BarState | undefined
-        if ((RuntimeType.UNDEFINED) != (state_buf_runtimeType))
+        if ((state_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             state_buf = TypeChecker.BarState_FromNumeric(valueDeserializer.readInt32())
         }

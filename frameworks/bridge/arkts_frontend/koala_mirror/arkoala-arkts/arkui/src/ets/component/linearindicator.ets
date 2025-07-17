@@ -79,7 +79,7 @@ export class LinearIndicatorController implements MaterializedBase {
         let options_type : int32 = RuntimeType.UNDEFINED
         options_type = runtimeType(options)
         thisSerializer.writeInt8((options_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (options_type)) {
+        if ((options_type) != (RuntimeType.UNDEFINED)) {
             const options_value  = options!
             LinearIndicatorStartOptions_serializer.write(thisSerializer, options_value)
         }
@@ -109,14 +109,14 @@ export class ArkLinearIndicatorPeer extends ArkCommonMethodPeer {
         let count_type : int32 = RuntimeType.UNDEFINED
         count_type = runtimeType(count)
         thisSerializer.writeInt8((count_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (count_type)) {
+        if ((count_type) != (RuntimeType.UNDEFINED)) {
             const count_value  = count!
             thisSerializer.writeNumber(count_value)
         }
         let controller_type : int32 = RuntimeType.UNDEFINED
         controller_type = runtimeType(controller)
         thisSerializer.writeInt8((controller_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (controller_type)) {
+        if ((controller_type) != (RuntimeType.UNDEFINED)) {
             const controller_value  = controller!
             LinearIndicatorController_serializer.write(thisSerializer, controller_value)
         }
@@ -128,7 +128,7 @@ export class ArkLinearIndicatorPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             LinearIndicatorStyle_serializer.write(thisSerializer, value_value)
         }
@@ -140,7 +140,7 @@ export class ArkLinearIndicatorPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -152,7 +152,7 @@ export class ArkLinearIndicatorPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -349,7 +349,7 @@ export class LinearIndicatorStartOptions_serializer {
         let value_interval_type : int32 = RuntimeType.UNDEFINED
         value_interval_type = runtimeType(value_interval)
         valueSerializer.writeInt8((value_interval_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_interval_type)) {
+        if ((value_interval_type) != (RuntimeType.UNDEFINED)) {
             const value_interval_value  = value_interval!
             valueSerializer.writeNumber(value_interval_value)
         }
@@ -357,7 +357,7 @@ export class LinearIndicatorStartOptions_serializer {
         let value_duration_type : int32 = RuntimeType.UNDEFINED
         value_duration_type = runtimeType(value_duration)
         valueSerializer.writeInt8((value_duration_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_duration_type)) {
+        if ((value_duration_type) != (RuntimeType.UNDEFINED)) {
             const value_duration_value  = value_duration!
             valueSerializer.writeNumber(value_duration_value)
         }
@@ -366,14 +366,14 @@ export class LinearIndicatorStartOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const interval_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let interval_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (interval_buf_runtimeType))
+        if ((interval_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             interval_buf = (valueDeserializer.readNumber() as number)
         }
         const interval_result : number | undefined = interval_buf
         const duration_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let duration_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (duration_buf_runtimeType))
+        if ((duration_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             duration_buf = (valueDeserializer.readNumber() as number)
         }
@@ -389,7 +389,7 @@ export class LinearIndicatorStyle_serializer {
         let value_space_type : int32 = RuntimeType.UNDEFINED
         value_space_type = runtimeType(value_space)
         valueSerializer.writeInt8((value_space_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_space_type)) {
+        if ((value_space_type) != (RuntimeType.UNDEFINED)) {
             const value_space_value  = value_space!
             LengthMetrics_serializer.write(valueSerializer, value_space_value)
         }
@@ -397,7 +397,7 @@ export class LinearIndicatorStyle_serializer {
         let value_strokeWidth_type : int32 = RuntimeType.UNDEFINED
         value_strokeWidth_type = runtimeType(value_strokeWidth)
         valueSerializer.writeInt8((value_strokeWidth_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_strokeWidth_type)) {
+        if ((value_strokeWidth_type) != (RuntimeType.UNDEFINED)) {
             const value_strokeWidth_value  = value_strokeWidth!
             LengthMetrics_serializer.write(valueSerializer, value_strokeWidth_value)
         }
@@ -405,7 +405,7 @@ export class LinearIndicatorStyle_serializer {
         let value_strokeRadius_type : int32 = RuntimeType.UNDEFINED
         value_strokeRadius_type = runtimeType(value_strokeRadius)
         valueSerializer.writeInt8((value_strokeRadius_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_strokeRadius_type)) {
+        if ((value_strokeRadius_type) != (RuntimeType.UNDEFINED)) {
             const value_strokeRadius_value  = value_strokeRadius!
             LengthMetrics_serializer.write(valueSerializer, value_strokeRadius_value)
         }
@@ -413,7 +413,7 @@ export class LinearIndicatorStyle_serializer {
         let value_trackBackgroundColor_type : int32 = RuntimeType.UNDEFINED
         value_trackBackgroundColor_type = runtimeType(value_trackBackgroundColor)
         valueSerializer.writeInt8((value_trackBackgroundColor_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_trackBackgroundColor_type)) {
+        if ((value_trackBackgroundColor_type) != (RuntimeType.UNDEFINED)) {
             const value_trackBackgroundColor_value  = value_trackBackgroundColor!
             ColorMetrics_serializer.write(valueSerializer, value_trackBackgroundColor_value)
         }
@@ -421,7 +421,7 @@ export class LinearIndicatorStyle_serializer {
         let value_trackColor_type : int32 = RuntimeType.UNDEFINED
         value_trackColor_type = runtimeType(value_trackColor)
         valueSerializer.writeInt8((value_trackColor_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_trackColor_type)) {
+        if ((value_trackColor_type) != (RuntimeType.UNDEFINED)) {
             const value_trackColor_value  = value_trackColor!
             ColorMetrics_serializer.write(valueSerializer, value_trackColor_value)
         }
@@ -430,35 +430,35 @@ export class LinearIndicatorStyle_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const space_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let space_buf : LengthMetrics | undefined
-        if ((RuntimeType.UNDEFINED) != (space_buf_runtimeType))
+        if ((space_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             space_buf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
         }
         const space_result : LengthMetrics | undefined = space_buf
         const strokeWidth_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let strokeWidth_buf : LengthMetrics | undefined
-        if ((RuntimeType.UNDEFINED) != (strokeWidth_buf_runtimeType))
+        if ((strokeWidth_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             strokeWidth_buf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
         }
         const strokeWidth_result : LengthMetrics | undefined = strokeWidth_buf
         const strokeRadius_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let strokeRadius_buf : LengthMetrics | undefined
-        if ((RuntimeType.UNDEFINED) != (strokeRadius_buf_runtimeType))
+        if ((strokeRadius_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             strokeRadius_buf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
         }
         const strokeRadius_result : LengthMetrics | undefined = strokeRadius_buf
         const trackBackgroundColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let trackBackgroundColor_buf : ColorMetrics | undefined
-        if ((RuntimeType.UNDEFINED) != (trackBackgroundColor_buf_runtimeType))
+        if ((trackBackgroundColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             trackBackgroundColor_buf = (ColorMetrics_serializer.read(valueDeserializer) as ColorMetrics)
         }
         const trackBackgroundColor_result : ColorMetrics | undefined = trackBackgroundColor_buf
         const trackColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let trackColor_buf : ColorMetrics | undefined
-        if ((RuntimeType.UNDEFINED) != (trackColor_buf_runtimeType))
+        if ((trackColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             trackColor_buf = (ColorMetrics_serializer.read(valueDeserializer) as ColorMetrics)
         }

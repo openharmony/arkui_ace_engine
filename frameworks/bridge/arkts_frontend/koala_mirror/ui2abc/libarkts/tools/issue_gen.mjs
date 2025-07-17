@@ -46,7 +46,7 @@ ${issue_src}
 
 `
 
-// TODO:
+// Improve:
 const log = ``
 
 const log_src =

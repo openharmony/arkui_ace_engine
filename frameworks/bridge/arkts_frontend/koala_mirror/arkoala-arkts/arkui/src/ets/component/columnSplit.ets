@@ -49,7 +49,7 @@ export class ArkColumnSplitPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -61,7 +61,7 @@ export class ArkColumnSplitPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             ColumnSplitDividerStyle_serializer.write(thisSerializer, value_value)
         }
@@ -213,7 +213,7 @@ export class ColumnSplitDividerStyle_serializer {
         let value_startMargin_type : int32 = RuntimeType.UNDEFINED
         value_startMargin_type = runtimeType(value_startMargin)
         valueSerializer.writeInt8((value_startMargin_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_startMargin_type)) {
+        if ((value_startMargin_type) != (RuntimeType.UNDEFINED)) {
             const value_startMargin_value  = value_startMargin!
             let value_startMargin_value_type : int32 = RuntimeType.UNDEFINED
             value_startMargin_value_type = runtimeType(value_startMargin_value)
@@ -237,7 +237,7 @@ export class ColumnSplitDividerStyle_serializer {
         let value_endMargin_type : int32 = RuntimeType.UNDEFINED
         value_endMargin_type = runtimeType(value_endMargin)
         valueSerializer.writeInt8((value_endMargin_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_endMargin_type)) {
+        if ((value_endMargin_type) != (RuntimeType.UNDEFINED)) {
             const value_endMargin_value  = value_endMargin!
             let value_endMargin_value_type : int32 = RuntimeType.UNDEFINED
             value_endMargin_value_type = runtimeType(value_endMargin_value)
@@ -262,7 +262,7 @@ export class ColumnSplitDividerStyle_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const startMargin_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let startMargin_buf : Dimension | undefined
-        if ((RuntimeType.UNDEFINED) != (startMargin_buf_runtimeType))
+        if ((startMargin_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const startMargin_buf__selector : int32 = valueDeserializer.readInt8()
             let startMargin_buf_ : string | number | Resource | undefined
@@ -283,7 +283,7 @@ export class ColumnSplitDividerStyle_serializer {
         const startMargin_result : Dimension | undefined = startMargin_buf
         const endMargin_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let endMargin_buf : Dimension | undefined
-        if ((RuntimeType.UNDEFINED) != (endMargin_buf_runtimeType))
+        if ((endMargin_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const endMargin_buf__selector : int32 = valueDeserializer.readInt8()
             let endMargin_buf_ : string | number | Resource | undefined

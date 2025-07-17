@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,6 @@ import { className, uint32 } from "@koalaui/common"
 import { __context, __id } from "../internals"
 import { IncrementalNode } from "../tree/IncrementalNode"
 import { memoEntry1 } from "./entry"
-import { __memo_context_type, __memo_id_type } from "../internals"
 
 /**
  * @param create - the node constructor is invoked only once,
@@ -33,8 +32,7 @@ export function NodeAttach<Node extends IncrementalNode>(
     update: (node: Node) => void,
     reuseKey?: string
 ): void {
-    const scope =
-        __context().scope<void>(__id(), 0, create, undefined, undefined, undefined, reuseKey)
+    const scope = __context().scopeEx<undefined>(__id(), 0, create, undefined, undefined, undefined, reuseKey)
     if (scope.unchanged) {
         scope.cached
     } else try {
@@ -81,7 +79,7 @@ export class DataNode<Data> extends IncrementalNode {
         data: Data,
         onDataChange?: () => void
     ): void {
-        const scope = __context().scope<void>(__id(), 1, (): IncrementalNode => new DataNode<Data>(kind))
+        const scope = __context().scopeEx<undefined>(__id(), 1, (): IncrementalNode => new DataNode<Data>(kind))
         const state = scope.param<Data>(0, data)
         if (scope.unchanged) {
             scope.cached

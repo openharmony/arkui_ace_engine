@@ -53,7 +53,7 @@ export class ArkMarqueePeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -86,7 +86,7 @@ export class ArkMarqueePeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -114,7 +114,7 @@ export class ArkMarqueePeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.writeBoolean(value_value)
         }
@@ -126,7 +126,7 @@ export class ArkMarqueePeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -154,7 +154,7 @@ export class ArkMarqueePeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
@@ -177,7 +177,7 @@ export class ArkMarqueePeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = (value as MarqueeUpdateStrategy)
             thisSerializer.writeInt32(TypeChecker.MarqueeUpdateStrategy_ToNumeric(value_value))
         }
@@ -189,7 +189,7 @@ export class ArkMarqueePeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -201,7 +201,7 @@ export class ArkMarqueePeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -213,7 +213,7 @@ export class ArkMarqueePeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
@@ -539,7 +539,7 @@ export class MarqueeOptions_serializer {
         let value_step_type : int32 = RuntimeType.UNDEFINED
         value_step_type = runtimeType(value_step)
         valueSerializer.writeInt8((value_step_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_step_type)) {
+        if ((value_step_type) != (RuntimeType.UNDEFINED)) {
             const value_step_value  = value_step!
             valueSerializer.writeNumber(value_step_value)
         }
@@ -547,7 +547,7 @@ export class MarqueeOptions_serializer {
         let value_loop_type : int32 = RuntimeType.UNDEFINED
         value_loop_type = runtimeType(value_loop)
         valueSerializer.writeInt8((value_loop_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_loop_type)) {
+        if ((value_loop_type) != (RuntimeType.UNDEFINED)) {
             const value_loop_value  = value_loop!
             valueSerializer.writeNumber(value_loop_value)
         }
@@ -555,7 +555,7 @@ export class MarqueeOptions_serializer {
         let value_fromStart_type : int32 = RuntimeType.UNDEFINED
         value_fromStart_type = runtimeType(value_fromStart)
         valueSerializer.writeInt8((value_fromStart_type).toChar())
-        if ((RuntimeType.UNDEFINED) != (value_fromStart_type)) {
+        if ((value_fromStart_type) != (RuntimeType.UNDEFINED)) {
             const value_fromStart_value  = value_fromStart!
             valueSerializer.writeBoolean(value_fromStart_value)
         }
@@ -567,21 +567,21 @@ export class MarqueeOptions_serializer {
         const start_result : boolean = valueDeserializer.readBoolean()
         const step_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let step_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (step_buf_runtimeType))
+        if ((step_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             step_buf = (valueDeserializer.readNumber() as number)
         }
         const step_result : number | undefined = step_buf
         const loop_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let loop_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (loop_buf_runtimeType))
+        if ((loop_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             loop_buf = (valueDeserializer.readNumber() as number)
         }
         const loop_result : number | undefined = loop_buf
         const fromStart_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let fromStart_buf : boolean | undefined
-        if ((RuntimeType.UNDEFINED) != (fromStart_buf_runtimeType))
+        if ((fromStart_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             fromStart_buf = valueDeserializer.readBoolean()
         }
