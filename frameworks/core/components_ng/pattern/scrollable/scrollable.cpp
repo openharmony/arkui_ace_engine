@@ -1817,11 +1817,6 @@ void Scrollable::StopAxisAnimation()
     axisAnimator_->StopAxisAnimation();
 }
 
-inline bool Scrollable::IsMouseWheelScroll(const GestureEvent& info)
-{
-    return info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() != SourceTool::TOUCHPAD;
-}
-
 void Scrollable::OnCollectTouchTarget(TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
     const RefPtr<TargetComponent>& targetComponent, ResponseLinkResult& responseLinkResult)
 {

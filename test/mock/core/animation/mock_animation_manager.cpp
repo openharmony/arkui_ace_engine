@@ -34,6 +34,9 @@ void MockAnimationManager::CancelAnimations()
 std::vector<RefPtr<MockImplicitAnimation>> MockAnimationManager::CloseAnimation()
 {
     inScope_ = false;
+    if (!enabled_) {
+        return {};
+    }
     if (activeProps_.empty()) {
         return {};
     }
@@ -43,7 +46,8 @@ std::vector<RefPtr<MockImplicitAnimation>> MockAnimationManager::CloseAnimation(
     }
     // capture active props in animation
     std::vector<RefPtr<MockImplicitAnimation>> res;
-    for (const auto& prop : activeProps_) {
+    auto props = std::move(activeProps_);
+    for (const auto& prop : props) {
         auto anim = propToAnimation_[prop].Upgrade();
         if (anim) {
             if (!anim->Finished()) {
@@ -57,7 +61,6 @@ std::vector<RefPtr<MockImplicitAnimation>> MockAnimationManager::CloseAnimation(
         propToAnimation_[prop] = res.back();
         animations_.emplace_back(res.back());
     }
-    activeProps_.clear();
     return res;
 }
 

@@ -73,34 +73,79 @@ public:
         return gesture;
     }
 
-    void PanStart(const Offset& delta)
+    static GestureEvent MakeMouseScrollGesture(const Offset& delta)
+    {
+        GestureEvent gesture;
+        gesture.SetSourceTool(SourceTool::MOUSE);
+        gesture.SetInputEventType(InputEventType::AXIS);
+        gesture.SetDelta(delta);
+        return gesture;
+    }
+
+    void ActionStart(GestureEvent& event)
     {
         const auto& controller = pattern_->freeScroll_;
-        auto gesture = MakePanGesture(delta);
         ASSERT_TRUE(controller && controller->freePanGesture_);
         ASSERT_TRUE(controller->freePanGesture_->onActionStart_);
         auto&& func = *(controller->freePanGesture_->onActionStart_);
-        func(gesture);
+        func(event);
     }
-    void PanUpdate(const Offset& delta)
+
+    void ActionUpdate(GestureEvent& event)
     {
         const auto& controller = pattern_->freeScroll_;
-        auto gesture = MakePanGesture(delta);
         ASSERT_TRUE(controller && controller->freePanGesture_);
         ASSERT_TRUE(controller->freePanGesture_->onActionUpdate_);
         auto&& func = *(controller->freePanGesture_->onActionUpdate_);
-        func(gesture);
+        func(event);
         FlushUITasks(frameNode_);
     }
-    void PanEnd(const Offset& delta, const Offset& velocity)
+
+    void ActionEnd(GestureEvent& event)
     {
         const auto& controller = pattern_->freeScroll_;
-        auto gesture = MakePanGesture(delta, Velocity(velocity));
         ASSERT_TRUE(controller && controller->freePanGesture_);
         ASSERT_TRUE(controller->freePanGesture_->onActionEnd_);
         auto&& func = *(controller->freePanGesture_->onActionEnd_);
-        func(gesture);
+        func(event);
     }
+
+    void PanStart(const Offset& delta)
+    {
+        auto gesture = MakePanGesture(delta);
+        ActionStart(gesture);
+    }
+
+    void PanUpdate(const Offset& delta)
+    {
+        auto gesture = MakePanGesture(delta);
+        ActionUpdate(gesture);
+    }
+
+    void PanEnd(const Offset& delta, const Offset& velocity)
+    {
+        auto gesture = MakePanGesture(delta, Velocity(velocity));
+        ActionEnd(gesture);
+    }
+
+    void MouseScrollStart()
+    {
+        auto gesture = MakeMouseScrollGesture({});
+        ActionStart(gesture);
+    }
+
+    void MouseScrollUpdate(const Offset& delta)
+    {
+        auto gesture = MakeMouseScrollGesture(delta);
+        ActionUpdate(gesture);
+    }
+
+    void MouseScrollEnd()
+    {
+        auto gesture = MakeMouseScrollGesture({});
+        ActionEnd(gesture);
+    }
+
     static TouchEventInfo MakeTouchEvent(TouchType type, const Offset& offset)
     {
         TouchEventInfo gesture("touch");
@@ -474,6 +519,27 @@ TEST_F(FreeScrollTest, Touch001)
     EXPECT_EQ(GetChildOffset(frameNode_, 0), OffsetF(0, 0)); // bounced back to boundary
     EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
     EXPECT_EQ(controller->state_, State::IDLE);
+}
+
+/**
+ * @tc.name: MouseWheel001
+ * @tc.desc: Test wheel scroll shouldn't start fling animation
+ * @tc.type: FUNC
+ */
+TEST_F(FreeScrollTest, MouseWheel001)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetAxis(Axis::FREE);
+    CreateFreeContent({ CONTENT_W, CONTENT_H });
+    CreateScrollDone();
+    MouseScrollStart();
+    EXPECT_EQ(pattern_->freeScroll_->state_, State::DRAG);
+    MouseScrollUpdate({ 0, -DELTA_Y });
+    EXPECT_EQ(pattern_->freeScroll_->state_, State::DRAG);
+    EXPECT_EQ(GetChildOffset(frameNode_, 0), OffsetF(0, -DELTA_Y));
+    MouseScrollEnd();
+    EXPECT_EQ(pattern_->freeScroll_->state_, State::IDLE);
 }
 
 /**

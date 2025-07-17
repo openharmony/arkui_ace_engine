@@ -218,6 +218,10 @@ void FreeScrollController::HandlePanUpdate(const GestureEvent& event)
 void FreeScrollController::HandlePanEndOrCancel(const GestureEvent& event)
 {
     state_ = State::IDLE;
+    if (Scrollable::IsMouseWheelScroll(event)) {
+        FireOnScrollEnd(); // no fling animation in mouse wheel scroll
+        return;
+    }
     const auto& src = event.GetVelocity();
     OffsetF velocity { static_cast<float>(src.GetVelocityX()), static_cast<float>(src.GetVelocityY()) };
     Fling(velocity);
