@@ -482,25 +482,11 @@ float TextFieldPattern::GetTextOrPlaceHolderFontSize()
 
 TextFieldPattern::TextFieldPattern() : twinklingInterval_(TWINKLING_INTERVAL_MS)
 {
-    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_VOID(context);
-    if (context &&
-        // for normal app add version protection, enable keyboard as default start from API 10 or higher
-        context->GetMinPlatformVersion() > KEYBOARD_DEFAULT_API) {
-        auto theme = context->GetTheme<TextFieldTheme>();
-        if (theme) {
-            independentControlKeyboard_ = theme->GetIndependentControlKeyboard();
-            needToRequestKeyboardOnFocus_ = !independentControlKeyboard_;
-        } else {
-            needToRequestKeyboardOnFocus_ = true;
-        }
-    }
     contentController_ = MakeRefPtr<ContentController>(WeakClaim(this));
     selectController_ = MakeRefPtr<TextSelectController>(WeakClaim(this));
     selectController_->InitContentController(contentController_);
     magnifierController_ = MakeRefPtr<MagnifierController>(WeakClaim(this));
     selectOverlay_ = MakeRefPtr<TextFieldSelectOverlay>(WeakClaim(this));
-    autoFillController_ = MakeRefPtr<AutoFillController>(WeakClaim(this));
     if (SystemProperties::GetDebugEnabled()) {
         twinklingInterval_ = 3000; // 3000 : for AtuoUITest
     }
@@ -3133,8 +3119,9 @@ void TextFieldPattern::ScheduleCursorTwinkling()
 
 void TextFieldPattern::StartTwinkling()
 {
+    auto autoFillController = GetOrCreateAutoFillController();
     auto autoFillAnimationStatus =
-        autoFillController_ ? autoFillController_->GetAutoFillAnimationStatus() : AutoFillAnimationStatus::INIT;
+        autoFillController ? autoFillController->GetAutoFillAnimationStatus() : AutoFillAnimationStatus::INIT;
     if (isTransparent_ || !HasFocus() || focusIndex_ == FocuseIndex::CANCEL || focusIndex_ == FocuseIndex::UNIT ||
         autoFillAnimationStatus != AutoFillAnimationStatus::INIT) {
         return;
@@ -8502,6 +8489,18 @@ void TextFieldPattern::OnAttachToFrameNode()
         frameNode->OnAccessibilityEvent(AccessibilityEventType::TEXT_SELECTION_UPDATE);
     };
     selectController_->SetOnAccessibility(std::move(onTextSelectorChange));
+
+    auto theme = pipeline->GetTheme<TextFieldTheme>(frameNode->GetThemeScopeId());
+    textFieldTheme_ = theme;
+    // for normal app add version protection, enable keyboard as default start from API 10 or higher
+    if (pipeline->GetMinPlatformVersion() > KEYBOARD_DEFAULT_API) {
+        if (theme) {
+            independentControlKeyboard_ = theme->GetIndependentControlKeyboard();
+            needToRequestKeyboardOnFocus_ = !independentControlKeyboard_;
+        } else {
+            needToRequestKeyboardOnFocus_ = true;
+        }
+    }
 }
 
 bool TextFieldPattern::NeedPaintSelect()
@@ -11240,12 +11239,12 @@ void TextFieldPattern::BeforeAutoFillAnimation(const std::u16string& content, co
     auto enableAutoFillAnimation = layoutProperty->GetEnableAutoFillAnimationValue(true);
     auto textValue = content;
     contentController_->FilterValue(textValue);
-    CHECK_NULL_VOID(autoFillController_);
+    CHECK_NULL_VOID(GetOrCreateAutoFillController());
     autoFillController_->SetAutoFillTextUtf16Value(textValue);
     auto onFinishCallback = [weak = AceType::WeakClaim(this), textValue, unFilteredValue = content]() {
         auto textFieldPattern = weak.Upgrade();
         CHECK_NULL_VOID(textFieldPattern);
-        auto autoFillController = textFieldPattern->GetAutoFillController();
+        auto autoFillController = textFieldPattern->GetOrCreateAutoFillController();
         CHECK_NULL_VOID(autoFillController);
         autoFillController->ResetAutoFillAnimationStatus();
         auto hostNode = textFieldPattern->GetHost();
@@ -11274,7 +11273,7 @@ void TextFieldPattern::BeforeAutoFillAnimation(const std::u16string& content, co
             [weak = AceType::WeakClaim(this), onFinish = std::move(onFinishCallback), textValue]() {
                 auto textFieldPattern = weak.Upgrade();
                 CHECK_NULL_VOID(textFieldPattern);
-                auto autoFillController = textFieldPattern->GetAutoFillController();
+                auto autoFillController = textFieldPattern->GetOrCreateAutoFillController();
                 CHECK_NULL_VOID(autoFillController);
                 autoFillController->StartAutoFillAnimation(onFinish, textValue);
             });

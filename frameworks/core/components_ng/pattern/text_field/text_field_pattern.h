@@ -427,8 +427,11 @@ public:
         return contentController_->GetTextUtf16Value();
     }
 
-    const RefPtr<AutoFillController>& GetAutoFillController()
+    const RefPtr<AutoFillController>& GetOrCreateAutoFillController()
     {
+        if (!autoFillController_) {
+            autoFillController_ = MakeRefPtr<AutoFillController>(WeakClaim(this));
+        }
         return autoFillController_;
     }
 
@@ -932,14 +935,6 @@ public:
     std::string TextContentTypeToString() const;
     virtual std::string GetPlaceholderFont() const;
     RefPtr<TextFieldTheme> GetTheme() const;
-    inline void InitTheme()
-    {
-        auto tmpHost = GetHost();
-        CHECK_NULL_VOID(tmpHost);
-        auto context = tmpHost->GetContext();
-        CHECK_NULL_VOID(context);
-        textFieldTheme_ = context->GetTheme<TextFieldTheme>(tmpHost->GetThemeScopeId());
-    }
     std::string GetTextColor() const;
     std::string GetCaretColor() const;
     std::string GetPlaceholderColor() const;
@@ -2005,7 +2000,6 @@ private:
     float textParagraphIndent_ = 0.0;
     RefPtr<Paragraph> paragraph_;
     InlineMeasureItem inlineMeasureItem_;
-    TextStyle nextLineUtilTextStyle_;
 
     RefPtr<ClickEvent> clickListener_;
     RefPtr<TouchEventImpl> touchListener_;

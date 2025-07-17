@@ -292,7 +292,7 @@ bool TextInputLayoutAlgorithm::CreateParagraphEx(const TextStyle& textStyle, con
     auto fontSize =
         textStyle.GetFontSize().ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
     auto paragraphData = CreateParagraphData { disableTextAlign, fontSize };
-    auto autofillController = pattern->GetAutoFillController();
+    auto autofillController = pattern->GetOrCreateAutoFillController();
     CHECK_NULL_RETURN(autofillController, false);
     auto autoFillAnimationStatus = autofillController->GetAutoFillAnimationStatus();
     if (autoFillAnimationStatus != AutoFillAnimationStatus::INIT) {
@@ -349,7 +349,7 @@ void TextInputLayoutAlgorithm::MeasureAutoFillIcon(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(textFieldPattern);
     auto textFieldlayoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_VOID(textFieldlayoutProperty);
-    auto autofillController = textFieldPattern->GetAutoFillController();
+    auto autofillController = textFieldPattern->GetOrCreateAutoFillController();
     CHECK_NULL_VOID(autofillController);
     auto weakAutoFillIcon = autofillController->GetAutoFillIconNode();
     auto autoFillIcon =  weakAutoFillIcon.Upgrade();
@@ -391,7 +391,7 @@ void TextInputLayoutAlgorithm::LayoutAutoFillIcon(LayoutWrapper* layoutWrapper)
     auto textFieldSize = textFieldGeometryNode->GetFrameSize();
     auto textFieldFrameWidth = textFieldSize.Width();
     auto textFieldFrameHeight = textFieldSize.Height();
-    auto autofillController = textFieldPattern->GetAutoFillController();
+    auto autofillController = textFieldPattern->GetOrCreateAutoFillController();
     CHECK_NULL_VOID(autofillController);
     auto weakAutoFillIcon = autofillController->GetAutoFillIconNode();
     auto autoFillIcon =  weakAutoFillIcon.Upgrade();
