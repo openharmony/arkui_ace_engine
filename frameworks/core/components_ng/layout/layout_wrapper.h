@@ -128,7 +128,7 @@ enum class IgnoreStrategy {
     NORMAL = 0,
     FROM_MARGIN,
     STRIDE_OVER,
-    SCROLLABLE_AXIS
+    AXIS_INSENSITIVE
 };
 class ACE_FORCE_EXPORT LayoutWrapper : public virtual AceType {
     DECLARE_ACE_TYPE(LayoutWrapper, AceType)
@@ -304,7 +304,7 @@ public:
 
     bool IsIgnoreOptsValid();
 
-    bool GetScrollableAxisSensitive()
+    bool IsScrollableAxisInsensitive()
     {
         return isScrollableAxis_;
     }

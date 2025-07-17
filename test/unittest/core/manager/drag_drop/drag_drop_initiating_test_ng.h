@@ -102,6 +102,12 @@ public:
         int32_t caseNum, DragDropInitiatingStatus dragStatus, DragDropInitiatingStatus expectStatus);
 };
 
+class DragDropInitiatingStateBaseTestNG : public DragDropInitiatingStateTestNG {
+public:
+    static void SetUpTestCase();
+    static void TearDownTestCase();
+};
+
 class DragDropInitiatingStateIdleTestNG : public DragDropInitiatingStateTestNG {
 public:
     static void SetUpTestCase();

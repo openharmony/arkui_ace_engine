@@ -81,7 +81,7 @@ static const std::unordered_map<SDKGradientDirection, float> GRADIENT_DIRECTION_
     {SDKGradientDirection::LeftBottom,  225.0f},
     {SDKGradientDirection::RightTop,     45.0f},
     {SDKGradientDirection::RightBottom, 135.0f},
-    {SDKGradientDirection::None,          0.0f}
+    {SDKGradientDirection::None,        180.0f}
 };
 
 struct SymbolGradient {

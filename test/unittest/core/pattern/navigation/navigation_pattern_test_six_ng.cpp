@@ -383,4 +383,65 @@ HWTEST_F(NavigationPatternTestSixNg, AdjustPrimaryAndPlaceHolderPosition002, Tes
     EXPECT_EQ(navigationPattern->primaryNodes_.size(), 0);
     NavigationPatternTestSixNg::TearDownTestSuite();
 }
+
+/**
+ * @tc.name: NavToolbarNode_ToJsonValue_001
+ * @tc.desc: Simple test for NavToolbarNode::ToJsonValue to guarantee coverage
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestSixNg, NavToolbarNode_ToJsonValue_001, TestSize.Level1)
+{
+    auto node = NavToolbarNode::GetOrCreateToolbarNode(
+        V2::TOOL_BAR_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavToolbarPattern>(); });
+    auto pattern = node->GetPattern<NavToolbarPattern>();
+    ASSERT_NE(pattern, nullptr);
+    NavigationToolbarOptions options;
+    BlurStyleOption blurOpt;
+    blurOpt.blurStyle = BlurStyle::THIN;
+    options.bgOptions.blurStyleOption = blurOpt;
+    EffectOption effectOpt;
+    effectOpt.adaptiveColor = AdaptiveColor::DEFAULT;
+    options.bgOptions.effectOption = effectOpt;
+    pattern->SetToolbarOptions(options);
+    MoreButtonOptions mbOpt;
+    BlurStyleOption mbBlurOpt;
+    mbBlurOpt.blurStyle = BlurStyle::REGULAR;
+    mbOpt.bgOptions.blurStyleOption = mbBlurOpt;
+    EffectOption mbEffectOpt;
+    mbEffectOpt.adaptiveColor = AdaptiveColor::DEFAULT;
+    mbOpt.bgOptions.effectOption = mbEffectOpt;
+    pattern->SetToolbarMoreButtonOptions(std::move(mbOpt));
+    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+    InspectorFilter filter;
+    node->ToJsonValue(json, filter);
+    auto moreButtonJson = json->GetValue("moreButtonOptions");
+    EXPECT_NE(moreButtonJson, nullptr);
+}
+
+/**
+ * @tc.name: TitleBarNode_ToJsonValue_001
+ * @tc.desc: Simple test for TitleBarNode::ToJsonValue to guarantee coverage
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestSixNg, TitleBarNode_ToJsonValue_001, TestSize.Level1)
+{
+    auto node = TitleBarNode::GetOrCreateTitleBarNode(
+        V2::TITLE_BAR_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    auto pattern = node->GetPattern<TitleBarPattern>();
+    ASSERT_NE(pattern, nullptr);
+    NavigationTitlebarOptions options;
+    BlurStyleOption blurOpt;
+    blurOpt.blurStyle = BlurStyle::THIN;
+    options.bgOptions.blurStyleOption = blurOpt;
+    EffectOption effectOpt;
+    effectOpt.adaptiveColor = AdaptiveColor::DEFAULT;
+    options.bgOptions.effectOption = effectOpt;
+    pattern->SetTitlebarOptions(options);
+    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+    InspectorFilter filter;
+    node->ToJsonValue(json, filter);
+    EXPECT_TRUE(json->Contains("backgroundBlurStyle"));
+}
 } // namespace OHOS::Ace::NG

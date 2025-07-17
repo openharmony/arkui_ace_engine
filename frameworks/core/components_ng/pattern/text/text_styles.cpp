@@ -50,41 +50,14 @@ TextStyle CreateTextStyleUsingTheme(const std::unique_ptr<FontStyle>& fontStyle,
     return textStyle;
 }
 
-void CreateTextStyleUsingTheme(
-    const RefPtr<TextLayoutProperty>& property, const RefPtr<TextTheme>& textTheme, TextStyle& textStyle, bool isSymbol)
+void CreateTextStyleUsingTheme(const RefPtr<TextLayoutProperty>& property, const RefPtr<TextTheme>& textTheme,
+    TextStyle& textStyle, bool isSymbol)
 {
-    if (!isSymbol) {
-        UseSelfStyleWithTheme(property, textStyle, textTheme);
-    } else {
-        SymbolUseSelfStyleWithTheme(property, textStyle, textTheme);
-    }
+    UseSelfStyleWithTheme(property, textStyle, textTheme, isSymbol);
 }
 
-void SymbolUseSelfStyleWithTheme(
-    const RefPtr<TextLayoutProperty>& property, TextStyle& textStyle, const RefPtr<TextTheme>& textTheme)
-{
-    CHECK_NULL_VOID(textTheme);
-    auto& fontStyle = property->GetFontStyle();
-    // The setting of MinFontScale, MaxFontScale must be done before any Dimension-type properties that
-    // depend on its value.
-    UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, MinFontScale, MinFontScale);
-    UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, MaxFontScale, MaxFontScale);
-
-    UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, FontSize, FontSize);
-    UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, FontWeight, FontWeight);
-    UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, SymbolColorList, SymbolColorList);
-    UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, SymbolEffectOptions, SymbolEffectOptions);
-    UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, SymbolShadow, SymbolShadow);
-    UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, ShaderStyle, ShaderStyle);
-    textStyle.SetSymbolType(property->GetSymbolTypeValue(SymbolType::SYSTEM));
-    auto renderStrategy = property->GetSymbolRenderingStrategyValue(0);
-    auto effectStrategy = property->GetSymbolEffectStrategyValue(0);
-    textStyle.SetRenderStrategy(renderStrategy < 0 ? 0 : renderStrategy);
-    textStyle.SetEffectStrategy(effectStrategy < 0 ? 0 : effectStrategy);
-}
-
-void UseSelfStyleWithTheme(
-    const RefPtr<TextLayoutProperty>& property, TextStyle& textStyle, const RefPtr<TextTheme>& textTheme)
+void UseSelfStyleWithTheme(const RefPtr<TextLayoutProperty>& property, TextStyle& textStyle,
+    const RefPtr<TextTheme>& textTheme, bool isSymbol)
 {
     CHECK_NULL_VOID(textTheme);
     auto& fontStyle = property->GetFontStyle();
@@ -111,6 +84,16 @@ void UseSelfStyleWithTheme(
     UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, VariableFontWeight, VariableFontWeight);
     UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, EnableVariableFontWeight, EnableVariableFontWeight);
     UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, FontForegroudGradiantColor, FontForegroudGradiantColor);
+
+    if (isSymbol) {
+        UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, SymbolColorList, SymbolColorList);
+        UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, SymbolRenderingStrategy, RenderStrategy);
+        UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, SymbolEffectStrategy, EffectStrategy);
+        UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, SymbolEffectOptions, SymbolEffectOptions);
+        UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, SymbolType, SymbolType);
+        UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, SymbolShadow, SymbolShadow);
+        UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, ShaderStyle, ShaderStyle);
+    }
 
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, LineHeight, LineHeight);
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, BaselineOffset, BaselineOffset);
@@ -277,6 +260,72 @@ std::string GetSymbolEffectOptionsInJson(const std::optional<SymbolEffectOptions
         text = value.value().ToString();
     }
     return text;
+}
+
+std::unique_ptr<JsonValue> GetSymbolShadowInJson(const std::optional<SymbolShadow>& value)
+{
+    auto res = JsonUtil::Create(true);
+    if (!value.has_value()) {
+        return res;
+    }
+    const auto& shadow = value.value();
+    res->Put("color", (shadow.color).ColorToString().c_str());
+    std::string offsetStr = "[" + std::to_string(shadow.offset.first) + ", "
+                           + std::to_string(shadow.offset.second) + "]";
+    res->Put("offset", offsetStr.c_str());
+    res->Put("radius", std::to_string(shadow.radius).c_str());
+    return res;
+}
+
+std::string GradientTypeToString(SymbolGradientType type)
+{
+    switch (type) {
+        case SymbolGradientType::COLOR_SHADER:
+            return "COLOR_SHADER";
+        case SymbolGradientType::RADIAL_GRADIENT:
+            return "RADIAL_GRADIENT";
+        case SymbolGradientType::LINEAR_GRADIENT:
+            return "LINEAR_GRADIENT";
+        default:
+            return "UNKNOWN";
+    }
+}
+
+std::unique_ptr<JsonValue> GetShaderStyleInJson(const std::optional<std::vector<SymbolGradient>>& value)
+{
+    auto array = JsonUtil::CreateArray(true);
+    if (!value.has_value() || value->empty()) {
+        return array;
+    }
+    for (const auto& gradient : *value) {
+        auto obj = JsonUtil::Create(true);
+        obj->Put("type", GradientTypeToString(gradient.type).c_str());
+        auto colorsArray = JsonUtil::CreateArray(true);
+        for (const auto& color : gradient.symbolColor) {
+            colorsArray->Put("", color.ColorToString().c_str());
+        }
+        obj->Put("symbolColor", colorsArray);
+        auto opacitiesArray = JsonUtil::CreateArray(true);
+        for (float opacity : gradient.symbolOpacities) {
+            opacitiesArray->Put("", std::to_string(opacity).c_str());
+        }
+        obj->Put("symbolOpacities", opacitiesArray);
+        obj->Put("repeating", gradient.repeating ? "true" : "false");
+        if (gradient.angle.has_value()) {
+            obj->Put("angle", std::to_string(*gradient.angle).c_str());
+        }
+        if (gradient.radius.has_value()) {
+            obj->Put("radius", gradient.radius->ToString().c_str());
+        }
+        if (gradient.radialCenterX.has_value()) {
+            obj->Put("radialCenterX", gradient.radialCenterX->ToString().c_str());
+        }
+        if (gradient.radialCenterY.has_value()) {
+            obj->Put("radialCenterY", gradient.radialCenterY->ToString().c_str());
+        }
+        array->Put(obj);
+    }
+    return array;
 }
 
 void FontStyle::UpdateColorByResourceId()

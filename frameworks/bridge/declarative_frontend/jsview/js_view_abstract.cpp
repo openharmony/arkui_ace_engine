@@ -13291,7 +13291,7 @@ void JSViewAbstract::UnRegisterResource(const std::string& key)
 void JSViewAbstract::ParseDragSpringLoadingConfiguration(
     const JSRef<JSObject>& paramObj, const RefPtr<NG::DragSpringLoadingConfiguration>& config)
 {
-    JSRef<JSObject> configuration = JSRef<JSObject>::Cast(paramObj);
+    JSRef<JSObject> configuration = paramObj;
     auto setConfigurationPropertyIfValid =
         [&configuration, &config](const char* propName,
             std::function<void(const RefPtr<NG::DragSpringLoadingConfiguration>&, int32_t)> setter) {

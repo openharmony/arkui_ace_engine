@@ -2621,6 +2621,154 @@ void JSWeb::ParseRawfileWebSrc(const JSRef<JSVal>& srcValue, std::string& webSrc
     }
 }
 
+void GetJsPixelMap(const FaviconReceivedEvent& eventInfo, JSRef<JSVal>& jsPixelMap)
+{
+    const RefPtr<WebFaviconReceived>& handler = eventInfo.GetHandler();
+    if (!handler) {
+        return;
+    }
+    std::shared_ptr<Media::PixelMap> pixelMap = handler->GetPixelMap();
+    if (!pixelMap) {
+        return;
+    }
+
+    RefPtr<Framework::JsEngine> engine = EngineHelper::GetCurrentEngine();
+    if (!engine) {
+        return;
+    }
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    if (!nativeEngine) {
+        return;
+    }
+    napi_env env = reinterpret_cast<napi_env>(nativeEngine);
+    napi_value napiValue = OHOS::Media::PixelMapNapi::CreatePixelMap(env, pixelMap);
+    if (!napiValue) {
+        return;
+    }
+
+    jsPixelMap = JsConverter::ConvertNapiValueToJsVal(napiValue);
+}
+ 
+JSRef<JSObject> FaviconReceivedEventToJSValue(const FaviconReceivedEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    if (obj.IsEmpty()) {
+        return JSRef<JSVal>::Cast(obj);
+    }
+
+    JSRef<JSVal> jsPixelMap;
+    GetJsPixelMap(eventInfo, jsPixelMap);
+    if (jsPixelMap.IsEmpty()) {
+        return JSRef<JSVal>::Cast(obj);
+    }
+
+    obj->SetPropertyObject("favicon", jsPixelMap);
+    return JSRef<JSObject>::Cast(obj);
+}
+
+void JSWeb::SetCallbackFromController(const JSRef<JSObject> controller)
+{
+    auto setWebDetachFunction = controller->GetProperty("setWebDetach");
+    std::function<void(int32_t)> setWebDetachCallback = nullptr;
+    if (setWebDetachFunction->IsFunction()) {
+        setWebDetachCallback = [webviewController = controller, func = JSRef<JSFunc>::Cast(setWebDetachFunction)](
+                                    int32_t webId) {
+            JSRef<JSVal> argv[] = { JSRef<JSVal>::Make(ToJSValue(webId)) };
+            func->Call(webviewController, 1, argv);
+        };
+    }
+
+    auto setFaviconFunction = controller->GetProperty("innerSetFavicon");
+    std::function<void(const std::shared_ptr<BaseEventInfo>&)> setFaviconCallback = nullptr;
+    if (setFaviconFunction->IsFunction()) {
+        setFaviconCallback = [webviewController = controller, func = JSRef<JSFunc>::Cast(setFaviconFunction)](
+            std::shared_ptr<BaseEventInfo> param) {
+            if (!param) {
+                return;
+            }
+            JSRef<JSVal> argv[] = {
+                FaviconReceivedEventToJSValue(static_cast<const FaviconReceivedEvent&>(*param)) };
+            func->Call(webviewController, 1, argv);
+        };
+    }
+
+    auto setRequestPermissionsFromUserFunction = controller->GetProperty("requestPermissionsFromUserWeb");
+    std::function<void(const std::shared_ptr<BaseEventInfo>&)> requestPermissionsFromUserCallback = nullptr;
+    if (setRequestPermissionsFromUserFunction->IsFunction()) {
+        requestPermissionsFromUserCallback = [webviewController = controller,
+            func = JSRef<JSFunc>::Cast(setRequestPermissionsFromUserFunction)]
+            (const std::shared_ptr<BaseEventInfo>& info) {
+                auto* eventInfo = TypeInfoHelper::DynamicCast<WebPermissionRequestEvent>(info.get());
+                if (!eventInfo) {
+                    return;
+                }
+                JSRef<JSObject> obj = JSRef<JSObject>::New();
+                JSRef<JSObject> permissionObj = JSClass<JSWebPermissionRequest>::NewInstance();
+                auto permissionEvent = Referenced::Claim(permissionObj->Unwrap<JSWebPermissionRequest>());
+                permissionEvent->SetEvent(*eventInfo);
+                obj->SetPropertyObject("request", permissionObj);
+                JSRef<JSVal> argv[] = { JSRef<JSVal>::Cast(obj) };
+                auto result = func->Call(webviewController, 1, argv);
+        };
+    }
+
+    auto setOpenAppLinkFunction = controller->GetProperty("openAppLink");
+    std::function<void(const std::shared_ptr<BaseEventInfo>&)> openAppLinkCallback = nullptr;
+    if (setOpenAppLinkFunction->IsFunction()) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "WebDelegate::OnOpenAppLink setOpenAppLinkFunction 2");
+        openAppLinkCallback = [webviewController = controller,
+            func = JSRef<JSFunc>::Cast(setOpenAppLinkFunction)]
+            (const std::shared_ptr<BaseEventInfo>& info) {
+                auto* eventInfo = TypeInfoHelper::DynamicCast<WebAppLinkEvent>(info.get());
+                if (!eventInfo) {
+                    return;
+                }
+                JSRef<JSObject> obj = JSRef<JSObject>::New();
+                JSRef<JSObject> callbackObj = JSClass<JSWebAppLinkCallback>::NewInstance();
+                auto callbackEvent = Referenced::Claim(callbackObj->Unwrap<JSWebAppLinkCallback>());
+                callbackEvent->SetEvent(*eventInfo);
+                obj->SetPropertyObject("result", callbackObj);
+                JSRef<JSVal> urlVal = JSRef<JSVal>::Make(ToJSValue(eventInfo->GetUrl()));
+                obj->SetPropertyObject("url", urlVal);
+                JSRef<JSVal> argv[] = { JSRef<JSVal>::Cast(obj) };
+                auto result = func->Call(webviewController, 1, argv);
+        };
+    }
+
+    auto fileSelectorShowFromUserFunction = controller->GetProperty("fileSelectorShowFromUserWeb");
+    std::function<void(const std::shared_ptr<BaseEventInfo>&)> fileSelectorShowFromUserCallback = nullptr;
+    if (fileSelectorShowFromUserFunction->IsFunction()) {
+        fileSelectorShowFromUserCallback = [webviewController = controller,
+            func = JSRef<JSFunc>::Cast(fileSelectorShowFromUserFunction)]
+            (const std::shared_ptr<BaseEventInfo>& info) {
+                auto* eventInfo = TypeInfoHelper::DynamicCast<FileSelectorEvent>(info.get());
+                if (!eventInfo) {
+                    return;
+                }
+                JSRef<JSObject> obj = JSRef<JSObject>::New();
+                JSRef<JSObject> paramObj = JSClass<JSFileSelectorParam>::NewInstance();
+                auto fileSelectorParam = Referenced::Claim(paramObj->Unwrap<JSFileSelectorParam>());
+                fileSelectorParam->SetParam(*eventInfo);
+                obj->SetPropertyObject("fileparam", paramObj);
+
+                JSRef<JSObject> resultObj = JSClass<JSFileSelectorResult>::NewInstance();
+                auto fileSelectorResult = Referenced::Claim(resultObj->Unwrap<JSFileSelectorResult>());
+
+                fileSelectorResult->SetResult(*eventInfo);
+
+                obj->SetPropertyObject("fileresult", resultObj);
+                JSRef<JSVal> argv[] = { JSRef<JSVal>::Cast(obj) };
+                auto result = func->Call(webviewController, 1, argv);
+            };
+    }
+
+    WebModel::GetInstance()->SetDefaultFileSelectorShow(std::move(fileSelectorShowFromUserCallback));
+    WebModel::GetInstance()->SetPermissionClipboard(std::move(requestPermissionsFromUserCallback));
+    WebModel::GetInstance()->SetOpenAppLinkFunction(std::move(openAppLinkCallback));
+    WebModel::GetInstance()->SetWebDetachFunction(std::move(setWebDetachCallback));
+    WebModel::GetInstance()->SetFaviconFunction(std::move(setFaviconCallback));
+}
+
 void JSWeb::Create(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsObject()) {
@@ -2683,83 +2831,14 @@ void JSWeb::Create(const JSCallbackInfo& info)
             func->Call(webviewController, 1, argv);
         };
 
-        auto setWebDetachFunction = controller->GetProperty("setWebDetach");
-        std::function<void(int32_t)> setWebDetachCallback = nullptr;
-        if (setWebDetachFunction->IsFunction()) {
-            setWebDetachCallback = [webviewController = controller, func = JSRef<JSFunc>::Cast(setWebDetachFunction)](
-                                     int32_t webId) {
-                JSRef<JSVal> argv[] = { JSRef<JSVal>::Make(ToJSValue(webId)) };
-                func->Call(webviewController, 1, argv);
-            };
-        }
-
         auto setHapPathFunction = controller->GetProperty("innerSetHapPath");
         std::function<void(const std::string&)> setHapPathCallback = nullptr;
         if (setHapPathFunction->IsFunction()) {
             setHapPathCallback = [webviewController = controller, func = JSRef<JSFunc>::Cast(setHapPathFunction)](
-                                     const std::string& hapPath) {
+                                        const std::string& hapPath) {
                 JSRef<JSVal> argv[] = { JSRef<JSVal>::Make(ToJSValue(hapPath)) };
                 func->Call(webviewController, 1, argv);
             };
-        }
-
-        auto setRequestPermissionsFromUserFunction = controller->GetProperty("requestPermissionsFromUserWeb");
-        std::function<void(const std::shared_ptr<BaseEventInfo>&)> requestPermissionsFromUserCallback = nullptr;
-        if (setRequestPermissionsFromUserFunction->IsFunction()) {
-            requestPermissionsFromUserCallback = [webviewController = controller,
-                func = JSRef<JSFunc>::Cast(setRequestPermissionsFromUserFunction)]
-                (const std::shared_ptr<BaseEventInfo>& info) {
-                    auto* eventInfo = TypeInfoHelper::DynamicCast<WebPermissionRequestEvent>(info.get());
-                    JSRef<JSObject> obj = JSRef<JSObject>::New();
-                    JSRef<JSObject> permissionObj = JSClass<JSWebPermissionRequest>::NewInstance();
-                    auto permissionEvent = Referenced::Claim(permissionObj->Unwrap<JSWebPermissionRequest>());
-                    permissionEvent->SetEvent(*eventInfo);
-                    obj->SetPropertyObject("request", permissionObj);
-                    JSRef<JSVal> argv[] = { JSRef<JSVal>::Cast(obj) };
-                    auto result = func->Call(webviewController, 1, argv);
-            };
-        }
-
-        auto setOpenAppLinkFunction = controller->GetProperty("openAppLink");
-        std::function<void(const std::shared_ptr<BaseEventInfo>&)> openAppLinkCallback = nullptr;
-        if (setOpenAppLinkFunction->IsFunction()) {
-            openAppLinkCallback = [webviewController = controller,
-                func = JSRef<JSFunc>::Cast(setOpenAppLinkFunction)]
-                (const std::shared_ptr<BaseEventInfo>& info) {
-                    auto* eventInfo = TypeInfoHelper::DynamicCast<WebAppLinkEvent>(info.get());
-                    JSRef<JSObject> obj = JSRef<JSObject>::New();
-                    JSRef<JSObject> callbackObj = JSClass<JSWebAppLinkCallback>::NewInstance();
-                    auto callbackEvent = Referenced::Claim(callbackObj->Unwrap<JSWebAppLinkCallback>());
-                    callbackEvent->SetEvent(*eventInfo);
-                    obj->SetPropertyObject("result", callbackObj);
-                    JSRef<JSVal> urlVal = JSRef<JSVal>::Make(ToJSValue(eventInfo->GetUrl()));
-                    obj->SetPropertyObject("url", urlVal);
-                    JSRef<JSVal> argv[] = { JSRef<JSVal>::Cast(obj) };
-                    auto result = func->Call(webviewController, 1, argv);
-            };
-        }
-        auto fileSelectorShowFromUserFunction = controller->GetProperty("fileSelectorShowFromUserWeb");
-        std::function<void(const std::shared_ptr<BaseEventInfo>&)> fileSelectorShowFromUserCallback = nullptr;
-        if (fileSelectorShowFromUserFunction->IsFunction()) {
-            fileSelectorShowFromUserCallback = [webviewController = controller,
-                func = JSRef<JSFunc>::Cast(fileSelectorShowFromUserFunction)]
-                (const std::shared_ptr<BaseEventInfo>& info) {
-                    auto* eventInfo = TypeInfoHelper::DynamicCast<FileSelectorEvent>(info.get());
-                    JSRef<JSObject> obj = JSRef<JSObject>::New();
-                    JSRef<JSObject> paramObj = JSClass<JSFileSelectorParam>::NewInstance();
-                    auto fileSelectorParam = Referenced::Claim(paramObj->Unwrap<JSFileSelectorParam>());
-                    fileSelectorParam->SetParam(*eventInfo);
-                    obj->SetPropertyObject("fileparam", paramObj);
-
-                    JSRef<JSObject> resultObj = JSClass<JSFileSelectorResult>::NewInstance();
-                    auto fileSelectorResult = Referenced::Claim(resultObj->Unwrap<JSFileSelectorResult>());
-
-                    fileSelectorResult->SetResult(*eventInfo);
-
-                    obj->SetPropertyObject("fileresult", resultObj);
-                    JSRef<JSVal> argv[] = { JSRef<JSVal>::Cast(obj) };
-                    auto result = func->Call(webviewController, 1, argv);
-                };
         }
 
         int32_t parentNWebId = -1;
@@ -2767,10 +2846,8 @@ void JSWeb::Create(const JSCallbackInfo& info)
         WebModel::GetInstance()->Create(isPopup ? "" : dstSrc.value(), std::move(setIdCallback),
             std::move(setHapPathCallback), parentNWebId, isPopup, renderMode, incognitoMode, sharedRenderProcessToken);
 
-        WebModel::GetInstance()->SetPermissionClipboard(std::move(requestPermissionsFromUserCallback));
-        WebModel::GetInstance()->SetOpenAppLinkFunction(std::move(openAppLinkCallback));
-        WebModel::GetInstance()->SetDefaultFileSelectorShow(std::move(fileSelectorShowFromUserCallback));
-        WebModel::GetInstance()->SetWebDetachFunction(std::move(setWebDetachCallback));
+        JSWeb::SetCallbackFromController(controller);
+
         auto getCmdLineFunction = controller->GetProperty("getCustomeSchemeCmdLine");
         if (!getCmdLineFunction->IsFunction()) {
             return;
@@ -4899,136 +4976,21 @@ void JSWeb::OnDataResubmitted(const JSCallbackInfo& args)
     WebModel::GetInstance()->SetOnDataResubmitted(uiCallback);
 }
 
-Media::PixelFormat GetPixelFormat(NG::TransImageColorType colorType)
+JSRef<JSVal> JSWeb::CreateFaviconReceivedHandler(const FaviconReceivedEvent& eventInfo)
 {
-    Media::PixelFormat pixelFormat;
-    switch (colorType) {
-        case NG::TransImageColorType::COLOR_TYPE_UNKNOWN:
-            pixelFormat = Media::PixelFormat::UNKNOWN;
-            break;
-        case NG::TransImageColorType::COLOR_TYPE_RGBA_8888:
-            pixelFormat = Media::PixelFormat::RGBA_8888;
-            break;
-        case NG::TransImageColorType::COLOR_TYPE_BGRA_8888:
-            pixelFormat = Media::PixelFormat::BGRA_8888;
-            break;
-        default:
-            pixelFormat = Media::PixelFormat::UNKNOWN;
-            break;
-    }
-    return pixelFormat;
-}
-
-Media::AlphaType GetAlphaType(NG::TransImageAlphaType alphaType)
-{
-    Media::AlphaType imageAlphaType;
-    switch (alphaType) {
-        case NG::TransImageAlphaType::ALPHA_TYPE_UNKNOWN:
-            imageAlphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_UNKNOWN;
-            break;
-        case NG::TransImageAlphaType::ALPHA_TYPE_OPAQUE:
-            imageAlphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_OPAQUE;
-            break;
-        case NG::TransImageAlphaType::ALPHA_TYPE_PREMULTIPLIED:
-            imageAlphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_PREMUL;
-            break;
-        case NG::TransImageAlphaType::ALPHA_TYPE_POSTMULTIPLIED:
-            imageAlphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_UNPREMUL;
-            break;
-        default:
-            imageAlphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_UNKNOWN;
-            break;
-    }
-    return imageAlphaType;
-}
-
-JSRef<JSObject> FaviconReceivedEventToJSValue(const FaviconReceivedEvent& eventInfo)
-{
-    JSRef<JSObject> obj = JSRef<JSObject>::New();
-    auto data = eventInfo.GetHandler()->GetData();
-    size_t width = eventInfo.GetHandler()->GetWidth();
-    size_t height = eventInfo.GetHandler()->GetHeight();
-    int colorType = eventInfo.GetHandler()->GetColorType();
-    int alphaType = eventInfo.GetHandler()->GetAlphaType();
-
-    Media::InitializationOptions opt;
-    opt.size.width = static_cast<int32_t>(width);
-    opt.size.height = static_cast<int32_t>(height);
-    opt.pixelFormat = GetPixelFormat(NG::TransImageColorType(colorType));
-    opt.alphaType = GetAlphaType(NG::TransImageAlphaType(alphaType));
-    opt.editable = true;
-    auto pixelMap = Media::PixelMap::Create(opt);
-    if (pixelMap == nullptr) {
-        return JSRef<JSVal>::Cast(obj);
-    }
-    uint32_t stride = width << 2;
-    uint64_t bufferSize = stride * height;
-    pixelMap->WritePixels(static_cast<const uint8_t*>(data), bufferSize);
-    std::shared_ptr<Media::PixelMap> pixelMapToJs(pixelMap.release());
-    auto engine = EngineHelper::GetCurrentEngine();
-    if (!engine) {
-        return JSRef<JSVal>::Cast(obj);
-    }
-    NativeEngine* nativeEngine = engine->GetNativeEngine();
-    napi_env env = reinterpret_cast<napi_env>(nativeEngine);
-    napi_value napiValue = OHOS::Media::PixelMapNapi::CreatePixelMap(env, pixelMapToJs);
-    auto jsPixelMap = JsConverter::ConvertNapiValueToJsVal(napiValue);
-    obj->SetPropertyObject("favicon", jsPixelMap);
-    return JSRef<JSObject>::Cast(obj);
-}
-
-JSRef<JSObject> JSWeb::CreateFaviconReceivedHandler(const FaviconReceivedEvent& eventInfo)
-{
-    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    JSRef<JSVal> obj = JSRef<JSObject>::New();
     if (obj.IsEmpty()) {
-        return JSRef<JSObject>::Cast(obj);
+        return JSRef<JSVal>::Cast(obj);
     }
 #if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
-    auto handler = eventInfo.GetHandler();
-    CHECK_NULL_RETURN(handler, JSRef<JSObject>::Cast(obj));
-
-    auto data = handler->GetData();
-    CHECK_NULL_RETURN(data, JSRef<JSObject>::Cast(obj));
-    size_t width = handler->GetWidth();
-    size_t height = handler->GetHeight();
-    int colorType = handler->GetColorType();
-    int alphaType = handler->GetAlphaType();
-
-    Media::InitializationOptions opt;
-    opt.size.width = static_cast<int64_t>(width);
-    opt.size.height = static_cast<int64_t>(height);
-    opt.pixelFormat = GetPixelFormat(NG::TransImageColorType(colorType));
-    opt.alphaType = GetAlphaType(NG::TransImageAlphaType(alphaType));
-    opt.editable = true;
-    auto pixelMap = Media::PixelMap::Create(opt);
-    CHECK_NULL_RETURN(pixelMap, JSRef<JSObject>::Cast(obj));
-    uint32_t bytesPerPixel = GetBytesPerPixel(PixelMapOhos::PixelFormatConverter(opt.pixelFormat));
-    if (width > std::numeric_limits<size_t>::max() / bytesPerPixel) {
-        return JSRef<JSObject>::Cast(obj);
+    JSRef<JSVal> jsPixelMap;
+    GetJsPixelMap(eventInfo, jsPixelMap);
+    if (jsPixelMap.IsEmpty()) {
+        return JSRef<JSVal>::Cast(obj);
     }
-    uint64_t stride = static_cast<uint64_t>(width) * bytesPerPixel;
-    if (height > std::numeric_limits<size_t>::max() / stride) {
-        return JSRef<JSObject>::Cast(obj);
-    }
-    uint64_t bufferSize = stride * static_cast<uint64_t>(height);
-    if (bufferSize > static_cast<uint64_t>(std::numeric_limits<size_t>::max())) {
-        return JSRef<JSObject>::Cast(obj);
-    }
-
-    pixelMap->WritePixels(static_cast<const uint8_t*>(data), static_cast<size_t>(bufferSize));
-    std::shared_ptr<Media::PixelMap> pixelMapToJs(pixelMap.release());
-    auto engine = EngineHelper::GetCurrentEngine();
-    CHECK_NULL_RETURN(engine, JSRef<JSObject>::Cast(obj));
-    NativeEngine* nativeEngine = engine->GetNativeEngine();
-    napi_env env = reinterpret_cast<napi_env>(nativeEngine);
-    napi_value napiValue = OHOS::Media::PixelMapNapi::CreatePixelMap(env, pixelMapToJs);
-    if (napiValue == nullptr) {
-        return JSRef<JSObject>::Cast(obj);
-    }
-    auto jsPixelMap = JsConverter::ConvertNapiValueToJsVal(napiValue);
     return jsPixelMap;
 #else
-    return JSRef<JSObject>::Cast(obj);
+    return JSRef<JSVal>::Cast(obj);
 #endif
 }
 
@@ -5073,6 +5035,7 @@ void JSWeb::OnFaviconReceived(const JSCallbackInfo& args)
         }
         auto executor = Container::CurrentTaskExecutorSafely();
         CHECK_NULL_VOID(executor);
+
         executor->PostTask([execCtx, postFunc = func, info]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto* eventInfo = TypeInfoHelper::DynamicCast<FaviconReceivedEvent>(info.get());

@@ -6517,6 +6517,10 @@ void JsAccessibilityManager::FindFocusedElementInfoNG(int64_t elementId, int32_t
     CommonProperty commonProperty;
     GenerateCommonProperty(ngPipeline, commonProperty, mainContext, resultNode);
     UpdateAccessibilityElementInfo(resultNode, commonProperty, info, ngPipeline);
+    SetRootAccessibilityVisible(resultNode, info);
+    SetRootAccessibilityNextFocusId(resultNode, rootNode, info);
+    SetRootAccessibilityPreFocusId(resultNode, rootNode, info,
+        nextFocusMapWithSubWindow_[context->GetInstanceId()]);
     UpdateUiExtensionParentIdForFocus(rootNode, uiExtensionOffset, info);
 }
 

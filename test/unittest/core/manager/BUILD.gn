@@ -56,6 +56,7 @@ ace_unittest("drag_drop_initiating_state_test_ng") {
   module_output = "manager"
   sources = [
     "./drag_drop/drag_drop_initiating_handler_test_ng.cpp",
+    "./drag_drop/drag_drop_initiating_state_base_test_ng.cpp",
     "./drag_drop/drag_drop_initiating_state_idle_test_ng.cpp",
     "./drag_drop/drag_drop_initiating_state_lifting_test_ng.cpp",
     "./drag_drop/drag_drop_initiating_state_machine_test_ng.cpp",

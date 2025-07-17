@@ -57,14 +57,30 @@ void PluginSubContainer::Initialize(const std::string& codeLanguage)
 
     taskExecutor_ = executor;
 
-    frontend_ = AceType::MakeRefPtr<PluginFrontend>();
-    if (!frontend_) {
-        return;
-    }
-
     auto container = AceEngine::Get().GetContainer(outSidePipelineContext->GetInstanceId());
     if (!container) {
         return;
+    }
+
+    if (codeLanguage == OHOS::AppExecFwk::Constants::ARKTS_MODE_STATIC) {
+        if (outSidePipelineContext->GetFrontendType() != FrontendType::ARK_TS) {
+            TAG_LOGE(AceLogTag::ACE_PLUGIN_COMPONENT,
+                "codeLanguage %{public}s is not supported in frontend type %{public}d.",
+                codeLanguage.c_str(), outSidePipelineContext->GetFrontendType());
+            return;
+        }
+        // TO BE uncomment: frontend_ = AceType::MakeRefPtr<ArktsPluginFrontend>(container->GetSharedRuntime());
+        // TO BE uncomment: frontend_->Initialize(FrontendType::ARK_TS, taskExecutor_);
+        TAG_LOGI(AceLogTag::ACE_PLUGIN_COMPONENT, "PluginSubContainer initialize end.");
+        return;
+    } else {
+        if (outSidePipelineContext->GetFrontendType() == FrontendType::ARK_TS) {
+            TAG_LOGE(AceLogTag::ACE_PLUGIN_COMPONENT,
+                "codeLanguage %{public}s is not supported in frontend type %{public}d.",
+                codeLanguage.c_str(), outSidePipelineContext->GetFrontendType());
+            return;
+        }
+        frontend_ = AceType::MakeRefPtr<PluginFrontend>();
     }
 
     // set JS engine，init in JS thread

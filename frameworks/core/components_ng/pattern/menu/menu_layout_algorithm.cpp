@@ -389,6 +389,7 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
         LessOrEqual(afterAnimationScale, 0.0f) ? menuTheme->GetPreviewAfterAnimationScale() : afterAnimationScale;
     previewScale_ = LessOrEqual(afterAnimationScale, 0.0f) ? previewScale_ : afterAnimationScale;
     position_ = props->GetMenuOffset().value_or(OffsetF());
+    anchorPosition_ = props->GetAnchorPosition();
     dumpInfo_.globalLocation = position_;
     // user-set offset
     positionOffset_ = props->GetPositionOffset().value_or(OffsetF());
@@ -2737,12 +2738,23 @@ void MenuLayoutAlgorithm::UpdateOptionConstraint(std::list<RefPtr<LayoutWrapper>
 float MenuLayoutAlgorithm::VerticalLayout(const SizeF& size, float position, bool isContextMenu)
 {
     placement_ = Placement::BOTTOM;
+    bool isOutBottom = GreatOrEqual(position + anchorPosition_->GetY() + size.Height(), wrapperRect_.Bottom());
     // can put menu below click point
     if (GreatOrEqual(bottomSpace_, size.Height())) {
         return position + margin_;
     }
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && isContextMenu) {
         if (LessNotEqual(bottomSpace_, size.Height()) && LessNotEqual(size.Height(), wrapperRect_.Height())) {
+            return wrapperRect_.Bottom() - size.Height() - paddingBottom_;
+        }
+        // can't fit in screen, line up with top of the screen
+        return wrapperRect_.Top() + paddingTop_;
+    } else if (anchorPosition_.has_value() && isOutBottom) {
+        // When the component height is less than the bottom margin and the menu height can be lowered,
+        // or when the anchor point y coordinate is at the bottom of the screen and
+        // the anchorPosition_ has a set value, the menu should be placed at the bottom of the screen.
+        if (((LessNotEqual(bottomSpace_, size.Height()) || GreatOrEqual(position, wrapperRect_.Bottom())) &&
+            LessNotEqual(size.Height(), wrapperRect_.Height()))) {
             return wrapperRect_.Bottom() - size.Height() - paddingBottom_;
         }
         // can't fit in screen, line up with top of the screen
@@ -3034,18 +3046,21 @@ OffsetF MenuLayoutAlgorithm::GetAdjustPosition(std::vector<Placement>& currentPl
 {
     OffsetF childPosition;
     OffsetF position;
-    for (size_t i = 0, len = currentPlacementStates.size(); i < len;) {
+    size_t len = currentPlacementStates.size();
+    for (size_t i = 0; i < len;) {
         placement_ = currentPlacementStates[i];
         if (placement_ == Placement::NONE) {
             break;
         }
         childPosition = GetPositionWithPlacement(childSize, topPosition, bottomPosition);
         position = AdjustPosition(childPosition, childSize.Width(), childSize.Height(), targetSecurity_);
-        if (NearEqual(position, OffsetF(0.0f, 0.0f))) {
-            i += step;
-            continue;
+        if (!NearEqual(position, OffsetF(0.0f, 0.0f))) {
+            break;
         }
-        break;
+        if (len - i <= step) {
+            break;
+        }
+        i += step;
     }
     return position;
 }

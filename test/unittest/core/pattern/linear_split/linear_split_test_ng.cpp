@@ -1286,4 +1286,44 @@ HWTEST_F(LinearSplitTestNg, IgnoreLayoutSafeArea001, TestSize.Level1)
     EXPECT_EQ(column->GetGeometryNode()->GetFrameSize(), SizeF(100.0f, 100.0f));
     EXPECT_EQ(column->GetGeometryNode()->GetFrameOffset(), OffsetF(100.0f, 0.0f))  << column->GetGeometryNode()->GetFrameRect().ToString();
 }
+
+/**
+ * @tc.name: IgnoreLayoutSafeArea002
+ * @tc.desc: Test MeasureSelfByLayoutPolicy function
+ * @tc.type: FUNC
+ */
+HWTEST_F(LinearSplitTestNg, IgnoreLayoutSafeArea002, TestSize.Level1)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->SetMinPlatformVersion(PLATFORM_VERSION_10);
+    RefPtr<FrameNode> column;
+    auto frameNode = CreateLinearSplit(SplitType::COLUMN_SPLIT,
+        [this, &column](LinearSplitModelNG model) { column = CreateColumn([this](ColumnModelNG model) {}); });
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(300.0f, DimensionUnit::PX), CalcLength(300.0f, DimensionUnit::PX)));
+    PaddingProperty padding;
+    padding.left = CalcLength(10.0f);
+    padding.right = CalcLength(10.0f);
+    padding.top = CalcLength(10.0f);
+    padding.bottom = CalcLength(10.0f);
+    layoutProperty->UpdateSafeAreaPadding(padding);
+    auto childLayoutProperty = column->GetLayoutProperty();
+    ASSERT_NE(childLayoutProperty, nullptr);
+    IgnoreLayoutSafeAreaOpts opts = { .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
+        .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL };
+    childLayoutProperty->UpdateIgnoreLayoutSafeAreaOpts(opts);
+    childLayoutProperty->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(100.0f, DimensionUnit::PX), CalcLength(100.0f, DimensionUnit::PX)));
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    frameNode->CreateLayoutTask();
+    EXPECT_EQ(frameNode->GetGeometryNode()->GetFrameSize(), SizeF(300.0f, 300.0f))
+        << frameNode->GetGeometryNode()->GetFrameRect().ToString();
+    EXPECT_EQ(frameNode->GetGeometryNode()->GetFrameOffset(), OffsetF(0.0f, 0.0f));
+    EXPECT_EQ(column->GetGeometryNode()->GetFrameSize(), SizeF(100.0f, 100.0f));
+    EXPECT_EQ(column->GetGeometryNode()->GetFrameOffset(), OffsetF(0.0f, 100.0f))
+        << column->GetGeometryNode()->GetFrameRect().ToString();
+}
 } // namespace OHOS::Ace::NG

@@ -1518,6 +1518,7 @@ HWTEST_F(MenuViewTestNg, UpdateMenuProperties002, TestSize.Level1)
 {
     MenuParam menuParam;
     menuParam.anchorPosition = OffsetF(10.0f, 10.0f);
+    menuParam.isAnchorPosition = true;
     ASSERT_NE(wrapperNode_, nullptr);
     ASSERT_NE(menuFrameNode_, nullptr);
     MenuView::UpdateMenuProperties(wrapperNode_, menuFrameNode_, menuParam, MenuType::MENU);

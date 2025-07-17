@@ -221,15 +221,15 @@ bool ArkTSUtils::ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& va
     return result;
 }
 
-bool ArkTSUtils::ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result, bool fromTheme)
+bool ArkTSUtils::ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result)
 {
     RefPtr<ResourceObject> resourceObject;
     NodeInfo nodeInfo = { "", ColorMode::COLOR_MODE_UNDEFINED };
-    return ParseJsColorAlpha(vm, value, result, resourceObject, nodeInfo, fromTheme);
+    return ParseJsColorAlpha(vm, value, result, resourceObject, nodeInfo);
 }
 
 bool ArkTSUtils::ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result,
-    RefPtr<ResourceObject>& resourceObject, const NodeInfo& nodeInfo, bool fromTheme)
+    RefPtr<ResourceObject>& resourceObject, const NodeInfo& nodeInfo)
 {
     bool state = false;
     if (value->IsNumber()) {
@@ -247,7 +247,7 @@ bool ArkTSUtils::ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& va
             CompleteResourceObjectFromColor(resourceObject, result, true, nodeInfo);
             return true;
         }
-        state = ParseJsColorFromResource(vm, value, result, resourceObject, fromTheme);
+        state = ParseJsColorFromResource(vm, value, result, resourceObject);
         CompleteResourceObjectFromColor(resourceObject, result, state, nodeInfo);
         return state;
     }
@@ -386,12 +386,12 @@ RefPtr<OHOS::Ace::ThemeConstants> GetThemeConstants(const EcmaVM* vm, const Loca
 }
 
 RefPtr<ResourceWrapper> CreateResourceWrapper(const EcmaVM* vm, const Local<JSValueRef>& jsObj,
-    RefPtr<ResourceObject>& resourceObject, bool fromTheme = false)
+    RefPtr<ResourceObject>& resourceObject)
 {
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
     RefPtr<ThemeConstants> themeConstants = nullptr;
     if (SystemProperties::GetResourceDecoupling()) {
-        resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject, fromTheme);
+        resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
         if (!resourceAdapter) {
             return nullptr;
         }
@@ -610,15 +610,14 @@ void ArkTSUtils::CompleteResourceObject(const EcmaVM* vm, Local<panda::ObjectRef
     }
 }
 
-bool ArkTSUtils::ParseJsColorFromResource(const EcmaVM* vm, const Local<JSValueRef>& jsObj, Color& result,
-    bool fromTheme)
+bool ArkTSUtils::ParseJsColorFromResource(const EcmaVM* vm, const Local<JSValueRef>& jsObj, Color& result)
 {
     RefPtr<ResourceObject> resourceObject;
-    return ParseJsColorFromResource(vm, jsObj, result, resourceObject, fromTheme);
+    return ParseJsColorFromResource(vm, jsObj, result, resourceObject);
 }
 
 bool ArkTSUtils::ParseJsColorFromResource(const EcmaVM* vm, const Local<JSValueRef>& jsObj, Color& result,
-    RefPtr<ResourceObject>& resourceObject, bool fromTheme)
+    RefPtr<ResourceObject>& resourceObject)
 {
     auto obj = jsObj ->ToObject(vm);
     auto resId = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "id"));
@@ -628,7 +627,7 @@ bool ArkTSUtils::ParseJsColorFromResource(const EcmaVM* vm, const Local<JSValueR
 
     CompleteResourceObject(vm, obj);
     resourceObject = GetResourceObject(vm, jsObj);
-    auto resourceWrapper = CreateResourceWrapper(vm, jsObj, resourceObject, fromTheme);
+    auto resourceWrapper = CreateResourceWrapper(vm, jsObj, resourceObject);
     if (!resourceWrapper) {
         return false;
     }
@@ -727,17 +726,7 @@ bool ArkTSUtils::ParseJsDimensionFromResource(const EcmaVM* vm, const Local<JSVa
     }
     auto resIdNum = resId->Int32Value(vm);
     if (resIdNum == -1) {
-        if (!IsGetResourceByName(vm, jsObj)) {
-            return false;
-        }
-        auto args = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "params"));
-        if (!args->IsArray(vm)) {
-            return false;
-        }
-        Local<panda::ArrayRef> params = static_cast<Local<panda::ArrayRef>>(args);
-        auto param = panda::ArrayRef::GetValueAt(vm, params, 0);
-        result = resourceWrapper->GetDimensionByName(param->ToString(vm)->ToString(vm));
-        return true;
+        return ParseJsDimensionFromResourceByName(vm, obj, dimensionUnit, resourceObject, resourceWrapper, result);
     }
     auto type = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "type"));
     if (type->IsNull() || !type->IsNumber()) {
@@ -754,6 +743,35 @@ bool ArkTSUtils::ParseJsDimensionFromResource(const EcmaVM* vm, const Local<JSVa
         return true;
     }
     result = resourceWrapper->GetDimension(resId->Int32Value(vm));
+    return true;
+}
+
+bool ArkTSUtils::ParseJsDimensionFromResourceByName(const EcmaVM* vm, const Local<panda::ObjectRef>& jsObj,
+    DimensionUnit dimensionUnit, const RefPtr<ResourceObject>& resourceObject,
+    const RefPtr<ResourceWrapper>& resourceWrapper, CalcDimension& result)
+{
+    if (!IsGetResourceByName(vm, jsObj)) {
+        return false;
+    }
+    auto args = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "params"));
+    if (!args->IsArray(vm)) {
+        return false;
+    }
+    Local<panda::ArrayRef> params = static_cast<Local<panda::ArrayRef>>(args);
+    auto param = panda::ArrayRef::GetValueAt(vm, params, 0);
+    auto resName = param->ToString(vm)->ToString(vm);
+
+    if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::STRING)) {
+        auto value = resourceWrapper->GetStringByName(resName);
+        result = StringUtils::StringToCalcDimension(value, false, dimensionUnit);
+        return true;
+    }
+    if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::INTEGER)) {
+        auto value = std::to_string(resourceWrapper->GetIntByName(resName));
+        result = StringUtils::StringToDimensionWithUnit(value, dimensionUnit);
+        return true;
+    }
+    result = resourceWrapper->GetDimensionByName(resName);
     return true;
 }
 
@@ -782,17 +800,7 @@ bool ArkTSUtils::ParseJsDimensionFromResourceNG(const EcmaVM* vm, const Local<JS
     }
     auto resIdNum = resId->Int32Value(vm);
     if (resIdNum == -1) {
-        if (!IsGetResourceByName(vm, jsObj)) {
-            return false;
-        }
-        auto args = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "params"));
-        if (!args->IsArray(vm)) {
-            return false;
-        }
-        Local<panda::ArrayRef> params = static_cast<Local<panda::ArrayRef>>(args);
-        auto param = panda::ArrayRef::GetValueAt(vm, params, 0);
-        result = resourceWrapper->GetDimensionByName(param->ToString(vm)->ToString(vm));
-        return true;
+        return ParseJsDimensionNGFromResourceByName(vm, obj, dimensionUnit, resourceObject, resourceWrapper, result);
     }
     auto type = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "type"));
     if (type->IsNull() || !type->IsNumber()) {
@@ -813,6 +821,34 @@ bool ArkTSUtils::ParseJsDimensionFromResourceNG(const EcmaVM* vm, const Local<JS
     }
 
     return false;
+}
+
+bool ArkTSUtils::ParseJsDimensionNGFromResourceByName(const EcmaVM* vm, const Local<panda::ObjectRef>& jsObj,
+    DimensionUnit dimensionUnit, const RefPtr<ResourceObject>& resourceObject,
+    const RefPtr<ResourceWrapper>& resourceWrapper, CalcDimension& result)
+{
+    if (!IsGetResourceByName(vm, jsObj)) {
+        return false;
+    }
+    auto args = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "params"));
+    if (!args->IsArray(vm)) {
+        return false;
+    }
+    Local<panda::ArrayRef> params = static_cast<Local<panda::ArrayRef>>(args);
+    auto param = panda::ArrayRef::GetValueAt(vm, params, 0);
+    auto resName = param->ToString(vm)->ToString(vm);
+
+    if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::STRING)) {
+        auto value = resourceWrapper->GetStringByName(resName);
+        return StringUtils::StringToCalcDimensionNG(value, result, false, dimensionUnit);
+    }
+    if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::INTEGER)) {
+        auto value = std::to_string(resourceWrapper->GetIntByName(resName));
+        StringUtils::StringToDimensionWithUnitNG(value, result, dimensionUnit);
+        return true;
+    }
+    result = resourceWrapper->GetDimensionByName(resName);
+    return true;
 }
 
 bool ArkTSUtils::ParseStringArray(const EcmaVM* vm, const Local<JSValueRef>& arg,
@@ -1532,6 +1568,8 @@ bool ArkTSUtils::ParseJsStringFromResource(const EcmaVM* vm, const Local<JSValue
     RefPtr<ResourceObject>& resourceObject)
 {
     auto obj = jsValue->ToObject(vm);
+    CompleteResourceObject(vm, obj);
+
     auto type = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "type"));
     auto resId = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "id"));
     auto args = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "params"));
@@ -1539,7 +1577,6 @@ bool ArkTSUtils::ParseJsStringFromResource(const EcmaVM* vm, const Local<JSValue
         return false;
     }
 
-    CompleteResourceObject(vm, obj);
     resourceObject = GetResourceObject(vm, obj);
     auto resourceWrapper = CreateResourceWrapper(vm, obj, resourceObject);
     if (!resourceWrapper) {
@@ -2771,6 +2808,25 @@ bool ArkTSUtils::ParseJsInt32(const EcmaVM *vm, const Local<JSValueRef> &value, 
     }
 
     return false;
+}
+
+bool ArkTSUtils::ParseJsIgnoresLayoutSafeAreaEdges(
+    const EcmaVM* vm, const Local<JSValueRef>& value, std::vector<ArkUI_Int32>& edges)
+{
+    if (!value->IsArray(vm)) {
+        return false;
+    }
+    auto array = panda::Local<panda::ArrayRef>(value);
+    auto length = array->Length(vm);
+    for (uint32_t index = 0; index < length; index++) {
+        auto item = panda::ArrayRef::GetValueAt(vm, array, index);
+        ArkUI_Int32 edge;
+        if (!ArkTSUtils::ParseJsInt32(vm, item, edge)) {
+            return false;
+        }
+        edges.push_back(edge);
+    }
+    return true;
 }
 
 void ArkTSUtils::ParseGradientCenter(

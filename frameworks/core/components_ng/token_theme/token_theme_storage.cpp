@@ -110,13 +110,17 @@ void TokenThemeStorage::CacheClear()
 
 void TokenThemeStorage::CacheResetColor()
 {
+    std::lock_guard<std::mutex> lock(themeCacheMutex_);
     for (auto& [themeId, theme] : themeCache_) {
         LOGD("Theme reset colors with id %{public}d", themeId);
-        auto resObjs = theme->GetResObjs();
+        auto tokenColors = theme ? theme->Colors() : nullptr;
+        if (!tokenColors) {
+            continue;
+        }
+        auto resObjs = tokenColors->GetResObjs();
         if (resObjs.size() != TokenColors::TOTAL_NUMBER) {
             continue;
         }
-        auto tokenColor = theme->Colors();
         for (int32_t i = 0; i < TokenColors::TOTAL_NUMBER; i++) {
             if (!resObjs[i]) {
                 continue;
@@ -126,9 +130,8 @@ void TokenThemeStorage::CacheResetColor()
             if (!state) {
                 continue;
             }
-            tokenColor->SetColor(i, colorValue);
+            tokenColors->SetColor(i, colorValue);
         }
-        theme->SetColors(tokenColor);
     }
 }
 

@@ -17,6 +17,8 @@
 
 #include <vector>
 
+#include "core/common/resource/resource_parse_utils.h"
+
 namespace OHOS::Ace {
 
 static const std::vector<TokenColorData> colorData = {
@@ -99,259 +101,270 @@ const std::vector<Color>& TokenColors::GetColors()
     return colors_;
 }
 
+Color TokenColors::GetColorWithResourceObject(int32_t colorIndex) const
+{
+    if ((colorMode_ == ColorMode::COLOR_MODE_UNDEFINED) && (resObjs_.size() == TokenColors::TOTAL_NUMBER) &&
+        resObjs_[colorIndex]) {
+        Color color;
+        ResourceParseUtils::ParseResColor(resObjs_[colorIndex], color);
+        return color;
+    }
+    return colors_[colorIndex];
+}
+
 Color TokenColors::Brand() const
 {
-    return colors_[BRAND];
+    return GetColorWithResourceObject(BRAND);
 }
 
 Color TokenColors::Warning() const
 {
-    return colors_[WARNING];
+    return GetColorWithResourceObject(WARNING);
 }
 
 Color TokenColors::Alert() const
 {
-    return colors_[ALERT];
+    return GetColorWithResourceObject(ALERT);
 }
 
 Color TokenColors::Confirm() const
 {
-    return colors_[CONFIRM];
+    return GetColorWithResourceObject(CONFIRM);
 }
 
 Color TokenColors::FontPrimary() const
 {
-    return colors_[FONT_PRIMARY];
+    return GetColorWithResourceObject(FONT_PRIMARY);
 }
 
 Color TokenColors::FontSecondary() const
 {
-    return colors_[FONT_SECONDARY];
+    return GetColorWithResourceObject(FONT_SECONDARY);
 }
 
 Color TokenColors::FontTertiary() const
 {
-    return colors_[FONT_TERTIARY];
+    return GetColorWithResourceObject(FONT_TERTIARY);
 }
 
 Color TokenColors::FontFourth() const
 {
-    return colors_[FONT_FOURTH];
+    return GetColorWithResourceObject(FONT_FOURTH);
 }
 
 Color TokenColors::FontEmphasize() const
 {
-    return colors_[FONT_EMPHASIZE];
+    return GetColorWithResourceObject(FONT_EMPHASIZE);
 }
 
 Color TokenColors::FontOnPrimary() const
 {
-    return colors_[FONT_ON_PRIMARY];
+    return GetColorWithResourceObject(FONT_ON_PRIMARY);
 }
 
 Color TokenColors::FontOnSecondary() const
 {
-    return colors_[FONT_ON_SECONDARY];
+    return GetColorWithResourceObject(FONT_ON_SECONDARY);
 }
 
 Color TokenColors::FontOnTertiary() const
 {
-    return colors_[FONT_ON_TERTIARY];
+    return GetColorWithResourceObject(FONT_ON_TERTIARY);
 }
 
 Color TokenColors::FontOnFourth() const
 {
-    return colors_[FONT_ON_FOURTH];
+    return GetColorWithResourceObject(FONT_ON_FOURTH);
 }
 
 Color TokenColors::IconPrimary() const
 {
-    return colors_[ICON_PRIMARY];
+    return GetColorWithResourceObject(ICON_PRIMARY);
 }
 
 Color TokenColors::IconSecondary() const
 {
-    return colors_[ICON_SECONDARY];
+    return GetColorWithResourceObject(ICON_SECONDARY);
 }
 
 Color TokenColors::IconTertiary() const
 {
-    return colors_[ICON_TERTIARY];
+    return GetColorWithResourceObject(ICON_TERTIARY);
 }
 
 Color TokenColors::IconFourth() const
 {
-    return colors_[ICON_FOURTH];
+    return GetColorWithResourceObject(ICON_FOURTH);
 }
 
 Color TokenColors::IconEmphasize() const
 {
-    return colors_[ICON_EMPHASIZE];
+    return GetColorWithResourceObject(ICON_EMPHASIZE);
 }
 
 Color TokenColors::IconSubEmphasize() const
 {
-    return colors_[ICON_SUB_EMPHASIZE];
+    return GetColorWithResourceObject(ICON_SUB_EMPHASIZE);
 }
 
 Color TokenColors::IconOnPrimary() const
 {
-    return colors_[ICON_ON_PRIMARY];
+    return GetColorWithResourceObject(ICON_ON_PRIMARY);
 }
 
 Color TokenColors::IconOnSecondary() const
 {
-    return colors_[ICON_ON_SECONDARY];
+    return GetColorWithResourceObject(ICON_ON_SECONDARY);
 }
 
 Color TokenColors::IconOnTertiary() const
 {
-    return colors_[ICON_ON_TERTIARY];
+    return GetColorWithResourceObject(ICON_ON_TERTIARY);
 }
 
 Color TokenColors::IconOnFourth() const
 {
-    return colors_[ICON_ON_FOURTH];
+    return GetColorWithResourceObject(ICON_ON_FOURTH);
 }
 
 Color TokenColors::BackgroundPrimary() const
 {
-    return colors_[BACKGROUND_PRIMARY];
+    return GetColorWithResourceObject(BACKGROUND_PRIMARY);
 }
 
 Color TokenColors::BackgroundSecondary() const
 {
-    return colors_[BACKGROUND_SECONDARY];
+    return GetColorWithResourceObject(BACKGROUND_SECONDARY);
 }
 
 Color TokenColors::BackgroundTertiary() const
 {
-    return colors_[BACKGROUND_TERTIARY];
+    return GetColorWithResourceObject(BACKGROUND_TERTIARY);
 }
 
 Color TokenColors::BackgroundFourth() const
 {
-    return colors_[BACKGROUND_FOURTH];
+    return GetColorWithResourceObject(BACKGROUND_FOURTH);
 }
 
 Color TokenColors::BackgroundEmphasize() const
 {
-    return colors_[BACKGROUND_EMPHASIZE];
+    return GetColorWithResourceObject(BACKGROUND_EMPHASIZE);
 }
 
 Color TokenColors::CompForegroundPrimary() const
 {
-    return colors_[COMP_FOREGROUND_PRIMARY];
+    return GetColorWithResourceObject(COMP_FOREGROUND_PRIMARY);
 }
 
 Color TokenColors::CompBackgroundPrimary() const
 {
-    return colors_[COMP_BACKGROUND_PRIMARY];
+    return GetColorWithResourceObject(COMP_BACKGROUND_PRIMARY);
 }
 
 Color TokenColors::CompBackgroundPrimaryTran() const
 {
-    return colors_[COMP_BACKGROUND_PRIMARY_TRAN];
+    return GetColorWithResourceObject(COMP_BACKGROUND_PRIMARY_TRAN);
 }
 
 Color TokenColors::CompBackgroundPrimaryContrary() const
 {
-    return colors_[COMP_BACKGROUND_PRIMARY_CONTRARY];
+    return GetColorWithResourceObject(COMP_BACKGROUND_PRIMARY_CONTRARY);
 }
 
 Color TokenColors::CompBackgroundGray() const
 {
-    return colors_[COMP_BACKGROUND_GRAY];
+    return GetColorWithResourceObject(COMP_BACKGROUND_GRAY);
 }
 
 Color TokenColors::CompBackgroundSecondary() const
 {
-    return colors_[COMP_BACKGROUND_SECONDARY];
+    return GetColorWithResourceObject(COMP_BACKGROUND_SECONDARY);
 }
 
 Color TokenColors::CompBackgroundTertiary() const
 {
-    return colors_[COMP_BACKGROUND_TERTIARY];
+    return GetColorWithResourceObject(COMP_BACKGROUND_TERTIARY);
 }
 
 Color TokenColors::CompBackgroundEmphasize() const
 {
-    return colors_[COMP_BACKGROUND_EMPHASIZE];
+    return GetColorWithResourceObject(COMP_BACKGROUND_EMPHASIZE);
 }
 
 Color TokenColors::CompBackgroundNeutral() const
 {
-    return colors_[COMP_BACKGROUND_NEUTRAL];
+    return GetColorWithResourceObject(COMP_BACKGROUND_NEUTRAL);
 }
 
 Color TokenColors::CompEmphasizeSecondary() const
 {
-    return colors_[COMP_EMPHASIZE_SECONDARY];
+    return GetColorWithResourceObject(COMP_EMPHASIZE_SECONDARY);
 }
 
 Color TokenColors::CompEmphasizeTertiary() const
 {
-    return colors_[COMP_EMPHASIZE_TERTIARY];
+    return GetColorWithResourceObject(COMP_EMPHASIZE_TERTIARY);
 }
 
 Color TokenColors::CompDivider() const
 {
-    return colors_[COMP_DIVIDER];
+    return GetColorWithResourceObject(COMP_DIVIDER);
 }
 
 Color TokenColors::CompCommonContrary() const
 {
-    return colors_[COMP_COMMON_CONTRARY];
+    return GetColorWithResourceObject(COMP_COMMON_CONTRARY);
 }
 
 Color TokenColors::CompBackgroundFocus() const
 {
-    return colors_[COMP_BACKGROUND_FOCUS];
+    return GetColorWithResourceObject(COMP_BACKGROUND_FOCUS);
 }
 
 Color TokenColors::CompFocusedPrimary() const
 {
-    return colors_[COMP_FOCUSED_PRIMARY];
+    return GetColorWithResourceObject(COMP_FOCUSED_PRIMARY);
 }
 
 Color TokenColors::CompFocusedSecondary() const
 {
-    return colors_[COMP_FOCUSED_SECONDARY];
+    return GetColorWithResourceObject(COMP_FOCUSED_SECONDARY);
 }
 
 Color TokenColors::CompFocusedTertiary() const
 {
-    return colors_[COMP_FOCUSED_TERTIARY];
+    return GetColorWithResourceObject(COMP_FOCUSED_TERTIARY);
 }
 
 Color TokenColors::InteractiveHover() const
 {
-    return colors_[INTERACTIVE_HOVER];
+    return GetColorWithResourceObject(INTERACTIVE_HOVER);
 }
 
 Color TokenColors::InteractivePressed() const
 {
-    return colors_[INTERACTIVE_PRESSED];
+    return GetColorWithResourceObject(INTERACTIVE_PRESSED);
 }
 
 Color TokenColors::InteractiveFocus() const
 {
-    return colors_[INTERACTIVE_FOCUS];
+    return GetColorWithResourceObject(INTERACTIVE_FOCUS);
 }
 
 Color TokenColors::InteractiveActive() const
 {
-    return colors_[INTERACTIVE_ACTIVE];
+    return GetColorWithResourceObject(INTERACTIVE_ACTIVE);
 }
 
 Color TokenColors::InteractiveSelect() const
 {
-    return colors_[INTERACTIVE_SELECT];
+    return GetColorWithResourceObject(INTERACTIVE_SELECT);
 }
 
 Color TokenColors::InteractiveClick() const
 {
-    return colors_[INTERACTIVE_CLICK];
+    return GetColorWithResourceObject(INTERACTIVE_CLICK);
 }
 
 const char* TokenColors::GetColorNameByIndex(int32_t idx)

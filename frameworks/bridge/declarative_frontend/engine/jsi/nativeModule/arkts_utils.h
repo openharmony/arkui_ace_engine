@@ -61,10 +61,9 @@ public:
         RefPtr<ResourceObject>& resourceObject, const NodeInfo& nodeInfo);
     static bool ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& color,
         std::vector<RefPtr<ResourceObject>>& resObjs, const NodeInfo& nodeInfo);
+    static bool ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result);
     static bool ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result,
-        bool fromTheme = false);
-    static bool ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result,
-        RefPtr<ResourceObject>& resourceObject, const NodeInfo& nodeInfo, bool fromTheme = false);
+        RefPtr<ResourceObject>& resourceObject, const NodeInfo& nodeInfo);
     static bool ParseJsColorAlpha(
         const EcmaVM* vm, const Local<JSValueRef>& value, Color& result, const Color& defaultColor);
     static bool ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value,
@@ -74,19 +73,24 @@ public:
     static bool ParseJsSymbolColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result,
         RefPtr<ResourceObject>& resourceObject, const NodeInfo& nodeInfo);
     static void CompleteResourceObject(const EcmaVM* vm, Local<panda::ObjectRef>& jsObj);
+    static bool ParseJsColorFromResource(const EcmaVM* vm, const Local<JSValueRef>& jsObj, Color& result);
     static bool ParseJsColorFromResource(const EcmaVM* vm, const Local<JSValueRef>& jsObj, Color& result,
-        bool fromTheme = false);
-    static bool ParseJsColorFromResource(const EcmaVM* vm, const Local<JSValueRef>& jsObj, Color& result,
-        RefPtr<ResourceObject>& resourceObject, bool fromTheme = false);
+        RefPtr<ResourceObject>& resourceObject);
     static bool ParseColorMetricsToColor(const EcmaVM *vm, const Local<JSValueRef> &jsValue, Color& result);
     static bool ParseColorMetricsToColor(
         const EcmaVM* vm, const Local<JSValueRef>& jsValue, Color& result, RefPtr<ResourceObject>& resourceObject);
     static bool ParseJsDimensionFromResource(const EcmaVM* vm, const Local<JSValueRef>& jsObj,
         DimensionUnit dimensionUnit, CalcDimension& result, RefPtr<ResourceObject>& resourceObject);
+    static bool ParseJsDimensionFromResourceByName(const EcmaVM* vm, const Local<panda::ObjectRef>& jsObj,
+        DimensionUnit dimensionUnit, const RefPtr<ResourceObject>& resourceObject,
+        const RefPtr<ResourceWrapper>& resourceWrapper, CalcDimension& result);
     static bool ParseJsDimensionFromResourceNG(
         const EcmaVM* vm, const Local<JSValueRef>& jsObj, DimensionUnit dimensionUnit, CalcDimension& result);
     static bool ParseJsDimensionFromResourceNG(const EcmaVM* vm, const Local<JSValueRef>& jsObj,
         DimensionUnit dimensionUnit, CalcDimension& result, RefPtr<ResourceObject>& resourceObject);
+    static bool ParseJsDimensionNGFromResourceByName(const EcmaVM* vm, const Local<panda::ObjectRef>& jsObj,
+        DimensionUnit dimensionUnit, const RefPtr<ResourceObject>& resourceObject,
+        const RefPtr<ResourceWrapper>& resourceWrapper, CalcDimension& result);
     static bool ParseStringArray(
         const EcmaVM* vm, const Local<JSValueRef>& arg, std::string* array, int32_t defaultLength);
     static bool ParseJsInteger(const EcmaVM *vm, const Local<JSValueRef> &value, int32_t &result);
@@ -184,6 +188,8 @@ public:
         std::vector<ArkUI_Float32>& values, std::vector<ArkUI_Int32>& units);
     static void ParseJsAngle(const EcmaVM* vm, const Local<JSValueRef>& value, std::optional<float>& angle);
     static bool ParseJsInt32(const EcmaVM* vm, const Local<JSValueRef>& value, int32_t& result);
+    static bool ParseJsIgnoresLayoutSafeAreaEdges(
+        const EcmaVM* vm, const Local<JSValueRef>& value, std::vector<ArkUI_Int32>& edges);
     static void ParseGradientCenter(const EcmaVM* vm, const Local<JSValueRef>& value,
         std::vector<ArkUIInt32orFloat32>& values, std::vector<RefPtr<ResourceObject>>& vectorResObj);
     static void ParseGradientCenter(

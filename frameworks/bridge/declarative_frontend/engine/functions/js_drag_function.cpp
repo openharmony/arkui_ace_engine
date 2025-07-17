@@ -616,7 +616,7 @@ void JsDragSpringLoadingContext::GetDragInfos(const JSCallbackInfo& args)
     auto jsValue = JsConverter::ConvertNapiValueToJsVal(nativeValue);
     dragInfosObj->SetPropertyObject("dataSummary", jsValue);
     dragInfosObj->SetProperty<std::string>("extraInfos", context_->GetExtraInfos());
-    JSRef<JSVal> dragInfosRef = JSRef<JSObject>::Cast(dragInfosObj);
+    JSRef<JSVal> dragInfosRef = dragInfosObj;
     args.SetReturnValue(dragInfosRef);
 }
 
@@ -635,7 +635,7 @@ void JsDragSpringLoadingContext::GetCurrentConfig(const JSCallbackInfo& args)
     curConfigObj->SetProperty<int32_t>("updateInterval", config->updateInterval);
     curConfigObj->SetProperty<int32_t>("updateNotifyCount", config->updateNotifyCount);
     curConfigObj->SetProperty<int32_t>("updateToFinishInterval", config->updateToFinishInterval);
-    JSRef<JSVal> curConfigRef = JSRef<JSObject>::Cast(curConfigObj);
+    JSRef<JSVal> curConfigRef = curConfigObj;
     args.SetReturnValue(curConfigRef);
 }
 
@@ -715,7 +715,7 @@ JSRef<JSVal> JsDragFunction::Execute(const RefPtr<DragEvent>& info)
 
 JSRef<JSVal> JsDragFunction::DragSpringLoadingExecute(const RefPtr<DragSpringLoadingContext>& info)
 {
-    JSRef<JSVal> springLoadingContext = JSRef<JSObject>::Cast(CreateSpringLoadingContext(info));
+    JSRef<JSVal> springLoadingContext = CreateSpringLoadingContext(info);
     JSRef<JSVal> params[] = { springLoadingContext };
     return JsFunction::ExecuteJS(1, params);
 }

@@ -2329,4 +2329,64 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage079, TestSi
     pointerPoint = dragDropManager->GetDragMoveLastPointByCurrentPointer(pointerId);
     EXPECT_EQ(pointerPoint.GetX(), 0);
 }
+
+/**
+ * @tc.name: DragDropManagerTestNgCoverage080
+ * @tc.desc: Test HandleTouchEvent
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage080, TestSize.Level1)
+{
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+
+    dragDropManager->dragAnimationPointerEvent_ = DragPointerEvent(0, 0, 0, 0);
+    dragDropManager->currentPointerId_ = 0;
+    TouchEvent event;
+    event.x = 1.0f;
+    event.y = 1.0f;
+    event.screenX = 1.0f;
+    event.screenY = 1.0f;
+    event.type = TouchType::MOVE;
+    event.pullType = TouchType::MOVE;
+    event.id = 0;
+    dragDropManager->dragDropState_ = DragDropMgrState::IDLE;
+    dragDropManager->HandleTouchEvent(event);
+    EXPECT_EQ(dragDropManager->dragAnimationPointerEvent_.windowX, 0);
+    EXPECT_EQ(dragDropManager->dragAnimationPointerEvent_.windowY, 0);
+    EXPECT_EQ(dragDropManager->dragAnimationPointerEvent_.displayX, 0);
+    EXPECT_EQ(dragDropManager->dragAnimationPointerEvent_.displayY, 0);
+
+    event.id = 0;
+    dragDropManager->currentPointerId_ = 0;
+    dragDropManager->dragDropState_ = DragDropMgrState::DRAGGING;
+    dragDropManager->HandleTouchEvent(event);
+    EXPECT_EQ(dragDropManager->dragAnimationPointerEvent_.windowX, 1);
+    EXPECT_EQ(dragDropManager->dragAnimationPointerEvent_.windowY, 1);
+    EXPECT_EQ(dragDropManager->dragAnimationPointerEvent_.displayX, 1);
+    EXPECT_EQ(dragDropManager->dragAnimationPointerEvent_.displayY, 1);
+
+    dragDropManager->dragAnimationPointerEvent_ = DragPointerEvent(0, 0, 0, 0);
+    event.id = 1;
+    dragDropManager->currentPointerId_ = 0;
+    dragDropManager->dragDropState_ = DragDropMgrState::IDLE;
+    dragDropManager->HandleTouchEvent(event);
+    EXPECT_EQ(dragDropManager->dragAnimationPointerEvent_.windowX, 0);
+    EXPECT_EQ(dragDropManager->dragAnimationPointerEvent_.windowY, 0);
+    EXPECT_EQ(dragDropManager->dragAnimationPointerEvent_.displayX, 0);
+    EXPECT_EQ(dragDropManager->dragAnimationPointerEvent_.displayY, 0);
+
+    event.id = 1;
+    dragDropManager->currentPointerId_ = 0;
+    dragDropManager->dragDropState_ = DragDropMgrState::DRAGGING;
+    dragDropManager->HandleTouchEvent(event);
+    EXPECT_EQ(dragDropManager->dragAnimationPointerEvent_.windowX, 0);
+    EXPECT_EQ(dragDropManager->dragAnimationPointerEvent_.windowY, 0);
+    EXPECT_EQ(dragDropManager->dragAnimationPointerEvent_.displayX, 0);
+    EXPECT_EQ(dragDropManager->dragAnimationPointerEvent_.displayY, 0);
+}
 } // namespace OHOS::Ace::NG

@@ -668,7 +668,7 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
         ImageRotateOrientation rotate;
         auto lastRotation = session_->GetLastOrientation();
         auto windowRotation = static_cast<uint32_t>(session_->GetWindowOrientation());
-        if (matchSnapshot) {
+        if (matchSnapshot && (!freeMultiWindow)) {
             auto orientation = TransformOrientationForMatchSnapshot(lastRotation, windowRotation);
             pattern->SetOrientation(orientation);
         }

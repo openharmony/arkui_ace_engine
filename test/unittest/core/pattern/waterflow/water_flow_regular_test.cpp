@@ -1071,7 +1071,7 @@ HWTEST_F(WaterFlowTestNg, IfElseNode001, TestSize.Level1)
     ifElseNode->FlushUpdateAndMarkDirty();
     pattern_->BeforeCreateLayoutWrapper();
     EXPECT_EQ(frameNode_->GetTotalChildCount(), 22);
-    EXPECT_EQ(frameNode_->GetChildrenUpdated(), 21);
+    EXPECT_EQ(frameNode_->GetChildrenUpdated(), 0);
     EXPECT_EQ(pattern_->layoutInfo_->footerIndex_, 0);
 
     // make [if] to empty branch.
@@ -1079,7 +1079,7 @@ HWTEST_F(WaterFlowTestNg, IfElseNode001, TestSize.Level1)
     ifElseNode->FlushUpdateAndMarkDirty();
     pattern_->BeforeCreateLayoutWrapper();
     EXPECT_EQ(frameNode_->GetTotalChildCount(), 21);
-    EXPECT_EQ(frameNode_->GetChildrenUpdated(), 21);
+    EXPECT_EQ(frameNode_->GetChildrenUpdated(), 0);
     EXPECT_EQ(pattern_->layoutInfo_->footerIndex_, 0);
 }
 
@@ -1174,17 +1174,17 @@ HWTEST_F(WaterFlowTestNg, OnAttachAtapter001, TestSize.Level1)
 }
 
 /**
- * @tc.name: ReachEndWithFooterMeasurementError001
- * @tc.desc: Test OnReachEnd event when footer has complex structure
+ * @tc.name: FooterEmptyWithNegativeSize001
+ * @tc.desc: Test footer with empty content that produces negative size
  * @tc.type: FUNC
  */
-HWTEST_F(WaterFlowTestNg, ReachEndWithFooterMeasurementError001, TestSize.Level1)
+HWTEST_F(WaterFlowTestNg, FooterEmptyWithNegativeSize001, TestSize.Level1)
 {
     bool reached = false;
     WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
     model.SetOnReachEnd([&]() { reached = true; });
 
-    // Create footer with complex structure that may cause measurement issues
     model.SetFooter([]() {
         ColumnModelNG column;
         column.Create(Dimension(), nullptr, "");
@@ -1196,45 +1196,69 @@ HWTEST_F(WaterFlowTestNg, ReachEndWithFooterMeasurementError001, TestSize.Level1
         ViewStackProcessor::GetInstance()->Pop(); // column
     });
 
-    CreateWaterFlowItems(TOTAL_LINE_NUMBER);
+    CreateWaterFlowItems(50);
     CreateDone();
 
-    // Verify footer is set correctly
-    EXPECT_EQ(pattern_->layoutInfo_->footerIndex_, 0);
-
-    // Scroll to bottom to trigger potential measurement issues
+    // Scroll to bottom to naturally trigger footer measurement
     ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
 
-    // Verify reach end event is triggered despite potential measurement errors
-    EXPECT_TRUE(reached);
-    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, TOTAL_LINE_NUMBER - 1);
-}
-
-/**
- * @tc.name: ReachEndWithFooterPrecisionError001
- * @tc.desc: Test OnReachEnd event with footer precision issues
- * @tc.type: FUNC
- */
-HWTEST_F(WaterFlowTestNg, ReachEndWithFooterPrecisionError001, TestSize.Level1)
-{
-    bool reached = false;
-    WaterFlowModelNG model = CreateWaterFlow();
-    model.SetOnReachEnd([&]() { reached = true; });
-
-    // Create simple footer to test precision issues
-    model.SetFooter(GetDefaultHeaderBuilder());
-
-    CreateWaterFlowItems(TOTAL_LINE_NUMBER);
-    CreateDone();
-
-    // Force layout to trigger potential precision errors
+    // Force layout to ensure measurement happens
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushUITasks();
 
-    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    // Verify the footer behavior - the branch should handle the edge case
+    // and the layout should still work correctly
+    EXPECT_EQ(pattern_->layoutInfo_->footerIndex_, 0);
 
-    // Should still trigger reach end despite precision errors
+    // Verify reach end event is triggered despite footer measurement edge case
     EXPECT_TRUE(reached);
-    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, TOTAL_LINE_NUMBER - 1);
+}
+
+/**
+ * @tc.name: FooterScrollBarTest001
+ * @tc.desc: Test scrollbar visibility during data switching with footer
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, FooterScrollBarTest001, TestSize.Level1) {
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetFooter(GetDefaultHeaderBuilder());
+    CreateDone();
+
+    // Verify initial empty state: only footer with small content height
+    EXPECT_TRUE(IsEqual(pattern_->layoutInfo_->GetContentHeight(), 50.0f));
+    EXPECT_LT(pattern_->layoutInfo_->GetContentHeight(), pattern_->layoutInfo_->lastMainSize_);
+
+    // Add sufficient data items to trigger scrolling
+    CreateWaterFlowItems(50);
+    CreateDone();
+    FlushUITasks();
+
+    // Verify state with data: should be scrollable
+    EXPECT_EQ(pattern_->layoutInfo_->footerIndex_, 0);
+    EXPECT_TRUE(pattern_->IsScrollable());
+
+    // Delete all data items, keep only footer
+    int totalChildren = frameNode_->GetTotalChildCount();
+    for (int i = 1; i < totalChildren; ++i) {
+        frameNode_->RemoveChildAtIndex(1);
+        frameNode_->ChildrenUpdatedFrom(1);
+    }
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks();
+
+    // Verify state after data deletion: back to footer-only state
+    EXPECT_EQ(frameNode_->GetTotalChildCount(), 1);
+    EXPECT_TRUE(GetChildFrameNode(frameNode_, 0)->IsActive());
+
+    // Re-add data (critical test scenario: empty data -> has data)
+    CreateWaterFlowItems(50);
+    CreateDone();
+    FlushUITasks();
+
+    // Verify state after data restoration
+    EXPECT_EQ(pattern_->layoutInfo_->footerIndex_, 0);
+    EXPECT_TRUE(pattern_->IsScrollable());
 }
 } // namespace OHOS::Ace::NG

@@ -105,6 +105,12 @@ ace_unittest("view_abstract_model_test_ng") {
   sources = [ "view_abstract_model_test_ng.cpp" ]
 }
 
+ace_unittest("view_abstract_model_static_test_ng") {
+  type = "new"
+  module_output = "basic"
+  sources = [ "view_abstract_model_static_test_ng.cpp" ]
+}
+
 ace_unittest("short_cuts_little_test_ng") {
   type = "new"
   module_output = "basic"
@@ -129,6 +135,12 @@ ace_unittest("node_render_status_monitor_test_ng") {
   sources = [ "node_render_status_monitor_test_ng.cpp" ]
 }
 
+ace_unittest("thread_safe_node_test_ng") {
+  type = "new"
+  module_output = "basic"
+  sources = [ "thread_safe_node_test_ng.cpp" ]
+}
+
 group("core_base_unittest") {
   testonly = true
   deps = [
@@ -142,12 +154,14 @@ group("core_base_unittest") {
     ":observer_test_ng",
     ":short_cuts_little_test_ng",
     ":short_cuts_test_ng",
+    ":thread_safe_node_test_ng",
     ":ui_node_test_ng",
     ":view_abstract_model_test_ng",
     ":view_abstract_test_ng",
     ":view_full_update_model_ng_test",
     ":view_partial_update_model_test_ng",
     ":view_stack_processor_test_ng",
+    ":view_abstract_model_static_test_ng",
   ]
 
   if (ace_engine_feature_enable_split_mode &&

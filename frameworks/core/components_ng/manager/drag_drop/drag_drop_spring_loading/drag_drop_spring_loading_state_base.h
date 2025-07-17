@@ -30,7 +30,7 @@ enum class DragDropSpringLoadingState : uint8_t {
     CANCEL = 4,
 };
 
-const std::string DRAG_GROP_SPRING_LOADING_TASK_NAME("ArkUIDragDropSpringLoadingTimer");
+const std::string DRAG_DROP_SPRING_LOADING_TASK_NAME("ArkUIDragDropSpringLoadingTimer");
 
 class DragDropSpringLoadingStateMachine;
 class DragDropSpringLoadingStateBase : public AceType {

@@ -306,10 +306,9 @@ void CreateTextStyleUsingTheme(const RefPtr<TextLayoutProperty>& property, const
 
 void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle, const std::unique_ptr<TextLineStyle>& textLineStyle,
     TextStyle& textStyle, bool isSymbol = false);
-void UseSelfStyleWithTheme(
-    const RefPtr<TextLayoutProperty>& property, TextStyle& textStyle, const RefPtr<TextTheme>& textTheme);
-void SymbolUseSelfStyleWithTheme(
-    const RefPtr<TextLayoutProperty>& property, TextStyle& textStyle, const RefPtr<TextTheme>& textTheme);
+
+void UseSelfStyleWithTheme(const RefPtr<TextLayoutProperty>& property, TextStyle& textStyle,
+    const RefPtr<TextTheme>& textTheme, bool isSymbol = false);
 
 std::string GetFontFamilyInJson(const std::optional<std::vector<std::string>>& value);
 std::string GetFontStyleInJson(const std::optional<Ace::FontStyle>& value);
@@ -319,6 +318,8 @@ std::string GetSymbolRenderingStrategyInJson(const std::optional<uint32_t>& valu
 std::string GetSymbolEffectStrategyInJson(const std::optional<uint32_t>& value);
 std::string GetLineBreakStrategyInJson(const std::optional<Ace::LineBreakStrategy>& value);
 std::string GetSymbolEffectOptionsInJson(const std::optional<SymbolEffectOptions>& value);
+std::unique_ptr<JsonValue> GetSymbolShadowInJson(const std::optional<SymbolShadow>& value);
+std::unique_ptr<JsonValue> GetShaderStyleInJson(const std::optional<std::vector<SymbolGradient>>& value);
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_TEXT_STYLES_H

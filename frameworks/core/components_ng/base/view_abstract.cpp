@@ -513,10 +513,7 @@ void ViewAbstract::SetCustomBackgroundColorWithResourceObj(const Color& color, c
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<Pattern>();
     CHECK_NULL_VOID(pattern);
-    if (!resObj) {
-        pattern->RemoveResObj("customBackgroundColor");
-        return;
-    }
+    pattern->RemoveResObj("customBackgroundColor");
     auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
         CHECK_NULL_VOID(resObj);
         auto frameNode = weak.Upgrade();
@@ -528,6 +525,68 @@ void ViewAbstract::SetCustomBackgroundColorWithResourceObj(const Color& color, c
         ACE_UPDATE_NODE_RENDER_CONTEXT(CustomBackgroundColor, backgroundColor, frameNode);
     };
     pattern->AddResObj("customBackgroundColor", resObj, std::move(updateFunc));
+}
+
+void ViewAbstract::SetBackgroundAlign(FrameNode* frameNode, const Alignment& align)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundAlign, align, frameNode);
+}
+
+void ViewAbstract::SetCustomBackgroundColor(FrameNode* frameNode, const Color& color)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj("customBackgroundColor");
+    ACE_UPDATE_NODE_RENDER_CONTEXT(CustomBackgroundColor, color, frameNode);
+}
+
+void ViewAbstract::SetBackgroundIgnoresLayoutSafeAreaEdges(FrameNode* frameNode, const uint32_t layoutSafeAreaEdges)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+        LayoutProperty, BackgroundIgnoresLayoutSafeAreaEdges, layoutSafeAreaEdges, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundIgnoresLayoutSafeAreaEdges, layoutSafeAreaEdges, frameNode);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_RENDER);
+}
+
+void ViewAbstract::SetIsTransitionBackground(FrameNode* frameNode, bool val)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(IsTransitionBackground, val, frameNode);
+}
+
+void ViewAbstract::SetIsBuilderBackground(FrameNode* frameNode, bool val)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BuilderBackgroundFlag, val, frameNode);
+}
+
+void ViewAbstract::SetCustomBackgroundColorWithResourceObj(
+    FrameNode* frameNode, const Color& color, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj("customBackgroundColor");
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        CHECK_NULL_VOID(resObj);
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<Pattern>();
+        CHECK_NULL_VOID(pattern);
+        Color backgroundColor = Color::TRANSPARENT;
+        ResourceParseUtils::ParseResColor(resObj, backgroundColor);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(CustomBackgroundColor, backgroundColor, frameNode);
+    };
+    pattern->AddResObj("customBackgroundColor", resObj, std::move(updateFunc));
+    ACE_UPDATE_NODE_RENDER_CONTEXT(CustomBackgroundColor, color, frameNode);
 }
 
 void ViewAbstract::RequestFrame()
@@ -6064,11 +6123,10 @@ void ViewAbstract::SetPosition(FrameNode* frameNode, const OffsetT<Dimension>& v
     ACE_UPDATE_NODE_RENDER_CONTEXT(Position, value, frameNode);
 }
 
-void ViewAbstract::SetPosition(FrameNode* frameNode, const Dimension& x, const Dimension& y,
-    const RefPtr<ResourceObject>& xresObj, const RefPtr<ResourceObject>& yresObj)
+void ViewAbstract::SetPosition(FrameNode* frameNode, OffsetT<Dimension>& value, const RefPtr<ResourceObject>& xresObj,
+    const RefPtr<ResourceObject>& yresObj)
 {
     CHECK_NULL_VOID(frameNode);
-    OffsetT<Dimension> value = { x, y };
     SetPositionX(frameNode, value, xresObj);
     SetPositionY(frameNode, value, yresObj);
     CheckIfParentNeedMarkDirty(frameNode);

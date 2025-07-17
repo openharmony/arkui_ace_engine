@@ -167,6 +167,26 @@ class ModifierWithKey {
     return true;
   }
 }
+class BackgroundModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetBackground(node);
+    }
+    else {
+      getUINativeModule().common.setBackground(
+        node, this.value.content, this.value.align, this.value.ignoresLayoutSafeAreaEdges);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue.content, this.value.content) ||
+      !isBaseOrResourceEqual(this.stageValue.align, this.value.align) ||
+      !deepCompareArrays(this.stageValue.ignoresLayoutSafeAreaEdges, this.value.ignoresLayoutSafeAreaEdges);
+  }
+}
+BackgroundModifier.identity = Symbol('background');
 class BackgroundColorModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -4144,8 +4164,19 @@ class ArkComponent {
     }
     return this;
   }
-  background(builder, options) {
-    throw new Error('Method not implemented.');
+  background(content, options) {
+    let arkBackground = new ArkBackground();
+    if (typeof content === 'function') {
+      throw new Error('Method not implemented.');
+    } else {
+      arkBackground.content = content;
+    }
+    if (typeof options === 'object') {
+      arkBackground.align = options.align;
+      arkBackground.ignoresLayoutSafeAreaEdges = options.ignoresLayoutSafeAreaEdges;
+    }
+    modifierWithKey(this._modifiersWithKeys, BackgroundModifier.identity, BackgroundModifier, arkBackground);
+    return this;
   }
   backgroundColor(value) {
     modifierWithKey(this._modifiersWithKeys, BackgroundColorModifier.identity, BackgroundColorModifier, value);
@@ -5339,7 +5370,7 @@ class GestureHandler {
 class TapGestureHandler extends GestureHandler {
   constructor(options) {
     super(CommonGestureType.TAP_GESTURE);
-    if (options !== undefined) {
+    if (options !== undefined && options !== null) {
       this.fingers = options.fingers;
       this.count = options.count;
       this.limitFingerCount = options.isFingerCountLimited;
@@ -5362,7 +5393,7 @@ class TapGestureHandler extends GestureHandler {
 class LongPressGestureHandler extends GestureHandler {
   constructor(options) {
     super(CommonGestureType.LONG_PRESS_GESTURE);
-    if (options !== undefined) {
+    if (options !== undefined && options !== null) {
       this.fingers = options.fingers;
       this.repeat = options.repeat;
       this.duration = options.duration;
@@ -5399,7 +5430,7 @@ class LongPressGestureHandler extends GestureHandler {
 class PanGestureHandler extends GestureHandler {
   constructor(options) {
     super(CommonGestureType.PAN_GESTURE);
-    if (options !== undefined) {
+    if (options !== undefined && options !== null) {
       this.fingers = options.fingers;
       this.direction = options.direction;
       this.distance = options.distance;
@@ -5447,7 +5478,7 @@ class PanGestureHandler extends GestureHandler {
 class SwipeGestureHandler extends GestureHandler {
   constructor(options) {
     super(CommonGestureType.SWIPE_GESTURE);
-    if (options !== undefined) {
+    if (options !== undefined && options !== null) {
       this.fingers = options.fingers;
       this.direction = options.direction;
       this.speed = options.speed;
@@ -5474,7 +5505,7 @@ class SwipeGestureHandler extends GestureHandler {
 class PinchGestureHandler extends GestureHandler {
   constructor(options) {
     super(CommonGestureType.PINCH_GESTURE);
-    if (options !== undefined) {
+    if (options !== undefined && options !== null) {
       this.fingers = options.fingers;
       this.distance = options.distance;
       this.limitFingerCount = options.isFingerCountLimited;
@@ -5515,7 +5546,7 @@ class PinchGestureHandler extends GestureHandler {
 class RotationGestureHandler extends GestureHandler {
   constructor(options) {
     super(CommonGestureType.ROTATION_GESTURE);
-    if (options !== undefined) {
+    if (options !== undefined && options !== null) {
       this.fingers = options.fingers;
       this.angle = options.angle;
       this.limitFingerCount = options.isFingerCountLimited;
@@ -5556,7 +5587,7 @@ class RotationGestureHandler extends GestureHandler {
 class GestureGroupHandler extends GestureHandler {
   constructor(options) {
     super(CommonGestureType.GESTURE_GROUP);
-    if (options !== undefined) {
+    if (options !== undefined && options !== null) {
       this.mode = options.mode;
       this.gestures = options.gestures;
     }
@@ -18994,6 +19025,20 @@ class ArkRegisterNativeEmbedRule {
     return (
       this.tag === another.tag &&
       this.type === another.type
+    );
+  }
+}
+class ArkBackground {
+  constructor() {
+    this.content = undefined;
+    this.align = undefined;
+    this.ignoresLayoutSafeAreaEdges = undefined;
+  }
+  isEqual(another) {
+    return (
+      this.content === another.content &&
+      this.align === another.align &&
+      deepCompareArrays(this.ignoresLayoutSafeAreaEdges, another.ignoresLayoutSafeAreaEdges)
     );
   }
 }

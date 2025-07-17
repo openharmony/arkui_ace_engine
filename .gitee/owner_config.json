@@ -4,7 +4,8 @@
             "https://gitee.com/cc520bf",
             "https://gitee.com/raulnaruto_admin",
             "https://gitee.com/bad-eleven",
-            "https://gitee.com/gongpingde"
+            "https://gitee.com/gongpingde",
+            "https://gitee.com/liyujie43"
         ],
         "https://gitee.com/arkui_superman": [
             "https://gitee.com/jiangdayuan",
@@ -112,6 +113,19 @@
         ],
         "https://gitee.com/form_framework": [
             "https://gitee.com/cx983299475"
+        ],
+        "https://gitee.com/arkui_rich_editor": [
+            "https://gitee.com/zhuweifeng94",
+            "https://gitee.com/zzc19990127"
+        ],
+        "https://gitee.com/arkui_advanced_ui_component": [
+            "https://gitee.com/fengluochenai",
+            "https://gitee.com/wangrunsen",
+            "https://gitee.com/wxwg_admin",
+            "https://gitee.com/guozonghao11"
+        ],
+        "arkui-idlize": [
+            "https://gitee.com/guozejun"
         ]
     },
     "userInfos": {
@@ -241,7 +255,10 @@
         },
         "https://gitee.com/liyujie43": {
             "info": "[Image能力 liyujie]",
-            "group": "https://gitee.com/arkui_image"
+            "group": [
+                "https://gitee.com/arkui_image",
+                "https://gitee.com/arkui-default"
+            ]
         },
         "https://gitee.com/luoying_ace_admin": {
             "info": "[picker类组件 luoying]",
@@ -446,6 +463,30 @@
         "https://gitee.com/cx983299475": {
             "info": "[卡片框架 chenxuan]",
             "group": "https://gitee.com/form_framework"
+        },
+        "https://gitee.com/zhuweifeng94": {
+            "info": "[富文本 zhuweifeng]",
+            "group": "https://gitee.com/arkui_rich_editor"
+        },
+        "https://gitee.com/zzc19990127": {
+            "info": "[富文本 zhangzecong]",
+            "group": "https://gitee.com/arkui_rich_editor"
+        },
+        "https://gitee.com/fengluochenai": {
+            "info": "[高级UI组件 luocheng]",
+            "group": "https://gitee.com/arkui_advanced_ui_component"
+        },
+        "https://gitee.com/wangrunsen": {
+            "info": "[高级UI组件 wangrunsen]",
+            "group": "https://gitee.com/arkui_advanced_ui_component"
+        },
+        "https://gitee.com/wxwg_admin": {
+            "info": "[高级UI组件 xuyinjie]",
+            "group": "https://gitee.com/arkui_advanced_ui_component"
+        },
+        "https://gitee.com/guozonghao11": {
+            "info": "[高级UI组件 guozonghao]",
+            "group": "https://gitee.com/arkui_advanced_ui_component"
         }
     }
 }

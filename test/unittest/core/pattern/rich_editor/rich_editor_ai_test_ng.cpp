@@ -34,6 +34,7 @@ int32_t testAboutToDelete = 0;
 int32_t testOnDeleteComplete = 0;
 const std::string ADDRESS = "天安门";
 const std::u16string ADDRESS_U16 = u"天安门";
+const std::string SPAN_PHONE = "12345678900";
 } // namespace
 
 class RichEditorAITestOneNg : public RichEditorCommonTestNg {
@@ -548,6 +549,65 @@ HWTEST_F(RichEditorAITestOneNg, InitAiselection, TestSize.Level1)
 }
 
 /**
+ * @tc.name: InitAiSelection002
+ * @tc.desc: test InitAiSelection
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorAITestOneNg, InitAiSelection002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto pattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto controller = pattern->GetRichEditorController();
+    ASSERT_NE(controller, nullptr);
+    std::map<int32_t, AISpan> aiSpanMap;
+    AISpan aiSpan0;
+    aiSpan0.content = ADDRESS;
+    aiSpan0.start = 0;
+    aiSpan0.end = 3;
+    aiSpanMap[0] = aiSpan0;
+    TextSpanOptions options;
+    options.value = ADDRESS_U16;
+    controller->AddTextSpan(options);
+    ParagraphManager::ParagraphInfo paragraphInfo;
+    RefPtr<MockParagraph> mockParagraph = AceType::MakeRefPtr<MockParagraph>();
+    EXPECT_CALL(*mockParagraph, GetRectsForRange(_, _, _))
+        .WillRepeatedly(Invoke([](int32_t start, int32_t end, std::vector<RectF>& selectedRects) {
+            selectedRects.emplace_back(RectF(0, 0, 100, 20));
+        }));
+    PositionWithAffinity positionWithAffinity(1, TextAffinity::DOWNSTREAM);
+    EXPECT_CALL(*mockParagraph, GetGlyphPositionAtCoordinate(_)).WillRepeatedly(Return(positionWithAffinity));
+    paragraphInfo.paragraph = mockParagraph;
+    paragraphInfo.start = 0;
+    paragraphInfo.end = 10;
+    pattern->paragraphs_.paragraphs_.emplace_back(paragraphInfo);
+    Offset offset = { 10, 10 };
+    pattern->dataDetectorAdapter_->aiSpanMap_ = aiSpanMap;
+    pattern->dataDetectorAdapter_->enablePreviewMenu_ = true;
+    pattern->textDetectEnable_ = true;
+
+    pattern->showSelect_ = false;
+    pattern->InitAiSelection(offset, false);
+    EXPECT_TRUE(pattern->GetTextSelector().aiStart.has_value());
+    EXPECT_TRUE(pattern->GetTextSelector().aiEnd.has_value());
+
+    pattern->showSelect_ = false;
+    pattern->InitAiSelection(offset, true);
+    EXPECT_TRUE(pattern->GetTextSelector().aiStart.has_value());
+    EXPECT_TRUE(pattern->GetTextSelector().aiEnd.has_value());
+
+    pattern->showSelect_ = true;
+    pattern->InitAiSelection(offset, false);
+    EXPECT_TRUE(pattern->GetTextSelector().aiStart.has_value());
+    EXPECT_TRUE(pattern->GetTextSelector().aiEnd.has_value());
+
+    pattern->showSelect_ = true;
+    pattern->InitAiSelection(offset, true);
+    EXPECT_FALSE(pattern->GetTextSelector().aiStart.has_value());
+    EXPECT_FALSE(pattern->GetTextSelector().aiEnd.has_value());
+}
+
+/**
  * @tc.name: UpdateAIStyle
  * @tc.desc: test UpdateAIStyle.
  * @tc.type: FUNC
@@ -572,5 +632,42 @@ HWTEST_F(RichEditorAITestOneNg, UpdateAIStyle, TestSize.Level1)
     richEditorPattern->SetTextDetectConfig(textDetectConfig);
 
     EXPECT_EQ(spanItem->aiSpanResultCount, 0);
+}
+
+/**
+ * @tc.name: CreateAIEntityMenuTest
+ * @tc.desc: Test CreateAIEntityMenu set preview menu nodes correctly
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorAITestOneNg, CreateAIEntityMenuTest, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto pattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step1. set invalid value
+     */
+    auto menuNode = pattern->CreateAIEntityMenu();
+    EXPECT_EQ(menuNode, nullptr);
+
+    pattern->textSelector_.aiStart = 0;
+    pattern->textSelector_.aiEnd = 5;
+    menuNode = pattern->CreateAIEntityMenu();
+    EXPECT_EQ(menuNode, nullptr);
+
+    /**
+     * @tc.steps: step2. set aiSpanMap
+     */
+    std::map<int32_t, AISpan> aiSpanMap;
+    AISpan aiSpan1;
+    aiSpan1.start = 0;
+    aiSpan1.end = 5;
+    aiSpan1.content = SPAN_PHONE;
+    aiSpan1.type = TextDataDetectType::PHONE_NUMBER;
+    aiSpanMap[0] = aiSpan1;
+    pattern->dataDetectorAdapter_->aiSpanMap_ = aiSpanMap;
+    menuNode = pattern->CreateAIEntityMenu();
+    EXPECT_EQ(menuNode, 0);
 }
 }

@@ -29,6 +29,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable.h"
 #include "core/components_ng/pattern/stack/stack_model_ng.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
+#include "core/components_ng/pattern/scrollable/scrollable_animation_consts.h"
 
 namespace OHOS::Ace::NG {
 using namespace testing;
@@ -37,7 +38,6 @@ constexpr Dimension FILL_LENGTH = Dimension(1.0, DimensionUnit::PERCENT);
 constexpr int32_t NULL_VALUE = -1;
 constexpr double DEFAULT_FRICTION = 0.6;
 constexpr double NEW_DEFAULT_FRICTION = 0.7;
-constexpr float FRICTION_SCALE = -4.2f;
 constexpr float DRAG_VELOCITY = 200.f;
 
 class TestNG : public testing::Test {

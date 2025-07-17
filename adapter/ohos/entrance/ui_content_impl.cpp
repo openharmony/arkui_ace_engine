@@ -1549,7 +1549,7 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
 
     SystemProperties::InitDeviceInfo(deviceWidth, deviceHeight, deviceHeight >= deviceWidth ? 0 : 1, density, false);
     std::unique_ptr<Global::Resource::ResConfig> resConfig(Global::Resource::CreateResConfig());
-    ColorMode colorMode = ColorMode::LIGHT;
+    ColorMode colorMode = Container::CurrentColorMode();
     if (context) {
         auto resourceManager = context->GetResourceManager();
         if (resourceManager != nullptr) {

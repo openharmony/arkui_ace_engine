@@ -3741,7 +3741,7 @@ int32_t OH_ArkUI_PointerEvent_PostClonedEvent(ArkUI_NodeHandle node, const ArkUI
     RETURN_RET_WITH_STATUS_CHECK(res, ARKUI_ERROR_CODE_NO_ERROR);
 }
 
-ArkUI_ErrorCode IsTouchEventSupportedScenario(int32_t scenarioExpr, const ArkUITouchEvent* touchEvent)
+ArkUI_ErrorCode IsTouchEventSupportedScenario(uint32_t scenarioExpr, const ArkUITouchEvent* touchEvent)
 {
     if (!touchEvent) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
@@ -3763,7 +3763,7 @@ ArkUI_ErrorCode IsTouchEventSupportedScenario(int32_t scenarioExpr, const ArkUIT
     return support ? ARKUI_ERROR_CODE_NO_ERROR : ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT;
 }
 
-ArkUI_ErrorCode IsMouseEventSupportedScenario(int32_t scenarioExpr, const ArkUIMouseEvent* mouseEvent)
+ArkUI_ErrorCode IsMouseEventSupportedScenario(uint32_t scenarioExpr, const ArkUIMouseEvent* mouseEvent)
 {
     if (!mouseEvent) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
@@ -3779,7 +3779,7 @@ ArkUI_ErrorCode IsMouseEventSupportedScenario(int32_t scenarioExpr, const ArkUIM
     return support ? ARKUI_ERROR_CODE_NO_ERROR : ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT;
 }
 
-ArkUI_ErrorCode IsAxisEventSupportedScenario(int32_t scenarioExpr, const ArkUIAxisEvent* axisEvent)
+ArkUI_ErrorCode IsAxisEventSupportedScenario(uint32_t scenarioExpr, const ArkUIAxisEvent* axisEvent)
 {
     if (!axisEvent) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
@@ -3795,7 +3795,7 @@ ArkUI_ErrorCode IsAxisEventSupportedScenario(int32_t scenarioExpr, const ArkUIAx
     return support ? ARKUI_ERROR_CODE_NO_ERROR : ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT;
 }
 
-ArkUI_ErrorCode IsKeyEventSupportedScenario(int32_t scenarioExpr, const ArkUIKeyEvent* keyEvent)
+ArkUI_ErrorCode IsKeyEventSupportedScenario(uint32_t scenarioExpr, const ArkUIKeyEvent* keyEvent)
 {
     if (!keyEvent) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
@@ -3814,7 +3814,7 @@ ArkUI_ErrorCode IsKeyEventSupportedScenario(int32_t scenarioExpr, const ArkUIKey
     return support ? ARKUI_ERROR_CODE_NO_ERROR : ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT;
 }
 
-ArkUI_ErrorCode CheckIsSupportedScenario(int32_t scenarioExpr, const ArkUI_UIInputEvent* event)
+ArkUI_ErrorCode CheckIsSupportedScenario(uint32_t scenarioExpr, const ArkUI_UIInputEvent* event)
 {
     if (!event) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;

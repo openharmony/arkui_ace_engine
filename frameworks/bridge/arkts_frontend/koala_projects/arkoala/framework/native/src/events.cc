@@ -30,7 +30,7 @@ KInt impl_CheckArkoalaGeneratedEvents(KByte* result, KInt size) {
 KOALA_INTEROP_2(CheckArkoalaGeneratedEvents, KInt, KByte*, KInt)
 
 KInt impl_InjectEvent(KByte* data, KInt size) {
-    if ((size_t)size >= sizeof(EventBuffer::buffer))
+    if ((size_t)size >= sizeof(EventBuffer::buffer) || data == NULL)
         return 0;
 
     EventBuffer event;

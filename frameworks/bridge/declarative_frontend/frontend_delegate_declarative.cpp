@@ -62,7 +62,10 @@ void MainWindowOverlay(std::function<void(RefPtr<NG::OverlayManager>)>&& task, c
     auto currentId = Container::CurrentId();
     ContainerScope scope(currentId);
     auto context = NG::PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
+    if (!context) {
+        TAG_LOGE(AceLogTag::ACE_OVERLAY, "context is null in MainWindowOverlay.");
+        return ;
+    }
     auto overlayManager = context->GetOverlayManager();
     if (overlay) {
         overlayManager = overlay;
@@ -1944,7 +1947,8 @@ DialogProperties FrontendDelegateDeclarative::ParsePropertiesFromAttr(const Prom
 {
     DialogProperties dialogProperties = {
         .autoCancel = dialogAttr.autoCancel, .customStyle = dialogAttr.customStyle,
-        .onWillDismiss = dialogAttr.customOnWillDismiss, .maskColor = dialogAttr.maskColor,
+        .onWillDismiss = dialogAttr.customOnWillDismiss,
+        .onWillDismissRelease = dialogAttr.customOnWillDismissRelease, .maskColor = dialogAttr.maskColor,
         .backgroundColor = dialogAttr.backgroundColor, .borderRadius = dialogAttr.borderRadius,
         .isShowInSubWindow = dialogAttr.showInSubWindow, .isModal = dialogAttr.isModal,
         .enableHoverMode = dialogAttr.enableHoverMode, .customBuilder = dialogAttr.customBuilder,
@@ -1966,8 +1970,7 @@ DialogProperties FrontendDelegateDeclarative::ParsePropertiesFromAttr(const Prom
         .focusable = dialogAttr.focusable,
         .dialogLevelMode = dialogAttr.dialogLevelMode,
         .dialogLevelUniqueId = dialogAttr.dialogLevelUniqueId,
-        .dialogImmersiveMode = dialogAttr.dialogImmersiveMode,
-        .onWillDismissRelease = dialogAttr.customOnWillDismissRelease
+        .dialogImmersiveMode = dialogAttr.dialogImmersiveMode
     };
     ParsePartialPropertiesFromAttr(dialogProperties, dialogAttr);
     return dialogProperties;
@@ -2007,8 +2010,8 @@ void FrontendDelegateDeclarative::OpenCustomDialog(const PromptDialogAttr &dialo
 void FrontendDelegateDeclarative::CloseCustomDialog(const int32_t dialogId)
 {
     auto task = [dialogId](const RefPtr<NG::OverlayManager>& overlayManager) {
-        CHECK_NULL_VOID(overlayManager);
         TAG_LOGI(AceLogTag::ACE_OVERLAY, "begin to close custom dialog.");
+        CHECK_NULL_VOID(overlayManager);
         overlayManager->CloseCustomDialog(dialogId);
         SubwindowManager::GetInstance()->CloseCustomDialogNG(dialogId);
     };

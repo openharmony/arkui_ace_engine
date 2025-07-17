@@ -29,7 +29,7 @@ constexpr int32_t SEQUENCE_FOURTH = 4;
 constexpr int32_t DOUBLE = 2;
 constexpr uint64_t SHORT_TIME = 100;
 constexpr uint64_t LONG_TIME = 10000;
-constexpr size_t SMPOOL_SIZE = 5;
+constexpr size_t SM_POOL_SIZE = 5;
 
 const Point FIRST_POINT(50, 50);
 const Point SECOND_POINT(60, 50);
@@ -150,44 +150,62 @@ const std::vector<DragDropSpringLoadingDetectorTestCase> DRAG_DROP_SPRING_LOADIN
 };
 
 const std::vector<DragDropSpringLoadingStateHandler> DRAG_DROP_SPRING_LOADING_STATE_HANDLER_TEST_CASES = {
-    DragDropSpringLoadingStateHandler(DragDropSpringLoadingReceivedInput::IDLE_ONENTER,
+    DragDropSpringLoadingStateHandler(DragDropSpringLoadingReceivedInput::IDLE_ON_ENTER,
         DragDropSpringLoadingState::IDLE, DragDropSpringLoadingState::END, true, SEQUENCE_FOURTH),
-    DragDropSpringLoadingStateHandler(DragDropSpringLoadingReceivedInput::IDLE_ONENTER,
+    DragDropSpringLoadingStateHandler(DragDropSpringLoadingReceivedInput::IDLE_ON_ENTER,
         DragDropSpringLoadingState::IDLE, DragDropSpringLoadingState::BEGIN, false, SEQUENCE_INIT),
-    DragDropSpringLoadingStateHandler(DragDropSpringLoadingReceivedInput::BEGIN_ONENTER,
+    DragDropSpringLoadingStateHandler(DragDropSpringLoadingReceivedInput::BEGIN_ON_ENTER,
         DragDropSpringLoadingState::IDLE, DragDropSpringLoadingState::BEGIN, false, SEQUENCE_INIT),
-    DragDropSpringLoadingStateHandler(DragDropSpringLoadingReceivedInput::BEGIN_ONENTER,
-        DragDropSpringLoadingState::BEGIN, DragDropSpringLoadingState::BEGIN, true, SEQUENCE_ZERO, false, true),
-    DragDropSpringLoadingStateHandler(DragDropSpringLoadingReceivedInput::BEGIN_ONENTER,
-        DragDropSpringLoadingState::BEGIN, DragDropSpringLoadingState::IDLE, true, SEQUENCE_INIT, true, true),
-    DragDropSpringLoadingStateHandler(DragDropSpringLoadingReceivedInput::BEGIN_ONENTER,
-        DragDropSpringLoadingState::BEGIN, DragDropSpringLoadingState::IDLE, true, SEQUENCE_INIT, true, false),
-    DragDropSpringLoadingStateHandler(DragDropSpringLoadingReceivedInput::BEGIN_ONENTER,
-        DragDropSpringLoadingState::BEGIN, DragDropSpringLoadingState::END, true, SEQUENCE_ONCE, false, false,
-        SEQUENCE_ZERO),
-    DragDropSpringLoadingStateHandler(DragDropSpringLoadingReceivedInput::UPDATE_ONENTER,
+    DragDropSpringLoadingStateHandler(DragDropSpringLoadingReceivedInput::BEGIN_ON_ENTER,
+        DragDropSpringLoadingState::BEGIN, DragDropSpringLoadingState::BEGIN, true, SEQUENCE_ZERO, false,
+        { true, false }),
+    DragDropSpringLoadingStateHandler(DragDropSpringLoadingReceivedInput::BEGIN_ON_ENTER,
+        DragDropSpringLoadingState::BEGIN, DragDropSpringLoadingState::IDLE, true, SEQUENCE_INIT, true,
+        { true, false }),
+    DragDropSpringLoadingStateHandler(DragDropSpringLoadingReceivedInput::BEGIN_ON_ENTER,
+        DragDropSpringLoadingState::BEGIN, DragDropSpringLoadingState::IDLE, true, SEQUENCE_INIT, true,
+        { false, false }),
+    DragDropSpringLoadingStateHandler(DragDropSpringLoadingReceivedInput::BEGIN_ON_ENTER,
+        DragDropSpringLoadingState::BEGIN, DragDropSpringLoadingState::IDLE, true, SEQUENCE_INIT, true, { true, true }),
+    DragDropSpringLoadingStateHandler(DragDropSpringLoadingReceivedInput::BEGIN_ON_ENTER,
+        DragDropSpringLoadingState::BEGIN, DragDropSpringLoadingState::IDLE, true, SEQUENCE_INIT, true,
+        { true, false, false }),
+    DragDropSpringLoadingStateHandler(DragDropSpringLoadingReceivedInput::BEGIN_ON_ENTER,
+        DragDropSpringLoadingState::BEGIN, DragDropSpringLoadingState::IDLE, true, SEQUENCE_INIT, true,
+        { true, false, true }),
+    DragDropSpringLoadingStateHandler(DragDropSpringLoadingReceivedInput::BEGIN_ON_ENTER,
+        DragDropSpringLoadingState::BEGIN, DragDropSpringLoadingState::END, true, SEQUENCE_ONCE, false,
+        { false, false }, SEQUENCE_ZERO),
+    DragDropSpringLoadingStateHandler(DragDropSpringLoadingReceivedInput::UPDATE_ON_ENTER,
         DragDropSpringLoadingState::IDLE, DragDropSpringLoadingState::BEGIN, false, SEQUENCE_INIT),
-    DragDropSpringLoadingStateHandler(DragDropSpringLoadingReceivedInput::UPDATE_ONENTER,
-        DragDropSpringLoadingState::UPDATE, DragDropSpringLoadingState::UPDATE, true, SEQUENCE_ZERO, false, true),
-    DragDropSpringLoadingStateHandler(DragDropSpringLoadingReceivedInput::UPDATE_ONENTER,
-        DragDropSpringLoadingState::UPDATE, DragDropSpringLoadingState::IDLE, true, SEQUENCE_INIT, true, true),
-    DragDropSpringLoadingStateHandler(DragDropSpringLoadingReceivedInput::UPDATE_ONENTER,
-        DragDropSpringLoadingState::UPDATE, DragDropSpringLoadingState::IDLE, true, SEQUENCE_INIT, true, false),
-    DragDropSpringLoadingStateHandler(DragDropSpringLoadingReceivedInput::UPDATE_ONENTER,
-        DragDropSpringLoadingState::UPDATE, DragDropSpringLoadingState::END, true, SEQUENCE_ONCE, false, false,
-        SEQUENCE_ZERO),
-    DragDropSpringLoadingStateHandler(DragDropSpringLoadingReceivedInput::END_ONENTER, DragDropSpringLoadingState::IDLE,
-        DragDropSpringLoadingState::BEGIN, false, SEQUENCE_INIT),
-    DragDropSpringLoadingStateHandler(DragDropSpringLoadingReceivedInput::UPDATE_ONENTER,
-        DragDropSpringLoadingState::END, DragDropSpringLoadingState::END, true, SEQUENCE_ZERO, false, true),
-    DragDropSpringLoadingStateHandler(DragDropSpringLoadingReceivedInput::UPDATE_ONENTER,
-        DragDropSpringLoadingState::END, DragDropSpringLoadingState::IDLE, true, SEQUENCE_INIT, true, true),
-    DragDropSpringLoadingStateHandler(DragDropSpringLoadingReceivedInput::UPDATE_ONENTER,
-        DragDropSpringLoadingState::END, DragDropSpringLoadingState::IDLE, true, SEQUENCE_INIT, true, false),
-    DragDropSpringLoadingStateHandler(DragDropSpringLoadingReceivedInput::CANCEL_ONENTER,
+    DragDropSpringLoadingStateHandler(DragDropSpringLoadingReceivedInput::UPDATE_ON_ENTER,
+        DragDropSpringLoadingState::UPDATE, DragDropSpringLoadingState::UPDATE, true, SEQUENCE_ZERO, false,
+        { true, false }),
+    DragDropSpringLoadingStateHandler(DragDropSpringLoadingReceivedInput::UPDATE_ON_ENTER,
+        DragDropSpringLoadingState::UPDATE, DragDropSpringLoadingState::IDLE, true, SEQUENCE_INIT, true,
+        { true, false }),
+    DragDropSpringLoadingStateHandler(DragDropSpringLoadingReceivedInput::UPDATE_ON_ENTER,
+        DragDropSpringLoadingState::UPDATE, DragDropSpringLoadingState::IDLE, true, SEQUENCE_INIT, true,
+        { false, false }),
+    DragDropSpringLoadingStateHandler(DragDropSpringLoadingReceivedInput::UPDATE_ON_ENTER,
+        DragDropSpringLoadingState::UPDATE, DragDropSpringLoadingState::END, true, SEQUENCE_ONCE, false,
+        { false, false }, SEQUENCE_ZERO),
+    DragDropSpringLoadingStateHandler(DragDropSpringLoadingReceivedInput::UPDATE_ON_ENTER,
+        DragDropSpringLoadingState::UPDATE, DragDropSpringLoadingState::UPDATE, true, SEQUENCE_ZERO, false,
+        { true, false }, SEQUENCE_ZERO),
+    DragDropSpringLoadingStateHandler(DragDropSpringLoadingReceivedInput::END_ON_ENTER,
+        DragDropSpringLoadingState::IDLE, DragDropSpringLoadingState::BEGIN, false, SEQUENCE_INIT),
+    DragDropSpringLoadingStateHandler(DragDropSpringLoadingReceivedInput::UPDATE_ON_ENTER,
+        DragDropSpringLoadingState::END, DragDropSpringLoadingState::END, true, SEQUENCE_ZERO, false, { true, false }),
+    DragDropSpringLoadingStateHandler(DragDropSpringLoadingReceivedInput::UPDATE_ON_ENTER,
+        DragDropSpringLoadingState::END, DragDropSpringLoadingState::IDLE, true, SEQUENCE_INIT, true, { true, false }),
+    DragDropSpringLoadingStateHandler(DragDropSpringLoadingReceivedInput::UPDATE_ON_ENTER,
+        DragDropSpringLoadingState::END, DragDropSpringLoadingState::IDLE, true, SEQUENCE_INIT, true, { false, false }),
+    DragDropSpringLoadingStateHandler(DragDropSpringLoadingReceivedInput::CANCEL_ON_ENTER,
         DragDropSpringLoadingState::CANCEL, DragDropSpringLoadingState::CANCEL, false, SEQUENCE_INIT),
-    DragDropSpringLoadingStateHandler(DragDropSpringLoadingReceivedInput::CANCEL_ONENTER,
-        DragDropSpringLoadingState::CANCEL, DragDropSpringLoadingState::IDLE, true, SEQUENCE_INIT, false, false),
+    DragDropSpringLoadingStateHandler(DragDropSpringLoadingReceivedInput::CANCEL_ON_ENTER,
+        DragDropSpringLoadingState::CANCEL, DragDropSpringLoadingState::IDLE, true, SEQUENCE_INIT, false,
+        { false, false }),
 };
 
 testing::AssertionResult DragSpringLoadingTestNg::CheckDragDropSpringLoadingStatus(
@@ -202,14 +220,14 @@ testing::AssertionResult DragSpringLoadingTestNg::CheckDragDropSpringLoadingStat
 }
 
 testing::AssertionResult DragSpringLoadingTestNg::CheckDragDropSpringLoadingNotifySequence(
-    int32_t caseNum, int32_t notifySequence, int32_t expectnotifySequence)
+    int32_t caseNum, int32_t notifySequence, int32_t expectNotifySequence)
 {
-    if (notifySequence == expectnotifySequence) {
+    if (notifySequence == expectNotifySequence) {
         return testing::AssertionSuccess();
     }
     return testing::AssertionFailure() << "TestCaseNum: " << caseNum
                                        << ", actual notifySequence: " << static_cast<int32_t>(notifySequence)
-                                       << ", expect notifySequence: " << static_cast<int32_t>(expectnotifySequence);
+                                       << ", expect notifySequence: " << static_cast<int32_t>(expectNotifySequence);
 }
 
 void DragSpringLoadingTestNg::HandleMoveInput(const DragDropSpringLoadingDetectorTestCase& testCase)
@@ -293,6 +311,37 @@ void HandleDragSpringLoadingCallback(
     }
 }
 
+void DragSpringLoadingTestNg::SetupTestCaseConditions(const DragDropSpringLoadingStateHandler& testCase)
+{
+    auto machine = detector_->stateMachine_;
+    if (testCase.hasCallback) {
+        dropFrameNode_->eventHub_->SetCustomerOnDragSpringLoading(
+            [testCase](
+                const RefPtr<DragSpringLoadingContext>& info) { HandleDragSpringLoadingCallback(info, testCase); });
+    }
+    if ((static_cast<int32_t>(testCase.receivedInput) & DRAG_DROP_SPRING_LOADING_DETECTOR_SET_USERCONFIG) != 0) {
+        auto relatedConfigurations = dropFrameNode_->GetOrCreateDragDropRelatedConfigurations();
+        ASSERT_NE(relatedConfigurations, nullptr);
+        machine->SetUserConfig(relatedConfigurations->GetOrCreateDragSpringLoadingConfiguration());
+    }
+    if (testCase.springLoadingMachineTestCase.transitionFailed) {
+        if (testCase.springLoadingMachineTestCase.isAllowedTransition) {
+            machine->stateMachinePool_->states_[DragDropSpringLoadingState::CANCEL].stateHandler = nullptr;
+        } else {
+            if (testCase.springLoadingMachineTestCase.isAllowedTransitionFind) {
+                machine->stateMachinePool_->states_[testCase.originStatus].transitions.clear();
+            } else {
+                machine->stateMachinePool_->states_.erase(testCase.originStatus);
+            }
+        }
+    } else {
+        if (testCase.originStatus == DragDropSpringLoadingState::END) {
+            machine->stateMachinePool_->states_[testCase.originStatus].transitions.emplace_back(
+                DragDropSpringLoadingState::CANCEL);
+        }
+    }
+}
+
 /**
  * @tc.name: DragSpringLoadingTest001
  * @tc.desc: Test State Machine RegisterStateHandler
@@ -303,7 +352,7 @@ HWTEST_F(DragSpringLoadingTestNg, DragSpringLoadingTest001, TestSize.Level1)
     ASSERT_NE(detector_, nullptr);
     auto smPool = detector_->stateMachine_->stateMachinePool_;
     ASSERT_TRUE(smPool);
-    EXPECT_EQ(smPool->states_.size(), SMPOOL_SIZE);
+    EXPECT_EQ(smPool->states_.size(), SM_POOL_SIZE);
 
     EXPECT_TRUE(smPool->IsAllowedTransition(DragDropSpringLoadingState::IDLE, DragDropSpringLoadingState::BEGIN));
 
@@ -385,25 +434,65 @@ HWTEST_F(DragSpringLoadingTestNg, DragSpringLoadingTest003, TestSize.Level1)
         detector_->preTimeStamp_ = 0;
         machine->currentState_ = testCase.originStatus;
         dropFrameNode_->eventHub_ = AceType::MakeRefPtr<EventHub>();
-        if (testCase.hasCallback) {
-            dropFrameNode_->eventHub_->SetCustomerOnDragSpringLoading(
-                [testCase](
-                    const RefPtr<DragSpringLoadingContext>& info) { HandleDragSpringLoadingCallback(info, testCase); });
+        SetupTestCaseConditions(testCase);
+        auto handler = machine->stateMachinePool_->GetStateHandler(testCase.originStatus);
+        if (testCase.springLoadingMachineTestCase.transitionFailed &&
+            !testCase.springLoadingMachineTestCase.isAllowedTransitionFind) {
+            ASSERT_EQ(handler, nullptr);
+            EXPECT_FALSE(machine->stateMachinePool_->IsAllowedTransition(testCase.originStatus, testCase.expectStatus));
+            caseNum++;
+            continue;
         }
-        if ((static_cast<int32_t>(testCase.receivedInput) & DRAG_DROP_SPRING_LOADING_DETECTOR_SET_USERCONFIG) != 0) {
-            auto relatedConfigurations = dropFrameNode_->GetOrCreateDragDropRelatedConfigurations();
-            ASSERT_NE(relatedConfigurations, nullptr);
-            machine->SetUserConfig(relatedConfigurations->GetOrCreateDragSpringLoadingConfiguration());
-        }
-        if (testCase.transitionFailed) {
-            machine->stateMachinePool_->states_[testCase.originStatus].transitions.clear();
-        }
-        machine->stateMachinePool_->GetStateHandler(testCase.originStatus)->OnEnter(testCase.extraInfo);
+        ASSERT_NE(handler, nullptr);
+        handler->OnEnter(testCase.extraInfo);
         EXPECT_TRUE(DragSpringLoadingTestNg::CheckDragDropSpringLoadingStatus(
             caseNum, machine->currentState_, testCase.expectStatus));
         EXPECT_TRUE(DragSpringLoadingTestNg::CheckDragDropSpringLoadingNotifySequence(
             caseNum, machine->GetCurrentNotifySequence(), testCase.notifySequence));
         caseNum++;
     }
+}
+
+/**
+ * @tc.name: DragSpringLoadingTest004
+ * @tc.desc: Test NotifyMove
+ * @tc.type: FUNC
+ */
+ HWTEST_F(DragSpringLoadingTestNg, DragSpringLoadingTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. initialize detector.
+     */
+    ASSERT_NE(detector_, nullptr);
+    ASSERT_NE(dropFrameNode_, nullptr);
+    ASSERT_NE(dragFrameNode_, nullptr);
+    dropFrameNode_->eventHub_ = AceType::MakeRefPtr<EventHub>();
+    auto machine = detector_->stateMachine_;
+    ASSERT_NE(machine, nullptr);
+    machine->ResetMachine();
+    detector_->ResetState();
+    dragFrameNode_->eventHub_ = AceType::MakeRefPtr<EventHub>();
+    detector_->preTargetFrameNode_ = dropFrameNode_;
+    detector_->preMovePoint_ = Point(0, 0);
+    detector_->preTimeStamp_ = 0;
+    machine->currentState_ = DragDropSpringLoadingState::BEGIN;
+
+    /**
+     * @tc.steps: step2. call NotifyIntercept.
+     */
+    detector_->NotifyIntercept("");
+    EXPECT_EQ(detector_->preTargetFrameNode_, nullptr);
+
+    detector_->preTargetFrameNode_ = dropFrameNode_;
+    detector_->preTargetFrameNode_->eventHub_->SetCustomerOnDragSpringLoading(
+                            [](const RefPtr<DragSpringLoadingContext>& info) { ASSERT_NE(info, nullptr); });
+    machine->stateMachinePool_ = nullptr;
+    detector_->NotifyIntercept("");
+    EXPECT_EQ(machine->currentState_, DragDropSpringLoadingState::IDLE);
+
+    detector_->preTargetFrameNode_ = dropFrameNode_;
+    machine->isWaitingForIdleFinish_ = true;
+    detector_->NotifyIntercept("");
+    EXPECT_FALSE(machine->isWaitingForIdleFinish_);
 }
 } // namespace OHOS::Ace::NG

@@ -3441,7 +3441,7 @@ void SwiperPattern::HandleDragUpdate(const GestureEvent& info)
 
     ScrollResult result = HandleScroll(static_cast<float>(mainDelta),
         SCROLL_FROM_UPDATE, NestedState::GESTURE, velocity);
-    if (!result.reachEdge || (result.reachEdge && GetEdgeEffect() == EdgeEffect::SPRING
+    if (!result.reachEdge || (result.reachEdge && GetEdgeEffect() == EdgeEffect::SPRING && !NearZero(mainDelta, 0.0)
         && CheckContentWillScroll(mainDelta, mainDelta))) {
         FireScrollStateEvent(ScrollState::SCROLL);
     }
@@ -4333,7 +4333,7 @@ bool SwiperPattern::AccumulatingTerminateHelper(
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    if (!host->GetScrollableAxisSensitive()) {
+    if (host->IsScrollableAxisInsensitive()) {
         return false;
     }
     auto expandFromSwiper = host->GetAccumulatedSafeAreaExpand(
@@ -7752,5 +7752,17 @@ void SwiperPattern::OnColorModeChange(uint32_t colorMode)
     }
     InitArrow();
     swiperNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void SwiperPattern::OnFontScaleConfigurationUpdate()
+{
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddAfterReloadAnimationTask([weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetMainSizeIsMeasured(false);
+        pattern->MarkDirtyNodeSelf();
+    });
 }
 } // namespace OHOS::Ace::NG

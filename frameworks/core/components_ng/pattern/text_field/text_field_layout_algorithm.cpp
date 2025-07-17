@@ -75,7 +75,7 @@ void TextFieldLayoutAlgorithm::ConstructTextStyles(
     auto isInlineStyle = pattern->IsNormalInlineState();
     auto isTextArea = pattern->IsTextArea();
     UpdateTextStyleFontScale(textFieldLayoutProperty, textStyle, pattern);
-    auto autofillController = pattern->GetAutoFillController();
+    auto autofillController = pattern->GetOrCreateAutoFillController();
     CHECK_NULL_VOID(autofillController);
     auto autoFillAnimationStatus = autofillController->GetAutoFillAnimationStatus();
     if (autoFillAnimationStatus != AutoFillAnimationStatus::INIT) {
@@ -1312,7 +1312,7 @@ void TextFieldLayoutAlgorithm::CalculateContentMaxSizeWithPolicy(
     if (widthLayoutPolicy == LayoutCalPolicy::FIX_AT_IDEAL_SIZE) {
         maxIdealSize.SetWidth(std::numeric_limits<double>::infinity());
     } else if (widthLayoutPolicy == LayoutCalPolicy::MATCH_PARENT) {
-        maxIdealSize.SetWidth(contentConstraint.parentIdealSize.Width().value_or(0.0f));
+        maxIdealSize.SetWidth(contentConstraint.parentIdealSize.Width().value_or(contentConstraint.maxSize.Width()));
         contentConstraint.selfIdealSize.SetWidth(maxIdealSize.Width());
     }
     auto heightLayoutPolicy = TextBase::GetLayoutCalPolicy(layoutWrapper, false);
@@ -1320,7 +1320,7 @@ void TextFieldLayoutAlgorithm::CalculateContentMaxSizeWithPolicy(
         heightLayoutPolicy == LayoutCalPolicy::FIX_AT_IDEAL_SIZE) {
         maxIdealSize.SetHeight(std::numeric_limits<double>::infinity());
     } else if (heightLayoutPolicy == LayoutCalPolicy::MATCH_PARENT) {
-        maxIdealSize.SetHeight(contentConstraint.parentIdealSize.Height().value_or(0.0f));
+        maxIdealSize.SetHeight(contentConstraint.parentIdealSize.Height().value_or(contentConstraint.maxSize.Height()));
         contentConstraint.selfIdealSize.SetHeight(maxIdealSize.Height());
     }
 }

@@ -427,9 +427,10 @@ ExpandEdges LayoutWrapper::GetAccumulatedSafeAreaExpand(
     StartPoint startPoint = StartPoint::NORMAL;
     if (strategy == IgnoreStrategy::FROM_MARGIN) {
         startPoint = StartPoint::FROM_MARGIN;
-    } else if (strategy == IgnoreStrategy::SCROLLABLE_AXIS) {
+    } else if (strategy == IgnoreStrategy::AXIS_INSENSITIVE) {
         isScrollableAxis_ = true;
-        auto sae = FilterEdges(GetAccumulatedSafeAreaExpandForAllEdges(startPoint, options.type), options.edges);
+        auto sae = FilterEdges(GetAccumulatedSafeAreaExpandForAllEdges(
+            includingSelf ? StartPoint::INCLUDING_SELF : startPoint, options.type), options.edges);
         isScrollableAxis_ = false;
         return sae;
     } else if (includingSelf) {
@@ -459,7 +460,7 @@ ExpandEdges LayoutWrapper::GetAccumulatedSafeAreaExpandForAllEdges(StartPoint st
     }
     // CreateMargin does get or create
     auto hostMargin = layoutProperty->CreateMargin();
-    if (hostMargin.AllSidesFilled(true)) {
+    if (startPoint != StartPoint::FROM_MARGIN && hostMargin.AllSidesFilled(true)) {
         return totalExpand;
     }
     // total expanding distance of four sides used to calculate cache
@@ -550,7 +551,7 @@ void LayoutWrapper::GetAccumulatedSafeAreaExpandHelper(
     auto innerSpace = layoutProperty->CreatePaddingAndBorder(false, false);
 
     auto pattern = recursiveHost->GetPattern();
-    if (isScrollableAxis_ && pattern && pattern->NeedCustomizeSafeAreaPadding()) {
+    if (!isScrollableAxis_ && pattern && pattern->NeedCustomizeSafeAreaPadding()) {
         innerSpace.Plus(pattern->CustomizeSafeAreaPadding(safeAreaPadding, true), true);
         safeAreaPadding = pattern->CustomizeSafeAreaPadding(safeAreaPadding, false);
     }
@@ -739,7 +740,9 @@ void LayoutWrapper::ApplyConstraint(LayoutConstraintF constraint)
         if (layoutProperty->GetCalcLayoutConstraint()) {
             idealSize = layoutProperty->GetCalcLayoutConstraint()->selfIdealSize;
         }
-        auto greaterThanApiTen = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN);
+        auto host = GetHostNode();
+        auto greaterThanApiTen = host ? host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TEN)
+                                      : Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN);
         constraint.ApplyAspectRatio(magicItemProperty.GetAspectRatioValue(), idealSize, greaterThanApiTen);
     }
 

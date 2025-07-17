@@ -175,15 +175,14 @@ float WaterFlowLayoutUtils::MeasureFooter(LayoutWrapper* wrapper, Axis axis)
 {
     auto footer = wrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_RETURN(footer, 0.0f);
-    if (footer->GetTotalChildCount() == 0) {
-        return 0.0f;
-    }
     auto layoutProperty = wrapper->GetLayoutProperty();
     auto footerConstraint = layoutProperty->CreateChildConstraint();
     footer->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_CONTENT);
     footer->Measure(footerConstraint);
     auto itemSize = footer->GetGeometryNode()->GetMarginFrameSize();
-    return GetMainAxisSize(itemSize, axis);
+    auto footerSize = GetMainAxisSize(itemSize, axis);
+
+    return std::max(footerSize, 0.0f);
 }
 
 float WaterFlowLayoutUtils::GetUserDefHeight(const RefPtr<WaterFlowSections>& sections, int32_t seg, int32_t idx)

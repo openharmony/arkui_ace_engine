@@ -170,6 +170,9 @@ RichEditorPattern::RichEditorPattern(bool isStyledStringMode) :
     floatingCaretState_.UpdateOriginCaretColor(GetDisplayColorMode());
     undoManager_ = RichEditorUndoManager::Create(isSpanStringMode_, WeakClaim(this));
     styleManager_ = std::make_unique<StyleManager>(WeakClaim(this));
+    if (!dataDetectorAdapter_) {
+        dataDetectorAdapter_ = MakeRefPtr<DataDetectorAdapter>();
+    }
 }
 
 RichEditorPattern::~RichEditorPattern()
@@ -3507,6 +3510,32 @@ bool RichEditorPattern::ClickAISpan(const PointF& textOffset, const AISpan& aiSp
         }
     }
     return false;
+}
+
+RefPtr<FrameNode> RichEditorPattern::CreateAIEntityMenu()
+{
+    CHECK_NULL_RETURN(dataDetectorAdapter_ && IsAiSelected(), nullptr);
+    auto aiSpan = dataDetectorAdapter_->aiSpanMap_.find(textSelector_.aiStart.value());
+    if (aiSpan == dataDetectorAdapter_->aiSpanMap_.end()) {
+        return nullptr;
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+
+    auto showSelectOverlayFunc = [weak = WeakClaim(this)](const RectF& firstHandle, const RectF& secondHandle) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetCaretPosition(pattern->textSelector_.destinationOffset);
+        auto focusHub = pattern->GetFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->RequestFocusImmediately();
+        IF_TRUE(!pattern->isEditing_, pattern->CloseKeyboard(true));
+        pattern->ShowSelectOverlay(firstHandle, secondHandle);
+    };
+
+    SetOnClickMenu(aiSpan->second, nullptr, showSelectOverlayFunc);
+    auto [isShowCopy, isShowSelectText] = GetCopyAndSelectable();
+    return dataDetectorAdapter_->CreateAIEntityMenu(aiSpan->second, host, { isShowCopy, isShowSelectText });
 }
 
 void RichEditorPattern::AdjustAIEntityRect(RectF& aiRect)
@@ -8157,9 +8186,7 @@ void RichEditorPattern::HandleMouseLeftButtonRelease(const MouseInfo& info)
         ShowSelectOverlay(RectF(), RectF(), false, TextResponseType::SELECTED_BY_MOUSE);
     }
     isMousePressed_ = false;
-    if (HasFocus()) {
-        HandleOnEditChanged(true);
-    }
+    RequestKeyboardToEdit();
 }
 
 void RichEditorPattern::HandleMouseLeftButton(const MouseInfo& info)
@@ -8854,10 +8881,14 @@ bool RichEditorPattern::CheckAIPreviewMenuEnable()
            copyOption_ != CopyOptions::None;
 }
 
-void RichEditorPattern::InitAiSelection(const Offset& globalOffset)
+void RichEditorPattern::InitAiSelection(const Offset& globalOffset, bool isBetweenSelection)
 {
     ResetAISelected(AIResetSelectionReason::INIT_SELECTION);
     CHECK_NULL_VOID(CheckAIPreviewMenuEnable());
+    if (showSelect_ && isBetweenSelection) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "no need for InitAiSelection");
+        return;
+    }
     int32_t extend = 0;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -8890,8 +8921,9 @@ std::function<void(Offset)> RichEditorPattern::GetThumbnailCallback()
     return [wk = WeakClaim(this)](const Offset& point) {
         auto pattern = wk.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->InitAiSelection(point);
-        if (!pattern->BetweenSelectedPosition(point) && !pattern->IsAiSelected()) {
+        auto isBetweenSelection = pattern->BetweenSelectedPosition(point);
+        pattern->InitAiSelection(point, isBetweenSelection);
+        if (!isBetweenSelection && !pattern->IsAiSelected()) {
             return;
         }
         auto isContentDraggable = pattern->JudgeContentDraggable();

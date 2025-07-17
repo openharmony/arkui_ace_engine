@@ -658,6 +658,7 @@ public:
     std::u16string DeleteForwardOperation(int32_t length, bool isIME = true);
     void SetInputMethodStatus(bool keyboardShown) override;
     bool ClickAISpan(const PointF& textOffset, const AISpan& aiSpan) override;
+    RefPtr<FrameNode> CreateAIEntityMenu() override;
     void AdjustAIEntityRect(RectF& aiRect) override;
     WindowMode GetWindowMode();
     bool GetIsMidScene();
@@ -907,7 +908,7 @@ public:
     bool IsHandlesShow() override;
     void CopySelectionMenuParams(SelectOverlayInfo& selectInfo, TextResponseType responseType);
     std::function<void(Offset)> GetThumbnailCallback() override;
-    void InitAiSelection(const Offset& globalOffset);
+    void InitAiSelection(const Offset& globalOffset, bool isBetweenSelection = false);
     bool CheckAIPreviewMenuEnable();
     void CreateDragNode();
     float GetMaxSelectedWidth();

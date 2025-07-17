@@ -1212,7 +1212,6 @@ void ScrollablePattern::SetScrollBar(const std::unique_ptr<ScrollBarProperty>& p
                 scrollBar_->FlushBarWidth();
             }
         }
-        scrollBar_->MarkNeedRender();
     }
 }
 
@@ -2532,9 +2531,6 @@ ScrollResult ScrollablePattern::HandleScroll(float offset, int32_t source, Neste
         static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
     UpdateNestedScrollVelocity(offset, state);
     bool moved = HandleScrollImpl(offset, source);
-    if (!moved && source == SCROLL_FROM_AXIS) {
-        SetScrollableCurrentPos(-GetTotalOffset());
-    }
     NotifyMoved(moved);
     return result;
 }
@@ -4507,7 +4503,7 @@ bool ScrollablePattern::AccumulatingTerminateHelper(
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    if (!host->GetScrollableAxisSensitive()) {
+    if (host->IsScrollableAxisInsensitive()) {
         return false;
     }
     auto expandFromList = host->GetAccumulatedSafeAreaExpand(false,

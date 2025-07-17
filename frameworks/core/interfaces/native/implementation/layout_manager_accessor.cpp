@@ -41,7 +41,7 @@ Ark_Number GetLineCountImpl(Ark_LayoutManager peer)
     CHECK_NULL_RETURN(peer, errValue);
     auto handler = peer->handler.Upgrade();
     CHECK_NULL_RETURN(handler, errValue);
-    int32_t count = handler->GetLineCount();
+    int32_t count = static_cast<int32_t>(handler->GetLineCount());
     return Converter::ArkValue<Ark_Number>(count);
 }
 Ark_PositionWithAffinity GetGlyphPositionAtCoordinateImpl(Ark_LayoutManager peer,

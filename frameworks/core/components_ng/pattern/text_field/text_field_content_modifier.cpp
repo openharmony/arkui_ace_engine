@@ -62,7 +62,7 @@ void TextFieldContentModifier::onDraw(DrawingContext& context)
     CHECK_NULL_VOID(textFieldPattern);
     auto paragraph = textFieldPattern->GetParagraph();
     CHECK_NULL_VOID(paragraph);
-    auto autofillController = textFieldPattern->GetAutoFillController();
+    auto autofillController = textFieldPattern->GetOrCreateAutoFillController();
     CHECK_NULL_VOID(autofillController);
     auto autoFillAnimationStatus = autofillController->GetAutoFillAnimationStatus();
     if (autoFillAnimationStatus != AutoFillAnimationStatus::INIT) {
@@ -734,7 +734,7 @@ void TextFieldContentModifier::DoAutoFillDraw(DrawingContext& context)
     auto& canvas = context.canvas;
     auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textFieldPattern);
-    auto autoFillController = textFieldPattern->GetAutoFillController();
+    auto autoFillController = textFieldPattern->GetOrCreateAutoFillController();
     CHECK_NULL_VOID(autoFillController);
     auto paragraph = autoFillController->GetAutoFillParagraph();
     CHECK_NULL_VOID(paragraph);

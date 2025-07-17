@@ -1866,7 +1866,7 @@ HWTEST_F(SelectOverlayManagerTestNg, CloseInternalTest002, TestSize.Level1)
 HWTEST_F(SelectOverlayManagerTestNg, CloseInternalTest003, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. CloseInternal
+     * @tc.steps: step1. CloseInternal.
      */
     Init();
     auto content = SelectContentOverlayManager(root_);

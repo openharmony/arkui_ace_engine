@@ -52,6 +52,10 @@ public:
     void SetColorMode(ColorMode colorMode)
     {
         colorMode_ = colorMode;
+        auto colors = IsDark() ? darkColors_ : colors_;
+        if (colors) {
+            colors->SetColorMode(colorMode);
+        }
     }
 
     ColorMode GetColorMode() const
@@ -66,17 +70,27 @@ public:
 
     void SetResObjs(std::vector<RefPtr<ResourceObject>>&& resObjs)
     {
-        resObjs_ = std::move(resObjs);
+        if (colors_) {
+            colors_->SetResObjs(std::move(resObjs));
+        }
     }
 
     void SetDarkResObjs(std::vector<RefPtr<ResourceObject>>&& darkResObjs)
     {
-        darkResObjs_ = std::move(darkResObjs);
+        if (darkColors_) {
+            darkColors_->SetResObjs(std::move(darkResObjs));
+        }
     }
 
     const std::vector<RefPtr<ResourceObject>>& GetResObjs() const
     {
-        return IsDark() ? darkResObjs_ : resObjs_;
+        static std::vector<RefPtr<ResourceObject>> resObjs = {};
+        if (IsDark() && darkColors_) {
+            resObjs = darkColors_->GetResObjs();
+        } else if (!IsDark() && colors_) {
+            resObjs = colors_->GetResObjs();
+        }
+        return resObjs;
     }
 
     static bool IsDarkMode();
@@ -85,8 +99,6 @@ private:
     int32_t id_ { 0 };
     RefPtr<TokenColors> colors_;
     RefPtr<TokenColors> darkColors_;
-    std::vector<RefPtr<ResourceObject>> resObjs_;
-    std::vector<RefPtr<ResourceObject>> darkResObjs_;
     ColorMode colorMode_ = ColorMode::COLOR_MODE_UNDEFINED;
     bool IsDark() const
     {

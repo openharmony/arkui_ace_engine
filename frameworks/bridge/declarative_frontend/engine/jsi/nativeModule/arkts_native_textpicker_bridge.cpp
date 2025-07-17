@@ -526,9 +526,12 @@ ArkUINativeModuleValue TextPickerBridge::SetDivider(ArkUIRuntimeCallInfo* runtim
     if (ParseDividerDimension(vm, dividerStrokeWidthArgs, dividerStrokeWidth, strokeWidthResObj)) {
         dividerStrokeWidth = pickerTheme ? pickerTheme->GetDividerThickness() : 0.0_vp;
     }
+
+    ArkUI_Bool isDefaultColor = false;
     auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
     if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, colorObj, colorResObj, nodeInfo)) {
         colorObj = pickerTheme ? pickerTheme->GetDividerColor() : Color::TRANSPARENT;
+        isDefaultColor = true;
     }
     if (ParseDividerDimension(vm, dividerStartMarginArgs, dividerStartMargin, startMarginResObj)) {
         dividerStartMargin = 0.0_vp;
@@ -548,7 +551,7 @@ ArkUINativeModuleValue TextPickerBridge::SetDivider(ArkUIRuntimeCallInfo* runtim
     dividerResObjStr.startMarginRawPtr = AceType::RawPtr(startMarginResObj);
     dividerResObjStr.endMarginRawPtr = AceType::RawPtr(endMarginResObj);
     GetArkUINodeModifiers()->getTextPickerModifier()->setTextPickerDividerWithResObj(
-        nativeNode, colorObj.GetValue(), values, units, size, &dividerResObjStr);
+        nativeNode, colorObj.GetValue(), values, units, size, &dividerResObjStr, isDefaultColor);
     return panda::JSValueRef::Undefined(vm);
 }
 

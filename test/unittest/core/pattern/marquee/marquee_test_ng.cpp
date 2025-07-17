@@ -33,6 +33,7 @@
 #include "core/components/theme/theme_manager_impl.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/marquee/marquee_layout_algorithm.h"
 #include "core/components_ng/pattern/marquee/marquee_layout_property.h"
 #include "core/components_ng/pattern/marquee/marquee_model_ng.h"
 #include "core/components_ng/pattern/marquee/marquee_paint_property.h"
@@ -1901,5 +1902,242 @@ HWTEST_F(MarqueeTestNg, OnFontScaleConfigurationUpdate_001, TestSize.Level1)
     MarqueePattern marqueeModel;
     marqueeModel.OnFontScaleConfigurationUpdate();
     EXPECT_FALSE(AnimationUtils::IsImplicitAnimationOpen());
+}
+
+/**
+ * @tc.name: MeasureWithLayoutPolicy
+ * @tc.desc: When marquee's width and height set layout policy, check the child's position and self framesize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueeTestNg, MeasureWithLayoutPolicy, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create and get marquee frameNode.
+     */
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::MARQUEE_ETS_TAG, 1, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
+    frameNode->MarkDirtyNode();
+
+    /**
+     * @tc.steps: step2. create marquee layoutWrapper and set marquee layoutAlgorithm.
+     * @tc.expected: step2. related function is called.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto pattern = frameNode->GetPattern<MarqueePattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto marqueeLayoutAlgorithm = AceType::DynamicCast<MarqueeLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    ASSERT_NE(marqueeLayoutAlgorithm, nullptr);
+    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(marqueeLayoutAlgorithm));
+
+    /**
+     * @tc.steps: step3. create and get marquee children frameNode.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+
+    /**
+     * @tc.steps: step4. create marquee layoutWrapper.
+     * @tc.expected: step4. related function is called.
+     */
+    RefPtr<GeometryNode> textGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(textGeometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> const textLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, textGeometryNode, textFrameNode->GetLayoutProperty());
+    ASSERT_NE(textLayoutWrapper, nullptr);
+    textGeometryNode->SetFrameWidth(200.0f);
+    textGeometryNode->SetFrameHeight(200.0f);
+    /**
+     * @tc.steps: step5. marquee frameNode and layoutWrapper need to add child.
+     */
+    frameNode->AddChild(textFrameNode);
+    layoutWrapper.AppendChild(textLayoutWrapper);
+
+    /**
+     * @tc.steps: step6. call the MeasureWithLayoutPolicy.
+     */
+    OptionalSizeF optionalSize;
+    marqueeLayoutAlgorithm->MeasureWithLayoutPolicy(&layoutWrapper, textLayoutWrapper, optionalSize);
+    EXPECT_FALSE(optionalSize.IsValid());
+    frameNode->GetLayoutProperty()->layoutConstraint_ = LayoutConstraintF();
+    frameNode->GetLayoutProperty()->UpdateLayoutPolicyProperty(LayoutCalPolicy::WRAP_CONTENT, true);
+    marqueeLayoutAlgorithm->MeasureWithLayoutPolicy(&layoutWrapper, textLayoutWrapper, optionalSize);
+    ASSERT_NE(optionalSize.Width(), std::nullopt);
+    EXPECT_EQ(optionalSize.Width().value(), 200.0f);
+    frameNode->GetLayoutProperty()->UpdateLayoutPolicyProperty(LayoutCalPolicy::WRAP_CONTENT, false);
+    marqueeLayoutAlgorithm->MeasureWithLayoutPolicy(&layoutWrapper, textLayoutWrapper, optionalSize);
+    ASSERT_NE(optionalSize.Height(), std::nullopt);
+    EXPECT_EQ(optionalSize.Height().value(), 200.0f);
+}
+
+/**
+ * @tc.name: HandleWidthConstraint
+ * @tc.desc: HandleWidthConstraint.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueeTestNg, HandleWidthConstraint, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create and get marquee frameNode.
+     */
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::MARQUEE_ETS_TAG, 1, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
+    frameNode->MarkDirtyNode();
+
+    /**
+     * @tc.steps: step2. create marquee layoutWrapper and set marquee layoutAlgorithm.
+     * @tc.expected: step2. related function is called.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto pattern = frameNode->GetPattern<MarqueePattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto marqueeLayoutAlgorithm = AceType::DynamicCast<MarqueeLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    ASSERT_NE(marqueeLayoutAlgorithm, nullptr);
+    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(marqueeLayoutAlgorithm));
+
+    /**
+     * @tc.steps: step3. create and get marquee children frameNode.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+
+    /**
+     * @tc.steps: step4. create marquee layoutWrapper.
+     * @tc.expected: step4. related function is called.
+     */
+    RefPtr<GeometryNode> textGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(textGeometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> const textLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, textGeometryNode, textFrameNode->GetLayoutProperty());
+    ASSERT_NE(textLayoutWrapper, nullptr);
+    /**
+     * @tc.steps: step5. marquee frameNode and layoutWrapper need to add child.
+     */
+    frameNode->AddChild(textFrameNode);
+    layoutWrapper.AppendChild(textLayoutWrapper);
+
+    /**
+     * @tc.steps: step6. call the HandleWidthConstraint.
+     */
+    MeasureCalculationContext calcContext { .layoutProperty = frameNode->GetLayoutProperty(),
+        .layoutConstraint = LayoutConstraintF(),
+        .optionalSize = OptionalSizeF() };
+    calcContext.layoutConstraint.selfIdealSize.SetWidth(50.0f);
+    marqueeLayoutAlgorithm->HandleWidthConstraint(LayoutCalPolicy::WRAP_CONTENT, 100.0f, calcContext);
+    EXPECT_FALSE(calcContext.optionalSize.Width());
+
+    calcContext.layoutConstraint.selfIdealSize.Reset();
+    marqueeLayoutAlgorithm->HandleWidthConstraint(LayoutCalPolicy::WRAP_CONTENT, 100.0f, calcContext);
+    ASSERT_NE(calcContext.optionalSize.Width(), std::nullopt);
+    EXPECT_EQ(calcContext.optionalSize.Width().value(), 100.0f);
+
+    calcContext.optionalSize.Reset();
+    marqueeLayoutAlgorithm->HandleWidthConstraint(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, 100.0f, calcContext);
+    ASSERT_NE(calcContext.optionalSize.Width(), std::nullopt);
+    EXPECT_EQ(calcContext.optionalSize.Width().value(), 100.0f);
+    EXPECT_EQ(calcContext.layoutConstraint.maxSize.Width(), Infinity<float>());
+
+    calcContext.optionalSize.Reset();
+    CalcSize calcSize;
+    calcSize.SetWidth(CalcLength(200.0f, DimensionUnit::VP));
+    calcContext.layoutProperty->UpdateCalcMaxSize(calcSize);
+    calcContext.layoutConstraint.maxSize.SetWidth(500.0f);
+    marqueeLayoutAlgorithm->HandleWidthConstraint(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, 100.0f, calcContext);
+    ASSERT_NE(calcContext.optionalSize.Width(), std::nullopt);
+    EXPECT_EQ(calcContext.optionalSize.Width().value(), 100.0f);
+    EXPECT_EQ(calcContext.layoutConstraint.maxSize.Width(), 500.0f);
+
+    calcContext.layoutConstraint.parentIdealSize.SetWidth(1000.0f);
+    marqueeLayoutAlgorithm->HandleWidthConstraint(LayoutCalPolicy::MATCH_PARENT, 100.0f, calcContext);
+    ASSERT_NE(calcContext.optionalSize.Width(), std::nullopt);
+    EXPECT_EQ(calcContext.optionalSize.Width().value(), 1000.0f);
+}
+
+/**
+ * @tc.name: HandleHeightConstraint
+ * @tc.desc: HandleHeightConstraint.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueeTestNg, HandleHeightConstraint, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create and get marquee frameNode.
+     */
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::MARQUEE_ETS_TAG, 1, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
+    frameNode->MarkDirtyNode();
+
+    /**
+     * @tc.steps: step2. create marquee layoutWrapper and set marquee layoutAlgorithm.
+     * @tc.expected: step2. related function is called.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto pattern = frameNode->GetPattern<MarqueePattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto marqueeLayoutAlgorithm = AceType::DynamicCast<MarqueeLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    ASSERT_NE(marqueeLayoutAlgorithm, nullptr);
+    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(marqueeLayoutAlgorithm));
+
+    /**
+     * @tc.steps: step3. create and get marquee children frameNode.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+
+    /**
+     * @tc.steps: step4. create marquee layoutWrapper.
+     * @tc.expected: step4. related function is called.
+     */
+    RefPtr<GeometryNode> textGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(textGeometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> const textLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, textGeometryNode, textFrameNode->GetLayoutProperty());
+    ASSERT_NE(textLayoutWrapper, nullptr);
+    /**
+     * @tc.steps: step5. marquee frameNode and layoutWrapper need to add child.
+     */
+    frameNode->AddChild(textFrameNode);
+    layoutWrapper.AppendChild(textLayoutWrapper);
+
+    /**
+     * @tc.steps: step6. call the HandleHeightConstraint.
+     */
+    MeasureCalculationContext calcContext { .layoutProperty = frameNode->GetLayoutProperty(),
+        .layoutConstraint = LayoutConstraintF(),
+        .optionalSize = OptionalSizeF() };
+    calcContext.layoutConstraint.selfIdealSize.SetHeight(50.0f);
+    marqueeLayoutAlgorithm->HandleHeightConstraint(LayoutCalPolicy::WRAP_CONTENT, 100.0f, calcContext);
+    EXPECT_FALSE(calcContext.optionalSize.Height());
+
+    calcContext.layoutConstraint.selfIdealSize.Reset();
+    marqueeLayoutAlgorithm->HandleHeightConstraint(LayoutCalPolicy::WRAP_CONTENT, 100.0f, calcContext);
+    ASSERT_NE(calcContext.optionalSize.Height(), std::nullopt);
+    EXPECT_EQ(calcContext.optionalSize.Height().value(), 100.0f);
+
+    calcContext.optionalSize.Reset();
+    marqueeLayoutAlgorithm->HandleHeightConstraint(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, 100.0f, calcContext);
+    ASSERT_NE(calcContext.optionalSize.Height(), std::nullopt);
+    EXPECT_EQ(calcContext.optionalSize.Height().value(), 100.0f);
+    EXPECT_EQ(calcContext.layoutConstraint.maxSize.Height(), Infinity<float>());
+
+    calcContext.optionalSize.Reset();
+    CalcSize calcSize;
+    calcSize.SetHeight(CalcLength(200.0f, DimensionUnit::VP));
+    calcContext.layoutProperty->UpdateCalcMaxSize(calcSize);
+    calcContext.layoutConstraint.maxSize.SetHeight(500.0f);
+    marqueeLayoutAlgorithm->HandleHeightConstraint(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, 100.0f, calcContext);
+    ASSERT_NE(calcContext.optionalSize.Height(), std::nullopt);
+    EXPECT_EQ(calcContext.optionalSize.Height().value(), 100.0f);
+    EXPECT_EQ(calcContext.layoutConstraint.maxSize.Height(), 500.0f);
+
+    calcContext.layoutConstraint.parentIdealSize.SetHeight(1000.0f);
+    marqueeLayoutAlgorithm->HandleHeightConstraint(LayoutCalPolicy::MATCH_PARENT, 100.0f, calcContext);
+    ASSERT_NE(calcContext.optionalSize.Height(), std::nullopt);
+    EXPECT_EQ(calcContext.optionalSize.Height().value(), 1000.0f);
 }
 } // namespace OHOS::Ace::NG

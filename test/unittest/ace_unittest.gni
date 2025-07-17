@@ -120,6 +120,8 @@ template("ace_unittest") {
       module_out_path = "ace_engine/ace_engine/${module_output}"
       if (ace_unittest_name == "display_sync_manager_test_ng") {
         module_out_path = "ace_engine/Graphic_2d_LTPO_DisplaySync/${module_output}"
+      } else if (ace_unittest_name == "window_scene_test") {
+        module_out_path = "ace_engine/window_manager/${module_output}"
       }
       sources = []
       sources += invoker.sources

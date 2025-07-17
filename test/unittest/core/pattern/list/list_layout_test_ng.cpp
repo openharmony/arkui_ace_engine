@@ -3165,4 +3165,44 @@ HWTEST_F(ListLayoutTestNg, LayoutPolicyTest001, TestSize.Level1)
     EXPECT_EQ(size, SizeF(500.0f, 300.0f));
     EXPECT_EQ(offset, OffsetF(0.0f, 0.0f));
 }
+
+/**
+ * @tc.name: LayoutPolicyTest001
+ * @tc.desc: test the measure result when setting matchParent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, LayoutPolicyTestWithIgnore001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create default list
+     */
+    RefPtr<FrameNode> list;
+    auto column = CreateColumn([this, &list](ColumnModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(500));
+        ViewAbstract::SetHeight(CalcLength(300));
+        ViewAbstract::SetSafeAreaPadding(CalcLength(10.0f, DimensionUnit::PX));
+        ListModelNG listModel;
+        listModel.Create();
+        ViewAbstractModelNG model1;
+        model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+        model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+        RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
+        ViewStackProcessor::GetInstance()->PopContainer();
+        list = AceType::DynamicCast<FrameNode>(element);
+    });
+    ASSERT_NE(column, nullptr);
+    ASSERT_EQ(column->GetChildren().size(), 1);
+    CreateLayoutTask(column);
+
+    IgnoreLayoutSafeAreaOpts opts = {.type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM, .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL};
+    list->GetLayoutProperty()->UpdateIgnoreLayoutSafeAreaOpts(opts);
+
+    // Expect list's width is 500, height is 300 land offset is [0.0, 0.0].
+    auto geometryNode = list->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto size = geometryNode->GetFrameSize();
+    auto offset = geometryNode->GetFrameOffset();
+    EXPECT_EQ(size, SizeF(500.0f, 300.0f));
+    EXPECT_EQ(offset, OffsetF(0.0f, 10.0f));
+}
 } // namespace OHOS::Ace::NG

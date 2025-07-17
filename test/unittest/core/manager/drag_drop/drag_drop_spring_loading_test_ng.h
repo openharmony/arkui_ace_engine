@@ -32,11 +32,11 @@ enum class DragDropSpringLoadingReceivedInput {
     NOTIFY_INTERCEPT = 1 << 1,
     THRESHOLD = 1 << 2,
     INTERCEPT = 1 << 3,
-    BEGIN_ONENTER = 1 << 4,
-    UPDATE_ONENTER = 1 << 5,
-    END_ONENTER = 1 << 6,
-    CANCEL_ONENTER = 1 << 7,
-    IDLE_ONENTER = 1 << 8,
+    BEGIN_ON_ENTER = 1 << 4,
+    UPDATE_ON_ENTER = 1 << 5,
+    END_ON_ENTER = 1 << 6,
+    CANCEL_ON_ENTER = 1 << 7,
+    IDLE_ON_ENTER = 1 << 8,
 };
 
 constexpr int32_t DRAG_DROP_SPRING_LOADING_DETECTOR_SET_USERCONFIG = 240;
@@ -56,6 +56,17 @@ struct SpringLoadingPreInfoTestCase {
 
     SpringLoadingPreInfoTestCase(bool hasPreTimeStamp, bool hasPreMovePoint)
         : hasPreTimeStamp(hasPreTimeStamp), hasPreMovePoint(hasPreMovePoint)
+    {}
+};
+
+struct SpringLoadingMachineTestCase {
+    bool transitionFailed = false;
+    bool isAllowedTransition = false;
+    bool isAllowedTransitionFind = true;
+
+    SpringLoadingMachineTestCase(bool transitionFailed, bool isAllowedTransition, bool isAllowedTransitionFind = true)
+        : transitionFailed(transitionFailed), isAllowedTransition(isAllowedTransition),
+          isAllowedTransitionFind(isAllowedTransitionFind)
     {}
 };
 
@@ -95,14 +106,15 @@ struct DragDropSpringLoadingDetectorTestCase : public DragDropSpringLoadingState
 struct DragDropSpringLoadingStateHandler : public DragDropSpringLoadingStateTestCase {
     int32_t notifySequence = 0;
     bool abort = false;
-    bool transitionFailed = false;
+    SpringLoadingMachineTestCase springLoadingMachineTestCase = { false, false };
     int32_t updateNotifyCount = DEFAULT_UPDATE_NOTIFY_COUNT;
     DragDropSpringLoadingStateHandler(DragDropSpringLoadingReceivedInput receivedInput,
         DragDropSpringLoadingState originStatus, DragDropSpringLoadingState expectStatus, bool hasCallback,
-        int32_t notifySequence, bool abort = false, bool transitionFailed = false,
+        int32_t notifySequence, bool abort = false,
+        SpringLoadingMachineTestCase springLoadingMachineTestCase = { false, false },
         int32_t updateNotifyCount = DEFAULT_UPDATE_NOTIFY_COUNT)
         : DragDropSpringLoadingStateTestCase(receivedInput, originStatus, expectStatus, hasCallback),
-          notifySequence(notifySequence), abort(abort), transitionFailed(transitionFailed),
+          notifySequence(notifySequence), abort(abort), springLoadingMachineTestCase(springLoadingMachineTestCase),
           updateNotifyCount(updateNotifyCount)
     {}
 };
@@ -123,11 +135,12 @@ protected:
     static testing::AssertionResult CheckDragDropSpringLoadingStatus(
         int32_t caseNum, DragDropSpringLoadingState dragStatus, DragDropSpringLoadingState expectStatus);
     static testing::AssertionResult CheckDragDropSpringLoadingNotifySequence(
-        int32_t caseNum, int32_t notifySequence, int32_t expectnotifySequence);
+        int32_t caseNum, int32_t notifySequence, int32_t expectNotifySequence);
 
     void HandleMoveInput(const DragDropSpringLoadingDetectorTestCase& testCase);
     void HandleNotifyInterceptInput(const DragDropSpringLoadingDetectorTestCase& testCase);
     void HandleThresholdInput(const DragDropSpringLoadingDetectorTestCase& testCase);
+    void SetupTestCaseConditions(const DragDropSpringLoadingStateHandler& testCase);
 };
 } // namespace OHOS::Ace::NG
 #endif

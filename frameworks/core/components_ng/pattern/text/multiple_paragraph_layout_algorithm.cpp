@@ -85,6 +85,7 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     auto textTheme = pipeline->GetTheme<TextTheme>(themeScopeId);
     CHECK_NULL_VOID(textTheme);
     CreateTextStyleUsingTheme(textLayoutProperty, textTheme, textStyle, frameNode->GetTag() == V2::SYMBOL_ETS_TAG);
+    textStyle.SetSymbolType(textLayoutProperty->GetSymbolTypeValue(SymbolType::SYSTEM));
     std::vector<std::string> fontFamilies;
     auto fontManager = pipeline->GetFontManager();
     if (fontManager && !(fontManager->GetAppCustomFont().empty()) &&
@@ -99,6 +100,7 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
         fontFamilies = textLayoutProperty->GetFontFamilyValue(defaultFontFamily);
     }
     UpdateFontFamilyWithSymbol(textStyle, fontFamilies, frameNode->GetTag() == V2::SYMBOL_ETS_TAG);
+    UpdateSymbolStyle(textStyle, frameNode->GetTag() == V2::SYMBOL_ETS_TAG);
     auto lineThicknessScale = textLayoutProperty->GetLineThicknessScale().value_or(1.0f);
     textStyle.SetLineThicknessScale(lineThicknessScale);
     auto textColor = textLayoutProperty->GetTextColorValue(textTheme->GetTextStyle().GetTextColor());
@@ -217,6 +219,15 @@ void MultipleParagraphLayoutAlgorithm::UpdateFontFamilyWithSymbol(TextStyle& tex
         symbolFontFamilies.push_back(DEFAULT_SYMBOL_FONTFAMILY);
         textStyle.SetFontFamilies(symbolFontFamilies);
     }
+}
+
+void MultipleParagraphLayoutAlgorithm::UpdateSymbolStyle(TextStyle& textStyle, bool isSymbol)
+{
+    if (!isSymbol) {
+        return;
+    }
+    textStyle.SetRenderStrategy(textStyle.GetRenderStrategy() < 0 ? 0 : textStyle.GetRenderStrategy());
+    textStyle.SetEffectStrategy(textStyle.GetEffectStrategy() < 0 ? 0 : textStyle.GetEffectStrategy());
 }
 
 void MultipleParagraphLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)

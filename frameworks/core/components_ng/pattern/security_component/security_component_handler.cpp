@@ -698,7 +698,7 @@ bool SecurityComponentHandler::CheckParentNodesEffect(RefPtr<FrameNode>& node,
                 "security component is invalid", parentNode->GetTag().c_str());
             message = SEC_COMP_ID + scId + SEC_COMP_TYPE + scType +
                 ", attribute linearGradientBlur of parent component " +
-                node->GetTag() + " is set";
+                parentNode->GetTag() + " is set";
             return true;
         }
         RefPtr<RenderContext> parentRenderContext = parentNode->GetRenderContext();
@@ -962,10 +962,12 @@ void SecurityComponentHandler::WriteButtonInfo(
     std::string& message)
 {
     buttonInfo.parentEffect_ = CheckParentNodesEffect(node, buttonInfo, message);
-    buttonInfo.text_ = layoutProperty->GetSecurityComponentDescription().value();
-    buttonInfo.icon_ = layoutProperty->GetIconStyle().value();
+    buttonInfo.text_= layoutProperty->GetSecurityComponentDescription().value_or(
+        static_cast<int32_t>(SaveButtonSaveDescription::TEXT_NULL));
+    buttonInfo.icon_ = layoutProperty->GetIconStyle().value_or(
+        static_cast<int32_t>(SaveButtonIconStyle::ICON_NULL));
     buttonInfo.bg_ = static_cast<SecCompBackground>(
-        layoutProperty->GetBackgroundType().value());
+        layoutProperty->GetBackgroundType().value_or(static_cast<int32_t>(SecCompBackground::UNKNOWN_BG)));
     buttonInfo.tipPosition_ = static_cast<Security::SecurityComponent::TipPosition>(
         layoutProperty->GetTipPosition().value_or(TipPosition::ABOVE_BOTTOM));
     buttonInfo.isCustomizable_ =

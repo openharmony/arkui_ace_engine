@@ -1111,4 +1111,43 @@ HWTEST_F(ScrollableNestedTestNg, BackToTopNestedScrollTest004, TestSize.Level1)
     EXPECT_FLOAT_EQ(listPattern->currentOffset_, 200);
     EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, -200);
 }
+
+/**
+ * @tc.name: NestedScrollFromAxis001
+ * @tc.desc: nested scroll from Axis
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableNestedTestNg, NestedScrollFromAxis001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Scroll nested List
+     */
+    auto rootNode = CreatScrollNestedList(EdgeEffect::NONE, EdgeEffect::NONE,
+        NestedScrollOptions {
+            .forward = NestedScrollMode::PARENT_FIRST,
+            .backward = NestedScrollMode::SELF_FIRST,
+        });
+    FlushUITasks(rootNode);
+
+    auto colNode = GetChildFrameNode(rootNode, 0);
+    auto listNode = GetChildFrameNode(colNode, 1);
+    auto listPattern = listNode->GetPattern<ListPattern>();
+    auto scrollPattern = rootNode->GetPattern<ScrollPattern>();
+    auto scrollScrollable = GetScrollable(rootNode);
+    auto listScrollable = GetScrollable(listNode);
+    listPattern->parent_ = scrollPattern;
+
+    /**
+     * @tc.steps: step2. scroll and list process scroll motion at the same time,
+     *   and list will make scroll reach to edge by nested scroll.
+     * @tc.expected: don't update scroll's currentPos_ when list processes scroll motion.
+     */
+    scrollPattern->currentOffset_ = -15.0f;
+    scrollScrollable->ProcessScrollMotion(10.0f, SCROLL_FROM_AXIS);
+    EXPECT_EQ(scrollPattern->currentOffset_, -5.0f);
+    EXPECT_EQ(scrollScrollable->currentPos_, 10.0f);
+    listScrollable->ProcessScrollMotion(10.0f, SCROLL_FROM_AXIS);
+    EXPECT_EQ(scrollPattern->currentOffset_, 0.0f);
+    EXPECT_EQ(scrollScrollable->currentPos_, 10.0f);
+}
 } // namespace OHOS::Ace::NG

@@ -160,6 +160,7 @@ public:
     static void RunJavaScriptOnDocumentStart(const JSCallbackInfo& args);
     static void RunJavaScriptOnDocumentEnd(const JSCallbackInfo& args);
     static void RunJavaScriptOnHeadEnd(const JSCallbackInfo& args);
+    static void SetCallbackFromController(const JSRef<JSObject> controller);
     static JSRef<JSVal> CreateJSWindowNewHandler(const WebWindowNewEvent& eventInfo);
     static bool HandleWindowNewEvent(const WebWindowNewEvent* eventInfo);
     static JSRef<JSVal> CreateScreenCaptureHandler(const WebScreenCaptureRequestEvent& eventInfo);
@@ -185,7 +186,7 @@ public:
     static JSRef<JSVal> CreateClientAuthenticationRequestHandler(const WebSslSelectCertEvent& eventInfo);
     static JSRef<JSVal> CreateSslErrorEventReceiveHandler(const WebSslErrorEvent& eventInfo);
     static JSRef<JSVal> CreateInterceptRequestHandler(const OnInterceptRequestEvent& eventInfo);
-    static JSRef<JSObject> CreateFaviconReceivedHandler(const FaviconReceivedEvent& eventInfo);
+    static JSRef<JSVal> CreateFaviconReceivedHandler(const FaviconReceivedEvent& eventInfo);
     static uint32_t GetBytesPerPixel(OHOS::Ace::PixelFormat format);
 
     // Enable or disable debugging of web content

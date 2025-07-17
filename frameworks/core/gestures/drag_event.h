@@ -384,7 +384,7 @@ public:
         bundleName_ = bundleName;
     }
 
-    std::string GetDragSource() const
+    const std::string& GetDragSource() const
     {
         return bundleName_;
     }

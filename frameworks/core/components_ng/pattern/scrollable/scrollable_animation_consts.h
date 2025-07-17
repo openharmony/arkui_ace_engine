@@ -19,6 +19,7 @@
 #include <cstdint>
 
 namespace OHOS::Ace::NG {
+inline constexpr float FLING_SCALE_K = 1.5f; // x(t) = [K / (4.2 * γ)] * v₀ * [1 - exp(-γt)]
 inline constexpr float FRICTION_SCALE = -4.2f;
 inline constexpr uint32_t CUSTOM_SPRING_ANIMATION_DURATION = 1000;
 }

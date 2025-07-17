@@ -1738,6 +1738,26 @@ HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg041, TestSize.Level1)
         }
     }
 }
+
+/**
+ * @tc.name: MenuLayoutAlgorithmTestNg042
+ * @tc.desc: Verify VerticalLayout.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg042, TestSize.Level1)
+{
+    RefPtr<MenuLayoutAlgorithm> menuLayoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
+    SizeF size(100, 100);
+    SizeF size_f(100, 200);
+    float clickPosition = 100.0f;
+    menuLayoutAlgorithm->bottomSpace_ = 50.0f;
+    menuLayoutAlgorithm->anchorPosition_ = {10.0f, 10.0f};
+    menuLayoutAlgorithm->wrapperSize_ = size_f;
+    menuLayoutAlgorithm->wrapperRect_ = Rect(0, 0, size_f.Width(), size_f.Height());
+    auto result = menuLayoutAlgorithm->VerticalLayout(size, clickPosition, false);
+    EXPECT_FLOAT_EQ(result, clickPosition);
+}
+
 /**
  * @tc.name: MenuLayoutAlgorithmTestNg044
  * @tc.desc: Verify InitCanExpandCurrentWindow.

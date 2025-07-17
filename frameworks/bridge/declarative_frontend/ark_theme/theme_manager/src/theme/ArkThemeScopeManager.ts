@@ -83,6 +83,11 @@ class ArkThemeScopeManager {
     private defaultTheme: ArkThemeBase | undefined = undefined;
 
     /**
+     * The themeId Stack
+     */
+    private themeIdStack: number[] = [];
+
+    /**
      * Handle component before rendering
      *
      * @param componentName component name
@@ -136,6 +141,10 @@ class ArkThemeScopeManager {
         if (scope === undefined) {
             scope = this.scopeForElmtId(elmtId);
         }
+        // if cannot getscope before, try get from themeId stack
+        if (scope === undefined && (this.themeIdStack.length > 0)) {
+            scope = this.themeScopes.find(item => item.getWithThemeId() === this.themeIdStack[this.themeIdStack.length - 1]);
+        }
         // keep color mode for handled container
         this.handledColorMode = scope?.colorMode();
         // trigger for enter local color mode for the component before rendering
@@ -152,6 +161,10 @@ class ArkThemeScopeManager {
         this.handledThemeScope = scope;
         // probably theme scope changed after previous component draw, handle it
         this.handleThemeScopeChange(this.handledThemeScope);
+        // save last scope themeId 
+        if (scope) {
+            this.themeIdStack.push(scope.getWithThemeId());
+        }
     }
 
     /**
@@ -168,6 +181,10 @@ class ArkThemeScopeManager {
         // flush theme scope of the handled component
         this.handledThemeScope = undefined;
         this.handledComponentElmtId = undefined;
+        // pop theme scope id of the handled component
+        if (this.themeIdStack.length > 0) {
+            this.themeIdStack.pop();
+        }
     }
 
     /**

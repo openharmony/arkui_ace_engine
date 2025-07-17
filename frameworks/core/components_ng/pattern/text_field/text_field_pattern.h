@@ -427,8 +427,11 @@ public:
         return contentController_->GetTextUtf16Value();
     }
 
-    const RefPtr<AutoFillController>& GetAutoFillController()
+    const RefPtr<AutoFillController>& GetOrCreateAutoFillController()
     {
+        if (!autoFillController_) {
+            autoFillController_ = MakeRefPtr<AutoFillController>(WeakClaim(this));
+        }
         return autoFillController_;
     }
 
@@ -932,14 +935,6 @@ public:
     std::string TextContentTypeToString() const;
     virtual std::string GetPlaceholderFont() const;
     RefPtr<TextFieldTheme> GetTheme() const;
-    inline void InitTheme()
-    {
-        auto tmpHost = GetHost();
-        CHECK_NULL_VOID(tmpHost);
-        auto context = tmpHost->GetContext();
-        CHECK_NULL_VOID(context);
-        textFieldTheme_ = context->GetTheme<TextFieldTheme>(tmpHost->GetThemeScopeId());
-    }
     std::string GetTextColor() const;
     std::string GetCaretColor() const;
     std::string GetPlaceholderColor() const;
@@ -1373,6 +1368,13 @@ public:
 
     RefPtr<Clipboard> GetClipboard() override
     {
+        if (!clipboard_) {
+            auto host = GetHost();
+            CHECK_NULL_RETURN(host, clipboard_);
+            auto context = host->GetContext();
+            CHECK_NULL_RETURN(context, clipboard_);
+            clipboard_ = ClipboardProxy::GetInstance()->GetClipboard(context->GetTaskExecutor());
+        }
         return clipboard_;
     }
 
@@ -1722,6 +1724,7 @@ protected:
     bool independentControlKeyboard_ = false;
     RefPtr<AutoFillController> autoFillController_;
     virtual IMEClient GetIMEClientInfo();
+    RefPtr<TextFieldSelectOverlay> selectOverlay_;
 
 private:
     Offset ConvertTouchOffsetToTextOffset(const Offset& touchOffset);
@@ -1850,7 +1853,6 @@ private:
     void SetAccessibilityActionOverlayAndSelection();
     void SetAccessibilityEditAction();
     void SetAccessibilityMoveTextAction();
-    void SetAccessibilityErrotText();
     void SetAccessibilityClearAction();
     void SetAccessibilityPasswordIconAction();
     void SetAccessibilityUnitAction();
@@ -1999,7 +2001,6 @@ private:
     float textParagraphIndent_ = 0.0;
     RefPtr<Paragraph> paragraph_;
     InlineMeasureItem inlineMeasureItem_;
-    TextStyle nextLineUtilTextStyle_;
 
     RefPtr<ClickEvent> clickListener_;
     RefPtr<TouchEventImpl> touchListener_;
@@ -2152,7 +2153,6 @@ private:
     bool keyboardAvoidance_ = false;
     bool hasMousePressed_ = false;
     bool showCountBorderStyle_ = false;
-    RefPtr<TextFieldSelectOverlay> selectOverlay_;
     OffsetF movingCaretOffset_;
     std::string autoFillUserName_;
     std::string autoFillNewPassword_;

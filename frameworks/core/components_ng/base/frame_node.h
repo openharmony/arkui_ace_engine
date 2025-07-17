@@ -1629,6 +1629,11 @@ private:
     void AddNodeToRegisterTouchTest();
     void CleanupPipelineResources();
 
+    void MarkModifyDoneMultiThread();
+    void MarkDirtyNodeMultiThread(PropertyChangeFlag extraFlag);
+    void RebuildRenderContextTreeMultiThread();
+    void MarkNeedRenderMultiThread(bool isRenderBoundary);
+
     bool isTrimMemRecycle_ = false;
     // sort in ZIndex.
     std::multiset<WeakPtr<FrameNode>, ZIndexComparator> frameChildren_;

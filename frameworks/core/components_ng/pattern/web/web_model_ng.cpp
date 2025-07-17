@@ -1291,6 +1291,14 @@ void WebModelNG::SetWebDetachFunction(std::function<void(int32_t)>&& jsCallback)
     webPattern->SetSetWebDetachCallback(std::move(jsCallback));
 }
 
+void WebModelNG::SetFaviconFunction(std::function<void(const std::shared_ptr<BaseEventInfo>&)>&& jsCallback)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+
+    webPattern->SetFaviconFunction(std::move(jsCallback));
+}
+
 void WebModelNG::SetTextAutosizing(bool isTextAutosizing)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();

@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <unordered_map>
 #include "core/components_ng/pattern/window_scene/scene/window_scene.h"
 
 #include "session_manager/include/scene_session_manager.h"
@@ -36,6 +37,7 @@ const uint32_t CLEAN_WINDOW_DELAY_TIME = 1000;
 const uint32_t REMOVE_STARTING_WINDOW_TIMEOUT_MS = 5000;
 const int32_t ANIMATION_DURATION = 200;
 const uint32_t REMOVE_SNAPSHOT_WINDOW_DELAY_TIME = 100;
+std::unordered_map<uint64_t, int> surfaceNodeCountMap_;
 } // namespace
 
 WindowScene::WindowScene(const sptr<Rosen::Session>& session)
@@ -191,6 +193,7 @@ void WindowScene::OnAttachToFrameNode()
     if (!IsMainWindow()) {
         auto surfaceNode = session_->GetSurfaceNode();
         CHECK_NULL_VOID(surfaceNode);
+        InsertSurfaceNodeId(surfaceNode->GetId());
         auto context = AceType::DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
         CHECK_NULL_VOID(context);
         context->SetRSNode(surfaceNode);
@@ -205,6 +208,7 @@ void WindowScene::OnAttachToFrameNode()
 
     auto surfaceNode = CreateLeashWindowNode();
     CHECK_NULL_VOID(surfaceNode);
+    InsertSurfaceNodeId(surfaceNode->GetId());
     session_->SetLeashWinSurfaceNode(surfaceNode);
     auto context = AceType::DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
     CHECK_NULL_VOID(context);
@@ -216,6 +220,27 @@ void WindowScene::OnAttachToFrameNode()
     WindowPattern::OnAttachToFrameNode();
 }
 
+void WindowScene::InsertSurfaceNodeId(uint64_t nodeId)
+{
+    auto iter = surfaceNodeCountMap_.find(nodeId);
+    if (iter == surfaceNodeCountMap_.end()) {
+        surfaceNodeCountMap_[nodeId] = 1;
+    } else {
+        surfaceNodeCountMap_[nodeId] = iter->second + 1;
+        TAG_LOGE(AceLogTag::ACE_WINDOW_SCENE,
+            "OnAttachToFrameNode id: %{public}d, duplicate surfaceNodeId:%{public}s, count:%{public}d",
+            session_->GetPersistentId(), std::to_string(nodeId).c_str(), iter->second);
+    }
+}
+
+void WindowScene::ClearSurfaceNodeId(uint64_t nodeId)
+{
+    auto iter = surfaceNodeCountMap_.find(nodeId);
+    if (iter != surfaceNodeCountMap_.end()) {
+        iter->second == 1 ? surfaceNodeCountMap_.erase(nodeId) : surfaceNodeCountMap_[iter->first] = iter->second - 1;
+    }
+}
+
 void WindowScene::OnDetachFromFrameNode(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(session_);
@@ -224,6 +249,11 @@ void WindowScene::OnDetachFromFrameNode(FrameNode* frameNode)
     auto surfaceNode = session_->GetSurfaceNode();
     if (surfaceNode) {
         surfaceNode->SetVisible(true);
+        ClearSurfaceNodeId(surfaceNode->GetId());
+    }
+    auto leashWinSurfaceNode = session_->GetLeashWinSurfaceNode();
+    if (leashWinSurfaceNode) {
+        ClearSurfaceNodeId(leashWinSurfaceNode->GetId());
     }
     CHECK_NULL_VOID(frameNode);
     auto windowName = IsMainWindow() ? session_->GetSessionInfo().bundleName_ : session_->GetWindowName();

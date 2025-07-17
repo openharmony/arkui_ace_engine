@@ -2553,4 +2553,30 @@ HWTEST_F(RatingTestNg, StringTypeToStr, TestSize.Level1)
         EXPECT_EQ(val, ret);
     }
 }
+
+/**
+ * @tc.name: OnColorModeChange
+ * @tc.desc: Test OnColorModeChange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingTestNg, OnColorModeChange, TestSize.Level1)
+{
+    RatingModelNG rating;
+    rating.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RatingPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    g_isConfigChangePerform = true;
+    int32_t colorMode = static_cast<int32_t>(ColorMode::DARK);
+    pattern->isNeedFocusStyle_ = true;
+    pattern->OnColorModeChange(colorMode);
+
+    EXPECT_TRUE(pattern->isForegroundImageInfoFromTheme_);
+    EXPECT_TRUE(pattern->isSecondaryImageInfoFromTheme_);
+    EXPECT_TRUE(pattern->isBackgroundImageInfoFromTheme_);
+
+    g_isConfigChangePerform = false;
+}
 } // namespace OHOS::Ace::NG
