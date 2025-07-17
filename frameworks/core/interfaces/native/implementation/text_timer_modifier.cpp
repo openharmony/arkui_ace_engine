@@ -185,8 +185,6 @@ void ContentModifierImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //TextTimerModelNG::SetContentModifier(frameNode, convValue);
     LOGE("Arkoala method TextTimerAttributeModifier.setContentModifier not implemented");
 }
 } // TextTimerAttributeModifier
