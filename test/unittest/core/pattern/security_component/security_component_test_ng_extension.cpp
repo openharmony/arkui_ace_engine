@@ -20,6 +20,7 @@
 #include <utility>
 
 #include "gtest/gtest.h"
+#include "ui/base/geometry/dimension.h"
 
 #define protected public
 #define private public
@@ -951,6 +952,53 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutElementIconElement
 }
 
 /**
+ * @tc.name: SecurityComponentLayoutElementIconElement002
+ * @tc.desc: Test security component icon element
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutElementIconElement002, TestSize.Level1)
+{
+    IconLayoutElement icon;
+    icon.isExist_ = false;
+    icon.DoMeasure();
+    icon.isExist_ = true;
+    icon.isSetSize_ = false;
+
+    icon.alpha_ = 0.0f;
+    ASSERT_EQ(icon.ShrinkWidth(1.0f), 1.0f);
+    ASSERT_EQ(icon.ShrinkHeight(1.0f), 1.0f);
+
+    icon.alpha_ = 1.0f;
+    icon.minIconSize_ = 1.0f;
+    icon.width_ = 2.0f;
+    icon.height_ = 2.0f;
+    ASSERT_EQ(icon.ShrinkWidth(2.0f), 1.0f);
+    icon.minIconSize_ = 1.0f;
+    icon.width_ = 2.0f;
+    icon.height_ = 2.0f;
+    ASSERT_EQ(icon.ShrinkHeight(2.0f), 1.0f);
+
+    icon.minIconSize_ = 1.0f;
+    icon.width_ = 4.0f;
+    icon.height_ = 2.0f;
+    ASSERT_EQ(icon.ShrinkWidth(1.5f), 0.0f);
+    icon.minIconSize_ = 1.0f;
+    icon.width_ = 4.0f;
+    icon.height_ = 2.0f;
+    ASSERT_EQ(icon.ShrinkHeight(1.5f), 0.0f);
+
+    icon.minIconSize_ = 0.0f;
+    icon.width_ = 4.0f;
+    icon.height_ = 2.0f;
+    ASSERT_EQ(icon.ShrinkWidth(2.0f), 0.0f);
+    icon.minIconSize_ = 0.0f;
+    icon.width_ = 4.0f;
+    icon.height_ = 2.0f;
+    ASSERT_EQ(icon.ShrinkHeight(2.0f), 0.0f);
+}
+
+/**
  * @tc.name: SecurityComponentLayoutElementTextElement001
  * @tc.desc: Test security component text element
  * @tc.type: FUNC
@@ -988,6 +1036,38 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutElementTextElement
     text.isSetSize_ = true;
     ASSERT_EQ(text.ShrinkWidth(0.0), 0.0);
     ASSERT_EQ(text.ShrinkHeight(0.0), 0.0);
+}
+
+/**
+ * @tc.name: SecurityComponentChooseExactFontSize001
+ * @tc.desc: Test security component ChooseExactFontSize
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentChooseExactFontSize001, TestSize.Level1)
+{
+    TextLayoutElement text;
+    RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0,
+        BUTTON_TYPE_NULL, V2::LOCATION_BUTTON_ETS_TAG);
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<SecurityComponentLayoutProperty> property =
+        AceType::MakeRefPtr<SecurityComponentLayoutProperty>();
+    RefPtr<TextLayoutProperty> textProp = AceType::MakeRefPtr<TextLayoutProperty>();
+    RefPtr<GeometryNode> geoNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapper> wrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geoNode, textProp);
+    property->UpdateSecurityComponentDescription(0);
+    property->UpdateFontSize(Dimension(2.0));
+    text.Init(property, wrapper);
+    ASSERT_TRUE(text.isExist_);
+    ASSERT_TRUE(text.isSetSize_);
+
+    RefPtr<TextLayoutProperty> textProperty =
+        AceType::MakeRefPtr<TextLayoutProperty>();
+    text.minTextSize_ = SizeF(1.0, 1.0);
+    text.ChooseExactFontSize(textProperty, true);
+    textProperty->UpdateFontSize(Dimension(14.0, DimensionUnit::FP));
+    text.ChooseExactFontSize(textProperty, true);
 }
 
 /**
@@ -1833,6 +1913,120 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmGetTextDi
 }
 
 /**
+ * @tc.name: SecurityComponentLayoutAlgorithmIsIconOutOfBackground001
+ * @tc.desc: Test security component IsIconOutOfBackground
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmIsIconOutOfBackground001, TestSize.Level1)
+{
+    auto buttonAlgorithm = AceType::MakeRefPtr<SecurityComponentLayoutAlgorithm>();
+    ASSERT_NE(buttonAlgorithm, nullptr);
+    auto imageIcon = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    auto imageGeometryNode = imageIcon->geometryNode_;
+    auto imageLayoutProperty = imageIcon->GetLayoutProperty<ImageLayoutProperty>();
+    auto imageWrapperNode = AceType::MakeRefPtr<LayoutWrapperNode>(
+        AceType::WeakClaim(AceType::RawPtr(imageIcon)), imageGeometryNode, imageLayoutProperty);
+
+    buttonAlgorithm->icon_ = IconLayoutElement();
+    RefPtr<LayoutWrapper> iconWrapper = imageWrapperNode;
+    buttonAlgorithm->icon_.Init(AceType::MakeRefPtr<SecurityComponentLayoutProperty>(), iconWrapper);
+    buttonAlgorithm->icon_.height_ = 4.0f;
+    buttonAlgorithm->icon_.width_ = 4.0f;
+    buttonAlgorithm->top_ = PaddingLayoutElement();
+    buttonAlgorithm->top_.Init(true, false, 3.0f, 0.0f);
+    buttonAlgorithm->left_ = PaddingLayoutElement();
+    buttonAlgorithm->left_.Init(true, false, 1.0f, 0.0f);
+
+    BorderRadiusProperty radius;
+    buttonAlgorithm->componentWidth_ = 3.0f;
+    EXPECT_EQ(buttonAlgorithm->IsIconOutOfBackground(radius), true);
+
+    buttonAlgorithm->componentWidth_ = 6.0f;
+    buttonAlgorithm->componentHeight_ = 5.0f;
+    EXPECT_EQ(buttonAlgorithm->IsIconOutOfBackground(radius), true);
+
+    buttonAlgorithm->componentHeight_ = 10.0f;
+    EXPECT_EQ(buttonAlgorithm->IsIconOutOfBackground(radius), false);
+
+    radius.radiusBottomRight = Dimension(1.0f);
+    EXPECT_EQ(buttonAlgorithm->IsIconOutOfBackground(radius), false);
+
+    radius.radiusBottomRight = Dimension(4.0f);
+    EXPECT_EQ(buttonAlgorithm->IsIconOutOfBackground(radius), false);
+
+    radius.radiusBottomRight = Dimension(6.0f);
+    EXPECT_EQ(buttonAlgorithm->IsIconOutOfBackground(radius), false);
+
+    radius.radiusBottomLeft = Dimension(1.0f);
+    EXPECT_EQ(buttonAlgorithm->IsIconOutOfBackground(radius), false);
+
+    radius.radiusBottomLeft = Dimension(4.0f);
+    EXPECT_EQ(buttonAlgorithm->IsIconOutOfBackground(radius), false);
+
+    radius.radiusBottomLeft = Dimension(6.0f);
+    EXPECT_EQ(buttonAlgorithm->IsIconOutOfBackground(radius), false);
+}
+
+/**
+ * @tc.name: SecurityComponentLayoutAlgorithmIsIconOutOfBackground002
+ * @tc.desc: Test security component IsIconOutOfBackground
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmIsIconOutOfBackground002, TestSize.Level1)
+{
+    auto buttonAlgorithm = AceType::MakeRefPtr<SecurityComponentLayoutAlgorithm>();
+    ASSERT_NE(buttonAlgorithm, nullptr);
+    auto imageIcon = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    auto imageGeometryNode = imageIcon->geometryNode_;
+    auto imageLayoutProperty = imageIcon->GetLayoutProperty<ImageLayoutProperty>();
+    auto imageWrapperNode = AceType::MakeRefPtr<LayoutWrapperNode>(
+        AceType::WeakClaim(AceType::RawPtr(imageIcon)), imageGeometryNode, imageLayoutProperty);
+
+    buttonAlgorithm->icon_ = IconLayoutElement();
+    RefPtr<LayoutWrapper> iconWrapper = imageWrapperNode;
+    buttonAlgorithm->icon_.Init(AceType::MakeRefPtr<SecurityComponentLayoutProperty>(), iconWrapper);
+    buttonAlgorithm->icon_.height_ = 4.0f;
+    buttonAlgorithm->icon_.width_ = 4.0f;
+    buttonAlgorithm->top_ = PaddingLayoutElement();
+    buttonAlgorithm->top_.Init(true, false, 3.0f, 0.0f);
+    buttonAlgorithm->left_ = PaddingLayoutElement();
+    buttonAlgorithm->left_.Init(true, false, 1.0f, 0.0f);
+
+    BorderRadiusProperty radius;
+    buttonAlgorithm->componentWidth_ = 3.0f;
+    EXPECT_EQ(buttonAlgorithm->IsIconOutOfBackground(radius), true);
+
+    buttonAlgorithm->componentWidth_ = 6.0f;
+    buttonAlgorithm->componentHeight_ = 5.0f;
+    EXPECT_EQ(buttonAlgorithm->IsIconOutOfBackground(radius), true);
+
+    buttonAlgorithm->componentHeight_ = 10.0f;
+    EXPECT_EQ(buttonAlgorithm->IsIconOutOfBackground(radius), false);
+
+    radius.radiusTopRight = Dimension(1.0f);
+    EXPECT_EQ(buttonAlgorithm->IsIconOutOfBackground(radius), false);
+
+    radius.radiusTopRight = Dimension(4.0f);
+    EXPECT_EQ(buttonAlgorithm->IsIconOutOfBackground(radius), false);
+
+    radius.radiusTopRight = Dimension(6.0f);
+    EXPECT_EQ(buttonAlgorithm->IsIconOutOfBackground(radius), false);
+
+    radius.radiusTopLeft = Dimension(1.0f);
+    EXPECT_EQ(buttonAlgorithm->IsIconOutOfBackground(radius), false);
+
+    radius.radiusTopLeft = Dimension(4.0f);
+    EXPECT_EQ(buttonAlgorithm->IsIconOutOfBackground(radius), false);
+
+    radius.radiusTopLeft = Dimension(6.0f);
+    EXPECT_EQ(buttonAlgorithm->IsIconOutOfBackground(radius), false);
+}
+
+/**
  * @tc.name: LayoutAlgorithmUpdateCircleButtonConstraint001
  * @tc.desc: Test security component UpdateCircleButtonConstraint
  * @tc.type: FUNC
@@ -2157,5 +2351,158 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmUpdateTex
     buttonAlgorithm->UpdateTextRectPoint();
     ASSERT_TRUE(NearEqual(buttonAlgorithm->textLeftTopPoint_.Width(), 21.0f));
     ASSERT_TRUE(NearEqual(buttonAlgorithm->textLeftTopPoint_.Height(), 11.0f));
+}
+
+/**
+ * @tc.name: SecurityComponentCheckGetBorderRect001
+ * @tc.desc: Test security component GetBorderRect
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckGetBorderRect001, TestSize.Level1)
+{
+    RefPtr<FrameNode> node = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(node, nullptr);
+    auto renderContext = node->GetRenderContext();
+    std::vector<RectF> borderRects;
+    BorderWidthProperty borderWidth;
+    BorderColorProperty borderColor;
+
+    renderContext->SetBorderWidth(borderWidth);
+    renderContext->SetBorderColor(borderColor);
+    ASSERT_FALSE(SecurityComponentHandler::GetBorderRect(node, borderRects));
+
+    borderWidth.SetBorderWidth(0.0_vp);
+    renderContext->UpdateBorderWidth(borderWidth);
+    ASSERT_TRUE(SecurityComponentHandler::GetBorderRect(node, borderRects));
+
+    borderWidth.SetBorderWidth(2.0_vp);
+    renderContext->UpdateBorderWidth(borderWidth);
+    ASSERT_TRUE(SecurityComponentHandler::GetBorderRect(node, borderRects));
+
+    borderColor.SetColor(Color::RED);
+    renderContext->UpdateBorderColor(borderColor);
+    ASSERT_TRUE(SecurityComponentHandler::GetBorderRect(node, borderRects));
+}
+
+/**
+ * @tc.name: SecurityComponentCheckForegroundEffect001
+ * @tc.desc: Test security component CheckForegroundEffect
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckForegroundEffect001, TestSize.Level1)
+{
+    RefPtr<FrameNode> node = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(node, nullptr);
+    auto renderContext = node->GetRenderContext();
+    std::string message = "";
+    OHOS::Security::SecurityComponent::SecCompBase buttonInfo;
+    
+    ASSERT_FALSE(SecurityComponentHandler::CheckForegroundEffect(node, message, renderContext, buttonInfo));
+
+    renderContext->UpdateForegroundEffect(1.0f);
+    ASSERT_FALSE(SecurityComponentHandler::CheckForegroundEffect(node, message, renderContext, buttonInfo));
+}
+
+/**
+ * @tc.name: SecurityComponentCheckOverlayText001
+ * @tc.desc: Test security component CheckOverlayText
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckOverlayText001, TestSize.Level1)
+{
+    RefPtr<FrameNode> node = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(node, nullptr);
+    auto renderContext = node->GetRenderContext();
+    std::string message = "";
+    OHOS::Security::SecurityComponent::SecCompBase buttonInfo;
+    
+    ASSERT_FALSE(SecurityComponentHandler::CheckOverlayText(node, message, renderContext, buttonInfo));
+
+    OverlayOptions option;
+    option.content = "test";
+    renderContext->UpdateOverlayText(option);
+    ASSERT_FALSE(SecurityComponentHandler::CheckOverlayText(node, message, renderContext, buttonInfo));
+}
+
+/**
+ * @tc.name: SecurityComponentCheckGetWindowSceneWindowId001
+ * @tc.desc: Test security component GetWindowSceneWindowId
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentGetWindowSceneWindowId001, TestSize.Level1)
+{
+    RefPtr<FrameNode> parent = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(parent, nullptr);
+    RefPtr<FrameNode> child = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(child, nullptr);
+    parent->AddChild(child);
+    uint32_t windId = 0;
+    
+    ASSERT_FALSE(SecurityComponentHandler::GetWindowSceneWindowId(child, windId));
+
+    parent->tag_ = V2::WINDOW_SCENE_ETS_TAG;
+    ASSERT_FALSE(SecurityComponentHandler::GetWindowSceneWindowId(child, windId));
+}
+
+/**
+ * @tc.name: SecurityComponentLayoutElementUpdateUserSetSize001
+ * @tc.desc: Test security component UpdateUserSetSize
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutElementUpdateUserSetSize001, TestSize.Level1)
+{
+    auto buttonAlgorithm = AceType::MakeRefPtr<SecurityComponentLayoutAlgorithm>();
+    ASSERT_NE(buttonAlgorithm, nullptr);
+    auto imageIcon = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    auto imageGeometryNode = imageIcon->geometryNode_;
+    auto imageLayoutProperty = imageIcon->GetLayoutProperty<ImageLayoutProperty>();
+    auto imageWrapperNode = AceType::MakeRefPtr<LayoutWrapperNode>(
+        AceType::WeakClaim(AceType::RawPtr(imageIcon)), imageGeometryNode, imageLayoutProperty);
+    auto secCompProperty = AceType::MakeRefPtr<SecurityComponentLayoutProperty>();
+    secCompProperty->UpdateIconStyle(1);
+    buttonAlgorithm->icon_ = IconLayoutElement();
+    RefPtr<LayoutWrapper> iconWrapper = imageWrapperNode;
+    buttonAlgorithm->icon_.Init(secCompProperty, iconWrapper);
+
+    buttonAlgorithm->icon_.UpdateUserSetSize(secCompProperty);
+    EXPECT_EQ(buttonAlgorithm->icon_.isSetSize_, false);
+
+    secCompProperty->UpdateIconSize(Dimension(1.0f));
+    buttonAlgorithm->icon_.UpdateUserSetSize(secCompProperty);
+    EXPECT_EQ(buttonAlgorithm->icon_.isSetSize_, true);
+    buttonAlgorithm->icon_.isSetSize_ = false;
+
+    NG::CalcSize calcSize1;
+    calcSize1.SetHeight(CalcLength(1.0f));
+    secCompProperty->UpdateIconCalcSize(calcSize1);
+    buttonAlgorithm->icon_.UpdateUserSetSize(secCompProperty);
+    EXPECT_EQ(buttonAlgorithm->icon_.isSetSize_, true);
+    buttonAlgorithm->icon_.isSetSize_ = false;
+
+    NG::CalcSize calcSize2;
+    calcSize2.SetWidth(CalcLength(1.0f));
+    secCompProperty->UpdateIconCalcSize(calcSize2);
+    buttonAlgorithm->icon_.UpdateUserSetSize(secCompProperty);
+    EXPECT_EQ(buttonAlgorithm->icon_.isSetSize_, true);
+    buttonAlgorithm->icon_.isSetSize_ = false;
+
+    NG::CalcSize calcSize3;
+    calcSize3.SetWidth(CalcLength(1.0f));
+    calcSize3.SetHeight(CalcLength(1.0f));
+    secCompProperty->UpdateIconCalcSize(calcSize3);
+    buttonAlgorithm->icon_.UpdateUserSetSize(secCompProperty);
+    EXPECT_EQ(buttonAlgorithm->icon_.isSetSize_, true);
+    buttonAlgorithm->icon_.isSetSize_ = false;
 }
 } // namespace OHOS::Ace::NG
