@@ -371,6 +371,11 @@ ani_object ArktsFrontend::CallGetUIContextFunc(int32_t instanceId)
     return result;
 }
 
+void* ArktsFrontend::GetEnv()
+{
+    return ArktsAniUtils::GetAniEnv(vm_);
+}
+
 void* ArktsFrontend::PushExtender(
     const std::string& url, const std::string& params, bool recoverable, std::function<void()>&& finishCallback)
 {

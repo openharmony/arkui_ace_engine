@@ -367,6 +367,7 @@ public:
         return pageRouterManager_;
     }
 
+    void* GetEnv() override;
     static void PreloadAceModule(void* aniEnv);
     static void* preloadArkTSRuntime;
 private:
