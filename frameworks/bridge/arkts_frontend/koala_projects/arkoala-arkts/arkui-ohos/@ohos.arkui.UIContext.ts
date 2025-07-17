@@ -628,4 +628,16 @@ export class UIObserver {
             this.observerImpl!.off(type, callback);
         }
     }
+    
+    public on(type: string, options: uiObserver.NavDestinationSwitchObserverOptions, callback: ((param: object) => void)): void {
+        if (this.observerImpl) {
+            this.observerImpl!.on(type, options, callback);
+        }
+    }
+
+    public off(type: string, options: uiObserver.NavDestinationSwitchObserverOptions, callback?: ((param: object) => void)): void {
+        if (this.observerImpl) {
+            this.observerImpl!.off(type, options, callback);
+        }
+    }
 }

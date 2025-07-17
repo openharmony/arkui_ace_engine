@@ -28,6 +28,8 @@ import hilog from '@ohos.hilog'
     {
         on(type: string, callback: object) : void;
         off(type: string, callback?: object) : void;
+        on(type: string, options: NavDestinationSwitchObserverOptions, callback: object): void;
+        off(type: string, options: NavDestinationSwitchObserverOptions, callback?: object): void;
     }
     
     class UIObserverImpl implements UIObserver
@@ -42,6 +44,9 @@ import hilog from '@ohos.hilog'
         
         public native on(type: string, callback: object) : void;
         public native off(type: string, callback?: object) : void;
+        
+        public native on(type: string, options: NavDestinationSwitchObserverOptions, callback: object): void;
+        public native off(type: string, options: NavDestinationSwitchObserverOptions, callback?: object): void;
     }
 
     export interface NavigationInfo {
