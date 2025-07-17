@@ -24,9 +24,6 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT FolderStackModelNG : public FolderStackModel {
 public:
     void Create(const std::vector<std::string>& itemId) override;
-    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
-    static void SetUpdateUpperItems(FrameNode* frameNode, const std::vector<std::string>& itemId);
-    static void SetAlignment(FrameNode* frameNode, const std::optional<Alignment>& valueOpt);
     void SetAlignment(Alignment alignment) override;
     static void SetOnFolderStateChange(
         FrameNode* frameNode, std::function<void(const NG::FolderEventInfo& folderEventInfo)>&& onChange);
