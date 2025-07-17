@@ -872,6 +872,8 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleForCustomRuntime(void* runtim
 
     bool evalResult = PreloadStateManagement(arkRuntime);
 
+    PreloadUIContent(arkRuntime);
+
     // preload ark component
     bool arkComponentResult = PreloadArkComponent(arkRuntime);
     if (!arkComponentResult) {
