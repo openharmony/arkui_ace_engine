@@ -245,6 +245,7 @@ void WaterFlowLayoutInfo::Reset()
     itemStart_ = false;
     offsetEnd_ = false;
     maxHeight_ = 0.0f;
+    knowTotalHeight_ = false;
 
     jumpIndex_ = EMPTY_JUMP_INDEX;
 
@@ -276,6 +277,7 @@ void WaterFlowLayoutInfo::Reset(int32_t resetFrom)
         return;
     }
     maxHeight_ = 0.0f;
+    knowTotalHeight_ = false;
     ClearCacheAfterIndex(resetFrom - 1);
     startIndex_ = std::max(resetFrom - 1, 0);
 }
@@ -447,6 +449,10 @@ void WaterFlowLayoutInfo::Sync(float mainSize, bool canOverScrollStart, bool can
     // adjust offset when it can't overScroll at bottom
     if (offsetEnd_ && Negative(currentOffset_) && !canOverScrollEnd) {
         currentOffset_ = std::min(-maxHeight_ + mainSize, 0.0f);
+    }
+
+    if (itemEnd_) {
+        knowTotalHeight_ = true;
     }
 
     startIndex_ = FastSolveStartIndex();
@@ -623,7 +629,7 @@ float WaterFlowLayoutInfo::EstimateTotalHeight() const
     if (!itemInfos_.empty()) {
         // in segmented layout
         childCount = static_cast<int32_t>(itemInfos_.size());
-    } else if (maxHeight_ && repeatDifference_ == 0) {
+    } else if (knowTotalHeight_ && repeatDifference_ == 0) {
         // in original layout, already reach end.
         return maxHeight_;
     } else {
