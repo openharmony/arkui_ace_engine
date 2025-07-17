@@ -48,6 +48,7 @@ void ScrollTestNg::SetUpTestSuite()
     auto scrollableTheme = ScrollableTheme::Builder().Build(scrollableThemeConstants);
     EXPECT_CALL(*themeManager, GetTheme(ScrollableTheme::TypeId())).WillRepeatedly(Return(scrollableTheme));
     MockAnimationManager::Enable(true);
+    MockAnimationManager::SetVersion(MockAnimationManager::Version::V1);
 }
 
 void ScrollTestNg::TearDownTestSuite()
@@ -55,6 +56,7 @@ void ScrollTestNg::TearDownTestSuite()
     TestNG::TearDownTestSuite();
     ResetMockResourceData();
     g_isConfigChangePerform = false;
+    MockAnimationManager::SetVersion(MockAnimationManager::Version::V0);
 }
 
 void ScrollTestNg::SetUp() {}
