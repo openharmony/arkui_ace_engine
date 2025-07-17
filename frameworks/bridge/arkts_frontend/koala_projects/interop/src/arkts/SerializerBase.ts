@@ -61,19 +61,19 @@ export function runtimeType<T>(value: T): int32 {
     if (value === null)
         return RuntimeType.OBJECT;
 
-    if (typeof value === "string")
+    if (value instanceof String)
         return RuntimeType.STRING
 
-    if (typeof value === "number")
+    if (value instanceof Numeric)
         return RuntimeType.NUMBER
 
-    if (typeof value === "boolean")
+    if (value instanceof Boolean)
         return RuntimeType.BOOLEAN
 
-    if (typeof value === "bigint")
+    if (value instanceof BigInt)
         return RuntimeType.BIGINT
 
-    if (typeof value === "function")
+    if (value instanceof Function)
         return RuntimeType.FUNCTION
 
     if (value instanceof Object)
