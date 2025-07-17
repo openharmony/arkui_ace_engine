@@ -24,6 +24,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr float PERCENT_HALF = 0.5f;
 const double AGE_FONT_SIZE_SCALE = 1.75;
+const int BORDER_COUNT = 2;
 } // namespace
 
 void BadgeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -109,6 +110,9 @@ void BadgeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto badgeHeight = badgeCircleDiameter;
     auto countLimit =
         layoutProperty->HasBadgeMaxCount() ? layoutProperty->GetBadgeMaxCountValue() : badgeTheme->GetMaxCount();
+    auto badgePosition = layoutProperty->GetBadgePosition();
+    auto borderWidth = layoutProperty->GetBadgeBorderWidthValue(badgeTheme->GetBadgeBorderWidth()).ConvertToVp();
+    auto borderWidthDiameter = Dimension(borderWidth, DimensionUnit::VP).ConvertToPx();
 
     std::u16string textData;
     if (textLayoutProperty->HasContent()) {
@@ -142,10 +146,19 @@ void BadgeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         badgeHeight = 0;
     }
     textLayoutProperty->UpdateMarginSelfIdealSize(SizeF(badgeWidth, badgeHeight));
-    auto textLayoutConstraint = textFirstLayoutConstraint;
-    textLayoutConstraint.selfIdealSize = OptionalSize<float>(badgeWidth, badgeHeight);
-
-    textWrapper->Measure(textLayoutConstraint);
+    if (badgePosition == BadgePosition::RIGHT_TOP && LessNotEqual(borderWidthDiameter, badgeCircleDiameter)) {
+        badgeHeight = std::max(borderWidthDiameter * BORDER_COUNT, badgeHeight);
+        OptionalSizeF textFrameSize = { badgeWidth, badgeHeight };
+        auto textGeometryNode = textWrapper->GetGeometryNode();
+        if (textGeometryNode) {
+            textGeometryNode->SetFrameSize(textFrameSize.ConvertToSizeT());
+        }
+    } else {
+        auto textLayoutConstraint = textFirstLayoutConstraint;
+        textLayoutConstraint.selfIdealSize = OptionalSize<float>(badgeWidth, badgeHeight);
+        textWrapper->Measure(textLayoutConstraint);
+    }
+    
     auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(childrenSize - 2);
     CHECK_NULL_VOID(childWrapper);
     childWrapper->Measure(childLayoutConstraint);
