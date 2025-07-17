@@ -14,7 +14,7 @@
  */
 
 import { TSInterfaceDeclaration, TSInterfaceHeritage } from '../../../generated';
-import { isSameNativeObject } from '../peers/ArktsObject';
+import { isSameNativeObject } from '../../../arkts-api/peers/ArktsObject';
 import { AstNode } from '../peers/AstNode';
 import { attachModifiers, updateThenAttach } from '../utilities/private';
 

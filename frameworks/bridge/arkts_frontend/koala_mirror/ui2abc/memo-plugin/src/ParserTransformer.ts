@@ -52,12 +52,18 @@ export default function memoParserTransformer(
             return
         }
 
-        return arkts.updateETSModuleByStatements(
-            program.ast as arkts.ETSModule,
-            [
-                factory.createContextTypesImportDeclaration(userPluginOptions?.stableForTests ?? false, userPluginOptions?.contextImport),
-                ...program.ast.statements,
-            ]
+        const module = program.ast as arkts.ETSModule
+        program.setAst(
+            arkts.factory.updateETSModule(
+                module,
+                [
+                    factory.createContextTypesImportDeclaration(userPluginOptions?.stableForTests ?? false, userPluginOptions?.contextImport),
+                    ...module.statements,
+                ],
+                module.ident,
+                module.getNamespaceFlag(),
+                module.program,
+            )
         )
     }
 }

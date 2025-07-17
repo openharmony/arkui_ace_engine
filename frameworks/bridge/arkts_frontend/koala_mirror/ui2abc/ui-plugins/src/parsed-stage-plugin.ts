@@ -38,20 +38,21 @@ export default function parsedTransformer(
         }
         
         // TODO: this logic is completely wrong, and need to be fully rethought.
-        const newFileIfRestart = path.resolve(arkts.global.arktsconfig!.outDir, "ui-parsed", path.relative(arkts.global.arktsconfig!.baseUrl, arkts.global.filePath))
-        const currentFile = restart ? newFileIfRestart : arkts.global.filePath
+        const newFileIfRestart = () => path.resolve(arkts.global.arktsconfig!.outDir, "ui-parsed", path.relative(arkts.global.arktsconfig!.baseUrl, arkts.global.filePath))
+        const currentFile = restart ? newFileIfRestart() : arkts.global.filePath
         const structs = resolver.getOrCreateTable(currentFile, restart)
         context.setParameter("importer", importer)
 
         const transformers: arkts.AbstractVisitor[] = [
             new StructRecorder(structs, restart),
             new StructCallRewriter(structs, importer),
-            new ClassTransformer(),
+            new ClassTransformer(importer),
             new ComponentTransformer(importer, userPluginOptions),
             new AnnotationsTransformer(),
             new CallTransformer(importer, userPluginOptions),
             new ImportsTransformer(importer)
         ]
-        transformers.reduce((node: arkts.AstNode, transformer: arkts.AbstractVisitor) => transformer.visitor(node), program.ast)
+        const result = transformers.reduce((node: arkts.AstNode, transformer: arkts.AbstractVisitor) => transformer.visitor(node), program.ast)
+        program.setAst(result as arkts.ETSModule)
     }
 }

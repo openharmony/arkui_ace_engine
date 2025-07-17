@@ -657,11 +657,11 @@ void InitExports(JSGlobalContextRef globalContext);
   } \
   MAKE_JSC_EXPORT(name)
 
-// todo: implement properly
+// Improve: implement properly
 #define KOALA_INTEROP_CTX_3(name, Ret, P0, P1, P2)                                                                                                                 \
   JSValueRef Jsc_##name(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception) \
   {                                                                                                                                                                \
-    printf("TODO: implement KOALA_INTEROP_CTX_3 for jsc");                                                                                                         \
+    printf("Improve: implement KOALA_INTEROP_CTX_3 for jsc");                                                                                                         \
     KOALA_MAYBE_LOG(name)                                                                                                                                          \
     P0 p0 = getArgument<P0>(ctx, argumentCount, arguments, 0);                                                                                                     \
     P1 p1 = getArgument<P1>(ctx, argumentCount, arguments, 1);                                                                                                     \
@@ -673,7 +673,7 @@ void InitExports(JSGlobalContextRef globalContext);
 #define KOALA_INTEROP_CTX_4(name, Ret, P0, P1, P2, P4)                                                                                                             \
   JSValueRef Jsc_##name(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount, const JSValueRef arguments[], JSValueRef *exception) \
   {                                                                                                                                                                \
-    printf("TODO: implement KOALA_INTEROP_CTX_4 for jsc");                                                                                                         \
+    printf("Improve: implement KOALA_INTEROP_CTX_4 for jsc");                                                                                                         \
     KOALA_MAYBE_LOG(name)                                                                                                                                          \
     P0 p0 = getArgument<P0>(ctx, argumentCount, arguments, 0);                                                                                                     \
     P1 p1 = getArgument<P1>(ctx, argumentCount, arguments, 1);                                                                                                     \
@@ -683,10 +683,10 @@ void InitExports(JSGlobalContextRef globalContext);
   }                                                                                                                                                                \
   MAKE_JSC_EXPORT(name)
 
-// todo: implement properly
+// Improve: implement properly
 #define KOALA_INTEROP_CTX_V3(name, P0, P1, P2) \
   JSValueRef Jsc_##name(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount, const JSValueRef arguments[], JSValueRef* exception) { \
-    printf("TODO: implement KOALA_INTEROP_CTX_V3 for jsc"); \
+    printf("Improve: implement KOALA_INTEROP_CTX_V3 for jsc"); \
     KOALA_MAYBE_LOG(name)                                             \
     P0 p0 = getArgument<P0>(ctx, argumentCount, arguments, 0);  \
     P1 p1 = getArgument<P1>(ctx, argumentCount, arguments, 1);  \
@@ -698,7 +698,7 @@ void InitExports(JSGlobalContextRef globalContext);
 
 #define KOALA_INTEROP_CTX_V4(name, P0, P1, P2, P3) \
   JSValueRef Jsc_##name(JSContextRef ctx, JSObjectRef function, JSObjectRef thisObject, size_t argumentCount, const JSValueRef arguments[], JSValueRef* exception) { \
-    printf("TODO: implement KOALA_INTEROP_CTX_V4 for jsc"); \
+    printf("Improve: implement KOALA_INTEROP_CTX_V4 for jsc"); \
     KOALA_MAYBE_LOG(name)                                             \
     P0 p0 = getArgument<P0>(ctx, argumentCount, arguments, 0);  \
     P1 p1 = getArgument<P1>(ctx, argumentCount, arguments, 1);  \
@@ -760,13 +760,13 @@ void InitExports(JSGlobalContextRef globalContext);
 
 #define KOALA_INTEROP_THROW(vmContext, object, ...) \
    do { \
-     /* TODO: implement*/ ASSERT(false); \
+     /* Improve: implement*/ ASSERT(false); \
      return __VA_ARGS__; \
    } while (0)
 
 #define KOALA_INTEROP_THROW_STRING(vmContext, message, ...) \
    do { \
-      ASSERT(false); /* TODO: implement*/ \
+      ASSERT(false); /* Improve: implement*/ \
      return __VA_ARGS__; \
    } while (0)
 

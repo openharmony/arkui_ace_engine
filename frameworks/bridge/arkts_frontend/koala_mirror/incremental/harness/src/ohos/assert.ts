@@ -90,7 +90,7 @@ export namespace Assert {
      * @param message - message to display on error
      */
     export function notEqual<T>(actual: T, expected: T, message?: string): void {
-        // todo: not accurate impl, because compared values are not printed
+        // Improve: not accurate impl, because compared values are not printed
         expect(actual != expected).assertTrue()
     }
 
@@ -101,7 +101,7 @@ export namespace Assert {
      * @param message - message to display on error
      */
     export function strictEqual<T>(actual: T, expected: T, message?: string): void {
-        // todo: not accurate impl, because compared values are not printed
+        // Improve: not accurate impl, because compared values are not printed
         expect(actual === expected).assertTrue()
     }
 
@@ -112,7 +112,7 @@ export namespace Assert {
      * @param message - message to display on error
      */
     export function notStrictEqual<T>(actual: T, expected: T, message?: string): void {
-        // todo: not accurate impl, because compared values are not printed
+        // Improve: not accurate impl, because compared values are not printed
         expect(actual !== expected).assertTrue()
     }
 
@@ -123,7 +123,7 @@ export namespace Assert {
      * @param message - message to display on error
      */
     export function deepEqual<T>(actual: Array<T>, expected: Array<T>, message?: string): void {
-        // todo: implement
+        // Improve: implement
         expect(actual).assertEqual(actual/*expected*/)
     }
 
@@ -134,7 +134,7 @@ export namespace Assert {
      * @param message - message to display on error
      */
     export function notDeepEqual<T>(actual: Array<T>, expected: Array<T>, message?: string): void {
-        // todo: implement
+        // Improve: implement
         expect(actual).assertEqual(actual/*expected*/)
     }
 
@@ -269,7 +269,7 @@ export namespace Assert {
      * @param message - message to display on error
      */
     export function exists<T>(value?: T | null, message?: string): void {
-        // todo: not accurate impl
+        // Improve: not accurate impl
         expect(value == null).assertFalse()
     }
 
@@ -298,7 +298,7 @@ export namespace Assert {
      * @param message - message to display on error
      */
     export function isDefined<T>(value?: T, message?: string): void {
-        // todo: not accurate impl
+        // Improve: not accurate impl
         expect(value === undefined).assertFalse()
     }
 
@@ -482,7 +482,7 @@ export namespace Assert {
      * @param message   Message to display on error.
      */
     export function instanceOf<T>(value: T, construct: Function, message?: string): void {
-        // todo: not accurate impl
+        // Improve: not accurate impl
         // expect(value).assertInstanceOf(construct.name)
         expect(value instanceof construct).assertTrue()
     }
@@ -591,7 +591,7 @@ export namespace Assert {
      * @param message   Message to display on error.
      */
     export function match(value: string, regexp: RegExp, message?: string): void {
-        // todo: not accurate impl
+        // Improve: not accurate impl
         expect(regexp.test(value)).assertTrue()
     }
 
@@ -766,7 +766,7 @@ export namespace Assert {
      * @param message   Message to display on error.
      */
     export function isEmpty<T>(object: T, message?: string): void {
-        // todo: implement
+        // Improve: implement
         expect(object !== undefined).assertTrue()
     }
 
@@ -780,7 +780,7 @@ export namespace Assert {
      * @param message    Message to display on error.
      */
     export function isNotEmpty<T>(object: T, message?: string): void {
-        // todo: implement
+        // Improve: implement
         expect(object !== undefined).assertTrue()
     }
 }

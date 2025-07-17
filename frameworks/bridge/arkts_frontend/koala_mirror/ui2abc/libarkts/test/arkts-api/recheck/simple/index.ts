@@ -19,7 +19,7 @@ export function updateTopLevelClass(
     module: arkts.ETSModule,
     update: (node: arkts.ClassDefinition) => arkts.ClassDefinition
 ) {
-    return arkts.updateETSModuleByStatements(
+    return arkts.factory.updateETSModule(
         module,
         [
             ...module.statements.map((node) => {
@@ -37,6 +37,9 @@ export function updateTopLevelClass(
                 }
                 return node
             })
-        ]
+        ],
+        module.ident,
+        module.getNamespaceFlag(),
+        module.program,
     )
 }

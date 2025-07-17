@@ -22,7 +22,7 @@ import {
     sharedMemoFunction,
 } from "./main_test_module_to_import"
 import { SharedLog } from "./test_module_to_import"
-// import * as ut from "./main_test_module_to_import"
+import * as ut from "./main_test_module_to_import"
 import { isCompilerPlugin } from "../testUtils"
 
 function assertResultArray<T>(actual: Array<T>, ...expected: T[]) {
@@ -654,7 +654,7 @@ class TestImportedMemo {
         GlobalStateHolder.globalState.value
         SharedLog.log.push('testImportedFunction call')
         sharedMemoFunction()
-        // ut.sharedMemoFunction()
+        ut.sharedMemoFunction()
     }
 }
 
@@ -1073,7 +1073,7 @@ suite("Auto-deducing memo annotation", () => {
             "deduced variable call"
         )
     })
-    test.expectFailure("Description of the problem", "memo is assumed when pasing a TRAILING lambda argument to a memo parameter", () => {
+    test.expectFailure("Test not implemented", "memo is assumed when pasing a TRAILING lambda argument to a memo parameter", () => {
         Assert.fail("implement me")
     })
 })
@@ -1500,7 +1500,7 @@ suite("Method receivers", () => {
         )
     })
 
-    test.expectFailure("Description of the problem", "lambda with receiver (ArkTS)", () => {
+    test.expectFailure("Test not implemented", "lambda with receiver (ArkTS)", () => {
         Assert.fail('implement me')
     })
 })
@@ -1602,9 +1602,7 @@ suite("Functions marked with @memo:intrinsic", () => {
 })
 
 suite("Memo functions with all kinds of import and export statements", () => {
-    test.expectFailure(
-        "issue ICB98S: https://gitee.com/rri_opensource/koala_projects/issues/ICB98S",
-        "Named import and qualified import with `*` of memo function",
+    test("Named import and qualified import with `*` of memo function",
         () => {
             SharedLog.log.length = 0
             const root = testRoot(TestImportedMemo.testImportedFunction)

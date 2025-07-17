@@ -18,7 +18,7 @@ import { defaultFilter, listPrograms } from "./plugins"
 import { Program } from "../generated"
 
 export class ProgramProvider {
-    // TODO: migrate to wrappers instead of pointers
+    // Improve: migrate to wrappers instead of pointers
     seenPrograms: Set<KNativePointer> = new Set<KNativePointer>()
     queue: Program[] = []
 

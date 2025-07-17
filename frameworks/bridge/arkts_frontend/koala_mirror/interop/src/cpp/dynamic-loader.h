@@ -17,6 +17,7 @@
 #define _DYNAMIC_LOADER_H
 
 #include <string>
+#include "interop-utils.h"
 
 #ifdef KOALA_WINDOWS
 #include <windows.h>
@@ -28,11 +29,7 @@ inline void* loadLibrary(const std::string& libPath) {
 
 inline const char* libraryError() {
     static char error[256];
-    #ifdef __STDC_LIB_EXT1__ 
-        snprintf_s(error, sizeof error, "error %lu", GetLastError());
-    #else
-        snprintf(error, sizeof error, "error %lu", GetLastError());
-    #endif
+    interop_snprintf(error, sizeof error, "error %lu", GetLastError());
     return error;
 }
 

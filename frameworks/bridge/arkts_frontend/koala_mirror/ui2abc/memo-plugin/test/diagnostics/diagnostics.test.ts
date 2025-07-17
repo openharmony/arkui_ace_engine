@@ -19,8 +19,8 @@ import * as path from "path"
 
 function runCompiler(file: string) {
     return child.spawnSync("../../incremental/tools/panda/arkts/ui2abc", [
-        "--arktsconfig", path.join("test", "arktsconfig-golden.json"),
-        "--output", file,
+        "--arktsconfig", path.resolve(path.join("test", "arktsconfig-golden.json")),
+        "--output", path.resolve(path.join("test/build/abc", file.replace(/\.ets$/, ".abc"))),
         path.join("test", "diagnostics", "input", file),
    ])
 }

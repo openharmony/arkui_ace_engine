@@ -35,3 +35,17 @@ export function memoryStats(): string {
 export function launchJob(job: () => void): Promise<void> {
     throw new Error("unsupported yet: return launch job()")
 }
+
+export class CoroutineLocalValue<T> {
+    private map = new containers.ConcurrentHashMap<int, T>
+    get(): T | undefined {
+        return this.map.get(CoroutineExtras.getWorkerId())
+    }
+    set(value: T | undefined) {
+        if (value) {
+            this.map.set(CoroutineExtras.getWorkerId(), value)
+        } else {
+            this.map.delete(CoroutineExtras.getWorkerId())
+        }
+    }
+}

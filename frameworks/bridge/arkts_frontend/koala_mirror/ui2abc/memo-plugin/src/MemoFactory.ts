@@ -14,7 +14,7 @@
  */
 
 import * as arkts from "@koalaui/libarkts"
-import { DebugNames, RuntimeNames, isVoidReturn } from "./utils"
+import { DebugNames, RuntimeNames, getRuntimePackage, isVoidReturn } from "./utils"
 
 export class factory {
     // Importing
@@ -40,7 +40,7 @@ export class factory {
     static createContextTypesImportDeclaration(debug: boolean, path?: string): arkts.ETSImportDeclaration {
         const mandatory = [factory.createContextTypeImportSpecifier(), factory.createIdTypeImportSpecifier()]
         return arkts.factory.createETSImportDeclaration(
-            arkts.factory.createStringLiteral(path ?? RuntimeNames.CONTEXT_TYPE_DEFAULT_IMPORT),
+            arkts.factory.createStringLiteral(path ?? getRuntimePackage()),
             debug ? [...mandatory, factory.createHashImportSpecifier()] : mandatory,
             arkts.Es2pandaImportKinds.IMPORT_KINDS_ALL
         )
@@ -205,7 +205,7 @@ export class factory {
                         ],
                         arkts.factory.createTSTypeParameterInstantiation(
                             returnTypeAnnotation
-                                ? [returnTypeAnnotation]
+                                ? [returnTypeAnnotation.clone()]
                                 : [arkts.factory.createETSPrimitiveType(arkts.Es2pandaPrimitiveType.PRIMITIVE_TYPE_VOID)],
                         ),
                     )
@@ -313,7 +313,7 @@ export class factory {
         return undefined
     }
     static deduceAsWrapperType(node: arkts.TSAsExpression): arkts.TypeNode|undefined {
-        return node.typeAnnotation
+        return node.typeAnnotation?.clone()
     }
     static deduceObjectWrapperType(node: arkts.Expression): arkts.TypeNode|undefined {
         return undefined
@@ -324,17 +324,16 @@ export class factory {
         const params = arrow.function?.params?.map(it => {
             const param = it as arkts.ETSParameterExpression
             return arkts.factory.createETSParameterExpression(
-                arkts.factory.createIdentifier(param.ident!.name),
+                arkts.factory.createIdentifier(param.ident!.name, param.typeAnnotation),
                 param.isOptional,
                 undefined,
-                param.typeAnnotation,
                 undefined
             )
         }) ?? []
         return arkts.factory.createETSFunctionType(
             undefined,
             params,
-            origType,
+            origType.clone(),
             false,
             arkts.Es2pandaScriptFunctionFlags.SCRIPT_FUNCTION_FLAGS_NONE,
             undefined

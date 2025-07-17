@@ -58,7 +58,7 @@ class CallbackRegistry {
         if (!record) {
             console.log(`Callback ${id} is not known`)
             // throw new Error(`Disposed or unwrapped callback called (id = ${id})`)
-            return 0; // todo
+            return 0; // Improve:
         }
         if (record.autoDisposable) {
             this.dispose(id)

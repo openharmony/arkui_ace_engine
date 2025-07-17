@@ -22,6 +22,7 @@
 #include "interop-logging.h"
 #include "dynamic-loader.h"
 #include "koala-types.h"
+#include "interop-utils.h"
 
 // DO NOT USE KOALA INTEROP MECHANISMS IN THIS FILE!
 
@@ -35,6 +36,10 @@
 
 #ifdef KOALA_ANI
 #include "ani.h"
+#endif
+
+#ifdef KOALA_KOTLIN
+#include "kotlin_koala_api.h"
 #endif
 
 #if defined(KOALA_LINUX) || defined(KOALA_MACOS) || defined(KOALA_OHOS)
@@ -128,6 +133,14 @@ const VMLibInfo pandaVMLib = {
 };
 #endif
 
+#ifdef KOALA_KOTLIN
+const VMLibInfo kotlinLib = {
+    .sdkPath = nullptr,
+    .platform = nullptr,
+    .lib = "kotlin_koala",
+};
+#endif
+
 struct VMInitArgs {
     int version;
     int nOptions;
@@ -138,6 +151,7 @@ struct VMInitArgs {
 #define PANDA_VM_KIND 2
 #define ES2PANDA_KIND 3
 #define PANDA_ANI_VM_KIND 4
+#define KOTLIN_KIND 5
 
 struct ForeignVMContext {
     void* currentVMContext;
@@ -292,6 +306,19 @@ static bool ResetErrorIfExists(ani_env *env)
 
 #endif
 
+std::string makeLibPath(const char *sdkPath, const char *platform, const char *lib) {
+    std::string result;
+    result.reserve(255);
+    if (sdkPath) {
+        result.append(sdkPath).append("/");
+    }
+    if (platform) {
+        result.append(platform).append("/");
+    }
+    result.append(libName(lib));
+    return result;
+}
+
 extern "C" DLL_EXPORT KInt LoadVirtualMachine(KInt vmKind, const char* bootFilesDir, const char* userFilesDir, const char* appLibPath, const ForeignVMContext* foreignVMContext)
 {
     if (vmKind == ES2PANDA_KIND) {
@@ -304,6 +331,9 @@ extern "C" DLL_EXPORT KInt LoadVirtualMachine(KInt vmKind, const char* bootFiles
         #endif
         #if defined(KOALA_ETS_NAPI) || defined(KOALA_ANI)
         (vmKind == PANDA_VM_KIND || vmKind == PANDA_ANI_VM_KIND) ? &pandaVMLib :
+        #endif
+        #ifdef KOALA_KOTLIN
+        (vmKind == KOTLIN_KIND) ? &kotlinLib :
         #endif
         nullptr;
 
@@ -318,7 +348,7 @@ extern "C" DLL_EXPORT KInt LoadVirtualMachine(KInt vmKind, const char* bootFiles
 #if USE_SYSTEM_ARKVM
         std::string(thisVM->sdkPath) + "/" + libName(thisVM->lib)
 #elif defined(KOALA_LINUX) || defined(KOALA_MACOS) || defined(KOALA_WINDOWS)
-        std::string(thisVM->sdkPath) + "/" + std::string(thisVM->platform) + "/" + libName(thisVM->lib)
+        makeLibPath(thisVM->sdkPath, thisVM->platform, thisVM->lib)
 #elif defined(KOALA_OHOS)
         std::string(OHOS_USER_LIBS) + "/" + libName(thisVM->lib)
 #else
@@ -473,6 +503,18 @@ extern "C" DLL_EXPORT KInt LoadVirtualMachine(KInt vmKind, const char* bootFiles
     }
 #endif
 
+#ifdef KOALA_KOTLIN
+    if (vmKind == KOTLIN_KIND) {
+        g_vmEntry.vmKind = vmKind;
+
+        typedef kotlin_koala_ExportedSymbols* (*get_symbols_t)(void);
+        get_symbols_t get_symbols = (get_symbols_t)findSymbol(handle, "kotlin_koala_symbols");
+        env = static_cast<void*>(get_symbols());
+
+        result = 0;
+    }
+#endif
+
     if (result != 0) {
         LOGE("Error creating a VM of kind %" LOG_PUBLIC "d: %" LOG_PUBLIC "d\n", vmKind, result);
         return result;
@@ -504,7 +546,7 @@ const AppInfo javaAppInfo = {
     "createApplication",
     "(Ljava/lang/String;Ljava/lang/String;)Lorg/koalaui/arkoala/Application;",
     "start",
-    "()J",
+    "(JI)J",
     "enter",
     "(IIJ)Z",
     "emitEvent",
@@ -520,7 +562,7 @@ const AppInfo pandaAppInfo = {
     "createApplication",
     "Lstd/core/String;Lstd/core/String;ZI:L@ohos/arkui/Application/Application;",
     "start",
-    "J:J",
+    "JI:J",
     "enter",
     "IIJ:Z",
     "emitEvent",
@@ -548,7 +590,7 @@ const AppInfo harnessAniAppInfo = {
     "createApplication",
     "Lstd/core/String;Lstd/core/String;Lstd/core/String;ZI:L@koalaui/ets-harness/src/EtsHarnessApplication/EtsHarnessApplication;",
     "start",
-    "J:J",
+    "JI:J",
     "enter",
     "IIJ:Z",
     "emitEvent",
@@ -563,9 +605,9 @@ const AppInfo aniAppInfo = {
     "createApplication",
     "Lstd/core/String;Lstd/core/String;Lstd/core/String;ZI:L@ohos/arkui/Application/Application;",
     "start",
-    "J:J",
+    "JI:J",
     "enter",
-    "IIJ:Z",
+    "IJ:Z",
     "emitEvent",
     "IIII:Lstd/core/String;",
     "UNUSED",
@@ -575,7 +617,11 @@ const AppInfo aniAppInfo = {
 };
 #endif
 
-extern "C" DLL_EXPORT KNativePointer StartApplication(const char* appUrl, const char* appParams)
+#ifdef KOALA_KOTLIN
+const AppInfo kotlinAppInfo = { 0 };
+#endif
+
+extern "C" DLL_EXPORT KNativePointer StartApplication(const char* appUrl, const char* appParams, int32_t loopIterations)
 {
     const auto isTestEnv = std::string(appUrl) == "EtsHarness";
     const AppInfo* appInfo =
@@ -587,6 +633,9 @@ extern "C" DLL_EXPORT KNativePointer StartApplication(const char* appUrl, const 
         #endif
         #if defined(KOALA_ANI)
         (g_vmEntry.vmKind == PANDA_ANI_VM_KIND) ? isTestEnv ? &harnessAniAppInfo : &aniAppInfo :
+        #endif
+        #if defined(KOALA_KOTLIN)
+        (g_vmEntry.vmKind == KOTLIN_KIND) ? &kotlinAppInfo :
         #endif
         nullptr;
 
@@ -703,7 +752,7 @@ extern "C" DLL_EXPORT KNativePointer StartApplication(const char* appUrl, const 
                 return nullptr;
             }
         }
-        // TODO: pass app entry point!
+        // Improve: pass app entry point!
         return reinterpret_cast<KNativePointer>(etsEnv->CallLongMethod((ets_object)(app), start, &g_vmEntry.foreignVMContext));
     }
 #endif
@@ -728,7 +777,7 @@ extern "C" DLL_EXPORT KNativePointer StartApplication(const char* appUrl, const 
 
         ani_boolean useNativeLog = ANI_FALSE;
         ani_string appUrlString {};
-        status = env->String_NewUTF8(appUrl, strlen(appUrl), &appUrlString);
+        status = env->String_NewUTF8(appUrl, interop_strlen(appUrl), &appUrlString);
         if (status != ANI_OK) {
             ResetErrorIfExists(env);
             return nullptr;
@@ -742,7 +791,7 @@ extern "C" DLL_EXPORT KNativePointer StartApplication(const char* appUrl, const 
         }
 
         ani_string appParamsString {};
-        status = env->String_NewUTF8(appParams, strlen(appParams), &appParamsString);
+        status = env->String_NewUTF8(appParams, interop_strlen(appParams), &appParamsString);
         if (status != ANI_OK) {
             ResetErrorIfExists(env);
             return nullptr;
@@ -808,9 +857,9 @@ extern "C" DLL_EXPORT KNativePointer StartApplication(const char* appUrl, const 
         }
 
         ani_long ptr = 0;
-        // TODO: pass app entry point!
+        // Improve: pass app entry point!
         status = env->Object_CallMethod_Long(static_cast<ani_object>(appInstance), start, &ptr,
-            reinterpret_cast<ani_long>(&g_vmEntry.foreignVMContext));
+            reinterpret_cast<ani_long>(&g_vmEntry.foreignVMContext), loopIterations);
         if (status != ANI_OK) {
             LOGE("Cannot start application");
             ResetErrorIfExists(env);
@@ -819,6 +868,20 @@ extern "C" DLL_EXPORT KNativePointer StartApplication(const char* appUrl, const 
         return reinterpret_cast<KNativePointer>(ptr);
     }
 #endif
+
+#if defined(KOALA_KOTLIN)
+    if (g_vmEntry.vmKind == KOTLIN_KIND) {
+        auto env = reinterpret_cast<kotlin_koala_ExportedSymbols*>(g_vmEntry.env);
+        auto ApplicationType = env->kotlin.root.koala.Application;
+
+        auto app = ApplicationType.Application(appUrl, appParams);
+        g_vmEntry.app = (void*)app.pinned;
+
+        auto ptr = ApplicationType.start(app);
+        return reinterpret_cast<KNativePointer>(ptr.pinned);
+    }
+#endif
+
     return nullptr;
 }
 
@@ -879,6 +942,16 @@ extern "C" DLL_EXPORT KBoolean RunApplication(const KInt arg0, const KInt arg1) 
             return ANI_FALSE;
         }
         return result;
+    }
+#endif
+
+#ifdef KOALA_KOTLIN
+    if (g_vmEntry.vmKind == KOTLIN_KIND) {
+        auto env = reinterpret_cast<kotlin_koala_ExportedSymbols*>(g_vmEntry.env);
+        auto ApplicationType = env->kotlin.root.koala.Application;
+
+        kotlin_koala_kref_koala_Application app = { .pinned = g_vmEntry.app };
+        return ApplicationType.enter(app, arg0, arg1) ? 1 : 0;
     }
 #endif
 
@@ -1024,7 +1097,7 @@ extern "C" DLL_EXPORT void RestartWith(const char* page)
             return;
         }
         ani_string pageString {};
-        auto status = env->String_NewUTF8(page, strlen(page), &pageString);
+        auto status = env->String_NewUTF8(page, interop_strlen(page), &pageString);
         if (status != ANI_OK) {
             ResetErrorIfExists(env);
             return;
@@ -1048,12 +1121,12 @@ extern "C" DLL_EXPORT const char* LoadView(const char* className, const char* pa
             return strdup("Cannot find loadView() method");
         }
         ani_string classNameString {};
-        auto status = env->String_NewUTF8(className, strlen(className), &classNameString);
+        auto status = env->String_NewUTF8(className, interop_strlen(className), &classNameString);
         if (status != ANI_OK) {
             return strdup("Cannot make ANI string");
         }
         ani_string paramsString {};
-        status = env->String_NewUTF8(params, strlen(params), &paramsString);
+        status = env->String_NewUTF8(params, interop_strlen(params), &paramsString);
         if (status != ANI_OK) {
             ResetErrorIfExists(env);
             return strdup("Cannot make ANI string");

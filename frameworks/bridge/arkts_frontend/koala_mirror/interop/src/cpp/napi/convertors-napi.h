@@ -31,7 +31,7 @@
 #include "koala-types.h"
 #include "interop-types.h"
 
-// TODO: switch to more generic convertors eventually.
+// Improve: switch to more generic convertors eventually.
 template<class T>
 struct InteropTypeConverter {
     using InteropType = T;
@@ -162,7 +162,7 @@ template<>
 struct InteropTypeConverter<KSerializerBuffer> {
     using InteropType = napi_value;
     static KSerializerBuffer convertFrom(napi_env env, InteropType value) {
-        return (KSerializerBuffer)getSerializerBufferPointer(env, value); // TODO we are receiving Uint8Array from the native side
+        return (KSerializerBuffer)getSerializerBufferPointer(env, value); // Improve: we are receiving Uint8Array from the native side
     }
     static InteropType convertTo(napi_env env, KSerializerBuffer value) {
       return makePointer(env, value);
@@ -257,7 +257,7 @@ public:
     status = napi_get_cb_info(env, info, &size, nullptr, nullptr, nullptr);
     KOALA_NAPI_THROW_IF_FAILED_VOID(env, status);
     if (size > 0) {
-      args.resize(size);  // TODO statically allocate small array for common case with few arguments passed
+      args.resize(size);  // Improve: statically allocate small array for common case with few arguments passed
       status = napi_get_cb_info(env, info, &size, args.data(), nullptr, nullptr);
       KOALA_NAPI_THROW_IF_FAILED_VOID(env, status);
     }
@@ -452,7 +452,6 @@ inline KBoolean getBoolean(const CallbackInfo& info, int index) {
   NAPI_ASSERT_INDEX(info, index, false);
   return getBoolean(info.Env(), info[index]);
 }
-
 template <typename Type>
 inline Type getArgument(const CallbackInfo& info, int index) = delete;
 
@@ -1414,7 +1413,7 @@ public:
     KOALA_INTEROP_V11(name, P0, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10)
 
 napi_value getKoalaNapiCallbackDispatcher(napi_env env);
-// TODO: can/shall we cache bridge reference?
+// Improve: can/shall we cache bridge reference?
 
 #define KOALA_INTEROP_CALL_VOID(venv, id, length, args)                            \
 {                                                                                  \

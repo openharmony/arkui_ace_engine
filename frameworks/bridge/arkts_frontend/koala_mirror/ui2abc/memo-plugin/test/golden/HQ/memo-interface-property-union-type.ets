@@ -21,9 +21,9 @@ function main(): void {}
 });
 
 interface A {
-  @memo() abstract set memo_union_arg(memo_union_arg: ((__memo_context: __memo_context_type, __memo_id: __memo_id_type)=> void) | undefined)
+  @memo() set memo_union_arg(memo_union_arg: (((__memo_context: __memo_context_type, __memo_id: __memo_id_type)=> void) | undefined))
   
-  @memo() get memo_union_arg(): ((__memo_context: __memo_context_type, __memo_id: __memo_id_type)=> void) | undefined
+  @memo() get memo_union_arg(): (((__memo_context: __memo_context_type, __memo_id: __memo_id_type)=> void) | undefined)
   
 }
 

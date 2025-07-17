@@ -11,7 +11,7 @@ function main(): void {}
     __memo_scope.cached;
     return;
   }
-  let x: C | D = C.$_instantiate(__memo_context, ((__memo_id) + (__hash("id_$_instantiate_@test/HQ/instantiate.ets"))), __memo_context.compute(((__memo_id) + (__hash("id_$_instantiate_@test/HQ/instantiate.ets"))), (() => {
+  let x: (C | D) = C.$_instantiate(__memo_context, ((__memo_id) + (__hash("id_$_instantiate_@test/HQ/instantiate.ets"))), __memo_context.compute(((__memo_id) + (__hash("id_$_instantiate_@test/HQ/instantiate.ets"))), (() => {
     return (() => {
       return new C();
     });

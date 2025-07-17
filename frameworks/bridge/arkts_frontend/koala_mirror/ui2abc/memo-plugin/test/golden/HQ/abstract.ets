@@ -23,7 +23,7 @@ function main(): void {}
 declare abstract class A {
   @memo() public x(__memo_context: __memo_context_type, __memo_id: __memo_id_type): void
   
-  public test_signature(@memo() arg1: ((__memo_context: __memo_context_type, __memo_id: __memo_id_type)=> void), @memo() arg2: ((__memo_context: __memo_context_type, __memo_id: __memo_id_type)=> void) | undefined, @memo() arg3: ((__memo_context: __memo_context_type, __memo_id: __memo_id_type)=> void) | undefined | ((__memo_context: __memo_context_type, __memo_id: __memo_id_type)=> int) | undefined, @memo() x: ((__memo_context: __memo_context_type, __memo_id: __memo_id_type, y: ((z: @memo() ((__memo_context: __memo_context_type, __memo_id: __memo_id_type)=> void))=> void))=> void)): @memo() ((__memo_context: __memo_context_type, __memo_id: __memo_id_type)=> void)
+  public test_signature(@memo() arg1: ((__memo_context: __memo_context_type, __memo_id: __memo_id_type)=> void), @memo() arg2: (((__memo_context: __memo_context_type, __memo_id: __memo_id_type)=> void) | undefined), @memo() arg3: ((((__memo_context: __memo_context_type, __memo_id: __memo_id_type)=> void) | undefined) | (((__memo_context: __memo_context_type, __memo_id: __memo_id_type)=> int) | undefined)), @memo() x: ((__memo_context: __memo_context_type, __memo_id: __memo_id_type, y: ((z: @memo() ((__memo_context: __memo_context_type, __memo_id: __memo_id_type)=> void))=> void))=> void)): @memo() ((__memo_context: __memo_context_type, __memo_id: __memo_id_type)=> void)
   
   public constructor() {}
   

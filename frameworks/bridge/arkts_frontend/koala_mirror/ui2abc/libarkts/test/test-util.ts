@@ -98,7 +98,7 @@ export function fileToAbc(path: string, isModule?: boolean): void {
 
 export function contextToAbc(): void {
     arkts.proceedToState(arkts.Es2pandaContextState.ES2PANDA_STATE_BIN_GENERATED)
-    // TODO: get name of file
+    // Improve: get name of file
     execSync('mkdir -p ./generated')
     execSync('mv ./main.abc ./generated/main.abc')
 }
