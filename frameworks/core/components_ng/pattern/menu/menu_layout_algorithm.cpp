@@ -2738,6 +2738,7 @@ void MenuLayoutAlgorithm::UpdateOptionConstraint(std::list<RefPtr<LayoutWrapper>
 float MenuLayoutAlgorithm::VerticalLayout(const SizeF& size, float position, bool isContextMenu)
 {
     placement_ = Placement::BOTTOM;
+    bool isOutBottom = GreatOrEqual(position + anchorPosition_->GetY() + size.Height(), wrapperRect_.Bottom());
     // can put menu below click point
     if (GreatOrEqual(bottomSpace_, size.Height())) {
         return position + margin_;
@@ -2748,19 +2749,18 @@ float MenuLayoutAlgorithm::VerticalLayout(const SizeF& size, float position, boo
         }
         // can't fit in screen, line up with top of the screen
         return wrapperRect_.Top() + paddingTop_;
-    } else {
-        float wrapperHeight = wrapperSize_.Height();
+    } else if (anchorPosition_.has_value() && isOutBottom) {
         // When the component height is less than the bottom margin and the menu height can be lowered,
         // or when the anchor point y coordinate is at the bottom of the screen and
         // the anchorPosition_ has a set value, the menu should be placed at the bottom of the screen.
-        if (anchorPosition_.has_value()) {
-            if (((LessNotEqual(bottomSpace_, size.Height()) || GreatOrEqual(position, wrapperRect_.Bottom())) &&
-                LessNotEqual(size.Height(), wrapperRect_.Height()))) {
-                return wrapperRect_.Bottom() - size.Height() - paddingBottom_;
-            }
-            // can't fit in screen, line up with top of the screen
-            return wrapperRect_.Top() + paddingTop_;
+        if (((LessNotEqual(bottomSpace_, size.Height()) || GreatOrEqual(position, wrapperRect_.Bottom())) &&
+            LessNotEqual(size.Height(), wrapperRect_.Height()))) {
+            return wrapperRect_.Bottom() - size.Height() - paddingBottom_;
         }
+        // can't fit in screen, line up with top of the screen
+        return wrapperRect_.Top() + paddingTop_;
+    } else {
+        float wrapperHeight = wrapperSize_.Height();
         // put menu above click point
         if (GreatOrEqual(topSpace_, size.Height())) {
             // menu show on top

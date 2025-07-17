@@ -1386,7 +1386,9 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
             menuProperty->UpdateMenuPlacement(menuParam.placement.value_or(OHOS::Ace::Placement::BOTTOM));
         }
         menuProperty->UpdateShowInSubWindow(menuParam.isShowInSubWindow);
-        menuProperty->UpdateAnchorPosition(menuParam.anchorPosition);
+        if (menuParam.isAnchorPosition) {
+            menuProperty->UpdateAnchorPosition(menuParam.anchorPosition);
+        }
     }
     UpdateMenuPaintProperty(menuNode, menuParam, type);
     auto scroll = CreateMenuScroll(column);
@@ -1594,7 +1596,9 @@ void MenuView::UpdateMenuProperties(const RefPtr<FrameNode>& wrapperNode, const 
             menuProperty->UpdateMenuPlacement(menuParam.placement.value());
         }
         menuProperty->UpdateShowInSubWindow(menuParam.isShowInSubWindow);
-        menuProperty->UpdateAnchorPosition(menuParam.anchorPosition);
+        if (menuParam.isAnchorPosition) {
+            menuProperty->UpdateAnchorPosition(menuParam.anchorPosition);
+        }
     }
     UpdateMenuPaintProperty(menuNode, menuParam, type);
 }
