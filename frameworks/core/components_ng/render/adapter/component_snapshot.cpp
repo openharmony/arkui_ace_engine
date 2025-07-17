@@ -29,8 +29,6 @@ namespace {
 
 constexpr std::chrono::duration<int, std::milli> SNAPSHOT_TIMEOUT_DURATION(3000);
 constexpr std::chrono::duration<int, std::milli> CREATE_SNAPSHOT_TIMEOUT_DURATION(80);
-constexpr int32_t CENTER_DIVISOR = 2;
-constexpr int32_t ALPHA_OFFSET = 3;
 
 class CustomizedCallback : public Rosen::SurfaceCaptureCallback {
 public:
@@ -197,7 +195,7 @@ void ProcessImageNode(const RefPtr<UINode>& node, std::string& imageIds)
     if (node->GetTag() == V2::IMAGE_ETS_TAG) {
         auto imageNode = AceType::DynamicCast<FrameNode>(node);
         if (imageNode && AceType::DynamicCast<ImagePattern>(imageNode->GetPattern())) {
-            imageIds += (std::to_string(imageNode->GetId()) + ", " + imageNode->GetInspectorId().value_or("") + ";");
+            imageIds += (std::to_string(imageNode->GetId()) + ", ");
             auto imagePattern = AceType::DynamicCast<ImagePattern>(imageNode->GetPattern());
             imagePattern->SetIsComponentSnapshotNode(true);
             imagePattern->OnVisibleAreaChange(true);
@@ -232,17 +230,6 @@ bool CheckImageSuccessfullyLoad(const RefPtr<UINode>& node, int32_t& imageCount)
             TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
                 "Image loading failed! ImageId=%{public}d ImageState=%{public}d",
                 imageNode->GetId(), static_cast<int32_t>(imageStateManger->GetCurrentState()));
-        }
-        auto canvasImage = imagePattern->GetCanvasImage();
-        CHECK_NULL_RETURN(canvasImage, result);
-        auto pixelMap = canvasImage->GetPixelMap();
-        CHECK_NULL_RETURN(pixelMap, result);
-        const uint8_t* pixels = pixelMap->GetPixels();
-        CHECK_NULL_RETURN(pixels, result);
-        auto byteCount = pixelMap->GetByteCount();
-        if (*(pixels + byteCount/CENTER_DIVISOR + ALPHA_OFFSET) == 0) {
-            TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Image's center pixel is transparent, imageCount:%{public}d.",
-                imageCount);
         }
         return result;
     }
@@ -450,7 +437,6 @@ void ComponentSnapshot::Create(
     if (flag) {
         executor->PostTask(
             [node]() {
-                TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Flush UI tasks with flag");
                 auto pipeline = node->GetContext();
                 CHECK_NULL_VOID(pipeline);
                 pipeline->FlushUITasks();
@@ -486,8 +472,7 @@ void ComponentSnapshot::BuilerTask(JsCallback&& callback, const RefPtr<FrameNode
     const RefPtr<PipelineContext>& pipeline, const SnapshotParam& param)
 {
     int32_t imageCount = 0;
-    auto checkResult = CheckImageSuccessfullyLoad(node, imageCount);
-    if (param.checkImageStatus && !checkResult) {
+    if (param.checkImageStatus && !CheckImageSuccessfullyLoad(node, imageCount)) {
         TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
             "Image loading failed! rootId=%{public}d rootNode=%{public}s",
             node->GetId(), node->GetTag().c_str());
@@ -496,7 +481,6 @@ void ComponentSnapshot::BuilerTask(JsCallback&& callback, const RefPtr<FrameNode
         return;
     }
     if (param.options.waitUntilRenderFinished) {
-        TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Flush UI tasks with waitUntilRenderFinished");
         pipeline->FlushUITasks();
         pipeline->FlushModifier();
         pipeline->FlushMessages();
@@ -505,9 +489,9 @@ void ComponentSnapshot::BuilerTask(JsCallback&& callback, const RefPtr<FrameNode
     auto& rsInterface = Rosen::RSInterfaces::GetInstance();
     TAG_LOGI(AceLogTag::ACE_COMPONENT_SNAPSHOT,
         "Begin to take surfaceCapture for ui, rootId=" SEC_PLD(%{public}d) " depth=%{public}d param=%{public}s "
-        "imageCount=%{public}d size=%{public}s, regionMode=%{public}d",
+        "imageCount=%{public}d size=%{public}s",
         SEC_PARAM(node->GetId()), node->GetDepth(), param.ToString().c_str(), imageCount,
-        node->GetGeometryNode()->GetFrameSize().ToString().c_str(), param.options.regionMode);
+        node->GetGeometryNode()->GetFrameSize().ToString().c_str());
     if (param.options.regionMode == NG::SnapshotRegionMode::NO_REGION) {
         rsInterface.TakeSurfaceCaptureForUI(
             rsNode,
