@@ -1659,7 +1659,9 @@ std::string TextPickerPattern::GetColumnWidthsStr() const
         oss << std::fixed << std::setprecision(PRECISION_TWO) << columnWidth << "px,";
     }
     std::string result = oss.str();
-    result.pop_back();
+    if (!result.empty()) {
+        result.pop_back();
+    }
     return result;
 }
 
