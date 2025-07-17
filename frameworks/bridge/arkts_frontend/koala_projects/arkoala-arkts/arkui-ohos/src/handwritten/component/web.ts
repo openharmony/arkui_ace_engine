@@ -63,6 +63,25 @@ export class ArkWebTransfer {
         return ArkUIAniModule._TransferFileSelectorParamToDynamic(value_casted.peer!.ptr)
     }
 
+    public static transferJsGeolocationStatic(value: Object | undefined | null): Object {
+        registerAllNativeModuleLibraryName()
+        if (value === undefined || value === null) {
+            throw new Error('dynamic object is null or undefined')
+        }
+        let result: JsGeolocation = new JsGeolocation()
+        if (!ArkUIAniModule._TransferJsGeolocationToStatic(result.peer!.ptr, value)) {
+            throw new Error('transfer failed')
+        }
+        return result as Object
+    }
+    public static transferJsGeolocationDynamic(value: Object): Object | undefined | null {
+        if (!TypeChecker.isJsGeolocation(value)) {
+            throw new Error('static object type mismatch')
+        }
+        const value_casted = value as JsGeolocation
+        return ArkUIAniModule._TransferJsGeolocationToDynamic(value_casted.peer!.ptr)
+    }
+
     public static transferJsResultStatic(value: Object | undefined | null): Object {
         registerAllNativeModuleLibraryName()
         if (value === undefined || value === null) {

@@ -88,6 +88,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::TransferScreenCaptureHandlerToStatic)
         },
         ani_native_function {
+            "_TransferJsGeolocationToStatic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferJsGeolocationToStatic)
+        },
+        ani_native_function {
             "_TransferJsResultToStatic",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::TransferJsResultToStatic)
@@ -156,6 +161,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_TransferScreenCaptureHandlerToDynamic",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::TransferScreenCaptureHandlerToDynamic)
+        },
+        ani_native_function {
+            "_TransferJsGeolocationToDynamic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferJsGeolocationToDynamic)
         },
         ani_native_function {
             "_TransferJsResultToDynamic",
