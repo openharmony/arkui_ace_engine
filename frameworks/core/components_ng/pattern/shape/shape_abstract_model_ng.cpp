@@ -172,7 +172,7 @@ void ShapeAbstractModelNG::SetStrokeDashArray(FrameNode* frameNode, const std::v
             return;
         }
         std::vector<Ace::Dimension> result;
-        for (int32_t i = 0; i < segments.size(); i++) {
+        for (size_t i = 0; i < segments.size(); i++) {
             if (resObjArray[i]) {
                 Dimension dim;
                 ResourceParseUtils::ConvertFromResObjNG(resObjArray[i], dim);

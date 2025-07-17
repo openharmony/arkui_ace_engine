@@ -358,8 +358,8 @@ void CanvasRendererPeerImpl::CreateImageData(
 void CanvasRendererPeerImpl::CreateImageData(
     std::vector<uint8_t>& vbuffer, const Ace::ImageData& imageData, uint32_t& width, uint32_t& height)
 {
-    uint32_t finalWidth = std::abs(imageData.dirtyWidth);
-    uint32_t finalHeight = std::abs(imageData.dirtyHeight);
+    uint32_t finalWidth = static_cast<uint32_t>(std::abs(imageData.dirtyWidth));
+    uint32_t finalHeight = static_cast<uint32_t>(std::abs(imageData.dirtyHeight));
     vbuffer.resize(finalWidth * finalHeight * PIXEL_SIZE);
     uint32_t* buffer = (uint32_t*)vbuffer.data();
     if (!buffer || (finalHeight > 0 && finalWidth > (UINT32_MAX / finalHeight))) {
@@ -435,7 +435,7 @@ void CanvasRendererPeerImpl::PutImageData(Ace::ImageData& src, const PutImageDat
     // copy the data from the image data.
     std::vector<uint32_t> vbuffer = src.data;
     auto* buffer = (uint8_t*)vbuffer.data();
-    int32_t bufferLength = vbuffer.size() * sizeof(uint32_t);
+    int32_t bufferLength = static_cast<int32_t>(vbuffer.size() * sizeof(uint32_t));
     imageData.data = std::vector<uint32_t>();
     for (int32_t i = std::max(imageData.dirtyY, 0); i < imageData.dirtyY + imageData.dirtyHeight; ++i) {
         for (int32_t j = std::max(imageData.dirtyX, 0); j < imageData.dirtyX + imageData.dirtyWidth; ++j) {
