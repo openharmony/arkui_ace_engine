@@ -262,6 +262,72 @@ std::string GetSymbolEffectOptionsInJson(const std::optional<SymbolEffectOptions
     return text;
 }
 
+std::unique_ptr<JsonValue> GetSymbolShadowInJson(const std::optional<SymbolShadow>& value)
+{
+    auto res = JsonUtil::Create(true);
+    if (!value.has_value()) {
+        return res;
+    }
+    const auto& shadow = value.value();
+    res->Put("color", (shadow.color).ColorToString().c_str());
+    std::string offsetStr = "[" + std::to_string(shadow.offset.first) + ", "
+                           + std::to_string(shadow.offset.second) + "]";
+    res->Put("offset", offsetStr.c_str());
+    res->Put("radius", std::to_string(shadow.radius).c_str());
+    return res;
+}
+
+std::string GradientTypeToString(SymbolGradientType type)
+{
+    switch (type) {
+        case SymbolGradientType::COLOR_SHADER:
+            return "COLOR_SHADER";
+        case SymbolGradientType::RADIAL_GRADIENT:
+            return "RADIAL_GRADIENT";
+        case SymbolGradientType::LINEAR_GRADIENT:
+            return "LINEAR_GRADIENT";
+        default:
+            return "UNKNOWN";
+    }
+}
+
+std::unique_ptr<JsonValue> GetShaderStyleInJson(const std::optional<std::vector<SymbolGradient>>& value)
+{
+    auto array = JsonUtil::CreateArray(true);
+    if (!value.has_value() || value->empty()) {
+        return array;
+    }
+    for (const auto& gradient : *value) {
+        auto obj = JsonUtil::Create(true);
+        obj->Put("type", GradientTypeToString(gradient.type).c_str());
+        auto colorsArray = JsonUtil::CreateArray(true);
+        for (const auto& color : gradient.symbolColor) {
+            colorsArray->Put("", color.ColorToString().c_str());
+        }
+        obj->Put("symbolColor", colorsArray);
+        auto opacitiesArray = JsonUtil::CreateArray(true);
+        for (float opacity : gradient.symbolOpacities) {
+            opacitiesArray->Put("", std::to_string(opacity).c_str());
+        }
+        obj->Put("symbolOpacities", opacitiesArray);
+        obj->Put("repeating", gradient.repeating ? "true" : "false");
+        if (gradient.angle.has_value()) {
+            obj->Put("angle", std::to_string(*gradient.angle).c_str());
+        }
+        if (gradient.radius.has_value()) {
+            obj->Put("radius", gradient.radius->ToString().c_str());
+        }
+        if (gradient.radialCenterX.has_value()) {
+            obj->Put("radialCenterX", gradient.radialCenterX->ToString().c_str());
+        }
+        if (gradient.radialCenterY.has_value()) {
+            obj->Put("radialCenterY", gradient.radialCenterY->ToString().c_str());
+        }
+        array->Put(obj);
+    }
+    return array;
+}
+
 void FontStyle::UpdateColorByResourceId()
 {
     if (propTextColor) {

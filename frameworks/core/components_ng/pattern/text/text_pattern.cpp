@@ -3974,6 +3974,11 @@ std::unique_ptr<JsonValue> TextPattern::GetShaderStyleInJson() const
     auto resultJson = JsonUtil::Create(true);
     auto layoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, resultJson);
+    auto shaderStyle = layoutProperty->GetShaderStyle();
+    if (shaderStyle.has_value() && shaderStyle->size() > 0) {
+        resultJson = ::OHOS::Ace::NG::GetShaderStyleInJson(shaderStyle);
+        return resultJson;
+    }
     if (layoutProperty->HasGradientShaderStyle()) {
         auto propGradient = layoutProperty->GetGradientShaderStyle().value_or(Gradient());
         auto type = propGradient.GetType();
