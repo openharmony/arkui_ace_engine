@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -212,6 +212,39 @@ HWTEST_F(SelectPatternTestNg, OnModifyDone002, TestSize.Level1)
 
     EXPECT_EQ(val, true);
 }
+
+/**
+ * @tc.name: RemoveParentRestrictionsForFixIdeal001
+ * @tc.desc: Test Select RemoveParentRestrictionsForFixIdeal.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, RemoveParentRestrictionsForFixIdeal001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select.
+     */
+    auto selectPattern = AceType::MakeRefPtr<SelectPattern>();
+    auto selectNode = FrameNode::CreateFrameNode(V2::SELECT_ETS_TAG, -1, selectPattern);
+    auto algorithm = AceType::MakeRefPtr<SelectLayoutAlgorithm>();
+    ASSERT_TRUE(algorithm);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutProp = AceType::MakeRefPtr<LayoutProperty>();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(selectNode, geometryNode, layoutProp);
+    ASSERT_NE(layoutWrapper, nullptr);
+    /**
+     * @tc.steps: step2. LayoutCalPolicy is FIX_AT_IDEAL_SIZE and set maxSize to FULL_SCREEN_SIZE.
+     * @tc.expected: childConstraint.maxSize is infinity.
+     */
+    LayoutConstraintF childConstraint;
+    LayoutPolicyProperty layoutPolicyProperty;
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    layoutProp->layoutPolicy_ = layoutPolicyProperty;
+    algorithm->RemoveParentRestrictionsForFixIdeal(layoutProp, childConstraint);
+    EXPECT_TRUE(std::isinf(childConstraint.maxSize.Width()));
+    EXPECT_TRUE(std::isinf(childConstraint.maxSize.Height()));
+}
+
 
 /**
  * @tc.name: OnModifyDone003

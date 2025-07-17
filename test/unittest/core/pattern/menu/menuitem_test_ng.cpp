@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -81,6 +81,7 @@ constexpr float TARGET_SIZE_WIDTH = 100.0f;
 constexpr float TARGET_SIZE_HEIGHT = 100.0f;
 constexpr float MENU_ITEM_SIZE_WIDTH = 100.0f;
 constexpr float MENU_ITEM_SIZE_HEIGHT = 50.0f;
+constexpr int32_t NODE_ID = 1;
 
 const SizeF FULL_SCREEN_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 const std::vector<std::string> FONT_FAMILY_VALUE = {"cursive"};
@@ -206,6 +207,77 @@ HWTEST_F(MenuItemTestNg, MenuItemAccessibilityPropertyGetText001, TestSize.Level
     menuItemLayoutProperty->UpdateContent(MENU_ITEM_TEXT);
 
     EXPECT_EQ(menuItemAccessibilityProperty_->GetText(), MENU_ITEM_TEXT);
+}
+
+/**
+ * @tc.name: MenuItemRemoveParentRestrictionsForFixIdeal001
+ * @tc.desc: Test MenuItem RemoveParentRestrictionsForFixIdeal.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestNg, MenuItemRemoveParentRestrictionsForFixIdeal001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create menu item.
+     */
+    auto menuItemPattern = AceType::MakeRefPtr<MenuItemPattern>();
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, -1, menuItemPattern);
+    auto algorithm = AceType::MakeRefPtr<MenuItemLayoutAlgorithm>();
+    ASSERT_TRUE(algorithm);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutProp = AceType::MakeRefPtr<LayoutProperty>();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(menuItemNode, geometryNode, layoutProp);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    /**
+     * @tc.steps: step2. LayoutCalPolicy is FIX_AT_IDEAL_SIZE and set maxSize to FULL_SCREEN_SIZE.
+     * @tc.expected: childConstraint.maxSize is infinity.
+     */
+    LayoutConstraintF childConstraint;
+    LayoutPolicyProperty layoutPolicyProperty;
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    layoutProp->layoutPolicy_ = layoutPolicyProperty;
+    algorithm->RemoveParentRestrictionsForFixIdeal(layoutProp, childConstraint);
+    EXPECT_TRUE(std::isinf(childConstraint.maxSize.Width()));
+    EXPECT_TRUE(std::isinf(childConstraint.maxSize.Height()));
+}
+
+/**
+ * @tc.name: MultiMenuRemoveParentRestrictionsForFixIdeal001
+ * @tc.desc: Test MultiMenu RemoveParentRestrictionsForFixIdeal.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestNg, MultiMenuRemoveParentRestrictionsForFixIdeal001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create multi menu.
+     */
+    ScreenSystemManager::GetInstance().SetWindowInfo(FULL_SCREEN_WIDTH, 1.0, 1.0);
+    auto menuNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, NODE_ID, AceType::MakeRefPtr<MenuPattern>(2, TEXT_TAG, MenuType::MULTI_MENU));
+    ASSERT_NE(menuNode, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::MENU_ITEM_ETS_TAG, 1, AceType::MakeRefPtr<MenuPattern>(3, TEXT_TAG, MenuType::MULTI_MENU));
+    frameNode->MountToParent(menuNode);
+    auto algorithm = AceType::MakeRefPtr<MultiMenuLayoutAlgorithm>();
+    ASSERT_TRUE(algorithm);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutProp = AceType::MakeRefPtr<LayoutProperty>();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(menuNode, geometryNode, layoutProp);
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    /**
+     * @tc.steps: step2. LayoutCalPolicy is FIX_AT_IDEAL_SIZE and set maxSize to FULL_SCREEN_SIZE.
+     * @tc.expected: childConstraint.maxSize is infinity.
+     */
+    LayoutConstraintF childConstraint;
+    LayoutPolicyProperty layoutPolicyProperty;
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    layoutProp->layoutPolicy_ = layoutPolicyProperty;
+    algorithm->RemoveParentRestrictionsForFixIdeal(layoutWrapper.GetRawPtr(), childConstraint);
+    EXPECT_TRUE(std::isinf(childConstraint.maxSize.Width()));
+    EXPECT_TRUE(std::isinf(childConstraint.maxSize.Height()));
 }
 
 /**
