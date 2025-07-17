@@ -24,6 +24,12 @@ export class PathStackUtils {
     static result: object | undefined = undefined
     private static infoMaps: Map<string, NavPathInfo> = new Map<string, NavPathInfo>()
     private static infoArray: Array<NavPathInfo> = new Array<NavPathInfo>()
+    static getParamByNavDestinationId(navDestinationId: string): Object | null | undefined {
+        if (PathStackUtils.infoMaps.has(navDestinationId)) {
+            return PathStackUtils.infoMaps.get(navDestinationId)!.param;
+        }
+        return undefined
+    }
     static addNavPathInfo(info: NavPathInfo, launchMode: LaunchMode, isReplace: boolean = false): void {
         if (launchMode === LaunchMode.MOVE_TO_TOP_SINGLETON) {
             let index = PathStackUtils.infoArray.findIndex(element => element.name === info.name)
