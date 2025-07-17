@@ -105,15 +105,18 @@ void CreateThemeScope(ArkUINodeHandle node, ArkUINodeHandle theme)
     withThemeNode->NotifyThemeScopeUpdate();
 }
 
-void SetDefaultTheme(const ArkUI_Uint32* colors, ArkUI_Bool isDark)
+void SetDefaultTheme(const ArkUI_Uint32* colors, ArkUI_Bool isDark, const void* resObjs)
 {
     TAG_LOGD(AceLogTag::ACE_DEFAULT_DOMAIN, "WithTheme SetDefaultTheme isDark:%{public}d", isDark);
     auto themeColors = ConvertColorArrayToTokenColors(colors);
+    auto resourceObjs = ConvertResObjArray(resObjs);
     auto theme = AceType::MakeRefPtr<TokenTheme>(0);
     if (isDark) {
         theme->SetDarkColors(themeColors);
+        theme->SetDarkResObjs(std::move(resourceObjs));
     } else {
         theme->SetColors(themeColors);
+        theme->SetResObjs(std::move(resourceObjs));
     }
     auto colorMode = isDark ? ColorMode::DARK : ColorMode::LIGHT;
     TokenThemeStorage::GetInstance()->SetDefaultTheme(theme, colorMode);

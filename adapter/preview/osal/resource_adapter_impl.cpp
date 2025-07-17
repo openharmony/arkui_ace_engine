@@ -264,7 +264,7 @@ RefPtr<ResourceAdapter> ResourceAdapter::Create()
 }
 
 RefPtr<ResourceAdapter> ResourceAdapter::CreateNewResourceAdapter(
-    const std::string& bundleName, const std::string& moduleName, bool fromTheme)
+    const std::string& bundleName, const std::string& moduleName)
 {
     TAG_LOGW(AceLogTag::ACE_RESOURCE,
         "Cannot preview the component from the %{public}s module, because it contains a resource reference. Preview it "
