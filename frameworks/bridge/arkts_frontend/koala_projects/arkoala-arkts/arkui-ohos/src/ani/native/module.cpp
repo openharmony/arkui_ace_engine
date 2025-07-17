@@ -118,6 +118,41 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::TransferWebContextMenuParamToStatic)
         },
         ani_native_function {
+            "_TransferHttpAuthHandlerToStatic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferHttpAuthHandlerToStatic)
+        },
+        ani_native_function {
+            "_TransferWebResourceReponseToStatic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferWebResourceReponseToStatic)
+        },
+        ani_native_function {
+            "_TransferWebResourceRequestToStatic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferWebResourceRequestToStatic)
+        },
+        ani_native_function {
+            "_TransferConsoleMessageToStatic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferConsoleMessageToStatic)
+        },
+        ani_native_function {
+            "_TransferDataResubmissionHandlerToStatic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferDataResubmissionHandlerToStatic)
+        },
+        ani_native_function {
+            "_TransferClientAuthenticationHandlerToStatic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferClientAuthenticationHandlerToStatic)
+        },
+        ani_native_function {
+            "_TransferSslErrorHandlerToStatic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferSslErrorHandlerToStatic)
+        },
+        ani_native_function {
             "_TransferScreenCaptureHandlerToDynamic",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::TransferScreenCaptureHandlerToDynamic)
@@ -151,6 +186,41 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_TransferWebContextMenuParamToDynamic",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::TransferWebContextMenuParamToDynamic)
+        },
+        ani_native_function {
+            "_TransferHttpAuthHandlerToDynamic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferHttpAuthHandlerToDynamic)
+        },
+        ani_native_function {
+            "_TransferWebResourceReponseToDynamic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferWebResourceReponseToDynamic)
+        },
+        ani_native_function {
+            "_TransferWebResourceRequestToDynamic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferWebResourceRequestToDynamic)
+        },
+        ani_native_function {
+            "_TransferConsoleMessageToDynamic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferConsoleMessageToDynamic)
+        },
+        ani_native_function {
+            "_TransferDataResubmissionHandlerToDynamic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferDataResubmissionHandlerToDynamic)
+        },
+        ani_native_function {
+            "_TransferClientAuthenticationHandlerToDynamic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferClientAuthenticationHandlerToDynamic)
+        },
+        ani_native_function {
+            "_TransferSslErrorHandlerToDynamic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferSslErrorHandlerToDynamic)
         },
         ani_native_function {
             "_ConvertUtils_ConvertFromPixelMapAni",
