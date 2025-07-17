@@ -47,11 +47,10 @@ public:
     {
         CHECK_NULL_VOID(vm_);
         CHECK_NULL_VOID(func_);
-        ani_env* env;
+        ani_env* env = nullptr;
         auto attachCurrentThreadStatus = GetAniEnv(vm_, &env);
-        CHECK_NULL_VOID(env);
-        env->GlobalReference_Delete(func_);
-        if (attachCurrentThreadStatus == ANI_OK) {
+        if (attachCurrentThreadStatus == ANI_OK && env != nullptr) {
+            env->GlobalReference_Delete(func_);
             vm_->DetachCurrentThread();
         }
     }
@@ -331,7 +330,7 @@ void ConvertRemoveCallbackFun(
     callback = [vm, callbackAni]() {
         CHECK_NULL_VOID(vm);
         CHECK_NULL_VOID(callbackAni);
-        ani_env* env;
+        ani_env* env = nullptr;
         auto attachCurrentThreadStatus = GetAniEnv(vm, &env);
         CHECK_NULL_VOID(env);
 
@@ -351,7 +350,7 @@ void ConvertGetCallbackFun(ani_vm* vm, std::function<std::string(const std::stri
         std::string value;
         CHECK_NULL_RETURN(vm, value);
         CHECK_NULL_RETURN(callbackAni, value);
-        ani_env* env;
+        ani_env* env = nullptr;
         auto attachCurrentThreadStatus = GetAniEnv(vm, &env);
         CHECK_NULL_RETURN(env, value);
         auto keyAni = AniUtils::StdStringToANIString(env, key);
@@ -405,8 +404,8 @@ ani_string GetCustomProperty(
     CHECK_NULL_RETURN(frameNode, nullptr);
     auto strKey = AniUtils::ANIStringToStdString(env, aniKey);
     auto ret = modifier->getCommonAniModifier()->getCustomProperty(env, frameNode, strKey);
-    if (!ret.empty()) {
-        auto retValue = AniUtils::StdStringToANIString(env, ret);
+    if (ret.has_value()) {
+        auto retValue = AniUtils::StdStringToANIString(env, ret.value());
         if (retValue) {
             return *retValue;
         }
