@@ -2972,6 +2972,7 @@ void OverlayManager::DeleteMenu(int32_t targetId)
         }
     }
     EraseMenuInfo(targetId);
+    SetIsMenuShow(false);
 }
 
 void OverlayManager::CleanMenuInSubWindowWithAnimation()
@@ -3075,6 +3076,7 @@ void OverlayManager::CleanMenuInSubWindow(int32_t targetId)
         }
         rootNode->RemoveChild(node);
         rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        SetIsMenuShow(false);
         auto subwindowMgr = SubwindowManager::GetInstance();
         subwindowMgr->DeleteHotAreas(Container::CurrentId(), node->GetId(), SubwindowType::TYPE_MENU);
         menuWrapperPattern->SetMenuStatus(MenuStatus::HIDE);
