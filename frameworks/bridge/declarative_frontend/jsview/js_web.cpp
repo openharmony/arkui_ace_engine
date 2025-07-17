@@ -49,6 +49,18 @@
 #include "core/components/web/web_event.h"
 #include "core/components_ng/pattern/web/web_model_ng.h"
 
+#include "bridge/js_frontend/engine/common/js_engine.h"
+#include "core/components/web/web_transfer_api.h"
+
+#define ARKWEB_CREATE_JS_OBJECT(nativeClass, jsClass, funName, eventValue)                                     \
+    napi_value Create##jsClass##Object(napi_env env, const RefPtr<nativeClass>& value)                         \
+    {                                                                                                          \
+        JSRef<JSObject> jsObject = JSClass<jsClass>::NewInstance();                                            \
+        auto nativeObject = Referenced::Claim(jsObject->Unwrap<jsClass>());                                    \
+        nativeObject->funName(eventValue);                                                                     \
+        return WrapNapiValue(env, JSRef<JSVal>::Cast(jsObject), static_cast<void*>(nativeObject.GetRawPtr())); \
+    }
+
 namespace OHOS::Ace {
 namespace {
 const std::string RAWFILE_PREFIX = "resource://RAWFILE/";
@@ -104,11 +116,11 @@ namespace OHOS::Ace::Framework {
 using namespace OHOS::Ace::Framework::CommonUtils;
 bool JSWeb::webDebuggingAccess_ = false;
 int32_t JSWeb::webDebuggingPort_ = 0;
-class JSWebDialog : public Referenced {
+class JSWebDialog : public WebTransferBase<RefPtr<Result>> {
 public:
     static void JSBind(BindingTarget globalObj)
     {
-        JSClass<JSWebDialog>::Declare("WebDialog");
+        JSClass<JSWebDialog>::Declare("JsResult");
         JSClass<JSWebDialog>::CustomMethod("handleConfirm", &JSWebDialog::Confirm);
         JSClass<JSWebDialog>::CustomMethod("handleCancel", &JSWebDialog::Cancel);
         JSClass<JSWebDialog>::CustomMethod("handlePromptConfirm", &JSWebDialog::PromptConfirm);
@@ -118,6 +130,7 @@ public:
     void SetResult(const RefPtr<Result>& result)
     {
         result_ = result;
+        transferValues_ = std::make_tuple(result_);
     }
 
     void Confirm(const JSCallbackInfo& args)
@@ -1477,7 +1490,7 @@ private:
     RefPtr<WebRequest> request_;
 };
 
-class JSFileSelectorParam : public Referenced {
+class JSFileSelectorParam : public WebTransferBase<RefPtr<WebFileSelectorParam>> {
 public:
     static void JSBind(BindingTarget globalObj)
     {
@@ -1494,6 +1507,7 @@ public:
     void SetParam(const FileSelectorEvent& eventInfo)
     {
         param_ = eventInfo.GetParam();
+        transferValues_ = std::make_tuple(param_);
     }
 
     void GetTitle(const JSCallbackInfo& args)
@@ -1563,7 +1577,7 @@ private:
     RefPtr<WebFileSelectorParam> param_;
 };
 
-class JSFileSelectorResult : public Referenced {
+class JSFileSelectorResult : public WebTransferBase<RefPtr<FileSelectorResult>> {
 public:
     static void JSBind(BindingTarget globalObj)
     {
@@ -1576,6 +1590,7 @@ public:
     void SetResult(const FileSelectorEvent& eventInfo)
     {
         result_ = eventInfo.GetFileSelectorResult();
+        transferValues_ = std::make_tuple(result_);
     }
 
     void HandleFileList(const JSCallbackInfo& args)
@@ -1619,7 +1634,7 @@ private:
     RefPtr<FileSelectorResult> result_;
 };
 
-class JSContextMenuParam : public Referenced {
+class JSContextMenuParam : public WebTransferBase<RefPtr<WebContextMenuParam>> {
 public:
     static void JSBind(BindingTarget globalObj)
     {
@@ -1671,6 +1686,7 @@ public:
     {
         param_ = eventInfo.GetParam();
         UpdatePreviewSize();
+        transferValues_ = std::make_tuple(param_);
     }
 
     void GetXCoord(const JSCallbackInfo& args)
@@ -1827,7 +1843,7 @@ private:
     int32_t previewHeight_ = -1;
 };
 
-class JSContextMenuResult : public Referenced {
+class JSContextMenuResult : public WebTransferBase<RefPtr<ContextMenuResult>> {
 public:
     static void JSBind(BindingTarget globalObj)
     {
@@ -1848,6 +1864,7 @@ public:
     void SetResult(const ContextMenuEvent& eventInfo)
     {
         result_ = eventInfo.GetContextMenuResult();
+        transferValues_ = std::make_tuple(result_);
     }
 
     void Cancel(const JSCallbackInfo& args)
@@ -2163,6 +2180,36 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSWebKeyboardController::JSBind(globalObj);
 }
 
+napi_env GetNapiEnv()
+{
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_RETURN(engine, nullptr);
+    auto nativeEngine = engine->GetNativeEngine();
+    CHECK_NULL_RETURN(nativeEngine, nullptr);
+    return reinterpret_cast<napi_env>(nativeEngine);
+}
+
+napi_value WrapNapiValue(napi_env env, const JSRef<JSVal>& obj, void* nativeValue)
+{
+    napi_value undefined;
+    napi_get_undefined(env, &undefined);
+    CHECK_NULL_RETURN(obj->IsObject(), undefined);
+    ArkNativeEngine* nativeEngine = reinterpret_cast<ArkNativeEngine*>(env);
+    CHECK_NULL_RETURN(nativeEngine, undefined);
+    panda::Local<JsiValue> value = obj.Get().GetLocalHandle();
+    JSValueWrapper valueWrapper = value;
+    ScopeRAII scope(env);
+    napi_value napiValue = nativeEngine->ValueToNapiValue(valueWrapper);
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, napiValue, &valueType);
+    if (valueType != napi_object) {
+        return undefined;
+    }
+    napi_wrap(env, napiValue, nativeValue,
+        [](napi_env env, void *data, void *hint) {}, nullptr, nullptr);
+    return napiValue;
+}
+
 JSRef<JSVal> LoadWebConsoleLogEventToJSValue(const LoadWebConsoleLogEvent& eventInfo)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::New();
@@ -2194,7 +2241,7 @@ JSRef<JSVal> WebDialogEventToJSValue(const WebDialogEvent& eventInfo)
     JSRef<JSObject> resultObj = JSClass<JSWebDialog>::NewInstance();
     auto jsWebDialog = Referenced::Claim(resultObj->Unwrap<JSWebDialog>());
     jsWebDialog->SetResult(eventInfo.GetResult());
-
+    WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(resultObj), static_cast<void *>(jsWebDialog.GetRawPtr()));
     obj->SetProperty("url", eventInfo.GetUrl());
     obj->SetProperty("message", eventInfo.GetMessage());
     if (eventInfo.GetType() == DialogEventType::DIALOG_EVENT_PROMPT) {
@@ -3659,10 +3706,12 @@ JSRef<JSVal> FileSelectorEventToJSValue(const FileSelectorEvent& eventInfo)
     JSRef<JSObject> paramObj = JSClass<JSFileSelectorParam>::NewInstance();
     auto fileSelectorParam = Referenced::Claim(paramObj->Unwrap<JSFileSelectorParam>());
     fileSelectorParam->SetParam(eventInfo);
+    WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(paramObj), static_cast<void *>(fileSelectorParam.GetRawPtr()));
 
     JSRef<JSObject> resultObj = JSClass<JSFileSelectorResult>::NewInstance();
     auto fileSelectorResult = Referenced::Claim(resultObj->Unwrap<JSFileSelectorResult>());
     fileSelectorResult->SetResult(eventInfo);
+    WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(resultObj), static_cast<void *>(fileSelectorResult.GetRawPtr()));
 
     obj->SetPropertyObject("result", resultObj);
     obj->SetPropertyObject("fileSelector", paramObj);
@@ -3721,10 +3770,12 @@ JSRef<JSVal> ContextMenuEventToJSValue(const ContextMenuEvent& eventInfo)
     JSRef<JSObject> paramObj = JSClass<JSContextMenuParam>::NewInstance();
     auto contextMenuParam = Referenced::Claim(paramObj->Unwrap<JSContextMenuParam>());
     contextMenuParam->SetParam(eventInfo);
+    WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(paramObj), static_cast<void *>(contextMenuParam.GetRawPtr()));
 
     JSRef<JSObject> resultObj = JSClass<JSContextMenuResult>::NewInstance();
     auto contextMenuResult = Referenced::Claim(resultObj->Unwrap<JSContextMenuResult>());
     contextMenuResult->SetResult(eventInfo);
+    WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(resultObj), static_cast<void *>(contextMenuResult.GetRawPtr()));
 
     obj->SetPropertyObject("result", resultObj);
     obj->SetPropertyObject("param", paramObj);
@@ -6405,4 +6456,10 @@ void JSWeb::OnPdfLoadEvent(const JSCallbackInfo& args)
     };
     WebModel::GetInstance()->SetOnPdfLoadEvent(jsCallback);
 }
+
+ARKWEB_CREATE_JS_OBJECT(Result, JSWebDialog, SetResult, value)
+ARKWEB_CREATE_JS_OBJECT(FileSelectorResult, JSFileSelectorResult, SetResult, FileSelectorEvent(nullptr, value))
+ARKWEB_CREATE_JS_OBJECT(WebFileSelectorParam, JSFileSelectorParam, SetParam, FileSelectorEvent(value, nullptr))
+ARKWEB_CREATE_JS_OBJECT(ContextMenuResult, JSContextMenuResult, SetResult, ContextMenuEvent(nullptr, value))
+ARKWEB_CREATE_JS_OBJECT(WebContextMenuParam, JSContextMenuParam, SetParam, ContextMenuEvent(value, nullptr))
 } // namespace OHOS::Ace::Framework
