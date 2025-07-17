@@ -93,6 +93,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::TransferJsResultToStatic)
         },
         ani_native_function {
+            "_TransferEventResultToStatic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferEventResultToStatic)
+        },
+        ani_native_function {
             "_TransferFileSelectorResultToStatic",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::TransferFileSelectorResultToStatic)
@@ -121,6 +126,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_TransferJsResultToDynamic",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::TransferJsResultToDynamic)
+        },
+        ani_native_function {
+            "_TransferEventResultToDynamic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferEventResultToDynamic)
         },
         ani_native_function {
             "_TransferFileSelectorResultToDynamic",

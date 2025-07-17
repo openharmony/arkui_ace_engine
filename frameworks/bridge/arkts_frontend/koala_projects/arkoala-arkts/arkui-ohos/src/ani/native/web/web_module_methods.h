@@ -24,6 +24,7 @@ void SetWebControllerControllerHandler(ani_env* env, ani_class aniClass, ani_lon
 
 ani_boolean TransferScreenCaptureHandlerToStatic(ani_env* env, ani_class aniClass, ani_long node, ani_object input);
 ani_boolean TransferJsResultToStatic(ani_env* env, ani_class aniClass, ani_long node, ani_object input);
+ani_boolean TransferEventResultToStatic(ani_env* env, ani_class aniClass, ani_long node, ani_object input);
 ani_boolean TransferFileSelectorResultToStatic(ani_env* env, ani_class aniClass, ani_long node, ani_object input);
 ani_boolean TransferFileSelectorParamToStatic(ani_env* env, ani_class aniClass, ani_long node, ani_object input);
 ani_boolean TransferWebContextMenuResultToStatic(ani_env* env, ani_class aniClass, ani_long node, ani_object input);
@@ -31,6 +32,7 @@ ani_boolean TransferWebContextMenuParamToStatic(ani_env* env, ani_class aniClass
 
 ani_object TransferScreenCaptureHandlerToDynamic(ani_env* env, ani_class aniClass, ani_long node);
 ani_object TransferJsResultToDynamic(ani_env* env, ani_class aniClass, ani_long node);
+ani_object TransferEventResultToDynamic(ani_env* env, ani_class aniClass, ani_long node);
 ani_object TransferFileSelectorResultToDynamic(ani_env* env, ani_class aniClass, ani_long node);
 ani_object TransferFileSelectorParamToDynamic(ani_env* env, ani_class aniClass, ani_long node);
 ani_object TransferWebContextMenuResultToDynamic(ani_env* env, ani_class aniClass, ani_long node);

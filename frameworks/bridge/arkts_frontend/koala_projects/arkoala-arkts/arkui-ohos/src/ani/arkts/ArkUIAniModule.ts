@@ -63,6 +63,7 @@ export class ArkUIAniModule {
     // for web
     native static _TransferScreenCaptureHandlerToStatic(ptr: KPointer, value: Object | undefined | null): boolean
     native static _TransferJsResultToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
+    native static _TransferEventResultToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
     native static _TransferFileSelectorResultToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
     native static _TransferFileSelectorParamToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
     native static _TransferWebContextMenuResultToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
@@ -70,6 +71,7 @@ export class ArkUIAniModule {
 
     native static _TransferScreenCaptureHandlerToDynamic(ptr: KPointer): Object | undefined | null
     native static _TransferJsResultToDynamic(ptr: KPointer) : Object | undefined | null
+    native static _TransferEventResultToDynamic(ptr: KPointer) : Object | undefined | null
     native static _TransferFileSelectorResultToDynamic(ptr: KPointer) : Object | undefined | null
     native static _TransferFileSelectorParamToDynamic(ptr: KPointer) : Object | undefined | null
     native static _TransferWebContextMenuResultToDynamic(ptr: KPointer) : Object | undefined | null

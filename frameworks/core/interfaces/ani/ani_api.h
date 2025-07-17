@@ -75,12 +75,14 @@ struct ArkUIAniWebModifier {
     void (*setWebControllerControllerHandler)(void* controllerHandler, const WebviewControllerInfo& controllerInfo);
     bool (*transferScreenCaptureHandlerToStatic)(void* peer, void* nativePtr);
     bool (*transferJsResultToStatic)(void* peer, void* nativePtr);
+    bool (*transferEventResultToStatic)(void* peer, void* nativePtr);
     bool (*transferFileSelectorResultToStatic)(void* peer, void* nativePtr);
     bool (*transferFileSelectorParamToStatic)(void* peer, void* nativePtr);
     bool (*transferWebContextMenuResultToStatic)(void* peer, void* nativePtr);
     bool (*transferWebContextMenuParamToStatic)(void* peer, void* nativePtr);
     napi_value (*transferScreenCaptureHandlerToDynamic)(napi_env env, void* peer);
     napi_value (*transferJsResultToDynamic)(napi_env env, void* peer);
+    napi_value (*transferEventResultToDynamic)(napi_env env, void* peer);
     napi_value (*transferFileSelectorResultToDynamic)(napi_env env, void* peer);
     napi_value (*transferFileSelectorParamToDynamic)(napi_env env, void* peer);
     napi_value (*transferWebContextMenuResultToDynamic)(napi_env env, void* peer);
