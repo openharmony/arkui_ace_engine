@@ -230,6 +230,9 @@ struct ArkUIAniXComponentModifier {
         std::function<void(const std::string&, float, float, float, float)>&& onSurfaceChanged,
         std::function<void(const std::string&)>&& onSurfaceDestroyed);
 };
+struct ArkUIAniConditionScopeModifier {
+    ani_long (*constructConditionScope)(ani_int);
+};
 struct ArkUIAniModifiers {
     ArkUI_Int32 version;
     const ArkUIAniImageModifier* (*getImageAniModifier)();
@@ -251,6 +254,7 @@ struct ArkUIAniModifiers {
     const ArkUIAniShapeModifier* (*getArkUIAniShapeModifier)();
     const ArkUIAniStateMgmtModifier* (*getStateMgmtAniModifier)();
     const ArkUIAniXComponentModifier* (*getArkUIAniXComponentModifier)();
+    const ArkUIAniConditionScopeModifier* (*getArkUIAniConditionScopeModifier)();
 };
 
 __attribute__((visibility("default"))) const ArkUIAniModifiers* GetArkUIAniModifiers(void);

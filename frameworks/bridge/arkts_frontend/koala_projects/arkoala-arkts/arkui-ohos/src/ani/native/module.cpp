@@ -37,6 +37,7 @@
 #include "stateMgmt/stateMgmt_module.h"
 #include "shape/shape_module_methods.h"
 #include "xcomponent/xcomponent_module_methods.h"
+#include "condition_scope/condition_scope.h"
 
 ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
 {
@@ -586,6 +587,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_OnLayout_InnerLayout",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::OnLayoutInnerLayout)
+        },
+        ani_native_function {
+            "_ConditionScopeNode_Construct",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ConstructConditionScope)
         },
     };
 

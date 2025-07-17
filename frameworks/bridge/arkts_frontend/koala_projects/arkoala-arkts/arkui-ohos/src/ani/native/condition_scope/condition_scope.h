@@ -13,32 +13,16 @@
  * limitations under the License.
  */
 
-import { conditionScopeImpl, conditionBranchImpl } from './conditionScope'
 
-export class WrappedBuilder<T> {
-    /** @memo */
-    builder: T;
-    constructor(t: T) {
-        this.builder = t;
-    }
-}
+#ifndef KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_CONDITION_SCOPE_NODE_MODULE
+#define KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_CONDITION_SCOPE_NODE_MODULE
 
-export function wrapBuilder<T>(builder: T): WrappedBuilder<T> {
-    return new WrappedBuilder<T>(builder);
-}
+#include "ani.h"
 
-/** @memo */
-export function ConditionScope(
-    /** @memo */
-    content: () => void
-): void {
-    conditionScopeImpl(content);
-}
+namespace OHOS::Ace::Ani {
 
-/** @memo */
-export function ConditionBranch(
-    /** @memo */
-    content: () => void
-): void {
-    conditionBranchImpl(content);
-}
+ani_long ConstructConditionScope(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_int id);
+
+} // namespace OHOS::Ace::Ani
+
+#endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_CONDITION_SCOPE_NODE_MODULE

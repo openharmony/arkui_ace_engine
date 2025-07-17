@@ -31,6 +31,7 @@
 #include "stateMgmt_ani_modifier.h"
 #include "xcomponent_ani_modifier.h"
 #include "lazy_for_each_node_ani_modifier.h"
+#include "condition_scope_ani_modifier.h"
 
 extern "C" {
 const ArkUIAniModifiers* GetArkUIAniModifiers()
@@ -56,6 +57,7 @@ const ArkUIAniModifiers* GetArkUIAniModifiers()
         .getArkUIAniShapeModifier = OHOS::Ace::NG::GetShapeAniModifier,
         .getStateMgmtAniModifier = OHOS::Ace::NG::GetStateMgmtAniModifier,
         .getArkUIAniXComponentModifier = OHOS::Ace::NG::GetXComponentAniModifier,
+        .getArkUIAniConditionScopeModifier = OHOS::Ace::NG::GetConditionScopeAniModifier,
     };
     return &impl;
 }
