@@ -613,7 +613,7 @@ private:
     RefPtr<WebConsoleLog> message_;
 };
 
-class JSWebGeolocation : public Referenced {
+class JSWebGeolocation : public WebTransferBase<RefPtr<WebGeolocation>> {
 public:
     static void JSBind(BindingTarget globalObj)
     {
@@ -625,6 +625,7 @@ public:
     void SetEvent(const LoadWebGeolocationShowEvent& eventInfo)
     {
         webGeolocation_ = eventInfo.GetWebGeolocation();
+        transferValues_ = std::make_tuple(webGeolocation_);
     }
 
     void Invoke(const JSCallbackInfo& args)
@@ -2401,6 +2402,7 @@ JSRef<JSVal> LoadWebGeolocationShowEventToJSValue(const LoadWebGeolocationShowEv
     JSRef<JSObject> geolocationObj = JSClass<JSWebGeolocation>::NewInstance();
     auto geolocationEvent = Referenced::Claim(geolocationObj->Unwrap<JSWebGeolocation>());
     geolocationEvent->SetEvent(eventInfo);
+    WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(geolocationObj), static_cast<void *>(geolocationEvent.GetRawPtr()));
     obj->SetPropertyObject("geolocation", geolocationObj);
     return JSRef<JSVal>::Cast(obj);
 }
@@ -6492,6 +6494,7 @@ void JSWeb::OnPdfLoadEvent(const JSCallbackInfo& args)
 }
 
 ARKWEB_CREATE_JS_OBJECT(WebScreenCaptureRequest, JSScreenCaptureRequest, SetEvent, value)
+ARKWEB_CREATE_JS_OBJECT(WebGeolocation, JSWebGeolocation, SetEvent, LoadWebGeolocationShowEvent("", value))
 ARKWEB_CREATE_JS_OBJECT(Result, JSWebDialog, SetResult, value)
 ARKWEB_CREATE_JS_OBJECT(GestureEventResult, JSNativeEmbedGestureRequest, SetResult, value)
 ARKWEB_CREATE_JS_OBJECT(FileSelectorResult, JSFileSelectorResult, SetResult, FileSelectorEvent(nullptr, value))
