@@ -249,7 +249,6 @@ template("ace_core_interfaces_native_node") {
     if (defined(config.pixel_map_support)) {
       external_deps += [
         "image_framework:image",
-        "image_framework:image_taihe",
       ]
     }
     if (defined(config.enable_drag_framework) && config.enable_drag_framework) {
@@ -257,7 +256,6 @@ template("ace_core_interfaces_native_node") {
       if (defined(global_parts_info.distributeddatamgr_udmf)) {
         external_deps += [ "udmf:udmf_client" ]
         external_deps += [ "udmf:libudmf" ]
-        external_deps += [ "udmf:udmf_taihe_native" ]
       }
     }
     if (build_ohos_sdk) {
