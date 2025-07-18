@@ -136,6 +136,10 @@ struct ArkUIAniCommonModifier {
 };
 struct ArkUIAniCustomNodeModifier {
     ani_long (*constructCustomNode)(ani_int);
+    ani_object (*queryNavigationInfo)(ani_env* env, ani_long node);
+    ani_object (*queryNavDestinationInfo)(ani_env* env, ani_long node);
+    ani_object (*queryNavDestinationInfo0)(ani_env* env, ani_long node, ani_int isInner);
+    ani_object (*queryRouterPageInfo)(ani_env* env, ani_long node);
 };
 struct ArkUIAniDrawModifier {
     void (*setDrawModifier)(ani_env* env, ani_long ptr, ani_int flag, ani_object fnObj);

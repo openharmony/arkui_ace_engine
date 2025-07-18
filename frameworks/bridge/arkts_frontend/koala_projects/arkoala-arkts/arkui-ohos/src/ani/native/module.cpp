@@ -238,6 +238,26 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::ConvertFromPixelMapAni)
         },
         ani_native_function {
+            "_CustomNode_QueryNavigationInfo",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::QueryNavigationInfo)
+        },
+        ani_native_function {
+            "_CustomNode_QueryNavDestinationInfo",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::QueryNavDestinationInfo)
+        },
+        ani_native_function {
+            "_CustomNode_QueryNavDestinationInfo0",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::QueryNavDestinationInfo0)
+        },
+        ani_native_function {
+            "_CustomNode_QueryRouterPageInfo",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::QueryRouterPageInfo)
+        },
+        ani_native_function {
             "_ConvertUtils_ConvertToPixelMapAni",
             "J:L@ohos/multimedia/image/image/PixelMap;",
             reinterpret_cast<void*>(OHOS::Ace::Ani::ConvertToPixelMapAni)
