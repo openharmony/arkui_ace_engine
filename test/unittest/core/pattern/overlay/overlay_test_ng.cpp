@@ -2811,12 +2811,21 @@ HWTEST_F(OverlayTestNg, BeforeCreateLayoutWrapperTest002, TestSize.Level1)
     auto topModalPattern = topModalNode->GetPattern<ModalPresentationPattern>();
     topModalPattern->SetEnableSafeArea(true);
     EXPECT_TRUE(topModalPattern->enableSafeArea_);
+    auto host = topModalPattern->GetHost();
+    EXPECT_NE(host, nullptr);
+    auto context = host->GetContext();
+    EXPECT_NE(context, nullptr);
+    auto inset = context->GetSafeAreaWithoutProcess();
+    NG::CalcLength safeAreaPaddingLeft(inset.left_.Length());
+    NG::CalcLength safeAreaPaddingRight(inset.right_.Length());
     topModalPattern->BeforeCreateLayoutWrapper();
     auto modalNodeLayoutProperty = topModalNode->layoutProperty_;
     ASSERT_NE(modalNodeLayoutProperty, nullptr);
     const std::unique_ptr<PaddingProperty>& modalSafeAreaPaddingProp =
         modalNodeLayoutProperty->GetSafeAreaPaddingProperty();
     ASSERT_NE(modalSafeAreaPaddingProp, nullptr);
+    EXPECT_EQ(modalSafeAreaPaddingProp->left, safeAreaPaddingLeft);
+    EXPECT_EQ(modalSafeAreaPaddingProp->right, safeAreaPaddingRight);
 }
 
 /**
