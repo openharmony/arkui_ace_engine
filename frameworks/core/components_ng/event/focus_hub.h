@@ -318,7 +318,7 @@ struct ScopeFocusAlgorithm final {
     GetNextFocusNodeFunc getNextFocusNode;
 };
 
-class ACE_EXPORT FocusHub : public virtual FocusEventHandler, public virtual FocusState {
+class ACE_FORCE_EXPORT FocusHub : public virtual FocusEventHandler, public virtual FocusState {
     DECLARE_ACE_TYPE(FocusHub, FocusEventHandler, FocusState)
 public:
     explicit FocusHub(const WeakPtr<EventHub>& eventHub, FocusType type = FocusType::DISABLE, bool focusable = false)
