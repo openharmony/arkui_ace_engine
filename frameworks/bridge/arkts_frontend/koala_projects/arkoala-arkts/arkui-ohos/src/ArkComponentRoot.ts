@@ -60,16 +60,12 @@ export function ArkComponentRoot(
                 let state = mutableState(false)
                 scheduleCallback(() => {
                     component.aboutToAppear()
-                    // TODO: page visibility doesn't belong here, remove when router transition state properly maintained.
-                    // component.onPageShow()
                     state.value = true
                 })
                 return state
             }, (_: MutableState<boolean> | undefined) =>
                 scheduleCallback(() => {
                     component.aboutToDisappear()
-                    // TODO: page visibility doesn't belong here, remove when router transition state properly maintained.
-                    // component.onPageHide()
                 })
             )
             // Do we need it here?
@@ -78,7 +74,6 @@ export function ArkComponentRoot(
                 InteropNativeModule._NativeLog(`ArkTS ArkComponentRoot NodeAttach before WithRouterTransitionState`)
                 InteropNativeModule._NativeLog("AceRouter:ArkComponentRoot NodeAttach, UpdateRouter page visibility state")
                 content();
-                router.UpdateVisiblePagePeerNode(node);
                 InteropNativeModule._NativeLog(`ArkTS ArkComponentRoot NodeAttach after WithRouterTransitionState`)
             }
         }

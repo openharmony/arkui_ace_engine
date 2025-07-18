@@ -29,6 +29,7 @@ import { HookDragInfo } from "arkui/handwritten"
 import { dragController } from "@ohos/arkui/dragController"
 import { componentSnapshot } from "@ohos/arkui/componentSnapshot"
 import { DrawableDescriptor } from "@ohos.arkui.drawableDescriptor"
+import { uiObserver }  from "@ohos/arkui/observer"
 
 export class ArkUIAniModule {
     static {
@@ -50,6 +51,10 @@ export class ArkUIAniModule {
     native static _Common_GetFocused_InstanceId(): KInt
     native static _Common_GetSharedLocalStorage(): LocalStorage
     native static _CustomNode_Construct(id: KInt, component: ArkCustomComponent): KPointer
+    native static _CustomNode_QueryNavigationInfo(ptr: KPointer): uiObserver.NavigationInfo
+    native static _CustomNode_QueryNavDestinationInfo(ptr: KPointer): uiObserver.NavDestinationInfo
+    native static _CustomNode_QueryNavDestinationInfo0(ptr: KPointer, isInner: boolean): uiObserver.NavDestinationInfo
+    native static _CustomNode_QueryRouterPageInfo(ptr: KPointer): uiObserver.RouterPageInfo
     native static _BuilderProxyNode_Construct(id: KInt): KPointer
     native static _ContentSlot_construct(id: KInt): KPointer
     native static _ContentSlotInterface_setContentSlotOptions(slot: KPointer, content: KPointer): void
