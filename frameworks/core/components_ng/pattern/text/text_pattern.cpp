@@ -946,7 +946,7 @@ void TextPattern::AsyncHandleOnCopySpanStringHtml(RefPtr<SpanString>& subSpanStr
             uiTaskExecutor->PostTask(
                 [weak, multiTypeRecordImpl]() {
                     auto textPattern = weak.Upgrade();
-                    CHECK_NULL_VOID(textPattern);
+                    CHECK_NULL_VOID(textPattern && textPattern->clipboard_);
                     RefPtr<PasteDataMix> pasteData = textPattern->clipboard_->CreatePasteDataMix();
                     textPattern->clipboard_->AddMultiTypeRecord(pasteData, multiTypeRecordImpl);
                     textPattern->clipboard_->SetData(pasteData, textPattern->copyOption_);
@@ -969,10 +969,14 @@ void TextPattern::HandleOnCopySpanString()
 std::list<RefPtr<SpanItem>> TextPattern::GetSpanSelectedContent()
 {
     std::list<RefPtr<SpanItem>> spans;
+    if (!textSelector_.IsValid()) {
+        return spans;
+    }
     auto selectStart = textSelector_.GetTextStart();
     auto selectEnd = textSelector_.GetTextEnd();
     int32_t tag = 0;
     for (const auto& item : spans_) {
+        CHECK_NULL_CONTINUE(item);
         if (item->GetSymbolUnicode() != 0) {
             tag = item->position == -1 ? tag + 1 : item->position;
             continue;
@@ -1030,6 +1034,7 @@ void TextPattern::AsyncHandleOnCopyWithoutSpanStringHtml(const std::string& past
             weak = WeakClaim(this), task = WeakClaim(RawPtr(taskExecutor))]() {
             auto textPattern = weak.Upgrade();
             CHECK_NULL_VOID(textPattern);
+            CHECK_NULL_VOID(multiTypeRecordImpl);
             multiTypeRecordImpl->SetPlainText(pasteData);
             std::string htmlText = "";
             if (!textPattern->spans_.empty()) {
@@ -1044,7 +1049,7 @@ void TextPattern::AsyncHandleOnCopyWithoutSpanStringHtml(const std::string& past
             uiTaskExecutor->PostTask(
                 [weak, multiTypeRecordImpl]() {
                     auto textPattern = weak.Upgrade();
-                    CHECK_NULL_VOID(textPattern);
+                    CHECK_NULL_VOID(textPattern && textPattern->clipboard_);
                     RefPtr<PasteDataMix> pasteDataMix = textPattern->clipboard_->CreatePasteDataMix();
                     textPattern->clipboard_->AddMultiTypeRecord(pasteDataMix, multiTypeRecordImpl);
                     textPattern->clipboard_->SetData(pasteDataMix, textPattern->copyOption_);
