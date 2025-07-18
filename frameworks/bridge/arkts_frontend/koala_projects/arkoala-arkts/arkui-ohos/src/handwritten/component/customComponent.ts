@@ -39,7 +39,7 @@ export interface LayoutCallback {
     }
 }
 
-class CustomDelegate<T extends ExtendableComponent, T_Options> extends
+export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
     ArkStructBase<CustomDelegate<T, T_Options>, T_Options> implements IExtendableComponent{
     private uiContext: UIContext | undefined;
     private instance: ExtendableComponent;
@@ -199,6 +199,10 @@ class CustomDelegate<T extends ExtendableComponent, T_Options> extends
 
     getPeerNode(): PeerNode | undefined {
         return this.getPeer();
+    }
+
+    isV2(): boolean {
+        return this.instance instanceof CustomComponentV2;
     }
 }
 

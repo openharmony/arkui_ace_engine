@@ -18,6 +18,7 @@
 #include "base/memory/ace_type.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
+#include "core/common/multi_thread_build_manager.h"
 #include "core/common/thread_checker.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
@@ -171,6 +172,11 @@ void OnLayoutInnerLayout(ani_env* env, ani_long ptr)
     Framework::AniGraphicsModule::OnLayoutInnerLayout(env, ptr);
 }
 
+void SetParallelScoped(ani_boolean parallel)
+{
+    MultiThreadBuildManager::SetIsThreadSafeNodeScope(parallel);
+}
+
 const ArkUIAniCommonModifier* GetCommonAniModifier()
 {
     static const ArkUIAniCommonModifier impl = {
@@ -188,7 +194,8 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .checkIsUIThread = OHOS::Ace::NG::CheckIsUIThread,
         .isDebugMode =  OHOS::Ace::NG::IsDebugMode,
         .onMeasureInnerMeasure = OHOS::Ace::NG::OnMeasureInnerMeasure,
-        .onLayoutInnerLayout = OHOS::Ace::NG::OnLayoutInnerLayout };
+        .onLayoutInnerLayout = OHOS::Ace::NG::OnLayoutInnerLayout,
+        .setParallelScoped = OHOS::Ace::NG::SetParallelScoped };
     return &impl;
 }
 

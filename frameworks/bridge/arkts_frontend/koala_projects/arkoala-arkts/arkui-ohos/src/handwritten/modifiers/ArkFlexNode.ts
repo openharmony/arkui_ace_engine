@@ -13,13 +13,23 @@
  * limitations under the License.
  */
 
-import { AttributeModifier, CommonAttribute } from 'arkui/component/common'
+import { InteropNativeModule } from '@koalaui/interop';
+import { ArkBaseNode } from './ArkBaseNode';
+import { FlexAttribute, ArkFlexPeer, PointLightStyle } from '../../component';
 
-import { CommonMethodModifier } from './CommonMethodModifier'
-export class CommonModifier  extends CommonMethodModifier implements CommonAttribute, AttributeModifier<CommonAttribute> {
-   applyNormalAttribute(instance: CommonAttribute): void {}
-   applyPressedAttribute(instance: CommonAttribute) : void {}
-   applyFocusedAttribute(instance: CommonAttribute) : void {}
-   applyDisabledAttribute(instance: CommonAttribute) : void {}
-   applySelectedAttribute(instance: CommonAttribute) : void {}
+/** @memo:stable */
+export class ArkFlexNode extends ArkBaseNode implements FlexAttribute {
+
+    constructParam(...param: Object[]): this {
+        InteropNativeModule._NativeLog('flex constructParam enter');
+        return this;
+    }
+
+    getPeer(): ArkFlexPeer {
+        return this.peer as ArkFlexPeer;
+    }
+
+    pointLight(value: PointLightStyle | undefined): this {
+        return this;
+    }
 }

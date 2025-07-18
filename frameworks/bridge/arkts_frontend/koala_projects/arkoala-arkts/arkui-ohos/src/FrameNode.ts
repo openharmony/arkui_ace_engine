@@ -31,6 +31,15 @@ import { RenderNode, RenderNodeInternal } from "./RenderNode"
 import { CommonAttribute, ArkCommonMethodPeer, CommonMethod, UIGestureEvent, UICommonEvent, UICommonEventInternal } from './component/common'
 import { ArkBaseNode } from './handwritten/modifiers/ArkBaseNode'
 import { ArkListNode } from './handwritten/modifiers/ArkListNode'
+import { ArkColumnNode } from './handwritten/modifiers/ArkColumnNode'
+import { ArkRowNode } from './handwritten/modifiers/ArkRowNode'
+import { ArkStackNode } from './handwritten/modifiers/ArkStackNode'
+import { ArkFlexNode } from './handwritten/modifiers/ArkFlexNode'
+import { ArkGridRowNode } from './handwritten/modifiers/ArkGridRowNode'
+import { ArkGridColNode } from './handwritten/modifiers/ArkGridColNode'
+import { ArkDividerNode } from './handwritten/modifiers/ArkDividerNode'
+import { ArkBlankNode } from './handwritten/modifiers/ArkBlankNode'
+import { ArkRelativeContainerNode } from './handwritten/modifiers/ArkRelativeContainerNode'
 import { ArkSearchNode } from './handwritten/modifiers/ArkSearchNode'
 import { ArkSwiperNode } from "./handwritten/modifiers/ArkSwiperNode";
 import { ArkTextAreaNode } from './handwritten/modifiers/ArkTextAreaNode'
@@ -38,6 +47,15 @@ import { ArkTextInputNode } from './handwritten/modifiers/ArkTextInputNode'
 import { ArkXComponentNode } from "./handwritten/modifiers/ArkXComponentNode"
 import { ModifierType } from './handwritten/modifiers/ArkCommonModifier'
 import { ListOptions, ListAttribute, ArkListPeer } from './component/list'
+import { ColumnOptions, ColumnAttribute, ArkColumnPeer } from './component/column'
+import { RowOptions, RowAttribute, ArkRowPeer } from './component/row'
+import { StackOptions, StackAttribute, ArkStackPeer } from './component/stack'
+import { FlexOptions, FlexAttribute, ArkFlexPeer } from './component/flex'
+import { RelativeContainerAttribute, ArkRelativeContainerPeer } from './component/relativeContainer'
+import { GridRowOptions, GridRowAttribute, ArkGridRowPeer } from './component/gridRow'
+import { GridColOptions, GridColAttribute, ArkGridColPeer } from './component/gridCol'
+import { DividerAttribute, ArkDividerPeer } from './component/divider'
+import { BlankAttribute, ArkBlankPeer } from './component/blank'
 import { SearchOptions, SearchAttribute, ArkSearchPeer } from './component/search'
 import { SwiperController, SwiperAttribute, ArkSwiperPeer } from './component/swiper'
 import { TextAreaOptions, TextAreaAttribute, ArkTextAreaPeer } from './component/textArea'
@@ -966,7 +984,99 @@ abstract class TypedFrameNode<T extends Object> extends FrameNode {
         return this.attribute_!;
     }
 }
+
 export namespace typeNode {
+
+    class ColumnFrameNode extends TypedFrameNode<ArkColumnNode> {
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkColumnNode) {
+            super(uiContext, type, attrCreator);
+        }
+        initialize(options: ColumnOptions): ColumnAttribute {
+            let arkColumnNode = this.attribute as ArkColumnNode;
+            return arkColumnNode!.initialize(options);
+        }
+    }
+
+    class RowFrameNode extends TypedFrameNode<ArkRowNode> {
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkRowNode) {
+            super(uiContext, type, attrCreator);
+        }
+        initialize(options: RowOptions): RowAttribute {
+            let arkRowNode = this.attribute as ArkRowNode;
+            return arkRowNode!.initialize(options);
+        }
+    }
+
+    class StackFrameNode extends TypedFrameNode<ArkStackNode> {
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkStackNode) {
+            super(uiContext, type, attrCreator);
+        }
+        initialize(options: StackOptions): StackAttribute {
+            let arkStackNode = this.attribute as ArkStackNode;
+            return arkStackNode!.initialize(options);
+        }
+    }
+
+    class FlexFrameNode extends TypedFrameNode<ArkFlexNode> {
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkFlexNode) {
+            super(uiContext, type, attrCreator);
+        }
+        initialize(options: FlexOptions): FlexAttribute {
+            let arkFlexNode = this.attribute as ArkFlexNode;
+            return arkFlexNode!.initialize(options);
+        }
+    }
+
+    class GridRowFrameNode extends TypedFrameNode<ArkGridRowNode> {
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkGridRowNode) {
+            super(uiContext, type, attrCreator);
+        }
+        initialize(options: GridRowOptions): GridRowAttribute {
+            let arkGridRowNode = this.attribute as ArkGridRowNode;
+            return arkGridRowNode!.initialize(options);
+        }
+    }
+
+    class GridColFrameNode extends TypedFrameNode<ArkGridColNode> {
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkGridColNode) {
+            super(uiContext, type, attrCreator);
+        }
+        initialize(options: GridColOptions): GridColAttribute {
+            let arkGridColNode = this.attribute as ArkGridColNode;
+            return arkGridColNode!.initialize(options);
+        }
+    }
+
+    class DividerFrameNode extends TypedFrameNode<ArkDividerNode> {
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkDividerNode) {
+            super(uiContext, type, attrCreator);
+        }
+        initialize(): DividerAttribute {
+            let arkDividerNode = this.attribute as ArkDividerNode;
+            return arkDividerNode!.initialize();
+        }
+    }
+
+    class BlankFrameNode extends TypedFrameNode<ArkBlankNode> {
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkBlankNode) {
+            super(uiContext, type, attrCreator);
+        }
+        initialize(): BlankAttribute {
+            let arkBlankNode = this.attribute as ArkBlankNode;
+            return arkBlankNode!.initialize();
+        }
+    }
+
+    class RelativeContainerFrameNode extends TypedFrameNode<ArkRelativeContainerNode> {
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkRelativeContainerNode) {
+            super(uiContext, type, attrCreator);
+        }
+        initialize(): RelativeContainerAttribute {
+            let arkRelativeContainerNode = this.attribute as ArkRelativeContainerNode;
+            return arkRelativeContainerNode!.initialize();
+        }
+    }
+
     class ListFrameNode extends TypedFrameNode<ArkListNode> {
         constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkListNode) {
             super(uiContext, type, attrCreator);
@@ -1045,7 +1155,109 @@ export namespace typeNode {
         }
     }
 
-    overload createNode { createListNode, createSearchNode, createTextAreaNode, createTextInputNode, createTextNode, createXComponentNode, createXComponentNodeWithOptions, createXComponentNodeWithParameters, createSwiperNode }
+    overload createNode { createColumnNode, createRowNode, createStackNode, createFlexNode, createGridRowNode,
+        createGridColNode, createDividerNode, createBlankNode, createRelativeContainerNode, createListNode,
+        createSearchNode, createTextAreaNode, createTextInputNode, createTextNode, createXComponentNode,
+        createXComponentNodeWithOptions, createXComponentNodeWithParameters, createSwiperNode }
+
+    // @ts-ignore
+    function createColumnNode(context: UIContext, type: string): ColumnFrameNode {
+        return new ColumnFrameNode(context, 'Column', (node: FrameNode, type: ModifierType): ArkColumnNode => {
+            let arknode = new ArkColumnNode();
+            const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
+            const peer = new ArkColumnPeer(retval, node._nodeId!.toInt(), "Column", 0);
+            arknode.setPeer(peer);
+            return arknode;
+        });
+    }
+
+    // @ts-ignore
+    function createRowNode(context: UIContext, type: string): RowFrameNode {
+        return new RowFrameNode(context, 'Row', (node: FrameNode, type: ModifierType): ArkRowNode => {
+            let arknode = new ArkRowNode();
+            const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
+            const peer = new ArkRowPeer(retval, node._nodeId!.toInt(), "Row", 0);
+            arknode.setPeer(peer);
+            return arknode;
+        });
+    }
+
+    // @ts-ignore
+    function createStackNode(context: UIContext, type: string): StackFrameNode {
+        return new StackFrameNode(context, 'Stack', (node: FrameNode, type: ModifierType): ArkStackNode => {
+            let arknode = new ArkStackNode();
+            const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
+            const peer = new ArkStackPeer(retval, node._nodeId!.toInt(), "Stack", 0);
+            arknode.setPeer(peer);
+            return arknode;
+        });
+    }
+
+    // @ts-ignore
+    function createFlexNode(context: UIContext, type: string): FlexFrameNode {
+        return new FlexFrameNode(context, 'Flex', (node: FrameNode, type: ModifierType): ArkFlexNode => {
+            let arknode = new ArkFlexNode();
+            const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
+            const peer = new ArkFlexPeer(retval, node._nodeId!.toInt(), "Flex", 0);
+            arknode.setPeer(peer);
+            return arknode;
+        });
+    }
+
+    // @ts-ignore
+    function createGridRowNode(context: UIContext, type: string): GridRowFrameNode {
+        return new GridRowFrameNode(context, 'GridRow', (node: FrameNode, type: ModifierType): ArkGridRowNode => {
+            let arknode = new ArkGridRowNode();
+            const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
+            const peer = new ArkGridRowPeer(retval, node._nodeId!.toInt(), "GridRow", 0);
+            arknode.setPeer(peer);
+            return arknode;
+        });
+    }
+
+    // @ts-ignore
+    function createGridColNode(context: UIContext, type: string): GridColFrameNode {
+        return new GridColFrameNode(context, 'GridCol', (node: FrameNode, type: ModifierType): ArkGridColNode => {
+            let arknode = new ArkGridColNode();
+            const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
+            const peer = new ArkGridColPeer(retval, node._nodeId!.toInt(), "GridCol", 0);
+            arknode.setPeer(peer);
+            return arknode;
+        });
+    }
+
+    // @ts-ignore
+    function createDividerNode(context: UIContext, type: string): DividerFrameNode {
+        return new DividerFrameNode(context, 'Divider', (node: FrameNode, type: ModifierType): ArkDividerNode => {
+            let arknode = new ArkDividerNode();
+            const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
+            const peer = new ArkDividerPeer(retval, node._nodeId!.toInt(), "Divider", 0);
+            arknode.setPeer(peer);
+            return arknode;
+        });
+    }
+
+    // @ts-ignore
+    function createBlankNode(context: UIContext, type: string): BlankFrameNode {
+        return new BlankFrameNode(context, 'Blank', (node: FrameNode, type: ModifierType): ArkBlankNode => {
+            let arknode = new ArkBlankNode();
+            const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
+            const peer = new ArkBlankPeer(retval, node._nodeId!.toInt(), "Blank", 0);
+            arknode.setPeer(peer);
+            return arknode;
+        });
+    }
+
+    // @ts-ignore
+    function createRelativeContainerNode(context: UIContext, type: string): RelativeContainerFrameNode {
+        return new RelativeContainerFrameNode(context, 'RelativeContainer', (node: FrameNode, type: ModifierType): ArkRelativeContainerNode => {
+            let arknode = new ArkRelativeContainerNode();
+            const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
+            const peer = new ArkRelativeContainerPeer(retval, node._nodeId!.toInt(), "RelativeContainer", 0);
+            arknode.setPeer(peer);
+            return arknode;
+        });
+    }
 
     // @ts-ignore
     function createListNode(context: UIContext, type: string): ListFrameNode {

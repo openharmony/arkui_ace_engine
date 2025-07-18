@@ -177,7 +177,21 @@ import { PointerStyle, DataSyncOptions } from '#external'
 export class Serializer extends SerializerBase {
     private static pool?: Array<Serializer> | undefined = undefined
     private static poolTop: int32 = -1
+    private static multithread: boolean = false
+    static setMultithreadMode(): void {
+        if (Serializer.multithread) {
+            return
+        }
+        if (Serializer.poolTop != -1) {
+            throw new Error("Serializer pool is being used. Check if you had released serializers before")
+        }
+        Serializer.multithread = true
+        Serializer.pool = undefined;
+    }
     static hold(): Serializer {
+        if (Serializer.multithread) {
+            return new Serializer()
+        }
         if (!(Serializer.pool != undefined))
         {
             Serializer.pool = new Array<Serializer>(8)
@@ -196,6 +210,10 @@ export class Serializer extends SerializerBase {
         return serializer
     }
     public release(): void {
+        if (Serializer.multithread) {
+            super.release()
+            return
+        }
         if (Serializer.poolTop == -1)
         {
             throw new Error("Serializer pool is empty. Check if you had hold serializers before")

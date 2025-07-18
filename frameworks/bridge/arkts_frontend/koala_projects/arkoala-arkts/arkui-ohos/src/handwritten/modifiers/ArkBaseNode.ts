@@ -683,7 +683,7 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
     }
     backgroundColor(value: ResourceColor | undefined): this {
         if (value != null) {
-            this.getPeer().backgroundColor1Attribute(value as ResourceColor);
+            this.getPeer().backgroundColor0Attribute(value as ResourceColor);
         }
         return this;
     }
