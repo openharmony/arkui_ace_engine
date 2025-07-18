@@ -1394,11 +1394,11 @@ HWTEST_F(XComponentTestTwoNg, GetAccessibilityNodeCursorPositionTest, TestSize.L
 }
 
 /**
- * @tc.name: SendAccessibilityAsyncEventTest
+ * @tc.name: SendAccessibilityAsyncEventTest1
  * @tc.desc: Test SendAccessibilityAsyncEvent Func
  * @tc.type: FUNC
  */
-HWTEST_F(XComponentTestTwoNg, SendAccessibilityAsyncEventTest, TestSize.Level1)
+HWTEST_F(XComponentTestTwoNg, SendAccessibilityAsyncEventTest1, TestSize.Level1)
 {
     /**
      * @tc.step1: Create XComponent and XComponentAccessibilityProvider
@@ -1423,27 +1423,94 @@ HWTEST_F(XComponentTestTwoNg, SendAccessibilityAsyncEventTest, TestSize.Level1)
     auto callback = [](int32_t errorCode) {};
     int32_t ret = xComponentAccessibilityProvider->SendAccessibilityAsyncEvent(accessibilityEvent, callback);
     EXPECT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: SendAccessibilityAsyncEventTest2
+ * @tc.desc: Test SendAccessibilityAsyncEvent Func
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestTwoNg, SendAccessibilityAsyncEventTest2, TestSize.Level1)
+{
+    /**
+     * @tc.step1: Create XComponent and XComponentAccessibilityProvider
+     * @tc.expected: Create XComponent and XComponentAccessibilityProvider Successfully
+     */
+    g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    auto xComponentAccessibilityProvider = std::make_shared<XComponentAccessibilityProvider>(pattern);
+    ASSERT_TRUE(xComponentAccessibilityProvider);
 
     /**
-     * @tc.step3: Call SendAccessibilityAsyncEvent Func when callback is null and thirdAccessibilityManager_ is not null
+     * @tc.step2: Call SendAccessibilityAsyncEvent Func when callback is null and thirdAccessibilityManager_ is not null
      * @tc.expected: ret = 0
      */
-    ret = xComponentAccessibilityProvider->SendAccessibilityAsyncEvent(accessibilityEvent, nullptr);
+    ArkUI_AccessibilityEventInfo accessibilityEvent;
+    auto thirdAccessibilityManager = std::make_shared<ThirdAccessibilityManager>();
+    xComponentAccessibilityProvider->thirdAccessibilityManager_ = thirdAccessibilityManager;
+    int32_t ret = xComponentAccessibilityProvider->SendAccessibilityAsyncEvent(accessibilityEvent, nullptr);
     EXPECT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: SendAccessibilityAsyncEventTest3
+ * @tc.desc: Test SendAccessibilityAsyncEvent Func
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestTwoNg, SendAccessibilityAsyncEventTest3, TestSize.Level1)
+{
+    /**
+     * @tc.step1: Create XComponent and XComponentAccessibilityProvider
+     * @tc.expected: Create XComponent and XComponentAccessibilityProvider Successfully
+     */
+    g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    auto xComponentAccessibilityProvider = std::make_shared<XComponentAccessibilityProvider>(pattern);
+    ASSERT_TRUE(xComponentAccessibilityProvider);
 
     /**
-     * @tc.step4: Call SendAccessibilityAsyncEvent Func when callback is not null and thirdAccessibilityManager_ is null
+     * @tc.step2: Call SendAccessibilityAsyncEvent Func when callback is not null and thirdAccessibilityManager_ is null
      * @tc.expected: ret = -1
      */
+    ArkUI_AccessibilityEventInfo accessibilityEvent;
     xComponentAccessibilityProvider->thirdAccessibilityManager_ = std::shared_ptr<ThirdAccessibilityManager>();
-    ret = xComponentAccessibilityProvider->SendAccessibilityAsyncEvent(accessibilityEvent, callback);
+    auto callback = [](int32_t errorCode) {};
+    int32_t ret = xComponentAccessibilityProvider->SendAccessibilityAsyncEvent(accessibilityEvent, callback);
     EXPECT_EQ(ret, -1);
+}
+
+/**
+ * @tc.name: SendAccessibilityAsyncEventTest4
+ * @tc.desc: Test SendAccessibilityAsyncEvent Func
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestTwoNg, SendAccessibilityAsyncEventTest4, TestSize.Level1)
+{
+    /**
+     * @tc.step1: Create XComponent and XComponentAccessibilityProvider
+     * @tc.expected: Create XComponent and XComponentAccessibilityProvider Successfully
+     */
+    g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    auto xComponentAccessibilityProvider = std::make_shared<XComponentAccessibilityProvider>(pattern);
+    ASSERT_TRUE(xComponentAccessibilityProvider);
 
     /**
-     * @tc.step5: Call SendAccessibilityAsyncEvent Func when callback is null and thirdAccessibilityManager_ is null
+     * @tc.step2: Call SendAccessibilityAsyncEvent Func when callback is null and thirdAccessibilityManager_ is null
      * @tc.expected: ret = -1
      */
-    ret = xComponentAccessibilityProvider->SendAccessibilityAsyncEvent(accessibilityEvent, nullptr);
+    ArkUI_AccessibilityEventInfo accessibilityEvent;
+    xComponentAccessibilityProvider->thirdAccessibilityManager_ = std::shared_ptr<ThirdAccessibilityManager>();
+    int32_t ret = xComponentAccessibilityProvider->SendAccessibilityAsyncEvent(accessibilityEvent, nullptr);
     EXPECT_EQ(ret, -1);
 }
 

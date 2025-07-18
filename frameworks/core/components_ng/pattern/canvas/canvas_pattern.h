@@ -231,6 +231,7 @@ private:
     TextDirection currentSetTextDirection_ = TextDirection::INHERIT;
     RefPtr<CanvasModifier> contentModifier_;
     bool isAttached_ = false;
+    int32_t id_ = -1;
     ACE_DISALLOW_COPY_AND_MOVE(CanvasPattern);
 };
 } // namespace OHOS::Ace::NG
