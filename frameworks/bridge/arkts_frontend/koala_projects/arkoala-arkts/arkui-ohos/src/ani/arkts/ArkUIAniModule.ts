@@ -76,6 +76,9 @@ export class ArkUIAniModule {
     native static _TransferDataResubmissionHandlerToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
     native static _TransferClientAuthenticationHandlerToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
     native static _TransferSslErrorHandlerToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
+    native static _TransferPermissionRequestToStatic(ptr: KPointer, value: Object | undefined | null): boolean
+    native static _TransferControllerHandlerToStatic(ptr: KPointer, value: Object | undefined | null): boolean
+    native static _TransferWebKeyboardControllerToStatic(ptr: KPointer, value: Object | undefined | null): boolean
 
     native static _TransferScreenCaptureHandlerToDynamic(ptr: KPointer): Object | undefined | null
     native static _TransferJsGeolocationToDynamic(ptr: KPointer) : Object | undefined | null
@@ -92,6 +95,9 @@ export class ArkUIAniModule {
     native static _TransferDataResubmissionHandlerToDynamic(ptr: KPointer) : Object | undefined | null
     native static _TransferClientAuthenticationHandlerToDynamic(ptr: KPointer) : Object | undefined | null
     native static _TransferSslErrorHandlerToDynamic(ptr: KPointer) : Object | undefined | null
+    native static _TransferPermissionRequestToDynamic(ptr: KPointer) : Object | undefined | null
+    native static _TransferControllerHandlerToDynamic(ptr: KPointer) : Object | undefined | null
+    native static _TransferWebKeyboardControllerToDynamic(ptr: KPointer) : Object | undefined | null
 
     // for Drag
     native static _DragEvent_Set_Data(ptr: KLong, data : unifiedDataChannel.UnifiedData) : void
