@@ -464,6 +464,7 @@ HWTEST_F(TouchEventTestNg, TouchEventTestAddClickEvent001, TestSize.Level1)
      */
     auto touchEventActuator = AceType::MakeRefPtr<TouchEventActuator>();
     EXPECT_NE(touchEventActuator, nullptr);
+
     /**
      * @tc.steps: step2. Replace ClickEvent when userCallback_ is not nullptr.
      * @tc.expected: userCallback_ will be reset and Make an new instance.
