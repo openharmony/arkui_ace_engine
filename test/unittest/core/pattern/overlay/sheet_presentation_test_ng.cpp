@@ -2573,6 +2573,7 @@ HWTEST_F(SheetPresentationTestNg, CalculateSheetRadius002, TestSize.Level1)
     auto sheetNode = FrameNode::CreateFrameNode(
         "Sheet", 101, AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
     auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
     ASSERT_NE(layoutProperty, nullptr);
     auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
