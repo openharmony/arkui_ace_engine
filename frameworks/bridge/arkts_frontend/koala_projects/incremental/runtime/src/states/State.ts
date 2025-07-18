@@ -244,9 +244,9 @@ interface ManagedScope extends Disposable, Dependency, ReadonlyTreeNode {
     invalidateOnReuse(): void
 }
 
-class StateImpl<Value> implements Observable, ManagedState, MutableState<Value> {
+export class StateImpl<Value> implements Observable, ManagedState, MutableState<Value> {
     protected manager: StateManagerImpl | undefined = undefined
-    private dependencies: Dependencies | undefined = undefined
+    public dependencies: Dependencies | undefined = undefined
     protected snapshot: Value
     protected myModified = false
     protected myUpdated = true
