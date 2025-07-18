@@ -3071,6 +3071,17 @@ void AceContainer::InitWindowCallback()
             return container->GetTargetViewportConfig(
                 orientation, enableStatusBar, statusBarAnimation, enableNavIndicator);
         });
+    windowManager->SetIsSetOrientationNeededCallback(
+        [window = uiWindow_](std::optional<Orientation> orientation) -> bool {
+            auto ori = Rosen::Orientation::INVALID;
+            if (orientation.has_value()) {
+                ori = static_cast<Rosen::Orientation>(static_cast<int32_t>(orientation.value()));
+            }
+            bool need = window->isNeededForciblySetOrientation(ori);
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "isNeededForciblySetOrientation ori:%{public}d, need:%{public}d",
+                static_cast<int32_t>(ori), need);
+            return need;
+        });
     windowManager->SetSetRequestedOrientationCallback(
         [window = uiWindow_](std::optional<Orientation> orientation, bool needAnimation) {
             auto ori = Rosen::Orientation::INVALID;

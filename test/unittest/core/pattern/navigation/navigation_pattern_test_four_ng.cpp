@@ -29,6 +29,7 @@
 #include "core/components_ng/pattern/navigation/tool_bar_pattern.h"
 #include "core/components_ng/pattern/stage/page_node.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
@@ -1455,7 +1456,6 @@ HWTEST_F(NavigationPatternTestFourNg, OnAllTransitionAnimationFinish002, TestSiz
     NavigationPatternTestFourNg::TearDownTestSuite();
 }
 
-
 /**
  * @tc.name: OnAllTransitionAnimationFinish003
  * @tc.desc: Branch: if (!IsPageLevelConfigEnabled()) = false
@@ -1484,6 +1484,57 @@ HWTEST_F(NavigationPatternTestFourNg, OnAllTransitionAnimationFinish003, TestSiz
     auto refCount = tempNode->RefCount();
     navigationPattern->OnAllTransitionAnimationFinish();
     EXPECT_EQ(refCount, tempNode->RefCount());
+    NavigationPatternTestFourNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: OnAllTransitionAnimationFinish004
+ * @tc.desc: Branch: if (!IsPageLevelConfigEnabled()) = false
+ *           Branch: if (visibleNodes.empty()) = false
+ *                   if (!windowMgr->IsSetOrientationNeeded(targetOrientation)) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestFourNg, OnAllTransitionAnimationFinish004, TestSize.Level1)
+{
+    NavigationPatternTestFourNg::SetUpTestSuite();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    SetIsPageLevelConfigEnabled(true, navigationPattern, navigationNode, pageNode);
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto backupBaseExecutor = pipeline->PipelineBase::taskExecutor_;
+    pipeline->PipelineBase::taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto navMgr = pipeline->GetNavigationManager();
+    ASSERT_NE(navMgr, nullptr);
+    auto windowMgr = pipeline->GetWindowManager();
+    ASSERT_NE(windowMgr, nullptr);
+    auto backupCallback = std::move(windowMgr->isSetOrientationNeededCallback_);
+    bool needSet = false;
+    bool callbackInvoked = false;
+    windowMgr->SetIsSetOrientationNeededCallback([&callbackInvoked, &needSet](std::optional<Orientation>) {
+        callbackInvoked = true;
+        return needSet;
+    });
+    auto tempNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 44, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    NavPathList navPathList;
+    navPathList.emplace_back(std::make_pair("pageOne", tempNode));
+    navigationPattern->navigationStack_->SetNavPathList(navPathList);
+
+    navMgr->beforeOrientationChangeTasks_.clear();
+    navigationPattern->OnAllTransitionAnimationFinish();
+    EXPECT_TRUE(callbackInvoked);
+    EXPECT_TRUE(navMgr->beforeOrientationChangeTasks_.empty());
+    windowMgr->isSetOrientationNeededCallback_ = std::move(backupCallback);
+    pipeline->PipelineBase::taskExecutor_ = backupBaseExecutor;
+    NavigationPatternTestFourNg::TearDownTestSuite();
 }
 
 /**

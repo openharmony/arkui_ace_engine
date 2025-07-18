@@ -4799,7 +4799,10 @@ void NavigationPattern::OnAllTransitionAnimationFinish()
         CHECK_NULL_VOID(geometryNode);
         geometryNode->ResetParentLayoutConstraint();
     };
-
+    if (!windowMgr->IsSetOrientationNeeded(targetOrientation)) {
+        restoreTask();
+        return;
+    }
     navigationMgr->AddBeforeOrientationChangeTask(std::move(restoreTask));
     windowMgr->SetRequestedOrientation(targetOrientation, false);
 }
