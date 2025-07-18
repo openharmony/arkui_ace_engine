@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/list/list_height_offset_calculator.h"
 
+#include "core/components_ng/syntax/arkoala_lazy_node.h"
+
 namespace OHOS::Ace::NG {
 ListHeightOffsetCalculator::ListHeightOffsetCalculator(const ListLayoutAlgorithm::PositionMap& itemPosition,
     float space, int32_t lanes, Axis axis, int32_t itemStartIndex)
@@ -203,9 +205,9 @@ void ListHeightOffsetCalculator::CalculateUINode(RefPtr<UINode> node, bool check
         if (AceType::InstanceOf<FrameNode>(child)) {
             auto frameNode = AceType::DynamicCast<FrameNode>(child);
             CalculateFrameNode(frameNode);
-        } else if (AceType::InstanceOf<LazyForEachNode>(child) ||
-            AceType::InstanceOf<RepeatVirtualScrollNode>(child) ||
-            AceType::InstanceOf<RepeatVirtualScroll2Node>(child)) {
+        } else if (AceType::InstanceOf<LazyForEachNode>(child) || AceType::InstanceOf<RepeatVirtualScrollNode>(child) ||
+                   AceType::InstanceOf<RepeatVirtualScroll2Node>(child) ||
+                   AceType::InstanceOf<ArkoalaLazyNode>(child)) {
             auto posMapStart = GetPosMapStartIndex();
             if (posMapStart >= 0 && posMapStart <= currentIndex_ && !syncPosMap_) {
                 CalculateLazyForEachNodeWithPosMap(child);

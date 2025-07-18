@@ -3117,6 +3117,13 @@ interfaces/napi/kits/router/ @arkui_superman
 interfaces/napi/kits/text_menu_controller/ @huawei_g_five
 interfaces/napi/kits/utils/ @arkuiframework
 
+[Arkoala]
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/LazyForEachImpl.ts @arkuistatemgmt
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/LazyItemNode.ts @arkuistatemgmt
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/RepeatImpl.ts @arkuistatemgmt
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ReusablePool.ts @arkuistatemgmt
+frameworks/bridge/arkts_frontend/koala_projects/incremental/ @arkuistatemgmt
+
 
 [Test source]
 test/mock/  @zhoulianhai5

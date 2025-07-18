@@ -629,8 +629,10 @@ export class StateManagerImpl implements StateManager {
         scope.node = node
         scope.nodeRef = node
         scope.dependencies = new Dependencies()
+        this.current = scope // to attach named states to this scope
         scope.setNamedState(CONTEXT_ROOT_SCOPE, new StateImpl<ScopeImpl<Node>>(this, scope, false))
         scope.setNamedState(CONTEXT_ROOT_NODE, new StateImpl<Node>(this, node, false))
+        this.current = undefined
         return scope
     }
 
