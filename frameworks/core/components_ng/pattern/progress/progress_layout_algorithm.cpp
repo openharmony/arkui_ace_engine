@@ -33,6 +33,7 @@ namespace OHOS::Ace::NG {
 namespace {
 const Dimension DEFALT_RING_DIAMETER = 72.0_vp;
 const Dimension DEFALT_CAPSULE_WIDTH = 28.0_vp;
+constexpr float ZERO_MEASURE_CONTENT_SIZE = 0.0f;
 } // namespace
 ProgressLayoutAlgorithm::ProgressLayoutAlgorithm() = default;
 
@@ -62,8 +63,8 @@ std::optional<SizeF> ProgressLayoutAlgorithm::MeasureContent(
     auto layoutProperty = AceType::DynamicCast<LayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(layoutProperty, std::nullopt);
     auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
-    if (layoutPolicy.has_value() && layoutPolicy->IsWrap()) {
-        return std::nullopt;
+    if (layoutPolicy.has_value() && (layoutPolicy->IsWrap() || layoutPolicy->IsFix())) {
+        return SizeF(ZERO_MEASURE_CONTENT_SIZE, ZERO_MEASURE_CONTENT_SIZE);
     }
     type_ = progressLayoutProperty->GetType().value_or(ProgressType::LINEAR);
     Dimension defaultThickness;
