@@ -44,13 +44,6 @@ void SliderModelNG::Create(float value, float step, float min, float max)
     ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, Min, min);
     ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, Max, max);
     SetSliderValue(value);
-    auto paintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
-    paintProperty->ResetBlockColorSetByUser();
-    paintProperty->ResetTrackBackgroundColorSetByUser();
-    paintProperty->ResetSelectColorSetByUser();
-    paintProperty->ResetBlockBorderColorSetByUser();
-    paintProperty->ResetStepColorSetByUser();
 }
 
 void SliderModelNG::SetSliderValue(float value)
