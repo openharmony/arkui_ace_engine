@@ -33,7 +33,7 @@ import { ArkDividerNode } from '../handwritten/modifiers/ArkDividerNode';
 import { ArkDividerAttributeSet, DividerModifier } from '../DividerModifier';
 
 export class ArkDividerPeer extends ArkCommonMethodPeer {
-    protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component: ComponentBase | undefined, flags: int32 = 0): ArkDividerPeer {
