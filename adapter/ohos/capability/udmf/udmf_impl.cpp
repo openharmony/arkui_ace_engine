@@ -693,4 +693,27 @@ bool UdmfClientImpl::IsBelongsTo(const std::string& summary, const std::string& 
     }
     return result;
 }
+
+#if defined(ACE_STATIC)
+RefPtr<UnifiedData> UdmfClientImpl::TransformUnifiedDataFromANI(void* rawData)
+{
+    CHECK_NULL_RETURN(rawData, nullptr);
+    auto unifiedDataPtr = reinterpret_cast<UDMF::UnifiedData*>(rawData);
+    std::shared_ptr<UDMF::UnifiedData> unifiedData(unifiedDataPtr);
+    auto udData = AceType::MakeRefPtr<UnifiedDataImpl>();
+    udData->SetUnifiedData(unifiedData);
+    return udData;
+}
+
+void UdmfClientImpl::TransformSummaryANI(std::map<std::string, int64_t>& summary, void* summaryPtr)
+{
+    auto udmfSummary = reinterpret_cast<UDMF::Summary*>(summaryPtr);
+    CHECK_NULL_VOID(udmfSummary);
+    udmfSummary->totalSize = 0;
+    for (auto element : summary) {
+        udmfSummary->totalSize += element.second;
+    }
+    udmfSummary->summary = std::move(summary);
+}
+#endif
 } // namespace OHOS::Ace

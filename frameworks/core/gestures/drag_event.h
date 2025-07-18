@@ -24,6 +24,9 @@
 #include "core/common/udmf/data_load_params.h"
 #include "core/common/udmf/unified_data.h"
 #include "core/event/ace_events.h"
+#if defined(ACE_STATIC)
+#include "core/gestures/gesture_info.h"
+#endif
 #include "core/gestures/velocity.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
 
@@ -439,6 +442,15 @@ public:
     {
         return useDataLoadParams_;
     }
+
+#if defined(ACE_STATIC)
+    RefPtr<PixelMap> GetDragDropInfoPixelMap() const;
+    void* GetDragDropInfoCustomNode() const;
+    std::string GetDragDropInfoExtraInfo() const;
+    void SetDragDropInfoPixelMap(RefPtr<PixelMap> pixelMap);
+    void SetDragDropInfoCustomNode(void* customNode);
+    void SetDragDropInfoExtraInfo(std::string& extraInfo);
+#endif
 
 private:
     RefPtr<PasteData> pasteData_;

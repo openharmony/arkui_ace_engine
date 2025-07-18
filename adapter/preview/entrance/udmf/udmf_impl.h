@@ -74,6 +74,10 @@ public:
     bool GetFileUriEntry(const RefPtr<UnifiedData>& unifiedData, std::vector<std::string>& uri) override;
     std::vector<uint8_t> GetSpanStringEntry(const RefPtr<UnifiedData>& unifiedData) override;
     bool IsBelongsTo(const std::string& summary, const std::string& allowDropType) override;
+#if defined(ACE_STATIC)
+    RefPtr<UnifiedData> TransformUnifiedDataFromANI(void* rawData) override;
+    void TransformSummaryANI(std::map<std::string, int64_t>& summary, void* summaryPtr) override;
+#endif
 };
 
 class UnifiedDataImpl : public UnifiedData {
