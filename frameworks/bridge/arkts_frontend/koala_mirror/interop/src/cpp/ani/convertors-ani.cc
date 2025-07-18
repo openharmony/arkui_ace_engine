@@ -183,8 +183,9 @@ bool setKoalaANICallbackDispatcher(
         clazz, dispatcherMethodName, dispatcherMethodSig,
         &g_koalaANICallbackDispatcher.method
     ));
-    if (!clazz || !g_koalaANICallbackDispatcher.method)
+    if (!clazz || !g_koalaANICallbackDispatcher.method) {
         INTEROP_FATAL("Dispatcher not found");
+    }
     if (g_koalaANICallbackDispatcher.method == nullptr) {
         return false;
     }
@@ -192,13 +193,15 @@ bool setKoalaANICallbackDispatcher(
 }
 
 void getKoalaANICallbackDispatcher(ani_class* clazz, ani_static_method* method) {
-    if (!g_koalaANICallbackDispatcher.clazz || !g_koalaANICallbackDispatcher.clazz)
+    if (!g_koalaANICallbackDispatcher.clazz || !g_koalaANICallbackDispatcher.clazz) {
         INTEROP_FATAL("Dispatcher not defined");
+    }
     *clazz = g_koalaANICallbackDispatcher.clazz;
     *method = g_koalaANICallbackDispatcher.method;
 }
 
-ani_env* getKoalaANIContext(void* hint) {
+ani_env* getKoalaANIContext(void* hint)
+{
     if (currentContext) {
         return currentContext;
     } else {
