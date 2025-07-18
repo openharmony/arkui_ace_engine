@@ -651,4 +651,41 @@ HWTEST_F(TouchEventTestNg, TouchEventOriginalIdTest002, TestSize.Level1)
     AceApplicationInfo::GetInstance().SetTouchPadIdChanged(false);
     EXPECT_EQ(touchPoint.GetOriginalReCovertId(), DEFAULT_MOUSE_ID);
 }
+
+/**
+ * @tc.name: CreateTouchItemInfoTest001
+ * @tc.desc: TriggerTouchCallBack.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TouchEventTestNg, CreateTouchItemInfoTest001, TestSize.Level1)
+{
+    TouchEvent touchEvent;
+    touchEvent.originalId = 0;
+    touchEvent.type = TouchType::DOWN;
+    std::vector<int32_t> touchPointIds = { 0, 1 };
+    std::vector<TouchType> touchPointExpectTypes = { TouchType::DOWN, TouchType::MOVE };
+
+    for (const auto& item : touchPointIds) {
+        TouchPoint touchPoint;
+        touchPoint.originalId = item;
+        touchEvent.pointers.emplace_back(touchPoint);
+    }
+
+    std::vector<TouchType> touchesTypes;
+    TouchEventFunc callback = [&touchesTypes](TouchEventInfo& info) {
+        auto touches = info.GetTouches();
+        for (const auto& touch : touches) {
+            touchesTypes.emplace_back(touch.GetTouchType());
+        }
+    };
+
+    auto clickEvent = AceType::MakeRefPtr<TouchEventImpl>(std::move(callback));
+    auto touchEventActuator = AceType::MakeRefPtr<TouchEventActuator>();
+    touchEventActuator->AddTouchAfterEvent(clickEvent);
+    touchEventActuator->TriggerTouchCallBack(touchEvent);
+
+    for (int32_t i = 0; (i < touchPointExpectTypes.size()) && (i < touchesTypes.size()); i++) {
+        EXPECT_EQ(touchesTypes[i], touchPointExpectTypes[i]);
+    }
+}
 } // namespace OHOS::Ace::NG
