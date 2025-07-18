@@ -3210,7 +3210,9 @@ void JsAccessibilityManager::InitializeCallback()
     client->IsEnabled(isEnabled);
     AceApplicationInfo::GetInstance().SetAccessibilityEnabled(isEnabled);
 
-    client->SearchNeedEvents(eventWhiteList_);
+    std::vector<uint32_t> needEvents;
+    client->SearchNeedEvents(needEvents);
+    UpdateEventWhiteList(needEvents);
 
     SubscribeStateObserver(AccessibilityStateEventType::EVENT_ACCESSIBILITY_STATE_CHANGED);
     SubscribeStateObserver(AccessibilityStateEventType::EVENT_SCREEN_READER_STATE_CHANGED);
