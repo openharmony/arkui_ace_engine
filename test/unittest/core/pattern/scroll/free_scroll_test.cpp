@@ -1365,4 +1365,42 @@ TEST_F(FreeScrollTest, OnScrollEdge002)
     EXPECT_EQ(triggeredEdges.front(), ScrollEdge::LEFT);
     EXPECT_EQ(triggeredEdges.back(), ScrollEdge::BOTTOM);
 }
+
+/**
+ * @tc.name: ScrollableState001
+ * @tc.desc: Test enableScroll after switching axis
+ * @tc.type: FUNC
+ */
+TEST_F(FreeScrollTest, ScrollableState001)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetAxis(Axis::VERTICAL);
+    model.SetScrollEnabled(false);
+    CreateScrollDone();
+
+    EXPECT_FALSE(pattern_->scrollableEvent_->GetEnabled());
+    ScrollModelNG::SetAxis(frameNode_.GetRawPtr(), Axis::FREE);
+    ScrollModelNG::SetScrollEnabled(frameNode_.GetRawPtr(), true);
+    pattern_->OnModifyDone();
+    EXPECT_TRUE(pattern_->scrollableEvent_->GetEnabled());
+}
+
+/**
+ * @tc.name: GestureReset001
+ * @tc.desc: Ensure gesture->IsEnabled() is synced with scroll state
+ * @tc.type: FUNC
+ */
+TEST_F(FreeScrollTest, GestureReset001)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetAxis(Axis::FREE);
+    model.SetScrollEnabled(false);
+    CreateScrollDone();
+    auto gesture = pattern_->freeScroll_->GetFreePanGesture();
+    EXPECT_FALSE(gesture->IsEnabled());
+    gesture->ResetStatusOnFinish(); // reset automatically called when a gesture finishes
+    EXPECT_TRUE(gesture->IsEnabled());
+    gesture = pattern_->freeScroll_->GetFreePanGesture();
+    EXPECT_FALSE(gesture->IsEnabled());
+}
 } // namespace OHOS::Ace::NG

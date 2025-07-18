@@ -38,6 +38,7 @@ public:
 
     RefPtr<PanRecognizer> GetFreePanGesture() const
     {
+        freePanGesture_->SetEnabled(enableScroll_); // workaround gesture's internal reset
         return freePanGesture_;
     }
 

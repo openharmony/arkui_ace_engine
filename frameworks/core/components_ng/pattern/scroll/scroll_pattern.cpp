@@ -64,6 +64,7 @@ void ScrollPattern::OnModifyDone()
         // need to init after scrollableEvent
         if (axis == Axis::FREE) {
             freeScroll_ = MakeRefPtr<FreeScrollController>(*this);
+            SetScrollEnabled(true); // always enable scrollEvent
             scrollBar2d_ = MakeRefPtr<ScrollBar2D>(*this);
             SetScrollBar(DisplayMode::OFF); // turn off single-axis scrollBar
             auto* ctx = GetRenderContext();
