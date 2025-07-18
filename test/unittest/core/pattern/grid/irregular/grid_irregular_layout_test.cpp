@@ -19,7 +19,6 @@
 #include "core/components_ng/pattern/grid/irregular/grid_irregular_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/irregular/grid_layout_range_solver.h"
 #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
-#include "core/components_ng/pattern/grid/irregular/grid_large_delta_converter.h"
 
 namespace OHOS::Ace::NG {
 class GridIrregularLayoutTest : public GridTestNg {};
