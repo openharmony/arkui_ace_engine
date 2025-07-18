@@ -189,7 +189,7 @@ void FreeScrollController::HandlePanStart(const GestureEvent& event)
 {
     state_ = State::DRAG;
     FireOnScrollStart();
-    if (axisAnimator_) {
+    if (axisAnimator_ && !Scrollable::IsMouseWheelScroll(event)) {
         axisAnimator_->StopAxisAnimation();
     }
 }
@@ -372,7 +372,7 @@ void FreeScrollController::HandleAxisAnimationFrame(float newOffset)
     }
     auto offset = offset_->Get();
     mouseWheelScrollIsVertical_ ? offset.SetY(newOffset) : offset.SetX(newOffset);
-    offset_->Set(offset);
+    offset_->Set(ClampPosition(offset));
 }
 
 void FreeScrollController::AnimateOnMouseScroll(const OffsetF& delta)
