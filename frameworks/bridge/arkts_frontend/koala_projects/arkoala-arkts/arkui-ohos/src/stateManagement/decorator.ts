@@ -27,6 +27,8 @@ export interface IDecoratedV1Variable<T> extends IDecoratedVariable {
     registerWatchToSource(me: IDecoratedV1Variable<T>): void;
 }
 
+export interface IDecoratedV2Variable extends IDecoratedVariable {}
+
 export interface IDecoratedImmutableVariable<T> {
     get(): T;
 }
@@ -41,6 +43,19 @@ export interface IDecoratedUpdatableVariable<T> {
 }
 
 export interface IStateDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV1Variable<T> {}
+
+export interface ILocalDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV2Variable {}
+
+export interface IParamDecoratedVariable<T>
+    extends IDecoratedImmutableVariable<T>,
+        IDecoratedUpdatableVariable<T>,
+        IDecoratedV2Variable {}
+
+export interface IParamOnceDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV2Variable {}
+
+export interface IProviderDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV2Variable {}
+
+export interface IConsumerDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV2Variable {}
 
 export interface IPropDecoratedVariable<T>
     extends IDecoratedMutableVariable<T>,
@@ -108,6 +123,21 @@ export const STATE_MGMT_FACTORY: IStateMgmtFactory = new __StateMgmtFactoryImpl(
 export interface IStateMgmtFactory {
     makeMutableStateMeta(): IMutableStateMeta;
     makeSubscribedWatches(): ISubscribedWatches;
+    makeLocal<T>(owningView: ExtendableComponent, varName: string, initValue: T): ILocalDecoratedVariable<T>;
+    makeParam<T>(owningView: ExtendableComponent, varName: string, initValue: T): IParamDecoratedVariable<T>;
+    makeParamOnce<T>(owningView: ExtendableComponent, varName: string, initValue: T): IParamOnceDecoratedVariable<T>;
+    makeProvider<T>(
+        owningView: ExtendableComponent,
+        varName: string,
+        provideAlias: string,
+        initValue: T
+    ): IProviderDecoratedVariable<T>;
+    makeConsumer<T>(
+        owningView: ExtendableComponent,
+        varName: string,
+        provideAlias: string,
+        initValue: T
+    ): IConsumerDecoratedVariable<T>;
     makeState<T>(
         owningView: ExtendableComponent,
         varName: string,
