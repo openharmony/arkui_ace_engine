@@ -49,6 +49,7 @@ export * from "./ListItemOpsHandWritten"
 export * from "./AlphabetIndexerOpsHandWritten"
 export * from "./SwiperOpsHandWritten"
 export * from "./RefreshOpsHandWritten"
+export * from "./AttributeModifierOpsHandWritten"
 
 // export interface PageTransitionExitInterface { }
 // export interface CommonTransition { }

@@ -245,3 +245,4 @@ export interface ChainWeightOptions {
 export interface AccessibilityOptions {
     accessibilityPreferred?: boolean;
 }
+
