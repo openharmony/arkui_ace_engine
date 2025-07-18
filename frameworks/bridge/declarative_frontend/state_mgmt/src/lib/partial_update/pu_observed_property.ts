@@ -29,6 +29,10 @@ class ObservedPropertyPU<T> extends ObservedPropertyAbstractPU<T>
 
   private wrappedValue_: T;
 
+  public staticWatchId?: number;
+
+  public _setInteropValueForStaticState?: setValue<T>;
+
   constructor(localInitValue: T, owningView: IPropertySubscriber, propertyName: PropertyInfo) {
     super(owningView, propertyName);
    
@@ -72,6 +76,10 @@ class ObservedPropertyPU<T> extends ObservedPropertyAbstractPU<T>
     if (this.wrappedValue_) {
       if (this.wrappedValue_ instanceof SubscribableAbstract) {
         (this.wrappedValue_ as SubscribableAbstract).removeOwningProperty(this);
+      // for interop
+      } else if (InteropConfigureStateMgmt.instance.needsInterop() && this.staticWatchId && typeof this.wrappedValue_ === 'object' &&
+        'removeWatchSubscriber' in this.wrappedValue_ && typeof this.wrappedValue_.removeWatchSubscriber === 'function') {
+        this.wrappedValue_.removeWatchSubscriber(this.staticWatchId);
       } else {
         ObservedObject.removeOwningProperty(this.wrappedValue_, this);
 
@@ -101,6 +109,14 @@ class ObservedPropertyPU<T> extends ObservedPropertyAbstractPU<T>
     }
 
     this.unsubscribeWrappedObject();
+
+    // for interop
+    if (InteropConfigureStateMgmt.instance.needsInterop() && newValue && typeof newValue === 'object' && isStaticProxy(newValue)) {
+      this.wrappedValue_ = InteropExtractorModule.getInteropObservedObject(newValue, this);
+      stateMgmtProfiler.end();
+      return true;
+    }
+
     if (!newValue || typeof newValue !== 'object') {
       // undefined, null, simple type: 
       // nothing to subscribe to in case of new value undefined || null || simple type 
@@ -154,6 +170,10 @@ class ObservedPropertyPU<T> extends ObservedPropertyAbstractPU<T>
       TrackedObject.notifyObjectValueAssignment(/* old value */ oldValue, /* new value */ this.wrappedValue_,
         this.notifyPropertyHasChangedPU,
         this.notifyTrackedObjectPropertyHasChanged, this);
+      // for interop
+      if (InteropConfigureStateMgmt.instance.needsInterop()) {
+        InteropExtractorModule.setStaticValueForInterop(this, newValue);
+      }
     }
   }
 

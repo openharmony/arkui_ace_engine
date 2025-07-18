@@ -197,6 +197,9 @@ struct PrebuildCompCmd {
 class ACE_EXPORT ViewStackProcessor final {
 public:
     friend class ScopedViewStackProcessor;
+#ifdef ACE_STATIC
+    friend class InteropViewStackProcessor;
+#endif
 
     ACE_FORCE_EXPORT static ViewStackProcessor* GetInstance();
     ~ViewStackProcessor() = default;
@@ -274,6 +277,9 @@ public:
     // create wrappingComponentsMap and the component to map and then Push
     // the map to the render component stack.
     ACE_FORCE_EXPORT void Push(const RefPtr<UINode>& element, bool isCustomView = false);
+#ifdef ACE_STATIC
+    ACE_FORCE_EXPORT void PushPtr(int64_t elementPtr);
+#endif
 
     // Wrap the components map for the stack top and then pop the stack.
     // Add the wrapped component has child of the new stack top's main component.
@@ -611,5 +617,9 @@ private:
 
     ACE_DISALLOW_COPY_AND_MOVE(ScopedViewStackProcessor);
 };
+
+#ifdef ACE_STATIC
+class InteropViewStackProcessor;
+#endif
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_VIEW_STACK_PROCESSOR_H
