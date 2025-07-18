@@ -25661,7 +25661,14 @@ typedef struct GENERATED_ArkUICanvasPathAccessor {
 
 typedef struct GENERATED_ArkUIPath2DAccessor {
     void (*destroyPeer)(Ark_Path2D peer);
-    Ark_Path2D (*ctor)();
+    Ark_Path2D (*construct0)();
+    Ark_Path2D (*construct1)(Ark_LengthMetricsUnit unit);
+    Ark_Path2D (*construct2)(Ark_Path2D path);
+    Ark_Path2D (*construct3)(Ark_Path2D path,
+                             Ark_LengthMetricsUnit unit);
+    Ark_Path2D (*construct4)(const Ark_String* d);
+    Ark_Path2D (*construct5)(const Ark_String* description,
+                             Ark_LengthMetricsUnit unit);
     Ark_NativePointer (*getFinalizer)();
     void (*addPath)(Ark_Path2D peer,
                     Ark_Path2D path,
@@ -25921,7 +25928,8 @@ typedef struct GENERATED_ArkUICanvasRendererAccessor {
 
 typedef struct GENERATED_ArkUICanvasRenderingContext2DAccessor {
     void (*destroyPeer)(Ark_CanvasRenderingContext2D peer);
-    Ark_CanvasRenderingContext2D (*ctor)(const Opt_RenderingContextSettings* settings);
+    Ark_CanvasRenderingContext2D (*construct)(const Opt_RenderingContextSettings* settings,
+                                              const Opt_LengthMetricsUnit* unit);
     Ark_NativePointer (*getFinalizer)();
     Ark_String (*toDataURL)(Ark_CanvasRenderingContext2D peer,
                             const Opt_String* type,
@@ -25951,9 +25959,10 @@ typedef struct GENERATED_ArkUICanvasRenderingContext2DAccessor {
 
 typedef struct GENERATED_ArkUIOffscreenCanvasRenderingContext2DAccessor {
     void (*destroyPeer)(Ark_OffscreenCanvasRenderingContext2D peer);
-    Ark_OffscreenCanvasRenderingContext2D (*ctor)(const Ark_Number* width,
-                                                  const Ark_Number* height,
-                                                  const Opt_RenderingContextSettings* settings);
+    Ark_OffscreenCanvasRenderingContext2D (*construct)(const Ark_Number* width,
+                                                       const Ark_Number* height,
+                                                       const Opt_RenderingContextSettings* settings,
+                                                       const Opt_LengthMetricsUnit* unit);
     Ark_NativePointer (*getFinalizer)();
     Ark_String (*toDataURL)(Ark_OffscreenCanvasRenderingContext2D peer,
                             const Opt_String* type,
@@ -25963,8 +25972,9 @@ typedef struct GENERATED_ArkUIOffscreenCanvasRenderingContext2DAccessor {
 
 typedef struct GENERATED_ArkUIOffscreenCanvasAccessor {
     void (*destroyPeer)(Ark_OffscreenCanvas peer);
-    Ark_OffscreenCanvas (*ctor)(const Ark_Number* width,
-                                const Ark_Number* height);
+    Ark_OffscreenCanvas (*construct)(const Ark_Number* width,
+                                     const Ark_Number* height,
+                                     const Opt_LengthMetricsUnit* unit);
     Ark_NativePointer (*getFinalizer)();
     Ark_ImageBitmap (*transferToImageBitmap)(Ark_OffscreenCanvas peer);
     Ark_OffscreenCanvasRenderingContext2D (*getContext2d)(Ark_OffscreenCanvas peer,
