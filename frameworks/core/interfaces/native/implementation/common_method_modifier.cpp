@@ -378,7 +378,7 @@ auto g_bindMenuOptionsParam = [](
         menuParam.positionOffset.SetX(offsetVal.value().first->ConvertToPx());
         menuParam.positionOffset.SetY(offsetVal.value().second->ConvertToPx());
     }
-    // menuParam.enableHoverMode = OptConvert<bool>(menuOptions.enableHoverMode).value_or(menuParam.enableHoverMode);
+    menuParam.enableHoverMode = OptConvert<bool>(menuOptions.enableHoverMode);
     menuParam.backgroundColor = OptConvert<Color>(menuOptions.backgroundColor);
     auto backgroundBlurStyle = OptConvert<BlurStyle>(menuOptions.backgroundBlurStyle);
     menuParam.backgroundBlurStyle = backgroundBlurStyle ?
@@ -821,25 +821,6 @@ template<>
 float Convert(const Ark_ForegroundEffectOptions& src)
 {
     return Convert<float>(src.radius);
-}
-
-template<>
-OverlayOptions Convert(const Ark_OverlayOptions& src)
-{
-    OverlayOptions dst;
-    auto align = Converter::OptConvert<Alignment>(src.align);
-    if (align) {
-        dst.align = align.value();
-    }
-    auto x = Converter::OptConvert<Dimension>(src.offset.value.x);
-    if (x) {
-        dst.x = x.value();
-    }
-    auto y = Converter::OptConvert<Dimension>(src.offset.value.y);
-    if (y) {
-        dst.y = y.value();
-    }
-    return dst;
 }
 
 template<>
