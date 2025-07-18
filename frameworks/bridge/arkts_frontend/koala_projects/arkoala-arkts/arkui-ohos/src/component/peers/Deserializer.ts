@@ -6885,7 +6885,7 @@ export class Deserializer extends DeserializerBase {
             stack_buf = (valueDeserializer.readString() as string)
         }
         const stack_result : string | undefined = stack_buf
-        const code_result : number = (valueDeserializer.readNumber() as number)
+        const code_result : int = (valueDeserializer.readInt32().toInt())
         let value : BusinessError = ({name: name_result, message: message_result, stack: stack_result, code: code_result} as BusinessError)
         return value
     }

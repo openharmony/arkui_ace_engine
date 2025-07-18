@@ -1769,7 +1769,7 @@ export class Serializer extends SerializerBase {
             valueSerializer.writeString(value_stack_value)
         }
         const value_code  = value.code
-        valueSerializer.writeNumber(value_code)
+        valueSerializer.writeInt32(value_code)
     }
     writeButtonOptions(value: ButtonOptions): void {
         let valueSerializer : Serializer = this
