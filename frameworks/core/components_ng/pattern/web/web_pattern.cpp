@@ -8158,6 +8158,7 @@ void WebPattern::CloseDataDetectorMenu()
     CHECK_NULL_VOID(webDataDetectorAdapter_);
     webDataDetectorAdapter_->CloseAIMenu();
 }
+
 bool WebPattern::MenuAvoidKeyboard(bool hideOrClose, double height)
 {
     auto host = GetHost();
@@ -8170,8 +8171,13 @@ bool WebPattern::MenuAvoidKeyboard(bool hideOrClose, double height)
     if (hideOrClose) {
         auto newBottom = std::optional<uint32_t>(keyboardInset.end);
         safeAreaManager->UpdateKeyboardWebSafeArea(0, newBottom);
+        safeAreaManager->SetKeyboardInsetImpl(std::function<SafeAreaInsets::Inset(SafeAreaManager *)>());
     } else {
         safeAreaManager->UpdateKeyboardWebSafeArea(height);
+        safeAreaManager->SetKeyboardInsetImpl([](SafeAreaManager* manager) {
+            CHECK_NULL_RETURN(manager, SafeAreaInsets::Inset());
+            return manager->GetKeyboardWebInset();
+        });
     }
     return true;
 }
