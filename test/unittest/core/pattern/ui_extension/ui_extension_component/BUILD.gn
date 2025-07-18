@@ -92,12 +92,9 @@ ace_unittest("ui_extension_accessibility_child_tree_callback_test") {
       "window_manager:scene_session",
       "window_manager:scene_session_manager",
     ]
-    cflags = []
 
     if (ace_engine_feature_asbng_path_enable) {
       defines += [ "ATOMIC_SERVICE_ATTRIBUTION_ENABLE" ]
-      cflags +=
-          [ "-DACE_ENGINE_PLUGIN_PATH=\"${ace_engine_feature_asbng_path}\"" ]
     }
   }
 }
@@ -171,12 +168,8 @@ ace_unittest("ui_extension_pattern_test_ng") {
       "window_manager:scene_session",
       "window_manager:scene_session_manager",
     ]
-    cflags = []
-
     if (ace_engine_feature_asbng_path_enable) {
       defines += [ "ATOMIC_SERVICE_ATTRIBUTION_ENABLE" ]
-      cflags +=
-          [ "-DACE_ENGINE_PLUGIN_PATH=\"${ace_engine_feature_asbng_path}\"" ]
     }
   }
 }
@@ -248,12 +241,9 @@ ace_unittest("ui_extension_component_testtwo_ng") {
       "window_manager:scene_session",
       "window_manager:scene_session_manager",
     ]
-    cflags = []
 
     if (ace_engine_feature_asbng_path_enable) {
       defines += [ "ATOMIC_SERVICE_ATTRIBUTION_ENABLE" ]
-      cflags +=
-          [ "-DACE_ENGINE_PLUGIN_PATH=\"${ace_engine_feature_asbng_path}\"" ]
     }
   }
 }
