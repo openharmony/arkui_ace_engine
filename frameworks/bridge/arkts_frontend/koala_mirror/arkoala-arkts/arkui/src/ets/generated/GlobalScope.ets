@@ -19,7 +19,7 @@
 import { Edges_serializer, BorderRadiuses_serializer, Edges, Dimension, BorderRadiuses, Length } from "./../component/units"
 import { SerializerBase, DeserializerBase, NativeBuffer, Finalizable, runtimeType, RuntimeType, MaterializedBase, registerCallback, wrapCallback, KPointer, toPeerPtr } from "@koalaui/interop"
 import { Resource_serializer, Resource } from "./resource"
-import { AnimateParam_serializer, AnimateParam, ICurve, FinishCallbackType, ExpectedFrameRateRange, CustomStyles } from "./../component/common"
+import { AnimateParam_serializer, AnimateParam, ICurve, FinishCallbackType, ExpectedFrameRateRange } from "./../component/common"
 import { ComponentInfo_serializer, ComponentInfo, Offset_componentutils, TranslateResult, ScaleResult, RotateResult, Matrix4Result } from "./../component/idlize"
 import { uiEffect_BrightnessBlenderParam_serializer, uiEffect_BrightnessBlender_serializer, uiEffect } from "./ohos.graphics.uiEffect"
 import { text_FontDescriptor_serializer, text } from "./ohos.graphics.text"
@@ -163,19 +163,6 @@ export class GlobalScope {
     static px2vp_serialize(value: number): number {
         const retval  = ArkUIGeneratedNativeModule._GlobalScope_px2vp(value)
         return retval
-    }
-    public static applyStyles<T>(self: T, customStyles: CustomStyles): T {
-        const self_casted = self as (T)
-        const customStyles_casted = customStyles as (CustomStyles)
-        return GlobalScope.applyStyles_serialize(self_casted, customStyles_casted)
-    }
-    static applyStyles_serialize<T>(self: T, customStyles: CustomStyles): T {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        thisSerializer.writeCustomObject("T", (self as Object))
-        thisSerializer.holdAndWriteCallback(customStyles)
-        const retval  = ArkUIGeneratedNativeModule._GlobalScope_applyStyles(thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-        throw new Error("Object deserialization is not implemented.")
     }
     public static setAppBgColor(value: string): void {
         const value_casted = value as (string)

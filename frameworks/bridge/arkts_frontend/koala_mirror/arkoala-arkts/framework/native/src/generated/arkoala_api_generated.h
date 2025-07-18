@@ -199,7 +199,7 @@ typedef struct InteropObject {
 // The only include allowed in this file! Do not add anything else ever.
 #include <stdint.h>
 
-#define GENERATED_ARKUI_FULL_API_VERSION 9999
+#define GENERATED_ARKUI_FULL_API_VERSION 132
 #define GENERATED_ARKUI_NODE_API_VERSION GENERATED_ARKUI_FULL_API_VERSION
 
 #define GENERATED_ARKUI_BASIC_NODE_API_VERSION 1
@@ -2297,8 +2297,6 @@ typedef struct Ark_SslErrorEvent Ark_SslErrorEvent;
 typedef struct Opt_SslErrorEvent Opt_SslErrorEvent;
 typedef struct Ark_StackOptions Ark_StackOptions;
 typedef struct Opt_StackOptions Opt_StackOptions;
-typedef struct Ark_StateStyles Ark_StateStyles;
-typedef struct Opt_StateStyles Opt_StateStyles;
 typedef struct Ark_StepperOptions Ark_StepperOptions;
 typedef struct Opt_StepperOptions Opt_StepperOptions;
 typedef struct Ark_StyledStringChangedListener Ark_StyledStringChangedListener;
@@ -15060,19 +15058,6 @@ typedef struct Opt_StackOptions {
     Ark_Tag tag;
     Ark_StackOptions value;
 } Opt_StackOptions;
-typedef struct Ark_StateStyles {
-    /* kind: Interface */
-    Opt_CustomStyles normal;
-    Opt_CustomStyles pressed;
-    Opt_CustomStyles disabled;
-    Opt_CustomStyles focused;
-    Opt_CustomStyles clicked;
-    Opt_CustomStyles selected;
-} Ark_StateStyles;
-typedef struct Opt_StateStyles {
-    Ark_Tag tag;
-    Ark_StateStyles value;
-} Opt_StateStyles;
 typedef struct Ark_StepperOptions {
     /* kind: Interface */
     Opt_Number index;
@@ -20964,8 +20949,6 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                   const Opt_String* value);
     void (*setGeometryTransition0)(Ark_NativePointer node,
                                    const Opt_String* value);
-    void (*setStateStyles)(Ark_NativePointer node,
-                           const Opt_StateStyles* value);
     void (*setRestoreId)(Ark_NativePointer node,
                          const Opt_Number* value);
     void (*setSphericalEffect)(Ark_NativePointer node,
@@ -28342,8 +28325,6 @@ typedef struct GENERATED_ArkUIGlobalScopeAccessor {
                       const Callback_Void* event);
     void (*animateToImmediately)(const Ark_AnimateParam* value,
                                  const Callback_Void* event);
-    Ark_CustomObject (*applyStyles)(const Ark_CustomObject* self,
-                                    const CustomStyles* customStyles);
     void (*bindCompatibleProvideCallback)(Ark_ExtendableComponent component,
                                           const Ark_CustomObject* createCompatibleState,
                                           const Ark_CustomObject* setCallback,

@@ -4614,20 +4614,6 @@ void impl_CommonMethod_setGeometryTransition0(Ark_NativePointer thisPtr, KSerial
         GetNodeModifiers()->getCommonMethodModifier()->setGeometryTransition0(self, static_cast<Opt_String*>(&value_value));
 }
 KOALA_INTEROP_DIRECT_V3(CommonMethod_setGeometryTransition0, Ark_NativePointer, KSerializerBuffer, int32_t)
-void impl_CommonMethod_setStateStyles(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
-        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
-        DeserializerBase thisDeserializer(thisArray, thisLength);
-        const auto value_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_StateStyles value_value_buf = {};
-        value_value_buf.tag = value_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-        if ((value_value_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
-        {
-            value_value_buf.value = StateStyles_serializer::read(thisDeserializer);
-        }
-        Opt_StateStyles value_value = value_value_buf;;
-        GetNodeModifiers()->getCommonMethodModifier()->setStateStyles(self, static_cast<Opt_StateStyles*>(&value_value));
-}
-KOALA_INTEROP_DIRECT_V3(CommonMethod_setStateStyles, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_CommonMethod_setRestoreId(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
@@ -43520,13 +43506,6 @@ void impl_GlobalScope_animateToImmediately(KSerializerBuffer thisArray, int32_t 
         GetAccessors()->getGlobalScopeAccessor()->animateToImmediately(static_cast<Ark_AnimateParam*>(&value_value), static_cast<Callback_Void*>(&event_value));
 }
 KOALA_INTEROP_DIRECT_V2(GlobalScope_animateToImmediately, KSerializerBuffer, int32_t)
-void impl_GlobalScope_applyStyles(KSerializerBuffer thisArray, int32_t thisLength) {
-        DeserializerBase thisDeserializer(thisArray, thisLength);
-        Ark_CustomObject self_value = static_cast<Ark_CustomObject>(thisDeserializer.readCustomObject("T"));;
-        CustomStyles customStyles_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_String instance)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_CustomStyles)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_String instance)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_CustomStyles))))};;
-        GetAccessors()->getGlobalScopeAccessor()->applyStyles(static_cast<Ark_CustomObject*>(&self_value), static_cast<CustomStyles*>(&customStyles_value));
-}
-KOALA_INTEROP_DIRECT_V2(GlobalScope_applyStyles, KSerializerBuffer, int32_t)
 void impl_GlobalScope_bindCompatibleProvideCallback(Ark_NativePointer component, KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         Ark_CustomObject createCompatibleState_value = static_cast<Ark_CustomObject>(thisDeserializer.readCustomObject("object"));;

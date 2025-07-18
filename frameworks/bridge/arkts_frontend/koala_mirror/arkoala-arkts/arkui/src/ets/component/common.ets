@@ -42,12 +42,12 @@ import { CustomBuilder } from "./builder"
 import { uniformTypeDescriptor } from "./../generated/ohos.data.uniformTypeDescriptor"
 import { SymbolGlyphModifier, SymbolGlyphModifier_serializer } from "./../generated/arkui.SymbolGlyphModifier"
 import { UIContext, UIContext_serializer } from "./../generated/ohos.arkui.UIContext"
+import { hookStateStyleImpl, CustomStyles, ContentModifier, UICommonBase, AttributeModifier, AttributeUpdater } from "./../handwritten"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
 import { Context } from "./../generated/application.Context"
 import { pointer } from "./../generated/ohos.multimodalInput.pointer"
 import { ButtonType, ButtonStyleMode, ButtonRole } from "./button"
-import { ContentModifier, UICommonBase, AttributeModifier, AttributeUpdater } from "./../handwritten"
 import { observer } from "./../generated/ohos.arkui.observer"
 import { promptAction } from "./../generated/ohos.promptAction"
 import { ScrollState } from "./list"
@@ -4578,18 +4578,6 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setGeometryTransition0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setStateStylesAttribute(value: StateStyles | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            StateStyles_serializer.write(thisSerializer, value_value)
-        }
-        ArkUIGeneratedNativeModule._CommonMethod_setStateStyles(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
     setRestoreIdAttribute(value: number | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
@@ -7311,7 +7299,6 @@ export interface SheetOptions extends BindOptions {
     placement?: Placement;
     placementOnTarget?: boolean;
 }
-export type CustomStyles = (instance: string) => void;
 export interface StateStyles {
     normal?: CustomStyles;
     pressed?: CustomStyles;
@@ -10174,9 +10161,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public stateStyles(value: StateStyles | undefined): this {
         if (this.checkPriority("stateStyles")) {
-            const value_casted = value as (StateStyles | undefined)
-            this.getPeer()?.setStateStylesAttribute(value_casted)
-            return this
+            hookStateStyleImpl(this, value)
         }
         return this
     }
@@ -13188,9 +13173,6 @@ export function vp2px(value: number): number {
 export function px2vp(value: number): number {
     return GlobalScope.px2vp(value)
 }
-export function applyStyles<T>(self: T, customStyles: CustomStyles): T {
-    return GlobalScope.applyStyles(self, customStyles)
-}
 export class GestureModifier_serializer {
     public static write(buffer: SerializerBase, value: GestureModifier): void {
         let valueSerializer : SerializerBase = buffer
@@ -15091,172 +15073,6 @@ export class SpringBackAction_serializer {
     springBack_buf_argsSerializer.release();
     return; }
         let value : SpringBackAction = ({springBack: springBack_result} as SpringBackAction)
-        return value
-    }
-}
-export class StateStyles_serializer {
-    public static write(buffer: SerializerBase, value: StateStyles): void {
-        let valueSerializer : SerializerBase = buffer
-        const value_normal  = value.normal
-        let value_normal_type : int32 = RuntimeType.UNDEFINED
-        value_normal_type = runtimeType(value_normal)
-        valueSerializer.writeInt8((value_normal_type).toChar())
-        if ((value_normal_type) != (RuntimeType.UNDEFINED)) {
-            const value_normal_value  = value_normal!
-            valueSerializer.holdAndWriteCallback(value_normal_value)
-        }
-        const value_pressed  = value.pressed
-        let value_pressed_type : int32 = RuntimeType.UNDEFINED
-        value_pressed_type = runtimeType(value_pressed)
-        valueSerializer.writeInt8((value_pressed_type).toChar())
-        if ((value_pressed_type) != (RuntimeType.UNDEFINED)) {
-            const value_pressed_value  = value_pressed!
-            valueSerializer.holdAndWriteCallback(value_pressed_value)
-        }
-        const value_disabled  = value.disabled
-        let value_disabled_type : int32 = RuntimeType.UNDEFINED
-        value_disabled_type = runtimeType(value_disabled)
-        valueSerializer.writeInt8((value_disabled_type).toChar())
-        if ((value_disabled_type) != (RuntimeType.UNDEFINED)) {
-            const value_disabled_value  = value_disabled!
-            valueSerializer.holdAndWriteCallback(value_disabled_value)
-        }
-        const value_focused  = value.focused
-        let value_focused_type : int32 = RuntimeType.UNDEFINED
-        value_focused_type = runtimeType(value_focused)
-        valueSerializer.writeInt8((value_focused_type).toChar())
-        if ((value_focused_type) != (RuntimeType.UNDEFINED)) {
-            const value_focused_value  = value_focused!
-            valueSerializer.holdAndWriteCallback(value_focused_value)
-        }
-        const value_clicked  = value.clicked
-        let value_clicked_type : int32 = RuntimeType.UNDEFINED
-        value_clicked_type = runtimeType(value_clicked)
-        valueSerializer.writeInt8((value_clicked_type).toChar())
-        if ((value_clicked_type) != (RuntimeType.UNDEFINED)) {
-            const value_clicked_value  = value_clicked!
-            valueSerializer.holdAndWriteCallback(value_clicked_value)
-        }
-        const value_selected  = value.selected
-        let value_selected_type : int32 = RuntimeType.UNDEFINED
-        value_selected_type = runtimeType(value_selected)
-        valueSerializer.writeInt8((value_selected_type).toChar())
-        if ((value_selected_type) != (RuntimeType.UNDEFINED)) {
-            const value_selected_value  = value_selected!
-            valueSerializer.holdAndWriteCallback(value_selected_value)
-        }
-    }
-    public static read(buffer: DeserializerBase): StateStyles {
-        let valueDeserializer : DeserializerBase = buffer
-        const normal_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let normal_buf : CustomStyles | undefined
-        if ((normal_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const normal_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
-            const normal_buf__call : KPointer = valueDeserializer.readPointer()
-            const normal_buf__callSync : KPointer = valueDeserializer.readPointer()
-            normal_buf = (instance: string):void => { 
-    const normal_buf__argsSerializer : SerializerBase = SerializerBase.hold();
-    normal_buf__argsSerializer.writeInt32(normal_buf__resource.resourceId);
-    normal_buf__argsSerializer.writePointer(normal_buf__call);
-    normal_buf__argsSerializer.writePointer(normal_buf__callSync);
-    normal_buf__argsSerializer.writeString(instance);
-    InteropNativeModule._CallCallback(-1565709723, normal_buf__argsSerializer.asBuffer(), normal_buf__argsSerializer.length());
-    normal_buf__argsSerializer.release();
-    return; }
-        }
-        const normal_result : CustomStyles | undefined = normal_buf
-        const pressed_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let pressed_buf : CustomStyles | undefined
-        if ((pressed_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const pressed_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
-            const pressed_buf__call : KPointer = valueDeserializer.readPointer()
-            const pressed_buf__callSync : KPointer = valueDeserializer.readPointer()
-            pressed_buf = (instance: string):void => { 
-    const pressed_buf__argsSerializer : SerializerBase = SerializerBase.hold();
-    pressed_buf__argsSerializer.writeInt32(pressed_buf__resource.resourceId);
-    pressed_buf__argsSerializer.writePointer(pressed_buf__call);
-    pressed_buf__argsSerializer.writePointer(pressed_buf__callSync);
-    pressed_buf__argsSerializer.writeString(instance);
-    InteropNativeModule._CallCallback(-1565709723, pressed_buf__argsSerializer.asBuffer(), pressed_buf__argsSerializer.length());
-    pressed_buf__argsSerializer.release();
-    return; }
-        }
-        const pressed_result : CustomStyles | undefined = pressed_buf
-        const disabled_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let disabled_buf : CustomStyles | undefined
-        if ((disabled_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const disabled_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
-            const disabled_buf__call : KPointer = valueDeserializer.readPointer()
-            const disabled_buf__callSync : KPointer = valueDeserializer.readPointer()
-            disabled_buf = (instance: string):void => { 
-    const disabled_buf__argsSerializer : SerializerBase = SerializerBase.hold();
-    disabled_buf__argsSerializer.writeInt32(disabled_buf__resource.resourceId);
-    disabled_buf__argsSerializer.writePointer(disabled_buf__call);
-    disabled_buf__argsSerializer.writePointer(disabled_buf__callSync);
-    disabled_buf__argsSerializer.writeString(instance);
-    InteropNativeModule._CallCallback(-1565709723, disabled_buf__argsSerializer.asBuffer(), disabled_buf__argsSerializer.length());
-    disabled_buf__argsSerializer.release();
-    return; }
-        }
-        const disabled_result : CustomStyles | undefined = disabled_buf
-        const focused_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let focused_buf : CustomStyles | undefined
-        if ((focused_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const focused_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
-            const focused_buf__call : KPointer = valueDeserializer.readPointer()
-            const focused_buf__callSync : KPointer = valueDeserializer.readPointer()
-            focused_buf = (instance: string):void => { 
-    const focused_buf__argsSerializer : SerializerBase = SerializerBase.hold();
-    focused_buf__argsSerializer.writeInt32(focused_buf__resource.resourceId);
-    focused_buf__argsSerializer.writePointer(focused_buf__call);
-    focused_buf__argsSerializer.writePointer(focused_buf__callSync);
-    focused_buf__argsSerializer.writeString(instance);
-    InteropNativeModule._CallCallback(-1565709723, focused_buf__argsSerializer.asBuffer(), focused_buf__argsSerializer.length());
-    focused_buf__argsSerializer.release();
-    return; }
-        }
-        const focused_result : CustomStyles | undefined = focused_buf
-        const clicked_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let clicked_buf : CustomStyles | undefined
-        if ((clicked_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const clicked_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
-            const clicked_buf__call : KPointer = valueDeserializer.readPointer()
-            const clicked_buf__callSync : KPointer = valueDeserializer.readPointer()
-            clicked_buf = (instance: string):void => { 
-    const clicked_buf__argsSerializer : SerializerBase = SerializerBase.hold();
-    clicked_buf__argsSerializer.writeInt32(clicked_buf__resource.resourceId);
-    clicked_buf__argsSerializer.writePointer(clicked_buf__call);
-    clicked_buf__argsSerializer.writePointer(clicked_buf__callSync);
-    clicked_buf__argsSerializer.writeString(instance);
-    InteropNativeModule._CallCallback(-1565709723, clicked_buf__argsSerializer.asBuffer(), clicked_buf__argsSerializer.length());
-    clicked_buf__argsSerializer.release();
-    return; }
-        }
-        const clicked_result : CustomStyles | undefined = clicked_buf
-        const selected_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let selected_buf : CustomStyles | undefined
-        if ((selected_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const selected_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
-            const selected_buf__call : KPointer = valueDeserializer.readPointer()
-            const selected_buf__callSync : KPointer = valueDeserializer.readPointer()
-            selected_buf = (instance: string):void => { 
-    const selected_buf__argsSerializer : SerializerBase = SerializerBase.hold();
-    selected_buf__argsSerializer.writeInt32(selected_buf__resource.resourceId);
-    selected_buf__argsSerializer.writePointer(selected_buf__call);
-    selected_buf__argsSerializer.writePointer(selected_buf__callSync);
-    selected_buf__argsSerializer.writeString(instance);
-    InteropNativeModule._CallCallback(-1565709723, selected_buf__argsSerializer.asBuffer(), selected_buf__argsSerializer.length());
-    selected_buf__argsSerializer.release();
-    return; }
-        }
-        const selected_result : CustomStyles | undefined = selected_buf
-        let value : StateStyles = ({normal: normal_result, pressed: pressed_result, disabled: disabled_result, focused: focused_result, clicked: clicked_result, selected: selected_result} as StateStyles)
         return value
     }
 }

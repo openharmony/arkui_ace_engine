@@ -37,7 +37,6 @@ npm_cmd("incremental.abc") {
     run_tasks = [ "build:incremental:inc:ui2abc" ]
 
     deps = [
-      ":incremental_install",        
       "$koala_root/ui2abc:ui2abc"
     ]
 

@@ -208,7 +208,6 @@ typedef enum CallbackKind {
     Kind_ContentWillScrollCallback = -2146044511,
     Kind_Context_getGroupDir_Callback = 260483890,
     Kind_CustomNodeBuilder = 1766817632,
-    Kind_CustomStyles = -1565709723,
     Kind_DataPanelModifierBuilder = -238036926,
     Kind_EditableTextOnChangeCallback = -1729563209,
     Kind_ErrorCallback = -1936519453,

@@ -19,15 +19,14 @@
         "test:ts": "mocha"
     },
     "dependencies": {
-        "@koalaui/common": "1.7.6+devel",
-        "@koalaui/compat": "1.7.6+devel",
-        "@koalaui/harness": "1.7.6+devel",
-        "@koalaui/build-common": "1.7.6+devel",
-        "@koalaui/runtime": "1.7.6+devel",
+        "@koalaui/common": "file:../../incremental/common",
+        "@koalaui/compat": "file:../../incremental/compat",
+        "@koalaui/harness": "file:../../incremental/harness",
+        "@koalaui/build-common": "file:../../incremental/build-common",
+        "@koalaui/runtime": "file:../../incremental/runtime",
         "@koalaui/annotate": "file:../annotate",
-        "@koalaui/ets-tsc": "4.9.5-r5",
-        "@koalaui/compiler-plugin": "1.7.6+devel",
-        "@koalaui/fast-arktsc": "1.7.6+devel"
+        "@koalaui/ets-tsc": "4.9.5-r6",
+        "@koalaui/fast-arktsc": "file:../fast-arktsc"
     },
     "devDependencies": {
         "@typescript-eslint/eslint-plugin": "^5.20.0",

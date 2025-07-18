@@ -17,7 +17,6 @@ import("//foundation/arkui/ace_engine/frameworks/bridge/arkts_frontend/koala_mir
 node_version = "v16.20.2"
 host_arch = "${host_os}-${host_cpu}"
 
-incremental_root = "../incremental"
 libarkts_root = "./libarkts"
 
 build_root = "//build"
@@ -27,11 +26,7 @@ npm_cmd("fast_arktsc_build") {
     outputs = [
         "$target_out_dir/fast_arktsc_build"
     ]
-    deps = [
-        ":ui2abc_install"
-    ]
     project_path = rebase_path("./fast-arktsc")
-    install = true
     run_tasks = [ "compile" ]
 }
 
@@ -49,8 +44,6 @@ npm_cmd("ui2abc_build") {
     ]
 
     deps = [
-        "$incremental_root:incremental_install",
-        ":ui2abc_install",
         ":fast_arktsc_build",
         "$libarkts_root:es2panda"
     ]
