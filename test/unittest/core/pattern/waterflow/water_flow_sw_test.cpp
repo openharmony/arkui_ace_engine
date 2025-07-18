@@ -14,9 +14,12 @@
  */
 
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/render/mock_render_context.h"
 #include "water_flow_item_maps.h"
 #include "water_flow_test_ng.h"
 
+#include "core/components/common/layout/constants.h"
+#include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_info_sw.h"
 #include "core/components_ng/syntax/if_else_model_ng.h"
 #include "core/components_ng/syntax/if_else_node.h"
@@ -362,5 +365,38 @@ HWTEST_F(WaterFlowSWTest, Layout002, TestSize.Level1)
     EXPECT_EQ(GetChildRect(frameNode_, 13).Top(), -50.0f);
     EXPECT_EQ(GetChildRect(frameNode_, 14).Top(), -50.0f);
     EXPECT_EQ(GetChildRect(frameNode_, 15).Top(), -50.0f);
+}
+
+/**
+ * @tc.name: ScrollToTagetTest001
+ * @tc.desc: Test ScrollToTaget with reverse and expandSafeArea
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, ScrollToTagetTest001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetLayoutDirection(FlexDirection::COLUMN_REVERSE);
+    
+    CreateItemsInLazyForEach(100, [](int32_t) { return 100.0f; });
+    CreateDone();
+
+    EXPECT_CALL(*MockPipelineContext::pipeline_, GetSafeArea)
+        .Times(2)
+        .WillRepeatedly(Return(SafeAreaInsets { {}, { .start = 0, .end = 100 }, {}, {} }));
+    layoutProperty_->UpdateSafeAreaExpandOpts({ .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL });
+
+    auto mockContext = AceType::DynamicCast<MockRenderContext>(frameNode_->GetRenderContext());
+    mockContext->SetPaintRectWithTransform(RectF(0.0f, 0.0f, WIDTH, HEIGHT));
+    ScrollAlign align = ScrollAlign::START;
+    // Move index 3 to middle of WaterFlow
+    auto child = frameNode_->GetChildByIndex(3);
+    ASSERT_NE(child, nullptr);
+    auto childNode = child->GetHostNode();
+    ASSERT_NE(childNode, nullptr);
+    auto mockChildContext = AceType::DynamicCast<MockRenderContext>(childNode->GetRenderContext());
+    mockChildContext->SetPaintRectWithTransform(RectF(WIDTH, 6 * ITEM_MAIN_SIZE, WIDTH, ITEM_MAIN_SIZE));
+    EXPECT_EQ(ScrollablePattern::ScrollToTarget(frameNode_, childNode, 0.0f, align), RET_SUCCESS);
+    EXPECT_TRUE(TickPosition(-100.0f));
 }
 } // namespace OHOS::Ace::NG

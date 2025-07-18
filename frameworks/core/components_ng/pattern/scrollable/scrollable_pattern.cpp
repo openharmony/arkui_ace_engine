@@ -28,6 +28,7 @@
 #include "core/common/recorder/event_definition.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/base/observer_handler.h"
+#include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_scroll_notifier.h"
 #include "core/components_ng/pattern/scroll/effect/scroll_fade_effect.h"
 #include "core/components_ng/pattern/scroll/scroll_event_hub.h"
@@ -35,6 +36,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable.h"
 #include "core/components_ng/pattern/scrollable/scrollable_event_hub.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
+#include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/syntax/for_each_node.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
@@ -44,7 +46,7 @@
 #include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar.h"
 #include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar_overlay_modifier.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
+
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -2284,16 +2286,24 @@ int32_t ScrollablePattern::ScrollToTarget(
     ACE_SCOPED_TRACE("ScrollToTarget, scrollable:%d, target:%d, offset:%f, align:%d", scrollable->GetId(),
         target->GetId(), targetOffset, targetAlign);
 
+    auto axis = pattern->GetAxis();
     auto scrollablePos = scrollable->GetTransformRelativeOffset();
     auto targetPos = target->GetTransformRelativeOffset();
-    auto offsetToScrollable = (targetPos - scrollablePos).GetMainOffset(pattern->GetAxis());
+    auto offsetToScrollable = (targetPos - scrollablePos).GetMainOffset(axis);
     auto scrollToOffset = pattern->GetTotalOffset();
     TAG_LOGI(AceLogTag::ACE_SCROLLABLE,
         "ScrollToTarget, scrollable:%{public}d, target:%{public}d, offset:%{public}f, align:%{public}d, "
         "currentOffset:%{public}f, offsetToScrollabl:%{public}f",
         scrollable->GetId(), target->GetId(), targetOffset, targetAlign, scrollToOffset, offsetToScrollable);
+
+    offsetToScrollable += targetOffset;
+    if (pattern->IsReverse()) {
+        offsetToScrollable += target->GetGeometryNode()->GetPaddingSize().MainSize(axis);
+        offsetToScrollable = pattern->GetMainContentSize() +
+                             ScrollableUtils::CheckHeightExpansion(scrollable->GetLayoutProperty(), axis) -
+                             offsetToScrollable;
+    }
     scrollToOffset += offsetToScrollable;
-    scrollToOffset += targetOffset;
     if (targetAlign == ScrollAlign::CENTER) {
         scrollToOffset -= pattern->GetMainContentSize() / 2;
     }
