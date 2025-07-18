@@ -205,11 +205,11 @@ bool GetEnumItem([[maybe_unused]] ani_env* env, ani_size index, const char* enum
     auto status = ANI_OK;
     static const std::string fullEnumName = std::string("@ohos.arkui.dragController.dragController.").append(enumName);
     if ((status = env->FindEnum(fullEnumName.c_str(), &enumType)) != ANI_OK) {
-        LOGE("AceDrag, find DragStatus Enum fail. status = %{public}d", status);
+        LOGE("AceDrag, find %{public}s fail. statsu = %{public}d", enumName, status);
         return false;
     }
     if ((status = env->Enum_GetEnumItemByIndex(enumType, index, &enumItem)) != ANI_OK) {
-        LOGE("AceDrag, get DragStatus Enum fail. status = %{public}d", status);
+        LOGE("AceDrag, get %{public}s Enum fail. status = %{public}d", enumName, status);
         return false;
     }
     return true;
