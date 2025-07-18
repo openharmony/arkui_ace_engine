@@ -21,6 +21,7 @@
 
 #include "bridge/arkts_frontend/arkts_ani_utils.h"
 #include "bridge/arkts_frontend/entry/arkts_entry_loader.h"
+#include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/base/subwindow/subwindow_manager.h"
 #include "bridge/arkts_frontend/ani_context_module.h"
@@ -417,6 +418,39 @@ void ArktsFrontend::ClearExtender()
 {
     CHECK_NULL_VOID(pageRouterManager_);
     pageRouterManager_->Clear();
+}
+
+bool ArktsFrontend::OnBackPressed()
+{
+    CHECK_NULL_RETURN(pageRouterManager_, false);
+    auto pageNode = pageRouterManager_->GetCurrentPageNode();
+    CHECK_NULL_RETURN(pageNode, false);
+    auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+    CHECK_NULL_RETURN(pagePattern, false);
+    if (pagePattern->OnBackPressed()) {
+        return true;
+    }
+    return pageRouterManager_->Pop();
+}
+
+void ArktsFrontend::OnShow()
+{
+    CHECK_NULL_VOID(pageRouterManager_);
+    auto pageNode = pageRouterManager_->GetCurrentPageNode();
+    CHECK_NULL_VOID(pageNode);
+    auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+    CHECK_NULL_VOID(pagePattern);
+    pagePattern->OnShow();
+}
+
+void ArktsFrontend::OnHide()
+{
+    CHECK_NULL_VOID(pageRouterManager_);
+    auto pageNode = pageRouterManager_->GetCurrentPageNode();
+    CHECK_NULL_VOID(pageNode);
+    auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+    CHECK_NULL_VOID(pagePattern);
+    pagePattern->OnHide();
 }
 
 bool ArktsFrontend::HandleMessage(void *frameNode, int32_t type, const std::string& param)
