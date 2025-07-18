@@ -84,7 +84,9 @@ export interface BadgeParamWithString extends BadgeParam {
     value: ResourceStr;
 }
 export interface BadgeAttribute extends CommonMethod {
-    attributeModifier(value: AttributeModifier<BadgeAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    attributeModifier(value: AttributeModifier<BadgeAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkBadgeStyle extends ArkCommonMethodStyle implements BadgeAttribute {
     attributeModifier_value?: AttributeModifier<BadgeAttribute> | AttributeModifier<CommonMethod> | undefined

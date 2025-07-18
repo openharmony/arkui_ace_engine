@@ -144,12 +144,24 @@ export interface ListItemOptions {
     style?: ListItemStyle;
 }
 export interface ListItemAttribute extends CommonMethod {
-    selectable(value: boolean | undefined): this
-    selected(value: boolean | undefined): this
-    swipeAction(value: SwipeActionOptions | undefined): this
-    onSelect(value: ((isSelected: boolean) => void) | undefined): this
-    _onChangeEvent_selected(callback_: ((selected: boolean | undefined) => void)): void
-    attributeModifier(value: AttributeModifier<ListItemAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    selectable(value: boolean | undefined): this {
+        throw new Error("Unimplemented method selectable")
+    }
+    selected(value: boolean | undefined): this {
+        throw new Error("Unimplemented method selected")
+    }
+    swipeAction(value: SwipeActionOptions | undefined): this {
+        throw new Error("Unimplemented method swipeAction")
+    }
+    onSelect(value: ((isSelected: boolean) => void) | undefined): this {
+        throw new Error("Unimplemented method onSelect")
+    }
+    _onChangeEvent_selected(callback_: ((selected: boolean | undefined) => void)): void {
+        throw new Error("Unimplemented method _onChangeEvent_selected")
+    }
+    attributeModifier(value: AttributeModifier<ListItemAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkListItemStyle extends ArkCommonMethodStyle implements ListItemAttribute {
     selectable_value?: boolean | undefined

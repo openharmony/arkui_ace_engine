@@ -916,50 +916,136 @@ export interface TextOverflowOptions {
     overflow: TextOverflow;
 }
 export interface TextAttribute extends CommonMethod {
-    fontColor(value: ResourceColor | undefined): this
-    fontSize(value: number | string | Resource | undefined): this
-    minFontSize(value: number | string | Resource | undefined): this
-    maxFontSize(value: number | string | Resource | undefined): this
-    minFontScale(value: number | Resource | undefined): this
-    maxFontScale(value: number | Resource | undefined): this
-    fontStyle(value: FontStyle | undefined): this
-    lineSpacing(value: LengthMetrics | undefined): this
-    textAlign(value: TextAlign | undefined): this
-    lineHeight(value: number | string | Resource | undefined): this
-    textOverflow(value: TextOverflowOptions | undefined): this
-    fontFamily(value: string | Resource | undefined): this
-    maxLines(value: number | undefined): this
-    decoration(value: DecorationStyleInterface | undefined): this
-    letterSpacing(value: number | string | undefined): this
-    textCase(value: TextCase | undefined): this
-    baselineOffset(value: number | string | undefined): this
-    copyOption(value: CopyOptions | undefined): this
+    fontColor(value: ResourceColor | undefined): this {
+        throw new Error("Unimplemented method fontColor")
+    }
+    fontSize(value: number | string | Resource | undefined): this {
+        throw new Error("Unimplemented method fontSize")
+    }
+    minFontSize(value: number | string | Resource | undefined): this {
+        throw new Error("Unimplemented method minFontSize")
+    }
+    maxFontSize(value: number | string | Resource | undefined): this {
+        throw new Error("Unimplemented method maxFontSize")
+    }
+    minFontScale(value: number | Resource | undefined): this {
+        throw new Error("Unimplemented method minFontScale")
+    }
+    maxFontScale(value: number | Resource | undefined): this {
+        throw new Error("Unimplemented method maxFontScale")
+    }
+    fontStyle(value: FontStyle | undefined): this {
+        throw new Error("Unimplemented method fontStyle")
+    }
+    lineSpacing(value: LengthMetrics | undefined): this {
+        throw new Error("Unimplemented method lineSpacing")
+    }
+    textAlign(value: TextAlign | undefined): this {
+        throw new Error("Unimplemented method textAlign")
+    }
+    lineHeight(value: number | string | Resource | undefined): this {
+        throw new Error("Unimplemented method lineHeight")
+    }
+    textOverflow(value: TextOverflowOptions | undefined): this {
+        throw new Error("Unimplemented method textOverflow")
+    }
+    fontFamily(value: string | Resource | undefined): this {
+        throw new Error("Unimplemented method fontFamily")
+    }
+    maxLines(value: number | undefined): this {
+        throw new Error("Unimplemented method maxLines")
+    }
+    decoration(value: DecorationStyleInterface | undefined): this {
+        throw new Error("Unimplemented method decoration")
+    }
+    letterSpacing(value: number | string | undefined): this {
+        throw new Error("Unimplemented method letterSpacing")
+    }
+    textCase(value: TextCase | undefined): this {
+        throw new Error("Unimplemented method textCase")
+    }
+    baselineOffset(value: number | string | undefined): this {
+        throw new Error("Unimplemented method baselineOffset")
+    }
+    copyOption(value: CopyOptions | undefined): this {
+        throw new Error("Unimplemented method copyOption")
+    }
     draggable(value: boolean | undefined): this
-    textShadow(value: ShadowOptions | Array<ShadowOptions> | undefined): this
-    heightAdaptivePolicy(value: TextHeightAdaptivePolicy | undefined): this
-    textIndent(value: Length | undefined): this
-    wordBreak(value: WordBreak | undefined): this
-    lineBreakStrategy(value: LineBreakStrategy | undefined): this
-    onCopy(value: ((value: string) => void) | undefined): this
-    caretColor(value: ResourceColor | undefined): this
-    selectedBackgroundColor(value: ResourceColor | undefined): this
-    ellipsisMode(value: EllipsisMode | undefined): this
-    enableDataDetector(value: boolean | undefined): this
-    dataDetectorConfig(value: TextDataDetectorConfig | undefined): this
-    onTextSelectionChange(value: ((selectionStart: number,selectionEnd: number) => void) | undefined): this
-    fontFeature(value: string | undefined): this
-    marqueeOptions(value: TextMarqueeOptions | undefined): this
-    onMarqueeStateChange(value: ((value0: MarqueeState) => void) | undefined): this
-    privacySensitive(value: boolean | undefined): this
-    textSelectable(value: TextSelectableMode | undefined): this
-    editMenuOptions(value: EditMenuOptions | undefined): this
-    halfLeading(value: boolean | undefined): this
-    enableHapticFeedback(value: boolean | undefined): this
-    font(fontValue: Font | undefined, options?: FontSettingOptions): this
-    fontWeight(weight: number | FontWeight | string | undefined, options?: FontSettingOptions): this
-    selection(selectionStart: number | undefined, selectionEnd: number | undefined): this
-    bindSelectionMenu(spanType: TextSpanType | undefined, content: CustomBuilder | undefined, responseType: TextResponseType | undefined, options?: SelectionMenuOptions): this
-    attributeModifier(value: AttributeModifier<TextAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    textShadow(value: ShadowOptions | Array<ShadowOptions> | undefined): this {
+        throw new Error("Unimplemented method textShadow")
+    }
+    heightAdaptivePolicy(value: TextHeightAdaptivePolicy | undefined): this {
+        throw new Error("Unimplemented method heightAdaptivePolicy")
+    }
+    textIndent(value: Length | undefined): this {
+        throw new Error("Unimplemented method textIndent")
+    }
+    wordBreak(value: WordBreak | undefined): this {
+        throw new Error("Unimplemented method wordBreak")
+    }
+    lineBreakStrategy(value: LineBreakStrategy | undefined): this {
+        throw new Error("Unimplemented method lineBreakStrategy")
+    }
+    onCopy(value: ((value: string) => void) | undefined): this {
+        throw new Error("Unimplemented method onCopy")
+    }
+    caretColor(value: ResourceColor | undefined): this {
+        throw new Error("Unimplemented method caretColor")
+    }
+    selectedBackgroundColor(value: ResourceColor | undefined): this {
+        throw new Error("Unimplemented method selectedBackgroundColor")
+    }
+    ellipsisMode(value: EllipsisMode | undefined): this {
+        throw new Error("Unimplemented method ellipsisMode")
+    }
+    enableDataDetector(value: boolean | undefined): this {
+        throw new Error("Unimplemented method enableDataDetector")
+    }
+    dataDetectorConfig(value: TextDataDetectorConfig | undefined): this {
+        throw new Error("Unimplemented method dataDetectorConfig")
+    }
+    onTextSelectionChange(value: ((selectionStart: number,selectionEnd: number) => void) | undefined): this {
+        throw new Error("Unimplemented method onTextSelectionChange")
+    }
+    fontFeature(value: string | undefined): this {
+        throw new Error("Unimplemented method fontFeature")
+    }
+    marqueeOptions(value: TextMarqueeOptions | undefined): this {
+        throw new Error("Unimplemented method marqueeOptions")
+    }
+    onMarqueeStateChange(value: ((value0: MarqueeState) => void) | undefined): this {
+        throw new Error("Unimplemented method onMarqueeStateChange")
+    }
+    privacySensitive(value: boolean | undefined): this {
+        throw new Error("Unimplemented method privacySensitive")
+    }
+    textSelectable(value: TextSelectableMode | undefined): this {
+        throw new Error("Unimplemented method textSelectable")
+    }
+    editMenuOptions(value: EditMenuOptions | undefined): this {
+        throw new Error("Unimplemented method editMenuOptions")
+    }
+    halfLeading(value: boolean | undefined): this {
+        throw new Error("Unimplemented method halfLeading")
+    }
+    enableHapticFeedback(value: boolean | undefined): this {
+        throw new Error("Unimplemented method enableHapticFeedback")
+    }
+    font(fontValue: Font | undefined, options?: FontSettingOptions): this {
+        throw new Error("Unimplemented method font")
+    }
+    fontWeight(weight: number | FontWeight | string | undefined, options?: FontSettingOptions): this {
+        throw new Error("Unimplemented method fontWeight")
+    }
+    selection(selectionStart: number | undefined, selectionEnd: number | undefined): this {
+        throw new Error("Unimplemented method selection")
+    }
+    bindSelectionMenu(spanType: TextSpanType | undefined, content: CustomBuilder | undefined, responseType: TextResponseType | undefined, options?: SelectionMenuOptions): this {
+        throw new Error("Unimplemented method bindSelectionMenu")
+    }
+    attributeModifier(value: AttributeModifier<TextAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkTextStyle extends ArkCommonMethodStyle implements TextAttribute {
     fontColor_value?: ResourceColor | undefined

@@ -79,8 +79,12 @@ export interface FlexSpaceOptions {
     cross?: LengthMetrics;
 }
 export interface FlexAttribute extends CommonMethod {
-    pointLight(value: PointLightStyle | undefined): this
-    attributeModifier(value: AttributeModifier<FlexAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    pointLight(value: PointLightStyle | undefined): this {
+        throw new Error("Unimplemented method pointLight")
+    }
+    attributeModifier(value: AttributeModifier<FlexAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkFlexStyle extends ArkCommonMethodStyle implements FlexAttribute {
     pointLight_value?: PointLightStyle | undefined

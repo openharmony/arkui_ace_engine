@@ -1754,7 +1754,9 @@ export interface IndicatorStyle {
 export type CustomNodeBuilder = (parentNode: KPointer) => KPointer;
 export type NavExtender_OnUpdateStack = () => void;
 export interface Root {
-    attributeModifier(value: AttributeModifier<Root> | undefined): this
+    attributeModifier(value: AttributeModifier<Root> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkRootStyle implements Root {
     public attributeModifier(value: AttributeModifier<Root> | undefined): this {
@@ -1764,7 +1766,9 @@ export class ArkRootStyle implements Root {
     }
 }
 export interface ComponentRoot {
-    attributeModifier(value: AttributeModifier<ComponentRoot> | undefined): this
+    attributeModifier(value: AttributeModifier<ComponentRoot> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkComponentRootStyle implements ComponentRoot {
     public attributeModifier(value: AttributeModifier<ComponentRoot> | undefined): this {
@@ -1776,9 +1780,15 @@ export class ArkComponentRootStyle implements ComponentRoot {
 export type Callback_onMeasureSize_SizeResult = (selfLayoutInfo: GeometryInfo, children: Array<Measurable>, constraint: ConstraintSizeOptions) => SizeResult;
 export type Callback_onPlaceChildren_Void = (selfLayoutInfo: GeometryInfo, children: Array<Layoutable>, constraint: ConstraintSizeOptions) => void;
 export interface CustomLayoutRoot {
-    subscribeOnMeasureSize(value: Callback_onMeasureSize_SizeResult): this
-    subscribeOnPlaceChildren(value: Callback_onPlaceChildren_Void): this
-    attributeModifier(value: AttributeModifier<CustomLayoutRoot> | undefined): this
+    subscribeOnMeasureSize(value: Callback_onMeasureSize_SizeResult): this {
+        throw new Error("Unimplemented method subscribeOnMeasureSize")
+    }
+    subscribeOnPlaceChildren(value: Callback_onPlaceChildren_Void): this {
+        throw new Error("Unimplemented method subscribeOnPlaceChildren")
+    }
+    attributeModifier(value: AttributeModifier<CustomLayoutRoot> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkCustomLayoutRootStyle implements CustomLayoutRoot {
     subscribeOnMeasureSize_value?: Callback_onMeasureSize_SizeResult

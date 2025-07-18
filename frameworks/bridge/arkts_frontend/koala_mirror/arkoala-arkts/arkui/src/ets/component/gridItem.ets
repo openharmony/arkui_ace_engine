@@ -150,15 +150,33 @@ export interface GridItemOptions {
     style?: GridItemStyle;
 }
 export interface GridItemAttribute extends CommonMethod {
-    rowStart(value: number | undefined): this
-    rowEnd(value: number | undefined): this
-    columnStart(value: number | undefined): this
-    columnEnd(value: number | undefined): this
-    selectable(value: boolean | undefined): this
-    selected(value: boolean | undefined): this
-    onSelect(value: ((isSelected: boolean) => void) | undefined): this
-    _onChangeEvent_selected(callback_: ((selected: boolean | undefined) => void)): void
-    attributeModifier(value: AttributeModifier<GridItemAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    rowStart(value: number | undefined): this {
+        throw new Error("Unimplemented method rowStart")
+    }
+    rowEnd(value: number | undefined): this {
+        throw new Error("Unimplemented method rowEnd")
+    }
+    columnStart(value: number | undefined): this {
+        throw new Error("Unimplemented method columnStart")
+    }
+    columnEnd(value: number | undefined): this {
+        throw new Error("Unimplemented method columnEnd")
+    }
+    selectable(value: boolean | undefined): this {
+        throw new Error("Unimplemented method selectable")
+    }
+    selected(value: boolean | undefined): this {
+        throw new Error("Unimplemented method selected")
+    }
+    onSelect(value: ((isSelected: boolean) => void) | undefined): this {
+        throw new Error("Unimplemented method onSelect")
+    }
+    _onChangeEvent_selected(callback_: ((selected: boolean | undefined) => void)): void {
+        throw new Error("Unimplemented method _onChangeEvent_selected")
+    }
+    attributeModifier(value: AttributeModifier<GridItemAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkGridItemStyle extends ArkCommonMethodStyle implements GridItemAttribute {
     rowStart_value?: number | undefined

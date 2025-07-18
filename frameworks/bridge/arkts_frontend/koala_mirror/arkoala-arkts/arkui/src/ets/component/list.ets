@@ -491,34 +491,90 @@ export interface ListDividerOptions {
     endMargin?: Length;
 }
 export interface ListAttribute extends ScrollableCommonMethod {
-    alignListItem(value: ListItemAlign | undefined): this
-    listDirection(value: Axis | undefined): this
-    contentStartOffset(value: number | undefined): this
-    contentEndOffset(value: number | undefined): this
-    divider(value: ListDividerOptions | undefined): this
-    multiSelectable(value: boolean | undefined): this
-    cachedCount(value: number | undefined): this
-    chainAnimation(value: boolean | undefined): this
-    chainAnimationOptions(value: ChainAnimationOptions | undefined): this
-    sticky(value: StickyStyle | undefined): this
-    scrollSnapAlign(value: ScrollSnapAlign | undefined): this
-    childrenMainSize(value: ChildrenMainSize | undefined): this
-    maintainVisibleContentPosition(value: boolean | undefined): this
-    stackFromEnd(value: boolean | undefined): this
-    onScrollIndex(value: ((start: number,end: number,center: number) => void) | undefined): this
-    onScrollVisibleContentChange(value: OnScrollVisibleContentChangeCallback | undefined): this
-    onItemMove(value: ((from: number,to: number) => boolean) | undefined): this
-    onItemDragStart(value: OnItemDragStartCallback | undefined): this
-    onItemDragEnter(value: ((event: ItemDragInfo) => void) | undefined): this
-    onItemDragMove(value: ((event: ItemDragInfo,itemIndex: number,insertIndex: number) => void) | undefined): this
-    onItemDragLeave(value: ((event: ItemDragInfo,itemIndex: number) => void) | undefined): this
-    onItemDrop(value: ((event: ItemDragInfo,itemIndex: number,insertIndex: number,isSuccess: boolean) => void) | undefined): this
-    onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this
-    onWillScroll(value: OnWillScrollCallback | undefined): this
-    onDidScroll(value: OnScrollCallback | undefined): this
-    lanes(value: number | LengthConstrain | undefined, gutter?: Dimension): this
-    cachedCount(count: number | undefined, show: boolean | undefined): this
-    attributeModifier(value: AttributeModifier<ListAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this
+    alignListItem(value: ListItemAlign | undefined): this {
+        throw new Error("Unimplemented method alignListItem")
+    }
+    listDirection(value: Axis | undefined): this {
+        throw new Error("Unimplemented method listDirection")
+    }
+    contentStartOffset(value: number | undefined): this {
+        throw new Error("Unimplemented method contentStartOffset")
+    }
+    contentEndOffset(value: number | undefined): this {
+        throw new Error("Unimplemented method contentEndOffset")
+    }
+    divider(value: ListDividerOptions | undefined): this {
+        throw new Error("Unimplemented method divider")
+    }
+    multiSelectable(value: boolean | undefined): this {
+        throw new Error("Unimplemented method multiSelectable")
+    }
+    cachedCount(value: number | undefined): this {
+        throw new Error("Unimplemented method cachedCount")
+    }
+    chainAnimation(value: boolean | undefined): this {
+        throw new Error("Unimplemented method chainAnimation")
+    }
+    chainAnimationOptions(value: ChainAnimationOptions | undefined): this {
+        throw new Error("Unimplemented method chainAnimationOptions")
+    }
+    sticky(value: StickyStyle | undefined): this {
+        throw new Error("Unimplemented method sticky")
+    }
+    scrollSnapAlign(value: ScrollSnapAlign | undefined): this {
+        throw new Error("Unimplemented method scrollSnapAlign")
+    }
+    childrenMainSize(value: ChildrenMainSize | undefined): this {
+        throw new Error("Unimplemented method childrenMainSize")
+    }
+    maintainVisibleContentPosition(value: boolean | undefined): this {
+        throw new Error("Unimplemented method maintainVisibleContentPosition")
+    }
+    stackFromEnd(value: boolean | undefined): this {
+        throw new Error("Unimplemented method stackFromEnd")
+    }
+    onScrollIndex(value: ((start: number,end: number,center: number) => void) | undefined): this {
+        throw new Error("Unimplemented method onScrollIndex")
+    }
+    onScrollVisibleContentChange(value: OnScrollVisibleContentChangeCallback | undefined): this {
+        throw new Error("Unimplemented method onScrollVisibleContentChange")
+    }
+    onItemMove(value: ((from: number,to: number) => boolean) | undefined): this {
+        throw new Error("Unimplemented method onItemMove")
+    }
+    onItemDragStart(value: OnItemDragStartCallback | undefined): this {
+        throw new Error("Unimplemented method onItemDragStart")
+    }
+    onItemDragEnter(value: ((event: ItemDragInfo) => void) | undefined): this {
+        throw new Error("Unimplemented method onItemDragEnter")
+    }
+    onItemDragMove(value: ((event: ItemDragInfo,itemIndex: number,insertIndex: number) => void) | undefined): this {
+        throw new Error("Unimplemented method onItemDragMove")
+    }
+    onItemDragLeave(value: ((event: ItemDragInfo,itemIndex: number) => void) | undefined): this {
+        throw new Error("Unimplemented method onItemDragLeave")
+    }
+    onItemDrop(value: ((event: ItemDragInfo,itemIndex: number,insertIndex: number,isSuccess: boolean) => void) | undefined): this {
+        throw new Error("Unimplemented method onItemDrop")
+    }
+    onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this {
+        throw new Error("Unimplemented method onScrollFrameBegin")
+    }
+    onWillScroll(value: OnWillScrollCallback | undefined): this {
+        throw new Error("Unimplemented method onWillScroll")
+    }
+    onDidScroll(value: OnScrollCallback | undefined): this {
+        throw new Error("Unimplemented method onDidScroll")
+    }
+    lanes(value: number | LengthConstrain | undefined, gutter?: Dimension): this {
+        throw new Error("Unimplemented method lanes")
+    }
+    cachedCount(count: number | undefined, show: boolean | undefined): this {
+        throw new Error("Unimplemented method cachedCount")
+    }
+    attributeModifier(value: AttributeModifier<ListAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkListStyle extends ArkScrollableCommonMethodStyle implements ListAttribute {
     alignListItem_value?: ListItemAlign | undefined

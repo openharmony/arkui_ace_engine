@@ -807,42 +807,114 @@ export enum SecurityComponentLayoutDirection {
     VERTICAL = 1
 }
 export interface SecurityComponentMethod {
-    iconSize(value: Dimension | undefined): this
-    layoutDirection(value: SecurityComponentLayoutDirection | undefined): this
-    position(value: Position | undefined): this
-    markAnchor(value: Position | undefined): this
-    offset(value: Position | Edges | LocalizedEdges | undefined): this
-    fontSize(value: Dimension | undefined): this
-    fontStyle(value: FontStyle | undefined): this
-    fontWeight(value: int32 | FontWeight | string | undefined): this
-    fontFamily(value: string | Resource | undefined): this
-    fontColor(value: ResourceColor | undefined): this
-    iconColor(value: ResourceColor | undefined): this
-    backgroundColor(value: ResourceColor | undefined): this
-    borderStyle(value: BorderStyle | undefined): this
-    borderWidth(value: Dimension | undefined): this
-    borderColor(value: ResourceColor | undefined): this
-    borderRadius(radius: Dimension | BorderRadiuses | undefined): this
-    padding(value: Padding | Dimension | undefined): this
-    textIconSpace(value: Dimension | undefined): this
-    key(value: string | undefined): this
-    width(value: Length | undefined): this
-    height(value: Length | undefined): this
-    size(value: SizeOptions | undefined): this
-    constraintSize(value: ConstraintSizeOptions | undefined): this
-    align(alignType: Alignment | undefined): this
-    alignRules(alignRule: AlignRuleOption | undefined): this
-    alignRules(alignRule: LocalizedAlignRuleOptions | undefined): this
-    id(description: string | undefined): this
-    chainMode(direction: Axis | undefined, style: ChainStyle | undefined): this
-    minFontScale(scale: double | Resource | undefined): this
-    maxFontScale(scale: double | Resource | undefined): this
-    maxLines(line: int32 | undefined): this
-    minFontSize(minSize: double | string | Resource | undefined): this
-    maxFontSize(maxSize: double | string | Resource | undefined): this
-    heightAdaptivePolicy(policy: TextHeightAdaptivePolicy | undefined): this
-    enabled(respond: boolean | undefined): this
-    attributeModifier(value: AttributeModifier<SecurityComponentMethod> | undefined): this
+    iconSize(value: Dimension | undefined): this {
+        throw new Error("Unimplemented method iconSize")
+    }
+    layoutDirection(value: SecurityComponentLayoutDirection | undefined): this {
+        throw new Error("Unimplemented method layoutDirection")
+    }
+    position(value: Position | undefined): this {
+        throw new Error("Unimplemented method position")
+    }
+    markAnchor(value: Position | undefined): this {
+        throw new Error("Unimplemented method markAnchor")
+    }
+    offset(value: Position | Edges | LocalizedEdges | undefined): this {
+        throw new Error("Unimplemented method offset")
+    }
+    fontSize(value: Dimension | undefined): this {
+        throw new Error("Unimplemented method fontSize")
+    }
+    fontStyle(value: FontStyle | undefined): this {
+        throw new Error("Unimplemented method fontStyle")
+    }
+    fontWeight(value: int32 | FontWeight | string | undefined): this {
+        throw new Error("Unimplemented method fontWeight")
+    }
+    fontFamily(value: string | Resource | undefined): this {
+        throw new Error("Unimplemented method fontFamily")
+    }
+    fontColor(value: ResourceColor | undefined): this {
+        throw new Error("Unimplemented method fontColor")
+    }
+    iconColor(value: ResourceColor | undefined): this {
+        throw new Error("Unimplemented method iconColor")
+    }
+    backgroundColor(value: ResourceColor | undefined): this {
+        throw new Error("Unimplemented method backgroundColor")
+    }
+    borderStyle(value: BorderStyle | undefined): this {
+        throw new Error("Unimplemented method borderStyle")
+    }
+    borderWidth(value: Dimension | undefined): this {
+        throw new Error("Unimplemented method borderWidth")
+    }
+    borderColor(value: ResourceColor | undefined): this {
+        throw new Error("Unimplemented method borderColor")
+    }
+    borderRadius(radius: Dimension | BorderRadiuses | undefined): this {
+        throw new Error("Unimplemented method borderRadius")
+    }
+    padding(value: Padding | Dimension | undefined): this {
+        throw new Error("Unimplemented method padding")
+    }
+    textIconSpace(value: Dimension | undefined): this {
+        throw new Error("Unimplemented method textIconSpace")
+    }
+    key(value: string | undefined): this {
+        throw new Error("Unimplemented method key")
+    }
+    width(value: Length | undefined): this {
+        throw new Error("Unimplemented method width")
+    }
+    height(value: Length | undefined): this {
+        throw new Error("Unimplemented method height")
+    }
+    size(value: SizeOptions | undefined): this {
+        throw new Error("Unimplemented method size")
+    }
+    constraintSize(value: ConstraintSizeOptions | undefined): this {
+        throw new Error("Unimplemented method constraintSize")
+    }
+    align(alignType: Alignment | undefined): this {
+        throw new Error("Unimplemented method align")
+    }
+    alignRules(alignRule: AlignRuleOption | undefined): this {
+        throw new Error("Unimplemented method alignRules")
+    }
+    alignRules(alignRule: LocalizedAlignRuleOptions | undefined): this {
+        throw new Error("Unimplemented method alignRules")
+    }
+    id(description: string | undefined): this {
+        throw new Error("Unimplemented method id")
+    }
+    chainMode(direction: Axis | undefined, style: ChainStyle | undefined): this {
+        throw new Error("Unimplemented method chainMode")
+    }
+    minFontScale(scale: double | Resource | undefined): this {
+        throw new Error("Unimplemented method minFontScale")
+    }
+    maxFontScale(scale: double | Resource | undefined): this {
+        throw new Error("Unimplemented method maxFontScale")
+    }
+    maxLines(line: int32 | undefined): this {
+        throw new Error("Unimplemented method maxLines")
+    }
+    minFontSize(minSize: double | string | Resource | undefined): this {
+        throw new Error("Unimplemented method minFontSize")
+    }
+    maxFontSize(maxSize: double | string | Resource | undefined): this {
+        throw new Error("Unimplemented method maxFontSize")
+    }
+    heightAdaptivePolicy(policy: TextHeightAdaptivePolicy | undefined): this {
+        throw new Error("Unimplemented method heightAdaptivePolicy")
+    }
+    enabled(respond: boolean | undefined): this {
+        throw new Error("Unimplemented method enabled")
+    }
+    attributeModifier(value: AttributeModifier<SecurityComponentMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkSecurityComponentMethodStyle implements SecurityComponentMethod {
     public iconSize(value: Dimension | undefined): this {

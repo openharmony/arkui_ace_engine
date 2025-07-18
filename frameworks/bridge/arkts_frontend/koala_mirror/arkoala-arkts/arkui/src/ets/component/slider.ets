@@ -592,29 +592,75 @@ export interface SliderConfiguration extends CommonConfiguration<SliderConfigura
     triggerChange: SliderTriggerChangeCallback;
 }
 export interface SliderAttribute extends CommonMethod {
-    blockColor(value: ResourceColor | undefined): this
-    trackColor(value: ResourceColor | LinearGradient | undefined): this
-    selectedColor(value: ResourceColor | LinearGradient | undefined): this
-    showSteps(value: boolean | undefined): this
-    trackThickness(value: Length | undefined): this
-    onChange(value: ((value: number,mode: SliderChangeMode) => void) | undefined): this
-    blockBorderColor(value: ResourceColor | undefined): this
-    blockBorderWidth(value: Length | undefined): this
-    stepColor(value: ResourceColor | undefined): this
-    trackBorderRadius(value: Length | undefined): this
-    selectedBorderRadius(value: Dimension | undefined): this
-    blockSize(value: SizeOptions | undefined): this
-    blockStyle(value: SliderBlockStyle | undefined): this
-    stepSize(value: Length | undefined): this
-    sliderInteractionMode(value: SliderInteraction | undefined): this
-    minResponsiveDistance(value: number | undefined): this
-    contentModifier(value: ContentModifier<SliderConfiguration> | undefined): this
-    slideRange(value: SlideRange | undefined): this
-    digitalCrownSensitivity(value: CrownSensitivity | undefined): this
-    enableHapticFeedback(value: boolean | undefined): this
-    showTips(value: boolean | undefined, content?: ResourceStr): this
-    _onChangeEvent_value(callback_: ((value: number | undefined) => void)): void
-    attributeModifier(value: AttributeModifier<SliderAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    blockColor(value: ResourceColor | undefined): this {
+        throw new Error("Unimplemented method blockColor")
+    }
+    trackColor(value: ResourceColor | LinearGradient | undefined): this {
+        throw new Error("Unimplemented method trackColor")
+    }
+    selectedColor(value: ResourceColor | LinearGradient | undefined): this {
+        throw new Error("Unimplemented method selectedColor")
+    }
+    showSteps(value: boolean | undefined): this {
+        throw new Error("Unimplemented method showSteps")
+    }
+    trackThickness(value: Length | undefined): this {
+        throw new Error("Unimplemented method trackThickness")
+    }
+    onChange(value: ((value: number,mode: SliderChangeMode) => void) | undefined): this {
+        throw new Error("Unimplemented method onChange")
+    }
+    blockBorderColor(value: ResourceColor | undefined): this {
+        throw new Error("Unimplemented method blockBorderColor")
+    }
+    blockBorderWidth(value: Length | undefined): this {
+        throw new Error("Unimplemented method blockBorderWidth")
+    }
+    stepColor(value: ResourceColor | undefined): this {
+        throw new Error("Unimplemented method stepColor")
+    }
+    trackBorderRadius(value: Length | undefined): this {
+        throw new Error("Unimplemented method trackBorderRadius")
+    }
+    selectedBorderRadius(value: Dimension | undefined): this {
+        throw new Error("Unimplemented method selectedBorderRadius")
+    }
+    blockSize(value: SizeOptions | undefined): this {
+        throw new Error("Unimplemented method blockSize")
+    }
+    blockStyle(value: SliderBlockStyle | undefined): this {
+        throw new Error("Unimplemented method blockStyle")
+    }
+    stepSize(value: Length | undefined): this {
+        throw new Error("Unimplemented method stepSize")
+    }
+    sliderInteractionMode(value: SliderInteraction | undefined): this {
+        throw new Error("Unimplemented method sliderInteractionMode")
+    }
+    minResponsiveDistance(value: number | undefined): this {
+        throw new Error("Unimplemented method minResponsiveDistance")
+    }
+    contentModifier(value: ContentModifier<SliderConfiguration> | undefined): this {
+        throw new Error("Unimplemented method contentModifier")
+    }
+    slideRange(value: SlideRange | undefined): this {
+        throw new Error("Unimplemented method slideRange")
+    }
+    digitalCrownSensitivity(value: CrownSensitivity | undefined): this {
+        throw new Error("Unimplemented method digitalCrownSensitivity")
+    }
+    enableHapticFeedback(value: boolean | undefined): this {
+        throw new Error("Unimplemented method enableHapticFeedback")
+    }
+    showTips(value: boolean | undefined, content?: ResourceStr): this {
+        throw new Error("Unimplemented method showTips")
+    }
+    _onChangeEvent_value(callback_: ((value: number | undefined) => void)): void {
+        throw new Error("Unimplemented method _onChangeEvent_value")
+    }
+    attributeModifier(value: AttributeModifier<SliderAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkSliderStyle extends ArkCommonMethodStyle implements SliderAttribute {
     blockColor_value?: ResourceColor | undefined

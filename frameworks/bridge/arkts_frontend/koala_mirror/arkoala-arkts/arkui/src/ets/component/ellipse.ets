@@ -57,7 +57,9 @@ export interface EllipseOptions {
     height?: string | number;
 }
 export interface EllipseAttribute extends CommonShapeMethod {
-    attributeModifier(value: AttributeModifier<EllipseAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this
+    attributeModifier(value: AttributeModifier<EllipseAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkEllipseStyle extends ArkCommonShapeMethodStyle implements EllipseAttribute {
     attributeModifier_value?: AttributeModifier<EllipseAttribute> | AttributeModifier<CommonMethod> | undefined

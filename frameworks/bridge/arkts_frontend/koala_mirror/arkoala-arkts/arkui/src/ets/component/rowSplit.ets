@@ -56,8 +56,12 @@ export class ArkRowSplitPeer extends ArkCommonMethodPeer {
     }
 }
 export interface RowSplitAttribute extends CommonMethod {
-    resizeable(value: boolean | undefined): this
-    attributeModifier(value: AttributeModifier<RowSplitAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    resizeable(value: boolean | undefined): this {
+        throw new Error("Unimplemented method resizeable")
+    }
+    attributeModifier(value: AttributeModifier<RowSplitAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkRowSplitStyle extends ArkCommonMethodStyle implements RowSplitAttribute {
     resizeable_value?: boolean | undefined

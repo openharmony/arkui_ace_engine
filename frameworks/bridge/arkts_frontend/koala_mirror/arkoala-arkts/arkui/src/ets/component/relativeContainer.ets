@@ -110,9 +110,15 @@ export interface LocalizedBarrierStyle {
     referencedId: Array<string>;
 }
 export interface RelativeContainerAttribute extends CommonMethod {
-    guideLine(value: Array<GuideLineStyle> | undefined): this
-    barrier(value: Array<BarrierStyle> | undefined): this
-    attributeModifier(value: AttributeModifier<RelativeContainerAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    guideLine(value: Array<GuideLineStyle> | undefined): this {
+        throw new Error("Unimplemented method guideLine")
+    }
+    barrier(value: Array<BarrierStyle> | undefined): this {
+        throw new Error("Unimplemented method barrier")
+    }
+    attributeModifier(value: AttributeModifier<RelativeContainerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkRelativeContainerStyle extends ArkCommonMethodStyle implements RelativeContainerAttribute {
     guideLine_value?: Array<GuideLineStyle> | undefined

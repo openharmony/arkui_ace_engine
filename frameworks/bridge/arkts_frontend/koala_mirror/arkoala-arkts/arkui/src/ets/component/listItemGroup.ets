@@ -92,9 +92,15 @@ export interface ListItemGroupOptions {
     style?: ListItemGroupStyle;
 }
 export interface ListItemGroupAttribute extends CommonMethod {
-    divider(value: ListDividerOptions | undefined): this
-    childrenMainSize(value: ChildrenMainSize | undefined): this
-    attributeModifier(value: AttributeModifier<ListItemGroupAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    divider(value: ListDividerOptions | undefined): this {
+        throw new Error("Unimplemented method divider")
+    }
+    childrenMainSize(value: ChildrenMainSize | undefined): this {
+        throw new Error("Unimplemented method childrenMainSize")
+    }
+    attributeModifier(value: AttributeModifier<ListItemGroupAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkListItemGroupStyle extends ArkCommonMethodStyle implements ListItemGroupAttribute {
     divider_value?: ListDividerOptions | undefined

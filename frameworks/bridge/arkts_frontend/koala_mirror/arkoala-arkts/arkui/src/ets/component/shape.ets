@@ -364,20 +364,48 @@ export interface ViewportRect {
     height?: number | string;
 }
 export interface ShapeAttribute extends CommonMethod {
-    viewPort(value: ViewportRect | undefined): this
-    stroke(value: ResourceColor | undefined): this
-    fill(value: ResourceColor | undefined): this
-    strokeDashOffset(value: number | string | undefined): this
-    strokeDashArray(value: Array<Length> | undefined): this
-    strokeLineCap(value: LineCapStyle | undefined): this
-    strokeLineJoin(value: LineJoinStyle | undefined): this
-    strokeMiterLimit(value: number | string | undefined): this
-    strokeOpacity(value: number | string | Resource | undefined): this
-    fillOpacity(value: number | string | Resource | undefined): this
-    strokeWidth(value: number | string | undefined): this
-    antiAlias(value: boolean | undefined): this
-    mesh(value: Array<number> | undefined, column: number | undefined, row: number | undefined): this
-    attributeModifier(value: AttributeModifier<ShapeAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    viewPort(value: ViewportRect | undefined): this {
+        throw new Error("Unimplemented method viewPort")
+    }
+    stroke(value: ResourceColor | undefined): this {
+        throw new Error("Unimplemented method stroke")
+    }
+    fill(value: ResourceColor | undefined): this {
+        throw new Error("Unimplemented method fill")
+    }
+    strokeDashOffset(value: number | string | undefined): this {
+        throw new Error("Unimplemented method strokeDashOffset")
+    }
+    strokeDashArray(value: Array<Length> | undefined): this {
+        throw new Error("Unimplemented method strokeDashArray")
+    }
+    strokeLineCap(value: LineCapStyle | undefined): this {
+        throw new Error("Unimplemented method strokeLineCap")
+    }
+    strokeLineJoin(value: LineJoinStyle | undefined): this {
+        throw new Error("Unimplemented method strokeLineJoin")
+    }
+    strokeMiterLimit(value: number | string | undefined): this {
+        throw new Error("Unimplemented method strokeMiterLimit")
+    }
+    strokeOpacity(value: number | string | Resource | undefined): this {
+        throw new Error("Unimplemented method strokeOpacity")
+    }
+    fillOpacity(value: number | string | Resource | undefined): this {
+        throw new Error("Unimplemented method fillOpacity")
+    }
+    strokeWidth(value: number | string | undefined): this {
+        throw new Error("Unimplemented method strokeWidth")
+    }
+    antiAlias(value: boolean | undefined): this {
+        throw new Error("Unimplemented method antiAlias")
+    }
+    mesh(value: Array<number> | undefined, column: number | undefined, row: number | undefined): this {
+        throw new Error("Unimplemented method mesh")
+    }
+    attributeModifier(value: AttributeModifier<ShapeAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkShapeStyle extends ArkCommonMethodStyle implements ShapeAttribute {
     viewPort_value?: ViewportRect | undefined

@@ -93,11 +93,21 @@ export class ArkCounterPeer extends ArkCommonMethodPeer {
     }
 }
 export interface CounterAttribute extends CommonMethod {
-    onInc(value: VoidCallback | undefined): this
-    onDec(value: VoidCallback | undefined): this
-    enableDec(value: boolean | undefined): this
-    enableInc(value: boolean | undefined): this
-    attributeModifier(value: AttributeModifier<CounterAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    onInc(value: VoidCallback | undefined): this {
+        throw new Error("Unimplemented method onInc")
+    }
+    onDec(value: VoidCallback | undefined): this {
+        throw new Error("Unimplemented method onDec")
+    }
+    enableDec(value: boolean | undefined): this {
+        throw new Error("Unimplemented method enableDec")
+    }
+    enableInc(value: boolean | undefined): this {
+        throw new Error("Unimplemented method enableInc")
+    }
+    attributeModifier(value: AttributeModifier<CounterAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkCounterStyle extends ArkCommonMethodStyle implements CounterAttribute {
     onInc_value?: VoidCallback | undefined

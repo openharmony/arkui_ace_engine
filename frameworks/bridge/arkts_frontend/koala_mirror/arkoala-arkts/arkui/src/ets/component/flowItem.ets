@@ -44,7 +44,9 @@ export class ArkFlowItemPeer extends ArkCommonMethodPeer {
     }
 }
 export interface FlowItemAttribute extends CommonMethod {
-    attributeModifier(value: AttributeModifier<FlowItemAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    attributeModifier(value: AttributeModifier<FlowItemAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkFlowItemStyle extends ArkCommonMethodStyle implements FlowItemAttribute {
     attributeModifier_value?: AttributeModifier<FlowItemAttribute> | AttributeModifier<CommonMethod> | undefined

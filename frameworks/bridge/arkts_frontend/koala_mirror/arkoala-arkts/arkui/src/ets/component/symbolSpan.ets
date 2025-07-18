@@ -168,12 +168,24 @@ export class ArkSymbolSpanPeer extends ArkCommonMethodPeer {
     }
 }
 export interface SymbolSpanAttribute extends CommonMethod {
-    fontSize(value: number | string | Resource | undefined): this
-    fontColor(value: Array<ResourceColor> | undefined): this
-    fontWeight(value: number | FontWeight | string | undefined): this
-    effectStrategy(value: SymbolEffectStrategy | undefined): this
-    renderingStrategy(value: SymbolRenderingStrategy | undefined): this
-    attributeModifier(value: AttributeModifier<SymbolSpanAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    fontSize(value: number | string | Resource | undefined): this {
+        throw new Error("Unimplemented method fontSize")
+    }
+    fontColor(value: Array<ResourceColor> | undefined): this {
+        throw new Error("Unimplemented method fontColor")
+    }
+    fontWeight(value: number | FontWeight | string | undefined): this {
+        throw new Error("Unimplemented method fontWeight")
+    }
+    effectStrategy(value: SymbolEffectStrategy | undefined): this {
+        throw new Error("Unimplemented method effectStrategy")
+    }
+    renderingStrategy(value: SymbolRenderingStrategy | undefined): this {
+        throw new Error("Unimplemented method renderingStrategy")
+    }
+    attributeModifier(value: AttributeModifier<SymbolSpanAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkSymbolSpanStyle extends ArkCommonMethodStyle implements SymbolSpanAttribute {
     fontSize_value?: number | string | Resource | undefined

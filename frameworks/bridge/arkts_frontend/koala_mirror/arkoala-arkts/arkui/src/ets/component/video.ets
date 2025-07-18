@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -407,26 +407,66 @@ export interface VideoOptions {
     posterOptions?: PosterOptions;
 }
 export interface VideoAttribute extends CommonMethod {
-    muted(value: boolean | undefined): this
-    autoPlay(value: boolean | undefined): this
-    controls(value: boolean | undefined): this
-    loop(value: boolean | undefined): this
-    objectFit(value: ImageFit | undefined): this
-    onStart(value: VoidCallback | undefined): this
-    onPause(value: VoidCallback | undefined): this
-    onFinish(value: VoidCallback | undefined): this
-    onFullscreenChange(value: ((value0: FullscreenInfo) => void) | undefined): this
-    onPrepared(value: ((value0: PreparedInfo) => void) | undefined): this
-    onSeeking(value: ((value0: PlaybackInfo) => void) | undefined): this
-    onSeeked(value: ((value0: PlaybackInfo) => void) | undefined): this
-    onUpdate(value: ((value0: PlaybackInfo) => void) | undefined): this
-    onError(value: (() => void) | undefined): this
-    onStop(value: (() => void) | undefined): this
-    enableAnalyzer(value: boolean | undefined): this
-    analyzerConfig(value: ImageAnalyzerConfig | undefined): this
-    surfaceBackgroundColor(value: ColorMetrics | undefined): this
-    enableShortcutKey(value: boolean | undefined): this
-    attributeModifier(value: AttributeModifier<VideoAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    muted(value: boolean | undefined): this {
+        throw new Error("Unimplemented method muted")
+    }
+    autoPlay(value: boolean | undefined): this {
+        throw new Error("Unimplemented method autoPlay")
+    }
+    controls(value: boolean | undefined): this {
+        throw new Error("Unimplemented method controls")
+    }
+    loop(value: boolean | undefined): this {
+        throw new Error("Unimplemented method loop")
+    }
+    objectFit(value: ImageFit | undefined): this {
+        throw new Error("Unimplemented method objectFit")
+    }
+    onStart(value: VoidCallback | undefined): this {
+        throw new Error("Unimplemented method onStart")
+    }
+    onPause(value: VoidCallback | undefined): this {
+        throw new Error("Unimplemented method onPause")
+    }
+    onFinish(value: VoidCallback | undefined): this {
+        throw new Error("Unimplemented method onFinish")
+    }
+    onFullscreenChange(value: ((value0: FullscreenInfo) => void) | undefined): this {
+        throw new Error("Unimplemented method onFullscreenChange")
+    }
+    onPrepared(value: ((value0: PreparedInfo) => void) | undefined): this {
+        throw new Error("Unimplemented method onPrepared")
+    }
+    onSeeking(value: ((value0: PlaybackInfo) => void) | undefined): this {
+        throw new Error("Unimplemented method onSeeking")
+    }
+    onSeeked(value: ((value0: PlaybackInfo) => void) | undefined): this {
+        throw new Error("Unimplemented method onSeeked")
+    }
+    onUpdate(value: ((value0: PlaybackInfo) => void) | undefined): this {
+        throw new Error("Unimplemented method onUpdate")
+    }
+    onError(value: (() => void) | undefined): this {
+        throw new Error("Unimplemented method onError")
+    }
+    onStop(value: (() => void) | undefined): this {
+        throw new Error("Unimplemented method onStop")
+    }
+    enableAnalyzer(value: boolean | undefined): this {
+        throw new Error("Unimplemented method enableAnalyzer")
+    }
+    analyzerConfig(value: ImageAnalyzerConfig | undefined): this {
+        throw new Error("Unimplemented method analyzerConfig")
+    }
+    surfaceBackgroundColor(value: ColorMetrics | undefined): this {
+        throw new Error("Unimplemented method surfaceBackgroundColor")
+    }
+    enableShortcutKey(value: boolean | undefined): this {
+        throw new Error("Unimplemented method enableShortcutKey")
+    }
+    attributeModifier(value: AttributeModifier<VideoAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkVideoStyle extends ArkCommonMethodStyle implements VideoAttribute {
     muted_value?: boolean | undefined

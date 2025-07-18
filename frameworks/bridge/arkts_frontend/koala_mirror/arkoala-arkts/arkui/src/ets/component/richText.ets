@@ -68,9 +68,15 @@ export class ArkRichTextPeer extends ArkCommonMethodPeer {
     }
 }
 export interface RichTextAttribute extends CommonMethod {
-    onStart(value: (() => void) | undefined): this
-    onComplete(value: (() => void) | undefined): this
-    attributeModifier(value: AttributeModifier<RichTextAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    onStart(value: (() => void) | undefined): this {
+        throw new Error("Unimplemented method onStart")
+    }
+    onComplete(value: (() => void) | undefined): this {
+        throw new Error("Unimplemented method onComplete")
+    }
+    attributeModifier(value: AttributeModifier<RichTextAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkRichTextStyle extends ArkCommonMethodStyle implements RichTextAttribute {
     onStart_value?: (() => void) | undefined

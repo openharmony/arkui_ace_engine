@@ -100,8 +100,12 @@ export class ArkBlankPeer extends ArkCommonMethodPeer {
     }
 }
 export interface BlankAttribute extends CommonMethod {
-    color(value: ResourceColor | undefined): this
-    attributeModifier(value: AttributeModifier<BlankAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    color(value: ResourceColor | undefined): this {
+        throw new Error("Unimplemented method color")
+    }
+    attributeModifier(value: AttributeModifier<BlankAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkBlankStyle extends ArkCommonMethodStyle implements BlankAttribute {
     color_value?: ResourceColor | undefined

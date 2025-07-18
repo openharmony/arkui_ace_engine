@@ -319,22 +319,54 @@ export interface ButtonStyle {
     icons?: ButtonIconOptions;
 }
 export interface SideBarContainerAttribute extends CommonMethod {
-    showSideBar(value: boolean | undefined): this
-    controlButton(value: ButtonStyle | undefined): this
-    showControlButton(value: boolean | undefined): this
-    onChange(value: ((value: boolean) => void) | undefined): this
-    sideBarWidth(value: number | undefined): this
-    minSideBarWidth(value: number | undefined): this
-    maxSideBarWidth(value: number | undefined): this
-    sideBarWidth(value: Length | undefined): this
-    minSideBarWidth(value: Length | undefined): this
-    maxSideBarWidth(value: Length | undefined): this
-    autoHide(value: boolean | undefined): this
-    sideBarPosition(value: SideBarPosition | undefined): this
-    divider(value: DividerStyle | undefined): this
-    minContentWidth(value: Dimension | undefined): this
-    _onChangeEvent_showSideBar(callback_: ((showSideBar: boolean | undefined) => void)): void
-    attributeModifier(value: AttributeModifier<SideBarContainerAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    showSideBar(value: boolean | undefined): this {
+        throw new Error("Unimplemented method showSideBar")
+    }
+    controlButton(value: ButtonStyle | undefined): this {
+        throw new Error("Unimplemented method controlButton")
+    }
+    showControlButton(value: boolean | undefined): this {
+        throw new Error("Unimplemented method showControlButton")
+    }
+    onChange(value: ((value: boolean) => void) | undefined): this {
+        throw new Error("Unimplemented method onChange")
+    }
+    sideBarWidth(value: number | undefined): this {
+        throw new Error("Unimplemented method sideBarWidth")
+    }
+    minSideBarWidth(value: number | undefined): this {
+        throw new Error("Unimplemented method minSideBarWidth")
+    }
+    maxSideBarWidth(value: number | undefined): this {
+        throw new Error("Unimplemented method maxSideBarWidth")
+    }
+    sideBarWidth(value: Length | undefined): this {
+        throw new Error("Unimplemented method sideBarWidth")
+    }
+    minSideBarWidth(value: Length | undefined): this {
+        throw new Error("Unimplemented method minSideBarWidth")
+    }
+    maxSideBarWidth(value: Length | undefined): this {
+        throw new Error("Unimplemented method maxSideBarWidth")
+    }
+    autoHide(value: boolean | undefined): this {
+        throw new Error("Unimplemented method autoHide")
+    }
+    sideBarPosition(value: SideBarPosition | undefined): this {
+        throw new Error("Unimplemented method sideBarPosition")
+    }
+    divider(value: DividerStyle | undefined): this {
+        throw new Error("Unimplemented method divider")
+    }
+    minContentWidth(value: Dimension | undefined): this {
+        throw new Error("Unimplemented method minContentWidth")
+    }
+    _onChangeEvent_showSideBar(callback_: ((showSideBar: boolean | undefined) => void)): void {
+        throw new Error("Unimplemented method _onChangeEvent_showSideBar")
+    }
+    attributeModifier(value: AttributeModifier<SideBarContainerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkSideBarContainerStyle extends ArkCommonMethodStyle implements SideBarContainerAttribute {
     showSideBar_value?: boolean | undefined

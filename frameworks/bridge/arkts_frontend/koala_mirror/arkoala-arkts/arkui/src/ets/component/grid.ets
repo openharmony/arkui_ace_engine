@@ -416,31 +416,81 @@ export interface ComputedBarAttribute {
     totalLength: number;
 }
 export interface GridAttribute extends ScrollableCommonMethod {
-    columnsTemplate(value: string | undefined): this
-    rowsTemplate(value: string | undefined): this
-    columnsGap(value: Length | undefined): this
-    rowsGap(value: Length | undefined): this
-    onScrollBarUpdate(value: ((index: number,offset: number) => ComputedBarAttribute) | undefined): this
-    onScrollIndex(value: ((first: number,last: number) => void) | undefined): this
-    cachedCount(value: number | undefined): this
-    editMode(value: boolean | undefined): this
-    multiSelectable(value: boolean | undefined): this
-    maxCount(value: number | undefined): this
-    minCount(value: number | undefined): this
-    cellLength(value: number | undefined): this
-    layoutDirection(value: GridDirection | undefined): this
-    supportAnimation(value: boolean | undefined): this
-    onItemDragStart(value: OnItemDragStartCallback | undefined): this
-    onItemDragEnter(value: ((event: ItemDragInfo) => void) | undefined): this
-    onItemDragMove(value: ((event: ItemDragInfo,itemIndex: number,insertIndex: number) => void) | undefined): this
-    onItemDragLeave(value: ((event: ItemDragInfo,itemIndex: number) => void) | undefined): this
-    onItemDrop(value: ((event: ItemDragInfo,itemIndex: number,insertIndex: number,isSuccess: boolean) => void) | undefined): this
-    alignItems(value: GridItemAlignment | undefined): this
-    onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this
-    onWillScroll(value: OnWillScrollCallback | undefined): this
-    onDidScroll(value: OnScrollCallback | undefined): this
-    cachedCount(count: number | undefined, show: boolean | undefined): this
-    attributeModifier(value: AttributeModifier<GridAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this
+    columnsTemplate(value: string | undefined): this {
+        throw new Error("Unimplemented method columnsTemplate")
+    }
+    rowsTemplate(value: string | undefined): this {
+        throw new Error("Unimplemented method rowsTemplate")
+    }
+    columnsGap(value: Length | undefined): this {
+        throw new Error("Unimplemented method columnsGap")
+    }
+    rowsGap(value: Length | undefined): this {
+        throw new Error("Unimplemented method rowsGap")
+    }
+    onScrollBarUpdate(value: ((index: number,offset: number) => ComputedBarAttribute) | undefined): this {
+        throw new Error("Unimplemented method onScrollBarUpdate")
+    }
+    onScrollIndex(value: ((first: number,last: number) => void) | undefined): this {
+        throw new Error("Unimplemented method onScrollIndex")
+    }
+    cachedCount(value: number | undefined): this {
+        throw new Error("Unimplemented method cachedCount")
+    }
+    editMode(value: boolean | undefined): this {
+        throw new Error("Unimplemented method editMode")
+    }
+    multiSelectable(value: boolean | undefined): this {
+        throw new Error("Unimplemented method multiSelectable")
+    }
+    maxCount(value: number | undefined): this {
+        throw new Error("Unimplemented method maxCount")
+    }
+    minCount(value: number | undefined): this {
+        throw new Error("Unimplemented method minCount")
+    }
+    cellLength(value: number | undefined): this {
+        throw new Error("Unimplemented method cellLength")
+    }
+    layoutDirection(value: GridDirection | undefined): this {
+        throw new Error("Unimplemented method layoutDirection")
+    }
+    supportAnimation(value: boolean | undefined): this {
+        throw new Error("Unimplemented method supportAnimation")
+    }
+    onItemDragStart(value: OnItemDragStartCallback | undefined): this {
+        throw new Error("Unimplemented method onItemDragStart")
+    }
+    onItemDragEnter(value: ((event: ItemDragInfo) => void) | undefined): this {
+        throw new Error("Unimplemented method onItemDragEnter")
+    }
+    onItemDragMove(value: ((event: ItemDragInfo,itemIndex: number,insertIndex: number) => void) | undefined): this {
+        throw new Error("Unimplemented method onItemDragMove")
+    }
+    onItemDragLeave(value: ((event: ItemDragInfo,itemIndex: number) => void) | undefined): this {
+        throw new Error("Unimplemented method onItemDragLeave")
+    }
+    onItemDrop(value: ((event: ItemDragInfo,itemIndex: number,insertIndex: number,isSuccess: boolean) => void) | undefined): this {
+        throw new Error("Unimplemented method onItemDrop")
+    }
+    alignItems(value: GridItemAlignment | undefined): this {
+        throw new Error("Unimplemented method alignItems")
+    }
+    onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this {
+        throw new Error("Unimplemented method onScrollFrameBegin")
+    }
+    onWillScroll(value: OnWillScrollCallback | undefined): this {
+        throw new Error("Unimplemented method onWillScroll")
+    }
+    onDidScroll(value: OnScrollCallback | undefined): this {
+        throw new Error("Unimplemented method onDidScroll")
+    }
+    cachedCount(count: number | undefined, show: boolean | undefined): this {
+        throw new Error("Unimplemented method cachedCount")
+    }
+    attributeModifier(value: AttributeModifier<GridAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkGridStyle extends ArkScrollableCommonMethodStyle implements GridAttribute {
     columnsTemplate_value?: string | undefined

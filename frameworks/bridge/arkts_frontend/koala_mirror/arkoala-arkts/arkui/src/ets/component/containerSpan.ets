@@ -56,8 +56,12 @@ export class ArkContainerSpanPeer extends PeerNode {
     }
 }
 export interface ContainerSpanAttribute {
-    textBackgroundStyle(value: TextBackgroundStyle | undefined): this
-    attributeModifier(value: AttributeModifier<ContainerSpanAttribute> | undefined): this
+    textBackgroundStyle(value: TextBackgroundStyle | undefined): this {
+        throw new Error("Unimplemented method textBackgroundStyle")
+    }
+    attributeModifier(value: AttributeModifier<ContainerSpanAttribute> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkContainerSpanStyle implements ContainerSpanAttribute {
     textBackgroundStyle_value?: TextBackgroundStyle | undefined

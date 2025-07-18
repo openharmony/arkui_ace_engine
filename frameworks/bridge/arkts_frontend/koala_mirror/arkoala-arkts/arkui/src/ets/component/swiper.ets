@@ -833,38 +833,102 @@ export type OnSwiperAnimationStartCallback = (index: number, targetIndex: number
 export type OnSwiperAnimationEndCallback = (index: number, extraInfo: SwiperAnimationEvent) => void;
 export type OnSwiperGestureSwipeCallback = (index: number, extraInfo: SwiperAnimationEvent) => void;
 export interface SwiperAttribute extends CommonMethod {
-    index(value: number | undefined): this
-    interval(value: number | undefined): this
-    indicator(value: IndicatorComponentController | DotIndicator | DigitIndicator | boolean | undefined): this
-    loop(value: boolean | undefined): this
-    duration(value: number | undefined): this
-    vertical(value: boolean | undefined): this
-    itemSpace(value: number | string | undefined): this
-    displayMode(value: SwiperDisplayMode | undefined): this
-    cachedCount(value: number | undefined): this
-    effectMode(value: EdgeEffect | undefined): this
-    disableSwipe(value: boolean | undefined): this
-    curve(value: Curve | string | ICurve | undefined): this
-    onChange(value: ((value0: number) => void) | undefined): this
-    onSelected(value: ((value0: number) => void) | undefined): this
-    onUnselected(value: ((value0: number) => void) | undefined): this
-    onAnimationStart(value: OnSwiperAnimationStartCallback | undefined): this
-    onAnimationEnd(value: OnSwiperAnimationEndCallback | undefined): this
-    onGestureSwipe(value: OnSwiperGestureSwipeCallback | undefined): this
-    nestedScroll(value: SwiperNestedScrollMode | undefined): this
-    customContentTransition(value: SwiperContentAnimatedTransition | undefined): this
-    onContentDidScroll(value: ContentDidScrollCallback | undefined): this
-    indicatorInteractive(value: boolean | undefined): this
-    pageFlipMode(value: PageFlipMode | undefined): this
-    onContentWillScroll(value: ContentWillScrollCallback | undefined): this
-    autoPlay(autoPlay: boolean | undefined, options: AutoPlayOptions | undefined): this
-    displayArrow(value: ArrowStyle | boolean | undefined, isHoverShow?: boolean): this
-    cachedCount(count: number | undefined, isShown: boolean | undefined): this
-    displayCount(value: number | string | SwiperAutoFill | undefined, swipeByGroup?: boolean): this
-    prevMargin(value: Length | undefined, ignoreBlank?: boolean): this
-    nextMargin(value: Length | undefined, ignoreBlank?: boolean): this
-    _onChangeEvent_index(callback_: ((index: number | undefined) => void)): void
-    attributeModifier(value: AttributeModifier<SwiperAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    index(value: number | undefined): this {
+        throw new Error("Unimplemented method index")
+    }
+    interval(value: number | undefined): this {
+        throw new Error("Unimplemented method interval")
+    }
+    indicator(value: IndicatorComponentController | DotIndicator | DigitIndicator | boolean | undefined): this {
+        throw new Error("Unimplemented method indicator")
+    }
+    loop(value: boolean | undefined): this {
+        throw new Error("Unimplemented method loop")
+    }
+    duration(value: number | undefined): this {
+        throw new Error("Unimplemented method duration")
+    }
+    vertical(value: boolean | undefined): this {
+        throw new Error("Unimplemented method vertical")
+    }
+    itemSpace(value: number | string | undefined): this {
+        throw new Error("Unimplemented method itemSpace")
+    }
+    displayMode(value: SwiperDisplayMode | undefined): this {
+        throw new Error("Unimplemented method displayMode")
+    }
+    cachedCount(value: number | undefined): this {
+        throw new Error("Unimplemented method cachedCount")
+    }
+    effectMode(value: EdgeEffect | undefined): this {
+        throw new Error("Unimplemented method effectMode")
+    }
+    disableSwipe(value: boolean | undefined): this {
+        throw new Error("Unimplemented method disableSwipe")
+    }
+    curve(value: Curve | string | ICurve | undefined): this {
+        throw new Error("Unimplemented method curve")
+    }
+    onChange(value: ((value0: number) => void) | undefined): this {
+        throw new Error("Unimplemented method onChange")
+    }
+    onSelected(value: ((value0: number) => void) | undefined): this {
+        throw new Error("Unimplemented method onSelected")
+    }
+    onUnselected(value: ((value0: number) => void) | undefined): this {
+        throw new Error("Unimplemented method onUnselected")
+    }
+    onAnimationStart(value: OnSwiperAnimationStartCallback | undefined): this {
+        throw new Error("Unimplemented method onAnimationStart")
+    }
+    onAnimationEnd(value: OnSwiperAnimationEndCallback | undefined): this {
+        throw new Error("Unimplemented method onAnimationEnd")
+    }
+    onGestureSwipe(value: OnSwiperGestureSwipeCallback | undefined): this {
+        throw new Error("Unimplemented method onGestureSwipe")
+    }
+    nestedScroll(value: SwiperNestedScrollMode | undefined): this {
+        throw new Error("Unimplemented method nestedScroll")
+    }
+    customContentTransition(value: SwiperContentAnimatedTransition | undefined): this {
+        throw new Error("Unimplemented method customContentTransition")
+    }
+    onContentDidScroll(value: ContentDidScrollCallback | undefined): this {
+        throw new Error("Unimplemented method onContentDidScroll")
+    }
+    indicatorInteractive(value: boolean | undefined): this {
+        throw new Error("Unimplemented method indicatorInteractive")
+    }
+    pageFlipMode(value: PageFlipMode | undefined): this {
+        throw new Error("Unimplemented method pageFlipMode")
+    }
+    onContentWillScroll(value: ContentWillScrollCallback | undefined): this {
+        throw new Error("Unimplemented method onContentWillScroll")
+    }
+    autoPlay(autoPlay: boolean | undefined, options: AutoPlayOptions | undefined): this {
+        throw new Error("Unimplemented method autoPlay")
+    }
+    displayArrow(value: ArrowStyle | boolean | undefined, isHoverShow?: boolean): this {
+        throw new Error("Unimplemented method displayArrow")
+    }
+    cachedCount(count: number | undefined, isShown: boolean | undefined): this {
+        throw new Error("Unimplemented method cachedCount")
+    }
+    displayCount(value: number | string | SwiperAutoFill | undefined, swipeByGroup?: boolean): this {
+        throw new Error("Unimplemented method displayCount")
+    }
+    prevMargin(value: Length | undefined, ignoreBlank?: boolean): this {
+        throw new Error("Unimplemented method prevMargin")
+    }
+    nextMargin(value: Length | undefined, ignoreBlank?: boolean): this {
+        throw new Error("Unimplemented method nextMargin")
+    }
+    _onChangeEvent_index(callback_: ((index: number | undefined) => void)): void {
+        throw new Error("Unimplemented method _onChangeEvent_index")
+    }
+    attributeModifier(value: AttributeModifier<SwiperAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkSwiperStyle extends ArkCommonMethodStyle implements SwiperAttribute {
     index_value?: number | undefined

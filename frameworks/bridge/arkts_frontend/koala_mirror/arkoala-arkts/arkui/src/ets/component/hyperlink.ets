@@ -111,8 +111,12 @@ export class ArkHyperlinkPeer extends ArkCommonMethodPeer {
     }
 }
 export interface HyperlinkAttribute extends CommonMethod {
-    color(value: Color | number | string | Resource | undefined): this
-    attributeModifier(value: AttributeModifier<HyperlinkAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    color(value: Color | number | string | Resource | undefined): this {
+        throw new Error("Unimplemented method color")
+    }
+    attributeModifier(value: AttributeModifier<HyperlinkAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkHyperlinkStyle extends ArkCommonMethodStyle implements HyperlinkAttribute {
     color_value?: Color | number | string | Resource | undefined

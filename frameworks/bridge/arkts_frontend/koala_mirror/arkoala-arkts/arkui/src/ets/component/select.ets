@@ -659,37 +659,99 @@ export interface MenuOutlineOptions {
     color?: ResourceColor | EdgeColors;
 }
 export interface SelectAttribute extends CommonMethod {
-    selected(value: number | Resource | undefined): this
-    value(value: ResourceStr | string | Resource | undefined): this
-    font(value: Font | undefined): this
-    fontColor(value: ResourceColor | undefined): this
-    selectedOptionBgColor(value: ResourceColor | undefined): this
-    selectedOptionFont(value: Font | undefined): this
-    selectedOptionFontColor(value: ResourceColor | undefined): this
-    optionBgColor(value: ResourceColor | undefined): this
-    optionFont(value: Font | undefined): this
-    optionFontColor(value: ResourceColor | undefined): this
-    onSelect(value: OnSelectCallback | undefined): this
-    space(value: Length | undefined): this
-    arrowPosition(value: ArrowPosition | undefined): this
-    optionWidth(value: Dimension | OptionWidthMode | undefined): this
-    optionHeight(value: Dimension | undefined): this
-    menuBackgroundColor(value: ResourceColor | undefined): this
-    menuBackgroundBlurStyle(value: BlurStyle | undefined): this
-    controlSize(value: ControlSize | undefined): this
-    menuItemContentModifier(value: ContentModifier<MenuItemConfiguration> | undefined): this
-    divider(value: DividerOptions | undefined): this
-    textModifier(value: TextModifier | undefined): this
-    arrowModifier(value: SymbolGlyphModifier | undefined): this
-    optionTextModifier(value: TextModifier | undefined): this
-    selectedOptionTextModifier(value: TextModifier | undefined): this
-    dividerStyle(value: DividerStyleOptions | undefined): this
-    avoidance(value: AvoidanceMode | undefined): this
-    menuOutline(value: MenuOutlineOptions | undefined): this
-    menuAlign(alignType: MenuAlignType | undefined, offset?: Offset): this
-    _onChangeEvent_selected(callback_: ((selected: number | Resource | undefined) => void)): void
-    _onChangeEvent_value(callback_: ((value: ResourceStr | string | Resource | undefined) => void)): void
-    attributeModifier(value: AttributeModifier<SelectAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    selected(value: number | Resource | undefined): this {
+        throw new Error("Unimplemented method selected")
+    }
+    value(value: ResourceStr | string | Resource | undefined): this {
+        throw new Error("Unimplemented method value")
+    }
+    font(value: Font | undefined): this {
+        throw new Error("Unimplemented method font")
+    }
+    fontColor(value: ResourceColor | undefined): this {
+        throw new Error("Unimplemented method fontColor")
+    }
+    selectedOptionBgColor(value: ResourceColor | undefined): this {
+        throw new Error("Unimplemented method selectedOptionBgColor")
+    }
+    selectedOptionFont(value: Font | undefined): this {
+        throw new Error("Unimplemented method selectedOptionFont")
+    }
+    selectedOptionFontColor(value: ResourceColor | undefined): this {
+        throw new Error("Unimplemented method selectedOptionFontColor")
+    }
+    optionBgColor(value: ResourceColor | undefined): this {
+        throw new Error("Unimplemented method optionBgColor")
+    }
+    optionFont(value: Font | undefined): this {
+        throw new Error("Unimplemented method optionFont")
+    }
+    optionFontColor(value: ResourceColor | undefined): this {
+        throw new Error("Unimplemented method optionFontColor")
+    }
+    onSelect(value: OnSelectCallback | undefined): this {
+        throw new Error("Unimplemented method onSelect")
+    }
+    space(value: Length | undefined): this {
+        throw new Error("Unimplemented method space")
+    }
+    arrowPosition(value: ArrowPosition | undefined): this {
+        throw new Error("Unimplemented method arrowPosition")
+    }
+    optionWidth(value: Dimension | OptionWidthMode | undefined): this {
+        throw new Error("Unimplemented method optionWidth")
+    }
+    optionHeight(value: Dimension | undefined): this {
+        throw new Error("Unimplemented method optionHeight")
+    }
+    menuBackgroundColor(value: ResourceColor | undefined): this {
+        throw new Error("Unimplemented method menuBackgroundColor")
+    }
+    menuBackgroundBlurStyle(value: BlurStyle | undefined): this {
+        throw new Error("Unimplemented method menuBackgroundBlurStyle")
+    }
+    controlSize(value: ControlSize | undefined): this {
+        throw new Error("Unimplemented method controlSize")
+    }
+    menuItemContentModifier(value: ContentModifier<MenuItemConfiguration> | undefined): this {
+        throw new Error("Unimplemented method menuItemContentModifier")
+    }
+    divider(value: DividerOptions | undefined): this {
+        throw new Error("Unimplemented method divider")
+    }
+    textModifier(value: TextModifier | undefined): this {
+        throw new Error("Unimplemented method textModifier")
+    }
+    arrowModifier(value: SymbolGlyphModifier | undefined): this {
+        throw new Error("Unimplemented method arrowModifier")
+    }
+    optionTextModifier(value: TextModifier | undefined): this {
+        throw new Error("Unimplemented method optionTextModifier")
+    }
+    selectedOptionTextModifier(value: TextModifier | undefined): this {
+        throw new Error("Unimplemented method selectedOptionTextModifier")
+    }
+    dividerStyle(value: DividerStyleOptions | undefined): this {
+        throw new Error("Unimplemented method dividerStyle")
+    }
+    avoidance(value: AvoidanceMode | undefined): this {
+        throw new Error("Unimplemented method avoidance")
+    }
+    menuOutline(value: MenuOutlineOptions | undefined): this {
+        throw new Error("Unimplemented method menuOutline")
+    }
+    menuAlign(alignType: MenuAlignType | undefined, offset?: Offset): this {
+        throw new Error("Unimplemented method menuAlign")
+    }
+    _onChangeEvent_selected(callback_: ((selected: number | Resource | undefined) => void)): void {
+        throw new Error("Unimplemented method _onChangeEvent_selected")
+    }
+    _onChangeEvent_value(callback_: ((value: ResourceStr | string | Resource | undefined) => void)): void {
+        throw new Error("Unimplemented method _onChangeEvent_value")
+    }
+    attributeModifier(value: AttributeModifier<SelectAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkSelectStyle extends ArkCommonMethodStyle implements SelectAttribute {
     selected_value?: number | Resource | undefined

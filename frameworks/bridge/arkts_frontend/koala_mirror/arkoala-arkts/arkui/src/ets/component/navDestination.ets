@@ -832,40 +832,108 @@ export interface NavDestinationTransition {
     event: (() => void);
 }
 export interface NavDestinationAttribute extends CommonMethod {
-    hideTitleBar(value: boolean | undefined): this
-    hideBackButton(value: boolean | undefined): this
-    onShown(value: (() => void) | undefined): this
-    onHidden(value: (() => void) | undefined): this
-    onBackPressed(value: (() => boolean) | undefined): this
-    onResult(value: ((value0: Object | undefined) => void) | undefined): this
-    mode(value: NavDestinationMode | undefined): this
-    backButtonIcon(value: ResourceStr | image.PixelMap | SymbolGlyphModifier | undefined): this
-    menus(value: Array<NavigationMenuItem> | CustomBuilder | undefined): this
-    onReady(value: ((value0: NavDestinationContext) => void) | undefined): this
-    onWillAppear(value: (() => void) | undefined): this
-    onWillDisappear(value: (() => void) | undefined): this
-    onWillShow(value: (() => void) | undefined): this
-    onWillHide(value: (() => void) | undefined): this
-    systemBarStyle(value: window.SystemBarStyle | undefined): this
-    recoverable(value: boolean | undefined): this
-    systemTransition(value: NavigationSystemTransitionType | undefined): this
-    bindToScrollable(value: Array<Scroller> | undefined): this
-    bindToNestedScrollable(value: Array<NestedScrollInfo> | undefined): this
-    onActive(value: ((value0: NavDestinationActiveReason) => void) | undefined): this
-    onInactive(value: ((value0: NavDestinationActiveReason) => void) | undefined): this
-    customTransition(value: NavDestinationTransitionDelegate | undefined): this
-    onNewParam(value: ((value0: Object | undefined) => void) | undefined): this
-    preferredOrientation(value: Orientation | undefined): this
-    enableNavigationIndicator(value: boolean | undefined): this
-    title(value: string | CustomBuilder | NavDestinationCommonTitle | NavDestinationCustomTitle | Resource | undefined, options?: NavigationTitleOptions): this
-    hideTitleBar(hide: boolean | undefined, animated: boolean | undefined): this
-    backButtonIcon(icon: ResourceStr | image.PixelMap | SymbolGlyphModifier | undefined, accessibilityText?: ResourceStr): this
-    menus(items: Array<NavigationMenuItem> | CustomBuilder | undefined, options?: NavigationMenuOptions): this
-    toolbarConfiguration(toolbarParam: Array<ToolbarItem> | CustomBuilder | undefined, options?: NavigationToolbarOptions): this
-    hideToolBar(hide: boolean | undefined, animated?: boolean): this
-    ignoreLayoutSafeArea(types?: Array<LayoutSafeAreaType>, edges?: Array<LayoutSafeAreaEdge>): this
-    enableStatusBar(enabled: boolean | undefined, animated?: boolean): this
-    attributeModifier(value: AttributeModifier<NavDestinationAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    hideTitleBar(value: boolean | undefined): this {
+        throw new Error("Unimplemented method hideTitleBar")
+    }
+    hideBackButton(value: boolean | undefined): this {
+        throw new Error("Unimplemented method hideBackButton")
+    }
+    onShown(value: (() => void) | undefined): this {
+        throw new Error("Unimplemented method onShown")
+    }
+    onHidden(value: (() => void) | undefined): this {
+        throw new Error("Unimplemented method onHidden")
+    }
+    onBackPressed(value: (() => boolean) | undefined): this {
+        throw new Error("Unimplemented method onBackPressed")
+    }
+    onResult(value: ((value0: Object | undefined) => void) | undefined): this {
+        throw new Error("Unimplemented method onResult")
+    }
+    mode(value: NavDestinationMode | undefined): this {
+        throw new Error("Unimplemented method mode")
+    }
+    backButtonIcon(value: ResourceStr | image.PixelMap | SymbolGlyphModifier | undefined): this {
+        throw new Error("Unimplemented method backButtonIcon")
+    }
+    menus(value: Array<NavigationMenuItem> | CustomBuilder | undefined): this {
+        throw new Error("Unimplemented method menus")
+    }
+    onReady(value: ((value0: NavDestinationContext) => void) | undefined): this {
+        throw new Error("Unimplemented method onReady")
+    }
+    onWillAppear(value: (() => void) | undefined): this {
+        throw new Error("Unimplemented method onWillAppear")
+    }
+    onWillDisappear(value: (() => void) | undefined): this {
+        throw new Error("Unimplemented method onWillDisappear")
+    }
+    onWillShow(value: (() => void) | undefined): this {
+        throw new Error("Unimplemented method onWillShow")
+    }
+    onWillHide(value: (() => void) | undefined): this {
+        throw new Error("Unimplemented method onWillHide")
+    }
+    systemBarStyle(value: window.SystemBarStyle | undefined): this {
+        throw new Error("Unimplemented method systemBarStyle")
+    }
+    recoverable(value: boolean | undefined): this {
+        throw new Error("Unimplemented method recoverable")
+    }
+    systemTransition(value: NavigationSystemTransitionType | undefined): this {
+        throw new Error("Unimplemented method systemTransition")
+    }
+    bindToScrollable(value: Array<Scroller> | undefined): this {
+        throw new Error("Unimplemented method bindToScrollable")
+    }
+    bindToNestedScrollable(value: Array<NestedScrollInfo> | undefined): this {
+        throw new Error("Unimplemented method bindToNestedScrollable")
+    }
+    onActive(value: ((value0: NavDestinationActiveReason) => void) | undefined): this {
+        throw new Error("Unimplemented method onActive")
+    }
+    onInactive(value: ((value0: NavDestinationActiveReason) => void) | undefined): this {
+        throw new Error("Unimplemented method onInactive")
+    }
+    customTransition(value: NavDestinationTransitionDelegate | undefined): this {
+        throw new Error("Unimplemented method customTransition")
+    }
+    onNewParam(value: ((value0: Object | undefined) => void) | undefined): this {
+        throw new Error("Unimplemented method onNewParam")
+    }
+    preferredOrientation(value: Orientation | undefined): this {
+        throw new Error("Unimplemented method preferredOrientation")
+    }
+    enableNavigationIndicator(value: boolean | undefined): this {
+        throw new Error("Unimplemented method enableNavigationIndicator")
+    }
+    title(value: string | CustomBuilder | NavDestinationCommonTitle | NavDestinationCustomTitle | Resource | undefined, options?: NavigationTitleOptions): this {
+        throw new Error("Unimplemented method title")
+    }
+    hideTitleBar(hide: boolean | undefined, animated: boolean | undefined): this {
+        throw new Error("Unimplemented method hideTitleBar")
+    }
+    backButtonIcon(icon: ResourceStr | image.PixelMap | SymbolGlyphModifier | undefined, accessibilityText?: ResourceStr): this {
+        throw new Error("Unimplemented method backButtonIcon")
+    }
+    menus(items: Array<NavigationMenuItem> | CustomBuilder | undefined, options?: NavigationMenuOptions): this {
+        throw new Error("Unimplemented method menus")
+    }
+    toolbarConfiguration(toolbarParam: Array<ToolbarItem> | CustomBuilder | undefined, options?: NavigationToolbarOptions): this {
+        throw new Error("Unimplemented method toolbarConfiguration")
+    }
+    hideToolBar(hide: boolean | undefined, animated?: boolean): this {
+        throw new Error("Unimplemented method hideToolBar")
+    }
+    ignoreLayoutSafeArea(types?: Array<LayoutSafeAreaType>, edges?: Array<LayoutSafeAreaEdge>): this {
+        throw new Error("Unimplemented method ignoreLayoutSafeArea")
+    }
+    enableStatusBar(enabled: boolean | undefined, animated?: boolean): this {
+        throw new Error("Unimplemented method enableStatusBar")
+    }
+    attributeModifier(value: AttributeModifier<NavDestinationAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkNavDestinationStyle extends ArkCommonMethodStyle implements NavDestinationAttribute {
     hideTitleBar_value?: boolean | undefined

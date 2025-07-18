@@ -122,13 +122,27 @@ export interface StepperOptions {
     index?: number;
 }
 export interface StepperAttribute extends CommonMethod {
-    onFinish(value: (() => void) | undefined): this
-    onSkip(value: (() => void) | undefined): this
-    onChange(value: ((prevIndex: number,index: number) => void) | undefined): this
-    onNext(value: ((prevIndex: number,index: number) => void) | undefined): this
-    onPrevious(value: ((prevIndex: number,index: number) => void) | undefined): this
-    _onChangeEvent_index(callback_: ((index: number) => void)): void
-    attributeModifier(value: AttributeModifier<StepperAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    onFinish(value: (() => void) | undefined): this {
+        throw new Error("Unimplemented method onFinish")
+    }
+    onSkip(value: (() => void) | undefined): this {
+        throw new Error("Unimplemented method onSkip")
+    }
+    onChange(value: ((prevIndex: number,index: number) => void) | undefined): this {
+        throw new Error("Unimplemented method onChange")
+    }
+    onNext(value: ((prevIndex: number,index: number) => void) | undefined): this {
+        throw new Error("Unimplemented method onNext")
+    }
+    onPrevious(value: ((prevIndex: number,index: number) => void) | undefined): this {
+        throw new Error("Unimplemented method onPrevious")
+    }
+    _onChangeEvent_index(callback_: ((index: number) => void)): void {
+        throw new Error("Unimplemented method _onChangeEvent_index")
+    }
+    attributeModifier(value: AttributeModifier<StepperAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkStepperStyle extends ArkCommonMethodStyle implements StepperAttribute {
     onFinish_value?: (() => void) | undefined

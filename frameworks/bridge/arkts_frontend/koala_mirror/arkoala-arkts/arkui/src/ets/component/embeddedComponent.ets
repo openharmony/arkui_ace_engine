@@ -74,9 +74,15 @@ export class ArkEmbeddedComponentPeer extends ArkCommonMethodPeer {
     }
 }
 export interface EmbeddedComponentAttribute extends CommonMethod {
-    onTerminated(value: ((value0: TerminationInfo) => void) | undefined): this
-    onError(value: ErrorCallback | undefined): this
-    attributeModifier(value: AttributeModifier<EmbeddedComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    onTerminated(value: ((value0: TerminationInfo) => void) | undefined): this {
+        throw new Error("Unimplemented method onTerminated")
+    }
+    onError(value: ErrorCallback | undefined): this {
+        throw new Error("Unimplemented method onError")
+    }
+    attributeModifier(value: AttributeModifier<EmbeddedComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkEmbeddedComponentStyle extends ArkCommonMethodStyle implements EmbeddedComponentAttribute {
     onTerminated_value?: ((value0: TerminationInfo) => void) | undefined

@@ -48,7 +48,9 @@ export class ArkNodeContainerPeer extends ArkCommonMethodPeer {
     }
 }
 export interface NodeContainerAttribute extends CommonMethod {
-    attributeModifier(value: AttributeModifier<NodeContainerAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    attributeModifier(value: AttributeModifier<NodeContainerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkNodeContainerStyle extends ArkCommonMethodStyle implements NodeContainerAttribute {
     attributeModifier_value?: AttributeModifier<NodeContainerAttribute> | AttributeModifier<CommonMethod> | undefined

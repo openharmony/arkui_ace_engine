@@ -111,8 +111,12 @@ export interface PolygonOptions {
     height?: string | number;
 }
 export interface PolygonAttribute extends CommonShapeMethod {
-    points(value: Array<ShapePoint> | undefined): this
-    attributeModifier(value: AttributeModifier<PolygonAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this
+    points(value: Array<ShapePoint> | undefined): this {
+        throw new Error("Unimplemented method points")
+    }
+    attributeModifier(value: AttributeModifier<PolygonAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkPolygonStyle extends ArkCommonShapeMethodStyle implements PolygonAttribute {
     points_value?: Array<ShapePoint> | undefined
