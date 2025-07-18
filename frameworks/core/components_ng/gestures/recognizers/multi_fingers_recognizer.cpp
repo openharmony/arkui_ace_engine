@@ -139,6 +139,8 @@ void MultiFingersRecognizer::UpdateTouchPointWithAxisEvent(const AxisEvent& even
     touchPoints_[event.id].y = event.y;
     touchPoints_[event.id].screenX = event.screenX;
     touchPoints_[event.id].screenY = event.screenY;
+    touchPoints_[event.id].globalDisplayX = event.globalDisplayX;
+    touchPoints_[event.id].globalDisplayY = event.globalDisplayY;
     touchPoints_[event.id].sourceType = event.sourceType;
     touchPoints_[event.id].sourceTool = event.sourceTool;
     touchPoints_[event.id].originalId = event.originalId;
@@ -148,6 +150,8 @@ void MultiFingersRecognizer::UpdateTouchPointWithAxisEvent(const AxisEvent& even
     point.y = event.y;
     point.screenX = event.screenX;
     point.screenY = event.screenY;
+    point.globalDisplayX = event.globalDisplayX;
+    point.globalDisplayY = event.globalDisplayY;
     point.sourceTool = event.sourceTool;
     point.originalId = event.originalId;
     touchPoints_[event.id].pointers = { point };
