@@ -119,4 +119,41 @@ RefPtr<UINode> DialogManager::GetDialogNodeByContentNode(const RefPtr<UINode>& c
     }
     return parent;
 }
+
+RefPtr<PipelineContext> DialogManager::GetMainPipelineContext(const RefPtr<FrameNode>& frameNode)
+{
+    // Get pipelineContext of main window or host window for UIExtension
+    if (!frameNode) {
+        TAG_LOGE(AceLogTag::ACE_OVERLAY, "get frameNode failed");
+        return nullptr;
+    }
+    auto pipeline = frameNode->GetContext();
+    if (!pipeline) {
+        TAG_LOGE(AceLogTag::ACE_OVERLAY, "get pipeline failed, nodeId: %{public}d", frameNode->GetId());
+        return nullptr;
+    }
+    auto containerId = pipeline->GetInstanceId();
+    auto container = AceEngine::Get().GetContainer(containerId);
+    if (!container) {
+        TAG_LOGE(AceLogTag::ACE_OVERLAY, "get container failed, nodeId: %{public}d", frameNode->GetId());
+        return nullptr;
+    }
+    RefPtr<PipelineContext> context;
+    if (container->IsSubContainer()) {
+        auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
+        auto parentContainer = AceEngine::Get().GetContainer(parentContainerId);
+        if (!parentContainer) {
+            TAG_LOGE(AceLogTag::ACE_OVERLAY, "get parentContainer failed, nodeId: %{public}d", frameNode->GetId());
+            return nullptr;
+        }
+        context = AceType::DynamicCast<PipelineContext>(parentContainer->GetPipelineContext());
+        if (!context) {
+            TAG_LOGE(AceLogTag::ACE_OVERLAY, "get context failed, nodeId: %{public}d", frameNode->GetId());
+            return nullptr;
+        }
+    } else {
+        context = AceType::Claim(pipeline);
+    }
+    return context;
+}
 } // namespace OHOS::Ace::NG

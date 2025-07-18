@@ -33,6 +33,7 @@
 #include "core/components/popup/popup_theme.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/menu/menu_paint_property.h"
+#include "core/components_ng/pattern/overlay/dialog_manager.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/pipeline/pipeline_base.h"
@@ -61,23 +62,29 @@ Dimension DEFAULT_P2_END_Y = 7.6_vp;
 
 Dimension BUBBLE_ARROW_WIDTH = 16.0_vp;
 Dimension BUBBLE_ARROW_HEIGHT = 8.0_vp;
+std::optional<float> BUBBLE_ARROW_WIDTH_F = std::nullopt;
+std::optional<float> BUBBLE_ARROW_HEIGHT_F = std::nullopt;
 constexpr double ARROW_OFFSET_START_VALUE = 0.0;
 constexpr double ARROW_OFFSET_CENTER_VALUE = 0.5;
 constexpr Dimension HORIZON_SPACING_WITH_SCREEN = 8.0_vp;
 constexpr Dimension BEZIER_WIDTH_HALF = 8.0_vp;
 
+constexpr Dimension DEFAULT_ARROW_VERTICAL_P1_OFFSET_X = 8.0_vp;
 Dimension ARROW_VERTICAL_P1_OFFSET_X = 8.0_vp;
 Dimension ARROW_VERTICAL_P2_OFFSET_X = 1.5_vp;
 Dimension ARROW_VERTICAL_P2_OFFSET_Y = 7.32_vp;
 Dimension ARROW_VERTICAL_P4_OFFSET_X = 1.5_vp;
 Dimension ARROW_VERTICAL_P4_OFFSET_Y = 7.32_vp;
+constexpr Dimension DEFAULT_ARROW_VERTICAL_P5_OFFSET_X = 8.0_vp;
 Dimension ARROW_VERTICAL_P5_OFFSET_X = 8.0_vp;
 
+constexpr Dimension DEFAULT_ARROW_HORIZON_P1_OFFSET_Y = 8.0_vp;
 Dimension ARROW_HORIZON_P1_OFFSET_Y = 8.0_vp;
 Dimension ARROW_HORIZON_P2_OFFSET_Y = 1.5_vp;
 Dimension ARROW_HORIZON_P2_OFFSET_X = 7.32_vp;
 Dimension ARROW_HORIZON_P4_OFFSET_Y = 1.5_vp;
 Dimension ARROW_HORIZON_P4_OFFSET_X = 7.32_vp;
+constexpr Dimension DEFAULT_ARROW_HORIZON_P5_OFFSET_Y = 8.0_vp;
 Dimension ARROW_HORIZON_P5_OFFSET_Y = 8.0_vp;
 
 Dimension ARROW_REPLACE_START_VERTICAL_P1_OFFSET_X = 8.0_vp;
@@ -118,6 +125,16 @@ constexpr int16_t ARROW_OFFSETS_INDEX_ONE = 1;
 constexpr int16_t ARROW_OFFSETS_INDEX_TWO = 2;
 constexpr int16_t ARROW_OFFSETS_INDEX_THREE = 3;
 
+double ConvertToPxByLayoutWrapper(const Dimension& dimension, LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_RETURN(layoutWrapper, dimension.ConvertToPx());
+    auto hostNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(hostNode, dimension.ConvertToPx());
+    auto pipelineContext = DialogManager::GetMainPipelineContext(hostNode);
+    CHECK_NULL_RETURN(pipelineContext, dimension.ConvertToPx());
+    return pipelineContext->NormalizeToPx(dimension);
+}
+
 void GetEndP2P4(const Dimension& radius)
 {
     auto h1 = BUBBLE_ARROW_HEIGHT.ConvertToPx() - radius.ConvertToPx();
@@ -147,28 +164,33 @@ void GetP2(const Dimension& radius)
     DEFAULT_P2_WIDTH = Dimension(w1 - side1 * std::cos(beta));
 }
 
-void calculateArrowPoint(Dimension height, Dimension width)
+void calculateArrowPoint(Dimension height, Dimension width, LayoutWrapper* layoutWrapper)
 {
-    auto rateX = width.ConvertToPx() / BUBBLE_ARROW_WIDTH.ConvertToPx();
+    // When the popup or tips show in subwindow, layout algorithm's pipeline will run at main window then subwindow.
+    // When user has set arrow width and unit is lpx, should convert to px by using main window's pipeline.
+    auto lastWidth = ConvertToPxByLayoutWrapper(DEFAULT_BUBBLE_ARROW_WIDTH, layoutWrapper);
+    auto rateX = NearZero(lastWidth) ? 1.0f : ConvertToPxByLayoutWrapper(width, layoutWrapper) / lastWidth;
     BUBBLE_ARROW_WIDTH = width;
     BUBBLE_ARROW_HEIGHT = height;
-
+    BUBBLE_ARROW_WIDTH_F = ConvertToPxByLayoutWrapper(width, layoutWrapper);
+    BUBBLE_ARROW_HEIGHT_F = ConvertToPxByLayoutWrapper(height, layoutWrapper);
+    
     GetEndP2P4(ARROW_RADIUS);
     GetP2(ARROW_RADIUS);
 
-    ARROW_VERTICAL_P1_OFFSET_X = ARROW_VERTICAL_P1_OFFSET_X * rateX;
+    ARROW_VERTICAL_P1_OFFSET_X = DEFAULT_ARROW_VERTICAL_P1_OFFSET_X * rateX;
     ARROW_VERTICAL_P2_OFFSET_Y = DEFAULT_P2_HEIGHT;
     ARROW_VERTICAL_P2_OFFSET_X = DEFAULT_P2_WIDTH;
     ARROW_VERTICAL_P4_OFFSET_Y = DEFAULT_P2_HEIGHT;
     ARROW_VERTICAL_P4_OFFSET_X = DEFAULT_P2_WIDTH;
-    ARROW_VERTICAL_P5_OFFSET_X = ARROW_VERTICAL_P5_OFFSET_X * rateX;
+    ARROW_VERTICAL_P5_OFFSET_X = DEFAULT_ARROW_VERTICAL_P5_OFFSET_X * rateX;
 
-    ARROW_HORIZON_P1_OFFSET_Y = ARROW_HORIZON_P1_OFFSET_Y * rateX;
+    ARROW_HORIZON_P1_OFFSET_Y = DEFAULT_ARROW_HORIZON_P1_OFFSET_Y * rateX;
     ARROW_HORIZON_P2_OFFSET_X = DEFAULT_P2_HEIGHT;
     ARROW_HORIZON_P2_OFFSET_Y = DEFAULT_P2_WIDTH;
     ARROW_HORIZON_P4_OFFSET_X = DEFAULT_P2_HEIGHT;
     ARROW_HORIZON_P4_OFFSET_Y = DEFAULT_P2_WIDTH;
-    ARROW_HORIZON_P5_OFFSET_Y = ARROW_HORIZON_P5_OFFSET_Y * rateX;
+    ARROW_HORIZON_P5_OFFSET_Y = DEFAULT_ARROW_HORIZON_P5_OFFSET_Y * rateX;
 
     auto p1x = BUBBLE_ARROW_WIDTH / HALF;
     auto p2x = Dimension(DEFAULT_P2_END_X.ConvertToPx() - p1x.ConvertToPx());
@@ -633,7 +655,7 @@ void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layout
     isCaretMode_ = layoutProp->GetIsCaretMode().value_or(true);
     auto height = layoutProp->GetArrowHeight().value_or(DEFAULT_BUBBLE_ARROW_HEIGHT);
     auto width = layoutProp->GetArrowWidth().value_or(DEFAULT_BUBBLE_ARROW_WIDTH);
-    calculateArrowPoint(height, width);
+    calculateArrowPoint(height, width, layoutWrapper);
     arrowHeight_ = height.ConvertToPx();
     scaledBubbleSpacing_ = arrowHeight_;
     realArrowWidth_ = BUBBLE_ARROW_WIDTH.ConvertToPx();
@@ -1398,9 +1420,9 @@ OffsetF BubbleLayoutAlgorithm::AddOffset(const OffsetF& position)
 
 void BubbleLayoutAlgorithm::UpdateChildPosition(OffsetF& childOffset)
 {
-    double arrowWidth = BUBBLE_ARROW_WIDTH.ConvertToPx();
+    double arrowWidth = BUBBLE_ARROW_WIDTH_F.value_or(BUBBLE_ARROW_WIDTH.ConvertToPx());
     double twoRadiusPx = borderRadius_.ConvertToPx() * 2.0;
-    float movingDistance = BUBBLE_ARROW_HEIGHT.ConvertToPx();
+    float movingDistance = BUBBLE_ARROW_HEIGHT_F.value_or(BUBBLE_ARROW_HEIGHT.ConvertToPx());
     switch (placement_) {
         case Placement::TOP:
         case Placement::TOP_LEFT:
