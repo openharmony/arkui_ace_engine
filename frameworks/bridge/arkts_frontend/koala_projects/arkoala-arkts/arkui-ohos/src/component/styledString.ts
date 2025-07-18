@@ -1416,7 +1416,7 @@ export class MutableStyledString extends StyledString implements MaterializedBas
         return retval
     }
     constructor(value?: string | ImageAttachment | CustomSpan, styles?: Array<StyleOptions>) {
-        super()
+        super(value, styles)
         if (((value) !== (undefined)) || ((styles) !== (undefined)))
         {
             const ctorPtr : KPointer = MutableStyledString.ctor_mutablestyledstring((value)!, styles)
