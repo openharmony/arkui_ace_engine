@@ -77,6 +77,21 @@ HWTEST_F(CustomNodeExtTestNg, CustomNodeExtCreator001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CustomNodeExtCreator002
+ * @tc.desc: Test the create of CustomNodeExt.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomNodeExtTestNg, CustomNodeExtCreator002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Invoke CustomNodeExt Create function.
+     * @tc.expected: Create CustomNodeExt.
+     */
+    auto frameNode = CustomNodeExtModelNG::CreateFrameNode(TEST_TAG, 1);
+    ASSERT_NE(frameNode, nullptr);
+}
+
+/**
  * @tc.name: CustomNodeExtSetMeasureCallback001
  * @tc.desc: Test the set of MeasureCallback in CustomNodeExt.
  * @tc.type: FUNC
