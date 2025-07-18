@@ -197,4 +197,13 @@ void OnLayoutInnerLayout(ani_env* env, ani_object obj, ani_long ptr)
     }
     modifier->getCommonAniModifier()->onLayoutInnerLayout(env, ptr);
 }
+
+void SetParallelScoped(ani_env* env, ani_object obj, ani_boolean parallel)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return;
+    }
+    modifier->getCommonAniModifier()->setParallelScoped(parallel);
+}
 } // namespace OHOS::Ace::Ani

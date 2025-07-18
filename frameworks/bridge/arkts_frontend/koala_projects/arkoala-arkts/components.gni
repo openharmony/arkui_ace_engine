@@ -17,6 +17,7 @@
 
 arkui_files = [
   "arkui-preprocessed/@ohos.animator.ets",
+  "arkui-preprocessed/@ohos.arkui.Parallelize.ets",
   "arkui-preprocessed/@ohos.arkui.UIContext.ets",
   "arkui-preprocessed/@ohos.arkui.componentSnapshot.ets",
   "arkui-preprocessed/@ohos.arkui.componentUtils.ets",
@@ -390,6 +391,7 @@ arkui_files = [
   "arkui-preprocessed/arkui/stateManagement/decoratorImpl/decoratorWatch.ets",
   "arkui-preprocessed/arkui/stateManagement/index.ets",
   "arkui-preprocessed/arkui/stateManagement/interop/interopStorage.ets",
+  "arkui-preprocessed/arkui/stateManagement/remember.ets",
   "arkui-preprocessed/arkui/stateManagement/runtime/index.ets",
   "arkui-preprocessed/arkui/stateManagement/storage/appStorage.ets",
   "arkui-preprocessed/arkui/stateManagement/storage/environment.ets",
@@ -441,6 +443,7 @@ arkui_path_keys = [
   "@ohos.multimodalInput.intentionCode",
   "@ohos/arkui/dragController",
   "#stateMgmtTool",
+  "@ohos/arkui/Parallelize",
 ]
 
 arkui_path_values = [
@@ -479,4 +482,5 @@ arkui_path_values = [
   "arkui-preprocessed/@ohos.multimodalInput.intentionCode.ets",
   "arkui-preprocessed/@ohos.arkui.dragController.ets",
   "arkui-preprocessed/arkui/stateManagement/tools/arkts",
+  "arkui-preprocessed/@ohos.arkui.Parallelize.ets",
 ]

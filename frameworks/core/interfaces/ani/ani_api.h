@@ -132,6 +132,7 @@ struct ArkUIAniCommonModifier {
     ani_boolean (*isDebugMode)(ArkUI_Int32 id);
     void (*onMeasureInnerMeasure)(ani_env* env, ani_long ptr);
     void (*onLayoutInnerLayout)(ani_env* env, ani_long ptr);
+    void (*setParallelScoped)(ani_boolean parallel);
 };
 struct ArkUIAniCustomNodeModifier {
     ani_long (*constructCustomNode)(ani_int);
