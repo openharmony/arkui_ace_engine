@@ -21,6 +21,7 @@ group("advanced_ui_component_static") {
     deps += [
       "swiperefresher:swipeRefresher",
       "splitlayout:splitLayout",
+       "composeListItem:composeListItem",
     ]
   }
 }
