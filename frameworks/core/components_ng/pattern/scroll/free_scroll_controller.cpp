@@ -378,7 +378,6 @@ void FreeScrollController::HandleAxisAnimationFrame(float newOffset)
 void FreeScrollController::AnimateOnMouseScroll(const OffsetF& delta)
 {
     mouseWheelScrollIsVertical_ = NearZero(delta.GetX());
-    Axis axis = mouseWheelScrollIsVertical_ ? Axis::VERTICAL : Axis::HORIZONTAL;
     if (!axisAnimator_) {
         axisAnimator_ = MakeRefPtr<AxisAnimator>(
             [wk = WeakClaim(this)](float newOffset) { // animation frame callback
@@ -389,6 +388,7 @@ void FreeScrollController::AnimateOnMouseScroll(const OffsetF& delta)
             nullptr, nullptr);
         axisAnimator_->Initialize(WeakClaim(pattern_.GetContext()));
     }
+    Axis axis = mouseWheelScrollIsVertical_ ? Axis::VERTICAL : Axis::HORIZONTAL;
     axisAnimator_->OnAxis(delta.GetMainOffset(axis), offset_->Get().GetMainOffset(axis));
 }
 
