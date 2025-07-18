@@ -121,7 +121,6 @@ auto g_bindMenuOptionsParam = [](const auto& menuOptions, MenuParam& menuParam) 
         menuParam.positionOffset.SetX(offsetVal.value().first->ConvertToPx());
         menuParam.positionOffset.SetY(offsetVal.value().second->ConvertToPx());
     }
-    menuParam.placement = OptConvert<Placement>(menuOptions.placement);
     menuParam.enableHoverMode = OptConvert<bool>(menuOptions.enableHoverMode).value_or(menuParam.enableHoverMode);
     menuParam.backgroundColor = OptConvert<Color>(menuOptions.backgroundColor);
     auto backgroundBlurStyle = OptConvert<BlurStyle>(menuOptions.backgroundBlurStyle);
@@ -132,9 +131,13 @@ auto g_bindMenuOptionsParam = [](const auto& menuOptions, MenuParam& menuParam) 
     menuParam.hasTransitionEffect = transitionOpt.has_value();
     menuParam.enableArrow = OptConvert<bool>(menuOptions.enableArrow);
     menuParam.arrowOffset = OptConvert<CalcDimension>(menuOptions.arrowOffset);
+    menuParam.placement = OptConvert<Placement>(menuOptions.placement);
     // if enableArrow is true and placement not set, set placement default value to top.
     if (menuParam.enableArrow.has_value() && !menuParam.placement.has_value() && menuParam.enableArrow.value()) {
         menuParam.placement = Placement::TOP;
+    }
+    if (!menuParam.placement.has_value()) {
+        menuParam.placement = Placement::BOTTOM_LEFT;
     }
     menuParam.borderRadius = OptConvert<BorderRadiusProperty>(menuOptions.borderRadius);
     menuParam.previewBorderRadius = OptConvert<BorderRadiusProperty>(menuOptions.previewBorderRadius);
