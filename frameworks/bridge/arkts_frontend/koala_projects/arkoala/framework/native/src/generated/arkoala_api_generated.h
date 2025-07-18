@@ -2586,6 +2586,8 @@ typedef struct Ark_Union_SizeOptions_ImageSize Ark_Union_SizeOptions_ImageSize;
 typedef struct Opt_Union_SizeOptions_ImageSize Opt_Union_SizeOptions_ImageSize;
 typedef struct Ark_Union_String_Array_String Ark_Union_String_Array_String;
 typedef struct Opt_Union_String_Array_String Opt_Union_String_Array_String;
+typedef struct Ark_Union_String_CustomBuilder Ark_Union_String_CustomBuilder;
+typedef struct Opt_Union_String_CustomBuilder Opt_Union_String_CustomBuilder;
 typedef struct Ark_Union_String_CustomBuilder_ComponentContent Ark_Union_String_CustomBuilder_ComponentContent;
 typedef struct Opt_Union_String_CustomBuilder_ComponentContent Opt_Union_String_CustomBuilder_ComponentContent;
 typedef struct Ark_Union_String_Number_Buffer_Resource Ark_Union_String_Number_Buffer_Resource;
@@ -15922,6 +15924,18 @@ typedef struct Opt_Union_String_Array_String {
     Ark_Tag tag;
     Ark_Union_String_Array_String value;
 } Opt_Union_String_Array_String;
+typedef struct Ark_Union_String_CustomBuilder {
+    /* kind: UnionType */
+    Ark_Int32 selector;
+    union {
+        Ark_String value0;
+        CustomNodeBuilder value1;
+    };
+} Ark_Union_String_CustomBuilder;
+typedef struct Opt_Union_String_CustomBuilder {
+    Ark_Tag tag;
+    Ark_Union_String_CustomBuilder value;
+} Opt_Union_String_CustomBuilder;
 typedef struct Ark_Union_String_CustomBuilder_ComponentContent {
     Ark_Int32 selector;
     union {
@@ -24046,7 +24060,19 @@ typedef struct GENERATED_ArkUIStateStylesOpsAccessor {
 typedef struct GENERATED_ArkUIDragDropOpsAccessor {
     void (*registerOnDragStart)(Ark_NativePointer node,
                                 const Callback_onDragStart* onDragStart);
+    void (*registerDragPreview)(Ark_NativePointer node,
+        const Opt_Union_CustomBuilder_DragItemInfo_String* preview,
+        const Opt_PreviewConfiguration* config);
+    void (*registerOnDrop)(Ark_NativePointer node,
+                            const Opt_OnDragEventCallback* eventCallback,
+                            const Opt_DropOptions* dropOptions);
 } GENERATED_ArkUIDragDropOpsAccessor;
+
+typedef struct GENERATED_ArkUIOverlayOpsAccessor {
+    void (*setOverlayAttribute)(Ark_NativePointer node,
+                                const Opt_Union_String_CustomBuilder* value,
+                                const Opt_OverlayOptions* options);
+} GENERATED_ArkUIOverlayOpsAccessor;
 
 typedef struct GENERATED_ArkUIUIContextAtomicServiceBarAccessor {
     Ark_Frame (*getBarRect)();
@@ -27664,6 +27690,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIUIContextAccessor* (*getUIContextAccessor)();
     const GENERATED_ArkUIStateStylesOpsAccessor* (*getStateStylesOpsAccessor)();
     const GENERATED_ArkUIDragDropOpsAccessor* (*getDragDropOpsAccessor)();
+    const GENERATED_ArkUIOverlayOpsAccessor* (*getOverlayOpsAccessor)();
     const GENERATED_ArkUIUIContextAtomicServiceBarAccessor* (*getUIContextAtomicServiceBarAccessor)();
     const GENERATED_ArkUIUIContextDispatchKeyEventAccessor* (*getUIContextDispatchKeyEventAccessor)();
     const GENERATED_ArkUIDrawableDescriptorAccessor* (*getDrawableDescriptorAccessor)();

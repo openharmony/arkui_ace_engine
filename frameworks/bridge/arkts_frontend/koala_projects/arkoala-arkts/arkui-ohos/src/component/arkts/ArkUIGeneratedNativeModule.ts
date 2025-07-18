@@ -4001,6 +4001,10 @@ export class ArkUIGeneratedNativeModule {
     native static _StateStylesOps_onStateStyleChange(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _DragDropOps_registerOnDragStart(node: KPointer,  thisArray: KSerializerBuffer, thisLength: int32) : void
+    @ani.unsafe.Direct
+    native static _DragDropOps_registerDragPreview(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _DragDropOps_registerOnDrop(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Quick
     native static _UIContextAtomicServiceBar_getBarRect(): KInteropReturnBuffer
     @ani.unsafe.Direct
@@ -5704,6 +5708,8 @@ export class ArkUIGeneratedNativeModule {
     native static _OffscreenCanvasRenderingContext2D_transferToImageBitmap(ptr: KPointer): KPointer
     @ani.unsafe.Direct
     native static _OffscreenCanvas_construct(width: number, height: number, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct    
+    native static _OverlayOps_setOverlayAttribute(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _OffscreenCanvas_getFinalizer(): KPointer
     @ani.unsafe.Direct

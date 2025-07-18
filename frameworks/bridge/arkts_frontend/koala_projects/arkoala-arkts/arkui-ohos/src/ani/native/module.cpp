@@ -328,6 +328,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::Invalidate)
         },
         ani_native_function {
+            "_SetOverlay_ComponentContent",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetOverlayComponentContent)
+        },
+        ani_native_function {
             "_SetWaterFlowOptions",
             "JLarkui/component/waterFlow/WaterFlowOptions;:V",
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetWaterFlowOptions)

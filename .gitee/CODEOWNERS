@@ -3044,6 +3044,7 @@ interfaces/native/node/textpicker_option.cpp @arkui_image
 interfaces/native/node/waterflow_section_option.cpp @arkuiscroll
 interfaces/native/node/waterflow_section_option.h @arkuiscroll
 interfaces/native/ui_input_event.h @arkuievent
+interfaces/native/implementation/overlay_accessor.cpp @arkuievent
 
 [Innerkits Interfaces]
 interfaces/inner_api/ace/ace_forward_compatibility.cpp @arkuiframework

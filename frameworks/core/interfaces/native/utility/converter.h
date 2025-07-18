@@ -636,6 +636,7 @@ namespace Converter {
     template<> std::vector<uint32_t> Convert(const Array_LayoutSafeAreaType& src);
     template<> uint32_t Convert(const Ark_LayoutSafeAreaEdge& src);
     template<> uint32_t Convert(const Ark_LayoutSafeAreaType& src);
+    template<> OverlayOptions Convert(const Ark_OverlayOptions& src);
 
     // SORTED_SECTION: No multiline declarations, please!
     template<> void AssignCast(std::optional<AIImageQuality>& dst, const Ark_ResolutionQuality& src);

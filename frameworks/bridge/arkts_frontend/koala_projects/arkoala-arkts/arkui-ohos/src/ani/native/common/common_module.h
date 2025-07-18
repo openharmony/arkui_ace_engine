@@ -40,6 +40,7 @@ ani_int IsDebugMode(ani_env* env, ani_object obj, ani_int id);
 void OnMeasureInnerMeasure(ani_env* env, ani_object obj, ani_long ptr);
 void OnLayoutInnerLayout(ani_env* env, ani_object obj, ani_long ptr);
 void SetParallelScoped(ani_env* env, ani_object obj, ani_boolean parallel);
+void SetOverlayComponentContent(ani_env* env, ani_object obj, ani_long ptr, ani_long buildNodePtr, ani_object options);
 } // namespace OHOS::Ace::Ani
 
 #endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_COMMON_MODULE
