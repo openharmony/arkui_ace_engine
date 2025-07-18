@@ -17,7 +17,6 @@
 
 #include "core/components_ng/pattern/grid/grid_utils.h"
 #include "core/components_ng/pattern/grid/irregular/grid_irregular_filler.h"
-#include "core/components_ng/pattern/grid/irregular/grid_large_delta_converter.h"
 #include "core/components_ng/pattern/grid/irregular/grid_layout_range_solver.h"
 #include "core/components_ng/pattern/grid/irregular/grid_layout_utils.h"
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
@@ -172,17 +171,10 @@ void GridIrregularLayoutAlgorithm::Init(const RefPtr<GridLayoutProperty>& props)
 }
 
 namespace {
-/**
- * @return offset to apply after the jump
- */
-inline float PrepareJumpOnReset(GridLayoutInfo& info)
+inline void PrepareJumpOnReset(GridLayoutInfo& info)
 {
-    if (info.jumpIndex_ != EMPTY_JUMP_INDEX) {
-        return 0.0f;
-    }
     info.jumpIndex_ = std::min(info.startIndex_, info.childrenCount_ - 1);
     info.scrollAlign_ = ScrollAlign::START;
-    return info.currentOffset_;
 }
 inline void ResetMaps(GridLayoutInfo& info)
 {
@@ -204,7 +196,8 @@ void GridIrregularLayoutAlgorithm::CheckForReset()
 {
     if (info_.IsResetted()) {
         // reset layout info_ and perform jump to current startIndex
-        postJumpOffset_ = PrepareJumpOnReset(info_);
+        postJumpOffset_ = info_.currentOffset_;
+        PrepareJumpOnReset(info_);
         ResetMaps(info_);
         ResetLayoutRange(info_);
         ResetFocusedIndex(wrapper_);
@@ -219,7 +212,8 @@ void GridIrregularLayoutAlgorithm::CheckForReset()
             info_.ClearMatrixToEnd(updateIdx, it->first);
         }
         if (updateIdx <= info_.endIndex_) {
-            postJumpOffset_ = PrepareJumpOnReset(info_);
+            postJumpOffset_ = info_.currentOffset_;
+            PrepareJumpOnReset(info_);
             ResetLayoutRange(info_);
             ResetFocusedIndex(wrapper_);
         }
@@ -233,7 +227,7 @@ void GridIrregularLayoutAlgorithm::CheckForReset()
             -info_.GetDistanceToBottom(mainSize, info_.GetTotalHeightOfItemsInView(mainGap_, true), mainGap_);
         postJumpOffset_ = info_.currentOffset_;
         info_.lineHeightMap_.clear();
-        postJumpOffset_ = PrepareJumpOnReset(info_);
+        PrepareJumpOnReset(info_);
         ResetLayoutRange(info_);
         ResetFocusedIndex(wrapper_);
         return;
@@ -318,12 +312,9 @@ void GridIrregularLayoutAlgorithm::MeasureBackward(float mainSize, bool toAdjust
     if ((toAdjust || !canOverScrollStart_) && res.row == 0) {
         res.pos = std::min(res.pos, 0.0f);
     }
-    if (res.idx > -1) {
-        UpdateStartInfo(info_, res);
-    }
+    UpdateStartInfo(info_, res);
 
-    auto [endLine, endIdx] =
-        solver.SolveForwardForEndIdx(mainGap_, mainSize - info_.currentOffset_, info_.startMainLineIndex_);
+    auto [endLine, endIdx] = solver.SolveForwardForEndIdx(mainGap_, mainSize - res.pos, res.row);
     info_.endMainLineIndex_ = endLine;
     info_.endIndex_ = endIdx;
 }
@@ -675,12 +666,9 @@ bool GridIrregularLayoutAlgorithm::IsIrregularLine(int32_t lineIndex) const
         return true;
     }
     auto props = DynamicCast<GridLayoutProperty>(wrapper_->GetLayoutProperty());
-    if (props->HasLayoutOptions()) {
-        const auto& opts = *props->GetLayoutOptions();
-        return std::any_of(line->second.begin(), line->second.end(),
-            [opts](const auto& item) { return opts.irregularIndexes.count(std::abs(item.second)); });
-    }
-    return false;
+    const auto& opts = *props->GetLayoutOptions();
+    return std::any_of(line->second.begin(), line->second.end(),
+        [opts](const auto& item) { return opts.irregularIndexes.count(std::abs(item.second)); });
 }
 
 void GridIrregularLayoutAlgorithm::SyncPreloadItems(int32_t cacheCnt)
