@@ -40,6 +40,7 @@ typedef struct __ani_env ani_env;
 typedef uint8_t ani_boolean;
 typedef int32_t ani_int;
 typedef int64_t ani_long;
+typedef double  ani_double;
 typedef class __ani_fn_object *ani_fn_object;
 typedef class __ani_string* ani_string;
 typedef class __ani_enum_item* ani_enum_item;
@@ -146,6 +147,12 @@ struct ArkUIAniCommonModifier {
     void (*onLayoutInnerLayout)(ani_env* env, ani_long ptr);
     void (*setParallelScoped)(ani_boolean parallel);
     void (*setOverlayComponent)(ani_long node, ani_long builderPtr, AniOverlayOptions options);
+    ani_double (*vp2px)(ani_double value, ani_int instanceId);
+    ani_double (*px2vp)(ani_double value, ani_int instanceId);
+    ani_double (*fp2px)(ani_double value, ani_int instanceId);
+    ani_double (*px2fp)(ani_double value, ani_int instanceId);
+    ani_double (*lpx2px)(ani_double value, ani_int instanceId);
+    ani_double (*px2lpx)(ani_double value, ani_int instanceId);
 };
 struct ArkUIAniCustomNodeModifier {
     ani_long (*constructCustomNode)(ani_int);

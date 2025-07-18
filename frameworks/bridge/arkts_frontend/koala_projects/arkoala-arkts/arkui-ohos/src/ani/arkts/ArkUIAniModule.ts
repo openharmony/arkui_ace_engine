@@ -200,4 +200,11 @@ export class ArkUIAniModule {
     native static _OnLayout_InnerLayout(ptr: KPointer): void
     native static _SetParallelScoped(parallel: boolean): void
     native static _ConditionScopeNode_Construct(id: KInt): KPointer;
+
+    native static _Common_vp2px(value:number, instanceId: KInt): number
+    native static _Common_px2vp(value:number, instanceId: KInt): number
+    native static _Common_fp2px(value:number, instanceId: KInt): number
+    native static _Common_px2fp(value:number, instanceId: KInt): number
+    native static _Common_lpx2px(value:number, instanceId: KInt): number
+    native static _Common_px2lpx(value:number, instanceId: KInt): number
 }
