@@ -18003,7 +18003,7 @@ export class Serializer extends SerializerBase {
             const value_borderColor_value  = value_borderColor!
             let value_borderColor_value_type : int32 = RuntimeType.UNDEFINED
             value_borderColor_value_type = runtimeType(value_borderColor_value)
-            if ((TypeChecker.isColor(value_borderColor_value)) || (RuntimeType.NUMBER == value_borderColor_value_type) || (RuntimeType.STRING == value_borderColor_value_type) || (RuntimeType.OBJECT == value_borderColor_value_type)) {
+            if ((TypeChecker.isColor(value_borderColor_value)) || (RuntimeType.NUMBER == value_borderColor_value_type) || (RuntimeType.STRING == value_borderColor_value_type) || ((RuntimeType.OBJECT == value_borderColor_value_type) && (TypeChecker.isResource(value_borderColor_value, false, false, false, false, false)))) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_borderColor_value_0  = value_borderColor_value as ResourceColor
                 let value_borderColor_value_0_type : int32 = RuntimeType.UNDEFINED
@@ -18417,7 +18417,7 @@ export class Serializer extends SerializerBase {
             const value_borderColor_value  = value_borderColor!
             let value_borderColor_value_type : int32 = RuntimeType.UNDEFINED
             value_borderColor_value_type = runtimeType(value_borderColor_value)
-            if ((TypeChecker.isColor(value_borderColor_value)) || (RuntimeType.NUMBER == value_borderColor_value_type) || (RuntimeType.STRING == value_borderColor_value_type) || (RuntimeType.OBJECT == value_borderColor_value_type)) {
+            if ((TypeChecker.isColor(value_borderColor_value)) || (RuntimeType.NUMBER == value_borderColor_value_type) || (RuntimeType.STRING == value_borderColor_value_type) || ((RuntimeType.OBJECT == value_borderColor_value_type) && (TypeChecker.isResource(value_borderColor_value, false, false, false, false, false)))) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_borderColor_value_0  = value_borderColor_value as ResourceColor
                 let value_borderColor_value_0_type : int32 = RuntimeType.UNDEFINED
@@ -18843,7 +18843,7 @@ export class Serializer extends SerializerBase {
             const value_borderColor_value  = value_borderColor!
             let value_borderColor_value_type : int32 = RuntimeType.UNDEFINED
             value_borderColor_value_type = runtimeType(value_borderColor_value)
-            if ((TypeChecker.isColor(value_borderColor_value)) || (RuntimeType.NUMBER == value_borderColor_value_type) || (RuntimeType.STRING == value_borderColor_value_type) || (RuntimeType.OBJECT == value_borderColor_value_type)) {
+            if ((TypeChecker.isColor(value_borderColor_value)) || (RuntimeType.NUMBER == value_borderColor_value_type) || (RuntimeType.STRING == value_borderColor_value_type) || ((RuntimeType.OBJECT == value_borderColor_value_type) && (TypeChecker.isResource(value_borderColor_value, false, false, false, false, false)))) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_borderColor_value_0  = value_borderColor_value as ResourceColor
                 let value_borderColor_value_0_type : int32 = RuntimeType.UNDEFINED
@@ -19273,7 +19273,7 @@ export class Serializer extends SerializerBase {
             const value_borderColor_value  = value_borderColor!
             let value_borderColor_value_type : int32 = RuntimeType.UNDEFINED
             value_borderColor_value_type = runtimeType(value_borderColor_value)
-            if ((TypeChecker.isColor(value_borderColor_value)) || (RuntimeType.NUMBER == value_borderColor_value_type) || (RuntimeType.STRING == value_borderColor_value_type) || (RuntimeType.OBJECT == value_borderColor_value_type)) {
+            if ((TypeChecker.isColor(value_borderColor_value)) || (RuntimeType.NUMBER == value_borderColor_value_type) || (RuntimeType.STRING == value_borderColor_value_type) || ((RuntimeType.OBJECT == value_borderColor_value_type) && (TypeChecker.isResource(value_borderColor_value, false, false, false, false, false)))) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_borderColor_value_0  = value_borderColor_value as ResourceColor
                 let value_borderColor_value_0_type : int32 = RuntimeType.UNDEFINED
@@ -20426,7 +20426,7 @@ export class Serializer extends SerializerBase {
             const value_borderColor_value  = value_borderColor!
             let value_borderColor_value_type : int32 = RuntimeType.UNDEFINED
             value_borderColor_value_type = runtimeType(value_borderColor_value)
-            if ((TypeChecker.isColor(value_borderColor_value)) || (RuntimeType.NUMBER == value_borderColor_value_type) || (RuntimeType.STRING == value_borderColor_value_type) || (RuntimeType.OBJECT == value_borderColor_value_type)) {
+            if ((TypeChecker.isColor(value_borderColor_value)) || (RuntimeType.NUMBER == value_borderColor_value_type) || (RuntimeType.STRING == value_borderColor_value_type) || ((RuntimeType.OBJECT == value_borderColor_value_type) && (TypeChecker.isResource(value_borderColor_value, false, false, false, false, false)))) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_borderColor_value_0  = value_borderColor_value as ResourceColor
                 let value_borderColor_value_0_type : int32 = RuntimeType.UNDEFINED
