@@ -125,7 +125,7 @@ RefPtr<FrameNode> TextClockTestNG::CreateTextClockParagraph(const TestProperty& 
  * @tc.desc: Test all the properties of textClock.
  * @tc.type: FUNC
  */
-HWTEST_F(TextClockTestNG, TextClockTest001, TestSize.Level1)
+HWTEST_F(TextClockTestNG, TextClockTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Initialize all properties of textClock.
@@ -270,7 +270,7 @@ HWTEST_F(TextClockTestNG, TextClockTest002, TestSize.Level1)
  * @tc.desc: Test event function of textClock.
  * @tc.type: FUNC
  */
-HWTEST_F(TextClockTestNG, TextClockTest003, TestSize.Level1)
+HWTEST_F(TextClockTestNG, TextClockTest003, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create textClock and set event.
@@ -305,7 +305,7 @@ HWTEST_F(TextClockTestNG, TextClockTest003, TestSize.Level1)
  * @tc.desc: Test GetHourWest function of textClock.
  * @tc.type: FUNC
  */
-HWTEST_F(TextClockTestNG, TextClockTest004, TestSize.Level1)
+HWTEST_F(TextClockTestNG, TextClockTest004, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Initialize the format property of textClock.
@@ -360,7 +360,7 @@ HWTEST_F(TextClockTestNG, TextClockTest004, TestSize.Level1)
  * @tc.desc: Test the fuction of parse format.
  * @tc.type: FUNC
  */
-HWTEST_F(TextClockTestNG, TextClockTest005, TestSize.Level1)
+HWTEST_F(TextClockTestNG, TextClockTest005, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Initialize all properties of textClock.
@@ -412,7 +412,7 @@ HWTEST_F(TextClockTestNG, TextClockTest005, TestSize.Level1)
  * @tc.desc: Test the fuction of parse format.
  * @tc.type: FUNC
  */
-HWTEST_F(TextClockTestNG, TextClockTest006, TestSize.Level1)
+HWTEST_F(TextClockTestNG, TextClockTest006, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Initialize all properties of textClock.
@@ -455,7 +455,7 @@ HWTEST_F(TextClockTestNG, TextClockTest006, TestSize.Level1)
  * @tc.desc: Test IsScrollable of textClockAccessibilityProperty.
  * @tc.type: FUNC
  */
-HWTEST_F(TextClockTestNG, TextClockAccessibilityPropertyIsScrollable001, TestSize.Level1)
+HWTEST_F(TextClockTestNG, TextClockAccessibilityPropertyIsScrollable001, TestSize.Level0)
 {
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::TEXTCLOCK_ETS_TAG,
         ViewStackProcessor::GetInstance()->ClaimNodeId(), []() { return AceType::MakeRefPtr<TextClockPattern>(); });
@@ -477,7 +477,7 @@ HWTEST_F(TextClockTestNG, TextClockAccessibilityPropertyIsScrollable001, TestSiz
  * @tc.desc: Test UpdateTextLayoutProperty of TextClockPattern.
  * @tc.type: FUNC
  */
-HWTEST_F(TextClockTestNG, TextClockTest007, TestSize.Level1)
+HWTEST_F(TextClockTestNG, TextClockTest007, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create textClock frameNode.
@@ -522,7 +522,7 @@ HWTEST_F(TextClockTestNG, TextClockTest007, TestSize.Level1)
  * @tc.desc: Test UpdateTextLayoutProperty of TextClockPattern.
  * @tc.type: FUNC
  */
-HWTEST_F(TextClockTestNG, TextClockTest008, TestSize.Level1)
+HWTEST_F(TextClockTestNG, TextClockTest008, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create textClock frameNode.
@@ -739,7 +739,7 @@ HWTEST_F(TextClockTestNG, TextClockTest010, TestSize.Level1)
  * @tc.desc: Test TextClockPattern of TextClock.
  * @tc.type: FUNC
  */
-HWTEST_F(TextClockTestNG, TextClockTest012, TestSize.Level1)
+HWTEST_F(TextClockTestNG, TextClockTest012, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create textClock frameNode.
@@ -849,7 +849,7 @@ HWTEST_F(TextClockTestNG, TextClockTest011, TestSize.Level1)
  * @tc.desc: Test TextClockModelNG of TextClock.
  * @tc.type: FUNC
  */
-HWTEST_F(TextClockTestNG, TextClockTest013, TestSize.Level1)
+HWTEST_F(TextClockTestNG, TextClockTest013, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create textClock and get frameNode.
@@ -889,7 +889,7 @@ HWTEST_F(TextClockTestNG, TextClockTest013, TestSize.Level1)
  * @tc.desc: Test TextClock property.
  * @tc.type: FUNC
  */
-HWTEST_F(TextClockTestNG, TextClockTest014, TestSize.Level1)
+HWTEST_F(TextClockTestNG, TextClockTest014, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Create framenode and Init.
@@ -1084,7 +1084,7 @@ HWTEST_F(TextClockTestNG, TextClockLayoutPropertyTest002, TestSize.Level1)
  * @tc.desc: Test event function of textClock.
  * @tc.type: FUNC
  */
-HWTEST_F(TextClockTestNG, TextClockLayoutPropertyTest003, TestSize.Level1)
+HWTEST_F(TextClockTestNG, TextClockLayoutPropertyTest003, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create textClock and set event.
@@ -1119,7 +1119,7 @@ HWTEST_F(TextClockTestNG, TextClockLayoutPropertyTest003, TestSize.Level1)
  * @tc.desc: Test GetHourWest function of textClock.
  * @tc.type: FUNC
  */
-HWTEST_F(TextClockTestNG, TextClockLayoutPropertyTest004, TestSize.Level1)
+HWTEST_F(TextClockTestNG, TextClockLayoutPropertyTest004, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Initialize the format property of textClock.
@@ -1174,7 +1174,7 @@ HWTEST_F(TextClockTestNG, TextClockLayoutPropertyTest004, TestSize.Level1)
  * @tc.desc: Test the fuction of parse format.
  * @tc.type: FUNC
  */
-HWTEST_F(TextClockTestNG, TextClockLayoutPropertyTest005, TestSize.Level1)
+HWTEST_F(TextClockTestNG, TextClockLayoutPropertyTest005, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Initialize all properties of textClock.
@@ -1226,7 +1226,7 @@ HWTEST_F(TextClockTestNG, TextClockLayoutPropertyTest005, TestSize.Level1)
  * @tc.desc: Test the fuction of parse format.
  * @tc.type: FUNC
  */
-HWTEST_F(TextClockTestNG, TextClockLayoutPropertyTest006, TestSize.Level1)
+HWTEST_F(TextClockTestNG, TextClockLayoutPropertyTest006, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Initialize all properties of textClock.
@@ -1269,7 +1269,7 @@ HWTEST_F(TextClockTestNG, TextClockLayoutPropertyTest006, TestSize.Level1)
  * @tc.desc: Test UpdateTextLayoutProperty of TextClockPattern.
  * @tc.type: FUNC
  */
-HWTEST_F(TextClockTestNG, TextClockLayoutPropertyTest007, TestSize.Level1)
+HWTEST_F(TextClockTestNG, TextClockLayoutPropertyTest007, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create textClock frameNode.
@@ -1314,7 +1314,7 @@ HWTEST_F(TextClockTestNG, TextClockLayoutPropertyTest007, TestSize.Level1)
  * @tc.desc: Test UpdateTextLayoutProperty of TextClockPattern.
  * @tc.type: FUNC
  */
-HWTEST_F(TextClockTestNG, TextClockLayoutPropertyTest008, TestSize.Level1)
+HWTEST_F(TextClockTestNG, TextClockLayoutPropertyTest008, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create textClock frameNode.
@@ -1376,7 +1376,7 @@ HWTEST_F(TextClockTestNG, TextClockLayoutPropertyTest008, TestSize.Level1)
  * @tc.desc: Test UpdateTextLayoutProperty of TextClockPattern.
  * @tc.type: FUNC
  */
-HWTEST_F(TextClockTestNG, TextClockLayoutPropertyTest009, TestSize.Level1)
+HWTEST_F(TextClockTestNG, TextClockLayoutPropertyTest009, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create textClock frameNode.
@@ -1436,7 +1436,7 @@ HWTEST_F(TextClockTestNG, TextClockLayoutPropertyTest009, TestSize.Level1)
  * @tc.desc: Test UpdateTextLayoutProperty of TextClockPattern.
  * @tc.type: FUNC
  */
- HWTEST_F(TextClockTestNG, TextClockLayoutPropertyTest010, TestSize.Level1)
+ HWTEST_F(TextClockTestNG, TextClockLayoutPropertyTest010, TestSize.Level0)
  {
     /**
      * @tc.steps: step1. create textClock frameNode.
@@ -1488,7 +1488,7 @@ HWTEST_F(TextClockTestNG, TextClockLayoutPropertyTest009, TestSize.Level1)
  * @tc.desc: Test TextClockLayoutAlgorithm of TextClock.
  * @tc.type: FUNC
  */
-HWTEST_F(TextClockTestNG, TextClockLayoutAlgorithm001, TestSize.Level1)
+HWTEST_F(TextClockTestNG, TextClockLayoutAlgorithm001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create textClock frameNode.
@@ -1546,7 +1546,7 @@ HWTEST_F(TextClockTestNG, TextClockLayoutAlgorithm001, TestSize.Level1)
  * @tc.desc: Test TextClockLayoutAlgorithm of TextClock.
  * @tc.type: FUNC
  */
-HWTEST_F(TextClockTestNG, TextClockLayoutAlgorithm002, TestSize.Level1)
+HWTEST_F(TextClockTestNG, TextClockLayoutAlgorithm002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create textClock frameNode.
@@ -1604,7 +1604,7 @@ HWTEST_F(TextClockTestNG, TextClockLayoutAlgorithm002, TestSize.Level1)
  * @tc.desc: Test UpdateTextLayoutProperty of TextClockPattern.
  * @tc.type: FUNC
  */
-HWTEST_F(TextClockTestNG, GetDateTimeIndex, TestSize.Level1)
+HWTEST_F(TextClockTestNG, GetDateTimeIndex, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create textClock frameNode.
@@ -1640,7 +1640,7 @@ HWTEST_F(TextClockTestNG, GetDateTimeIndex, TestSize.Level1)
  * @tc.desc: Test UpdateTextLayoutProperty of TextClockPattern.
  * @tc.type: FUNC
  */
-HWTEST_F(TextClockTestNG, GetAmPm, TestSize.Level1)
+HWTEST_F(TextClockTestNG, GetAmPm, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create textClock frameNode.
@@ -1673,7 +1673,7 @@ HWTEST_F(TextClockTestNG, GetAmPm, TestSize.Level1)
  * @tc.desc: Test UpdateTextLayoutProperty of TextClockPattern.
  * @tc.type: FUNC
  */
-HWTEST_F(TextClockTestNG, AddZeroPrefix, TestSize.Level1)
+HWTEST_F(TextClockTestNG, AddZeroPrefix, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create textClock frameNode.
@@ -1707,7 +1707,7 @@ HWTEST_F(TextClockTestNG, AddZeroPrefix, TestSize.Level1)
  * @tc.desc: Test UpdateTextLayoutProperty of TextClockPattern.
  * @tc.type: FUNC
  */
-HWTEST_F(TextClockTestNG, RemoveZeroPrefix, TestSize.Level1)
+HWTEST_F(TextClockTestNG, RemoveZeroPrefix, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create textClock frameNode.
@@ -1740,7 +1740,7 @@ HWTEST_F(TextClockTestNG, RemoveZeroPrefix, TestSize.Level1)
  * @tc.desc: Test UpdateTextLayoutProperty of TextClockPattern.
  * @tc.type: FUNC
  */
-HWTEST_F(TextClockTestNG, FireBuilder, TestSize.Level1)
+HWTEST_F(TextClockTestNG, FireBuilder, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create textClock frameNode.
@@ -1773,7 +1773,7 @@ HWTEST_F(TextClockTestNG, FireBuilder, TestSize.Level1)
  * @tc.desc: Test UpdateTextLayoutProperty of TextClockPattern.
  * @tc.type: FUNC
  */
-HWTEST_F(TextClockTestNG, BuildContentModifierNode, TestSize.Level1)
+HWTEST_F(TextClockTestNG, BuildContentModifierNode, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create textClock frameNode.
@@ -1803,7 +1803,7 @@ HWTEST_F(TextClockTestNG, BuildContentModifierNode, TestSize.Level1)
  * @tc.desc: Test ResetTextColor and ResetFontColor of TextClock.
  * @tc.type: FUNC
  */
-HWTEST_F(TextClockTestNG, TextClockTest015, TestSize.Level1)
+HWTEST_F(TextClockTestNG, TextClockTest015, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create textClock and get frameNode.
@@ -1840,7 +1840,7 @@ HWTEST_F(TextClockTestNG, TextClockTest015, TestSize.Level1)
  * @tc.desc: Test OnThemeScopeUpdate of TextClockPattern.
  * @tc.type: FUNC
  */
-HWTEST_F(TextClockTestNG, TextClockTest016, TestSize.Level1)
+HWTEST_F(TextClockTestNG, TextClockTest016, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create textClock frameNode.
@@ -1886,7 +1886,7 @@ HWTEST_F(TextClockTestNG, TextClockTest016, TestSize.Level1)
  * @tc.desc: Test ResetTextColor and ResetFontColor of TextClock.
  * @tc.type: FUNC
  */
-HWTEST_F(TextClockTestNG, TextClockTest017, TestSize.Level1)
+HWTEST_F(TextClockTestNG, TextClockTest017, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create textClock and get frameNode.
@@ -1922,7 +1922,7 @@ HWTEST_F(TextClockTestNG, TextClockTest017, TestSize.Level1)
  * @tc.desc: Test OnThemeScopeUpdate of TextClockPattern.
  * @tc.type: FUNC
  */
-HWTEST_F(TextClockTestNG, TextClockTest018, TestSize.Level1)
+HWTEST_F(TextClockTestNG, TextClockTest018, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create textClock frameNode.
@@ -1968,7 +1968,7 @@ HWTEST_F(TextClockTestNG, TextClockTest018, TestSize.Level1)
  * @tc.desc: Test RemoveResObjByKey
  * @tc.type: FUNC
  */
-HWTEST_F(TextClockTestNG, TextClockTest019, TestSize.Level1)
+HWTEST_F(TextClockTestNG, TextClockTest019, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create textClock frameNode.
