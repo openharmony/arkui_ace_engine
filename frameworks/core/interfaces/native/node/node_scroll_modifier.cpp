@@ -1340,5 +1340,29 @@ void ResetOnScrollFrameBeginCallBack(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     ScrollModelNG::SetOnScrollFrameBegin(frameNode, nullptr);
 }
+
+void SetOnWillStopDragging(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onWillStopDragging = [extraParam](const CalcDimension& velocity) -> void {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        bool usePx = NodeModel::UsePXUnit(reinterpret_cast<ArkUI_Node*>(extraParam));
+        event.componentAsyncEvent.subKind = ON_SCROLL_WILL_STOP_DRAGGING;
+        event.componentAsyncEvent.data[0].f32 =
+            usePx ? static_cast<float>(velocity.ConvertToPx()) : static_cast<float>(velocity.Value());
+        SendArkUISyncEvent(&event);
+    };
+    ScrollableModelNG::SetOnWillStopDragging(frameNode, std::move(onWillStopDragging));
+}
+
+void ResetOnWillStopDragging(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollableModelNG::SetOnWillStopDragging(frameNode, nullptr);
+}
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG
