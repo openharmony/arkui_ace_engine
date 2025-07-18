@@ -23,7 +23,6 @@ import { UserView, UserViewBuilder, EntryPoint } from "./UserView"
 import { ClickEvent, ClickEventInternal } from "./component"
 import { checkEvents, setCustomEventsChecker } from "./component/Events"
 import { checkArkoalaCallbacks } from "./component/peers/CallbacksChecker"
-import { setUIDetachedRootCreator } from "./component/peers/CallbackTransformer"
 import { enterForeignContext, leaveForeignContext } from "./handwritten"
 import { wrapSystemCallback, KUint8ArrayPtr } from "@koalaui/interop"
 import { deserializeAndCallCallback } from "./component/peers/CallbackDeserializeCall"
@@ -114,7 +113,6 @@ export function createUiDetachedRoot(
     let uicontext = getUicontextByInstanceId(instanceId);
     return uicontext.getDetachedRootEntryManager().createUiDetachedRoot(peerFactory, builder);
 }
-setUIDetachedRootCreator(createUiDetachedRoot)
 
 export function destroyUiDetachedRoot(ptr: KPointer, instanceId: int32): boolean {
     if (instanceId < 0) {
@@ -162,7 +160,7 @@ function drawCurrentCrash(crash: Object) {
 }
 
 function registerSyncCallbackProcessor() {
-    wrapSystemCallback(1, (buff:KSerializerBuffer, len:int32) => {
+    wrapSystemCallback(1, (buff: KSerializerBuffer, len: int32) => {
         deserializeAndCallCallback(new Deserializer(buff, len))
         return 0
     })
@@ -331,7 +329,7 @@ export class Application {
         this.computeRoot()
         let detachedRoots = getDetachedRootsByInstanceId(this.instanceId);
         for (const detachedRoot of detachedRoots.values()) {
-            detachedRoot.entry.value
+            detachedRoot.compute()
         }
         updateLazyItems()
         flushBuilderRootNode()
@@ -351,7 +349,7 @@ export class Application {
                 try {
                     root.value
                     for (const detachedRoot of detachedRoots.values()) {
-                        detachedRoot.entry.value
+                        detachedRoot.compute()
                     }
                 } catch (error) {
                     InteropNativeModule._NativeLog('has error in partialUpdates')

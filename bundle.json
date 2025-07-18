@@ -217,6 +217,7 @@
                             "native_node.h",
                             "native_interface.h",
                             "native_type.h",
+                            "native_node_ani.h",
                             "native_node_napi.h"
                         ]
                     },

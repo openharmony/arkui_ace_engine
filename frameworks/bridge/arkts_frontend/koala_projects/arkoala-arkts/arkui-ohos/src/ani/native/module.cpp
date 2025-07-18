@@ -589,6 +589,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::OnLayoutInnerLayout)
         },
         ani_native_function {
+            "_SetParallelScoped",
+            "Z:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetParallelScoped)
+        },
+        ani_native_function {
             "_ConditionScopeNode_Construct",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::ConstructConditionScope)

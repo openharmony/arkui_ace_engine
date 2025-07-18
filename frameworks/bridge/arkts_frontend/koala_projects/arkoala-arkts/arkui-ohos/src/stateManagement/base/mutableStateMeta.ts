@@ -14,7 +14,7 @@
  */
 
 import { int32 } from '@koalaui/common';
-import { MutableState } from '@koalaui/runtime';
+import { MutableState, StateImpl } from '@koalaui/runtime';
 import { IMutableStateMeta, IMutableKeyedStateMeta } from '../decorator';
 import { RenderIdType } from '../decorator';
 import { ObserveSingleton } from './observeSingleton';
@@ -60,11 +60,18 @@ export class MutableStateMeta extends MutableStateMetaBase implements IMutableSt
         if (this.bindings_) {
             // for Monitor & Computed
         }
-        this.__metaDependency!.value += 1;
+        if (this.shouldFireChange()) {
+            this.__metaDependency!.value += 1;
+        }
     }
 
     clearBinding(id: RenderIdType): void {
         this.bindings_?.delete(id);
+    }
+
+    shouldFireChange(): boolean {
+        const dependency = (this.__metaDependency as StateImpl<int32>).dependencies;
+        return !!(dependency && !dependency.empty);
     }
 }
 

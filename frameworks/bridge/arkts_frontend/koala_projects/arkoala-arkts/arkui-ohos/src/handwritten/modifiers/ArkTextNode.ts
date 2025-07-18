@@ -24,7 +24,6 @@ import { Resource } from "global.resource"
 import { runtimeType, RuntimeType,  } from "@koalaui/interop"
 import { TextOptions } from "../../component/text";
 export class ArkTextNode extends ArkBaseNode  implements TextAttribute  {
-    
     constructParam(...params: Object[]): this {
         if (params.length > 2) {
             throw new Error('more than 2 parameters')

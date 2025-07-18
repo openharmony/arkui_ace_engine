@@ -172,16 +172,12 @@ void ContentModifier0Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CheckboxModelNG::SetContentModifier0(frameNode, convValue);
 }
 void ContentModifier1Impl(Ark_NativePointer node,
                           const Opt_ContentModifier* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CheckboxModelNG::SetContentModifier1(frameNode, convValue);
 }
 void _onChangeEvent_selectImpl(Ark_NativePointer node,
                                const Callback_Opt_Boolean_Void* callback)
