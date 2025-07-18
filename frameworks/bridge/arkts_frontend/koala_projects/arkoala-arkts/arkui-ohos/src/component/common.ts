@@ -6926,7 +6926,7 @@ export class ArkScrollableCommonMethodPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._ScrollableCommonMethod_edgeEffect(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    fadingEdgeAttribute(enabled: boolean | undefined, options?: FadingEdgeOptions): void {
+    fadingEdgeAttribute(enabled: boolean | undefined, options?: FadingEdgeOptions | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let enabled_type : int32 = RuntimeType.UNDEFINED
         enabled_type = runtimeType(enabled)
@@ -9142,7 +9142,7 @@ export interface ScrollableCommonMethod extends CommonMethod {
     digitalCrownSensitivity(value: CrownSensitivity | undefined): this
     backToTop(value: boolean | undefined): this
     edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions | undefined): this
-    fadingEdge(enabled: boolean | undefined, options?: FadingEdgeOptions): this
+    fadingEdge(enabled: boolean | undefined, options?: FadingEdgeOptions | undefined): this
 }
 export class ArkScrollableCommonMethodStyle extends ArkCommonMethodStyle implements ScrollableCommonMethod {
     public scrollBar(value: BarState | undefined): this {
@@ -9193,7 +9193,7 @@ export class ArkScrollableCommonMethodStyle extends ArkCommonMethodStyle impleme
     public edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions | undefined): this {
         return this
     }
-    public fadingEdge(enabled: boolean | undefined, options?: FadingEdgeOptions): this {
+    public fadingEdge(enabled: boolean | undefined, options?: FadingEdgeOptions | undefined): this {
         return this
     }
 }
@@ -11648,10 +11648,10 @@ export class ArkScrollableCommonMethodComponent extends ArkCommonMethodComponent
         }
         return this
     }
-    public fadingEdge(enabled: boolean | undefined, options?: FadingEdgeOptions): this {
+    public fadingEdge(enabled: boolean | undefined, options?: FadingEdgeOptions | undefined): this {
         if (this.checkPriority("fadingEdge")) {
             const enabled_casted = enabled as (boolean | undefined)
-            const options_casted = options as (FadingEdgeOptions)
+            const options_casted = options as (FadingEdgeOptions | undefined)
             this.getPeer()?.fadingEdgeAttribute(enabled_casted, options_casted)
             return this
         }
