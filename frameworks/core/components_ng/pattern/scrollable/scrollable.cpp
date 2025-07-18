@@ -208,7 +208,7 @@ void Scrollable::SetOnActionExtUpdate()
     auto actionExtUpdate = [weakScroll = AceType::WeakClaim(this)](const GestureEvent& info) {
         auto scroll = weakScroll.Upgrade();
         CHECK_NULL_VOID(scroll);
-        scroll->HandleExtDragUpdate(info);
+        scroll->HandleExtDragUpdate();
     };
     panRecognizerNG_->SetOnActionExtUpdate(actionExtUpdate);
 }

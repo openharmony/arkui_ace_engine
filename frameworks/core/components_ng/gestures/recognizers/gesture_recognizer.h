@@ -195,7 +195,7 @@ public:
 
     void SetOnActionExtUpdate(const GestureEventFunc& onActionExtUpdate)
     {
-        OnActionExtUpdate_ = std::make_unique<GestureEventFunc>(onActionExtUpdate);
+        onActionExtUpdate_ = std::make_unique<GestureEventFunc>(onActionExtUpdate);
     }
 
     void SetOnActionUpdate(const GestureEventFunc& onActionUpdate)
@@ -508,7 +508,7 @@ protected:
     std::unique_ptr<GestureEventFunc> onAction_;
     std::unique_ptr<GestureEventFunc> onActionStart_;
     std::unique_ptr<GestureEventFunc> onActionUpdate_;
-    std::unique_ptr<GestureEventFunc> OnActionExtUpdate_;
+    std::unique_ptr<GestureEventFunc> onActionExtUpdate_;
     std::unique_ptr<GestureEventFunc> onActionEnd_;
     std::unique_ptr<GestureEventFunc> onActionCancel_;
     // triggered when the recongnizer is rejected

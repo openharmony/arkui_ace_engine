@@ -566,7 +566,7 @@ void PanRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
 bool PanRecognizer::HandlePanExtAccept()
 {
     if (onActionExtUpdate_ && *onActionExtUpdate_) {
-        auto callbackFuncton = *onActionExtUpdate_;
+        auto callbackFunction = *onActionExtUpdate_;
         GestureEvent info = GetGestureEventInfo();
         callbackFunction(info);
     }

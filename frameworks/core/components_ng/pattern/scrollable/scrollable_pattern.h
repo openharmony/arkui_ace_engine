@@ -1142,7 +1142,7 @@ private:
     ModalSheetCoordinationMode CoordinateWithSheet(double& offset, int32_t source, bool isAtTop);
     bool NeedCoordinateScrollWithNavigation(double offset, int32_t source, const OverScrollOffset& overOffsets);
     void SetUiDvsyncSwitch(bool on);
-    void SetUiDvsyncCommandTime(uint64_t time);
+    void SetUiDVSyncCommandTime(uint64_t time);
     void SetNestedScrolling(bool nestedScrolling);
     void InitRatio();
     void SetOnHiddenChangeForParent();

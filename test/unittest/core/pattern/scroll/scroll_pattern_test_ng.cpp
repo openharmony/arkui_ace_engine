@@ -1763,25 +1763,4 @@ HWTEST_F(ScrollPatternTestNg, ValidateOffset16, TestSize.Level1)
     scrollPattern->ValidateOffset(11.0, 2.0f);
     EXPECT_EQ(scrollPattern->currentOffset_, 1.0f);
 }
-
-/**
- * @tc.name: ValidateOffset16
- * @tc.desc: Test ValidateOffset
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollPatternTestNg, ValidateOffset16, TestSize.Level1)
-{
-    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
-    ASSERT_NE(scrollPattern, nullptr);
-    float scrollableDistance = 2.0f;
-    scrollPattern->scrollableDistance_ = scrollableDistance;
-    EdgeEffect edgeEffect = EdgeEffect::FADE;
-    scrollPattern->edgeEffect_ = edgeEffect;
-    FlexDirection direction = FlexDirection::ROW_REVERSE;
-    scrollPattern->SetDirection(direction);
-    scrollPattern->axis_ = Axis::HORIZONTAL;
-    scrollPattern->currentOffset_ = 1.0f;
-    scrollPattern->ValidateOffset(11.0, 2.0f);
-    EXPECT_EQ(scrollPattern->currentOffset_, 1.0f);
-}
 } // namespace OHOS::Ace::NG

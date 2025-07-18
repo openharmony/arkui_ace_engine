@@ -624,7 +624,7 @@ void ScrollablePattern::OnTouchTestDone(const std::shared_ptr<BaseGestureEvent>&
     }
 }
 
-void ScrollablePattern::SetHandleExtScrollCallback(const RefPtr<Scrollable>& srollable)
+void ScrollablePattern::SetHandleExtScrollCallback(const RefPtr<Scrollable>& scrollable)
 {
     // move HandleScroll and HandleOverScroll to ScrollablePattern by setting callbacks to scrollable
     CHECK_NULL_VOID(scrollable);
@@ -2543,9 +2543,9 @@ float ScrollablePattern::GetDVSyncOffset()
         return 0;
     }
     uint64_t currentVsync = context->GetVsyncTime();
-    uint64_t currentTime = GetSysTimeStamp();
+    uint64_t currentTime = GetSysTimestamp();
     bool needUpdateCommandTime = false;
-    if (currentVsync >= offsets_.back().first && currentVsync -currentTime > DVSYNC_DELAY_TIME_BASE) {
+    if (currentVsync >= offsets_.back().first && currentVsync - currentTime > DVSYNC_DELAY_TIME_BASE) {
         currentTime += DVSYNC_OFFSET_TIME;
         needUpdateCommandTime = true;
     }
@@ -2561,7 +2561,7 @@ float ScrollablePattern::GetDVSyncOffset()
                 commandTime = offsets_.front().first;
             }
         }
-        offset_.pop();
+        offsets_.pop();
     }
     if (commandTime == 0) {
         commandTime = currentTime;
