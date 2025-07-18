@@ -26,6 +26,7 @@ koalaui_common_files = [
   "src/uniqueId.ts",
   "src/index.ts",
   "src/Point.ts",
+  "src/Utils.ts",
   "src/Matrix44.ts",
   "src/LifecycleEvent.ts",
   "src/sha1.ts",
