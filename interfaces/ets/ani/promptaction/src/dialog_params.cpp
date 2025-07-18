@@ -455,7 +455,9 @@ bool GetShowDialogOptions(ani_env* env, ani_object object, OHOS::Ace::DialogProp
     GetFunctionParam(env, object, "onDidDisappear", dialogProps.onDidDisappear);
     GetFunctionParam(env, object, "onWillAppear", dialogProps.onWillAppear);
     GetFunctionParam(env, object, "onWillDisappear", dialogProps.onWillDisappear);
-    GetLevelMode(env, object, dialogProps.dialogLevelMode);
+    if (!dialogProps.isShowInSubWindow) {
+        GetLevelMode(env, object, dialogProps.dialogLevelMode);
+    }
     double levelUniqueId = -1;
     GetDoubleParam(env, object, "levelUniqueId", levelUniqueId);
     dialogProps.dialogLevelUniqueId = static_cast<int32_t>(levelUniqueId);
@@ -681,7 +683,9 @@ bool GetActionMenuOptions(ani_env* env, ani_object object, OHOS::Ace::DialogProp
     GetActionMenuButtons(env, object, dialogProps.buttons);
     GetBoolParam(env, object, "showInSubWindow", dialogProps.isShowInSubWindow);
     GetBoolParam(env, object, "isModal", dialogProps.isModal);
-    GetLevelMode(env, object, dialogProps.dialogLevelMode);
+    if (!dialogProps.isShowInSubWindow) {
+        GetLevelMode(env, object, dialogProps.dialogLevelMode);
+    }
     double levelUniqueId = -1;
     GetDoubleParam(env, object, "levelUniqueId", levelUniqueId);
     dialogProps.dialogLevelUniqueId = static_cast<int32_t>(levelUniqueId);
@@ -931,7 +935,9 @@ bool GetBaseDialogOptions(ani_env* env, ani_object object, OHOS::Ace::DialogProp
     GetBackgroundBlurStyleOptions(env, object, dialogProps.blurStyleOption);
     GetBackgroundEffectOptions(env, object, dialogProps.effectOption);
     GetKeyboardAvoidDistance(env, object, dialogProps.keyboardAvoidDistance);
-    GetLevelMode(env, object, dialogProps.dialogLevelMode);
+    if (!dialogProps.isShowInSubWindow) {
+        GetLevelMode(env, object, dialogProps.dialogLevelMode);
+    }
     double levelUniqueId = -1;
     GetDoubleParam(env, object, "levelUniqueId", levelUniqueId);
     dialogProps.dialogLevelUniqueId = static_cast<int32_t>(levelUniqueId);
