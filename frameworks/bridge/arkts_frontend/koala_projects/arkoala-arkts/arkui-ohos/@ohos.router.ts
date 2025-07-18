@@ -25,6 +25,10 @@ namespace router {
         params: Object;
     }
 
+    export interface EnableAlertOptions {
+        message: string;
+    }
+
     export function error(prefix: string, e: Object|null|undefined): string {
         if (e instanceof Error) {
             return `${prefix}: ${e} ${e.stack}`

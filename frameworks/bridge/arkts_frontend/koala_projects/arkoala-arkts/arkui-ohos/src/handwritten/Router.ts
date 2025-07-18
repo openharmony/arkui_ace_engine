@@ -130,6 +130,7 @@ class RouterImpl implements Router {
     private peerNodeList = new Array<KPointer>
     public readonly visiblePages = arrayState<VisiblePage>()
     private showingPageIndex : number = 0
+    private entryPage: VisiblePage | undefined = undefined;
     private rootState: Array<ComputableState<IncrementalNode>> = new Array<ComputableState<IncrementalNode>>()
 
     constructor(moduleName: string) {
@@ -182,8 +183,11 @@ class RouterImpl implements Router {
     }
 
     push(options: router.RouterOptions): void {
-        let className = this.getClassName(options.url)
-        let entryObject = this.RunPage(className)
+        if (options.url === '/') {
+            options.url = this.entryPage?.url!;
+        }
+        let className = this.getClassName(options.url);
+        let entryObject = this.RunPage(className);
         if (entryObject) {
             let manager = GlobalStateManager.instance
             let stateNode = manager.updatableNode<IncrementalNode>(new IncrementalNode(), (context: StateContext) => {
@@ -224,8 +228,11 @@ class RouterImpl implements Router {
     }
 
     replace(options: router.RouterOptions): void {
-        let className = this.getClassName(options.url)
-        let entryObject = this.RunPage(className)
+        if (options.url === '/') {
+            options.url = this.entryPage?.url!;
+        }
+        let className = this.getClassName(options.url);
+        let entryObject = this.RunPage(className);
         if (entryObject) {
             let manager = GlobalStateManager.instance
             let stateNode = manager.updatableNode<IncrementalNode>(new IncrementalNode(), (context: StateContext) => {
@@ -324,10 +331,10 @@ class RouterImpl implements Router {
     }
 
     getStateByIndex(index: number): router.RouterState | undefined {
-        if (index > this.showingPageIndex) {
+        if (index > this.showingPageIndex + 1 || index <= 0) {
             return undefined
         }
-        let page = this.visiblePages.at(index)
+        let page = this.visiblePages.at(index - 1);
         let state: router.RouterState = {
             index: index,
             name: page.url,
@@ -386,6 +393,7 @@ class RouterImpl implements Router {
         this.peerNodeList.splice(this.peerNodeList.length, 0, pageNode)
 
         let newPage = new VisiblePage(builder, options.url, this.getPathInfo(options.url), options.params)
+        this.entryPage = newPage;
         this.visiblePages.splice(0, 0, newPage)
     }
 }

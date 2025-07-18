@@ -157,12 +157,9 @@ public:
 
     void UpdateState(Frontend::State state) override {}
 
-    bool OnBackPressed() override
-    {
-        return false;
-    }
-    void OnShow() override {}
-    void OnHide() override {}
+    bool OnBackPressed() override;
+    void OnShow() override;
+    void OnHide() override;
     void OnConfigurationUpdated(const std::string& data) override {
         OnMediaQueryUpdate();
     }
