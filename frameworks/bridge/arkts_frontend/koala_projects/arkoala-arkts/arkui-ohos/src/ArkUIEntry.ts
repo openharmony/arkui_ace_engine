@@ -36,6 +36,7 @@ import { createStateManager } from "@koalaui/runtime"
 import { UIContextImpl, ContextRecord, DetachedRootEntryManager, DetachedRootEntry } from "arkui/handwritten/UIContextImpl"
 import { UIContextUtil } from "arkui/handwritten/UIContextUtil"
 import { flushBuilderRootNode } from "./BuilderNode"
+import { ObserveSingleton } from './stateManagement/base/observeSingleton';
 
 setCustomEventsChecker(checkArkoalaCallbacks)
 
@@ -303,9 +304,11 @@ export class Application {
         // NativeModule._NativeLog("ARKTS: updateState")
         let uiContextRouter = this.uiContext!.getRouter();
         let rootState = uiContextRouter.getStateRoot();
+        ObserveSingleton.instance.updateDirty();
         this.updateStates(this.manager!, rootState)
         while (StateUpdateLoop.len) {
             StateUpdateLoop.consume();
+            ObserveSingleton.instance.updateDirty();
             this.updateStates(this.manager!, rootState)
         }
         // Here we request to draw a frame and call custom components callbacks.
