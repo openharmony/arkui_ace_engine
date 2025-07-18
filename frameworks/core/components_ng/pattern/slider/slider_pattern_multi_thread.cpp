@@ -31,7 +31,6 @@ void SliderPattern::UpdateValueMultiThread(const RefPtr<FrameNode>& frameNode)
 
 void SliderPattern::OnAttachToFrameNodeMultiThread()
 {
-    InitHapticController();
 }
 
 void SliderPattern::OnAttachToMainTreeMultiThread()
