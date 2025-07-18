@@ -24,7 +24,7 @@ class MeasureLayoutParam;
 
 #ifdef ACE_STATIC
 class ACE_FORCE_EXPORT MeasureLayoutChild {
-#else 
+#else
 class MeasureLayoutChild {
 #endif
 public:
@@ -44,7 +44,7 @@ private:
 
 #ifdef ACE_STATIC
 class ACE_FORCE_EXPORT MeasureLayoutParam : public AceType {
-#else 
+#else
 class MeasureLayoutParam : public AceType {
 #endif
     DECLARE_ACE_TYPE(MeasureLayoutParam, AceType)

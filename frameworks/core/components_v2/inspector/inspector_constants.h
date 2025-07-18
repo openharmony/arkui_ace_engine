@@ -309,7 +309,7 @@ ACE_EXPORT extern const char RECYCLE_VIEW_ETS_TAG[];
 // common
 #ifdef ACE_STATIC
 ACE_FORCE_EXPORT extern const char COMMON_VIEW_ETS_TAG[];
-#else 
+#else
 ACE_EXPORT extern const char COMMON_VIEW_ETS_TAG[];
 #endif
 // option
