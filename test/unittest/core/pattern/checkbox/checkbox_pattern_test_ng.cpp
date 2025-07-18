@@ -1632,6 +1632,55 @@ HWTEST_F(CheckBoxPatternTestNG, CheckBoxPatternTest045, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CheckBoxPatternTest046
+ * @tc.desc: Test CheckBox OnDetachFromFrameNodeMultiThread.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxPatternTestNG, CheckBoxPatternTest046, TestSize.Level1)
+{
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnDetachFromFrameNodeMultiThread();
+}
+
+/**
+ * @tc.name: CheckBoxPatternTest047
+ * @tc.desc: Test CheckBox OnDetachFromMainTree.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxPatternTestNG, CheckBoxPatternTest047, TestSize.Level1)
+{
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnDetachFromMainTree();
+}
+
+/**
+ * @tc.name: CheckBoxPatternTest048
+ * @tc.desc: Test CheckBox OnDetachFromMainTreeMultiThread.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxPatternTestNG, CheckBoxPatternTest048, TestSize.Level1)
+{
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnDetachFromMainTreeMultiThread(frameNode);
+}
+
+/**
  * @tc.name: InitDefaultMarginTest001
  * @tc.desc: Test Checkbox InitDefaultMargin.
  * @tc.type: FUNC

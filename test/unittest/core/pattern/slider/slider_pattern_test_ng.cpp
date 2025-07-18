@@ -2416,6 +2416,48 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest035, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SliderPatternTest036
+ * @tc.desc: Test Slider OnDetachFromFrameNodeMultiThread.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderPatternTest036, TestSize.Level1)
+{
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::SLIDER_ETS_TAG, -1, AceType::MakeRefPtr<SliderPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto sliderPattern = frameNode->GetPattern<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    sliderPattern->OnDetachFromFrameNodeMultiThread();
+}
+
+/**
+ * @tc.name: SliderPatternTest037
+ * @tc.desc: Test Slider OnDetachFromMainTree.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderPatternTest037, TestSize.Level1)
+{
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::SLIDER_ETS_TAG, -1, AceType::MakeRefPtr<SliderPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto sliderPattern = frameNode->GetPattern<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    sliderPattern->OnDetachFromMainTree();
+}
+
+/**
+ * @tc.name: SliderPatternTest038
+ * @tc.desc: Test Slider OnDetachFromMainTreeMultiThread.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderPatternTest038, TestSize.Level1)
+{
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::SLIDER_ETS_TAG, -1, AceType::MakeRefPtr<SliderPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto sliderPattern = frameNode->GetPattern<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    sliderPattern->OnDetachFromMainTreeMultiThread(frameNode);
+}
+
+/**
  * @tc.name: OnColorConfigurationUpdate001
  * @tc.desc: test OnColorConfigurationUpdate.
  * @tc.type: FUNC
