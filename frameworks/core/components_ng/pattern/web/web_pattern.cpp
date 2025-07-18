@@ -8058,6 +8058,11 @@ void WebPattern::AdjustRotationRenderFit(WindowSizeChangeReason type)
     if (type != WindowSizeChangeReason::ROTATION) {
         return;
     }
+    if (!isAttachedToMainTree_ || !isVisible_) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::AdjustRotationRenderFit not support");
+        return;
+    }
+
     if (delegate_) {
         delegate_->MaximizeResize();
     }
@@ -8065,7 +8070,7 @@ void WebPattern::AdjustRotationRenderFit(WindowSizeChangeReason type)
     bool isNwebEx = delegate_->IsNWebEx();
     TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::AdjustRotationRenderFit, isNwebEx: %{public}d", isNwebEx);
     if (isNwebEx && SystemProperties::GetDeviceType() == DeviceType::TWO_IN_ONE &&
-        isVisible_ && renderMode_ == RenderMode::ASYNC_RENDER) {
+        renderMode_ == RenderMode::ASYNC_RENDER) {
         isRotating_ = true;
         TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::AdjustRotationRenderFit, webId: %{public}d", GetWebId());
         if (renderContextForSurface_) {
