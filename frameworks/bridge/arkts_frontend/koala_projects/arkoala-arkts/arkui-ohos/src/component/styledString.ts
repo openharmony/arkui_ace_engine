@@ -789,15 +789,7 @@ export class ParagraphStyle implements MaterializedBase {
         return retval
     }
     constructor(value?: ParagraphStyleInterface) {
-        const ctorPtr : KPointer = ParagraphStyle.ctor_paragraphstyle(value)
-        this.peer = new Finalizable(ctorPtr, ParagraphStyle.getFinalizer())
-        this.textAlign = this.getTextAlign()
-        this.textIndent = this.getTextIndent()
-        this.maxLines = this.getMaxLines()
-        this.overflow = this.getOverflow()
-        this.wordBreak = this.getWordBreak()
-        this.leadingMargin = this.getLeadingMargin()
-        this.paragraphSpacing = this.getParagraphSpacing()
+        hookStyledStringConstructor(this, value)
     }
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._ParagraphStyle_getFinalizer()
@@ -818,7 +810,7 @@ export class ParagraphStyle implements MaterializedBase {
         return this.getWordBreak_serialize()
     }
     public getLeadingMargin(): number | LeadingMarginPlaceholder | undefined {
-        return this.getLeadingMargin_serialize()
+        return hookGetStyledStringLeadingMargin(this)
     }
     public getParagraphSpacing(): number | undefined {
         return this.getParagraphSpacing_serialize()

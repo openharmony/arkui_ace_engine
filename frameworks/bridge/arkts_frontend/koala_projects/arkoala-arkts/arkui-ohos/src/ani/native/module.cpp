@@ -24,6 +24,7 @@
 #include "lazy_for_each_module.h"
 #include "drag_and_drop/native_drag_drop_global.h"
 #include "dragController/drag_controller_module.h"
+#include "styled_string/styled_string_module.h"
 #include "image_span/image_span_module.h"
 #include "image/image_module.h"
 #include "list/list_children_main_size_module.h"
@@ -471,6 +472,16 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_DragController_notifyDragStartReques",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::ANIDragActionNotifyDragStartReques)
+        },
+        ani_native_function {
+            "_StyledString_SetPixelMap",
+            "JL@ohos/multimedia/image/image/PixelMap;:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::StyledStringModule::SetPixelMap)
+        },
+        ani_native_function {
+            "_StyledString_GetPixelMap",
+            "J:L@ohos/multimedia/image/image/PixelMap;",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::StyledStringModule::GetPixelMap)
         },
         ani_native_function {
             "_ImageSpan_Set_PixelMap",

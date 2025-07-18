@@ -150,6 +150,10 @@ export class ArkUIAniModule {
     native static _DeleteViewStackProcessor(ptr: KPointer): void
     
     native static _BackgroundImage_PixelMap(ptr: KPointer, pixelmap: image.PixelMap, repeat: KInt): void
+    // for StyledString
+    native static _StyledString_SetPixelMap(peerPtr: KPointer, pixelmap: image.PixelMap): void
+    native static _StyledString_GetPixelMap(peerPtr: KPointer): image.PixelMap
+
     // for ImageSpan
     native static _ImageSpan_Set_PixelMap(ptr: KPointer, pixelmap: image.PixelMap): void
     native static _ImageSpan_SetAlt_PixelMap(ptr: KPointer, pixelmap: image.PixelMap): void

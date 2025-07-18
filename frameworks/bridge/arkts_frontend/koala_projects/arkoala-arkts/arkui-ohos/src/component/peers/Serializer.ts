@@ -3909,8 +3909,6 @@ export class Serializer extends SerializerBase {
     }
     writeLeadingMarginPlaceholder(value: LeadingMarginPlaceholder): void {
         let valueSerializer : Serializer = this
-        const value_pixelMap  = value.pixelMap
-        valueSerializer.writePixelMap(value_pixelMap)
         const value_size  = value.size
         const value_size_0  = value_size[0]
         valueSerializer.writeLength(value_size_0)
