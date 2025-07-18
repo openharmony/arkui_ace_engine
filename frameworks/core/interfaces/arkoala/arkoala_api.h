@@ -2210,14 +2210,14 @@ struct ArkUIPaddingRes {
 };
 
 struct ArkUIBackgroundContent {
-    ArkUI_Int32 color;
+    ArkUI_Uint32 color;
     void* bgColorRawPtr;
 };
 
 struct ArkUIBackgroundOptions {
     ArkUI_Int32 align;
     ArkUI_Int32* ignoresLayoutSafeAreaEdges;
-    ArkUI_Int32 ignoresLayoutSafeAreaEdgesSize;
+    ArkUI_Uint32 ignoresLayoutSafeAreaEdgesSize;
 };
 
 struct ArkUIRectShape {
