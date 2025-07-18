@@ -318,6 +318,7 @@ export interface WaterFlowAttribute extends ScrollableCommonMethod {
     enableScrollInteraction(value: boolean | undefined): this
     friction(value: number | Resource | undefined): this
     cachedCount(count: number | undefined, show?: boolean): this
+    cachedCount(value: number | undefined): this
     onReachStart(value: (() => void) | undefined): this
     onReachEnd(value: (() => void) | undefined): this
     onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this
@@ -370,6 +371,9 @@ export class ArkWaterFlowStyle extends ArkScrollableCommonMethodStyle implements
         return this
     }
     public cachedCount(count: number | undefined, show?: boolean): this {
+        return this
+    }
+    public cachedCount(value: number | undefined): this {
         return this
     }
     public onReachStart(value: (() => void) | undefined): this {
@@ -488,6 +492,18 @@ export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent im
                 const count_casted = count as (number | undefined)
                 const show_casted = show as (boolean | undefined)
                 this.getPeer()?.cachedCount1Attribute(count_casted, show_casted)
+                return this
+            }
+            throw new Error("Can not select appropriate overload")
+        }
+        return this
+    }
+    public cachedCount(value: number | undefined): this {
+        if (this.checkPriority("cachedCount")) {
+            const count_type = runtimeType(value)
+            if ((RuntimeType.NUMBER == count_type) || (RuntimeType.UNDEFINED == count_type)) {
+                const value_casted = value as (number | undefined)
+                this.getPeer()?.cachedCount0Attribute(value_casted)
                 return this
             }
             throw new Error("Can not select appropriate overload")

@@ -99,19 +99,19 @@ export class WaterFlowSections implements MaterializedBase {
 
         // 计算实际操作的 start 和 deleteCount
         const intStart: number = WaterFlowSections.toArrayIndex(start, oldLength);
-        const bound: number = 0;
         let intDeleteCount: number = 0;
 
         if (deleteCount === undefined && sections === undefined) {
             intDeleteCount = oldLength - intStart;
         }
-        else {
+        else if(deleteCount !== undefined) {
+            intDeleteCount = Math.trunc(deleteCount);
             if (intDeleteCount > oldLength - intStart) {
                 intDeleteCount = oldLength - intStart;
             }
         }
 
-        intDeleteCount = Math.max(intDeleteCount, bound);
+        intDeleteCount = intDeleteCount < 0 ? 0 : intDeleteCount;
         //记录变更
         this.changeArray.push({
             start: intStart,
