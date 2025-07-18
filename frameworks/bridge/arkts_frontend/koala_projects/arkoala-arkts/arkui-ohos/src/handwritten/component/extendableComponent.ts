@@ -18,6 +18,7 @@ import { UIContext } from "@ohos/arkui/UIContext"
 import { IProvideDecoratedVariable } from "../stateManagement/decorator";
 import { LocalStorage } from '@ohos.arkui.stateManagement';
 import { PeerNode } from "../PeerNode";
+import { uiObserver } from "@ohos/arkui/observer"
 import { IProviderDecoratedVariable } from "../stateManagement/decorator";
 
 export interface LifeCycle {
@@ -32,6 +33,10 @@ export interface IExtendableComponent {
     getUIContext(): UIContext;
     getUniqueId(): int32;
     getPeerNode(): PeerNode | undefined;
+    queryNavigationInfo(): uiObserver.NavigationInfo;
+    queryNavDestinationInfo(isInner: boolean): uiObserver.NavDestinationInfo;
+    queryNavDestinationInfo(): uiObserver.NavDestinationInfo
+    queryRouterPageInfo(): uiObserver.RouterPageInfo;
 }
 
 export abstract class ExtendableComponent implements LifeCycle {
@@ -94,6 +99,19 @@ export abstract class ExtendableComponent implements LifeCycle {
 
     getUniqueId(): int32 {
         return this.delegate_!.getUniqueId();
+    }
+    
+    queryNavigationInfo(): uiObserver.NavigationInfo {
+        return this.delegate_!.queryNavigationInfo();
+    }
+    queryRouterPageInfo(): uiObserver.RouterPageInfo {
+        return this.delegate_!.queryRouterPageInfo();
+    }
+    queryNavDestinationInfo(isInner: boolean): uiObserver.NavDestinationInfo {
+        return this.delegate_!.queryNavDestinationInfo(isInner);
+    }
+    queryNavDestinationInfo() : uiObserver.NavDestinationInfo {
+        return this.delegate_!.queryNavDestinationInfo();
     }
 
     public get localStorage_(): LocalStorage {

@@ -180,9 +180,10 @@ public:
     void Push(const RouterPageInfo& target);
 
     // For ArkTS1.2
-    RefPtr<FrameNode> PushExtender(const RouterPageInfo& target);
-    RefPtr<FrameNode> ReplaceExtender(const RouterPageInfo& target, std::function<void()>&& finishCallback);
-    RefPtr<FrameNode> RunPageExtender(const RouterPageInfo& target);
+    RefPtr<FrameNode> PushExtender(const RouterPageInfo& target, std::function<void()>&& finishCallback);
+    RefPtr<FrameNode> ReplaceExtender(const RouterPageInfo& target, std::function<void()>&& enterFinishCallback,
+        std::function<void()>&& exitFinishCallback);
+    RefPtr<FrameNode> RunPageExtender(const RouterPageInfo& target, std::function<void()>&& finishCallback);
 
     void PushNamedRoute(const RouterPageInfo& target);
     bool Pop();

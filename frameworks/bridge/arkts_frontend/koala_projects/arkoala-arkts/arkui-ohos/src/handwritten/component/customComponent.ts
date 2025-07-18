@@ -23,6 +23,8 @@ import { GeometryInfo, Layoutable, Measurable, SizeResult, Theme } from "./commo
 import { ConstraintSizeOptions } from "./units"
 import { LocalStorage } from '@ohos.arkui.stateManagement';
 import { PeerNode } from "../PeerNode"
+import { ArkUIAniModule } from "arkui.ani"
+import { uiObserver } from '@ohos/arkui/observer'
 
 export interface PageLifeCycle {
     onPageShow(): void {}
@@ -53,6 +55,21 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
 
     get isCustomLayout(): boolean {
         return this.instance instanceof LayoutCallback;
+    }
+
+    queryNavigationInfo(): uiObserver.NavigationInfo {
+        return ArkUIAniModule._CustomNode_QueryNavigationInfo(this.getPeer()!.peer.ptr);
+    }
+    
+    queryRouterPageInfo(): uiObserver.RouterPageInfo {
+        return ArkUIAniModule._CustomNode_QueryRouterPageInfo(this.getPeer()!.peer.ptr);
+    }
+
+    queryNavDestinationInfo(isInner:boolean): uiObserver.NavDestinationInfo {
+        return ArkUIAniModule._CustomNode_QueryNavDestinationInfo0(this.getPeer()!.peer.ptr, isInner);
+    }
+    queryNavDestinationInfo() : uiObserver.NavDestinationInfo {
+        return ArkUIAniModule._CustomNode_QueryNavDestinationInfo(this.getPeer()!.peer.ptr); 
     }
 
     aboutToAppear(): void {
