@@ -35,7 +35,9 @@ class BuilderNodeFinalizationRegisterProxy {
 class FrameNodeFinalizationRegisterProxy {
   constructor() {
     this.finalizationRegistry_ = new FinalizationRegistry((heldValue: number) => {
-      FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.delete(heldValue);
+      if (!FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(heldValue)?.deref()) {
+        FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.delete(heldValue);
+      }
       FrameNodeFinalizationRegisterProxy.rootFrameNodeIdToBuilderNode_.delete(heldValue);
     });
   }

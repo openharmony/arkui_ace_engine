@@ -795,7 +795,9 @@ BuilderNodeFinalizationRegisterProxy.ElementIdToOwningBuilderNode_ = new Map();
 class FrameNodeFinalizationRegisterProxy {
     constructor() {
         this.finalizationRegistry_ = new FinalizationRegistry((heldValue) => {
-            FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.delete(heldValue);
+            if (!FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(heldValue)?.deref()) {
+                FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.delete(heldValue);
+            }
             FrameNodeFinalizationRegisterProxy.rootFrameNodeIdToBuilderNode_.delete(heldValue);
         });
     }
@@ -1051,6 +1053,12 @@ class FrameNode extends Disposable {
             nodeId = getUINativeModule().frameNode.getIdByNodePtr(nodePtr);
             __JSScopeUtil__.restoreInstanceId();
         }
+        if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
+            let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
+            if (frameNode) {
+                return frameNode;
+            }
+        }
         if (nodeId !== -1 && !getUINativeModule().frameNode.isModifiable(nodePtr)) {
             __JSScopeUtil__.syncInstanceId(this.instanceId_);
             let frameNode = new ProxyFrameNode(this.uiContext_);
@@ -1175,10 +1183,6 @@ class FrameNode extends Disposable {
         if (nodeId === undefined || nodeId === -1) {
             return null;
         }
-        if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
-            let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
-            return frameNode === undefined ? null : frameNode;
-        }
         return this.convertToFrameNode(result.nodePtr, result.nodeId);
     }
     getFirstChildIndexWithoutExpand() {
@@ -1193,10 +1197,6 @@ class FrameNode extends Disposable {
         if (nodeId === undefined || nodeId === -1) {
             return null;
         }
-        if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
-            let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
-            return frameNode === undefined ? null : frameNode;
-        }
         return this.convertToFrameNode(result.nodePtr, result.nodeId);
     }
     getFirstChildWithoutExpand() {
@@ -1204,10 +1204,6 @@ class FrameNode extends Disposable {
         const nodeId = result?.nodeId;
         if (nodeId === undefined || nodeId === -1) {
             return null;
-        }
-        if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
-            let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
-            return frameNode === undefined ? null : frameNode;
         }
         return this.convertToFrameNode(result.nodePtr, result.nodeId);
     }
@@ -1217,10 +1213,6 @@ class FrameNode extends Disposable {
         if (nodeId === undefined || nodeId === -1) {
             return null;
         }
-        if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
-            let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
-            return frameNode === undefined ? null : frameNode;
-        }
         return this.convertToFrameNode(result.nodePtr, result.nodeId);
     }
     getNextSiblingWithoutExpand() {
@@ -1229,10 +1221,6 @@ class FrameNode extends Disposable {
         if (nodeId === undefined || nodeId === -1) {
             return null;
         }
-        if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
-            let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
-            return frameNode === undefined ? null : frameNode;
-        }
         return this.convertToFrameNode(result.nodePtr, result.nodeId);
     }
     getPreviousSibling(isExpanded) {
@@ -1240,10 +1228,6 @@ class FrameNode extends Disposable {
         const nodeId = result?.nodeId;
         if (nodeId === undefined || nodeId === -1) {
             return null;
-        }
-        if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
-            let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
-            return frameNode === undefined ? null : frameNode;
         }
         return this.convertToFrameNode(result.nodePtr, result.nodeId);
     }
@@ -1254,10 +1238,6 @@ class FrameNode extends Disposable {
         __JSScopeUtil__.restoreInstanceId();
         if (nodeId === undefined || nodeId === -1) {
             return null;
-        }
-        if (FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.has(nodeId)) {
-            let frameNode = FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.get(nodeId).deref();
-            return frameNode === undefined ? null : frameNode;
         }
         return this.convertToFrameNode(result.nodePtr, result.nodeId);
     }
@@ -1498,7 +1478,7 @@ class FrameNode extends Disposable {
     }
     addSupportedUIStates(uistates, statesChangeHandler, excludeInner) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        getUINativeModule().frameNode.addSupportedStates(this.getNodePtr(), uistates, (currentUIStates)=>{
+        getUINativeModule().frameNode.addSupportedStates(this.getNodePtr(), uistates, (currentUIStates) => {
             statesChangeHandler(this, currentUIStates);
         }, excludeInner);
         __JSScopeUtil__.restoreInstanceId();
@@ -1606,6 +1586,10 @@ class TypedFrameNode extends FrameNode {
     constructor(uiContext, type, attrCreator, options) {
         super(uiContext, type, options);
         this.attrCreator_ = attrCreator;
+    }
+    dispose(){
+        this._nativeRef?.dispose();
+        super.dispose();
     }
     initialize(...args) {
         return this.attribute.initialize(args);
@@ -2213,14 +2197,14 @@ class typeNode {
     }
     static getEvent(node, nodeType) {
         if (node === undefined || node === null || node.getNodeType() !== nodeType) {
-          return undefined;
+            return undefined;
         }
         let event = __eventMap__.get(nodeType);
         if (event === undefined || event === null) {
-          return undefined;
+            return undefined;
         }
         return event(node);
-      } 
+    }
     static bindController(node, controller, nodeType) {
         if (node === undefined || node === null || controller === undefined || controller === null ||
             node.getNodeType() !== nodeType || node.getNodePtr() === null || node.getNodePtr() === undefined) {
@@ -3323,7 +3307,6 @@ globalThis.__addBuilderNodeToBuilder__ = function __addBuilderNodeToBuilder__(id
 globalThis.__deleteBuilderNodeFromBuilder__ = function __deleteBuilderNodeFromBuilder__(id, builderIds) {
     return __disconnectConnection__(UINodeRegisterProxy.GetViewBuildNodeBase(id), builderIds);
 };
-
 
 export default {
     NodeController, BuilderNode, BaseNode, RenderNode, FrameNode, FrameNodeUtils,
