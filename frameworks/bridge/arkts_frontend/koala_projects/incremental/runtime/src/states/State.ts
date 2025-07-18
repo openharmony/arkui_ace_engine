@@ -511,8 +511,8 @@ class ParameterImpl<Value> implements MutableState<Value> {
     update(value: Value, equivalent?: Equivalent<Value>): void {
         const isModified = ObservableHandler.dropModified(this._value)
         if (!refEqual<Value>(this._value, value)) {
-            this._value = value
             this._modified = isModified || (equivalent?.(this._value, value) != true)
+            this._value = value
         } else {
             this._modified = isModified
         }
