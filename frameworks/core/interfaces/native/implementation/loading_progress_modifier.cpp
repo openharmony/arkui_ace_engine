@@ -35,9 +35,6 @@ void SetLoadingProgressOptionsImpl(Ark_NativePointer node)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(undefined);
-    //auto convValue = Converter::OptConvert<type>(undefined); // for enums
-    //LoadingProgressModelNG::SetSetLoadingProgressOptions(frameNode, convValue);
 }
 } // LoadingProgressInterfaceModifier
 namespace LoadingProgressAttributeModifier {
@@ -66,8 +63,6 @@ void ContentModifierImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //LoadingProgressModelNG::SetContentModifier(frameNode, convValue);
     LOGE("ARKOALA LoadingProgressAttributeModifier::ContentModifierImpl -> Method is not implemented");
 }
 } // LoadingProgressAttributeModifier
