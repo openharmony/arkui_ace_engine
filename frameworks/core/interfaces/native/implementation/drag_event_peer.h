@@ -22,4 +22,12 @@ struct DragEventPeer {
     virtual ~DragEventPeer() = default;
 
     OHOS::Ace::RefPtr<OHOS::Ace::DragEvent> dragInfo;
+
+    static DragEventPeer* Create(const OHOS::Ace::RefPtr<OHOS::Ace::DragEvent>& src)
+    {
+        auto dragEventPeer = new DragEventPeer;
+        CHECK_NULL_RETURN(dragEventPeer, nullptr);
+        dragEventPeer->dragInfo = src;
+        return dragEventPeer;
+    }
 };
