@@ -79,6 +79,39 @@ RefPtr<ImageSpan> Convert(const Ark_ImageAttachmentInterface& value)
     return AceType::MakeRefPtr<ImageSpan>(imageOptions);
 }
 
+template<>
+RefPtr<ImageSpan> Convert(const Ark_ResourceImageAttachmentOptions& value)
+{
+    ImageSpanOptions imageOptions;
+    auto resourceStrOpt = Converter::OptConvert<Converter::Ark_Resource_Simple>(value.resourceValue);
+    if (resourceStrOpt.has_value()) {
+        imageOptions.bundleName = resourceStrOpt->bundleName;
+        imageOptions.moduleName = resourceStrOpt->moduleName;
+        imageOptions.image = resourceStrOpt->content;
+    }
+    auto imageStyle = OptConvert<ImageSpanAttribute>(value.layoutStyle).value_or(ImageSpanAttribute());
+    imageStyle.verticalAlign = OptConvert<VerticalAlign>(value.verticalAlign);
+    imageStyle.objectFit = OptConvert<ImageFit>(value.objectFit);
+    imageStyle.size = OptConvert<ImageSpanSize>(value.size);
+    std::optional<Ark_ColorFilterType> colorFilter = GetOpt(value.colorFilter);
+    if (colorFilter) {
+        Converter::VisitUnion(
+            *colorFilter,
+            [&imageStyle](const Ark_ColorFilter& filter) {
+                if (filter && filter->GetColorFilterMatrix().size() == COLOR_FILTER_MATRIX_SIZE) {
+                    imageStyle.colorFilterMatrix = filter->GetColorFilterMatrix();
+                }
+            },
+            [](const Ark_DrawingColorFilter& colorStrategy) {
+                LOGE("Arkoala: ImageAttachmentAccessor convert from DrawinColorFilter doesn't supported");
+            },
+            []() {
+            });
+    }
+    imageOptions.imageAttribute = imageStyle;
+    return AceType::MakeRefPtr<ImageSpan>(imageOptions);
+}
+
 void AssignArkValue(Ark_ImageAttachmentLayoutStyle& dst, const ImageSpanAttribute& src)
 {
     Ark_ImageAttachmentLayoutStyle style = {
@@ -110,7 +143,7 @@ void DestroyPeerImpl(Ark_ImageAttachment peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_ImageAttachment CtorImpl(const Ark_ImageAttachmentInterface* value)
+Ark_ImageAttachment CtorImpl(const Ark_Union_ImageAttachmentInterface_Opt_AttachmentType* value)
 {
     auto peer = PeerUtils::CreatePeer<ImageAttachmentPeer>();
     CHECK_NULL_RETURN(value, peer);
