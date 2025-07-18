@@ -29,7 +29,7 @@ export class DiagnosticVisitor extends ScopedVisitor {
         this.enterScope(beforeChildren)
         const node = this.visitEachChild(beforeChildren)
 
-        // TODO: check state mutation, panda issue 26718
+        // Improve: check state mutation, panda issue 26718
         this.checkDefaultValueMemoCall(node)
         this.checkOutOfMemoContextMemoCall(node)
         this.checkMemoDeclarationIsExplicitlyTyped(node)

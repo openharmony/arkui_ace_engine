@@ -23,6 +23,7 @@
 
 #include "interop-types.h"
 #include "interop-logging.h"
+#include "interop-utils.h"
 #include "koala-types.h"
 
 void holdManagedCallbackResource(InteropInt32);
@@ -142,7 +143,7 @@ inline void parseDimension(const InteropString &string, InteropLength *result)
 template <typename T>
 inline void convertor(T value) = delete;
 
-// TODO: restore full printing!
+// Improve: restore full printing!
 template <typename T>
 inline void WriteToString(std::string *result, T value) = delete;
 
@@ -205,18 +206,14 @@ template <>
 inline void WriteToString(std::string *result, const InteropMaterialized *value)
 {
   char hex[20];
-  #ifdef __STDC_LIB_EXT1__ 
-    std::snprintf_s(hex, sizeof(hex), "0x%llx", (long long)value->ptr);
-  #else
-    std::snprintf(hex, sizeof(hex), "0x%llx", (long long)value->ptr);
-  #endif
+  interop_snprintf(hex, sizeof(hex), "0x%llx", (long long)value->ptr);
   result->append("\"");
   result->append("Materialized ");
   result->append(hex);
   result->append("\"");
 }
 
-// TODO: generate!
+// Improve: generate!
 template<>
 inline void WriteToString(std::string *result, const InteropCallbackResource *value)
 {
@@ -254,7 +251,7 @@ inline void WriteToString(std::string *result, const InteropCustomObject *value)
 {
   if (strcmp(value->kind, "NativeErrorFunction") == 0)
   {
-    result->append("() => {} /* TBD: Function*/");
+    result->append("() => {} /* Improve: Function*/");
     return;
   }
   result->append("{");
@@ -283,7 +280,7 @@ struct CustomDeserializer
   virtual InteropCustomObject deserialize(DeserializerBase *deserializer, const std::string &kind)
   {
     InteropCustomObject result;
-    strcpy(result.kind, "error");
+    interop_strcpy(result.kind, sizeof(result.kind), "error");
     return result;
   }
   CustomDeserializer *next = nullptr;
@@ -336,11 +333,7 @@ public:
     if (length > 0)
     {
       value = malloc(length * sizeof(E));
-      #ifdef __STDC_LIB_EXT1__
-        memset_s(value, length * sizeof(E), 0, length * sizeof(E));
-      #else
-        memset(value, 0, length * sizeof(E));
-      #endif
+      interop_memset(value, length * sizeof(E), 0, length * sizeof(E));
       toClean.push_back(value);
     }
     array->length = length;
@@ -355,19 +348,11 @@ public:
     if (length > 0)
     {
       keys = malloc(length * sizeof(K));
-      #ifdef __STDC_LIB_EXT1__
-        memset_s(keys, length * sizeof(K), 0, length * sizeof(K));
-      #else
-        memset(keys, 0, length * sizeof(K));
-      #endif
+      interop_memset(keys, length * sizeof(K), 0, length * sizeof(K));
       toClean.push_back(keys);
 
       values = malloc(length * sizeof(V));
-      #ifdef __STDC_LIB_EXT1__
-        memset_s(values, length * sizeof(V), 0, length * sizeof(V));
-      #else
-        memset(values, 0, length * sizeof(V));
-      #endif
+      interop_memset(values, length * sizeof(V), 0, length * sizeof(V));
       toClean.push_back(values);
     }
     map->size = length;
@@ -400,8 +385,8 @@ public:
     if (tag == INTEROP_TAG_UNDEFINED) LOGE("Undefined interop tag");
     // Skip undefined tag!.
     InteropCustomObject result;
-    strcpy(result.kind, "Error");
-    strcat(result.kind, kind.c_str());
+    interop_strcpy(result.kind, sizeof(result.kind), "Error");
+    interop_strcat(result.kind, sizeof(result.kind), kind.c_str());
     return result;
   }
 
@@ -439,82 +424,74 @@ public:
   }
   InteropInt32 readInt32()
   {
-    check(4);
+    check(sizeof(InteropInt32));
 #ifdef KOALA_NO_UNALIGNED_ACCESS
     InteropInt32 value;
-    #ifdef __STDC_LIB_EXT1__
-      memcpy_s(&value, 4, data + position, 4);
-    #else
-      memcpy(&value, data + position, 4);
-    #endif
+    interop_memcpy(&value, sizeof(InteropInt32), data + position, sizeof(InteropInt32));
 #else
     auto value = *(InteropInt32 *)(data + position);
 #endif
-    position += 4;
+    position += sizeof(InteropInt32);
     return value;
   }
   InteropInt64 readInt64()
   {
-    check(8);
+    check(sizeof(InteropInt64));
 #ifdef KOALA_NO_UNALIGNED_ACCESS
     InteropInt64 value;
-    #ifdef __STDC_LIB_EXT1__
-      memcpy_s(&value, 4, data + position, 4);
-    #else
-      memcpy(&value, data + position, 4);
-    #endif
+    interop_memcpy(&value, sizeof(InteropInt64), data + position, sizeof(InteropInt64));
 #else
     auto value = *(InteropInt64 *)(data + position);
 #endif
-    position += 8;
+    position += sizeof(InteropInt64);
     return value;
   }
   InteropUInt64 readUInt64()
   {
-    check(8);
+    check(sizeof(InteropUInt64));
 #ifdef KOALA_NO_UNALIGNED_ACCESS
     InteropInt64 value;
-    #ifdef __STDC_LIB_EXT1__
-      memcpy_s(&value, 4, data + position, 4);
-    #else
-      memcpy(&value, data + position, 4);
-    #endif
+    interop_memcpy(&value, sizeof(InteropUInt64), data + position, sizeof(InteropUInt64));
 #else
     auto value = *(InteropUInt64 *)(data + position);
 #endif
-    position += 8;
+    position += sizeof(InteropUInt64);
     return value;
   }
   InteropFloat32 readFloat32()
   {
-    check(4);
+    check(sizeof(InteropFloat32));
 #ifdef KOALA_NO_UNALIGNED_ACCESS
     InteropFloat32 value;
-    #ifdef __STDC_LIB_EXT1__
-      memcpy_s(&value, 4, data + position, 4);
-    #else
-      memcpy(&value, data + position, 4);
-    #endif
+    interop_memcpy(&value, sizeof(InteropFloat32), data + position, sizeof(InteropFloat32));
 #else
     auto value = *(InteropFloat32 *)(data + position);
 #endif
-    position += 4;
+    position += sizeof(InteropFloat32);
+    return value;
+  }
+  InteropFloat64 readFloat64()
+  {
+    check(sizeof(InteropFloat64));
+#ifdef KOALA_NO_UNALIGNED_ACCESS
+    InteropFloat64 value;
+    interop_memcpy(&value, sizeof(InteropFloat64), data + position, sizeof(InteropFloat64));
+#else
+    auto value = *(InteropFloat64 *)(data + position);
+#endif
+    position += sizeof(InteropFloat64);
     return value;
   }
   InteropNativePointer readPointer()
   {
-    check(8);
+    check(sizeof(InteropInt64));
 #ifdef KOALA_NO_UNALIGNED_ACCESS
-    int64_t value = 0;
-    #ifdef __STDC_LIB_EXT1__
-      memcpy_s(&value, 8, data + position, 8);
-    #else
-      memcpy(&value, data + position, 8);
-    #endif
+    InteropInt64 value = 0;
+    interop_memcpy(&value, sizeof(InteropInt64), data + position, sizeof(InteropInt64));
 #else
-    int64_t value = *(int64_t *)(data + position);
+    InteropInt64 value = *(int64_t *)(data + position);
 #endif
-    position += 8;
+    position += sizeof(InteropInt64);
     return reinterpret_cast<InteropNativePointer>(static_cast<uintptr_t>(value));
   }
   InteropNativePointer readPointerOrDefault(InteropNativePointer defaultValue)
@@ -549,7 +526,7 @@ public:
     return InteropBuffer { resource, (void*)data, length };
   }
 
-  // TODO: produce them with prefix in generator.
+  // Improve: produce them with prefix in generator.
   InteropLength readLength()
   {
     InteropLength result = {};
@@ -648,11 +625,24 @@ inline void WriteToString(std::string *result, InteropFloat32 value)
 #if (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && (__MAC_OS_X_VERSION_MAX_ALLOWED < 130300L))
   // to_chars() is not available on older macOS.
   char buf[20];
-  #ifdef __STDC_LIB_EXT1__ 
-    snprintf_s(buf, sizeof buf, "%f", value);
-  #else
-    snprintf(buf, sizeof buf, "%f", value);
-  #endif
+  interop_snprintf(buf, sizeof buf, "%f", value);
+  result->append(buf);
+#else
+  std::string storage;
+  storage.resize(20);
+  // We use to_chars() to avoid locale issues.
+  auto rc = std::to_chars(storage.data(), storage.data() + storage.size(), value);
+  storage.resize(rc.ptr - storage.data());
+  result->append(storage);
+#endif
+}
+template <>
+inline void WriteToString(std::string *result, InteropFloat64 value)
+{
+#if (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && (__MAC_OS_X_VERSION_MAX_ALLOWED < 130300L))
+  // to_chars() is not available on older macOS.
+  char buf[20];
+  interop_snprintf(buf, sizeof buf, "%f", value);
   result->append(buf);
 #else
   std::string storage;

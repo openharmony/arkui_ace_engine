@@ -17,17 +17,17 @@ import { ArktsObject } from "./ArktsObject"
 import { Program } from "../../generated"
 import { global } from "../static/global"
 import { passString, passStringArray } from "../utilities/private"
-import { KNativePointer, nullptr } from "@koalaui/interop"
+import { KNativePointer, nullptr, KBoolean } from "@koalaui/interop"
 import { Config } from "./Config"
+import { filterSource, throwError } from "../../utils"
+import { AstNode } from "./AstNode"
 
 export class Context extends ArktsObject {
     constructor(peer: KNativePointer) {
         super(peer)
     }
 
-    static createFromString(
-        source: string
-    ): Context {
+    static createFromString(source: string): Context {
         if (!global.configIsInitialized()) {
             throw new Error(`Config not initialized`)
         }
@@ -38,6 +38,18 @@ export class Context extends ArktsObject {
                 passString(global.filePath)
             )
         )
+    }
+    
+    /** @deprecated Use {@link createCacheFromFile} instead */
+    static createCacheContextFromFile(
+        configPtr: KNativePointer,
+        fileName: string,
+        globalContextPtr: KNativePointer,
+        isExternal: KBoolean
+    ): Context {
+        return new Context(
+            global.es2panda._CreateCacheContextFromFile(configPtr, passString(fileName), globalContextPtr, isExternal)
+        );
     }
 
     static createFromFile(filePath: string, configPath: string, stdlibPath: string, outputPath: string): Context | undefined {
@@ -72,12 +84,31 @@ export class Context extends ArktsObject {
         )
     }
 
+    static createContextGenerateAbcForExternalSourceFiles(
+        filenames: string[]): Context {
+        if (!global.configIsInitialized()) {
+            throwError(`Config not initialized`);
+        }
+        return new Context(
+            global.es2panda._CreateContextGenerateAbcForExternalSourceFiles(global.config, filenames.length, passStringArray(filenames))
+        );
+    }
 
     destroy() {
         if (this.peer != nullptr) {
             global.es2panda._DestroyContext(this.peer)
             this.peer = nullptr
         }
+    }
+    
+    /** @deprecated */
+    static destroyAndRecreate(ast: AstNode): Context {
+        console.log('[TS WRAPPER] DESTROY AND RECREATE');
+        const source = filterSource(ast.dumpSrc());
+        global.es2panda._DestroyContext(global.context);
+        global.compilerContext = Context.createFromString(source) as any; // Improve: commonize Context
+
+        return new Context(global.context);
     }
 
     get program(): Program {

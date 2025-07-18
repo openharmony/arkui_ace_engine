@@ -56,7 +56,7 @@ typedef enum InteropRuntimeType
 typedef float InteropFloat32;
 typedef double InteropFloat64;
 typedef int32_t InteropInt32;
-typedef unsigned int InteropUInt32; // TODO: update unsigned int
+typedef unsigned int InteropUInt32; // Improve: update unsigned int
 typedef int64_t InteropInt64;
 typedef uint64_t InteropUInt64;
 typedef int8_t InteropInt8;

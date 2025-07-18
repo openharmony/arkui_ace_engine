@@ -14,7 +14,7 @@
  */
 
 import { Identifier } from '../../../generated';
-import { isSameNativeObject } from '../peers/ArktsObject';
+import { isSameNativeObject } from '../../../arkts-api/peers/ArktsObject';
 import { AstNode } from '../peers/AstNode';
 import { ETSParameterExpression } from '../types';
 import { attachModifiers, updateThenAttach } from '../utilities/private';
@@ -26,7 +26,7 @@ export function updateETSParameterExpression(
 ): ETSParameterExpression {
     if (
         isSameNativeObject(identifier, original.identifier) &&
-        !initializer // TODO: get this from ETSParameterExpression
+        !initializer // Improve: get this from ETSParameterExpression
     ) {
         return original;
     }

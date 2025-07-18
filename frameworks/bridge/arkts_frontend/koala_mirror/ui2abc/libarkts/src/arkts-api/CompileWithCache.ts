@@ -23,6 +23,7 @@ import { Es2pandaContextState } from "../generated/Es2pandaEnums"
 import { Program } from "../generated"
 import { runTransformerOnProgram } from "../plugin-utils"
 import { ProgramProvider } from "./ProgramProvider"
+import { Options } from "./peers/Options"
 
 export interface ProgramInfo {
     /**
@@ -99,6 +100,8 @@ export function compileWithCache(
 
         global.config = config.peer
         global.compilerContext = new Context(context)
+        const options = Options.createOptions(new Config(global.config))
+        global.arktsconfig = options.getArkTsConfig()
 
         function applyPlugins(plugins: ProgramTransformer[] | undefined, state: Es2pandaContextState) {
             plugins?.forEach(plugin => {
@@ -107,7 +110,10 @@ export function compileWithCache(
                 let currentProgram = provider.next()
                 let isFirstProgram = true
                 while (currentProgram) {
-                    if (programsForPluginApplication.includes(currentProgram.absoluteName) || currentProgram.absoluteName == it.absoluteName) {
+                    if (
+                        (!isExternalProgram && programsForPluginApplication.includes(currentProgram.absoluteName)) ||
+                        (isExternalProgram && currentProgram.absoluteName == it.absoluteName)
+                     ) {
                         const options: CompilationOptions = {
                             isMainProgram: isFirstProgram,
                             stage: state,

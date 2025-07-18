@@ -14,7 +14,7 @@
  */
 
 import { ClassDeclaration, ClassDefinition } from '../../../generated';
-import { isSameNativeObject } from '../peers/ArktsObject';
+import { isSameNativeObject } from '../../../arkts-api/peers/ArktsObject';
 import { attachModifiers, updateThenAttach } from '../utilities/private';
 
 export function updateClassDeclaration(original: ClassDeclaration, def?: ClassDefinition): ClassDeclaration {

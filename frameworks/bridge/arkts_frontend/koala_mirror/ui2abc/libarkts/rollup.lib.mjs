@@ -16,6 +16,8 @@ import nodeResolve from "@rollup/plugin-node-resolve";
 import typescript from "@rollup/plugin-typescript";
 import commonjs from '@rollup/plugin-commonjs'
 
+const ENABLE_SOURCE_MAPS = false // Enable for debugging
+
 /** @type {import("rollup").RollupOptions} */
 export default [
     makeConfig("./src/index.ts", "libarkts.js"),
@@ -32,15 +34,16 @@ function makeConfig(input, output) {
                 // terser()
             ],
             banner: APACHE_LICENSE_HEADER(),
+            sourcemap: ENABLE_SOURCE_MAPS
         },
         plugins: [
         commonjs(),
             typescript({
                 outputToFilesystem: false,
                 module: "esnext",
-                sourceMap: false,
+                sourceMap: ENABLE_SOURCE_MAPS,
                 declarationMap: false,
-                declaration: false,
+                declaration: true,
                 composite: false,
             }),
             nodeResolve({

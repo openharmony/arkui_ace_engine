@@ -1,6 +1,6 @@
 {
     "name": "@koalaui/harness",
-    "version": "1.7.4+devel",
+    "version": "1.7.6+devel",
     "description": "A harness library compatible with OHOS and ArkTS",
     "main": "build/src/index.js",
     "types": "build/src/index.d.ts",
@@ -31,16 +31,17 @@
         "test": "mocha",
         "compile:ohos": "ets-tsc -b ./tsconfig-ohos.json",
         "compile:all": "npm run compile && npm run compile:ohos",
-        "compile:arkts": "fast-arktsc --config ./arktsconfig.json --link-name ./build/harness.abc --compiler ../tools/panda/arkts/arktsc",
-        "compile:arkts:ui2abc": "fast-arktsc --config ./arktsconfig.json --link-name ./build/harness.abc --compiler ../tools/panda/arkts/ui2abc",
+        "fast-arktsc": "npm run compile --prefix ../../ui2abc/fast-arktsc",
+        "compile:arkts": "npm run fast-arktsc && node ../../ui2abc/fast-arktsc --config ./arktsconfig.json --link-name ./build/harness.abc --compiler ../tools/panda/arkts/arktsc",
+        "compile:arkts:ui2abc": "npm run fast-arktsc && node ../../ui2abc/fast-arktsc --config ./arktsconfig.json --link-name ./build/harness.abc --compiler ../tools/panda/arkts/ui2abc",
         "build:harness": "npm run build:harness:inc",
         "build:harness:inc": "npm run compile:arkts && ninja ${NINJA_OPTIONS} -f build/abc/build.ninja",
         "build:harness:inc:ui2abc": "npm run compile:arkts:ui2abc && PANDA_SDK_PATH=${PANDA_SDK_PATH:=../tools/panda/node_modules/@panda/sdk} ninja ${NINJA_OPTIONS} -f build/abc/build.ninja"
     },
     "keywords": [],
     "dependencies": {
-        "@koalaui/common": "1.7.4+devel",
-        "@koalaui/compat": "1.7.4+devel"
+        "@koalaui/common": "file:../common",
+        "@koalaui/compat": "file:../compat"
     },
     "devDependencies": {
         "@ohos/hypium": "1.0.6",

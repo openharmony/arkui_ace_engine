@@ -13,48 +13,6 @@
  * limitations under the License.
  */
 
-import { KoalaCallsiteKey } from "@koalaui/common"
-import { __context, __id } from "../internals"
-import { StateContext } from "../states/State"
-import { memoEntry1 } from "./entry"
-import { __memo_context_type, __memo_id_type } from "../internals"
-
-/** @internal */
-export class MemoCallbackContext {
-    private readonly context: StateContext
-    private readonly id: KoalaCallsiteKey
-
-    private constructor(context: StateContext, id: KoalaCallsiteKey) {
-        this.context = context
-        this.id = id
-    }
-
-    /**
-     * This method stores a memo context to call a memo-function later from non-memo-context.
-     * Do not use this dangerous API if you do not understand the incremental engine deeply.
-     * @see call
-     * @internal
-     */
-     /** @memo */
-    static Make(): MemoCallbackContext {
-        return new MemoCallbackContext(__context(), __id())
-    }
-
-    /**
-     * This method allows you to call a memo-function from non-memo-context.
-     * It can be used only if the state manager is not available, for example, from native code.
-     * Do not use this dangerous API if you do not understand the incremental engine deeply.
-     * @internal
-     */
-    call(
-        /** @memo */
-        callback: (args: Int32Array) => number,
-        args: Int32Array
-    ): number {
-        return memoEntry1(this.context, this.id, callback, args)
-    }
-}
-
 /** @internal */
 export function memoBind<T>(
     /** @memo */

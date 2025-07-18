@@ -15,6 +15,8 @@
 
 export { Assert, Assert as assert } from "./assert"
 export { startTests } from "./mocha"
+export { TestFilter, setTestFilter } from "../arkts/shared"
+
 
 export function test(title: any, fn?: any) {
     throw new Error("unsupported test: " + title)

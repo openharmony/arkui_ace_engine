@@ -17,106 +17,118 @@ import * as arkts from "../../../../../src/arkts-api"
 
 export function addUseImportClassSameFileAndCreateClass(program: arkts.Program, options: arkts.CompilationOptions) {
     if (options.isMainProgram) {
-        arkts.updateETSModuleByStatements(
-            program.ast as arkts.ETSModule,
-            [
-                // import { C as C } from "./library"
-                arkts.factory.createETSImportDeclaration(
-                    arkts.factory.createStringLiteral(
-                        './library'
-                    ),
-                    [
-                        arkts.factory.createImportSpecifier(
-                            arkts.factory.createIdentifier(
-                                'C'
-                            ),
-                            arkts.factory.createIdentifier(
-                                'C'
-                            )
-                        )
-                    ],
-                    arkts.Es2pandaImportKinds.IMPORT_KINDS_ALL
-                ),
-                ...program.ast.statements,
-                // class D {
-                //     c = new C()
-                // }
-                arkts.factory.createClassDeclaration(
-                    arkts.factory.createClassDefinition(
-                        arkts.factory.createIdentifier("D"),
-                        undefined,
-                        undefined,
-                        [],
-                        undefined,
-                        undefined,
+        const module = program.ast as arkts.ETSModule
+        program.setAst(
+            arkts.factory.updateETSModule(
+                module,
+                [
+                    // import { C as C } from "./library"
+                    arkts.factory.createETSImportDeclaration(
+                        arkts.factory.createStringLiteral(
+                            './library'
+                        ),
                         [
-                            arkts.factory.createClassProperty(
-                                arkts.factory.createIdentifier("c"),
-                                arkts.factory.createETSNewClassInstanceExpression(
-                                    arkts.factory.createETSTypeReference(
-                                        arkts.factory.createETSTypeReferencePart(
-                                            arkts.factory.createIdentifier("C")
-                                        )
-                                    ),
-                                    []
+                            arkts.factory.createImportSpecifier(
+                                arkts.factory.createIdentifier(
+                                    'C'
                                 ),
-                                undefined,
-                                arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_NONE,
-                                false,
+                                arkts.factory.createIdentifier(
+                                    'C'
+                                )
                             )
                         ],
-                        arkts.Es2pandaClassDefinitionModifiers.CLASS_DEFINITION_MODIFIERS_CLASS_DECL,
-                        arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_NONE,
+                        arkts.Es2pandaImportKinds.IMPORT_KINDS_ALL
+                    ),
+                    ...module.statements,
+                    // class D {
+                    //     c = new C()
+                    // }
+                    arkts.factory.createClassDeclaration(
+                        arkts.factory.createClassDefinition(
+                            arkts.factory.createIdentifier("D"),
+                            undefined,
+                            undefined,
+                            [],
+                            undefined,
+                            undefined,
+                            [
+                                arkts.factory.createClassProperty(
+                                    arkts.factory.createIdentifier("c"),
+                                    arkts.factory.createETSNewClassInstanceExpression(
+                                        arkts.factory.createETSTypeReference(
+                                            arkts.factory.createETSTypeReferencePart(
+                                                arkts.factory.createIdentifier("C")
+                                            )
+                                        ),
+                                        []
+                                    ),
+                                    undefined,
+                                    arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_NONE,
+                                    false,
+                                )
+                            ],
+                            arkts.Es2pandaClassDefinitionModifiers.CLASS_DEFINITION_MODIFIERS_CLASS_DECL,
+                            arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_NONE,
+                        )
                     )
-                )
-            ]
+                ],
+                module.ident,
+                module.getNamespaceFlag(),
+                module.program,
+            )
         )
     } else {
-        arkts.updateETSModuleByStatements(
-            program.ast as arkts.ETSModule,
-            [
-                ...program.ast.statements,
-                arkts.factory.createClassDeclaration(
-                    arkts.factory.createClassDefinition(
-                        arkts.factory.createIdentifier(
-                            "C"
-                        ),
-                        undefined,
-                        undefined,
-                        [],
-                        undefined,
-                        undefined,
-                        [
-                            arkts.factory.createMethodDefinition(
-                                arkts.Es2pandaMethodDefinitionKind.METHOD_DEFINITION_KIND_CONSTRUCTOR,
-                                arkts.factory.createIdentifier("constructor"),
-                                arkts.factory.createFunctionExpression(
-                                    arkts.factory.createIdentifier("constructor"),
-                                    arkts.factory.createScriptFunction(
-                                        arkts.factory.createBlockStatement(
-                                            [],
-                                        ),
-                                        undefined,
-                                        [],
-                                        undefined,
-                                        false,
-                                        arkts.Es2pandaScriptFunctionFlags.SCRIPT_FUNCTION_FLAGS_CONSTRUCTOR,
-                                        arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_NONE,
-                                        arkts.factory.createIdentifier("constructor"),
-                                        [],
-                                    )
-                                ),
-                                arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_CONSTRUCTOR,
-                                false,
-                                [],
+        const module = program.ast as arkts.ETSModule
+        program.setAst(
+            arkts.factory.updateETSModule(
+                module,
+                [
+                    ...module.statements,
+                    arkts.factory.createClassDeclaration(
+                        arkts.factory.createClassDefinition(
+                            arkts.factory.createIdentifier(
+                                "C"
                             ),
-                        ],
-                        arkts.Es2pandaClassDefinitionModifiers.CLASS_DEFINITION_MODIFIERS_CLASS_DECL,
-                        arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_NONE,
-                    ),
-                    arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_EXPORT,
-                )
-            ]
+                            undefined,
+                            undefined,
+                            [],
+                            undefined,
+                            undefined,
+                            [
+                                arkts.factory.createMethodDefinition(
+                                    arkts.Es2pandaMethodDefinitionKind.METHOD_DEFINITION_KIND_CONSTRUCTOR,
+                                    arkts.factory.createIdentifier("constructor"),
+                                    arkts.factory.createFunctionExpression(
+                                        arkts.factory.createIdentifier("constructor"),
+                                        arkts.factory.createScriptFunction(
+                                            arkts.factory.createBlockStatement(
+                                                [],
+                                            ),
+                                            undefined,
+                                            [],
+                                            undefined,
+                                            false,
+                                            arkts.Es2pandaScriptFunctionFlags.SCRIPT_FUNCTION_FLAGS_CONSTRUCTOR,
+                                            arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_NONE,
+                                            arkts.factory.createIdentifier("constructor"),
+                                            [],
+                                        )
+                                    ),
+                                    arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_CONSTRUCTOR,
+                                    false,
+                                    [],
+                                ),
+                            ],
+                            arkts.Es2pandaClassDefinitionModifiers.CLASS_DEFINITION_MODIFIERS_CLASS_DECL,
+                            arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_NONE,
+                        ),
+                        arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_EXPORT,
+                    )
+                ],
+                module.ident,
+                module.getNamespaceFlag(),
+                module.program,
+            )
         )
     }
     return program

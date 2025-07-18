@@ -428,7 +428,7 @@ function proxyMapValues<T, V>(data: Map<T, V>, parent: ObservableHandler, observ
 }
 
 function proxySetValues<T>(data: Set<T>, parent: ObservableHandler, observed?: boolean): Set<T> {
-    // TODO: check if necessary to replace items of the set with observed objects as
+    // Improve: check if necessary to replace items of the set with observed objects as
     // for complex objects add() function won't find original object inside the set of proxies
     /*
     if (observed === undefined) observed = ObservableHandler.contains(parent)
@@ -466,7 +466,7 @@ function addObservable(data: any) {
             const observable = ObservableHandler.find(this)
             if (observable && !this.has(value)) {
                 observable.onModify()
-                // TODO: check if necessary to replace items of the set with observed objects as
+                // Improve: check if necessary to replace items of the set with observed objects as
                 // for complex objects add() function won't find original object inside the set of proxies
                 // value = observableProxy(value, observable)
             }
@@ -520,4 +520,24 @@ function clearObservable(data: any) {
             return this.clearOriginal()
         }
     }
+}
+
+/**
+ * Interface for getting the observed properties of a class
+ */
+export interface TrackableProps {
+    /**
+     * Retrieves the set of property names that are being tracked for changes using `@Track` decorator
+     */
+    trackedProperties(): ReadonlySet<string>
+}
+
+/**
+ * Interface for getting the observability status of a class
+ */
+export interface ObservableClass {
+    /**
+     * Indicates whether the class is decorated with `@Observed`.
+     */
+    isObserved(): boolean
 }

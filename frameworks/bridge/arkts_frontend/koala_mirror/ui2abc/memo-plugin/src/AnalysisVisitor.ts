@@ -30,7 +30,7 @@ function isGetter(node: arkts.ScriptFunction) {
 }
 
 export class AnalysisVisitor extends arkts.AbstractVisitor {
-    // TODO: migrate to wrappers instead of pointers
+    // Improve: migrate to wrappers instead of pointers
     constructor(
         public scriptFunctions: Map<arkts.KNativePointer, MemoFunctionKind>,
         public ETSFunctionTypes: Map<arkts.KNativePointer, MemoFunctionKind>,

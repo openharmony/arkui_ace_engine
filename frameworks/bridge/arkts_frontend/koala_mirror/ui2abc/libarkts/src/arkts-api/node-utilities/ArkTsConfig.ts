@@ -19,7 +19,6 @@ export function dumpArkTsConfigInfo(arkTsConfig: ArkTsConfig) {
     console.log(`ArkTsConfig info:`)
     console.log(`\tBaseUrl:          ${arkTsConfig.baseUrl}`)
     console.log(`\tConfigPath:       ${arkTsConfig.configPath}`)
-    console.log(`\tEntry:            ${arkTsConfig.entry}`)
     console.log(`\tOutDir:           ${arkTsConfig.outDir}`)
     console.log(`\tPackage:          ${arkTsConfig.package}`)
     console.log(`\tRootDir:          ${arkTsConfig.rootDir}`)

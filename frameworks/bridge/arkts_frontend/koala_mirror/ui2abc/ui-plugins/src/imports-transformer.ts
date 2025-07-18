@@ -23,9 +23,12 @@ export class ImportsTransformer extends arkts.AbstractVisitor {
 
     visitor(node: arkts.AstNode): arkts.AstNode {
         if (arkts.isETSModule(node)) {
-            return arkts.updateETSModuleByStatements(
+            return arkts.factory.updateETSModule(
                 node,
-                this.imports.emit(node.statements)
+                this.imports.emit(node.statements),
+                node.ident,
+                node.getNamespaceFlag(),
+                node.program,
             )
         }
         throw new Error(`Must not be there`)

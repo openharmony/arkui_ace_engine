@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { ChainExpression, Expression, isChainExpression, isMemberExpression, MemberExpression } from "src/generated";
+import { BlockStatement, ChainExpression, Expression, isChainExpression, isMemberExpression, MemberExpression } from "src/generated";
 import { AbstractVisitor } from "./AbstractVisitor";
 import { AstNode } from "./peers/AstNode"
 import { factory } from "./factory/nodeFactory";
@@ -65,6 +65,7 @@ export class ChainExpressionFilter extends AbstractVisitor {
     }
 
 
+    visitor(beforeChildren: BlockStatement): BlockStatement
     visitor(beforeChildren: AstNode): AstNode {
         const node = this.visitEachChild(beforeChildren)
         if (isChainExpression(node)) {

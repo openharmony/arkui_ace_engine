@@ -15,30 +15,30 @@
 
 import { Assert as assert, suite, test } from "@koalaui/harness"
 import { TestNode, ReusableTestNode, testUpdate, memoEntry, __id } from "../../src"
-import { createStateManager, InternalScope } from "../../src/states/State"
+import { createStateManager, IncrementalScope } from "../../src/states/State"
 import { assertNode } from "./State.test"
 suite("State", () => {
     test("reuse nodes basic", () => {
         const manager = createStateManager()
         const changed = manager.mutableState(false)
 
-        let reusedScope: InternalScope<void>
+        let reusedScope: IncrementalScope<void>
         const rootNode = new ReusableTestNode(); rootNode.content = "root"
         const root = manager.updatableNode(rootNode, context => {
             assert.equal(rootNode, context.node)
             if (!changed.value) {
                 reusedScope =
-                    context.scope(5, 0, () => { const node = new TestNode(); node.content = "first node"; return node }, undefined, undefined, undefined, "reuse")
+                    context.scopeEx(5, 0, () => { const node = new TestNode(); node.content = "first node"; return node }, undefined, undefined, undefined, "reuse")
                 if (!reusedScope.unchanged)
                     reusedScope.recache()
-                const scope = context.scope(6, 0, () => { const node = new TestNode(); node.content = "second node"; return node }, undefined, undefined, undefined, "reuse")
+                const scope = context.scopeEx(6, 0, () => { const node = new TestNode(); node.content = "second node"; return node }, undefined, undefined, undefined, "reuse")
                 if (!scope.unchanged)
                     scope.recache()
             } else {
-                const scope3 = context.scope(6, 0, () => { const node = new TestNode(); node.content = "third node"; return node }, undefined, undefined, undefined, "reuse")
+                const scope3 = context.scopeEx(6, 0, () => { const node = new TestNode(); node.content = "third node"; return node }, undefined, undefined, undefined, "reuse")
                 if (!scope3.unchanged)
                     scope3.recache()
-                let scope4 = context.scope(7, 0, () => { const node = new TestNode(); node.content = "fourth node"; return node }, undefined, undefined, undefined, "reuse")
+                let scope4 = context.scopeEx(7, 0, () => { const node = new TestNode(); node.content = "fourth node"; return node }, undefined, undefined, undefined, "reuse")
                 assert.equal(reusedScope, scope4)
                 if (!scope4.unchanged)
                     scope4.recache()
@@ -60,32 +60,32 @@ suite("State", () => {
         const manager = createStateManager()
         const phase = manager.mutableState(0)
 
-        let reusedScope1: InternalScope<void>
-        let reusedScope2: InternalScope<void>
+        let reusedScope1: IncrementalScope<void>
+        let reusedScope2: IncrementalScope<void>
         const rootNode = new ReusableTestNode(); rootNode.content = "root"
         const root = manager.updatableNode(rootNode, context => {
             assert.equal(rootNode, context.node)
             if (phase.value == 0) {
                 reusedScope1 =
-                    context.scope(5, 0, () => { const node = new TestNode(); node.content = "first node"; return node }, undefined, undefined, undefined, "reuse")
+                    context.scopeEx(5, 0, () => { const node = new TestNode(); node.content = "first node"; return node }, undefined, undefined, undefined, "reuse")
                 if (!reusedScope1.unchanged)
                     reusedScope1.recache()
-                reusedScope2 = context.scope(6, 0, () => { const node = new TestNode(); node.content = "second node"; return node }, undefined, undefined, undefined, "reuse")
+                reusedScope2 = context.scopeEx(6, 0, () => { const node = new TestNode(); node.content = "second node"; return node }, undefined, undefined, undefined, "reuse")
                 if (!reusedScope2.unchanged)
                     reusedScope2.recache()
             } else if (phase.value == 1) {
                 // remove all
             } else {
-                const scope3 = context.scope(8, 0, () => new TestNode(), undefined, undefined, undefined, "reuse")
+                const scope3 = context.scopeEx(8, 0, () => new TestNode(), undefined, undefined, undefined, "reuse")
                 assert.equal(reusedScope2, scope3)
                 if (!scope3.unchanged)
                     scope3.recache()
-                const scope4 = context.scope(9, 0, () => new TestNode(), undefined, undefined, undefined, "reuse")
+                const scope4 = context.scopeEx(9, 0, () => new TestNode(), undefined, undefined, undefined, "reuse")
                 assert.equal(reusedScope1, scope4)
                 if (!scope4.unchanged)
                     scope4.recache()
                 // scope 5 is brand new
-                const scope5 = context.scope(10, 0, () => new TestNode(), undefined, undefined, undefined, "reuse")
+                const scope5 = context.scopeEx(10, 0, () => new TestNode(), undefined, undefined, undefined, "reuse")
                 if (!scope5.unchanged)
                     scope5.recache()
             }
@@ -115,10 +115,10 @@ suite("State", () => {
         const root = manager.updatableNode(rootNode, context => {
             assert.equal(rootNode, context.node)
             const scope1 =
-                context.scope(5, 0, () => firstNode, undefined, undefined, undefined, "reuse")
+                context.scopeEx(5, 0, () => firstNode, undefined, undefined, undefined, "reuse")
             if (!scope1.unchanged)
                 scope1.recache()
-            const scope2 = context.scope(6, 0, () => secondNode, undefined, undefined, undefined, "reuse")
+            const scope2 = context.scopeEx(6, 0, () => secondNode, undefined, undefined, undefined, "reuse")
             if (!scope2.unchanged)
                 scope2.recache()
         })
@@ -136,19 +136,19 @@ suite("State", () => {
         const manager = createStateManager()
         const version = manager.mutableState(0)
 
-        let reusedScope: InternalScope<void>
+        let reusedScope: IncrementalScope<void>
         const rootNode = new ReusableTestNode(); rootNode.content = "root"
         const root = manager.updatableNode(rootNode, context => {
             assert.equal(rootNode, context.node)
             if (version.value == 0) {
                 memoEntry(context, 2, () => {
                     reusedScope =
-                        context.scope(5, 0, () => { const node = new TestNode(); node.content = "first node"; return node }, undefined, undefined, undefined, "reuse")
+                        context.scopeEx(5, 0, () => { const node = new TestNode(); node.content = "first node"; return node }, undefined, undefined, undefined, "reuse")
                     if (!reusedScope.unchanged)
                         reusedScope.recache()
                 })
                 memoEntry(context, 3, () => {
-                    const scope = context.scope(6, 0, () => { const node = new TestNode(); node.content = "second node"; return node }, undefined, undefined, undefined, "reuse")
+                    const scope = context.scopeEx(6, 0, () => { const node = new TestNode(); node.content = "second node"; return node }, undefined, undefined, undefined, "reuse")
                     if (!scope.unchanged)
                         scope.recache()
                 })
@@ -159,7 +159,7 @@ suite("State", () => {
                 memoEntry(context, 3, () => {
                     id = __id()
                     console.log(`scope3`)
-                    const scope3 = context.scope(6, 0, () => { const node = new TestNode(); node.content = "third node"; return node }, undefined, undefined, undefined, "reuse")
+                    const scope3 = context.scopeEx(6, 0, () => { const node = new TestNode(); node.content = "third node"; return node }, undefined, undefined, undefined, "reuse")
                     if (!scope3.unchanged) {
                         // assert.equal(__id(), 0)
                         scope3.recache()
@@ -169,7 +169,7 @@ suite("State", () => {
                 memoEntry(context, 0, () => {
                     assert.equal(__id(), id - 3)
                     console.log(`scope4`)
-                    let scope4 = context.scope(7, 0, () => { const node = new TestNode(); node.content = "fourth node"; return node }, undefined, undefined, undefined, "reuse")
+                    let scope4 = context.scopeEx(7, 0, () => { const node = new TestNode(); node.content = "fourth node"; return node }, undefined, undefined, undefined, "reuse")
                     assert.equal(reusedScope, scope4)
                     if (!scope4.unchanged)
                         scope4.recache()

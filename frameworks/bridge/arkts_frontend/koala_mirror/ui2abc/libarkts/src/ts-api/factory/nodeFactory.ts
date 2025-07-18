@@ -85,7 +85,7 @@ import {
     ImportSpecifier,
 } from "../types"
 
-// TODO: add flags and base
+// Improve: add flags and base
 export function createNodeFactory() {
     return {
         createSourceFile,
@@ -154,7 +154,7 @@ export function createNodeFactory() {
         return new SourceFile(node)
     }
 
-    // TODO: fix (now doesn't create a new node)
+    // Improve: fix (now doesn't create a new node)
     // @api
     // updateSourceFile(
     //     node: SourceFile,
@@ -315,7 +315,7 @@ export function createNodeFactory() {
     ): VariableDeclaration {
         return new VariableDeclaration(
             arkts.factory.createVariableDeclarator(
-                // TODO: maybe incorrect
+                // Improve: maybe incorrect
                 Es2pandaVariableDeclaratorFlag.VARIABLE_DECLARATOR_FLAG_UNKNOWN,
                 passIdentifier(name, type),
                 passNode(initializer)
@@ -341,7 +341,7 @@ export function createNodeFactory() {
         return new VariableDeclaration(
             arkts.factory.updateVariableDeclarator(
                 node.node,
-                // TODO: maybe incorrect
+                // Improve: maybe incorrect
                 Es2pandaVariableDeclaratorFlag.VARIABLE_DECLARATOR_FLAG_UNKNOWN,
                 passIdentifier(name, type),
                 passNode(initializer)
@@ -867,7 +867,7 @@ export function createNodeFactory() {
         )
     }
 
-    // TODO: rewrite maybe
+    // Improve: rewrite maybe
     // @api
     // createToken(
     //     token: SyntaxKind._
@@ -1017,7 +1017,7 @@ export function createNodeFactory() {
                     passNodeArray(members),
                     // passModifiers(modifiers) | es2panda_ModifierFlags.MODIFIER_FLAGS_PUBLIC | es2panda_ModifierFlags.MODIFIER_FLAGS_STATIC,
                     Es2pandaModifierFlags.MODIFIER_FLAGS_NONE,
-                    // TODO: pass through modifiers
+                    // Improve: pass through modifiers
                     Es2pandaClassDefinitionModifiers.CLASS_DEFINITION_MODIFIERS_NONE,
                     passTypeParams(typeParameters),
                     undefined
@@ -1052,7 +1052,7 @@ export function createNodeFactory() {
                     passNodeArray(members),
                     // passModifiers(modifiers) | es2panda_ModifierFlags.MODIFIER_FLAGS_PUBLIC | es2panda_ModifierFlags.MODIFIER_FLAGS_STATIC,
                     Es2pandaModifierFlags.MODIFIER_FLAGS_NONE,
-                    // TODO: pass through modifiers
+                    // Improve: pass through modifiers
                     Es2pandaClassDefinitionModifiers.CLASS_DEFINITION_MODIFIERS_NONE,
                     passTypeParams(typeParameters)
                 )
@@ -1109,7 +1109,7 @@ export function createNodeFactory() {
         )
     }
 
-    // TODO: fix modifiers
+    // Improve: fix modifiers
     // @api
     // createMethodDeclaration(
     //     modifiers: readonly ModifierLike[] | undefined,
@@ -1186,7 +1186,7 @@ export function createNodeFactory() {
                 Es2pandaMethodDefinitionKind.METHOD_DEFINITION_KIND_METHOD,
                 _name,
                 arkts.factory.createFunctionExpression(
-                    // TODO: maybe fix
+                    // Improve: maybe fix
                     arkts.factory.updateScriptFunction(
                         node.node.scriptFunction,
                         passNode(body),
@@ -1231,7 +1231,7 @@ export function createNodeFactory() {
                         arkts.FunctionSignature.create(
                             undefined,
                             passNodeArray(parameters),
-                            // TODO: change to void maybe
+                            // Improve: change to void maybe
                             undefined
                         ),
                         passModifiersToScriptFunction(modifiers) | Es2pandaScriptFunctionFlags.SCRIPT_FUNCTION_FLAGS_CONSTRUCTOR,
@@ -1269,14 +1269,14 @@ export function createNodeFactory() {
                 Es2pandaMethodDefinitionKind.METHOD_DEFINITION_KIND_CONSTRUCTOR,
                 _name,
                 arkts.factory.createFunctionExpression(
-                    // TODO: maybe fix
+                    // Improve: maybe fix
                     arkts.factory.updateScriptFunction(
                         node.node.scriptFunction,
                         passNode(body),
                         arkts.FunctionSignature.create(
                             undefined,
                             passNodeArray(parameters),
-                            // TODO: change to void maybe
+                            // Improve: change to void maybe
                             undefined
                         ),
                         passModifiersToScriptFunction(modifiers) | Es2pandaScriptFunctionFlags.SCRIPT_FUNCTION_FLAGS_CONSTRUCTOR,
@@ -1324,7 +1324,7 @@ export function createNodeFactory() {
         expression: Expression
     ): ParenthesizedExpression {
         return expression
-        // TODO:
+        // Improve:
         // return new ParenthesizedExpression(
         //     expression
         // )
@@ -1340,7 +1340,7 @@ export function createNodeFactory() {
         expression: Expression
     ): ParenthesizedExpression {
         return expression
-        // TODO:
+        // Improve:
         // return new ParenthesizedExpression(
         //     expression
         // )

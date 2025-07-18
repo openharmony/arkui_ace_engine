@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { ArktsObject } from './ArktsObject';
+import { ArktsObject } from '../../../arkts-api/peers/ArktsObject';
 import { global } from '../static/global';
 import { KNativePointer } from '@koalaui/interop';
 import { Es2pandaPluginDiagnosticType as PluginDiagnosticType } from '../../../generated/Es2pandaEnums';

@@ -36,6 +36,8 @@ export {
     Observed,
     Observable,
     ObservableHandler,
+    TrackableProps,
+    ObservableClass,
     observableProxy,
     observableProxyArray,
     propDeepCopy,
@@ -59,6 +61,7 @@ export {
     int8Array,
     errorAsString,
     unsafeCast,
+    CoroutineLocalValue,
     scheduleCoroutine,
     memoryStats,
     launchJob

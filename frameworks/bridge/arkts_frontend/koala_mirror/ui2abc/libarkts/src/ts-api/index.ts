@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-// TODO: remove private export
+// Improve: remove private export
 export * from "./utilities/private"
 export * from "./utilities/public"
 export * from "./types"

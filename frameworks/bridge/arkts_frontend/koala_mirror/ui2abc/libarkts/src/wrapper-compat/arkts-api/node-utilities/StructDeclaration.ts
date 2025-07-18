@@ -14,7 +14,7 @@
  */
 
 import { ClassDefinition } from '../../../generated';
-import { isSameNativeObject } from '../peers/ArktsObject';
+import { isSameNativeObject } from '../../../arkts-api/peers/ArktsObject';
 import { StructDeclaration } from '../types';
 import { attachModifiers, updateThenAttach } from '../utilities/private';
 

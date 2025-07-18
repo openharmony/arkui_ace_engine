@@ -15,7 +15,7 @@
 
 import * as arkts from "@koalaui/libarkts"
 import { ApplicationInfo, ComponentTransformerOptions } from "./component-transformer"
-import { Importer } from "./utils"
+import { getComponentPackage, Importer } from "./utils"
 
 export class CallTransformer extends arkts.AbstractVisitor {
 
@@ -93,7 +93,7 @@ export class CallTransformer extends arkts.AbstractVisitor {
         const component = this.componentsList.get(name)
         if (!this.seenComponents.has(name)) {
             this.seenComponents.add(name)
-            this.imports.add(component.options ?? `${name}Options`, '@ohos.arkui')
+            this.imports.add(component.options ?? `${name}Options`, getComponentPackage())
         }
         node = this.visitEachChild(node) as arkts.CallExpression
         return arkts.factory.createCallExpression(node.callee,
