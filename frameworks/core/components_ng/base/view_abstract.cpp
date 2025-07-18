@@ -4264,11 +4264,11 @@ int32_t ViewAbstract::OpenMenu(NG::MenuParam& menuParam, const RefPtr<NG::UINode
     CHECK_NULL_RETURN(pipelineContext, ERROR_CODE_INTERNAL_ERROR);
     menuWrapperPattern->SetIsOpenMenu(true);
     NG::OffsetF menuPosition { menuParam.positionOffset.GetX(), menuParam.positionOffset.GetY() };
-    if (menuParam.isAnchorPosition) {
+    if (menuParam.anchorPosition.has_value()) {
         NG::OffsetF targetNodePosition = targetNode->GetPositionToWindowWithTransform();
-        menuPosition = { menuParam.anchorPosition.GetX() + menuParam.positionOffset.GetX() +
+        menuPosition = { menuParam.anchorPosition->GetX() + menuParam.positionOffset.GetX() +
                         targetNodePosition.GetX(),
-                        menuParam.anchorPosition.GetY() + menuParam.positionOffset.GetY() +
+                        menuParam.anchorPosition->GetY() + menuParam.positionOffset.GetY() +
                         targetNodePosition.GetY() };
     }
     if (menuParam.isShowInSubWindow && targetNode->GetTag() != V2::SELECT_ETS_TAG) {
@@ -4300,20 +4300,17 @@ int32_t ViewAbstract::UpdateMenu(const NG::MenuParam& menuParam, const RefPtr<NG
     wrapperPattern->SetMenuParam(menuParam);
     MenuView::UpdateMenuParam(menuWrapperNode, menu, menuParam);
     MenuView::UpdateMenuProperties(menuWrapperNode, menu, menuParam, menuParam.type);
-    if (menuParam.isAnchorPosition) {
+    if (menuParam.anchorPosition.has_value()) {
         auto menuProperty = menu->GetLayoutProperty<MenuLayoutProperty>();
         if (menuProperty) {
             auto target = ElementRegister::GetInstance()->
                 GetSpecificItemById<NG::FrameNode>(wrapperPattern->GetTargetId());
             CHECK_NULL_RETURN(target, ERROR_CODE_INTERNAL_ERROR);
             NG::OffsetF targetNodePosition = target->GetPositionToWindowWithTransform();
-            auto pipelineContext = target->GetContext();
-            CHECK_NULL_RETURN(pipelineContext, ERROR_CODE_INTERNAL_ERROR);
-            auto windowRect = pipelineContext->GetDisplayWindowRectInfo();
-            NG::OffsetF menuPosition = { menuParam.anchorPosition.GetX() + menuParam.positionOffset.GetX() +
-                                         targetNodePosition.GetX() + windowRect.Left(),
-                                         menuParam.anchorPosition.GetY() + menuParam.positionOffset.GetY() +
-                                         targetNodePosition.GetY() + windowRect.Top() };
+            NG::OffsetF menuPosition = { menuParam.anchorPosition->GetX() + menuParam.positionOffset.GetX() +
+                                         targetNodePosition.GetX(),
+                                         menuParam.anchorPosition->GetY() + menuParam.positionOffset.GetY() +
+                                         targetNodePosition.GetY() };
             menuProperty->UpdateMenuOffset(menuPosition);
             menuProperty->ResetMenuPlacement();
         }

@@ -2738,7 +2738,6 @@ void MenuLayoutAlgorithm::UpdateOptionConstraint(std::list<RefPtr<LayoutWrapper>
 float MenuLayoutAlgorithm::VerticalLayout(const SizeF& size, float position, bool isContextMenu)
 {
     placement_ = Placement::BOTTOM;
-    bool isOutBottom = GreatOrEqual(position + anchorPosition_->GetY() + size.Height(), wrapperRect_.Bottom());
     // can put menu below click point
     if (GreatOrEqual(bottomSpace_, size.Height())) {
         return position + margin_;
@@ -2749,31 +2748,41 @@ float MenuLayoutAlgorithm::VerticalLayout(const SizeF& size, float position, boo
         }
         // can't fit in screen, line up with top of the screen
         return wrapperRect_.Top() + paddingTop_;
-    } else if (anchorPosition_.has_value() && isOutBottom) {
+    } else if (anchorPosition_.has_value()) {
         // When the component height is less than the bottom margin and the menu height can be lowered,
         // or when the anchor point y coordinate is at the bottom of the screen and
         // the anchorPosition_ has a set value, the menu should be placed at the bottom of the screen.
-        if (((LessNotEqual(bottomSpace_, size.Height()) || GreatOrEqual(position, wrapperRect_.Bottom())) &&
-            LessNotEqual(size.Height(), wrapperRect_.Height()))) {
-            return wrapperRect_.Bottom() - size.Height() - paddingBottom_;
+        bool isOutBottom = GreatOrEqual(position + anchorPosition_->GetY() + size.Height(), wrapperRect_.Bottom());
+        if (isOutBottom) {
+            if (((LessNotEqual(bottomSpace_, size.Height()) || GreatOrEqual(position, wrapperRect_.Bottom())) &&
+                LessNotEqual(size.Height(), wrapperRect_.Height()))) {
+                return wrapperRect_.Bottom() - size.Height() - paddingBottom_;
+            }
+            // can't fit in screen, line up with top of the screen
+            return wrapperRect_.Top() + paddingTop_;
+        } else {
+            return CalcVerticalPosition(size);
         }
-        // can't fit in screen, line up with top of the screen
-        return wrapperRect_.Top() + paddingTop_;
     } else {
-        float wrapperHeight = wrapperSize_.Height();
-        // put menu above click point
-        if (GreatOrEqual(topSpace_, size.Height())) {
-            // menu show on top
-            placement_ = Placement::TOP;
-            return topSpace_ - size.Height() + margin_;
-        }
-        // line up bottom of menu with bottom of the screen
-        if (LessNotEqual(size.Height(), wrapperHeight)) {
-            return wrapperHeight - size.Height();
-        }
-        // can't fit in screen, line up with top of the screen
-        return 0.0f;
+        return CalcVerticalPosition(size);
     }
+}
+
+float MenuLayoutAlgorithm::CalcVerticalPosition(const SizeF& size)
+{
+    float wrapperHeight = wrapperSize_.Height();
+    // put menu above click point
+    if (GreatOrEqual(topSpace_, size.Height())) {
+        // menu show on top
+        placement_ = Placement::TOP;
+        return topSpace_ - size.Height() + margin_;
+    }
+    // line up bottom of menu with bottom of the screen
+    if (LessNotEqual(size.Height(), wrapperHeight)) {
+        return wrapperHeight - size.Height();
+    }
+    // can't fit in screen, line up with top of the screen
+    return 0.0f;
 }
 
 // returns horizontal offset
