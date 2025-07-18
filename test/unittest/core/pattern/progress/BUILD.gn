@@ -15,6 +15,8 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("progress_test_ng") {
   type = "new"
+  module_name = "Component-ShowInfo"
+  module_output = ""
   sources = [
     "progress_builder_test_ng.cpp",
     "progress_content_modifier_test_ng.cpp",

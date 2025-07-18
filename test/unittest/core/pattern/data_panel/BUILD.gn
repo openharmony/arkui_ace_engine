@@ -15,6 +15,8 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("data_panel_test_ng") {
   type = "new"
+  module_name = "Component-ShowInfo"
+  module_output = ""
   sources = [
     "data_panel_content_modifier_test_ng.cpp",
     "data_panel_test_ng.cpp",

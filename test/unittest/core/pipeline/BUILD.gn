@@ -15,6 +15,7 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("pipeline_context_test_ng") {
   type = "pipeline"
+  module_name = "ace_engine"
   module_output = "pipeline"
   flutter_skia = true
   external_deps = [
