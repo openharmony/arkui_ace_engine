@@ -1134,4 +1134,11 @@ bool PipelineBase::CheckIfGetTheme()
     }
     return true;
 }
+
+void PipelineBase::SetUiDVSyncCommandTime(uint64_t vsyncTime)
+{
+    DVSyncChangeTime_ = vsyncTime;
+    commandTimeUpdate_ = true;
+    dvsyncTimeUpdate_ = true;
+}
 } // namespace OHOS::Ace

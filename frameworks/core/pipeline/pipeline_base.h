@@ -1597,6 +1597,7 @@ public:
         return configurationChange_;
     }
 
+    void SetUiDVSyncCommandTime(uint64_t vsyncTime);
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()
@@ -1752,6 +1753,9 @@ protected:
 
     SerializedGesture serializedGesture_;
     RefPtr<NG::THPExtraManager> thpExtraMgr_;
+    uint64_t DVSyncChangeTime_ = 0;
+    bool commandTimeUpdate_ = false;
+    bool dvsyncTimeUpdate_ = false;
 private:
     void DumpFrontend() const;
     double ModifyKeyboardHeight(double keyboardHeight) const;

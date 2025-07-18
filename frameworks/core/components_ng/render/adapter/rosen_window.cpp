@@ -394,4 +394,9 @@ void RosenWindow::NotifySnapshotUpdate()
     rsWindow_->NotifySnapshotUpdate();
 }
 
+void RosenWindow::SetDVSyncUpdate(uint64_t dvsyncTime)
+{
+    CHECK_NULL_VOID(rsUIDirector_);
+    rsUIDirector_->SetDVSyncUpdate(dvsyncTime);
+}
 } // namespace OHOS::Ace::NG

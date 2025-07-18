@@ -2541,5 +2541,27 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg126, TestSize.Level1)
     // Verify no unexpected side effects
     EXPECT_TRUE(context_->scheduleTasks_.empty());
 }
+
+/**
+ * @tc.name: PipelineContextTestNg127
+ * @tc.desc: Test the function UpdateDVSyncTime.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg127, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    ASSERT_NE(context_->GetWindow(), nullptr);
+    context_->commandTimeUpdate_ = true;
+    context_->DVSyncChangeTime_ = true;
+    context_->lastVSyncTime_ = GetSysTimestamp();
+    std::string abilityName = "test";
+    context_->UpdateDVSyncTime(100, abilityName, 8333333);
+
+    EXPECT_FALSE(context_->commandTimeUpdate_);
+}
 } // namespace NG
 } // namespace OHOS::Ace
