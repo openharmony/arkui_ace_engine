@@ -1747,6 +1747,35 @@ HWTEST_F(BubbleTestTwoNg, BubblePatternUpdateMaskColorTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: BubblePatternUpdateBubbleBackGroundColorTest002
+ * @tc.desc: Test BubblePattern::UpdateBubbleBackGroundColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestTwoNg, BubblePatternUpdateBubbleBackGroundColorTest002, TestSize.Level1)
+{
+     /**
+     * @tc.steps: step1. create targetNode and get frameNode.
+     */
+    auto targetNode = FrameNode::GetOrCreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    popupParam->SetBlurStyle(BlurStyle::COMPONENT_REGULAR);
+    auto popupNode = BubbleView::CreateBubbleNode(targetNode->GetTag(), targetNode->GetId(), popupParam);
+    ASSERT_NE(popupNode, nullptr);
+    auto bubblePattern = popupNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+    bubblePattern->SetPopupParam(popupParam);
+    Color testColor = Color::RED;
+    bubblePattern->UpdateBubbleBackGroundColor(testColor);
+    auto childNode = AceType::DynamicCast<FrameNode>(popupNode->GetFirstChild());
+    ASSERT_NE(childNode, nullptr);
+    auto renderContext = childNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_EQ(renderContext->GetBackBlurStyle().has_value(), true);
+    EXPECT_EQ(BlurStyle::COMPONENT_REGULAR, renderContext->GetBackBlurStyle()->blurStyle);
+}
+
+/**
  * @tc.name: InitTargetSizeAndPosition002
  * @tc.desc: Test InitTargetSizeAndPosition.
  * @tc.type: FUNC
