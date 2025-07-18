@@ -38815,11 +38815,31 @@ void impl_CanvasPath_rect(Ark_NativePointer thisPtr, KInteropNumber x, KInteropN
         GetAccessors()->getCanvasPathAccessor()->rect(self, (const Ark_Number*) (&x), (const Ark_Number*) (&y), (const Ark_Number*) (&w), (const Ark_Number*) (&h));
 }
 KOALA_INTEROP_DIRECT_V5(CanvasPath_rect, Ark_NativePointer, KInteropNumber, KInteropNumber, KInteropNumber, KInteropNumber)
-Ark_NativePointer impl_Path2D_ctor() {
-        return GetAccessors()->getPath2DAccessor()->ctor();
+Ark_NativePointer impl_Path2D_construct0() {
+        return GetAccessors()->getPath2DAccessor()->construct0();
 }
-KOALA_INTEROP_DIRECT_0(Path2D_ctor, Ark_NativePointer)
-Ark_NativePointer impl_Path2D_getFinalizer() {
+KOALA_INTEROP_DIRECT_0(Path2D_construct0, Ark_NativePointer)
+Ark_NativePointer impl_Path2D_construct1(Ark_Int32 unit) {
+        return GetAccessors()->getPath2DAccessor()->construct1(static_cast<Ark_LengthMetricsUnit>(unit));
+}
+KOALA_INTEROP_DIRECT_1(Path2D_construct1, Ark_NativePointer, Ark_Int32)
+Ark_NativePointer impl_Path2D_construct2(Ark_NativePointer path) {
+        return GetAccessors()->getPath2DAccessor()->construct2(static_cast<Ark_Path2D>(path));
+}
+KOALA_INTEROP_DIRECT_1(Path2D_construct2, Ark_NativePointer, Ark_NativePointer)
+Ark_NativePointer impl_Path2D_construct3(Ark_NativePointer path, Ark_Int32 unit) {
+        return GetAccessors()->getPath2DAccessor()->construct3(static_cast<Ark_Path2D>(path), static_cast<Ark_LengthMetricsUnit>(unit));
+}
+KOALA_INTEROP_DIRECT_2(Path2D_construct3, Ark_NativePointer, Ark_NativePointer, Ark_Int32)
+Ark_NativePointer impl_Path2D_construct4(const KStringPtr& d) {
+        return GetAccessors()->getPath2DAccessor()->construct4((const Ark_String*) (&d));
+}
+KOALA_INTEROP_1(Path2D_construct4, Ark_NativePointer, KStringPtr)
+Ark_NativePointer impl_Path2D_construct5(const KStringPtr& description, Ark_Int32 unit) {
+        return GetAccessors()->getPath2DAccessor()->construct5((const Ark_String*) (&description), static_cast<Ark_LengthMetricsUnit>(unit));
+}
+KOALA_INTEROP_2(Path2D_construct5, Ark_NativePointer, KStringPtr, Ark_Int32)
+ Ark_NativePointer impl_Path2D_getFinalizer() {
         return GetAccessors()->getPath2DAccessor()->getFinalizer();
 }
 KOALA_INTEROP_DIRECT_0(Path2D_getFinalizer, Ark_NativePointer)
@@ -39791,7 +39811,7 @@ void impl_CanvasRenderer_setTextBaseline(Ark_NativePointer thisPtr, const KStrin
         GetAccessors()->getCanvasRendererAccessor()->setTextBaseline(self, (const Ark_String*) (&textBaseline));
 }
 KOALA_INTEROP_V2(CanvasRenderer_setTextBaseline, Ark_NativePointer, KStringPtr)
-Ark_NativePointer impl_CanvasRenderingContext2D_ctor(KSerializerBuffer thisArray, int32_t thisLength) {
+Ark_NativePointer impl_CanvasRenderingContext2D_construct(KSerializerBuffer thisArray, int32_t thisLength) {
         Deserializer thisDeserializer(thisArray, thisLength);
         const auto settings_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
         Opt_RenderingContextSettings settings_value_buf = {};
@@ -39801,9 +39821,17 @@ Ark_NativePointer impl_CanvasRenderingContext2D_ctor(KSerializerBuffer thisArray
             settings_value_buf.value = static_cast<Ark_RenderingContextSettings>(thisDeserializer.readRenderingContextSettings());
         }
         Opt_RenderingContextSettings settings_value = settings_value_buf;;
-        return GetAccessors()->getCanvasRenderingContext2DAccessor()->ctor((const Opt_RenderingContextSettings*)&settings_value);
+        const auto unit_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_LengthMetricsUnit unit_value_buf = {};
+        unit_value_buf.tag = unit_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((INTEROP_RUNTIME_UNDEFINED) != (unit_value_buf_runtimeType))
+        {
+            unit_value_buf.value = static_cast<Ark_LengthMetricsUnit>(thisDeserializer.readInt32());
+        }
+        Opt_LengthMetricsUnit unit_value = unit_value_buf;;
+        return GetAccessors()->getCanvasRenderingContext2DAccessor()->construct(static_cast<Opt_RenderingContextSettings*>(&settings_value), static_cast<Opt_LengthMetricsUnit*>(&unit_value));
 }
-KOALA_INTEROP_DIRECT_2(CanvasRenderingContext2D_ctor, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_DIRECT_2(CanvasRenderingContext2D_construct, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_CanvasRenderingContext2D_getFinalizer() {
         return GetAccessors()->getCanvasRenderingContext2DAccessor()->getFinalizer();
 }
@@ -39900,7 +39928,7 @@ Ark_NativePointer impl_CanvasRenderingContext2D_getCanvas(Ark_NativePointer this
         return GetAccessors()->getCanvasRenderingContext2DAccessor()->getCanvas(self);
 }
 KOALA_INTEROP_DIRECT_1(CanvasRenderingContext2D_getCanvas, Ark_NativePointer, Ark_NativePointer)
-Ark_NativePointer impl_OffscreenCanvasRenderingContext2D_ctor(KInteropNumber width, KInteropNumber height, KSerializerBuffer thisArray, int32_t thisLength) {
+Ark_NativePointer impl_OffscreenCanvasRenderingContext2D_construct(KInteropNumber width, KInteropNumber height, KSerializerBuffer thisArray, int32_t thisLength) {
         Deserializer thisDeserializer(thisArray, thisLength);
         const auto settings_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
         Opt_RenderingContextSettings settings_value_buf = {};
@@ -39910,9 +39938,17 @@ Ark_NativePointer impl_OffscreenCanvasRenderingContext2D_ctor(KInteropNumber wid
             settings_value_buf.value = static_cast<Ark_RenderingContextSettings>(thisDeserializer.readRenderingContextSettings());
         }
         Opt_RenderingContextSettings settings_value = settings_value_buf;;
-        return GetAccessors()->getOffscreenCanvasRenderingContext2DAccessor()->ctor((const Ark_Number*) (&width), (const Ark_Number*) (&height), (const Opt_RenderingContextSettings*)&settings_value);
+        const auto unit_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_LengthMetricsUnit unit_value_buf = {};
+        unit_value_buf.tag = unit_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((INTEROP_RUNTIME_UNDEFINED) != (unit_value_buf_runtimeType))
+        {
+            unit_value_buf.value = static_cast<Ark_LengthMetricsUnit>(thisDeserializer.readInt32());
+        }
+        Opt_LengthMetricsUnit unit_value = unit_value_buf;;
+        return GetAccessors()->getOffscreenCanvasRenderingContext2DAccessor()->construct((const Ark_Number*) (&width), (const Ark_Number*) (&height), static_cast<Opt_RenderingContextSettings*>(&settings_value), static_cast<Opt_LengthMetricsUnit*>(&unit_value));
 }
-KOALA_INTEROP_DIRECT_4(OffscreenCanvasRenderingContext2D_ctor, Ark_NativePointer, KInteropNumber, KInteropNumber, KSerializerBuffer, int32_t)
+KOALA_INTEROP_DIRECT_4(OffscreenCanvasRenderingContext2D_construct, Ark_NativePointer, KInteropNumber, KInteropNumber, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_OffscreenCanvasRenderingContext2D_getFinalizer() {
         return GetAccessors()->getOffscreenCanvasRenderingContext2DAccessor()->getFinalizer();
 }
@@ -39944,10 +39980,19 @@ Ark_NativePointer impl_OffscreenCanvasRenderingContext2D_transferToImageBitmap(A
         return GetAccessors()->getOffscreenCanvasRenderingContext2DAccessor()->transferToImageBitmap(self);
 }
 KOALA_INTEROP_DIRECT_1(OffscreenCanvasRenderingContext2D_transferToImageBitmap, Ark_NativePointer, Ark_NativePointer)
-Ark_NativePointer impl_OffscreenCanvas_ctor(KInteropNumber width, KInteropNumber height) {
-        return GetAccessors()->getOffscreenCanvasAccessor()->ctor((const Ark_Number*) (&width), (const Ark_Number*) (&height));
+Ark_NativePointer impl_OffscreenCanvas_construct(KInteropNumber width, KInteropNumber height, KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto unit_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_LengthMetricsUnit unit_value_buf = {};
+        unit_value_buf.tag = unit_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((INTEROP_RUNTIME_UNDEFINED) != (unit_value_buf_runtimeType))
+        {
+            unit_value_buf.value = static_cast<Ark_LengthMetricsUnit>(thisDeserializer.readInt32());
+        }
+        Opt_LengthMetricsUnit unit_value = unit_value_buf;;
+        return GetAccessors()->getOffscreenCanvasAccessor()->construct((const Ark_Number*) (&width), (const Ark_Number*) (&height), static_cast<Opt_LengthMetricsUnit*>(&unit_value));
 }
-KOALA_INTEROP_DIRECT_2(OffscreenCanvas_ctor, Ark_NativePointer, KInteropNumber, KInteropNumber)
+KOALA_INTEROP_DIRECT_4(OffscreenCanvas_construct, Ark_NativePointer, KInteropNumber, KInteropNumber, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_OffscreenCanvas_getFinalizer() {
         return GetAccessors()->getOffscreenCanvasAccessor()->getFinalizer();
 }
