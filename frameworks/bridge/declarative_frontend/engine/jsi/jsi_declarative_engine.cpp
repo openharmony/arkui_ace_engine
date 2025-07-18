@@ -693,6 +693,7 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleWorker(void* runtime)
     JsRegisterWorkerViews(JSNApi::GetGlobalObject(vm), runtime);
 
     // preload js enums
+    LOGI("preload js enums in PreloadAceModuleWorker");
     PreloadJsEnums(arkRuntime);
 
     // preload requireNative
