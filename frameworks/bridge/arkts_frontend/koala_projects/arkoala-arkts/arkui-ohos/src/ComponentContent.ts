@@ -23,6 +23,7 @@ import { Content } from "./Content"
 import { KPointer, pointer } from "@koalaui/interop"
 
 export class ComponentContent<T = undefined> implements Content {
+    // the name of "builderNode_" is used in ace_engine/interfaces/native/node/native_node_ani.cpp.
     private builderNode_: BuilderNode<T>;
     private parentWeak_?: WeakRef<FrameNode>;
     private attachedNodeRef_?:pointer;
