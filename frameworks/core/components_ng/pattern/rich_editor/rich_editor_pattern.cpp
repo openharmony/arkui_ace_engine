@@ -13164,7 +13164,7 @@ void RichEditorPattern::ReportComponentChangeEvent() {
     CHECK_NULL_VOID(value);
     value->Put("text", str.c_str());
     UiSessionManager::GetInstance()->ReportComponentChangeEvent(frameId_, "event", value);
-    SEC_TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "nodeId:[%{public}d] RichEditor reportComponentChangeEvent %{public}d",
+    SEC_TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "nodeId:[%{public}d] RichEditor reportComponentChangeEvent %{public}zu",
         frameId_, str.length());
 #endif
 }
