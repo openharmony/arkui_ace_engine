@@ -8848,16 +8848,20 @@ void RichEditorPattern::UpdateAIMenuOptions()
     } else {
         auto aiItemOptions = GetAIItemOption();
         auto isShowAIMenuOption = TextPattern::PrepareAIMenuOptions(aiItemOptions);
-        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "UpdateAIMenuOptions isShowAIMenuOption=%{public}d", isShowAIMenuOption);
         SetIsShowAIMenuOption(isShowAIMenuOption);
         SetAIItemOption(aiItemOptions);
     }
-    bool isAskCeliaEnabled = (copyOption_ == CopyOptions::Local || copyOption_ == CopyOptions::Distributed) &&
-        ((NeedShowAIDetect() && !IsShowAIMenuOption()) || (IsEditing() && IsSelected()));
+    bool isAskCeliaEnabled = (copyOption_ == CopyOptions::Local || copyOption_ == CopyOptions::Distributed);
+    if (IsEditing()) {
+        isAskCeliaEnabled &= IsSelected();
+    } else {
+        isAskCeliaEnabled &= !IsShowAIMenuOption();
+    }
     SetIsAskCeliaEnabled(isAskCeliaEnabled);
-
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "UpdateAIMenuOptions isShowAIMenuOption=%{public}d "
+        "isAskCeliaEnabled=%{public}d", isShowAIMenuOption_, isAskCeliaEnabled_);
     CHECK_NULL_VOID(dataDetectorAdapter_);
-    if (IsAskCeliaEnabled() && !NeedShowAIDetect() &&
+    if (isShowAIMenuOption_ && !NeedShowAIDetect() &&
         dataDetectorAdapter_->textDetectResult_.menuOptionAndAction.empty()) {
         dataDetectorAdapter_->GetAIEntityMenu();
     }

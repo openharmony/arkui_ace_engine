@@ -1032,6 +1032,8 @@ protected:
     bool isSpanStringMode_ = false;
     RefPtr<MutableSpanString> styledString_;
     bool keyEventInitialized_ = false;
+    bool isShowAIMenuOption_ = false;
+    bool isAskCeliaEnabled_ = false;
 
     RefPtr<FrameNode> dragNode_;
     RefPtr<LongPressEvent> longPressEvent_;
@@ -1239,10 +1241,8 @@ private:
     // left mouse click(lastLeftMouseClickStyle_ = true) ==> dragging(isTryEntityDragging_ = true)
     MouseFormat lastLeftMouseClickStyle_ = MouseFormat::DEFAULT;
     bool isTryEntityDragging_ = false;
-    bool isShowAIMenuOption_ = false;
     std::unordered_map<TextDataDetectType, AISpan> aiMenuOptions_;
     bool isRegisteredAreaCallback_ = false;
-    bool isAskCeliaEnabled_ = false;
 };
 } // namespace OHOS::Ace::NG
 
