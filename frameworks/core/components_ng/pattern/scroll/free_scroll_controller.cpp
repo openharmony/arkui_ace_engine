@@ -272,10 +272,10 @@ void FreeScrollController::Fling(const OffsetF& velocity)
 
 void FreeScrollController::HandleOffsetUpdate(const OffsetF& currentValue)
 {
+    pattern_.MarkDirty();
     if (state_ == State::DRAG) {
         return; // callbacks and checks already handled in HandlePanUpdate
     }
-    pattern_.MarkDirty();
 
     FireOnWillScroll(currentValue - prevOffset_, ToScrollState(state_), ToScrollSource(state_));
     const bool reachedEdge = CheckCrashEdge(currentValue, pattern_.GetViewPortExtent() - pattern_.GetViewSize());
