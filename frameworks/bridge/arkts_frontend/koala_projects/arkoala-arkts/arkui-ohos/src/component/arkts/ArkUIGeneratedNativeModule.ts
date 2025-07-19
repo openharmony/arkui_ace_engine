@@ -1229,9 +1229,9 @@ export class ArkUIGeneratedNativeModule {
     native static _GridAttribute_onScrollFrameBegin(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _GridAttribute_onWillScroll(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void 
-    @ani.unsafe.Quick
+    @ani.unsafe.Direct
     native static _GridAttribute_onDidScroll(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void 
-    @ani.unsafe.Quick
+    @ani.unsafe.Direct
     native static _GridAttribute_edgeEffect(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _GridItem_construct(id: KInt, flags: KInt): KPointer
