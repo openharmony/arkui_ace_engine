@@ -346,6 +346,9 @@ public:
     }
 
     virtual void ForceCleanRecognizer() {};
+    virtual void ForceCleanRecognizerWithGroup() {
+        ForceCleanRecognizer();
+    };
     virtual void CleanRecognizerState() {};
 
     bool AboutToAddCurrentFingers(const TouchEvent& event);
