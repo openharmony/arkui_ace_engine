@@ -273,7 +273,7 @@ void GridPattern::FireOnScrollStart(bool withPerfMonitor)
     ScrollablePattern::RecordScrollEvent(Recorder::EventType::SCROLL_START);
     UIObserverHandler::GetInstance().NotifyScrollEventStateChange(
         AceType::WeakClaim(this), ScrollEventType::SCROLL_START);
-    SuggestOpIncGroup(true);
+    // SuggestOpIncGroup(true);
     if (withPerfMonitor) {
         PerfMonitor::GetPerfMonitor()->StartCommercial(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "");
     }
