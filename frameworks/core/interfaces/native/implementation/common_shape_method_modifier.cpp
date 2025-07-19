@@ -140,7 +140,7 @@ void StrokeDashArrayImpl(Ark_NativePointer node,
     // if odd,add twice
     auto length = dashArray->size();
     if (length & 1) {
-        for (int32_t i = 0; i < length; i++) {
+        for (int32_t i = 0; i < static_cast<int32_t>(length); i++) {
             dashArray->emplace_back((*dashArray)[i]);
         }
     }

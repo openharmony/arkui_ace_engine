@@ -76,7 +76,13 @@ private:
         assert(ownData);
         assert(newLength > dataLength);
         auto* newData = reinterpret_cast<uint8_t*>(malloc(newLength));
-        memcpy(newData, data, position);
+        if (newData == NULL) {
+            return;
+        }
+        if (data == NULL || memcpy_s(newData, newLength, data, position) != 0) {
+            free(newData);
+            return;
+        }
         free(data);
         data = newData;
     }

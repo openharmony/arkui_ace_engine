@@ -125,7 +125,7 @@ namespace OHOS::Ace::NG::Converter {
         T AllocateMap(std::size_t size)
         {
             T result;
-            result.size = size;
+            result.size = static_cast<int32_t>(size);
             result.keys = static_cast<decltype(T().keys)>(Allocate(size * sizeof(*result.keys)));
             result.values = static_cast<decltype(T().values)>(Allocate(size * sizeof(*result.values)));
             return result;
