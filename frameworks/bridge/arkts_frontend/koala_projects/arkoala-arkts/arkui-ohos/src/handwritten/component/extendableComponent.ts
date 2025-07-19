@@ -26,6 +26,7 @@ import {
 } from '@ohos.arkui.stateManagement';
 import { UIContext } from '@ohos/arkui/UIContext';
 import { PeerNode } from '../PeerNode';
+import { Theme } from "@ohos/arkui/theme";
 
 export interface LifeCycle {
     aboutToAppear(): void {}
@@ -162,4 +163,6 @@ export abstract class ExtendableComponent implements LifeCycle {
         }
         return ret;
     }
+
+    onWillApplyTheme(theme: Theme) {}
 }

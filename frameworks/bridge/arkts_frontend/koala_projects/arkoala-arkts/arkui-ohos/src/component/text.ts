@@ -1588,16 +1588,9 @@ export function Text(
     const receiver = remember(() => {
         return new ArkTextComponent()
     })
-    const scope = __context().scope(__id());
     NodeAttach<ArkTextPeer>((): ArkTextPeer => ArkTextPeer.create(receiver), (_: ArkTextPeer) => {
-        const parentRef = scope.parent?.nodeRef;
-        console.log(`FZY Text NodeAttach ${parentRef}`);
-        const parentPeer = parentRef ? findPeerNode(parentRef) : undefined;
-        if (parentPeer && parentPeer.peer && receiver.getPeer()) {
-            console.info(`FZY ArkTextPeer parent ${parentPeer}`)
-            ArkUIAniModule._ApplyParentThemeScopeId(receiver.getPeer().getPeerPtr(), parentPeer.getPeerPtr());
-        }
-        ArkThemeScopeManager.getInstance().onComponentCreateEnter("Text", receiver.getPeer()?.getId(), receiver.isFirstBuild)        
+        ArkThemeScopeManager.getInstance().applyParentThemeScopeId(receiver);
+        ArkThemeScopeManager.getInstance().onComponentCreateEnter("Text", receiver.getPeer()?.getId(), receiver.isFirstBuild)
 
         receiver.setTextOptions(content,value)
         style?.(receiver)
