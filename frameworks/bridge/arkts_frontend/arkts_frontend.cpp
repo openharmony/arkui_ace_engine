@@ -287,4 +287,20 @@ ani_object ArktsFrontend::CallGetUIContextFunc()
     }
     return result;
 }
+
+void* ArktsFrontend::GetEnv()
+{
+    return ArktsAniUtils::GetAniEnv(vm_);
+}
+
+void* ArktsFrontend::preloadArkTSRuntime = nullptr;
+void ArktsFrontend::PreloadAceModule(void* aniEnv)
+{
+    ArktsFrontend::preloadArkTSRuntime = aniEnv;
+}
+
+extern "C" ACE_FORCE_EXPORT void OHOS_ACE_PreloadAceArkTSModule(void* aniEnv)
+{
+    ArktsFrontend::PreloadAceModule(aniEnv);
+}
 } // namespace OHOS::Ace
