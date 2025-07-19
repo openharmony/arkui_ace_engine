@@ -1254,14 +1254,14 @@ HWTEST_F(BubbleTestTwoNg, GetBottomRect001, TestSize.Level1)
     BubbleTestTwoNg::InitGetRectSetting(algorithm);
 
     algorithm.isHalfFoldHover_ = false;
-    Rect rect = algorithm.GetBottomRect();
+    Rect rect = algorithm.GetBottomRect(Dimension(0.0f));
     EXPECT_FLOAT_EQ(rect.Width(), CHILDSIZE_ONE_HUNDRED_EIGHTY);
     EXPECT_FLOAT_EQ(rect.Height(), RESULT_FORTY);
     EXPECT_FLOAT_EQ(rect.Left(), RESULT_TEN);
     EXPECT_FLOAT_EQ(rect.Top(), RESULT_ONE_HUNDRED_FIFTY);
 
     algorithm.isHalfFoldHover_ = true;
-    rect = algorithm.GetBottomRect();
+    rect = algorithm.GetBottomRect(Dimension(0.0f));
     EXPECT_FLOAT_EQ(rect.Width(), CHILDSIZE_ONE_HUNDRED_EIGHTY);
     EXPECT_FLOAT_EQ(rect.Height(), RESULT_FIFTY);
     EXPECT_FLOAT_EQ(rect.Left(), RESULT_TEN);
@@ -1279,14 +1279,14 @@ HWTEST_F(BubbleTestTwoNg, GetTopRect001, TestSize.Level1)
     BubbleTestTwoNg::InitGetRectSetting(algorithm);
 
     algorithm.isHalfFoldHover_ = false;
-    Rect rect = algorithm.GetTopRect();
+    Rect rect = algorithm.GetTopRect(Dimension(0.0f));
     EXPECT_FLOAT_EQ(rect.Width(), CHILDSIZE_ONE_HUNDRED_EIGHTY);
     EXPECT_FLOAT_EQ(rect.Height(), RESULT_FORTY);
     EXPECT_FLOAT_EQ(rect.Left(), RESULT_TEN);
     EXPECT_FLOAT_EQ(rect.Top(), RESULT_TEN);
 
     algorithm.isHalfFoldHover_ = true;
-    rect = algorithm.GetTopRect();
+    rect = algorithm.GetTopRect(Dimension(0.0f));
     EXPECT_FLOAT_EQ(rect.Width(), CHILDSIZE_ONE_HUNDRED_EIGHTY);
     EXPECT_FLOAT_EQ(rect.Height(), RESULT_FIFTY);
     EXPECT_FLOAT_EQ(rect.Left(), RESULT_TEN);
@@ -1304,14 +1304,14 @@ HWTEST_F(BubbleTestTwoNg, GetRightRect001, TestSize.Level1)
     BubbleTestTwoNg::InitGetRectSetting(algorithm);
 
     algorithm.isHalfFoldHover_ = false;
-    Rect rect = algorithm.GetRightRect();
+    Rect rect = algorithm.GetRightRect(Dimension(0.0f));
     EXPECT_FLOAT_EQ(rect.Width(), RESULT_FORTY);
     EXPECT_FLOAT_EQ(rect.Height(), CHILDSIZE_ONE_HUNDRED_EIGHTY);
     EXPECT_FLOAT_EQ(rect.Left(), RESULT_ONE_HUNDRED_FIFTY);
     EXPECT_FLOAT_EQ(rect.Top(), RESULT_TEN);
 
     algorithm.isHalfFoldHover_ = true;
-    rect = algorithm.GetRightRect();
+    rect = algorithm.GetRightRect(Dimension(0.0f));
     EXPECT_FLOAT_EQ(rect.Width(), RESULT_FORTY);
     EXPECT_FLOAT_EQ(rect.Height(), SIZE_TWO_HUNDRED);
     EXPECT_FLOAT_EQ(rect.Left(), RESULT_ONE_HUNDRED_FIFTY);
@@ -1329,14 +1329,14 @@ HWTEST_F(BubbleTestTwoNg, GetLeftRect001, TestSize.Level1)
     BubbleTestTwoNg::InitGetRectSetting(algorithm);
 
     algorithm.isHalfFoldHover_ = false;
-    Rect rect = algorithm.GetLeftRect();
+    Rect rect = algorithm.GetLeftRect(Dimension(0.0f));
     EXPECT_FLOAT_EQ(rect.Width(), RESULT_FORTY);
     EXPECT_FLOAT_EQ(rect.Height(), CHILDSIZE_ONE_HUNDRED_EIGHTY);
     EXPECT_FLOAT_EQ(rect.Left(), RESULT_TEN);
     EXPECT_FLOAT_EQ(rect.Top(), RESULT_TEN);
 
     algorithm.isHalfFoldHover_ = true;
-    rect = algorithm.GetLeftRect();
+    rect = algorithm.GetLeftRect(Dimension(0.0f));
     EXPECT_FLOAT_EQ(rect.Width(), RESULT_FORTY);
     EXPECT_FLOAT_EQ(rect.Height(), SIZE_TWO_HUNDRED);
     EXPECT_FLOAT_EQ(rect.Left(), RESULT_TEN);
