@@ -142,7 +142,7 @@ struct ArkUIAniCommonModifier {
     void (*setOverlayComponent)(ani_long node, ani_long builderPtr, AniOverlayOptions options);
 };
 struct ArkUIAniCustomNodeModifier {
-    ani_long (*constructCustomNode)(ani_int);
+    ani_long (*constructCustomNode)(ani_int, std::function<void()>&& onCleanupFunc);
     ani_object (*queryNavigationInfo)(ani_env* env, ani_long node);
     ani_object (*queryNavDestinationInfo)(ani_env* env, ani_long node);
     ani_object (*queryNavDestinationInfo0)(ani_env* env, ani_long node, ani_int isInner);

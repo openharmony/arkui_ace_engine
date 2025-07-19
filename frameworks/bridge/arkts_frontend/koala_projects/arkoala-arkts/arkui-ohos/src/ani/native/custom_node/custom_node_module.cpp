@@ -28,9 +28,41 @@ ani_long ConstructCustomNode(ani_env* env, [[maybe_unused]] ani_object aniClass,
         return 0;
     }
 
+    ani_vm* vm = nullptr;
+    env->GetVM(&vm);
+
+    std::shared_ptr<ani_wref> weakRef(new ani_wref, [vm](ani_wref* wref) {
+        ani_env* env = nullptr;
+        vm->GetEnv(ANI_VERSION_1, &env);
+        env->WeakReference_Delete(*wref);
+    });
+
+    env->WeakReference_Create(obj, weakRef.get());
+
+    ani_type type;
+    env->Object_GetType(obj, &type);
+
+    ani_method onCleanupMethod;
+    env->Class_FindMethod(static_cast<ani_class>(type), "onCleanup", nullptr, &onCleanupMethod);
+    auto onCleanupFunc = [vm, weakRef, onCleanupMethod]() {
+        ani_env* env = nullptr;
+        if (ANI_OK != vm->GetEnv(ANI_VERSION_1, &env)) {
+            return;
+        }
+        ani_boolean released;
+        ani_ref localRef;
+        if (ANI_OK != env->WeakReference_GetReference(*weakRef, &released, &localRef)) {
+            return;
+        }
+
+        if (!released) {
+            env->Object_CallMethod_Void(static_cast<ani_object>(localRef), onCleanupMethod);
+        }
+    };
+
     // ani_object obj from ts is supposed to be processed here
 
-    ani_long customNode = modifier->getCustomNodeAniModifier()->constructCustomNode(id);
+    ani_long customNode = modifier->getCustomNodeAniModifier()->constructCustomNode(id, onCleanupFunc);
     return customNode;
 }
 

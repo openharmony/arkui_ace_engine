@@ -45,6 +45,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
     ArkStructBase<CustomDelegate<T, T_Options>, T_Options> implements IExtendableComponent{
     private uiContext: UIContext | undefined;
     private instance: ExtendableComponent;
+    private executedAboutToDisappear: boolean = false;
 
     constructor(uiContext: UIContext | undefined, instance: ExtendableComponent) {
         super();
@@ -76,7 +77,10 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
         this.instance.aboutToAppear();
     }
     aboutToDisappear(): void {
-        this.instance.aboutToDisappear();
+        if (!this.executedAboutToDisappear) {
+            this.instance.aboutToDisappear();
+            this.executedAboutToDisappear = true;
+        }
     }
     onDidBuild(): void {
         this.instance.onDidBuild();
@@ -220,6 +224,10 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
 
     isV2(): boolean {
         return this.instance instanceof CustomComponentV2;
+    }
+
+    onCleanup(): void {
+        this.aboutToDisappear();
     }
 }
 

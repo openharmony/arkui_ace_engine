@@ -28,11 +28,12 @@
 
 namespace OHOS::Ace::NG {
 
-ani_long ConstructCustomNode(ani_int id)
+ani_long ConstructCustomNode(ani_int id, std::function<void()>&& onCleanupFunc)
 {
     std::string key = NG::ViewStackProcessor::GetInstance()->ProcessViewId(std::to_string(id));
     auto customNode = NG::CustomNode::CreateCustomNode(id, key);
     customNode->IncRefCount();
+    customNode->SetOnCleanupFunc(std::move(onCleanupFunc));
     TAG_LOGI(AceLogTag::ACE_NATIVE_NODE, "ConstructCustomNode: customNode %{public}p %{public}d",
         AceType::RawPtr(customNode), id);
     if (customNode) {
