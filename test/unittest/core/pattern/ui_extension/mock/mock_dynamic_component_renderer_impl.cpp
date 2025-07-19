@@ -83,8 +83,8 @@ void DynamicComponentRendererImpl::SearchElementInfoByAccessibilityId(int64_t el
 void DynamicComponentRendererImpl::SearchElementInfosByText(int64_t elementId, const std::string& text,
     int64_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output) {}
 
-void DynamicComponentRendererImpl::FindFocusedElementInfo(int64_t elementId, int32_t focusType, int64_t baseParent,
-    Accessibility::AccessibilityElementInfo& output) {}
+void DynamicComponentRendererImpl::FindFocusedElementInfo(int64_t elementId, int32_t focusType,
+    int64_t baseParent, Accessibility::AccessibilityElementInfo& output) {}
 
 void DynamicComponentRendererImpl::FocusMoveSearch(int64_t elementId, int32_t direction, int64_t baseParent,
     Accessibility::AccessibilityElementInfo& output) {}
