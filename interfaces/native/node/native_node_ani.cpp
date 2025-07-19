@@ -15,11 +15,13 @@
 
 #include "native_node_ani.h"
 
+#include "node/node_model.h"
+
 #include "base/error/error_code.h"
 #include "base/log/log.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/implementation/frame_node_peer_impl.h"
-#include "node/node_model.h"
+#include "core/interfaces/native/implementation/node_content_peer.h"
 
 namespace {
 constexpr char NAV_PATH_STACK_CLASS[] = "Larkui/component/navigation/NavPathStack;";
@@ -167,6 +169,44 @@ int32_t OH_ArkUI_NativeModule_GetContextFromAniValue(ani_env* env, ani_object co
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     *handle = new ArkUI_Context({ .id = instanceId });
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_NativeModule_GetNodeContentFromAniValue(
+    ani_env* env, ani_object nodeContent, ArkUI_NodeContentHandle* content)
+{
+    if (env == nullptr) {
+        LOGE("env is nullptr");
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    ani_ref nodeContentPeerRef;
+    if (env->Object_GetFieldByName_Ref(nodeContent, "nativePtr_", &nodeContentPeerRef) != ANI_OK) {
+        LOGE("fail to get nativePtr_ from nodeContent");
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    ani_object nodeContentPeerObj = static_cast<ani_object>(nodeContentPeerRef);
+    ani_class pointerClass;
+    env->FindClass("Lstd/core/Long;", &pointerClass);
+    ani_boolean isPointer;
+    ani_status status = env->Object_InstanceOf(nodeContentPeerObj, pointerClass, &isPointer);
+    if (status != ANI_OK || !isPointer) {
+        LOGE("nodeContentPeerObj class is error");
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+
+    ani_long nodeContentPeerPtr;
+    status = env->Object_CallMethodByName_Long(nodeContentPeerObj, "unboxed", ":J", &nodeContentPeerPtr);
+    if (status != ANI_OK) {
+        LOGE("unbox nodeContentPeerObj fail");
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+
+    auto* nodeContentPeer = reinterpret_cast<NodeContentPeer*>(nodeContentPeerPtr);
+    if (nodeContentPeer == nullptr) {
+        LOGE("fail to get nodeContentPeer");
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    *content = reinterpret_cast<ArkUI_NodeContentHandle>(OHOS::Ace::AceType::RawPtr(nodeContentPeer->content));
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
 }
 

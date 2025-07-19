@@ -3529,6 +3529,10 @@
     },
     {
         "first_introduced": "20",
+        "name": "OH_ArkUI_NativeModule_GetNodeContentFromAniValue"
+    },
+    {
+        "first_introduced": "20",
         "name": "OH_ArkUI_NativeModule_GetNavDestinationAniParam"
     }
 ]
