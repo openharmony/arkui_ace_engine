@@ -21,6 +21,7 @@ import { ArkRootPeer } from "./component"
 import { ReusablePool } from "./ReusablePool"
 import { StateStylesOps } from './component/arkui-custom'
 import { ArkUIAniModule } from "arkui.ani"
+import { StateUpdateLoop } from "./stateManagement"     
 
 export const PeerNodeType = 11
 export const RootPeerType = 33
@@ -215,7 +216,9 @@ export class PeerNode extends IncrementalNode {
             const manager = GlobalStateManager.instance
             this._uiStateStyle = manager.mutableState<int32>(0 as int32, true)
             StateStylesOps.onStateStyleChange(this.getPeerPtr(), (state: int32) => {
-                this._uiStateStyle!.value = state
+                StateUpdateLoop.add(() => {
+                    this._uiStateStyle!.value = state
+                })
             })
             return this._uiStateStyle!;
         }
