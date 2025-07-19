@@ -32,6 +32,7 @@ CustomNode* CustomNodeStatic::ConstructCustomNode(int32_t id, KoalaPageInfo&& in
     customNode->SetOnPageHideFunc(std::move(info.onPageHideFunc));
     customNode->SetOnBackPressedFunc(std::move(info.onBackPressedFunc));
     customNode->SetPageTransitionFunc(std::move(info.pageTransitionFunc));
+    customNode->SetOnCleanupFunc(std::move(info.onCleanupFunc));
 
     return AceType::RawPtr(customNode);
 }
