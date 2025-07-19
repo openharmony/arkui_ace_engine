@@ -19,12 +19,14 @@ import { UIContext } from "@ohos/arkui/UIContext"
 import { ContextRecord } from "arkui/handwritten/UIContextImpl";
 import { ArkStructBase } from "../ArkStructBase"
 import { ExtendableComponent, IExtendableComponent } from "./extendableComponent";
-import { GeometryInfo, Layoutable, Measurable, SizeResult, Theme } from "./common"
+import { GeometryInfo, Layoutable, Measurable, SizeResult } from "./common"
 import { ConstraintSizeOptions } from "./units"
 import { LocalStorage } from '@ohos.arkui.stateManagement';
 import { PeerNode } from "../PeerNode"
 import { ArkUIAniModule } from "arkui.ani"
 import { uiObserver } from '@ohos/arkui/observer'
+import { Theme } from '@ohos/arkui/theme';
+import { ArkThemeScopeManager } from "arkui/handwritten/theme/ArkThemeScopeManager";
 
 export interface PageLifeCycle {
     onPageShow(): void {}
@@ -51,6 +53,8 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
         this.uiContext = uiContext;
         this.instance = instance;
         this.instance.setDelegate(this);
+
+        ArkThemeScopeManager.getInstance().onViewPUCreate(this);
     }
 
     get isCustomLayout(): boolean {
@@ -179,6 +183,8 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
     // Theme
     onWillApplyTheme(theme: Theme): void {
         // TODO: this.instance.onWillApplyTheme(theme);
+        this.instance.onWillApplyTheme(theme);
+        console.log(`FZY CustomDelegate onWillApplyTheme`);
     }
 
     protected __initializeStruct(
@@ -220,6 +226,10 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
 
     isV2(): boolean {
         return this.instance instanceof CustomComponentV2;
+    }
+
+    onGlobalThemeChanged(theme: Theme): void {
+        this.onWillApplyTheme(theme);
     }
 }
 

@@ -20,6 +20,7 @@ import { LocalStorage } from '@ohos.arkui.stateManagement';
 import { PeerNode } from "../PeerNode";
 import { uiObserver } from "@ohos/arkui/observer"
 import { IProviderDecoratedVariable } from "../stateManagement/decorator";
+import { Theme } from "@ohos/arkui/theme";
 
 export interface LifeCycle {
     aboutToAppear(): void {}
@@ -138,4 +139,6 @@ export abstract class ExtendableComponent implements LifeCycle {
     getPeerNode(): PeerNode | undefined {
         return this.delegate_!.getPeerNode();
     }
+
+    onWillApplyTheme(theme: Theme) {}
 }

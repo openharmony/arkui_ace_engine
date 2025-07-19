@@ -18,15 +18,17 @@ import { ThemeColorMode } from "arkui/component/common";
 import { ArkThemeBase } from './ArkThemeBase';
 import { WithThemeOptions } from 'arkui/component/withTheme';
 import { int32 } from "@koalaui/common";
+import { ArkStructBase } from 'arkui/ArkStructBase';
+import { ArkCustomComponent } from 'arkui/ArkCustomComponent';
 
-class ArkThemeScopeItem {
+export class ArkThemeScopeItem {
     elmtId: int32 = -1;
     // ownerId: number;
-    // owner: ViewPuInternal;
+    owner?: ArkCustomComponent;
     name: string = "";
     isInWhiteList?: boolean = undefined;
     // the CustomComponent with same elmtId, receives onWillApplyTheme callback
-    // listener?: ViewPuInternal | undefined = undefined;
+    listener?: ArkCustomComponent = undefined;
 }
 
 class ArkThemeScopeArray extends Array<ArkThemeScopeItem> {
@@ -138,23 +140,25 @@ export class ArkThemeScope {
      *
      * @param listener the Custom component
      */
-    // addCustomListenerInScope(listener: ViewPuInternal) {
-    //     const len = this.components ? this.components.length : -1;
-    //     if (len <= 0) {
-    //         return;
-    //     }
-    //     const listenerId = listener.id__();
-    //     // the last ThemeScopeItem probably corresponds to Custom component
-    //     let themeScopeItem = this.components[len - 1];
-    //     if (themeScopeItem.elmtId === listenerId) {
-    //         themeScopeItem.listener = listener;
-    //         return;
-    //     }
-    //     themeScopeItem = this.components.find((item) => item.elmtId === listenerId);
-    //     if (themeScopeItem) {
-    //         themeScopeItem.listener = listener;
-    //     }
-    // }
+    addCustomListenerInScope(listener: ArkCustomComponent) {
+        console.log(`FZY addCustomListenerInScope 111`);
+        const len = this.components ? this.components!.length : -1;
+        if (len <= 0) {
+            return;
+        }
+        const listenerId = listener.getPeer()!.getId();
+        console.log(`FZY addCustomListenerInScope 222, ${listenerId}`);
+        // the last ThemeScopeItem probably corresponds to Custom component
+        let themeScopeItem = this.components![len - 1];
+        if (themeScopeItem.elmtId === listenerId) {
+            themeScopeItem.listener = listener;
+            return;
+        }
+        let searchThemeScope = this.components!.find((item) => item.elmtId === listenerId);
+        if (searchThemeScope) {
+            searchThemeScope.listener = listener;
+        }
+    }
 
     /**
      * Remove components from the current theme scope by elmtId
