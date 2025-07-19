@@ -288,7 +288,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
           // send viewPropertyHasChanged right away
           this.owningView_.viewPropertyHasChanged(this.info_, this.dependentElmtIdsByProperty_.getAllPropertyDependencies());
         } else {
-          this.owningView_.collectElementsNeedToUpdateSynchronously(this.info_, this.dependentElmtIdsByProperty_.getAllPropertyDependencies());
+          this.owningView_.collectElementsNeedToUpdateSynchronously(this.info_, this.dependentElmtIdsByProperty_.getAllPropertyDependencies(), true);
         }
         // send changed observed property to profiler
         // only will be true when enable profiler
@@ -323,7 +323,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
           this.owningView_.viewPropertyHasChanged(this.info_, this.dependentElmtIdsByProperty_.getTrackedObjectPropertyDependencies(changedPropertyName, 'notifyTrackedObjectPropertyHasChanged'));
         } else {
           this.owningView_.collectElementsNeedToUpdateSynchronously(this.info_,
-            this.dependentElmtIdsByProperty_.getTrackedObjectPropertyDependencies(changedPropertyName, 'notifyTrackedObjectPropertyHasChanged'));
+            this.dependentElmtIdsByProperty_.getTrackedObjectPropertyDependencies(changedPropertyName, 'notifyTrackedObjectPropertyHasChanged'), false);
         }
         
         // send changed observed property to profiler
