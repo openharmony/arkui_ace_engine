@@ -534,12 +534,57 @@ TEST_F(FreeScrollTest, MouseWheel001)
     CreateFreeContent({ CONTENT_W, CONTENT_H });
     CreateScrollDone();
     MouseScrollStart();
-    EXPECT_EQ(pattern_->freeScroll_->state_, State::DRAG);
+    auto& freeScroll = *pattern_->freeScroll_;
+    EXPECT_EQ(freeScroll.state_, State::DRAG);
     MouseScrollUpdate({ 0, -DELTA_Y });
-    EXPECT_EQ(pattern_->freeScroll_->state_, State::DRAG);
+    EXPECT_EQ(freeScroll.state_, State::DRAG);
     EXPECT_EQ(GetChildOffset(frameNode_, 0), OffsetF(0, -DELTA_Y));
+    EXPECT_TRUE(freeScroll.mouseWheelScrollIsVertical_);
     MouseScrollEnd();
-    EXPECT_EQ(pattern_->freeScroll_->state_, State::IDLE);
+    EXPECT_EQ(freeScroll.state_, State::IDLE);
+    ASSERT_TRUE(freeScroll.axisAnimator_);
+    EXPECT_TRUE(freeScroll.axisAnimator_->IsRunning());
+    MouseScrollStart();
+    EXPECT_TRUE(freeScroll.axisAnimator_->IsRunning()); // next mouse event shouldn't stop animation
+    PanStart({});
+    EXPECT_FALSE(freeScroll.axisAnimator_->IsRunning()); // drag event should stop animation
+}
+
+/**
+ * @tc.name: MouseWheel002
+ * @tc.desc: Test wheel scroll frame callback
+ * @tc.type: FUNC
+ */
+TEST_F(FreeScrollTest, MouseWheel002)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetAxis(Axis::FREE);
+    CreateFreeContent({ CONTENT_W, CONTENT_H });
+    CreateScrollDone();
+    auto& freeScroll = *pattern_->freeScroll_;
+    MouseScrollStart();
+    MouseScrollUpdate({ 0, -DELTA_Y });
+    freeScroll.HandleAxisAnimationFrame(-DELTA_Y / 2);
+    FlushUITasks(frameNode_);
+    EXPECT_EQ(GetChildOffset(frameNode_, 0), OffsetF(0, -DELTA_Y / 2));
+    freeScroll.HandleAxisAnimationFrame(-DELTA_Y);
+    MouseScrollUpdate({ 0, -DELTA_Y });
+    EXPECT_EQ(freeScroll.axisAnimator_->GetAxisScrollMotion()->GetFinalPosition(), -DELTA_Y * 2);
+    MouseScrollEnd();
+    MouseScrollStart();
+    MouseScrollUpdate({ -DELTA_X, 0 });
+    MouseScrollEnd();
+    EXPECT_TRUE(freeScroll.axisAnimator_->IsRunning());
+    freeScroll.HandleAxisAnimationFrame(-DELTA_X);
+    FlushUITasks(frameNode_);
+    EXPECT_EQ(GetChildOffset(frameNode_, 0), OffsetF(-DELTA_X, -DELTA_Y));
+
+    freeScroll.ScrollTo({LARGE_DELTA_X, LARGE_DELTA_Y}, std::nullopt); // start a scroll animation
+    freeScroll.HandleAxisAnimationFrame(-DELTA_X); // should be ignored
+    FlushUITasks(frameNode_);
+    EXPECT_EQ(GetChildOffset(frameNode_, 0), OffsetF(-DELTA_X, -DELTA_Y));
+    MockAnimationManager::GetInstance().Reset();
 }
 
 /**
@@ -1319,5 +1364,43 @@ TEST_F(FreeScrollTest, OnScrollEdge002)
     EXPECT_EQ(triggeredEdges.size(), 2);
     EXPECT_EQ(triggeredEdges.front(), ScrollEdge::LEFT);
     EXPECT_EQ(triggeredEdges.back(), ScrollEdge::BOTTOM);
+}
+
+/**
+ * @tc.name: ScrollableState001
+ * @tc.desc: Test enableScroll after switching axis
+ * @tc.type: FUNC
+ */
+TEST_F(FreeScrollTest, ScrollableState001)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetAxis(Axis::VERTICAL);
+    model.SetScrollEnabled(false);
+    CreateScrollDone();
+
+    EXPECT_FALSE(pattern_->scrollableEvent_->GetEnabled());
+    ScrollModelNG::SetAxis(frameNode_.GetRawPtr(), Axis::FREE);
+    ScrollModelNG::SetScrollEnabled(frameNode_.GetRawPtr(), true);
+    pattern_->OnModifyDone();
+    EXPECT_TRUE(pattern_->scrollableEvent_->GetEnabled());
+}
+
+/**
+ * @tc.name: GestureReset001
+ * @tc.desc: Ensure gesture->IsEnabled() is synced with scroll state
+ * @tc.type: FUNC
+ */
+TEST_F(FreeScrollTest, GestureReset001)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetAxis(Axis::FREE);
+    model.SetScrollEnabled(false);
+    CreateScrollDone();
+    auto gesture = pattern_->freeScroll_->GetFreePanGesture();
+    EXPECT_FALSE(gesture->IsEnabled());
+    gesture->ResetStatusOnFinish(); // reset automatically called when a gesture finishes
+    EXPECT_TRUE(gesture->IsEnabled());
+    gesture = pattern_->freeScroll_->GetFreePanGesture();
+    EXPECT_FALSE(gesture->IsEnabled());
 }
 } // namespace OHOS::Ace::NG

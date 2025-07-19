@@ -64,6 +64,7 @@ void ScrollPattern::OnModifyDone()
         // need to init after scrollableEvent
         if (axis == Axis::FREE) {
             freeScroll_ = MakeRefPtr<FreeScrollController>(*this);
+            SetScrollEnabled(true); // always enable scrollEvent
             scrollBar2d_ = MakeRefPtr<ScrollBar2D>(*this);
             SetScrollBar(DisplayMode::OFF); // turn off single-axis scrollBar
             auto* ctx = GetRenderContext();
@@ -181,8 +182,10 @@ bool ScrollPattern::SetScrollProperties(const RefPtr<LayoutWrapper>& dirty)
     auto layoutAlgorithm = DynamicCast<ScrollLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithm, false);
     currentOffset_ = layoutAlgorithm->GetCurrentOffset();
-    if (freeScroll_) {
+    if (freeScroll_ && scrollBar2d_) {
         freeScroll_->OnLayoutFinished(layoutAlgorithm->GetFreeOffset(), layoutAlgorithm->GetScrollableArea());
+        scrollBar2d_->SyncLayout(
+            layoutAlgorithm->GetFreeOffset(), layoutAlgorithm->GetViewSize(), layoutAlgorithm->GetViewPortExtent());
     }
     auto oldScrollableDistance = scrollableDistance_;
     scrollableDistance_ = layoutAlgorithm->GetScrollableDistance();
@@ -818,9 +821,7 @@ void ScrollPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scroll
 
 void ScrollPattern::UpdateScrollBarOffset()
 {
-    if (scrollBar2d_ && freeScroll_) {
-        // update 2d scroll bar
-        scrollBar2d_->SyncLayout(freeScroll_->GetOffset(), GetViewSize(), GetViewPortExtent());
+    if (freeScroll_) {
         return;
     }
     CheckScrollBarOff();
