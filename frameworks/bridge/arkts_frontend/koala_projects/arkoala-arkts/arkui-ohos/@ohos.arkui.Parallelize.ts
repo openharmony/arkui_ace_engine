@@ -96,7 +96,7 @@ export interface ParallelAttribute {
 }
 
 /** @memo */
-export function Parallel(
+export function ParallelizeUI(
     /** @memo */
     style: ((attributes: ParallelAttribute) => void) | undefined,
     options?: ParallelOption | undefined,
