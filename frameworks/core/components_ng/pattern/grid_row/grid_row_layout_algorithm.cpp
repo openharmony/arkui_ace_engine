@@ -549,6 +549,7 @@ void GridRowLayoutAlgorithm::MeasureAdaptiveLayoutChildren(LayoutWrapper* layout
         auto childNode = child->GetHostNode();
         if (childNode && childNode->GetLayoutProperty() && childNode->GetLayoutProperty()->IsExpandConstraintNeeded()) {
             bundle.first.emplace_back(childNode);
+            child->SetDelaySelfLayoutForIgnore();
             child->GetGeometryNode()->SetParentLayoutConstraint(parentConstraint);
             continue;
         }

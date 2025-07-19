@@ -15,8 +15,8 @@
 
 namespace OHOS::Ace::NG {
 template<typename T>
-void LayoutConstraintT<T>::ApplyAspectRatio(
-    float ratio, const std::optional<CalcSize>& calcSize, bool greaterThanApiTen)
+void LayoutConstraintT<T>::ApplyAspectRatio(float ratio, const std::optional<CalcSize>& calcSize,
+    const std::optional<NG::LayoutPolicyProperty>& layoutPolicy, bool greaterThanApiTen)
 {
     if (!Positive(ratio)) {
         // just in case ratio is illegal value
@@ -24,9 +24,9 @@ void LayoutConstraintT<T>::ApplyAspectRatio(
     }
     std::optional<bool> useDefinedWidth;
     if (calcSize) {
-        if (calcSize.value().Width()) {
+        if (calcSize.value().Width() || (layoutPolicy.has_value() && layoutPolicy->IsWidthMatch())) {
             useDefinedWidth = true;
-        } else if (calcSize.value().Height()) {
+        } else if (calcSize.value().Height() || (layoutPolicy.has_value() && layoutPolicy->IsHeightMatch())) {
             useDefinedWidth = false;
         }
     }
