@@ -656,7 +656,6 @@ SwiperParameters JSSwiper::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
     SwiperModel::GetInstance()->SetIsIndicatorCustomSize(
         parseSelectedItemWOk || parseSelectedItemHOk || parseItemWOk || parseItemHOk);
     SetDotIndicatorInfo(obj, swiperParameters, swiperIndicatorTheme);
-    swiperParameters.parametersByUser.insert("dotIndicator");
     return swiperParameters;
 }
 void JSSwiper::SetDotIndicatorInfo(const JSRef<JSObject>& obj, SwiperParameters& swiperParameters,
@@ -1129,7 +1128,6 @@ void JSSwiper::SetIndicatorStyle(const JSCallbackInfo& info)
             swiperParameters.resourceItemSizeValueObject = resItemSizeObj;
         }
     }
-    swiperParameters.parametersByUser.insert("dotIndicator");
     SwiperModel::GetInstance()->SetDotIndicatorStyle(swiperParameters);
     info.ReturnSelf();
 }
