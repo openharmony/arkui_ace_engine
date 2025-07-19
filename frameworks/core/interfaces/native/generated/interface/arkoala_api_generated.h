@@ -14910,7 +14910,7 @@ typedef struct Opt_TouchResult {
     Ark_TouchResult value;
 } Opt_TouchResult;
 typedef struct Ark_TransformationMatrix {
-    Array_Number matrix4x4;
+    int64_t matrix4Object;
 } Ark_TransformationMatrix;
 typedef struct Opt_TransformationMatrix {
     Ark_Tag tag;

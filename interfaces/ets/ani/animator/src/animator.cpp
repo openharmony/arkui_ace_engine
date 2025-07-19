@@ -20,13 +20,20 @@
 #include <string>
 #include <vector>
 
+#include "interop_js/arkts_esvalue.h"
+#include "interop_js/arkts_interop_js_api.h"
+#include "interop_js/hybridgref_ani.h"
+#include "interop_js/hybridgref_napi.h"
+#include "napi/kits/animator/animator_option.h"
+
 #include "base/memory/referenced.h"
 #include "base/utils/string_utils.h"
 #include "bridge/common/utils/utils.h"
-#include "core/animation/animation.h"
 #include "core/animation/animator.h"
+#include "core/animation/animation.h"
 #include "core/animation/curve.h"
 #include "core/animation/spring_motion.h"
+
 namespace OHOS::Ace::Ani {
 constexpr size_t INTERPOLATING_SPRING_PARAMS_SIZE = 4;
 constexpr char INTERPOLATING_SPRING[] = "interpolating-spring";
@@ -47,24 +54,6 @@ constexpr int32_t ANIMATION_DIRETION_NORMAL_NUM = 0;
 constexpr int32_t ANIMATION_DIRETION_REVERSE_NUM = 1;
 constexpr int32_t ANIMATION_DIRETION_ALTERNATE_NUM = 2;
 constexpr int32_t ANIMATION_DIRETION_ALTERNATE_REVERSE_NUM = 3;
-struct AnimatorOption {
-    int32_t duration = 0;
-    int32_t delay = 0;
-    int32_t iterations = 0;
-    double begin = 0.0;
-    double end = 0.0;
-    std::string easing = "ease";
-    std::string fill = "none";
-    std::string direction = "normal";
-
-    std::string ToString() const
-    {
-        return "AnimatorOption:[" + std::to_string(duration) + "," + std::to_string(delay) + "," +
-               std::to_string(iterations) + "," + std::to_string(begin) + "," + std::to_string(end) + "," + easing +
-               "," + fill + "," + direction + "]";
-    }
-};
-
 static AnimationDirection StringToAnimationDirection(const std::string &direction)
 {
     if (direction.compare("alternate") == 0) {
@@ -94,7 +83,7 @@ static FillMode StringToFillMode(const std::string &fillMode)
 class AnimatorResult final {
 public:
     AnimatorResult() = default;
-    AnimatorResult(RefPtr<Animator> &animator, std::shared_ptr<AnimatorOption> &option)
+    AnimatorResult(RefPtr<Animator> &animator, std::shared_ptr<Napi::AnimatorOption> &option)
         : animator_(animator), option_(option)
     {
         ApplyOption();
@@ -106,7 +95,7 @@ public:
         return animator_;
     }
 
-    std::shared_ptr<AnimatorOption> GetAnimatorOption() const
+    std::shared_ptr<Napi::AnimatorOption> GetAnimatorOption() const
     {
         return option_;
     }
@@ -161,6 +150,16 @@ public:
         motion_ = motion;
     }
 
+    void SetAnimatorOption(std::shared_ptr<Napi::AnimatorOption> &animatorOption)
+    {
+        option_ = animatorOption;
+    }
+
+    void SetAnimator(RefPtr<Animator> &animator)
+    {
+        animator_ = animator;
+    }
+
     void ApplyOption()
     {
         CHECK_NULL_VOID(animator_);
@@ -182,7 +181,7 @@ public:
 private:
     RefPtr<Animator> animator_;
     RefPtr<Motion> motion_;
-    std::shared_ptr<AnimatorOption> option_;
+    std::shared_ptr<Napi::AnimatorOption> option_;
     ani_ref onframe_ = nullptr;
     ani_ref onfinish_ = nullptr;
     ani_ref oncancel_ = nullptr;
@@ -300,13 +299,13 @@ std::string ANIUtils_ANIStringToStdString(ani_env *env, ani_string ani_str)
     return content;
 }
 
-static AnimatorResult *GetAnimatorResult(ani_env *env, ani_object obj)
+static AnimatorResult* GetAnimatorResult(ani_env *env, ani_object obj)
 {
     ani_long animatorResultForAni;
     if (ANI_OK != env->Object_GetFieldByName_Long(obj, "animatorResult", &animatorResultForAni)) {
         return nullptr;
     }
-    return reinterpret_cast<AnimatorResult *>(animatorResultForAni);
+    return reinterpret_cast<AnimatorResult*>(animatorResultForAni);
 }
 
 static JsSimpleAnimatorOption *GetJsSimpleAnimatorOption(ani_env *env, ani_object obj)
@@ -410,7 +409,7 @@ static void JSPlay(ani_env *env, ani_object obj)
     animator->PrintVsyncInfoIfNeed();
 }
 
-static void ParseAnimatorOption(ani_env *env, ani_object obj, std::shared_ptr<AnimatorOption> option)
+static void ParseAnimatorOption(ani_env *env, ani_object obj, std::shared_ptr<Napi::AnimatorOption> option)
 {
     ani_double durationAni;
     ani_double iterationsAni;
@@ -474,7 +473,7 @@ static void SetOnfinish([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_obje
     return;
 }
 
-static RefPtr<Motion> ParseOptionToMotion(const std::shared_ptr<AnimatorOption> &option)
+static RefPtr<Motion> ParseOptionToMotion(const std::shared_ptr<Napi::AnimatorOption> &option)
 {
     const auto &curveStr = option->easing;
     if (curveStr.back() != ')') {
@@ -558,7 +557,7 @@ static void SetOnframe([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_objec
     auto onFrameCallback = [env,
                                onframeGlobalRef,
                                id = animator->GetId(),
-                               weakOption = std::weak_ptr<AnimatorOption>(animatorResult->GetAnimatorOption())](
+                               weakOption = std::weak_ptr<Napi::AnimatorOption>(animatorResult->GetAnimatorOption())](
                                double value) {
         auto fnObj = reinterpret_cast<ani_fn_object>(onframeGlobalRef);
         auto option = weakOption.lock();
@@ -644,6 +643,56 @@ static void SetOnrepeat([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_obje
         env->FunctionalObject_Call(fnObj, 0, NULL, &result);
     });
     return;
+}
+
+static ani_object AnimatorTransferStatic(ani_env *aniEnv, ani_object, ani_object input)
+{
+    ani_object animatorObj = {};
+    static const char *className = "L@ohos/animator/AnimatorResultInner;";
+    ani_class cls;
+    if (ANI_OK != aniEnv->FindClass(className, &cls)) {
+        TAG_LOGI(AceLogTag::ACE_ANIMATION, "[ANI] find class fail");
+        return animatorObj;
+    }
+
+    ani_method ctor;
+    if (ANI_OK != aniEnv->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
+        TAG_LOGI(AceLogTag::ACE_ANIMATION, "[ANI] find method fail");
+        return animatorObj;
+    }
+
+    if (aniEnv == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_ANIMATION, "[ANI] aniEnv is null");
+        return nullptr;
+    }
+    void *unwrapResult = nullptr;
+    bool success = arkts_esvalue_unwrap(aniEnv, input, &unwrapResult);
+    if (!success) {
+        TAG_LOGE(AceLogTag::ACE_ANIMATION, "[ANI] failed to unwrap");
+        return nullptr;
+    }
+    if (unwrapResult == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_ANIMATION, "[ANI] null unwrapResult");
+        return nullptr;
+    }
+    auto animatorResultPre = reinterpret_cast<OHOS::Ace::Napi::AnimatorResult*>(unwrapResult);
+    if (animatorResultPre == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_ANIMATION, "[ANI] null animatorResult");
+        return nullptr;
+    }
+
+    auto option = animatorResultPre->GetAnimatorOption();
+    auto motion = animatorResultPre->GetMotion();
+    auto animator = animatorResultPre->GetAnimator();
+    auto animatorResult = new AnimatorResult();
+    animatorResult->SetMotion(motion);
+    animatorResult->SetAnimatorOption(option);
+    animatorResult->SetAnimator(animator);
+    if (ANI_OK != aniEnv->Object_New(cls, ctor, &animatorObj, reinterpret_cast<ani_long>(animatorResult))) {
+        TAG_LOGI(AceLogTag::ACE_ANIMATION, "[ANI] create animatorResult fail");
+        return animatorObj;
+    }
+    return animatorObj;
 }
 
 void ParseExpectedFrameRateRange(ani_env *env, ani_object objOption,
@@ -740,26 +789,26 @@ std::string AnimationDirectionToString(const AnimationDirection& direction)
 
 ani_object ANICreate(ani_env *env, [[maybe_unused]] ani_object object, [[maybe_unused]] ani_object aniOption)
 {
-    ani_object animator_obj = {};
+    ani_object animatorObj = {};
     static const char *className = "L@ohos/animator/AnimatorResultInner;";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         TAG_LOGI(AceLogTag::ACE_ANIMATION, "[ANI] find class fail");
-        return animator_obj;
+        return animatorObj;
     }
 
     ani_method ctor;
     if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
         TAG_LOGI(AceLogTag::ACE_ANIMATION, "[ANI] find method fail");
-        return animator_obj;
+        return animatorObj;
     }
 
     // create animatot and construct animatorResult
-    auto option = std::make_shared<AnimatorOption>();
+    auto option = std::make_shared<Napi::AnimatorOption>();
     if (IsInstanceOfCls(env, aniOption, "L@ohos/animator/SimpleAnimatorOptions;")) {
         auto simpleAnimatorOption = GetJsSimpleAnimatorOption(env, aniOption);
         if (simpleAnimatorOption == nullptr) {
-            return animator_obj;
+            return animatorObj;
         }
         option->begin = simpleAnimatorOption->GetBegin();
         option->end = simpleAnimatorOption->GetEnd();
@@ -784,12 +833,12 @@ ani_object ANICreate(ani_env *env, [[maybe_unused]] ani_object object, [[maybe_u
     auto animatorResult = new AnimatorResult(animator, option);
 
     // bind end with front object
-    if (ANI_OK != env->Object_New(cls, ctor, &animator_obj, reinterpret_cast<ani_long>(animatorResult))) {
+    if (ANI_OK != env->Object_New(cls, ctor, &animatorObj, reinterpret_cast<ani_long>(animatorResult))) {
         TAG_LOGI(AceLogTag::ACE_ANIMATION, "[ANI] create animatorResult fail");
-        return animator_obj;
+        return animatorObj;
     }
 
-    return animator_obj;
+    return animatorObj;
 }
 
 static void ANIReset(ani_env *env, [[maybe_unused]] ani_object object, [[maybe_unused]] ani_object options)
@@ -799,7 +848,7 @@ static void ANIReset(ani_env *env, [[maybe_unused]] ani_object object, [[maybe_u
     if (!animatorResult) {
         return;
     }
-    auto option = std::make_shared<AnimatorOption>();
+    auto option = std::make_shared<Napi::AnimatorOption>();
     ParseAnimatorOption(env, options, option);
     auto animator = animatorResult->GetAnimator();
     if (!animator) {
@@ -1018,6 +1067,7 @@ ani_status BindAnimatorResult(ani_env *env)
         ani_native_function{"reset", "L@ohos/animator/AnimatorOptions;:V", reinterpret_cast<void *>(ANIReset)},
         ani_native_function{"setExpectedFrameRateRange", nullptr,
             reinterpret_cast<void *>(JSSetExpectedFrameRateRange)},
+        ani_native_function{ "nativeTransferStatic", nullptr, reinterpret_cast<void*>(AnimatorTransferStatic)}
     };
 
     if (ANI_OK != env->Class_BindNativeMethods(cls, methods.data(), methods.size())) {

@@ -18,6 +18,7 @@
 arkui_files = [
   "arkui-preprocessed/@ohos.animator.ets",
   "arkui-preprocessed/@ohos.arkui.Parallelize.ets",
+  "arkui-preprocessed/@ohos.arkui.shape.ets",
   "arkui-preprocessed/@ohos.arkui.UIContext.ets",
   "arkui-preprocessed/@ohos.arkui.componentSnapshot.ets",
   "arkui-preprocessed/@ohos.arkui.componentUtils.ets",
@@ -449,6 +450,7 @@ arkui_path_keys = [
   "@ohos/arkui/focusController",
   "@ohos/arkui/componentSnapshot",
   "@ohos/mediaquery",
+  "@ohos/arkui/shape",
   "@ohos.multimodalInput.intentionCode",
   "@ohos/arkui/dragController",
   "#stateMgmtTool",
@@ -488,6 +490,7 @@ arkui_path_values = [
   "arkui-preprocessed/@ohos.arkui.focusController.ets",
   "arkui-preprocessed/@ohos.arkui.componentSnapshot.ets",
   "arkui-preprocessed/@ohos.mediaquery.ets",
+  "arkui-preprocessed/@ohos.arkui.shape.ets",
   "arkui-preprocessed/@ohos.multimodalInput.intentionCode.ets",
   "arkui-preprocessed/@ohos.arkui.dragController.ets",
   "arkui-preprocessed/arkui/stateManagement/tools/arkts",

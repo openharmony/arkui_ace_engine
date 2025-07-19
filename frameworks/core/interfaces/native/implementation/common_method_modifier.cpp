@@ -3533,8 +3533,12 @@ void Transform0Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CommonMethodModelNG::SetTransform0(frameNode, convValue);
+    auto addr = value->value.matrix4Object;
+    auto convValue = reinterpret_cast<Matrix4 *>(addr);
+    if (!convValue) {
+        return;
+    }
+    ViewAbstract::SetTransformMatrix(frameNode, *convValue);
 }
 void Transform1Impl(Ark_NativePointer node,
                     const Opt_Object* value)
@@ -4354,19 +4358,30 @@ void ClipShape0Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<RefPtr<BasicShape>>(value);
-    if (convValue.has_value() && convValue.value()) {
-        // TODO: Reset value
-        // ViewAbstract::SetClipShape(convValue.value());
+    auto addr = value->value.value0;
+    auto convValue = reinterpret_cast<CircleShapePeer* >(addr);
+    if (!convValue) {
+        return;
     }
+    if (!convValue->shape) {
+        return;
+    }
+    ViewAbstract::SetClipShape(frameNode, convValue->shape);
 }
 void ClipShape1Impl(Ark_NativePointer node,
                     const Opt_Union_CircleShape_EllipseShape_PathShape_RectShape* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CommonMethodModelNG::SetClipShape1(frameNode, convValue);
+    auto addr = value->value.value0;
+    auto convValue = reinterpret_cast<CircleShapePeer* >(addr);
+    if (!convValue) {
+        return;
+    }
+    if (!convValue->shape) {
+        return;
+    }
+    ViewAbstract::SetClipShape(frameNode, convValue->shape);
 }
 void Mask0Impl(Ark_NativePointer node,
                const Opt_ProgressMask* value)
@@ -4397,17 +4412,30 @@ void MaskShape0Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<RefPtr<BasicShape>>(value);
-    if (convValue.has_value() && convValue.value()) {
-        // TODO: Reset value
-        ViewAbstract::SetMask(convValue.value());
+    auto addr = value->value.value0;
+    auto convValue = reinterpret_cast<CircleShapePeer* >(addr);
+    if (!convValue) {
+        return;
     }
+    if (!convValue->shape) {
+        return;
+    }
+    ViewAbstract::SetMask(frameNode, convValue->shape);
 }
 void MaskShape1Impl(Ark_NativePointer node,
                     const Opt_Union_CircleShape_EllipseShape_PathShape_RectShape* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    auto addr = value->value.value0;
+    auto convValue = reinterpret_cast<CircleShapePeer* >(addr);
+    if (!convValue) {
+        return;
+    }
+    if (!convValue->shape) {
+        return;
+    }
+    ViewAbstract::SetMask(frameNode, convValue->shape);
 }
 void KeyImpl(Ark_NativePointer node,
              const Opt_String* value)
@@ -5759,7 +5787,7 @@ void BindSheetImpl(Ark_NativePointer node,
         Converter::VisitUnion(sheetOptions->title,
             [&sheetStyle](const Ark_SheetTitleOptions& value) {
                 sheetStyle.sheetTitle = OptConvert<std::string>(value.title);
-                sheetStyle.sheetSubtitle = OptConvert<std::string>(value.title);
+                sheetStyle.sheetSubtitle = OptConvert<std::string>(value.subtitle.value);
             },
             [frameNode, node, &cbs](const CustomNodeBuilder& value) {
                 cbs.titleBuilder = [callback = CallbackHelper(value), node]() {
