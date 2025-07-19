@@ -28,6 +28,7 @@
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/layout_policy_property.h"
 #include "core/components_ng/property/measure_property.h"
+#include "core/components_ng/property/magic_layout_property.h"
 
 namespace OHOS::Ace::NG {
 #ifdef ACE_STATIC
@@ -111,7 +112,7 @@ void UpdateOptionSizeByMaxOrMinCalcLayoutConstraint(OptionalSizeF& frameSize,
 
 OptionalSizeF CalcLayoutPolicySingleSide(const std::optional<NG::LayoutPolicyProperty>& childLayoutPolicy,
     const std::unique_ptr<MeasureProperty>& childCalcLayoutConstraint,
-    const std::optional<LayoutConstraintF>& parentConstraint);
+    const std::optional<LayoutConstraintF>& parentConstraint, const MagicItemProperty& magicItemProperty);
 void UpdateSingleSideByMaxOrMinCalcLayoutConstraint(OptionalSizeF& frameSize,
     const std::optional<CalcSize>& calcLayoutConstraintMaxMinSize,
     const std::optional<LayoutConstraintF>& parentConstraint, bool IsMaxSize);

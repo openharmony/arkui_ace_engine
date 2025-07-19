@@ -743,7 +743,8 @@ void LayoutWrapper::ApplyConstraint(LayoutConstraintF constraint)
         auto host = GetHostNode();
         auto greaterThanApiTen = host ? host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TEN)
                                       : Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN);
-        constraint.ApplyAspectRatio(magicItemProperty.GetAspectRatioValue(), idealSize, greaterThanApiTen);
+        constraint.ApplyAspectRatio(magicItemProperty.GetAspectRatioValue(), idealSize,
+            layoutProperty->GetLayoutPolicyProperty(), greaterThanApiTen);
     }
 
     auto&& insets = layoutProperty->GetSafeAreaInsets();

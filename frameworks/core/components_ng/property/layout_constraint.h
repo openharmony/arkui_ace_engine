@@ -96,7 +96,8 @@ struct LayoutConstraintT {
         return NearEqual(first, second);
     }
 
-    void ApplyAspectRatio(float ratio, const std::optional<CalcSize>& calcSize, bool greaterThanApiTen = false);
+    void ApplyAspectRatio(float ratio, const std::optional<CalcSize>& calcSize,
+        const std::optional<NG::LayoutPolicyProperty>& layoutPolicy = std::nullopt, bool greaterThanApiTen = false);
 
     void ApplyAspectRatioToParentIdealSize(bool useWidth, float ratio);
 
