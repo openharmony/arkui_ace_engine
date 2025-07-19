@@ -303,8 +303,11 @@
             "group": "https://gitee.com/arkuiscroll"
         },
         "https://gitee.com/zhoutianer": {
-            "info": "[WaterFlow组件 zhoutianer]",
-            "group": "https://gitee.com/arkuiscroll"
+            "info": "[滚动类组件/Arkoala前端 zhoutianer]",
+            "group": [
+                "https://gitee.com/arkuiscroll",
+                "https://gitee.com/arkuistatemgmt"
+            ]
         },
         "https://gitee.com/xuzhidan": {
             "info": "[导航点 xuzhidan]",
