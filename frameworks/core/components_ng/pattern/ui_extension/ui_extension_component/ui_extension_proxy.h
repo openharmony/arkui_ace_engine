@@ -30,7 +30,10 @@ public:
     void SendData(const RefPtr<WantParamsWrap>& params);
     int32_t SendDataSync(const RefPtr<WantParamsWrap>& wantParams, AAFwk::WantParams& reWantParams);
     RefPtr<UIExtensionPattern> GetPattern() const;
-
+    /* only for 1.2 begin */
+    int32_t SendDataSync(const AAFwk::WantParams& wantParams, AAFwk::WantParams& reWantParams);
+    void SendData(const AAFwk::WantParams& wantParams);
+    /* only for 1.2 end */
 private:
     RefPtr<SessionWrapper> sessionWrapper_;
     WeakPtr<UIExtensionPattern> pattern_;
