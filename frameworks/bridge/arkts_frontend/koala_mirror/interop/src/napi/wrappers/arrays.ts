@@ -51,7 +51,7 @@ function withArray<C extends TypedArray, R>(
 }
 
 export function withPtrArray<R>(data: BigUint64Array, access: Access, exec: ExecWithLength<BigUint64Array | null, R>) {
-    return exec(data ?? null, data?.length ?? 0) // TODO rethink
+    return exec(data ?? null, data?.length ?? 0) // Improve: rethink
 }
 
 export function toPtrArray<T extends Wrapper>(data: Array<T | undefined> | undefined): BigUint64Array {

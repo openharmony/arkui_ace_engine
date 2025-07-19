@@ -30,7 +30,7 @@ import { ArkGridColNode } from '../handwritten/modifiers/ArkGridColNode';
 import { ArkGridColAttributeSet, GridColModifier } from '../GridColModifier';
 
 export class ArkGridColPeer extends ArkCommonMethodPeer {
-    protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component: ComponentBase | undefined, flags: int32 = 0): ArkGridColPeer {
@@ -156,30 +156,6 @@ export class ArkGridColStyle extends ArkCommonMethodStyle implements GridColAttr
         }
 }
 export class ArkGridColComponent extends ArkCommonMethodComponent implements GridColAttribute {
-    protected _modifierHost: ArkGridColNode | undefined;
-    setModifierHost(value: ArkGridColNode): void {
-        this._modifierHost = value;
-    }
-    getModifierHost(): ArkGridColNode {
-        if (this._modifierHost === undefined || this._modifierHost === null) {
-            this._modifierHost = new ArkGridColNode()
-            this._modifierHost!.setPeer(this.getPeer());
-        }
-        return this._modifierHost!;
-    }
-    getAttributeSet(): ArkGridColAttributeSet  {
-        return this.getPeer()._attributeSet as ArkGridColAttributeSet;
-    }
-
-    initAttributeSet<T>(modifier: AttributeModifier<T>): void {
-        let isCommonModifier: boolean = modifier instanceof GridColModifier;
-        if (isCommonModifier) {
-            let commonModifier = modifier as object as GridColModifier;
-            this.getPeer()._attributeSet = commonModifier.attributeSet;
-        } else if (this.getPeer()._attributeSet == null) {
-            this.getPeer()._attributeSet = new ArkGridColAttributeSet();
-        }
-    }
     getPeer(): ArkGridColPeer {
         return (this.peer as ArkGridColPeer)
     }

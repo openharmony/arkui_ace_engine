@@ -37,6 +37,7 @@
 #include "stateMgmt/stateMgmt_module.h"
 #include "shape/shape_module_methods.h"
 #include "xcomponent/xcomponent_module_methods.h"
+#include "condition_scope/condition_scope.h"
 
 ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
 {
@@ -238,6 +239,26 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::ConvertFromPixelMapAni)
         },
         ani_native_function {
+            "_CustomNode_QueryNavigationInfo",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::QueryNavigationInfo)
+        },
+        ani_native_function {
+            "_CustomNode_QueryNavDestinationInfo",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::QueryNavDestinationInfo)
+        },
+        ani_native_function {
+            "_CustomNode_QueryNavDestinationInfo0",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::QueryNavDestinationInfo0)
+        },
+        ani_native_function {
+            "_CustomNode_QueryRouterPageInfo",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::QueryRouterPageInfo)
+        },
+        ani_native_function {
             "_ConvertUtils_ConvertToPixelMapAni",
             "J:L@ohos/multimedia/image/image/PixelMap;",
             reinterpret_cast<void*>(OHOS::Ace::Ani::ConvertToPixelMapAni)
@@ -306,6 +327,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_Invalidate",
             "J:V",
             reinterpret_cast<void*>(OHOS::Ace::Ani::Invalidate)
+        },
+        ani_native_function {
+            "_SetOverlay_ComponentContent",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetOverlayComponentContent)
         },
         ani_native_function {
             "_SetWaterFlowOptions",
@@ -586,6 +612,16 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_OnLayout_InnerLayout",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::OnLayoutInnerLayout)
+        },
+        ani_native_function {
+            "_SetParallelScoped",
+            "Z:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetParallelScoped)
+        },
+        ani_native_function {
+            "_ConditionScopeNode_Construct",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ConstructConditionScope)
         },
     };
 

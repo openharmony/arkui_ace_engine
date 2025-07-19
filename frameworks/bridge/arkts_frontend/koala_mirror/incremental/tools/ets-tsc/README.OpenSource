@@ -1,0 +1,11 @@
+[
+  {
+    "Name": "typescript",
+    "License": "Apache-2.0",
+    "License File": "NOTICE",
+    "Version Number": "4.2.3",
+    "Owner": "lihong67@huawei.com",
+    "Upstream URL": "https://github.com/Microsoft/TypeScript.git",
+    "Description": "TypeScript is a language for application scale JavaScript development."
+  }
+]

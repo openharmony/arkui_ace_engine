@@ -37,11 +37,18 @@ export enum DecoratorNames {
     LOCAL_STORAGE_PROP = "LocalStorageProp",
     LOCAL_STORAGE_LINK = "LocalStorageLink",
     LOCAL_BUILDER = "LocalBuilder",
+    TRACK = "Track",
 }
 
 export enum DecoratorParameters {
     USE_SHARED_STORAGE = "useSharedStorage",
     ALLOW_OVERRIDE = "allowOverride",
+}
+
+export function hasEntryAnnotation(node: arkts.ClassDefinition): boolean {
+    return node.annotations.some((it) =>
+        it.expr !== undefined && arkts.isIdentifier(it.expr) && it.expr.name === DecoratorNames.ENTRY
+    )
 }
 
 export function isDecoratorAnnotation(anno: arkts.AnnotationUsage, decoratorName: DecoratorNames): boolean {
@@ -82,7 +89,6 @@ export function createGetter(
         [arkts.factory.createReturnStatement(returns)]
     )
 
-    const key = arkts.factory.createIdentifier(name, undefined)
     const scriptFunction = arkts.factory.createScriptFunction(
         body,
         undefined,
@@ -91,14 +97,14 @@ export function createGetter(
         false,
         arkts.Es2pandaScriptFunctionFlags.SCRIPT_FUNCTION_FLAGS_GETTER,
         arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_PUBLIC,
-        key,
+        arkts.factory.createIdentifier(name),
         undefined
     )
 
     return arkts.factory.createMethodDefinition(
         arkts.Es2pandaMethodDefinitionKind.METHOD_DEFINITION_KIND_GET,
-        key,
-        arkts.factory.createFunctionExpression(key, scriptFunction),
+        arkts.factory.createIdentifier(name),
+        arkts.factory.createFunctionExpression(arkts.factory.createIdentifier(name), scriptFunction),
         arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_PUBLIC,
         false
     );
@@ -127,7 +133,6 @@ export function createSetter(
     if (needMemo) {
         param.setAnnotations([annotation(InternalAnnotations.MEMO)])
     }
-    const key = arkts.factory.createIdentifier(name, undefined)
     const scriptFunction = arkts.factory.createScriptFunction(
         body,
         undefined,
@@ -136,14 +141,14 @@ export function createSetter(
         false,
         arkts.Es2pandaScriptFunctionFlags.SCRIPT_FUNCTION_FLAGS_SETTER,
         arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_PUBLIC,
-        key,
+        arkts.factory.createIdentifier(name),
         undefined
     )
 
     return arkts.factory.createMethodDefinition(
         arkts.Es2pandaMethodDefinitionKind.METHOD_DEFINITION_KIND_SET,
-        key,
-        arkts.factory.createFunctionExpression(key, scriptFunction),
+        arkts.factory.createIdentifier(name),
+        arkts.factory.createFunctionExpression(arkts.factory.createIdentifier(name), scriptFunction),
         arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_PUBLIC,
         false
     );
@@ -159,7 +164,6 @@ export function createSetter2(
         arkts.factory.createIdentifier('value', type?.clone()),
         false
     );
-    const key = arkts.factory.createIdentifier(name, undefined)
     const scriptFunction = arkts.factory.createScriptFunction(
         body,
         undefined,
@@ -168,14 +172,14 @@ export function createSetter2(
         false,
         arkts.Es2pandaScriptFunctionFlags.SCRIPT_FUNCTION_FLAGS_SETTER,
         arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_PUBLIC,
-        key,
+        arkts.factory.createIdentifier(name),
         undefined
     );
 
     return arkts.factory.createMethodDefinition(
         arkts.Es2pandaMethodDefinitionKind.METHOD_DEFINITION_KIND_SET,
-        key,
-        arkts.factory.createFunctionExpression(key, scriptFunction),
+        arkts.factory.createIdentifier(name),
+        arkts.factory.createFunctionExpression(arkts.factory.createIdentifier(name), scriptFunction),
         arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_PUBLIC,
         false
     );

@@ -12777,6 +12777,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         //auto convValue = Converter::OptConvert<type>(node); // for enums
         //undefinedModelNG::SetRegisterOnDragStart(frameNode, convValue);
     }
+    void RegisterDragPreviewImpl(Ark_NativePointer node,
+                                 const Opt_Union_CustomBuilder_DragItemInfo_String* preview,
+                                 const Opt_PreviewConfiguration* config)
+    {
+    }
+    void RegisterOnDropImpl(Ark_NativePointer node,
+                            const Opt_OnDragEventCallback* eventCallback,
+                            const Opt_DropOptions* dropOptions)
+    {
+    }
     } // DragDropOpsAccessor
     namespace UIContextAtomicServiceBarAccessor {
     Ark_Frame GetBarRectImpl()
@@ -14740,6 +14750,31 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void ClosePopupImpl(Ark_VMContext vmContext,
+        Ark_AsyncWorkerPtr asyncWorker,
+        Ark_PromptAction peer,
+        Ark_NativePointer content,
+        const Callback_Opt_Array_String_Void* promiseValue)
+    {
+    }
+    void OpenMenuImpl(Ark_VMContext vmContext,
+        Ark_AsyncWorkerPtr asyncWorker,
+        Ark_PromptAction peer,
+        Ark_NativePointer content,
+        const Ark_TargetInfo* targetInfo,
+        const Opt_MenuOptions* options,
+        const Callback_Opt_Array_String_Void* promiseValue)
+    {
+    }
+    void UpdateMenuImpl(Ark_VMContext vmContext,
+        Ark_AsyncWorkerPtr asyncWorker,
+        Ark_PromptAction peer,
+        Ark_NativePointer content,
+        const Ark_MenuOptions* options,
+        const Opt_Boolean* partialUpdate,
+        const Callback_Opt_Array_String_Void* promiseValue)
+    {
+    }
+    void CloseMenuImpl(Ark_VMContext vmContext,
         Ark_AsyncWorkerPtr asyncWorker,
         Ark_PromptAction peer,
         Ark_NativePointer content,
@@ -17231,6 +17266,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     } // OffscreenCanvasRenderingContext2DAccessor
+    namespace OverlayOpsAccessor {
+    void SetOverlayAttributeImpl(Ark_NativePointer node,
+                                    const Opt_Union_String_CustomBuilder* value,
+                                    const Opt_OverlayOptions* options)
+    {
+    }
+    } // OverlayOpsAccessor
     namespace OffscreenCanvasAccessor {
     void DestroyPeerImpl(Ark_OffscreenCanvas peer)
     {
@@ -20798,6 +20840,34 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     } // DismissPopupActionAccessor
+    namespace DismissDialogActionAccessor {
+    void DestroyPeerImpl(Ark_DismissDialogAction peer)
+    {
+        auto peerImpl = reinterpret_cast<DismissDialogActionPeerImpl *>(peer);
+        if (peerImpl) {
+            delete peerImpl;
+        }
+    }
+    Ark_DismissDialogAction ConstructImpl()
+    {
+        return {};
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        return reinterpret_cast<void *>(&DestroyPeerImpl);
+    }
+    void DismissImpl(Ark_DismissDialogAction peer)
+    {
+    }
+    Ark_DismissReason GetReasonImpl(Ark_DismissDialogAction peer)
+    {
+        return {};
+    }
+    void SetReasonImpl(Ark_DismissDialogAction peer,
+                       Ark_DismissReason reason)
+    {
+    }
+    } // DismissDialogActionAccessor
     namespace TextShadowStyleAccessor {
     void DestroyPeerImpl(Ark_TextShadowStyle peer)
     {
@@ -22372,6 +22442,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             PromptActionAccessor::OpenPopupImpl,
             PromptActionAccessor::UpdatePopupImpl,
             PromptActionAccessor::ClosePopupImpl,
+            PromptActionAccessor::OpenMenuImpl,
+            PromptActionAccessor::UpdateMenuImpl,
+            PromptActionAccessor::CloseMenuImpl,
         };
         return &PromptActionAccessorImpl;
     }
@@ -23087,7 +23160,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         static const GENERATED_ArkUIPath2DAccessor Path2DAccessorImpl {
             Path2DAccessor::DestroyPeerImpl,
-            Path2DAccessor::CtorImpl,
+            Path2DAccessor::Construct0Impl,
+            Path2DAccessor::Construct1Impl,
+            Path2DAccessor::Construct2Impl,
+            Path2DAccessor::Construct3Impl,
+            Path2DAccessor::Construct4Impl,
+            Path2DAccessor::Construct5Impl,
             Path2DAccessor::GetFinalizerImpl,
             Path2DAccessor::AddPathImpl,
         };
@@ -23260,7 +23338,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         static const GENERATED_ArkUICanvasRenderingContext2DAccessor CanvasRenderingContext2DAccessorImpl {
             CanvasRenderingContext2DAccessor::DestroyPeerImpl,
-            CanvasRenderingContext2DAccessor::CtorImpl,
+            CanvasRenderingContext2DAccessor::ConstructImpl,
             CanvasRenderingContext2DAccessor::GetFinalizerImpl,
             CanvasRenderingContext2DAccessor::ToDataURLImpl,
             CanvasRenderingContext2DAccessor::StartImageAnalyzerImpl,
@@ -23283,7 +23361,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         static const GENERATED_ArkUIOffscreenCanvasRenderingContext2DAccessor OffscreenCanvasRenderingContext2DAccessorImpl {
             OffscreenCanvasRenderingContext2DAccessor::DestroyPeerImpl,
-            OffscreenCanvasRenderingContext2DAccessor::CtorImpl,
+            OffscreenCanvasRenderingContext2DAccessor::ConstructImpl,
             OffscreenCanvasRenderingContext2DAccessor::GetFinalizerImpl,
             OffscreenCanvasRenderingContext2DAccessor::ToDataURLImpl,
             OffscreenCanvasRenderingContext2DAccessor::TransferToImageBitmapImpl,
@@ -23298,7 +23376,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         static const GENERATED_ArkUIOffscreenCanvasAccessor OffscreenCanvasAccessorImpl {
             OffscreenCanvasAccessor::DestroyPeerImpl,
-            OffscreenCanvasAccessor::CtorImpl,
+            OffscreenCanvasAccessor::ConstructImpl,
             OffscreenCanvasAccessor::GetFinalizerImpl,
             OffscreenCanvasAccessor::TransferToImageBitmapImpl,
             OffscreenCanvasAccessor::GetContext2dImpl,
@@ -25042,6 +25120,23 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct DismissPopupActionPeer {
         virtual ~DismissPopupActionPeer() = default;
     };
+
+    const GENERATED_ArkUIDismissDialogActionAccessor* GetDismissDialogActionAccessor()
+    {
+        static const GENERATED_ArkUIDismissDialogActionAccessor DismissDialogActionAccessorImpl {
+            DismissDialogActionAccessor::DestroyPeerImpl,
+            DismissDialogActionAccessor::ConstructImpl,
+            DismissDialogActionAccessor::GetFinalizerImpl,
+            DismissDialogActionAccessor::DismissImpl,
+            DismissDialogActionAccessor::GetReasonImpl,
+            DismissDialogActionAccessor::SetReasonImpl,
+        };
+        return &DismissDialogActionAccessorImpl;
+    }
+
+    struct DismissDialogActionPeer {
+        virtual ~DismissDialogActionPeer() = default;
+    };
     const GENERATED_ArkUITextShadowStyleAccessor* GetTextShadowStyleAccessor()
     {
         static const GENERATED_ArkUITextShadowStyleAccessor TextShadowStyleAccessorImpl {
@@ -25472,6 +25567,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetLetterSpacingStyleAccessor,
             GetLevelOrderAccessor,
             GetDismissPopupActionAccessor,
+            GetDismissDialogActionAccessor,
             GetTextShadowStyleAccessor,
             GetBackgroundColorStyleAccessor,
             GetGestureStyleAccessor,

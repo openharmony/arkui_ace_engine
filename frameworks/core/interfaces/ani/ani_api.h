@@ -63,6 +63,12 @@ struct ArkUIDragInfo {
     bool delayCreating = false;
 };
 
+struct AniOverlayOptions {
+    int32_t alignment = 0;
+    float x = 0.0f;
+    float y = 0.0f;
+};
+
 struct ArkUIAniImageModifier {
     void (*setPixelMap)(ArkUINodeHandle node, void* pixelmap);
     void (*setDrawableDescriptor)(ArkUINodeHandle node, void* drawablem, int type);
@@ -132,9 +138,15 @@ struct ArkUIAniCommonModifier {
     ani_boolean (*isDebugMode)(ArkUI_Int32 id);
     void (*onMeasureInnerMeasure)(ani_env* env, ani_long ptr);
     void (*onLayoutInnerLayout)(ani_env* env, ani_long ptr);
+    void (*setParallelScoped)(ani_boolean parallel);
+    void (*setOverlayComponent)(ani_long node, ani_long builderPtr, AniOverlayOptions options);
 };
 struct ArkUIAniCustomNodeModifier {
-    ani_long (*constructCustomNode)(ani_int id, std::function<std::string()>&& onDumpInspectorFunc);
+    ani_long (*constructCustomNode)(ani_int, std::function<std::string()>&& onDumpInspectorFunc);
+    ani_object (*queryNavigationInfo)(ani_env* env, ani_long node);
+    ani_object (*queryNavDestinationInfo)(ani_env* env, ani_long node);
+    ani_object (*queryNavDestinationInfo0)(ani_env* env, ani_long node, ani_int isInner);
+    ani_object (*queryRouterPageInfo)(ani_env* env, ani_long node);
 };
 struct ArkUIAniDrawModifier {
     void (*setDrawModifier)(ani_env* env, ani_long ptr, ani_int flag, ani_object fnObj);
@@ -230,6 +242,9 @@ struct ArkUIAniXComponentModifier {
         std::function<void(const std::string&, float, float, float, float)>&& onSurfaceChanged,
         std::function<void(const std::string&)>&& onSurfaceDestroyed);
 };
+struct ArkUIAniConditionScopeModifier {
+    ani_long (*constructConditionScope)(ani_int);
+};
 struct ArkUIAniModifiers {
     ArkUI_Int32 version;
     const ArkUIAniImageModifier* (*getImageAniModifier)();
@@ -251,6 +266,7 @@ struct ArkUIAniModifiers {
     const ArkUIAniShapeModifier* (*getArkUIAniShapeModifier)();
     const ArkUIAniStateMgmtModifier* (*getStateMgmtAniModifier)();
     const ArkUIAniXComponentModifier* (*getArkUIAniXComponentModifier)();
+    const ArkUIAniConditionScopeModifier* (*getArkUIAniConditionScopeModifier)();
 };
 
 __attribute__((visibility("default"))) const ArkUIAniModifiers* GetArkUIAniModifiers(void);

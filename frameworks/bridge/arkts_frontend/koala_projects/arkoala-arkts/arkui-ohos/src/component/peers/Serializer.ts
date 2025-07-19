@@ -177,7 +177,21 @@ import { PointerStyle, DataSyncOptions } from '#external'
 export class Serializer extends SerializerBase {
     private static pool?: Array<Serializer> | undefined = undefined
     private static poolTop: int32 = -1
+    private static multithread: boolean = false
+    static setMultithreadMode(): void {
+        if (Serializer.multithread) {
+            return
+        }
+        if (Serializer.poolTop != -1) {
+            throw new Error("Serializer pool is being used. Check if you had released serializers before")
+        }
+        Serializer.multithread = true
+        Serializer.pool = undefined;
+    }
     static hold(): Serializer {
+        if (Serializer.multithread) {
+            return new Serializer()
+        }
         if (!(Serializer.pool != undefined))
         {
             Serializer.pool = new Array<Serializer>(8)
@@ -196,6 +210,10 @@ export class Serializer extends SerializerBase {
         return serializer
     }
     public release(): void {
+        if (Serializer.multithread) {
+            super.release()
+            return
+        }
         if (Serializer.poolTop == -1)
         {
             throw new Error("Serializer pool is empty. Check if you had hold serializers before")
@@ -2568,10 +2586,7 @@ export class Serializer extends SerializerBase {
     }
     writeDismissDialogAction(value: DismissDialogAction): void {
         let valueSerializer : Serializer = this
-        const value_dismiss  = value.dismiss
-        valueSerializer.holdAndWriteCallback(value_dismiss)
-        const value_reason  = value.reason
-        valueSerializer.writeInt32(TypeChecker.DismissReason_ToNumeric(value_reason))
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     writeDismissPopupAction(value: DismissPopupAction): void {
         let valueSerializer : Serializer = this
@@ -17058,15 +17073,15 @@ export class Serializer extends SerializerBase {
             const value_fontWeight_value  = value_fontWeight!
             let value_fontWeight_value_type : int32 = RuntimeType.UNDEFINED
             value_fontWeight_value_type = runtimeType(value_fontWeight_value)
-            if (RuntimeType.NUMBER == value_fontWeight_value_type) {
-                valueSerializer.writeInt8(0 as int32)
-                const value_fontWeight_value_0  = value_fontWeight_value as number
-                valueSerializer.writeNumber(value_fontWeight_value_0)
-            }
-            else if (TypeChecker.isFontWeight(value_fontWeight_value)) {
+            if (TypeChecker.isFontWeight(value_fontWeight_value)) {
                 valueSerializer.writeInt8(1 as int32)
                 const value_fontWeight_value_1  = value_fontWeight_value as FontWeight
                 valueSerializer.writeInt32(TypeChecker.FontWeight_ToNumeric(value_fontWeight_value_1))
+            }
+            else if (RuntimeType.NUMBER == value_fontWeight_value_type) {
+                valueSerializer.writeInt8(0 as int32)
+                const value_fontWeight_value_0  = value_fontWeight_value as number
+                valueSerializer.writeNumber(value_fontWeight_value_0)
             }
             else if (RuntimeType.STRING == value_fontWeight_value_type) {
                 valueSerializer.writeInt8(2 as int32)
@@ -18036,7 +18051,7 @@ export class Serializer extends SerializerBase {
             const value_borderColor_value  = value_borderColor!
             let value_borderColor_value_type : int32 = RuntimeType.UNDEFINED
             value_borderColor_value_type = runtimeType(value_borderColor_value)
-            if ((TypeChecker.isColor(value_borderColor_value)) || (RuntimeType.NUMBER == value_borderColor_value_type) || (RuntimeType.STRING == value_borderColor_value_type) || (RuntimeType.OBJECT == value_borderColor_value_type)) {
+            if ((TypeChecker.isColor(value_borderColor_value)) || (RuntimeType.NUMBER == value_borderColor_value_type) || (RuntimeType.STRING == value_borderColor_value_type) || ((RuntimeType.OBJECT == value_borderColor_value_type) && (TypeChecker.isResource(value_borderColor_value, false, false, false, false, false)))) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_borderColor_value_0  = value_borderColor_value as ResourceColor
                 let value_borderColor_value_0_type : int32 = RuntimeType.UNDEFINED
@@ -18450,7 +18465,7 @@ export class Serializer extends SerializerBase {
             const value_borderColor_value  = value_borderColor!
             let value_borderColor_value_type : int32 = RuntimeType.UNDEFINED
             value_borderColor_value_type = runtimeType(value_borderColor_value)
-            if ((TypeChecker.isColor(value_borderColor_value)) || (RuntimeType.NUMBER == value_borderColor_value_type) || (RuntimeType.STRING == value_borderColor_value_type) || (RuntimeType.OBJECT == value_borderColor_value_type)) {
+            if ((TypeChecker.isColor(value_borderColor_value)) || (RuntimeType.NUMBER == value_borderColor_value_type) || (RuntimeType.STRING == value_borderColor_value_type) || ((RuntimeType.OBJECT == value_borderColor_value_type) && (TypeChecker.isResource(value_borderColor_value, false, false, false, false, false)))) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_borderColor_value_0  = value_borderColor_value as ResourceColor
                 let value_borderColor_value_0_type : int32 = RuntimeType.UNDEFINED
@@ -18876,7 +18891,7 @@ export class Serializer extends SerializerBase {
             const value_borderColor_value  = value_borderColor!
             let value_borderColor_value_type : int32 = RuntimeType.UNDEFINED
             value_borderColor_value_type = runtimeType(value_borderColor_value)
-            if ((TypeChecker.isColor(value_borderColor_value)) || (RuntimeType.NUMBER == value_borderColor_value_type) || (RuntimeType.STRING == value_borderColor_value_type) || (RuntimeType.OBJECT == value_borderColor_value_type)) {
+            if ((TypeChecker.isColor(value_borderColor_value)) || (RuntimeType.NUMBER == value_borderColor_value_type) || (RuntimeType.STRING == value_borderColor_value_type) || ((RuntimeType.OBJECT == value_borderColor_value_type) && (TypeChecker.isResource(value_borderColor_value, false, false, false, false, false)))) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_borderColor_value_0  = value_borderColor_value as ResourceColor
                 let value_borderColor_value_0_type : int32 = RuntimeType.UNDEFINED
@@ -19306,7 +19321,7 @@ export class Serializer extends SerializerBase {
             const value_borderColor_value  = value_borderColor!
             let value_borderColor_value_type : int32 = RuntimeType.UNDEFINED
             value_borderColor_value_type = runtimeType(value_borderColor_value)
-            if ((TypeChecker.isColor(value_borderColor_value)) || (RuntimeType.NUMBER == value_borderColor_value_type) || (RuntimeType.STRING == value_borderColor_value_type) || (RuntimeType.OBJECT == value_borderColor_value_type)) {
+            if ((TypeChecker.isColor(value_borderColor_value)) || (RuntimeType.NUMBER == value_borderColor_value_type) || (RuntimeType.STRING == value_borderColor_value_type) || ((RuntimeType.OBJECT == value_borderColor_value_type) && (TypeChecker.isResource(value_borderColor_value, false, false, false, false, false)))) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_borderColor_value_0  = value_borderColor_value as ResourceColor
                 let value_borderColor_value_0_type : int32 = RuntimeType.UNDEFINED
@@ -20459,7 +20474,7 @@ export class Serializer extends SerializerBase {
             const value_borderColor_value  = value_borderColor!
             let value_borderColor_value_type : int32 = RuntimeType.UNDEFINED
             value_borderColor_value_type = runtimeType(value_borderColor_value)
-            if ((TypeChecker.isColor(value_borderColor_value)) || (RuntimeType.NUMBER == value_borderColor_value_type) || (RuntimeType.STRING == value_borderColor_value_type) || (RuntimeType.OBJECT == value_borderColor_value_type)) {
+            if ((TypeChecker.isColor(value_borderColor_value)) || (RuntimeType.NUMBER == value_borderColor_value_type) || (RuntimeType.STRING == value_borderColor_value_type) || ((RuntimeType.OBJECT == value_borderColor_value_type) && (TypeChecker.isResource(value_borderColor_value, false, false, false, false, false)))) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_borderColor_value_0  = value_borderColor_value as ResourceColor
                 let value_borderColor_value_0_type : int32 = RuntimeType.UNDEFINED
@@ -20583,7 +20598,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_onDidAppear_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_onDidAppear_type)) {
             const value_onDidAppear_value  = value_onDidAppear!
-            valueSerializer.holdAndWriteCallback(value_onDidAppear_value)
+            valueSerializer.holdAndWriteCallback(CallbackTransformer.transfromToCallbackVoid(value_onDidAppear_value))
         }
         const value_onDidDisappear  = value.onDidDisappear
         let value_onDidDisappear_type : int32 = RuntimeType.UNDEFINED
@@ -20591,7 +20606,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_onDidDisappear_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_onDidDisappear_type)) {
             const value_onDidDisappear_value  = value_onDidDisappear!
-            valueSerializer.holdAndWriteCallback(value_onDidDisappear_value)
+            valueSerializer.holdAndWriteCallback(CallbackTransformer.transfromToCallbackVoid(value_onDidDisappear_value))
         }
         const value_onWillAppear  = value.onWillAppear
         let value_onWillAppear_type : int32 = RuntimeType.UNDEFINED
@@ -20599,7 +20614,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_onWillAppear_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_onWillAppear_type)) {
             const value_onWillAppear_value  = value_onWillAppear!
-            valueSerializer.holdAndWriteCallback(value_onWillAppear_value)
+            valueSerializer.holdAndWriteCallback(CallbackTransformer.transfromToCallbackVoid(value_onWillAppear_value))
         }
         const value_onWillDisappear  = value.onWillDisappear
         let value_onWillDisappear_type : int32 = RuntimeType.UNDEFINED
@@ -20607,7 +20622,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_onWillDisappear_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_onWillDisappear_type)) {
             const value_onWillDisappear_value  = value_onWillDisappear!
-            valueSerializer.holdAndWriteCallback(value_onWillDisappear_value)
+            valueSerializer.holdAndWriteCallback(CallbackTransformer.transfromToCallbackVoid(value_onWillDisappear_value))
         }
         const value_keyboardAvoidDistance  = value.keyboardAvoidDistance
         let value_keyboardAvoidDistance_type : int32 = RuntimeType.UNDEFINED

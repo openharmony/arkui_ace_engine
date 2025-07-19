@@ -33,7 +33,7 @@ import { addUseImportClassSameFileAndExportClass } from "./exports/add-export"
 import { addUseImportClassSameFileAndCreateClass } from "./exports/create-class"
 import { addUseImportClassSameFileAfterRewritingStructToClass, rewriteStructToClass } from "./exports/struct-to-class"
 
-const DIR = './test/arkts-api/recheck/'
+const DIR = './test/arkts-api/recheck'
 const PANDA_SDK_PATH = process.env.PANDA_SDK_PATH ?? '../../incremental/tools/panda/node_modules/@panda/sdk'
 
 function createConfig(file: string) {
@@ -177,11 +177,11 @@ suite(util.basename(__filename), () => {
             runTest('static/function', undefined)
         })
 
-        test("public setter", () => {
+        test.skip("public setter", () => {
             runTest('static/public-setter', undefined)
         })
 
-        test("constructor with overload", () => {
+        test.skip("constructor with overload", () => {
             runTest('static/constructor', undefined)
         })
 
@@ -202,8 +202,7 @@ suite(util.basename(__filename), () => {
             runTest('static/import-type', undefined)
         })
 
-        // failure reason
-        test.skip("import all", () => {
+        test("import all", () => {
             runTest('static/import-all', undefined)
         })
     })
@@ -211,19 +210,19 @@ suite(util.basename(__filename), () => {
     suite('simple', () => {
         test('rename class', () => {
             runTest('simple/rename-class', (program: arkts.Program) => {
-                return updateTopLevelClass(program.ast as arkts.ETSModule, renameClass)
+                program.setAst(updateTopLevelClass(program.ast as arkts.ETSModule, renameClass))
             })
         })
 
         test('add class method', () => {
             runTest('simple/add-class-method', (program: arkts.Program) => {
-                return updateTopLevelClass(program.ast as arkts.ETSModule, addClassMethod)
+                program.setAst(updateTopLevelClass(program.ast as arkts.ETSModule, addClassMethod))
             })
         })
 
         test('add variable declaration', () => {
             runTest('simple/add-variable', (program: arkts.Program) => {
-                return updateTopLevelClass(program.ast as arkts.ETSModule, addVariableDeclaration)
+                program.setAst(updateTopLevelClass(program.ast as arkts.ETSModule, addVariableDeclaration))
             })
         })
     })

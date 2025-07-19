@@ -103,9 +103,7 @@ bool GetInt64Param(ani_env* env, ani_object object, int64_t& result);
 bool GetInt64Param(ani_env* env, ani_object object, const char *name, int64_t& result);
 bool GetDoubleParam(ani_env* env, ani_object object, double& result);
 bool GetDoubleParam(ani_env* env, ani_object object, const char *name, double& result);
-bool GetFloatParam(ani_env* env, ani_object object, float& result);
-bool GetFloatParam(ani_env* env, ani_object object, const char *name, float& result);
-bool GetFloatArrayParam(ani_env *env, ani_object object, const char *name, std::vector<float>& result);
+bool GetDoubleParamOpt(ani_env *env, ani_object object, const char *name, std::optional<double>& result);
 std::string ANIStringToStdString(ani_env *env, ani_string ani_str);
 bool GetStringParam(ani_env *env, ani_object object, std::string& result);
 bool GetStringParam(ani_env *env, ani_object object, const char *name, std::string& result);
@@ -168,10 +166,10 @@ bool GetShadowParamOpt(ani_env *env, ani_object object, std::optional<OHOS::Ace:
 ani_object WrapBusinessError(ani_env* env, const std::string& msg);
 ani_ref CreateBusinessError(ani_env* env, int32_t code, const std::string& msg);
 bool ResourceIntegerToString(const ResourceInfo& resourceInfo, std::string& result);
-bool GetDimesionParam(ani_env* env, ani_object object, OHOS::Ace::CalcDimension& result);
-bool GetDimesionParam(ani_env* env, ani_ref ref, OHOS::Ace::CalcDimension& result);
-bool GetDimesionParam(ani_env* env, ani_object object, const char *name, OHOS::Ace::CalcDimension& result);
-bool GetDimesionParamOpt(ani_env* env, ani_object object, const char *name,
+bool GetDimensionParam(ani_env* env, ani_object object, OHOS::Ace::CalcDimension& result);
+bool GetDimensionParam(ani_env* env, ani_ref ref, OHOS::Ace::CalcDimension& result);
+bool GetDimensionParam(ani_env* env, ani_object object, const char *name, OHOS::Ace::CalcDimension& result);
+bool GetDimensionParamOpt(ani_env* env, ani_object object, const char *name,
     std::optional<OHOS::Ace::CalcDimension>& result);
 void CheckDimension(OHOS::Ace::CalcDimension value);
 bool GetBackgroundBlurStyleParam(ani_env* env, ani_object object, int32_t& result);

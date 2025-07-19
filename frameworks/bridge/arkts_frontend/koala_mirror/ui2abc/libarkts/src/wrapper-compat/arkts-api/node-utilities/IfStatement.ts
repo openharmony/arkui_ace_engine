@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { isSameNativeObject } from '../peers/ArktsObject';
+import { isSameNativeObject } from '../../../arkts-api/peers/ArktsObject';
 import { AstNode } from '../peers/AstNode';
 import { IfStatement } from '../types';
 import { attachModifiers, updateThenAttach } from '../utilities/private';

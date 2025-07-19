@@ -28,7 +28,7 @@ export class StateMgmtConsole {
 }
 
 class ViewInfo {
-    component?: string;
+    componentName?: string;
     isV2?: boolean;
 }
 

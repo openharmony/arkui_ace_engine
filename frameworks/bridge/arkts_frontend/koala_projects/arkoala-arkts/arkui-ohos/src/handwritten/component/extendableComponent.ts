@@ -16,7 +16,14 @@
 import { int32 } from '@koalaui/common';
 import { CustomComponentV2 } from './customComponent';
 import { InteropNativeModule } from '@koalaui/interop';
-import { IProvideDecoratedVariable, LocalStorage, StateMgmtDFX, DumpInfo } from '@ohos.arkui.stateManagement';
+import {
+    IProvideDecoratedVariable,
+    IProviderDecoratedVariable,
+    LocalStorage,
+    StateMgmtDFX,
+    DumpInfo
+} from '@ohos.arkui.stateManagement';
+import { uiObserver } from '@ohos/arkui/observer';
 import { UIContext } from '@ohos/arkui/UIContext';
 import { PeerNode } from '../PeerNode';
 
@@ -32,6 +39,10 @@ export interface IExtendableComponent {
     getUIContext(): UIContext;
     getUniqueId(): int32;
     getPeerNode(): PeerNode | undefined;
+    queryNavigationInfo(): uiObserver.NavigationInfo;
+    queryNavDestinationInfo(isInner: boolean): uiObserver.NavDestinationInfo;
+    queryNavDestinationInfo(): uiObserver.NavDestinationInfo
+    queryRouterPageInfo(): uiObserver.RouterPageInfo;
 }
 
 export abstract class ExtendableComponent implements LifeCycle {
@@ -39,8 +50,9 @@ export abstract class ExtendableComponent implements LifeCycle {
 
     private parent_: ExtendableComponent | undefined;
     private providedVars_: Map<string, IProvideDecoratedVariable<object>> = new Map<string, IProvideDecoratedVariable<object>>();
+    private providedVarsV2_: Map<string, IProviderDecoratedVariable<object>> = new Map<string, IProviderDecoratedVariable<object>>();
     private delegate_?: IExtendableComponent;
-    private localStoragebackStore_?: LocalStorage | undefined = undefined;\
+    private localStoragebackStore_?: LocalStorage | undefined = undefined;
     private backLocalStorage_?: LocalStorage | undefined = undefined;
     private useSharedStorage_?: boolean | undefined = undefined;;
 
@@ -54,11 +66,27 @@ export abstract class ExtendableComponent implements LifeCycle {
         this.delegate_ = delegate;
     }
 
+    addProvidedVarV2<T>(providedPropName: string, store: IProviderDecoratedVariable<T>): void {
+        this.providedVarsV2_.set(providedPropName, store as object as IProviderDecoratedVariable<object>);
+    }
+
     addProvidedVar<T>(providedPropName: string, store: IProvideDecoratedVariable<T>, allowOverride?: boolean | undefined): void {
         if (!allowOverride && this.findProvide<T>(providedPropName)) {
             throw new ReferenceError(`Duplicate @Provide property with name ${providedPropName}. Property with this name is provided by one of the ancestor Component already.`);
         }
         this.providedVars_.set(providedPropName, store as object as IProvideDecoratedVariable<object>);
+    }
+
+    findProvideV2<T>(providedPropName: string): IProviderDecoratedVariable<T> | null {
+        let parentCom = this.parent_;
+        while (parentCom !== undefined) {
+            let provideVar = parentCom.providedVarsV2_.get(providedPropName);
+            if (provideVar !== undefined) {
+                return provideVar as object as IProviderDecoratedVariable<T>;
+            }
+            parentCom = parentCom.parent_;
+        }
+        return null;
     }
 
     findProvide<T>(providedPropName: string): IProvideDecoratedVariable<T> | null {
@@ -78,6 +106,19 @@ export abstract class ExtendableComponent implements LifeCycle {
 
     getUniqueId(): int32 {
         return this.delegate_!.getUniqueId();
+    }
+    
+    queryNavigationInfo(): uiObserver.NavigationInfo {
+        return this.delegate_!.queryNavigationInfo();
+    }
+    queryRouterPageInfo(): uiObserver.RouterPageInfo {
+        return this.delegate_!.queryRouterPageInfo();
+    }
+    queryNavDestinationInfo(isInner: boolean): uiObserver.NavDestinationInfo {
+        return this.delegate_!.queryNavDestinationInfo(isInner);
+    }
+    queryNavDestinationInfo() : uiObserver.NavDestinationInfo {
+        return this.delegate_!.queryNavDestinationInfo();
     }
 
     public get localStorage_(): LocalStorage {
@@ -109,8 +150,8 @@ export abstract class ExtendableComponent implements LifeCycle {
         const dumpInfo: DumpInfo = new DumpInfo();
         dumpInfo.viewinfo = {
             componentName: Type.of(this).getName(),
-            isV2: this instanceof CustomComponentV2 ? true : false;
-        }
+            isV2: this instanceof CustomComponentV2 ? true : false
+        };
         let ret: string = '';
         try {
             StateMgmtDFX.getDecoratedVariableInfo(this, dumpInfo);
@@ -119,5 +160,6 @@ export abstract class ExtendableComponent implements LifeCycle {
             InteropNativeModule._NativeLog(`dump component ${ dumpInfo.viewinfo.componentName}\
                 error: ${(error as Error).message}`);
         }
+        return ret;
     }
 }

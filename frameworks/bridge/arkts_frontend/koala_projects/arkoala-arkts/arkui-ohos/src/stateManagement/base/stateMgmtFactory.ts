@@ -13,7 +13,16 @@
  * limitations under the License.
  */
 
-import { ILocalStoragePropRefDecoratedVariable, IPropRefDecoratedVariable, IStateMgmtFactory } from '../decorator';
+import {
+    IConsumerDecoratedVariable,
+    ILocalDecoratedVariable,
+    ILocalStoragePropRefDecoratedVariable,
+    IParamDecoratedVariable,
+    IParamOnceDecoratedVariable,
+    IPropRefDecoratedVariable,
+    IProviderDecoratedVariable,
+    IStateMgmtFactory,
+} from '../decorator';
 import {
     IStateDecoratedVariable,
     ILinkDecoratedVariable,
@@ -42,6 +51,11 @@ import { UIUtils } from '../utils';
 import { AppStorage } from '../storage/appStorage';
 import { PropRefDecoratedVariable } from '../decoratorImpl/decoratorPropRef';
 import { StoragePropRefDecoratedVariable } from '../decoratorImpl/decoratorStoragePropRef';
+import { LocalDecoratedVariable } from '../decoratorImpl/decoratorLocal';
+import { ParamDecoratedVariable } from '../decoratorImpl/decoratorParam';
+import { ParamOnceDecoratedVariable } from '../decoratorImpl/decoratorParamOnce';
+import { ProviderDecoratedVariable } from '../decoratorImpl/decoratorProvider';
+import { ConsumerDecoratedVariable } from '../decoratorImpl/decoratorConsumer';
 
 export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
     public makeMutableStateMeta(): IMutableStateMeta {
@@ -50,6 +64,46 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
     public makeSubscribedWatches(): ISubscribedWatches {
         return new SubscribedWatches();
     }
+    makeLocal<T>(owningView: ExtendableComponent, varName: string, initValue: T): ILocalDecoratedVariable<T> {
+        return new LocalDecoratedVariable<T>(owningView, varName, UIUtils.makeObserved(initValue) as T);
+    }
+
+    makeParam<T>(owningView: ExtendableComponent, varName: string, initValue: T): IParamDecoratedVariable<T> {
+        return new ParamDecoratedVariable<T>(owningView, varName, UIUtils.makeObserved(initValue) as T);
+    }
+
+    makeParamOnce<T>(owningView: ExtendableComponent, varName: string, initValue: T): IParamOnceDecoratedVariable<T> {
+        return new ParamOnceDecoratedVariable<T>(owningView, varName, UIUtils.makeObserved(initValue) as T);
+    }
+
+    makeProvider<T>(
+        owningView: ExtendableComponent,
+        varName: string,
+        provideAlias: string,
+        initValue: T
+    ): IProviderDecoratedVariable<T> {
+        return new ProviderDecoratedVariable<T>(
+            owningView,
+            varName,
+            provideAlias,
+            UIUtils.makeObserved(initValue) as T
+        );
+    }
+
+    makeConsumer<T>(
+        owningView: ExtendableComponent,
+        varName: string,
+        provideAlias: string,
+        initValue: T
+    ): IConsumerDecoratedVariable<T> {
+        return new ConsumerDecoratedVariable<T>(
+            owningView,
+            varName,
+            provideAlias,
+            UIUtils.makeObserved(initValue) as T
+        );
+    }
+
     makeState<T>(
         owningView: ExtendableComponent,
         varName: string,

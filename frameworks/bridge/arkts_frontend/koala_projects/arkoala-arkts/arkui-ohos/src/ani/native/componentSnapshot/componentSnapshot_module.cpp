@@ -20,7 +20,7 @@
 #include "bridge/common/utils/engine_helper.h"
 #include "core/common/ace_engine.h"
 #ifdef PIXEL_MAP_SUPPORTED
-// #include "pixel_map_taihe_ani.h"
+#include "pixel_map_taihe_ani.h"
 #endif
 
 namespace OHOS::Ace::Ani {
@@ -341,10 +341,10 @@ void TriggerJsCallback(SnapshotAsyncCtx* asyncCtx)
 
     if (ctx->errCode == OHOS::Ace::ERROR_CODE_NO_ERROR) {
 #ifdef PIXEL_MAP_SUPPORTED
-        // ani_object pixmapItem = OHOS::Media::PixelMapTaiheAni::CreateEtsPixelMap(ctx->env, ctx->pixmap);
-        // if (pixmapItem) {
-        //     resultRef[1] = pixmapItem;
-        // }
+        ani_object pixmapItem = OHOS::Media::PixelMapTaiheAni::CreateEtsPixelMap(ctx->env, ctx->pixmap);
+        if (pixmapItem) {
+            resultRef[1] = pixmapItem;
+        }
 #endif
     }
     ani_status status = ANI_OK;

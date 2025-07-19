@@ -17,6 +17,7 @@
 #include <stdarg.h>
 
 #include "interop-logging.h"
+#include "interop-utils.h"
 
 namespace {
 
@@ -83,11 +84,7 @@ extern "C" [[noreturn]] void InteropLogFatal(const char* format, ...) {
     va_list args;
     va_start(args, format);
     char buffer[4096];
-    #ifdef __STDC_LIB_EXT1__ 
-        vsnprintf_s(buffer, sizeof(buffer) - 1, format, args);
-    #else
-        vsnprintf(buffer, sizeof(buffer) - 1, format, args);
-    #endif
+    interop_vsnprintf(buffer, sizeof(buffer) - 1, format, args);
     LOGE("FATAL: %s", buffer);
     va_end(args);
     abort();

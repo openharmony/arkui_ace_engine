@@ -1174,6 +1174,14 @@ std::pair<std::optional<Color>, Dimension> Convert(const Ark_ColorStop& src)
 }
 
 template<>
+std::pair<std::optional<Dimension>, std::optional<Dimension>> Convert(const Ark_Position& src)
+{
+    auto x = OptConvert<Dimension>(src.x);
+    auto y = OptConvert<Dimension>(src.y);
+    return {x, y};
+}
+
+template<>
 Gradient Convert(const Ark_LinearGradient_common& value)
 {
     NG::Gradient gradient;
@@ -1498,6 +1506,42 @@ template<>
 uint32_t Convert(const Ark_LayoutSafeAreaType& src)
 {
     return static_cast<uint32_t>(src);
+}
+
+template<>
+OverlayOptions Convert(const Ark_OverlayOptions& src)
+{
+    OverlayOptions dst;
+    auto align = Converter::OptConvert<Alignment>(src.align);
+    if (align) {
+        dst.align = align.value();
+    }
+    auto x = Converter::OptConvert<Dimension>(src.offset.value.x);
+    if (x) {
+        dst.x = x.value();
+    }
+    auto y = Converter::OptConvert<Dimension>(src.offset.value.y);
+    if (y) {
+        dst.y = y.value();
+    }
+    return dst;
+}
+
+template<>
+BindSheetDismissReason Convert(const Ark_DismissReason& src)
+{
+    switch (src) {
+        case Ark_DismissReason::ARK_DISMISS_REASON_PRESS_BACK:
+            return BindSheetDismissReason::BACK_PRESSED;
+        case Ark_DismissReason::ARK_DISMISS_REASON_TOUCH_OUTSIDE:
+            return BindSheetDismissReason::TOUCH_OUTSIDE;
+        case Ark_DismissReason::ARK_DISMISS_REASON_CLOSE_BUTTON:
+            return BindSheetDismissReason::CLOSE_BUTTON;
+        default:
+            LOGE("Unexpected enum value in Ark_DismissReason: %{public}d", src);
+            break;
+    }
+    return BindSheetDismissReason::CLOSE_BUTTON;
 }
 
 template<>
@@ -2207,6 +2251,19 @@ BlurStyleOption Convert(const Ark_BackgroundBlurStyleOptions& src)
         dst.inactiveColor = color.value();
         dst.isValidColor = true;
     }
+    return dst;
+}
+
+template<>
+BlurStyleOption Convert(const Ark_ForegroundBlurStyleOptions& src)
+{
+    BlurStyleOption dst;
+    dst.colorMode = OptConvert<ThemeColorMode>(src.colorMode).value_or(dst.colorMode);
+    dst.adaptiveColor = OptConvert<AdaptiveColor>(src.adaptiveColor).value_or(dst.adaptiveColor);
+    if (auto scaleOpt = OptConvert<float>(src.scale); scaleOpt) {
+        dst.scale = static_cast<double>(*scaleOpt);
+    }
+    dst.blurOption = OptConvert<BlurOption>(src.blurOptions).value_or(dst.blurOption);
     return dst;
 }
 

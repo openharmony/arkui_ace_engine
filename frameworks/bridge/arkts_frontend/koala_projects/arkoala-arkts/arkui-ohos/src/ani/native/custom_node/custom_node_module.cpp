@@ -30,8 +30,22 @@ ani_long ConstructCustomNode(ani_env* env, [[maybe_unused]] ani_object aniClass,
     }
 
     // ani_object obj from ts is supposed to be processed here
+    ani_vm* vm = nullptr;
+    env->GetVM(&vm);
+
+    std::shared_ptr<ani_wref> weakRef(new ani_wref, [vm](ani_wref* wref) {
+        ani_env* env = nullptr;
+        vm->GetEnv(ANI_VERSION_1, &env);
+        env->WeakReference_Delete(*wref);
+    });
+
+    env->WeakReference_Create(obj, weakRef.get());
+
+    ani_type type;
+    env->Object_GetType(obj, &type);
+
     ani_method onDumpInspectorMethod;
-    env->Class_FindMethod(static_cast<ani_class>(type), "onDumpInspector", ":Lstd/core/string",
+    env->Class_FindMethod(static_cast<ani_class>(type), "onDumpInspector", ":Lstd/core/String;",
         &onDumpInspectorMethod);
     auto onDumpInspector = [vm, weakRef, onDumpInspectorMethod]() {
         ani_env *env = nullptr;
@@ -39,16 +53,55 @@ ani_long ConstructCustomNode(ani_env* env, [[maybe_unused]] ani_object aniClass,
         ani_boolean released;
         ani_ref localRef;
         ani_ref result{};
-        env_weakReference(*weakRef, &released, &localRef);
+        env->WeakReference_GetReference(*weakRef, &released, &localRef);
         if (!released) {
             env->Object_CallMethod_Ref(static_cast<ani_object>(localRef), onDumpInspectorMethod, &result);
         }
         ani_string aniStr = static_cast<ani_string>(result);
         return AniUtils::ANIStringToStdString(env, aniStr);
-    }
+    };
 
     ani_long customNode = modifier->getCustomNodeAniModifier()->constructCustomNode(id, std::move(onDumpInspector));
     return customNode;
 }
- 
+
+ani_object QueryNavigationInfo(ani_env* env, [[maybe_unused]] ani_object, ani_long node)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier) {
+        return nullptr;
+    }
+    ani_object res = modifier->getCustomNodeAniModifier()->queryNavigationInfo(env, node);
+    return res;
+}
+
+ani_object QueryNavDestinationInfo(ani_env* env, [[maybe_unused]] ani_object, ani_long node)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier) {
+        return nullptr;
+    }
+    ani_object res = modifier->getCustomNodeAniModifier()->queryNavDestinationInfo(env, node);
+    return res;
+}
+
+ani_object QueryNavDestinationInfo0(ani_env* env, [[maybe_unused]] ani_object, ani_long node, ani_boolean isInner)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier) {
+        return nullptr;
+    }
+    ani_object res = modifier->getCustomNodeAniModifier()->queryNavDestinationInfo0(env, node, isInner);
+    return res;
+}
+
+ani_object QueryRouterPageInfo(ani_env* env, [[maybe_unused]] ani_object, ani_long node)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier) {
+        return nullptr;
+    }
+    ani_object res = modifier->getCustomNodeAniModifier()->queryRouterPageInfo(env, node);
+    return res;
+}
 } // namespace OHOS::Ace::Ani

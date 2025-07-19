@@ -15,7 +15,6 @@
 
 import * as arkts from "@koalaui/libarkts"
 import { factory } from "./MemoFactory"
-import { isSyntheticReturnStatement } from "./utils"
 
 /**
  * This transformer corrects function's body according to memo transformation
@@ -35,9 +34,7 @@ export class ReturnTransformer extends arkts.AbstractVisitor {
     }
 
     visitor(beforeChildren: arkts.AstNode): arkts.AstNode {
-        // TODO: temporary checking skip nodes by comparison with expected skip nodes
-        // Should be fixed when update procedure implemented properly
-        if (/* beforeChildren === this.skipNode */ isSyntheticReturnStatement(beforeChildren)) {
+        if (beforeChildren === this.skipNode) {
             return beforeChildren
         }
         if (arkts.isScriptFunction(beforeChildren)) {

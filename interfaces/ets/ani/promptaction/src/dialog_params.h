@@ -42,13 +42,17 @@ bool GetMaskRect(ani_env *env, ani_object object, std::optional<OHOS::Ace::Dimen
 bool GetDialogAlignment(ani_env* env, ani_object object, OHOS::Ace::DialogAlignment& result);
 bool GetThemeColorMode(ani_env* env, ani_object object, OHOS::Ace::ThemeColorMode& result);
 bool GetAdaptiveColor(ani_env* env, ani_object object, OHOS::Ace::AdaptiveColor& result);
+bool GetGrayscale(ani_env* env, ani_object object, std::vector<float>& result);
 bool GetBlurOptions(ani_env* env, ani_object object, OHOS::Ace::BlurOption& result);
 bool GetBlurStyleActivePolicy(ani_env* env, ani_object object, OHOS::Ace::BlurStyleActivePolicy& result);
 bool GetBackgroundBlurStyleOptions(ani_env* env, ani_object object, std::optional<OHOS::Ace::BlurStyleOption>& result);
 bool GetBackgroundEffectOptions(ani_env* env, ani_object object, std::optional<OHOS::Ace::EffectOption>& result);
 bool GetLevelMode(ani_env* env, ani_object object, OHOS::Ace::LevelMode& result);
 bool GetImmersiveMode(ani_env* env, ani_object object, OHOS::Ace::ImmersiveMode& result);
+void UpdateDialogAlignment(OHOS::Ace::DialogAlignment& alignment);
+bool GetOnLanguageChange(OHOS::Ace::DialogProperties& dialogProps);
 bool GetShowDialogOptions(ani_env* env, ani_object object, OHOS::Ace::DialogProperties& dialogProps);
+bool GetShowDialogOptionsInternal(ani_env* env, ani_object object, OHOS::Ace::DialogProperties& dialogProps);
 ani_ref CreateShowDialogSuccessResponse(ani_env* env, int32_t index);
 std::function<void(int32_t, int32_t)> GetShowDialogCallback(std::shared_ptr<PromptActionAsyncContext>& asyncContext);
 std::function<void(int32_t, int32_t)> GetShowDialogPromise(std::shared_ptr<PromptActionAsyncContext>& asyncContext);
@@ -59,6 +63,8 @@ std::function<void(int32_t, int32_t)> GetShowActionMenuCallback(
     std::shared_ptr<PromptActionAsyncContext>& asyncContext);
 std::function<void(int32_t, int32_t)> GetShowActionMenuPromise(
     std::shared_ptr<PromptActionAsyncContext>& asyncContext);
+bool GetOnWillDismiss(ani_env* env, ani_object object,
+    std::function<void(const int32_t& reason, const int32_t& instanceId)>& result);
 bool GetKeyboardAvoidMode(ani_env* env, ani_object object, OHOS::Ace::KeyboardAvoidMode& result);
 bool GetKeyboardAvoidDistance(ani_env *env, ani_object object, std::optional<OHOS::Ace::Dimension>& result);
 bool GetBaseDialogOptions(ani_env* env, ani_object object, OHOS::Ace::DialogProperties& dialogProps);

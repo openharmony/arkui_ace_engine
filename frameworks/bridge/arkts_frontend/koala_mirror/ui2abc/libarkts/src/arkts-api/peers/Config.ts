@@ -21,7 +21,7 @@ import { KNativePointer, nullptr } from "@koalaui/interop"
 export class Config extends ArktsObject {
     constructor(peer: KNativePointer) {
         super(peer)
-        // TODO: wait for getter from api
+        // Improve: wait for getter from api
         this.path = ``
     }
 

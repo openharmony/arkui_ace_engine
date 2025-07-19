@@ -30,6 +30,25 @@
 namespace {
 using namespace OHOS::Ace;
 
+ani_object CreateDouble(ani_env* env, double value)
+{
+    CHECK_NULL_RETURN(env, nullptr);
+    static const char* className = "std.core.Double";
+    ani_class doubleCls;
+    if (ANI_OK != env->FindClass(className, &doubleCls)) {
+        return nullptr;
+    }
+    ani_method doubleCtor;
+    if (ANI_OK != env->Class_FindMethod(doubleCls, "<ctor>", "D:V", &doubleCtor)) {
+        return nullptr;
+    }
+    ani_object doubleObj;
+    if (ANI_OK != env->Object_New(doubleCls, doubleCtor, &doubleObj, static_cast<ani_double>(value))) {
+        return nullptr;
+    }
+    return doubleObj;
+}
+
 std::string ANIUtils_ANIStringToStdString(ani_env* env, ani_string ani_str)
 {
     ani_size strSize;
@@ -208,6 +227,32 @@ NG::WaterFlowSections::Section AniWaterFlowModule::ParseSectionOptions(ani_env* 
     env->Reference_IsUndefined(margin, &isUndefined);
     if (!isUndefined) {
         curSection.margin = ParseMargin(env, margin);
+    }
+
+    ani_ref func;
+    env->Object_GetPropertyByName_Ref(static_cast<ani_object>(section), "onGetItemMainSizeByIndex", &func);
+
+    ani_class ClassGetItemMainSizeByIndex;
+    env->FindClass("Lstd/core/Function1;", &ClassGetItemMainSizeByIndex);
+    ani_boolean isGetItemMainSizeByIndex;
+    env->Object_InstanceOf(static_cast<ani_object>(func), ClassGetItemMainSizeByIndex, &isGetItemMainSizeByIndex);
+
+    isUndefined = false;
+    env->Reference_IsUndefined(func, &isUndefined);
+
+    if (isGetItemMainSizeByIndex && !isUndefined) {
+        ani_ref fnObjGlobalRef = nullptr;
+        env->GlobalReference_Create(func, &fnObjGlobalRef);
+        auto onGetItemMainSizeByIndex = [fnObjGlobalRef, env](int32_t index) {
+            ani_ref aniRes;
+            ani_ref aniIdx = CreateDouble(env, ani_double(index));
+
+            env->FunctionalObject_Call(static_cast<ani_fn_object>(fnObjGlobalRef), 1, &aniIdx, &aniRes);
+            ani_double res;
+            env->Object_CallMethodByName_Double(static_cast<ani_object>(aniRes), "unboxed", ":D", &res);
+            return static_cast<float>(res);
+        };
+        curSection.onGetItemMainSizeByIndex = std::move(onGetItemMainSizeByIndex);
     }
 
     return curSection;

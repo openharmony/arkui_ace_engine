@@ -14,7 +14,7 @@
  */
 
 import { ScriptFunction } from '../../../generated';
-import { isSameNativeObject } from '../peers/ArktsObject';
+import { isSameNativeObject } from '../../../arkts-api/peers/ArktsObject';
 import { ArrowFunctionExpression } from '../types';
 import { attachModifiers, updateThenAttach } from '../utilities/private';
 

@@ -2997,6 +2997,7 @@ interfaces/native/native_interface_xcomponent.cpp @arkuilayout
 interfaces/native/native_interface_xcomponent.h @arkuilayout
 interfaces/native/native_node.h @arkui_architecture
 interfaces/native/native_node_napi.h @arkuiframework
+interfaces/native/native_node_ani.h @arkuiframework
 interfaces/native/native_styled_string.h @huawei_g_five
 interfaces/native/native_type.h @arkui_architecture
 interfaces/native/native_xcomponent_key_event.h @arkuilayout
@@ -3017,6 +3018,7 @@ interfaces/native/node/native_compatible.h @arkuiframework
 interfaces/native/node/native_drawable_descriptor.cpp @arkui_image
 interfaces/native/node/native_drawable_descriptor.h @arkui_image
 interfaces/native/node/native_impl.cpp @arkui_architecture
+interfaces/native/node/native_node_ani.cpp @arkuiframework
 interfaces/native/node/native_node_extented.cpp @arkuiframework
 interfaces/native/node/native_node_napi.cpp @arkuiframework
 interfaces/native/node/node_adapter_impl.cpp @arkuiframework
@@ -3042,6 +3044,7 @@ interfaces/native/node/textpicker_option.cpp @arkui_image
 interfaces/native/node/waterflow_section_option.cpp @arkuiscroll
 interfaces/native/node/waterflow_section_option.h @arkuiscroll
 interfaces/native/ui_input_event.h @arkuievent
+interfaces/native/implementation/overlay_accessor.cpp @arkuievent
 
 [Innerkits Interfaces]
 interfaces/inner_api/ace/ace_forward_compatibility.cpp @arkuiframework

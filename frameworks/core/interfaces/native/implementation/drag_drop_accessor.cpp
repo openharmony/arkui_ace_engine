@@ -48,12 +48,87 @@ void RegisterOnDragStartImpl(Ark_NativePointer node, const Callback_onDragStart*
     };
     ViewAbstract::SetOnDragStart(frameNode, std::move(onDragStartLambda));
 }
+
+void RegisterDragPreviewImpl(Ark_NativePointer node, const Opt_Union_CustomBuilder_DragItemInfo_String* preview,
+    const Opt_PreviewConfiguration* config)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(config);
+    bool onlyForLifting = optValue ? Converter::OptConvert<bool>(optValue->onlyForLifting).value_or(false) : false;
+    bool delayCreating = optValue ? Converter::OptConvert<bool>(optValue->delayCreating).value_or(false) : false;
+    Converter::VisitUnionPtr(preview,
+        [frameNode, onlyForLifting, delayCreating](const Ark_String& val) {
+            ViewAbstract::SetDragPreview(frameNode,
+                DragDropInfo { .inspectorId = Converter::Convert<std::string>(val),
+                               .onlyForLifting = onlyForLifting, .delayCreating = delayCreating });
+        },
+        [node, frameNode, onlyForLifting, delayCreating](const CustomNodeBuilder& val) {
+            CallbackHelper(val).BuildAsync([frameNode, onlyForLifting, delayCreating](const RefPtr<UINode>& uiNode) {
+                ViewAbstract::SetDragPreview(frameNode, DragDropInfo { .customNode = uiNode,
+                                                                       .onlyForLifting = onlyForLifting,
+                                                                       .delayCreating = delayCreating  });
+                }, node);
+        },
+        [node, frameNode, onlyForLifting, delayCreating](const Ark_DragItemInfo& value) {
+            auto builder = Converter::OptConvert<CustomNodeBuilder>(value.builder);
+            DragDropInfo dragDropInfo {
+                .extraInfo = Converter::OptConvert<std::string>(value.extraInfo).value_or(std::string()),
+                .onlyForLifting = onlyForLifting, .delayCreating = delayCreating };
+            if (builder) {
+                CallbackHelper(builder.value()).BuildAsync([frameNode, dragDropInfo = std::move(dragDropInfo)](
+                    const RefPtr<UINode>& uiNode) {
+                    DragDropInfo info;
+                    info.customNode = uiNode;
+                    info.onlyForLifting = dragDropInfo.onlyForLifting;
+                    info.delayCreating = dragDropInfo.delayCreating;
+                    ViewAbstract::SetDragPreview(frameNode, info);
+                    }, node);
+            } else {
+                ViewAbstract::SetDragPreview(frameNode, DragDropInfo {
+                    .onlyForLifting = onlyForLifting, .delayCreating = delayCreating });
+            }
+        },
+        [frameNode]() {
+            ViewAbstract::SetDragPreview(frameNode, DragDropInfo {});
+        });
+}
+
+void RegisterOnDropImpl(Ark_NativePointer node, const Opt_OnDragEventCallback* eventCallback,
+    const Opt_DropOptions* dropOptions)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(eventCallback);
+    if (!optValue) {
+        return;
+    }
+    auto onDrop = [callback = CallbackHelper(*optValue)](const RefPtr<OHOS::Ace::DragEvent>& dragEvent,
+        const std::string& extraParams) {
+        CHECK_NULL_VOID(dragEvent);
+        Ark_DragEvent arkDragEvent = Converter::ArkValue<Ark_DragEvent>(dragEvent);
+        callback.InvokeSync(arkDragEvent, Converter::ArkValue<Opt_String>(extraParams));
+    };
+    ViewAbstract::SetOnDrop(frameNode, std::move(onDrop));
+
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto optValueDropOption = Converter::GetOptPtr(dropOptions);
+    if (!optValueDropOption) {
+        eventHub->SetDisableDataPrefetch(false);
+        return;
+    }
+    auto disableDataPrefetch = Converter::OptConvert<bool>(optValueDropOption->disableDataPrefetch).value_or(false);
+    eventHub->SetDisableDataPrefetch(disableDataPrefetch);
+}
 }// DragDropOpsAccessor
 
 const GENERATED_ArkUIDragDropOpsAccessor* GetDragDropOpsAccessor()
 {
     static const GENERATED_ArkUIDragDropOpsAccessor DragDropOpsAccessorImpl {
         DragDropOpsAccessor::RegisterOnDragStartImpl,
+        DragDropOpsAccessor::RegisterDragPreviewImpl,
+        DragDropOpsAccessor::RegisterOnDropImpl
     };
     return &DragDropOpsAccessorImpl;
 }

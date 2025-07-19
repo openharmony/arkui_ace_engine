@@ -19,7 +19,7 @@
 #include <sstream>
 #include <sys/stat.h>
 #ifdef PIXEL_MAP_SUPPORTED
-// #include "pixel_map_taihe_ani.h"
+#include "pixel_map_taihe_ani.h"
 #endif
 
 #include "core/common/ace_engine.h"
@@ -135,12 +135,12 @@ void TriggerJsCallback(SnapshotAsyncCtx* asyncCtx)
 
     if (ctx->errCode == OHOS::Ace::ERROR_CODE_NO_ERROR) {
 #ifdef PIXEL_MAP_SUPPORTED
-        // ani_object pixmapItem = OHOS::Media::PixelMapTaiheAni::CreateEtsPixelMap(ctx->env, ctx->pixmap);
-        // if (pixmapItem) {
-        //     resultRef[1] = pixmapItem;
-        // } else {
-        //     TAG_LOGE(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "PixelMapTaiheAni CreatePixelMap failed!");
-        // }
+        ani_object pixmapItem = OHOS::Media::PixelMapTaiheAni::CreateEtsPixelMap(ctx->env, ctx->pixmap);
+        if (pixmapItem) {
+            resultRef[1] = pixmapItem;
+        } else {
+            TAG_LOGE(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "PixelMapTaiheAni CreatePixelMap failed!");
+        }
 #endif
     }
     ani_status status = ANI_OK;
@@ -522,10 +522,10 @@ static ani_object ANI_GetSync([[maybe_unused]] ani_env* env, ani_string componen
     switch (pair.first) {
         case OHOS::Ace::ERROR_CODE_NO_ERROR:
 #ifdef PIXEL_MAP_SUPPORTED
-            // pixelMap = OHOS::Media::PixelMapTaiheAni::CreateEtsPixelMap(env, pair.second);
-            // if (!pixelMap) {
-            //     TAG_LOGE(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "PixelMapTaiheAni CreatePixelMap failed!");
-            // }
+            pixelMap = OHOS::Media::PixelMapTaiheAni::CreateEtsPixelMap(env, pair.second);
+            if (!pixelMap) {
+                TAG_LOGE(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "PixelMapTaiheAni CreatePixelMap failed!");
+            }
 #endif
             break;
         case OHOS::Ace::ERROR_CODE_INTERNAL_ERROR:
@@ -586,10 +586,10 @@ static ani_object ANI_GetSyncWithUniqueId([[maybe_unused]] ani_env* env, ani_obj
     switch (pair.first) {
         case OHOS::Ace::ERROR_CODE_NO_ERROR:
 #ifdef PIXEL_MAP_SUPPORTED
-            // pixelMap = OHOS::Media::PixelMapTaiheAni::CreateEtsPixelMap(env, pair.second);
-            // if (!pixelMap) {
-            //     TAG_LOGE(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "PixelMapTaiheAni CreatePixelMap failed!");
-            // }
+            pixelMap = OHOS::Media::PixelMapTaiheAni::CreateEtsPixelMap(env, pair.second);
+            if (!pixelMap) {
+                TAG_LOGE(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "PixelMapTaiheAni CreatePixelMap failed!");
+            }
 #endif
             break;
         case OHOS::Ace::ERROR_CODE_INTERNAL_ERROR:

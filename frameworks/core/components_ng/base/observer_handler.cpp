@@ -47,6 +47,7 @@ UIObserverHandler& UIObserverHandler::GetInstance()
 
 void UIObserverHandler::NotifyNavigationStateChange(const WeakPtr<AceType>& weakPattern, NavDestinationState state)
 {
+    NotifyNavigationStateChangeForAni(weakPattern, state);
     CHECK_NULL_VOID(navigationHandleFunc_);
     auto ref = weakPattern.Upgrade();
     CHECK_NULL_VOID(ref);
@@ -78,6 +79,28 @@ void UIObserverHandler::NotifyNavigationStateChange(const WeakPtr<AceType>& weak
         GetNavigationUniqueId(pattern));
     navigationHandleFunc_(info);
     pathInfo->CloseScope();
+}
+
+void UIObserverHandler::NotifyNavigationStateChangeForAni(
+    const WeakPtr<AceType>& weakPattern, NavDestinationState state)
+{
+    CHECK_NULL_VOID(navigationHandleFuncForAni_);
+    auto ref = weakPattern.Upgrade();
+    CHECK_NULL_VOID(ref);
+    auto pattern = AceType::DynamicCast<NavDestinationPattern>(ref);
+    CHECK_NULL_VOID(pattern);
+    auto context = pattern->GetNavDestinationContext();
+    CHECK_NULL_VOID(context);
+    auto pathInfo = pattern->GetNavPathInfo();
+    CHECK_NULL_VOID(pathInfo);
+    auto host = AceType::DynamicCast<NavDestinationGroupNode>(pattern->GetHost());
+    CHECK_NULL_VOID(host);
+    NavDestinationMode mode = host->GetNavDestinationMode();
+    auto uniqueId = host->GetId();
+    
+    NavDestinationInfo info(GetNavigationId(pattern), pattern->GetName(), state, context->GetIndex(),
+        pathInfo->GetParamObj(), std::to_string(pattern->GetNavDestinationId()), mode, uniqueId);
+    navigationHandleFuncForAni_(info);
 }
 
 void UIObserverHandler::NotifyScrollEventStateChange(const WeakPtr<AceType>& weakPattern, ScrollEventType eventType)
@@ -413,6 +436,11 @@ void UIObserverHandler::NotifyNavDestinationSwitch(std::optional<NavDestinationI
 void UIObserverHandler::SetHandleNavigationChangeFunc(NavigationHandleFunc func)
 {
     navigationHandleFunc_ = func;
+}
+
+void UIObserverHandler::SetHandleNavigationChangeFuncForAni(NavigationHandleFuncForAni func)
+{
+    navigationHandleFuncForAni_ = func;
 }
 
 void UIObserverHandler::SetHandleScrollEventChangeFunc(ScrollEventHandleFunc func)

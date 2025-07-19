@@ -32,7 +32,7 @@ import {
     Es2pandaVariableDeclarationKind,
 } from "../../arkts-api"
 
-export function todo(): any {
+export function emptyImplementation(): any {
     throwError("Not yet implemented")
 }
 
@@ -96,7 +96,7 @@ export function classByEtsNode(node: arkts.AstNode) {
     return types.get(node.type) ?? throwError(`UNSUPPORTED NODE (ts): ${Es2pandaAstNodeType[node.type]}`)
 }
 
-// TODO: add checks for casts in functions below
+// Improve: add checks for casts in functions below
 
 export function unpackNode<U extends arkts.AstNode, T extends ts.Node<U> >(node: U): T
 export function unpackNode<U extends arkts.AstNode | undefined, T extends ts.Node<U> >(node: U): T | undefined
@@ -149,7 +149,7 @@ export function passIdentifier(node: ts.Identifier | string | undefined, typeAnn
     )
 }
 
-// TODO: support optional params
+// Improve: support optional params
 export function passTypeParams(params: readonly ts.TypeParameterDeclaration[] | undefined): arkts.TSTypeParameterDeclaration | undefined {
     if (params === undefined) {
         return undefined
@@ -165,12 +165,12 @@ export function unpackModifiers(modifiers: KInt | undefined): ts.NodeArray<ts.Mo
         // [Es2pandaModifierFlags.MODIFIER_FLAGS_CONSTRUCTOR, SyntaxKind.ConstructorKeyword],
 
         [Es2pandaModifierFlags.MODIFIER_FLAGS_ABSTRACT, SyntaxKind.AbstractKeyword],
-        // TODO: unsupported
+        // Improve: unsupported
         // [Es2pandaModifierFlags. , SyntaxKind.AccessorKeyword],
         [Es2pandaModifierFlags.MODIFIER_FLAGS_ASYNC, SyntaxKind.AsyncKeyword],
         [Es2pandaModifierFlags.MODIFIER_FLAGS_CONST, SyntaxKind.ConstKeyword],
         [Es2pandaModifierFlags.MODIFIER_FLAGS_DECLARE, SyntaxKind.DeclareKeyword],
-        // TODO: choose one
+        // Improve: choose one
         // [Es2pandaModifierFlags.MODIFIER_FLAGS_DEFAULT_EXPORT, SyntaxKind.DefaultClause],
         // [Es2pandaModifierFlags.MODIFIER_FLAGS_DEFAULT_EXPORT, SyntaxKind.DefaultKeyword],
         [Es2pandaModifierFlags.MODIFIER_FLAGS_EXPORT, SyntaxKind.ExportKeyword],
@@ -209,7 +209,7 @@ export function passModifiers(modifiers: ReadonlyArray<ts.Modifier | undefined |
         // [SyntaxKind.ConstructorKeyword, Es2pandaModifierFlags.MODIFIER_FLAGS_CONSTRUCTOR],
 
         [SyntaxKind.AbstractKeyword, Es2pandaModifierFlags.MODIFIER_FLAGS_ABSTRACT],
-        // TODO: unsupported
+        // Improve: unsupported
         // [SyntaxKind.AccessorKeyword, Es2pandaModifierFlags.],
         [SyntaxKind.AsyncKeyword, Es2pandaModifierFlags.MODIFIER_FLAGS_ASYNC],
         [SyntaxKind.ConstKeyword, Es2pandaModifierFlags.MODIFIER_FLAGS_CONST],

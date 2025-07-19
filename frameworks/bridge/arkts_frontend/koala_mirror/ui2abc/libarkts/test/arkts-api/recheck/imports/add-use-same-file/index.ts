@@ -17,41 +17,43 @@ import * as arkts from "../../../../../src/arkts-api"
 
 export function addUseImportSameFile(program: arkts.Program, options: arkts.CompilationOptions) {
     if (options.isMainProgram) {
-        arkts.updateETSModuleByStatements(
-            program.ast as arkts.ETSModule,
-            [
-                ...program.ast.statements,
-                arkts.factory.createCallExpression(
-                    arkts.factory.createIdentifier("testFunction"),
-                    [],
-                    undefined,
-                    false,
-                    false,
-                    undefined
-                )
-            ]
-        )
-        arkts.updateETSModuleByStatements(
-            program.ast as arkts.ETSModule,
-            [
-                arkts.factory.createETSImportDeclaration(
-                    arkts.factory.createStringLiteral(
-                        './library'
-                    ),
-                    [
-                        arkts.factory.createImportSpecifier(
-                            arkts.factory.createIdentifier(
-                                'testFunction'
-                            ),
-                            arkts.factory.createIdentifier(
-                                'testFunction'
+        const module = program.ast as arkts.ETSModule
+        program.setAst(
+            arkts.factory.updateETSModule(
+                module,
+                [
+                    arkts.factory.createETSImportDeclaration(
+                        arkts.factory.createStringLiteral(
+                            './library'
+                        ),
+                        [
+                            arkts.factory.createImportSpecifier(
+                                arkts.factory.createIdentifier(
+                                    'testFunction'
+                                ),
+                                arkts.factory.createIdentifier(
+                                    'testFunction'
+                                )
                             )
+                        ],
+                        arkts.Es2pandaImportKinds.IMPORT_KINDS_ALL
+                    ),
+                    ...module.statements,
+                    arkts.factory.createExpressionStatement(
+                        arkts.factory.createCallExpression(
+                            arkts.factory.createIdentifier("testFunction"),
+                            [],
+                            undefined,
+                            false,
+                            false,
+                            undefined
                         )
-                    ],
-                    arkts.Es2pandaImportKinds.IMPORT_KINDS_ALL
-                ),
-                ...program.ast.statements,
-            ]
+                    )
+                ],
+                module.ident,
+                module.getNamespaceFlag(),
+                module.program,
+            )
         )
     }
     return program

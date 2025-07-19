@@ -21,7 +21,7 @@ import { unpackNonNullableNode } from "../../arkts-api"
 
 export { proceedToState, startChecker } from "../../arkts-api"
 
-// TODO: like in arkts utils
+// Improve: like in arkts utils
 export function getDecl(node: ts.Node): ts.Node | undefined {
     if (node.node === undefined) {
         throwError('there is no arkts pair of ts node (unable to getDecl)')
@@ -42,10 +42,10 @@ export function getDecl(node: ts.Node): ts.Node | undefined {
     return ts.unpackNode(unpackNonNullableNode(decl))
 }
 
-// TODO: like in arkts utils
+// Improve: like in arkts utils
 export function getOriginalNode(node: ts.Node): ts.Node {
     if (node.node === undefined) {
-        // TODO: fix this
+        // Improve: fix this
         throwError('there is no arkts pair of ts node (unable to getOriginalNode)')
     }
     if (node.node.originalPeer === nullptr) {

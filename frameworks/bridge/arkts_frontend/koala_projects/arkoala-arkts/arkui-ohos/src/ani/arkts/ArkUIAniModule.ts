@@ -23,12 +23,13 @@ import { LocalStorage } from '@ohos.arkui.stateManagement';
 import { DrawContext } from "arkui/Graphics"
 import { AnimatableArithmetic, DrawModifier, AsyncCallback, Callback, DragItemInfo, ResourceColor } from "arkui/component"
 import { ArkCustomComponent } from "arkui/ArkCustomComponent"
-import { WaterFlowOptions,WaterFlowSections, XComponentControllerCallbackInternal } from "arkui/component"
+import { WaterFlowOptions,WaterFlowSections, XComponentControllerCallbackInternal, OverlayOptions } from "arkui/component"
 import { ChildrenMainSize } from "arkui/component"
 import { HookDragInfo } from "arkui/handwritten"
 import { dragController } from "@ohos/arkui/dragController"
 import { componentSnapshot } from "@ohos/arkui/componentSnapshot"
 import { DrawableDescriptor } from "@ohos.arkui.drawableDescriptor"
+import { uiObserver }  from "@ohos/arkui/observer"
 
 export class ArkUIAniModule {
     static {
@@ -50,6 +51,10 @@ export class ArkUIAniModule {
     native static _Common_GetFocused_InstanceId(): KInt
     native static _Common_GetSharedLocalStorage(): LocalStorage
     native static _CustomNode_Construct(id: KInt, component: ArkCustomComponent): KPointer
+    native static _CustomNode_QueryNavigationInfo(ptr: KPointer): uiObserver.NavigationInfo
+    native static _CustomNode_QueryNavDestinationInfo(ptr: KPointer): uiObserver.NavDestinationInfo
+    native static _CustomNode_QueryNavDestinationInfo0(ptr: KPointer, isInner: boolean): uiObserver.NavDestinationInfo
+    native static _CustomNode_QueryRouterPageInfo(ptr: KPointer): uiObserver.RouterPageInfo
     native static _BuilderProxyNode_Construct(id: KInt): KPointer
     native static _ContentSlot_construct(id: KInt): KPointer
     native static _ContentSlotInterface_setContentSlotOptions(slot: KPointer, content: KPointer): void
@@ -59,6 +64,7 @@ export class ArkUIAniModule {
     native static _SetWaterFlowOptions(ptr: KPointer, options: WaterFlowOptions): void
     native static _SetListChildrenMainSize(ptr: KPointer, value: ChildrenMainSize): void
     native static _LazyForEachNode_Construct(id: KInt): KPointer
+    native static _SetOverlay_ComponentContent(node: KPointer, buildNodePtr: KPointer, options?: OverlayOptions): void
 
     // for web
     native static _TransferScreenCaptureHandlerToStatic(ptr: KPointer, value: Object | undefined | null): boolean
@@ -148,7 +154,7 @@ export class ArkUIAniModule {
     native static _PopViewStackProcessor(): KPointer
 
     native static _DeleteViewStackProcessor(ptr: KPointer): void
-    
+
     native static _BackgroundImage_PixelMap(ptr: KPointer, pixelmap: image.PixelMap, repeat: KInt): void
     // for ImageSpan
     native static _ImageSpan_Set_PixelMap(ptr: KPointer, pixelmap: image.PixelMap): void
@@ -178,7 +184,7 @@ export class ArkUIAniModule {
     native static _Env_GetAccessibilityEnabled(): boolean
     native static _Env_GetLayoutDirection(): string
     native static _Env_GetLanguageCode(): string
-    
+
     // for XComponent
     native static _XComponent_SetSurfaceCallback(ptr: KPointer, callback: XComponentControllerCallbackInternal): void;
 
@@ -186,4 +192,6 @@ export class ArkUIAniModule {
     native static _IsDebugMode(id: KInt): KBoolean
     native static _OnMeasure_InnerMeasure(ptr: KPointer): void
     native static _OnLayout_InnerLayout(ptr: KPointer): void
+    native static _SetParallelScoped(parallel: boolean): void
+    native static _ConditionScopeNode_Construct(id: KInt): KPointer;
 }

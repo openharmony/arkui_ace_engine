@@ -1838,7 +1838,8 @@ typedef struct DisappearSymbolEffectPeer* Ark_DisappearSymbolEffect;
 typedef struct Opt_DisappearSymbolEffect Opt_DisappearSymbolEffect;
 typedef struct Ark_DismissContentCoverAction Ark_DismissContentCoverAction;
 typedef struct Opt_DismissContentCoverAction Opt_DismissContentCoverAction;
-typedef struct Ark_DismissDialogAction Ark_DismissDialogAction;
+typedef struct DismissDialogActionPeer DismissDialogActionPeer;
+typedef struct DismissDialogActionPeer* Ark_DismissDialogAction;
 typedef struct Opt_DismissDialogAction Opt_DismissDialogAction;
 typedef struct DismissPopupActionPeer DismissPopupActionPeer;
 typedef struct DismissPopupActionPeer* Ark_DismissPopupAction;
@@ -2584,6 +2585,8 @@ typedef struct Ark_Union_SizeOptions_ImageSize Ark_Union_SizeOptions_ImageSize;
 typedef struct Opt_Union_SizeOptions_ImageSize Opt_Union_SizeOptions_ImageSize;
 typedef struct Ark_Union_String_Array_String Ark_Union_String_Array_String;
 typedef struct Opt_Union_String_Array_String Opt_Union_String_Array_String;
+typedef struct Ark_Union_String_CustomBuilder Ark_Union_String_CustomBuilder;
+typedef struct Opt_Union_String_CustomBuilder Opt_Union_String_CustomBuilder;
 typedef struct Ark_Union_String_CustomBuilder_ComponentContent Ark_Union_String_CustomBuilder_ComponentContent;
 typedef struct Opt_Union_String_CustomBuilder_ComponentContent Opt_Union_String_CustomBuilder_ComponentContent;
 typedef struct Ark_Union_String_Number_Buffer_Resource Ark_Union_String_Number_Buffer_Resource;
@@ -12507,10 +12510,6 @@ typedef struct Opt_DismissContentCoverAction {
     Ark_Tag tag;
     Ark_DismissContentCoverAction value;
 } Opt_DismissContentCoverAction;
-typedef struct Ark_DismissDialogAction {
-    Callback_Void dismiss;
-    Ark_DismissReason reason;
-} Ark_DismissDialogAction;
 typedef struct Opt_DismissDialogAction {
     Ark_Tag tag;
     Ark_DismissDialogAction value;
@@ -15921,6 +15920,18 @@ typedef struct Opt_Union_String_Array_String {
     Ark_Tag tag;
     Ark_Union_String_Array_String value;
 } Opt_Union_String_Array_String;
+typedef struct Ark_Union_String_CustomBuilder {
+    /* kind: UnionType */
+    Ark_Int32 selector;
+    union {
+        Ark_String value0;
+        CustomNodeBuilder value1;
+    };
+} Ark_Union_String_CustomBuilder;
+typedef struct Opt_Union_String_CustomBuilder {
+    Ark_Tag tag;
+    Ark_Union_String_CustomBuilder value;
+} Opt_Union_String_CustomBuilder;
 typedef struct Ark_Union_String_CustomBuilder_ComponentContent {
     Ark_Int32 selector;
     union {
@@ -24027,7 +24038,19 @@ typedef struct GENERATED_ArkUIUIContextAccessor {
 typedef struct GENERATED_ArkUIDragDropOpsAccessor {
     void (*registerOnDragStart)(Ark_NativePointer node,
                                 const Callback_onDragStart* onDragStart);
+    void (*registerDragPreview)(Ark_NativePointer node,
+        const Opt_Union_CustomBuilder_DragItemInfo_String* preview,
+        const Opt_PreviewConfiguration* config);
+    void (*registerOnDrop)(Ark_NativePointer node,
+                            const Opt_OnDragEventCallback* eventCallback,
+                            const Opt_DropOptions* dropOptions);
 } GENERATED_ArkUIDragDropOpsAccessor;
+
+typedef struct GENERATED_ArkUIOverlayOpsAccessor {
+    void (*setOverlayAttribute)(Ark_NativePointer node,
+                                const Opt_Union_String_CustomBuilder* value,
+                                const Opt_OverlayOptions* options);
+} GENERATED_ArkUIOverlayOpsAccessor;
 
 typedef struct GENERATED_ArkUIStateStylesOpsAccessor {
     void (*onStateStyleChange)(Ark_NativePointer node,
@@ -25661,7 +25684,14 @@ typedef struct GENERATED_ArkUICanvasPathAccessor {
 
 typedef struct GENERATED_ArkUIPath2DAccessor {
     void (*destroyPeer)(Ark_Path2D peer);
-    Ark_Path2D (*ctor)();
+    Ark_Path2D (*construct0)();
+    Ark_Path2D (*construct1)(Ark_LengthMetricsUnit unit);
+    Ark_Path2D (*construct2)(Ark_Path2D path);
+    Ark_Path2D (*construct3)(Ark_Path2D path,
+                             Ark_LengthMetricsUnit unit);
+    Ark_Path2D (*construct4)(const Ark_String* d);
+    Ark_Path2D (*construct5)(const Ark_String* description,
+                             Ark_LengthMetricsUnit unit);
     Ark_NativePointer (*getFinalizer)();
     void (*addPath)(Ark_Path2D peer,
                     Ark_Path2D path,
@@ -25921,7 +25951,8 @@ typedef struct GENERATED_ArkUICanvasRendererAccessor {
 
 typedef struct GENERATED_ArkUICanvasRenderingContext2DAccessor {
     void (*destroyPeer)(Ark_CanvasRenderingContext2D peer);
-    Ark_CanvasRenderingContext2D (*ctor)(const Opt_RenderingContextSettings* settings);
+    Ark_CanvasRenderingContext2D (*construct)(const Opt_RenderingContextSettings* settings,
+                                              const Opt_LengthMetricsUnit* unit);
     Ark_NativePointer (*getFinalizer)();
     Ark_String (*toDataURL)(Ark_CanvasRenderingContext2D peer,
                             const Opt_String* type,
@@ -25951,9 +25982,10 @@ typedef struct GENERATED_ArkUICanvasRenderingContext2DAccessor {
 
 typedef struct GENERATED_ArkUIOffscreenCanvasRenderingContext2DAccessor {
     void (*destroyPeer)(Ark_OffscreenCanvasRenderingContext2D peer);
-    Ark_OffscreenCanvasRenderingContext2D (*ctor)(const Ark_Number* width,
-                                                  const Ark_Number* height,
-                                                  const Opt_RenderingContextSettings* settings);
+    Ark_OffscreenCanvasRenderingContext2D (*construct)(const Ark_Number* width,
+                                                       const Ark_Number* height,
+                                                       const Opt_RenderingContextSettings* settings,
+                                                       const Opt_LengthMetricsUnit* unit);
     Ark_NativePointer (*getFinalizer)();
     Ark_String (*toDataURL)(Ark_OffscreenCanvasRenderingContext2D peer,
                             const Opt_String* type,
@@ -25963,8 +25995,9 @@ typedef struct GENERATED_ArkUIOffscreenCanvasRenderingContext2DAccessor {
 
 typedef struct GENERATED_ArkUIOffscreenCanvasAccessor {
     void (*destroyPeer)(Ark_OffscreenCanvas peer);
-    Ark_OffscreenCanvas (*ctor)(const Ark_Number* width,
-                                const Ark_Number* height);
+    Ark_OffscreenCanvas (*construct)(const Ark_Number* width,
+                                     const Ark_Number* height,
+                                     const Opt_LengthMetricsUnit* unit);
     Ark_NativePointer (*getFinalizer)();
     Ark_ImageBitmap (*transferToImageBitmap)(Ark_OffscreenCanvas peer);
     Ark_OffscreenCanvasRenderingContext2D (*getContext2d)(Ark_OffscreenCanvas peer,
@@ -27309,6 +27342,15 @@ typedef struct GENERATED_ArkUIDismissPopupActionAccessor {
     void (*setReason)(Ark_DismissPopupAction peer, Ark_DismissReason reason);
 } GENERATED_ArkUIDismissPopupActionAccessor;
 
+typedef struct GENERATED_ArkUIDismissDialogActionAccessor {
+    void (*destroyPeer)(Ark_DismissDialogAction peer);
+    Ark_DismissDialogAction (*construct)();
+    Ark_NativePointer (*getFinalizer)();
+    void (*dismiss)(Ark_DismissDialogAction peer);
+    Ark_DismissReason (*getReason)(Ark_DismissDialogAction peer);
+    void (*setReason)(Ark_DismissDialogAction peer, Ark_DismissReason reason);
+} GENERATED_ArkUIDismissDialogActionAccessor;
+
 typedef struct GENERATED_ArkUITextShadowStyleAccessor {
     void (*destroyPeer)(Ark_TextShadowStyle peer);
     Ark_TextShadowStyle (*ctor)(const Ark_Union_ShadowOptions_Array_ShadowOptions* value);
@@ -27492,14 +27534,36 @@ typedef struct GENERATED_ArkUIPromptActionAccessor {
                             Ark_PromptAction peer,
                             Ark_NativePointer content,
                             const Callback_Opt_Array_String_Void* promiseValue);
+    void (*openMenu)(Ark_VMContext vmContext,
+                        Ark_AsyncWorkerPtr asyncWorker,
+                        Ark_PromptAction peer,
+                        Ark_NativePointer content,
+                        const Ark_TargetInfo* targetInfo,
+                        const Opt_MenuOptions* options,
+                        const Callback_Opt_Array_String_Void* promiseValue);
+    void (*updateMenu)(Ark_VMContext vmContext,
+                        Ark_AsyncWorkerPtr asyncWorker,
+                         Ark_PromptAction peer,
+                         Ark_NativePointer content,
+                         const Ark_MenuOptions* options,
+                         const Opt_Boolean* partialUpdate,
+                         const Callback_Opt_Array_String_Void* promiseValue);
+    void (*closeMenu)(Ark_VMContext vmContext,
+                            Ark_AsyncWorkerPtr asyncWorker,
+                            Ark_PromptAction peer,
+                            Ark_NativePointer content,
+                            const Callback_Opt_Array_String_Void* promiseValue);
 } GENERATED_ArkUIPromptActionAccessor;
 
 typedef struct GENERATED_ArkUIRouterExtenderAccessor {
-    Ark_NativePointer (*push)(const Ark_String* url);
-    Ark_NativePointer (*replace)(const Ark_String* url, const Opt_Callback_Void* finishCallback);
+    Ark_NativePointer (*push)(const Ark_String* url, const Opt_Boolean* recover,
+        Ark_NativePointer jsView, const Opt_Callback_Void* finishCallback);
+    Ark_NativePointer (*replace)(const Ark_String* url, const Opt_Boolean* recover, Ark_NativePointer jsView,
+        const Opt_Callback_Void* enterFinishCallback, const Opt_Callback_Void* exitFinishCallback);
     void (*moveCommonUnderPageNode)(Ark_NativePointer commonNode, Ark_NativePointer pageNode);
     void (*back)();
-    Ark_NativePointer (*runPage)(const Ark_String* url);
+    Ark_NativePointer (*runPage)(const Ark_String* url, const Opt_Boolean* recover,
+        Ark_NativePointer jsView, const Opt_Callback_Void* finishCallback);
     void (*clear)();
 } GENERATED_ArkUIRouterExtenderAccessor;
 
@@ -27652,6 +27716,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIUIContextAccessor* (*getUIContextAccessor)();
     const GENERATED_ArkUIStateStylesOpsAccessor* (*getStateStylesOpsAccessor)();
     const GENERATED_ArkUIDragDropOpsAccessor* (*getDragDropOpsAccessor)();
+    const GENERATED_ArkUIOverlayOpsAccessor* (*getOverlayOpsAccessor)();
     const GENERATED_ArkUIUIContextAtomicServiceBarAccessor* (*getUIContextAtomicServiceBarAccessor)();
     const GENERATED_ArkUIUIContextDispatchKeyEventAccessor* (*getUIContextDispatchKeyEventAccessor)();
     const GENERATED_ArkUIDrawableDescriptorAccessor* (*getDrawableDescriptorAccessor)();
@@ -27851,6 +27916,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUILetterSpacingStyleAccessor* (*getLetterSpacingStyleAccessor)();
     const GENERATED_ArkUILevelOrderAccessor* (*getLevelOrderAccessor)();
     const GENERATED_ArkUIDismissPopupActionAccessor* (*getDismissPopupActionAccessor)();
+    const GENERATED_ArkUIDismissDialogActionAccessor* (*getDismissDialogActionAccessor)();
     const GENERATED_ArkUITextShadowStyleAccessor* (*getTextShadowStyleAccessor)();
     const GENERATED_ArkUIBackgroundColorStyleAccessor* (*getBackgroundColorStyleAccessor)();
     const GENERATED_ArkUIGestureStyleAccessor* (*getGestureStyleAccessor)();

@@ -14,7 +14,7 @@
  */
 
 import { ClassProperty, Expression, TypeNode } from '../../../generated';
-import { isSameNativeObject } from '../peers/ArktsObject';
+import { isSameNativeObject } from '../../../arkts-api/peers/ArktsObject';
 import { updateThenAttach } from '../utilities/private';
 import { classPropertySetOptional, hasModifierFlag } from '../utilities/public';
 import { Es2pandaModifierFlags } from '../../../generated/Es2pandaEnums';

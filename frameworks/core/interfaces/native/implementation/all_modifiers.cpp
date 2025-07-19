@@ -224,6 +224,7 @@ const GENERATED_ArkUIRestrictedWorkerAccessor* GetRestrictedWorkerAccessor();
 const GENERATED_ArkUIUIContextAccessor* GetUIContextAccessor();
 const GENERATED_ArkUIStateStylesOpsAccessor* GetStateStylesOpsAccessor();
 const GENERATED_ArkUIDragDropOpsAccessor* GetDragDropOpsAccessor();
+const GENERATED_ArkUIOverlayOpsAccessor* GetOverlayOpsAccessor();
 const GENERATED_ArkUIUIContextAtomicServiceBarAccessor* GetUIContextAtomicServiceBarAccessor();
 const GENERATED_ArkUIUIContextDispatchKeyEventAccessor* GetUIContextDispatchKeyEventAccessor();
 const GENERATED_ArkUIDrawableDescriptorAccessor* GetDrawableDescriptorAccessor();
@@ -423,6 +424,7 @@ const GENERATED_ArkUIBaselineOffsetStyleAccessor* GetBaselineOffsetStyleAccessor
 const GENERATED_ArkUILetterSpacingStyleAccessor* GetLetterSpacingStyleAccessor();
 const GENERATED_ArkUILevelOrderAccessor* GetLevelOrderAccessor();
 const GENERATED_ArkUIDismissPopupActionAccessor* GetDismissPopupActionAccessor();
+const GENERATED_ArkUIDismissDialogActionAccessor* GetDismissDialogActionAccessor();
 const GENERATED_ArkUITextShadowStyleAccessor* GetTextShadowStyleAccessor();
 const GENERATED_ArkUIBackgroundColorStyleAccessor* GetBackgroundColorStyleAccessor();
 const GENERATED_ArkUIGestureStyleAccessor* GetGestureStyleAccessor();
@@ -585,6 +587,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetUIContextAccessor,
         GetStateStylesOpsAccessor,
         GetDragDropOpsAccessor,
+        GetOverlayOpsAccessor,
         GetUIContextAtomicServiceBarAccessor,
         GetUIContextDispatchKeyEventAccessor,
         GetDrawableDescriptorAccessor,
@@ -784,6 +787,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetLetterSpacingStyleAccessor,
         GetLevelOrderAccessor,
         GetDismissPopupActionAccessor,
+        GetDismissDialogActionAccessor,
         GetTextShadowStyleAccessor,
         GetBackgroundColorStyleAccessor,
         GetGestureStyleAccessor,

@@ -89,7 +89,7 @@ export class StructCallRewriter extends arkts.AbstractVisitor {
         return rewritten
     }
 
-    // TODO: FIX, move to checked phase
+    // Improve: FIX, move to checked phase
     private updateArrowFunctionExpression(targetPropertyNameId: arkts.Identifier, original: arkts.ArrowFunctionExpression): arkts.ArrowFunctionExpression {
         let targetPropertyName = targetPropertyNameId.name
         // Add @memo annotation if using @BuildParam decorated property

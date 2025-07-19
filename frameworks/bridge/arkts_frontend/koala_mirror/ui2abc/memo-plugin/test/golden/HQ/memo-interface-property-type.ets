@@ -21,7 +21,7 @@ function main(): void {}
 });
 
 interface A {
-  abstract set arg_memo_type(arg_memo_type: @memo() ((__memo_context: __memo_context_type, __memo_id: __memo_id_type)=> void))
+  set arg_memo_type(arg_memo_type: @memo() ((__memo_context: __memo_context_type, __memo_id: __memo_id_type)=> void))
   
   get arg_memo_type(): @memo() ((__memo_context: __memo_context_type, __memo_id: __memo_id_type)=> void)
   

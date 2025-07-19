@@ -108,7 +108,7 @@ bool GetToastShadow(ani_env* env, ani_object object, std::optional<OHOS::Ace::Sh
     return false;
 }
 
-bool GetShowToastOptions(ani_env* env, ani_object object, OHOS::Ace::NG::ToastInfo result)
+bool GetShowToastOptions(ani_env* env, ani_object object, OHOS::Ace::NG::ToastInfo& result)
 {
     if (IsUndefinedObject(env, object)) {
         return false;

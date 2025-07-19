@@ -157,6 +157,23 @@ public:
         return ViewAbstract::ClosePopup(customNode);
     }
 
+    static int32_t OpenMenu(NG::MenuParam param, const RefPtr<NG::UINode>& customNode, const int32_t& targetId)
+    {
+        return ViewAbstract::OpenMenu(param, customNode, targetId);
+    }
+
+    static int32_t GetMenuParam(NG::MenuParam& menuParam, const RefPtr<NG::UINode>& customNode);
+
+    static int32_t UpdateMenu(const NG::MenuParam& menuParam, const RefPtr<NG::UINode>& customNode)
+    {
+        return ViewAbstract::UpdateMenu(menuParam, customNode);
+    }
+
+    static int32_t CloseMenu(const RefPtr<UINode>& customNode)
+    {
+        return ViewAbstract::CloseMenu(customNode);
+    }
+
     static void SetAccessibilityVirtualNode(FrameNode* frameNode, std::function<RefPtr<NG::UINode>()>&& buildFunc);
     static void DisableOnAccessibilityHover(FrameNode* frameNode);
     static void SetOnAccessibilityHover(FrameNode* frameNode, OnAccessibilityHoverFunc &&onAccessibilityHoverEventFunc);

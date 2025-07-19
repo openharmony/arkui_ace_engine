@@ -83,11 +83,11 @@ export class factory {
     /**
      * create `initializers: <optionsName> | undefined` as identifier
      */
-    static createInitializerOptionsIdentifier(optionsName: string): arkts.Identifier {
+    static createInitializerOptionsIdentifier(optionsName: string, inBuild: boolean): arkts.Identifier {
         return arkts.factory.createIdentifier(
-            CustomComponentNames.COMPONENT_INITIALIZERS_NAME,
+            inBuild ? CustomComponentNames.COMPONENT_INITIALIZERS_NAME_0 : CustomComponentNames.COMPONENT_INITIALIZERS_NAME,
             arkts.factory.createETSUnionType([
-                factory.createTypeReferenceFromString(optionsName),
+                factory.createTypeReferenceFromString(inBuild ? 'Object' : optionsName),
                 arkts.factory.createETSUndefinedType()
             ])
         )
@@ -96,10 +96,10 @@ export class factory {
     /**
      * create `initializers: <optionsName> | undefined` as parameter
      */
-    static createInitializersOptionsParameter(optionsName: string, isOptional: boolean = false): arkts.ETSParameterExpression {
+    static createInitializersOptionsParameter(optionsName: string, inBuild: boolean, isOptional: boolean = false): arkts.ETSParameterExpression {
         return arkts.factory.createETSParameterExpression(
             factory.createInitializerOptionsIdentifier(
-                optionsName
+                optionsName, inBuild
             ),
             isOptional
         )

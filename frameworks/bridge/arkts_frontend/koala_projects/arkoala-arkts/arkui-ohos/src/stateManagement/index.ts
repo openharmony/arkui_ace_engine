@@ -12,3 +12,4 @@ export * from './decoratorImpl/decoratorWatch';
 export * from './decorator';
 export * from './tools/stateMgmtDFX';
 export * from './utils';
+export * from './remember';

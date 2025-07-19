@@ -35,15 +35,20 @@ void DestroyPeerImpl(Ark_OffscreenCanvas peer)
         delete peer;
     }
 }
-Ark_OffscreenCanvas CtorImpl(const Ark_Number* width,
-                             const Ark_Number* height)
+Ark_OffscreenCanvas ConstructImpl(const Ark_Number* width,
+                                  const Ark_Number* height,
+                                  const Opt_LengthMetricsUnit* unit)
 {
     CHECK_NULL_RETURN(width, {});
     CHECK_NULL_RETURN(height, {});
     auto cw = static_cast<double>(Converter::Convert<float>(*width));
     auto ch = static_cast<double>(Converter::Convert<float>(*height));
+    auto optUnit = Converter::OptConvertPtr<Ace::CanvasUnit>(unit);
     auto peer = new OffscreenCanvasPeer();
     peer->SetOptions(cw, ch);
+    if (unit->tag != INTEROP_TAG_UNDEFINED) {
+        peer->SetUnit(optUnit.value());
+    }
     return peer;
 }
 Ark_NativePointer GetFinalizerImpl()
@@ -64,7 +69,8 @@ Ark_OffscreenCanvasRenderingContext2D GetContext2dImpl(Ark_OffscreenCanvas peer,
     CHECK_NULL_RETURN(options, {});
     auto width = Converter::ArkValue<Ark_Number>(static_cast<float>(peer->GetWidth()));
     auto height = Converter::ArkValue<Ark_Number>(static_cast<float>(peer->GetHeight()));
-    auto offscreenContext = GetOffscreenCanvasRenderingContext2DAccessor()->ctor(&width, &height, options);
+    auto offscreenContext =
+        GetOffscreenCanvasRenderingContext2DAccessor()->construct(nullptr, nullptr, nullptr, nullptr);
     auto offscreenSettings = Converter::OptConvert<RenderingContextSettingsPeer*>(*options).value_or(nullptr);
     return peer->GetContext2D(offscreenContext, offscreenSettings);
 }
@@ -101,7 +107,7 @@ const GENERATED_ArkUIOffscreenCanvasAccessor* GetOffscreenCanvasAccessor()
 {
     static const GENERATED_ArkUIOffscreenCanvasAccessor OffscreenCanvasAccessorImpl {
         OffscreenCanvasAccessor::DestroyPeerImpl,
-        OffscreenCanvasAccessor::CtorImpl,
+        OffscreenCanvasAccessor::ConstructImpl,
         OffscreenCanvasAccessor::GetFinalizerImpl,
         OffscreenCanvasAccessor::TransferToImageBitmapImpl,
         OffscreenCanvasAccessor::GetContext2dImpl,

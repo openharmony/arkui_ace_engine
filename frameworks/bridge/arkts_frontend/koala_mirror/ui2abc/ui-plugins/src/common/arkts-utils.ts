@@ -19,7 +19,6 @@ export function annotation(name: string, params?: arkts.AstNode[]): arkts.Annota
     const ident: arkts.Identifier = arkts.factory.createIdentifier(name).setAnnotationUsage()
     const annotation: arkts.AnnotationUsage = arkts.factory.createAnnotationUsage(ident, params ?? [])
     annotation.modifierFlags = arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_ANNOTATION_USAGE
-    ident.parent = annotation
 
     return annotation
 }
@@ -32,8 +31,18 @@ export function removeAnnotationByName(
     annotations: readonly arkts.AnnotationUsage[],
     annoName: string
 ): arkts.AnnotationUsage[] {
-    return annotations.filter((it) => !isAnnotation(it, annoName));
+    return annotations.filter((it) => !isAnnotation(it, annoName))
 }
+
+export function addAnnotation(
+    annotations: readonly arkts.AnnotationUsage[],
+    annoName: string
+): arkts.AnnotationUsage[] {
+    return annotations.find((it) => isAnnotation(it, annoName)) ?
+        [...annotations] :
+        [annotation(annoName), ...annotations]
+}
+
 
 export function expectName(node: arkts.AstNode | undefined): string {
     if (!node) {

@@ -19,9 +19,9 @@ function main(): void {}
 });
 
 interface A {
-  @memo() abstract set memo_optional_arg(memo_optional_arg: ((__memo_context: __memo_context_type, __memo_id: __memo_id_type)=> void) | undefined)
+  @memo() set memo_optional_arg(memo_optional_arg: (((__memo_context: __memo_context_type, __memo_id: __memo_id_type)=> void) | undefined))
   
-  @memo() get memo_optional_arg(): ((__memo_context: __memo_context_type, __memo_id: __memo_id_type)=> void) | undefined
+  @memo() get memo_optional_arg(): (((__memo_context: __memo_context_type, __memo_id: __memo_id_type)=> void) | undefined)
   
 }
 

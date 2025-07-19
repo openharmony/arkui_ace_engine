@@ -29,8 +29,8 @@ import {
 import { AstNode } from "./reexport-for-generated"
 
 export interface RunTransformerHooks {
-    onProgramTransformStart?(options: CompilationOptions): void
-    onProgramTransformEnd?(options: CompilationOptions): void
+    onProgramTransformStart?(options: CompilationOptions, program: Program): void
+    onProgramTransformEnd?(options: CompilationOptions, program: Program): void
 }
 
 class ASTCache {
@@ -46,34 +46,25 @@ class ASTCache {
 
 export function runTransformerOnProgram(program: Program, options: CompilationOptions, transform: ProgramTransformer | undefined, pluginContext: PluginContext, hooks: RunTransformerHooks = {}) {
     // Perform some additional actions before the transformation start
-    hooks.onProgramTransformStart?.(options)
-
-    // AST to be transformed
-    const ast = program.ast
+    hooks.onProgramTransformStart?.(options, program)
 
     // Save currently existing imports in the program
     const importStorage = new ImportStorage(program, options.stage == Es2pandaContextState.ES2PANDA_STATE_PARSED)
 
     // Run some common plugins that should be run before plugin usage and depends on the current stage
-    stageSpecificPreFilters(ast, options.stage)
+    stageSpecificPreFilters(program, options.stage)
 
     // Run the plugin itself
     transform?.(program, options, pluginContext)
 
     // Run some common plugins that should be run after plugin usage and depends on the current stage
-    stageSpecificPostFilters(ast, options.stage)
-
-    // For oveloads, set additional pointer to base overload to fix AST
-    setBaseOverloads(ast)
+    stageSpecificPostFilters(program, options.stage)
 
     // Update internal import information based on import modification by plugin
     importStorage.update()
 
-    // Set parents of all nodes in AST
-    setAllParents(ast)
-
     // Perform some additional actions after the transformation end
-    hooks.onProgramTransformEnd?.(options)
+    hooks.onProgramTransformEnd?.(options, program)
 }
 
 export function runTransformer(prog: Program, state: Es2pandaContextState, restart: boolean, transform: ProgramTransformer | undefined, pluginContext: PluginContext, hooks: RunTransformerHooks = {}) {
@@ -107,14 +98,14 @@ function setAllParents(ast: AstNode) {
     arktsGlobal.es2panda._AstNodeUpdateAll(arktsGlobal.context, ast.peer)
 }
 
-function stageSpecificPreFilters(script: AstNode, state: Es2pandaContextState) {
+function stageSpecificPreFilters(program: Program, state: Es2pandaContextState) {
     if (state == Es2pandaContextState.ES2PANDA_STATE_CHECKED) {
-        inferVoidReturnType(script)
+        inferVoidReturnType(program)
     }
 }
 
-function stageSpecificPostFilters(script: AstNode, state: Es2pandaContextState) {
+function stageSpecificPostFilters(program: Program, state: Es2pandaContextState) {
     if (state == Es2pandaContextState.ES2PANDA_STATE_CHECKED) {
-        new ChainExpressionFilter().visitor(script)
+        program.setAst(new ChainExpressionFilter().visitor(program.ast))
     }
 }

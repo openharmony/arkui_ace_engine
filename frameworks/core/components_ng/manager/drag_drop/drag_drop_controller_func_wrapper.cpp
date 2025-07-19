@@ -576,8 +576,6 @@ bool DragControllerFuncWrapper::GetDragPreviewInfo(const RefPtr<OverlayManager>&
     }
     auto container = AceEngine::Get().GetContainer(containerId);
     CHECK_NULL_RETURN(container, false);
-    auto pipeline = container->GetPipelineContext();
-    CHECK_NULL_RETURN(pipeline, false);
     auto width = imageNode->GetGeometryNode()->GetFrameRect().Width();
     auto height = imageNode->GetGeometryNode()->GetFrameRect().Height();
     auto scaleData = dragDropManager->GetScaleInfo(width, height, false);

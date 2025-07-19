@@ -14,7 +14,7 @@
  */
 
 import { ETSFunctionType, FunctionSignature } from '../../../generated';
-import { isSameNativeObject } from '../peers/ArktsObject';
+import { isSameNativeObject } from '../../../arkts-api/peers/ArktsObject';
 import { attachModifiers, updateThenAttach } from '../utilities/private';
 import { Es2pandaScriptFunctionFlags } from '../../../generated/Es2pandaEnums';
 
@@ -28,7 +28,7 @@ export function updateETSFunctionType(
         isSameNativeObject(signature?.returnType, original.returnType) &&
         isSameNativeObject(signature?.params, original.params) &&
         isSameNativeObject(funcFlags, original.flags)
-        /* TODO: no getter for signature's hasReceiver */
+        /* Improve: no getter for signature's hasReceiver */
     ) {
         return original;
     }

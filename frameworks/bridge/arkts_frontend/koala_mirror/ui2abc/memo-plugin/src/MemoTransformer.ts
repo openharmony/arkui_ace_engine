@@ -67,18 +67,21 @@ export default function memoTransformer(
         let result = functionTransformer.visitor(node)
         if (restart) {
             if ((functionTransformer.modified || signatureTransformer.modified)) {
-                result = arkts.updateETSModuleByStatements(
+                result = arkts.factory.updateETSModule(
                     result,
                     [
                         factory.createContextTypesImportDeclaration(userPluginOptions?.stableForTests ?? false, userPluginOptions?.contextImport),
                         ...result.statements
-                    ]
+                    ],
+                    result.ident,
+                    result.getNamespaceFlag(),
+                    result.program,
                 )
             }
         }
         if (userPluginOptions?.keepTransformed && options.isMainProgram) {
             dumpAstToFile(result, userPluginOptions.keepTransformed, userPluginOptions?.stableForTests ?? false)
         }
-        return result
+        program.setAst(result)
     }
 }

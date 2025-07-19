@@ -22,16 +22,17 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, AttributeModifier, StateStyles } from "./common"
 import { ResourceColor, Length, ResourceStr } from "./units"
 import { FontWeight, FontStyle, Color } from "./enums"
 import { Resource } from "global.resource"
 import { ContentModifier, CommonConfiguration } from "./arkui-wrapper-builder"
 import { LabelStyle } from "./arkui-external"
-import { CallbackKind } from "./peers/CallbackKind"
-import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ButtonModifier } from "../ButtonModifier"
+import { hookButtonAttributeModifier } from "../handwritten"
 export class ArkButtonPeer extends ArkCommonMethodPeer {
+    _attributeSet?: ButtonModifier;
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -350,21 +351,23 @@ export interface ButtonOptions {
     role?: ButtonRole;
 }
 export interface ButtonAttribute extends CommonMethod {
-    type(value: ButtonType | undefined): this
-    stateEffect(value: boolean | undefined): this
-    buttonStyle(value: ButtonStyleMode | undefined): this
-    controlSize(value: ControlSize | undefined): this
-    role(value: ButtonRole | undefined): this
-    fontColor(value: ResourceColor | undefined): this
-    fontSize(value: Length | undefined): this
-    fontWeight(value: number | FontWeight | string | undefined): this
-    fontStyle(value: FontStyle | undefined): this
-    fontFamily(value: string | Resource | undefined): this
-    contentModifier(value: ContentModifier | undefined): this
-    labelStyle(value: LabelStyle | undefined): this
-    minFontScale(value: number | Resource | undefined): this
-    maxFontScale(value: number | Resource | undefined): this
+    type(value: ButtonType | undefined): this {return this;}
+    stateEffect(value: boolean | undefined): this { return this;}
+    buttonStyle(value: ButtonStyleMode | undefined): this { return this;}
+    controlSize(value: ControlSize | undefined): this { return this;}
+    role(value: ButtonRole | undefined): this { return this;}
+    fontColor(value: ResourceColor | undefined): this { return this;}
+    fontSize(value: Length | undefined): this { return this;}
+    fontWeight(value: number | FontWeight | string | undefined): this { return this;}
+    fontStyle(value: FontStyle | undefined): this { return this;}
+    fontFamily(value: string | Resource | undefined): this { return this;}
+    contentModifier(value: ContentModifier | undefined): this { return this;}
+    labelStyle(value: LabelStyle | undefined): this { return this;}
+    minFontScale(value: number | Resource | undefined): this { return this;}
+    maxFontScale(value: number | Resource | undefined): this { return this;}
+    attributeModifier(value: AttributeModifier<ButtonAttribute> | AttributeModifier<CommonMethod>| undefined): this { return this;}
 }
+
 export class ArkButtonStyle extends ArkCommonMethodStyle implements ButtonAttribute {
     type_value?: ButtonType | undefined
     stateEffect_value?: boolean | undefined
@@ -466,6 +469,12 @@ export class ArkButtonComponent extends ArkCommonMethodComponent implements Butt
         }
         return this
     }
+  
+    public attributeModifier(modifier: AttributeModifier<ButtonAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        hookButtonAttributeModifier(this, modifier);
+        return this
+    }
+
     public buttonStyle(value: ButtonStyleMode | undefined): this {
         if (this.checkPriority("buttonStyle")) {
             const value_casted = value as (ButtonStyleMode | undefined)

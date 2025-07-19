@@ -13,6 +13,11 @@
     },
     "include": [
         "./src/index.ts",
+        "./src/arkts/shared.ts",
         "./src/ohos/**/*"
+    ],
+    "references": [
+        { "path": "../common" },
+        { "path": "../compat/tsconfig-ohos.json" }
     ]
 }

@@ -18,6 +18,7 @@ import { throwError } from "../utils"
 import { global } from "./static/global"
 import { KNativePointer, nullptr } from "@koalaui/interop"
 import { AstNode } from "./peers/AstNode"
+import { NodeCache } from "./node-cache"
 
 export const nodeByType = new Map<Es2pandaAstNodeType, (peer: KNativePointer) => AstNode>([])
 
@@ -27,5 +28,5 @@ export function classByPeer<T extends AstNode>(peer: KNativePointer): T {
     }
     const type = global.generatedEs2panda._AstNodeTypeConst(global.context, peer)
     const create = nodeByType.get(type) ?? throwError(`unknown node type: ${type}`)
-    return create(peer) as T
+    return NodeCache.cached(peer, create)
 }

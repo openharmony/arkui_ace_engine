@@ -14,7 +14,7 @@
  */
 
 import { ObjectExpression, Property } from '../../../generated';
-import { isSameNativeObject } from '../peers/ArktsObject';
+import { isSameNativeObject } from '../../../arkts-api/peers/ArktsObject';
 import { attachModifiers, updateThenAttach } from '../utilities/private';
 import { Es2pandaAstNodeType } from '../../../generated/Es2pandaEnums';
 
@@ -26,8 +26,8 @@ export function updateObjectExpression(
 ): ObjectExpression {
     if (
         isSameNativeObject(properties, original.properties)
-        /* TODO: no getter for nodeType */
-        /* TODO: no getter for trailingComma */
+        /* Improve: no getter for nodeType */
+        /* Improve: no getter for trailingComma */
     ) {
         return original;
     }

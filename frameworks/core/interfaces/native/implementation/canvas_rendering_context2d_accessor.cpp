@@ -33,12 +33,17 @@ void DestroyPeerImpl(Ark_CanvasRenderingContext2D peer)
         peer->DecRefCount();
     }
 }
-Ark_CanvasRenderingContext2D CtorImpl(const Opt_RenderingContextSettings* settings)
+Ark_CanvasRenderingContext2D ConstructImpl(const Opt_RenderingContextSettings* settings,
+                                           const Opt_LengthMetricsUnit* unit)
 {
     CHECK_NULL_RETURN(settings, {});
     auto peer = Referenced::MakeRefPtr<CanvasRenderingContext2DPeer>();
     peer->IncRefCount();
     auto optSettings = Converter::OptConvert<Ark_RenderingContextSettings>(*settings);
+    auto optUnit = Converter::OptConvertPtr<Ace::CanvasUnit>(unit);
+    if (unit->tag != INTEROP_TAG_UNDEFINED) {
+        peer->SetUnit(optUnit.value());
+    }
     peer->SetOptions(optSettings);
     return Referenced::RawPtr(peer);
 }
@@ -128,7 +133,7 @@ const GENERATED_ArkUICanvasRenderingContext2DAccessor* GetCanvasRenderingContext
 {
     static const GENERATED_ArkUICanvasRenderingContext2DAccessor CanvasRenderingContext2DAccessorImpl {
         CanvasRenderingContext2DAccessor::DestroyPeerImpl,
-        CanvasRenderingContext2DAccessor::CtorImpl,
+        CanvasRenderingContext2DAccessor::ConstructImpl,
         CanvasRenderingContext2DAccessor::GetFinalizerImpl,
         CanvasRenderingContext2DAccessor::ToDataURLImpl,
         CanvasRenderingContext2DAccessor::StartImageAnalyzerImpl,

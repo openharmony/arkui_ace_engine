@@ -30,7 +30,7 @@ export function isSamePtr(a: KPointer, b: KPointer) {
     return (a === b)
 }
 
-// TODO rethink me
+// Improve: rethink me
 export function ptrToBits(ptr: KPointer): Uint32Array | null {
     let result = new Uint32Array(2)
     let ptrBigInt = ptr as bigint

@@ -233,7 +233,7 @@ class MutableAnimatedStateImpl<Value> implements MutableAnimatedState<Value> {
     }
 
     set value(value: Value) {
-        this.animatedState.setAnimation(this.animationProvider(this.value, value))
+        this.animatedState.setAnimation(this.animationProvider(this.animatedState.value, value))
     }
 
     get running(): boolean {
@@ -276,7 +276,7 @@ class StateAnimatorImpl<P, V> implements StateAnimator<P, V> {
     }
 
     onValueChange(action: (newValue: V) => void): void {
-        // TODO: rethink how we'd better subscribe appropriate scope on value change.
+        // Improve: rethink how we'd better subscribe appropriate scope on value change.
         this.value
         this.animatedState.onValueChange(action)
     }

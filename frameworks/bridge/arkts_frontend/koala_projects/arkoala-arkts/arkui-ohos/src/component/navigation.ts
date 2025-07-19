@@ -164,6 +164,9 @@ export class NavPathStack implements MaterializedBase {
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._NavPathStack_getFinalizer()
     }
+    static getParamWithNavDestinationId(navDestinationId: string): Object | null | undefined {
+        return PathStackUtils.getParamByNavDestinationId(navDestinationId);
+    }
     public pushPath(info: NavPathInfo, animated?: boolean | undefined): void {
         PathStackUtils.pushPath(this, info, animated)
     }
