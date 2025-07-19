@@ -1369,7 +1369,7 @@ NG::LinearGradientBlurPara Convert(const Ark_LinearGradientBlurOptions& value)
     std::pair<float, float> pair;
     std::vector<std::pair<float, float>> fractionStops;
     auto fractionStopsVec = Convert<std::vector<Ark_FractionStop>>(value.fractionStops);
-    for (auto arkPair : fractionStopsVec) {
+    for (auto& arkPair : fractionStopsVec) {
         pair = Convert<std::pair<float, float>>(arkPair);
         fractionStops.push_back(pair);
     }
