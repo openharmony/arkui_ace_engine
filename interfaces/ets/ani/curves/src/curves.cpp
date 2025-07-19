@@ -179,6 +179,9 @@ static CurvesObj* unwrapp(ani_env *env, ani_object object)
 static ani_double Interpolate([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object, ani_double fraction)
 {
     auto curveObject = unwrapp(env, object);
+    if (!curveObject) {
+        return 0.0;
+    }
     auto curveString = curveObject->curveString;
     float time = static_cast<float>(fraction);
     time = std::clamp(time, 0.0f, 1.0f);
@@ -224,9 +227,7 @@ static ani_object CubicBezierCurve([[maybe_unused]] ani_env *env,
 
     ani_object curve_object;
 
-    if (ANI_OK != env->Object_New(cls, ctor, &curve_object, reinterpret_cast<ani_object>(cubicBezierCurve))) {
-        return nullptr;
-    }
+    env->Object_New(cls, ctor, &curve_object, reinterpret_cast<ani_object>(cubicBezierCurve));
 
     if (OHOS::Ace::Container::IsCurrentUseNewPipeline()) {
         return curve_object;
@@ -359,9 +360,7 @@ static ani_object SpringResponsiveMotion([[maybe_unused]] ani_env *env,
     springResponsiveMotion->interpolate = Interpolate;
     static const char *className = "L@ohos/curves/curves/Curves;";
     ani_class cls;
-    if (ANI_OK != env->FindClass(className, &cls)) {
-        return nullptr;
-    }
+    env->FindClass(className, &cls);
     ani_method ctor;
     if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
         return nullptr;
@@ -401,9 +400,7 @@ static ani_object SpringMotion([[maybe_unused]] ani_env *env,
     springMotion->interpolate = Interpolate;
     static const char *className = "L@ohos/curves/curves/Curves;";
     ani_class cls;
-    if (ANI_OK != env->FindClass(className, &cls)) {
-        return nullptr;
-    }
+    env->FindClass(className, &cls);
     ani_method ctor;
     if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
         return nullptr;
@@ -527,10 +524,7 @@ static ani_object InterpolatingSpring([[maybe_unused]] ani_env* env,
 
     ani_object obj;
 
-    if (ANI_OK != env->Object_New(cls, ctor, &obj, reinterpret_cast<ani_object>(interpolatingCurve))) {
-        std::cerr << "New curve object Fail" << std::endl;
-        return nullptr;
-    }
+    env->Object_New(cls, ctor, &obj, reinterpret_cast<ani_object>(interpolatingCurve));
 
     if (OHOS::Ace::Container::IsCurrentUseNewPipeline()) {
         return obj;

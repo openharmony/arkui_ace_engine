@@ -1085,11 +1085,16 @@ void  ViewAbstractModelStatic::SetRotate(FrameNode* frameNode, const std::vector
     int32_t indZ = 2;
     int32_t indA = 3;
     int32_t indP = 4;
-    rotateVec.x = (value.size() > indX && value[indX].has_value()) ? value[indX].value() : DEFAULT_ROTATE_VEC.x;
-    rotateVec.y = (value.size() > indY && value[indY].has_value()) ? value[indY].value() : DEFAULT_ROTATE_VEC.y;
-    rotateVec.z = (value.size() > indZ && value[indZ].has_value()) ? value[indZ].value() : DEFAULT_ROTATE_VEC.z;
-    rotateVec.w = (value.size() > indA && value[indA].has_value()) ? value[indA].value() : DEFAULT_ROTATE_VEC.w;
-    rotateVec.v = (value.size() > indP && value[indP].has_value()) ? value[indP].value() : DEFAULT_ROTATE_VEC.v;
+    rotateVec.x = (value.size() > static_cast<uint32_t>(indX) && value[indX].has_value()) ? value[indX].value()
+                                                                                          : DEFAULT_ROTATE_VEC.x;
+    rotateVec.y = (value.size() > static_cast<uint32_t>(indY) && value[indY].has_value()) ? value[indY].value()
+                                                                                          : DEFAULT_ROTATE_VEC.y;
+    rotateVec.z = (value.size() > static_cast<uint32_t>(indZ) && value[indZ].has_value()) ? value[indZ].value()
+                                                                                          : DEFAULT_ROTATE_VEC.z;
+    rotateVec.w = (value.size() > static_cast<uint32_t>(indA) && value[indA].has_value()) ? value[indA].value()
+                                                                                          : DEFAULT_ROTATE_VEC.w;
+    rotateVec.v = (value.size() > static_cast<uint32_t>(indP) && value[indP].has_value()) ? value[indP].value()
+                                                                                          : DEFAULT_ROTATE_VEC.v;
     ACE_UPDATE_NODE_RENDER_CONTEXT(TransformRotate, rotateVec, frameNode);
 }
 
