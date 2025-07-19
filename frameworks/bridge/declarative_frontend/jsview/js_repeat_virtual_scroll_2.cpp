@@ -47,7 +47,11 @@ enum {
 
 static JSRef<JSFunc> GetJSFunc(JsiRef<JSObject> options, const char* propertyName)
 {
-    return JSRef<JSFunc>::Cast(options->GetProperty(propertyName));
+    auto prop = options->GetProperty(propertyName);
+    if (!prop->IsFunction()) {
+        return JSRef<JSFunc>();
+    }
+    return JSRef<JSFunc>::Cast(prop);
 }
 
 static bool ParseAndVerifyParams(const JSCallbackInfo& info)
