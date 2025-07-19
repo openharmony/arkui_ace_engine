@@ -124,9 +124,7 @@ void RefreshPattern::OnModifyDone()
     InitPanEvent(gestureHub);
     InitOnKeyEvent();
     InitChildNode();
-    if (isHigherVersion_) {
-        InitOffsetProperty();
-    } else {
+    if (!isHigherVersion_) {
         triggerLoadingDistance_ = static_cast<float>(
             std::clamp(layoutProperty->GetIndicatorOffset().value_or(triggerLoadingDistanceTheme_).ConvertToPx(),
                 -1.0f * triggerLoadingDistanceTheme_.ConvertToPx(), GetTriggerRefreshDisTance().ConvertToPx()));
@@ -187,10 +185,12 @@ void RefreshPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     panDirection.type = PanDirection::VERTICAL;
     panEvent_ = MakeRefPtr<PanEvent>(
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
-    PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() },
-        { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.ConvertToPx() } };
+    PanDistanceMapDimension distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE },
+        { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE } };
     gestureHub->AddPanEvent(panEvent_, panDirection, 1, distanceMap);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
         gestureHub->SetIsAllowMouse(false);
     }
 }
@@ -240,9 +240,8 @@ void RefreshPattern::InitProgressNode()
     }
     auto progressLayoutProperty = progressChild_->GetLayoutProperty<LoadingProgressLayoutProperty>();
     CHECK_NULL_VOID(progressLayoutProperty);
-    progressLayoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(loadingProgressSizeTheme_.ConvertToPx()),
-            CalcLength(loadingProgressSizeTheme_.ConvertToPx())));
+    CalcLength length = CalcLength(loadingProgressSizeTheme_.ConvertToPx());
+    progressLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(length, length));
     progressChild_->MarkDirtyNode();
 }
 
@@ -342,7 +341,7 @@ void RefreshPattern::InitChildNode()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto accessibilityProperty = host->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    auto accessibilityProperty = host->GetAccessibilityProperty<NG::RefreshAccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
     auto accessibilityLevel = accessibilityProperty->GetAccessibilityLevel();
     if (!progressChild_) {
@@ -357,9 +356,11 @@ void RefreshPattern::InitChildNode()
         }
     }
     CHECK_NULL_VOID(progressChild_);
-    auto progressAccessibilityProperty = progressChild_->GetAccessibilityProperty<AccessibilityProperty>();
-    CHECK_NULL_VOID(progressAccessibilityProperty);
-    progressAccessibilityProperty->SetAccessibilityLevel(accessibilityLevel);
+    if (accessibilityProperty->HasAccessibilityLevel()) {
+        auto progressAccessibilityProperty = progressChild_->GetAccessibilityProperty<AccessibilityProperty>();
+        CHECK_NULL_VOID(progressAccessibilityProperty);
+        progressAccessibilityProperty->SetAccessibilityLevel(accessibilityLevel);
+    }
 
     if (hasLoadingText_ && !loadingTextNode_) {
         InitProgressColumn();
@@ -379,9 +380,11 @@ void RefreshPattern::InitChildNode()
         CHECK_NULL_VOID(layoutProperty);
         loadingTextLayoutProperty->UpdateContent(layoutProperty->GetLoadingTextValue());
         loadingTextNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        auto textAccessibilityProperty = loadingTextNode_->GetAccessibilityProperty<AccessibilityProperty>();
-        CHECK_NULL_VOID(textAccessibilityProperty);
-        textAccessibilityProperty->SetAccessibilityLevel(accessibilityLevel);
+        if (accessibilityProperty->HasAccessibilityLevel()) {
+            auto textAccessibilityProperty = loadingTextNode_->GetAccessibilityProperty<AccessibilityProperty>();
+            CHECK_NULL_VOID(textAccessibilityProperty);
+            textAccessibilityProperty->SetAccessibilityLevel(accessibilityLevel);
+        }
     }
 }
 
@@ -844,8 +847,6 @@ float RefreshPattern::GetLoadingVisibleHeight()
 {
     float loadingHeight = 0.0f;
     CHECK_NULL_RETURN(progressChild_, 0.0f);
-    auto renderContext = progressChild_->GetRenderContext();
-    CHECK_NULL_RETURN(renderContext, 0.0f);
     auto geometryNode = progressChild_->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, 0.0f);
     if (loadingTextNode_) {
@@ -890,7 +891,9 @@ void RefreshPattern::SpeedTriggerAnimation(float speed)
         [&, weak = AceType::WeakClaim(this)]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            pattern->offsetProperty_->Set(targetOffset);
+            auto offsetProperty = pattern->offsetProperty_;
+            CHECK_NULL_VOID(offsetProperty);
+            offsetProperty->Set(targetOffset);
         },
         [weak = AceType::WeakClaim(this), recycle]() {
             auto pattern = weak.Upgrade();
@@ -941,7 +944,14 @@ void RefreshPattern::QuickFirstChildAppear()
     option.SetCurve(DEFAULT_CURVE);
     option.SetDuration(LOADING_ANIMATION_DURATION);
     animation_ = AnimationUtils::StartAnimation(
-        option, [&]() { offsetProperty_->Set(static_cast<float>(refreshOffset_.ConvertToPx())); },
+        option,
+        [weak = AceType::WeakClaim(this), refreshOffset = refreshOffset_]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            auto offsetProperty = pattern->offsetProperty_;
+            CHECK_NULL_VOID(offsetProperty);
+            offsetProperty->Set(static_cast<float>(refreshOffset.ConvertToPx()));
+        },
         [weak = AceType::WeakClaim(this)]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
@@ -956,7 +966,14 @@ void RefreshPattern::QuickFirstChildDisappear()
     option.SetCurve(DEFAULT_CURVE);
     option.SetDuration(LOADING_ANIMATION_DURATION);
     animation_ = AnimationUtils::StartAnimation(
-        option, [&]() { offsetProperty_->Set(0.0f); },
+        option,
+        [weak = AceType::WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            auto offsetProperty = pattern->offsetProperty_;
+            CHECK_NULL_VOID(offsetProperty);
+            offsetProperty->Set(0.f);
+        },
         [weak = AceType::WeakClaim(this)]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
@@ -978,6 +995,7 @@ void RefreshPattern::ResetAnimation()
 {
     float currentOffset = scrollOffset_;
     if (isHigherVersion_) {
+        InitOffsetProperty();
         if (animation_) {
             AnimationOption option;
             option.SetCurve(DEFAULT_CURVE);
@@ -997,6 +1015,7 @@ void RefreshPattern::ResetAnimation()
         } else {
             CHECK_NULL_VOID(offsetProperty_);
             offsetProperty_->Set(currentOffset);
+            EndTrailingTrace();
         }
     } else {
         AnimationUtils::StopAnimation(animation_);
