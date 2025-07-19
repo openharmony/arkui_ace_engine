@@ -27,7 +27,6 @@
 
 #include "etsapi.h"
 #include "koala-types.h"
-#include "securec.h"
 
 template<class T>
 struct InteropTypeConverter {
@@ -113,9 +112,7 @@ struct InteropTypeConverter<KInteropBuffer> {
     static InteropType convertTo(EtsEnv* env, KInteropBuffer value) {
       ets_byteArray array = env->NewByteArray(value.length);
       KByte* data = (KByte*)env->PinByteArray(array);
-      if (memcpy_s(data, value.length, value.data, value.length) != 0) {
-        return array;
-      }
+      memcpy(data, (KByte*)value.data, value.length);
       env->UnpinByteArray(array);
       value.dispose(value.resourceId);
       return array;
@@ -212,9 +209,7 @@ struct InteropTypeConverter<KInteropReturnBuffer> {
     static InteropType convertTo(EtsEnv* env, KInteropReturnBuffer value) {
       ets_byteArray array = env->NewByteArray(value.length);
       KByte* data = (KByte*)env->PinByteArray(array);
-      if (memcpy_s(data, value.length, value.data, value.length) != 0) {
-        return array;
-      }
+      memcpy(data, (KByte*)value.data, value.length);
       env->UnpinByteArray(array);
       value.dispose(value.data, value.length);
       return array;
