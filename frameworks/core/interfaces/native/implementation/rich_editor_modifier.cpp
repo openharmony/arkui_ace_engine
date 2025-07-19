@@ -187,7 +187,6 @@ void AssignArkValue(Ark_RichEditorTextStyleResult& dst, const RichEditorAbstract
     dst.fontWeight = Converter::ArkValue<Ark_Number>(src.GetFontWeight());
     dst.fontFamily = Converter::ArkValue<Ark_String>(src.GetFontFamily());
     dst.decoration = Converter::ArkValue<Ark_DecorationStyleResult>(src);
-    // dst.textShadow = implement it
     LOGW("RichEditor modifier :: textShadow conversion is not implemented yet.");
     dst.letterSpacing = Converter::ArkValue<Opt_Number>(src.GetLetterspacing());
     dst.lineHeight = Converter::ArkValue<Opt_Number>(src.GetLineHeight());
@@ -736,16 +735,12 @@ void KeyboardAppearanceImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //RichEditorModelNG::SetKeyboardAppearance(frameNode, convValue);
 }
 void StopBackPressImpl(Ark_NativePointer node,
                        const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //RichEditorModelNG::SetStopBackPress(frameNode, convValue);
 }
 void BindSelectionMenuImpl(Ark_NativePointer node,
                            const Opt_RichEditorSpanType* spanType,
