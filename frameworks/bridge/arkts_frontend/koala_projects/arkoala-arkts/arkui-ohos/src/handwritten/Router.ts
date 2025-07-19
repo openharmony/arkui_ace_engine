@@ -213,17 +213,20 @@ class RouterImpl implements Router {
                 node?.dispose();
                 this.showingPageIndex = this.showingPageIndex - 1;
             };
+            let newPage = new VisiblePage(entryObject.entry, options.url, this.getPathInfo(options.url), options.params);
+            this.visiblePages.splice(this.showingPageIndex + 1, 0, newPage);
+            this.showingPageIndex += 1;
             let pageNode = RouterExtender.routerPush(options, jsViewNodePtr, pagePushTransitionCallback);
             if (pageNode === nullptr) {
                 InteropNativeModule._NativeLog("AceRouter:push page failed")
+                this.visiblePages.pop();
                 this.rootState.pop()
+                this.showingPageIndex -= 1;
                 return
             }
             this.peerNodeList.splice(this.peerNodeList.length, 0, pageNode)
 
-            let newPage = new VisiblePage(entryObject.entry, options.url, this.getPathInfo(options.url), options.params)
-            this.visiblePages.splice(this.showingPageIndex + 1, 0, newPage)
-            this.showingPageIndex += 1
+            
         }
     }
 
@@ -270,17 +273,18 @@ class RouterImpl implements Router {
                 node?.dispose();
                 this.showingPageIndex = this.showingPageIndex - 1;
             };
-            let pageNode = RouterExtender.routerReplace(options, jsViewNodePtr, pageEnterTransitionCallback, pageExitTransitionCallback)
-            if (pageNode === nullptr) {
-                InteropNativeModule._NativeLog("AceRouter:replace page failed")
-                this.rootState.pop()
-                return
-            }
-            this.peerNodeList.push(pageNode)
-
             let newPage = new VisiblePage(entryObject.entry, options.url, this.getPathInfo(options.url), options.params)
             this.visiblePages.push(newPage)
             this.showingPageIndex += 1
+            let pageNode = RouterExtender.routerReplace(options, jsViewNodePtr, pageEnterTransitionCallback, pageExitTransitionCallback)
+            if (pageNode === nullptr) {
+                InteropNativeModule._NativeLog("AceRouter:replace page failed")
+                this.visiblePages.pop();
+                this.rootState.pop()
+                this.showingPageIndex -= 1;
+                return
+            }
+            this.peerNodeList.push(pageNode)
         }
     }
 
@@ -389,12 +393,11 @@ class RouterImpl implements Router {
             node?.dispose();
             this.showingPageIndex = this.showingPageIndex - 1;
         };
-        let pageNode = RouterExtender.routerRunPage(options, jsViewNodePtr, pagePushTransitionCallback)
-        this.peerNodeList.splice(this.peerNodeList.length, 0, pageNode)
-
         let newPage = new VisiblePage(builder, options.url, this.getPathInfo(options.url), options.params)
         this.entryPage = newPage;
         this.visiblePages.splice(0, 0, newPage)
+        let pageNode = RouterExtender.routerRunPage(options, jsViewNodePtr, pagePushTransitionCallback)
+        this.peerNodeList.splice(this.peerNodeList.length, 0, pageNode)
     }
 }
 
