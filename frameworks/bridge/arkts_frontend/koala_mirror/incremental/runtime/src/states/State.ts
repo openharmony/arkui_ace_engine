@@ -551,7 +551,7 @@ class ParameterImpl<Value> implements MutableState<Value> {
     }
 }
 
-class StateManagerImpl implements StateManager {
+export class StateManagerImpl implements StateManager {
     private stateCreating: string | undefined = undefined
     private readonly statesNamed: Map<string, Disposable> = new Map<string, Disposable>()
     private readonly statesCreated: Set<ManagedState> = new Set<ManagedState>()

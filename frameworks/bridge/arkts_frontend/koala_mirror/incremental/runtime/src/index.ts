@@ -149,6 +149,7 @@ export {
     State,
     StateContext,
     StateManager,
+    StateManagerImpl,
     ValueTracker,
 } from "./states/State"
 

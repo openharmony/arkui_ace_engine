@@ -56,7 +56,7 @@
         "copy:.node": "mkdir -p ./build/native/build && cp ./native/build/es2panda_*.node ./build/native/build",
         "compile:native": "npm run compile:koala:interop && npm run compile:meson && npm run copy:.node",
         "crosscompile:native": "npm run compile:koala:interop && npm run crosscompile:meson && npm run copy:.node",
-        "compile:src": "npx ets-tsc -p ./tsconfig.json",
+        "compile:src": "ets-tsc -p ./tsconfig.json",
         "compile": "npm run compile:native && npm run compile:js",
         "compile:release": "npm run crosscompile:native && npm run compile:js",
         "compile:js": "npm run compile:src && rm -rf lib/ && rollup -c rollup.lib.mjs && rollup -c rollup.es2panda.mjs",
