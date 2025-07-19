@@ -1261,4 +1261,61 @@ HWTEST_F(WaterFlowTestNg, FooterScrollBarTest001, TestSize.Level1) {
     EXPECT_EQ(pattern_->layoutInfo_->footerIndex_, 0);
     EXPECT_TRUE(pattern_->IsScrollable());
 }
+
+
+/**
+ * @tc.name: WaterFlowInitializeWithFooterContentTest001
+ * @tc.desc: Test SetWaterFlowInitialize with footerContent but no sections
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, WaterFlowInitializeWithFooterContentTest001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetLayoutMode(NG::WaterFlowLayoutMode::TOP_DOWN);
+    model.SetColumnsTemplate("1fr 1fr");
+
+    // Create footerContent (UINode) to test footerContent branch
+    auto footerBuilder = GetDefaultHeaderBuilder();
+    RefPtr<NG::UINode> footerNode;
+    if (footerBuilder) {
+        NG::ScopedViewStackProcessor builderViewStackProcessor;
+        footerBuilder();
+        footerNode = NG::ViewStackProcessor::GetInstance()->Finish();
+    }
+    model.SetFooterWithFrameNode(footerNode);
+
+    CreateWaterFlowItems(5);
+    CreateDone();
+
+    // Verify footerContent is set and sections are reset
+    EXPECT_EQ(pattern_->layoutInfo_->footerIndex_, 0);
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    EXPECT_EQ(secObj->GetSectionInfo().size(), 0);
+}
+
+/**
+ * @tc.name: WaterFlowInitializeWithFooterTest001
+ * @tc.desc: Test SetWaterFlowInitialize with footer function but no sections/footerContent
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, WaterFlowInitializeWithFooterTest001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetLayoutMode(NG::WaterFlowLayoutMode::TOP_DOWN);
+    model.SetColumnsTemplate("1fr 1fr");
+
+    // Set footer function to test footer branch
+    auto footerBuilder = GetDefaultHeaderBuilder();
+    model.SetFooter(std::move(footerBuilder));
+
+    CreateWaterFlowItems(5);
+    CreateDone();
+
+    // Verify footer is set and sections are reset
+    EXPECT_EQ(pattern_->layoutInfo_->footerIndex_, 0);
+    auto footerRect = GetChildRect(frameNode_, pattern_->layoutInfo_->footerIndex_);
+    EXPECT_GT(footerRect.GetY(), 0.0f);
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    EXPECT_EQ(secObj->GetSectionInfo().size(), 0);
+}
 } // namespace OHOS::Ace::NG
