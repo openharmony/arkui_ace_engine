@@ -20,6 +20,7 @@
 #include <cstddef>
 #include <string>
 
+#include "frameworks/core/common/container_consts.h"
 #include "frameworks/core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::Ani {
@@ -51,8 +52,29 @@ ani_long ANICreateDialogController(ani_env* env, ani_object object);
 void ANICloseDialog(ani_env* env, ani_object object);
 void ANICleanDialogController(ani_env* env, ani_object object);
 ani_status BindDialogController(ani_env* env);
+ani_status BindCommonController(ani_env* env);
 bool GetDialogController(ani_env* env, ani_object object,
     std::function<void(RefPtr<NG::FrameNode> dialogNode)>& result);
+
+class DismissDialogAction {
+public:
+    DismissDialogAction() = default;
+    ~DismissDialogAction() = default;
+
+    void SetInstanceId(const int32_t instanceId)
+    {
+        instanceId_ = instanceId;
+    }
+
+    void Dismiss();
+
+private:
+    int32_t instanceId_ = INSTANCE_ID_UNDEFINED;
+};
+
+void ANIDismissDialog(ani_env* env, ani_object object);
+ani_status BindDismissDialogAction(ani_env* env);
+ani_object ANICreateDismissDialogAction(ani_env* env, const int32_t reason, const int32_t instanceId);
 
 } // OHOS::Ace::Ani
 

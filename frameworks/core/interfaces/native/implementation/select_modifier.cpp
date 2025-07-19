@@ -16,6 +16,7 @@
 #include <variant>
 
 #include "arkoala_api_generated.h"
+#include "core/components/common/properties/blur_style_option.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/select/select_model_ng.h"
 #include "core/components_ng/pattern/select/select_model_static.h"
@@ -497,6 +498,8 @@ void MenuBackgroundBlurStyle1Impl(Ark_NativePointer node,
     BlurStyleOption option = {};
     if (convValue) {
         option.blurStyle = convValue.value();
+    } else {
+        option.blurStyle = BlurStyle::COMPONENT_ULTRA_THIN;
     }
     SelectModelNG::SetMenuBackgroundBlurStyle(frameNode, option);
 }

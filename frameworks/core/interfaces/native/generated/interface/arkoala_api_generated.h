@@ -1838,7 +1838,8 @@ typedef struct DisappearSymbolEffectPeer* Ark_DisappearSymbolEffect;
 typedef struct Opt_DisappearSymbolEffect Opt_DisappearSymbolEffect;
 typedef struct Ark_DismissContentCoverAction Ark_DismissContentCoverAction;
 typedef struct Opt_DismissContentCoverAction Opt_DismissContentCoverAction;
-typedef struct Ark_DismissDialogAction Ark_DismissDialogAction;
+typedef struct DismissDialogActionPeer DismissDialogActionPeer;
+typedef struct DismissDialogActionPeer* Ark_DismissDialogAction;
 typedef struct Opt_DismissDialogAction Opt_DismissDialogAction;
 typedef struct DismissPopupActionPeer DismissPopupActionPeer;
 typedef struct DismissPopupActionPeer* Ark_DismissPopupAction;
@@ -12509,10 +12510,6 @@ typedef struct Opt_DismissContentCoverAction {
     Ark_Tag tag;
     Ark_DismissContentCoverAction value;
 } Opt_DismissContentCoverAction;
-typedef struct Ark_DismissDialogAction {
-    Callback_Void dismiss;
-    Ark_DismissReason reason;
-} Ark_DismissDialogAction;
 typedef struct Opt_DismissDialogAction {
     Ark_Tag tag;
     Ark_DismissDialogAction value;
@@ -27345,6 +27342,15 @@ typedef struct GENERATED_ArkUIDismissPopupActionAccessor {
     void (*setReason)(Ark_DismissPopupAction peer, Ark_DismissReason reason);
 } GENERATED_ArkUIDismissPopupActionAccessor;
 
+typedef struct GENERATED_ArkUIDismissDialogActionAccessor {
+    void (*destroyPeer)(Ark_DismissDialogAction peer);
+    Ark_DismissDialogAction (*construct)();
+    Ark_NativePointer (*getFinalizer)();
+    void (*dismiss)(Ark_DismissDialogAction peer);
+    Ark_DismissReason (*getReason)(Ark_DismissDialogAction peer);
+    void (*setReason)(Ark_DismissDialogAction peer, Ark_DismissReason reason);
+} GENERATED_ArkUIDismissDialogActionAccessor;
+
 typedef struct GENERATED_ArkUITextShadowStyleAccessor {
     void (*destroyPeer)(Ark_TextShadowStyle peer);
     Ark_TextShadowStyle (*ctor)(const Ark_Union_ShadowOptions_Array_ShadowOptions* value);
@@ -27524,6 +27530,25 @@ typedef struct GENERATED_ArkUIPromptActionAccessor {
                          const Opt_Boolean* partialUpdate,
                          const Callback_Opt_Array_String_Void* promiseValue);
     void (*closePopup)(Ark_VMContext vmContext,
+                            Ark_AsyncWorkerPtr asyncWorker,
+                            Ark_PromptAction peer,
+                            Ark_NativePointer content,
+                            const Callback_Opt_Array_String_Void* promiseValue);
+    void (*openMenu)(Ark_VMContext vmContext,
+                        Ark_AsyncWorkerPtr asyncWorker,
+                        Ark_PromptAction peer,
+                        Ark_NativePointer content,
+                        const Ark_TargetInfo* targetInfo,
+                        const Opt_MenuOptions* options,
+                        const Callback_Opt_Array_String_Void* promiseValue);
+    void (*updateMenu)(Ark_VMContext vmContext,
+                        Ark_AsyncWorkerPtr asyncWorker,
+                         Ark_PromptAction peer,
+                         Ark_NativePointer content,
+                         const Ark_MenuOptions* options,
+                         const Opt_Boolean* partialUpdate,
+                         const Callback_Opt_Array_String_Void* promiseValue);
+    void (*closeMenu)(Ark_VMContext vmContext,
                             Ark_AsyncWorkerPtr asyncWorker,
                             Ark_PromptAction peer,
                             Ark_NativePointer content,
@@ -27891,6 +27916,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUILetterSpacingStyleAccessor* (*getLetterSpacingStyleAccessor)();
     const GENERATED_ArkUILevelOrderAccessor* (*getLevelOrderAccessor)();
     const GENERATED_ArkUIDismissPopupActionAccessor* (*getDismissPopupActionAccessor)();
+    const GENERATED_ArkUIDismissDialogActionAccessor* (*getDismissDialogActionAccessor)();
     const GENERATED_ArkUITextShadowStyleAccessor* (*getTextShadowStyleAccessor)();
     const GENERATED_ArkUIBackgroundColorStyleAccessor* (*getBackgroundColorStyleAccessor)();
     const GENERATED_ArkUIGestureStyleAccessor* (*getGestureStyleAccessor)();

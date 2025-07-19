@@ -195,23 +195,6 @@ auto g_isPopupCreated = [](FrameNode* frameNode) -> bool {
     return true;
 };
 
-auto g_onWillDismissPopup = [](
-    const Opt_Union_Boolean_Callback_DismissPopupAction_Void& param, RefPtr<PopupParam>& popupParam) {
-    CHECK_NULL_VOID(popupParam);
-    Converter::VisitUnion(param,
-        [&popupParam](const Ark_Boolean& value) {
-            popupParam->SetInteractiveDismiss(Converter::Convert<bool>(value));
-            popupParam->SetOnWillDismiss(nullptr);
-        },
-        [&popupParam](const Callback_DismissPopupAction_Void& value) {
-            auto callback = [arkCallback = CallbackHelper(value)](int32_t reason) {
-            };
-            popupParam->SetOnWillDismiss(std::move(callback));
-            popupParam->SetInteractiveDismiss(true);
-        },
-        []() {});
-};
-
 auto g_popupCommonParam = [](const auto& src, RefPtr<PopupParam>& popupParam) {
     CHECK_NULL_VOID(popupParam);
     // popupParam->SetEnableHoverMode(OptConvert<bool>(src.enableHoverMode).value_or(popupParam->EnableHoverMode()));
@@ -395,8 +378,7 @@ auto g_bindMenuOptionsParam = [](
         menuParam.positionOffset.SetX(offsetVal.value().first->ConvertToPx());
         menuParam.positionOffset.SetY(offsetVal.value().second->ConvertToPx());
     }
-    menuParam.placement = OptConvert<Placement>(menuOptions.placement);
-    // menuParam.enableHoverMode = OptConvert<bool>(menuOptions.enableHoverMode).value_or(menuParam.enableHoverMode);
+    menuParam.enableHoverMode = OptConvert<bool>(menuOptions.enableHoverMode);
     menuParam.backgroundColor = OptConvert<Color>(menuOptions.backgroundColor);
     auto backgroundBlurStyle = OptConvert<BlurStyle>(menuOptions.backgroundBlurStyle);
     menuParam.backgroundBlurStyle = backgroundBlurStyle ?
@@ -407,9 +389,13 @@ auto g_bindMenuOptionsParam = [](
     menuParam.hasTransitionEffect = transitionOpt.has_value();
     menuParam.enableArrow = OptConvert<bool>(menuOptions.enableArrow);
     menuParam.arrowOffset = OptConvert<CalcDimension>(menuOptions.arrowOffset);
+    menuParam.placement = OptConvert<Placement>(menuOptions.placement);
     // if enableArrow is true and placement not set, set placement default value to top.
     if (menuParam.enableArrow.has_value() && !menuParam.placement.has_value() && menuParam.enableArrow.value()) {
         menuParam.placement = Placement::TOP;
+    }
+    if (!menuParam.placement.has_value()) {
+        menuParam.placement = Placement::BOTTOM_LEFT;
     }
     menuParam.borderRadius = OptConvert<BorderRadiusProperty>(menuOptions.borderRadius);
     menuParam.previewBorderRadius = OptConvert<BorderRadiusProperty>(menuOptions.previewBorderRadius);
@@ -469,6 +455,7 @@ const GENERATED_ArkUIPanRecognizerAccessor* GetPanRecognizerAccessor();
 const GENERATED_ArkUIPinchRecognizerAccessor* GetPinchRecognizerAccessor();
 const GENERATED_ArkUISwipeRecognizerAccessor* GetSwipeRecognizerAccessor();
 const GENERATED_ArkUIRotationRecognizerAccessor* GetRotationRecognizerAccessor();
+const GENERATED_ArkUIDismissPopupActionAccessor* GetDismissPopupActionAccessor();
 
 namespace CommonMethodModifier {
 void BackgroundEffect1Impl(
@@ -779,14 +766,6 @@ BackgroundImageSize Convert(const Ark_ImageSize& src)
 }
 
 template<>
-std::pair<std::optional<Dimension>, std::optional<Dimension>> Convert(const Ark_Position& src)
-{
-    auto x = OptConvert<Dimension>(src.x);
-    auto y = OptConvert<Dimension>(src.y);
-    return {x, y};
-}
-
-template<>
 TranslateOpt Convert(const Ark_TranslateOptions& src)
 {
     TranslateOpt translateOptions;
@@ -842,19 +821,6 @@ template<>
 float Convert(const Ark_ForegroundEffectOptions& src)
 {
     return Convert<float>(src.radius);
-}
-
-template<>
-BlurStyleOption Convert(const Ark_ForegroundBlurStyleOptions& src)
-{
-    BlurStyleOption dst;
-    dst.colorMode = OptConvert<ThemeColorMode>(src.colorMode).value_or(dst.colorMode);
-    dst.adaptiveColor = OptConvert<AdaptiveColor>(src.adaptiveColor).value_or(dst.adaptiveColor);
-    if (auto scaleOpt = OptConvert<float>(src.scale); scaleOpt) {
-        dst.scale = static_cast<double>(*scaleOpt);
-    }
-    dst.blurOption = OptConvert<BlurOption>(src.blurOptions).value_or(dst.blurOption);
-    return dst;
 }
 
 template<>
@@ -5480,20 +5446,42 @@ void BindPopupImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optShow = Converter::OptConvert<bool>(*show);
+    auto onWillDismissPopup = [](
+        const Opt_Union_Boolean_Callback_DismissPopupAction_Void& param, RefPtr<PopupParam>& popupParam) {
+        CHECK_NULL_VOID(popupParam);
+        Converter::VisitUnion(param,
+            [&popupParam](const Ark_Boolean& value) {
+                popupParam->SetInteractiveDismiss(Converter::Convert<bool>(value));
+                popupParam->SetOnWillDismiss(nullptr);
+            },
+            [&popupParam](const Callback_DismissPopupAction_Void& value) {
+                auto callback = [arkCallback = CallbackHelper(value)](int32_t reason) {
+                    Ark_DismissPopupAction parameter = GetDismissPopupActionAccessor()->construct();
+                    auto reasonValue = Converter::ArkValue<Ark_DismissReason>(
+                        static_cast<BindSheetDismissReason>(reason));
+                    GetDismissPopupActionAccessor()->setReason(parameter, reasonValue);
+                    arkCallback.InvokeSync(parameter);
+                    GetDismissPopupActionAccessor()->destroyPeer(parameter);
+                };
+                popupParam->SetOnWillDismiss(std::move(callback));
+                popupParam->SetInteractiveDismiss(true);
+            },
+            []() {});
+    };
     Converter::VisitUnion(*popup,
-        [frameNode, optShow](const Ark_PopupOptions& value) {
+        [frameNode, optShow, onWillDismissPopup](const Ark_PopupOptions& value) {
             auto popupParam = Converter::Convert<RefPtr<PopupParam>>(value);
             CHECK_NULL_VOID(popupParam);
-            g_onWillDismissPopup(value.onWillDismiss, popupParam);
+            onWillDismissPopup(value.onWillDismiss, popupParam);
             if (optShow) {
                 popupParam->SetIsShow(*optShow);
             }
            ViewAbstractModelStatic::BindPopup(frameNode, popupParam, nullptr);
         },
-        [frameNode, node, optShow](const Ark_CustomPopupOptions& value) {
+        [frameNode, node, optShow, onWillDismissPopup](const Ark_CustomPopupOptions& value) {
             auto popupParam = Converter::Convert<RefPtr<PopupParam>>(value);
             CHECK_NULL_VOID(popupParam);
-            g_onWillDismissPopup(value.onWillDismiss, popupParam);
+            onWillDismissPopup(value.onWillDismiss, popupParam);
             if (popupParam->IsShow() && !g_isPopupCreated(frameNode)) {
                 if (optShow) {
                     popupParam->SetIsShow(*optShow);

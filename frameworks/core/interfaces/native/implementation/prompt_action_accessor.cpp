@@ -78,6 +78,80 @@ int32_t ParseTargetInfo(const Ark_TargetInfo* targetInfo, int32_t& targetId)
     return result;
 }
 
+auto g_bindMenuOptionsParamCallbacks = [](
+    const auto& menuOptions, MenuParam& menuParam, WeakPtr<FrameNode> weakNode) {
+    auto onAppearValue = OptConvert<Callback_Void>(menuOptions.onAppear);
+    if (onAppearValue) {
+        auto onAppear = [arkCallback = CallbackHelper(onAppearValue.value()), weakNode]() {
+            PipelineContext::SetCallBackNode(weakNode);
+            arkCallback.Invoke();
+        };
+        menuParam.onAppear = std::move(onAppear);
+    }
+    auto onDisappearValue = OptConvert<Callback_Void>(menuOptions.onDisappear);
+    if (onDisappearValue) {
+        auto onDisappear = [arkCallback = CallbackHelper(onDisappearValue.value()), weakNode]() {
+            PipelineContext::SetCallBackNode(weakNode);
+            arkCallback.Invoke();
+        };
+        menuParam.onDisappear = std::move(onDisappear);
+    }
+    auto aboutToAppearValue = OptConvert<Callback_Void>(menuOptions.aboutToAppear);
+    if (aboutToAppearValue) {
+        auto aboutToAppear = [arkCallback = CallbackHelper(aboutToAppearValue.value()), weakNode]() {
+            PipelineContext::SetCallBackNode(weakNode);
+            arkCallback.Invoke();
+        };
+        menuParam.aboutToAppear = std::move(aboutToAppear);
+    }
+    auto aboutToDisAppearValue = OptConvert<Callback_Void>(menuOptions.aboutToDisappear);
+    if (aboutToDisAppearValue) {
+        auto aboutToDisappear = [arkCallback = CallbackHelper(aboutToDisAppearValue.value()), weakNode]() {
+            PipelineContext::SetCallBackNode(weakNode);
+            arkCallback.Invoke();
+        };
+        menuParam.aboutToDisappear = std::move(aboutToDisappear);
+    }
+};
+
+auto g_bindMenuOptionsParam = [](const auto& menuOptions, MenuParam& menuParam) {
+    auto offsetVal =
+        OptConvert<std::pair<std::optional<Dimension>, std::optional<Dimension>>>(menuOptions.offset);
+    if (offsetVal) {
+        menuParam.positionOffset.SetX(offsetVal.value().first->ConvertToPx());
+        menuParam.positionOffset.SetY(offsetVal.value().second->ConvertToPx());
+    }
+    menuParam.enableHoverMode = OptConvert<bool>(menuOptions.enableHoverMode);
+    menuParam.backgroundColor = OptConvert<Color>(menuOptions.backgroundColor);
+    auto backgroundBlurStyle = OptConvert<BlurStyle>(menuOptions.backgroundBlurStyle);
+    menuParam.backgroundBlurStyle =
+        backgroundBlurStyle ? std::optional<int32_t>(static_cast<int32_t>(backgroundBlurStyle.value())) : std::nullopt;
+    auto transitionOpt = OptConvert<RefPtr<NG::ChainedTransitionEffect>>(menuOptions.transition);
+    menuParam.transition = transitionOpt.value_or(menuParam.transition);
+    menuParam.hasTransitionEffect = transitionOpt.has_value();
+    menuParam.enableArrow = OptConvert<bool>(menuOptions.enableArrow);
+    menuParam.arrowOffset = OptConvert<CalcDimension>(menuOptions.arrowOffset);
+    menuParam.placement = OptConvert<Placement>(menuOptions.placement);
+    // if enableArrow is true and placement not set, set placement default value to top.
+    if (menuParam.enableArrow.has_value() && !menuParam.placement.has_value() && menuParam.enableArrow.value()) {
+        menuParam.placement = Placement::TOP;
+    }
+    if (!menuParam.placement.has_value()) {
+        menuParam.placement = Placement::BOTTOM_LEFT;
+    }
+    menuParam.borderRadius = OptConvert<BorderRadiusProperty>(menuOptions.borderRadius);
+    menuParam.previewBorderRadius = OptConvert<BorderRadiusProperty>(menuOptions.previewBorderRadius);
+    menuParam.layoutRegionMargin = OptConvert<PaddingProperty>(menuOptions.layoutRegionMargin);
+    menuParam.layoutRegionMargin->start = menuParam.layoutRegionMargin->left;
+    menuParam.layoutRegionMargin->end = menuParam.layoutRegionMargin->right;
+    menuParam.hapticFeedbackMode =
+        OptConvert<HapticFeedbackMode>(menuOptions.hapticFeedbackMode).value_or(menuParam.hapticFeedbackMode);
+    menuParam.outlineColor = OptConvert<BorderColorProperty>(menuOptions.outlineColor);
+    menuParam.outlineWidth = OptConvert<BorderWidthProperty>(menuOptions.outlineWidth);
+    menuParam.effectOption = OptConvert<EffectOption>(menuOptions.backgroundEffect);
+    menuParam.blurStyleOption = OptConvert<BlurStyleOption>(menuOptions.backgroundBlurStyleOptions);
+};
+
 auto g_onWillDismissPopup = [](
     const Opt_Union_Boolean_Callback_DismissPopupAction_Void& param, RefPtr<PopupParam>& popupParam) {
     CHECK_NULL_VOID(popupParam);
@@ -266,6 +340,13 @@ RefPtr<PopupParam> Convert(const Ark_PopupCommonOptions& src)
     return popupParam;
 }
 
+template<>
+MenuParam Convert(const Ark_MenuOptions& src)
+{
+    MenuParam menuParam;
+    g_bindMenuOptionsParam(src, menuParam);
+    return menuParam;
+}
 } // OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -344,6 +425,64 @@ void ClosePopupImpl(Ark_VMContext vmContext,
     CHECK_NULL_VOID(frameNode);
     auto result = ViewAbstractModelStatic::ClosePopup(frameNode);
 }
+void OpenMenuImpl(Ark_VMContext vmContext,
+    Ark_AsyncWorkerPtr asyncWorker,
+    Ark_PromptAction peer,
+    Ark_NativePointer content,
+    const Ark_TargetInfo* targetInfo,
+    const Opt_MenuOptions* options,
+    const Callback_Opt_Array_String_Void* promiseValue)
+{
+    Ark_FrameNode peerNode = (Ark_FrameNode)content;
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peerNode);
+    CHECK_NULL_VOID(frameNode);
+    MenuParam menuParam = Converter::Convert<MenuParam>(options->value);
+    g_bindMenuOptionsParamCallbacks(options->value, menuParam, AceType::WeakClaim(frameNode.GetRawPtr()));
+    auto pipelineContext = frameNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    menuParam.isShowInSubWindow =
+        Converter::OptConvert<bool>(options->value.showInSubWindow).value_or(theme->GetExpandDisplay());
+    int targetId = INVALID_ID;
+    auto result = ParseTargetInfo(targetInfo, targetId);
+    if (result == ERROR_CODE_NO_ERROR) {
+        result = ViewAbstractModelStatic::OpenMenu(menuParam, frameNode, targetId);
+    }
+}
+void UpdateMenuImpl(Ark_VMContext vmContext,
+    Ark_AsyncWorkerPtr asyncWorker,
+    Ark_PromptAction peer,
+    Ark_NativePointer content,
+    const Ark_MenuOptions* options,
+    const Opt_Boolean* partialUpdate,
+    const Callback_Opt_Array_String_Void* promiseValue)
+{
+    Ark_FrameNode peerNode = (Ark_FrameNode)content;
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peerNode);
+    CHECK_NULL_VOID(frameNode);
+    MenuParam menuParam;
+    auto isPartialUpdate = Converter::OptConvert<bool>(*partialUpdate);
+    if (isPartialUpdate) {
+        auto result = ViewAbstractModelStatic::GetMenuParam(menuParam, frameNode);
+        if (result != ERROR_CODE_NO_ERROR && result != ERROR_CODE_INTERNAL_ERROR) {
+            return;
+        }
+    }
+    g_bindMenuOptionsParam(*options, menuParam);
+    ViewAbstractModelStatic::UpdateMenu(menuParam, frameNode);
+}
+void CloseMenuImpl(Ark_VMContext vmContext,
+    Ark_AsyncWorkerPtr asyncWorker,
+    Ark_PromptAction peer,
+    Ark_NativePointer content,
+    const Callback_Opt_Array_String_Void* promiseValue)
+{
+    Ark_FrameNode peerNode = (Ark_FrameNode)content;
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peerNode);
+    CHECK_NULL_VOID(frameNode);
+    auto result = ViewAbstractModelStatic::CloseMenu(frameNode);
+}
 } // PromptActionAccessor
 
 const GENERATED_ArkUIPromptActionAccessor* GetPromptActionAccessor()
@@ -352,6 +491,9 @@ const GENERATED_ArkUIPromptActionAccessor* GetPromptActionAccessor()
         PromptActionAccessor::OpenPopupImpl,
         PromptActionAccessor::UpdatePopupImpl,
         PromptActionAccessor::ClosePopupImpl,
+        PromptActionAccessor::OpenMenuImpl,
+        PromptActionAccessor::UpdateMenuImpl,
+        PromptActionAccessor::CloseMenuImpl,
     };
     return &PromptActionAccessorImpl;
 }

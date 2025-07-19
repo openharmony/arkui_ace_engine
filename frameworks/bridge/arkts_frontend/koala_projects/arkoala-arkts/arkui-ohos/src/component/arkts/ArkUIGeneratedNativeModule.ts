@@ -3992,6 +3992,12 @@ export class ArkUIGeneratedNativeModule {
     native static _PromptAction_updatePopup(ptr: KPointer, content: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Quick
     native static _PromptAction_closePopup(ptr: KPointer, content: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Quick
+    native static _PromptAction_openMenu(ptr: KPointer, content: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Quick
+    native static _PromptAction_updateMenu(ptr: KPointer, content: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Quick
+    native static _PromptAction_closeMenu(ptr: KPointer, content: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
     native static _UIContext_clearResourceCache(ptr: KPointer): void
     @ani.unsafe.Direct
     native static _UIContext_isFollowingSystemFontScale(ptr: KPointer): boolean
@@ -6999,6 +7005,16 @@ export class ArkUIGeneratedNativeModule {
     native static _DismissPopupAction_getReason(ptr: KPointer): int32
     @ani.unsafe.Direct
     native static _DismissPopupAction_setReason(ptr: KPointer, reason: KInt): void
+    @ani.unsafe.Direct
+    native static _DismissDialogAction_construct(): KPointer
+    @ani.unsafe.Direct
+    native static _DismissDialogAction_getFinalizer(): KPointer
+    @ani.unsafe.Direct
+    native static _DismissDialogAction_dismiss(ptr: KPointer): void
+    @ani.unsafe.Direct
+    native static _DismissDialogAction_getReason(ptr: KPointer): int32
+    @ani.unsafe.Direct
+    native static _DismissDialogAction_setReason(ptr: KPointer, reason: KInt): void
     @ani.unsafe.Direct
     native static _TextShadowStyle_ctor(thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct

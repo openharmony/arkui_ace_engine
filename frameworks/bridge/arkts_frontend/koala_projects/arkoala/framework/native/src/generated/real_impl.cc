@@ -14756,6 +14756,31 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         const Callback_Opt_Array_String_Void* promiseValue)
     {
     }
+    void OpenMenuImpl(Ark_VMContext vmContext,
+        Ark_AsyncWorkerPtr asyncWorker,
+        Ark_PromptAction peer,
+        Ark_NativePointer content,
+        const Ark_TargetInfo* targetInfo,
+        const Opt_MenuOptions* options,
+        const Callback_Opt_Array_String_Void* promiseValue)
+    {
+    }
+    void UpdateMenuImpl(Ark_VMContext vmContext,
+        Ark_AsyncWorkerPtr asyncWorker,
+        Ark_PromptAction peer,
+        Ark_NativePointer content,
+        const Ark_MenuOptions* options,
+        const Opt_Boolean* partialUpdate,
+        const Callback_Opt_Array_String_Void* promiseValue)
+    {
+    }
+    void CloseMenuImpl(Ark_VMContext vmContext,
+        Ark_AsyncWorkerPtr asyncWorker,
+        Ark_PromptAction peer,
+        Ark_NativePointer content,
+        const Callback_Opt_Array_String_Void* promiseValue)
+    {
+    }
     } // PromptActionAccessor
 
     namespace SpringPropAccessor {
@@ -20815,6 +20840,34 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     } // DismissPopupActionAccessor
+    namespace DismissDialogActionAccessor {
+    void DestroyPeerImpl(Ark_DismissDialogAction peer)
+    {
+        auto peerImpl = reinterpret_cast<DismissDialogActionPeerImpl *>(peer);
+        if (peerImpl) {
+            delete peerImpl;
+        }
+    }
+    Ark_DismissDialogAction ConstructImpl()
+    {
+        return {};
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        return reinterpret_cast<void *>(&DestroyPeerImpl);
+    }
+    void DismissImpl(Ark_DismissDialogAction peer)
+    {
+    }
+    Ark_DismissReason GetReasonImpl(Ark_DismissDialogAction peer)
+    {
+        return {};
+    }
+    void SetReasonImpl(Ark_DismissDialogAction peer,
+                       Ark_DismissReason reason)
+    {
+    }
+    } // DismissDialogActionAccessor
     namespace TextShadowStyleAccessor {
     void DestroyPeerImpl(Ark_TextShadowStyle peer)
     {
@@ -22389,6 +22442,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             PromptActionAccessor::OpenPopupImpl,
             PromptActionAccessor::UpdatePopupImpl,
             PromptActionAccessor::ClosePopupImpl,
+            PromptActionAccessor::OpenMenuImpl,
+            PromptActionAccessor::UpdateMenuImpl,
+            PromptActionAccessor::CloseMenuImpl,
         };
         return &PromptActionAccessorImpl;
     }
@@ -25064,6 +25120,23 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct DismissPopupActionPeer {
         virtual ~DismissPopupActionPeer() = default;
     };
+
+    const GENERATED_ArkUIDismissDialogActionAccessor* GetDismissDialogActionAccessor()
+    {
+        static const GENERATED_ArkUIDismissDialogActionAccessor DismissDialogActionAccessorImpl {
+            DismissDialogActionAccessor::DestroyPeerImpl,
+            DismissDialogActionAccessor::ConstructImpl,
+            DismissDialogActionAccessor::GetFinalizerImpl,
+            DismissDialogActionAccessor::DismissImpl,
+            DismissDialogActionAccessor::GetReasonImpl,
+            DismissDialogActionAccessor::SetReasonImpl,
+        };
+        return &DismissDialogActionAccessorImpl;
+    }
+
+    struct DismissDialogActionPeer {
+        virtual ~DismissDialogActionPeer() = default;
+    };
     const GENERATED_ArkUITextShadowStyleAccessor* GetTextShadowStyleAccessor()
     {
         static const GENERATED_ArkUITextShadowStyleAccessor TextShadowStyleAccessorImpl {
@@ -25494,6 +25567,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetLetterSpacingStyleAccessor,
             GetLevelOrderAccessor,
             GetDismissPopupActionAccessor,
+            GetDismissDialogActionAccessor,
             GetTextShadowStyleAccessor,
             GetBackgroundColorStyleAccessor,
             GetGestureStyleAccessor,
