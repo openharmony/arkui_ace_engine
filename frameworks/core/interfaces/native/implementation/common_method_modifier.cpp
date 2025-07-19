@@ -2102,7 +2102,11 @@ void BackgroundImageSizeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    // ViewAbstract::SetBackgroundImageSize(frameNode, Converter::OptConvertPtr<BackgroundImageSize>(value));
+    auto convValue = Converter::OptConvertPtr<BackgroundImageSize>(value);
+    if (!convValue) {
+        return;
+    }
+    ViewAbstract::SetBackgroundImageSize(frameNode, *convValue);
 }
 void BackgroundImagePositionImpl(Ark_NativePointer node,
                                  const Opt_Union_Position_Alignment* value)
