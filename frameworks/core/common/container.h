@@ -208,9 +208,7 @@ public:
     {
         return displayOrientation_;
     }
-    virtual bool IsPcOrPadFreeMultiWindowMode() const { return false; }
     virtual bool IsFullScreenWindow() const { return true; }
-    virtual bool SetSystemBarEnabled(SystemBarType type, bool enable, bool animation) { return true; }
 
     virtual RefPtr<DisplayInfo> GetDisplayInfo();
 

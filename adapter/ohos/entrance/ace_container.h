@@ -971,13 +971,11 @@ private:
 
     void FlushReloadTask(bool needReloadTransition, const ConfigurationChange& configurationChange);
     void InitSystemBarConfig();
-    bool IsPcOrPadFreeMultiWindowMode() const override;
     bool IsFullScreenWindow() const override
     {
         CHECK_NULL_RETURN(uiWindow_, false);
         return uiWindow_->GetWindowMode() == Rosen::WindowMode::WINDOW_MODE_FULLSCREEN;
     }
-    bool SetSystemBarEnabled(SystemBarType type, bool enable, bool animation) override;
     void InitializeStaticHybridDynamic(std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility);
     void InitializeDynamicHybridStatic(std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility);
 

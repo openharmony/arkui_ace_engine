@@ -662,7 +662,7 @@ void IgnoreLayoutSafeAreaImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(types);
     CHECK_NULL_VOID(edges);
-    NG::SafeAreaExpandOpts opts { .type = NG::SAFE_AREA_TYPE_SYSTEM, .edges = NG::SAFE_AREA_EDGE_ALL };
+    NG::IgnoreLayoutSafeAreaOpts opts { .type = NG::SAFE_AREA_TYPE_SYSTEM, .edges = NG::SAFE_AREA_EDGE_ALL };
     if (types->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
         auto typeRawArray = Converter::Convert<std::vector<uint32_t>>(types->value);
         uint32_t safeAreaType = NG::SAFE_AREA_TYPE_NONE;
