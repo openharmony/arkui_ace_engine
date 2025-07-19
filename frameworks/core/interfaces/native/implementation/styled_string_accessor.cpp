@@ -96,12 +96,10 @@ RefPtr<SpanBase> Convert(const Ark_StyleOptions& src)
             if (!CheckKeyAndValueTypeEqual(static_cast<int32_t>(src.styledKey), valueTypeId)) {
                 return;
             }
-            result = peer->span;
-            CHECK_NULL_VOID(result);
+            CHECK_NULL_VOID(peer->span);
             auto start = Converter::OptConvert<int32_t>(src.start).value_or(0);
             auto end = Converter::OptConvert<int32_t>(src.length).value_or(0) + start;
-            result->UpdateStartIndex(start);
-            result->UpdateEndIndex(end);
+            result = peer->span->GetSubSpan(start, end);
         },
         [&result, &src](const Ark_UserDataSpan& peer) {
             auto start = Converter::OptConvert<int32_t>(src.start).value_or(0);
