@@ -1493,19 +1493,28 @@ ArkUINativeModuleValue TextAreaBridge::SetEnterKeyType(ArkUIRuntimeCallInfo *run
     return panda::JSValueRef::Undefined(vm);
 }
 
-ArkUINativeModuleValue TextAreaBridge::SetTextAreAutoCapitalizationMode(ArkUIRuntimeCallInfo *runtimeCallInfo)
+ArkUINativeModuleValue TextAreaBridge::SetTextAreaAutoCapitalizationMode(ArkUIRuntimeCallInfo *runtimeCallInfo)
 {
     EcmaVM *vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+
+    if (firstArg->IsUndefined() || firstArg->IsNull()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    if (!(firstArg->IsNativePointer(vm))) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
-    if (secondArg->IsNumber()) {
+    if (!(secondArg->IsUndefined()) && !(secondArg->IsNull()) && secondArg->IsNumber()) {
         int32_t value = secondArg->Int32Value(vm);
-        GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreAutoCapitalizationMode(nativeNode, value);
+        GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaAutoCapitalizationMode(nativeNode, value);
     } else {
-        GetArkUINodeModifiers()->getTextAreaModifier()->resetTextAreAutoCapitalizationMode(nativeNode);
+        GetArkUINodeModifiers()->getTextAreaModifier()->resetTextAreaAutoCapitalizationMode(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -1521,13 +1530,22 @@ ArkUINativeModuleValue TextAreaBridge::ResetEnterKeyType(ArkUIRuntimeCallInfo *r
     return panda::JSValueRef::Undefined(vm);
 }
 
-ArkUINativeModuleValue TextAreaBridge::ResetTextAreAutoCapitalizationMode(ArkUIRuntimeCallInfo *runtimeCallInfo)
+ArkUINativeModuleValue TextAreaBridge::ResetTextAreaAutoCapitalizationMode(ArkUIRuntimeCallInfo *runtimeCallInfo)
 {
     EcmaVM *vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+
+    if (firstArg->IsUndefined() || firstArg->IsNull()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    if (!(firstArg->IsNativePointer(vm))) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    GetArkUINodeModifiers()->getTextAreaModifier()->resetTextAreAutoCapitalizationMode(nativeNode);
+    GetArkUINodeModifiers()->getTextAreaModifier()->resetTextAreaAutoCapitalizationMode(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
