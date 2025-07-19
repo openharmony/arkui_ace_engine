@@ -65,6 +65,31 @@ Ark_Int32 GetResourceIdImpl(const Ark_String* bundleName,
     uint32_t resId = resourceAdapter->GetResId(resourceStr);
     return static_cast<Ark_Int32>(resId);
 }
+#ifdef ACE_STATIC
+void ResourceManagerResetImpl()
+{
+    ResourceManager::GetInstance().Reset();
+}
+void SetFrameCallbackImpl(const Callback_Number_Void* onFrameCallback,
+                          const Callback_Number_Void* onIdleCallback,
+                          const Ark_Number* delayTime)
+{
+    CHECK_NULL_VOID(delayTime);
+    auto delayTimeInt = Converter::Convert<int32_t>(*delayTime);
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto onFrameCallbackFunc = [callback = CallbackHelper(*onFrameCallback)](double delayTimeInt) -> void {
+        auto delayTime = Converter::ArkValue<Ark_Number>(delayTimeInt);
+        callback.Invoke(delayTime);
+    };
+    auto onIdleCallbackFunc = [callback = CallbackHelper(*onIdleCallback)](double delayTimeInt,
+        int32_t frameCount) -> void {
+        auto delayTime = Converter::ArkValue<Ark_Number>(delayTimeInt);
+        callback.Invoke(delayTime);
+    };
+    context->AddFrameCallback(std::move(onFrameCallbackFunc), std::move(onIdleCallbackFunc), delayTimeInt);
+}
+#endif
 } // SystemOpsAccessor
 const GENERATED_ArkUISystemOpsAccessor* GetSystemOpsAccessor()
 {
@@ -74,6 +99,10 @@ const GENERATED_ArkUISystemOpsAccessor* GetSystemOpsAccessor()
         SystemOpsAccessor::SyncInstanceIdImpl,
         SystemOpsAccessor::RestoreInstanceIdImpl,
         SystemOpsAccessor::GetResourceIdImpl,
+#ifdef ACE_STATIC
+        SystemOpsAccessor::ResourceManagerResetImpl,
+        SystemOpsAccessor::SetFrameCallbackImpl,
+#endif
     };
     return &SystemOpsAccessorImpl;
 }
