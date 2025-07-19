@@ -48,4 +48,3 @@ void impl_EmulateTextInputEvent(KInt nodeId, const KStringPtr& text) {
     GetFullImpl()->getEventsAPI()->getTextInputEventsReceiver()->onChange(nodeId, str, preview);
     */
 }
-// KOALA_INTEROP_V2(EmulateTextInputEvent, KInt, KStringPtr) // TODO Where to place it?
