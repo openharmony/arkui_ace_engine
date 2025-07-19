@@ -34,6 +34,13 @@ public:
         ViewStackProcessor::GetInstance()->Push(uiNode, isCustomView);
     }
 
+#ifdef ACE_STATIC
+    void PushPtr(int64_t pointer) override
+    {
+        ViewStackProcessor::GetInstance()->PushPtr(pointer);
+    }
+#endif
+
     void Pop() override
     {
         ViewStackProcessor::GetInstance()->Pop();
