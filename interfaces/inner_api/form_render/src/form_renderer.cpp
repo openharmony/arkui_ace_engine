@@ -27,9 +27,6 @@ constexpr char FORM_RENDERER_DISPATCHER[] = "ohos.extra.param.key.process_on_for
 constexpr char FORM_RENDERER_PROCESS_ON_ADD_SURFACE[] = "ohos.extra.param.key.process_on_add_surface";
 constexpr char TRANSPARENT_COLOR[] = "#00FFFFFF";
 constexpr int32_t DOUBLE = 2;
-constexpr int64_t DEFAULT_TIMESTAMP = -1;
-constexpr int64_t DELAY_SET_DEFAULT_TIMESTAMP_TASK = 50; //ms
-constexpr int64_t DELAY_RESIZE_FORM_AGAIN_TASK = 100; //ms
 constexpr int32_t RSSURFACENODE_PROPERTIES_WIDTH_INDEX = 2;
 constexpr int32_t RSSURFACENODE_PROPERTIES_HEIGHT_INDEX = 3;
 } // namespace
@@ -119,7 +116,6 @@ void FormRenderer::RunFormPageInner(const OHOS::AAFwk::Want& want, const OHOS::A
     if (rsSurfaceNode == nullptr) {
         return;
     }
-    HandleTimeStampAndSetBounds(rsSurfaceNode);
     if (renderingMode_ == AppExecFwk::Constants::RenderingMode::SINGLE_COLOR || enableBlurBackground_) {
         HILOG_INFO("InitUIContent SetFormBackgroundColor #00FFFFFF");
         uiContent_->SetFormBackgroundColor(TRANSPARENT_COLOR);
@@ -306,9 +302,7 @@ void FormRenderer::UpdateFormSize(float width, float height, float borderWidth)
         uiContent_->SetFormHeight(resizedHeight);
         lastBorderWidth_ = borderWidth_;
         std::shared_ptr<EventHandler> eventHandler = eventHandler_.lock();
-        rsSurfaceNode->SetBounds(borderWidth_, borderWidth_, resizedWidth, resizedHeight);
-        HILOG_INFO(
-            "UpdateFormSize after setbounds, rsSurfaceNode width: %{public}f, height: %{public}f",
+        HILOG_INFO("UpdateFormSize after set uiContent, width: %{public}f, height: %{public}f",
             rsSurfaceNode->GetStagingProperties().GetBounds().data_[RSSURFACENODE_PROPERTIES_WIDTH_INDEX],
             rsSurfaceNode->GetStagingProperties().GetBounds().data_[RSSURFACENODE_PROPERTIES_HEIGHT_INDEX]);
         if (!eventHandler) {
@@ -322,8 +316,6 @@ void FormRenderer::UpdateFormSize(float width, float height, float borderWidth)
             }
             uiContent->OnFormSurfaceChange(resizedWidth, resizedHeight);
         });
-    } else {
-        CheckWhetherNeedResizeFormAgain(borderWidth, resizedWidth, resizedHeight);
     }
 }
 
@@ -544,9 +536,7 @@ void FormRenderer::AttachUIContent(const OHOS::AAFwk::Want& want, const OHOS::Ap
         uiContent_->SetFormHeight(height);
         lastBorderWidth_ = borderWidth_;
         uiContent_->OnFormSurfaceChange(width, height);
-        rsSurfaceNode->SetBounds(borderWidth_, borderWidth_, width, height);
-        HILOG_INFO(
-            "AttachUIContent after setbounds, rsSurfaceNode width: %{public}f, height: %{public}f",
+        HILOG_INFO("AttachUIContent after set uiContent, width: %{public}f, height: %{public}f",
             rsSurfaceNode->GetStagingProperties().GetBounds().data_[RSSURFACENODE_PROPERTIES_WIDTH_INDEX],
             rsSurfaceNode->GetStagingProperties().GetBounds().data_[RSSURFACENODE_PROPERTIES_HEIGHT_INDEX]);
     }
@@ -603,89 +593,6 @@ void FormRenderer::SetVisibleChange(bool isVisible)
         return;
     }
     uiContent_->ProcessFormVisibleChange(isVisible);
-}
-
-void FormRenderer::HandleTimeStampAndSetBounds(std::shared_ptr<Rosen::RSSurfaceNode> rsSurfaceNode)
-{
-    int64_t timeStamp = static_cast<int64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(
-        std::chrono::system_clock::now().time_since_epoch()).count());
-    std::shared_ptr<EventHandler> eventHandler = eventHandler_.lock();
-    SetRunFormPageInnerTimeStamp(timeStamp);
-
-    if (eventHandler) {
-        auto task = [weak = weak_from_this()]() {
-            auto formRenderer = weak.lock();
-            if (formRenderer) {
-                formRenderer->SetRunFormPageInnerTimeStamp(DEFAULT_TIMESTAMP);
-            } else {
-                HILOG_WARN("HandleTimeStampAndSetBounds, formRenderer is nullptr");
-            }
-        };
-        eventHandler->PostTask(task, DELAY_SET_DEFAULT_TIMESTAMP_TASK);
-    }
-
-    rsSurfaceNode->SetBounds(round(borderWidth_), round(borderWidth_), round(width_ - borderWidth_ * DOUBLE),
-        round(height_ - borderWidth_ * DOUBLE));
-    HILOG_INFO(
-        "HandleTimeStampAndSetBounds after setbounds, rsSurfaceNode width: %{public}f, height: %{public}f",
-        rsSurfaceNode->GetStagingProperties().GetBounds().data_[RSSURFACENODE_PROPERTIES_WIDTH_INDEX],
-        rsSurfaceNode->GetStagingProperties().GetBounds().data_[RSSURFACENODE_PROPERTIES_HEIGHT_INDEX]);
-}
-
-void FormRenderer::CheckWhetherNeedResizeFormAgain(float borderWidth, float width, float height)
-{
-    int64_t timeStamp = static_cast<int64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(
-        std::chrono::system_clock::now().time_since_epoch()).count());
-    int64_t runFormPageInnerTimeStamp = GetRunFormPageInnerTimeStamp();
-    SetRunFormPageInnerTimeStamp(DEFAULT_TIMESTAMP);
-    if (timeStamp - runFormPageInnerTimeStamp > DELAY_SET_DEFAULT_TIMESTAMP_TASK) {
-        return;
-    }
-    std::shared_ptr<EventHandler> eventHandler = eventHandler_.lock();
-    if (eventHandler == nullptr) {
-        HILOG_ERROR("CheckWhetherNeedResizeFormAgain, eventHandler is nullptr!");
-        return;
-    }
-    auto task = [weak = weak_from_this(), borderWidth, resizedWidth = width, resizedHeight = height]() {
-        auto formRenderer = weak.lock();
-        if (formRenderer == nullptr) {
-            HILOG_WARN("CheckWhetherNeedResizeFormAgain, formRenderer is nullptr");
-            return;
-        }
-        formRenderer->ResizeFormAgain(borderWidth, resizedWidth, resizedHeight);
-    };
-    eventHandler->PostTask(task, DELAY_RESIZE_FORM_AGAIN_TASK);
-}
-
-void FormRenderer::ResizeFormAgain(float borderWidth, float width, float height)
-{
-    if (uiContent_ == nullptr) {
-        HILOG_ERROR("uiContent_ is null");
-        return;
-    }
-    auto rsSurfaceNode = uiContent_->GetFormRootNode();
-    if (rsSurfaceNode == nullptr) {
-        HILOG_ERROR("rsSurfaceNode is nullptr.");
-        return;
-    }
-    uiContent_->SetFormWidth(width);
-    uiContent_->SetFormHeight(height);
-    uiContent_->OnFormSurfaceChange(width, height);
-    rsSurfaceNode->SetBounds(borderWidth, borderWidth, width, height);
-    HILOG_INFO(
-        "ResizeFormAgain after setbounds, rsSurfaceNode width: %{public}f, height: %{public}f",
-        rsSurfaceNode->GetStagingProperties().GetBounds().data_[RSSURFACENODE_PROPERTIES_WIDTH_INDEX],
-        rsSurfaceNode->GetStagingProperties().GetBounds().data_[RSSURFACENODE_PROPERTIES_HEIGHT_INDEX]);
-}
-
-int64_t FormRenderer::GetRunFormPageInnerTimeStamp()
-{
-    return runFormPageInnerTimeStamp_;
-}
-
-void FormRenderer::SetRunFormPageInnerTimeStamp(int64_t timeStamp)
-{
-    runFormPageInnerTimeStamp_ = timeStamp;
 }
 
 bool FormRenderer::IsManagerDelegateValid(const OHOS::AAFwk::Want& want)
