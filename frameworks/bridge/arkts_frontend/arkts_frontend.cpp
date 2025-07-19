@@ -49,6 +49,8 @@ struct AppInfo {
     const char* checkCallbackEventMethodSig;
     const char* handleMessageMethodName;
     const char* handleMessageMethodSig;
+    const char* registerNativeModule;
+    const char* registerNativeModuleSig;
 };
 /* copied from arkcompiler_ets_frontend vmloader.cc*/
 const AppInfo KOALA_APP_INFO = {
@@ -66,6 +68,8 @@ const AppInfo KOALA_APP_INFO = {
     ":V",
     "handleMessage",
     "JILstd/core/String;:Z",
+    "registerNativeModulePreloader",
+    ":V",
 };
 
 // void TryEmitError(EtsEnv& env)
@@ -505,6 +509,23 @@ void* ArktsFrontend::preloadArkTSRuntime = nullptr;
 void ArktsFrontend::PreloadAceModule(void* aniEnv)
 {
     ArktsFrontend::preloadArkTSRuntime = aniEnv;
+
+    auto* env = reinterpret_cast<ani_env*>(aniEnv);
+    ani_class appClass;
+    if (env->FindClass(KOALA_APP_INFO.className, &appClass) != ANI_OK) {
+        LOGE("PreloadAceModule: Cannot load main class %{public}s", KOALA_APP_INFO.className);
+        return;
+    }
+
+    ani_static_method create;
+    if (env->Class_FindStaticMethod(
+        appClass, KOALA_APP_INFO.registerNativeModule, KOALA_APP_INFO.registerNativeModuleSig, &create) != ANI_OK) {
+        LOGE("PreloadAceModule: Cannot find method %{public}s", KOALA_APP_INFO.registerNativeModule);
+        return;
+    }
+
+    ani_ref appLocal;
+    env->Class_CallStaticMethod_Void(appClass, create, &appLocal);
 }
 
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_PreloadAceArkTSModule(void* aniEnv)
