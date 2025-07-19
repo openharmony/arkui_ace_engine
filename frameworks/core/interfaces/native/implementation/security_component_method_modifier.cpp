@@ -136,7 +136,6 @@ void MarkAnchorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    // ViewAbstract::MarkAnchor(frameNode, Converter::OptConvert<OffsetT<Dimension>>(*value));
 }
 void OffsetImpl(Ark_NativePointer node,
                 const Opt_Union_Position_Edges_LocalizedEdges* value)
@@ -278,7 +277,6 @@ void KeyImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    // ViewAbstract::SetInspectorId(frameNode, *convValue);
 }
 void WidthImpl(Ark_NativePointer node,
                const Opt_Length* value)

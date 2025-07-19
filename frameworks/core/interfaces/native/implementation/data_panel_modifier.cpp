@@ -229,8 +229,6 @@ void ContentModifierImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //DataPanelModelNG::SetContentModifier(frameNode, convValue);
     LOGE("DataPanel::ContentModifierImpl isn't implemented. Ark_CustomObject isn't supported.");
 }
 } // DataPanelAttributeModifier

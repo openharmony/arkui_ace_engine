@@ -138,9 +138,6 @@ void SetImageOptions2Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(src);
-    //auto convValue = Converter::OptConvert<type>(src); // for enums
-    //ImageModelNG::SetSetImageOptions2(frameNode, convValue);
     LOGE("Arkoala: Image.SetImageOptions2Impl - method not implemented");
 }
 } // ImageInterfaceModifier
@@ -194,8 +191,6 @@ void FillColor1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //ImageModelNG::SetFillColor1(frameNode, convValue);
 }
 void ObjectFitImpl(Ark_NativePointer node,
                    const Opt_ImageFit* value)
@@ -210,8 +205,6 @@ void ImageMatrixImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //ImageModelNG::SetImageMatrix(frameNode, convValue);
 }
 void ObjectRepeatImpl(Ark_NativePointer node,
                       const Opt_ImageRepeat* value)

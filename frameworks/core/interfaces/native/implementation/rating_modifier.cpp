@@ -175,8 +175,6 @@ void ContentModifier0Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //RatingModelNG::SetContentModifier0(frameNode, convValue);
     LOGE("ARKOALA RatingInterfaceModifier::ContentModifier is not implemented.");
 }
 void ContentModifier1Impl(Ark_NativePointer node,
@@ -184,8 +182,6 @@ void ContentModifier1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //RatingModelNG::SetContentModifier1(frameNode, convValue);
 }
 void _onChangeEvent_ratingImpl(Ark_NativePointer node,
                                const Callback_Number_Void* callback)
