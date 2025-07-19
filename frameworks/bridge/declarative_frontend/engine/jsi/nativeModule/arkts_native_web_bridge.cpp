@@ -1131,11 +1131,12 @@ ArkUINativeModuleValue WebBridge::SetOnNativeEmbedLifecycleChange(ArkUIRuntimeCa
     panda::Local<panda::FunctionRef> func = obj;
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::Undefined(vm));
-    std::function<void(NativeEmbedDataInfo&)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+    std::function<void(NativeEmbedDataInfo&)> callback = [vm, weak = AceType::WeakClaim(frameNode),
+                                                             func = panda::CopyableGlobal(vm, func)](
                                                              NativeEmbedDataInfo& event) -> void {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weak.Upgrade());
         const char* keyPosition[] = { "x", "y" };
         Local<JSValueRef> valuesPosition[] = { panda::NumberRef::New(vm, static_cast<int32_t>(event.GetEmebdInfo().x)),
             panda::NumberRef::New(vm, static_cast<int32_t>(event.GetEmebdInfo().y)) };
