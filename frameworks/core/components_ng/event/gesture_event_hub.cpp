@@ -1484,7 +1484,7 @@ void GestureEventHub::DumpVelocityInfoFroPanEvent(int32_t fingerId)
     panEventActuator_->DumpVelocityInfo(fingerId);
 }
 
-GestureEvent GestureEventHub::GetGestureEventInfo()
+const GestureEvent GestureEventHub::GetGestureEventInfo()
 {
     RefPtr<ClickRecognizer> clickRecognizer;
     if (clickEventActuator_) {
@@ -1497,7 +1497,7 @@ GestureEvent GestureEventHub::GetGestureEventInfo()
     return clickRecognizer->GetGestureEventInfo();
 }
 
-ClickInfo GestureEventHub::GetClickInfo()
+const ClickInfo GestureEventHub::GetClickInfo()
 {
     RefPtr<ClickRecognizer> clickRecognizer;
     if (clickEventActuator_) {

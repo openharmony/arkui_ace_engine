@@ -2488,7 +2488,7 @@ bool LostFocus(const RefPtr<NG::FrameNode>& frameNode)
     return true;
 }
 
-void HandleWillClickAccept(RefPtr<NG::FrameNode>& frameNode)
+void HandleWillClickAccept(const RefPtr<NG::FrameNode>& frameNode)
 {
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();
@@ -2500,7 +2500,7 @@ void HandleWillClickAccept(RefPtr<NG::FrameNode>& frameNode)
     NG::UIObserverHandler::GetInstance().NotifyWillClick(gestureEventInfo, clickInfo, frameNode);
 }
 
-void HandleDidClickAccept(RefPtr<NG::FrameNode>& frameNode)
+void HandleDidClickAccept(const RefPtr<NG::FrameNode>& frameNode)
 {
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetOrCreateEventHub<NG::EventHub>();

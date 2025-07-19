@@ -1675,8 +1675,6 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager030, TestSize.Level1)
     jsAccessibilityManager->ConvertActionTypeToBoolen(ActionType::ACCESSIBILITY_ACTION_CLICK,
         frameNode, elementId, context, actionArguments);
     EXPECT_EQ(frameNode->GetNodeName(), "WillClick_Click_DidClick");
-    NG::UIObserverHandler::GetInstance().SetWillClickFunc(nullptr);
-    NG::UIObserverHandler::GetInstance().SetDidClickFunc(nullptr);
 }
 
 /**
@@ -1723,8 +1721,6 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager030, TestSize.Level1)
     jsAccessibilityManager->ConvertActionTypeToBoolen(ActionType::ACCESSIBILITY_ACTION_CLICK,
         frameNode, elementId, context, actionArguments);
     EXPECT_EQ(frameNode->GetNodeName(), "WillClick_Click");
-    NG::UIObserverHandler::GetInstance().SetWillClickFunc(nullptr);
-    NG::UIObserverHandler::GetInstance().SetDidClickFunc(nullptr);
 }
 
 /**

@@ -257,6 +257,7 @@ examples/ImageAnimator/ @arkui_image
 examples/Picker/ @arkui_image
 examples/PickDialog/ @arkui_image
 examples/ScrollableComponentTest/ @arkuiscroll
+examples/UIExtension @arkuiabilitygroup
 
 [Frameworks Base]
 frameworks/base/background_task_helper/background_task_helper.h @arkuiframework
