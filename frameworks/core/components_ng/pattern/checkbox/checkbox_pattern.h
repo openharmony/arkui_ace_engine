@@ -182,6 +182,9 @@ public:
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
+    void OnDetachFromFrameNodeMultiThread();
+    void OnDetachFromMainTree() override;
+    void OnDetachFromMainTreeMultiThread(const RefPtr<FrameNode>& frameNode);
     void OnModifyDone() override;
     void OnAfterModifyDone() override;
     void InitClickEvent();
@@ -206,6 +209,7 @@ private:
     void StartExitAnimation();
     void UpdateState();
     void UpdateUnSelect();
+    void UpdateGroupStatus(FrameNode* frameNode);
     void CheckBoxGroupIsTrue();
     void SetPrePageIdToLastPageId();
     // Init key event
