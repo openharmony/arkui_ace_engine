@@ -362,7 +362,9 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     CheckScrollable();
 
     if (layoutInfo_->measureInNextFrame_) {
-        GetContext()->AddAfterLayoutTask([weak = AceType::WeakClaim(this)]() {
+        auto context = GetContext();
+        CHECK_NULL_RETURN(context, false);
+        context->AddAfterLayoutTask([weak = AceType::WeakClaim(this)]() {
             ACE_SCOPED_TRACE("WaterFlow MeasureInNextFrame");
             auto waterFlow = weak.Upgrade();
             if (waterFlow) {

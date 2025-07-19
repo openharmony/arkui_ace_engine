@@ -1914,4 +1914,30 @@ HWTEST_F(WaterFlowSegmentTest, ChangeHeight004, TestSize.Level1)
     EXPECT_EQ(info->itemInfos_[32].mainSize, 100.0f);
     EXPECT_EQ(info->itemInfos_[33].mainOffset, 2023.0f);
 }
+
+/**
+ * @tc.name: WaterFlowInitializeWithSectionsTest001
+ * @tc.desc: Test SetWaterFlowInitialize with sections parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentTest, WaterFlowInitializeWithSectionsTest001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetLayoutMode(NG::WaterFlowLayoutMode::TOP_DOWN);
+    model.SetColumnsTemplate("1fr 1fr");
+
+    // Create sections to test the sections branch
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_4);
+    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+
+    CreateWaterFlowItems(5);
+    CreateDone();
+
+    // Verify sections are properly set
+    EXPECT_NE(pattern_->GetOrCreateWaterFlowSections(), nullptr);
+    EXPECT_EQ(secObj->GetSectionInfo().size(), 4);
+    // When sections exist, footer should be ignored/reset
+    EXPECT_EQ(pattern_->layoutInfo_->footerIndex_, -1);
+}
 } // namespace OHOS::Ace::NG
