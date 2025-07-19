@@ -168,5 +168,18 @@ void ImageModelStatic::SetEnhancedImageQuality(FrameNode* frameNode, const std::
     CHECK_NULL_VOID(pattern);
     pattern->SetImageQuality(imageQuality.value_or(AIImageQuality::NONE));
 }
+
+#if defined(ACE_STATIC)
+void ImageModelStatic::SetResizableLattice(FrameNode* frameNode, const RefPtr<DrawingLattice>& lattice)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageResizableLattice, lattice, frameNode);
+}
+void ImageModelStatic::SetDrawingColorFilter(FrameNode* frameNode, const RefPtr<DrawingColorFilter>& colorFilter)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, DrawingColorFilter, colorFilter, frameNode);
+    ACE_RESET_NODE_PAINT_PROPERTY(ImageRenderProperty, ColorFilter, frameNode);
+}
+#endif
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_STATIC_CPP

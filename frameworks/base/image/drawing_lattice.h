@@ -26,6 +26,16 @@ class ACE_EXPORT DrawingLattice : public AceType {
 public:
     static RefPtr<DrawingLattice> CreateDrawingLattice(void* sptrAddr);
     static RefPtr<DrawingLattice> CreateDrawingLatticeFromNative(void* sptrAddr);
+#if defined(ACE_STATIC)
+    /**
+     * @description: Create ace lattice by drawing lattice ani
+     * @param aniAddr ani lattice of drawing lattice
+     * @return  ace lattice object
+     *
+     * only for arkts 1.2
+     */
+    static RefPtr<DrawingLattice> CreateDrawingLatticeFromAni(void* aniAddr);
+#endif
     virtual void* GetDrawingLatticeSptrAddr() = 0; //define the return value as void is for tdd compilation
     virtual std::string DumpToString() = 0;
 };

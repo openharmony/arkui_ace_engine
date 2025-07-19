@@ -430,6 +430,13 @@ private:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnDetachFromMainTree() override;
 
+#if defined(ACE_STATIC)
+    void OnAttachToMainTree() override;
+    void OnAttachToFrameNodeMultiThread() {}
+    void OnDetachFromFrameNodeMultiThread(FrameNode* frameNode) {}
+    void OnAttachToMainTreeMultiThread();
+    void OnDetachFromMainTreeMultiThread();
+#endif
     void OnModifyDone() override;
     void OnPixelMapDrawableModifyDone();
     ImagePaintConfig CreatePaintConfig();
