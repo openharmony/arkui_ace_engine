@@ -4870,16 +4870,24 @@ bool JsAccessibilityManager::DumpInfoParams(const std::vector<std::string>& para
         } else if (*arg == "-json") {
             argument.mode = DumpMode::TREE;
         } else {
-            if (argument.mode == DumpMode::NODE) {
-                argument.mode = DumpMode::HANDLE_EVENT;
+            if (HandleNodeModeParam(*arg, argument)) {
                 break;
-            } else {
-                argument.mode = DumpMode::NODE;
-                argument.nodeId = StringUtils::StringToLongInt(*arg);
             }
         }
     }
     return true;
+}
+
+bool JsAccessibilityManager::HandleNodeModeParam(const std::string& param, DumpInfoArgument& argument)
+{
+    if (argument.mode == DumpMode::NODE) {
+        argument.mode = DumpMode::HANDLE_EVENT;
+        return true;
+    } else {
+        argument.mode = DumpMode::NODE;
+        argument.nodeId = StringUtils::StringToLongInt(param);
+        return false;
+    }
 }
 
 void JsAccessibilityManager::OnDumpInfoNG(const std::vector<std::string>& params, uint32_t windowId, bool hasJson)
@@ -5687,7 +5695,7 @@ void JsAccessibilityManager::JsInteractionOperation::SearchElementInfoBySpecific
     }
 
     executor->PostTask(
-        [weak = GetHandler(), splitElementId, &param, requestId, &callback, windowId]() {
+        [weak = GetHandler(), splitElementId, param, requestId, &callback, windowId]() {
             auto jsAccessibilityManager = weak.Upgrade();
             if (!jsAccessibilityManager) {
                 std::list<AccessibilityElementInfo> infos;
@@ -5695,6 +5703,7 @@ void JsAccessibilityManager::JsInteractionOperation::SearchElementInfoBySpecific
                 callback.SetSearchElementInfoBySpecificPropertyResult(infos, treeInfos, requestId);
                 TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY,
                     "SetSearchElementInfoBySpecificPropertyResult, requestId: %{public}d", requestId);
+                return;
             }
             ACE_SCOPED_TRACE("SearchElementInfoBySpecificProperty");
             jsAccessibilityManager->SearchElementInfoBySpecificProperty(
