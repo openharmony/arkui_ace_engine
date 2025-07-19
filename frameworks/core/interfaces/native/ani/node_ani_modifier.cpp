@@ -27,6 +27,7 @@
 #include "interop_ani_modifier.h"
 #include "drag_controller_ani_modifier.h"
 #include "video_ani_modifier.h"
+#include "rich_editor_ani_modifier.h"
 #include "shape_ani_modifier.h"
 #include "stateMgmt_ani_modifier.h"
 #include "xcomponent_ani_modifier.h"

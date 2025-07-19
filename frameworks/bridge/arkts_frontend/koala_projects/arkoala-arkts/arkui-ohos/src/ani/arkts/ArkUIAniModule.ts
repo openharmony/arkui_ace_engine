@@ -133,6 +133,9 @@ export class ArkUIAniModule {
     // for Shape
     native static _Shape_Transfer_PixelMap(ptr: KPointer, pixelmap: image.PixelMap): void;
 
+    // for RichEditor
+    native static _RichEditor_Transfer_PixelMap(pixelmap: image.PixelMap): KPointer;
+
     // for  stateMgmt
     native static _PersistentStorage_Get(key: string): string
     native static _PersistentStorage_Set(key: string, value: string): void

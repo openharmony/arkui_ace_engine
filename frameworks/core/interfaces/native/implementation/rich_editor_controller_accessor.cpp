@@ -640,6 +640,7 @@ Ark_Number AddImageSpanImpl(Ark_RichEditorController peer,
         locOptions = optionsOpt.value();
     }
     auto info = Converter::OptConvert<ImageSourceInfo>(*value);
+    
     if (info) {
         locOptions.image = info->GetSrc();
         locOptions.bundleName = info->GetBundleName();

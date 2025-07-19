@@ -37,6 +37,7 @@ import { Tuple_Number_Number } from "./arkui-synthetics"
 import { DecorationStyleInterface, StyledString, StyledStringInternal, MutableStyledString, MutableStyledStringInternal } from "./styledString"
 import { TextBackgroundStyle } from "./span"
 import { PixelMap } from "#external"
+import { ArkUIAniModule } from "arkui.ani"
 import { SymbolEffectStrategy, SymbolRenderingStrategy } from "./symbolglyph"
 import { Callback_GestureEvent_Void, GestureEvent } from "./gesture"
 import { OnHoverCallback } from "./sdk-stubs"
@@ -1520,8 +1521,10 @@ export class RichEditorController extends RichEditorBaseController implements Ma
         value_type = runtimeType(value)
         if (TypeChecker.isPixelMap(value, false, false)) {
             thisSerializer.writeInt8(0 as int32)
-            const value_0  = value as PixelMap
-            thisSerializer.writePixelMap(value_0)
+            const pixelMap = value as PixelMap
+            let ptr = ArkUIAniModule._RichEditor_Transfer_PixelMap(pixelMap)
+            const ptr_value : KPointer = ptr as KPointer
+            thisSerializer.writePointer(ptr_value)
         }
         else if ((RuntimeType.STRING == value_type) || (RuntimeType.OBJECT == value_type)) {
             thisSerializer.writeInt8(1 as int32)

@@ -41646,7 +41646,7 @@ Ark_Number impl_RichEditorController_addImageSpan(Ark_NativePointer thisPtr, KSe
         value_value_buf.selector = value_value_buf_selector;
         if (value_value_buf_selector == 0) {
             value_value_buf.selector = 0;
-            value_value_buf.value0 = static_cast<Ark_PixelMap>(thisDeserializer.readPixelMap());
+            value_value_buf.value0 = static_cast<Ark_NativePointer>(thisDeserializer.readPointer());
         }
         else if (value_value_buf_selector == 1) {
             value_value_buf.selector = 1;
