@@ -69,7 +69,12 @@ double FfiOHOSAceFrameworkFp2Px(double value)
 
 double FfiOHOSAceFrameworkPx2Fp(double value)
 {
-    return value / GetFp2PxParam();
+    double fp2PxGap = GetFp2PxParam();
+    if (fp2PxGap > 0) {
+        return value / fp2PxGap;
+    } else {
+        return value;
+    }
 }
 
 double GetdesignWidthScale()
@@ -102,7 +107,11 @@ double FfiOHOSAceFrameworkLpx2Px(double value)
 double FfiOHOSAceFrameworkPx2Lpx(double value)
 {
     auto designWidthScale = GetdesignWidthScale();
-    return value / designWidthScale;
+    if (designWidthScale > 0) {
+        return value / designWidthScale;
+    } else {
+        return value;
+    }
 }
 }
 }
