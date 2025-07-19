@@ -271,7 +271,7 @@ private:
      */
     bool MeasureExistingLine(int32_t line, float& mainLength, int32_t& endIdx);
 
-    LayoutWrapper* wrapper_;
+    LayoutWrapper* wrapper_ = nullptr;
     SizeF frameSize_;
     int32_t currentMainLineIndex_ = 0;        // it equals to row index in vertical grid
     int32_t prevStartMainLineIndex_ = -1;     // startMainLineIndex before upward lazy items request
