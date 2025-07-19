@@ -257,6 +257,7 @@ public:
     WidthBreakpoint GetWidthBreakpoint(const WidthLayoutBreakPoint& layoutBreakpoints) const;
     HeightBreakpoint GetHeightBreakpoint(const HeightLayoutBreakPoint& layoutBreakpoints) const;
 
+    virtual void SetDVSyncUpdate(uint64_t dvsyncTime) {}
 protected:
     bool isRequestVsync_ = false;
     bool onShow_ = true;

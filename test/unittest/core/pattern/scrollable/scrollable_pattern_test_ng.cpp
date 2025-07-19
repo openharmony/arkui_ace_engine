@@ -1989,4 +1989,16 @@ HWTEST_F(ScrollablePatternTestNg, HandleOnWillScrollEventEx, TestSize.Level1)
     manager->HandleOnWillScrollEventEx(result, ScrollState::SCROLL, ScrollSource::DRAG);
     EXPECT_EQ(result.offset.Value(), 1.0);
 }
+
+/**
+ * @tc.name: GetDVSyncOffset
+ * @tc.desc: Test GetDVSyncOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollablePatternTestNg, GetDVSyncOffset, TestSize.Level1)
+{
+    RefPtr<ListPattern> scrollablePattern = AceType::MakeRefPtr<ListPattern>();
+    float dvsyncOffset = scrollablePattern->GetDVSyncOffset();
+    EXPECT_EQ(dvsyncOffset, 0);
+}
 } // namespace OHOS::Ace::NG

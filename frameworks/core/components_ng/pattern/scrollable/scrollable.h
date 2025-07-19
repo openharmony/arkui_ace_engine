@@ -201,9 +201,11 @@ public:
     void HandleTouchUp();
     void HandleTouchCancel();
     void HandleDragStart(const GestureEvent& info);
+    void HandleExtDragUpdate();
     void HandleDragUpdate(const GestureEvent& info);
     void HandleDragEnd(const GestureEvent& info, bool isFromPanEnd = false);
     void HandleScrollEnd(const std::optional<float>& velocity);
+    ScrollResult HandleExtScroll();
     bool HandleOverScroll(double velocity);
     ScrollResult HandleScroll(double offset, int32_t source, NestedState state);
     void ProcessAxisUpdateEvent(float mainDelta, bool fromScrollBar = false);
@@ -411,6 +413,10 @@ public:
     {
         overScrollCallback_ = std::move(func);
     }
+    void SetHandleExtScrollCallback(std::function<ScrollResult(void)>&& func)
+    {
+        handleExtScrollCallback_ = std::move(func);
+    }
     void StartScrollAnimation(float mainPosition, float velocity, bool isScrollFromTouchPad = false);
     void SetOnScrollStartRec(std::function<void(float)>&& func)
     {
@@ -603,6 +609,7 @@ private:
     void InitPanRecognizerNG();
     void SetOnActionStart();
     void SetOnActionUpdate();
+    void SetOnActionExtUpdate();
     void SetOnActionEnd();
     void SetOnActionCancel();
     void SetPanEndCallback();
@@ -695,6 +702,8 @@ private:
     std::function<void(const std::optional<float>&)> onScrollEndRec_;
     // ScrollablePattern::RemainVelocityToChild
     RemainVelocityCallback remainVelocityCallback_;
+    // ScrollablePattern::HandleExtScroll
+    std::function<ScrollResult(void)> handleExtScrollCallback_;
 
     EdgeEffect edgeEffect_ = EdgeEffect::NONE;
     bool canOverScroll_ = true;

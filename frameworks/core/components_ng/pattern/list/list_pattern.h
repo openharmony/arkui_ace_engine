@@ -628,6 +628,7 @@ private:
     void ProcessFocusEvent(bool indexChanged);
     void RequestFocusForItem(int32_t index, int32_t indexInGroup);
     RefPtr<FocusHub> GetChildFocusHubInGroup(int32_t indexInList, int32_t indexInListItemGroup) const;
+    void ResetForExtScroll() override;
 
     std::optional<int32_t> focusIndex_;
     std::optional<int32_t> focusGroupIndex_;

@@ -1323,6 +1323,10 @@ Dimension NG::PipelineContext::GetCustomTitleHeight()
     return Dimension();
 }
 
+void PipelineBase::SetUiDVSyncCommandTime(uint64_t vsyncTime)
+{
+}
+
 void PipelineBase::SetFontScale(float fontScale)
 {
     fontScale_ = fontScale;

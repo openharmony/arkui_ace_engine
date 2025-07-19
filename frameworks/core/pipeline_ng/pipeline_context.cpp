@@ -687,6 +687,27 @@ void PipelineContext::FlushDragEvents(const RefPtr<DragDropManager>& manager,
     nodeToPointEvent_ = std::move(nodeToPointEvent);
 }
 
+void PipelineContext::UpdateDVSyncTime(uint64_t nanoTimestamp, const std::string& abilityName, uint64_t vsyncPeriod)
+{
+    if (nanoTimestamp < lastVSyncTime_) {
+        commandTimeUpdate_ = false;
+    }
+    if (commandTimeUpdate_) {
+        int64_t now = GetSysTimestamp();
+        if (DVSyncChangeTime_ < now) {
+            commandTimeUpdate_ = false;
+        }
+        if (commandTimeUpdate_) {
+            window_->RecordFrameTime(DVSyncChangeTime_, abilityName);
+            if (dvsyncTimeUpdate_) {
+                window_->SetDVSyncUpdate(nanoTimestamp);
+                dvsyncTimeUpdate_ = false;
+            }
+            DVSyncChangeTime_ += vsyncPeriod;
+        }
+    }
+}
+
 void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
 {
     CHECK_RUN_ON(UI);
@@ -721,6 +742,8 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     auto hasRunningAnimation = FlushModifierAnimation(nanoTimestamp);
     FlushTouchEvents();
     FlushDragEvents();
+    UpdateDVSyncTime(nanoTimestamp, abilityName, vsyncPeriod);
+    lastVSyncTime_ = nanoTimestamp;
     FlushFrameCallbackFromCAPI(nanoTimestamp, frameCount);
     FlushBuild();
     if (isFormRender_ && drawDelegate_ && rootNode_) {
