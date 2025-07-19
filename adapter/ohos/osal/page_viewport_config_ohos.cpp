@@ -68,8 +68,8 @@ void PageViewportConfigOhos::ApplySafeArea()
     auto mgr = pipeline->GetSafeAreaManager();
     CHECK_NULL_VOID(mgr);
     BackupInfo backupInfo;
-    backupInfo.rootWidth = static_cast<uint32_t>(pipeline->GetRootWidth());
-    backupInfo.rootHeight = static_cast<uint32_t>(pipeline->GetRootHeight());
+    backupInfo.rootWidth = static_cast<int32_t>(pipeline->GetRootWidth());
+    backupInfo.rootHeight = static_cast<int32_t>(pipeline->GetRootHeight());
     TAG_LOGI(AceLogTag::ACE_NAVIGATION, "backup rootSize, width:%{public}u, height:%{public}u",
         backupInfo.rootWidth, backupInfo.rootHeight);
     for (auto& avoidArea : avoidAreas_) {
