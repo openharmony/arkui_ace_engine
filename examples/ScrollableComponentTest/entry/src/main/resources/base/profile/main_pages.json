@@ -43,6 +43,7 @@
     "pages/List/AutoSort/AutoSort",
     "pages/List/DeleteAndShift/DeleteAndShift",
     "pages/List/DragAndDropSorting/DragAndDropSorting",
+    "pages/List/DragAndDropSorting/ListItemGroup",
     "pages/List/FadingEdge/FadingEdge",
     "pages/List/ListNestedGrid/ListGridDemo",
     "pages/List/LoopScrolling/LoopScrolling",

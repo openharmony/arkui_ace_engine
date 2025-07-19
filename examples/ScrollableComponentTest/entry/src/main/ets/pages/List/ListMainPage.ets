@@ -47,6 +47,7 @@ struct IndexPage {
     new TextList(13, 'SlideHorizontallyOneSide', 'pages/List/SlideHorizontallyOneSide'),
     new TextList(14, 'FoldExpand', 'pages/List/FoldExpand'),
     new TextList(15, 'MultiSelectSliding', 'pages/List/MultiSelectSliding'),
+    new TextList(16, '点击放大item', 'pages/List/DragAndDropSorting/ListItemGroup'),
   ]
   @State fontSize: Resource | undefined = undefined
   build() {
