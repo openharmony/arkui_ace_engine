@@ -56,7 +56,7 @@ struct DialogPropsForUpdate {
     Opt_Boolean showInSubWindow;
     Opt_ResourceStr subtitle;
     Opt_ResourceStr title;
-    Opt_TextStyle_alert_dialog textStyle;
+    Opt_AlertDialogTextStyleOptions textStyle;
     Opt_TransitionEffect transition;
     Opt_Length width;
     Opt_LevelMode levelMode;
@@ -236,7 +236,7 @@ void UpdateDynamicDialogProperties(DialogProperties& dialogProps, const DialogPr
         offset.SetX(offsetX);
         dialogProps.maskRect->SetOffset(offset);
     }
-    auto textStyle = Converter::OptConvert<Ark_TextStyle_alert_dialog>(props.textStyle);
+    auto textStyle = Converter::OptConvert<Ark_AlertDialogTextStyleOptions>(props.textStyle);
     if (textStyle) {
         auto wordBreak = Converter::OptConvert<WordBreak>(textStyle.value().wordBreak);
         if (wordBreak) {

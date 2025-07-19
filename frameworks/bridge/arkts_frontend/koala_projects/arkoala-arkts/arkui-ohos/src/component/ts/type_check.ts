@@ -58,7 +58,7 @@ import { DrawContext, Rect, LengthUnit, ShapeClip, RoundRect, Circle, CommandPat
 import { DataOperationType } from "./../lazyForEach"
 import { DataPanelType, ColorStop, LinearGradient, DataPanelOptions, DataPanelShadowOptions } from "./../dataPanel"
 import { DatePickerMode, DatePickerOptions, DatePickerResult, LunarSwitchStyle, DatePickerDialogOptions, Callback_DatePickerResult_Void } from "./../datePicker"
-import { DialogAlignment, DialogButtonDirection, TextStyle_alert_dialog, AlertDialogButtonBaseOptions, AlertDialogButtonOptions, AlertDialogParamWithButtons, AlertDialogParam, AlertDialogParamWithConfirm, AlertDialogParamWithOptions } from "./../alertDialog"
+import { DialogAlignment, DialogButtonDirection, AlertDialogTextStyleOptions, AlertDialogButtonBaseOptions, AlertDialogButtonOptions, AlertDialogParamWithButtons, AlertDialogParam, AlertDialogParamWithConfirm, AlertDialogParamWithOptions } from "./../alertDialog"
 import { DistributionType, DisturbanceFieldShape, ParticleEmitterShape, ParticleType, ParticleUpdater } from "./../particle"
 import { DpiFollowStrategy, UIExtensionProxy, Callback_UIExtensionProxy_Void, WindowModeFollowStrategy, UIExtensionOptions, Literal_Number_code__want } from "./../uiExtensionComponent"
 import { EditMode, ListItemStyle, Sticky, SwipeActionState, SwipeEdgeEffect, ListItemOptions, SwipeActionItem, Callback_SwipeActionState_Void, SwipeActionOptions } from "./../listItem"
@@ -17022,12 +17022,12 @@ export class TypeChecker {
             throw new Error("Can not discriminate value typeof TextSpanType")
         }
     }
-    static isTextStyle_alert_dialog(value: Object | string | number | undefined | boolean, duplicated_wordBreak: boolean): boolean {
+    static isAlertDialogTextStyleOptions(value: Object | string | number | undefined | boolean, duplicated_wordBreak: boolean): boolean {
         if ((!duplicated_wordBreak) && (value?.hasOwnProperty("wordBreak"))) {
             return true
         }
         else {
-            throw new Error("Can not discriminate value typeof TextStyle_alert_dialog")
+            throw new Error("Can not discriminate value typeof AlertDialogTextStyleOptions")
         }
     }
     static isTextStyle_styled_string(value: Object | string | number | undefined | boolean, duplicated_fontColor: boolean, duplicated_fontFamily: boolean, duplicated_fontSize: boolean, duplicated_fontWeight: boolean, duplicated_fontStyle: boolean): boolean {
