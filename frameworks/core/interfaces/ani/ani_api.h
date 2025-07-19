@@ -94,6 +94,9 @@ struct ArkUIAniWebModifier {
     bool (*transferDataResubmissionHandlerToStatic)(void* peer, void* nativePtr);
     bool (*transferClientAuthenticationHandlerToStatic)(void* peer, void* nativePtr);
     bool (*transferSslErrorHandlerToStatic)(void* peer, void* nativePtr);
+    bool (*transferPermissionRequestToStatic)(void* peer, void* nativePtr);
+    bool (*transferControllerHandlerToStatic)(void* peer, void* nativePtr);
+    bool (*transferWebKeyboardControllerToStatic)(void* peer, void* nativePtr);
     napi_value (*transferScreenCaptureHandlerToDynamic)(napi_env env, void* peer);
     napi_value (*transferJsGeolocationToDynamic)(napi_env env, void* peer);
     napi_value (*transferJsResultToDynamic)(napi_env env, void* peer);
@@ -109,6 +112,9 @@ struct ArkUIAniWebModifier {
     napi_value (*transferDataResubmissionHandlerToDynamic)(napi_env env, void* peer);
     napi_value (*transferClientAuthenticationHandlerToDynamic)(napi_env env, void* peer);
     napi_value (*transferSslErrorHandlerToDynamic)(napi_env env, void* peer);
+    napi_value (*transferControllerHandlerToDynamic)(napi_env env, void* peer);
+    napi_value (*transferPermissionRequestToDynamic)(napi_env env, void* peer);
+    napi_value (*transferWebKeyboardControllerToDynamic)(napi_env env, void* peer);
 };
 struct ArkUIAniDragModifier {
     void (*setDragData)(ani_ref event, ani_ref data);

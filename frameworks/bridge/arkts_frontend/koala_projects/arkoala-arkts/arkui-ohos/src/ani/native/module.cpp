@@ -234,6 +234,36 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::TransferSslErrorHandlerToDynamic)
         },
         ani_native_function {
+            "_TransferPermissionRequestToStatic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferPermissionRequestToStatic)
+        },
+        ani_native_function {
+            "_TransferControllerHandlerToStatic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferControllerHandlerToStatic)
+        },
+        ani_native_function {
+            "_TransferWebKeyboardControllerToStatic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferWebKeyboardControllerToStatic)
+        },
+        ani_native_function {
+            "_TransferPermissionRequestToDynamic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferPermissionRequestToDynamic)
+        },
+        ani_native_function {
+            "_TransferControllerHandlerToDynamic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferControllerHandlerToDynamic)
+        },
+        ani_native_function {
+            "_TransferWebKeyboardControllerToDynamic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferWebKeyboardControllerToDynamic)
+        },
+        ani_native_function {
             "_ConvertUtils_ConvertFromPixelMapAni",
             "L@ohos/multimedia/image/image/PixelMap;:J",
             reinterpret_cast<void*>(OHOS::Ace::Ani::ConvertFromPixelMapAni)

@@ -808,4 +808,129 @@ ani_object TransferSslErrorHandlerToDynamic(ani_env* env, ani_class aniClass, an
     }
     return reinterpret_cast<ani_object>(result);
 }
+
+ani_boolean TransferPermissionRequestToStatic(ani_env* env, ani_class aniClass, ani_long node, ani_object input)
+{
+    ani_object esValue = ESValueWrap(env, input);
+    if (!esValue) {
+        HILOGE("TransferPermissionRequestToStatic ESValueWrap failed");
+        return ANI_FALSE;
+    }
+    void *nativePtr = nullptr;
+    if (!arkts_esvalue_unwrap(env, esValue, &nativePtr) || nativePtr == nullptr) {
+        HILOGE("TransferPermissionRequestToStatic arkts_esvalue_unwrap failed");
+        return ANI_FALSE;
+    }
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getWebAniModifier() || !env) {
+        return ANI_FALSE;
+    }
+    return modifier->getWebAniModifier()->transferPermissionRequestToStatic(reinterpret_cast<void*>(node), nativePtr);
+}
+
+ani_boolean TransferControllerHandlerToStatic(ani_env* env, ani_class aniClass, ani_long node, ani_object input)
+{
+    ani_object esValue = ESValueWrap(env, input);
+    if (!esValue) {
+        HILOGE("TransferControllerHandlerToStatic ESValueWrap failed");
+        return ANI_FALSE;
+    }
+    void *nativePtr = nullptr;
+    if (!arkts_esvalue_unwrap(env, esValue, &nativePtr) || nativePtr == nullptr) {
+        HILOGE("TransferControllerHandlerToStatic arkts_esvalue_unwrap failed");
+        return ANI_FALSE;
+    }
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getWebAniModifier() || !env) {
+        return ANI_FALSE;
+    }
+    return modifier->getWebAniModifier()->transferControllerHandlerToStatic(reinterpret_cast<void*>(node), nativePtr);
+}
+
+ani_boolean TransferWebKeyboardControllerToStatic(ani_env* env, ani_class aniClass, ani_long node, ani_object input)
+{
+    ani_object esValue = ESValueWrap(env, input);
+    if (!esValue) {
+        HILOGE("arkweb_test TransferWebKeyboardControllerToStatic ESValueWrap failed");
+        return ANI_FALSE;
+    }
+    void *nativePtr = nullptr;
+    if (!arkts_esvalue_unwrap(env, esValue, &nativePtr) || nativePtr == nullptr) {
+        HILOGE("arkweb_test TransferWebKeyboardControllerToStatic arkts_esvalue_unwrap failed");
+        return ANI_FALSE;
+    }
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getWebAniModifier() || !env) {
+        return ANI_FALSE;
+    }
+    return modifier->getWebAniModifier()->transferWebKeyboardControllerToStatic(
+        reinterpret_cast<void*>(node), nativePtr);
+}
+
+ani_object TransferControllerHandlerToDynamic(ani_env* env, ani_class aniClass, ani_long node)
+{
+    CHECK_NULL_RETURN(env, nullptr);
+    ani_ref undefinedRef;
+    env->GetUndefined(&undefinedRef);
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getWebAniModifier()) {
+        return reinterpret_cast<ani_object>(undefinedRef);
+    }
+    ani_ref result = nullptr;
+    {
+        napi_env jsenv {};
+        bool success = arkts_napi_scope_open(env, &jsenv);
+        CHECK_NULL_RETURN(success, reinterpret_cast<ani_object>(undefinedRef));
+        napi_value dynamic =
+            modifier->getWebAniModifier()->transferControllerHandlerToDynamic(jsenv, reinterpret_cast<void*>(node));
+        CHECK_NULL_RETURN(dynamic, reinterpret_cast<ani_object>(undefinedRef));
+        success = arkts_napi_scope_close_n(jsenv, 1, &dynamic, &result);
+        CHECK_NULL_RETURN(success, reinterpret_cast<ani_object>(undefinedRef));
+    }
+    return reinterpret_cast<ani_object>(result);
+}
+ani_object TransferPermissionRequestToDynamic(ani_env* env, ani_class aniClass, ani_long node)
+{
+    CHECK_NULL_RETURN(env, nullptr);
+    ani_ref undefinedRef;
+    env->GetUndefined(&undefinedRef);
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getWebAniModifier()) {
+        return reinterpret_cast<ani_object>(undefinedRef);
+    }
+    ani_ref result = nullptr;
+    {
+        napi_env jsenv {};
+        bool success = arkts_napi_scope_open(env, &jsenv);
+        CHECK_NULL_RETURN(success, reinterpret_cast<ani_object>(undefinedRef));
+        napi_value dynamic =
+            modifier->getWebAniModifier()->transferPermissionRequestToDynamic(jsenv, reinterpret_cast<void*>(node));
+        CHECK_NULL_RETURN(dynamic, reinterpret_cast<ani_object>(undefinedRef));
+        success = arkts_napi_scope_close_n(jsenv, 1, &dynamic, &result);
+        CHECK_NULL_RETURN(success, reinterpret_cast<ani_object>(undefinedRef));
+    }
+    return reinterpret_cast<ani_object>(result);
+}
+ani_object TransferWebKeyboardControllerToDynamic(ani_env* env, ani_class aniClass, ani_long node)
+{
+    CHECK_NULL_RETURN(env, nullptr);
+    ani_ref undefinedRef;
+    env->GetUndefined(&undefinedRef);
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getWebAniModifier()) {
+        return reinterpret_cast<ani_object>(undefinedRef);
+    }
+    ani_ref result = nullptr;
+    {
+        napi_env jsenv {};
+        bool success = arkts_napi_scope_open(env, &jsenv);
+        CHECK_NULL_RETURN(success, reinterpret_cast<ani_object>(undefinedRef));
+        napi_value dynamic =
+            modifier->getWebAniModifier()->transferWebKeyboardControllerToDynamic(jsenv, reinterpret_cast<void*>(node));
+        CHECK_NULL_RETURN(dynamic, reinterpret_cast<ani_object>(undefinedRef));
+        success = arkts_napi_scope_close_n(jsenv, 1, &dynamic, &result);
+        CHECK_NULL_RETURN(success, reinterpret_cast<ani_object>(undefinedRef));
+    }
+    return reinterpret_cast<ani_object>(result);
+}
 } // namespace OHOS::Ace::Ani
