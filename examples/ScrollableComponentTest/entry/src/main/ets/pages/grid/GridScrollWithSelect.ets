@@ -1,4 +1,3 @@
-// GridScrollWithSelect.ets
 import { GridDataSource } from './GridDataSource';
 import { display, curves } from '@kit.ArkUI';
 
