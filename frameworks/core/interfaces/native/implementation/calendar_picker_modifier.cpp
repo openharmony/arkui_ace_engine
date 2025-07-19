@@ -113,8 +113,6 @@ void MarkTodayImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CalendarPickerModelNG::SetMarkToday(frameNode, convValue);
 }
 void EdgeAlign0Impl(Ark_NativePointer node,
                     const Opt_CalendarAlign* alignType,

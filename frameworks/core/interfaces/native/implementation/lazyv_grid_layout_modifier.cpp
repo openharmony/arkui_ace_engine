@@ -30,9 +30,6 @@ void SetLazyVGridLayoutOptionsImpl(Ark_NativePointer node)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(undefined);
-    //auto convValue = Converter::OptConvert<type>(undefined); // for enums
-    //LazyVGridLayoutModelNG::SetSetLazyVGridLayoutOptions(frameNode, convValue);
 }
 } // LazyVGridLayoutInterfaceModifier
 namespace LazyVGridLayoutAttributeModifier {
@@ -41,8 +38,6 @@ void ColumnsTemplateImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //LazyVGridLayoutModelNG::SetColumnsTemplate(frameNode, convValue);
 }
 } // LazyVGridLayoutAttributeModifier
 const GENERATED_ArkUILazyVGridLayoutModifier* GetLazyVGridLayoutModifier()
