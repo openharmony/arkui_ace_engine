@@ -220,6 +220,9 @@ void PagePattern::OnAttachToMainTree()
 
 void PagePattern::OnDetachFromMainTree()
 {
+#if defined(ACE_STATIC)
+    FireOnNodeDisposeCallback();
+#endif
 #if defined(ENABLE_SPLIT_MODE)
     if (!needFireObserver_) {
         return;

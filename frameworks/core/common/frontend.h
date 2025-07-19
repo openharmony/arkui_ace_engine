@@ -166,6 +166,29 @@ public:
 
     virtual void PushPage(const std::string& url, const std::string& params) = 0;
 
+#if defined(ACE_STATIC)
+    // For ArkTS1.2
+    virtual void* PushExtender(
+        const std::string& url, const std::string& params, bool recoverable, std::function<void()>&& finishCallback)
+    {
+        return nullptr;
+    };
+    virtual void* ReplaceExtender(const std::string& url, const std::string& params, bool recoverable,
+        std::function<void()>&& enterFinishCallback, std::function<void()>&& exitFinishCallback)
+    {
+        return nullptr;
+    };
+    virtual void* RunPageExtender(
+        const std::string& url, const std::string& params, bool recoverable, std::function<void()>&& finishCallback)
+    {
+        return nullptr;
+    };
+    virtual void BackExtender(const std::string& url, const std::string& params) {};
+    virtual void ClearExtender() {};
+    virtual void ShowAlertBeforeBackPageExtender(const std::string& url) {};
+    virtual void HideAlertBeforeBackPageExtender() {};
+#endif
+
     // Gets front-end event handler to handle ace event.
     virtual RefPtr<AceEventHandler> GetEventHandler() = 0;
 
