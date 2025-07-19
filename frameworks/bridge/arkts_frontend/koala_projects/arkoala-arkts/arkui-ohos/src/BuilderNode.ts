@@ -42,7 +42,7 @@ export interface BuildOptions {
     nestingBuilderSupported?: boolean;
 }
 
-const __uiNode_name_map__: Array<string> = ["ContentSlot", "CustomComponent", "LazyForEach", "IfElse", "ConditionScope"]
+const __uiNode_name_map__: Array<string> = ["ContentSlot", "CustomComponent", "LazyForEach", "ConditionScope"]
 
 class BuilderRootNode extends IncrementalNode {
     public __parent?: ArkBuilderProxyNodePeer;

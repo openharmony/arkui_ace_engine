@@ -245,7 +245,7 @@ struct ArkUIAniXComponentModifier {
 
 struct ArkUIAniConditionScopeModifier {
     ani_long (*constructConditionScope)(ani_int);
-}
+};
 
 struct ArkUIAniComponentConentModifier {
     void (*removeComponentFromFrameNode)(ani_long node, ani_long content);
