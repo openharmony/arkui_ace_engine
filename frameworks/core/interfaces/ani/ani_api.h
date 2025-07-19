@@ -16,11 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_ANI_API_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_ANI_API_H
 
+#include <cstdint>
 #include <functional>
 #include <string>
-#include <cstdint>
+
 #include "core/common/ace_engine.h"
-#include "core/common/udmf/udmf_client.h"
 #include "core/components_ng/render/adapter/component_snapshot.h"
 #include "core/components_ng/render/snapshot_param.h"
 
@@ -29,6 +29,7 @@ extern "C" {
 #endif
 
 #define ARKUI_ANI_API_VERSION 100
+#define EXTRA_INFO_MAX_LENGTH 1024
 #define ARKUI_ANI_MODIFIER_FUNCTION_NAME "GetArkUIAniModifiers"
 
 struct _ArkUINode;
@@ -44,6 +45,9 @@ typedef class __ani_fn_object *ani_fn_object;
 typedef class __ani_string* ani_string;
 typedef class __ani_enum_item* ani_enum_item;
 typedef class __ani_error* ani_error;
+typedef struct __ani_resolver *ani_resolver;
+typedef struct napi_env__* napi_env;
+typedef struct napi_value__* napi_value;
 typedef _ArkUINode* ArkUINodeHandle;
 typedef int ArkUI_Int32;
 typedef size_t ani_size;
@@ -57,6 +61,14 @@ typedef struct WebviewControllerInfo {
     std::function<void(int32_t)> setWebIdFunc = nullptr;
     std::function<void(const std::string&)> setHapPathFunc = nullptr;
 } WebviewControllerInfo;
+
+namespace OHOS::Ace::Ani {
+class DragAction;
+}
+enum class ArkUIDragStatus { STARTED, ENDED };
+enum class ArkUIDragResult { DRAG_SUCCESS, DRAG_FAIL, DRAG_CANCEL };
+enum class ArkUIDragBehavior { UNKNOWN, COPY, MOVE };
+
 struct ArkUIDragInfo {
     void* pixelMap;
     bool onlyForLifting = false;
@@ -69,13 +81,67 @@ struct AniOverlayOptions {
     float y = 0.0f;
 };
 
+struct ArkUIDragNotifyMessage {
+    ArkUIDragResult result;
+    ArkUIDragBehavior dragBehavior;
+};
+
+struct ArkUIDragPreviewOption {
+    bool isScaleEnabled = true;
+    bool isNumber = false;
+    bool isDefaultShadowEnabled = false;
+    bool isDefaultRadiusEnabled = false;
+    union {
+        ArkUI_Int32 badgeNumber;
+        bool isShowBadge = true;
+    };
+    void ResetDragPreviewMode()
+    {
+        isScaleEnabled = true;
+        isDefaultShadowEnabled = false;
+        isDefaultRadiusEnabled = false;
+    }
+};
+
+struct ArkUIDragPointerEvent {
+    ArkUI_Int32 pointerEventId = 0;
+    ArkUI_Int32 pointerId = 0;
+    ArkUI_Int32 windowX = 0;
+    ArkUI_Int32 windowY = 0;
+    ArkUI_Int32 displayX = 0;
+    ArkUI_Int32 displayY = 0;
+    ArkUI_Int32 deviceId = 0;
+    ArkUI_Int32 displayId = 0;
+    ArkUI_Int32 sourceType = 0;
+    ArkUI_Int32 originId = 0;
+};
+
+struct ArkUIDragControllerAsync {
+    ani_env* env = nullptr;
+    bool isArray = false;
+    const char* extraParams;
+    bool hasHandle = false;
+    void* touchPoint;
+    ani_ref unifiedData = nullptr;
+    ani_ref pixelMap = nullptr;
+    std::vector<ani_ref> pixelMapList;
+    ArkUINodeHandle customBuilderNode = nullptr;
+    std::vector<ArkUINodeHandle> customBuilderNodeList;
+    ani_fn_object asyncCallback = nullptr;
+    ani_resolver deferred = nullptr;
+    ArkUIDragPointerEvent dragPointerEvent;
+    ArkUIDragPreviewOption dragPreviewOption;
+    std::function<void(std::shared_ptr<ArkUIDragControllerAsync>, const ArkUIDragNotifyMessage&,
+        const ArkUIDragStatus)> callBackJsFunction;
+    OHOS::Ace::Ani::DragAction* dragAction = nullptr;
+};
+
 struct ArkUIAniImageModifier {
     void (*setPixelMap)(ArkUINodeHandle node, void* pixelmap);
     void (*setDrawableDescriptor)(ArkUINodeHandle node, void* drawablem, int type);
     void (*setResizableLattice)(ArkUINodeHandle node, void* lattice);
     void (*setDrawingColorFilter)(ArkUINodeHandle node, void* colorFilter);
 };
-
 struct ArkUIAniWebModifier {
     void (*setWebOptions)(ArkUINodeHandle node, const WebviewControllerInfo& controllerInfo);
     void (*setWebControllerControllerHandler)(void* controllerHandler, const WebviewControllerInfo& controllerInfo);
@@ -194,17 +260,10 @@ struct ArkUIAniInteropModifier {
     void (*deleteViewStackProcessor)(ani_long ptr);
 };
 struct ArkUIAniDragControllerModifier {
-    ani_object (*aniExecuteDragWithCallback)(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_object custom,
-        ani_long builderObj, ani_object destroyCallbackObj, ani_object dragInfo, ani_object callback);
-    ani_object (*aniCreateDragAction)([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass,
-        ani_object customArray, ani_object builderArray, ani_object destroyCallbackObj,
-        [[maybe_unused]] ani_object dragInfoObj);
-    ani_object (*aniDragActionStartDrag)(
-        [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long dragActionPtr);
-    void (*aniDragActionOn)([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, const char* type,
-        ani_object callback, ani_long dragActionPtr);
-    void (*aniDragActionOff)([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, const char* type,
-        [[maybe_unused]] ani_object callback, ani_long dragActionPtr);
+    bool (*aniHandleExecuteDrag)(ArkUIDragControllerAsync& asyncCtx);
+    bool (*aniHandleDragAction)(ArkUIDragControllerAsync& asyncCtx);
+    bool (*aniHandleDragActionStartDrag)(ArkUIDragControllerAsync& asyncCtx);
+    void (*createDragEventPeer)(const ArkUIDragNotifyMessage& dragNotifyMsg, ani_long& dragEventPeer);
     ani_object (*aniGetDragPreview)([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass);
     void (*aniDragPreviewSetForegroundColor)(
         [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, ani_object color, ani_long dragPreviewPtr);
