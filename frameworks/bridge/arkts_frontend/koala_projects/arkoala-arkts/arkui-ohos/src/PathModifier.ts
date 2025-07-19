@@ -14,7 +14,7 @@
  */
 
 import { AttributeModifier, CommonMethod, CommonShapeMethod, ArkCommonShapeMethodPeer } from 'arkui/component/common';
-import { AttributeUpdateFlag, CommonMethodModifier } from './CommonMethodModifier';
+import { AttributeUpdaterFlag, CommonMethodModifier } from './CommonMethodModifier';
 import { ArkPathPeer, PathAttribute } from 'arkui/component/path';
 import { CommonShapeMethodModifier } from './CommonShapeMethodModifier';
 
@@ -24,34 +24,34 @@ export class PathModifier extends CommonShapeMethodModifier implements PathAttri
     applyFocusedAttribute(instance: CommonShapeMethod): void { }
     applyDisabledAttribute(instance: CommonShapeMethod): void { }
     applySelectedAttribute(instance: CommonShapeMethod): void { }
-    _commands_flag: AttributeUpdateFlag = AttributeUpdateFlag.INITIAL
+    _commands_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _commands0_value?: string | undefined
     applyModifierPatch(peer: ArkPathPeer): void {
-        if (this._commands_flag != AttributeUpdateFlag.INITIAL)
+        if (this._commands_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._commands_flag) {
-                case AttributeUpdateFlag.UPDATE: {
+                case AttributeUpdaterFlag.UPDATE: {
                     peer.commandsAttribute((this._commands0_value as string | undefined));
-                    this._commands_flag = AttributeUpdateFlag.RESET;
+                    this._commands_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
-                case AttributeUpdateFlag.SKIP: {
-                    this._commands_flag = AttributeUpdateFlag.RESET;
+                case AttributeUpdaterFlag.SKIP: {
+                    this._commands_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
                 default: {
-                    this._commands_flag = AttributeUpdateFlag.INITIAL;
+                    this._commands_flag = AttributeUpdaterFlag.INITIAL;
                     peer.commandsAttribute(undefined);
                 }
             }
         }
     }
     mergeModifier(modifier: PathModifier): void {
-        if (modifier._commands_flag != AttributeUpdateFlag.INITIAL)
+        if (modifier._commands_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._commands_flag) {
-                case AttributeUpdateFlag.UPDATE:
-                case AttributeUpdateFlag.SKIP: {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
                     this.commands(modifier._commands0_value);
                     break;
                 }
@@ -62,14 +62,14 @@ export class PathModifier extends CommonShapeMethodModifier implements PathAttri
         }
     }
     commands(value: string | undefined): this {
-        if (((this._commands_flag) == (AttributeUpdateFlag.INITIAL)) || ((this._commands0_value) == (value)))
+        if (((this._commands_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._commands0_value) == (value)))
         {
-            this._commands_flag = AttributeUpdateFlag.UPDATE
+            this._commands_flag = AttributeUpdaterFlag.UPDATE
             this._commands0_value = value
         }
         else
         {
-            this._commands_flag = AttributeUpdateFlag.SKIP
+            this._commands_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

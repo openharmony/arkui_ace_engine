@@ -14,7 +14,7 @@
  */
 
 import { AttributeModifier, CommonMethod, CommonShapeMethod, ArkCommonShapeMethodPeer } from 'arkui/component/common';
-import { AttributeUpdateFlag, CommonMethodModifier } from './CommonMethodModifier';
+import { AttributeUpdaterFlag, CommonMethodModifier } from './CommonMethodModifier';
 import { ShapePoint, LineAttribute, ArkLinePeer } from 'arkui/component/line';
 import { CommonShapeMethodModifier } from './CommonShapeMethodModifier'
 
@@ -24,54 +24,54 @@ export class LineModifier extends CommonShapeMethodModifier implements LineAttri
     applyFocusedAttribute(instance: CommonShapeMethod): void { }
     applyDisabledAttribute(instance: CommonShapeMethod): void { }
     applySelectedAttribute(instance: CommonShapeMethod): void { }
-    _startPoint_flag: AttributeUpdateFlag = AttributeUpdateFlag.INITIAL
+    _startPoint_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _startPoint0_value?: ShapePoint | undefined
-    _endPoint_flag: AttributeUpdateFlag = AttributeUpdateFlag.INITIAL
+    _endPoint_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _endPoint0_value?: ShapePoint | undefined
     applyModifierPatch(peer: ArkLinePeer): void {
-        if (this._startPoint_flag != AttributeUpdateFlag.INITIAL)
+        if (this._startPoint_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._startPoint_flag) {
-                case AttributeUpdateFlag.UPDATE: {
+                case AttributeUpdaterFlag.UPDATE: {
                     peer.startPointAttribute((this._startPoint0_value as ShapePoint | undefined));
-                    this._startPoint_flag = AttributeUpdateFlag.RESET;
+                    this._startPoint_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
-                case AttributeUpdateFlag.SKIP: {
-                    this._startPoint_flag = AttributeUpdateFlag.RESET;
+                case AttributeUpdaterFlag.SKIP: {
+                    this._startPoint_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
                 default: {
-                    this._startPoint_flag = AttributeUpdateFlag.INITIAL;
+                    this._startPoint_flag = AttributeUpdaterFlag.INITIAL;
                     peer.startPointAttribute(undefined);
                 }
             }
         }
-        if (this._endPoint_flag != AttributeUpdateFlag.INITIAL)
+        if (this._endPoint_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._endPoint_flag) {
-                case AttributeUpdateFlag.UPDATE: {
+                case AttributeUpdaterFlag.UPDATE: {
                     peer.endPointAttribute((this._endPoint0_value as ShapePoint | undefined));
-                    this._endPoint_flag = AttributeUpdateFlag.RESET;
+                    this._endPoint_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
-                case AttributeUpdateFlag.SKIP: {
-                    this._endPoint_flag = AttributeUpdateFlag.RESET;
+                case AttributeUpdaterFlag.SKIP: {
+                    this._endPoint_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
                 default: {
-                    this._endPoint_flag = AttributeUpdateFlag.INITIAL;
+                    this._endPoint_flag = AttributeUpdaterFlag.INITIAL;
                     peer.endPointAttribute(undefined);
                 }
             }
         }
     }
     mergeModifier(modifier: LineModifier): void {
-        if (modifier._startPoint_flag != AttributeUpdateFlag.INITIAL)
+        if (modifier._startPoint_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._startPoint_flag) {
-                case AttributeUpdateFlag.UPDATE:
-                case AttributeUpdateFlag.SKIP: {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
                     this.startPoint(modifier._startPoint0_value);
                     break;
                 }
@@ -80,11 +80,11 @@ export class LineModifier extends CommonShapeMethodModifier implements LineAttri
                 }
             }
         }
-        if (modifier._endPoint_flag != AttributeUpdateFlag.INITIAL)
+        if (modifier._endPoint_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._endPoint_flag) {
-                case AttributeUpdateFlag.UPDATE:
-                case AttributeUpdateFlag.SKIP: {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
                     this.endPoint(modifier._endPoint0_value);
                     break;
                 }
@@ -95,26 +95,26 @@ export class LineModifier extends CommonShapeMethodModifier implements LineAttri
         }
     }
     startPoint(value: ShapePoint | undefined): this {
-        if (((this._startPoint_flag) == (AttributeUpdateFlag.INITIAL)) || (false))
+        if (((this._startPoint_flag) == (AttributeUpdaterFlag.INITIAL)) || (false))
         {
-            this._startPoint_flag = AttributeUpdateFlag.UPDATE
+            this._startPoint_flag = AttributeUpdaterFlag.UPDATE
             this._startPoint0_value = value
         }
         else
         {
-            this._startPoint_flag = AttributeUpdateFlag.SKIP
+            this._startPoint_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
     endPoint(value: ShapePoint | undefined): this {
-        if (((this._endPoint_flag) == (AttributeUpdateFlag.INITIAL)) || (false))
+        if (((this._endPoint_flag) == (AttributeUpdaterFlag.INITIAL)) || (false))
         {
-            this._endPoint_flag = AttributeUpdateFlag.UPDATE
+            this._endPoint_flag = AttributeUpdaterFlag.UPDATE
             this._endPoint0_value = value
         }
         else
         {
-            this._endPoint_flag = AttributeUpdateFlag.SKIP
+            this._endPoint_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

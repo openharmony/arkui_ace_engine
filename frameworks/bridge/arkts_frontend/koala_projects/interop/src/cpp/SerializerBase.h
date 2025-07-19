@@ -28,6 +28,7 @@
 #include "callback-resource.h"
 #include "interop-types.h"
 #include "koala-types.h"
+#include "securec.h"
 
 #ifdef __arm__
 #define KOALA_NO_UNALIGNED_ACCESS 1
@@ -172,7 +173,9 @@ public:
         check(8);
         int64_t value64 = static_cast<int64_t>(reinterpret_cast<uintptr_t>(value));
 #ifdef KOALA_NO_UNALIGNED_ACCESS
-        memcpy(data + position, &value64, 8);
+        if (memcpy_s(data + position, 8, &value64, 8) != 0) {
+            return;
+        }
 #else
         *((int64_t*)(data + position)) = value64;
 #endif

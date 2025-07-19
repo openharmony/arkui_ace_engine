@@ -709,10 +709,6 @@ void* createEffectComponentNode(ArkUI_Int32 nodeId)
 
 void* createEllipseNode(ArkUI_Int32 nodeId)
 {
-    // auto frameNode = EllipseModelNG::CreateFrameNode(nodeId);
-    // CHECK_NULL_RETURN(frameNode, nullptr);
-    // frameNode->IncRefCount();
-    // return AceType::RawPtr(frameNode);
     return nullptr;
 }
 
@@ -730,10 +726,6 @@ void* createEmbeddedComponentNode(ArkUI_Int32 nodeId)
 
 void* createFolderStackNode(ArkUI_Int32 nodeId)
 {
-    // auto frameNode = FolderStackModelNG::CreateFrameNode(nodeId);
-    // CHECK_NULL_RETURN(frameNode, nullptr);
-    // frameNode->IncRefCount();
-    // return AceType::RawPtr(frameNode);
     return nullptr;
 }
 
@@ -751,10 +743,6 @@ void* createFormComponentNode(ArkUI_Int32 nodeId)
 
 void* createFormLinkNode(ArkUI_Int32 nodeId)
 {
-    // auto frameNode = FormLinkModelNG::CreateFrameNode(nodeId);
-    // CHECK_NULL_RETURN(frameNode, nullptr);
-    // frameNode->IncRefCount();
-    // return AceType::RawPtr(frameNode);
     return nullptr;
 }
 
