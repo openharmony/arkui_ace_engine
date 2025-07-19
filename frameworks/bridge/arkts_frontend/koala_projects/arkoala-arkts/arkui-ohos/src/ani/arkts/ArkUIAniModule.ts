@@ -154,7 +154,7 @@ export class ArkUIAniModule {
     native static _PopViewStackProcessor(): KPointer
 
     native static _DeleteViewStackProcessor(ptr: KPointer): void
-    
+
     native static _BackgroundImage_PixelMap(ptr: KPointer, pixelmap: image.PixelMap, repeat: KInt): void
     // for ImageSpan
     native static _ImageSpan_Set_PixelMap(ptr: KPointer, pixelmap: image.PixelMap): void
@@ -184,7 +184,7 @@ export class ArkUIAniModule {
     native static _Env_GetAccessibilityEnabled(): boolean
     native static _Env_GetLayoutDirection(): string
     native static _Env_GetLanguageCode(): string
-    
+
     // for XComponent
     native static _XComponent_SetSurfaceCallback(ptr: KPointer, callback: XComponentControllerCallbackInternal): void;
 
@@ -193,4 +193,5 @@ export class ArkUIAniModule {
     native static _OnMeasure_InnerMeasure(ptr: KPointer): void
     native static _OnLayout_InnerLayout(ptr: KPointer): void
     native static _SetParallelScoped(parallel: boolean): void
+    native static _ConditionScopeNode_Construct(id: KInt): KPointer;
 }
