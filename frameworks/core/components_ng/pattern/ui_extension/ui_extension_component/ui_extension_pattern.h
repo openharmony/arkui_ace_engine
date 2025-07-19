@@ -154,6 +154,10 @@ public:
     void FireAsyncCallbacks();
     void SetBindModalCallback(const std::function<void()>&& callback);
     void FireBindModalCallback();
+    /* only for 1.2 begin */
+    bool GetIsTransferringCaller();
+    void SetIsTransferringCaller(bool isTransferringCaller);
+    /* only for 1.2 end */
     void SetDensityDpi(bool densityDpi);
     bool GetDensityDpi();
     bool IsCompatibleOldVersion();
@@ -453,6 +457,9 @@ private:
 
     bool isWindowModeFollowHost_ = false;
     bool isModalRequestFocus_ = true;
+    /* only for 1.2 begin */
+    bool hasAttachContext_ = false;
+    /* only for 1.2 end */
     std::shared_ptr<AccessibilitySAObserverCallback> accessibilitySAObserverCallback_;
 
     ContainerModalAvoidInfo avoidInfo_;
