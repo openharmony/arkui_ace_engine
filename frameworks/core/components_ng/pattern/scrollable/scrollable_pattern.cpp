@@ -46,7 +46,9 @@
 #include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar.h"
 #include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar_overlay_modifier.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-
+#ifdef ACE_STATIC
+#include "core/components_ng/syntax/arkoala_lazy_node.h"
+#endif
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -4390,7 +4392,11 @@ void ScrollablePattern::GetRepeatCountInfo(
             totalChildCount += repeatRealCount;
         } else if (AceType::InstanceOf<FrameNode>(child) || AceType::InstanceOf<LazyForEachNode>(child) ||
                    AceType::InstanceOf<RepeatVirtualScrollNode>(child) || AceType::InstanceOf<ForEachNode>(child) ||
-                   AceType::InstanceOf<CustomNode>(child)) {
+                   AceType::InstanceOf<CustomNode>(child)
+#ifdef ACE_STATIC
+                   || InstanceOf<ArkoalaLazyNode>(child)
+#endif
+        ) {
             totalChildCount += child->FrameCount();
         } else {
             GetRepeatCountInfo(child, repeatDifference, firstRepeatCount, totalChildCount);
