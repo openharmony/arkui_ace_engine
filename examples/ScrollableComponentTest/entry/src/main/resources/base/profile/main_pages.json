@@ -77,6 +77,7 @@
     "pages/Scroll/RecycleView/Index",
     "pages/Scroll/ScrollNode",
     "pages/Scroll/ScrollWithLayoutWeight",
+    "pages/Scroll/FreeScroll",
     "pages/LazyVGridLayout/LazyVGridLayoutMainPage",
     "pages/LazyVGridLayout/LazyVGridLayoutAttribute"
   ]
