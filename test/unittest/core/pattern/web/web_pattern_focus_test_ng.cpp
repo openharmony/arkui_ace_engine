@@ -508,8 +508,8 @@ HWTEST_F(WebPatternFocusTestNg, DestroyAnalyzerOverlay_003, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnAccessibilityHoverEvent
- * @tc.desc: OnAccessibilityHoverEvent.
+ * @tc.name: OnAccessibilityHoverEvent1
+ * @tc.desc: OnAccessibilityHoverEvent1.
  * @tc.type: FUNC
  */
 HWTEST_F(WebPatternFocusTestNg, OnAccessibilityHoverEvent, TestSize.Level1)
@@ -525,13 +525,47 @@ HWTEST_F(WebPatternFocusTestNg, OnAccessibilityHoverEvent, TestSize.Level1)
     ASSERT_NE(webPattern, nullptr);
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
-
-    const NG::PointF point(20, 100);
     SourceType sourceType = SourceType::NONE;
     AccessibilityHoverEventType eventType = AccessibilityHoverEventType::MOVE;
     TimeStamp time;
+    auto result = webPattern->GetWebAccessibilityIdBySurfaceId("hoverSurfaceId");
+    ASSERT_EQ(result, -1);
+
+    const NG::PointF point(20, 100);
     webPattern->OnAccessibilityHoverEvent(point, sourceType, eventType, time);
+    result = webPattern->GetWebAccessibilityIdBySurfaceId("hoverSurfaceId");
+    ASSERT_NE(result, -1);
+#endif
+}
+
+/**
+ * @tc.name: OnAccessibilityHoverEvent2
+ * @tc.desc: OnAccessibilityHoverEvent2.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternFocusTestNg, OnAccessibilityHoverEvent2, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
+    SourceType sourceType = SourceType::NONE;
+    AccessibilityHoverEventType eventType = AccessibilityHoverEventType::MOVE;
+    TimeStamp time;
+    auto result = webPattern->GetWebAccessibilityIdBySurfaceId("hoverSurfaceId");
+    ASSERT_NE(result, -1);
+
+    const NG::PointF point(-1, -1);
+    webPattern->OnAccessibilityHoverEvent(point, sourceType, eventType, time);
+    result = webPattern->GetWebAccessibilityIdBySurfaceId("hoverSurfaceId");
+    ASSERT_EQ(result, -1);
 #endif
 }
 
