@@ -327,8 +327,9 @@ public:
     if (length > 0)
     {
       value = malloc(length * sizeof(E));
-      memset(value, 0, length * sizeof(E));
-      toClean.push_back(value);
+      if (value && memset_s(value, length * sizeof(E), 0, length * sizeof(E)) == 0) {
+        toClean.push_back(value);
+      }
     }
     array->length = length;
     array->array = reinterpret_cast<E *>(value);
@@ -342,9 +343,9 @@ public:
     if (length > 0)
     {
       keys = malloc(length * sizeof(K));
-      memset(keys, 0, length * sizeof(K));
-      toClean.push_back(keys);
-
+      if (keys && memset_s(keys, length * sizeof(K), 0, length * sizeof(K)) == 0) {
+        toClean.push_back(keys);
+      }
       values = malloc(length * sizeof(V));
       memset(values, 0, length * sizeof(V));
       toClean.push_back(values);
