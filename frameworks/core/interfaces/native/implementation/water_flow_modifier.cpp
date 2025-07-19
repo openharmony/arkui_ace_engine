@@ -235,9 +235,6 @@ void CachedCount1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(count);
-    //auto convValue = Converter::OptConvert<type>(count); // for enums
-    //WaterFlowModelStatic::SetCachedCount1(frameNode, convValue);
 }
 void OnReachStartImpl(Ark_NativePointer node,
                       const Opt_Callback_Void* value)

@@ -358,8 +358,6 @@ void Indicator1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //SwiperModelNG::SetIndicator1(frameNode, convValue);
 }
 void LoopImpl(Ark_NativePointer node,
               const Opt_Boolean* value)
@@ -506,8 +504,6 @@ void OnSelectedImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //SwiperModelNG::SetOnSelected(frameNode, convValue);
 }
 void IndicatorStyleImpl(Ark_NativePointer node,
                         const Opt_IndicatorStyle* value)
@@ -529,8 +525,6 @@ void OnUnselectedImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //SwiperModelNG::SetOnUnselected(frameNode, convValue);
 }
 void OnAnimationStartImpl(Ark_NativePointer node,
                           const Opt_OnSwiperAnimationStartCallback* value)
@@ -677,8 +671,6 @@ void OnContentWillScrollImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //SwiperModelNG::SetOnContentWillScroll(frameNode, convValue);
 }
 void DisplayArrowImpl(Ark_NativePointer node,
                       const Opt_Union_ArrowStyle_Boolean* value,
