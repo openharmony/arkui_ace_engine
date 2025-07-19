@@ -13,11 +13,12 @@
  * limitations under the License.
  */
 
-import { int32 } from "@koalaui/common"
-import { UIContext } from "@ohos/arkui/UIContext"
-import { IProvideDecoratedVariable } from "../stateManagement/decorator";
-import { LocalStorage } from '@ohos.arkui.stateManagement';
-import { PeerNode } from "../PeerNode";
+import { int32 } from '@koalaui/common';
+import { CustomComponentV2 } from './customComponent';
+import { InteropNativeModule } from '@koalaui/interop';
+import { IProvideDecoratedVariable, LocalStorage, StateMgmtDFX, DumpInfo } from '@ohos.arkui.stateManagement';
+import { UIContext } from '@ohos/arkui/UIContext';
+import { PeerNode } from '../PeerNode';
 
 export interface LifeCycle {
     aboutToAppear(): void {}
@@ -39,12 +40,13 @@ export abstract class ExtendableComponent implements LifeCycle {
     private parent_: ExtendableComponent | undefined;
     private providedVars_: Map<string, IProvideDecoratedVariable<object>> = new Map<string, IProvideDecoratedVariable<object>>();
     private delegate_?: IExtendableComponent;
-    private localStoragebackStore_?: LocalStorage | undefined = undefined;
+    private localStoragebackStore_?: LocalStorage | undefined = undefined;\
+    private backLocalStorage_?: LocalStorage | undefined = undefined;
     private useSharedStorage_?: boolean | undefined = undefined;;
 
     constructor(useSharedStorage?: boolean, storage?: LocalStorage) {
         this.useSharedStorage_ = useSharedStorage;
-        this.localStoragebackStore_ = storage;
+        this.backLocalStorage_ = storage;
         this.parent_ = ExtendableComponent.current as (ExtendableComponent | undefined);
     }
 
@@ -88,7 +90,7 @@ export abstract class ExtendableComponent implements LifeCycle {
                 this.localStoragebackStore_ = this.getUIContext().getSharedLocalStorage();
             }
             if (!this.localStoragebackStore_) {
-                this.localStoragebackStore_ = new LocalStorage();
+                this.localStoragebackStore_ = this.backLocalStorage_ ? this.backLocalStorage_ : new LocalStorage();
             }
         }
 
@@ -101,5 +103,21 @@ export abstract class ExtendableComponent implements LifeCycle {
     
     getPeerNode(): PeerNode | undefined {
         return this.delegate_!.getPeerNode();
+    }
+
+    public onDumpInspector(): string {
+        const dumpInfo: DumpInfo = new DumpInfo();
+        dumpInfo.viewinfo = {
+            componentName: Type.of(this).getName(),
+            isV2: this instanceof CustomComponentV2 ? true : false;
+        }
+        let ret: string = '';
+        try {
+            StateMgmtDFX.getDecoratedVariableInfo(this, dumpInfo);
+            ret = JSON.stringify(dumpInfo);
+        } catch (error) {
+            InteropNativeModule._NativeLog(`dump component ${ dumpInfo.viewinfo.componentName}\
+                error: ${(error as Error).message}`);
+        }
     }
 }

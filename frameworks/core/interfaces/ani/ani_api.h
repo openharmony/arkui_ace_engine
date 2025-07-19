@@ -134,7 +134,7 @@ struct ArkUIAniCommonModifier {
     void (*onLayoutInnerLayout)(ani_env* env, ani_long ptr);
 };
 struct ArkUIAniCustomNodeModifier {
-    ani_long (*constructCustomNode)(ani_int);
+    ani_long (*constructCustomNode)(ani_int id, std::function<std::string()>&& onDumpInspectorFunc);
 };
 struct ArkUIAniDrawModifier {
     void (*setDrawModifier)(ani_env* env, ani_long ptr, ani_int flag, ani_object fnObj);
@@ -212,10 +212,10 @@ struct ArkUIAniShapeModifier {
     void (*setPixelMap)(ArkUINodeHandle node, void* pixelMap);
 };
 struct ArkUIAniStateMgmtModifier {
-    std::string (*persistentStorageGet)(std::string key);
-    void (*persistentStorageSet)(std::string key, std::string value);
-    bool (*persistentStorageHas)(std::string key);
-    void (*persistentStorageDelete)(std::string key);
+    std::string (*persistentStorageGet)(const std::string& key);
+    void (*persistentStorageSet)(const std::string& key, const std::string& value);
+    bool (*persistentStorageHas)(const std::string& key);
+    void (*persistentStorageDelete)(const std::string& key);
     void (*persistentStorageClear)();
     int32_t (*getColorMode)();
     float (*getFontWeightScale)();

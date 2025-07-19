@@ -84,11 +84,11 @@ export class LocalStorage {
      * @syscap SystemCapability.ArkUI.ArkUI.Full
      * @since 20
      */
-    public has(key: string, ttype?: Type): boolean {
-        const ttypeOpt: Type | undefined = this.store_.getType(key);
-        let result : boolean = (ttypeOpt !== undefined) && (ttype === undefined || ttype!.equals(ttypeOpt!));
+    public has(propName: string, ttype?: Type): boolean {
+        const ttypeOpt: Type | undefined = this.store_.getType(propName);
+        let result: boolean = ttypeOpt !== undefined && (ttype === undefined || ttype!.equals(ttypeOpt!));
         if (!result) {
-            result = this.store_.has(key);
+            result = this.store_.has(propName);
         }
         return result;
     }
@@ -132,8 +132,8 @@ export class LocalStorage {
      * @syscap SystemCapability.ArkUI.ArkUI.Full
      * @since 20
      */
-    public get<T>(key: string, ttype: Type): T | undefined {
-        return this.store_.get<T>(key, ttype);
+    public get<T>(propName: string, ttype: Type): T | undefined {
+        return this.store_.get<T>(propName, ttype);
     }
 
     /**
@@ -143,12 +143,12 @@ export class LocalStorage {
      *
      * @param { string } propName
      * @param { T } newValue - must be of type T
-     * @returns { boolean } return true if key exists, and newValue can be assigned to configured type.
+     * @returns { boolean } return true if propName exists, and newValue can be assigned to configured type.
      * @syscap SystemCapability.ArkUI.ArkUI.Full
      * @since 20
      */
-    public set<T>(key: string, newValue: T): boolean {
-        return this.store_.set<T>(key, newValue);
+    public set<T>(propName: string, newValue: T): boolean {
+        return this.store_.set<T>(propName, newValue);
     }
 
     /**
@@ -171,8 +171,8 @@ export class LocalStorage {
      * @syscap SystemCapability.ArkUI.ArkUI.Full
      * @since 20
      */
-    public setOrCreate<T>(key: string, newValue: T, ttype: Type): boolean {
-        return this.store_.setOrCreate<T>(key, newValue, ttype);
+    public setOrCreate<T>(propName: string, newValue: T, ttype: Type): boolean {
+        return this.store_.setOrCreate<T>(propName, newValue, ttype);
     }
 
     /**
@@ -186,8 +186,8 @@ export class LocalStorage {
      * @syscap SystemCapability.ArkUI.ArkUI.Full
      * @since 20
      */
-    public ref<T>(key: string, ttype: Type): AbstractProperty<T> | undefined {
-        return this.store_.ref<T>(key, ttype);
+    public ref<T>(propName: string, ttype: Type): AbstractProperty<T> | undefined {
+        return this.store_.ref<T>(propName, ttype) as AbstractProperty<T> | undefined;
     }
 
     /**
@@ -214,8 +214,8 @@ export class LocalStorage {
      * @syscap SystemCapability.ArkUI.ArkUI.Full
      * @since 20
      */
-    public setAndRef<T>(key: string, defaultValue: T, ttype: Type): AbstractProperty<T> | undefined {
-        return this.store_.setAndRef<T>(key, defaultValue, ttype);
+    public setAndRef<T>(propName: string, defaultValue: T, ttype: Type): AbstractProperty<T> | undefined {
+        return this.store_.setAndRef<T>(propName, defaultValue, ttype);
     }
 
     /**
@@ -232,8 +232,7 @@ export class LocalStorage {
      * @since 20
      */
     public link<T>(propName: string, ttype: Type): SubscribedAbstractProperty<T> | undefined {
-        // TODO Verify
-        return this.ref<T>(propName, ttype) as SubscribedAbstractProperty<T> | undefined;
+        return this.store_.ref<T>(propName, ttype);
     }
 
     /**
@@ -251,8 +250,7 @@ export class LocalStorage {
      * @since 20
      */
     public setAndLink<T>(propName: string, defaultValue: T, ttype: Type): SubscribedAbstractProperty<T> | undefined {
-        // TODO chk this works
-        return this.setAndRef<T>(propName, defaultValue, ttype) as SubscribedAbstractProperty<T> | undefined;
+        return this.store_.setAndRef<T>(propName, defaultValue, ttype);
     }
 
     /**
@@ -271,8 +269,8 @@ export class LocalStorage {
      * @syscap SystemCapability.ArkUI.ArkUI.Full
      * @since 20
      */
-    delete(key: string): boolean {
-        return this.store_.delete(key);
+    delete(propName: string): boolean {
+        return this.store_.delete(propName);
     }
 
     /**
@@ -292,7 +290,7 @@ export class LocalStorage {
     /**
      * Internal function to create a @StorageLink. Not part of the SDK
      * @param owner
-     * @param key
+     * @param propName
      * @param varName
      * @param defaultValue
      * @param ttype
@@ -301,23 +299,23 @@ export class LocalStorage {
      */
     public __makeStorageLink<T>(
         owner: ExtendableComponent,
-        key: string,
+        propName: string,
         varName: string,
         defaultValue: T,
         ttype: Type,
         watchFunc?: WatchFuncType
     ): StorageLinkDecoratedVariable<T> | undefined {
-        return this.store_.makeStorageLink<T>(owner, key, varName, defaultValue, ttype, watchFunc);
+        return this.store_.makeStorageLink<T>(owner, propName, varName, defaultValue, ttype, watchFunc);
     }
 
     /**
-     * Internal function to get the StorageProp for key, no type verification
+     * Internal function to get the StorageProp for propName, no type verification
      * use for test code only
      * not part of the SDK
-     * @param key
+     * @param propName
      * @returns
      */
-    public __getStoragePropUnsafe<T>(key: string): StorageProperty<T> | undefined {
-        return this.store_.__getStoragePropUnsafe<T>(key);
+    public __getStoragePropUnsafe<T>(propName: string): StorageProperty<T> | undefined {
+        return this.store_.__getStoragePropUnsafe<T>(propName);
     }
 }

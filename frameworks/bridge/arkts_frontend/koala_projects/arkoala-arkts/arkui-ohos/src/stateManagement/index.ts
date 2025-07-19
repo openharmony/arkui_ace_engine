@@ -10,4 +10,5 @@ export * from './storage/localStorage';
 export * from './base/types';
 export * from './decoratorImpl/decoratorWatch';
 export * from './decorator';
+export * from './tools/stateMgmtDFX';
 export * from './utils';
