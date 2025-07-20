@@ -456,8 +456,10 @@ void AssignArkValue(Ark_RichEditorParagraphStyle& dst, const ParagraphInfo& src)
         .pixmap = src.leadingMarginPixmap,
     };
     dst.textAlign = Converter::ArkValue<Opt_TextAlign>(static_cast<TextAlign>(src.textAlign));
+    // read pixel map is not supported
+    auto arkLength = Converter::ArkValue<Ark_Length>(leadingMargin.size.Width());
     dst.leadingMargin = Converter::ArkUnion<
-        Opt_Union_Dimension_LeadingMarginPlaceholder, Ark_LeadingMarginPlaceholder>(leadingMargin);
+        Opt_Union_Dimension_LeadingMarginPlaceholder, Ark_Length>(arkLength);
     dst.wordBreak = Converter::ArkValue<Opt_WordBreak>(static_cast<WordBreak>(src.wordBreak));
     dst.lineBreakStrategy = Converter::ArkValue<Opt_LineBreakStrategy>(
         static_cast<LineBreakStrategy>(src.lineBreakStrategy));
@@ -473,8 +475,10 @@ void AssignArkValue(Ark_RichEditorParagraphStyle& dst, const TextStyleResult& sr
         .pixmap = nullptr,
     };
     dst.textAlign = Converter::ArkValue<Opt_TextAlign>(static_cast<TextAlign>(src.textAlign));
+    // read pixel map is not supported
+    auto arkLength = Converter::ArkValue<Ark_Length>(leadingMargin.size.Width());
     dst.leadingMargin = Converter::ArkUnion<
-        Opt_Union_Dimension_LeadingMarginPlaceholder, Ark_LeadingMarginPlaceholder>(leadingMargin);
+        Opt_Union_Dimension_LeadingMarginPlaceholder, Ark_Length>(arkLength);
     dst.wordBreak = Converter::ArkValue<Opt_WordBreak>(static_cast<WordBreak>(src.wordBreak));
     dst.lineBreakStrategy = Converter::ArkValue<Opt_LineBreakStrategy>(
         static_cast<LineBreakStrategy>(src.lineBreakStrategy));
@@ -577,7 +581,8 @@ void AssignArkValue(Ark_RichEditorTextSpanResult& dst, const ResultObject& src, 
 void AssignArkValue(Ark_RichEditorImageSpanResult& dst, const ResultObject& src, ConvContext *ctx)
 {
     dst.spanPosition = ArkValue<Ark_RichEditorSpanPosition>(src.spanPosition);
-    dst.valuePixelMap = ArkValue<Opt_PixelMap>(PixelMapPeer::Create(src.valuePixelMap));
+    // read pixel map is not supported
+    dst.valuePixelMap = ArkValue<Opt_PixelMap>(Ark_Empty());
     dst.valueResourceStr = ArkUnion<Opt_ResourceStr, Ark_String>(src.valueString, ctx);
     dst.imageStyle = ArkValue<Ark_RichEditorImageSpanStyleResult>(src.imageStyle);
     dst.offsetInSpan.value0 = ArkValue<Ark_Number>(src.offsetInSpan[0]);
