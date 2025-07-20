@@ -90,9 +90,7 @@ export interface ILocalStoragePropRefDecoratedVariable<T>
     extends IDecoratedMutableVariable<T>,
         IDecoratedV1Variable<T> {}
 
-export type LinkSourceType<T> = IStateDecoratedVariable<T> | ILinkDecoratedVariable<T> | IObjectLinkDecoratedVariable<T> |
-    IPropDecoratedVariable<T> | IPropRefDecoratedVariable<T> | IStorageLinkDecoratedVariable<T> | ILocalStorageLinkDecoratedVariable<T> |
-    IStoragePropRefDecoratedVariable<T> | ILocalStoragePropRefDecoratedVariable<T> | IProvideDecoratedVariable<T> | IConsumeDecoratedVariable<T>;
+export type LinkSourceType<T> = IDecoratedV1Variable<T>;
 
 export interface IMutableStateMeta {
     addRef(): void;
