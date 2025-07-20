@@ -979,11 +979,14 @@ JsiRef<JsiValue> JSDatePickerDialog::GetDateObj(const std::unique_ptr<JsonValue>
     if (second && second->IsNumber()) {
         dateTime.tm_sec = second->GetInt();
     }
+
+    dateTime.tm_isdst = -1; // Auto considering daylight saving time
     if (!isDatePicker) {
         auto milliseconds = Date::GetMilliSecondsByDateTime(dateTime);
         auto dateObj = JSDate::New(milliseconds);
         return dateObj;
     }
+
     auto timestamp = std::chrono::system_clock::from_time_t(std::mktime(&dateTime));
     auto duration = timestamp.time_since_epoch();
     auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
