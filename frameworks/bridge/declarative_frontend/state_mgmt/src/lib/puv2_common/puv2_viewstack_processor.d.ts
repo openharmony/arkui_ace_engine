@@ -99,8 +99,4 @@ declare class ViewStackProcessor {
   public static PushPrebuildCompCmd(): void;
 
   public static CheckIsPrebuildTimeout(): boolean;
-  
-  public static push(pointer: number): void;
-
-  public static pop(): void;
 }

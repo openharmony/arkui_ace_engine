@@ -164,10 +164,6 @@ if (defined(enable_plugin_pattern_test_ng)) {
       "plugin_pattern_test_ng.cpp",
     ]
 
-    if (ace_engine_feature_enable_static_instructive_code) {
-      source += [ "$ace_root/frameworks/core/components_ng/base/interop/view_stack_processor_interop.cpp" ]
-    }
-
     deps = [
       "$ability_runtime_inner_api_path/ability_manager:ability_manager",
       "$ability_runtime_services_path/abilitymgr:abilityms",
