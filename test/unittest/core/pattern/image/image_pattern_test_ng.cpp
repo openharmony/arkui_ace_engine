@@ -42,7 +42,7 @@ public:
     ~MockImageObject() override = default;
 };
 
-class MockDrawableDescriptor : public DrawableDescriptor {
+class MockDrawableDescriptor : public AceDrawableDescriptor {
 public:
     MOCK_METHOD(void, RegisterRedrawCallback, (RedrawCallback && callback), (override));
     MOCK_METHOD(void, Draw, (RSCanvas & canvas, const NG::ImagePaintConfig& config), (override));

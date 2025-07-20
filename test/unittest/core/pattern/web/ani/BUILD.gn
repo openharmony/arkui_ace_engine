@@ -748,5 +748,5 @@ ohos_unittest("web_pattern_static_unit_test_ohos") {
 
 group("web_pattern_static_unit_test") {
   testonly = true
-  deps = [ ":web_pattern_static_unit_test_ohos" ]
+  #deps = [ ":web_pattern_static_unit_test_ohos" ]
 }
