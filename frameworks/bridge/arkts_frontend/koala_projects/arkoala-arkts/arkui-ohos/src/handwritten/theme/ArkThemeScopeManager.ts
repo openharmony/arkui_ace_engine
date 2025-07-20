@@ -13,18 +13,18 @@
  * limitations under the License.
  */
 
-import { CustomTheme, Theme, Colors } from '@ohos/arkui/theme';
+import { CustomTheme, Colors } from '@ohos/arkui/theme';
 import { ThemeColorMode } from 'arkui/component/common';
-import { InteropNativeModule } from '@koalaui/interop';
 import { ArkThemeBase } from './ArkThemeBase';
 import { ArkSystemTheme } from './system/ArkSystemTheme';
 import { ArkThemeCache } from './ArkThemeCache';
 import { ArkThemeImpl } from './ArkThemeImpl';
 import { ArkThemeNativeHelper } from './ArkThemeNativeHelper';
-import { WithThemeOptions, WithTheme } from '../../component/withTheme';
+import { WithThemeOptions } from '../../component/withTheme';
 import { ArkUIAniModule } from '../../ani/arkts/ArkUIAniModule';
-import { unsafeCast, int32, int64, float32 } from "@koalaui/common";
+import { int32 } from "@koalaui/common";
 import { ArkThemeScope } from './ArkThemeScope';
+import { ArkColorsImpl } from './ArkColorsImpl';
 
 type ViewPuInternal = Object;
 
@@ -228,7 +228,7 @@ export class ArkThemeScopeManager {
         
         if (theme?.colors) {
             console.log('FZY cloneCustomThemeWithExpand 333')
-            Colors.expandByBrandColor(theme!.colors!);
+            ArkColorsImpl.expandByBrandColor(theme!.colors!);
         }
         console.log('FZY cloneCustomThemeWithExpand 555')
         return theme;
