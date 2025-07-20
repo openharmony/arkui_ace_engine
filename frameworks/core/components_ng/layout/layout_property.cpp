@@ -2113,13 +2113,6 @@ void LayoutProperty::CheckBackgroundLayoutSafeAreaEdges(const TextDirection& dir
         propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT;
         localizedBackgroundIgnoresLayoutSafeAreaEdges_ = edges;
     }
-
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    const auto& target = host->GetRenderContext();
-    CHECK_NULL_VOID(target);
-    target->UpdateBackgroundIgnoresLayoutSafeAreaEdges(
-        localizedBackgroundIgnoresLayoutSafeAreaEdges_.value_or(LAYOUT_SAFE_AREA_EDGE_NONE));
 }
 
 void LayoutProperty::LocalizedPaddingOrMarginChange(

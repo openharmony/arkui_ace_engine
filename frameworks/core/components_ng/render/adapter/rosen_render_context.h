@@ -400,7 +400,6 @@ public:
     void CreateBackgroundPixelMap(const RefPtr<FrameNode>& customNode) override;
     void OnIsTransitionBackgroundUpdate(bool isTransitionBackground) override {}
     void OnBuilderBackgroundFlagUpdate(bool isBuilderBackground) override;
-    void OnBackgroundIgnoresLayoutSafeAreaEdgesUpdate(uint32_t edges) override;
 
     void ColorToRSColor(const Color& color, OHOS::Rosen::RSColor& rsColor);
     void OnBackgroundColorUpdate(const Color& value) override;
@@ -538,6 +537,8 @@ public:
     void RemoveFromTree() override;
 
     void SetNeedUseCmdlistDrawRegion(bool needUseCmdlistDrawRegion) override;
+
+    void UpdateCustomBackground() override;
 
 protected:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
