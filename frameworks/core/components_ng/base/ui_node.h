@@ -1057,29 +1057,6 @@ public:
         return drawChildrenParent_.Upgrade();
     }
 
-    bool IsFreeNode() const
-    {
-        return isFreeNode_;
-    }
-
-    bool IsFreeState() const
-    {
-        return isFreeState_;
-    }
-
-    bool IsFreeNodeTree()
-    {
-        if (!IsFreeNode()) {
-            return false;
-        }
-        for (const auto& child : GetChildren()) {
-            if (!child->IsFreeNodeTree()) {
-                return false;
-            }
-        }
-        return true;
-    }
-
     bool IsThreadSafeNode() const
     {
         return isThreadSafeNode_;
@@ -1229,8 +1206,6 @@ private:
     WeakPtr<UINode> ancestor_; // always correct parent ptr, used to remove duplicates when inserting child nodes
     bool isRoot_ = false;
     bool onMainTree_ = false;
-    bool isFreeNode_ = false;
-    bool isFreeState_ = false; // the free node in free state can be operated by non UI threads
     bool isThreadSafeNode_ = false;
     bool isFree_ = false; // the thread safe node in free state can be operated by non UI threads
     std::vector<std::function<void()>> afterAttachMainTreeTasks_;

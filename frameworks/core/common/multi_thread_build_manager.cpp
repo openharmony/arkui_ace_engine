@@ -33,7 +33,6 @@ constexpr uint32_t ASYNC_UITASK_QOS = 5;
 std::unique_ptr<ffrt::queue> asyncUITaskQueue = nullptr;
 #endif
 }
-thread_local bool MultiThreadBuildManager::isFreeNodeScope_ = false;
 thread_local bool MultiThreadBuildManager::isThreadSafeNodeScope_ = false;
 thread_local bool MultiThreadBuildManager::isUIThread_ = false;
 
@@ -81,39 +80,11 @@ bool MultiThreadBuildManager::CheckNodeOnValidThread(NG::UINode* node)
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "CheckNodeOnValidThread failed. node is nullptr");
         return false;
     }
-    if (!node->IsFreeState() && !MultiThreadBuildManager::IsOnUIThread()) {
+    if (!node->IsFree() && !MultiThreadBuildManager::IsOnUIThread()) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "CheckNodeOnValidThread failed. unfree node not run on main thread");
         return false;
     }
     return true;
-}
-
-void MultiThreadBuildManager::SetIsFreeNodeScope(bool isFreeNodeScope)
-{
-    isFreeNodeScope_ = isFreeNodeScope;
-}
-
-bool MultiThreadBuildManager::IsFreeNodeScope()
-{
-    return isFreeNodeScope_;
-}
-
-void MultiThreadBuildManager::TryExecuteUnSafeTask(NG::UINode* node, std::function<void()>&& task)
-{
-    if (node->IsFreeState()) {
-        node->PostAfterAttachMainTreeTask(std::move(task));
-    } else if (task) {
-        task();
-    }
-}
-
-bool MultiThreadBuildManager::TryPostUnSafeTask(NG::UINode* node, std::function<void()>&& task)
-{
-    if (node->IsFreeState()) {
-        node->PostAfterAttachMainTreeTask(std::move(task));
-        return true;
-    }
-    return false;
 }
 
 void MultiThreadBuildManager::SetIsThreadSafeNodeScope(bool isThreadSafeNodeScope)

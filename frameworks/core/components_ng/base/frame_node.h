@@ -1418,8 +1418,6 @@ public:
     }
 
     void AddToOcclusionMap(bool enable);
-    void MarkModifyDoneUnsafely();
-    void MarkDirtyNodeUnsafely(PropertyChangeFlag extraFlag);
 
 protected:
     void DumpInfo() override;

@@ -37,7 +37,6 @@ struct ArkUI_Node {
     ArkUINodeHandle uiNodeHandle = nullptr;
     bool cNode = false;
     bool threadSafeNode = false;
-    bool freeNode = false;
     bool buildNode = false;
     void* extraData = nullptr;
     void* extraCustomData = nullptr;
@@ -127,7 +126,6 @@ inline bool UsePXUnit(ArkUI_NodeHandle nodePtr)
 
 bool InitialFullImpl();
 ArkUIFullNodeAPI* GetFullImpl();
-ArkUI_NodeHandle CreateNodeInner(ArkUI_NodeType type, bool isFreeNode);
 ArkUI_NodeHandle CreateNode(ArkUI_NodeType type);
 void DisposeNativeSource(ArkUI_NodeHandle nativePtr);
 void DisposeNode(ArkUI_NodeHandle nativePtr);
