@@ -34,7 +34,7 @@ public:
     static bool IsUndefined(ani_env* env, ani_object obj);
     static ani_object GetUndefined(ani_env* env);
     static std::optional<ani_string> StdStringToANIString(ani_env *env, std::string str);
-    static ani_error GetErrorObject(ani_env* env, const char *errMsg, int32_t code);
+    static ani_ref CreateBusinessError(ani_env* env, const char *msg, ani_int code);
     static void AniThrow(ani_env* env, const char *errMsg, int32_t code);
     static bool IsClassObject(ani_env *env, ani_ref object_ref, const char *class_descriptor);
     static bool GetBigIntValue(ani_env* env, ani_object object, int64_t& longValue);

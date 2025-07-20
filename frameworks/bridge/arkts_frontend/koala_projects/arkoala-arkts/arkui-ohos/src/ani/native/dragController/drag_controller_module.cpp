@@ -327,7 +327,7 @@ void TriggerJsCallback(std::shared_ptr<ArkUIDragControllerAsync> asyncCtx, ani_r
     } else {
         if (asyncCtx->asyncCallback) { // asyncCallback
             std::vector<ani_ref> resultRef(PARAMETER_NUM);
-            auto errObj = AniUtils::GetErrorObject(asyncCtx->env, "", ERROR_CODE_NO_ERROR);
+            auto errObj = AniUtils::CreateBusinessError(asyncCtx->env, "", ERROR_CODE_NO_ERROR);
             resultRef[0] = errObj;
             resultRef[1] = result;
             ani_ref fnReturnVal;
@@ -466,11 +466,10 @@ bool ParseDragItemInfoParam(ani_env* env, ArkUIDragControllerAsync& asyncCtx, an
         auto nativePixelMap =
             OHOS::Media::PixelMapTaiheAni::GetNativePixelMap(env, reinterpret_cast<ani_object>(pixelMapAni));
         if (nativePixelMap) {
-            auto pixelMapPtr = reinterpret_cast<void*>(&nativePixelMap);
             if (asyncCtx.isArray) {
-                asyncCtx.pixelMapList.emplace_back(reinterpret_cast<ani_ref>(pixelMapPtr));
+                asyncCtx.pixelMapList.emplace_back(SharedPointerWrapper(nativePixelMap));
             } else {
-                asyncCtx.pixelMap = reinterpret_cast<ani_ref>(pixelMapPtr);
+                asyncCtx.pixelMap = SharedPointerWrapper(nativePixelMap);
             }
         } else {
             HILOGE("AceDrag, get native pixelMap from taiheAni is null.");
@@ -512,7 +511,7 @@ bool ParseDragMixParam(ani_env* env, ArkUIDragControllerAsync& asyncCtx, ani_obj
         for (int32_t i = 0; i < dragItemInfoArrayLengthInt; i++) {
             ani_ref itemRef;
             if ((status = env->Object_CallMethodByName_Ref(
-                dragItemInfo, "$_get", "i:Lstd/core/Object;", &itemRef, (ani_int)i)) != ANI_OK) {
+                dragItemInfo, "$_get", "i:C{std.core.Object}", &itemRef, (ani_int)i)) != ANI_OK) {
                 HILOGE("AceDrag, get dragItemInfo from array fail. status = %{public}d", status);
                 isParseSucess = false;
                 break;
@@ -811,23 +810,30 @@ bool CheckAndParseSecondParams(ani_env* env, ArkUIDragControllerAsync& asyncCtx,
         asyncCtx.unifiedData = TransformUnifiedDataFormANI(env, static_cast<ani_object>(dataAni));
     }
 
-    ani_ref pointXAni;
-    ani_ref pointYAni;
-    if (ANI_OK != env->Object_GetPropertyByName_Ref(static_cast<ani_object>(touchPointAni), "x", &pointXAni)) {
-        HILOGE("AceDrag, get touchPoint x value failed.");
-        return false;
-    }
-    if (ANI_OK != env->Object_GetPropertyByName_Ref(static_cast<ani_object>(touchPointAni), "y", &pointYAni)) {
-        HILOGE("AceDrag, get touchPoint y value failed.");
-        return false;
-    }
+    std::shared_ptr<DimensionOffset> dimensionPtr = nullptr;
+    if (!AniUtils::IsUndefined(env, static_cast<ani_object>(touchPointAni))) {
+        ani_ref pointXAni = nullptr;
+        ani_ref pointYAni = nullptr;
+        if (ANI_OK != env->Object_GetPropertyByName_Ref(static_cast<ani_object>(touchPointAni), "x", &pointXAni)) {
+            HILOGE("AceDrag, get touchPoint x value failed.");
+            return false;
+        }
+        if (ANI_OK != env->Object_GetPropertyByName_Ref(static_cast<ani_object>(touchPointAni), "y", &pointYAni)) {
+            HILOGE("AceDrag, get touchPoint y value failed.");
+            return false;
+        }
 
-    std::optional<Dimension> dx = ConvertDimensionType(env, pointXAni);
-    std::optional<Dimension> dy = ConvertDimensionType(env, pointYAni);
-    if (dx.has_value() && dy.has_value()) {
-        std::shared_ptr<DimensionOffset> dimensionPtr = std::make_shared<DimensionOffset>(dx.value(), dy.value());
-        asyncCtx.touchPoint = dimensionPtr.get();
+        std::optional<Dimension> dx = ConvertDimensionType(env, pointXAni);
+        std::optional<Dimension> dy = ConvertDimensionType(env, pointYAni);
+        if (dx.has_value() && dy.has_value()) {
+            dimensionPtr = std::make_shared<DimensionOffset>(dx.value(), dy.value());
+            asyncCtx.touchPoint = SharedPointerWrapper(dimensionPtr);
+        }
+    } else {
+        dimensionPtr = std::make_shared<DimensionOffset>(OHOS::Ace::NG::OffsetF(0.0f, 0.0f));
+        asyncCtx.touchPoint = SharedPointerWrapper(dimensionPtr);
     }
+    
     if (!ParsePreviewOptions(env, asyncCtx, static_cast<ani_object>(previewOptionsAni))) {
         HILOGE("AceDrag, parse previewOptions failed.");
         return false;

@@ -815,6 +815,7 @@ void UpdatePreviewOptionDefaultAttr(
     dragAsyncContext->dragPreviewOption.isScaleEnabled = asyncCtx.dragPreviewOption.isScaleEnabled;
     dragAsyncContext->dragPreviewOption.isDefaultShadowEnabled = asyncCtx.dragPreviewOption.isDefaultShadowEnabled;
     dragAsyncContext->dragPreviewOption.isDefaultRadiusEnabled = asyncCtx.dragPreviewOption.isDefaultRadiusEnabled;
+    dragAsyncContext->dragPreviewOption.isNumber = asyncCtx.dragPreviewOption.isNumber;
     if (asyncCtx.dragPreviewOption.isNumber) {
         dragAsyncContext->dragPreviewOption.badgeNumber = asyncCtx.dragPreviewOption.badgeNumber;
     } else {
@@ -832,66 +833,39 @@ void CreateDragEventPeer(const ArkUIDragNotifyMessage& dragNotifyMsg, ani_long& 
     dragEventPeer = reinterpret_cast<ani_long>(arkDragInfo);
 }
 
-void ConvertDragPointerEvent(bool startDrag, ArkUIDragPointerEvent& dragPointerEvent, DragPointerEvent& pointerEvent)
-{
-    if (startDrag) {
-        pointerEvent.pointerEventId = dragPointerEvent.pointerEventId;
-        pointerEvent.pointerId = dragPointerEvent.pointerId;
-        pointerEvent.windowX = dragPointerEvent.windowX;
-        pointerEvent.windowY = dragPointerEvent.windowY;
-        pointerEvent.displayX = dragPointerEvent.displayX;
-        pointerEvent.displayY = dragPointerEvent.displayY;
-        pointerEvent.deviceId = dragPointerEvent.deviceId;
-        pointerEvent.displayId = dragPointerEvent.displayId;
-        pointerEvent.sourceType = dragPointerEvent.sourceType;
-        pointerEvent.originId = dragPointerEvent.originId;
-    } else {
-        dragPointerEvent.pointerEventId = pointerEvent.pointerEventId;
-        dragPointerEvent.pointerId = pointerEvent.pointerId;
-        dragPointerEvent.windowX = pointerEvent.windowX;
-        dragPointerEvent.windowY = pointerEvent.windowY;
-        dragPointerEvent.displayX = pointerEvent.displayX;
-        dragPointerEvent.displayY = pointerEvent.displayY ;
-        dragPointerEvent.deviceId = pointerEvent.deviceId;
-        dragPointerEvent.displayId = pointerEvent.displayId;
-        dragPointerEvent.sourceType = pointerEvent.sourceType;
-        dragPointerEvent.originId = pointerEvent.originId;
-    }
-}
-
 std::shared_ptr<DragControllerAsyncCtx> ConvertDragControllerAsync(const ArkUIDragControllerAsync& asyncCtx)
 {
     auto dragAsyncContext = std::make_shared<DragControllerAsyncCtx>();
     CHECK_NULL_RETURN(dragAsyncContext, nullptr);
     dragAsyncContext->env = asyncCtx.env;
     dragAsyncContext->isArray = asyncCtx.isArray;
-    dragAsyncContext->extraParams = std::string(asyncCtx.extraParams);
+    if (asyncCtx.extraParams) {
+        dragAsyncContext->extraParams = std::string(asyncCtx.extraParams);
+    }
     dragAsyncContext->hasHandle = asyncCtx.hasHandle;
-    dragAsyncContext->touchPoint = *static_cast<DimensionOffset*>(asyncCtx.touchPoint);
+    void* touchPointPtr = asyncCtx.touchPoint;
+    dragAsyncContext->touchPoint = *static_cast<DimensionOffset*>(touchPointPtr);
     dragAsyncContext->customBuilderNode = asyncCtx.customBuilderNode;
     dragAsyncContext->customBuilderNodeList = asyncCtx.customBuilderNodeList;
     dragAsyncContext->asyncCallback = asyncCtx.asyncCallback;
     dragAsyncContext->deferred = asyncCtx.deferred;
     dragAsyncContext->dragPointerEvent.pointerId = asyncCtx.dragPointerEvent.pointerId;
+    UpdatePreviewOptionDefaultAttr(dragAsyncContext, asyncCtx);
     dragAsyncContext->dragAction = asyncCtx.dragAction;
     dragAsyncContext->callBackJsFunction = asyncCtx.callBackJsFunction;
     UpdatePreviewOptionDefaultAttr(dragAsyncContext, asyncCtx);
     auto unifiedDataPtr = reinterpret_cast<void*>(asyncCtx.unifiedData);
-        RefPtr<UnifiedData> udData = UdmfClient::GetInstance()->TransformUnifiedDataFromANI(unifiedDataPtr);
-        dragAsyncContext->unifiedData = udData;
+    RefPtr<UnifiedData> udData = UdmfClient::GetInstance()->TransformUnifiedDataFromANI(unifiedDataPtr);
+    dragAsyncContext->unifiedData = udData;
 #if defined(PIXEL_MAP_SUPPORTED)
-    auto pixelMapValue = reinterpret_cast<void*>(asyncCtx.pixelMap);
-    auto refPixelMap = PixelMap::CreatePixelMap(&pixelMapValue);
-        if (refPixelMap) {
-            dragAsyncContext->pixelMap = CopyMediaPixelMap(refPixelMap);
-        }
-    for (const auto& refPixelMap : asyncCtx.pixelMapList) {
-        auto pixelMapValue = reinterpret_cast<void*>(refPixelMap);
-        auto pixelMap = PixelMap::CreatePixelMap(&pixelMapValue);
-        if (pixelMap) {
-            dragAsyncContext->pixelMapList.push_back(pixelMap->GetPixelMapSharedPtr());
+    if (asyncCtx.pixelMap) {
+        dragAsyncContext->pixelMap = std::static_pointer_cast<Media::PixelMap>(asyncCtx.pixelMap.GetSharedPtr());
     }
-        }
+
+    for (const auto& pixelMapValue : asyncCtx.pixelMapList) {
+        dragAsyncContext->pixelMapList.emplace_back(
+            std::static_pointer_cast<Media::PixelMap>(pixelMapValue.GetSharedPtr()));
+    }
 #endif
     return dragAsyncContext;
 }
@@ -917,7 +891,7 @@ bool ANIHandleExecuteDrag(ArkUIDragControllerAsync& asyncCtx)
     return true;
 }
 
-bool ANIHandleDragAction(ArkUIDragControllerAsync& asyncCtx)
+bool ANIHandleDragActionStartDrag(ArkUIDragControllerAsync& asyncCtx)
 {
     auto dragAsyncContext = ConvertDragControllerAsync(asyncCtx);
     CHECK_NULL_RETURN(dragAsyncContext, false);
@@ -934,17 +908,6 @@ bool ANIHandleDragAction(ArkUIDragControllerAsync& asyncCtx)
         LOGE("AceDrag, confirm current point info failed.");
         return false;
     }
-    ConvertDragPointerEvent(false, asyncCtx.dragPointerEvent, dragAsyncContext->dragPointerEvent);
-    
-    return true;
-}
-
-bool ANIHandleDragActionStartDrag(ArkUIDragControllerAsync& asyncCtx)
-{
-    auto dragAsyncContext = ConvertDragControllerAsync(asyncCtx);
-    ConvertDragPointerEvent(true, asyncCtx.dragPointerEvent, dragAsyncContext->dragPointerEvent);
-    CHECK_NULL_RETURN(dragAsyncContext, false);
-    dragAsyncContext->instanceId = Ace::Container::CurrentIdSafely();
     ParameterType parameterType = GetParameterType(dragAsyncContext);
     if (parameterType == ParameterType::DRAG_PIXEL_ARRAY) {
         OnMultipleComplete(dragAsyncContext);
@@ -1014,7 +977,6 @@ const ArkUIAniDragControllerModifier* GetDragControllerAniModifier()
 {
     static const ArkUIAniDragControllerModifier impl = {
         .aniHandleExecuteDrag = NG::ANIHandleExecuteDrag,
-        .aniHandleDragAction = NG::ANIHandleDragAction,
         .aniHandleDragActionStartDrag = NG::ANIHandleDragActionStartDrag,
         .createDragEventPeer = NG::CreateDragEventPeer,
         .aniGetDragPreview = NG::ANIGetDragPreview,
