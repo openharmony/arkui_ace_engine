@@ -2365,4 +2365,25 @@ int32_t VideoPattern::OnInjectionEvent(const std::string& command)
     pattern->Start();
     return RET_SUCCESS;
 }
+
+void VideoPattern::SetVideoController(const RefPtr<VideoControllerV2>& videoController)
+{
+    if (videoControllerV2_) {
+        // Video Controller is already attached
+        return;
+    }
+    videoControllerV2_ = videoController;
+
+    // if pattern is attached to frame node
+    auto frameNode = frameNode_.Upgrade();
+    // full screen node is not supposed to register js controller event
+    if (frameNode && !InstanceOf<VideoFullScreenPattern>(this)) {
+        SetMethodCall();
+    }
+}
+
+RefPtr<VideoControllerV2> VideoPattern::GetVideoController()
+{
+    return videoControllerV2_;
+}
 } // namespace OHOS::Ace::NG

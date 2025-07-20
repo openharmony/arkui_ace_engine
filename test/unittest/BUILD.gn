@@ -1496,6 +1496,9 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/test/mock/core/pattern/mock_picker_haptic_factory.cpp",
     "$ace_root/test/mock/core/pattern/mock_web_pattern.cpp",
   ]
+  if (ace_engine_feature_enable_static_instructive_code) {
+    sources += [ "$ace_root/frameworks/core/components_ng/pattern/xcomponent/xcomponent_pattern_multithread.cpp" ]
+  }
   if (ace_engine_feature_enable_split_mode &&
       defined(
           vendor_configs.ace_engine_advanced_split_mode_pattern_test_sources)) {

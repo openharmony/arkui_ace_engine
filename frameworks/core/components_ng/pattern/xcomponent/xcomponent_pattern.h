@@ -388,6 +388,7 @@ protected:
     void AdjustNativeWindowSize(float width, float height);
     bool IsSupportImageAnalyzerFeature();
     void UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode);
+    void RegisterTransformHintCallback(PipelineContext* context);
 
     std::optional<std::string> id_;
     XComponentType type_;
@@ -477,12 +478,20 @@ private:
     void ReleaseImageAnalyzer();
     void SetRotation(uint32_t rotation);
     void RegisterSurfaceCallbackModeEvent();
-    void RegisterTransformHintCallback(PipelineContext* context);
     void RegisterSurfaceRenderContext();
     void UnregisterSurfaceRenderContext();
     std::shared_ptr<Rosen::RSUIContext> GetRSUIContext(const RefPtr<FrameNode>& frameNode);
     void RegisterNode();
     void UnregisterNode();
+
+#ifdef ACE_STATIC
+    void InitSurfaceMultiThread(const RefPtr<FrameNode>& host);
+    void InitControllerMultiThread();
+    void OnAttachToMainTreeMultiThread(const RefPtr<FrameNode>& host);
+    void RegisterContextEventMultiThread(const RefPtr<FrameNode>& host);
+    void OnDetachFromMainTreeMultiThread(const RefPtr<FrameNode>& host);
+    void OnDetachFromFrameNodeMultiThread(FrameNode* frameNode);
+#endif
 
 #ifdef RENDER_EXTRACT_SUPPORTED
     RenderSurface::RenderSurfaceType CovertToRenderSurfaceType(const XComponentType& hostType);

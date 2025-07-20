@@ -1397,4 +1397,38 @@ HWTEST_F(VideoTestNg, CallVideoPatternAdjustVolumeFunc, TestSize.Level1)
     pattern->AdjustVolume(step);
     EXPECT_EQ(pattern->currentVolume_, 1);
 }
+
+/**
+ * @tc.name: Test VideoPattern SetVideoController
+ * @tc.desc: Test VideoPattern SetVideoController() func
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoTestNg, CallVideoPatternSetVideoControllerFunc, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Video
+     * @tc.expected: Create Video successfully
+     */
+    testProperty.videoController = nullptr;
+    auto frameNode = CreateVideoNode(testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<VideoPattern>();
+    ASSERT_TRUE(pattern);
+
+    /**
+     * @tc.steps: step2. call SetVideoController
+     * @tc.expected: SetVideoController successfully
+     */
+    auto videoControllerInit = AceType::MakeRefPtr<VideoControllerV2>();
+    pattern->SetVideoController(videoControllerInit);
+    EXPECT_EQ(pattern->GetVideoController(), videoControllerInit);
+
+    /**
+     * @tc.steps: step3. call SetVideoController to update videoController
+     * @tc.expected: VideoController is not updated.
+     */
+    auto videoControllerUpdate = AceType::MakeRefPtr<VideoControllerV2>();
+    pattern->SetVideoController(videoControllerUpdate);
+    EXPECT_NE(pattern->GetVideoController(), videoControllerUpdate);
+}
 } // namespace OHOS::Ace::NG
