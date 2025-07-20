@@ -28,12 +28,10 @@ namespace OHOS::Ace::NG {
 void AniThemeModule::UpdateColorMode(int32_t colorMode)
 {
     ColorMode colorModeValue = MapAniColorModeToColorMode(colorMode);
-    LOGI("FZY AniThemeModule::UpdateColorMode %{public}d", static_cast<int32_t>(colorModeValue));
     if (colorModeValue != ColorMode::COLOR_MODE_UNDEFINED) {
 #if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
         UpdateColorModeForThemeConstants(colorModeValue);
 #else
-        LOGI("FZY AniThemeModule::UpdateColorMode resMgr UpdateColorMode");
         ResourceManager::GetInstance().UpdateColorMode(colorModeValue);
 #endif
         auto pipelineContext = NG::PipelineContext::GetCurrentContextSafely();
@@ -51,7 +49,6 @@ void AniThemeModule::RestoreColorMode()
 #if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
     UpdateColorModeForThemeConstants(colorModeValue);
 #else
-    LOGI("FZY AniThemeModule::RestoreColorMode resMgr UpdateColorMode ");
     ResourceManager::GetInstance().UpdateColorMode(colorModeValue);
 #endif
 }

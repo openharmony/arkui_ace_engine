@@ -141,13 +141,11 @@ export class ArkThemeScope {
      * @param listener the Custom component
      */
     addCustomListenerInScope(listener: ArkCustomComponent) {
-        console.log(`FZY addCustomListenerInScope 111`);
         const len = this.components ? this.components!.length : -1;
         if (len <= 0) {
             return;
         }
         const listenerId = listener.getPeer()!.getId();
-        console.log(`FZY addCustomListenerInScope 222, ${listenerId}`);
         // the last ThemeScopeItem probably corresponds to Custom component
         let themeScopeItem = this.components![len - 1];
         if (themeScopeItem.elmtId === listenerId) {
