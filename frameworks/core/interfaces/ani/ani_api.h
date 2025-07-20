@@ -290,7 +290,7 @@ struct ArkUIAniShapeModifier {
 };
 struct ArkUIAniRichEditorModifier {
     ani_long (*transferPixelMap)(void* pixelMap);
-}
+};
 struct ArkUIAniStateMgmtModifier {
     std::string (*persistentStorageGet)(std::string key);
     void (*persistentStorageSet)(std::string key, std::string value);
