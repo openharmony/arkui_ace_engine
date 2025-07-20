@@ -26,7 +26,7 @@ ani_long RichEditorTransferPixelMap(ani_env* env, [[maybe_unused]]ani_object ani
 {
     ani_long nativeObj {};
     const auto* modifier = GetNodeAniModifier();
-    if (!modifier | !modifier->getRichEditorAniModifier() | env) {
+    if (!modifier || !modifier->getRichEditorAniModifier() || !env) {
         return nativeObj;
     }
     auto pixelMap = OHOS::Media::PixelMapTaiheAni::GetNativePixelMap(env, pixelMapObj);
