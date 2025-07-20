@@ -663,6 +663,36 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::ConstructConditionScope)
         },
+        ani_native_function {
+            "_Common_vp2px",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::Vp2px)
+        },
+        ani_native_function {
+            "_Common_px2vp",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::Px2vp)
+        },
+        ani_native_function {
+            "_Common_fp2px",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::Fp2px)
+        },
+        ani_native_function {
+            "_Common_px2fp",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::Px2fp)
+        },
+        ani_native_function {
+            "_Common_lpx2px",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::Lpx2px)
+        },
+        ani_native_function {
+            "_Common_px2lpx",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::Px2lpx)
+       }
     };
 
     auto bindRst = env->Class_BindNativeMethods(cls, methods.data(), methods.size());

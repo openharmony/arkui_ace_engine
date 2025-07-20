@@ -72,7 +72,7 @@ void AnimateToImmediatelyImpl(const Ark_AnimateParam* value,
 }
 Ark_Number Vp2pxImpl(const Ark_Number* value)
 {
-    auto invalid = Converter::ArkValue<Ark_Number>(0);
+    auto invalid = Converter::ArkValue<Ark_Number>(0.0);
     CHECK_NULL_RETURN(value, invalid);
     double vpValue = Converter::Convert<double>(*value);
     double density = PipelineBase::GetCurrentDensity();

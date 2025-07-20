@@ -292,4 +292,57 @@ void SetOverlayComponentContent(ani_env* env, ani_object obj, ani_long ptr, ani_
     ParseOverlayOptions(env, options, opt);
     modifier->getCommonAniModifier()->setOverlayComponent(ptr, buildNodePtr, opt);
 }
+ani_double Vp2px(ani_env* env, ani_object obj, ani_double value, ani_int instanceId)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return 0;
+    }
+    return modifier->getCommonAniModifier()->vp2px(value, instanceId);
+}
+
+ani_double Px2vp(ani_env* env, ani_object obj, ani_double value, ani_int instanceId)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return 0;
+    }
+    return modifier->getCommonAniModifier()->px2vp(value, instanceId);
+}
+
+ani_double Fp2px(ani_env* env, ani_object obj, ani_double value, ani_int instanceId)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return 0;
+    }
+    return modifier->getCommonAniModifier()->fp2px(value, instanceId);
+}
+
+ani_double Px2fp(ani_env* env, ani_object obj, ani_double value, ani_int instanceId)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return 0;
+    }
+    return modifier->getCommonAniModifier()->px2fp(value, instanceId);
+}
+
+ani_double Lpx2px(ani_env* env, ani_object obj, ani_double value, ani_int instanceId)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return 0;
+    }
+    return modifier->getCommonAniModifier()->lpx2px(value, instanceId);
+}
+
+ani_double Px2lpx(ani_env* env, ani_object obj, ani_double value, ani_int instanceId)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return 0;
+    }
+    return modifier->getCommonAniModifier()->px2lpx(value, instanceId);
+}
 } // namespace OHOS::Ace::Ani
