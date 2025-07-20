@@ -135,6 +135,7 @@ void AssignArkValue(Ark_RichEditorTextSpanResult& dst, const RichEditorAbstractS
 void AssignArkValue(Ark_RichEditorImageSpanResult& dst, const RichEditorAbstractSpanResult& src, ConvContext *ctx)
 {
     dst.spanPosition = Converter::ArkValue<Ark_RichEditorSpanPosition>(src);
+    // read pixel map is not supported
     dst.valuePixelMap = Converter::ArkValue<Opt_PixelMap>(Ark_Empty());
     auto valueResourceStr = src.GetValueResourceStr();
     dst.valueResourceStr = valueResourceStr.empty() ? Converter::ArkUnion<Opt_ResourceStr>(Ark_Empty())
