@@ -16,8 +16,94 @@
 #include "ani_utils.h"
 
 #include "interfaces/inner_api/ace_kit/include/ui/base/utils/utils.h"
+#include "base/log/log.h"
+#include "bridge/arkts_frontend/arkts_ani_utils.h"
+#include "core/common/resource/resource_manager.h"
+#include "core/common/container.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr uint32_t COLOR_ALPHA_OFFSET = 24;
+constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
+uint32_t ColorAlphaAdapt(uint32_t origin)
+{
+    uint32_t result = origin;
+    if ((origin >> COLOR_ALPHA_OFFSET) == 0) {
+        result = origin | COLOR_ALPHA_VALUE;
+    }
+    return result;
+}
+} // namespace
+bool AniUtils::ParseAniColor(ani_env* env, ani_object aniValue, Color& color, RefPtr<ResourceObject>& resObj)
+{
+    ani_status status;
+    ani_class stringClass;
+    if ((status = env->FindClass("Lstd/core/String;", &stringClass)) != ANI_OK) {
+        LOGW("ParseAniColor find string failed. %{public}d", status);
+        return false;
+    }
+    ani_boolean isString;
+    if ((status = env->Object_InstanceOf(aniValue, stringClass, &isString)) != ANI_OK) {
+        LOGW("ParseAniColor call instanceof string failed. %{public}d", status);
+        return false;
+    }
+    if (isString) {
+        auto srcString = ArktsAniUtils::ANIStringToStdString(env, static_cast<ani_string>(aniValue));
+        Color::ParseColorString(srcString, color);
+        return true;
+    }
+
+    ani_class doubleClass;
+    if ((status = env->FindClass("Lstd/core/Double;", &doubleClass)) != ANI_OK) {
+        LOGW("ParseAniColor find int failed. %{public}d", status);
+        return false;
+    }
+    ani_boolean isDouble;
+    if ((status = env->Object_InstanceOf(aniValue, doubleClass, &isDouble)) != ANI_OK) {
+        LOGW("ParseAniColor call instanceof double failed. %{public}d", status);
+        return false;
+    }
+    if (isDouble) {
+        ani_double doubleSrc;
+        if ((status = env->Object_CallMethodByName_Double(aniValue, "unboxed", ":d", &doubleSrc)) != ANI_OK) {
+            LOGW("GetColorValue unboxed double failed. %{public}d", status);
+            return false;
+        }
+        color = Color(ColorAlphaAdapt(static_cast<uint32_t>(doubleSrc)));
+        return true;
+    }
+
+    ani_class resourceClass;
+    if ((status = env->FindClass("Lglobal/resource/Resource;", &resourceClass)) != ANI_OK) {
+        LOGW("ParseAniColor find Resource failed. %{public}d", status);
+        return false;
+    }
+    ani_boolean isResource;
+    if ((status = env->Object_InstanceOf(aniValue, resourceClass, &isResource)) != ANI_OK) {
+        LOGW("ParseAniColor call instanceof Resource failed. %{public}d", status);
+        return false;
+    }
+    if (isResource) {
+        ani_double resId;
+        env->Object_GetPropertyByName_Double(aniValue, "id", &resId);
+        ani_double resType;
+        env->Object_GetPropertyByName_Double(aniValue, "type", &resType);
+        ani_ref bundleName;
+        env->Object_GetPropertyByName_Ref(aniValue, "bundleName", &bundleName);
+        ani_ref moduleName;
+        env->Object_GetPropertyByName_Ref(aniValue, "moduleName", &moduleName);
+        std::vector<ResourceObjectParams> params;
+        resObj = AceType::MakeRefPtr<ResourceObject>(resId, resType, params,
+            ArktsAniUtils::ANIStringToStdString(env, static_cast<ani_string>(bundleName)),
+            ArktsAniUtils::ANIStringToStdString(env, static_cast<ani_string>(moduleName)),
+            Container::CurrentIdSafely());
+        auto resAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resObj);
+        color =  resAdapter->GetColor(static_cast<int32_t>(resId));
+        return true;
+    }
+    return false;
+}
+
 
 std::string AniUtils::ANIStringToStdString(ani_env* env, ani_string aniStr)
 {

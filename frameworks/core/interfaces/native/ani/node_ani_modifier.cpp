@@ -33,6 +33,9 @@
 #include "xcomponent_ani_modifier.h"
 #include "lazy_for_each_node_ani_modifier.h"
 #include "condition_scope_ani_modifier.h"
+#include "resource_ani_modifier.h"
+#include "color_ani_modifier.h"
+#include "theme_ani_modifier.h"
 
 extern "C" {
 const ArkUIAniModifiers* GetArkUIAniModifiers()
@@ -60,6 +63,9 @@ const ArkUIAniModifiers* GetArkUIAniModifiers()
         .getArkUIAniXComponentModifier = OHOS::Ace::NG::GetXComponentAniModifier,
         .getArkUIAniConditionScopeModifier = OHOS::Ace::NG::GetConditionScopeAniModifier,
         .getArkUIAniComponentConentModifier = OHOS::Ace::NG::GetArkUIAniComponentConentModifier,
+        .getResourceModifier = OHOS::Ace::NG::GetResourceAniModifier,
+        .getColorModifier = OHOS::Ace::NG::GetColorAniModifier,
+        .getAniThemeModifier = OHOS::Ace::NG::GetThemeAniModifier
     };
     return &impl;
 }

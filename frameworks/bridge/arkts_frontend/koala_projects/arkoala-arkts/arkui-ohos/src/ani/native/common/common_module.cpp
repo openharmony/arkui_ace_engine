@@ -21,8 +21,10 @@
 
 #include "ani.h"
 #include "load.h"
+#include "log/log.h"
 
 #include "base/utils/utils.h"
+#include "resource/resource_module.h"
 // #include "pixel_map_taihe_ani.h"
 
 namespace OHOS::Ace::Ani {
@@ -430,7 +432,43 @@ void SetDefaultTheme(ani_env* env, ani_object aniClass, ani_array colorArray, an
     if (!modifier) {
         return;
     }
-    modifier->getCommonAniModifier()->setDefaultTheme(env, colorArray, isDark);
+
+    auto aniThemeModifier = modifier->getAniThemeModifier();
+    int32_t tokenColorsSize = aniThemeModifier->getTokenColorsSize();
+    auto isDarkValue = static_cast<bool>(isDark);
+    ani_size length;
+    env->Array_GetLength(colorArray, &length);
+    if (length < tokenColorsSize) {
+        HILOGW("colorArray incorrect in SetDefaultTheme");
+    }
+
+    std::vector<uint32_t> colors;
+    // auto basisTheme = TokenThemeStorage::GetInstance()->ObtainSystemTheme();
+    std::vector<uint32_t> systemColors;
+    modifier->getAniThemeModifier()->obtainSystemColors(systemColors);
+    for (int32_t i = 0; i < tokenColorsSize; i++) {
+        // type ResourceColor = number | string | Resource
+        ani_ref value;
+        auto status = env->Array_Get(colorArray, i, &value);
+        if (status != ANI_OK) {
+            HILOGW("SetDefaultTheme colorArray get index: %{public}d failed", i);
+            continue;
+        }
+        uint32_t color = 0;
+        RefPtr<ResourceObject> resObj;
+        bool isColorAvailable = false;
+        if (!ResourceModule::ParseAniColor(env, static_cast<ani_object>(value), color)) {
+            if (i < systemColors.size()) {
+                color = systemColors[i];
+                isColorAvailable = true;
+            }
+        } else {
+            isColorAvailable = true;
+        }
+        colors.push_back(color);
+    }
+
+    modifier->getCommonAniModifier()->setDefaultTheme(env, colors, isDarkValue);
 }
 
 void UpdateColorMode(ani_env* env, ani_object aniClass, ani_int colorMode)
@@ -467,8 +505,12 @@ void CreateAndBindTheme(ani_env* env, ani_object aniClass, ani_int themeScopeId,
     if (!modifier) {
         return;
     }
+    std::vector<uint32_t> colorsArr;
+    if (!ResourceModule::HandleThemeColorsArg(env, colors, colorsArr)) {
+        return;
+    }
     modifier->getCommonAniModifier()->createAndBindTheme(
-        env, themeScopeId, themeId, colors, colorMode, onThemeScopeDestroy);
+        env, themeScopeId, themeId, colorsArr, colorMode, onThemeScopeDestroy);
 }
 
 void ApplyParentThemeScopeId(ani_env* env, ani_object aniClass, ani_long self, ani_long parent)

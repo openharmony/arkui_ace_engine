@@ -25,6 +25,7 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/token_theme/token_theme_storage.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/ani/ani_theme.h"
 #include "core/interfaces/native/ani/ani_theme_module.h"
 #include "core/interfaces/native/ani/resource_ani_modifier.h"
@@ -430,37 +431,9 @@ void RemoveThemeInNative(ani_env* env, ani_int withThemeId)
     AniThemeScope::RemoveAniTheme(themeScopeId);
 }
 
-void SetDefaultTheme(ani_env* env, ani_array colorArray, ani_boolean isDark)
+void SetDefaultTheme(ani_env* env, const std::vector<ArkUI_Uint32>& colors, ani_boolean isDark)
 {
     auto isDarkValue = static_cast<bool>(isDark);
-    ani_size length;
-    env->Array_GetLength(colorArray, &length);
-    if (length < TokenColors::TOTAL_NUMBER) {
-        LOGW("colorArray incorrect in SetDefaultTheme");
-    }
-    std::vector<uint32_t> colors;
-    auto basisTheme = TokenThemeStorage::GetInstance()->ObtainSystemTheme();
-    for (size_t i = 0; i < TokenColors::TOTAL_NUMBER; i++) {
-        // type ResourceColor = number | string | Resource
-        ani_ref value;
-        auto status = env->Array_Get(colorArray, i, &value);
-        if (status != ANI_OK) {
-            LOGW("SetDefaultTheme colorArray get index: %{public}d failed", i);
-            continue;
-        }
-        Color color;
-        RefPtr<ResourceObject> resObj;
-        bool isColorAvailable = false;
-        if (!ResourceAniModifier::ParseAniColor(env, static_cast<ani_object>(value), color, resObj)) {
-            if (basisTheme) {
-                color = basisTheme->Colors()->GetByIndex(i);
-                isColorAvailable = true;
-            }
-        } else {
-            isColorAvailable = true;
-        }
-        colors.push_back(color.GetValue());
-    }
     NodeModifier::GetThemeModifier()->setDefaultTheme(colors.data(), isDarkValue);
 }
 
@@ -487,22 +460,18 @@ void SetThemeScopeId(ani_env* env, ani_int themeScopeId)
     AniThemeScope::aniCurrentTheme.swap(themeOpt);
 }
 
-void CreateAndBindTheme(ani_env* env, ani_int themeScopeId, ani_int themeId, ani_array colorsArg, ani_int colorMode,
-    ani_fn_object onThemeScopeDestroy)
+void CreateAndBindTheme(ani_env* env, ani_int themeScopeId, ani_int themeId, const std::vector<ArkUI_Uint32>& colorsArg,
+    ani_int colorMode, ani_fn_object onThemeScopeDestroy)
 {
     int32_t themeScopeIdValue = static_cast<int32_t>(themeScopeId);
     int32_t themeIdValue = static_cast<int32_t>(themeId);
     int32_t colorModeValue = static_cast<int32_t>(colorMode);
-    
-    if (!colorsArg) {
-        return;
-    }
 
-    std::vector<uint32_t> colors;
+    // std::vector<uint32_t> colors;
     std::vector<RefPtr<ResourceObject>> resObjs;
-    if (!AniThemeModule::HandleThemeColorsArg(env, colorsArg, colors, resObjs)) {
-        return;
-    }
+    // if (!AniThemeModule::HandleThemeColorsArg(env, colorsArg, colors, resObjs)) {
+    //     return;
+    // }
 
     if (!onThemeScopeDestroy) {
         return;
@@ -520,7 +489,7 @@ void CreateAndBindTheme(ani_env* env, ani_int themeScopeId, ani_int themeId, ani
     };
 
     auto themeModifier = NodeModifier::GetThemeModifier();
-    auto theme = themeModifier->createTheme(themeId, colors.data(), colorModeValue, static_cast<void*>(&resObjs));
+    auto theme = themeModifier->createTheme(themeId, colorsArg.data(), colorModeValue, static_cast<void*>(&resObjs));
     CHECK_NULL_VOID(theme);
     ArkUINodeHandle node = themeModifier->getWithThemeNode(themeScopeId);
     if (!node) {

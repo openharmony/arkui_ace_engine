@@ -21,7 +21,11 @@
 #include <string>
 
 #include <cstdint>
+#include <vector>
 #include "ani.h"
+#include "ui/base/referenced.h"
+#include "ui/properties/color.h"
+#include "ui/resource/resource_object.h"
 #include "core/common/ace_engine.h"
 #include "core/components_ng/render/adapter/component_snapshot.h"
 #include "core/components_ng/render/snapshot_param.h"
@@ -227,12 +231,12 @@ struct ArkUIAniCommonModifier {
     ArkUI_Uint32 (*getColorValueByNumber)(ArkUI_Uint32 src);
     void (*sendThemeToNative)(ani_env* env, ani_array colors, ani_int id);
     void (*removeThemeInNative)(ani_env* env, ani_int withThemeId);
-    void (*setDefaultTheme)(ani_env* env, ani_array colors, ani_boolean isDark);
+    void (*setDefaultTheme)(ani_env* env, const std::vector<ArkUI_Uint32>& colors, ani_boolean isDark);
     void (*updateColorMode)(ani_int colorMode);
     void (*restoreColorMode)();
     void (*setThemeScopeId)(ani_env* env, ani_int themeScopeId);
-    void (*createAndBindTheme)(ani_env* env, ani_int themeScopeId, ani_int themeId, ani_array colors, ani_int colorMode,
-        ani_fn_object onThemeScopeDestroy);
+    void (*createAndBindTheme)(ani_env* env, ani_int themeScopeId, ani_int themeId,
+        const std::vector<ArkUI_Uint32>& colors, ani_int colorMode, ani_fn_object onThemeScopeDestroy);
     void (*applyParentThemeScopeId)(ani_env* env, ani_long self, ani_long parent);
 };
 struct ArkUIAniCustomNodeModifier {
@@ -339,6 +343,21 @@ struct ArkUIAniComponentConentModifier {
     void (*addComponentToFrameNode)(ani_long node, ani_long content);
 };
 
+struct ArkUIResourceModifier {
+    uint32_t (*getColorById)(int32_t id, int32_t type, std::string bundleName, std::string moduleName);
+    bool (*parseAniColor)(ani_env* env, ani_object aniValue, OHOS::Ace::Color& color,
+        OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject>& resObj);
+};
+
+struct ArkUIColorModifier {
+    bool (*parseColorString)(std::string src, uint32_t& color);
+};
+
+struct ArkUIAniThemeModifier {
+    void (*obtainSystemColors)(std::vector<uint32_t>& systemColors);
+    int32_t (*getTokenColorsSize)();
+};
+
 struct ArkUIAniModifiers {
     ArkUI_Int32 version;
     const ArkUIAniImageModifier* (*getImageAniModifier)();
@@ -362,6 +381,9 @@ struct ArkUIAniModifiers {
     const ArkUIAniXComponentModifier* (*getArkUIAniXComponentModifier)();
     const ArkUIAniConditionScopeModifier* (*getArkUIAniConditionScopeModifier)();
     const ArkUIAniComponentConentModifier* (*getArkUIAniComponentConentModifier)();
+    const ArkUIResourceModifier* (*getResourceModifier)();
+    const ArkUIColorModifier* (*getColorModifier)();
+    const ArkUIAniThemeModifier* (*getAniThemeModifier)();
 };
 
 __attribute__((visibility("default"))) const ArkUIAniModifiers* GetArkUIAniModifiers(void);

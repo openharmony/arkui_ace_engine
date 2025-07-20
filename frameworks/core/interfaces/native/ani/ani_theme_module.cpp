@@ -84,33 +84,33 @@ ColorMode AniThemeModule::MapAniColorModeToColorMode(int32_t aniColorMode)
     return ColorMode::COLOR_MODE_UNDEFINED;
 }
 
-bool AniThemeModule::HandleThemeColorsArg(
-    ani_env* env, ani_array colorsArg, std::vector<uint32_t>& colors, std::vector<RefPtr<ResourceObject>>& resObjs)
-{
-    auto basisTheme = TokenThemeStorage::GetInstance()->GetDefaultTheme();
-    if (!basisTheme) {
-        basisTheme = TokenThemeStorage::GetInstance()->ObtainSystemTheme();
-    }
-    if (!basisTheme) {
-        return false;
-    }
-    for (size_t i = 0; i < TokenColors::TOTAL_NUMBER; i++) {
-        Color color;
-        ani_ref colorParams;
-        RefPtr<ResourceObject> resObj;
-        auto status = env->Array_Get(colorsArg, i, &colorParams);
-        if (status != ANI_OK) {
-            LOGW("HandleThemeColorsArg colorsArg get index: %{public}d failed", i);
-            continue;
-        }
-        if (!ResourceAniModifier::ParseAniColor(env, static_cast<ani_object>(colorParams), color, resObj)) {
-            color = basisTheme->Colors()->GetByIndex(i);
-        }
-        resObjs.push_back(resObj);
-        colors.push_back(static_cast<uint32_t>(color.GetValue()));
-    }
-    return true;
-}
+// bool AniThemeModule::HandleThemeColorsArg(
+//     ani_env* env, ani_array colorsArg, std::vector<uint32_t>& colors, std::vector<RefPtr<ResourceObject>>& resObjs)
+// {
+//     auto basisTheme = TokenThemeStorage::GetInstance()->GetDefaultTheme();
+//     if (!basisTheme) {
+//         basisTheme = TokenThemeStorage::GetInstance()->ObtainSystemTheme();
+//     }
+//     if (!basisTheme) {
+//         return false;
+//     }
+//     for (size_t i = 0; i < TokenColors::TOTAL_NUMBER; i++) {
+//         Color color;
+//         ani_ref colorParams;
+//         RefPtr<ResourceObject> resObj;
+//         auto status = env->Array_Get(colorsArg, i, &colorParams);
+//         if (status != ANI_OK) {
+//             LOGW("HandleThemeColorsArg colorsArg get index: %{public}d failed", i);
+//             continue;
+//         }
+//         if (!ResourceAniModifier::ParseAniColor(env, static_cast<ani_object>(colorParams), color, resObj)) {
+//             color = basisTheme->Colors()->GetByIndex(i);
+//         }
+//         resObjs.push_back(resObj);
+//         colors.push_back(static_cast<uint32_t>(color.GetValue()));
+//     }
+//     return true;
+// }
 
 ArkUINodeHandle AniThemeModule::CreateWithThemeNode(int32_t themeScopeId)
 {

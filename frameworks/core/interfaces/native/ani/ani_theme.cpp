@@ -23,7 +23,9 @@
 
 #include "base/log/log_wrapper.h"
 #include "bridge/arkts_frontend/arkts_ani_utils.h"
-#include "core/interfaces/native/ani/resource_ani_modifier.h"
+#include "core/common/resource/resource_manager.h"
+#include "core/common/resource/resource_object.h"
+#include "core/interfaces/native/ani/ani_utils.h"
 
 namespace OHOS::Ace::NG {
 std::map<int32_t, AniTheme> AniThemeScope::aniThemes = {};
@@ -57,7 +59,7 @@ Color AniThemeColors::ConvertAniValueToColor(ani_object aniValue) const
     }
     Color color;
     RefPtr<ResourceObject> resObj;
-    ResourceAniModifier::ParseAniColor(env, aniValue, color, resObj);
+    AniUtils::ParseAniColor(env, aniValue, color, resObj);
     return color;
 }
 

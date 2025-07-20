@@ -13,13 +13,25 @@
  * limitations under the License.
  */
 
-#ifndef FRAMEWORKS_CORE_INTERFACES_NATIVE_ANI_RESOURCE_ANI_MODIFIER_H
-#define FRAMEWORKS_CORE_INTERFACES_NATIVE_ANI_RESOURCE_ANI_MODIFIER_H
-
-#include "core/interfaces/ani/ani_api.h"
+#include "color_ani_modifier.h"
+#include "ui/properties/color.h"
 
 namespace OHOS::Ace::NG {
-const ArkUIResourceModifier* GetResourceAniModifier();
-} // namespace OHOS::Ace::NG
+bool ParseColorString(std::string src, uint32_t& color)
+{
+    Color colorObj;
+    if (!Color::ParseColorString(src, colorObj)) {
+        return false;
+    }
+    color = colorObj.GetValue();
+    return true;
+}
 
-#endif
+const ArkUIColorModifier* GetColorAniModifier()
+{
+    static const ArkUIColorModifier impl = {
+        .parseColorString = OHOS::Ace::NG::ParseColorString,
+    };
+    return &impl;
+}
+} // namespace OHOS::Ace::NG

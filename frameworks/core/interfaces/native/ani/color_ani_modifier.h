@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-#ifndef FRAMEWORKS_CORE_INTERFACES_NATIVE_ANI_RESOURCE_ANI_MODIFIER_H
-#define FRAMEWORKS_CORE_INTERFACES_NATIVE_ANI_RESOURCE_ANI_MODIFIER_H
+#ifndef FRAMEWORKS_CORE_INTERFACES_NATIVE_ANI_COLOR_ANI_MODIFIER_H
+#define FRAMEWORKS_CORE_INTERFACES_NATIVE_ANI_COLOR_ANI_MODIFIER_H
 
 #include "core/interfaces/ani/ani_api.h"
 
 namespace OHOS::Ace::NG {
-const ArkUIResourceModifier* GetResourceAniModifier();
+const ArkUIColorModifier* GetColorAniModifier();
 } // namespace OHOS::Ace::NG
 
 #endif

@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 
-import { ResourceColor, Color } from 'arkui/component';
+import { ResourceColor } from 'arkui/component';
+import { Color } from 'arkui/component/enums';
 import { ArkResourcesHelper } from 'arkui/handwritten/theme/ArkResourcesHelper';
 import { BrandColors, ArkThemeResource } from 'arkui/handwritten/theme';
 import { Resource } from 'global.resource';

@@ -20,12 +20,15 @@
 #include <vector>
 
 #include "ani.h"
+#include "ui/properties/color.h"
+#include "core/common/resource/resource_object.h"
 
 namespace OHOS::Ace::NG {
 class AniUtils {
 public:
     static std::string ANIStringToStdString(ani_env* env, ani_string aniStr);
     static ani_object CreateDouble(ani_env* env, double value);
+    static bool ParseAniColor(ani_env* env, ani_object aniValue, Color& color, RefPtr<ResourceObject>& resObj);
 };
 } // namespace OHOS::Ace::NG
 
