@@ -57,6 +57,7 @@ const ArkUIAniModifiers* GetArkUIAniModifiers()
         .getArkUIAniShapeModifier = OHOS::Ace::NG::GetShapeAniModifier,
         .getStateMgmtAniModifier = OHOS::Ace::NG::GetStateMgmtAniModifier,
         .getArkUIAniXComponentModifier = OHOS::Ace::NG::GetXComponentAniModifier,
+        .getRichEditorAniModifier = OHOS::Ace::NG::GetRichEditorAniModifier
     };
     return &impl;
 }
