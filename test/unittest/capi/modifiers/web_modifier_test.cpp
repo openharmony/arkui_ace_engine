@@ -1915,8 +1915,8 @@ HWTEST_F(WebModifierTest, onFirstContentfulPaintTest, TestSize.Level1)
     auto checkCallback = [](const Ark_Int32 resourceId, const Ark_OnFirstContentfulPaintEvent parameter) {
         checkEvent = CheckEvent{
             .resourceId = resourceId,
-            .navigationStartTick = Converter::Convert<int32_t>(parameter.navigationStartTick),
-            .firstContentfulPaintMs = Converter::Convert<int32_t>(parameter.firstContentfulPaintMs)
+            .navigationStartTick = Converter::Convert<int64_t>(parameter.navigationStartTick),
+            .firstContentfulPaintMs = Converter::Convert<int64_t>(parameter.firstContentfulPaintMs)
         };
     };
 
@@ -1955,9 +1955,9 @@ HWTEST_F(WebModifierTest, onFirstMeaningfulPaintTest, TestSize.Level1)
     auto checkCallback = [](const Ark_Int32 resourceId, const Ark_FirstMeaningfulPaint parameter) {
         checkEvent = CheckEvent{
             .resourceId = resourceId,
-            .navigationStartTime = Converter::OptConvert<int32_t>(parameter.navigationStartTime)
+            .navigationStartTime = Converter::OptConvert<int64_t>(parameter.navigationStartTime)
                 .value_or(0),
-            .firstMeaningfulPaintTime = Converter::OptConvert<int32_t>(parameter.firstMeaningfulPaintTime)
+            .firstMeaningfulPaintTime = Converter::OptConvert<int64_t>(parameter.firstMeaningfulPaintTime)
                 .value_or(0)
         };
     };
@@ -2005,13 +2005,13 @@ HWTEST_F(WebModifierTest, onLargestContentfulPaintTest, TestSize.Level1)
     auto checkCallback = [](const Ark_Int32 resourceId, const Ark_LargestContentfulPaint parameter) {
         checkEvent = CheckEvent{
             .resourceId = resourceId,
-            .navigationStartTime = Converter::OptConvert<int32_t>(parameter.navigationStartTime).value_or(0),
-            .largestImagePaintTime = Converter::OptConvert<int32_t>(parameter.largestImagePaintTime).value_or(0),
-            .largestTextPaintTime = Converter::OptConvert<int32_t>(parameter.largestTextPaintTime).value_or(0),
-            .largestImageLoadStartTime = Converter::OptConvert<int32_t>(parameter.largestImageLoadStartTime)
+            .navigationStartTime = Converter::OptConvert<int64_t>(parameter.navigationStartTime).value_or(0),
+            .largestImagePaintTime = Converter::OptConvert<int64_t>(parameter.largestImagePaintTime).value_or(0),
+            .largestTextPaintTime = Converter::OptConvert<int64_t>(parameter.largestTextPaintTime).value_or(0),
+            .largestImageLoadStartTime = Converter::OptConvert<int64_t>(parameter.largestImageLoadStartTime)
                 .value_or(0),
-            .largestImageLoadEndTime = Converter::OptConvert<int32_t>(parameter.largestImageLoadEndTime).value_or(0),
-            .imageBPP = Converter::OptConvert<double>(parameter.imageBPP).value_or(2)
+            .largestImageLoadEndTime = Converter::OptConvert<int64_t>(parameter.largestImageLoadEndTime).value_or(0),
+            .imageBPP = Converter::OptConvert<float>(parameter.imageBPP).value_or(2)
         };
     };
 

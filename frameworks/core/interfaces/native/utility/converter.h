@@ -46,6 +46,7 @@
 #include "core/components_ng/pattern/navigation/navigation_options.h"
 #include "core/components_ng/pattern/navigation/navigation_transition_proxy.h"
 #include "core/components_ng/pattern/overlay/level_order.h"
+#include "core/components/dialog/dialog_properties.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
@@ -271,10 +272,7 @@ namespace Converter {
     }
 
     template<>
-    inline std::string Convert(const Ark_String& src)
-    {
-        return (src.chars != nullptr) ? std::string(src.chars, src.length) : "";
-    }
+    std::string Convert(const Ark_String& src);
 
     template<>
     inline std::string Convert(const Ark_Buffer& src)
@@ -352,8 +350,7 @@ namespace Converter {
     template<>
     inline ImageSourceInfo Convert(const Ark_String& value)
     {
-        auto str = value.chars ? value.chars : "";
-        return ImageSourceInfo(str);
+        return ImageSourceInfo(Convert<std::string>(value));
     }
 
     template<>
@@ -480,6 +477,7 @@ namespace Converter {
     template<> Ark_CharPtr Convert(const Ark_Undefined& src);
     template<> BlurOption Convert(const Ark_BlurOptions& src);
     template<> BlurStyleOption Convert(const Ark_BackgroundBlurStyleOptions& src);
+    template<> BlurStyleOption Convert(const Ark_ForegroundBlurStyleOptions& src);
     template<> BorderColorProperty Convert(const Ark_EdgeColors& src);
     template<> BorderColorProperty Convert(const Ark_LocalizedEdgeColors& src);
     template<> BorderColorProperty Convert(const Ark_ResourceColor& src);
@@ -626,6 +624,7 @@ namespace Converter {
     template<> std::pair<Dimension, Dimension> Convert(const Ark_Position& src);
     template<> std::pair<Dimension, Dimension> Convert(const Ark_Tuple_Dimension_Dimension& src);
     template<> std::pair<std::optional<Color>, Dimension> Convert(const Ark_ColorStop& src);
+    template<> std::pair<std::optional<Dimension>, std::optional<Dimension>> Convert(const Ark_Position& src);
     template<> std::set<SourceTool> Convert(const Array_SourceTool& src);
     template<> std::set<std::string> Convert(const Array_UniformDataType& src);
     template<> std::string Convert(const Ark_CommandPath& src);
@@ -640,6 +639,8 @@ namespace Converter {
     template<> std::vector<uint32_t> Convert(const Array_LayoutSafeAreaType& src);
     template<> uint32_t Convert(const Ark_LayoutSafeAreaEdge& src);
     template<> uint32_t Convert(const Ark_LayoutSafeAreaType& src);
+    template<> OverlayOptions Convert(const Ark_OverlayOptions& src);
+    template<> BindSheetDismissReason Convert(const Ark_DismissReason& src);
 
     // SORTED_SECTION: No multiline declarations, please!
     template<> void AssignCast(std::optional<AIImageQuality>& dst, const Ark_ResolutionQuality& src);
@@ -836,6 +837,8 @@ namespace Converter {
     void AssignCast(std::optional<SharedTransitionEffectType>& dst, const Ark_SharedTransitionEffectType& src);
     template<> void AssignCast(std::optional<ShapePoint>& dst, const Opt_ShapePoint& src);
     template<> void AssignCast(std::optional<double>& dst, const Opt_LevelOrder& src);
+    template<> void AssignCast(std::optional<LevelMode>& dst, const Ark_LevelMode& src);
+    template<> void AssignCast(std::optional<ImmersiveMode>& dst, const Ark_ImmersiveMode& src);
 
     template<typename From>
     std::optional<decltype(From().value)> GetOpt(const From& src)

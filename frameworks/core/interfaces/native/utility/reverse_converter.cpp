@@ -751,8 +751,10 @@ void AssignArkValue(Ark_RichEditorSymbolSpanStyle& dst, const SymbolSpanStyle& s
 {
     dst.fontSize = Converter::ArkUnion<Opt_Union_Number_String_Resource, Ark_Number>(src.fontSize);
     dst.fontWeight = Converter::ArkUnion<Opt_Union_Number_FontWeight_String, Ark_Number>(src.fontWeight);
-    dst.effectStrategy.value = static_cast<Ark_SymbolEffectStrategy>(src.effectStrategy);
-    dst.renderingStrategy.value = static_cast<Ark_SymbolRenderingStrategy>(src.renderingStrategy);
+    auto arkEffectStrategy = static_cast<Ark_SymbolEffectStrategy>(src.effectStrategy);
+    dst.effectStrategy = Converter::ArkValue<Opt_SymbolEffectStrategy>(arkEffectStrategy);
+    auto arkRenderingStrategy = static_cast<Ark_SymbolRenderingStrategy>(src.renderingStrategy);
+    dst.renderingStrategy = Converter::ArkValue<Opt_SymbolRenderingStrategy>(arkRenderingStrategy);
     if (src.symbolColor.size()) {
         std::vector<Ark_ResourceColor> colors;
         std::stringstream symbolColors(src.symbolColor);

@@ -15,7 +15,7 @@
 
 // TODO: the real chai exports 'assert', but 'assert' is still a keyword in ArkTS
 import { Assert, suite, test } from "@koalaui/harness"
-import { MarkableQueue, markableQueue } from "@koalaui/common"
+import { MarkableQueue, markableQueue } from "../../src/common/MarkableQueue"
 
 const collector = new Array<string>()
 

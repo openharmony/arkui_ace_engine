@@ -28,7 +28,7 @@ import { componentSnapshot } from "@ohos/arkui/componentSnapshot"
 import { dragController } from "@ohos/arkui/dragController"
 import { focusController } from "@ohos/arkui/focusController"
 import { Frame } from "arkui/Graphics"
-import { KeyEvent, KeyframeAnimateParam, KeyframeState, PopupCommonOptions } from "arkui/component/common"
+import { KeyEvent, KeyframeAnimateParam, KeyframeState, PopupCommonOptions, MenuOptions } from "arkui/component/common"
 import { TextMenuOptions } from "arkui/component/textCommon"
 import { Nullable, WidthBreakpoint, HeightBreakpoint } from "arkui/component/enums"
 import { KeyProcessingMode } from "arkui/component/focus"
@@ -46,7 +46,7 @@ import { LocalStorage } from 'arkui/stateManagement/storage/localStorage';
 import { AsyncCallback, CustomBuilder, DragItemInfo, Callback } from 'arkui/component'
 import { Router as RouterExt } from 'arkui/handwritten';
 import { ComponentContent } from "arkui/ComponentContent"
-import { ComputableState } from '@koalaui/runtime'
+import { ComputableState, IncrementalNode } from '@koalaui/runtime'
 import { PeerNode } from 'arkui/PeerNode'
 import { ArkUIAniModule } from 'arkui.ani';
 import { UIContextUtil } from 'arkui/handwritten/UIContextUtil';
@@ -138,7 +138,7 @@ export class Router {
         throw Error("getStateByUrl not implemented in Router!");
     }
 
-    public getStateRoot(): ComputableState<PeerNode> {
+    public getStateRoot(): ComputableState<IncrementalNode> {
         throw Error("getStateRoot not implemented in Router!");
     }
 }
@@ -244,6 +244,11 @@ export class DragController {
 export interface OverlayManagerOptions {
     renderRootOverlay?: boolean;
     enableBackPressedEvent?: boolean;
+}
+
+class OverlayManagerOptionsInner implements OverlayManagerOptions {
+    renderRootOverlay?: boolean = true;
+    enableBackPressedEvent?: boolean = false;
 }
 
 export class ContextMenuController {
@@ -361,6 +366,14 @@ export class PromptAction {
         throw Error("presentCustomDialog not implemented in PromptAction!")
     }
 
+    getTopOrder(): LevelOrder {
+        throw Error("getTopOrder not implemented in PromptAction!")
+    }
+
+    getBottomOrder(): LevelOrder {
+        throw Error("getBottomOrder not implemented in PromptAction!")
+    }
+
     openPopup(content: ComponentContent, target: TargetInfo, options?: PopupCommonOptions): Promise<void> {
         throw Error("openPopup not implemented in PromptAction!")
     }
@@ -371,6 +384,18 @@ export class PromptAction {
 
     closePopup(content: ComponentContent): Promise<void> {
         throw Error("closePopup not implemented in PromptAction!")
+    }
+
+    openMenu(content: ComponentContent, target: TargetInfo, options?: MenuOptions): Promise<void> {
+        throw Error("openMenu not implemented in PromptAction!")
+    }
+
+    updateMenu(content: ComponentContent, options: MenuOptions, partialUpdate?: boolean): Promise<void> {
+        throw Error("updateMenu not implemented in PromptAction!")
+    }
+
+    closeMenu(content: ComponentContent): Promise<void> {
+        throw Error("closeMenu not implemented in PromptAction!")
     }
 }
 
@@ -601,6 +626,18 @@ export class UIObserver {
     public off(type: string, callback?: ((param: object) => void)): void {
         if (this.observerImpl) {
             this.observerImpl!.off(type, callback);
+        }
+    }
+    
+    public on(type: string, options: uiObserver.NavDestinationSwitchObserverOptions, callback: ((param: object) => void)): void {
+        if (this.observerImpl) {
+            this.observerImpl!.on(type, options, callback);
+        }
+    }
+
+    public off(type: string, options: uiObserver.NavDestinationSwitchObserverOptions, callback?: ((param: object) => void)): void {
+        if (this.observerImpl) {
+            this.observerImpl!.off(type, options, callback);
         }
     }
 }

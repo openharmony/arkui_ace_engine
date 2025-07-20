@@ -36,6 +36,12 @@ export class SurfaceRectAniInternal implements SurfaceRect {
     }
 }
 
+export class TypedXComponentPeerInternal extends ArkXComponentPeer {
+    public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+        super(peerPtr, id, name, flags)
+    }
+}
+
 function hookSetXComponentOptions(component: ArkXComponentComponent,
     value: XComponentParameter | XComponentOptions | NativeXComponentParameters): void {
     if (TypeChecker.isXComponentOptions(value, true, false, true, true)) {

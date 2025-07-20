@@ -15,7 +15,7 @@
 
 import { LabelPair } from '../../../generated/peers/LabelPair';
 import { BlockStatement, CatchClause, Statement, TryStatement } from '../../../generated';
-import { isSameNativeObject } from '../peers/ArktsObject';
+import { isSameNativeObject } from '../../../arkts-api/peers/ArktsObject';
 import { attachModifiers, updateThenAttach } from '../utilities/private';
 
 export function updateTryStatement(
@@ -30,8 +30,8 @@ export function updateTryStatement(
         isSameNativeObject(block, original.block) &&
         isSameNativeObject(catchClauses, original.catchClauses) &&
         isSameNativeObject(finalizer, original.finallyBlock)
-        /* TODO: no getter for finalizerInsertionsLabelPair */
-        /* TODO: no getter for finalizerInsertionsStatement */
+        /* Improve: no getter for finalizerInsertionsLabelPair */
+        /* Improve: no getter for finalizerInsertionsStatement */
     ) {
         return original;
     }

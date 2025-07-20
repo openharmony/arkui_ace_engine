@@ -23,12 +23,13 @@ import { LocalStorage } from '@ohos.arkui.stateManagement';
 import { DrawContext } from "arkui/Graphics"
 import { AnimatableArithmetic, DrawModifier, AsyncCallback, Callback, DragItemInfo, ResourceColor } from "arkui/component"
 import { ArkCustomComponent } from "arkui/ArkCustomComponent"
-import { WaterFlowOptions,WaterFlowSections, XComponentControllerCallbackInternal } from "arkui/component"
+import { WaterFlowOptions,WaterFlowSections, XComponentControllerCallbackInternal, OverlayOptions } from "arkui/component"
 import { ChildrenMainSize } from "arkui/component"
 import { HookDragInfo } from "arkui/handwritten"
 import { dragController } from "@ohos/arkui/dragController"
 import { componentSnapshot } from "@ohos/arkui/componentSnapshot"
 import { DrawableDescriptor } from "@ohos.arkui.drawableDescriptor"
+import { uiObserver }  from "@ohos/arkui/observer"
 
 export class ArkUIAniModule {
     static {
@@ -50,6 +51,10 @@ export class ArkUIAniModule {
     native static _Common_GetFocused_InstanceId(): KInt
     native static _Common_GetSharedLocalStorage(): LocalStorage
     native static _CustomNode_Construct(id: KInt, component: ArkCustomComponent): KPointer
+    native static _CustomNode_QueryNavigationInfo(ptr: KPointer): uiObserver.NavigationInfo
+    native static _CustomNode_QueryNavDestinationInfo(ptr: KPointer): uiObserver.NavDestinationInfo
+    native static _CustomNode_QueryNavDestinationInfo0(ptr: KPointer, isInner: boolean): uiObserver.NavDestinationInfo
+    native static _CustomNode_QueryRouterPageInfo(ptr: KPointer): uiObserver.RouterPageInfo
     native static _BuilderProxyNode_Construct(id: KInt): KPointer
     native static _ContentSlot_construct(id: KInt): KPointer
     native static _ContentSlotInterface_setContentSlotOptions(slot: KPointer, content: KPointer): void
@@ -59,6 +64,46 @@ export class ArkUIAniModule {
     native static _SetWaterFlowOptions(ptr: KPointer, options: WaterFlowOptions): void
     native static _SetListChildrenMainSize(ptr: KPointer, value: ChildrenMainSize): void
     native static _LazyForEachNode_Construct(id: KInt): KPointer
+    native static _SetOverlay_ComponentContent(node: KPointer, buildNodePtr: KPointer, options?: OverlayOptions): void
+
+    // for web
+    native static _TransferScreenCaptureHandlerToStatic(ptr: KPointer, value: Object | undefined | null): boolean
+    native static _TransferJsGeolocationToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
+    native static _TransferJsResultToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
+    native static _TransferEventResultToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
+    native static _TransferFileSelectorResultToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
+    native static _TransferFileSelectorParamToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
+    native static _TransferWebContextMenuResultToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
+    native static _TransferWebContextMenuParamToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
+    native static _TransferHttpAuthHandlerToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
+    native static _TransferWebResourceReponseToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
+    native static _TransferWebResourceRequestToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
+    native static _TransferConsoleMessageToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
+    native static _TransferDataResubmissionHandlerToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
+    native static _TransferClientAuthenticationHandlerToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
+    native static _TransferSslErrorHandlerToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
+    native static _TransferPermissionRequestToStatic(ptr: KPointer, value: Object | undefined | null): boolean
+    native static _TransferControllerHandlerToStatic(ptr: KPointer, value: Object | undefined | null): boolean
+    native static _TransferWebKeyboardControllerToStatic(ptr: KPointer, value: Object | undefined | null): boolean
+
+    native static _TransferScreenCaptureHandlerToDynamic(ptr: KPointer): Object | undefined | null
+    native static _TransferJsGeolocationToDynamic(ptr: KPointer) : Object | undefined | null
+    native static _TransferJsResultToDynamic(ptr: KPointer) : Object | undefined | null
+    native static _TransferEventResultToDynamic(ptr: KPointer) : Object | undefined | null
+    native static _TransferFileSelectorResultToDynamic(ptr: KPointer) : Object | undefined | null
+    native static _TransferFileSelectorParamToDynamic(ptr: KPointer) : Object | undefined | null
+    native static _TransferWebContextMenuResultToDynamic(ptr: KPointer) : Object | undefined | null
+    native static _TransferWebContextMenuParamToDynamic(ptr: KPointer) : Object | undefined | null
+    native static _TransferHttpAuthHandlerToDynamic(ptr: KPointer) : Object | undefined | null
+    native static _TransferWebResourceReponseToDynamic(ptr: KPointer) : Object | undefined | null
+    native static _TransferWebResourceRequestToDynamic(ptr: KPointer) : Object | undefined | null
+    native static _TransferConsoleMessageToDynamic(ptr: KPointer) : Object | undefined | null
+    native static _TransferDataResubmissionHandlerToDynamic(ptr: KPointer) : Object | undefined | null
+    native static _TransferClientAuthenticationHandlerToDynamic(ptr: KPointer) : Object | undefined | null
+    native static _TransferSslErrorHandlerToDynamic(ptr: KPointer) : Object | undefined | null
+    native static _TransferPermissionRequestToDynamic(ptr: KPointer) : Object | undefined | null
+    native static _TransferControllerHandlerToDynamic(ptr: KPointer) : Object | undefined | null
+    native static _TransferWebKeyboardControllerToDynamic(ptr: KPointer) : Object | undefined | null
 
     // for Drag
     native static _DragEvent_Set_Data(ptr: KLong, data : unifiedDataChannel.UnifiedData) : void
@@ -115,7 +160,7 @@ export class ArkUIAniModule {
     native static _PopViewStackProcessor(): KPointer
 
     native static _DeleteViewStackProcessor(ptr: KPointer): void
-    
+
     native static _BackgroundImage_PixelMap(ptr: KPointer, pixelmap: image.PixelMap, repeat: KInt): void
     // for ImageSpan
     native static _ImageSpan_Set_PixelMap(ptr: KPointer, pixelmap: image.PixelMap): void
@@ -148,12 +193,17 @@ export class ArkUIAniModule {
     native static _Env_GetAccessibilityEnabled(): boolean
     native static _Env_GetLayoutDirection(): string
     native static _Env_GetLanguageCode(): string
-    
+
     // for XComponent
     native static _XComponent_SetSurfaceCallback(ptr: KPointer, callback: XComponentControllerCallbackInternal): void;
+    // for ComponentContent
+    native static _RemoveComponent_FromFrameNode(ptr: KPointer, content: KPointer): void
+    native static _AddComponent_ToFrameNode(ptr: KPointer, content: KPointer): void
 
     native static _CheckIsUIThread(id: KInt): KBoolean
     native static _IsDebugMode(id: KInt): KBoolean
     native static _OnMeasure_InnerMeasure(ptr: KPointer): void
     native static _OnLayout_InnerLayout(ptr: KPointer): void
+    native static _SetParallelScoped(parallel: boolean): void
+    native static _ConditionScopeNode_Construct(id: KInt): KPointer;
 }

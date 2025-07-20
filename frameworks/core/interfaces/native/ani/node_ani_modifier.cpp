@@ -15,6 +15,7 @@
 
 #include "animation_ani_modifier.h"
 #include "common_ani_modifier.h"
+#include "component_content_ani_modifier.h"
 #include "component_snapshot_ani_modifier.h"
 #include "content_slot_ani_modifier.h"
 #include "image_ani_modifier.h"
@@ -32,6 +33,7 @@
 #include "stateMgmt_ani_modifier.h"
 #include "xcomponent_ani_modifier.h"
 #include "lazy_for_each_node_ani_modifier.h"
+#include "condition_scope_ani_modifier.h"
 
 extern "C" {
 const ArkUIAniModifiers* GetArkUIAniModifiers()
@@ -53,11 +55,13 @@ const ArkUIAniModifiers* GetArkUIAniModifiers()
         .getInteropAniModifier = OHOS::Ace::NG::GetInteropAniModifier,
         .getDragControllerAniModifier = OHOS::Ace::NG::GetDragControllerAniModifier,
         .getImageSpanAniModifier = OHOS::Ace::NG::GetImageSpanAniModifier,
+        .getRichEditorAniModifier = OHOS::Ace::NG::GetRichEditorAniModifier
         .getArkUIAniVideoModifier = OHOS::Ace::NG::GetVideoAniModifier,
         .getArkUIAniShapeModifier = OHOS::Ace::NG::GetShapeAniModifier,
         .getStateMgmtAniModifier = OHOS::Ace::NG::GetStateMgmtAniModifier,
         .getArkUIAniXComponentModifier = OHOS::Ace::NG::GetXComponentAniModifier,
-        .getRichEditorAniModifier = OHOS::Ace::NG::GetRichEditorAniModifier
+        .getArkUIAniConditionScopeModifier = OHOS::Ace::NG::GetConditionScopeAniModifier,
+        .getArkUIAniComponentConentModifier = OHOS::Ace::NG::GetArkUIAniComponentConentModifier,
     };
     return &impl;
 }

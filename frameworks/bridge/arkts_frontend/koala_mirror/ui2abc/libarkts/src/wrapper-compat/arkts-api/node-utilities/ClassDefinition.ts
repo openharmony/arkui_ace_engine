@@ -21,7 +21,7 @@ import {
     TSTypeParameterDeclaration,
     TSTypeParameterInstantiation,
 } from '../../../generated';
-import { isSameNativeObject } from '../peers/ArktsObject';
+import { isSameNativeObject } from '../../../arkts-api/peers/ArktsObject';
 import { AstNode } from '../peers/AstNode';
 import { MethodDefinition } from '../types';
 import { updateThenAttach } from '../utilities/private';
@@ -49,7 +49,7 @@ export function updateClassDefinition(
         isSameNativeObject(body, original.body) &&
         isSameNativeObject(modifiers, original.modifiers) &&
         isSameNativeObject(flags, classDefinitionFlags(original))
-        /* TODO: no getter for ctor */
+        /* Improve: no getter for ctor */
     ) {
         return original;
     }

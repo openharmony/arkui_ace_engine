@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 import { LocalStorage } from './localStorage';
+import { InteropAppStorage } from '../interop/interopStorage';
 
 /**
  * AppStorage singleton is class of @see LocalStorage for
@@ -21,4 +22,4 @@ import { LocalStorage } from './localStorage';
  * @syscap SystemCapability.ArkUI.ArkUI.Full
  * @since 20
  */
-export const AppStorage: LocalStorage = new LocalStorage();
+export const AppStorage: LocalStorage = new InteropAppStorage();

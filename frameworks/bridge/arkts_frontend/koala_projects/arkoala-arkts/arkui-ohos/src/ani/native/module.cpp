@@ -38,6 +38,7 @@
 #include "stateMgmt/stateMgmt_module.h"
 #include "shape/shape_module_methods.h"
 #include "xcomponent/xcomponent_module_methods.h"
+#include "condition_scope/condition_scope.h"
 
 ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
 {
@@ -84,9 +85,209 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetWebControllerControllerHandler)
         },
         ani_native_function {
+            "_TransferScreenCaptureHandlerToStatic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferScreenCaptureHandlerToStatic)
+        },
+        ani_native_function {
+            "_TransferJsGeolocationToStatic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferJsGeolocationToStatic)
+        },
+        ani_native_function {
+            "_TransferJsResultToStatic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferJsResultToStatic)
+        },
+        ani_native_function {
+            "_TransferEventResultToStatic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferEventResultToStatic)
+        },
+        ani_native_function {
+            "_TransferFileSelectorResultToStatic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferFileSelectorResultToStatic)
+        },
+        ani_native_function {
+            "_TransferFileSelectorParamToStatic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferFileSelectorParamToStatic)
+        },
+        ani_native_function {
+            "_TransferWebContextMenuResultToStatic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferWebContextMenuResultToStatic)
+        },
+        ani_native_function {
+            "_TransferWebContextMenuParamToStatic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferWebContextMenuParamToStatic)
+        },
+        ani_native_function {
+            "_TransferHttpAuthHandlerToStatic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferHttpAuthHandlerToStatic)
+        },
+        ani_native_function {
+            "_TransferWebResourceReponseToStatic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferWebResourceReponseToStatic)
+        },
+        ani_native_function {
+            "_TransferWebResourceRequestToStatic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferWebResourceRequestToStatic)
+        },
+        ani_native_function {
+            "_TransferConsoleMessageToStatic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferConsoleMessageToStatic)
+        },
+        ani_native_function {
+            "_TransferDataResubmissionHandlerToStatic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferDataResubmissionHandlerToStatic)
+        },
+        ani_native_function {
+            "_TransferClientAuthenticationHandlerToStatic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferClientAuthenticationHandlerToStatic)
+        },
+        ani_native_function {
+            "_TransferSslErrorHandlerToStatic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferSslErrorHandlerToStatic)
+        },
+        ani_native_function {
+            "_TransferScreenCaptureHandlerToDynamic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferScreenCaptureHandlerToDynamic)
+        },
+        ani_native_function {
+            "_TransferJsGeolocationToDynamic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferJsGeolocationToDynamic)
+        },
+        ani_native_function {
+            "_TransferJsResultToDynamic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferJsResultToDynamic)
+        },
+        ani_native_function {
+            "_TransferEventResultToDynamic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferEventResultToDynamic)
+        },
+        ani_native_function {
+            "_TransferFileSelectorResultToDynamic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferFileSelectorResultToDynamic)
+        },
+        ani_native_function {
+            "_TransferFileSelectorParamToDynamic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferFileSelectorParamToDynamic)
+        },
+        ani_native_function {
+            "_TransferWebContextMenuResultToDynamic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferWebContextMenuResultToDynamic)
+        },
+        ani_native_function {
+            "_TransferWebContextMenuParamToDynamic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferWebContextMenuParamToDynamic)
+        },
+        ani_native_function {
+            "_TransferHttpAuthHandlerToDynamic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferHttpAuthHandlerToDynamic)
+        },
+        ani_native_function {
+            "_TransferWebResourceReponseToDynamic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferWebResourceReponseToDynamic)
+        },
+        ani_native_function {
+            "_TransferWebResourceRequestToDynamic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferWebResourceRequestToDynamic)
+        },
+        ani_native_function {
+            "_TransferConsoleMessageToDynamic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferConsoleMessageToDynamic)
+        },
+        ani_native_function {
+            "_TransferDataResubmissionHandlerToDynamic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferDataResubmissionHandlerToDynamic)
+        },
+        ani_native_function {
+            "_TransferClientAuthenticationHandlerToDynamic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferClientAuthenticationHandlerToDynamic)
+        },
+        ani_native_function {
+            "_TransferSslErrorHandlerToDynamic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferSslErrorHandlerToDynamic)
+        },
+        ani_native_function {
+            "_TransferPermissionRequestToStatic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferPermissionRequestToStatic)
+        },
+        ani_native_function {
+            "_TransferControllerHandlerToStatic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferControllerHandlerToStatic)
+        },
+        ani_native_function {
+            "_TransferWebKeyboardControllerToStatic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferWebKeyboardControllerToStatic)
+        },
+        ani_native_function {
+            "_TransferPermissionRequestToDynamic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferPermissionRequestToDynamic)
+        },
+        ani_native_function {
+            "_TransferControllerHandlerToDynamic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferControllerHandlerToDynamic)
+        },
+        ani_native_function {
+            "_TransferWebKeyboardControllerToDynamic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferWebKeyboardControllerToDynamic)
+        },
+        ani_native_function {
             "_ConvertUtils_ConvertFromPixelMapAni",
             "L@ohos/multimedia/image/image/PixelMap;:J",
             reinterpret_cast<void*>(OHOS::Ace::Ani::ConvertFromPixelMapAni)
+        },
+        ani_native_function {
+            "_CustomNode_QueryNavigationInfo",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::QueryNavigationInfo)
+        },
+        ani_native_function {
+            "_CustomNode_QueryNavDestinationInfo",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::QueryNavDestinationInfo)
+        },
+        ani_native_function {
+            "_CustomNode_QueryNavDestinationInfo0",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::QueryNavDestinationInfo0)
+        },
+        ani_native_function {
+            "_CustomNode_QueryRouterPageInfo",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::QueryRouterPageInfo)
         },
         ani_native_function {
             "_ConvertUtils_ConvertToPixelMapAni",
@@ -157,6 +358,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_Invalidate",
             "J:V",
             reinterpret_cast<void*>(OHOS::Ace::Ani::Invalidate)
+        },
+        ani_native_function {
+            "_SetOverlay_ComponentContent",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetOverlayComponentContent)
         },
         ani_native_function {
             "_SetWaterFlowOptions",
@@ -424,6 +630,16 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetXComponentControllerCallback)
         },
         ani_native_function {
+            "_RemoveComponent_FromFrameNode",
+            "JJ:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::RemoveComponentFromFrameNode)
+        },
+        ani_native_function {
+            "_AddComponent_ToFrameNode",
+            "JJ:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::AddComponentToFrameNode)
+        },
+        ani_native_function {
             "_CheckIsUIThread",
             "I:I",
             reinterpret_cast<void*>(OHOS::Ace::Ani::CheckIsUIThread)
@@ -442,6 +658,16 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_OnLayout_InnerLayout",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::OnLayoutInnerLayout)
+        },
+        ani_native_function {
+            "_SetParallelScoped",
+            "Z:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetParallelScoped)
+        },
+        ani_native_function {
+            "_ConditionScopeNode_Construct",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ConstructConditionScope)
         },
     };
 

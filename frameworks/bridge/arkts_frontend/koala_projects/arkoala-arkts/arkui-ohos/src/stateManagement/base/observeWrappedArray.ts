@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { IMutableKeyedStateMeta, IObservedObject, RenderIdType, WatchIdType } from '../decorator';
+import { IMutableKeyedStateMeta, IObservedObject, ISubscribedWatches, RenderIdType, WatchIdType } from '../decorator';
 import { SubscribedWatches } from '../decoratorImpl/decoratorWatch';
 import { ObserveSingleton } from './observeSingleton';
 import { FactoryInternal } from './iFactoryInternal';
@@ -24,7 +24,7 @@ final class CONSTANT {
     public static readonly OB_LENGTH = '__OB_LENGTH';
 }
 
-export class WrappedArray<T> extends Array<T> implements IObservedObject, ObserveWrappedBase {
+export class WrappedArray<T> extends Array<T> implements IObservedObject, ObserveWrappedBase, ISubscribedWatches {
     public store_: Array<T>;
     private meta_: IMutableKeyedStateMeta;
     // support for @Watch
@@ -141,6 +141,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
         this.store_.extendTo(arrayLength, initialValue);
         this.meta_.fireChange(CONSTANT.OB_LENGTH);
         this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
+        this.executeOnSubscribingWatches('extendTo');
     }
 
     /**
@@ -152,6 +153,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
         this.store_.shrinkTo(arrayLength);
         this.meta_.fireChange(CONSTANT.OB_LENGTH);
         this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
+        this.executeOnSubscribingWatches('shrinkTo');
     }
 
     /**

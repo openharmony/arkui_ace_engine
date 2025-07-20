@@ -1,0 +1,28 @@
+{
+    "extends": "@koalaui/build-common/tsconfig.json",
+    "include": [
+        "./src/**/*.ts",
+    ],
+    "exclude": [
+        "./src/generated/arkts"
+    ],
+    "compilerOptions": {
+        "outDir": "./build/ts",
+        "paths": {
+            "@koalaui/arkui-common": [
+                "../../arkoala-arkts/arkui-common/src"
+            ],
+            "#components": [
+                "./src/generated/ts"
+            ],
+        }
+    },
+    "files": [
+        "../../incremental/tools/panda/arkts/std-lib/global.d.ts"
+    ], // TODO: maybe delete this section
+    "references": [
+        { "path": "../../incremental/runtime" },
+        { "path": "../../arkoala-arkts/arkui-common" },
+        { "path": "../../interop" }
+    ]
+}

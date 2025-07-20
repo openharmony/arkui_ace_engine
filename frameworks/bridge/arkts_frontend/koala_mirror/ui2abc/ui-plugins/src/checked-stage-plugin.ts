@@ -29,12 +29,13 @@ export default function checkedTransformer(
 ): arkts.ProgramTransformer {
     return (program: arkts.Program, _compilationOptions: arkts.CompilationOptions, context: arkts.PluginContext) => {
         const structsResolver = context.parameter<StructsResolver>("structsTable")!;
-        [
+        const result = [
             new InstantiateFactoryHelper(),
             new EtsFirstArgTransformer(),
             new StyleTransformer(),
             new BuilderLambdaTransformer(structsResolver)
         ]
         .reduce((node: arkts.AstNode, transformer) => transformer.visitor(node), program.ast)
+        program.setAst(result as arkts.ETSModule)
     }
 }

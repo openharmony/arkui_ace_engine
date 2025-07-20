@@ -14,7 +14,7 @@
  */
 
 import { FunctionSignature, ScriptFunction } from '../../../generated';
-import { isSameNativeObject } from '../peers/ArktsObject';
+import { isSameNativeObject } from '../../../arkts-api/peers/ArktsObject';
 import { AstNode } from '../peers/AstNode';
 import { updateThenAttach } from '../utilities/private';
 

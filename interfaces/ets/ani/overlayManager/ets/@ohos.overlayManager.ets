@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { OverlayManagerOptions } from "./@ohos.arkui.UIContext"
-import { LevelOrder } from "./@ohos.promptAction"
+import { OverlayManagerOptions } from "@ohos.arkui.UIContext"
+import { LevelOrder } from "@ohos.promptAction"
 
 export default namespace overlayManager {
     loadLibrary("overlayManager_ani");

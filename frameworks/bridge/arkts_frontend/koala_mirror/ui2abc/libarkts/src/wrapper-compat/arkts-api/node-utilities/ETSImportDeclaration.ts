@@ -14,7 +14,7 @@
  */
 
 import { ETSImportDeclaration, StringLiteral } from '../../../generated';
-import { isSameNativeObject } from '../peers/ArktsObject';
+import { isSameNativeObject } from '../../../arkts-api/peers/ArktsObject';
 import { AstNode } from '../peers/AstNode';
 import { attachModifiers, updateThenAttach } from '../utilities/private';
 import { Es2pandaImportKinds } from '../../../generated/Es2pandaEnums';
@@ -30,7 +30,7 @@ export function updateETSImportDeclaration(
         isSameNativeObject(specifiers, original.specifiers) &&
         isSameNativeObject(importKind, Number(original.isTypeKind))
     ) {
-        /* TODO: probably should set importMetadata, but no getter provided yet */
+        /* Improve: probably should set importMetadata, but no getter provided yet */
         return original;
     }
 

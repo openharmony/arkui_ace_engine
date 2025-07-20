@@ -81,7 +81,9 @@ export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent 
     ): void {
         ArkComponentRoot(this, () => {
             this.__updateStruct(initializers);
-            OBSERVE.renderingComponent = ObserveSingleton.RenderingComponentV1;
+            this.isV2()
+                ? OBSERVE.renderingComponent = ObserveSingleton.RenderingComponentV2
+                : OBSERVE.renderingComponent = ObserveSingleton.RenderingComponentV1;
             this.build();
             OBSERVE.renderingComponent = ObserveSingleton.RenderingComponent;
             remember(() => {
@@ -116,5 +118,9 @@ export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent 
             )
             component._buildWrapper(content, initializers);
         }, reuseId)
+    }
+
+    isV2(): boolean {
+        return true;
     }
 }

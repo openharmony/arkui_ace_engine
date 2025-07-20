@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { IMutableKeyedStateMeta, IObservedObject, RenderIdType, WatchIdType } from '../decorator';
+import { IMutableKeyedStateMeta, IObservedObject, ISubscribedWatches, RenderIdType, WatchIdType } from '../decorator';
 import { SubscribedWatches } from '../decoratorImpl/decoratorWatch';
 import { FactoryInternal } from './iFactoryInternal';
 import { ObserveSingleton } from './observeSingleton';
@@ -24,7 +24,7 @@ final class CONSTANT {
     public static readonly OB_LENGTH = '__OB_LENGTH';
 }
 
-export class WrappedSet<K> extends Set<K> implements IObservedObject, ObserveWrappedBase {
+export class WrappedSet<K> extends Set<K> implements IObservedObject, ObserveWrappedBase, ISubscribedWatches {
     public store_: Set<K>;
     // Use public access to enable unit testing.
     public meta_: IMutableKeyedStateMeta;
@@ -90,6 +90,7 @@ export class WrappedSet<K> extends Set<K> implements IObservedObject, ObserveWra
             this.meta_.fireChange(String(val as Object | undefined | null));
             this.meta_.fireChange(CONSTANT.OB_SET_ANY_PROPERTY);
             this.meta_.fireChange(CONSTANT.OB_LENGTH);
+            this.executeOnSubscribingWatches('add');
         }
         return this;
     }
@@ -135,6 +136,7 @@ export class WrappedSet<K> extends Set<K> implements IObservedObject, ObserveWra
             this.meta_.fireChange(String(val as Object | undefined | null));
             this.meta_.fireChange(CONSTANT.OB_SET_ANY_PROPERTY);
             this.meta_.fireChange(CONSTANT.OB_LENGTH);
+            this.executeOnSubscribingWatches('delete');
             return res;
         } else {
             return false;
@@ -152,6 +154,7 @@ export class WrappedSet<K> extends Set<K> implements IObservedObject, ObserveWra
             this.store_.clear();
             this.meta_.fireChange(CONSTANT.OB_LENGTH);
             this.meta_.fireChange(CONSTANT.OB_SET_ANY_PROPERTY);
+            this.executeOnSubscribingWatches('clear');
         }
     }
 

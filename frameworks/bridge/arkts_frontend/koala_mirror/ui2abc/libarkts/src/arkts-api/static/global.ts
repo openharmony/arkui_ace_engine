@@ -41,12 +41,12 @@ export class global {
         global._config = undefined
     }
 
-    // TODO: rename to contextPeer
+    // Improve: rename to contextPeer
     public static get context(): KNativePointer {
         return global.compilerContext?.peer ?? throwError('Global.context not initialized')
     }
 
-    // TODO: rename to context when the pointer valued one is eliminated
+    // Improve: rename to context when the pointer valued one is eliminated
     public static compilerContext: Context
 
     private static _es2panda: Es2pandaNativeModule | undefined = undefined
@@ -73,4 +73,7 @@ export class global {
     }
 
     public static profiler = new Profiler()
+
+    // Check node type values during node creation
+    public static validatePeerTypes = false
 }

@@ -13,49 +13,34 @@
  * limitations under the License.
  */
 
-import { KPointer } from "@koalaui/interop"
-import { PeerNode } from "../../PeerNode"
+import { KPointer, nullptr } from "@koalaui/interop"
+import { IncrementalNode } from "@koalaui/runtime"
 import { CustomBuilder } from "../common"
 import { CustomNodeBuilder } from "../customBuilder"
-import { ArkComponentRootPeer } from "../staticComponents"
-import { int32 } from '@koalaui/common'
 import { UIContextUtil } from 'arkui/handwritten/UIContextUtil'
-
-// TODO need invert dependency: createUiDetachedRoot should be imported from @koalaui/arkoala same as in TS
-export type UIDetachedRootCreator = (
-    peerFactory: () => PeerNode,
-    /** @memo */
-    builder: () => void,
-    instanceId: int32
-) => PeerNode
-function createUiDetachedRootStub(
-    factory: () => PeerNode,
-    /** @memo */
-    builder: () => void,
-    instanceId: int32
-): PeerNode {
-    throw new Error("Not implemented")
-}
-
-let createUiDetachedRoot: UIDetachedRootCreator = createUiDetachedRootStub
-
-export function setUIDetachedRootCreator(creator: UIDetachedRootCreator): void {
-    createUiDetachedRoot = creator
-}
-
-function componentRootPeerFactory(): PeerNode {
-    return ArkComponentRootPeer.create(undefined)
-}
+import { UIContextImpl } from 'arkui/handwritten/UIContextImpl'
 
 export class CallbackTransformer {
     static transformFromCustomBuilder(value: CustomBuilder): CustomNodeBuilder {
-        let instanceId = UIContextUtil.getCurrentInstanceId();
+        let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
         return (parentNodeId: KPointer): KPointer => {
-            const peer = createUiDetachedRoot(componentRootPeerFactory, value, instanceId)
-            return peer.peer.ptr
+            const peer = context.getDetachedRootEntryManager().createUiDetachedFreeRoot(() => new IncrementalNode(), value)
+            return peer ? peer.peer.ptr : nullptr;
         }
     }
     static transformToCustomBuilder(value: CustomNodeBuilder): CustomBuilder {
         throw new Error("Not implemented")
+    }
+
+    static transfromToCallbackVoid(value: (data: undefined) => void): (() => void) {
+        return () => {
+            return value(undefined)
+        }
+    }
+
+    static transfromFromCallbackVoid(value: () => void): ((data: undefined) => void) {
+        return (data: undefined) => {
+            return value()
+        }
     }
 }

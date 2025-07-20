@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-import { IMutableStateMeta, IObservedObject, RenderIdType, WatchIdType } from '../decorator';
+import { IMutableStateMeta, IObservedObject, ISubscribedWatches, RenderIdType, WatchIdType } from '../decorator';
 import { SubscribedWatches } from '../decoratorImpl/decoratorWatch';
 import { ObserveSingleton } from './observeSingleton';
 import { FactoryInternal } from './iFactoryInternal';
 import { ObserveWrappedBase } from './observeWrappedBase';
 
-export class WrappedDate extends Date implements IObservedObject, ObserveWrappedBase {
+export class WrappedDate extends Date implements IObservedObject, ObserveWrappedBase, ISubscribedWatches {
     private store_: Date;
     private meta_: IMutableStateMeta;
     // support for @Watch

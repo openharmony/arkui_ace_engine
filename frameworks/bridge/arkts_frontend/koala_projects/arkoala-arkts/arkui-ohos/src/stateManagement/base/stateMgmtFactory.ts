@@ -13,7 +13,16 @@
  * limitations under the License.
  */
 
-import { IStateMgmtFactory } from '../decorator';
+import {
+    IConsumerDecoratedVariable,
+    ILocalDecoratedVariable,
+    ILocalStoragePropRefDecoratedVariable,
+    IParamDecoratedVariable,
+    IParamOnceDecoratedVariable,
+    IPropRefDecoratedVariable,
+    IProviderDecoratedVariable,
+    IStateMgmtFactory,
+} from '../decorator';
 import {
     IStateDecoratedVariable,
     ILinkDecoratedVariable,
@@ -40,6 +49,13 @@ import { StateMgmtTool } from '#stateMgmtTool';
 import { SubscribedWatches } from '../decoratorImpl/decoratorWatch';
 import { UIUtils } from '../utils';
 import { AppStorage } from '../storage/appStorage';
+import { PropRefDecoratedVariable } from '../decoratorImpl/decoratorPropRef';
+import { StoragePropRefDecoratedVariable } from '../decoratorImpl/decoratorStoragePropRef';
+import { LocalDecoratedVariable } from '../decoratorImpl/decoratorLocal';
+import { ParamDecoratedVariable } from '../decoratorImpl/decoratorParam';
+import { ParamOnceDecoratedVariable } from '../decoratorImpl/decoratorParamOnce';
+import { ProviderDecoratedVariable } from '../decoratorImpl/decoratorProvider';
+import { ConsumerDecoratedVariable } from '../decoratorImpl/decoratorConsumer';
 
 export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
     public makeMutableStateMeta(): IMutableStateMeta {
@@ -48,6 +64,46 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
     public makeSubscribedWatches(): ISubscribedWatches {
         return new SubscribedWatches();
     }
+    makeLocal<T>(owningView: ExtendableComponent, varName: string, initValue: T): ILocalDecoratedVariable<T> {
+        return new LocalDecoratedVariable<T>(owningView, varName, UIUtils.makeObserved(initValue) as T);
+    }
+
+    makeParam<T>(owningView: ExtendableComponent, varName: string, initValue: T): IParamDecoratedVariable<T> {
+        return new ParamDecoratedVariable<T>(owningView, varName, UIUtils.makeObserved(initValue) as T);
+    }
+
+    makeParamOnce<T>(owningView: ExtendableComponent, varName: string, initValue: T): IParamOnceDecoratedVariable<T> {
+        return new ParamOnceDecoratedVariable<T>(owningView, varName, UIUtils.makeObserved(initValue) as T);
+    }
+
+    makeProvider<T>(
+        owningView: ExtendableComponent,
+        varName: string,
+        provideAlias: string,
+        initValue: T
+    ): IProviderDecoratedVariable<T> {
+        return new ProviderDecoratedVariable<T>(
+            owningView,
+            varName,
+            provideAlias,
+            UIUtils.makeObserved(initValue) as T
+        );
+    }
+
+    makeConsumer<T>(
+        owningView: ExtendableComponent,
+        varName: string,
+        provideAlias: string,
+        initValue: T
+    ): IConsumerDecoratedVariable<T> {
+        return new ConsumerDecoratedVariable<T>(
+            owningView,
+            varName,
+            provideAlias,
+            UIUtils.makeObserved(initValue) as T
+        );
+    }
+
     makeState<T>(
         owningView: ExtendableComponent,
         varName: string,
@@ -66,6 +122,15 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
         return new PropDecoratedVariable<T>(owningView, varName, UIUtils.makeObserved(initValue) as T, watchFunc);
     }
 
+    makePropRef<T>(
+        owningView: ExtendableComponent,
+        varName: string,
+        initValue: T,
+        watchFunc?: WatchFuncType
+    ): IPropRefDecoratedVariable<T> {
+        return new PropRefDecoratedVariable<T>(owningView, varName, UIUtils.makeObserved(initValue) as T, watchFunc);
+    }
+
     makeLink<T>(
         owningView: ExtendableComponent,
         varName: string,
@@ -73,13 +138,36 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
         watchFunc?: WatchFuncType
     ): ILinkDecoratedVariable<T> {
         if (StateMgmtTool.isIStateDecoratedVariable(source)) {
-            return this.makeLinkOnState(owningView, varName, source as Object as IStateDecoratedVariable<T>, watchFunc);
+            return this.makeLinkOnState(
+                owningView,
+                varName,
+                source as Object as IStateDecoratedVariable<T>,
+                watchFunc
+            ) as ILinkDecoratedVariable<T>;
         }
         if (StateMgmtTool.isIPropDecoratedVariable(source)) {
-            return this.makeLinkOnProp(owningView, varName, source as Object as IPropDecoratedVariable<T>, watchFunc);
+            return this.makeLinkOnProp(
+                owningView,
+                varName,
+                source as Object as IPropDecoratedVariable<T>,
+                watchFunc
+            ) as ILinkDecoratedVariable<T>;
+        }
+        if (source instanceof IPropRefDecoratedVariable) {
+            return this.makeLinkOnPropRef(
+                owningView,
+                varName,
+                source as Object as IPropRefDecoratedVariable<T>,
+                watchFunc
+            ) as ILinkDecoratedVariable<T>;
         }
         if (StateMgmtTool.isILinkDecoratedVariable(source)) {
-            return this.makeLinkOnLink(owningView, varName, source as Object as ILinkDecoratedVariable<T>, watchFunc);
+            return this.makeLinkOnLink(
+                owningView,
+                varName,
+                source as Object as ILinkDecoratedVariable<T>,
+                watchFunc
+            ) as ILinkDecoratedVariable<T>;
         }
         if (StateMgmtTool.isIObjectLinkDecoratedVariable(source)) {
             return this.makeLinkOnObjectLink(
@@ -87,7 +175,7 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
                 varName,
                 source as Object as IObjectLinkDecoratedVariable<T>,
                 watchFunc
-            );
+            ) as ILinkDecoratedVariable<T>;
         }
         if (StateMgmtTool.isIProvideDecoratedVariable(source)) {
             return this.makeLinkOnProvide(
@@ -95,7 +183,7 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
                 varName,
                 source as Object as IProvideDecoratedVariable<T>,
                 watchFunc
-            );
+            ) as ILinkDecoratedVariable<T>;
         }
         if (StateMgmtTool.isIConsumeDecoratedVariable(source)) {
             return this.makeLinkOnConsume(
@@ -103,7 +191,7 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
                 varName,
                 source as Object as IConsumeDecoratedVariable<T>,
                 watchFunc
-            );
+            ) as ILinkDecoratedVariable<T>;
         }
         if (StateMgmtTool.isIStorageLinkDecoratedVariable(source)) {
             return this.makeLinkOnStorageLink(
@@ -111,7 +199,7 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
                 varName,
                 source as Object as IStorageLinkDecoratedVariable<T>,
                 watchFunc
-            );
+            ) as ILinkDecoratedVariable<T>;
         }
         if (StateMgmtTool.isILocalStorageLinkDecoratedVariable(source)) {
             return this.makeLinkOnLocalStorageLink(
@@ -119,7 +207,7 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
                 varName,
                 source as Object as ILocalStorageLinkDecoratedVariable<T>,
                 watchFunc
-            );
+            ) as ILinkDecoratedVariable<T>;
         }
         if (StateMgmtTool.isIStoragePropRefDecoratedVariable(source)) {
             return this.makeLinkOnStoragePropRef(
@@ -127,7 +215,15 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
                 varName,
                 source as Object as IStoragePropRefDecoratedVariable<T>,
                 watchFunc
-            );
+            ) as ILinkDecoratedVariable<T>;
+        }
+        if (source instanceof ILocalStoragePropRefDecoratedVariable) {
+            return this.makeLinkOnLocalStoragePropRef(
+                owningView,
+                varName,
+                source as Object as ILocalStoragePropRefDecoratedVariable<T>,
+                watchFunc
+            ) as ILinkDecoratedVariable<T>;
         }
         throw new Error('inValid Link source');
     }
@@ -153,6 +249,24 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
         owningView: ExtendableComponent,
         varName: string,
         source: IPropDecoratedVariable<T>,
+        watchFunc?: WatchFuncType
+    ): ILinkDecoratedVariable<T> {
+        const link = new LinkDecoratedVariable<T>(
+            owningView,
+            varName,
+            source,
+            () => source.get(),
+            (newValue: T) => source.set(newValue),
+            watchFunc
+        );
+        source.registerWatchToSource(link);
+        return link;
+    }
+
+    protected makeLinkOnPropRef<T>(
+        owningView: ExtendableComponent,
+        varName: string,
+        source: IPropRefDecoratedVariable<T>,
         watchFunc?: WatchFuncType
     ): ILinkDecoratedVariable<T> {
         const link = new LinkDecoratedVariable<T>(
@@ -225,6 +339,24 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
         owningView: ExtendableComponent,
         varName: string,
         source: IStoragePropRefDecoratedVariable<T>,
+        watchFunc?: WatchFuncType
+    ): ILinkDecoratedVariable<T> {
+        const link = new LinkDecoratedVariable<T>(
+            owningView,
+            varName,
+            source,
+            () => source.get(),
+            (newValue: T) => source.set(newValue),
+            watchFunc
+        );
+        source.registerWatchToSource(link);
+        return link;
+    }
+
+    protected makeLinkOnLocalStoragePropRef<T>(
+        owningView: ExtendableComponent,
+        varName: string,
+        source: ILocalStoragePropRefDecoratedVariable<T>,
         watchFunc?: WatchFuncType
     ): ILinkDecoratedVariable<T> {
         const link = new LinkDecoratedVariable<T>(
@@ -381,25 +513,47 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
 
     makeStoragePropRef<T>(
         owningView: ExtendableComponent,
-        propertyNameInAppStorage: string,
+        propName: string,
         varName: string,
-        defaultValue: T,
+        initValue: T,
         ttype: Type,
         watchFunc?: WatchFuncType
     ): IStoragePropRefDecoratedVariable<T> {
-        const result: IStoragePropRefDecoratedVariable<T> | undefined = AppStorage.__makeStorageLink<T>(
-            owningView,
-            propertyNameInAppStorage,
-            varName,
-            UIUtils.makeObserved(defaultValue) as T,
-            ttype,
-            watchFunc
-        );
-        if (result === undefined) {
-            throw new TypeError(`@StoragePropRef('${propertyNameInAppStorage}') ${varName}
-                configured Type ${ttype.toString()} does not match property type in storage`);
-            // error of unutilized variable can not be recovered, must throw.
+        const ref = AppStorage.setAndRef<T>(propName, UIUtils.makeObserved(initValue), ttype);
+        if (ref === undefined) {
+            throw new TypeError(
+                `@StoragePropRef('${propName}') ${varName} configured Type ${ttype.toString()} does not match property type in storage`
+            );
         }
-        return result;
+        return new StoragePropRefDecoratedVariable<T>(
+            owningView,
+            ref,
+            propName,
+            varName,
+            watchFunc
+        ) as IStoragePropRefDecoratedVariable<T>;
+    }
+
+    makeLocalStoragePropRef<T>(
+        owningView: ExtendableComponent,
+        propName: string,
+        varName: string,
+        initValue: T,
+        ttype: Type,
+        watchFunc?: WatchFuncType
+    ): ILocalStoragePropRefDecoratedVariable<T> {
+        const ref = owningView.localStorage_.setAndRef<T>(propName, UIUtils.makeObserved(initValue), ttype);
+        if (ref === undefined) {
+            throw new TypeError(
+                `@LocalStoragePropRef('${propName}') ${varName} configured Type ${ttype.toString()} does not match property type in storage`
+            );
+        }
+        return new StoragePropRefDecoratedVariable<T>(
+            owningView,
+            ref,
+            propName,
+            varName,
+            watchFunc
+        ) as ILocalStoragePropRefDecoratedVariable<T>;
     }
 }

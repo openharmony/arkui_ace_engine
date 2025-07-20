@@ -90,7 +90,7 @@ suite.skip(util.basename(__filename), () => {
                 factory.updateVariableStatement(
                     varStatement,
                     [
-                        // TODO: not ok maybe (problem with ModifierFlags)
+                        // Improve: not ok maybe (problem with ModifierFlags)
                         factory.createToken(ts.SyntaxKind.PublicKeyword),
                         factory.createToken(ts.SyntaxKind.StaticKeyword),
                         factory.createToken(ts.SyntaxKind.ConstKeyword),
@@ -148,7 +148,7 @@ suite.skip(util.basename(__filename), () => {
                 factory.updateVariableStatement(
                     varStatement,
                     [
-                        // TODO: not ok maybe (problem with ModifierFlags)
+                        // Improve: not ok maybe (problem with ModifierFlags)
                         factory.createToken(ts.SyntaxKind.PublicKeyword),
                         factory.createToken(ts.SyntaxKind.StaticKeyword),
                     ],
@@ -200,7 +200,7 @@ suite.skip(util.basename(__filename), () => {
             [
                 factory.createVariableStatement(
                     [
-                        // TODO: not ok maybe (problem with ModifierFlags)
+                        // Improve: not ok maybe (problem with ModifierFlags)
                         factory.createToken(ts.SyntaxKind.PublicKeyword),
                         factory.createToken(ts.SyntaxKind.StaticKeyword),
                         factory.createToken(ts.SyntaxKind.ConstKeyword),

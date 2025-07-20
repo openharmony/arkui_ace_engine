@@ -35,6 +35,7 @@
 #include "frameworks/core/components_ng/pattern/overlay/dialog_manager_static.h"
 #include "frameworks/core/components_ng/pattern/overlay/overlay_manager.h"
 #include "frameworks/core/interfaces/native/implementation/frame_node_peer_impl.h"
+#include "frameworks/core/pipeline_ng/pipeline_context.h"
 #include "interfaces/inner_api/ace_kit/include/ui/base/referenced.h"
 
 namespace OHOS::Ace::NG {
@@ -144,7 +145,7 @@ static void CloseToast(ani_env* env, ani_double toastId)
     }
 }
 
-static void ShowDialogWithCallback(ani_env* env, ani_object options, ani_object callback)
+static void ShowDialogWithCallback(ani_env* env, ani_object options, ani_object callback, ani_object optionsInternal)
 {
     TAG_LOGD(OHOS::Ace::AceLogTag::ACE_DIALOG, "[ANI] ShowDialogWithCallback enter.");
     OHOS::Ace::DialogProperties dialogProps;
@@ -152,6 +153,8 @@ static void ShowDialogWithCallback(ani_env* env, ani_object options, ani_object 
         TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "Parse show dialog options fail.");
         return;
     }
+    GetShowDialogOptionsInternal(env, optionsInternal, dialogProps);
+    dialogProps.type = OHOS::Ace::DialogType::ALERT_DIALOG;
 
     auto asyncContext = std::make_shared<PromptActionAsyncContext>();
     asyncContext->env = env;
@@ -170,7 +173,7 @@ static void ShowDialogWithCallback(ani_env* env, ani_object options, ani_object 
     }
 }
 
-static ani_object ShowDialog(ani_env* env, ani_object options)
+static ani_object ShowDialog(ani_env* env, ani_object options, ani_object optionsInternal)
 {
     TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] ShowDialog enter.");
     OHOS::Ace::DialogProperties dialogProps;
@@ -178,6 +181,8 @@ static ani_object ShowDialog(ani_env* env, ani_object options)
         TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "Parse show dialog options fail.");
         return nullptr;
     }
+    GetShowDialogOptionsInternal(env, optionsInternal, dialogProps);
+    dialogProps.type = OHOS::Ace::DialogType::ALERT_DIALOG;
 
     auto asyncContext = std::make_shared<PromptActionAsyncContext>();
     asyncContext->env = env;
@@ -207,6 +212,8 @@ static void ShowActionMenuWithCallback(ani_env* env, ani_object options, ani_obj
         TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "Parse show action menu options fail.");
         return;
     }
+    dialogProps.autoCancel = true;
+    dialogProps.isMenu = true;
 
     auto asyncContext = std::make_shared<PromptActionAsyncContext>();
     asyncContext->env = env;
@@ -233,6 +240,8 @@ static ani_object ShowActionMenu(ani_env* env, ani_object options)
         TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "Parse show action menu options fail.");
         return nullptr;
     }
+    dialogProps.autoCancel = true;
+    dialogProps.isMenu = true;
 
     auto asyncContext = std::make_shared<PromptActionAsyncContext>();
     asyncContext->env = env;
@@ -264,6 +273,7 @@ static ani_object OpenCustomDialogContent(ani_env* env, ani_long content, ani_ob
     Ark_FrameNode peerNode = (Ark_FrameNode)content;
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peerNode);
     CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->SetBuilderFunc(nullptr);
     dialogProps.contentNode = OHOS::Ace::AceType::WeakClaim(OHOS::Ace::AceType::RawPtr(frameNode));
 
     auto asyncContext = std::make_shared<PromptActionAsyncContext>();
@@ -326,6 +336,8 @@ static ani_object UpdateCustomDialog(ani_env* env, ani_long content, ani_object 
         TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DIALOG, "Parse open custom dialog options fail.");
         return nullptr;
     }
+    dialogProps.isSysBlurStyle = false;
+
     Ark_FrameNode peerNode = (Ark_FrameNode)content;
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peerNode);
     CHECK_NULL_RETURN(frameNode, nullptr);
@@ -407,9 +419,11 @@ static ani_object OpenCustomDialogWithController(ani_env* env, ani_long content,
     TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] OpenCustomDialogWithController enter.");
     OHOS::Ace::DialogProperties dialogProps;
     GetBaseDialogOptions(env, options, dialogProps);
+    GetDialogOptionsInternal(env, optionsInternal, dialogProps);
     Ark_FrameNode peerNode = (Ark_FrameNode)content;
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peerNode);
     CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->SetBuilderFunc(nullptr);
     dialogProps.contentNode = OHOS::Ace::AceType::WeakClaim(OHOS::Ace::AceType::RawPtr(frameNode));
     if (!OHOS::Ace::Ani::GetDialogController(env, controller, dialogProps.dialogCallback)) {
         return nullptr;
@@ -441,6 +455,7 @@ static ani_object PresentCustomDialog(ani_env* env, ani_long builder, ani_object
     TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] PresentCustomDialog enter.");
     OHOS::Ace::DialogProperties dialogProps;
     GetDialogOptions(env, options, dialogProps);
+    GetDialogOptionsInternal(env, optionsInternal, dialogProps);
     dialogProps.customBuilder = GetCustomBuilder(env, builder);
     dialogProps.isUserCreatedDialog = true;
     OHOS::Ace::Ani::GetDialogController(env, controller, dialogProps.dialogCallback);
@@ -463,6 +478,69 @@ static ani_object PresentCustomDialog(ani_env* env, ani_long builder, ani_object
         OHOS::Ace::SubwindowManager::GetInstance()->OpenCustomDialogStatic(dialogProps, std::move(finishCallback));
     }
     return result;
+}
+
+static ani_status CreateAniDouble(ani_env* env, double value, ani_object& result)
+{
+    ani_status state;
+    ani_class doubleClass;
+    if ((state = env->FindClass("Lstd/core/Double;", &doubleClass)) != ANI_OK) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY, "FindClass std/core/doubleClass failed, %{public}d", state);
+        return state;
+    }
+    ani_method doubleClassCtor;
+    if ((state = env->Class_FindMethod(doubleClass, "<ctor>", "D:V", &doubleClassCtor)) != ANI_OK) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY, "Class_FindMethod Double ctor failed, %{public}d", state);
+        return state;
+    }
+    ani_double aniValue = value;
+    if ((state = env->Object_New(doubleClass, doubleClassCtor, &result, aniValue)) != ANI_OK) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY, "New Double object failed, %{public}d", state);
+        return state;
+    }
+    return state;
+}
+
+static ani_object GetTopOrder(ani_env* env)
+{
+    TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] GetTopOrder enter.");
+    ani_object aniOrder = nullptr;
+    ani_ref undefinedRef = nullptr;
+    if (ANI_OK != env->GetUndefined(&undefinedRef)) {
+        return aniOrder;
+    }
+    aniOrder = static_cast<ani_object>(undefinedRef);
+
+    auto context = OHOS::Ace::NG::PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(context, aniOrder);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_RETURN(overlayManager, aniOrder);
+    auto orderValue = overlayManager->GetTopOrder();
+    if (orderValue.has_value()) {
+        CreateAniDouble(env, orderValue.value(), aniOrder);
+    }
+    return aniOrder;
+}
+
+static ani_object GetBottomOrder(ani_env* env)
+{
+    TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] GetBottomOrder enter.");
+    ani_object aniOrder = nullptr;
+    ani_ref undefinedRef = nullptr;
+    if (ANI_OK != env->GetUndefined(&undefinedRef)) {
+        return aniOrder;
+    }
+    aniOrder = static_cast<ani_object>(undefinedRef);
+
+    auto context = OHOS::Ace::NG::PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(context, aniOrder);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_RETURN(overlayManager, aniOrder);
+    auto orderValue = overlayManager->GetBottomOrder();
+    if (orderValue.has_value()) {
+        CreateAniDouble(env, orderValue.value(), aniOrder);
+    }
+    return aniOrder;
 }
 
 ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
@@ -498,6 +576,8 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         ani_native_function {"openCustomDialogWithController", nullptr,
             reinterpret_cast<void *>(OpenCustomDialogWithController)},
         ani_native_function {"presentCustomDialog", nullptr, reinterpret_cast<void *>(PresentCustomDialog)},
+        ani_native_function {"getTopOrder", nullptr, reinterpret_cast<void *>(GetTopOrder)},
+        ani_native_function {"getBottomOrder", nullptr, reinterpret_cast<void *>(GetBottomOrder)},
     };
     status = env->Namespace_BindNativeFunctions(ns, methods.data(), methods.size());
     if (status != ANI_OK) {
@@ -505,10 +585,24 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         return ANI_ERROR;
     }
 
+    status = OHOS::Ace::Ani::BindCommonController(env);
+    if (status != ANI_OK) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY,
+            "PromptAction BindCommonController fail. status: %{public}d", status);
+        return ANI_ERROR;
+    }
+
     status = OHOS::Ace::Ani::BindDialogController(env);
     if (status != ANI_OK) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY,
             "PromptAction BindDialogController fail. status: %{public}d", status);
+        return ANI_ERROR;
+    }
+
+    status = OHOS::Ace::Ani::BindDismissDialogAction(env);
+    if (status != ANI_OK) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY,
+            "PromptAction BindDismissDialogAction fail. status: %{public}d", status);
         return ANI_ERROR;
     }
 

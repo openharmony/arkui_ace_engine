@@ -13,4 +13,4 @@
  * limitations under the License.
  */
 
-export { Assert, assert, suite, test } from "#harness"
+export { Assert, assert, suite, test, TestFilter, setTestFilter } from "#harness"

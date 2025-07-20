@@ -18930,7 +18930,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void InitialScaleImpl(Ark_NativePointer node,
-                          const Opt_Number* value)
+                          const Opt_Float32* value)
     {
         if (!needGroupedLog(1))
             return;
@@ -25209,6 +25209,36 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void RegisterDragPreviewImpl(Ark_NativePointer node,
+                                 const Opt_Union_CustomBuilder_DragItemInfo_String* preview,
+                                 const Opt_PreviewConfiguration* config)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("registerDragPreview(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, preview);
+        out.append(", ");
+        WriteToString(&out, config);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void RegisterOnDropImpl(Ark_NativePointer node,
+                            const Opt_OnDragEventCallback* eventCallback,
+                            const Opt_DropOptions* dropOptions)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("registerOnDrop(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, eventCallback);
+        out.append(", ");
+        WriteToString(&out, dropOptions);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     } // DragDropOpsAccessor
     namespace StateStylesOpsAccessor {
     void OnStateStyleChangeImpl(Ark_NativePointer node,
@@ -29285,6 +29315,31 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void ClosePopupImpl(Ark_VMContext vmContext,
+        Ark_AsyncWorkerPtr asyncWorker,
+        Ark_PromptAction peer,
+        Ark_NativePointer content,
+        const Callback_Opt_Array_String_Void* promiseValue)
+    {
+    }
+    void OpenMenuImpl(Ark_VMContext vmContext,
+        Ark_AsyncWorkerPtr asyncWorker,
+        Ark_PromptAction peer,
+        Ark_NativePointer content,
+        const Ark_TargetInfo* targetInfo,
+        const Opt_MenuOptions* options,
+        const Callback_Opt_Array_String_Void* promiseValue)
+    {
+    }
+    void UpdateMenuImpl(Ark_VMContext vmContext,
+        Ark_AsyncWorkerPtr asyncWorker,
+        Ark_PromptAction peer,
+        Ark_NativePointer content,
+        const Ark_MenuOptions* options,
+        const Opt_Boolean* partialUpdate,
+        const Callback_Opt_Array_String_Void* promiseValue)
+    {
+    }
+    void CloseMenuImpl(Ark_VMContext vmContext,
         Ark_AsyncWorkerPtr asyncWorker,
         Ark_PromptAction peer,
         Ark_NativePointer content,
@@ -35070,6 +35125,23 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return (Ark_ImageBitmap) 300;
     }
     } // OffscreenCanvasRenderingContext2DAccessor
+    namespace OverlayOpsAccessor {
+    void SetOverlayAttributeImpl(Ark_NativePointer node,
+                                    const Opt_Union_String_CustomBuilder* value,
+                                    const Opt_OverlayOptions* options)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("setOverlayAttribute(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, value);
+        out.append(", ");
+        WriteToString(&out, options);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    } // OverlayOpsAccessor
     namespace OffscreenCanvasAccessor {
     void DestroyPeerImpl(Ark_OffscreenCanvas peer)
     {
@@ -40968,7 +41040,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return fnPtr<KNativePointer>(dummyClassFinalizer);
     }
-    Ark_Number XImpl(Ark_WebContextMenuParam peer)
+    Ark_Int32 XImpl(Ark_WebContextMenuParam peer)
     {
         if (!needGroupedLog(1))
             return {42};
@@ -40978,7 +41050,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {42};
     }
-    Ark_Number YImpl(Ark_WebContextMenuParam peer)
+    Ark_Int32 YImpl(Ark_WebContextMenuParam peer)
     {
         if (!needGroupedLog(1))
             return {42};
@@ -41078,7 +41150,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return 0;
     }
-    Ark_Number GetEditStateFlagsImpl(Ark_WebContextMenuParam peer)
+    Ark_Int32 GetEditStateFlagsImpl(Ark_WebContextMenuParam peer)
     {
         if (!needGroupedLog(1))
             return {42};
@@ -41088,7 +41160,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {42};
     }
-    Ark_Number GetPreviewWidthImpl(Ark_WebContextMenuParam peer)
+    Ark_Int32 GetPreviewWidthImpl(Ark_WebContextMenuParam peer)
     {
         if (!needGroupedLog(1))
             return {42};
@@ -41098,7 +41170,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {42};
     }
-    Ark_Number GetPreviewHeightImpl(Ark_WebContextMenuParam peer)
+    Ark_Int32 GetPreviewHeightImpl(Ark_WebContextMenuParam peer)
     {
         if (!needGroupedLog(1))
             return {42};
@@ -42798,8 +42870,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     } // DismissPopupActionAccessor
-    namespace DissmissDialogActionNewAccessor {
-    void DestroyPeerImpl(Ark_DissmissDialogActionNew peer)
+    namespace DismissDialogActionAccessor {
+    void DestroyPeerImpl(Ark_DismissDialogAction peer)
     {
         if (!needGroupedLog(1))
             return;
@@ -42807,15 +42879,15 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_DissmissDialogActionNew ConstructImpl()
+    Ark_DismissDialogAction ConstructImpl()
     {
         if (!needGroupedLog(1))
-            return (Ark_DissmissDialogActionNew) 100;
-        string out("new DissmissDialogActionNew(");
+            return (Ark_DismissDialogAction) 100;
+        string out("new DismissDialogAction(");
         out.append(") \n");
-        out.append("[return (Ark_DissmissDialogActionNew) 100] \n");
+        out.append("[return (Ark_DismissDialogAction) 100] \n");
         appendGroupedLog(1, out);
-        return (Ark_DissmissDialogActionNew) 100;
+        return (Ark_DismissDialogAction) 100;
     }
     Ark_NativePointer GetFinalizerImpl()
     {
@@ -42827,7 +42899,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return fnPtr<KNativePointer>(dummyClassFinalizer);
     }
-    void DismissImpl(Ark_DissmissDialogActionNew peer)
+    void DismissImpl(Ark_DismissDialogAction peer)
     {
         if (!needGroupedLog(1))
             return;
@@ -42835,7 +42907,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_DismissReasonNew GetReasonImpl(Ark_DissmissDialogActionNew peer)
+    Ark_DismissReason GetReasonImpl(Ark_DismissDialogAction peer)
     {
         if (!needGroupedLog(1))
             return {};
@@ -42845,8 +42917,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {};
     }
-    void SetReasonImpl(Ark_DissmissDialogActionNew peer,
-                       Ark_DismissReasonNew reason)
+    void SetReasonImpl(Ark_DismissDialogAction peer,
+                       Ark_DismissReason reason)
     {
         if (!needGroupedLog(1))
             return;
@@ -42855,7 +42927,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    } // DissmissDialogActionNewAccessor
+    } // DismissDialogActionAccessor
     namespace TextShadowStyleAccessor {
     void DestroyPeerImpl(Ark_TextShadowStyle peer)
     {
@@ -44175,6 +44247,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return &DragDropOpsAccessorImpl;
     }
 
+    const GENERATED_ArkUIOverlayOpsAccessor* GetOverlayOpsAccessor()
+    {
+        static const GENERATED_ArkUIOverlayOpsAccessor OverlayOpsAccessorImpl {
+            OverlayOpsAccessor::SetOverlayAttributeImpl,
+        };
+        return &OverlayOpsAccessorImpl;
+    }
+
     const GENERATED_ArkUIUIContextAtomicServiceBarAccessor* GetUIContextAtomicServiceBarAccessor()
     {
         static const GENERATED_ArkUIUIContextAtomicServiceBarAccessor UIContextAtomicServiceBarAccessorImpl {
@@ -44913,6 +44993,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             PromptActionAccessor::OpenPopupImpl,
             PromptActionAccessor::UpdatePopupImpl,
             PromptActionAccessor::ClosePopupImpl,
+            PromptActionAccessor::OpenMenuImpl,
+            PromptActionAccessor::UpdateMenuImpl,
+            PromptActionAccessor::CloseMenuImpl,
         };
         return &PromptActionAccessorImpl;
     }
@@ -45628,7 +45711,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         static const GENERATED_ArkUIPath2DAccessor Path2DAccessorImpl {
             Path2DAccessor::DestroyPeerImpl,
-            Path2DAccessor::CtorImpl,
+            Path2DAccessor::Construct0Impl,
+            Path2DAccessor::Construct1Impl,
+            Path2DAccessor::Construct2Impl,
+            Path2DAccessor::Construct3Impl,
+            Path2DAccessor::Construct4Impl,
+            Path2DAccessor::Construct5Impl,
             Path2DAccessor::GetFinalizerImpl,
             Path2DAccessor::AddPathImpl,
         };
@@ -45801,7 +45889,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         static const GENERATED_ArkUICanvasRenderingContext2DAccessor CanvasRenderingContext2DAccessorImpl {
             CanvasRenderingContext2DAccessor::DestroyPeerImpl,
-            CanvasRenderingContext2DAccessor::CtorImpl,
+            CanvasRenderingContext2DAccessor::ConstructImpl,
             CanvasRenderingContext2DAccessor::GetFinalizerImpl,
             CanvasRenderingContext2DAccessor::ToDataURLImpl,
             CanvasRenderingContext2DAccessor::StartImageAnalyzerImpl,
@@ -45824,7 +45912,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         static const GENERATED_ArkUIOffscreenCanvasRenderingContext2DAccessor OffscreenCanvasRenderingContext2DAccessorImpl {
             OffscreenCanvasRenderingContext2DAccessor::DestroyPeerImpl,
-            OffscreenCanvasRenderingContext2DAccessor::CtorImpl,
+            OffscreenCanvasRenderingContext2DAccessor::ConstructImpl,
             OffscreenCanvasRenderingContext2DAccessor::GetFinalizerImpl,
             OffscreenCanvasRenderingContext2DAccessor::ToDataURLImpl,
             OffscreenCanvasRenderingContext2DAccessor::TransferToImageBitmapImpl,
@@ -45839,7 +45927,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         static const GENERATED_ArkUIOffscreenCanvasAccessor OffscreenCanvasAccessorImpl {
             OffscreenCanvasAccessor::DestroyPeerImpl,
-            OffscreenCanvasAccessor::CtorImpl,
+            OffscreenCanvasAccessor::ConstructImpl,
             OffscreenCanvasAccessor::GetFinalizerImpl,
             OffscreenCanvasAccessor::TransferToImageBitmapImpl,
             OffscreenCanvasAccessor::GetContext2dImpl,
@@ -47583,6 +47671,23 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct DismissPopupActionPeer {
         virtual ~DismissPopupActionPeer() = default;
     };
+
+    const GENERATED_ArkUIDismissDialogActionAccessor* GetDismissDialogActionAccessor()
+    {
+        static const GENERATED_ArkUIDismissDialogActionAccessor DismissDialogActionAccessorImpl {
+            DismissDialogActionAccessor::DestroyPeerImpl,
+            DismissDialogActionAccessor::ConstructImpl,
+            DismissDialogActionAccessor::GetFinalizerImpl,
+            DismissDialogActionAccessor::DismissImpl,
+            DismissDialogActionAccessor::GetReasonImpl,
+            DismissDialogActionAccessor::SetReasonImpl,
+        };
+        return &DismissDialogActionAccessorImpl;
+    }
+
+    struct DismissDialogActionPeer {
+        virtual ~DismissDialogActionPeer() = default;
+    };
     const GENERATED_ArkUITextShadowStyleAccessor* GetTextShadowStyleAccessor()
     {
         static const GENERATED_ArkUITextShadowStyleAccessor TextShadowStyleAccessorImpl {
@@ -48002,6 +48107,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetLetterSpacingStyleAccessor,
             GetLevelOrderAccessor,
             GetDismissPopupActionAccessor,
+            GetDismissDialogActionAccessor,
             GetTextShadowStyleAccessor,
             GetBackgroundColorStyleAccessor,
             GetGestureStyleAccessor,

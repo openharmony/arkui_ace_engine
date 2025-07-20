@@ -29,10 +29,7 @@ void SliderPattern::UpdateValueMultiThread(const RefPtr<FrameNode>& frameNode)
     frameNode->PostAfterAttachMainTreeTask(std::move(updateTask));
 }
 
-// void SliderPattern::OnAttachToFrameNodeMultiThread()
-// {
-//     InitHapticController();
-// }
+void SliderPattern::OnAttachToFrameNodeMultiThread() {}
 
 void SliderPattern::OnAttachToMainTreeMultiThread()
 {
@@ -40,9 +37,7 @@ void SliderPattern::OnAttachToMainTreeMultiThread()
     RegisterVisibleAreaChange();
 }
 
-void SliderPattern::OnDetachFromFrameNodeMultiThread()
-{
-}
+void SliderPattern::OnDetachFromFrameNodeMultiThread() {}
 
 void SliderPattern::OnDetachFromMainTreeMultiThread(const RefPtr<FrameNode>& frameNode)
 {

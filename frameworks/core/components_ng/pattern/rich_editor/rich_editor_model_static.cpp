@@ -45,6 +45,14 @@ RefPtr<RichEditorBaseControllerBase> RichEditorModelStatic::GetRichEditorStyledS
     return pattern->GetRichEditorStyledStringController();
 }
 
+bool RichEditorModelStatic::IsStyledStringMode(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto richEditorPattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_RETURN(richEditorPattern, false);
+    return richEditorPattern->GetSpanStringMode();
+}
+
 void RichEditorModelStatic::SetStyledStringMode(FrameNode* frameNode, bool isStyledStringMode)
 {
     auto richEditorPattern = frameNode->GetPattern<RichEditorPattern>();

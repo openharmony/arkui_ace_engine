@@ -15,12 +15,12 @@
 
 import * as fs from "node:fs"
 import * as path from "node:path"
-import { checkSDK, arktsGlobal as global, metaDatabase, runTransformer, runTransformerOnProgram, CompilationOptions, findStdlib } from "@koalaui/libarkts"
+import { checkSDK, arktsGlobal as global, metaDatabase, runTransformer, CompilationOptions, findStdlib, Program, dumpProgramSrcFormatted, rebindContext, recheckContext } from "@koalaui/libarkts"
 import { CheckedBackFilter, PluginContextImpl } from "@koalaui/libarkts"
 import { Command } from "commander"
 import { filterSource, isNumber, throwError } from "@koalaui/libarkts"
 import { Es2pandaContextState } from "@koalaui/libarkts"
-import { Options, AstNode, GlobalContext, Config, Context, createETSModuleFromContext, proceedToState, ProgramTransformer, rebindSubtree, recheckSubtree, dumpProgramInfo, dumpArkTsConfigInfo, collectDependencies } from "@koalaui/libarkts"
+import { Options, Config, Context, createETSModuleFromContext, proceedToState, ProgramTransformer, dumpProgramInfo, dumpArkTsConfigInfo, collectDependencies } from "@koalaui/libarkts"
 import { ProgramInfo, compileWithCache } from "@koalaui/libarkts"
 
 interface CommandLineOptions {
@@ -30,7 +30,8 @@ interface CommandLineOptions {
     dumpAst: boolean
     restartStages: boolean
     stage: number
-    useCache: boolean
+    useCache: boolean,
+    simultaneous: boolean
 }
 
 function parseCommandLineArgs(): CommandLineOptions {
@@ -44,6 +45,7 @@ function parseCommandLineArgs(): CommandLineOptions {
         .option('--restart-stages', 'Restart the compiler to proceed to next stage')
         .option('--stage <int>', 'Stage of multistage compilation (from 0 to number of plugins in arktsconfig + 1)')
         .option('--cache', 'Use AST chaches')
+        .option('--simultaneous', 'Use "simultaneous" mode of compilation')
         .parse(process.argv)
 
     const cliOptions = commander.opts()
@@ -69,8 +71,9 @@ function parseCommandLineArgs(): CommandLineOptions {
     const restartStages = cliOptions.restartStages ?? false
     const stage = cliOptions.stage ?? 0
     const useCache = cliOptions.cache ?? false
+    const simultaneous = cliOptions.simultaneous ?? false
 
-    return { files, configPath, outputs, dumpAst, restartStages, stage, useCache }
+    return { files, configPath, outputs, dumpAst, restartStages, stage, useCache, simultaneous }
 }
 
 function insertPlugin(
@@ -80,47 +83,38 @@ function insertPlugin(
     dumpAst: boolean,
     restart: boolean,
     pluginContext: PluginContextImpl,
-    updateWith?: (node: AstNode) => void
-): AstNode {
-    const script = createETSModuleFromContext()
-    // Or this: const script = createETSModuleFromSource(source)
-    if (script === undefined) {
-        throw new Error(`Failed to receive AST from es2panda`)
-    }
-
-    if (dumpAst) {
-        console.log(`BEFORE ${stateName(state)}:`)
-        console.log(filterSource(script.dumpSrc()))
-    }
-
+) {
     global.profiler.curPlugin = pluginName
     global.profiler.transformStarted()
 
     runTransformer(global.compilerContext.program, state, restart, transform, pluginContext, {
-        onProgramTransformStart(options: CompilationOptions) {
+        onProgramTransformStart(options: CompilationOptions, program: Program) {
+            if (dumpAst) {
+                console.log(`BEFORE ${pluginName}:`)
+                dumpProgramSrcFormatted(program)
+            }
             if (!options.isMainProgram) global.profiler.transformDepStarted()
         },
-        onProgramTransformEnd(options: CompilationOptions) {
+        onProgramTransformEnd(options: CompilationOptions, program: Program) {
             if (!options.isMainProgram) global.profiler.transformDepEnded(state, pluginName)
+            if (dumpAst) {
+                console.log(`AFTER ${pluginName}:`)
+                dumpProgramSrcFormatted(program)
+            }
         }
     })
 
     global.profiler.transformEnded(state, pluginName)
     global.profiler.curPlugin = ""
 
-    if (dumpAst) {
-        console.log(`AFTER ${stateName(state)}:`)
-        if (restart) {
-            console.log(filterSource(script.dumpSrc()))
-        } else {
-            console.log(script.dumpSrc())
+    if (!restart) {
+        if (state == Es2pandaContextState.ES2PANDA_STATE_BOUND) {
+            rebindContext()
+        }
+        if (state == Es2pandaContextState.ES2PANDA_STATE_CHECKED) {
+            recheckContext()
         }
     }
-
-    if (!restart) {
-        updateWith?.(script)
-    }
-    return script
 }
 
 function restartCompiler(source: string, configPath: string, filePath: string, stdlib: string, outputPath: string, verbose: boolean = true) {
@@ -244,7 +238,7 @@ function invokeWithPlugins(
 
     pluginsByState.get(Es2pandaContextState.ES2PANDA_STATE_BOUND)?.forEach(plugin => {
         if (!terminate) {
-            insertPlugin(plugin, Es2pandaContextState.ES2PANDA_STATE_BOUND, pluginNames[pluginsApplied], dumpAst, restart, pluginContext, rebindSubtree)
+            insertPlugin(plugin, Es2pandaContextState.ES2PANDA_STATE_BOUND, pluginNames[pluginsApplied], dumpAst, restart, pluginContext)
             restartProcedure(Es2pandaContextState.ES2PANDA_STATE_BOUND)
         }
     })
@@ -256,7 +250,7 @@ function invokeWithPlugins(
 
     pluginsByState.get(Es2pandaContextState.ES2PANDA_STATE_CHECKED)?.forEach(plugin => {
         if (!terminate) {
-            insertPlugin(plugin, Es2pandaContextState.ES2PANDA_STATE_CHECKED, pluginNames[pluginsApplied], dumpAst, restart, pluginContext, recheckSubtree)
+            insertPlugin(plugin, Es2pandaContextState.ES2PANDA_STATE_CHECKED, pluginNames[pluginsApplied], dumpAst, restart, pluginContext)
             restartProcedure(Es2pandaContextState.ES2PANDA_STATE_CHECKED)
         }
     })
@@ -274,7 +268,97 @@ function invokeWithPlugins(
     compilerConfig.destroy()
 }
 
-const exportsFromInitialFile: string[] = []
+function invokeSimultaneous(
+    configPath: string,
+    filePaths: string[],
+    outputPaths: string[],
+    pluginsByState: Map<Es2pandaContextState, ProgramTransformer[]>,
+    dumpAst: boolean,
+    pluginNames: string[],
+    pluginContext: PluginContextImpl
+): void {
+    const stdlib = findStdlib()
+
+    const compilerConfig = Config.create([
+        '_',
+        '--simultaneous',
+        '--arktsconfig',
+        configPath,
+        '--extension',
+        'ets',
+        '--stdlib',
+        stdlib,
+        '--output',
+        outputPaths[0],
+        filePaths[0]
+    ])
+    global.config = compilerConfig.peer
+    if (!global.configIsInitialized())
+        throw new Error(`Wrong config: path=${configPath}`)
+
+    const compilerContext = Context.createContextGenerateAbcForExternalSourceFiles(filePaths)
+    global.compilerContext = compilerContext
+
+    pluginNames.push(`_proceed_to_binary`)
+    let pluginsApplied = 0
+
+    let terminate = false
+
+    proceedToState(Es2pandaContextState.ES2PANDA_STATE_PARSED)
+
+    // listPrograms(compilerContext.program).forEach(
+    //     program => {
+    //         console.log(program.absoluteName)
+    //         console.log("IS GEN", global.generatedEs2panda._ProgramIsGenAbcForExternalConst(compilerContext.peer, program.peer))
+    //     }
+    // )
+
+    const options = Options.createOptions(new Config(global.config))
+    global.arktsconfig = options.getArkTsConfig()
+
+    console.log("COMPILATION STARTED")
+
+    dumpArkTsConfigInfo(global.arktsconfig)
+    dumpProgramInfo(compilerContext.program)
+
+    pluginsByState.get(Es2pandaContextState.ES2PANDA_STATE_PARSED)?.forEach(plugin => {
+        if (!terminate) {
+            insertPlugin(plugin, Es2pandaContextState.ES2PANDA_STATE_PARSED, pluginNames[pluginsApplied], dumpAst, false, pluginContext)
+            pluginsApplied++
+        }
+    })
+
+    if (!terminate) {
+        proceedToState(Es2pandaContextState.ES2PANDA_STATE_BOUND)
+    }
+    pluginsByState.get(Es2pandaContextState.ES2PANDA_STATE_BOUND)?.forEach(plugin => {
+        if (!terminate) {
+            insertPlugin(plugin, Es2pandaContextState.ES2PANDA_STATE_BOUND, pluginNames[pluginsApplied], dumpAst, false, pluginContext)
+            pluginsApplied++
+        }
+    })
+    if (!terminate) {
+        proceedToState(Es2pandaContextState.ES2PANDA_STATE_CHECKED)
+    }
+
+    pluginsByState.get(Es2pandaContextState.ES2PANDA_STATE_CHECKED)?.forEach(plugin => {
+        if (!terminate) {
+            insertPlugin(plugin, Es2pandaContextState.ES2PANDA_STATE_CHECKED, pluginNames[pluginsApplied], dumpAst, false, pluginContext)
+            pluginsApplied++
+        }
+    })
+
+    if (!terminate) {
+        proceedToState(Es2pandaContextState.ES2PANDA_STATE_BIN_GENERATED)
+    }
+
+    global.profiler.compilationEnded()
+    global.profiler.report()
+    global.profiler.reportToFile(true)
+
+    compilerContext.destroy()
+    compilerConfig.destroy()
+}
 
 function generateDeclFromCurrentContext(filePath: string) {
     proceedToState(Es2pandaContextState.ES2PANDA_STATE_PARSED)
@@ -285,7 +369,6 @@ function generateDeclFromCurrentContext(filePath: string) {
                 .visitor(global.compilerContext!.program.ast)
                 .dumpSrc()
         ),
-        ...exportsFromInitialFile
     ].join('\n')
     fs.mkdirSync(path.dirname(filePath), { recursive: true })
     fs.writeFileSync(filePath, out)
@@ -293,7 +376,7 @@ function generateDeclFromCurrentContext(filePath: string) {
 
 function loadPlugin(configDir: string, jsonPlugin: any) {
     const pluginPath = jsonPlugin.transform ?? throwError(`arktsconfig plugins objects should specify transform`)
-    /** TODO: read and pass plugin options */
+    /** Improve: read and pass plugin options */
     const plugin = (pluginPath.startsWith(".") || pluginPath.startsWith("/")) ?
         path.resolve(configDir, pluginPath) : pluginPath
     const pluginFunction: (config?: any) => any = require(plugin)(jsonPlugin)
@@ -331,7 +414,7 @@ function readAndSortPlugins(configDir: string, plugins: any[]) {
 
 export function main() {
     checkSDK()
-    const { files, configPath, outputs, dumpAst, restartStages, stage, useCache } = parseCommandLineArgs()
+    const { files, configPath, outputs, dumpAst, restartStages, stage, useCache, simultaneous } = parseCommandLineArgs()
     if (files.length != outputs.length) {
         reportErrorAndExit("Different length of inputs and outputs")
     }
@@ -369,7 +452,9 @@ export function main() {
             pluginsByState.get(Es2pandaContextState.ES2PANDA_STATE_PARSED),
             pluginsByState.get(Es2pandaContextState.ES2PANDA_STATE_CHECKED)
         )
-    } else {
+    } else if (simultaneous) {
+        invokeSimultaneous(configPath, files, outputs, pluginsByState, dumpAst, pluginNames, pluginContext)
+    }else {
         for (var i = 0; i < files.length; i++) {
             invokeWithPlugins(configPath, files[i], outputs[i], pluginsByState, dumpAst, restartStages, stage, pluginNames, pluginContext)
         }

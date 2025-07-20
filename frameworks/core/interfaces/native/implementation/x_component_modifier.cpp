@@ -136,7 +136,20 @@ void OnLoadImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    LOGE("XComponentInterfaceModifier::OnLoadImpl - Ark_CustomObject is not supported");
+#ifdef XCOMPONENT_SUPPORTED
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        return;
+    }
+    auto onLoad =
+        [arkCallback = CallbackHelper(*optValue)](const std::string& xcomponentId) {
+            Opt_Object loadedObj;
+            loadedObj.tag = InteropTag::INTEROP_TAG_UNDEFINED;
+            arkCallback.InvokeSync(loadedObj);
+            TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] onLoad triggers", xcomponentId.c_str());
+    };
+    XComponentModelNG::SetOnLoad(frameNode, std::move(onLoad));
+#endif // XCOMPONENT_SUPPORTED
 }
 void OnDestroyImpl(Ark_NativePointer node,
                    const Opt_VoidCallback* value)
@@ -150,7 +163,7 @@ void OnDestroyImpl(Ark_NativePointer node,
     }
     auto onDestroy =
         [arkCallback = CallbackHelper(*optValue)](const std::string&) {
-            arkCallback.Invoke();
+            arkCallback.InvokeSync();
     };
     XComponentModelNG::SetOnDestroy(frameNode, std::move(onDestroy));
 #endif // XCOMPONENT_SUPPORTED
@@ -163,6 +176,7 @@ void EnableAnalyzerImpl(Ark_NativePointer node,
 #ifdef XCOMPONENT_SUPPORTED
     auto convValue = Converter::OptConvert<bool>(*value);
     if (!convValue) {
+        XComponentModelNG::EnableAnalyzer(frameNode, false);
         return;
     }
     XComponentModelNG::EnableAnalyzer(frameNode, *convValue);

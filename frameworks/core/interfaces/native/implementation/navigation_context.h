@@ -177,6 +177,8 @@ protected:
 class NavigationStack : public ::OHOS::Ace::NG::NavigationStack, public PathStack {
     DECLARE_ACE_TYPE(NavigationStack, ::OHOS::Ace::NG::NavigationStack);
 public:
+    NavigationStack() = default;
+    ~NavigationStack() override = default;
     void SetOnStateChangedCallback(std::function<void()> callback) override
     {
         PathStack::SetOnStateChangedCallback(callback);

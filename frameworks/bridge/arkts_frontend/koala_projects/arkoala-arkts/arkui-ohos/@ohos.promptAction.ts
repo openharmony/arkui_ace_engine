@@ -79,6 +79,21 @@ export class LevelOrder implements MaterializedBase {
 }
 
 declare namespace promptAction {
+    export enum CommonState {
+        UNINITIALIZED = 0,
+        INITIALIZED = 1,
+        APPEARING = 2,
+        APPEARED = 3,
+        DISAPPEARING = 4,
+        DISAPPEARED = 5,
+    }
+
+    export class CommonController {
+        constructor();
+        close(): void;
+        getState(): CommonState;
+    }
+
     export interface ShowToastOptions {
         message: string | Resource;
         duration?: number;
@@ -122,13 +137,18 @@ declare namespace promptAction {
         shadow?: ShadowOptions | ShadowStyle;
         enableHoverMode?: boolean;
         hoverModeArea?: HoverModeAreaType;
-        onDidAppear?: (() => void);
-        onDidDisappear?: (() => void);
-        onWillAppear?: (() => void);
-        onWillDisappear?: (() => void);
+        onDidAppear?: ((data: undefined) => void);
+        onDidDisappear?: ((data: undefined) => void);
+        onWillAppear?: ((data: undefined) => void);
+        onWillDisappear?: ((data: undefined) => void);
         levelMode?: LevelMode;
         levelUniqueId?: number;
         immersiveMode?: ImmersiveMode;
+        levelOrder?: LevelOrder;
+    }
+
+    export interface ShowDialogOptionsInternal {
+        levelOrder?: number;
     }
 
     export interface ShowDialogSuccessResponse {
@@ -184,6 +204,7 @@ declare namespace promptAction {
         levelMode?: LevelMode;
         levelUniqueId?: number;
         immersiveMode?: ImmersiveMode;
+        levelOrder?: LevelOrder;
         focusable?: boolean;
     }
 
@@ -191,6 +212,7 @@ declare namespace promptAction {
         transition?: KPointer;
         dialogTransition?: KPointer;
         maskTransition?: KPointer;
+        levelOrder?: number;
     }
 
     export interface CustomDialogOptions extends BaseDialogOptions {
@@ -204,11 +226,6 @@ declare namespace promptAction {
         borderStyle?: BorderStyle | EdgeStyles;
         backgroundBlurStyle?: BlurStyle;
         shadow?: ShadowOptions | ShadowStyle;
-    }
-
-    export class CommonController {
-        constructor();
-        close(): void;
     }
 
     export class DialogController extends CommonController {}
@@ -237,9 +254,11 @@ declare namespace promptAction {
 
     export function closeToast(toastId: number): void;
 
-    export function showDialog1(options: ShowDialogOptions, callback: AsyncCallback<ShowDialogSuccessResponse>): void;
+    export function showDialog1(options: ShowDialogOptions, callback: AsyncCallback<ShowDialogSuccessResponse>,
+        optionsInternal?: ShowDialogOptionsInternal): void;
 
-    export function showDialog(options: ShowDialogOptions): Promise<ShowDialogSuccessResponse>;
+    export function showDialog(options: ShowDialogOptions,
+        optionsInternal?: ShowDialogOptionsInternal): Promise<ShowDialogSuccessResponse>;
 
     export function showActionMenu1(options: ActionMenuOptions,
         callback: AsyncCallback<ActionMenuSuccessResponse>): void;
@@ -263,6 +282,9 @@ declare namespace promptAction {
 
     export function presentCustomDialog(builder: KPointer, controller?: DialogController,
         options?: DialogOptions, optionsInternal?: DialogOptionsInternal): Promise<number>;
+
+    export function getTopOrder(): number | undefined;
+    export function getBottomOrder(): number | undefined;
 }
 
 export default promptAction

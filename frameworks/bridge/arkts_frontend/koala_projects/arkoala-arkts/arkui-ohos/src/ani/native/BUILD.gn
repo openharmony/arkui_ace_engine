@@ -51,17 +51,19 @@ ohos_shared_library("arkoala_native_ani") {
     "list/list_children_main_size_module.cpp",
     "web/web_module_methods.cpp",
     "xcomponent/xcomponent_module_methods.cpp",
+    "condition_scope/condition_scope.cpp",
   ]
 
   external_deps = [
     "hilog:libhilog",
     "image_framework:image",
-    #"image_framework:image_taihe",
+    "image_framework:image_taihe",
+    "napi:ace_napi",
     "runtime_core:ani",
     "runtime_core:ani_helpers",
     "udmf:libudmf",
     "udmf:udmf_client",
-    #"udmf:udmf_taihe_native",
+    "udmf:udmf_taihe_native",
   ]
 
   configs = [ "$ace_root:ace_config" ]

@@ -1,0 +1,52 @@
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/config/components/ets_frontend/ets2abc_config.gni")
+
+node_version = "v16.20.2"
+host_arch = "${host_os}-${host_cpu}"
+
+template("npm_cmd") {
+    action("$target_name") {
+        script = "//foundation/arkui/ace_engine/frameworks/bridge/arkts_frontend/koala_mirror/gn/command/npm_util.py"
+        outputs = invoker.outputs
+        if (defined(invoker.deps)) {
+            deps = invoker.deps
+        }
+        if (defined(invoker.external_deps)) {
+            external_deps = invoker.external_deps
+        }
+        args = [
+            "--node-path", rebase_path("//prebuilts/build-tools/common/nodejs/node-${node_version}-${host_arch}/bin"),
+            "--arklink-path", rebase_path("${static_linker_build_path}"),
+            "--es2panda-path", rebase_path("${ets2abc_build_path}"),
+            "--stdlib-path", rebase_path("//arkcompiler/runtime_core/static_core/plugins/ets/stdlib"),
+            "--project-path", invoker.project_path
+        ]
+        if (defined(invoker.target_out_path)) {
+            args += [ "--target-out-path", invoker.target_out_path ]
+        }
+        if (defined(invoker.built_file_path)) {
+            args += [ "--built-file-path", invoker.built_file_path ]
+        }
+        if (defined(invoker.install) && invoker.install) {
+            args += [ "--install" ]
+        }
+        if (defined(invoker.install_path)) {
+            args += [ "--install-path", invoker.install_path ]
+        }
+        if (defined(invoker.run_tasks)) {
+            args += [ "--run-tasks" ] + invoker.run_tasks
+        }
+    }
+}

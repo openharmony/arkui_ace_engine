@@ -68,6 +68,8 @@ extern "C" DLL_EXPORT const InteropAsyncWorker* GetAsyncWorker();
 #include "convertors-cj.h"
 #elif KOALA_ANI
 #include "convertors-ani.h"
+#elif KOALA_KOTLIN
+#include "convertors-kotlin.h"
 #else
 #error "One of above branches must be taken"
 #endif

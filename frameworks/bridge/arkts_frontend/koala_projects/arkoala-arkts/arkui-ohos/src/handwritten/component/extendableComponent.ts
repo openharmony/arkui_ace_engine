@@ -18,6 +18,8 @@ import { UIContext } from "@ohos/arkui/UIContext"
 import { IProvideDecoratedVariable } from "../stateManagement/decorator";
 import { LocalStorage } from '@ohos.arkui.stateManagement';
 import { PeerNode } from "../PeerNode";
+import { uiObserver } from "@ohos/arkui/observer"
+import { IProviderDecoratedVariable } from "../stateManagement/decorator";
 
 export interface LifeCycle {
     aboutToAppear(): void {}
@@ -31,6 +33,10 @@ export interface IExtendableComponent {
     getUIContext(): UIContext;
     getUniqueId(): int32;
     getPeerNode(): PeerNode | undefined;
+    queryNavigationInfo(): uiObserver.NavigationInfo;
+    queryNavDestinationInfo(isInner: boolean): uiObserver.NavDestinationInfo;
+    queryNavDestinationInfo(): uiObserver.NavDestinationInfo
+    queryRouterPageInfo(): uiObserver.RouterPageInfo;
 }
 
 export abstract class ExtendableComponent implements LifeCycle {
@@ -38,6 +44,7 @@ export abstract class ExtendableComponent implements LifeCycle {
 
     private parent_: ExtendableComponent | undefined;
     private providedVars_: Map<string, IProvideDecoratedVariable<object>> = new Map<string, IProvideDecoratedVariable<object>>();
+    private providedVarsV2_: Map<string, IProviderDecoratedVariable<object>> = new Map<string, IProviderDecoratedVariable<object>>();
     private delegate_?: IExtendableComponent;
     private localStoragebackStore_?: LocalStorage | undefined = undefined;
     private useSharedStorage_?: boolean | undefined = undefined;;
@@ -52,11 +59,27 @@ export abstract class ExtendableComponent implements LifeCycle {
         this.delegate_ = delegate;
     }
 
+    addProvidedVarV2<T>(providedPropName: string, store: IProviderDecoratedVariable<T>): void {
+        this.providedVarsV2_.set(providedPropName, store as object as IProviderDecoratedVariable<object>);
+    }
+
     addProvidedVar<T>(providedPropName: string, store: IProvideDecoratedVariable<T>, allowOverride?: boolean | undefined): void {
         if (!allowOverride && this.findProvide<T>(providedPropName)) {
             throw new ReferenceError(`Duplicate @Provide property with name ${providedPropName}. Property with this name is provided by one of the ancestor Component already.`);
         }
         this.providedVars_.set(providedPropName, store as object as IProvideDecoratedVariable<object>);
+    }
+
+    findProvideV2<T>(providedPropName: string): IProviderDecoratedVariable<T> | null {
+        let parentCom = this.parent_;
+        while (parentCom !== undefined) {
+            let provideVar = parentCom.providedVarsV2_.get(providedPropName);
+            if (provideVar !== undefined) {
+                return provideVar as object as IProviderDecoratedVariable<T>;
+            }
+            parentCom = parentCom.parent_;
+        }
+        return null;
     }
 
     findProvide<T>(providedPropName: string): IProvideDecoratedVariable<T> | null {
@@ -76,6 +99,19 @@ export abstract class ExtendableComponent implements LifeCycle {
 
     getUniqueId(): int32 {
         return this.delegate_!.getUniqueId();
+    }
+    
+    queryNavigationInfo(): uiObserver.NavigationInfo {
+        return this.delegate_!.queryNavigationInfo();
+    }
+    queryRouterPageInfo(): uiObserver.RouterPageInfo {
+        return this.delegate_!.queryRouterPageInfo();
+    }
+    queryNavDestinationInfo(isInner: boolean): uiObserver.NavDestinationInfo {
+        return this.delegate_!.queryNavDestinationInfo(isInner);
+    }
+    queryNavDestinationInfo() : uiObserver.NavDestinationInfo {
+        return this.delegate_!.queryNavDestinationInfo();
     }
 
     public get localStorage_(): LocalStorage {

@@ -312,7 +312,7 @@ suite.skip(util.basename(__filename), () => {
         )
     })
 
-    // TODO: change 0 -> 777 (waiting fix)
+    // Improve: change 0 -> 777 (waiting fix)
     test("sample-1", function() {
         const sample_in =
         `
@@ -378,7 +378,7 @@ suite.skip(util.basename(__filename), () => {
         )
     })
 
-    // TODO: change 0 -> 777 (waiting fix)
+    // Improve: change 0 -> 777 (waiting fix)
     test("sample-2", function() {
         const sample_in =
         `

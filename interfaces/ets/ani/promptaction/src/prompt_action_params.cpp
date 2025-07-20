@@ -206,66 +206,13 @@ bool GetDoubleParam(ani_env* env, ani_object object, const char *name, double& r
     return GetDoubleParam(env, resultObj, result);
 }
 
-bool GetFloatParam(ani_env* env, ani_object object, float& result)
+bool GetDoubleParamOpt(ani_env *env, ani_object object, const char *name, std::optional<double>& result)
 {
-    ani_float resultValue;
-    ani_status status = env->Object_CallMethodByName_Float(object, "unboxed", nullptr, &resultValue);
-    if (status != ANI_OK) {
+    double resultValue;
+    if (!GetDoubleParam(env, object, name, resultValue)) {
         return false;
     }
-    result = static_cast<float>(resultValue);
-    return true;
-}
-
-bool GetFloatParam(ani_env* env, ani_object object, const char *name, float& result)
-{
-    ani_ref resultRef;
-    ani_status status = env->Object_GetPropertyByName_Ref(object, name, &resultRef);
-    if (status != ANI_OK) {
-        return false;
-    }
-
-    if (IsUndefinedObject(env, resultRef)) {
-        return false;
-    }
-    ani_object resultObj = static_cast<ani_object>(resultRef);
-    return GetFloatParam(env, resultObj, result);
-}
-
-bool GetFloatArrayParam(ani_env *env, ani_object object, const char *name, std::vector<float>& result)
-{
-    ani_ref resultRef;
-    ani_status status = env->Object_GetPropertyByName_Ref(object, name, &resultRef);
-    if (status != ANI_OK) {
-        return false;
-    }
-
-    if (IsUndefinedObject(env, resultRef) || !IsArrayObject(env, resultRef)) {
-        return false;
-    }
-
-    ani_size length;
-    ani_array resultObj = static_cast<ani_array>(resultRef);
-    status = env->Array_GetLength(resultObj, &length);
-    if (status != ANI_OK) {
-        return false;
-    }
-
-    std::vector<float> floatArray;
-    for (int i = 0; i < int(length); i++) {
-        ani_ref itemRef;
-        status = env->Array_Get(resultObj, (ani_int)i, &itemRef);
-        if (status != ANI_OK) {
-            continue;
-        }
-
-        float itemFloat;
-        ani_object itemObj = static_cast<ani_object>(itemRef);
-        if (GetFloatParam(env, itemObj, itemFloat)) {
-            floatArray.emplace_back(itemFloat);
-        }
-    }
-    result = floatArray;
+    result = std::make_optional<double>(resultValue);
     return true;
 }
 
@@ -353,7 +300,7 @@ bool GetStringArrayParam(ani_env *env, ani_object object, const char *name, std:
 
 bool GetEnumInt(ani_env* env, ani_object resultObj, const char *enum_descriptor, int32_t& result)
 {
-    if (IsEnum(env, resultObj, enum_descriptor)) {
+    if (!IsEnum(env, resultObj, enum_descriptor)) {
         return false;
     }
 
@@ -394,7 +341,7 @@ bool GetEnumIntOpt(ani_env* env, ani_object object, const char *name, const char
 
 bool GetEnumString(ani_env* env, ani_object resultObj, const char *enum_descriptor, std::string& result)
 {
-    if (IsEnum(env, resultObj, enum_descriptor)) {
+    if (!IsEnum(env, resultObj, enum_descriptor)) {
         return false;
     }
 
@@ -435,10 +382,17 @@ bool GetEnumStringOpt(ani_env* env, ani_object object, const char *name, const c
 
 bool GetFunctionParam(ani_env *env, ani_ref ref, std::function<void()>& result)
 {
-    result = [env, ref]() {
-        if (ref) {
-            ani_fn_object func = static_cast<ani_fn_object>(ref);
-            env->FunctionalObject_Call(func, 0, nullptr, nullptr);
+    ani_ref globalRef;
+    env->GlobalReference_Create(ref, &globalRef);
+    result = [env, globalRef]() {
+        if (globalRef) {
+            ani_fn_object func = static_cast<ani_fn_object>(globalRef);
+            std::vector<ani_ref> args;
+            ani_ref fnReturnVal {};
+            ani_status status = env->FunctionalObject_Call(func, args.size(), args.data(), &fnReturnVal);
+            if (status != ANI_OK) {
+                TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY, "FunctionalObject_Call fail. status: %{public}d", status);
+            }
         }
     };
     return true;
@@ -662,14 +616,14 @@ void CompleteResourceParamV1(ani_env *env, ani_object object)
     }
 
     ModifyResourceParam(env, object, resType, resName);
-    ani_int idInt = static_cast<ani_int>(UNKNOWN_RESOURCE_ID);
-    status = env->Object_SetPropertyByName_Int(object, "id", idInt);
+    ani_double aniId = static_cast<ani_double>(static_cast<double>(UNKNOWN_RESOURCE_ID));
+    status = env->Object_SetPropertyByName_Double(object, "id", aniId);
     if (status != ANI_OK) {
         return;
     }
 
-    int32_t aniType = static_cast<int32_t>(resType);
-    status = env->Object_SetPropertyByName_Int(object, "type", static_cast<ani_int>(aniType));
+    ani_double aniType = static_cast<ani_double>(static_cast<double>(resType));
+    status = env->Object_SetPropertyByName_Double(object, "type", aniType);
     if (status != ANI_OK) {
         return;
     }
@@ -719,8 +673,8 @@ void CompleteResourceParamV2(ani_env *env, ani_object object)
         return;
     }
 
-    int32_t aniType = static_cast<int32_t>(resType);
-    status = env->Object_SetPropertyByName_Int(object, "type", static_cast<ani_int>(aniType));
+    ani_double aniType = static_cast<ani_double>(static_cast<double>(resType));
+    status = env->Object_SetPropertyByName_Double(object, "type", aniType);
     if (status != ANI_OK) {
         return;
     }
@@ -758,10 +712,16 @@ bool GetResourceParam(ani_env *env, ani_object object, ResourceInfo& result)
     }
 
     CompleteResourceParam(env, object);
-    GetInt32Param(env, object, "id", result.resId);
+    ani_double id;
+    ani_status status = env->Object_GetPropertyByName_Double(object, "id", &id);
+    if (status == ANI_OK) {
+        result.resId = static_cast<int32_t>(id);
+    }
     GetStringParamOpt(env, object, "bundleName", result.bundleName);
     GetStringParamOpt(env, object, "moduleName", result.moduleName);
-    GetInt32Param(env, object, "type", result.type);
+    double type = 0;
+    GetDoubleParam(env, object, "type", type);
+    result.type = static_cast<int32_t>(type);
     GetStringArrayParam(env, object, "params", result.params);
     return true;
 }
@@ -1016,7 +976,7 @@ bool GetLengthParam(ani_env *env, ani_ref ref, OHOS::Ace::CalcDimension& result)
 bool GetColorParam(ani_env* env, ani_object object, PromptActionColor& result)
 {
     int32_t resultInt;
-    if (!GetEnumInt(env, object, "policy", "Larkui/component/enums/Color;", resultInt)) {
+    if (!GetEnumInt(env, object, "Larkui/component/enums/Color;", resultInt)) {
         return false;
     }
     result = static_cast<PromptActionColor>(resultInt);
@@ -1027,7 +987,7 @@ bool GetResourceColorParam(ani_env *env, ani_object object, OHOS::Ace::Color& re
 {
     std::string resultStr;
     if (GetStringParam(env, object, resultStr)) {
-        result = OHOS::Ace::Color::FromString(resultStr);
+        OHOS::Ace::Color::ParseColorString(resultStr, result);
         return true;
     }
 
@@ -1050,7 +1010,7 @@ bool GetResourceColorParam(ani_env *env, ani_object object, OHOS::Ace::Color& re
         if (resultStr.size() == 0) {
             return false;
         }
-        result = OHOS::Ace::Color::FromString(resultStr);
+        OHOS::Ace::Color::ParseColorString(resultStr, result);
         return true;
     }
     return false;
@@ -1461,7 +1421,7 @@ bool ResourceIntegerToString(const ResourceInfo& resourceInfo, std::string& resu
     return true;
 }
 
-bool GetDimesionParam(ani_env* env, ani_object object, OHOS::Ace::CalcDimension& result)
+bool GetDimensionParam(ani_env* env, ani_object object, OHOS::Ace::CalcDimension& result)
 {
     double resultDouble;
     if (GetDoubleParam(env, object, resultDouble)) {
@@ -1483,8 +1443,8 @@ bool GetDimesionParam(ani_env* env, ani_object object, OHOS::Ace::CalcDimension&
     }
 
     std::string resourceStr;
-    if (ResourceToString(resourceInfo, resourceStr)) {
-        return true;
+    if (!ResourceToString(resourceInfo, resourceStr)) {
+        return false;
     }
 
     if (!ResourceIntegerToString(resourceInfo, resourceStr)) {
@@ -1494,13 +1454,13 @@ bool GetDimesionParam(ani_env* env, ani_object object, OHOS::Ace::CalcDimension&
     return true;
 }
 
-bool GetDimesionParam(ani_env* env, ani_ref ref, OHOS::Ace::CalcDimension& result)
+bool GetDimensionParam(ani_env* env, ani_ref ref, OHOS::Ace::CalcDimension& result)
 {
     ani_object object = static_cast<ani_object>(ref);
-    return GetDimesionParam(env, object, result);
+    return GetDimensionParam(env, object, result);
 }
 
-bool GetDimesionParam(ani_env* env, ani_object object, const char *name, OHOS::Ace::CalcDimension& result)
+bool GetDimensionParam(ani_env* env, ani_object object, const char *name, OHOS::Ace::CalcDimension& result)
 {
     ani_ref resultRef;
     ani_status status = env->Object_GetPropertyByName_Ref(object, name, &resultRef);
@@ -1511,14 +1471,14 @@ bool GetDimesionParam(ani_env* env, ani_object object, const char *name, OHOS::A
     if (IsUndefinedObject(env, resultRef)) {
         return false;
     }
-    return GetDimesionParam(env, resultRef, result);
+    return GetDimensionParam(env, resultRef, result);
 }
 
-bool GetDimesionParamOpt(ani_env* env, ani_object object, const char *name,
+bool GetDimensionParamOpt(ani_env* env, ani_object object, const char *name,
     std::optional<OHOS::Ace::CalcDimension>& result)
 {
     OHOS::Ace::CalcDimension dimension;
-    if (!GetDimesionParam(env, object, name, dimension)) {
+    if (!GetDimensionParam(env, object, name, dimension)) {
         return false;
     }
     result = std::make_optional<OHOS::Ace::CalcDimension>(dimension);

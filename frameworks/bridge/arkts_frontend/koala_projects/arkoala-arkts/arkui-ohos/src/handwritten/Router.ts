@@ -28,17 +28,20 @@ import {
     GlobalStateManager,
     StateContext,
     ComputableState,
+    IncrementalNode,
 } from "@koalaui/runtime"
 import { ArkUINativeModule } from "#components"
 import { KPointer, runtimeType, RuntimeType } from "@koalaui/interop"
 import router from "@ohos/router"
 import { EntryPoint, UserView, UserViewBuilder } from "arkui/UserView"
 import { InteropNativeModule, nullptr } from "@koalaui/interop"
-import { PeerNode } from "../PeerNode"
+import { findPeerNode, PeerNode } from "../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { Visibility } from "../component"
+import { JsResultInternal, Visibility } from "../component"
 import { Serializer } from "../component/peers/Serializer"
 import { RouterExtender } from "./ArkRouterExtenderMaterialized"
+import { UIContextImpl } from "./UIContextImpl"
+import { UIContextUtil } from "arkui/handwritten/UIContextUtil"
 
 // ----------------------------------------------------------
 // TODO: Remove these constants when enums are fixed in Panda
@@ -117,7 +120,7 @@ export interface Router {
 
     UpdateVisiblePagePeerNode(node: PeerNode, index?: number): void
 
-    getEntryRootValue(): ComputableState<PeerNode>
+    getEntryRootValue(): ComputableState<IncrementalNode>
 
     runStartPage(options: router.RouterOptions, builder: UserViewBuilder): void
 }
@@ -127,7 +130,8 @@ class RouterImpl implements Router {
     private peerNodeList = new Array<KPointer>
     public readonly visiblePages = arrayState<VisiblePage>()
     private showingPageIndex : number = 0
-    private rootState: Array<ComputableState<PeerNode>> = new Array<ComputableState<PeerNode>>()
+    private entryPage: VisiblePage | undefined = undefined;
+    private rootState: Array<ComputableState<IncrementalNode>> = new Array<ComputableState<IncrementalNode>>()
 
     constructor(moduleName: string) {
         this.moduleName = moduleName
@@ -179,12 +183,14 @@ class RouterImpl implements Router {
     }
 
     push(options: router.RouterOptions): void {
-        let className = this.getClassName(options.url)
-        let entryObject = this.RunPage(className)
+        if (options.url === '/') {
+            options.url = this.entryPage?.url!;
+        }
+        let className = this.getClassName(options.url);
+        let entryObject = this.RunPage(className);
         if (entryObject) {
             let manager = GlobalStateManager.instance
-            let peerNode = PeerNode.generateRootPeer()
-            let stateNode = manager.updatableNode<PeerNode>(peerNode, (context: StateContext) => {
+            let stateNode = manager.updatableNode<IncrementalNode>(new IncrementalNode(), (context: StateContext) => {
                 const frozen = manager.frozen
                 manager.frozen = true
                 memoEntry<void>(context, 0, () => {
@@ -192,8 +198,22 @@ class RouterImpl implements Router {
                 })
                 manager.frozen = frozen
             })
+            const incNode = stateNode.value
+            const peerNode = findPeerNode(incNode);
+            if (peerNode === undefined) {
+                InteropNativeModule._NativeLog("AceRouter:create jsView failed");
+                return;
+            }
+            const jsViewNodePtr = peerNode!.peer.ptr;
             this.rootState.push(stateNode)
-            let pageNode = RouterExtender.routerPush(options)
+            let pagePushTransitionCallback = () => {
+                this.peerNodeList.pop();
+                this.visiblePages.pop();
+                let node = this.rootState.pop();
+                node?.dispose();
+                this.showingPageIndex = this.showingPageIndex - 1;
+            };
+            let pageNode = RouterExtender.routerPush(options, jsViewNodePtr, pagePushTransitionCallback);
             if (pageNode === nullptr) {
                 InteropNativeModule._NativeLog("AceRouter:push page failed")
                 this.rootState.pop()
@@ -208,12 +228,14 @@ class RouterImpl implements Router {
     }
 
     replace(options: router.RouterOptions): void {
-        let className = this.getClassName(options.url)
-        let entryObject = this.RunPage(className)
+        if (options.url === '/') {
+            options.url = this.entryPage?.url!;
+        }
+        let className = this.getClassName(options.url);
+        let entryObject = this.RunPage(className);
         if (entryObject) {
             let manager = GlobalStateManager.instance
-            let peerNode = PeerNode.generateRootPeer()
-            let stateNode = manager.updatableNode<PeerNode>(peerNode, (context: StateContext) => {
+            let stateNode = manager.updatableNode<IncrementalNode>(new IncrementalNode(), (context: StateContext) => {
                 const frozen = manager.frozen
                 manager.frozen = true
                 memoEntry<void>(context, 0, () => {
@@ -222,14 +244,33 @@ class RouterImpl implements Router {
                 manager.frozen = frozen
             })
             
-            this.rootState.push(stateNode)
-            let pageTransiTionFinishCallback = () => {
-                this.peerNodeList.splice(this.showingPageIndex - 1, 1)
-                this.visiblePages.splice(this.showingPageIndex - 1, 1)
-                this.rootState.splice(this.showingPageIndex - 1, 1)
-                this.showingPageIndex -= 1
+            const incNode = stateNode.value
+            const peerNode = findPeerNode(incNode);
+            if (peerNode === undefined) {
+                InteropNativeModule._NativeLog("AceRouter:create jsView failed");
+                return;
             }
-            let pageNode = RouterExtender.routerReplace(options, pageTransiTionFinishCallback)
+            const jsViewNodePtr = peerNode!.peer.ptr
+            this.rootState.push(stateNode);
+            let pageExitTransitionCallback = () => {
+                this.peerNodeList.splice(this.showingPageIndex - 1, 1);
+                this.visiblePages.splice(this.showingPageIndex - 1, 1);
+                let nodeArray = this.rootState.splice(this.showingPageIndex - 1, 1);
+                if (nodeArray !== undefined) {
+                    nodeArray?.forEach((element) => {
+                        element?.dispose();
+                    })
+                }
+                this.showingPageIndex -= 1;
+            };
+            let pageEnterTransitionCallback = () => {
+                this.peerNodeList.pop();
+                this.visiblePages.pop();
+                let node = this.rootState.pop();
+                node?.dispose();
+                this.showingPageIndex = this.showingPageIndex - 1;
+            };
+            let pageNode = RouterExtender.routerReplace(options, jsViewNodePtr, pageEnterTransitionCallback, pageExitTransitionCallback)
             if (pageNode === nullptr) {
                 InteropNativeModule._NativeLog("AceRouter:replace page failed")
                 this.rootState.pop()
@@ -252,11 +293,7 @@ class RouterImpl implements Router {
             RouterExtender.routerBack(options)
             return;
         }
-        this.showingPageIndex = this.showingPageIndex - 1
-        this.peerNodeList.pop()
         RouterExtender.routerBack(options)
-        this.visiblePages.pop()
-        this.rootState.pop()
     }
 
     clear(): void {
@@ -283,8 +320,9 @@ class RouterImpl implements Router {
 
     getState(): router.RouterState {
         let curPage = this.visiblePages.at(this.showingPageIndex)
+        // routerState index is started from 1. 
         let state: router.RouterState = {
-            index: this.showingPageIndex,
+            index: this.showingPageIndex + 1,
             name: curPage.url,
             path: curPage.path,
             params: curPage.params !== undefined ? curPage.params! : new Object()
@@ -293,10 +331,10 @@ class RouterImpl implements Router {
     }
 
     getStateByIndex(index: number): router.RouterState | undefined {
-        if (index > this.showingPageIndex) {
+        if (index > this.showingPageIndex + 1 || index <= 0) {
             return undefined
         }
-        let page = this.visiblePages.at(index)
+        let page = this.visiblePages.at(index - 1);
         let state: router.RouterState = {
             index: index,
             name: page.url,
@@ -310,8 +348,9 @@ class RouterImpl implements Router {
         let retVal: Array<router.RouterState> = new Array<router.RouterState>()
         this.visiblePages.value.forEach((element, index) => {
             if (element.url === url) {
+                // routerState index is started from 1. 
                 let state: router.RouterState = {
-                    index: index,
+                    index: index + 1,
                     name: element.url,
                     path: element.path,
                     params: element.params !== undefined ? element.params! : new Object()
@@ -322,25 +361,39 @@ class RouterImpl implements Router {
         return retVal
     }
 
-    getEntryRootValue(): ComputableState<PeerNode> {
+    getEntryRootValue(): ComputableState<IncrementalNode> {
         return this.rootState.at(this.rootState.length - 1)!
     }
 
     runStartPage(options: router.RouterOptions, builder: UserViewBuilder): void {
         let manager = GlobalStateManager.instance
-        let peerNode = PeerNode.generateRootPeer()
-        let stateNode = manager.updatableNode<PeerNode>(peerNode, (context: StateContext) => {
+        let stateNode = manager.updatableNode<IncrementalNode>(new IncrementalNode(), (context: StateContext) => {
             const frozen = manager.frozen
             manager.frozen = true
             memoEntry<void>(context, 0, builder)
             manager.frozen = frozen
         })
 
-        let pageNode = RouterExtender.routerRunPage(options)
+        const incNode = stateNode.value
+        const peerNode = findPeerNode(incNode);
+        if (peerNode === undefined) {
+            InteropNativeModule._NativeLog("AceRouter:create jsView failed");
+            return;
+        }
+        const jsViewNodePtr = peerNode!.peer.ptr
         this.rootState.push(stateNode)
+        let pagePushTransitionCallback = () => {
+            this.peerNodeList.pop();
+            this.visiblePages.pop();
+            let node = this.rootState.pop();
+            node?.dispose();
+            this.showingPageIndex = this.showingPageIndex - 1;
+        };
+        let pageNode = RouterExtender.routerRunPage(options, jsViewNodePtr, pagePushTransitionCallback)
         this.peerNodeList.splice(this.peerNodeList.length, 0, pageNode)
 
         let newPage = new VisiblePage(builder, options.url, this.getPathInfo(options.url), options.params)
+        this.entryPage = newPage;
         this.visiblePages.splice(0, 0, newPage)
     }
 }
@@ -349,7 +402,6 @@ export function Routed(
     /** @memo */
     initial: () => void,
     moduleName: string,
-    rootPeer: PeerNode,
     initialUrl?: string,
 ): void {
     let routerImp = new RouterImpl(moduleName)

@@ -14,7 +14,7 @@
  */
 
 import { KInt } from '@koalaui/interop';
-import { isSameNativeObject } from '../peers/ArktsObject';
+import { isSameNativeObject } from '../../../arkts-api/peers/ArktsObject';
 import { VariableDeclaration, VariableDeclarator } from '../types';
 import { attachModifiers, updateThenAttach } from '../utilities/private';
 import { Es2pandaVariableDeclarationKind } from '../../../generated/Es2pandaEnums';

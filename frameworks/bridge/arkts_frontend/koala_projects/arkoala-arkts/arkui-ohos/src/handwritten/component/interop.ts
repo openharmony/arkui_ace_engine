@@ -53,14 +53,23 @@ export interface CompatibleComponentInfo {
 /** @memo */
 export function compatibleComponent(
     init: () => CompatibleComponentInfo,
-    update: (instance: ESValue) => void
+    update: (instance: ESValue) => void,
+    component?: ExtendableComponent,
 ): void {
     NodeAttach<CompatiblePeerNode>((): CompatiblePeerNode => {
         let global = ESValue.getGlobal();
         const ptr = ArkUIAniModule._CreateViewStackProcessor();
         openInterop(global);
+        if (component !== undefined) {
+            bindCompatibleLocalStorageCallback(component!);
+        }
         const result = init();
         const realComponent = result.component;
+        if (component !== undefined && realComponent !== undefined) {
+            bindCompatibleLocalStorageCallback(component!, realComponent!);
+            let resetViewPUInterop = global.getProperty('resetViewPUFindLocalStorageInterop');
+            resetViewPUInterop.invoke();
+        }
         const nodePtr = ArkUIAniModule._PopViewStackProcessor();
         ArkUIAniModule._DeleteViewStackProcessor(ptr);
         return CompatiblePeerNode.create(nodePtr, realComponent);
@@ -115,6 +124,22 @@ export function bindCompatibleProvideCallback(staticComponent: ExtendableCompone
     setCallback.invoke(callback, component);
     return;
 }
+
+export function bindCompatibleLocalStorageCallback(staticComponent: ExtendableComponent,
+    component?: ESValue): void {
+    const callback = (): Object | null => {
+        let storage = staticComponent.localStorage_;
+        if ((storage === null)) {
+            return storage;
+        }
+        return storage.getProxy()!.unwrap()! as Object;
+    }
+    let global = ESValue.getGlobal();
+    let setFindLocalStorageInterop = global.getProperty('setFindLocalStorageInterop');
+    setFindLocalStorageInterop.invoke(callback, component);
+    return;
+}
+
 
 export function getCompatibleState<T>(staticState: IDecoratedV1Variable<T>, createState: ESValue): ESValue {
     let source = staticState;
@@ -224,4 +249,99 @@ export function registerCreateStaticObservedCallback(): void {
     let registerCallback = global.getProperty('registerCallbackForMakeObserved');
     registerCallback.invoke(makeObservedcallback);
     return;
+}
+
+/** @memo */
+export function compatibleWrappedBuilder(builder: Any, ...args: FixedArray<ESValue>): void {
+    compatibleComponent((() => {
+        const global = ESValue.getGlobal();
+        const viewStackProcessor = global.getProperty('ViewStackProcessor');
+        const createId = viewStackProcessor.getProperty('AllocateNewElmetIdForNextComponent');
+        const elmtId = createId.invoke();
+
+        let component: ESValue;
+        let createCompatibleNode: ESValue;
+        switch (args.length) {
+            case 0:
+                createCompatibleNode = global.getProperty('createCompatibleNodeWithFuncVoid');
+                component = createCompatibleNode.invoke(ESValue.wrap(builder), elmtId);
+                break;
+            case 1:
+                createCompatibleNode = global.getProperty('createCompatibleNodeWithFunc');
+                component = createCompatibleNode.invoke(ESValue.wrap(builder), elmtId, args[0]);
+                break;
+            case 2:
+                createCompatibleNode = global.getProperty('createCompatibleNodeWithFunc2');
+                component = createCompatibleNode.invoke(ESValue.wrap(builder), elmtId, args[0], args[1]);
+                break;
+            case 3:
+                createCompatibleNode = global.getProperty('createCompatibleNodeWithFunc3');
+                component = createCompatibleNode.invoke(ESValue.wrap(builder), elmtId, args[0], 
+                    args[1], args[2]);
+                break;
+            case 4:
+                createCompatibleNode = global.getProperty('createCompatibleNodeWithFunc4');
+                component = createCompatibleNode.invoke(ESValue.wrap(builder), elmtId, args[0], 
+                    args[1], args[2], args[3]);
+                break;
+            case 5:
+                createCompatibleNode = global.getProperty('createCompatibleNodeWithFunc5');
+                component = createCompatibleNode.invoke(ESValue.wrap(builder), elmtId, args[0], 
+                    args[1], args[2], args[3], args[4]);
+                break;
+            case 6:
+                createCompatibleNode = global.getProperty('createCompatibleNodeWithFunc6');
+                component = createCompatibleNode.invoke(ESValue.wrap(builder), elmtId, args[0],
+                    args[1], args[2], args[3], args[4], args[5]);
+                break;
+            case 7:
+                createCompatibleNode = global.getProperty('createCompatibleNodeWithFunc7');
+                component = createCompatibleNode.invoke(ESValue.wrap(builder), elmtId, args[0],
+                    args[1], args[2], args[3], args[4], args[5], args[6]);
+                break;
+            case 8:
+                createCompatibleNode = global.getProperty('createCompatibleNodeWithFunc8');
+                component = createCompatibleNode.invoke(ESValue.wrap(builder), elmtId, args[0],
+                    args[1], args[2], args[3], args[4], args[5], args[6], args[7]);
+                break;
+            case 9:
+                createCompatibleNode = global.getProperty('createCompatibleNodeWithFunc9');
+                component = createCompatibleNode.invoke(ESValue.wrap(builder), elmtId, args[0],
+                    args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8]);
+                break;
+            case 10:
+                createCompatibleNode = global.getProperty('createCompatibleNodeWithFunc10');
+                component = createCompatibleNode.invoke(ESValue.wrap(builder), elmtId, args[0],
+                    args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9]);
+                break;
+            default:
+                throw Error('Error arguments in Legacy Builder Function');
+        }
+        const viewPUCreate = global.getProperty('viewPUCreate');
+        viewPUCreate.invoke(component);
+        return {
+            component: component,
+            name: 'compatibleWrappedBuilder',
+        };
+    }), ((instance: ESValue) => {
+        if (args.length !== 1) {
+            return;
+        }
+        const param = args[0]
+        if (param.typeOf() !== 'object') {
+            return;
+        }
+        let it = param.keys();
+        const stateParam = instance.getProperty('arg1') as ESValue;
+        while (true) {
+            const result = it.next()
+            if (result.done) {
+                break;
+            }
+            stateParam.setProperty(result.value as ESValue, param.getProperty(result.value as ESValue));
+        }
+        const global = ESValue.getGlobal();
+        const runPendingJobs = global.getProperty('runPendingJobs');
+        runPendingJobs.invoke();
+    }));
 }

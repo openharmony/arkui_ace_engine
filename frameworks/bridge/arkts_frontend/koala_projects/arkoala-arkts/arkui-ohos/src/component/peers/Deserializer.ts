@@ -152,7 +152,7 @@ import { ToggleType, ToggleOptions, SwitchStyle } from "./../toggle"
 import { UniformDataType } from "./../arkui-uniformtypedescriptor"
 import { WindowSceneAttribute } from "./../windowScene"
 import { Callback_Array_String_Void, Callback_Array_TextMenuItem_Void, Callback_Buffer_Void, Callback_ComputedBarAttribute_Void, Callback_CustomBuilder_Void, Callback_GestureJudgeResult_Void, Callback_GestureRecognizer_Void, Callback_HitTestMode_Void, Callback_Literal_Number_offsetRemain_Void, Callback_OffsetResult_Void, Callback_OnScrollFrameBeginHandlerResult_Void, Callback_Opt_Array_NavDestinationTransition_Void, Callback_Opt_Array_String_Void, Callback_Opt_NavigationAnimatedTransition_Void, Callback_Opt_StyledString_Opt_Array_String_Void, Callback_Opt_TabContentAnimatedTransition_Void, Callback_Pointer_Void, Callback_StyledStringMarshallingValue_Void, Callback_TouchResult_Void, Callback_Tuple_Number_Number_Number_Number_Void, Callback_Tuple_Number_Number_Void, Callback_Union_CustomBuilder_DragItemInfo_Void, Callback_WebKeyboardOptions_Void, Callback_WebResourceResponse_Void, Callback_WithThemeAttribute_Void } from "./../generatorSynthetic"
-import { Callback_DismissDialogAction_Void, DismissDialogAction, ActionSheetButtonOptions, ActionSheetOffset, SheetInfo, ActionSheetOptions } from "./../actionSheet"
+import { Callback_DismissDialogAction_Void, DismissDialogAction, ActionSheetButtonOptions, ActionSheetOffset, SheetInfo, ActionSheetOptions, DismissDialogActionInternal } from "./../actionSheet"
 import { Want } from "./../ohos.app.ability"
 import { Callback_TerminationInfo_Void, TerminationInfo } from "./../embeddedComponent"
 import { BusinessError } from "#external"
@@ -576,8 +576,8 @@ export class Deserializer extends DeserializerBase {
     }
     readOnFirstContentfulPaintEvent(): OnFirstContentfulPaintEvent {
         let valueDeserializer : Deserializer = this
-        const navigationStartTick_result : number = (valueDeserializer.readNumber() as number)
-        const firstContentfulPaintMs_result : number = (valueDeserializer.readNumber() as number)
+        const navigationStartTick_result : int64 = (valueDeserializer.readInt64().toLong())
+        const firstContentfulPaintMs_result : int64 = (valueDeserializer.readInt64().toLong())
         let value : OnFirstContentfulPaintEvent = ({navigationStartTick: navigationStartTick_result, firstContentfulPaintMs: firstContentfulPaintMs_result} as OnFirstContentfulPaintEvent)
         return value
     }
@@ -589,8 +589,8 @@ export class Deserializer extends DeserializerBase {
     }
     readOnOverScrollEvent(): OnOverScrollEvent {
         let valueDeserializer : Deserializer = this
-        const xOffset_result : number = (valueDeserializer.readNumber() as number)
-        const yOffset_result : number = (valueDeserializer.readNumber() as number)
+        const xOffset_result : float32 = valueDeserializer.readFloat32().toFloat()
+        const yOffset_result : float32 = valueDeserializer.readFloat32().toFloat()
         let value : OnOverScrollEvent = ({xOffset: xOffset_result, yOffset: yOffset_result} as OnOverScrollEvent)
         return value
     }
@@ -602,15 +602,15 @@ export class Deserializer extends DeserializerBase {
     }
     readOnScaleChangeEvent(): OnScaleChangeEvent {
         let valueDeserializer : Deserializer = this
-        const oldScale_result : number = (valueDeserializer.readNumber() as number)
-        const newScale_result : number = (valueDeserializer.readNumber() as number)
+        const oldScale_result : float32 = valueDeserializer.readFloat32().toFloat()
+        const newScale_result : float32 = valueDeserializer.readFloat32().toFloat()
         let value : OnScaleChangeEvent = ({oldScale: oldScale_result, newScale: newScale_result} as OnScaleChangeEvent)
         return value
     }
     readOnScrollEvent(): OnScrollEvent {
         let valueDeserializer : Deserializer = this
-        const xOffset_result : number = (valueDeserializer.readNumber() as number)
-        const yOffset_result : number = (valueDeserializer.readNumber() as number)
+        const xOffset_result : float32 = valueDeserializer.readFloat32().toFloat()
+        const yOffset_result : float32 = valueDeserializer.readFloat32().toFloat()
         let value : OnScrollEvent = ({xOffset: xOffset_result, yOffset: yOffset_result} as OnScrollEvent)
         return value
     }
@@ -7643,10 +7643,8 @@ export class Deserializer extends DeserializerBase {
     }
     readDismissDialogAction(): DismissDialogAction {
         let valueDeserializer : Deserializer = this
-        const dismiss_result : (() => void) = valueDeserializer.readCallback_Void()
-        const reason_result : DismissReason = TypeChecker.DismissReason_FromNumeric(valueDeserializer.readInt32())
-        let value : DismissDialogAction = ({dismiss: dismiss_result, reason: reason_result} as DismissDialogAction)
-        return value
+        let ptr: KPointer = valueDeserializer.readPointer()
+        return DismissDialogActionInternal.fromPtr(ptr)
     }
     readDismissPopupAction(): DismissPopupAction {
         let valueDeserializer : Deserializer = this
@@ -8120,19 +8118,19 @@ export class Deserializer extends DeserializerBase {
     readFirstMeaningfulPaint(): FirstMeaningfulPaint {
         let valueDeserializer : Deserializer = this
         const navigationStartTime_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let navigationStartTime_buf : number | undefined
+        let navigationStartTime_buf : int64 | undefined
         if ((RuntimeType.UNDEFINED) != (navigationStartTime_buf_runtimeType))
         {
-            navigationStartTime_buf = (valueDeserializer.readNumber() as number)
+            navigationStartTime_buf = (valueDeserializer.readInt64().toLong())
         }
-        const navigationStartTime_result : number | undefined = navigationStartTime_buf
+        const navigationStartTime_result : int64 | undefined = navigationStartTime_buf
         const firstMeaningfulPaintTime_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let firstMeaningfulPaintTime_buf : number | undefined
+        let firstMeaningfulPaintTime_buf : int64 | undefined
         if ((RuntimeType.UNDEFINED) != (firstMeaningfulPaintTime_buf_runtimeType))
         {
-            firstMeaningfulPaintTime_buf = (valueDeserializer.readNumber() as number)
+            firstMeaningfulPaintTime_buf = (valueDeserializer.readInt64().toLong())
         }
-        const firstMeaningfulPaintTime_result : number | undefined = firstMeaningfulPaintTime_buf
+        const firstMeaningfulPaintTime_result : int64 | undefined = firstMeaningfulPaintTime_buf
         let value : FirstMeaningfulPaint = ({navigationStartTime: navigationStartTime_result, firstMeaningfulPaintTime: firstMeaningfulPaintTime_result} as FirstMeaningfulPaint)
         return value
     }
@@ -8826,47 +8824,47 @@ export class Deserializer extends DeserializerBase {
     readLargestContentfulPaint(): LargestContentfulPaint {
         let valueDeserializer : Deserializer = this
         const navigationStartTime_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let navigationStartTime_buf : number | undefined
+        let navigationStartTime_buf : int64 | undefined
         if ((RuntimeType.UNDEFINED) != (navigationStartTime_buf_runtimeType))
         {
-            navigationStartTime_buf = (valueDeserializer.readNumber() as number)
+            navigationStartTime_buf = (valueDeserializer.readInt64().toLong())
         }
-        const navigationStartTime_result : number | undefined = navigationStartTime_buf
+        const navigationStartTime_result : int64 | undefined = navigationStartTime_buf
         const largestImagePaintTime_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let largestImagePaintTime_buf : number | undefined
+        let largestImagePaintTime_buf : int64 | undefined
         if ((RuntimeType.UNDEFINED) != (largestImagePaintTime_buf_runtimeType))
         {
-            largestImagePaintTime_buf = (valueDeserializer.readNumber() as number)
+            largestImagePaintTime_buf = (valueDeserializer.readInt64().toLong())
         }
-        const largestImagePaintTime_result : number | undefined = largestImagePaintTime_buf
+        const largestImagePaintTime_result : int64 | undefined = largestImagePaintTime_buf
         const largestTextPaintTime_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let largestTextPaintTime_buf : number | undefined
+        let largestTextPaintTime_buf : int64 | undefined
         if ((RuntimeType.UNDEFINED) != (largestTextPaintTime_buf_runtimeType))
         {
-            largestTextPaintTime_buf = (valueDeserializer.readNumber() as number)
+            largestTextPaintTime_buf = (valueDeserializer.readInt64().toLong())
         }
-        const largestTextPaintTime_result : number | undefined = largestTextPaintTime_buf
+        const largestTextPaintTime_result : int64 | undefined = largestTextPaintTime_buf
         const imageBPP_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let imageBPP_buf : number | undefined
+        let imageBPP_buf : double | undefined
         if ((RuntimeType.UNDEFINED) != (imageBPP_buf_runtimeType))
         {
-            imageBPP_buf = (valueDeserializer.readNumber() as number)
+            imageBPP_buf = (valueDeserializer.readFloat32().toDouble())
         }
-        const imageBPP_result : number | undefined = imageBPP_buf
+        const imageBPP_result : double | undefined = imageBPP_buf
         const largestImageLoadStartTime_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let largestImageLoadStartTime_buf : number | undefined
+        let largestImageLoadStartTime_buf : int64 | undefined
         if ((RuntimeType.UNDEFINED) != (largestImageLoadStartTime_buf_runtimeType))
         {
-            largestImageLoadStartTime_buf = (valueDeserializer.readNumber() as number)
+            largestImageLoadStartTime_buf = (valueDeserializer.readInt64().toLong())
         }
-        const largestImageLoadStartTime_result : number | undefined = largestImageLoadStartTime_buf
+        const largestImageLoadStartTime_result : int64 | undefined = largestImageLoadStartTime_buf
         const largestImageLoadEndTime_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let largestImageLoadEndTime_buf : number | undefined
+        let largestImageLoadEndTime_buf : int64 | undefined
         if ((RuntimeType.UNDEFINED) != (largestImageLoadEndTime_buf_runtimeType))
         {
-            largestImageLoadEndTime_buf = (valueDeserializer.readNumber() as number)
+            largestImageLoadEndTime_buf = (valueDeserializer.readInt64().toLong())
         }
-        const largestImageLoadEndTime_result : number | undefined = largestImageLoadEndTime_buf
+        const largestImageLoadEndTime_result : int64 | undefined = largestImageLoadEndTime_buf
         let value : LargestContentfulPaint = ({navigationStartTime: navigationStartTime_result, largestImagePaintTime: largestImagePaintTime_result, largestTextPaintTime: largestTextPaintTime_result, imageBPP: imageBPP_result, largestImageLoadStartTime: largestImageLoadStartTime_result, largestImageLoadEndTime: largestImageLoadEndTime_result} as LargestContentfulPaint)
         return value
     }
@@ -10653,7 +10651,7 @@ export class Deserializer extends DeserializerBase {
     readRenderProcessNotRespondingData(): RenderProcessNotRespondingData {
         let valueDeserializer : Deserializer = this
         const jsStack_result : string = (valueDeserializer.readString() as string)
-        const pid_result : number = (valueDeserializer.readNumber() as number)
+        const pid_result : int32 = (valueDeserializer.readInt32().toInt())
         const reason_result : RenderProcessNotRespondingReason = TypeChecker.RenderProcessNotRespondingReason_FromNumeric(valueDeserializer.readInt32())
         let value : RenderProcessNotRespondingData = ({jsStack: jsStack_result, pid: pid_result, reason: reason_result} as RenderProcessNotRespondingData)
         return value
@@ -12830,12 +12828,12 @@ export class Deserializer extends DeserializerBase {
         let valueDeserializer : Deserializer = this
         const useSystemKeyboard_result : boolean = valueDeserializer.readBoolean()
         const enterKeyType_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let enterKeyType_buf : number | undefined
+        let enterKeyType_buf : int32 | undefined
         if ((RuntimeType.UNDEFINED) != (enterKeyType_buf_runtimeType))
         {
-            enterKeyType_buf = (valueDeserializer.readNumber() as number)
+            enterKeyType_buf = (valueDeserializer.readInt32().toInt())
         }
-        const enterKeyType_result : number | undefined = enterKeyType_buf
+        const enterKeyType_result : int32 | undefined = enterKeyType_buf
         const customKeyboard_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
         let customKeyboard_buf : CustomBuilder | undefined
         if ((RuntimeType.UNDEFINED) != (customKeyboard_buf_runtimeType))
@@ -12849,12 +12847,12 @@ export class Deserializer extends DeserializerBase {
     readWebMediaOptions(): WebMediaOptions {
         let valueDeserializer : Deserializer = this
         const resumeInterval_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let resumeInterval_buf : number | undefined
+        let resumeInterval_buf : int32 | undefined
         if ((RuntimeType.UNDEFINED) != (resumeInterval_buf_runtimeType))
         {
-            resumeInterval_buf = (valueDeserializer.readNumber() as number)
+            resumeInterval_buf = (valueDeserializer.readInt32().toInt())
         }
-        const resumeInterval_result : number | undefined = resumeInterval_buf
+        const resumeInterval_result : int32 | undefined = resumeInterval_buf
         const audioExclusive_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
         let audioExclusive_buf : boolean | undefined
         if ((RuntimeType.UNDEFINED) != (audioExclusive_buf_runtimeType))
@@ -18126,19 +18124,19 @@ export class Deserializer extends DeserializerBase {
         }
         const position_result : Position | undefined = position_buf
         const width_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let width_buf : number | undefined
+        let width_buf : int32 | undefined
         if ((RuntimeType.UNDEFINED) != (width_buf_runtimeType))
         {
-            width_buf = (valueDeserializer.readNumber() as number)
+            width_buf = (valueDeserializer.readInt32().toInt())
         }
-        const width_result : number | undefined = width_buf
+        const width_result : int32 | undefined = width_buf
         const height_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let height_buf : number | undefined
+        let height_buf : int32 | undefined
         if ((RuntimeType.UNDEFINED) != (height_buf_runtimeType))
         {
-            height_buf = (valueDeserializer.readNumber() as number)
+            height_buf = (valueDeserializer.readInt32().toInt())
         }
-        const height_result : number | undefined = height_buf
+        const height_result : int32 | undefined = height_buf
         const url_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
         let url_buf : string | undefined
         if ((RuntimeType.UNDEFINED) != (url_buf_runtimeType))
@@ -24128,33 +24126,33 @@ export class Deserializer extends DeserializerBase {
         }
         const hoverModeArea_result : HoverModeAreaType | undefined = hoverModeArea_buf
         const onDidAppear_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let onDidAppear_buf : (() => void) | undefined
+        let onDidAppear_buf : ((data: undefined) => void) | undefined
         if ((RuntimeType.UNDEFINED) != (onDidAppear_buf_runtimeType))
         {
-            onDidAppear_buf = valueDeserializer.readCallback_Void()
+            onDidAppear_buf = CallbackTransformer.transfromFromCallbackVoid(valueDeserializer.readCallback_Void())
         }
-        const onDidAppear_result : (() => void) | undefined = onDidAppear_buf
+        const onDidAppear_result : ((data: undefined) => void) | undefined = onDidAppear_buf
         const onDidDisappear_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let onDidDisappear_buf : (() => void) | undefined
+        let onDidDisappear_buf : ((data: undefined) => void) | undefined
         if ((RuntimeType.UNDEFINED) != (onDidDisappear_buf_runtimeType))
         {
-            onDidDisappear_buf = valueDeserializer.readCallback_Void()
+            onDidDisappear_buf = CallbackTransformer.transfromFromCallbackVoid(valueDeserializer.readCallback_Void())
         }
-        const onDidDisappear_result : (() => void) | undefined = onDidDisappear_buf
+        const onDidDisappear_result : ((data: undefined) => void) | undefined = onDidDisappear_buf
         const onWillAppear_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let onWillAppear_buf : (() => void) | undefined
+        let onWillAppear_buf : ((data: undefined) => void) | undefined
         if ((RuntimeType.UNDEFINED) != (onWillAppear_buf_runtimeType))
         {
-            onWillAppear_buf = valueDeserializer.readCallback_Void()
+            onWillAppear_buf = CallbackTransformer.transfromFromCallbackVoid(valueDeserializer.readCallback_Void())
         }
-        const onWillAppear_result : (() => void) | undefined = onWillAppear_buf
+        const onWillAppear_result : ((data: undefined) => void) | undefined = onWillAppear_buf
         const onWillDisappear_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let onWillDisappear_buf : (() => void) | undefined
+        let onWillDisappear_buf : ((data: undefined) => void) | undefined
         if ((RuntimeType.UNDEFINED) != (onWillDisappear_buf_runtimeType))
         {
-            onWillDisappear_buf = valueDeserializer.readCallback_Void()
+            onWillDisappear_buf = CallbackTransformer.transfromFromCallbackVoid(valueDeserializer.readCallback_Void())
         }
-        const onWillDisappear_result : (() => void) | undefined = onWillDisappear_buf
+        const onWillDisappear_result : ((data: undefined) => void) | undefined = onWillDisappear_buf
         const keyboardAvoidDistance_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
         let keyboardAvoidDistance_buf : LengthMetrics | undefined
         if ((RuntimeType.UNDEFINED) != (keyboardAvoidDistance_buf_runtimeType))

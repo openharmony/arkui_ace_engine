@@ -21,6 +21,7 @@
 
 #include "bridge/arkts_frontend/arkts_ani_utils.h"
 #include "bridge/arkts_frontend/entry/arkts_entry_loader.h"
+#include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/base/subwindow/subwindow_manager.h"
 #include "bridge/arkts_frontend/ani_context_module.h"
@@ -48,13 +49,15 @@ struct AppInfo {
     const char* checkCallbackEventMethodSig;
     const char* handleMessageMethodName;
     const char* handleMessageMethodSig;
+    const char* registerNativeModule;
+    const char* registerNativeModuleSig;
 };
 /* copied from arkcompiler_ets_frontend vmloader.cc*/
 const AppInfo KOALA_APP_INFO = {
     "Larkui/ArkUIEntry/Application;",
     "createApplication",
-    "Lstd/core/String;Lstd/core/String;ZLarkui/UserView/UserView;Larkui/UserView/EntryPoint;:Larkui/ArkUIEntry/"
-    "Application;",
+    "Lstd/core/String;Lstd/core/String;ZLstd/core/String;Larkui/UserView/UserView;Larkui/UserView/EntryPoint;"
+    ":Larkui/ArkUIEntry/Application;",
     "start",
     ":J",
     "enter",
@@ -65,6 +68,8 @@ const AppInfo KOALA_APP_INFO = {
     ":V",
     "handleMessage",
     "JILstd/core/String;:Z",
+    "registerNativeModulePreloader",
+    ":V",
 };
 
 // void TryEmitError(EtsEnv& env)
@@ -357,7 +362,7 @@ ani_object ArktsFrontend::CallGetUIContextFunc(int32_t instanceId)
     CHECK_NULL_RETURN(env, result);
 
     ani_class uiContextClass;
-    if ((status = env->FindClass("L@ohos/arkui/UIContext/UIContext;", &uiContextClass)) != ANI_OK) {
+    if ((status = env->FindClass("Larkui/handwritten/UIContextUtil/UIContextUtil;", &uiContextClass)) != ANI_OK) {
         LOGE("FindClass UIContext failed, %{public}d", status);
         return result;
     }
@@ -371,36 +376,45 @@ ani_object ArktsFrontend::CallGetUIContextFunc(int32_t instanceId)
     return result;
 }
 
-void* ArktsFrontend::PushExtender(const std::string& url, const std::string& params)
+void* ArktsFrontend::GetEnv()
+{
+    return ArktsAniUtils::GetAniEnv(vm_);
+}
+
+void* ArktsFrontend::PushExtender(
+    const std::string& url, const std::string& params, bool recoverable, std::function<void()>&& finishCallback)
 {
     CHECK_NULL_RETURN(pageRouterManager_, nullptr);
     NG::RouterPageInfo routerPageInfo;
     routerPageInfo.url = url;
     routerPageInfo.params = params;
-    routerPageInfo.recoverable = true;
-    auto pageNode = pageRouterManager_->PushExtender(routerPageInfo);
+    routerPageInfo.recoverable = recoverable;
+    auto pageNode = pageRouterManager_->PushExtender(routerPageInfo, std::move(finishCallback));
     return pageNode.GetRawPtr();
 }
 
-void* ArktsFrontend::ReplaceExtender(
-    const std::string& url, const std::string& params, std::function<void()>&& finishCallback)
+void* ArktsFrontend::ReplaceExtender(const std::string& url, const std::string& params, bool recoverable,
+    std::function<void()>&& enterFinishCallback, std::function<void()>&& exitFinishCallback)
 {
     CHECK_NULL_RETURN(pageRouterManager_, nullptr);
     NG::RouterPageInfo routerPageInfo;
     routerPageInfo.url = url;
     routerPageInfo.params = params;
-    routerPageInfo.recoverable = true;
-    auto pageNode = pageRouterManager_->ReplaceExtender(routerPageInfo, std::move(finishCallback));
+    routerPageInfo.recoverable = recoverable;
+    auto pageNode =
+        pageRouterManager_->ReplaceExtender(routerPageInfo, std::move(enterFinishCallback), std::move(exitFinishCallback));
     return pageNode.GetRawPtr();
 }
 
-void* ArktsFrontend::RunPageExtender(const std::string& url, const std::string& params)
+void* ArktsFrontend::RunPageExtender(
+    const std::string& url, const std::string& params, bool recoverable, std::function<void()>&& finishCallback)
 {
     CHECK_NULL_RETURN(pageRouterManager_, nullptr);
     NG::RouterPageInfo routerPageInfo;
     routerPageInfo.url = url;
     routerPageInfo.params = params;
-    auto pageNode = pageRouterManager_->RunPageExtender(routerPageInfo);
+    routerPageInfo.recoverable = recoverable;
+    auto pageNode = pageRouterManager_->RunPageExtender(routerPageInfo, std::move(finishCallback));
     return pageNode.GetRawPtr();
 }
 
@@ -417,6 +431,39 @@ void ArktsFrontend::ClearExtender()
 {
     CHECK_NULL_VOID(pageRouterManager_);
     pageRouterManager_->Clear();
+}
+
+bool ArktsFrontend::OnBackPressed()
+{
+    CHECK_NULL_RETURN(pageRouterManager_, false);
+    auto pageNode = pageRouterManager_->GetCurrentPageNode();
+    CHECK_NULL_RETURN(pageNode, false);
+    auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+    CHECK_NULL_RETURN(pagePattern, false);
+    if (pagePattern->OnBackPressed()) {
+        return true;
+    }
+    return pageRouterManager_->Pop();
+}
+
+void ArktsFrontend::OnShow()
+{
+    CHECK_NULL_VOID(pageRouterManager_);
+    auto pageNode = pageRouterManager_->GetCurrentPageNode();
+    CHECK_NULL_VOID(pageNode);
+    auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+    CHECK_NULL_VOID(pagePattern);
+    pagePattern->OnShow();
+}
+
+void ArktsFrontend::OnHide()
+{
+    CHECK_NULL_VOID(pageRouterManager_);
+    auto pageNode = pageRouterManager_->GetCurrentPageNode();
+    CHECK_NULL_VOID(pageNode);
+    auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+    CHECK_NULL_VOID(pagePattern);
+    pagePattern->OnHide();
 }
 
 bool ArktsFrontend::HandleMessage(void *frameNode, int32_t type, const std::string& param)
@@ -467,6 +514,23 @@ void* ArktsFrontend::preloadArkTSRuntime = nullptr;
 void ArktsFrontend::PreloadAceModule(void* aniEnv)
 {
     ArktsFrontend::preloadArkTSRuntime = aniEnv;
+
+    auto* env = reinterpret_cast<ani_env*>(aniEnv);
+    ani_class appClass;
+    if (env->FindClass(KOALA_APP_INFO.className, &appClass) != ANI_OK) {
+        LOGE("PreloadAceModule: Cannot load main class %{public}s", KOALA_APP_INFO.className);
+        return;
+    }
+
+    ani_static_method create;
+    if (env->Class_FindStaticMethod(
+        appClass, KOALA_APP_INFO.registerNativeModule, KOALA_APP_INFO.registerNativeModuleSig, &create) != ANI_OK) {
+        LOGE("PreloadAceModule: Cannot find method %{public}s", KOALA_APP_INFO.registerNativeModule);
+        return;
+    }
+
+    ani_ref appLocal;
+    env->Class_CallStaticMethod_Void(appClass, create, &appLocal);
 }
 
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_PreloadAceArkTSModule(void* aniEnv)

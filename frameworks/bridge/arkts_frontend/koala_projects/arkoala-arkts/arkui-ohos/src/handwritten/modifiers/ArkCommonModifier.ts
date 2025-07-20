@@ -13,8 +13,11 @@
  * limitations under the License.
  */
 
-import { AnimatableArithmetic, AttributeModifier, BlendMode } from '../../component/common'
-import { AccessibilityCallback, AlignRuleOption, AnimateParam, Bindable, BackgroundBlurStyleOptions, BackgroundBrightnessOptions, BackgroundEffectOptions, BlendApplyType, BlurOptions, BlurStyle, BorderImageOption, ChainStyle, ClickEffect, ClickEvent, CommonAttribute, ContentCoverOptions, ContextMenuOptions, CustomBuilder, CustomPopupOptions, DragEvent, DragInteractionOptions, DragItemInfo, DragPreviewOptions, DrawModifier, EffectType, ForegroundBlurStyleOptions, ForegroundEffectOptions, GeometryTransitionOptions, GestureModifier, GestureRecognizerJudgeBeginCallback, HoverEvent, InvertOptions, KeyEvent, LinearGradientBlurOptions, BackgroundOptions, Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs, LocalizedAlignRuleOptions, MenuElement, MenuOptions, ModalTransition, MotionBlurOptions, MotionPathOptions, MouseEvent, OutlineStyle, OverlayOptions, PixelRoundPolicy, PixelStretchEffectOptions, PopupOptions, PreDragStatus, ProgressMask, Rectangle, RotateOptions, SafeAreaEdge, SafeAreaType, ScaleOptions, ShadowOptions, ShadowStyle, SheetOptions, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, StateStyles, TouchEvent, TouchResult, TouchTestInfo, TransitionEffect, TransitionFinishCallback, TransitionOptions, TranslateOptions, VisibleAreaChangeCallback, sharedTransitionOptions, BackgroundImageOptions, ArkCommonMethodPeer, SystemAdaptiveOptions, CrownEvent, FocusAxisEvent, AxisEvent, FocusMovement, LinearGradientOptions, OnDragEventCallback, LayoutPolicy, PreviewConfiguration, DropOptions, SweepGradientOptions, AccessibilitySamePageMode, AccessibilityRoleType, AccessibilityFocusCallback, ReuseOptions, TipsMessageType, TipsOptions, VisibleAreaEventOptions, RadialGradientOptions, CommonMethod } from "../../component/common";
+
+import { AttributeUpdater } from '../../AttributeUpdater';
+import { CommonModifier } from '../../CommonModifier';
+import { ArkCommonMethodComponent, AttributeModifier, AnimatableArithmetic, BackgroundOptions, BlendMode } from '../../component/common';
+import { AccessibilityCallback, AlignRuleOption, AnimateParam, Bindable, BackgroundBlurStyleOptions, BackgroundBrightnessOptions, BackgroundEffectOptions, BlendApplyType, BlurOptions, BlurStyle, BorderImageOption, ChainStyle, ClickEffect, ClickEvent, CommonAttribute, ContentCoverOptions, ContextMenuOptions, CustomBuilder, CustomPopupOptions, DragEvent, DragInteractionOptions, DragItemInfo, DragPreviewOptions, DrawModifier, EffectType, ForegroundBlurStyleOptions, ForegroundEffectOptions, GeometryTransitionOptions, GestureModifier, GestureRecognizerJudgeBeginCallback, HoverEvent, InvertOptions, KeyEvent, LinearGradientBlurOptions, Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs, LocalizedAlignRuleOptions, MenuElement, MenuOptions, ModalTransition, MotionBlurOptions, MotionPathOptions, MouseEvent, OutlineStyle, OverlayOptions, PixelRoundPolicy, PixelStretchEffectOptions, PopupOptions, PreDragStatus, ProgressMask, Rectangle, RotateOptions, SafeAreaEdge, SafeAreaType, ScaleOptions, ShadowOptions, ShadowStyle, SheetOptions, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, StateStyles, TouchEvent, TouchResult, TouchTestInfo, TransitionEffect, TransitionFinishCallback, TransitionOptions, TranslateOptions, VisibleAreaChangeCallback, sharedTransitionOptions, BackgroundImageOptions, ArkCommonMethodPeer, SystemAdaptiveOptions, CrownEvent, FocusAxisEvent, AxisEvent, FocusMovement, LinearGradientOptions, OnDragEventCallback, LayoutPolicy, PreviewConfiguration, DropOptions, SweepGradientOptions, AccessibilitySamePageMode, AccessibilityRoleType, AccessibilityFocusCallback, ReuseOptions, TipsMessageType, TipsOptions, VisibleAreaEventOptions, RadialGradientOptions, CommonMethod } from "../../component/common";
 import { Color, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey } from '../../component/enums'
 import { ResourceColor, ConstraintSizeOptions, SizeOptions, Length, ChainWeightOptions, Padding, LocalizedPadding, Position, BorderOptions, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, EdgeStyles, Edges } from '../../component/units'
 import { Resource } from "global.resource"
@@ -26,10 +29,11 @@ import { CircleShape, EllipseShape, PathShape, RectShape } from "../../component
 import { FocusBoxStyle, FocusPriority } from "../../component/focus"
 import { TransformationMatrix } from "../../component/arkui-common"
 import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureType, GestureMask } from "../../component/gesture"
-import { ComponentContent } from "../../component/arkui-custom"
+import { ComponentContent } from 'arkui/ComponentContent'
 import { int32} from "@koalaui/common"
 import { PeerNode } from '../../PeerNode';
 import { InteropNativeModule } from '@koalaui/interop';
+import { CommonMethodModifier } from '../../CommonMethodModifier';
 export enum ModifierType {
    ORIGIN = 0,
    STATE = 1,
@@ -102,37 +106,37 @@ const UI_STATE_FOCUSED = 1 << 1;
 const UI_STATE_DISABLED = 1 << 2;
 const UI_STATE_SELECTED = 1 << 3;
 
-export function applyUIAttributes<T>(modifier: AttributeModifier<T>, nativeNode: ArkCommonMethodPeer, state: int32 = 0): void {
-    modifier.applyNormalAttribute(nativeNode._attributeSet! as T);
+export function applyUIAttributes<T>(modifier: AttributeModifier<T>, attributeSet: CommonMethodModifier, state: int32 = 0): void {     
+    modifier.applyNormalAttribute(attributeSet as T);
     if (state & UI_STATE_PRESSED) {
-        modifier.applyPressedAttribute(nativeNode._attributeSet! as T);
+        modifier.applyPressedAttribute(attributeSet as T);
     }
     if (state & UI_STATE_FOCUSED) {
-        modifier.applyFocusedAttribute(nativeNode._attributeSet! as T);
+        modifier.applyFocusedAttribute(attributeSet as T);
     }
     if (state & UI_STATE_DISABLED) {
-        modifier.applyDisabledAttribute(nativeNode._attributeSet! as T);
+        modifier.applyDisabledAttribute(attributeSet as T);
     }
     if (state & UI_STATE_SELECTED) {
-        modifier.applySelectedAttribute(nativeNode._attributeSet! as T);
+        modifier.applySelectedAttribute(attributeSet as T);
     }
 }
 
-export function applyUIAttributesUpdate<T>(modifier: AttributeModifier<T>, nativeNode: ArkCommonMethodPeer, state: int32 = 0, isInit:boolean = true): void {
+export function applyUIAttributesUpdate<T>(modifier: AttributeModifier<T>, attributeSet: CommonMethodModifier, state: int32 = 0, isInit:boolean = true): void {
     if (state == UI_STATE_NORMAL && !isInit) {
-        modifier.applyNormalAttribute(nativeNode._attributeSet! as T);
+        modifier.applyNormalAttribute(attributeSet as T);
     }
     if (state & UI_STATE_PRESSED) {
-        modifier.applyPressedAttribute(nativeNode._attributeSet! as T);
+        modifier.applyPressedAttribute(attributeSet as T);
     }
     if (state & UI_STATE_FOCUSED) {
-        modifier.applyFocusedAttribute(nativeNode._attributeSet! as T);
+        modifier.applyFocusedAttribute(attributeSet as T);
     }
     if (state & UI_STATE_DISABLED) {
-        modifier.applyDisabledAttribute(nativeNode._attributeSet! as T);
+        modifier.applyDisabledAttribute(attributeSet as T);
     }
     if (state & UI_STATE_SELECTED) {
-        modifier.applySelectedAttribute(nativeNode._attributeSet! as T);
+        modifier.applySelectedAttribute(attributeSet as T);
     }
 }
  
@@ -2003,4 +2007,62 @@ export class ArkCommonAttributeSet implements CommonAttribute {
     public attributeModifier<T>(value: AttributeModifier<T>): this {
         return this
     }
+}
+
+export function applyAttributeModifierBase<T, MethodSet extends CommonMethodModifier, MethodComponent extends ArkCommonMethodComponent>
+    (modifier: AttributeModifier<T>, attributeSet: () => MethodSet, func: (component: MethodComponent, ...params: FixedArray<Object>) => void, updaterReceiver: () => MethodComponent, node: ArkCommonMethodPeer): void {
+    let attributeSet_ = attributeSet();
+    let isAttributeUpdater: boolean = (modifier instanceof AttributeUpdater);
+    if (isAttributeUpdater) {
+        let attributeUpdater = modifier as object as AttributeUpdater<T>
+        let needUpdate: boolean = false;
+        if (!attributeUpdater.peerNode_) {
+            attributeUpdater.initializeModifier(attributeSet_ as Object as T);
+            needUpdate = true;
+        } else if (node !== attributeUpdater.peerNode_) {
+            attributeUpdater.onComponentChanged(attributeSet_ as Object as T);
+            needUpdate = true;
+        }
+        if (needUpdate) {
+            attributeUpdater.peerNode_ = node;
+            let receiver = updaterReceiver();
+            receiver.setPeer(node);
+            attributeUpdater.attribute = receiver as Object as T;
+            attributeUpdater.updateConstructorParams = (...params: FixedArray<Object>) => {
+                func(receiver, ...params);
+                return receiver as Object as T;
+            };
+        }
+    }
+    let isInit: boolean = true;
+    let currentState = node.getStateStyleMutable();
+    if (currentState === undefined) {
+        currentState = node.getOrCreateStateStyleMutable()!;
+    } else {
+        isInit = false;
+    }
+    if (isAttributeUpdater) {
+        applyUIAttributesUpdate(modifier, attributeSet_, currentState.value, isInit);
+    } else {
+        applyUIAttributes(modifier, attributeSet_, currentState.value);
+    }
+    attributeSet_.applyModifierPatch(node);
+}
+
+export function applyCommonModifier(peerNode: ArkCommonMethodPeer, modifier: AttributeModifier<CommonMethod>) {
+    let attributeSet = (): CommonMethodModifier => {
+        let commonModifier = modifier as object as CommonModifier;
+        let initModifier = peerNode._attributeSet ? peerNode._attributeSet! : new CommonMethodModifier();
+        initModifier.mergeModifier(commonModifier);
+        peerNode._attributeSet = initModifier;
+        return initModifier;
+    }
+    let constructParam = (component:ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+    };
+    let updaterReceiver = (): ArkCommonMethodComponent => {
+        let component: ArkCommonMethodComponent = new ArkCommonMethodComponent();
+        component.setPeer(peerNode);
+        return component;
+    };
+    applyAttributeModifierBase(modifier, attributeSet, constructParam, updaterReceiver, peerNode);
 }

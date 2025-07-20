@@ -63,14 +63,15 @@ export class ObjectLinkDecoratedVariable<T>
     // @ObjectLink is immutable, no set
     // @ObjectLink updates from parent
     public update(newValue: T): void {
-        const value = this.backing_.get(false);
-        if (value === newValue) {
+        const oldValue = this.backing_.get(false);
+        if (oldValue === newValue) {
             return;
         }
+        const value = UIUtils.makeObserved(newValue) as T;
         StateUpdateLoop.add(() => {
-            if (this.backing_.set(UIUtils.makeObserved(newValue) as T)) {
-                this.unregisterWatchFromObservedObjectChanges(value);
-                this.registerWatchForObservedObjectChanges(newValue);
+            if (this.backing_.set(value)) {
+                this.unregisterWatchFromObservedObjectChanges(oldValue);
+                this.registerWatchForObservedObjectChanges(value);
                 this.execWatchFuncs();
             }
         });

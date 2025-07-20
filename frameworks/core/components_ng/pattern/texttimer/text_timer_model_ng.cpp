@@ -107,7 +107,7 @@ void TextTimerModelNG::SetTextShadow(const std::vector<Shadow>& value)
         for (auto& shadow : shadows) {
             shadow.ReloadResources();
         }
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, TextShadow, value, frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, TextShadow, shadows, frameNode);
     };
     ACE_UPDATE_LAYOUT_PROPERTY(TextTimerLayoutProperty, TextShadow, value);
     if (SystemProperties::ConfigChangePerform()) {

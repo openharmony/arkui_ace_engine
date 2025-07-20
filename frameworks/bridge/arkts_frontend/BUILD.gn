@@ -51,7 +51,7 @@ template("arkts_frontend") {
     defines += invoker.defines
     configs = [ "$ace_root:ace_config" ]
     if (!build_ohos_sdk) {
-      # deps = [ ":ArkoalaNative_ark" ]
+      deps = [ ":ArkoalaNative_ark" ]
     }
 
     sources = [

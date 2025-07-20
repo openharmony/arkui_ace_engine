@@ -53,7 +53,7 @@ public:
      * @param DrawableInfo construct drawable descriptor object params
      * @return ani_object ArkTS object -> DrawableDescriptor
      */
-    static ani_object CreateDrawableDescriptor(ani_env* env, const DrawableInfo& info);
+    static ani_object CreateDrawableDescriptor(ani_env* env, DrawableInfo& info);
 };
 
 } // namespace OHOS::Ace::Ani

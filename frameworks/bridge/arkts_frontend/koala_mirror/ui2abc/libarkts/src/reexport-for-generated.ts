@@ -31,3 +31,8 @@ export {
 export { nodeByType } from "./arkts-api/class-by-peer"
 export { global } from "./arkts-api/static/global"
 export { Es2pandaMemberExpressionKind } from "./generated/Es2pandaEnums"
+export {
+    extension_ETSModuleGetNamespaceFlag,
+    extension_MethodDefinitionOnUpdate,
+    extension_MethodDefinitionSetChildrenParentPtr,
+} from "./arkts-api/utilities/extensions"
