@@ -28,6 +28,7 @@
 #include "interop_ani_modifier.h"
 #include "drag_controller_ani_modifier.h"
 #include "video_ani_modifier.h"
+#include "rich_editor_ani_modifier.h"
 #include "shape_ani_modifier.h"
 #include "stateMgmt_ani_modifier.h"
 #include "xcomponent_ani_modifier.h"
@@ -54,6 +55,7 @@ const ArkUIAniModifiers* GetArkUIAniModifiers()
         .getInteropAniModifier = OHOS::Ace::NG::GetInteropAniModifier,
         .getDragControllerAniModifier = OHOS::Ace::NG::GetDragControllerAniModifier,
         .getImageSpanAniModifier = OHOS::Ace::NG::GetImageSpanAniModifier,
+        .getRichEditorAniModifier = OHOS::Ace::NG::GetRichEditorAniModifier,
         .getArkUIAniVideoModifier = OHOS::Ace::NG::GetVideoAniModifier,
         .getArkUIAniShapeModifier = OHOS::Ace::NG::GetShapeAniModifier,
         .getStateMgmtAniModifier = OHOS::Ace::NG::GetStateMgmtAniModifier,

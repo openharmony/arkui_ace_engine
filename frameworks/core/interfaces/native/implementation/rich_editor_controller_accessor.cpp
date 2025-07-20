@@ -639,7 +639,20 @@ Ark_Number AddImageSpanImpl(Ark_RichEditorController peer,
     if (optionsOpt) {
         locOptions = optionsOpt.value();
     }
-    auto info = Converter::OptConvert<ImageSourceInfo>(*value);
+    std::optional<ImageSourceInfo> info;
+    Converter::VisitUnion(*value,
+        [&info](const Ark_NativePointer& val) {
+            auto pixelMap = reinterpret_cast<PixelMap*>(val);
+            CHECK_NULL_VOID(pixelMap);
+            RefPtr<PixelMap> PixelMapRef = AceType::Claim(pixelMap);
+            CHECK_NULL_VOID(PixelMapRef);
+            info = ImageSourceInfo(PixelMapRef);
+        },
+        [&info](const Ark_ResourceStr& val) {
+            info = Converter::OptConvert<ImageSourceInfo>(val);
+        },
+        []() {}
+    );
     if (info) {
         locOptions.image = info->GetSrc();
         locOptions.bundleName = info->GetBundleName();

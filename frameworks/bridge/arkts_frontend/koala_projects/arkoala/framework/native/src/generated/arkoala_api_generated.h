@@ -15674,7 +15674,7 @@ typedef struct Opt_Union_Padding_Dimension {
 typedef struct Ark_Union_PixelMap_ResourceStr {
     Ark_Int32 selector;
     union {
-        Ark_PixelMap value0;
+        Ark_NativePointer value0;
         Ark_ResourceStr value1;
     };
 } Ark_Union_PixelMap_ResourceStr;

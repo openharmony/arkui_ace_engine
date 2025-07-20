@@ -295,6 +295,9 @@ struct ArkUIAniVideoModifier {
 struct ArkUIAniShapeModifier {
     void (*setPixelMap)(ArkUINodeHandle node, void* pixelMap);
 };
+struct ArkUIAniRichEditorModifier {
+    ani_long (*transferPixelMap)(void* pixelMap);
+};
 struct ArkUIAniStateMgmtModifier {
     std::string (*persistentStorageGet)(std::string key);
     void (*persistentStorageSet)(std::string key, std::string value);
@@ -343,6 +346,7 @@ struct ArkUIAniModifiers {
     const ArkUIAniImageSpanModifier* (*getImageSpanAniModifier)();
     const ArkUIAniVideoModifier* (*getArkUIAniVideoModifier)();
     const ArkUIAniShapeModifier* (*getArkUIAniShapeModifier)();
+    const ArkUIAniRichEditorModifier* (*getRichEditorAniModifier)();
     const ArkUIAniStateMgmtModifier* (*getStateMgmtAniModifier)();
     const ArkUIAniXComponentModifier* (*getArkUIAniXComponentModifier)();
     const ArkUIAniConditionScopeModifier* (*getArkUIAniConditionScopeModifier)();
