@@ -35,9 +35,6 @@ public:
 
     static RefPtr<NG::AniThemeColors> GetThemeColors()
     {
-        if (NG::AniThemeScope::aniCurrentTheme) {
-            LOGI("FZY AniThemeUtils GetThemeColors %{public}d", NG::AniThemeScope::aniCurrentTheme.value().id_);
-        }
         return (NG::AniThemeScope::aniCurrentTheme) ? NG::AniThemeScope::aniCurrentTheme->Colors() : nullptr;
     }
 };

@@ -16,7 +16,6 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_THEME_JS_THEME_UTILS_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_THEME_JS_THEME_UTILS_H
 
-#include <optional>
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
@@ -24,7 +23,6 @@
 #include "bridge/js_frontend/engine/jsi/js_value.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/interfaces/native/ani/ani_theme.h"
 
 namespace OHOS::Ace::Framework {
 class JSThemeUtils {

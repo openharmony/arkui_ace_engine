@@ -36,7 +36,6 @@ void AniThemeColors::SetColors(ani_env* env, ani_array colors)
         // type ResourceColor = number | string | Resource
         ani_ref value;
         env->Array_Get_Ref((ani_array_ref)colors, i, &value);
-        LOGI("FZY AniThemeColors::SetColors %{public}s", ArktsAniUtils::JsonStringify(env, (ani_object)value).c_str());
 
         ani_ref globalRef;
         env->GlobalReference_Create(value, &globalRef);
@@ -59,14 +58,11 @@ Color AniThemeColors::ConvertAniValueToColor(ani_object aniValue) const
     Color color;
     RefPtr<ResourceObject> resObj;
     ResourceAniModifier::ParseAniColor(env, aniValue, color, resObj);
-    LOGI("FZY AniThemeColors::ConvertAniValueToColor %{public}s, color: %{public}s",
-        ArktsAniUtils::JsonStringify(env, aniValue).c_str(), color.ToString().c_str());
     return color;
 }
 
 AniThemeColors::~AniThemeColors()
 {
-    LOGI("FZY ~AniThemeColors id: %{public}d", id_);
     auto* env = ArktsAniUtils::GetAniEnv(vm_);
     if (!env) {
         return;

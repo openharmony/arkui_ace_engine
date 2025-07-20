@@ -419,7 +419,6 @@ void SendThemeToNative(ani_env* env, ani_array colorArray, ani_int id)
 
     // save the current theme when Theme was created by WithTheme container
     if (AniThemeScope::isCurrentThemeDefault || themeScopeId > 0) {
-        LOGI("FZY SendThemeToNative set currentTheme %{public}d", id);
         std::optional<NG::AniTheme> themeOpt = std::make_optional(AniThemeScope::GetAniTheme(themeScopeId));
         AniThemeScope::aniCurrentTheme.swap(themeOpt);
     }
@@ -485,7 +484,6 @@ void SetThemeScopeId(ani_env* env, ani_int themeScopeId)
                                            ? std::make_optional(AniThemeScope::GetAniTheme(scopeId))
                                            : std::nullopt;
 
-    LOGI("FZY SetThemeScopeId swap currentTHeme %{public}d", themeScopeId);
     AniThemeScope::aniCurrentTheme.swap(themeOpt);
 }
 

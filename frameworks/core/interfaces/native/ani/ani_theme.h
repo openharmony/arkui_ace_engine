@@ -120,7 +120,6 @@ public:
 
     Color FontPrimary() const
     {
-        LOGI("FZY AniThemeColors FontPrimary, %{public}d", id_);
         return ConvertAniValueToColor(colors_[FONT_PRIMARY]);
     }
     Color FontSecondary() const
@@ -355,19 +354,16 @@ public:
 
     static void AddAniTheme(int32_t themeScopeId, const AniTheme& aniTheme)
     {
-        LOGI("FZY AddAniTheme %{public}d", themeScopeId);
         aniThemes[themeScopeId] = aniTheme;
     }
 
     static void RemoveAniTheme(int32_t themeScopeId)
     {
-        LOGI("FZY RemoveAniTheme %{public}d", themeScopeId);
         aniThemes.erase(themeScopeId);
     }
 
     static bool IsAniThemeExists(int32_t themeScopeId)
     {
-        LOGI("FZY IsAniThemeExists %{public}d", themeScopeId);
         auto iter = aniThemes.find(themeScopeId);
         return iter != aniThemes.end();
     }
