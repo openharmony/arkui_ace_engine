@@ -188,6 +188,8 @@ public:
     };
     virtual void BackExtender(const std::string& url, const std::string& params) {};
     virtual void ClearExtender() {};
+    virtual void ShowAlertBeforeBackPageExtender(const std::string& url) {};
+    virtual void HideAlertBeforeBackPageExtender() {};
 
     // Gets front-end event handler to handle ace event.
     virtual RefPtr<AceEventHandler> GetEventHandler() = 0;

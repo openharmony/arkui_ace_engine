@@ -80,6 +80,18 @@ namespace router {
         return globalRouterImp!.getStateByUrl(url);
     }
 
+    export function showAlertBeforeBackPage(options: router.EnableAlertOptions): void {
+        let uiContext: UIContextImpl = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+        const globalRouterImp = uiContext.getRouter().getRouter();
+        globalRouterImp!.showAlertBeforeBackPage(options);
+    }
+
+    export function hideAlertBeforeBackPage(): void {
+        let uiContext: UIContextImpl = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+        const globalRouterImp = uiContext.getRouter().getRouter();
+        globalRouterImp!.hideAlertBeforeBackPage();
+    }
+
     export function pushUrl(options: RouterOptions): void {
         InteropNativeModule._NativeLog("AceRouter:enter ohos pushUrl " + options.url)
         let uiContext: UIContextImpl = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;

@@ -27562,9 +27562,12 @@ typedef struct GENERATED_ArkUIRouterExtenderAccessor {
         const Opt_Callback_Void* enterFinishCallback, const Opt_Callback_Void* exitFinishCallback);
     void (*moveCommonUnderPageNode)(Ark_NativePointer commonNode, Ark_NativePointer pageNode);
     void (*back)();
+    void (*backWithOptions)(const Ark_String* url, const Opt_Object* params);
     Ark_NativePointer (*runPage)(const Ark_String* url, const Opt_Boolean* recover,
         Ark_NativePointer jsView, const Opt_Callback_Void* finishCallback);
     void (*clear)();
+    void (*showAlertBeforeBackPage)(const Ark_String* message);
+    void (*hideAlertBeforeBackPage)();
 } GENERATED_ArkUIRouterExtenderAccessor;
 
 /**

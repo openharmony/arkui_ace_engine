@@ -45570,6 +45570,21 @@ void impl_RouterExtender_RouterBack0attribute() {
         return GetAccessors()->getRouterExtenderAccessor()->back();
 }
 KOALA_INTEROP_DIRECT_V0(RouterExtender_RouterBack0attribute)
+void impl_RouterExtender_RouterBack1attribute(KSerializerBuffer thisArray, int32_t thisLength) {
+    Deserializer thisDeserializer(thisArray, thisLength);
+    const auto url = static_cast<Ark_String>(thisDeserializer.readString());
+
+    const auto param_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+    Opt_Object param_value_buf = {};
+    param_value_buf.tag = param_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+    if ((INTEROP_RUNTIME_UNDEFINED) != (param_runtimeType))
+    {
+        param_value_buf.value = thisDeserializer.readObject();
+    }
+    Opt_Object param_value = param_value_buf;
+    return GetAccessors()->getRouterExtenderAccessor()->backWithOptions((const Ark_String*)(&url), (const Opt_Object*)&param_value);
+}
+KOALA_INTEROP_DIRECT_V2(RouterExtender_RouterBack1attribute, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_RouterExtender_RouterRunPage(KSerializerBuffer thisArray, int32_t thisLength) {
     Deserializer thisDeserializer(thisArray, thisLength);
     const auto url = static_cast<Ark_String>(thisDeserializer.readString());
@@ -45595,6 +45610,14 @@ void impl_RouterExtender_RouterClear() {
         GetAccessors()->getRouterExtenderAccessor()->clear();
 }
 KOALA_INTEROP_DIRECT_V0(RouterExtender_RouterClear)
+void impl_RouterExtender_ShowAlertBeforeBackPage(const KStringPtr& value) {
+    return GetAccessors()->getRouterExtenderAccessor()->showAlertBeforeBackPage((const Ark_String*)(&value));
+}
+KOALA_INTEROP_V1(RouterExtender_ShowAlertBeforeBackPage, KStringPtr)
+void impl_RouterExtender_HideAlertBeforeBackPage() {
+    GetAccessors()->getRouterExtenderAccessor()->hideAlertBeforeBackPage();
+}
+KOALA_INTEROP_DIRECT_V0(RouterExtender_HideAlertBeforeBackPage)
 Ark_Int64 impl_UIStateGet(Ark_NativePointer thisPtr) {
         return GetNodeModifiers()->getUIStateModifier()->getUIState(thisPtr);
 }

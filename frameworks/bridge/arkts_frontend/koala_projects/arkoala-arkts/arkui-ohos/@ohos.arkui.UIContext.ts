@@ -141,6 +141,14 @@ export class Router {
     public getStateRoot(): ComputableState<IncrementalNode> {
         throw Error("getStateRoot not implemented in Router!");
     }
+
+    public showAlertBeforeBackPage(options: router.EnableAlertOptions): void {
+        throw Error("showAlertBeforeBackPage not implemented in Router!");
+    }
+
+    public hideAlertBeforeBackPage(): void {
+        throw Error("hideAlertBeforeBackPage not implemented in Router!");
+    }
 }
 
 export interface AtomicServiceBar {

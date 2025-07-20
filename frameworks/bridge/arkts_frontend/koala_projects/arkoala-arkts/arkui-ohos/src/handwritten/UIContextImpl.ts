@@ -602,6 +602,24 @@ export class RouterImpl extends Router {
         ArkUIAniModule._Common_Restore_InstanceId();
         return result;
     }
+
+    public showAlertBeforeBackPage(options: router.EnableAlertOptions): void {
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        this.router_!.showAlertBeforeBackPage(options);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
+    public hideAlertBeforeBackPage(): void {
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        this.router_!.hideAlertBeforeBackPage();
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
 }
 
 export class UIInspectorImpl extends UIInspector {
