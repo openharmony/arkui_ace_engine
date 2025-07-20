@@ -560,4 +560,51 @@ HWTEST_F(RefreshLayoutTestNg, ResetAnimation001, TestSize.Level1)
     pattern_->ResetAnimation();
     EXPECT_EQ(pattern_->offsetProperty_->Get(), pattern_->refreshOffset_.ConvertToPx());
 }
+
+/**
+ * @tc.name: TestInitChildNode001
+ * @tc.desc: Test InitChildNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshLayoutTestNg, InitChildNode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create with loadingText
+     * @tc.expected: loadingText node exists.
+     */
+    RefreshModelNG model = CreateRefresh();
+    model.SetLoadingText("loadingText");
+    CreateDone();
+    EXPECT_TRUE(pattern_->isHigherVersion_);
+    EXPECT_NE(pattern_->progressChild_, nullptr);
+    EXPECT_NE(pattern_->loadingTextNode_, nullptr);
+
+    /**
+     * @tc.steps: step2. refresh don't set accessibilityLevel
+     * @tc.expected: progress node and loadingText node don't have accessibilityLevel.
+     */
+    auto refreshAccessibilityProperty = frameNode_->GetAccessibilityProperty<NG::RefreshAccessibilityProperty>();
+    EXPECT_NE(refreshAccessibilityProperty, nullptr);
+    EXPECT_FALSE(refreshAccessibilityProperty->HasAccessibilityLevel());
+    auto progressAccessibilityProperty = pattern_->progressChild_->GetAccessibilityProperty<AccessibilityProperty>();
+    EXPECT_NE(progressAccessibilityProperty, nullptr);
+    EXPECT_FALSE(progressAccessibilityProperty->accessibilityLevel_.has_value());
+    auto textAccessibilityProperty = pattern_->loadingTextNode_->GetAccessibilityProperty<AccessibilityProperty>();
+    EXPECT_NE(textAccessibilityProperty, nullptr);
+    EXPECT_FALSE(textAccessibilityProperty->accessibilityLevel_.has_value());
+
+    /**
+     * @tc.steps: step3. refresh sets accessibilityLevel
+     * @tc.expected: progress node and loadingText node have accessibilityLevel.
+     */
+    
+    refreshAccessibilityProperty->SetAccessibilityLevel("no");
+    EXPECT_TRUE(refreshAccessibilityProperty->HasAccessibilityLevel());
+    EXPECT_EQ(refreshAccessibilityProperty->accessibilityLevel_.value(), "no");
+    pattern_->InitChildNode();
+    EXPECT_TRUE(progressAccessibilityProperty->accessibilityLevel_.has_value());
+    EXPECT_EQ(progressAccessibilityProperty->accessibilityLevel_.value(), "no");
+    EXPECT_TRUE(textAccessibilityProperty->accessibilityLevel_.has_value());
+    EXPECT_EQ(textAccessibilityProperty->accessibilityLevel_.value(), "no");
+}
 } // namespace OHOS::Ace::NG
