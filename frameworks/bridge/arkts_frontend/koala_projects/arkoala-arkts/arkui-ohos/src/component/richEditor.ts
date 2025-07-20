@@ -1661,7 +1661,8 @@ export class RichEditorController extends RichEditorBaseController implements Ma
             const value_value  = value!
             thisSerializer.writeRichEditorRange(value_value)
         }
-        const retval  = ArkUIGeneratedNativeModule._RichEditorController_getParagraphs(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._RichEditorController_getParagraphs(this.peer!.ptr,
+            thisSerializer.asBuffer(), thisSerializer.length()) as FixedArray<byte>
         thisSerializer.release()
         let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const buffer_length : int32 = retvalDeserializer.readInt32()
