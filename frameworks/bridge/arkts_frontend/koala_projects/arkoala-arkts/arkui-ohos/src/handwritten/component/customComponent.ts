@@ -192,7 +192,6 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
     onWillApplyTheme(theme: Theme): void {
         // TODO: this.instance.onWillApplyTheme(theme);
         this.instance.onWillApplyTheme(theme);
-        console.log(`FZY CustomDelegate onWillApplyTheme`);
     }
 
     protected __initializeStruct(

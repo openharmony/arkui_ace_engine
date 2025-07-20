@@ -57,8 +57,6 @@ private:
         // normal
         ViewStackModel::GetInstance()->SetVisualState(VisualState::NORMAL);
         if (isLabelButton) {
-            LOGI("FZY ButtonTheme ApplyTheme FontColor %{public}s",
-                AniButtonTheme::FontColor(themeColors).ToString().c_str());
             ButtonModel::GetInstance()->SetFontColor(AniButtonTheme::FontColor(themeColors));
         }
         ButtonModel::GetInstance()->BackgroundColor(AniButtonTheme::BackgroundColor(themeColors, false), true);

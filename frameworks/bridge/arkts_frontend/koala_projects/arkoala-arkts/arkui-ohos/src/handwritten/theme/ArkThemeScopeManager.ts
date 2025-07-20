@@ -100,7 +100,6 @@ export class ArkThemeScopeManager {
      * @param colorMode local color mode
      */
     onEnterLocalColorMode(colorMode: ThemeColorMode) {
-        console.warn(`FZY onEnterLocalColorMode ${colorMode}`);
         ArkUIAniModule._UpdateColorMode(colorMode);
     }
 
@@ -108,7 +107,6 @@ export class ArkThemeScopeManager {
      * Exit from the local color mode scope
      */
     onExitLocalColorMode() {
-        console.warn(`FZY onExitLocalColorMode`);
         ArkUIAniModule._RestoreColorMode();
     }
 
@@ -162,7 +160,6 @@ export class ArkThemeScopeManager {
      * @param ownerComponent theme scope changes listener
      */
     public onViewPUCreate(ownerComponent: ArkCustomComponent) {
-        console.log(`FZY onViewPUCreate `)
         this.subscribeListener(ownerComponent);
         const peer = ownerComponent.getPeer();
         if (peer) {
@@ -201,12 +198,9 @@ export class ArkThemeScopeManager {
      * @param listener theme scope changes listener
      */
     private subscribeListener(listener: ArkCustomComponent) {
-        console.log(`FZY subscribeListener 111`);
         if (this.listeners.includes(listener)) {
-            console.log(`FZY subscribeListener 222`);
             return;
         }
-        console.log(`FZY subscribeListener 333`);
         this.listeners.push(listener);
     }
 
@@ -239,14 +233,12 @@ export class ArkThemeScopeManager {
      * @param withThemeOptions WithTheme container`s options
      */
     onScopeEnter(withThemeId: number, withThemeOptions: WithThemeOptions, theme: ArkThemeBase) {
-        console.log(`FZY onScopeEnter ${withThemeId}, ${this.handledIsFirstRender}`);
         // save theme scope id on scope enter
         this.lastThemeScopeId = withThemeId;
         if (this.handledIsFirstRender === true) {
             // create theme scope
             let themeScope = new ArkThemeScope(withThemeId, withThemeId, withThemeOptions, theme);
             // keep created scope to the array of the scopes under construction
-            console.log(`FZY onScopeEnter push`);
             this.localThemeScopes.push(themeScope);
             if (!this.themeScopes) {
                 this.themeScopes = new Array<ArkThemeScope>();
@@ -269,7 +261,6 @@ export class ArkThemeScopeManager {
     onScopeExit() {
         // remove top theme scope from the array of scopes under construction
         if (this.handledIsFirstRender === true) {
-            console.log(`FZY onScopeExit pop`);
             this.localThemeScopes.pop();
         }
     }
@@ -304,15 +295,11 @@ export class ArkThemeScopeManager {
      * @returns theme instance
      */
     static cloneCustomThemeWithExpand(customTheme?: CustomTheme): CustomTheme | undefined {
-        console.log(`FZY cloneCustomThemeWithExpand 111, customTheme`);
         const theme = ArkThemeBase.copyCustomTheme(customTheme);
-        console.log('FZY cloneCustomThemeWithExpand 222');
 
         if (theme?.colors) {
-            console.log('FZY cloneCustomThemeWithExpand 333');
             ArkColorsImpl.expandByBrandColor(theme!.colors!);
         }
-        console.log('FZY cloneCustomThemeWithExpand 555');
         return theme;
     }
 
@@ -327,9 +314,6 @@ export class ArkThemeScopeManager {
         const baselineTheme = this.defaultTheme ?? ArkThemeScopeManager.systemTheme;
         // try to take theme from the cache
         const theme = ArkThemeCache.getInstance().get(baselineTheme.id, customTheme, colorMode);
-        if (theme) {
-            console.info(`FZY makeTheme get theme from cache`);
-        }
         // return theme instance from cache or create new theme instance
         return theme ? theme : new ArkThemeImpl(customTheme, colorMode, baselineTheme);
     }
@@ -344,18 +328,11 @@ export class ArkThemeScopeManager {
     }
 
     setDefaultTheme(customTheme: CustomTheme) {
-        console.error(`FZY manager setDefaultTheme customTheme`);
         // unbind previous default theme from 0 theme scope
         this.defaultTheme?.unbindFromScope(0);
         this.defaultTheme = ArkThemeScopeManager.systemTheme;
         const cloneTheme = ArkThemeScopeManager.cloneCustomThemeWithExpand(customTheme);
-        console.error(`FZY manager setDefaultTheme cloneTheme`);
         this.defaultTheme = this.makeTheme(cloneTheme, ThemeColorMode.SYSTEM);
-        console.error(
-            `FZY manager setDefaultTheme defaultTheme ${JSON.stringify(
-                ArkThemeNativeHelper.convertColorsToArray(this.defaultTheme!.colors!)
-            )}`
-        );
         // bind new default theme to 0 theme scope
         this.defaultTheme?.bindToScope(0);
 
@@ -374,7 +351,6 @@ export class ArkThemeScopeManager {
     }
 
     onComponentCreateEnter(componentName: string, elmtId: int32 | undefined, isFirstRender: boolean) {
-        console.log(`FZY onComponentCreateEnter ${componentName} ${elmtId}, isFirst ${isFirstRender}`);
         this.handledIsFirstRender = isFirstRender;
         this.handledComponentElmtId = elmtId;
 
@@ -394,9 +370,6 @@ export class ArkThemeScopeManager {
 
         // we need to keep component to the theme scope before first render
         if (isFirstRender) {
-            console.log(
-                `FZY onComponentCreateEnter currentLocalScope localThemeScopes ${this.localThemeScopes.length}`
-            );
             const currentLocalScope: ArkThemeScope | undefined =
                 this.localThemeScopes.length > 0 ? this.localThemeScopes[this.localThemeScopes.length - 1] : undefined;
             const currentIfElseScope: ArkThemeScope | undefined =
@@ -435,10 +408,8 @@ export class ArkThemeScopeManager {
     }
 
     onComponentCreateExit(elmtId?: int32) {
-        console.log(`FZY onComponentCreateExit ${elmtId}`);
         // trigger for exit local color mode for the component after rendering
         if (this.handledColorMode === ThemeColorMode.LIGHT || this.handledColorMode === ThemeColorMode.DARK) {
-            console.log(`FZY onComponentCreateExit ${elmtId}, colorMode: ${this.handledColorMode}`);
             this.onExitLocalColorMode();
         }
 
@@ -511,10 +482,8 @@ export class ArkThemeScopeManager {
         const stateManager = GlobalStateManager.instance as StateManagerImpl;
         const scope = stateManager.current;
         const parentRef = scope?.parent?.nodeRef;
-        console.log(`FZY Text NodeAttach ${parentRef}`);
         const parentPeer = parentRef ? findPeerNode(parentRef) : undefined;
         if (parentPeer && parentPeer.peer && component.getPeer()) {
-            console.info(`FZY ArkTextPeer parent ${parentPeer}`)
             ArkUIAniModule._ApplyParentThemeScopeId(component.getPeer().getPeerPtr(), parentPeer.getPeerPtr());
         }
     }

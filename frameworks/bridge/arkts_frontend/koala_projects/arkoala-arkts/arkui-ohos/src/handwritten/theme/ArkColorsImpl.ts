@@ -213,8 +213,6 @@ export class ArkColorsImpl implements Colors {
     }
 
     static expandByBrandColor(colors: CustomColors) {
-        console.warn(`FZY expandByBrandColor ${Object.keys(colors)}`);
-        console.warn(`FZY expandByBrandColor ${Object.values(colors)}`);
         if (colors!.brand) {
             const brandColors: BrandColors = ArkColorsImpl.makeBrandColors(colors.brand);
             colors.fontEmphasize = colors.fontEmphasize ?? brandColors.primary!;
