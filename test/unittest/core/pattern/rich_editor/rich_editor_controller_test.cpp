@@ -1122,4 +1122,26 @@ HWTEST_F(RichEditorControllerTest, RichEditorController22, TestSize.Level1)
     EXPECT_EQ(newSpan2->GetTextDecorationColor(), TEXT_DECORATION_COLOR_VALUE);
     EXPECT_EQ(newSpan2->GetLineThicknessScale(), TEXT_DECORATION_THICKNESS_SCALE);
 }
+
+/**
+ * @tc.name: RichEditorController23
+ * @tc.desc: test set selection
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorControllerTest, RichEditorController23, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    AddSpan(INIT_VALUE_1);
+    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->RequestFocusImmediately();
+    richEditorPattern->isEditing_ = true;
+    richEditorController->SetSelection(0, 2);
+    EXPECT_EQ(richEditorPattern->textSelector_.GetTextStart(), 0);
+    EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 2);
+}
 }
