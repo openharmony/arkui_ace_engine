@@ -14,10 +14,12 @@
  */
 
 import { ArkThemeBase } from './ArkThemeBase';
-import { CustomTheme, Colors } from '@ohos/arkui/theme';
 import { ThemeColorMode } from 'arkui/component/common';
 import { ArkShapesImpl } from './ArkShapesImpl';
 import { ArkTypographyImpl } from './ArkTypographyImpl';
+import { ArkColorsImpl } from './ArkColorsImpl';
+import { CustomThemeInternal } from '../theme';
+import { CustomTheme } from '@ohos/arkui/theme';
 
 export class ArkThemeImpl extends ArkThemeBase {
     constructor(
@@ -25,9 +27,19 @@ export class ArkThemeImpl extends ArkThemeBase {
         colorMode: ThemeColorMode,
         baselineTheme: ArkThemeBase,
     ) {
-        super(baselineTheme.id, customTheme, colorMode,
-            new Colors(customTheme ? customTheme.colors : undefined, baselineTheme.colors),
-            new ArkShapesImpl(customTheme ? customTheme.shapes : undefined, baselineTheme.shapes),
-            new ArkTypographyImpl(customTheme ? customTheme.typography : undefined, baselineTheme.typography));
+        super(
+            baselineTheme.id,
+            customTheme,
+            colorMode,
+            new ArkColorsImpl(customTheme ? customTheme.colors : undefined, baselineTheme.colors),
+            new ArkShapesImpl(
+                customTheme ? (customTheme as CustomThemeInternal).shapes : undefined,
+                baselineTheme.shapes
+            ),
+            new ArkTypographyImpl(
+                customTheme ? (customTheme as CustomThemeInternal).typography : undefined,
+                baselineTheme.typography
+            )
+        );
     }
 }
