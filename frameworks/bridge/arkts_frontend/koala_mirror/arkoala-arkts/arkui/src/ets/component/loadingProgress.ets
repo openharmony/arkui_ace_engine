@@ -112,10 +112,18 @@ export enum LoadingProgressStyle {
     Orbital = 2
 }
 export interface LoadingProgressAttribute extends CommonMethod {
-    color(value: ResourceColor | undefined): this
-    enableLoading(value: boolean | undefined): this
-    contentModifier(value: ContentModifier<LoadingProgressConfiguration> | undefined): this
-    attributeModifier(value: AttributeModifier<LoadingProgressAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    color(value: ResourceColor | undefined): this {
+        throw new Error("Unimplemented method color")
+    }
+    enableLoading(value: boolean | undefined): this {
+        throw new Error("Unimplemented method enableLoading")
+    }
+    contentModifier(value: ContentModifier<LoadingProgressConfiguration> | undefined): this {
+        throw new Error("Unimplemented method contentModifier")
+    }
+    attributeModifier(value: AttributeModifier<LoadingProgressAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkLoadingProgressStyle extends ArkCommonMethodStyle implements LoadingProgressAttribute {
     color_value?: ResourceColor | undefined

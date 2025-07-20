@@ -111,8 +111,12 @@ export interface PolylineOptions {
     height?: string | number;
 }
 export interface PolylineAttribute extends CommonShapeMethod {
-    points(value: Array<ShapePoint> | undefined): this
-    attributeModifier(value: AttributeModifier<PolylineAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this
+    points(value: Array<ShapePoint> | undefined): this {
+        throw new Error("Unimplemented method points")
+    }
+    attributeModifier(value: AttributeModifier<PolylineAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkPolylineStyle extends ArkCommonShapeMethodStyle implements PolylineAttribute {
     points_value?: Array<ShapePoint> | undefined

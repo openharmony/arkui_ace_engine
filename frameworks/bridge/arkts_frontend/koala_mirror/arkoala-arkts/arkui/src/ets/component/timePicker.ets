@@ -236,19 +236,45 @@ export interface TimePickerOptions {
 }
 export type OnTimePickerChangeCallback = (result: TimePickerResult) => void;
 export interface TimePickerAttribute extends CommonMethod {
-    useMilitaryTime(value: boolean | undefined): this
-    loop(value: boolean | undefined): this
-    disappearTextStyle(value: PickerTextStyle | undefined): this
-    textStyle(value: PickerTextStyle | undefined): this
-    selectedTextStyle(value: PickerTextStyle | undefined): this
-    dateTimeOptions(value: intl.DateTimeOptions | undefined): this
-    onChange(value: OnTimePickerChangeCallback | undefined): this
-    onEnterSelectedArea(value: ((value0: TimePickerResult) => void) | undefined): this
-    enableHapticFeedback(value: boolean | undefined): this
-    digitalCrownSensitivity(value: CrownSensitivity | undefined): this
-    enableCascade(value: boolean | undefined): this
-    _onChangeEvent_selected(callback_: ((selected: Date) => void)): void
-    attributeModifier(value: AttributeModifier<TimePickerAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    useMilitaryTime(value: boolean | undefined): this {
+        throw new Error("Unimplemented method useMilitaryTime")
+    }
+    loop(value: boolean | undefined): this {
+        throw new Error("Unimplemented method loop")
+    }
+    disappearTextStyle(value: PickerTextStyle | undefined): this {
+        throw new Error("Unimplemented method disappearTextStyle")
+    }
+    textStyle(value: PickerTextStyle | undefined): this {
+        throw new Error("Unimplemented method textStyle")
+    }
+    selectedTextStyle(value: PickerTextStyle | undefined): this {
+        throw new Error("Unimplemented method selectedTextStyle")
+    }
+    dateTimeOptions(value: intl.DateTimeOptions | undefined): this {
+        throw new Error("Unimplemented method dateTimeOptions")
+    }
+    onChange(value: OnTimePickerChangeCallback | undefined): this {
+        throw new Error("Unimplemented method onChange")
+    }
+    onEnterSelectedArea(value: ((value0: TimePickerResult) => void) | undefined): this {
+        throw new Error("Unimplemented method onEnterSelectedArea")
+    }
+    enableHapticFeedback(value: boolean | undefined): this {
+        throw new Error("Unimplemented method enableHapticFeedback")
+    }
+    digitalCrownSensitivity(value: CrownSensitivity | undefined): this {
+        throw new Error("Unimplemented method digitalCrownSensitivity")
+    }
+    enableCascade(value: boolean | undefined): this {
+        throw new Error("Unimplemented method enableCascade")
+    }
+    _onChangeEvent_selected(callback_: ((selected: Date) => void)): void {
+        throw new Error("Unimplemented method _onChangeEvent_selected")
+    }
+    attributeModifier(value: AttributeModifier<TimePickerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkTimePickerStyle extends ArkCommonMethodStyle implements TimePickerAttribute {
     useMilitaryTime_value?: boolean | undefined

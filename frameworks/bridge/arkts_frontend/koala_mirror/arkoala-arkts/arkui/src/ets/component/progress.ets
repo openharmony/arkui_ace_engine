@@ -236,12 +236,24 @@ export enum ProgressStyle {
 export interface ProgressStyleMap {
 }
 export interface ProgressAttribute extends CommonMethod {
-    value(value: number | undefined): this
-    color(value: ResourceColor | LinearGradient | undefined): this
-    style(value: LinearStyleOptions | RingStyleOptions | CapsuleStyleOptions | ProgressStyleOptions | undefined): this
-    privacySensitive(value: boolean | undefined): this
-    contentModifier(value: ContentModifier<ProgressConfiguration> | undefined): this
-    attributeModifier(value: AttributeModifier<ProgressAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    value(value: number | undefined): this {
+        throw new Error("Unimplemented method value")
+    }
+    color(value: ResourceColor | LinearGradient | undefined): this {
+        throw new Error("Unimplemented method color")
+    }
+    style(value: LinearStyleOptions | RingStyleOptions | CapsuleStyleOptions | ProgressStyleOptions | undefined): this {
+        throw new Error("Unimplemented method style")
+    }
+    privacySensitive(value: boolean | undefined): this {
+        throw new Error("Unimplemented method privacySensitive")
+    }
+    contentModifier(value: ContentModifier<ProgressConfiguration> | undefined): this {
+        throw new Error("Unimplemented method contentModifier")
+    }
+    attributeModifier(value: AttributeModifier<ProgressAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkProgressStyle extends ArkCommonMethodStyle implements ProgressAttribute {
     value_value?: number | undefined

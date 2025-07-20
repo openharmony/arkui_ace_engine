@@ -546,24 +546,44 @@ export interface OnScrollFrameBeginHandlerResult {
 }
 export type OnScrollFrameBeginCallback = (offset: number, state: ScrollState) => OnScrollFrameBeginHandlerResult;
 export interface ScrollAttribute extends ScrollableCommonMethod {
-    scrollable(value: ScrollDirection | undefined): this
-    onWillScroll(value: ScrollOnWillScrollCallback | undefined): this
-    onDidScroll(value: ScrollOnScrollCallback | undefined): this
-    onScrollEdge(value: OnScrollEdgeCallback | undefined): this
+    scrollable(value: ScrollDirection | undefined): this {
+        throw new Error("Unimplemented method scrollable")
+    }
+    onWillScroll(value: ScrollOnWillScrollCallback | undefined): this {
+        throw new Error("Unimplemented method onWillScroll")
+    }
+    onDidScroll(value: ScrollOnScrollCallback | undefined): this {
+        throw new Error("Unimplemented method onDidScroll")
+    }
+    onScrollEdge(value: OnScrollEdgeCallback | undefined): this {
+        throw new Error("Unimplemented method onScrollEdge")
+    }
     onScrollStart(value: VoidCallback | undefined): this
     onScrollStop(value: VoidCallback | undefined): this
     scrollBar(value: BarState | undefined): this
     scrollBarColor(value: Color | number | string | undefined): this
     scrollBarWidth(value: number | string | undefined): this
-    onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this
+    onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this {
+        throw new Error("Unimplemented method onScrollFrameBegin")
+    }
     nestedScroll(value: NestedScrollOptions | undefined): this
     enableScrollInteraction(value: boolean | undefined): this
     friction(value: number | Resource | undefined): this
-    scrollSnap(value: ScrollSnapOptions | undefined): this
-    enablePaging(value: boolean | undefined): this
-    initialOffset(value: OffsetOptions | undefined): this
-    edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions): this
-    attributeModifier(value: AttributeModifier<ScrollAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this
+    scrollSnap(value: ScrollSnapOptions | undefined): this {
+        throw new Error("Unimplemented method scrollSnap")
+    }
+    enablePaging(value: boolean | undefined): this {
+        throw new Error("Unimplemented method enablePaging")
+    }
+    initialOffset(value: OffsetOptions | undefined): this {
+        throw new Error("Unimplemented method initialOffset")
+    }
+    edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions): this {
+        throw new Error("Unimplemented method edgeEffect")
+    }
+    attributeModifier(value: AttributeModifier<ScrollAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkScrollStyle extends ArkScrollableCommonMethodStyle implements ScrollAttribute {
     scrollable_value?: ScrollDirection | undefined

@@ -170,10 +170,18 @@ export interface RoundedRectOptions {
     radiusHeight?: number | string;
 }
 export interface RectAttribute extends CommonShapeMethod {
-    radiusWidth(value: number | string | undefined): this
-    radiusHeight(value: number | string | undefined): this
-    radius(value: number | string | Array<number | string> | undefined): this
-    attributeModifier(value: AttributeModifier<RectAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this
+    radiusWidth(value: number | string | undefined): this {
+        throw new Error("Unimplemented method radiusWidth")
+    }
+    radiusHeight(value: number | string | undefined): this {
+        throw new Error("Unimplemented method radiusHeight")
+    }
+    radius(value: number | string | Array<number | string> | undefined): this {
+        throw new Error("Unimplemented method radius")
+    }
+    attributeModifier(value: AttributeModifier<RectAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkRectStyle extends ArkCommonShapeMethodStyle implements RectAttribute {
     radiusWidth_value?: number | string | undefined

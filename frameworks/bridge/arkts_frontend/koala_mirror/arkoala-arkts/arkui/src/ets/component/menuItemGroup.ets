@@ -60,7 +60,9 @@ export interface MenuItemGroupOptions {
     footer?: ResourceStr | CustomBuilder;
 }
 export interface MenuItemGroupAttribute extends CommonMethod {
-    attributeModifier(value: AttributeModifier<MenuItemGroupAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    attributeModifier(value: AttributeModifier<MenuItemGroupAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkMenuItemGroupStyle extends ArkCommonMethodStyle implements MenuItemGroupAttribute {
     attributeModifier_value?: AttributeModifier<MenuItemGroupAttribute> | AttributeModifier<CommonMethod> | undefined

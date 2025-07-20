@@ -200,15 +200,33 @@ export interface CheckBoxConfiguration extends CommonConfiguration<CheckBoxConfi
 }
 export type OnCheckboxChangeCallback = (value: boolean) => void;
 export interface CheckboxAttribute extends CommonMethod {
-    select(value: boolean | undefined): this
-    selectedColor(value: ResourceColor | undefined): this
-    shape(value: CheckBoxShape | undefined): this
-    unselectedColor(value: ResourceColor | undefined): this
-    mark(value: MarkStyle | undefined): this
-    onChange(value: OnCheckboxChangeCallback | undefined): this
-    contentModifier(value: ContentModifier<CheckBoxConfiguration> | undefined): this
-    _onChangeEvent_select(callback_: ((select: boolean | undefined) => void)): void
-    attributeModifier(value: AttributeModifier<CheckboxAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    select(value: boolean | undefined): this {
+        throw new Error("Unimplemented method select")
+    }
+    selectedColor(value: ResourceColor | undefined): this {
+        throw new Error("Unimplemented method selectedColor")
+    }
+    shape(value: CheckBoxShape | undefined): this {
+        throw new Error("Unimplemented method shape")
+    }
+    unselectedColor(value: ResourceColor | undefined): this {
+        throw new Error("Unimplemented method unselectedColor")
+    }
+    mark(value: MarkStyle | undefined): this {
+        throw new Error("Unimplemented method mark")
+    }
+    onChange(value: OnCheckboxChangeCallback | undefined): this {
+        throw new Error("Unimplemented method onChange")
+    }
+    contentModifier(value: ContentModifier<CheckBoxConfiguration> | undefined): this {
+        throw new Error("Unimplemented method contentModifier")
+    }
+    _onChangeEvent_select(callback_: ((select: boolean | undefined) => void)): void {
+        throw new Error("Unimplemented method _onChangeEvent_select")
+    }
+    attributeModifier(value: AttributeModifier<CheckboxAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkCheckboxStyle extends ArkCommonMethodStyle implements CheckboxAttribute {
     select_value?: boolean | undefined

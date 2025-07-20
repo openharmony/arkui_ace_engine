@@ -49,7 +49,9 @@ export class ArkRootScenePeer extends ArkCommonMethodPeer {
 export interface RootSceneSession {
 }
 export interface RootSceneAttribute extends CommonMethod {
-    attributeModifier(value: AttributeModifier<RootSceneAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    attributeModifier(value: AttributeModifier<RootSceneAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkRootSceneStyle extends ArkCommonMethodStyle implements RootSceneAttribute {
     attributeModifier_value?: AttributeModifier<RootSceneAttribute> | AttributeModifier<CommonMethod> | undefined

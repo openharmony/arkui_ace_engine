@@ -135,10 +135,18 @@ export interface GridColOptions {
     order?: number | GridColColumnOption;
 }
 export interface GridColAttribute extends CommonMethod {
-    span(value: number | GridColColumnOption | undefined): this
-    gridColOffset(value: number | GridColColumnOption | undefined): this
-    order(value: number | GridColColumnOption | undefined): this
-    attributeModifier(value: AttributeModifier<GridColAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    span(value: number | GridColColumnOption | undefined): this {
+        throw new Error("Unimplemented method span")
+    }
+    gridColOffset(value: number | GridColColumnOption | undefined): this {
+        throw new Error("Unimplemented method gridColOffset")
+    }
+    order(value: number | GridColColumnOption | undefined): this {
+        throw new Error("Unimplemented method order")
+    }
+    attributeModifier(value: AttributeModifier<GridColAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkGridColStyle extends ArkCommonMethodStyle implements GridColAttribute {
     span_value?: number | GridColColumnOption | undefined

@@ -44,7 +44,9 @@ export class ArkEffectComponentPeer extends ArkCommonMethodPeer {
     }
 }
 export interface EffectComponentAttribute extends CommonMethod {
-    attributeModifier(value: AttributeModifier<EffectComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    attributeModifier(value: AttributeModifier<EffectComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkEffectComponentStyle extends ArkCommonMethodStyle implements EffectComponentAttribute {
     attributeModifier_value?: AttributeModifier<EffectComponentAttribute> | AttributeModifier<CommonMethod> | undefined

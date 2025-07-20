@@ -188,15 +188,33 @@ export interface DatePickerOptions {
     mode?: DatePickerMode;
 }
 export interface DatePickerAttribute extends CommonMethod {
-    lunar(value: boolean | undefined): this
-    disappearTextStyle(value: PickerTextStyle | undefined): this
-    textStyle(value: PickerTextStyle | undefined): this
-    selectedTextStyle(value: PickerTextStyle | undefined): this
-    onDateChange(value: ((value0: Date) => void) | undefined): this
-    digitalCrownSensitivity(value: CrownSensitivity | undefined): this
-    enableHapticFeedback(value: boolean | undefined): this
-    _onChangeEvent_selected(callback_: ((value0: Date) => void)): void
-    attributeModifier(value: AttributeModifier<DatePickerAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    lunar(value: boolean | undefined): this {
+        throw new Error("Unimplemented method lunar")
+    }
+    disappearTextStyle(value: PickerTextStyle | undefined): this {
+        throw new Error("Unimplemented method disappearTextStyle")
+    }
+    textStyle(value: PickerTextStyle | undefined): this {
+        throw new Error("Unimplemented method textStyle")
+    }
+    selectedTextStyle(value: PickerTextStyle | undefined): this {
+        throw new Error("Unimplemented method selectedTextStyle")
+    }
+    onDateChange(value: ((value0: Date) => void) | undefined): this {
+        throw new Error("Unimplemented method onDateChange")
+    }
+    digitalCrownSensitivity(value: CrownSensitivity | undefined): this {
+        throw new Error("Unimplemented method digitalCrownSensitivity")
+    }
+    enableHapticFeedback(value: boolean | undefined): this {
+        throw new Error("Unimplemented method enableHapticFeedback")
+    }
+    _onChangeEvent_selected(callback_: ((value0: Date) => void)): void {
+        throw new Error("Unimplemented method _onChangeEvent_selected")
+    }
+    attributeModifier(value: AttributeModifier<DatePickerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkDatePickerStyle extends ArkCommonMethodStyle implements DatePickerAttribute {
     lunar_value?: boolean | undefined

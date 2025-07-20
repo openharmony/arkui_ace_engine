@@ -90,10 +90,18 @@ export enum ItemState {
     Skip = 3
 }
 export interface StepperItemAttribute extends CommonMethod {
-    prevLabel(value: string | undefined): this
-    nextLabel(value: string | undefined): this
-    status(value: ItemState | undefined): this
-    attributeModifier(value: AttributeModifier<StepperItemAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    prevLabel(value: string | undefined): this {
+        throw new Error("Unimplemented method prevLabel")
+    }
+    nextLabel(value: string | undefined): this {
+        throw new Error("Unimplemented method nextLabel")
+    }
+    status(value: ItemState | undefined): this {
+        throw new Error("Unimplemented method status")
+    }
+    attributeModifier(value: AttributeModifier<StepperItemAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkStepperItemStyle extends ArkCommonMethodStyle implements StepperItemAttribute {
     prevLabel_value?: string | undefined

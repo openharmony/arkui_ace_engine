@@ -85,9 +85,15 @@ export interface PluginErrorData {
 }
 export type PluginErrorCallback = (info: PluginErrorData) => void;
 export interface PluginComponentAttribute extends CommonMethod {
-    onComplete(value: VoidCallback | undefined): this
-    onError(value: PluginErrorCallback | undefined): this
-    attributeModifier(value: AttributeModifier<PluginComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    onComplete(value: VoidCallback | undefined): this {
+        throw new Error("Unimplemented method onComplete")
+    }
+    onError(value: PluginErrorCallback | undefined): this {
+        throw new Error("Unimplemented method onError")
+    }
+    attributeModifier(value: AttributeModifier<PluginComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkPluginComponentStyle extends ArkCommonMethodStyle implements PluginComponentAttribute {
     onComplete_value?: VoidCallback | undefined

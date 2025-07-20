@@ -81,9 +81,15 @@ export interface StackOptions {
     alignContent?: Alignment;
 }
 export interface StackAttribute extends CommonMethod {
-    alignContent(value: Alignment | undefined): this
-    pointLight(value: PointLightStyle | undefined): this
-    attributeModifier(value: AttributeModifier<StackAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    alignContent(value: Alignment | undefined): this {
+        throw new Error("Unimplemented method alignContent")
+    }
+    pointLight(value: PointLightStyle | undefined): this {
+        throw new Error("Unimplemented method pointLight")
+    }
+    attributeModifier(value: AttributeModifier<StackAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkStackStyle extends ArkCommonMethodStyle implements StackAttribute {
     alignContent_value?: Alignment | undefined

@@ -344,24 +344,60 @@ export type TextPickerScrollStopCallback = (value: string | Array<string>, index
 export type OnTextPickerChangeCallback = (selectItem: string | Array<string>, index: number | Array<number>) => void;
 export type TextPickerEnterSelectedAreaCallback = (value: string | Array<string>, index: number | Array<number>) => void;
 export interface TextPickerAttribute extends CommonMethod {
-    defaultPickerItemHeight(value: number | string | undefined): this
-    canLoop(value: boolean | undefined): this
-    disappearTextStyle(value: PickerTextStyle | undefined): this
-    textStyle(value: PickerTextStyle | undefined): this
-    selectedTextStyle(value: PickerTextStyle | undefined): this
-    disableTextStyleAnimation(value: boolean | undefined): this
-    defaultTextStyle(value: TextPickerTextStyle | undefined): this
-    onChange(value: OnTextPickerChangeCallback | undefined): this
-    onScrollStop(value: TextPickerScrollStopCallback | undefined): this
-    onEnterSelectedArea(value: TextPickerEnterSelectedAreaCallback | undefined): this
-    selectedIndex(value: number | Array<number> | undefined): this
-    divider(value: DividerOptions | undefined): this
-    gradientHeight(value: Dimension | undefined): this
-    enableHapticFeedback(value: boolean | undefined): this
-    digitalCrownSensitivity(value: CrownSensitivity | undefined): this
-    _onChangeEvent_selected(callback_: ((selected: number | Array<number>) => void)): void
-    _onChangeEvent_value(callback_: ((value: ResourceStr | Array<ResourceStr>) => void)): void
-    attributeModifier(value: AttributeModifier<TextPickerAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    defaultPickerItemHeight(value: number | string | undefined): this {
+        throw new Error("Unimplemented method defaultPickerItemHeight")
+    }
+    canLoop(value: boolean | undefined): this {
+        throw new Error("Unimplemented method canLoop")
+    }
+    disappearTextStyle(value: PickerTextStyle | undefined): this {
+        throw new Error("Unimplemented method disappearTextStyle")
+    }
+    textStyle(value: PickerTextStyle | undefined): this {
+        throw new Error("Unimplemented method textStyle")
+    }
+    selectedTextStyle(value: PickerTextStyle | undefined): this {
+        throw new Error("Unimplemented method selectedTextStyle")
+    }
+    disableTextStyleAnimation(value: boolean | undefined): this {
+        throw new Error("Unimplemented method disableTextStyleAnimation")
+    }
+    defaultTextStyle(value: TextPickerTextStyle | undefined): this {
+        throw new Error("Unimplemented method defaultTextStyle")
+    }
+    onChange(value: OnTextPickerChangeCallback | undefined): this {
+        throw new Error("Unimplemented method onChange")
+    }
+    onScrollStop(value: TextPickerScrollStopCallback | undefined): this {
+        throw new Error("Unimplemented method onScrollStop")
+    }
+    onEnterSelectedArea(value: TextPickerEnterSelectedAreaCallback | undefined): this {
+        throw new Error("Unimplemented method onEnterSelectedArea")
+    }
+    selectedIndex(value: number | Array<number> | undefined): this {
+        throw new Error("Unimplemented method selectedIndex")
+    }
+    divider(value: DividerOptions | undefined): this {
+        throw new Error("Unimplemented method divider")
+    }
+    gradientHeight(value: Dimension | undefined): this {
+        throw new Error("Unimplemented method gradientHeight")
+    }
+    enableHapticFeedback(value: boolean | undefined): this {
+        throw new Error("Unimplemented method enableHapticFeedback")
+    }
+    digitalCrownSensitivity(value: CrownSensitivity | undefined): this {
+        throw new Error("Unimplemented method digitalCrownSensitivity")
+    }
+    _onChangeEvent_selected(callback_: ((selected: number | Array<number>) => void)): void {
+        throw new Error("Unimplemented method _onChangeEvent_selected")
+    }
+    _onChangeEvent_value(callback_: ((value: ResourceStr | Array<ResourceStr>) => void)): void {
+        throw new Error("Unimplemented method _onChangeEvent_value")
+    }
+    attributeModifier(value: AttributeModifier<TextPickerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkTextPickerStyle extends ArkCommonMethodStyle implements TextPickerAttribute {
     defaultPickerItemHeight_value?: number | string | undefined

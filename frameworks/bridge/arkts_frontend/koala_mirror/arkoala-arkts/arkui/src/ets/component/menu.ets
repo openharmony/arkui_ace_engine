@@ -172,13 +172,27 @@ export enum SubMenuExpandingMode {
     STACK_EXPAND = 2
 }
 export interface MenuAttribute extends CommonMethod {
-    font(value: Font | undefined): this
-    fontColor(value: ResourceColor | undefined): this
-    radius(value: Dimension | BorderRadiuses | undefined): this
-    menuItemDivider(value: DividerStyleOptions | undefined): this
-    menuItemGroupDivider(value: DividerStyleOptions | undefined): this
-    subMenuExpandingMode(value: SubMenuExpandingMode | undefined): this
-    attributeModifier(value: AttributeModifier<MenuAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    font(value: Font | undefined): this {
+        throw new Error("Unimplemented method font")
+    }
+    fontColor(value: ResourceColor | undefined): this {
+        throw new Error("Unimplemented method fontColor")
+    }
+    radius(value: Dimension | BorderRadiuses | undefined): this {
+        throw new Error("Unimplemented method radius")
+    }
+    menuItemDivider(value: DividerStyleOptions | undefined): this {
+        throw new Error("Unimplemented method menuItemDivider")
+    }
+    menuItemGroupDivider(value: DividerStyleOptions | undefined): this {
+        throw new Error("Unimplemented method menuItemGroupDivider")
+    }
+    subMenuExpandingMode(value: SubMenuExpandingMode | undefined): this {
+        throw new Error("Unimplemented method subMenuExpandingMode")
+    }
+    attributeModifier(value: AttributeModifier<MenuAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkMenuStyle extends ArkCommonMethodStyle implements MenuAttribute {
     font_value?: Font | undefined

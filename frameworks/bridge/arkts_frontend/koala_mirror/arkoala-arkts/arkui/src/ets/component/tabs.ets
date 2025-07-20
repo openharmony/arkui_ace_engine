@@ -677,36 +677,96 @@ export type OnTabsGestureSwipeCallback = (index: number, extraInfo: TabsAnimatio
 export type TabsCustomContentTransitionCallback = (from: number, to: number) => TabContentAnimatedTransition | undefined;
 export type OnTabsContentWillChangeCallback = (currentIndex: number, comingIndex: number) => boolean;
 export interface TabsAttribute extends CommonMethod {
-    vertical(value: boolean | undefined): this
-    barPosition(value: BarPosition | undefined): this
-    scrollable(value: boolean | undefined): this
-    barWidth(value: Length | undefined): this
-    barHeight(value: Length | undefined): this
-    animationDuration(value: number | undefined): this
-    animationMode(value: AnimationMode | undefined): this
-    edgeEffect(value: EdgeEffect | undefined): this
-    onChange(value: ((value0: number) => void) | undefined): this
-    onSelected(value: ((value0: number) => void) | undefined): this
-    onTabBarClick(value: ((value0: number) => void) | undefined): this
-    onUnselected(value: ((value0: number) => void) | undefined): this
-    onAnimationStart(value: OnTabsAnimationStartCallback | undefined): this
-    onAnimationEnd(value: OnTabsAnimationEndCallback | undefined): this
-    onGestureSwipe(value: OnTabsGestureSwipeCallback | undefined): this
-    fadingEdge(value: boolean | undefined): this
-    divider(value: DividerStyle | undefined): this
-    barOverlap(value: boolean | undefined): this
-    barBackgroundColor(value: ResourceColor | undefined): this
-    barGridAlign(value: BarGridColumnOptions | undefined): this
-    customContentTransition(value: TabsCustomContentTransitionCallback | undefined): this
-    barBackgroundBlurStyle(value: BlurStyle | undefined): this
-    barBackgroundEffect(value: BackgroundEffectOptions | undefined): this
-    pageFlipMode(value: PageFlipMode | undefined): this
-    onContentWillChange(value: OnTabsContentWillChangeCallback | undefined): this
-    barMode(value: BarMode | undefined, options?: ScrollableBarModeOptions): this
-    barBackgroundBlurStyle(style: BlurStyle | undefined, options: BackgroundBlurStyleOptions | undefined): this
-    cachedMaxCount(count: number | undefined, mode: TabsCacheMode | undefined): this
-    _onChangeEvent_index(callback_: ((value0: number) => void)): void
-    attributeModifier(value: AttributeModifier<TabsAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    vertical(value: boolean | undefined): this {
+        throw new Error("Unimplemented method vertical")
+    }
+    barPosition(value: BarPosition | undefined): this {
+        throw new Error("Unimplemented method barPosition")
+    }
+    scrollable(value: boolean | undefined): this {
+        throw new Error("Unimplemented method scrollable")
+    }
+    barWidth(value: Length | undefined): this {
+        throw new Error("Unimplemented method barWidth")
+    }
+    barHeight(value: Length | undefined): this {
+        throw new Error("Unimplemented method barHeight")
+    }
+    animationDuration(value: number | undefined): this {
+        throw new Error("Unimplemented method animationDuration")
+    }
+    animationMode(value: AnimationMode | undefined): this {
+        throw new Error("Unimplemented method animationMode")
+    }
+    edgeEffect(value: EdgeEffect | undefined): this {
+        throw new Error("Unimplemented method edgeEffect")
+    }
+    onChange(value: ((value0: number) => void) | undefined): this {
+        throw new Error("Unimplemented method onChange")
+    }
+    onSelected(value: ((value0: number) => void) | undefined): this {
+        throw new Error("Unimplemented method onSelected")
+    }
+    onTabBarClick(value: ((value0: number) => void) | undefined): this {
+        throw new Error("Unimplemented method onTabBarClick")
+    }
+    onUnselected(value: ((value0: number) => void) | undefined): this {
+        throw new Error("Unimplemented method onUnselected")
+    }
+    onAnimationStart(value: OnTabsAnimationStartCallback | undefined): this {
+        throw new Error("Unimplemented method onAnimationStart")
+    }
+    onAnimationEnd(value: OnTabsAnimationEndCallback | undefined): this {
+        throw new Error("Unimplemented method onAnimationEnd")
+    }
+    onGestureSwipe(value: OnTabsGestureSwipeCallback | undefined): this {
+        throw new Error("Unimplemented method onGestureSwipe")
+    }
+    fadingEdge(value: boolean | undefined): this {
+        throw new Error("Unimplemented method fadingEdge")
+    }
+    divider(value: DividerStyle | undefined): this {
+        throw new Error("Unimplemented method divider")
+    }
+    barOverlap(value: boolean | undefined): this {
+        throw new Error("Unimplemented method barOverlap")
+    }
+    barBackgroundColor(value: ResourceColor | undefined): this {
+        throw new Error("Unimplemented method barBackgroundColor")
+    }
+    barGridAlign(value: BarGridColumnOptions | undefined): this {
+        throw new Error("Unimplemented method barGridAlign")
+    }
+    customContentTransition(value: TabsCustomContentTransitionCallback | undefined): this {
+        throw new Error("Unimplemented method customContentTransition")
+    }
+    barBackgroundBlurStyle(value: BlurStyle | undefined): this {
+        throw new Error("Unimplemented method barBackgroundBlurStyle")
+    }
+    barBackgroundEffect(value: BackgroundEffectOptions | undefined): this {
+        throw new Error("Unimplemented method barBackgroundEffect")
+    }
+    pageFlipMode(value: PageFlipMode | undefined): this {
+        throw new Error("Unimplemented method pageFlipMode")
+    }
+    onContentWillChange(value: OnTabsContentWillChangeCallback | undefined): this {
+        throw new Error("Unimplemented method onContentWillChange")
+    }
+    barMode(value: BarMode | undefined, options?: ScrollableBarModeOptions): this {
+        throw new Error("Unimplemented method barMode")
+    }
+    barBackgroundBlurStyle(style: BlurStyle | undefined, options: BackgroundBlurStyleOptions | undefined): this {
+        throw new Error("Unimplemented method barBackgroundBlurStyle")
+    }
+    cachedMaxCount(count: number | undefined, mode: TabsCacheMode | undefined): this {
+        throw new Error("Unimplemented method cachedMaxCount")
+    }
+    _onChangeEvent_index(callback_: ((value0: number) => void)): void {
+        throw new Error("Unimplemented method _onChangeEvent_index")
+    }
+    attributeModifier(value: AttributeModifier<TabsAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkTabsStyle extends ArkCommonMethodStyle implements TabsAttribute {
     vertical_value?: boolean | undefined

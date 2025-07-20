@@ -124,12 +124,24 @@ export interface OnFoldStatusChangeInfo {
 export type OnFoldStatusChangeCallback = (event: OnFoldStatusChangeInfo) => void;
 export type OnHoverStatusChangeCallback = (param: HoverEventParam) => void;
 export interface FolderStackAttribute extends CommonMethod {
-    alignContent(value: Alignment | undefined): this
-    onFolderStateChange(value: OnFoldStatusChangeCallback | undefined): this
-    onHoverStatusChange(value: OnHoverStatusChangeCallback | undefined): this
-    enableAnimation(value: boolean | undefined): this
-    autoHalfFold(value: boolean | undefined): this
-    attributeModifier(value: AttributeModifier<FolderStackAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    alignContent(value: Alignment | undefined): this {
+        throw new Error("Unimplemented method alignContent")
+    }
+    onFolderStateChange(value: OnFoldStatusChangeCallback | undefined): this {
+        throw new Error("Unimplemented method onFolderStateChange")
+    }
+    onHoverStatusChange(value: OnHoverStatusChangeCallback | undefined): this {
+        throw new Error("Unimplemented method onHoverStatusChange")
+    }
+    enableAnimation(value: boolean | undefined): this {
+        throw new Error("Unimplemented method enableAnimation")
+    }
+    autoHalfFold(value: boolean | undefined): this {
+        throw new Error("Unimplemented method autoHalfFold")
+    }
+    attributeModifier(value: AttributeModifier<FolderStackAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkFolderStackStyle extends ArkCommonMethodStyle implements FolderStackAttribute {
     alignContent_value?: Alignment | undefined

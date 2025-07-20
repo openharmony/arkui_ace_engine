@@ -44,7 +44,9 @@ export class ArkScreenPeer extends ArkCommonMethodPeer {
     }
 }
 export interface ScreenAttribute extends CommonMethod {
-    attributeModifier(value: AttributeModifier<ScreenAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    attributeModifier(value: AttributeModifier<ScreenAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkScreenStyle extends ArkCommonMethodStyle implements ScreenAttribute {
     attributeModifier_value?: AttributeModifier<ScreenAttribute> | AttributeModifier<CommonMethod> | undefined

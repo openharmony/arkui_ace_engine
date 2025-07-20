@@ -872,21 +872,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void DrawModifierImpl(Ark_NativePointer node,
-                          const Opt_DrawModifier* value)
-    {
-        if (value->value) {
-            auto frameNode = AsNode(node);
-            frameNode->setDrawModifier(value->value);
-        }
-        if (!needGroupedLog(1)) {
-            return;
-        }
-        string out("drawModifier(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
     } // CommonMethodModifier
 
     namespace EventEmulatorAccessor {
@@ -3124,18 +3109,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void OnClick0Impl(Ark_NativePointer node,
-                      const Opt_Callback_ClickEvent_Void* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setOnClick0(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
     void OnHoverImpl(Ark_NativePointer node,
                      const Opt_Callback_Boolean_HoverEvent_Void* value)
     {
@@ -4156,18 +4129,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void StateStylesImpl(Ark_NativePointer node,
-                         const Opt_StateStyles* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setStateStyles(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
     void RestoreIdImpl(Ark_NativePointer node,
                        const Opt_Number* value)
     {
@@ -4687,21 +4648,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         WriteToString(&out, options);
         out.append(", ");
         WriteToString(&out, sysOptions);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void OnClick1Impl(Ark_NativePointer node,
-                      const Opt_Callback_ClickEvent_Void* event,
-                      const Opt_Number* distanceThreshold)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setOnClick1(");
-        WriteToString(&out, event);
-        out.append(", ");
-        WriteToString(&out, distanceThreshold);
         out.append(") \n");
         appendGroupedLog(1, out);
     }
@@ -21631,7 +21577,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::KeyImpl,
             CommonMethodModifier::IdImpl,
             CommonMethodModifier::GeometryTransition0Impl,
-            CommonMethodModifier::StateStylesImpl,
             CommonMethodModifier::RestoreIdImpl,
             CommonMethodModifier::SphericalEffectImpl,
             CommonMethodModifier::LightUpEffectImpl,
@@ -52058,22 +52003,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_CustomObject ApplyStylesImpl(const Ark_CustomObject* self,
-                                     const CustomStyles* customStyles)
-    {
-        if (!needGroupedLog(1))
-        {
-            return {};
-        }
-        string out("applyStyles(");
-        WriteToString(&out, self);
-        out.append(", ");
-        WriteToString(&out, customStyles);
-        out.append(") \n");
-        out.append("[return {}] \n");
-        appendGroupedLog(1, out);
-        return {};
-    }
     void BindCompatibleProvideCallbackImpl(Ark_ExtendableComponent component,
                                            const Ark_CustomObject* createCompatibleState,
                                            const Ark_CustomObject* setCallback,
@@ -56829,7 +56758,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GlobalScopeAccessor::$rawfileImpl,
             GlobalScopeAccessor::AnimateToImpl,
             GlobalScopeAccessor::AnimateToImmediatelyImpl,
-            GlobalScopeAccessor::ApplyStylesImpl,
             GlobalScopeAccessor::BindCompatibleProvideCallbackImpl,
             GlobalScopeAccessor::BorderRadiusesImpl,
             GlobalScopeAccessor::BorderStylesImpl,

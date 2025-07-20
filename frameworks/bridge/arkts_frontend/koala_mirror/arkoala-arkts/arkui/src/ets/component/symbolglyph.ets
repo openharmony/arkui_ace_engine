@@ -295,15 +295,33 @@ export enum EffectFillStyle {
     ITERATIVE = 1
 }
 export interface SymbolGlyphAttribute extends CommonMethod {
-    fontSize(value: number | string | Resource | undefined): this
-    fontColor(value: Array<ResourceColor> | undefined): this
-    fontWeight(value: number | FontWeight | string | undefined): this
-    effectStrategy(value: SymbolEffectStrategy | undefined): this
-    renderingStrategy(value: SymbolRenderingStrategy | undefined): this
-    minFontScale(value: number | Resource | undefined): this
-    maxFontScale(value: number | Resource | undefined): this
-    symbolEffect(symbolEffect: SymbolEffect | undefined, triggerValue?: boolean | number): this
-    attributeModifier(value: AttributeModifier<SymbolGlyphAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    fontSize(value: number | string | Resource | undefined): this {
+        throw new Error("Unimplemented method fontSize")
+    }
+    fontColor(value: Array<ResourceColor> | undefined): this {
+        throw new Error("Unimplemented method fontColor")
+    }
+    fontWeight(value: number | FontWeight | string | undefined): this {
+        throw new Error("Unimplemented method fontWeight")
+    }
+    effectStrategy(value: SymbolEffectStrategy | undefined): this {
+        throw new Error("Unimplemented method effectStrategy")
+    }
+    renderingStrategy(value: SymbolRenderingStrategy | undefined): this {
+        throw new Error("Unimplemented method renderingStrategy")
+    }
+    minFontScale(value: number | Resource | undefined): this {
+        throw new Error("Unimplemented method minFontScale")
+    }
+    maxFontScale(value: number | Resource | undefined): this {
+        throw new Error("Unimplemented method maxFontScale")
+    }
+    symbolEffect(symbolEffect: SymbolEffect | undefined, triggerValue?: boolean | number): this {
+        throw new Error("Unimplemented method symbolEffect")
+    }
+    attributeModifier(value: AttributeModifier<SymbolGlyphAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkSymbolGlyphStyle extends ArkCommonMethodStyle implements SymbolGlyphAttribute {
     fontSize_value?: number | string | Resource | undefined

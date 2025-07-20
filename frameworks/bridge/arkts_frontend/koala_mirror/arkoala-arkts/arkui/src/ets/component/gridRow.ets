@@ -122,9 +122,15 @@ export interface GridRowOptions {
     direction?: GridRowDirection;
 }
 export interface GridRowAttribute extends CommonMethod {
-    onBreakpointChange(value: ((breakpoints: string) => void) | undefined): this
-    alignItems(value: ItemAlign | undefined): this
-    attributeModifier(value: AttributeModifier<GridRowAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    onBreakpointChange(value: ((breakpoints: string) => void) | undefined): this {
+        throw new Error("Unimplemented method onBreakpointChange")
+    }
+    alignItems(value: ItemAlign | undefined): this {
+        throw new Error("Unimplemented method alignItems")
+    }
+    attributeModifier(value: AttributeModifier<GridRowAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkGridRowStyle extends ArkCommonMethodStyle implements GridRowAttribute {
     onBreakpointChange_value?: ((breakpoints: string) => void) | undefined

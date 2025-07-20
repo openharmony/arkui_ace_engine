@@ -157,9 +157,15 @@ export interface LineOptions {
     height?: string | number;
 }
 export interface LineAttribute extends CommonShapeMethod {
-    startPoint(value: ShapePoint | undefined): this
-    endPoint(value: ShapePoint | undefined): this
-    attributeModifier(value: AttributeModifier<LineAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this
+    startPoint(value: ShapePoint | undefined): this {
+        throw new Error("Unimplemented method startPoint")
+    }
+    endPoint(value: ShapePoint | undefined): this {
+        throw new Error("Unimplemented method endPoint")
+    }
+    attributeModifier(value: AttributeModifier<LineAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkLineStyle extends ArkCommonShapeMethodStyle implements LineAttribute {
     startPoint_value?: ShapePoint | undefined

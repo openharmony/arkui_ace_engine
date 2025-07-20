@@ -81,8 +81,12 @@ export enum PasteButtonOnClickResult {
 }
 export type PasteButtonCallback = (event: ClickEvent, result: PasteButtonOnClickResult, error?: BusinessError) => void;
 export interface PasteButtonAttribute extends SecurityComponentMethod {
-    onClick(value: PasteButtonCallback | undefined): this
-    attributeModifier(value: AttributeModifier<PasteButtonAttribute> | AttributeModifier<SecurityComponentMethod> | undefined): this
+    onClick(value: PasteButtonCallback | undefined): this {
+        throw new Error("Unimplemented method onClick")
+    }
+    attributeModifier(value: AttributeModifier<PasteButtonAttribute> | AttributeModifier<SecurityComponentMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkPasteButtonStyle extends ArkSecurityComponentMethodStyle implements PasteButtonAttribute {
     onClick_value?: PasteButtonCallback | undefined

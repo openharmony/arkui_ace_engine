@@ -374,21 +374,51 @@ export interface ButtonLabelStyle {
     font?: Font;
 }
 export interface ButtonAttribute extends CommonMethod {
-    type(value: ButtonType | undefined): this
-    stateEffect(value: boolean | undefined): this
-    buttonStyle(value: ButtonStyleMode | undefined): this
-    controlSize(value: ControlSize | undefined): this
-    role(value: ButtonRole | undefined): this
-    fontColor(value: ResourceColor | undefined): this
-    fontSize(value: Length | undefined): this
-    fontWeight(value: number | FontWeight | string | undefined): this
-    fontStyle(value: FontStyle | undefined): this
-    fontFamily(value: string | Resource | undefined): this
-    contentModifier(value: ContentModifier<ButtonConfiguration> | undefined): this
-    labelStyle(value: ButtonLabelStyle | undefined): this
-    minFontScale(value: number | Resource | undefined): this
-    maxFontScale(value: number | Resource | undefined): this
-    attributeModifier(value: AttributeModifier<ButtonAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    type(value: ButtonType | undefined): this {
+        throw new Error("Unimplemented method type")
+    }
+    stateEffect(value: boolean | undefined): this {
+        throw new Error("Unimplemented method stateEffect")
+    }
+    buttonStyle(value: ButtonStyleMode | undefined): this {
+        throw new Error("Unimplemented method buttonStyle")
+    }
+    controlSize(value: ControlSize | undefined): this {
+        throw new Error("Unimplemented method controlSize")
+    }
+    role(value: ButtonRole | undefined): this {
+        throw new Error("Unimplemented method role")
+    }
+    fontColor(value: ResourceColor | undefined): this {
+        throw new Error("Unimplemented method fontColor")
+    }
+    fontSize(value: Length | undefined): this {
+        throw new Error("Unimplemented method fontSize")
+    }
+    fontWeight(value: number | FontWeight | string | undefined): this {
+        throw new Error("Unimplemented method fontWeight")
+    }
+    fontStyle(value: FontStyle | undefined): this {
+        throw new Error("Unimplemented method fontStyle")
+    }
+    fontFamily(value: string | Resource | undefined): this {
+        throw new Error("Unimplemented method fontFamily")
+    }
+    contentModifier(value: ContentModifier<ButtonConfiguration> | undefined): this {
+        throw new Error("Unimplemented method contentModifier")
+    }
+    labelStyle(value: ButtonLabelStyle | undefined): this {
+        throw new Error("Unimplemented method labelStyle")
+    }
+    minFontScale(value: number | Resource | undefined): this {
+        throw new Error("Unimplemented method minFontScale")
+    }
+    maxFontScale(value: number | Resource | undefined): this {
+        throw new Error("Unimplemented method maxFontScale")
+    }
+    attributeModifier(value: AttributeModifier<ButtonAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkButtonStyle extends ArkCommonMethodStyle implements ButtonAttribute {
     type_value?: ButtonType | undefined

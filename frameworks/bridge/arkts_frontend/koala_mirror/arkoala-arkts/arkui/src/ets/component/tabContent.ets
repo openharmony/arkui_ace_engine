@@ -248,10 +248,18 @@ export interface TabBarOptions {
     text?: string | Resource;
 }
 export interface TabContentAttribute extends CommonMethod {
-    tabBar(value: ComponentContent | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined): this
-    onWillShow(value: VoidCallback | undefined): this
-    onWillHide(value: VoidCallback | undefined): this
-    attributeModifier(value: AttributeModifier<TabContentAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    tabBar(value: ComponentContent | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined): this {
+        throw new Error("Unimplemented method tabBar")
+    }
+    onWillShow(value: VoidCallback | undefined): this {
+        throw new Error("Unimplemented method onWillShow")
+    }
+    onWillHide(value: VoidCallback | undefined): this {
+        throw new Error("Unimplemented method onWillHide")
+    }
+    attributeModifier(value: AttributeModifier<TabContentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkTabContentStyle extends ArkCommonMethodStyle implements TabContentAttribute {
     tabBar_value?: ComponentContent | SubTabBarStyle | BottomTabBarStyle | string | Resource | CustomBuilder | TabBarOptions | undefined

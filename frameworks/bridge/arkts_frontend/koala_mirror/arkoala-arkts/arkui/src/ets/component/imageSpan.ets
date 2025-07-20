@@ -135,12 +135,24 @@ export class ArkImageSpanPeer extends ArkBaseSpanPeer {
     }
 }
 export interface ImageSpanAttribute extends BaseSpan {
-    verticalAlign(value: ImageSpanAlignment | undefined): this
-    objectFit(value: ImageFit | undefined): this
-    onComplete(value: ImageCompleteCallback | undefined): this
-    onError(value: ImageErrorCallback | undefined): this
-    alt(value: image.PixelMap | undefined): this
-    attributeModifier(value: AttributeModifier<ImageSpanAttribute> | AttributeModifier<BaseSpan> | AttributeModifier<CommonMethod> | undefined): this
+    verticalAlign(value: ImageSpanAlignment | undefined): this {
+        throw new Error("Unimplemented method verticalAlign")
+    }
+    objectFit(value: ImageFit | undefined): this {
+        throw new Error("Unimplemented method objectFit")
+    }
+    onComplete(value: ImageCompleteCallback | undefined): this {
+        throw new Error("Unimplemented method onComplete")
+    }
+    onError(value: ImageErrorCallback | undefined): this {
+        throw new Error("Unimplemented method onError")
+    }
+    alt(value: image.PixelMap | undefined): this {
+        throw new Error("Unimplemented method alt")
+    }
+    attributeModifier(value: AttributeModifier<ImageSpanAttribute> | AttributeModifier<BaseSpan> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkImageSpanStyle extends ArkBaseSpanStyle implements ImageSpanAttribute {
     verticalAlign_value?: ImageSpanAlignment | undefined

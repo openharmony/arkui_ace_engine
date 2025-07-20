@@ -138,13 +138,27 @@ export interface RatingConfiguration extends CommonConfiguration<RatingConfigura
 }
 export type OnRatingChangeCallback = (rating: number) => void;
 export interface RatingAttribute extends CommonMethod {
-    stars(value: number | undefined): this
-    stepSize(value: number | undefined): this
-    starStyle(value: StarStyleOptions | undefined): this
-    onChange(value: OnRatingChangeCallback | undefined): this
-    contentModifier(value: ContentModifier<RatingConfiguration> | undefined): this
-    _onChangeEvent_rating(callback_: ((rating: number | undefined) => void)): void
-    attributeModifier(value: AttributeModifier<RatingAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    stars(value: number | undefined): this {
+        throw new Error("Unimplemented method stars")
+    }
+    stepSize(value: number | undefined): this {
+        throw new Error("Unimplemented method stepSize")
+    }
+    starStyle(value: StarStyleOptions | undefined): this {
+        throw new Error("Unimplemented method starStyle")
+    }
+    onChange(value: OnRatingChangeCallback | undefined): this {
+        throw new Error("Unimplemented method onChange")
+    }
+    contentModifier(value: ContentModifier<RatingConfiguration> | undefined): this {
+        throw new Error("Unimplemented method contentModifier")
+    }
+    _onChangeEvent_rating(callback_: ((rating: number | undefined) => void)): void {
+        throw new Error("Unimplemented method _onChangeEvent_rating")
+    }
+    attributeModifier(value: AttributeModifier<RatingAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkRatingStyle extends ArkCommonMethodStyle implements RatingAttribute {
     stars_value?: number | undefined

@@ -181,13 +181,27 @@ export interface ToggleOptions {
     isOn?: boolean | undefined;
 }
 export interface ToggleAttribute extends CommonMethod {
-    onChange(value: ((value0: boolean) => void) | undefined): this
-    contentModifier(value: ContentModifier<ToggleConfiguration> | undefined): this
-    selectedColor(value: ResourceColor | undefined): this
-    switchPointColor(value: ResourceColor | undefined): this
-    switchStyle(value: SwitchStyle | undefined): this
-    _onChangeEvent_isOn(callback_: ((isOn: boolean | undefined) => void)): void
-    attributeModifier(value: AttributeModifier<ToggleAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    onChange(value: ((value0: boolean) => void) | undefined): this {
+        throw new Error("Unimplemented method onChange")
+    }
+    contentModifier(value: ContentModifier<ToggleConfiguration> | undefined): this {
+        throw new Error("Unimplemented method contentModifier")
+    }
+    selectedColor(value: ResourceColor | undefined): this {
+        throw new Error("Unimplemented method selectedColor")
+    }
+    switchPointColor(value: ResourceColor | undefined): this {
+        throw new Error("Unimplemented method switchPointColor")
+    }
+    switchStyle(value: SwitchStyle | undefined): this {
+        throw new Error("Unimplemented method switchStyle")
+    }
+    _onChangeEvent_isOn(callback_: ((isOn: boolean | undefined) => void)): void {
+        throw new Error("Unimplemented method _onChangeEvent_isOn")
+    }
+    attributeModifier(value: AttributeModifier<ToggleAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkToggleStyle extends ArkCommonMethodStyle implements ToggleAttribute {
     onChange_value?: ((value0: boolean) => void) | undefined

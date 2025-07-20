@@ -229,16 +229,36 @@ export interface MarqueeOptions {
     src: string;
 }
 export interface MarqueeAttribute extends CommonMethod {
-    fontColor(value: ResourceColor | undefined): this
-    fontSize(value: Length | undefined): this
-    allowScale(value: boolean | undefined): this
-    fontWeight(value: number | FontWeight | string | undefined): this
-    fontFamily(value: string | Resource | undefined): this
-    marqueeUpdateStrategy(value: MarqueeUpdateStrategy | undefined): this
-    onStart(value: (() => void) | undefined): this
-    onBounce(value: (() => void) | undefined): this
-    onFinish(value: (() => void) | undefined): this
-    attributeModifier(value: AttributeModifier<MarqueeAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    fontColor(value: ResourceColor | undefined): this {
+        throw new Error("Unimplemented method fontColor")
+    }
+    fontSize(value: Length | undefined): this {
+        throw new Error("Unimplemented method fontSize")
+    }
+    allowScale(value: boolean | undefined): this {
+        throw new Error("Unimplemented method allowScale")
+    }
+    fontWeight(value: number | FontWeight | string | undefined): this {
+        throw new Error("Unimplemented method fontWeight")
+    }
+    fontFamily(value: string | Resource | undefined): this {
+        throw new Error("Unimplemented method fontFamily")
+    }
+    marqueeUpdateStrategy(value: MarqueeUpdateStrategy | undefined): this {
+        throw new Error("Unimplemented method marqueeUpdateStrategy")
+    }
+    onStart(value: (() => void) | undefined): this {
+        throw new Error("Unimplemented method onStart")
+    }
+    onBounce(value: (() => void) | undefined): this {
+        throw new Error("Unimplemented method onBounce")
+    }
+    onFinish(value: (() => void) | undefined): this {
+        throw new Error("Unimplemented method onFinish")
+    }
+    attributeModifier(value: AttributeModifier<MarqueeAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkMarqueeStyle extends ArkCommonMethodStyle implements MarqueeAttribute {
     fontColor_value?: ResourceColor | undefined

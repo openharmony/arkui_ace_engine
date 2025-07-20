@@ -16,7 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { AccessibilityHoverEvent_serializer, TouchTestInfo_serializer, TouchResult_serializer, AxisEvent_serializer, HoverEvent_serializer, ClickEvent_serializer, CrownEvent_serializer, DismissContentCoverAction_serializer, DismissPopupAction_serializer, DismissSheetAction_serializer, DragEvent_serializer, FocusAxisEvent_serializer, ItemDragInfo_serializer, KeyEvent_serializer, MouseEvent_serializer, GeometryInfo_serializer, Measurable_serializer, SizeResult_serializer, Layoutable_serializer, ScrollResult_serializer, SheetDismiss_serializer, SpringBackAction_serializer, TerminationInfo_serializer, TouchEvent_serializer, DragItemInfo_serializer, PopupStateChangeParam_serializer, AccessibilityCallback, AccessibilityHoverEvent, AccessibilityFocusCallback, TouchTestInfo, TouchResult, AxisEvent, HoverEvent, ClickEvent, CrownEvent, DismissContentCoverAction, DismissPopupAction, DismissSheetAction, DragEvent, FocusAxisEvent, ItemDragInfo, KeyEvent, MouseEvent, GeometryInfo, Measurable, SizeResult, Layoutable, ScrollResult, PreDragStatus, SheetDismiss, SheetType, SpringBackAction, TerminationInfo, TouchEvent, DragItemInfo, CustomStyles, GestureRecognizerJudgeBeginCallback, HoverCallback, ModifierKeyStateGetter, OnDragEventCallback, OnItemDragStartCallback, OnMoveHandler, OnScrollCallback, OnWillScrollCallback, PopupStateChangeCallback, PopupStateChangeParam, ReuseIdCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TransitionFinishCallback, VisibleAreaChangeCallback } from "./../../component/common"
+import { AccessibilityHoverEvent_serializer, TouchTestInfo_serializer, TouchResult_serializer, AxisEvent_serializer, HoverEvent_serializer, ClickEvent_serializer, CrownEvent_serializer, DismissContentCoverAction_serializer, DismissPopupAction_serializer, DismissSheetAction_serializer, DragEvent_serializer, FocusAxisEvent_serializer, ItemDragInfo_serializer, KeyEvent_serializer, MouseEvent_serializer, GeometryInfo_serializer, Measurable_serializer, SizeResult_serializer, Layoutable_serializer, ScrollResult_serializer, SheetDismiss_serializer, SpringBackAction_serializer, TerminationInfo_serializer, TouchEvent_serializer, DragItemInfo_serializer, PopupStateChangeParam_serializer, AccessibilityCallback, AccessibilityHoverEvent, AccessibilityFocusCallback, TouchTestInfo, TouchResult, AxisEvent, HoverEvent, ClickEvent, CrownEvent, DismissContentCoverAction, DismissPopupAction, DismissSheetAction, DragEvent, FocusAxisEvent, ItemDragInfo, KeyEvent, MouseEvent, GeometryInfo, Measurable, SizeResult, Layoutable, ScrollResult, PreDragStatus, SheetDismiss, SheetType, SpringBackAction, TerminationInfo, TouchEvent, DragItemInfo, GestureRecognizerJudgeBeginCallback, HoverCallback, ModifierKeyStateGetter, OnDragEventCallback, OnItemDragStartCallback, OnMoveHandler, OnScrollCallback, OnWillScrollCallback, PopupStateChangeCallback, PopupStateChangeParam, ReuseIdCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TransitionFinishCallback, VisibleAreaChangeCallback } from "./../../component/common"
 import { image_PixelMap_serializer, image } from "./../ohos.multimedia.image"
 import { ButtonConfiguration_serializer, ButtonConfiguration, ButtonTriggerClickCallback } from "./../../component/button"
 import { Area_serializer, ConstraintSizeOptions_serializer, SizeOptions_serializer, Area, ConstraintSizeOptions, ResourceStr, SizeOptions, VoidCallback } from "./../../component/units"
@@ -2133,12 +2133,6 @@ export function deserializeAndCallCustomNodeBuilder(thisDeserializer: Deserializ
     const _callResult  = _call(parentNode)
     _continuation(_callResult)
 }
-export function deserializeAndCallCustomStyles(thisDeserializer: DeserializerBase): void {
-    const _resourceId : int32 = thisDeserializer.readInt32()
-    const _call  = (ResourceHolder.instance().get(_resourceId) as CustomStyles)
-    let instance : string = (thisDeserializer.readString() as string)
-    _call(instance)
-}
 export function deserializeAndCallDataPanelModifierBuilder(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((parentNode: KPointer,config: DataPanelConfiguration) => KPointer))
@@ -3779,7 +3773,6 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.Kind_ContentWillScrollCallback: return deserializeAndCallContentWillScrollCallback(thisDeserializer);
         case CallbackKind.Kind_Context_getGroupDir_Callback: return deserializeAndCallContext_getGroupDir_Callback(thisDeserializer);
         case CallbackKind.Kind_CustomNodeBuilder: return deserializeAndCallCustomNodeBuilder(thisDeserializer);
-        case CallbackKind.Kind_CustomStyles: return deserializeAndCallCustomStyles(thisDeserializer);
         case CallbackKind.Kind_DataPanelModifierBuilder: return deserializeAndCallDataPanelModifierBuilder(thisDeserializer);
         case CallbackKind.Kind_EditableTextOnChangeCallback: return deserializeAndCallEditableTextOnChangeCallback(thisDeserializer);
         case CallbackKind.Kind_ErrorCallback: return deserializeAndCallErrorCallback(thisDeserializer);

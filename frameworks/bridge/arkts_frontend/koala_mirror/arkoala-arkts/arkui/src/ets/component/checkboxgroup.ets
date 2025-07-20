@@ -192,14 +192,30 @@ export interface CheckboxGroupResult {
 }
 export type OnCheckboxGroupChangeCallback = (value: CheckboxGroupResult) => void;
 export interface CheckboxGroupAttribute extends CommonMethod {
-    selectAll(value: boolean | undefined): this
-    selectedColor(value: ResourceColor | undefined): this
-    unselectedColor(value: ResourceColor | undefined): this
-    mark(value: MarkStyle | undefined): this
-    onChange(value: OnCheckboxGroupChangeCallback | undefined): this
-    checkboxShape(value: CheckBoxShape | undefined): this
-    _onChangeEvent_selectAll(callback_: ((selectAll: boolean | undefined) => void)): void
-    attributeModifier(value: AttributeModifier<CheckboxGroupAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    selectAll(value: boolean | undefined): this {
+        throw new Error("Unimplemented method selectAll")
+    }
+    selectedColor(value: ResourceColor | undefined): this {
+        throw new Error("Unimplemented method selectedColor")
+    }
+    unselectedColor(value: ResourceColor | undefined): this {
+        throw new Error("Unimplemented method unselectedColor")
+    }
+    mark(value: MarkStyle | undefined): this {
+        throw new Error("Unimplemented method mark")
+    }
+    onChange(value: OnCheckboxGroupChangeCallback | undefined): this {
+        throw new Error("Unimplemented method onChange")
+    }
+    checkboxShape(value: CheckBoxShape | undefined): this {
+        throw new Error("Unimplemented method checkboxShape")
+    }
+    _onChangeEvent_selectAll(callback_: ((selectAll: boolean | undefined) => void)): void {
+        throw new Error("Unimplemented method _onChangeEvent_selectAll")
+    }
+    attributeModifier(value: AttributeModifier<CheckboxGroupAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkCheckboxGroupStyle extends ArkCommonMethodStyle implements CheckboxGroupAttribute {
     selectAll_value?: boolean | undefined

@@ -164,11 +164,21 @@ export interface CalendarOptions {
     disabledDateRange?: Array<DateRange>;
 }
 export interface CalendarPickerAttribute extends CommonMethod {
-    textStyle(value: PickerTextStyle | undefined): this
-    onChange(value: ((value0: Date) => void) | undefined): this
-    markToday(value: boolean | undefined): this
-    edgeAlign(alignType: CalendarAlign | undefined, offset?: Offset): this
-    attributeModifier(value: AttributeModifier<CalendarPickerAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    textStyle(value: PickerTextStyle | undefined): this {
+        throw new Error("Unimplemented method textStyle")
+    }
+    onChange(value: ((value0: Date) => void) | undefined): this {
+        throw new Error("Unimplemented method onChange")
+    }
+    markToday(value: boolean | undefined): this {
+        throw new Error("Unimplemented method markToday")
+    }
+    edgeAlign(alignType: CalendarAlign | undefined, offset?: Offset): this {
+        throw new Error("Unimplemented method edgeAlign")
+    }
+    attributeModifier(value: AttributeModifier<CalendarPickerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkCalendarPickerStyle extends ArkCommonMethodStyle implements CalendarPickerAttribute {
     textStyle_value?: PickerTextStyle | undefined

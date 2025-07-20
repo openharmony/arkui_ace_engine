@@ -341,9 +341,15 @@ export interface TextBackgroundStyle {
     radius?: Dimension | BorderRadiuses;
 }
 export interface BaseSpan extends CommonMethod {
-    textBackgroundStyle(value: TextBackgroundStyle | undefined): this
-    baselineOffset(value: LengthMetrics | undefined): this
-    attributeModifier(value: AttributeModifier<BaseSpan> | AttributeModifier<CommonMethod> | undefined): this
+    textBackgroundStyle(value: TextBackgroundStyle | undefined): this {
+        throw new Error("Unimplemented method textBackgroundStyle")
+    }
+    baselineOffset(value: LengthMetrics | undefined): this {
+        throw new Error("Unimplemented method baselineOffset")
+    }
+    attributeModifier(value: AttributeModifier<BaseSpan> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkBaseSpanStyle extends ArkCommonMethodStyle implements BaseSpan {
     textBackgroundStyle_value?: TextBackgroundStyle | undefined
@@ -366,18 +372,42 @@ export class ArkBaseSpanStyle extends ArkCommonMethodStyle implements BaseSpan {
     }
 }
 export interface SpanAttribute extends BaseSpan {
-    font(value: Font | undefined): this
-    fontColor(value: ResourceColor | undefined): this
-    fontSize(value: number | string | Resource | undefined): this
-    fontStyle(value: FontStyle | undefined): this
-    fontWeight(value: number | FontWeight | string | undefined): this
-    fontFamily(value: string | Resource | undefined): this
-    decoration(value: DecorationStyleInterface | undefined): this
-    letterSpacing(value: number | string | undefined): this
-    textCase(value: TextCase | undefined): this
-    lineHeight(value: Length | undefined): this
-    textShadow(value: ShadowOptions | Array<ShadowOptions> | undefined): this
-    attributeModifier(value: AttributeModifier<SpanAttribute> | AttributeModifier<BaseSpan> | AttributeModifier<CommonMethod> | undefined): this
+    font(value: Font | undefined): this {
+        throw new Error("Unimplemented method font")
+    }
+    fontColor(value: ResourceColor | undefined): this {
+        throw new Error("Unimplemented method fontColor")
+    }
+    fontSize(value: number | string | Resource | undefined): this {
+        throw new Error("Unimplemented method fontSize")
+    }
+    fontStyle(value: FontStyle | undefined): this {
+        throw new Error("Unimplemented method fontStyle")
+    }
+    fontWeight(value: number | FontWeight | string | undefined): this {
+        throw new Error("Unimplemented method fontWeight")
+    }
+    fontFamily(value: string | Resource | undefined): this {
+        throw new Error("Unimplemented method fontFamily")
+    }
+    decoration(value: DecorationStyleInterface | undefined): this {
+        throw new Error("Unimplemented method decoration")
+    }
+    letterSpacing(value: number | string | undefined): this {
+        throw new Error("Unimplemented method letterSpacing")
+    }
+    textCase(value: TextCase | undefined): this {
+        throw new Error("Unimplemented method textCase")
+    }
+    lineHeight(value: Length | undefined): this {
+        throw new Error("Unimplemented method lineHeight")
+    }
+    textShadow(value: ShadowOptions | Array<ShadowOptions> | undefined): this {
+        throw new Error("Unimplemented method textShadow")
+    }
+    attributeModifier(value: AttributeModifier<SpanAttribute> | AttributeModifier<BaseSpan> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkSpanStyle extends ArkBaseSpanStyle implements SpanAttribute {
     font_value?: Font | undefined

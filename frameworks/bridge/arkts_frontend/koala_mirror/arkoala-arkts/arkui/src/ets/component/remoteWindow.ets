@@ -60,7 +60,9 @@ export interface WindowAnimationTarget {
     readonly missionId: number;
 }
 export interface RemoteWindowAttribute extends CommonMethod {
-    attributeModifier(value: AttributeModifier<RemoteWindowAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    attributeModifier(value: AttributeModifier<RemoteWindowAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkRemoteWindowStyle extends ArkCommonMethodStyle implements RemoteWindowAttribute {
     attributeModifier_value?: AttributeModifier<RemoteWindowAttribute> | AttributeModifier<CommonMethod> | undefined

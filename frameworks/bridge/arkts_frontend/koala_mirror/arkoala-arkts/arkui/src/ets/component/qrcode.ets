@@ -150,10 +150,16 @@ export class ArkQRCodePeer extends ArkCommonMethodPeer {
     }
 }
 export interface QRCodeAttribute extends CommonMethod {
-    color(value: ResourceColor | undefined): this
+    color(value: ResourceColor | undefined): this {
+        throw new Error("Unimplemented method color")
+    }
     backgroundColor(value: ResourceColor | undefined): this
-    contentOpacity(value: number | Resource | undefined): this
-    attributeModifier(value: AttributeModifier<QRCodeAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    contentOpacity(value: number | Resource | undefined): this {
+        throw new Error("Unimplemented method contentOpacity")
+    }
+    attributeModifier(value: AttributeModifier<QRCodeAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkQRCodeStyle extends ArkCommonMethodStyle implements QRCodeAttribute {
     color_value?: ResourceColor | undefined

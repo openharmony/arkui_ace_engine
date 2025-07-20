@@ -606,34 +606,90 @@ export type OnAlphabetIndexerSelectCallback = (index: number) => void;
 export type OnAlphabetIndexerPopupSelectCallback = (index: number) => void;
 export type OnAlphabetIndexerRequestPopupDataCallback = (index: number) => Array<string>;
 export interface AlphabetIndexerAttribute extends CommonMethod {
-    color(value: ResourceColor | undefined): this
-    selectedColor(value: ResourceColor | undefined): this
-    popupColor(value: ResourceColor | undefined): this
-    selectedBackgroundColor(value: ResourceColor | undefined): this
-    popupBackground(value: ResourceColor | undefined): this
-    popupSelectedColor(value: ResourceColor | undefined): this
-    popupUnselectedColor(value: ResourceColor | undefined): this
-    popupItemBackgroundColor(value: ResourceColor | undefined): this
-    usingPopup(value: boolean | undefined): this
-    selectedFont(value: Font | undefined): this
-    popupFont(value: Font | undefined): this
-    popupItemFont(value: Font | undefined): this
-    itemSize(value: string | number | undefined): this
-    font(value: Font | undefined): this
-    onSelect(value: OnAlphabetIndexerSelectCallback | undefined): this
-    onRequestPopupData(value: OnAlphabetIndexerRequestPopupDataCallback | undefined): this
-    onPopupSelect(value: OnAlphabetIndexerPopupSelectCallback | undefined): this
-    selected(value: number | undefined): this
-    popupPosition(value: Position | undefined): this
-    autoCollapse(value: boolean | undefined): this
-    popupItemBorderRadius(value: number | undefined): this
-    itemBorderRadius(value: number | undefined): this
-    popupBackgroundBlurStyle(value: BlurStyle | undefined): this
-    popupTitleBackground(value: ResourceColor | undefined): this
-    enableHapticFeedback(value: boolean | undefined): this
-    alignStyle(value: IndexerAlign | undefined, offset?: Length): this
-    _onChangeEvent_selected(callback_: ((selected: number | undefined) => void)): void
-    attributeModifier(value: AttributeModifier<AlphabetIndexerAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    color(value: ResourceColor | undefined): this {
+        throw new Error("Unimplemented method color")
+    }
+    selectedColor(value: ResourceColor | undefined): this {
+        throw new Error("Unimplemented method selectedColor")
+    }
+    popupColor(value: ResourceColor | undefined): this {
+        throw new Error("Unimplemented method popupColor")
+    }
+    selectedBackgroundColor(value: ResourceColor | undefined): this {
+        throw new Error("Unimplemented method selectedBackgroundColor")
+    }
+    popupBackground(value: ResourceColor | undefined): this {
+        throw new Error("Unimplemented method popupBackground")
+    }
+    popupSelectedColor(value: ResourceColor | undefined): this {
+        throw new Error("Unimplemented method popupSelectedColor")
+    }
+    popupUnselectedColor(value: ResourceColor | undefined): this {
+        throw new Error("Unimplemented method popupUnselectedColor")
+    }
+    popupItemBackgroundColor(value: ResourceColor | undefined): this {
+        throw new Error("Unimplemented method popupItemBackgroundColor")
+    }
+    usingPopup(value: boolean | undefined): this {
+        throw new Error("Unimplemented method usingPopup")
+    }
+    selectedFont(value: Font | undefined): this {
+        throw new Error("Unimplemented method selectedFont")
+    }
+    popupFont(value: Font | undefined): this {
+        throw new Error("Unimplemented method popupFont")
+    }
+    popupItemFont(value: Font | undefined): this {
+        throw new Error("Unimplemented method popupItemFont")
+    }
+    itemSize(value: string | number | undefined): this {
+        throw new Error("Unimplemented method itemSize")
+    }
+    font(value: Font | undefined): this {
+        throw new Error("Unimplemented method font")
+    }
+    onSelect(value: OnAlphabetIndexerSelectCallback | undefined): this {
+        throw new Error("Unimplemented method onSelect")
+    }
+    onRequestPopupData(value: OnAlphabetIndexerRequestPopupDataCallback | undefined): this {
+        throw new Error("Unimplemented method onRequestPopupData")
+    }
+    onPopupSelect(value: OnAlphabetIndexerPopupSelectCallback | undefined): this {
+        throw new Error("Unimplemented method onPopupSelect")
+    }
+    selected(value: number | undefined): this {
+        throw new Error("Unimplemented method selected")
+    }
+    popupPosition(value: Position | undefined): this {
+        throw new Error("Unimplemented method popupPosition")
+    }
+    autoCollapse(value: boolean | undefined): this {
+        throw new Error("Unimplemented method autoCollapse")
+    }
+    popupItemBorderRadius(value: number | undefined): this {
+        throw new Error("Unimplemented method popupItemBorderRadius")
+    }
+    itemBorderRadius(value: number | undefined): this {
+        throw new Error("Unimplemented method itemBorderRadius")
+    }
+    popupBackgroundBlurStyle(value: BlurStyle | undefined): this {
+        throw new Error("Unimplemented method popupBackgroundBlurStyle")
+    }
+    popupTitleBackground(value: ResourceColor | undefined): this {
+        throw new Error("Unimplemented method popupTitleBackground")
+    }
+    enableHapticFeedback(value: boolean | undefined): this {
+        throw new Error("Unimplemented method enableHapticFeedback")
+    }
+    alignStyle(value: IndexerAlign | undefined, offset?: Length): this {
+        throw new Error("Unimplemented method alignStyle")
+    }
+    _onChangeEvent_selected(callback_: ((selected: number | undefined) => void)): void {
+        throw new Error("Unimplemented method _onChangeEvent_selected")
+    }
+    attributeModifier(value: AttributeModifier<AlphabetIndexerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkAlphabetIndexerStyle extends ArkCommonMethodStyle implements AlphabetIndexerAttribute {
     color_value?: ResourceColor | undefined

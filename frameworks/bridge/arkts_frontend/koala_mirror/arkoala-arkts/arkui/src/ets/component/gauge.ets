@@ -280,17 +280,39 @@ export interface GaugeConfiguration extends CommonConfiguration<GaugeConfigurati
     max: number;
 }
 export interface GaugeAttribute extends CommonMethod {
-    value(value: number | undefined): this
-    startAngle(value: number | undefined): this
-    endAngle(value: number | undefined): this
-    colors(value: ResourceColor | LinearGradient | Array<[ ResourceColor | LinearGradient, number ]> | undefined): this
-    strokeWidth(value: Length | undefined): this
-    description(value: CustomBuilder | undefined): this
-    trackShadow(value: GaugeShadowOptions | undefined): this
-    indicator(value: GaugeIndicatorOptions | undefined): this
-    privacySensitive(value: boolean | undefined): this
-    contentModifier(value: ContentModifier<GaugeConfiguration> | undefined): this
-    attributeModifier(value: AttributeModifier<GaugeAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    value(value: number | undefined): this {
+        throw new Error("Unimplemented method value")
+    }
+    startAngle(value: number | undefined): this {
+        throw new Error("Unimplemented method startAngle")
+    }
+    endAngle(value: number | undefined): this {
+        throw new Error("Unimplemented method endAngle")
+    }
+    colors(value: ResourceColor | LinearGradient | Array<[ ResourceColor | LinearGradient, number ]> | undefined): this {
+        throw new Error("Unimplemented method colors")
+    }
+    strokeWidth(value: Length | undefined): this {
+        throw new Error("Unimplemented method strokeWidth")
+    }
+    description(value: CustomBuilder | undefined): this {
+        throw new Error("Unimplemented method description")
+    }
+    trackShadow(value: GaugeShadowOptions | undefined): this {
+        throw new Error("Unimplemented method trackShadow")
+    }
+    indicator(value: GaugeIndicatorOptions | undefined): this {
+        throw new Error("Unimplemented method indicator")
+    }
+    privacySensitive(value: boolean | undefined): this {
+        throw new Error("Unimplemented method privacySensitive")
+    }
+    contentModifier(value: ContentModifier<GaugeConfiguration> | undefined): this {
+        throw new Error("Unimplemented method contentModifier")
+    }
+    attributeModifier(value: AttributeModifier<GaugeAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkGaugeStyle extends ArkCommonMethodStyle implements GaugeAttribute {
     value_value?: number | undefined

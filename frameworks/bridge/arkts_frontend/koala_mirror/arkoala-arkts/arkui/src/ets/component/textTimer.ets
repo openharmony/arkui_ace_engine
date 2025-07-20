@@ -310,16 +310,36 @@ export interface TextTimerOptions {
     controller?: TextTimerController;
 }
 export interface TextTimerAttribute extends CommonMethod {
-    format(value: string | undefined): this
-    fontColor(value: ResourceColor | undefined): this
-    fontSize(value: Length | undefined): this
-    fontStyle(value: FontStyle | undefined): this
-    fontWeight(value: number | FontWeight | ResourceStr | undefined): this
-    fontFamily(value: ResourceStr | undefined): this
-    onTimer(value: ((utc: number,elapsedTime: number) => void) | undefined): this
-    textShadow(value: ShadowOptions | Array<ShadowOptions> | undefined): this
-    contentModifier(value: ContentModifier<TextTimerConfiguration> | undefined): this
-    attributeModifier(value: AttributeModifier<TextTimerAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    format(value: string | undefined): this {
+        throw new Error("Unimplemented method format")
+    }
+    fontColor(value: ResourceColor | undefined): this {
+        throw new Error("Unimplemented method fontColor")
+    }
+    fontSize(value: Length | undefined): this {
+        throw new Error("Unimplemented method fontSize")
+    }
+    fontStyle(value: FontStyle | undefined): this {
+        throw new Error("Unimplemented method fontStyle")
+    }
+    fontWeight(value: number | FontWeight | ResourceStr | undefined): this {
+        throw new Error("Unimplemented method fontWeight")
+    }
+    fontFamily(value: ResourceStr | undefined): this {
+        throw new Error("Unimplemented method fontFamily")
+    }
+    onTimer(value: ((utc: number,elapsedTime: number) => void) | undefined): this {
+        throw new Error("Unimplemented method onTimer")
+    }
+    textShadow(value: ShadowOptions | Array<ShadowOptions> | undefined): this {
+        throw new Error("Unimplemented method textShadow")
+    }
+    contentModifier(value: ContentModifier<TextTimerConfiguration> | undefined): this {
+        throw new Error("Unimplemented method contentModifier")
+    }
+    attributeModifier(value: AttributeModifier<TextTimerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkTextTimerStyle extends ArkCommonMethodStyle implements TextTimerAttribute {
     format_value?: string | undefined

@@ -193,13 +193,27 @@ export class ArkIndicatorComponentPeer extends ArkCommonMethodPeer {
     }
 }
 export interface IndicatorComponentAttribute extends CommonMethod {
-    initialIndex(value: number | undefined): this
-    count(value: number | undefined): this
-    style(value: DotIndicator | DigitIndicator | undefined): this
-    loop(value: boolean | undefined): this
-    vertical(value: boolean | undefined): this
-    onChange(value: ((value0: number) => void) | undefined): this
-    attributeModifier(value: AttributeModifier<IndicatorComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    initialIndex(value: number | undefined): this {
+        throw new Error("Unimplemented method initialIndex")
+    }
+    count(value: number | undefined): this {
+        throw new Error("Unimplemented method count")
+    }
+    style(value: DotIndicator | DigitIndicator | undefined): this {
+        throw new Error("Unimplemented method style")
+    }
+    loop(value: boolean | undefined): this {
+        throw new Error("Unimplemented method loop")
+    }
+    vertical(value: boolean | undefined): this {
+        throw new Error("Unimplemented method vertical")
+    }
+    onChange(value: ((value0: number) => void) | undefined): this {
+        throw new Error("Unimplemented method onChange")
+    }
+    attributeModifier(value: AttributeModifier<IndicatorComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkIndicatorComponentStyle extends ArkCommonMethodStyle implements IndicatorComponentAttribute {
     initialIndex_value?: number | undefined

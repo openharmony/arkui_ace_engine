@@ -27,7 +27,8 @@ import {
     Measurable,
     SizeResult,
     PageLifeCycle,
-    LayoutCallback
+    LayoutCallback,
+    CommonMethod
 } from "../../generated"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { rememberDisposable, remember, mutableState, MutableState, NodeAttach, RunEffect } from "@koalaui/runtime"
@@ -179,7 +180,7 @@ export class CustomComponent<T extends CustomComponent<T, OptionsT>, OptionsT ex
     }
 
     protected __initializeStruct(
-        initializers?: OptionsT,
+        initializers?: Object,
         @memo
         content?: () => void
     ): void {}
@@ -264,3 +265,5 @@ export interface IPropertySubscriber { }
 export interface ISinglePropertyChangeSubscriber { }
 
 export interface CustomComponentV2 {}
+
+export type CustomStyles = (instance:CommonMethod) => void
