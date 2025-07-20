@@ -55,7 +55,7 @@ const ArkUIAniModifiers* GetArkUIAniModifiers()
         .getInteropAniModifier = OHOS::Ace::NG::GetInteropAniModifier,
         .getDragControllerAniModifier = OHOS::Ace::NG::GetDragControllerAniModifier,
         .getImageSpanAniModifier = OHOS::Ace::NG::GetImageSpanAniModifier,
-        .getRichEditorAniModifier = OHOS::Ace::NG::GetRichEditorAniModifier
+        .getRichEditorAniModifier = OHOS::Ace::NG::GetRichEditorAniModifier,
         .getArkUIAniVideoModifier = OHOS::Ace::NG::GetVideoAniModifier,
         .getArkUIAniShapeModifier = OHOS::Ace::NG::GetShapeAniModifier,
         .getStateMgmtAniModifier = OHOS::Ace::NG::GetStateMgmtAniModifier,
