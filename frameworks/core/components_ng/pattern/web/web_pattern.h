@@ -869,13 +869,6 @@ public:
     void OnShowMagnifier();
     void OnHideMagnifier();
     void SetTouchHandleExistState(bool touchHandleExist);
-protected:
-    void ModifyWebSrc(const std::string& webSrc)
-    {
-        webSrc_ = webSrc;
-    }
-
-    void OnWebSrcUpdate();
 private:
     friend class WebContextSelectOverlay;
     friend class WebSelectOverlay;
@@ -925,6 +918,7 @@ private:
     void OnAttachToMainTree() override;
     void OnDetachFromMainTree() override;
 
+    void OnWebSrcUpdate();
     void OnWebDataUpdate();
     void OnJsEnabledUpdate(bool value);
     void OnMediaPlayGestureAccessUpdate(bool value);
