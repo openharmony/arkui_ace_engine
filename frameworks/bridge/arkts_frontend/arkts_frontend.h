@@ -269,6 +269,9 @@ public:
     }
 
     ani_object CallGetUIContextFunc();
+#ifdef ACE_STATIC
+    void SetAniContext(int32_t instanceId, ani_ref* context);
+#endif
     bool IsDrawChildrenCallbackFuncExist(const std::string& componentId) override { return false; }
     void OnDrawChildrenCompleted(const std::string& componentId) override {}
 
