@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-import { Colors } from '@ohos/arkui/theme';
 import { ArkThemeBase } from '../ArkThemeBase';
 import { ThemeColorMode } from 'arkui/component/common';
 import { ArkSystemShapes } from './ArkSystemShapes';
 import { ArkSystemTypography } from './ArkSystemTypography';
+import { ArkSystemColors } from './ArkSystemColors';
 
 export class ArkSystemTheme extends ArkThemeBase {
     constructor() {
@@ -25,7 +25,7 @@ export class ArkSystemTheme extends ArkThemeBase {
             -1, // no parent theme
             undefined,
             ThemeColorMode.SYSTEM,
-            new Colors(),
+            new ArkSystemColors(),
             new ArkSystemShapes(),
             new ArkSystemTypography()
         );
