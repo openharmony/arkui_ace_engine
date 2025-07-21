@@ -561,10 +561,11 @@ export class DrawContext {
         return this.canvas_
     }
 }
-export interface Vector2T {
-    x: number;
-    y: number;
+export interface Vector2T<T> {
+    x: T;
+    y: T;
 }
+export type PositionT<T> = Vector2T<T>;
 export interface Vector3 {
     x: number;
     y: number;
