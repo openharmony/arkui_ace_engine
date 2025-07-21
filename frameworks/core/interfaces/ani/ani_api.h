@@ -212,6 +212,10 @@ struct ArkUIAniCommonModifier {
     void (*onMeasureInnerMeasure)(ani_env* env, ani_long ptr);
     void (*onLayoutInnerLayout)(ani_env* env, ani_long ptr);
     void (*setParallelScoped)(ani_boolean parallel);
+    void (*setCustomPropertyCallBack)(
+        ani_env* env, ArkUINodeHandle node, std::function<void()>&& func,
+        std::function<std::string(const std::string&)>&& getFunc);
+    std::optional<std::string> (*getCustomProperty)(ani_env* env, ArkUINodeHandle node, const std::string& key);
     void (*setOverlayComponent)(ani_long node, ani_long builderPtr, AniOverlayOptions options);
     ani_double (*vp2px)(ani_double value, ani_int instanceId);
     ani_double (*px2vp)(ani_double value, ani_int instanceId);
