@@ -1025,9 +1025,8 @@ LayoutConstraintF TextLayoutAlgorithm::CalcContentConstraint(
             contentConstraint.maxSize.SetWidth(std::numeric_limits<double>::infinity());
         }
     } else if (widthPolicy == LayoutCalPolicy::MATCH_PARENT) {
-        auto idealSize = constraint.parentIdealSize;
-        idealSize.Constrain(constraint.minSize, constraint.maxSize, true);
-        contentConstraint.selfIdealSize.SetWidth(idealSize.Width().value_or(0.0f));
+        contentConstraint.selfIdealSize.SetWidth(
+            constraint.parentIdealSize.Width().value_or(constraint.maxSize.Width()));
     }
     auto heightPolicy = TextBase::GetLayoutCalPolicy(layoutWrapper, false);
     if (heightPolicy == LayoutCalPolicy::FIX_AT_IDEAL_SIZE) {
@@ -1038,9 +1037,8 @@ LayoutConstraintF TextLayoutAlgorithm::CalcContentConstraint(
             contentConstraint.maxSize.SetHeight(std::numeric_limits<double>::infinity());
         }
     } else if (heightPolicy == LayoutCalPolicy::MATCH_PARENT) {
-        auto idealSize = constraint.parentIdealSize;
-        idealSize.Constrain(constraint.minSize, constraint.maxSize, true);
-        contentConstraint.selfIdealSize.SetHeight(idealSize.Height().value_or(0.0f));
+        contentConstraint.selfIdealSize.SetHeight(
+            constraint.parentIdealSize.Height().value_or(constraint.maxSize.Height()));
     }
     cachedCalcContentConstraint_ = contentConstraint;
     return contentConstraint;
@@ -1076,5 +1074,63 @@ std::optional<float> TextLayoutAlgorithm::GetCalcLayoutConstraintLength(
         isWidth ? layoutConstraint->percentReference.Width() : layoutConstraint->percentReference.Height();
     CHECK_NULL_RETURN(optionalCalcLength, std::nullopt);
     return ConvertToPx(optionalCalcLength, ScaleProperty::CreateScaleProperty(), percentLength);
+}
+
+void TextLayoutAlgorithm::MeasureWithFixAtIdealSize(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto widthPolicy = TextBase::GetLayoutCalPolicy(layoutWrapper, true);
+    auto heightPolicy = TextBase::GetLayoutCalPolicy(layoutWrapper, false);
+    if (widthPolicy != LayoutCalPolicy::FIX_AT_IDEAL_SIZE && heightPolicy != LayoutCalPolicy::FIX_AT_IDEAL_SIZE) {
+        return;
+    }
+    auto geometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto& content = geometryNode->GetContent();
+    CHECK_NULL_VOID(content);
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto padding = layoutProperty->CreatePaddingAndBorder();
+    auto contentSize = content->GetRect().GetSize();
+    AddPaddingToSize(padding, contentSize);
+    OptionalSizeF frameSize;
+    frameSize.UpdateIllegalSizeWithCheck(contentSize);
+    frameSize = UpdateOptionSizeByCalcLayoutConstraint(
+        frameSize, layoutProperty->GetCalcLayoutConstraint(), layoutProperty->GetLayoutConstraint()->percentReference);
+    auto fixSize = frameSize.ConvertToSizeT();
+    auto measureSize = geometryNode->GetFrameSize();
+    if (widthPolicy == LayoutCalPolicy::FIX_AT_IDEAL_SIZE) {
+        measureSize.SetWidth(fixSize.Width());
+    }
+    if (heightPolicy == LayoutCalPolicy::FIX_AT_IDEAL_SIZE) {
+        measureSize.SetHeight(fixSize.Height());
+    }
+    geometryNode->SetFrameSize(measureSize);
+}
+
+void TextLayoutAlgorithm::MeasureWithMatchParent(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto layoutPolicyProperty = layoutProperty->GetLayoutPolicyProperty();
+    CHECK_NULL_VOID(layoutPolicyProperty);
+    auto heightLayoutPolicy = layoutPolicyProperty.value().heightLayoutPolicy_;
+    if (heightLayoutPolicy != LayoutCalPolicy::MATCH_PARENT) {
+        return;
+    }
+    const auto& contentConstraint = layoutProperty->GetContentLayoutConstraint();
+    CHECK_NULL_VOID(contentConstraint);
+    auto padding = layoutProperty->CreatePaddingAndBorder();
+    auto geometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto contentHeight = contentConstraint->parentIdealSize.Height().value_or(contentConstraint->maxSize.Height());
+    geometryNode->SetFrameHeight(contentHeight + padding.top.value_or(0.0f) + padding.bottom.value_or(0.0f));
+}
+
+void TextLayoutAlgorithm::MeasureWidthLayoutCalPolicy(LayoutWrapper* layoutWrapper)
+{
+    MeasureWithFixAtIdealSize(layoutWrapper);
+    MeasureWithMatchParent(layoutWrapper);
 }
 } // namespace OHOS::Ace::NG
