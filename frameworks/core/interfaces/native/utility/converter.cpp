@@ -2425,7 +2425,7 @@ BorderWidthProperty Convert(const Ark_LocalizedEdgeWidths& src)
     widthProperty.multiValued = true;
 
     auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
-    widthProperty.leftDimen = 
+    widthProperty.leftDimen =
         isRightToLeft? Converter::OptConvert<Dimension>(src.end) : Converter::OptConvert<Dimension>(src.start);
     widthProperty.rightDimen =
         isRightToLeft? Converter::OptConvert<Dimension>(src.start) : Converter::OptConvert<Dimension>(src.end);
