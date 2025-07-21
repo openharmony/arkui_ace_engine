@@ -1682,6 +1682,7 @@ public:
     void SetBackBorderRadius();
     void OnColorModeChange(uint32_t colorMode) override;
 
+    void ProcessResponseArea();
 protected:
     virtual void InitDragEvent();
     void OnAttachToMainTree() override;
@@ -1903,7 +1904,6 @@ private:
     void GetInlinePositionYAndHeight(double& positionY, double& height) const;
 #endif
     void NotifyOnEditChanged(bool isChanged);
-    void ProcessResponseArea();
     void ProcessCancelButton();
     bool HasInputOperation();
     AceAutoFillType ConvertToAceAutoFillType(TextInputType type);
