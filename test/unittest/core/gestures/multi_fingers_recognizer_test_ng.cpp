@@ -81,6 +81,8 @@ HWTEST_F(MultiFingersRecognizerTestNg, Test003, TestSize.Level1)
     event.y = 10.1;
     event.screenX = 10.1;
     event.screenY = 10.1;
+    event.globalDisplayX = 10.1;
+    event.globalDisplayY = 10.1;
     event.sourceType = SourceType::MOUSE;
     event.sourceTool = SourceTool::PEN;
     event.originalId = 1;
