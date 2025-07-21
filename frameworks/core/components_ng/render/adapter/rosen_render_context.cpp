@@ -74,6 +74,7 @@
 #include "core/components_ng/render/image_painter.h"
 #include "interfaces/inner_api/ace_kit/include/ui/view/draw/modifier.h"
 #include "core/pipeline/pipeline_base.h"
+#include "base/utils/multi_thread.h"
 
 namespace OHOS::Ace::NG {
 
@@ -1098,6 +1099,8 @@ void RosenRenderContext::UpdateWindowActiveState(bool isActive)
 
 void RosenRenderContext::SetFrontBlurFilter()
 {
+    auto host = GetHost();
+    FREE_NODE_CHECK(host, SetFrontBlurFilter);
     CHECK_NULL_VOID(rsNode_);
     auto context = GetPipelineContext();
     CHECK_NULL_VOID(context);
@@ -7350,6 +7353,7 @@ void RosenRenderContext::NotifyHostTransformUpdated(bool changed)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    FREE_NODE_CHECK(host, NotifyHostTransformUpdated, changed);
     host->NotifyTransformInfoChanged();
     host->OnNodeTransformInfoUpdate(changed);
     host->UpdateAccessibilityNodeRect();
