@@ -10668,7 +10668,9 @@ void JSViewAbstract::GetJsAngleWithDefault(
 
 inline void JSViewAbstract::CheckAngle(std::optional<float>& angle)
 {
-    angle = std::clamp(angle.value(), 0.0f, MAX_ANGLE);
+    if (angle.has_value()) {
+        angle = std::clamp(angle.value(), 0.0f, MAX_ANGLE);
+    }
 }
 
 void JSViewAbstract::GetPerspective(

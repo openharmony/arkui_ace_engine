@@ -412,7 +412,9 @@ void ContainerModalView::AddButtonHoverEvent(
             auto renderContext = buttonNode->GetRenderContext();
             renderContext->UpdateBackgroundColor(theme->GetControlBtnColor(isCloseBtn, isHoverType));
         }
-        imageLayoutProperty->UpdateImageSourceInfo(sourceInfo.value());
+        if (sourceInfo.has_value()) {
+            imageLayoutProperty->UpdateImageSourceInfo(sourceInfo.value());
+        }
         buttonNode->MarkModifyDone();
         imageNode->MarkModifyDone();
     };
