@@ -50,6 +50,7 @@ export * from "./AlphabetIndexerOpsHandWritten"
 export * from "./SwiperOpsHandWritten"
 export * from "./RefreshOpsHandWritten"
 export * from "./AttributeModifierOpsHandWritten"
+export * from  "./ContentModifierHooks"
 
 // export interface PageTransitionExitInterface { }
 // export interface CommonTransition { }

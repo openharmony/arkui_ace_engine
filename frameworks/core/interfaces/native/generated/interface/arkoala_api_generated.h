@@ -2274,6 +2274,10 @@ typedef struct Ark_PreviewText Ark_PreviewText;
 typedef struct Opt_PreviewText Opt_PreviewText;
 typedef struct Ark_ProgressOptions Ark_ProgressOptions;
 typedef struct Opt_ProgressOptions Opt_ProgressOptions;
+typedef struct Ark_RadioConfiguration Ark_RadioConfiguration;
+typedef struct Opt_RadioConfiguration Opt_RadioConfiguration;
+typedef struct RadioModifierBuilder RadioModifierBuilder;
+typedef struct Opt_RadioModifierBuilder Opt_RadioModifierBuilder;
 typedef struct Ark_ProgressStyleOptions Ark_ProgressStyleOptions;
 typedef struct Opt_ProgressStyleOptions Opt_ProgressStyleOptions;
 typedef struct Ark_RadialGradientOptions Ark_RadialGradientOptions;
@@ -14318,6 +14322,26 @@ typedef struct Opt_ProgressOptions {
     Ark_Tag tag;
     Ark_ProgressOptions value;
 } Opt_ProgressOptions;
+typedef struct Ark_RadioConfiguration {
+    Ark_Boolean enabled;
+    Ark_String value;
+    Ark_Boolean checked;
+    Callback_Boolean_Void triggerChange;
+} Ark_RadioConfiguration;
+typedef struct Opt_RadioConfiguration {
+    Ark_Tag tag;
+    Ark_RadioConfiguration value;
+} Opt_RadioConfiguration;
+typedef struct RadioModifierBuilder {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Ark_RadioConfiguration config, const Callback_Pointer_Void continuation);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Ark_RadioConfiguration config, const Callback_Pointer_Void continuation);
+} RadioModifierBuilder;
+typedef struct Opt_RadioModifierBuilder {
+    Ark_Tag tag;
+    RadioModifierBuilder value;
+} Opt_RadioModifierBuilder;
 typedef struct Ark_ProgressStyleOptions {
     Opt_Boolean enableSmoothEffect;
     Opt_Length strokeWidth;
@@ -27953,6 +27977,13 @@ typedef struct GENERATED_ArkUIRouterExtenderAccessor {
     void (*hideAlertBeforeBackPage)();
 } GENERATED_ArkUIRouterExtenderAccessor;
 
+typedef struct GENERATED_ArkUIContentModifierHelperAccessor {
+    void (*contentModifierRadio)(Ark_NativePointer node,
+                                const Ark_Object* contentModifier,
+                                const RadioModifierBuilder* builder);
+    void (*resetContentModifierRadio)(Ark_NativePointer node);
+} GENERATED_ArkUIContentModifierHelperAccessor;
+
 /**
  * An API to control an implementation. When making changes modifying binary
  * layout, i.e. adding new events - increase ARKUI_API_VERSION above for binary
@@ -28317,6 +28348,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIGlobalScopeAccessor* (*getGlobalScopeAccessor)();
     const GENERATED_ArkUIPromptActionAccessor* (*getPromptActionAccessor)();
     const GENERATED_ArkUIRouterExtenderAccessor* (*getRouterExtenderAccessor)();
+    const GENERATED_ArkUIContentModifierHelperAccessor* (*getContentModifierHelperAccessor)();
 } GENERATED_ArkUIAccessors;
 
 typedef struct GENERATED_ArkUIGraphicsAPI {

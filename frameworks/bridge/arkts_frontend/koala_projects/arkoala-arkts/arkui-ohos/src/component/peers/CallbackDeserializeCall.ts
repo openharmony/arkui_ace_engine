@@ -88,7 +88,7 @@ import { OnFoldStatusChangeCallback, OnFoldStatusChangeInfo, OnHoverStatusChange
 import { OnHoverCallback } from "./../sdk-stubs"
 import { OnLinearIndicatorChangeCallback } from "./../linearindicator"
 import { SurfaceRect, Callback_String_SurfaceRect_Void, OnNativeLoadCallback } from "./../xcomponent"
-import { OnRadioChangeCallback } from "./../radio"
+import { OnRadioChangeCallback, RadioConfiguration } from "./../radio"
 import { OnRatingChangeCallback } from "./../rating"
 import { PageTransitionCallback, RouteType } from "./../pageTransition"
 import { PasteButtonCallback, PasteButtonOnClickResult } from "./../pasteButton"
@@ -2692,6 +2692,15 @@ export function deserializeAndCallCallback_String_SurfaceRect_Void(thisDeseriali
     let rect : SurfaceRect = thisDeserializer.readSurfaceRect()
     _call(surfaceId, rect)
 }
+export function deserializeAndCallRadioModifierBuilder(thisDeserializer: Deserializer): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((parentNode: KPointer,config: RadioConfiguration) => KPointer))
+    let parentNode : KPointer = thisDeserializer.readPointer()
+    let config : RadioConfiguration = thisDeserializer.readRadioConfiguration()
+    let _continuation : ((value: KPointer) => void) = thisDeserializer.readCallback_Pointer_Void()
+    const _callResult  = _call(parentNode, config)
+    _continuation(_callResult)
+}
 export function deserializeAndCallCallback(thisDeserializer: Deserializer): void {
     const kind : int32 = thisDeserializer.readInt32()
     switch (kind) {
@@ -3004,6 +3013,7 @@ export function deserializeAndCallCallback(thisDeserializer: Deserializer): void
         case -1829763354/*CallbackKind.Kind_WebKeyboardCallback*/: return deserializeAndCallWebKeyboardCallback(thisDeserializer);
         case 219587748/*CallbackKind.Kind_WithThemeInterface*/: return deserializeAndCallWithThemeInterface(thisDeserializer);
         case -1736208400/*CallbackKind.Kind_Callback_String_SurfaceRect_Void*/: return deserializeAndCallCallback_String_SurfaceRect_Void(thisDeserializer);
+        case -327322091/*CallbackKind.Kind_RadioModifierBuilder*/: return deserializeAndCallRadioModifierBuilder(thisDeserializer);
     }
     console.log("Unknown callback kind")
 }

@@ -45668,6 +45668,17 @@ void impl_RouterExtender_HideAlertBeforeBackPage() {
     GetAccessors()->getRouterExtenderAccessor()->hideAlertBeforeBackPage();
 }
 KOALA_INTEROP_DIRECT_V0(RouterExtender_HideAlertBeforeBackPage)
+void impl_ContentModifierHelper_contentModifierRadio(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
+    Deserializer thisDeserializer(thisArray, thisLength);
+    Ark_Object contentModifier_value = static_cast<Ark_ContentModifier>(thisDeserializer.readObject());;
+    RadioModifierBuilder builder_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Ark_RadioConfiguration config, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_RadioModifierBuilder)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Ark_RadioConfiguration config, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_RadioModifierBuilder))))};;
+    GetAccessors()->getContentModifierHelperAccessor()->contentModifierRadio(node, (const Ark_Object*)&contentModifier_value, (const RadioModifierBuilder*)&builder_value);
+}
+KOALA_INTEROP_DIRECT_V3(ContentModifierHelper_contentModifierRadio, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_ContentModifierHelper_resetContentModifierRadio(Ark_NativePointer node) {
+    GetAccessors()->getContentModifierHelperAccessor()->resetContentModifierRadio(node);
+}
+KOALA_INTEROP_DIRECT_V1(ContentModifierHelper_resetContentModifierRadio, Ark_NativePointer)
 Ark_Int64 impl_UIStateGet(Ark_NativePointer thisPtr) {
         return GetNodeModifiers()->getUIStateModifier()->getUIState(thisPtr);
 }

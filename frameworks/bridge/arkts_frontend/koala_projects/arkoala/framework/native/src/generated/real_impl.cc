@@ -21309,6 +21309,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     } // RouterExtenderAccessor
+    namespace ContentModifierHelperAccessor {
+    void ContentModifierRadioImpl(Ark_NativePointer node,
+                                  const Ark_Object* contentModifier,
+                                  const RadioModifierBuilder* builder)
+    {
+    }
+
+    void ResetContentModifierRadioImpl(Ark_NativePointer node)
+    {
+    }
+    }
     const GENERATED_ArkUIAlphabetIndexerOpsAccessor* GetAlphabetIndexerOpsAccessor()
     {
         static const GENERATED_ArkUIAlphabetIndexerOpsAccessor AlphabetIndexerOpsAccessorImpl {
@@ -25347,6 +25358,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         };
         return &RouterExtenderAccessorImpl;
     }
+    const GENERATED_ArkUIContentModifierHelperAccessor* GetContentModifierHelperAccessor()
+    {
+        static const GENERATED_ArkUIContentModifierHelperAccessor ContentModifierHelperAccessorImpl {
+            ContentModifierHelperAccessor::ContentModifierRadioImpl,
+            ContentModifierHelperAccessor::ResetContentModifierRadioImpl,
+        };
+        return &ContentModifierHelperAccessorImpl;
+    }
     const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
     {
         static const GENERATED_ArkUIAccessors accessorsImpl = {
@@ -25580,6 +25599,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetLinearIndicatorControllerAccessor,
             GetGlobalScopeAccessor,
             GetRouterExtenderAccessor,
+            GetContentModifierHelperAccessor,
         };
         return &accessorsImpl;
     }

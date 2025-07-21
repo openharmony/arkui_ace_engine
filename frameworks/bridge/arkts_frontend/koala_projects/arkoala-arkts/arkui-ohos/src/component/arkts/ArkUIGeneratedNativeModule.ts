@@ -7192,4 +7192,8 @@ export class ArkUIGeneratedNativeModule {
     native static _RouterExtender_ShowAlertBeforeBackPage(message: KStringPtr): void
     @ani.unsafe.Direct
     native static _RouterExtender_HideAlertBeforeBackPage(): void
+    @ani.unsafe.Direct
+    native static _ContentModifierHelper_contentModifierRadio(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ContentModifierHelper_resetContentModifierRadio(node: KPointer): void
 }

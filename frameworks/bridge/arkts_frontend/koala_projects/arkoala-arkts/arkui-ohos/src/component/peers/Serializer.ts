@@ -47,7 +47,7 @@ import { OnFoldStatusChangeCallback, OnHoverStatusChangeCallback, OnFoldStatusCh
 import { OnHoverCallback } from "./../sdk-stubs"
 import { OnLinearIndicatorChangeCallback, LinearIndicatorController, LinearIndicatorControllerInternal, LinearIndicatorStartOptions, LinearIndicatorStyle } from "./../linearindicator"
 import { OnNativeLoadCallback, XComponentController, XComponentControllerInternal, Literal_Number_surfaceHeight_surfaceWidth, SurfaceRect, SurfaceRotationOptions, NativeXComponentParameters, XComponentOptions } from "./../xcomponent"
-import { OnRadioChangeCallback, RadioIndicatorType, RadioOptions, RadioStyle } from "./../radio"
+import { OnRadioChangeCallback, RadioConfiguration, RadioIndicatorType, RadioOptions, RadioStyle } from "./../radio"
 import { OnRatingChangeCallback, RatingOptions, StarStyleOptions } from "./../rating"
 import { OnScrollEdgeCallback, OnScrollFrameBeginCallback, ScrollOnScrollCallback, ScrollOnWillScrollCallback, Scroller, ScrollerInternal, ScrollAlign, OffsetResult, OnScrollFrameBeginHandlerResult, ScrollAttribute, ScrollDirection, ScrollSnapOptions, OffsetOptions, ScrollOptions, ScrollEdgeOptions, ScrollPageOptions, Literal_Boolean_next_Axis_direction, ScrollToIndexOptions, ScrollAnimationOptions } from "./../scroll"
 import { OnScrollVisibleContentChangeCallback, ChainEdgeEffect, ScrollState, ListAttribute, ListItemAlign, ListDividerOptions, ChainAnimationOptions, StickyStyle, ScrollSnapAlign, Callback_Number_Number_Number_Void, VisibleListContentInfo, Callback_Number_Boolean, Callback_Number_Number_Boolean, ListItemGroupArea, ListScroller, ListScrollerInternal, CloseSwipeActionOptions, ListOptions } from "./../list"
@@ -6883,6 +6883,17 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeNumber(value_surfaceWidth)
         const value_surfaceHeight  = value.surfaceHeight
         valueSerializer.writeNumber(value_surfaceHeight)
+    }
+    writeRadioConfiguration(value: RadioConfiguration): void {
+        let valueSerializer : Serializer = this
+        const value_enabled  = value.enabled
+        valueSerializer.writeBoolean(value_enabled)
+        const value_value  = value.value
+        valueSerializer.writeString(value_value)
+        const value_checked  = value.checked
+        valueSerializer.writeBoolean(value_checked)
+        const value_triggerChange  = value.triggerChange
+        valueSerializer.holdAndWriteCallback(value_triggerChange)
     }
     writeSurfaceRotationOptions(value: SurfaceRotationOptions): void {
         let valueSerializer : Serializer = this
