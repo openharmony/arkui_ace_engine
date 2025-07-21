@@ -43,7 +43,7 @@ int32_t Container::SafelyId()
 {
     uint32_t containerCount = ContainerScope::ContainerCount();
     if (containerCount == 0) {
-        return DEFAULT_ID;
+        return INSTANCE_ID_UNDEFINED;
     }
     if (containerCount == 1) {
         return ContainerScope::SingletonId();
@@ -358,7 +358,7 @@ int32_t Container::GenerateId<PLUGIN_SUBCONTAINER>()
 #ifdef PLUGIN_COMPONENT_SUPPORTED
     return PluginManager::GetInstance().GetPluginSubContainerId();
 #else
-    return DEFAULT_ID;
+    return INSTANCE_ID_UNDEFINED;
 #endif
 }
 
