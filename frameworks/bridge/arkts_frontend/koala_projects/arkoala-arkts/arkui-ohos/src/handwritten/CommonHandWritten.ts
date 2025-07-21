@@ -19,6 +19,8 @@ import { Filter, VisualEffect, BrightnessBlender } from "#external"
 import { KPointer, RuntimeType, runtimeType } from "@koalaui/interop"
 import {ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
+import { ArkUIAniModule } from 'arkui.ani';
+import { CustomProperty } from '../component/common';
 
 export function hookCommonMethodGestureImpl(commonMethod: ArkCommonMethodComponent, gesture: GestureType | undefined, mask?: GestureMask): void {
     if (gesture instanceof Gesture) {
@@ -124,4 +126,35 @@ export class CommonMethodHandWritten {
     static hookCommonMethodAnimateToImmediatelyImpl(value: AnimateParam, event: (() => void)): void {
         AnimationExtender.AnimateToImmediatelyImpl(value, event);
     }
+}
+
+export class ElementIdToCustomProperties {
+    constructor() { }
+    static instance_: ElementIdToCustomProperties = new ElementIdToCustomProperties();
+    static _elementIdToCustomProperties = new Map<number, Map<string, CustomProperty>>();
+}
+export function hookCustomPropertyImpl(arkComponent: ArkCommonMethodComponent,
+    name: string, value: CustomProperty): void {
+    const nodeId = arkComponent.getPeer().getId();
+    if (!ElementIdToCustomProperties._elementIdToCustomProperties.has(nodeId)) {
+        ElementIdToCustomProperties._elementIdToCustomProperties.set(nodeId, new Map<string, CustomProperty>());
+    }
+    const customProperties = ElementIdToCustomProperties._elementIdToCustomProperties.get(nodeId);
+    if (customProperties) {
+        customProperties.set(name, value);
+    }
+    const removeCallback: () => void = () => {
+        ElementIdToCustomProperties._elementIdToCustomProperties.delete(nodeId);
+    };
+    const getCallback: (name: string) => string | undefined = (name: string) => {
+        if (ElementIdToCustomProperties._elementIdToCustomProperties.has(nodeId)) {
+            const customPropertiesGet = ElementIdToCustomProperties._elementIdToCustomProperties.get(nodeId);
+            if (customPropertiesGet) {
+                const propertyValue = customPropertiesGet.get(name);
+                return propertyValue !== undefined ? JSON.stringify(propertyValue) : undefined;
+            }
+        }
+        return undefined;
+    };
+    ArkUIAniModule._Common_SetCustomPropertyCallBack(arkComponent.getPeer().getPeerPtr(), removeCallback, getCallback);
 }

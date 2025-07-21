@@ -27,7 +27,9 @@ import { int32 } from "@koalaui/common"
 import { Serializer } from "./component"
 import { ArkUIAniModule } from "arkui.ani"
 import { RenderNode, RenderNodeInternal } from "./RenderNode"
-import { CommonAttribute, ArkCommonMethodPeer, CommonMethod, UIGestureEvent, UICommonEvent, UICommonEventInternal } from './component/common'
+import { CommonAttribute, ArkCommonMethodPeer, CommonMethod, UIGestureEvent, UICommonEvent, UICommonEventInternal,
+    CustomProperty
+} from './component/common'
 import { ArkBaseNode } from './handwritten/modifiers/ArkBaseNode'
 import { ArkListNode } from './handwritten/modifiers/ArkListNode'
 import { ArkColumnNode } from './handwritten/modifiers/ArkColumnNode'
@@ -68,6 +70,7 @@ import { DrawContext } from './Graphics';
 import { JSBuilderNode } from "./BuilderNode"
 import { BusinessError } from '#external';
 import { Resource } from 'global.resource';
+import { ElementIdToCustomProperties } from './handwritten/CommonHandWritten'
 
 
 export interface CrossLanguageOptions {
@@ -842,6 +845,17 @@ export class FrameNode implements MaterializedBase {
     private getNodeType_serialize(): string {
         const retval = ArkUIGeneratedNativeModule._FrameNode_getNodeType(this.peer!.ptr)
         return retval
+    }
+    public getCustomProperty(name: string): CustomProperty {
+        const name_casted = name as (string);
+        const nodeId = this._nodeId;
+        if (ElementIdToCustomProperties._elementIdToCustomProperties.has(nodeId)) {
+            const customProperties = ElementIdToCustomProperties._elementIdToCustomProperties.get(nodeId);
+            if (customProperties) {
+                return customProperties.get(name_casted);
+            }
+        }
+        return ArkUIAniModule._Common_getCustomProperty(this!.peer!.ptr, name_casted);
     }
 }
 class ImmutableFrameNode extends FrameNode {

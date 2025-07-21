@@ -189,6 +189,40 @@ void SetParallelScoped(ani_boolean parallel)
     MultiThreadBuildManager::SetIsThreadSafeNodeScope(parallel);
 }
 
+static void SetCustomPropertyCallBack(
+    ani_env* env, ArkUINodeHandle node, std::function<void()>&& func,
+    std::function<std::string(const std::string&)>&& getFunc)
+{
+    auto id = Container::CurrentIdSafelyWithCheck();
+    ContainerScope scope(id);
+    auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+    if (pipeline && !pipeline->CheckThreadSafe()) {
+        LOGF_ABORT("SetCustomPropertyCallBack doesn't run on UI thread");
+    }
+    auto frameNode = reinterpret_cast<NG::FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetCustomPropertyCallback(std::move(func), std::move(getFunc));
+}
+
+static std::optional<std::string> GetCustomProperty(ani_env* env, ArkUINodeHandle node, const std::string& key)
+{
+    auto id = Container::CurrentIdSafelyWithCheck();
+    ContainerScope scope(id);
+    auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+    if (pipeline && !pipeline->CheckThreadSafe()) {
+        LOGF_ABORT("GetCustomProperty doesn't run on UI thread");
+    }
+    auto frameNode = reinterpret_cast<NG::FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, std::nullopt);
+
+    std::string capiCustomProperty;
+    if (frameNode->GetCapiCustomProperty(key, capiCustomProperty)) {
+        return capiCustomProperty;
+    } else {
+        return std::nullopt;
+    }
+}
+
 Alignment ParseAlignment(int32_t align)
 {
     Alignment alignment = Alignment::CENTER;
@@ -388,6 +422,8 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .onMeasureInnerMeasure = OHOS::Ace::NG::OnMeasureInnerMeasure,
         .onLayoutInnerLayout = OHOS::Ace::NG::OnLayoutInnerLayout,
         .setParallelScoped = OHOS::Ace::NG::SetParallelScoped,
+        .setCustomPropertyCallBack = OHOS::Ace::NG::SetCustomPropertyCallBack,
+        .getCustomProperty = OHOS::Ace::NG::GetCustomProperty,
         .setOverlayComponent = OHOS::Ace::NG::SetOverlayComponent,
         .vp2px = OHOS::Ace::NG::Vp2px,
         .px2vp = OHOS::Ace::NG::Px2vp,
