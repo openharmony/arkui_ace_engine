@@ -590,17 +590,6 @@ export class ArkSymbolGlyphSet extends ArkCommonMethodSet implements SymbolGlyph
         throw new Error("Not implemented")
     }
 }
-export class PulseSymbolEffect_serializer {
-    public static write(buffer: SerializerBase, value: PulseSymbolEffect): void {
-        let valueSerializer : SerializerBase = buffer
-        valueSerializer.writePointer(toPeerPtr(value))
-    }
-    public static read(buffer: DeserializerBase): PulseSymbolEffect {
-        let valueDeserializer : DeserializerBase = buffer
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return PulseSymbolEffectInternal.fromPtr(ptr)
-    }
-}
 export class SymbolEffect_serializer {
     public static write(buffer: SerializerBase, value: SymbolEffect): void {
         let valueSerializer : SerializerBase = buffer
@@ -994,26 +983,6 @@ export class HierarchicalSymbolEffect extends SymbolEffect implements Materializ
         }
         ArkUIGeneratedNativeModule._HierarchicalSymbolEffect_setFillStyle(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
-    }
-}
-export class PulseSymbolEffectInternal {
-    public static fromPtr(ptr: KPointer): PulseSymbolEffect {
-        return new PulseSymbolEffect(ptr)
-    }
-}
-export class PulseSymbolEffect extends SymbolEffect implements MaterializedBase {
-    constructor(peerPtr: KPointer) {
-        super(peerPtr)
-    }
-    constructor() {
-        this(PulseSymbolEffect.construct())
-    }
-    static construct(): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._PulseSymbolEffect_construct()
-        return retval
-    }
-    static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._PulseSymbolEffect_getFinalizer()
     }
 }
 export class ReplaceSymbolEffectInternal {

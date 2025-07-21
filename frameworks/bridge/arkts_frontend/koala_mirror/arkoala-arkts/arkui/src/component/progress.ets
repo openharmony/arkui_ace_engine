@@ -125,7 +125,7 @@ export class ArkProgressPeer extends ArkCommonMethodPeer {
                 const value_value_1  = value_value as RingStyleOptions
                 RingStyleOptions_serializer.write(thisSerializer, value_value_1)
             }
-            else if (TypeChecker.isCapsuleStyleOptions(value_value, false, false, false, false, false, false, false)) {
+            else if (TypeChecker.isCapsuleStyleOptions(value_value, false, false, false, false, false, false)) {
                 thisSerializer.writeInt8((2).toChar())
                 const value_value_2  = value_value as CapsuleStyleOptions
                 CapsuleStyleOptions_serializer.write(thisSerializer, value_value_2)
@@ -215,7 +215,6 @@ export interface LinearStyleOptions extends ScanEffectOptions, CommonProgressSty
 export interface CapsuleStyleOptions extends ScanEffectOptions, CommonProgressStyleOptions {
     borderColor?: ResourceColor;
     borderWidth?: Length;
-    content?: string;
     font?: Font;
     fontColor?: ResourceColor;
     showDefaultPercentage?: boolean;
@@ -931,14 +930,6 @@ export class CapsuleStyleOptions_serializer {
                 Resource_serializer.write(valueSerializer, value_borderWidth_value_2)
             }
         }
-        const value_content  = value.content
-        let value_content_type : int32 = RuntimeType.UNDEFINED
-        value_content_type = runtimeType(value_content)
-        valueSerializer.writeInt8((value_content_type).toChar())
-        if ((value_content_type) != (RuntimeType.UNDEFINED)) {
-            const value_content_value  = value_content!
-            valueSerializer.writeString(value_content_value)
-        }
         const value_font  = value.font
         let value_font_type : int32 = RuntimeType.UNDEFINED
         value_font_type = runtimeType(value_font)
@@ -1047,13 +1038,6 @@ export class CapsuleStyleOptions_serializer {
             borderWidth_buf = (borderWidth_buf_ as string | number | Resource)
         }
         const borderWidth_result : Length | undefined = borderWidth_buf
-        const content_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let content_buf : string | undefined
-        if ((content_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            content_buf = (valueDeserializer.readString() as string)
-        }
-        const content_result : string | undefined = content_buf
         const font_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let font_buf : Font | undefined
         if ((font_buf_runtimeType) != (RuntimeType.UNDEFINED))
@@ -1099,7 +1083,7 @@ export class CapsuleStyleOptions_serializer {
             borderRadius_buf = (LengthMetrics_serializer.read(valueDeserializer) as LengthMetrics)
         }
         const borderRadius_result : LengthMetrics | undefined = borderRadius_buf
-        let value : CapsuleStyleOptions = ({enableScanEffect: enableScanEffect_result, borderColor: borderColor_result, borderWidth: borderWidth_result, content: content_result, font: font_result, fontColor: fontColor_result, showDefaultPercentage: showDefaultPercentage_result, borderRadius: borderRadius_result} as CapsuleStyleOptions)
+        let value : CapsuleStyleOptions = ({enableScanEffect: enableScanEffect_result, borderColor: borderColor_result, borderWidth: borderWidth_result, font: font_result, fontColor: fontColor_result, showDefaultPercentage: showDefaultPercentage_result, borderRadius: borderRadius_result} as CapsuleStyleOptions)
         return value
     }
 }

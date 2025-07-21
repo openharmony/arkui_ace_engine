@@ -17,14 +17,14 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { AnimateParam_serializer, TranslateOptions_serializer, AnimateParam, TranslateOptions, TouchEvent, TouchEventInternal, ClickEvent, ClickEventInternal, GeometryInfo, Measurable, Layoutable, ICurve, SizeResult, ICurve_serializer } from "./common"
+import { AnimateParam_serializer, TranslateOptions_serializer, AnimateParam, TranslateOptions, TouchEvent, TouchEventInternal, ClickEvent, ClickEventInternal, GeometryInfo, Measurable, Layoutable, SizeResult } from "./common"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackKind } from "./../generated/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { Resource_serializer, Resource } from "./../generated/resource"
 import { SizeOptions_serializer, Length, SizeOptions, Position_serializer, Position, ResourceColor, ResourceStr, ConstraintSizeOptions } from "./units"
-import { Color, Curve, FontStyle, FontWeight, TextOverflow, TextCase } from "./enums"
+import { Color, FontStyle, FontWeight, TextOverflow, TextCase } from "./enums"
 import { ContentModifier, UICommonBase, AttributeModifier, AttributeUpdater } from "./../handwritten"
 import { ButtonConfiguration } from "./button"
 import { CheckBoxConfiguration } from "./checkbox"
@@ -46,6 +46,7 @@ import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
+import { curves, curves_ICurve_serializer } from "./../generated/ohos.curves"
 import { CustomDialogController } from "./customDialogController"
 import { CustomBuilder } from "./builder"
 import { text } from "./../generated/ohos.graphics.text"
@@ -1534,7 +1535,7 @@ export interface DoubleAnimationParam {
     endValue: float;
     duration: int32;
     delay: int32;
-    curve: Curve | string | ICurve;
+    curve: curves.Curve | string | curves.ICurve;
     onProgress?: Callback_Extender_OnProgress;
     onFinish?: Callback_Extender_OnFinish;
 }
@@ -2167,10 +2168,10 @@ export class DoubleAnimationParam_serializer {
         const value_curve  = value.curve
         let value_curve_type : int32 = RuntimeType.UNDEFINED
         value_curve_type = runtimeType(value_curve)
-        if (TypeChecker.isCurve(value_curve)) {
+        if (TypeChecker.iscurves_Curve(value_curve)) {
             valueSerializer.writeInt8((0).toChar())
-            const value_curve_0  = value_curve as Curve
-            valueSerializer.writeInt32(TypeChecker.Curve_ToNumeric(value_curve_0))
+            const value_curve_0  = value_curve as curves.Curve
+            valueSerializer.writeInt32(TypeChecker.curves_Curve_ToNumeric(value_curve_0))
         }
         else if (RuntimeType.STRING == value_curve_type) {
             valueSerializer.writeInt8((1).toChar())
@@ -2179,8 +2180,8 @@ export class DoubleAnimationParam_serializer {
         }
         else if (RuntimeType.OBJECT == value_curve_type) {
             valueSerializer.writeInt8((2).toChar())
-            const value_curve_2  = value_curve as ICurve
-            ICurve_serializer.write(valueSerializer, value_curve_2)
+            const value_curve_2  = value_curve as curves.ICurve
+            curves_ICurve_serializer.write(valueSerializer, value_curve_2)
         }
         const value_onProgress  = value.onProgress
         let value_onProgress_type : int32 = RuntimeType.UNDEFINED
@@ -2207,20 +2208,20 @@ export class DoubleAnimationParam_serializer {
         const duration_result : int32 = valueDeserializer.readInt32()
         const delay_result : int32 = valueDeserializer.readInt32()
         const curve_buf_selector : int32 = valueDeserializer.readInt8()
-        let curve_buf : Curve | string | ICurve | undefined
+        let curve_buf : curves.Curve | string | curves.ICurve | undefined
         if (curve_buf_selector == (0).toChar()) {
-            curve_buf = TypeChecker.Curve_FromNumeric(valueDeserializer.readInt32())
+            curve_buf = TypeChecker.curves_Curve_FromNumeric(valueDeserializer.readInt32())
         }
         else if (curve_buf_selector == (1).toChar()) {
             curve_buf = (valueDeserializer.readString() as string)
         }
         else if (curve_buf_selector == (2).toChar()) {
-            curve_buf = (ICurve_serializer.read(valueDeserializer) as ICurve)
+            curve_buf = (curves_ICurve_serializer.read(valueDeserializer) as curves.ICurve)
         }
         else {
             throw new Error("One of the branches for curve_buf has to be chosen through deserialisation.")
         }
-        const curve_result : Curve | string | ICurve = (curve_buf as Curve | string | ICurve)
+        const curve_result : curves.Curve | string | curves.ICurve = (curve_buf as curves.Curve | string | curves.ICurve)
         const onProgress_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let onProgress_buf : Callback_Extender_OnProgress | undefined
         if ((onProgress_buf_runtimeType) != (RuntimeType.UNDEFINED))

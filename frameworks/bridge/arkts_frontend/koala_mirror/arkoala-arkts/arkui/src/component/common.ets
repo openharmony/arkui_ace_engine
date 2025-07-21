@@ -23,7 +23,7 @@ import { CallbackKind } from "./../generated/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { unifiedDataChannel_Summary_serializer, unifiedDataChannel } from "./../generated/ohos.data.unifiedDataChannel"
 import { DrawContext, DrawContextInternal, LengthMetrics_serializer, LengthMetrics } from "./../generated/arkui.Graphics"
-import { KeyType, KeySource, Color, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, InteractionHand, GradientDirection, Curve, SharedTransitionEffectType, ArrowPointPosition, Placement, LineCapStyle, LineJoinStyle, BarState, CrownSensitivity, EdgeEffect, TransitionType, TextDecorationType, TextDecorationStyle, PlayMode, HorizontalAlign, VerticalAlign, FontWeight, FontStyle, TouchType, CrownAction, ClickEffectLevel, NestedScrollMode, PixelRoundCalcPolicy, ScrollSource, IlluminatedType, AccessibilityHoverType, AxisAction, AxisModel, MouseButton, MouseAction } from "./enums"
+import { KeyType, KeySource, Color, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, InteractionHand, GradientDirection, SharedTransitionEffectType, ArrowPointPosition, Placement, LineCapStyle, LineJoinStyle, BarState, CrownSensitivity, EdgeEffect, TransitionType, TextDecorationType, TextDecorationStyle, PlayMode, HorizontalAlign, VerticalAlign, FontWeight, FontStyle, TouchType, CrownAction, ClickEffectLevel, NestedScrollMode, PixelRoundCalcPolicy, ScrollSource, IlluminatedType, AccessibilityHoverType, AxisAction, AxisModel, MouseButton, MouseAction } from "./enums"
 import { IntentionCode } from "./../generated/ohos.multimodalInput.intentionCode"
 import { Position_serializer, DirectionalEdgesT_serializer, Position, DirectionalEdgesT, ConstraintSizeOptions_serializer, ConstraintSizeOptions, ResourceColor, SizeOptions, SizeOptions_serializer, ChainWeightOptions_serializer, Padding_serializer, LocalizedPadding_serializer, BorderOptions_serializer, EdgeStyles_serializer, EdgeWidths_serializer, LocalizedEdgeWidths_serializer, EdgeColors_serializer, LocalizedEdgeColors_serializer, BorderRadiuses_serializer, LocalizedBorderRadiuses_serializer, OutlineOptions_serializer, EdgeOutlineStyles_serializer, EdgeOutlineWidths_serializer, OutlineRadiuses_serializer, Edges_serializer, LocalizedEdges_serializer, LocalizedPosition_serializer, AccessibilityOptions_serializer, Length, ChainWeightOptions, Padding, LocalizedPadding, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, VoidCallback, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, Bias, Font, Bias_serializer, Area_serializer, Font_serializer } from "./units"
 import { Resource_serializer, Resource } from "./../generated/resource"
@@ -40,15 +40,15 @@ import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { CustomBuilder } from "./builder"
 import { uniformTypeDescriptor } from "./../generated/ohos.data.uniformTypeDescriptor"
+import { curves, curves_ICurve_serializer } from "./../generated/ohos.curves"
 import { SymbolGlyphModifier, SymbolGlyphModifier_serializer } from "./../generated/arkui.SymbolGlyphModifier"
 import { UIContext, UIContext_serializer } from "./../generated/ohos.arkui.UIContext"
-import { hookStateStyleImpl, CustomStyles, ContentModifier, UICommonBase, AttributeModifier, AttributeUpdater } from "./../handwritten"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
 import { Context } from "./../generated/application.Context"
 import { pointer } from "./../generated/ohos.multimodalInput.pointer"
 import { ButtonType, ButtonStyleMode, ButtonRole } from "./button"
-import { observer } from "./../generated/ohos.arkui.observer"
+import { ContentModifier, CustomStyles, UICommonBase, AttributeModifier, AttributeUpdater } from "./../handwritten"
 import { promptAction } from "./../generated/ohos.promptAction"
 import { ScrollState } from "./list"
 import { Want, Want_serializer } from "./../generated/ohos.app.ability.Want"
@@ -580,6 +580,60 @@ export class ChildrenMainSize implements MaterializedBase {
         ArkUIGeneratedNativeModule._ChildrenMainSize_setChildDefaultSize(this.peer!.ptr, childDefaultSize)
     }
 }
+export interface DismissPopupAction {
+    reason: DismissReason
+    dismiss(): void
+}
+export class DismissPopupActionInternal implements MaterializedBase,DismissPopupAction {
+    peer?: Finalizable | undefined = undefined
+    public getPeer(): Finalizable | undefined {
+        return this.peer
+    }
+    get reason(): DismissReason {
+        return this.getReason()
+    }
+    set reason(reason: DismissReason) {
+        this.setReason(reason)
+    }
+    constructor(peerPtr: KPointer) {
+        this.peer = new Finalizable(peerPtr, DismissPopupActionInternal.getFinalizer())
+    }
+    constructor() {
+        this(DismissPopupActionInternal.construct())
+    }
+    static construct(): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._DismissPopupAction_construct()
+        return retval
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._DismissPopupAction_getFinalizer()
+    }
+    public static fromPtr(ptr: KPointer): DismissPopupActionInternal {
+        return new DismissPopupActionInternal(ptr)
+    }
+    public dismiss(): void {
+        this.dismiss_serialize()
+        return
+    }
+    private getReason(): DismissReason {
+        return this.getReason_serialize()
+    }
+    private setReason(reason: DismissReason): void {
+        const reason_casted = reason as (DismissReason)
+        this.setReason_serialize(reason_casted)
+        return
+    }
+    private dismiss_serialize(): void {
+        ArkUIGeneratedNativeModule._DismissPopupAction_dismiss(this.peer!.ptr)
+    }
+    private getReason_serialize(): DismissReason {
+        const retval  = ArkUIGeneratedNativeModule._DismissPopupAction_getReason(this.peer!.ptr)
+        return TypeChecker.DismissReason_FromNumeric(retval)
+    }
+    private setReason_serialize(reason: DismissReason): void {
+        ArkUIGeneratedNativeModule._DismissPopupAction_setReason(this.peer!.ptr, TypeChecker.DismissReason_ToNumeric(reason))
+    }
+}
 export interface DragEvent {
     dragBehavior: DragBehavior
     useCustomDropAnimation: boolean
@@ -598,7 +652,6 @@ export interface DragEvent {
     getVelocityY(): number
     getVelocity(): number
     executeDropAnimation(customDropAnimation: (() => void)): void
-    startDataLoading(options: DataSyncOptions): string
 }
 export class DragEventInternal implements MaterializedBase,DragEvent {
     peer?: Finalizable | undefined = undefined
@@ -688,10 +741,6 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
         this.executeDropAnimation_serialize(customDropAnimation_casted)
         return
     }
-    public startDataLoading(options: DataSyncOptions): string {
-        const options_casted = options as (DataSyncOptions)
-        return this.startDataLoading_serialize(options_casted)
-    }
     private getDragBehavior(): DragBehavior {
         return this.getDragBehavior_serialize()
     }
@@ -777,13 +826,6 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
         ArkUIGeneratedNativeModule._DragEvent_executeDropAnimation(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private startDataLoading_serialize(options: DataSyncOptions): string {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        thisSerializer.writeCustomObject("object", options)
-        const retval  = ArkUIGeneratedNativeModule._DragEvent_startDataLoading(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-        return retval
-    }
     private getDragBehavior_serialize(): DragBehavior {
         const retval  = ArkUIGeneratedNativeModule._DragEvent_getDragBehavior(this.peer!.ptr)
         return TypeChecker.DragBehavior_FromNumeric(retval)
@@ -867,14 +909,6 @@ export class DrawModifier implements MaterializedBase {
     set drawContent_callback(drawContent_callback: ((drawContext: DrawContext) => void)) {
         this.setDrawContent_callback(drawContent_callback)
     }
-    drawFront(drawContext: DrawContext): void {
-    }
-    get drawFront_callback(): ((drawContext: DrawContext) => void) {
-        return this.getDrawFront_callback()
-    }
-    set drawFront_callback(drawFront_callback: ((drawContext: DrawContext) => void)) {
-        this.setDrawFront_callback(drawFront_callback)
-    }
     constructor(peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, DrawModifier.getFinalizer())
     }
@@ -882,7 +916,6 @@ export class DrawModifier implements MaterializedBase {
         this(DrawModifier.construct())
         this.drawBehind_callback = this.drawBehind
         this.drawContent_callback = this.drawContent
-        this.drawFront_callback = this.drawFront
     }
     static construct(): KPointer {
         const retval  = ArkUIGeneratedNativeModule._DrawModifier_construct()
@@ -911,14 +944,6 @@ export class DrawModifier implements MaterializedBase {
         this.setDrawContent_callback_serialize(drawContent_callback_casted)
         return
     }
-    private getDrawFront_callback(): ((drawContext: DrawContext) => void) {
-        return this.getDrawFront_callback_serialize()
-    }
-    private setDrawFront_callback(drawFront_callback: ((drawContext: DrawContext) => void)): void {
-        const drawFront_callback_casted = drawFront_callback as (((drawContext: DrawContext) => void))
-        this.setDrawFront_callback_serialize(drawFront_callback_casted)
-        return
-    }
     private invalidate_serialize(): void {
         ArkUIGeneratedNativeModule._DrawModifier_invalidate(this.peer!.ptr)
     }
@@ -940,16 +965,6 @@ export class DrawModifier implements MaterializedBase {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.holdAndWriteCallback(drawContent_callback)
         ArkUIGeneratedNativeModule._DrawModifier_setDrawContent_callback(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    private getDrawFront_callback_serialize(): ((drawContext: DrawContext) => void) {
-        const retval  = ArkUIGeneratedNativeModule._DrawModifier_getDrawFront_callback(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
-    }
-    private setDrawFront_callback_serialize(drawFront_callback: ((drawContext: DrawContext) => void)): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        thisSerializer.holdAndWriteCallback(drawFront_callback)
-        ArkUIGeneratedNativeModule._DrawModifier_setDrawFront_callback(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }
@@ -987,39 +1002,6 @@ export class GestureModifierInternal implements MaterializedBase,GestureModifier
         UIGestureEvent_serializer.write(thisSerializer, event)
         ArkUIGeneratedNativeModule._GestureModifier_applyGesture(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
-    }
-}
-export interface ICurve {
-    interpolate(fraction: number): number
-}
-export class ICurveInternal implements MaterializedBase,ICurve {
-    peer?: Finalizable | undefined = undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
-    constructor(peerPtr: KPointer) {
-        this.peer = new Finalizable(peerPtr, ICurveInternal.getFinalizer())
-    }
-    constructor() {
-        this(ICurveInternal.construct())
-    }
-    static construct(): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._ICurve_construct()
-        return retval
-    }
-    static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._ICurve_getFinalizer()
-    }
-    public static fromPtr(ptr: KPointer): ICurveInternal {
-        return new ICurveInternal(ptr)
-    }
-    public interpolate(fraction: number): number {
-        const fraction_casted = fraction as (number)
-        return this.interpolate_serialize(fraction_casted)
-    }
-    private interpolate_serialize(fraction: number): number {
-        const retval  = ArkUIGeneratedNativeModule._ICurve_interpolate(this.peer!.ptr, fraction)
-        return retval
     }
 }
 export interface KeyEvent {
@@ -2026,10 +2008,30 @@ export class TransitionEffect implements MaterializedBase {
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    static readonly IDENTITY: TransitionEffect = TransitionEffect.getIDENTITY()
-    static readonly OPACITY: TransitionEffect = TransitionEffect.getOPACITY()
-    static readonly SLIDE: TransitionEffect = TransitionEffect.getSLIDE()
-    static readonly SLIDE_SWITCH: TransitionEffect = TransitionEffect.getSLIDE_SWITCH()
+    get IDENTITY(): TransitionEffect {
+        return this.getIDENTITY()
+    }
+    set IDENTITY(IDENTITY: TransitionEffect) {
+        this.setIDENTITY(IDENTITY)
+    }
+    get OPACITY(): TransitionEffect {
+        return this.getOPACITY()
+    }
+    set OPACITY(OPACITY: TransitionEffect) {
+        this.setOPACITY(OPACITY)
+    }
+    get SLIDE(): TransitionEffect {
+        return this.getSLIDE()
+    }
+    set SLIDE(SLIDE: TransitionEffect) {
+        this.setSLIDE(SLIDE)
+    }
+    get SLIDE_SWITCH(): TransitionEffect {
+        return this.getSLIDE_SWITCH()
+    }
+    set SLIDE_SWITCH(SLIDE_SWITCH: TransitionEffect) {
+        this.setSLIDE_SWITCH(SLIDE_SWITCH)
+    }
     constructor(_0: boolean, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, TransitionEffect.getFinalizer())
     }
@@ -2136,26 +2138,6 @@ export class TransitionEffect implements MaterializedBase {
         const obj : TransitionEffect = TransitionEffectInternal.fromPtr(retval)
         return obj
     }
-    private static getIDENTITY_serialize(): TransitionEffect {
-        const retval  = ArkUIGeneratedNativeModule._TransitionEffect_getIDENTITY()
-        const obj : TransitionEffect = TransitionEffectInternal.fromPtr(retval)
-        return obj
-    }
-    private static getOPACITY_serialize(): TransitionEffect {
-        const retval  = ArkUIGeneratedNativeModule._TransitionEffect_getOPACITY()
-        const obj : TransitionEffect = TransitionEffectInternal.fromPtr(retval)
-        return obj
-    }
-    private static getSLIDE_serialize(): TransitionEffect {
-        const retval  = ArkUIGeneratedNativeModule._TransitionEffect_getSLIDE()
-        const obj : TransitionEffect = TransitionEffectInternal.fromPtr(retval)
-        return obj
-    }
-    private static getSLIDE_SWITCH_serialize(): TransitionEffect {
-        const retval  = ArkUIGeneratedNativeModule._TransitionEffect_getSLIDE_SWITCH()
-        const obj : TransitionEffect = TransitionEffectInternal.fromPtr(retval)
-        return obj
-    }
     public static translate(options: TranslateOptions): TransitionEffect {
         const options_casted = options as (TranslateOptions)
         return TransitionEffect.translate_serialize(options_casted)
@@ -2189,17 +2171,37 @@ export class TransitionEffect implements MaterializedBase {
         const transitionEffect_casted = transitionEffect as (TransitionEffect)
         return this.combine_serialize(transitionEffect_casted)
     }
-    private static getIDENTITY(): TransitionEffect {
-        return TransitionEffect.getIDENTITY_serialize()
+    private getIDENTITY(): TransitionEffect {
+        return this.getIDENTITY_serialize()
     }
-    private static getOPACITY(): TransitionEffect {
-        return TransitionEffect.getOPACITY_serialize()
+    private setIDENTITY(IDENTITY: TransitionEffect): void {
+        const IDENTITY_casted = IDENTITY as (TransitionEffect)
+        this.setIDENTITY_serialize(IDENTITY_casted)
+        return
     }
-    private static getSLIDE(): TransitionEffect {
-        return TransitionEffect.getSLIDE_serialize()
+    private getOPACITY(): TransitionEffect {
+        return this.getOPACITY_serialize()
     }
-    private static getSLIDE_SWITCH(): TransitionEffect {
-        return TransitionEffect.getSLIDE_SWITCH_serialize()
+    private setOPACITY(OPACITY: TransitionEffect): void {
+        const OPACITY_casted = OPACITY as (TransitionEffect)
+        this.setOPACITY_serialize(OPACITY_casted)
+        return
+    }
+    private getSLIDE(): TransitionEffect {
+        return this.getSLIDE_serialize()
+    }
+    private setSLIDE(SLIDE: TransitionEffect): void {
+        const SLIDE_casted = SLIDE as (TransitionEffect)
+        this.setSLIDE_serialize(SLIDE_casted)
+        return
+    }
+    private getSLIDE_SWITCH(): TransitionEffect {
+        return this.getSLIDE_SWITCH_serialize()
+    }
+    private setSLIDE_SWITCH(SLIDE_SWITCH: TransitionEffect): void {
+        const SLIDE_SWITCH_casted = SLIDE_SWITCH as (TransitionEffect)
+        this.setSLIDE_SWITCH_serialize(SLIDE_SWITCH_casted)
+        return
     }
     private animation_serialize(value: AnimateParam): TransitionEffect {
         const thisSerializer : SerializerBase = SerializerBase.hold()
@@ -2213,6 +2215,38 @@ export class TransitionEffect implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._TransitionEffect_combine(this.peer!.ptr, toPeerPtr(transitionEffect))
         const obj : TransitionEffect = TransitionEffectInternal.fromPtr(retval)
         return obj
+    }
+    private getIDENTITY_serialize(): TransitionEffect {
+        const retval  = ArkUIGeneratedNativeModule._TransitionEffect_getIDENTITY(this.peer!.ptr)
+        const obj : TransitionEffect = TransitionEffectInternal.fromPtr(retval)
+        return obj
+    }
+    private setIDENTITY_serialize(IDENTITY: TransitionEffect): void {
+        ArkUIGeneratedNativeModule._TransitionEffect_setIDENTITY(this.peer!.ptr, toPeerPtr(IDENTITY))
+    }
+    private getOPACITY_serialize(): TransitionEffect {
+        const retval  = ArkUIGeneratedNativeModule._TransitionEffect_getOPACITY(this.peer!.ptr)
+        const obj : TransitionEffect = TransitionEffectInternal.fromPtr(retval)
+        return obj
+    }
+    private setOPACITY_serialize(OPACITY: TransitionEffect): void {
+        ArkUIGeneratedNativeModule._TransitionEffect_setOPACITY(this.peer!.ptr, toPeerPtr(OPACITY))
+    }
+    private getSLIDE_serialize(): TransitionEffect {
+        const retval  = ArkUIGeneratedNativeModule._TransitionEffect_getSLIDE(this.peer!.ptr)
+        const obj : TransitionEffect = TransitionEffectInternal.fromPtr(retval)
+        return obj
+    }
+    private setSLIDE_serialize(SLIDE: TransitionEffect): void {
+        ArkUIGeneratedNativeModule._TransitionEffect_setSLIDE(this.peer!.ptr, toPeerPtr(SLIDE))
+    }
+    private getSLIDE_SWITCH_serialize(): TransitionEffect {
+        const retval  = ArkUIGeneratedNativeModule._TransitionEffect_getSLIDE_SWITCH(this.peer!.ptr)
+        const obj : TransitionEffect = TransitionEffectInternal.fromPtr(retval)
+        return obj
+    }
+    private setSLIDE_SWITCH_serialize(SLIDE_SWITCH: TransitionEffect): void {
+        ArkUIGeneratedNativeModule._TransitionEffect_setSLIDE_SWITCH(this.peer!.ptr, toPeerPtr(SLIDE_SWITCH))
     }
 }
 export interface UICommonEvent {
@@ -4578,6 +4612,9 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setGeometryTransition0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setStateStylesAttribute(value: StateStyles | undefined): void {
+        throw new Error("Not implemented")
+    }
     setRestoreIdAttribute(value: number | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
@@ -6803,7 +6840,7 @@ export enum TouchTestStrategy {
 export interface AnimateParam {
     duration?: number;
     tempo?: number;
-    curve?: Curve | string | ICurve;
+    curve?: curves.Curve | string | curves.ICurve;
     delay?: number;
     iterations?: number;
     playMode?: PlayMode;
@@ -6811,6 +6848,7 @@ export interface AnimateParam {
     finishCallbackType?: FinishCallbackType;
     expectedFrameRateRange?: ExpectedFrameRateRange;
 }
+export type ICurve = curves.ICurve;
 export interface MotionPathOptions {
     path: string;
     from?: number;
@@ -6819,7 +6857,7 @@ export interface MotionPathOptions {
 }
 export interface sharedTransitionOptions {
     duration?: number;
-    curve?: Curve | string | ICurve;
+    curve?: curves.Curve | string | curves.ICurve;
     delay?: number;
     motionPath?: MotionPathOptions;
     zIndex?: number;
@@ -7146,9 +7184,7 @@ export enum DragBehavior {
 export type UnifiedData = unifiedDataChannel.UnifiedData;
 export type Summary = unifiedDataChannel.Summary;
 export type UniformDataType = uniformTypeDescriptor.UniformDataType;
-export type DataSyncOptions = object;
 export enum DragResult {
-    UNKNOWN = -1,
     DRAG_SUCCESSFUL = 0,
     DRAG_FAILED = 1,
     DRAG_CANCELED = 2,
@@ -7317,10 +7353,6 @@ export enum DismissReason {
     CLOSE_BUTTON = 2,
     SLIDE_DOWN = 3
 }
-export interface DismissPopupAction {
-    dismiss: (() => void);
-    reason: DismissReason;
-}
 export interface PopupStateChangeParam {
     isVisible: boolean;
 }
@@ -7364,7 +7396,7 @@ export interface TipsOptions {
 }
 export interface PopupButton {
     value: string;
-    action: (() => void);
+    action: VoidCallback;
 }
 export interface PopupOptions {
     message: string;
@@ -9400,9 +9432,9 @@ export interface SizeResult {
 }
 export interface MeasureResult extends SizeResult {
 }
-export type NavDestinationInfo = observer.NavDestinationInfo;
-export type NavigationInfo = observer.NavigationInfo;
-export type RouterPageInfo = observer.RouterPageInfo;
+export type NavDestinationInfo = object;
+export type NavigationInfo = object;
+export type RouterPageInfo = object;
 export { UIContext } from "./../generated/ohos.arkui.UIContext"
 export { DrawContext } from "./../generated/arkui.Graphics"
 export type VisualEffect = uiEffect.VisualEffect;
@@ -9581,7 +9613,7 @@ export interface KeyframeAnimateParam {
 }
 export interface KeyframeState {
     duration: number;
-    curve?: Curve | string | ICurve;
+    curve?: curves.Curve | string | curves.ICurve;
     event: (() => void);
 }
 export type HoverCallback = (isHover: boolean, event: HoverEvent) => void;
@@ -10623,7 +10655,9 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public stateStyles(value: StateStyles | undefined): this {
         if (this.checkPriority("stateStyles")) {
-            hookStateStyleImpl(this, value)
+            const value_casted = value as (StateStyles | undefined)
+            this.getPeer()?.setStateStylesAttribute(value_casted)
+            return this
         }
         return this
     }
@@ -13635,6 +13669,9 @@ export function vp2px(value: number): number {
 export function px2vp(value: number): number {
     return GlobalScope.px2vp(value)
 }
+export function applyStyles<T>(self: T, customStyles: CustomStyles): T {
+    return GlobalScope.applyStyles(self, customStyles)
+}
 export class GestureModifier_serializer {
     public static write(buffer: SerializerBase, value: GestureModifier): void {
         let valueSerializer : SerializerBase = buffer
@@ -13644,17 +13681,6 @@ export class GestureModifier_serializer {
         let valueDeserializer : DeserializerBase = buffer
         let ptr : KPointer = valueDeserializer.readPointer()
         return GestureModifierInternal.fromPtr(ptr)
-    }
-}
-export class ICurve_serializer {
-    public static write(buffer: SerializerBase, value: ICurve): void {
-        let valueSerializer : SerializerBase = buffer
-        valueSerializer.writePointer(toPeerPtr(value))
-    }
-    public static read(buffer: DeserializerBase): ICurve {
-        let valueDeserializer : DeserializerBase = buffer
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return ICurveInternal.fromPtr(ptr)
     }
 }
 export class LayoutPolicy_serializer {
@@ -13813,17 +13839,6 @@ export class TouchTestInfo_serializer {
         return value
     }
 }
-export class TransitionEffect_serializer {
-    public static write(buffer: SerializerBase, value: TransitionEffect): void {
-        let valueSerializer : SerializerBase = buffer
-        valueSerializer.writePointer(toPeerPtr(value))
-    }
-    public static read(buffer: DeserializerBase): TransitionEffect {
-        let valueDeserializer : DeserializerBase = buffer
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return TransitionEffectInternal.fromPtr(ptr)
-    }
-}
 export class UICommonEvent_serializer {
     public static write(buffer: SerializerBase, value: UICommonEvent): void {
         let valueSerializer : SerializerBase = buffer
@@ -13852,22 +13867,6 @@ export class AlignRuleOption_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const _stub_result : int32 = valueDeserializer.readInt32()
         let value : AlignRuleOption = ({_stub: _stub_result} as AlignRuleOption)
-        return value
-    }
-}
-export class AsymmetricTransitionOption_serializer {
-    public static write(buffer: SerializerBase, value: AsymmetricTransitionOption): void {
-        let valueSerializer : SerializerBase = buffer
-        const value_appear  = value.appear
-        TransitionEffect_serializer.write(valueSerializer, value_appear)
-        const value_disappear  = value.disappear
-        TransitionEffect_serializer.write(valueSerializer, value_disappear)
-    }
-    public static read(buffer: DeserializerBase): AsymmetricTransitionOption {
-        let valueDeserializer : DeserializerBase = buffer
-        const appear_result : TransitionEffect = (TransitionEffect_serializer.read(valueDeserializer) as TransitionEffect)
-        const disappear_result : TransitionEffect = (TransitionEffect_serializer.read(valueDeserializer) as TransitionEffect)
-        let value : AsymmetricTransitionOption = ({appear: appear_result, disappear: disappear_result} as AsymmetricTransitionOption)
         return value
     }
 }
@@ -14132,27 +14131,12 @@ export class DismissContentCoverAction_serializer {
 export class DismissPopupAction_serializer {
     public static write(buffer: SerializerBase, value: DismissPopupAction): void {
         let valueSerializer : SerializerBase = buffer
-        const value_dismiss  = value.dismiss
-        valueSerializer.holdAndWriteCallback(value_dismiss)
-        const value_reason  = value.reason
-        valueSerializer.writeInt32(TypeChecker.DismissReason_ToNumeric(value_reason))
+        valueSerializer.writePointer(toPeerPtr(value))
     }
     public static read(buffer: DeserializerBase): DismissPopupAction {
         let valueDeserializer : DeserializerBase = buffer
-        const dismiss_buf_resource : CallbackResource = valueDeserializer.readCallbackResource()
-        const dismiss_buf_call : KPointer = valueDeserializer.readPointer()
-        const dismiss_buf_callSync : KPointer = valueDeserializer.readPointer()
-        const dismiss_result : (() => void) = ():void => { 
-    const dismiss_buf_argsSerializer : SerializerBase = SerializerBase.hold();
-    dismiss_buf_argsSerializer.writeInt32(dismiss_buf_resource.resourceId);
-    dismiss_buf_argsSerializer.writePointer(dismiss_buf_call);
-    dismiss_buf_argsSerializer.writePointer(dismiss_buf_callSync);
-    InteropNativeModule._CallCallback(-1867723152, dismiss_buf_argsSerializer.asBuffer(), dismiss_buf_argsSerializer.length());
-    dismiss_buf_argsSerializer.release();
-    return; }
-        const reason_result : DismissReason = TypeChecker.DismissReason_FromNumeric(valueDeserializer.readInt32())
-        let value : DismissPopupAction = ({dismiss: dismiss_result, reason: reason_result} as DismissPopupAction)
-        return value
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return DismissPopupActionInternal.fromPtr(ptr)
     }
 }
 export class DismissSheetAction_serializer {
@@ -15102,12 +15086,12 @@ export class PopupButton_serializer {
         const action_buf_resource : CallbackResource = valueDeserializer.readCallbackResource()
         const action_buf_call : KPointer = valueDeserializer.readPointer()
         const action_buf_callSync : KPointer = valueDeserializer.readPointer()
-        const action_result : (() => void) = ():void => { 
+        const action_result : VoidCallback = ():void => { 
     const action_buf_argsSerializer : SerializerBase = SerializerBase.hold();
     action_buf_argsSerializer.writeInt32(action_buf_resource.resourceId);
     action_buf_argsSerializer.writePointer(action_buf_call);
     action_buf_argsSerializer.writePointer(action_buf_callSync);
-    InteropNativeModule._CallCallback(-1867723152, action_buf_argsSerializer.asBuffer(), action_buf_argsSerializer.length());
+    InteropNativeModule._CallCallback(-2038961969, action_buf_argsSerializer.asBuffer(), action_buf_argsSerializer.length());
     action_buf_argsSerializer.release();
     return; }
         let value : PopupButton = ({value: value_result, action: action_result} as PopupButton)
@@ -15910,10 +15894,10 @@ export class AnimateParam_serializer {
             const value_curve_value  = value_curve!
             let value_curve_value_type : int32 = RuntimeType.UNDEFINED
             value_curve_value_type = runtimeType(value_curve_value)
-            if (TypeChecker.isCurve(value_curve_value)) {
+            if (TypeChecker.iscurves_Curve(value_curve_value)) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_curve_value_0  = value_curve_value as Curve
-                valueSerializer.writeInt32(TypeChecker.Curve_ToNumeric(value_curve_value_0))
+                const value_curve_value_0  = value_curve_value as curves.Curve
+                valueSerializer.writeInt32(TypeChecker.curves_Curve_ToNumeric(value_curve_value_0))
             }
             else if (RuntimeType.STRING == value_curve_value_type) {
                 valueSerializer.writeInt8((1).toChar())
@@ -15922,8 +15906,8 @@ export class AnimateParam_serializer {
             }
             else if (RuntimeType.OBJECT == value_curve_value_type) {
                 valueSerializer.writeInt8((2).toChar())
-                const value_curve_value_2  = value_curve_value as ICurve
-                ICurve_serializer.write(valueSerializer, value_curve_value_2)
+                const value_curve_value_2  = value_curve_value as curves.ICurve
+                curves_ICurve_serializer.write(valueSerializer, value_curve_value_2)
             }
         }
         const value_delay  = value.delay
@@ -15992,26 +15976,26 @@ export class AnimateParam_serializer {
         }
         const tempo_result : number | undefined = tempo_buf
         const curve_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let curve_buf : Curve | string | ICurve | undefined
+        let curve_buf : curves.Curve | string | curves.ICurve | undefined
         if ((curve_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const curve_buf__selector : int32 = valueDeserializer.readInt8()
-            let curve_buf_ : Curve | string | ICurve | undefined
+            let curve_buf_ : curves.Curve | string | curves.ICurve | undefined
             if (curve_buf__selector == (0).toChar()) {
-                curve_buf_ = TypeChecker.Curve_FromNumeric(valueDeserializer.readInt32())
+                curve_buf_ = TypeChecker.curves_Curve_FromNumeric(valueDeserializer.readInt32())
             }
             else if (curve_buf__selector == (1).toChar()) {
                 curve_buf_ = (valueDeserializer.readString() as string)
             }
             else if (curve_buf__selector == (2).toChar()) {
-                curve_buf_ = (ICurve_serializer.read(valueDeserializer) as ICurve)
+                curve_buf_ = (curves_ICurve_serializer.read(valueDeserializer) as curves.ICurve)
             }
             else {
                 throw new Error("One of the branches for curve_buf_ has to be chosen through deserialisation.")
             }
-            curve_buf = (curve_buf_ as Curve | string | ICurve)
+            curve_buf = (curve_buf_ as curves.Curve | string | curves.ICurve)
         }
-        const curve_result : Curve | string | ICurve | undefined = curve_buf
+        const curve_result : curves.Curve | string | curves.ICurve | undefined = curve_buf
         const delay_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let delay_buf : number | undefined
         if ((delay_buf_runtimeType) != (RuntimeType.UNDEFINED))
@@ -16397,290 +16381,6 @@ export class BackgroundEffectOptions_serializer {
         }
         const inactiveColor_result : ResourceColor | undefined = inactiveColor_buf
         let value : BackgroundEffectOptions = ({radius: radius_result, saturation: saturation_result, brightness: brightness_result, color: color_result, adaptiveColor: adaptiveColor_result, blurOptions: blurOptions_result, policy: policy_result, inactiveColor: inactiveColor_result} as BackgroundEffectOptions)
-        return value
-    }
-}
-export class ContentCoverOptions_serializer {
-    public static write(buffer: SerializerBase, value: ContentCoverOptions): void {
-        let valueSerializer : SerializerBase = buffer
-        const value_backgroundColor  = value.backgroundColor
-        let value_backgroundColor_type : int32 = RuntimeType.UNDEFINED
-        value_backgroundColor_type = runtimeType(value_backgroundColor)
-        valueSerializer.writeInt8((value_backgroundColor_type).toChar())
-        if ((value_backgroundColor_type) != (RuntimeType.UNDEFINED)) {
-            const value_backgroundColor_value  = value_backgroundColor!
-            let value_backgroundColor_value_type : int32 = RuntimeType.UNDEFINED
-            value_backgroundColor_value_type = runtimeType(value_backgroundColor_value)
-            if (TypeChecker.isColor(value_backgroundColor_value)) {
-                valueSerializer.writeInt8((0).toChar())
-                const value_backgroundColor_value_0  = value_backgroundColor_value as Color
-                valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_backgroundColor_value_0))
-            }
-            else if (RuntimeType.NUMBER == value_backgroundColor_value_type) {
-                valueSerializer.writeInt8((1).toChar())
-                const value_backgroundColor_value_1  = value_backgroundColor_value as number
-                valueSerializer.writeNumber(value_backgroundColor_value_1)
-            }
-            else if (RuntimeType.STRING == value_backgroundColor_value_type) {
-                valueSerializer.writeInt8((2).toChar())
-                const value_backgroundColor_value_2  = value_backgroundColor_value as string
-                valueSerializer.writeString(value_backgroundColor_value_2)
-            }
-            else if (RuntimeType.OBJECT == value_backgroundColor_value_type) {
-                valueSerializer.writeInt8((3).toChar())
-                const value_backgroundColor_value_3  = value_backgroundColor_value as Resource
-                Resource_serializer.write(valueSerializer, value_backgroundColor_value_3)
-            }
-        }
-        const value_onAppear  = value.onAppear
-        let value_onAppear_type : int32 = RuntimeType.UNDEFINED
-        value_onAppear_type = runtimeType(value_onAppear)
-        valueSerializer.writeInt8((value_onAppear_type).toChar())
-        if ((value_onAppear_type) != (RuntimeType.UNDEFINED)) {
-            const value_onAppear_value  = value_onAppear!
-            valueSerializer.holdAndWriteCallback(value_onAppear_value)
-        }
-        const value_onDisappear  = value.onDisappear
-        let value_onDisappear_type : int32 = RuntimeType.UNDEFINED
-        value_onDisappear_type = runtimeType(value_onDisappear)
-        valueSerializer.writeInt8((value_onDisappear_type).toChar())
-        if ((value_onDisappear_type) != (RuntimeType.UNDEFINED)) {
-            const value_onDisappear_value  = value_onDisappear!
-            valueSerializer.holdAndWriteCallback(value_onDisappear_value)
-        }
-        const value_onWillAppear  = value.onWillAppear
-        let value_onWillAppear_type : int32 = RuntimeType.UNDEFINED
-        value_onWillAppear_type = runtimeType(value_onWillAppear)
-        valueSerializer.writeInt8((value_onWillAppear_type).toChar())
-        if ((value_onWillAppear_type) != (RuntimeType.UNDEFINED)) {
-            const value_onWillAppear_value  = value_onWillAppear!
-            valueSerializer.holdAndWriteCallback(value_onWillAppear_value)
-        }
-        const value_onWillDisappear  = value.onWillDisappear
-        let value_onWillDisappear_type : int32 = RuntimeType.UNDEFINED
-        value_onWillDisappear_type = runtimeType(value_onWillDisappear)
-        valueSerializer.writeInt8((value_onWillDisappear_type).toChar())
-        if ((value_onWillDisappear_type) != (RuntimeType.UNDEFINED)) {
-            const value_onWillDisappear_value  = value_onWillDisappear!
-            valueSerializer.holdAndWriteCallback(value_onWillDisappear_value)
-        }
-        const value_modalTransition  = value.modalTransition
-        let value_modalTransition_type : int32 = RuntimeType.UNDEFINED
-        value_modalTransition_type = runtimeType(value_modalTransition)
-        valueSerializer.writeInt8((value_modalTransition_type).toChar())
-        if ((value_modalTransition_type) != (RuntimeType.UNDEFINED)) {
-            const value_modalTransition_value  = (value_modalTransition as ModalTransition)
-            valueSerializer.writeInt32(TypeChecker.ModalTransition_ToNumeric(value_modalTransition_value))
-        }
-        const value_onWillDismiss  = value.onWillDismiss
-        let value_onWillDismiss_type : int32 = RuntimeType.UNDEFINED
-        value_onWillDismiss_type = runtimeType(value_onWillDismiss)
-        valueSerializer.writeInt8((value_onWillDismiss_type).toChar())
-        if ((value_onWillDismiss_type) != (RuntimeType.UNDEFINED)) {
-            const value_onWillDismiss_value  = value_onWillDismiss!
-            valueSerializer.holdAndWriteCallback(value_onWillDismiss_value)
-        }
-        const value_transition  = value.transition
-        let value_transition_type : int32 = RuntimeType.UNDEFINED
-        value_transition_type = runtimeType(value_transition)
-        valueSerializer.writeInt8((value_transition_type).toChar())
-        if ((value_transition_type) != (RuntimeType.UNDEFINED)) {
-            const value_transition_value  = value_transition!
-            TransitionEffect_serializer.write(valueSerializer, value_transition_value)
-        }
-    }
-    public static read(buffer: DeserializerBase): ContentCoverOptions {
-        let valueDeserializer : DeserializerBase = buffer
-        const backgroundColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let backgroundColor_buf : ResourceColor | undefined
-        if ((backgroundColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const backgroundColor_buf__selector : int32 = valueDeserializer.readInt8()
-            let backgroundColor_buf_ : Color | number | string | Resource | undefined
-            if (backgroundColor_buf__selector == (0).toChar()) {
-                backgroundColor_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-            }
-            else if (backgroundColor_buf__selector == (1).toChar()) {
-                backgroundColor_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (backgroundColor_buf__selector == (2).toChar()) {
-                backgroundColor_buf_ = (valueDeserializer.readString() as string)
-            }
-            else if (backgroundColor_buf__selector == (3).toChar()) {
-                backgroundColor_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for backgroundColor_buf_ has to be chosen through deserialisation.")
-            }
-            backgroundColor_buf = (backgroundColor_buf_ as Color | number | string | Resource)
-        }
-        const backgroundColor_result : ResourceColor | undefined = backgroundColor_buf
-        const onAppear_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let onAppear_buf : (() => void) | undefined
-        if ((onAppear_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const onAppear_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
-            const onAppear_buf__call : KPointer = valueDeserializer.readPointer()
-            const onAppear_buf__callSync : KPointer = valueDeserializer.readPointer()
-            onAppear_buf = ():void => { 
-    const onAppear_buf__argsSerializer : SerializerBase = SerializerBase.hold();
-    onAppear_buf__argsSerializer.writeInt32(onAppear_buf__resource.resourceId);
-    onAppear_buf__argsSerializer.writePointer(onAppear_buf__call);
-    onAppear_buf__argsSerializer.writePointer(onAppear_buf__callSync);
-    InteropNativeModule._CallCallback(-1867723152, onAppear_buf__argsSerializer.asBuffer(), onAppear_buf__argsSerializer.length());
-    onAppear_buf__argsSerializer.release();
-    return; }
-        }
-        const onAppear_result : (() => void) | undefined = onAppear_buf
-        const onDisappear_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let onDisappear_buf : (() => void) | undefined
-        if ((onDisappear_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const onDisappear_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
-            const onDisappear_buf__call : KPointer = valueDeserializer.readPointer()
-            const onDisappear_buf__callSync : KPointer = valueDeserializer.readPointer()
-            onDisappear_buf = ():void => { 
-    const onDisappear_buf__argsSerializer : SerializerBase = SerializerBase.hold();
-    onDisappear_buf__argsSerializer.writeInt32(onDisappear_buf__resource.resourceId);
-    onDisappear_buf__argsSerializer.writePointer(onDisappear_buf__call);
-    onDisappear_buf__argsSerializer.writePointer(onDisappear_buf__callSync);
-    InteropNativeModule._CallCallback(-1867723152, onDisappear_buf__argsSerializer.asBuffer(), onDisappear_buf__argsSerializer.length());
-    onDisappear_buf__argsSerializer.release();
-    return; }
-        }
-        const onDisappear_result : (() => void) | undefined = onDisappear_buf
-        const onWillAppear_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let onWillAppear_buf : (() => void) | undefined
-        if ((onWillAppear_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const onWillAppear_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
-            const onWillAppear_buf__call : KPointer = valueDeserializer.readPointer()
-            const onWillAppear_buf__callSync : KPointer = valueDeserializer.readPointer()
-            onWillAppear_buf = ():void => { 
-    const onWillAppear_buf__argsSerializer : SerializerBase = SerializerBase.hold();
-    onWillAppear_buf__argsSerializer.writeInt32(onWillAppear_buf__resource.resourceId);
-    onWillAppear_buf__argsSerializer.writePointer(onWillAppear_buf__call);
-    onWillAppear_buf__argsSerializer.writePointer(onWillAppear_buf__callSync);
-    InteropNativeModule._CallCallback(-1867723152, onWillAppear_buf__argsSerializer.asBuffer(), onWillAppear_buf__argsSerializer.length());
-    onWillAppear_buf__argsSerializer.release();
-    return; }
-        }
-        const onWillAppear_result : (() => void) | undefined = onWillAppear_buf
-        const onWillDisappear_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let onWillDisappear_buf : (() => void) | undefined
-        if ((onWillDisappear_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const onWillDisappear_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
-            const onWillDisappear_buf__call : KPointer = valueDeserializer.readPointer()
-            const onWillDisappear_buf__callSync : KPointer = valueDeserializer.readPointer()
-            onWillDisappear_buf = ():void => { 
-    const onWillDisappear_buf__argsSerializer : SerializerBase = SerializerBase.hold();
-    onWillDisappear_buf__argsSerializer.writeInt32(onWillDisappear_buf__resource.resourceId);
-    onWillDisappear_buf__argsSerializer.writePointer(onWillDisappear_buf__call);
-    onWillDisappear_buf__argsSerializer.writePointer(onWillDisappear_buf__callSync);
-    InteropNativeModule._CallCallback(-1867723152, onWillDisappear_buf__argsSerializer.asBuffer(), onWillDisappear_buf__argsSerializer.length());
-    onWillDisappear_buf__argsSerializer.release();
-    return; }
-        }
-        const onWillDisappear_result : (() => void) | undefined = onWillDisappear_buf
-        const modalTransition_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let modalTransition_buf : ModalTransition | undefined
-        if ((modalTransition_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            modalTransition_buf = TypeChecker.ModalTransition_FromNumeric(valueDeserializer.readInt32())
-        }
-        const modalTransition_result : ModalTransition | undefined = modalTransition_buf
-        const onWillDismiss_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let onWillDismiss_buf : ((value0: DismissContentCoverAction) => void) | undefined
-        if ((onWillDismiss_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const onWillDismiss_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
-            const onWillDismiss_buf__call : KPointer = valueDeserializer.readPointer()
-            const onWillDismiss_buf__callSync : KPointer = valueDeserializer.readPointer()
-            onWillDismiss_buf = (value0: DismissContentCoverAction):void => { 
-    const onWillDismiss_buf__argsSerializer : SerializerBase = SerializerBase.hold();
-    onWillDismiss_buf__argsSerializer.writeInt32(onWillDismiss_buf__resource.resourceId);
-    onWillDismiss_buf__argsSerializer.writePointer(onWillDismiss_buf__call);
-    onWillDismiss_buf__argsSerializer.writePointer(onWillDismiss_buf__callSync);
-    DismissContentCoverAction_serializer.write(onWillDismiss_buf__argsSerializer, value0);
-    InteropNativeModule._CallCallback(-1283506641, onWillDismiss_buf__argsSerializer.asBuffer(), onWillDismiss_buf__argsSerializer.length());
-    onWillDismiss_buf__argsSerializer.release();
-    return; }
-        }
-        const onWillDismiss_result : ((value0: DismissContentCoverAction) => void) | undefined = onWillDismiss_buf
-        const transition_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let transition_buf : TransitionEffect | undefined
-        if ((transition_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            transition_buf = (TransitionEffect_serializer.read(valueDeserializer) as TransitionEffect)
-        }
-        const transition_result : TransitionEffect | undefined = transition_buf
-        let value : ContentCoverOptions = ({backgroundColor: backgroundColor_result, onAppear: onAppear_result, onDisappear: onDisappear_result, onWillAppear: onWillAppear_result, onWillDisappear: onWillDisappear_result, modalTransition: modalTransition_result, onWillDismiss: onWillDismiss_result, transition: transition_result} as ContentCoverOptions)
-        return value
-    }
-}
-export class ContextMenuAnimationOptions_serializer {
-    public static write(buffer: SerializerBase, value: ContextMenuAnimationOptions): void {
-        let valueSerializer : SerializerBase = buffer
-        const value_scale  = value.scale
-        let value_scale_type : int32 = RuntimeType.UNDEFINED
-        value_scale_type = runtimeType(value_scale)
-        valueSerializer.writeInt8((value_scale_type).toChar())
-        if ((value_scale_type) != (RuntimeType.UNDEFINED)) {
-            const value_scale_value  = value_scale!
-            const value_scale_value_0  = value_scale_value[0]
-            valueSerializer.writeNumber(value_scale_value_0)
-            const value_scale_value_1  = value_scale_value[1]
-            valueSerializer.writeNumber(value_scale_value_1)
-        }
-        const value_transition  = value.transition
-        let value_transition_type : int32 = RuntimeType.UNDEFINED
-        value_transition_type = runtimeType(value_transition)
-        valueSerializer.writeInt8((value_transition_type).toChar())
-        if ((value_transition_type) != (RuntimeType.UNDEFINED)) {
-            const value_transition_value  = value_transition!
-            TransitionEffect_serializer.write(valueSerializer, value_transition_value)
-        }
-        const value_hoverScale  = value.hoverScale
-        let value_hoverScale_type : int32 = RuntimeType.UNDEFINED
-        value_hoverScale_type = runtimeType(value_hoverScale)
-        valueSerializer.writeInt8((value_hoverScale_type).toChar())
-        if ((value_hoverScale_type) != (RuntimeType.UNDEFINED)) {
-            const value_hoverScale_value  = value_hoverScale!
-            const value_hoverScale_value_0  = value_hoverScale_value[0]
-            valueSerializer.writeNumber(value_hoverScale_value_0)
-            const value_hoverScale_value_1  = value_hoverScale_value[1]
-            valueSerializer.writeNumber(value_hoverScale_value_1)
-        }
-    }
-    public static read(buffer: DeserializerBase): ContextMenuAnimationOptions {
-        let valueDeserializer : DeserializerBase = buffer
-        const scale_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let scale_buf : AnimationNumberRange | undefined
-        if ((scale_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const scale_buf__value0 : number = (valueDeserializer.readNumber() as number)
-            const scale_buf__value1 : number = (valueDeserializer.readNumber() as number)
-            scale_buf = ([scale_buf__value0, scale_buf__value1] as AnimationNumberRange)
-        }
-        const scale_result : AnimationNumberRange | undefined = scale_buf
-        const transition_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let transition_buf : TransitionEffect | undefined
-        if ((transition_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            transition_buf = (TransitionEffect_serializer.read(valueDeserializer) as TransitionEffect)
-        }
-        const transition_result : TransitionEffect | undefined = transition_buf
-        const hoverScale_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let hoverScale_buf : AnimationNumberRange | undefined
-        if ((hoverScale_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const hoverScale_buf__value0 : number = (valueDeserializer.readNumber() as number)
-            const hoverScale_buf__value1 : number = (valueDeserializer.readNumber() as number)
-            hoverScale_buf = ([hoverScale_buf__value0, hoverScale_buf__value1] as AnimationNumberRange)
-        }
-        const hoverScale_result : AnimationNumberRange | undefined = hoverScale_buf
-        let value : ContextMenuAnimationOptions = ({scale: scale_result, transition: transition_result, hoverScale: hoverScale_result} as ContextMenuAnimationOptions)
         return value
     }
 }
@@ -17655,10 +17355,10 @@ export class sharedTransitionOptions_serializer {
             const value_curve_value  = value_curve!
             let value_curve_value_type : int32 = RuntimeType.UNDEFINED
             value_curve_value_type = runtimeType(value_curve_value)
-            if (TypeChecker.isCurve(value_curve_value)) {
+            if (TypeChecker.iscurves_Curve(value_curve_value)) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_curve_value_0  = value_curve_value as Curve
-                valueSerializer.writeInt32(TypeChecker.Curve_ToNumeric(value_curve_value_0))
+                const value_curve_value_0  = value_curve_value as curves.Curve
+                valueSerializer.writeInt32(TypeChecker.curves_Curve_ToNumeric(value_curve_value_0))
             }
             else if (RuntimeType.STRING == value_curve_value_type) {
                 valueSerializer.writeInt8((1).toChar())
@@ -17667,8 +17367,8 @@ export class sharedTransitionOptions_serializer {
             }
             else if (RuntimeType.OBJECT == value_curve_value_type) {
                 valueSerializer.writeInt8((2).toChar())
-                const value_curve_value_2  = value_curve_value as ICurve
-                ICurve_serializer.write(valueSerializer, value_curve_value_2)
+                const value_curve_value_2  = value_curve_value as curves.ICurve
+                curves_ICurve_serializer.write(valueSerializer, value_curve_value_2)
             }
         }
         const value_delay  = value.delay
@@ -17714,26 +17414,26 @@ export class sharedTransitionOptions_serializer {
         }
         const duration_result : number | undefined = duration_buf
         const curve_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let curve_buf : Curve | string | ICurve | undefined
+        let curve_buf : curves.Curve | string | curves.ICurve | undefined
         if ((curve_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const curve_buf__selector : int32 = valueDeserializer.readInt8()
-            let curve_buf_ : Curve | string | ICurve | undefined
+            let curve_buf_ : curves.Curve | string | curves.ICurve | undefined
             if (curve_buf__selector == (0).toChar()) {
-                curve_buf_ = TypeChecker.Curve_FromNumeric(valueDeserializer.readInt32())
+                curve_buf_ = TypeChecker.curves_Curve_FromNumeric(valueDeserializer.readInt32())
             }
             else if (curve_buf__selector == (1).toChar()) {
                 curve_buf_ = (valueDeserializer.readString() as string)
             }
             else if (curve_buf__selector == (2).toChar()) {
-                curve_buf_ = (ICurve_serializer.read(valueDeserializer) as ICurve)
+                curve_buf_ = (curves_ICurve_serializer.read(valueDeserializer) as curves.ICurve)
             }
             else {
                 throw new Error("One of the branches for curve_buf_ has to be chosen through deserialisation.")
             }
-            curve_buf = (curve_buf_ as Curve | string | ICurve)
+            curve_buf = (curve_buf_ as curves.Curve | string | curves.ICurve)
         }
-        const curve_result : Curve | string | ICurve | undefined = curve_buf
+        const curve_result : curves.Curve | string | curves.ICurve | undefined = curve_buf
         const delay_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let delay_buf : number | undefined
         if ((delay_buf_runtimeType) != (RuntimeType.UNDEFINED))
@@ -19508,1392 +19208,6 @@ export class BorderImageOption_serializer {
         return value
     }
 }
-export class ContextMenuOptions_serializer {
-    public static write(buffer: SerializerBase, value: ContextMenuOptions): void {
-        let valueSerializer : SerializerBase = buffer
-        const value_offset  = value.offset
-        let value_offset_type : int32 = RuntimeType.UNDEFINED
-        value_offset_type = runtimeType(value_offset)
-        valueSerializer.writeInt8((value_offset_type).toChar())
-        if ((value_offset_type) != (RuntimeType.UNDEFINED)) {
-            const value_offset_value  = value_offset!
-            Position_serializer.write(valueSerializer, value_offset_value)
-        }
-        const value_placement  = value.placement
-        let value_placement_type : int32 = RuntimeType.UNDEFINED
-        value_placement_type = runtimeType(value_placement)
-        valueSerializer.writeInt8((value_placement_type).toChar())
-        if ((value_placement_type) != (RuntimeType.UNDEFINED)) {
-            const value_placement_value  = (value_placement as Placement)
-            valueSerializer.writeInt32(TypeChecker.Placement_ToNumeric(value_placement_value))
-        }
-        const value_enableArrow  = value.enableArrow
-        let value_enableArrow_type : int32 = RuntimeType.UNDEFINED
-        value_enableArrow_type = runtimeType(value_enableArrow)
-        valueSerializer.writeInt8((value_enableArrow_type).toChar())
-        if ((value_enableArrow_type) != (RuntimeType.UNDEFINED)) {
-            const value_enableArrow_value  = value_enableArrow!
-            valueSerializer.writeBoolean(value_enableArrow_value)
-        }
-        const value_arrowOffset  = value.arrowOffset
-        let value_arrowOffset_type : int32 = RuntimeType.UNDEFINED
-        value_arrowOffset_type = runtimeType(value_arrowOffset)
-        valueSerializer.writeInt8((value_arrowOffset_type).toChar())
-        if ((value_arrowOffset_type) != (RuntimeType.UNDEFINED)) {
-            const value_arrowOffset_value  = value_arrowOffset!
-            let value_arrowOffset_value_type : int32 = RuntimeType.UNDEFINED
-            value_arrowOffset_value_type = runtimeType(value_arrowOffset_value)
-            if (RuntimeType.STRING == value_arrowOffset_value_type) {
-                valueSerializer.writeInt8((0).toChar())
-                const value_arrowOffset_value_0  = value_arrowOffset_value as string
-                valueSerializer.writeString(value_arrowOffset_value_0)
-            }
-            else if (RuntimeType.NUMBER == value_arrowOffset_value_type) {
-                valueSerializer.writeInt8((1).toChar())
-                const value_arrowOffset_value_1  = value_arrowOffset_value as number
-                valueSerializer.writeNumber(value_arrowOffset_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_arrowOffset_value_type) {
-                valueSerializer.writeInt8((2).toChar())
-                const value_arrowOffset_value_2  = value_arrowOffset_value as Resource
-                Resource_serializer.write(valueSerializer, value_arrowOffset_value_2)
-            }
-        }
-        const value_preview  = value.preview
-        let value_preview_type : int32 = RuntimeType.UNDEFINED
-        value_preview_type = runtimeType(value_preview)
-        valueSerializer.writeInt8((value_preview_type).toChar())
-        if ((value_preview_type) != (RuntimeType.UNDEFINED)) {
-            const value_preview_value  = value_preview!
-            let value_preview_value_type : int32 = RuntimeType.UNDEFINED
-            value_preview_value_type = runtimeType(value_preview_value)
-            if (TypeChecker.isMenuPreviewMode(value_preview_value)) {
-                valueSerializer.writeInt8((0).toChar())
-                const value_preview_value_0  = value_preview_value as MenuPreviewMode
-                valueSerializer.writeInt32(TypeChecker.MenuPreviewMode_ToNumeric(value_preview_value_0))
-            }
-            else if (RuntimeType.FUNCTION == value_preview_value_type) {
-                valueSerializer.writeInt8((1).toChar())
-                const value_preview_value_1  = value_preview_value as CustomBuilder
-                valueSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(value_preview_value_1))
-            }
-        }
-        const value_previewBorderRadius  = value.previewBorderRadius
-        let value_previewBorderRadius_type : int32 = RuntimeType.UNDEFINED
-        value_previewBorderRadius_type = runtimeType(value_previewBorderRadius)
-        valueSerializer.writeInt8((value_previewBorderRadius_type).toChar())
-        if ((value_previewBorderRadius_type) != (RuntimeType.UNDEFINED)) {
-            const value_previewBorderRadius_value  = value_previewBorderRadius!
-            let value_previewBorderRadius_value_type : int32 = RuntimeType.UNDEFINED
-            value_previewBorderRadius_value_type = runtimeType(value_previewBorderRadius_value)
-            if ((RuntimeType.STRING == value_previewBorderRadius_value_type) || (RuntimeType.NUMBER == value_previewBorderRadius_value_type) || (RuntimeType.OBJECT == value_previewBorderRadius_value_type)) {
-                valueSerializer.writeInt8((0).toChar())
-                const value_previewBorderRadius_value_0  = value_previewBorderRadius_value as Length
-                let value_previewBorderRadius_value_0_type : int32 = RuntimeType.UNDEFINED
-                value_previewBorderRadius_value_0_type = runtimeType(value_previewBorderRadius_value_0)
-                if (RuntimeType.STRING == value_previewBorderRadius_value_0_type) {
-                    valueSerializer.writeInt8((0).toChar())
-                    const value_previewBorderRadius_value_0_0  = value_previewBorderRadius_value_0 as string
-                    valueSerializer.writeString(value_previewBorderRadius_value_0_0)
-                }
-                else if (RuntimeType.NUMBER == value_previewBorderRadius_value_0_type) {
-                    valueSerializer.writeInt8((1).toChar())
-                    const value_previewBorderRadius_value_0_1  = value_previewBorderRadius_value_0 as number
-                    valueSerializer.writeNumber(value_previewBorderRadius_value_0_1)
-                }
-                else if (RuntimeType.OBJECT == value_previewBorderRadius_value_0_type) {
-                    valueSerializer.writeInt8((2).toChar())
-                    const value_previewBorderRadius_value_0_2  = value_previewBorderRadius_value_0 as Resource
-                    Resource_serializer.write(valueSerializer, value_previewBorderRadius_value_0_2)
-                }
-            }
-            else if (TypeChecker.isBorderRadiuses(value_previewBorderRadius_value, false, false, false, false)) {
-                valueSerializer.writeInt8((1).toChar())
-                const value_previewBorderRadius_value_1  = value_previewBorderRadius_value as BorderRadiuses
-                BorderRadiuses_serializer.write(valueSerializer, value_previewBorderRadius_value_1)
-            }
-            else if (TypeChecker.isLocalizedBorderRadiuses(value_previewBorderRadius_value, false, false, false, false)) {
-                valueSerializer.writeInt8((2).toChar())
-                const value_previewBorderRadius_value_2  = value_previewBorderRadius_value as LocalizedBorderRadiuses
-                LocalizedBorderRadiuses_serializer.write(valueSerializer, value_previewBorderRadius_value_2)
-            }
-        }
-        const value_borderRadius  = value.borderRadius
-        let value_borderRadius_type : int32 = RuntimeType.UNDEFINED
-        value_borderRadius_type = runtimeType(value_borderRadius)
-        valueSerializer.writeInt8((value_borderRadius_type).toChar())
-        if ((value_borderRadius_type) != (RuntimeType.UNDEFINED)) {
-            const value_borderRadius_value  = value_borderRadius!
-            let value_borderRadius_value_type : int32 = RuntimeType.UNDEFINED
-            value_borderRadius_value_type = runtimeType(value_borderRadius_value)
-            if ((RuntimeType.STRING == value_borderRadius_value_type) || (RuntimeType.NUMBER == value_borderRadius_value_type) || (RuntimeType.OBJECT == value_borderRadius_value_type)) {
-                valueSerializer.writeInt8((0).toChar())
-                const value_borderRadius_value_0  = value_borderRadius_value as Length
-                let value_borderRadius_value_0_type : int32 = RuntimeType.UNDEFINED
-                value_borderRadius_value_0_type = runtimeType(value_borderRadius_value_0)
-                if (RuntimeType.STRING == value_borderRadius_value_0_type) {
-                    valueSerializer.writeInt8((0).toChar())
-                    const value_borderRadius_value_0_0  = value_borderRadius_value_0 as string
-                    valueSerializer.writeString(value_borderRadius_value_0_0)
-                }
-                else if (RuntimeType.NUMBER == value_borderRadius_value_0_type) {
-                    valueSerializer.writeInt8((1).toChar())
-                    const value_borderRadius_value_0_1  = value_borderRadius_value_0 as number
-                    valueSerializer.writeNumber(value_borderRadius_value_0_1)
-                }
-                else if (RuntimeType.OBJECT == value_borderRadius_value_0_type) {
-                    valueSerializer.writeInt8((2).toChar())
-                    const value_borderRadius_value_0_2  = value_borderRadius_value_0 as Resource
-                    Resource_serializer.write(valueSerializer, value_borderRadius_value_0_2)
-                }
-            }
-            else if (TypeChecker.isBorderRadiuses(value_borderRadius_value, false, false, false, false)) {
-                valueSerializer.writeInt8((1).toChar())
-                const value_borderRadius_value_1  = value_borderRadius_value as BorderRadiuses
-                BorderRadiuses_serializer.write(valueSerializer, value_borderRadius_value_1)
-            }
-            else if (TypeChecker.isLocalizedBorderRadiuses(value_borderRadius_value, false, false, false, false)) {
-                valueSerializer.writeInt8((2).toChar())
-                const value_borderRadius_value_2  = value_borderRadius_value as LocalizedBorderRadiuses
-                LocalizedBorderRadiuses_serializer.write(valueSerializer, value_borderRadius_value_2)
-            }
-        }
-        const value_onAppear  = value.onAppear
-        let value_onAppear_type : int32 = RuntimeType.UNDEFINED
-        value_onAppear_type = runtimeType(value_onAppear)
-        valueSerializer.writeInt8((value_onAppear_type).toChar())
-        if ((value_onAppear_type) != (RuntimeType.UNDEFINED)) {
-            const value_onAppear_value  = value_onAppear!
-            valueSerializer.holdAndWriteCallback(value_onAppear_value)
-        }
-        const value_onDisappear  = value.onDisappear
-        let value_onDisappear_type : int32 = RuntimeType.UNDEFINED
-        value_onDisappear_type = runtimeType(value_onDisappear)
-        valueSerializer.writeInt8((value_onDisappear_type).toChar())
-        if ((value_onDisappear_type) != (RuntimeType.UNDEFINED)) {
-            const value_onDisappear_value  = value_onDisappear!
-            valueSerializer.holdAndWriteCallback(value_onDisappear_value)
-        }
-        const value_aboutToAppear  = value.aboutToAppear
-        let value_aboutToAppear_type : int32 = RuntimeType.UNDEFINED
-        value_aboutToAppear_type = runtimeType(value_aboutToAppear)
-        valueSerializer.writeInt8((value_aboutToAppear_type).toChar())
-        if ((value_aboutToAppear_type) != (RuntimeType.UNDEFINED)) {
-            const value_aboutToAppear_value  = value_aboutToAppear!
-            valueSerializer.holdAndWriteCallback(value_aboutToAppear_value)
-        }
-        const value_aboutToDisappear  = value.aboutToDisappear
-        let value_aboutToDisappear_type : int32 = RuntimeType.UNDEFINED
-        value_aboutToDisappear_type = runtimeType(value_aboutToDisappear)
-        valueSerializer.writeInt8((value_aboutToDisappear_type).toChar())
-        if ((value_aboutToDisappear_type) != (RuntimeType.UNDEFINED)) {
-            const value_aboutToDisappear_value  = value_aboutToDisappear!
-            valueSerializer.holdAndWriteCallback(value_aboutToDisappear_value)
-        }
-        const value_layoutRegionMargin  = value.layoutRegionMargin
-        let value_layoutRegionMargin_type : int32 = RuntimeType.UNDEFINED
-        value_layoutRegionMargin_type = runtimeType(value_layoutRegionMargin)
-        valueSerializer.writeInt8((value_layoutRegionMargin_type).toChar())
-        if ((value_layoutRegionMargin_type) != (RuntimeType.UNDEFINED)) {
-            const value_layoutRegionMargin_value  = value_layoutRegionMargin!
-            Padding_serializer.write(valueSerializer, value_layoutRegionMargin_value)
-        }
-        const value_previewAnimationOptions  = value.previewAnimationOptions
-        let value_previewAnimationOptions_type : int32 = RuntimeType.UNDEFINED
-        value_previewAnimationOptions_type = runtimeType(value_previewAnimationOptions)
-        valueSerializer.writeInt8((value_previewAnimationOptions_type).toChar())
-        if ((value_previewAnimationOptions_type) != (RuntimeType.UNDEFINED)) {
-            const value_previewAnimationOptions_value  = value_previewAnimationOptions!
-            ContextMenuAnimationOptions_serializer.write(valueSerializer, value_previewAnimationOptions_value)
-        }
-        const value_backgroundColor  = value.backgroundColor
-        let value_backgroundColor_type : int32 = RuntimeType.UNDEFINED
-        value_backgroundColor_type = runtimeType(value_backgroundColor)
-        valueSerializer.writeInt8((value_backgroundColor_type).toChar())
-        if ((value_backgroundColor_type) != (RuntimeType.UNDEFINED)) {
-            const value_backgroundColor_value  = value_backgroundColor!
-            let value_backgroundColor_value_type : int32 = RuntimeType.UNDEFINED
-            value_backgroundColor_value_type = runtimeType(value_backgroundColor_value)
-            if (TypeChecker.isColor(value_backgroundColor_value)) {
-                valueSerializer.writeInt8((0).toChar())
-                const value_backgroundColor_value_0  = value_backgroundColor_value as Color
-                valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_backgroundColor_value_0))
-            }
-            else if (RuntimeType.NUMBER == value_backgroundColor_value_type) {
-                valueSerializer.writeInt8((1).toChar())
-                const value_backgroundColor_value_1  = value_backgroundColor_value as number
-                valueSerializer.writeNumber(value_backgroundColor_value_1)
-            }
-            else if (RuntimeType.STRING == value_backgroundColor_value_type) {
-                valueSerializer.writeInt8((2).toChar())
-                const value_backgroundColor_value_2  = value_backgroundColor_value as string
-                valueSerializer.writeString(value_backgroundColor_value_2)
-            }
-            else if (RuntimeType.OBJECT == value_backgroundColor_value_type) {
-                valueSerializer.writeInt8((3).toChar())
-                const value_backgroundColor_value_3  = value_backgroundColor_value as Resource
-                Resource_serializer.write(valueSerializer, value_backgroundColor_value_3)
-            }
-        }
-        const value_backgroundBlurStyle  = value.backgroundBlurStyle
-        let value_backgroundBlurStyle_type : int32 = RuntimeType.UNDEFINED
-        value_backgroundBlurStyle_type = runtimeType(value_backgroundBlurStyle)
-        valueSerializer.writeInt8((value_backgroundBlurStyle_type).toChar())
-        if ((value_backgroundBlurStyle_type) != (RuntimeType.UNDEFINED)) {
-            const value_backgroundBlurStyle_value  = (value_backgroundBlurStyle as BlurStyle)
-            valueSerializer.writeInt32(TypeChecker.BlurStyle_ToNumeric(value_backgroundBlurStyle_value))
-        }
-        const value_backgroundBlurStyleOptions  = value.backgroundBlurStyleOptions
-        let value_backgroundBlurStyleOptions_type : int32 = RuntimeType.UNDEFINED
-        value_backgroundBlurStyleOptions_type = runtimeType(value_backgroundBlurStyleOptions)
-        valueSerializer.writeInt8((value_backgroundBlurStyleOptions_type).toChar())
-        if ((value_backgroundBlurStyleOptions_type) != (RuntimeType.UNDEFINED)) {
-            const value_backgroundBlurStyleOptions_value  = value_backgroundBlurStyleOptions!
-            BackgroundBlurStyleOptions_serializer.write(valueSerializer, value_backgroundBlurStyleOptions_value)
-        }
-        const value_backgroundEffect  = value.backgroundEffect
-        let value_backgroundEffect_type : int32 = RuntimeType.UNDEFINED
-        value_backgroundEffect_type = runtimeType(value_backgroundEffect)
-        valueSerializer.writeInt8((value_backgroundEffect_type).toChar())
-        if ((value_backgroundEffect_type) != (RuntimeType.UNDEFINED)) {
-            const value_backgroundEffect_value  = value_backgroundEffect!
-            BackgroundEffectOptions_serializer.write(valueSerializer, value_backgroundEffect_value)
-        }
-        const value_transition  = value.transition
-        let value_transition_type : int32 = RuntimeType.UNDEFINED
-        value_transition_type = runtimeType(value_transition)
-        valueSerializer.writeInt8((value_transition_type).toChar())
-        if ((value_transition_type) != (RuntimeType.UNDEFINED)) {
-            const value_transition_value  = value_transition!
-            TransitionEffect_serializer.write(valueSerializer, value_transition_value)
-        }
-        const value_enableHoverMode  = value.enableHoverMode
-        let value_enableHoverMode_type : int32 = RuntimeType.UNDEFINED
-        value_enableHoverMode_type = runtimeType(value_enableHoverMode)
-        valueSerializer.writeInt8((value_enableHoverMode_type).toChar())
-        if ((value_enableHoverMode_type) != (RuntimeType.UNDEFINED)) {
-            const value_enableHoverMode_value  = value_enableHoverMode!
-            valueSerializer.writeBoolean(value_enableHoverMode_value)
-        }
-        const value_outlineColor  = value.outlineColor
-        let value_outlineColor_type : int32 = RuntimeType.UNDEFINED
-        value_outlineColor_type = runtimeType(value_outlineColor)
-        valueSerializer.writeInt8((value_outlineColor_type).toChar())
-        if ((value_outlineColor_type) != (RuntimeType.UNDEFINED)) {
-            const value_outlineColor_value  = value_outlineColor!
-            let value_outlineColor_value_type : int32 = RuntimeType.UNDEFINED
-            value_outlineColor_value_type = runtimeType(value_outlineColor_value)
-            if ((TypeChecker.isColor(value_outlineColor_value)) || (RuntimeType.NUMBER == value_outlineColor_value_type) || (RuntimeType.STRING == value_outlineColor_value_type) || (RuntimeType.OBJECT == value_outlineColor_value_type)) {
-                valueSerializer.writeInt8((0).toChar())
-                const value_outlineColor_value_0  = value_outlineColor_value as ResourceColor
-                let value_outlineColor_value_0_type : int32 = RuntimeType.UNDEFINED
-                value_outlineColor_value_0_type = runtimeType(value_outlineColor_value_0)
-                if (TypeChecker.isColor(value_outlineColor_value_0)) {
-                    valueSerializer.writeInt8((0).toChar())
-                    const value_outlineColor_value_0_0  = value_outlineColor_value_0 as Color
-                    valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_outlineColor_value_0_0))
-                }
-                else if (RuntimeType.NUMBER == value_outlineColor_value_0_type) {
-                    valueSerializer.writeInt8((1).toChar())
-                    const value_outlineColor_value_0_1  = value_outlineColor_value_0 as number
-                    valueSerializer.writeNumber(value_outlineColor_value_0_1)
-                }
-                else if (RuntimeType.STRING == value_outlineColor_value_0_type) {
-                    valueSerializer.writeInt8((2).toChar())
-                    const value_outlineColor_value_0_2  = value_outlineColor_value_0 as string
-                    valueSerializer.writeString(value_outlineColor_value_0_2)
-                }
-                else if (RuntimeType.OBJECT == value_outlineColor_value_0_type) {
-                    valueSerializer.writeInt8((3).toChar())
-                    const value_outlineColor_value_0_3  = value_outlineColor_value_0 as Resource
-                    Resource_serializer.write(valueSerializer, value_outlineColor_value_0_3)
-                }
-            }
-            else if (TypeChecker.isEdgeColors(value_outlineColor_value, false, false, false, false)) {
-                valueSerializer.writeInt8((1).toChar())
-                const value_outlineColor_value_1  = value_outlineColor_value as EdgeColors
-                EdgeColors_serializer.write(valueSerializer, value_outlineColor_value_1)
-            }
-        }
-        const value_outlineWidth  = value.outlineWidth
-        let value_outlineWidth_type : int32 = RuntimeType.UNDEFINED
-        value_outlineWidth_type = runtimeType(value_outlineWidth)
-        valueSerializer.writeInt8((value_outlineWidth_type).toChar())
-        if ((value_outlineWidth_type) != (RuntimeType.UNDEFINED)) {
-            const value_outlineWidth_value  = value_outlineWidth!
-            let value_outlineWidth_value_type : int32 = RuntimeType.UNDEFINED
-            value_outlineWidth_value_type = runtimeType(value_outlineWidth_value)
-            if ((RuntimeType.STRING == value_outlineWidth_value_type) || (RuntimeType.NUMBER == value_outlineWidth_value_type) || (RuntimeType.OBJECT == value_outlineWidth_value_type)) {
-                valueSerializer.writeInt8((0).toChar())
-                const value_outlineWidth_value_0  = value_outlineWidth_value as Dimension
-                let value_outlineWidth_value_0_type : int32 = RuntimeType.UNDEFINED
-                value_outlineWidth_value_0_type = runtimeType(value_outlineWidth_value_0)
-                if (RuntimeType.STRING == value_outlineWidth_value_0_type) {
-                    valueSerializer.writeInt8((0).toChar())
-                    const value_outlineWidth_value_0_0  = value_outlineWidth_value_0 as string
-                    valueSerializer.writeString(value_outlineWidth_value_0_0)
-                }
-                else if (RuntimeType.NUMBER == value_outlineWidth_value_0_type) {
-                    valueSerializer.writeInt8((1).toChar())
-                    const value_outlineWidth_value_0_1  = value_outlineWidth_value_0 as number
-                    valueSerializer.writeNumber(value_outlineWidth_value_0_1)
-                }
-                else if (RuntimeType.OBJECT == value_outlineWidth_value_0_type) {
-                    valueSerializer.writeInt8((2).toChar())
-                    const value_outlineWidth_value_0_2  = value_outlineWidth_value_0 as Resource
-                    Resource_serializer.write(valueSerializer, value_outlineWidth_value_0_2)
-                }
-            }
-            else if (TypeChecker.isEdgeOutlineWidths(value_outlineWidth_value, false, false, false, false)) {
-                valueSerializer.writeInt8((1).toChar())
-                const value_outlineWidth_value_1  = value_outlineWidth_value as EdgeOutlineWidths
-                EdgeOutlineWidths_serializer.write(valueSerializer, value_outlineWidth_value_1)
-            }
-        }
-        const value_hapticFeedbackMode  = value.hapticFeedbackMode
-        let value_hapticFeedbackMode_type : int32 = RuntimeType.UNDEFINED
-        value_hapticFeedbackMode_type = runtimeType(value_hapticFeedbackMode)
-        valueSerializer.writeInt8((value_hapticFeedbackMode_type).toChar())
-        if ((value_hapticFeedbackMode_type) != (RuntimeType.UNDEFINED)) {
-            const value_hapticFeedbackMode_value  = (value_hapticFeedbackMode as HapticFeedbackMode)
-            valueSerializer.writeInt32(TypeChecker.HapticFeedbackMode_ToNumeric(value_hapticFeedbackMode_value))
-        }
-    }
-    public static read(buffer: DeserializerBase): ContextMenuOptions {
-        let valueDeserializer : DeserializerBase = buffer
-        const offset_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let offset_buf : Position | undefined
-        if ((offset_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            offset_buf = Position_serializer.read(valueDeserializer)
-        }
-        const offset_result : Position | undefined = offset_buf
-        const placement_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let placement_buf : Placement | undefined
-        if ((placement_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            placement_buf = TypeChecker.Placement_FromNumeric(valueDeserializer.readInt32())
-        }
-        const placement_result : Placement | undefined = placement_buf
-        const enableArrow_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let enableArrow_buf : boolean | undefined
-        if ((enableArrow_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            enableArrow_buf = valueDeserializer.readBoolean()
-        }
-        const enableArrow_result : boolean | undefined = enableArrow_buf
-        const arrowOffset_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let arrowOffset_buf : Length | undefined
-        if ((arrowOffset_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const arrowOffset_buf__selector : int32 = valueDeserializer.readInt8()
-            let arrowOffset_buf_ : string | number | Resource | undefined
-            if (arrowOffset_buf__selector == (0).toChar()) {
-                arrowOffset_buf_ = (valueDeserializer.readString() as string)
-            }
-            else if (arrowOffset_buf__selector == (1).toChar()) {
-                arrowOffset_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (arrowOffset_buf__selector == (2).toChar()) {
-                arrowOffset_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for arrowOffset_buf_ has to be chosen through deserialisation.")
-            }
-            arrowOffset_buf = (arrowOffset_buf_ as string | number | Resource)
-        }
-        const arrowOffset_result : Length | undefined = arrowOffset_buf
-        const preview_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let preview_buf : MenuPreviewMode | CustomBuilder | undefined
-        if ((preview_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const preview_buf__selector : int32 = valueDeserializer.readInt8()
-            let preview_buf_ : MenuPreviewMode | CustomBuilder | undefined
-            if (preview_buf__selector == (0).toChar()) {
-                preview_buf_ = TypeChecker.MenuPreviewMode_FromNumeric(valueDeserializer.readInt32())
-            }
-            else if (preview_buf__selector == (1).toChar()) {
-                const preview_buf__u_resource : CallbackResource = valueDeserializer.readCallbackResource()
-                const preview_buf__u_call : KPointer = valueDeserializer.readPointer()
-                const preview_buf__u_callSync : KPointer = valueDeserializer.readPointer()
-                preview_buf_ = ():void => { 
-    const preview_buf__u_argsSerializer : SerializerBase = SerializerBase.hold();
-    preview_buf__u_argsSerializer.writeInt32(preview_buf__u_resource.resourceId);
-    preview_buf__u_argsSerializer.writePointer(preview_buf__u_call);
-    preview_buf__u_argsSerializer.writePointer(preview_buf__u_callSync);
-    InteropNativeModule._CallCallback(737226752, preview_buf__u_argsSerializer.asBuffer(), preview_buf__u_argsSerializer.length());
-    preview_buf__u_argsSerializer.release();
-    return; }
-            }
-            else {
-                throw new Error("One of the branches for preview_buf_ has to be chosen through deserialisation.")
-            }
-            preview_buf = (preview_buf_ as MenuPreviewMode | CustomBuilder)
-        }
-        const preview_result : MenuPreviewMode | CustomBuilder | undefined = preview_buf
-        const previewBorderRadius_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let previewBorderRadius_buf : BorderRadiusType | undefined
-        if ((previewBorderRadius_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const previewBorderRadius_buf__selector : int32 = valueDeserializer.readInt8()
-            let previewBorderRadius_buf_ : Length | BorderRadiuses | LocalizedBorderRadiuses | undefined
-            if (previewBorderRadius_buf__selector == (0).toChar()) {
-                const previewBorderRadius_buf__u_selector : int32 = valueDeserializer.readInt8()
-                let previewBorderRadius_buf__u : string | number | Resource | undefined
-                if (previewBorderRadius_buf__u_selector == (0).toChar()) {
-                    previewBorderRadius_buf__u = (valueDeserializer.readString() as string)
-                }
-                else if (previewBorderRadius_buf__u_selector == (1).toChar()) {
-                    previewBorderRadius_buf__u = (valueDeserializer.readNumber() as number)
-                }
-                else if (previewBorderRadius_buf__u_selector == (2).toChar()) {
-                    previewBorderRadius_buf__u = Resource_serializer.read(valueDeserializer)
-                }
-                else {
-                    throw new Error("One of the branches for previewBorderRadius_buf__u has to be chosen through deserialisation.")
-                }
-                previewBorderRadius_buf_ = (previewBorderRadius_buf__u as string | number | Resource)
-            }
-            else if (previewBorderRadius_buf__selector == (1).toChar()) {
-                previewBorderRadius_buf_ = BorderRadiuses_serializer.read(valueDeserializer)
-            }
-            else if (previewBorderRadius_buf__selector == (2).toChar()) {
-                previewBorderRadius_buf_ = LocalizedBorderRadiuses_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for previewBorderRadius_buf_ has to be chosen through deserialisation.")
-            }
-            previewBorderRadius_buf = (previewBorderRadius_buf_ as Length | BorderRadiuses | LocalizedBorderRadiuses)
-        }
-        const previewBorderRadius_result : BorderRadiusType | undefined = previewBorderRadius_buf
-        const borderRadius_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let borderRadius_buf : Length | BorderRadiuses | LocalizedBorderRadiuses | undefined
-        if ((borderRadius_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const borderRadius_buf__selector : int32 = valueDeserializer.readInt8()
-            let borderRadius_buf_ : Length | BorderRadiuses | LocalizedBorderRadiuses | undefined
-            if (borderRadius_buf__selector == (0).toChar()) {
-                const borderRadius_buf__u_selector : int32 = valueDeserializer.readInt8()
-                let borderRadius_buf__u : string | number | Resource | undefined
-                if (borderRadius_buf__u_selector == (0).toChar()) {
-                    borderRadius_buf__u = (valueDeserializer.readString() as string)
-                }
-                else if (borderRadius_buf__u_selector == (1).toChar()) {
-                    borderRadius_buf__u = (valueDeserializer.readNumber() as number)
-                }
-                else if (borderRadius_buf__u_selector == (2).toChar()) {
-                    borderRadius_buf__u = Resource_serializer.read(valueDeserializer)
-                }
-                else {
-                    throw new Error("One of the branches for borderRadius_buf__u has to be chosen through deserialisation.")
-                }
-                borderRadius_buf_ = (borderRadius_buf__u as string | number | Resource)
-            }
-            else if (borderRadius_buf__selector == (1).toChar()) {
-                borderRadius_buf_ = BorderRadiuses_serializer.read(valueDeserializer)
-            }
-            else if (borderRadius_buf__selector == (2).toChar()) {
-                borderRadius_buf_ = LocalizedBorderRadiuses_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for borderRadius_buf_ has to be chosen through deserialisation.")
-            }
-            borderRadius_buf = (borderRadius_buf_ as Length | BorderRadiuses | LocalizedBorderRadiuses)
-        }
-        const borderRadius_result : Length | BorderRadiuses | LocalizedBorderRadiuses | undefined = borderRadius_buf
-        const onAppear_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let onAppear_buf : (() => void) | undefined
-        if ((onAppear_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const onAppear_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
-            const onAppear_buf__call : KPointer = valueDeserializer.readPointer()
-            const onAppear_buf__callSync : KPointer = valueDeserializer.readPointer()
-            onAppear_buf = ():void => { 
-    const onAppear_buf__argsSerializer : SerializerBase = SerializerBase.hold();
-    onAppear_buf__argsSerializer.writeInt32(onAppear_buf__resource.resourceId);
-    onAppear_buf__argsSerializer.writePointer(onAppear_buf__call);
-    onAppear_buf__argsSerializer.writePointer(onAppear_buf__callSync);
-    InteropNativeModule._CallCallback(-1867723152, onAppear_buf__argsSerializer.asBuffer(), onAppear_buf__argsSerializer.length());
-    onAppear_buf__argsSerializer.release();
-    return; }
-        }
-        const onAppear_result : (() => void) | undefined = onAppear_buf
-        const onDisappear_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let onDisappear_buf : (() => void) | undefined
-        if ((onDisappear_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const onDisappear_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
-            const onDisappear_buf__call : KPointer = valueDeserializer.readPointer()
-            const onDisappear_buf__callSync : KPointer = valueDeserializer.readPointer()
-            onDisappear_buf = ():void => { 
-    const onDisappear_buf__argsSerializer : SerializerBase = SerializerBase.hold();
-    onDisappear_buf__argsSerializer.writeInt32(onDisappear_buf__resource.resourceId);
-    onDisappear_buf__argsSerializer.writePointer(onDisappear_buf__call);
-    onDisappear_buf__argsSerializer.writePointer(onDisappear_buf__callSync);
-    InteropNativeModule._CallCallback(-1867723152, onDisappear_buf__argsSerializer.asBuffer(), onDisappear_buf__argsSerializer.length());
-    onDisappear_buf__argsSerializer.release();
-    return; }
-        }
-        const onDisappear_result : (() => void) | undefined = onDisappear_buf
-        const aboutToAppear_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let aboutToAppear_buf : (() => void) | undefined
-        if ((aboutToAppear_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const aboutToAppear_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
-            const aboutToAppear_buf__call : KPointer = valueDeserializer.readPointer()
-            const aboutToAppear_buf__callSync : KPointer = valueDeserializer.readPointer()
-            aboutToAppear_buf = ():void => { 
-    const aboutToAppear_buf__argsSerializer : SerializerBase = SerializerBase.hold();
-    aboutToAppear_buf__argsSerializer.writeInt32(aboutToAppear_buf__resource.resourceId);
-    aboutToAppear_buf__argsSerializer.writePointer(aboutToAppear_buf__call);
-    aboutToAppear_buf__argsSerializer.writePointer(aboutToAppear_buf__callSync);
-    InteropNativeModule._CallCallback(-1867723152, aboutToAppear_buf__argsSerializer.asBuffer(), aboutToAppear_buf__argsSerializer.length());
-    aboutToAppear_buf__argsSerializer.release();
-    return; }
-        }
-        const aboutToAppear_result : (() => void) | undefined = aboutToAppear_buf
-        const aboutToDisappear_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let aboutToDisappear_buf : (() => void) | undefined
-        if ((aboutToDisappear_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const aboutToDisappear_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
-            const aboutToDisappear_buf__call : KPointer = valueDeserializer.readPointer()
-            const aboutToDisappear_buf__callSync : KPointer = valueDeserializer.readPointer()
-            aboutToDisappear_buf = ():void => { 
-    const aboutToDisappear_buf__argsSerializer : SerializerBase = SerializerBase.hold();
-    aboutToDisappear_buf__argsSerializer.writeInt32(aboutToDisappear_buf__resource.resourceId);
-    aboutToDisappear_buf__argsSerializer.writePointer(aboutToDisappear_buf__call);
-    aboutToDisappear_buf__argsSerializer.writePointer(aboutToDisappear_buf__callSync);
-    InteropNativeModule._CallCallback(-1867723152, aboutToDisappear_buf__argsSerializer.asBuffer(), aboutToDisappear_buf__argsSerializer.length());
-    aboutToDisappear_buf__argsSerializer.release();
-    return; }
-        }
-        const aboutToDisappear_result : (() => void) | undefined = aboutToDisappear_buf
-        const layoutRegionMargin_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let layoutRegionMargin_buf : Padding | undefined
-        if ((layoutRegionMargin_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            layoutRegionMargin_buf = Padding_serializer.read(valueDeserializer)
-        }
-        const layoutRegionMargin_result : Padding | undefined = layoutRegionMargin_buf
-        const previewAnimationOptions_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let previewAnimationOptions_buf : ContextMenuAnimationOptions | undefined
-        if ((previewAnimationOptions_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            previewAnimationOptions_buf = ContextMenuAnimationOptions_serializer.read(valueDeserializer)
-        }
-        const previewAnimationOptions_result : ContextMenuAnimationOptions | undefined = previewAnimationOptions_buf
-        const backgroundColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let backgroundColor_buf : ResourceColor | undefined
-        if ((backgroundColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const backgroundColor_buf__selector : int32 = valueDeserializer.readInt8()
-            let backgroundColor_buf_ : Color | number | string | Resource | undefined
-            if (backgroundColor_buf__selector == (0).toChar()) {
-                backgroundColor_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-            }
-            else if (backgroundColor_buf__selector == (1).toChar()) {
-                backgroundColor_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (backgroundColor_buf__selector == (2).toChar()) {
-                backgroundColor_buf_ = (valueDeserializer.readString() as string)
-            }
-            else if (backgroundColor_buf__selector == (3).toChar()) {
-                backgroundColor_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for backgroundColor_buf_ has to be chosen through deserialisation.")
-            }
-            backgroundColor_buf = (backgroundColor_buf_ as Color | number | string | Resource)
-        }
-        const backgroundColor_result : ResourceColor | undefined = backgroundColor_buf
-        const backgroundBlurStyle_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let backgroundBlurStyle_buf : BlurStyle | undefined
-        if ((backgroundBlurStyle_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            backgroundBlurStyle_buf = TypeChecker.BlurStyle_FromNumeric(valueDeserializer.readInt32())
-        }
-        const backgroundBlurStyle_result : BlurStyle | undefined = backgroundBlurStyle_buf
-        const backgroundBlurStyleOptions_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let backgroundBlurStyleOptions_buf : BackgroundBlurStyleOptions | undefined
-        if ((backgroundBlurStyleOptions_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            backgroundBlurStyleOptions_buf = BackgroundBlurStyleOptions_serializer.read(valueDeserializer)
-        }
-        const backgroundBlurStyleOptions_result : BackgroundBlurStyleOptions | undefined = backgroundBlurStyleOptions_buf
-        const backgroundEffect_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let backgroundEffect_buf : BackgroundEffectOptions | undefined
-        if ((backgroundEffect_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            backgroundEffect_buf = BackgroundEffectOptions_serializer.read(valueDeserializer)
-        }
-        const backgroundEffect_result : BackgroundEffectOptions | undefined = backgroundEffect_buf
-        const transition_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let transition_buf : TransitionEffect | undefined
-        if ((transition_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            transition_buf = (TransitionEffect_serializer.read(valueDeserializer) as TransitionEffect)
-        }
-        const transition_result : TransitionEffect | undefined = transition_buf
-        const enableHoverMode_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let enableHoverMode_buf : boolean | undefined
-        if ((enableHoverMode_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            enableHoverMode_buf = valueDeserializer.readBoolean()
-        }
-        const enableHoverMode_result : boolean | undefined = enableHoverMode_buf
-        const outlineColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let outlineColor_buf : ResourceColor | EdgeColors | undefined
-        if ((outlineColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const outlineColor_buf__selector : int32 = valueDeserializer.readInt8()
-            let outlineColor_buf_ : ResourceColor | EdgeColors | undefined
-            if (outlineColor_buf__selector == (0).toChar()) {
-                const outlineColor_buf__u_selector : int32 = valueDeserializer.readInt8()
-                let outlineColor_buf__u : Color | number | string | Resource | undefined
-                if (outlineColor_buf__u_selector == (0).toChar()) {
-                    outlineColor_buf__u = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-                }
-                else if (outlineColor_buf__u_selector == (1).toChar()) {
-                    outlineColor_buf__u = (valueDeserializer.readNumber() as number)
-                }
-                else if (outlineColor_buf__u_selector == (2).toChar()) {
-                    outlineColor_buf__u = (valueDeserializer.readString() as string)
-                }
-                else if (outlineColor_buf__u_selector == (3).toChar()) {
-                    outlineColor_buf__u = Resource_serializer.read(valueDeserializer)
-                }
-                else {
-                    throw new Error("One of the branches for outlineColor_buf__u has to be chosen through deserialisation.")
-                }
-                outlineColor_buf_ = (outlineColor_buf__u as Color | number | string | Resource)
-            }
-            else if (outlineColor_buf__selector == (1).toChar()) {
-                outlineColor_buf_ = EdgeColors_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for outlineColor_buf_ has to be chosen through deserialisation.")
-            }
-            outlineColor_buf = (outlineColor_buf_ as ResourceColor | EdgeColors)
-        }
-        const outlineColor_result : ResourceColor | EdgeColors | undefined = outlineColor_buf
-        const outlineWidth_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let outlineWidth_buf : Dimension | EdgeOutlineWidths | undefined
-        if ((outlineWidth_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const outlineWidth_buf__selector : int32 = valueDeserializer.readInt8()
-            let outlineWidth_buf_ : Dimension | EdgeOutlineWidths | undefined
-            if (outlineWidth_buf__selector == (0).toChar()) {
-                const outlineWidth_buf__u_selector : int32 = valueDeserializer.readInt8()
-                let outlineWidth_buf__u : string | number | Resource | undefined
-                if (outlineWidth_buf__u_selector == (0).toChar()) {
-                    outlineWidth_buf__u = (valueDeserializer.readString() as string)
-                }
-                else if (outlineWidth_buf__u_selector == (1).toChar()) {
-                    outlineWidth_buf__u = (valueDeserializer.readNumber() as number)
-                }
-                else if (outlineWidth_buf__u_selector == (2).toChar()) {
-                    outlineWidth_buf__u = Resource_serializer.read(valueDeserializer)
-                }
-                else {
-                    throw new Error("One of the branches for outlineWidth_buf__u has to be chosen through deserialisation.")
-                }
-                outlineWidth_buf_ = (outlineWidth_buf__u as string | number | Resource)
-            }
-            else if (outlineWidth_buf__selector == (1).toChar()) {
-                outlineWidth_buf_ = EdgeOutlineWidths_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for outlineWidth_buf_ has to be chosen through deserialisation.")
-            }
-            outlineWidth_buf = (outlineWidth_buf_ as Dimension | EdgeOutlineWidths)
-        }
-        const outlineWidth_result : Dimension | EdgeOutlineWidths | undefined = outlineWidth_buf
-        const hapticFeedbackMode_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let hapticFeedbackMode_buf : HapticFeedbackMode | undefined
-        if ((hapticFeedbackMode_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            hapticFeedbackMode_buf = TypeChecker.HapticFeedbackMode_FromNumeric(valueDeserializer.readInt32())
-        }
-        const hapticFeedbackMode_result : HapticFeedbackMode | undefined = hapticFeedbackMode_buf
-        let value : ContextMenuOptions = ({offset: offset_result, placement: placement_result, enableArrow: enableArrow_result, arrowOffset: arrowOffset_result, preview: preview_result, previewBorderRadius: previewBorderRadius_result, borderRadius: borderRadius_result, onAppear: onAppear_result, onDisappear: onDisappear_result, aboutToAppear: aboutToAppear_result, aboutToDisappear: aboutToDisappear_result, layoutRegionMargin: layoutRegionMargin_result, previewAnimationOptions: previewAnimationOptions_result, backgroundColor: backgroundColor_result, backgroundBlurStyle: backgroundBlurStyle_result, backgroundBlurStyleOptions: backgroundBlurStyleOptions_result, backgroundEffect: backgroundEffect_result, transition: transition_result, enableHoverMode: enableHoverMode_result, outlineColor: outlineColor_result, outlineWidth: outlineWidth_result, hapticFeedbackMode: hapticFeedbackMode_result} as ContextMenuOptions)
-        return value
-    }
-}
-export class CustomPopupOptions_serializer {
-    public static write(buffer: SerializerBase, value: CustomPopupOptions): void {
-        let valueSerializer : SerializerBase = buffer
-        const value_builder  = value.builder
-        valueSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(value_builder))
-        const value_placement  = value.placement
-        let value_placement_type : int32 = RuntimeType.UNDEFINED
-        value_placement_type = runtimeType(value_placement)
-        valueSerializer.writeInt8((value_placement_type).toChar())
-        if ((value_placement_type) != (RuntimeType.UNDEFINED)) {
-            const value_placement_value  = (value_placement as Placement)
-            valueSerializer.writeInt32(TypeChecker.Placement_ToNumeric(value_placement_value))
-        }
-        const value_popupColor  = value.popupColor
-        let value_popupColor_type : int32 = RuntimeType.UNDEFINED
-        value_popupColor_type = runtimeType(value_popupColor)
-        valueSerializer.writeInt8((value_popupColor_type).toChar())
-        if ((value_popupColor_type) != (RuntimeType.UNDEFINED)) {
-            const value_popupColor_value  = value_popupColor!
-            let value_popupColor_value_type : int32 = RuntimeType.UNDEFINED
-            value_popupColor_value_type = runtimeType(value_popupColor_value)
-            if (TypeChecker.isColor(value_popupColor_value)) {
-                valueSerializer.writeInt8((0).toChar())
-                const value_popupColor_value_0  = value_popupColor_value as Color
-                valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_popupColor_value_0))
-            }
-            else if (RuntimeType.STRING == value_popupColor_value_type) {
-                valueSerializer.writeInt8((1).toChar())
-                const value_popupColor_value_1  = value_popupColor_value as string
-                valueSerializer.writeString(value_popupColor_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_popupColor_value_type) {
-                valueSerializer.writeInt8((2).toChar())
-                const value_popupColor_value_2  = value_popupColor_value as Resource
-                Resource_serializer.write(valueSerializer, value_popupColor_value_2)
-            }
-            else if (RuntimeType.NUMBER == value_popupColor_value_type) {
-                valueSerializer.writeInt8((3).toChar())
-                const value_popupColor_value_3  = value_popupColor_value as number
-                valueSerializer.writeNumber(value_popupColor_value_3)
-            }
-        }
-        const value_enableArrow  = value.enableArrow
-        let value_enableArrow_type : int32 = RuntimeType.UNDEFINED
-        value_enableArrow_type = runtimeType(value_enableArrow)
-        valueSerializer.writeInt8((value_enableArrow_type).toChar())
-        if ((value_enableArrow_type) != (RuntimeType.UNDEFINED)) {
-            const value_enableArrow_value  = value_enableArrow!
-            valueSerializer.writeBoolean(value_enableArrow_value)
-        }
-        const value_autoCancel  = value.autoCancel
-        let value_autoCancel_type : int32 = RuntimeType.UNDEFINED
-        value_autoCancel_type = runtimeType(value_autoCancel)
-        valueSerializer.writeInt8((value_autoCancel_type).toChar())
-        if ((value_autoCancel_type) != (RuntimeType.UNDEFINED)) {
-            const value_autoCancel_value  = value_autoCancel!
-            valueSerializer.writeBoolean(value_autoCancel_value)
-        }
-        const value_onStateChange  = value.onStateChange
-        let value_onStateChange_type : int32 = RuntimeType.UNDEFINED
-        value_onStateChange_type = runtimeType(value_onStateChange)
-        valueSerializer.writeInt8((value_onStateChange_type).toChar())
-        if ((value_onStateChange_type) != (RuntimeType.UNDEFINED)) {
-            const value_onStateChange_value  = value_onStateChange!
-            valueSerializer.holdAndWriteCallback(value_onStateChange_value)
-        }
-        const value_arrowOffset  = value.arrowOffset
-        let value_arrowOffset_type : int32 = RuntimeType.UNDEFINED
-        value_arrowOffset_type = runtimeType(value_arrowOffset)
-        valueSerializer.writeInt8((value_arrowOffset_type).toChar())
-        if ((value_arrowOffset_type) != (RuntimeType.UNDEFINED)) {
-            const value_arrowOffset_value  = value_arrowOffset!
-            let value_arrowOffset_value_type : int32 = RuntimeType.UNDEFINED
-            value_arrowOffset_value_type = runtimeType(value_arrowOffset_value)
-            if (RuntimeType.STRING == value_arrowOffset_value_type) {
-                valueSerializer.writeInt8((0).toChar())
-                const value_arrowOffset_value_0  = value_arrowOffset_value as string
-                valueSerializer.writeString(value_arrowOffset_value_0)
-            }
-            else if (RuntimeType.NUMBER == value_arrowOffset_value_type) {
-                valueSerializer.writeInt8((1).toChar())
-                const value_arrowOffset_value_1  = value_arrowOffset_value as number
-                valueSerializer.writeNumber(value_arrowOffset_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_arrowOffset_value_type) {
-                valueSerializer.writeInt8((2).toChar())
-                const value_arrowOffset_value_2  = value_arrowOffset_value as Resource
-                Resource_serializer.write(valueSerializer, value_arrowOffset_value_2)
-            }
-        }
-        const value_showInSubWindow  = value.showInSubWindow
-        let value_showInSubWindow_type : int32 = RuntimeType.UNDEFINED
-        value_showInSubWindow_type = runtimeType(value_showInSubWindow)
-        valueSerializer.writeInt8((value_showInSubWindow_type).toChar())
-        if ((value_showInSubWindow_type) != (RuntimeType.UNDEFINED)) {
-            const value_showInSubWindow_value  = value_showInSubWindow!
-            valueSerializer.writeBoolean(value_showInSubWindow_value)
-        }
-        const value_mask  = value.mask
-        let value_mask_type : int32 = RuntimeType.UNDEFINED
-        value_mask_type = runtimeType(value_mask)
-        valueSerializer.writeInt8((value_mask_type).toChar())
-        if ((value_mask_type) != (RuntimeType.UNDEFINED)) {
-            const value_mask_value  = value_mask!
-            let value_mask_value_type : int32 = RuntimeType.UNDEFINED
-            value_mask_value_type = runtimeType(value_mask_value)
-            if (RuntimeType.BOOLEAN == value_mask_value_type) {
-                valueSerializer.writeInt8((0).toChar())
-                const value_mask_value_0  = value_mask_value as boolean
-                valueSerializer.writeBoolean(value_mask_value_0)
-            }
-            else if (RuntimeType.OBJECT == value_mask_value_type) {
-                valueSerializer.writeInt8((1).toChar())
-                const value_mask_value_1  = value_mask_value as PopupMaskType
-                PopupMaskType_serializer.write(valueSerializer, value_mask_value_1)
-            }
-        }
-        const value_targetSpace  = value.targetSpace
-        let value_targetSpace_type : int32 = RuntimeType.UNDEFINED
-        value_targetSpace_type = runtimeType(value_targetSpace)
-        valueSerializer.writeInt8((value_targetSpace_type).toChar())
-        if ((value_targetSpace_type) != (RuntimeType.UNDEFINED)) {
-            const value_targetSpace_value  = value_targetSpace!
-            let value_targetSpace_value_type : int32 = RuntimeType.UNDEFINED
-            value_targetSpace_value_type = runtimeType(value_targetSpace_value)
-            if (RuntimeType.STRING == value_targetSpace_value_type) {
-                valueSerializer.writeInt8((0).toChar())
-                const value_targetSpace_value_0  = value_targetSpace_value as string
-                valueSerializer.writeString(value_targetSpace_value_0)
-            }
-            else if (RuntimeType.NUMBER == value_targetSpace_value_type) {
-                valueSerializer.writeInt8((1).toChar())
-                const value_targetSpace_value_1  = value_targetSpace_value as number
-                valueSerializer.writeNumber(value_targetSpace_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_targetSpace_value_type) {
-                valueSerializer.writeInt8((2).toChar())
-                const value_targetSpace_value_2  = value_targetSpace_value as Resource
-                Resource_serializer.write(valueSerializer, value_targetSpace_value_2)
-            }
-        }
-        const value_offset  = value.offset
-        let value_offset_type : int32 = RuntimeType.UNDEFINED
-        value_offset_type = runtimeType(value_offset)
-        valueSerializer.writeInt8((value_offset_type).toChar())
-        if ((value_offset_type) != (RuntimeType.UNDEFINED)) {
-            const value_offset_value  = value_offset!
-            Position_serializer.write(valueSerializer, value_offset_value)
-        }
-        const value_width  = value.width
-        let value_width_type : int32 = RuntimeType.UNDEFINED
-        value_width_type = runtimeType(value_width)
-        valueSerializer.writeInt8((value_width_type).toChar())
-        if ((value_width_type) != (RuntimeType.UNDEFINED)) {
-            const value_width_value  = value_width!
-            let value_width_value_type : int32 = RuntimeType.UNDEFINED
-            value_width_value_type = runtimeType(value_width_value)
-            if (RuntimeType.STRING == value_width_value_type) {
-                valueSerializer.writeInt8((0).toChar())
-                const value_width_value_0  = value_width_value as string
-                valueSerializer.writeString(value_width_value_0)
-            }
-            else if (RuntimeType.NUMBER == value_width_value_type) {
-                valueSerializer.writeInt8((1).toChar())
-                const value_width_value_1  = value_width_value as number
-                valueSerializer.writeNumber(value_width_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_width_value_type) {
-                valueSerializer.writeInt8((2).toChar())
-                const value_width_value_2  = value_width_value as Resource
-                Resource_serializer.write(valueSerializer, value_width_value_2)
-            }
-        }
-        const value_arrowPointPosition  = value.arrowPointPosition
-        let value_arrowPointPosition_type : int32 = RuntimeType.UNDEFINED
-        value_arrowPointPosition_type = runtimeType(value_arrowPointPosition)
-        valueSerializer.writeInt8((value_arrowPointPosition_type).toChar())
-        if ((value_arrowPointPosition_type) != (RuntimeType.UNDEFINED)) {
-            const value_arrowPointPosition_value  = (value_arrowPointPosition as ArrowPointPosition)
-            valueSerializer.writeInt32(TypeChecker.ArrowPointPosition_ToNumeric(value_arrowPointPosition_value))
-        }
-        const value_arrowWidth  = value.arrowWidth
-        let value_arrowWidth_type : int32 = RuntimeType.UNDEFINED
-        value_arrowWidth_type = runtimeType(value_arrowWidth)
-        valueSerializer.writeInt8((value_arrowWidth_type).toChar())
-        if ((value_arrowWidth_type) != (RuntimeType.UNDEFINED)) {
-            const value_arrowWidth_value  = value_arrowWidth!
-            let value_arrowWidth_value_type : int32 = RuntimeType.UNDEFINED
-            value_arrowWidth_value_type = runtimeType(value_arrowWidth_value)
-            if (RuntimeType.STRING == value_arrowWidth_value_type) {
-                valueSerializer.writeInt8((0).toChar())
-                const value_arrowWidth_value_0  = value_arrowWidth_value as string
-                valueSerializer.writeString(value_arrowWidth_value_0)
-            }
-            else if (RuntimeType.NUMBER == value_arrowWidth_value_type) {
-                valueSerializer.writeInt8((1).toChar())
-                const value_arrowWidth_value_1  = value_arrowWidth_value as number
-                valueSerializer.writeNumber(value_arrowWidth_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_arrowWidth_value_type) {
-                valueSerializer.writeInt8((2).toChar())
-                const value_arrowWidth_value_2  = value_arrowWidth_value as Resource
-                Resource_serializer.write(valueSerializer, value_arrowWidth_value_2)
-            }
-        }
-        const value_arrowHeight  = value.arrowHeight
-        let value_arrowHeight_type : int32 = RuntimeType.UNDEFINED
-        value_arrowHeight_type = runtimeType(value_arrowHeight)
-        valueSerializer.writeInt8((value_arrowHeight_type).toChar())
-        if ((value_arrowHeight_type) != (RuntimeType.UNDEFINED)) {
-            const value_arrowHeight_value  = value_arrowHeight!
-            let value_arrowHeight_value_type : int32 = RuntimeType.UNDEFINED
-            value_arrowHeight_value_type = runtimeType(value_arrowHeight_value)
-            if (RuntimeType.STRING == value_arrowHeight_value_type) {
-                valueSerializer.writeInt8((0).toChar())
-                const value_arrowHeight_value_0  = value_arrowHeight_value as string
-                valueSerializer.writeString(value_arrowHeight_value_0)
-            }
-            else if (RuntimeType.NUMBER == value_arrowHeight_value_type) {
-                valueSerializer.writeInt8((1).toChar())
-                const value_arrowHeight_value_1  = value_arrowHeight_value as number
-                valueSerializer.writeNumber(value_arrowHeight_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_arrowHeight_value_type) {
-                valueSerializer.writeInt8((2).toChar())
-                const value_arrowHeight_value_2  = value_arrowHeight_value as Resource
-                Resource_serializer.write(valueSerializer, value_arrowHeight_value_2)
-            }
-        }
-        const value_radius  = value.radius
-        let value_radius_type : int32 = RuntimeType.UNDEFINED
-        value_radius_type = runtimeType(value_radius)
-        valueSerializer.writeInt8((value_radius_type).toChar())
-        if ((value_radius_type) != (RuntimeType.UNDEFINED)) {
-            const value_radius_value  = value_radius!
-            let value_radius_value_type : int32 = RuntimeType.UNDEFINED
-            value_radius_value_type = runtimeType(value_radius_value)
-            if (RuntimeType.STRING == value_radius_value_type) {
-                valueSerializer.writeInt8((0).toChar())
-                const value_radius_value_0  = value_radius_value as string
-                valueSerializer.writeString(value_radius_value_0)
-            }
-            else if (RuntimeType.NUMBER == value_radius_value_type) {
-                valueSerializer.writeInt8((1).toChar())
-                const value_radius_value_1  = value_radius_value as number
-                valueSerializer.writeNumber(value_radius_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_radius_value_type) {
-                valueSerializer.writeInt8((2).toChar())
-                const value_radius_value_2  = value_radius_value as Resource
-                Resource_serializer.write(valueSerializer, value_radius_value_2)
-            }
-        }
-        const value_shadow  = value.shadow
-        let value_shadow_type : int32 = RuntimeType.UNDEFINED
-        value_shadow_type = runtimeType(value_shadow)
-        valueSerializer.writeInt8((value_shadow_type).toChar())
-        if ((value_shadow_type) != (RuntimeType.UNDEFINED)) {
-            const value_shadow_value  = value_shadow!
-            let value_shadow_value_type : int32 = RuntimeType.UNDEFINED
-            value_shadow_value_type = runtimeType(value_shadow_value)
-            if (RuntimeType.OBJECT == value_shadow_value_type) {
-                valueSerializer.writeInt8((0).toChar())
-                const value_shadow_value_0  = value_shadow_value as ShadowOptions
-                ShadowOptions_serializer.write(valueSerializer, value_shadow_value_0)
-            }
-            else if (TypeChecker.isShadowStyle(value_shadow_value)) {
-                valueSerializer.writeInt8((1).toChar())
-                const value_shadow_value_1  = value_shadow_value as ShadowStyle
-                valueSerializer.writeInt32(TypeChecker.ShadowStyle_ToNumeric(value_shadow_value_1))
-            }
-        }
-        const value_backgroundBlurStyle  = value.backgroundBlurStyle
-        let value_backgroundBlurStyle_type : int32 = RuntimeType.UNDEFINED
-        value_backgroundBlurStyle_type = runtimeType(value_backgroundBlurStyle)
-        valueSerializer.writeInt8((value_backgroundBlurStyle_type).toChar())
-        if ((value_backgroundBlurStyle_type) != (RuntimeType.UNDEFINED)) {
-            const value_backgroundBlurStyle_value  = (value_backgroundBlurStyle as BlurStyle)
-            valueSerializer.writeInt32(TypeChecker.BlurStyle_ToNumeric(value_backgroundBlurStyle_value))
-        }
-        const value_focusable  = value.focusable
-        let value_focusable_type : int32 = RuntimeType.UNDEFINED
-        value_focusable_type = runtimeType(value_focusable)
-        valueSerializer.writeInt8((value_focusable_type).toChar())
-        if ((value_focusable_type) != (RuntimeType.UNDEFINED)) {
-            const value_focusable_value  = value_focusable!
-            valueSerializer.writeBoolean(value_focusable_value)
-        }
-        const value_transition  = value.transition
-        let value_transition_type : int32 = RuntimeType.UNDEFINED
-        value_transition_type = runtimeType(value_transition)
-        valueSerializer.writeInt8((value_transition_type).toChar())
-        if ((value_transition_type) != (RuntimeType.UNDEFINED)) {
-            const value_transition_value  = value_transition!
-            TransitionEffect_serializer.write(valueSerializer, value_transition_value)
-        }
-        const value_onWillDismiss  = value.onWillDismiss
-        let value_onWillDismiss_type : int32 = RuntimeType.UNDEFINED
-        value_onWillDismiss_type = runtimeType(value_onWillDismiss)
-        valueSerializer.writeInt8((value_onWillDismiss_type).toChar())
-        if ((value_onWillDismiss_type) != (RuntimeType.UNDEFINED)) {
-            const value_onWillDismiss_value  = value_onWillDismiss!
-            let value_onWillDismiss_value_type : int32 = RuntimeType.UNDEFINED
-            value_onWillDismiss_value_type = runtimeType(value_onWillDismiss_value)
-            if (RuntimeType.BOOLEAN == value_onWillDismiss_value_type) {
-                valueSerializer.writeInt8((0).toChar())
-                const value_onWillDismiss_value_0  = value_onWillDismiss_value as boolean
-                valueSerializer.writeBoolean(value_onWillDismiss_value_0)
-            }
-            else if (RuntimeType.FUNCTION == value_onWillDismiss_value_type) {
-                valueSerializer.writeInt8((1).toChar())
-                const value_onWillDismiss_value_1  = value_onWillDismiss_value as ((value0: DismissPopupAction) => void)
-                valueSerializer.holdAndWriteCallback(value_onWillDismiss_value_1)
-            }
-        }
-        const value_enableHoverMode  = value.enableHoverMode
-        let value_enableHoverMode_type : int32 = RuntimeType.UNDEFINED
-        value_enableHoverMode_type = runtimeType(value_enableHoverMode)
-        valueSerializer.writeInt8((value_enableHoverMode_type).toChar())
-        if ((value_enableHoverMode_type) != (RuntimeType.UNDEFINED)) {
-            const value_enableHoverMode_value  = value_enableHoverMode!
-            valueSerializer.writeBoolean(value_enableHoverMode_value)
-        }
-        const value_followTransformOfTarget  = value.followTransformOfTarget
-        let value_followTransformOfTarget_type : int32 = RuntimeType.UNDEFINED
-        value_followTransformOfTarget_type = runtimeType(value_followTransformOfTarget)
-        valueSerializer.writeInt8((value_followTransformOfTarget_type).toChar())
-        if ((value_followTransformOfTarget_type) != (RuntimeType.UNDEFINED)) {
-            const value_followTransformOfTarget_value  = value_followTransformOfTarget!
-            valueSerializer.writeBoolean(value_followTransformOfTarget_value)
-        }
-        const value_keyboardAvoidMode  = value.keyboardAvoidMode
-        let value_keyboardAvoidMode_type : int32 = RuntimeType.UNDEFINED
-        value_keyboardAvoidMode_type = runtimeType(value_keyboardAvoidMode)
-        valueSerializer.writeInt8((value_keyboardAvoidMode_type).toChar())
-        if ((value_keyboardAvoidMode_type) != (RuntimeType.UNDEFINED)) {
-            const value_keyboardAvoidMode_value  = (value_keyboardAvoidMode as KeyboardAvoidMode)
-            valueSerializer.writeInt32(TypeChecker.KeyboardAvoidMode_ToNumeric(value_keyboardAvoidMode_value))
-        }
-    }
-    public static read(buffer: DeserializerBase): CustomPopupOptions {
-        let valueDeserializer : DeserializerBase = buffer
-        const builder_buf_resource : CallbackResource = valueDeserializer.readCallbackResource()
-        const builder_buf_call : KPointer = valueDeserializer.readPointer()
-        const builder_buf_callSync : KPointer = valueDeserializer.readPointer()
-        const builder_result : CustomBuilder = ():void => { 
-    const builder_buf_argsSerializer : SerializerBase = SerializerBase.hold();
-    builder_buf_argsSerializer.writeInt32(builder_buf_resource.resourceId);
-    builder_buf_argsSerializer.writePointer(builder_buf_call);
-    builder_buf_argsSerializer.writePointer(builder_buf_callSync);
-    InteropNativeModule._CallCallback(737226752, builder_buf_argsSerializer.asBuffer(), builder_buf_argsSerializer.length());
-    builder_buf_argsSerializer.release();
-    return; }
-        const placement_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let placement_buf : Placement | undefined
-        if ((placement_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            placement_buf = TypeChecker.Placement_FromNumeric(valueDeserializer.readInt32())
-        }
-        const placement_result : Placement | undefined = placement_buf
-        const popupColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let popupColor_buf : Color | string | Resource | number | undefined
-        if ((popupColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const popupColor_buf__selector : int32 = valueDeserializer.readInt8()
-            let popupColor_buf_ : Color | string | Resource | number | undefined
-            if (popupColor_buf__selector == (0).toChar()) {
-                popupColor_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-            }
-            else if (popupColor_buf__selector == (1).toChar()) {
-                popupColor_buf_ = (valueDeserializer.readString() as string)
-            }
-            else if (popupColor_buf__selector == (2).toChar()) {
-                popupColor_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else if (popupColor_buf__selector == (3).toChar()) {
-                popupColor_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else {
-                throw new Error("One of the branches for popupColor_buf_ has to be chosen through deserialisation.")
-            }
-            popupColor_buf = (popupColor_buf_ as Color | string | Resource | number)
-        }
-        const popupColor_result : Color | string | Resource | number | undefined = popupColor_buf
-        const enableArrow_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let enableArrow_buf : boolean | undefined
-        if ((enableArrow_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            enableArrow_buf = valueDeserializer.readBoolean()
-        }
-        const enableArrow_result : boolean | undefined = enableArrow_buf
-        const autoCancel_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let autoCancel_buf : boolean | undefined
-        if ((autoCancel_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            autoCancel_buf = valueDeserializer.readBoolean()
-        }
-        const autoCancel_result : boolean | undefined = autoCancel_buf
-        const onStateChange_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let onStateChange_buf : PopupStateChangeCallback | undefined
-        if ((onStateChange_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const onStateChange_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
-            const onStateChange_buf__call : KPointer = valueDeserializer.readPointer()
-            const onStateChange_buf__callSync : KPointer = valueDeserializer.readPointer()
-            onStateChange_buf = (event: PopupStateChangeParam):void => { 
-    const onStateChange_buf__argsSerializer : SerializerBase = SerializerBase.hold();
-    onStateChange_buf__argsSerializer.writeInt32(onStateChange_buf__resource.resourceId);
-    onStateChange_buf__argsSerializer.writePointer(onStateChange_buf__call);
-    onStateChange_buf__argsSerializer.writePointer(onStateChange_buf__callSync);
-    PopupStateChangeParam_serializer.write(onStateChange_buf__argsSerializer, event);
-    InteropNativeModule._CallCallback(-1444325632, onStateChange_buf__argsSerializer.asBuffer(), onStateChange_buf__argsSerializer.length());
-    onStateChange_buf__argsSerializer.release();
-    return; }
-        }
-        const onStateChange_result : PopupStateChangeCallback | undefined = onStateChange_buf
-        const arrowOffset_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let arrowOffset_buf : Length | undefined
-        if ((arrowOffset_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const arrowOffset_buf__selector : int32 = valueDeserializer.readInt8()
-            let arrowOffset_buf_ : string | number | Resource | undefined
-            if (arrowOffset_buf__selector == (0).toChar()) {
-                arrowOffset_buf_ = (valueDeserializer.readString() as string)
-            }
-            else if (arrowOffset_buf__selector == (1).toChar()) {
-                arrowOffset_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (arrowOffset_buf__selector == (2).toChar()) {
-                arrowOffset_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for arrowOffset_buf_ has to be chosen through deserialisation.")
-            }
-            arrowOffset_buf = (arrowOffset_buf_ as string | number | Resource)
-        }
-        const arrowOffset_result : Length | undefined = arrowOffset_buf
-        const showInSubWindow_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let showInSubWindow_buf : boolean | undefined
-        if ((showInSubWindow_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            showInSubWindow_buf = valueDeserializer.readBoolean()
-        }
-        const showInSubWindow_result : boolean | undefined = showInSubWindow_buf
-        const mask_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let mask_buf : boolean | PopupMaskType | undefined
-        if ((mask_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const mask_buf__selector : int32 = valueDeserializer.readInt8()
-            let mask_buf_ : boolean | PopupMaskType | undefined
-            if (mask_buf__selector == (0).toChar()) {
-                mask_buf_ = valueDeserializer.readBoolean()
-            }
-            else if (mask_buf__selector == (1).toChar()) {
-                mask_buf_ = PopupMaskType_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for mask_buf_ has to be chosen through deserialisation.")
-            }
-            mask_buf = (mask_buf_ as boolean | PopupMaskType)
-        }
-        const mask_result : boolean | PopupMaskType | undefined = mask_buf
-        const targetSpace_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let targetSpace_buf : Length | undefined
-        if ((targetSpace_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const targetSpace_buf__selector : int32 = valueDeserializer.readInt8()
-            let targetSpace_buf_ : string | number | Resource | undefined
-            if (targetSpace_buf__selector == (0).toChar()) {
-                targetSpace_buf_ = (valueDeserializer.readString() as string)
-            }
-            else if (targetSpace_buf__selector == (1).toChar()) {
-                targetSpace_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (targetSpace_buf__selector == (2).toChar()) {
-                targetSpace_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for targetSpace_buf_ has to be chosen through deserialisation.")
-            }
-            targetSpace_buf = (targetSpace_buf_ as string | number | Resource)
-        }
-        const targetSpace_result : Length | undefined = targetSpace_buf
-        const offset_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let offset_buf : Position | undefined
-        if ((offset_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            offset_buf = Position_serializer.read(valueDeserializer)
-        }
-        const offset_result : Position | undefined = offset_buf
-        const width_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let width_buf : Dimension | undefined
-        if ((width_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const width_buf__selector : int32 = valueDeserializer.readInt8()
-            let width_buf_ : string | number | Resource | undefined
-            if (width_buf__selector == (0).toChar()) {
-                width_buf_ = (valueDeserializer.readString() as string)
-            }
-            else if (width_buf__selector == (1).toChar()) {
-                width_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (width_buf__selector == (2).toChar()) {
-                width_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for width_buf_ has to be chosen through deserialisation.")
-            }
-            width_buf = (width_buf_ as string | number | Resource)
-        }
-        const width_result : Dimension | undefined = width_buf
-        const arrowPointPosition_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let arrowPointPosition_buf : ArrowPointPosition | undefined
-        if ((arrowPointPosition_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            arrowPointPosition_buf = TypeChecker.ArrowPointPosition_FromNumeric(valueDeserializer.readInt32())
-        }
-        const arrowPointPosition_result : ArrowPointPosition | undefined = arrowPointPosition_buf
-        const arrowWidth_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let arrowWidth_buf : Dimension | undefined
-        if ((arrowWidth_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const arrowWidth_buf__selector : int32 = valueDeserializer.readInt8()
-            let arrowWidth_buf_ : string | number | Resource | undefined
-            if (arrowWidth_buf__selector == (0).toChar()) {
-                arrowWidth_buf_ = (valueDeserializer.readString() as string)
-            }
-            else if (arrowWidth_buf__selector == (1).toChar()) {
-                arrowWidth_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (arrowWidth_buf__selector == (2).toChar()) {
-                arrowWidth_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for arrowWidth_buf_ has to be chosen through deserialisation.")
-            }
-            arrowWidth_buf = (arrowWidth_buf_ as string | number | Resource)
-        }
-        const arrowWidth_result : Dimension | undefined = arrowWidth_buf
-        const arrowHeight_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let arrowHeight_buf : Dimension | undefined
-        if ((arrowHeight_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const arrowHeight_buf__selector : int32 = valueDeserializer.readInt8()
-            let arrowHeight_buf_ : string | number | Resource | undefined
-            if (arrowHeight_buf__selector == (0).toChar()) {
-                arrowHeight_buf_ = (valueDeserializer.readString() as string)
-            }
-            else if (arrowHeight_buf__selector == (1).toChar()) {
-                arrowHeight_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (arrowHeight_buf__selector == (2).toChar()) {
-                arrowHeight_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for arrowHeight_buf_ has to be chosen through deserialisation.")
-            }
-            arrowHeight_buf = (arrowHeight_buf_ as string | number | Resource)
-        }
-        const arrowHeight_result : Dimension | undefined = arrowHeight_buf
-        const radius_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let radius_buf : Dimension | undefined
-        if ((radius_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const radius_buf__selector : int32 = valueDeserializer.readInt8()
-            let radius_buf_ : string | number | Resource | undefined
-            if (radius_buf__selector == (0).toChar()) {
-                radius_buf_ = (valueDeserializer.readString() as string)
-            }
-            else if (radius_buf__selector == (1).toChar()) {
-                radius_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (radius_buf__selector == (2).toChar()) {
-                radius_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for radius_buf_ has to be chosen through deserialisation.")
-            }
-            radius_buf = (radius_buf_ as string | number | Resource)
-        }
-        const radius_result : Dimension | undefined = radius_buf
-        const shadow_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let shadow_buf : ShadowOptions | ShadowStyle | undefined
-        if ((shadow_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const shadow_buf__selector : int32 = valueDeserializer.readInt8()
-            let shadow_buf_ : ShadowOptions | ShadowStyle | undefined
-            if (shadow_buf__selector == (0).toChar()) {
-                shadow_buf_ = ShadowOptions_serializer.read(valueDeserializer)
-            }
-            else if (shadow_buf__selector == (1).toChar()) {
-                shadow_buf_ = TypeChecker.ShadowStyle_FromNumeric(valueDeserializer.readInt32())
-            }
-            else {
-                throw new Error("One of the branches for shadow_buf_ has to be chosen through deserialisation.")
-            }
-            shadow_buf = (shadow_buf_ as ShadowOptions | ShadowStyle)
-        }
-        const shadow_result : ShadowOptions | ShadowStyle | undefined = shadow_buf
-        const backgroundBlurStyle_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let backgroundBlurStyle_buf : BlurStyle | undefined
-        if ((backgroundBlurStyle_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            backgroundBlurStyle_buf = TypeChecker.BlurStyle_FromNumeric(valueDeserializer.readInt32())
-        }
-        const backgroundBlurStyle_result : BlurStyle | undefined = backgroundBlurStyle_buf
-        const focusable_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let focusable_buf : boolean | undefined
-        if ((focusable_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            focusable_buf = valueDeserializer.readBoolean()
-        }
-        const focusable_result : boolean | undefined = focusable_buf
-        const transition_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let transition_buf : TransitionEffect | undefined
-        if ((transition_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            transition_buf = (TransitionEffect_serializer.read(valueDeserializer) as TransitionEffect)
-        }
-        const transition_result : TransitionEffect | undefined = transition_buf
-        const onWillDismiss_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let onWillDismiss_buf : boolean | ((value0: DismissPopupAction) => void) | undefined
-        if ((onWillDismiss_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const onWillDismiss_buf__selector : int32 = valueDeserializer.readInt8()
-            let onWillDismiss_buf_ : boolean | ((value0: DismissPopupAction) => void) | undefined
-            if (onWillDismiss_buf__selector == (0).toChar()) {
-                onWillDismiss_buf_ = valueDeserializer.readBoolean()
-            }
-            else if (onWillDismiss_buf__selector == (1).toChar()) {
-                const onWillDismiss_buf__u_resource : CallbackResource = valueDeserializer.readCallbackResource()
-                const onWillDismiss_buf__u_call : KPointer = valueDeserializer.readPointer()
-                const onWillDismiss_buf__u_callSync : KPointer = valueDeserializer.readPointer()
-                onWillDismiss_buf_ = (value0: DismissPopupAction):void => { 
-    const onWillDismiss_buf__u_argsSerializer : SerializerBase = SerializerBase.hold();
-    onWillDismiss_buf__u_argsSerializer.writeInt32(onWillDismiss_buf__u_resource.resourceId);
-    onWillDismiss_buf__u_argsSerializer.writePointer(onWillDismiss_buf__u_call);
-    onWillDismiss_buf__u_argsSerializer.writePointer(onWillDismiss_buf__u_callSync);
-    DismissPopupAction_serializer.write(onWillDismiss_buf__u_argsSerializer, value0);
-    InteropNativeModule._CallCallback(-2004166751, onWillDismiss_buf__u_argsSerializer.asBuffer(), onWillDismiss_buf__u_argsSerializer.length());
-    onWillDismiss_buf__u_argsSerializer.release();
-    return; }
-            }
-            else {
-                throw new Error("One of the branches for onWillDismiss_buf_ has to be chosen through deserialisation.")
-            }
-            onWillDismiss_buf = (onWillDismiss_buf_ as boolean | ((value0: DismissPopupAction) => void))
-        }
-        const onWillDismiss_result : boolean | ((value0: DismissPopupAction) => void) | undefined = onWillDismiss_buf
-        const enableHoverMode_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let enableHoverMode_buf : boolean | undefined
-        if ((enableHoverMode_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            enableHoverMode_buf = valueDeserializer.readBoolean()
-        }
-        const enableHoverMode_result : boolean | undefined = enableHoverMode_buf
-        const followTransformOfTarget_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let followTransformOfTarget_buf : boolean | undefined
-        if ((followTransformOfTarget_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            followTransformOfTarget_buf = valueDeserializer.readBoolean()
-        }
-        const followTransformOfTarget_result : boolean | undefined = followTransformOfTarget_buf
-        const keyboardAvoidMode_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let keyboardAvoidMode_buf : KeyboardAvoidMode | undefined
-        if ((keyboardAvoidMode_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            keyboardAvoidMode_buf = TypeChecker.KeyboardAvoidMode_FromNumeric(valueDeserializer.readInt32())
-        }
-        const keyboardAvoidMode_result : KeyboardAvoidMode | undefined = keyboardAvoidMode_buf
-        let value : CustomPopupOptions = ({builder: builder_result, placement: placement_result, popupColor: popupColor_result, enableArrow: enableArrow_result, autoCancel: autoCancel_result, onStateChange: onStateChange_result, arrowOffset: arrowOffset_result, showInSubWindow: showInSubWindow_result, mask: mask_result, targetSpace: targetSpace_result, offset: offset_result, width: width_result, arrowPointPosition: arrowPointPosition_result, arrowWidth: arrowWidth_result, arrowHeight: arrowHeight_result, radius: radius_result, shadow: shadow_result, backgroundBlurStyle: backgroundBlurStyle_result, focusable: focusable_result, transition: transition_result, onWillDismiss: onWillDismiss_result, enableHoverMode: enableHoverMode_result, followTransformOfTarget: followTransformOfTarget_result, keyboardAvoidMode: keyboardAvoidMode_result} as CustomPopupOptions)
-        return value
-    }
-}
 export class EventTarget_serializer {
     public static write(buffer: SerializerBase, value: EventTarget): void {
         let valueSerializer : SerializerBase = buffer
@@ -20978,770 +19292,6 @@ export class LayoutChild_serializer {
         let valueDeserializer : DeserializerBase = buffer
         let ptr : KPointer = valueDeserializer.readPointer()
         return LayoutChildInternal.fromPtr(ptr)
-    }
-}
-export class MenuOptions_serializer {
-    public static write(buffer: SerializerBase, value: MenuOptions): void {
-        let valueSerializer : SerializerBase = buffer
-        const value_offset  = value.offset
-        let value_offset_type : int32 = RuntimeType.UNDEFINED
-        value_offset_type = runtimeType(value_offset)
-        valueSerializer.writeInt8((value_offset_type).toChar())
-        if ((value_offset_type) != (RuntimeType.UNDEFINED)) {
-            const value_offset_value  = value_offset!
-            Position_serializer.write(valueSerializer, value_offset_value)
-        }
-        const value_placement  = value.placement
-        let value_placement_type : int32 = RuntimeType.UNDEFINED
-        value_placement_type = runtimeType(value_placement)
-        valueSerializer.writeInt8((value_placement_type).toChar())
-        if ((value_placement_type) != (RuntimeType.UNDEFINED)) {
-            const value_placement_value  = (value_placement as Placement)
-            valueSerializer.writeInt32(TypeChecker.Placement_ToNumeric(value_placement_value))
-        }
-        const value_enableArrow  = value.enableArrow
-        let value_enableArrow_type : int32 = RuntimeType.UNDEFINED
-        value_enableArrow_type = runtimeType(value_enableArrow)
-        valueSerializer.writeInt8((value_enableArrow_type).toChar())
-        if ((value_enableArrow_type) != (RuntimeType.UNDEFINED)) {
-            const value_enableArrow_value  = value_enableArrow!
-            valueSerializer.writeBoolean(value_enableArrow_value)
-        }
-        const value_arrowOffset  = value.arrowOffset
-        let value_arrowOffset_type : int32 = RuntimeType.UNDEFINED
-        value_arrowOffset_type = runtimeType(value_arrowOffset)
-        valueSerializer.writeInt8((value_arrowOffset_type).toChar())
-        if ((value_arrowOffset_type) != (RuntimeType.UNDEFINED)) {
-            const value_arrowOffset_value  = value_arrowOffset!
-            let value_arrowOffset_value_type : int32 = RuntimeType.UNDEFINED
-            value_arrowOffset_value_type = runtimeType(value_arrowOffset_value)
-            if (RuntimeType.STRING == value_arrowOffset_value_type) {
-                valueSerializer.writeInt8((0).toChar())
-                const value_arrowOffset_value_0  = value_arrowOffset_value as string
-                valueSerializer.writeString(value_arrowOffset_value_0)
-            }
-            else if (RuntimeType.NUMBER == value_arrowOffset_value_type) {
-                valueSerializer.writeInt8((1).toChar())
-                const value_arrowOffset_value_1  = value_arrowOffset_value as number
-                valueSerializer.writeNumber(value_arrowOffset_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_arrowOffset_value_type) {
-                valueSerializer.writeInt8((2).toChar())
-                const value_arrowOffset_value_2  = value_arrowOffset_value as Resource
-                Resource_serializer.write(valueSerializer, value_arrowOffset_value_2)
-            }
-        }
-        const value_preview  = value.preview
-        let value_preview_type : int32 = RuntimeType.UNDEFINED
-        value_preview_type = runtimeType(value_preview)
-        valueSerializer.writeInt8((value_preview_type).toChar())
-        if ((value_preview_type) != (RuntimeType.UNDEFINED)) {
-            const value_preview_value  = value_preview!
-            let value_preview_value_type : int32 = RuntimeType.UNDEFINED
-            value_preview_value_type = runtimeType(value_preview_value)
-            if (TypeChecker.isMenuPreviewMode(value_preview_value)) {
-                valueSerializer.writeInt8((0).toChar())
-                const value_preview_value_0  = value_preview_value as MenuPreviewMode
-                valueSerializer.writeInt32(TypeChecker.MenuPreviewMode_ToNumeric(value_preview_value_0))
-            }
-            else if (RuntimeType.FUNCTION == value_preview_value_type) {
-                valueSerializer.writeInt8((1).toChar())
-                const value_preview_value_1  = value_preview_value as CustomBuilder
-                valueSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(value_preview_value_1))
-            }
-        }
-        const value_previewBorderRadius  = value.previewBorderRadius
-        let value_previewBorderRadius_type : int32 = RuntimeType.UNDEFINED
-        value_previewBorderRadius_type = runtimeType(value_previewBorderRadius)
-        valueSerializer.writeInt8((value_previewBorderRadius_type).toChar())
-        if ((value_previewBorderRadius_type) != (RuntimeType.UNDEFINED)) {
-            const value_previewBorderRadius_value  = value_previewBorderRadius!
-            let value_previewBorderRadius_value_type : int32 = RuntimeType.UNDEFINED
-            value_previewBorderRadius_value_type = runtimeType(value_previewBorderRadius_value)
-            if ((RuntimeType.STRING == value_previewBorderRadius_value_type) || (RuntimeType.NUMBER == value_previewBorderRadius_value_type) || (RuntimeType.OBJECT == value_previewBorderRadius_value_type)) {
-                valueSerializer.writeInt8((0).toChar())
-                const value_previewBorderRadius_value_0  = value_previewBorderRadius_value as Length
-                let value_previewBorderRadius_value_0_type : int32 = RuntimeType.UNDEFINED
-                value_previewBorderRadius_value_0_type = runtimeType(value_previewBorderRadius_value_0)
-                if (RuntimeType.STRING == value_previewBorderRadius_value_0_type) {
-                    valueSerializer.writeInt8((0).toChar())
-                    const value_previewBorderRadius_value_0_0  = value_previewBorderRadius_value_0 as string
-                    valueSerializer.writeString(value_previewBorderRadius_value_0_0)
-                }
-                else if (RuntimeType.NUMBER == value_previewBorderRadius_value_0_type) {
-                    valueSerializer.writeInt8((1).toChar())
-                    const value_previewBorderRadius_value_0_1  = value_previewBorderRadius_value_0 as number
-                    valueSerializer.writeNumber(value_previewBorderRadius_value_0_1)
-                }
-                else if (RuntimeType.OBJECT == value_previewBorderRadius_value_0_type) {
-                    valueSerializer.writeInt8((2).toChar())
-                    const value_previewBorderRadius_value_0_2  = value_previewBorderRadius_value_0 as Resource
-                    Resource_serializer.write(valueSerializer, value_previewBorderRadius_value_0_2)
-                }
-            }
-            else if (TypeChecker.isBorderRadiuses(value_previewBorderRadius_value, false, false, false, false)) {
-                valueSerializer.writeInt8((1).toChar())
-                const value_previewBorderRadius_value_1  = value_previewBorderRadius_value as BorderRadiuses
-                BorderRadiuses_serializer.write(valueSerializer, value_previewBorderRadius_value_1)
-            }
-            else if (TypeChecker.isLocalizedBorderRadiuses(value_previewBorderRadius_value, false, false, false, false)) {
-                valueSerializer.writeInt8((2).toChar())
-                const value_previewBorderRadius_value_2  = value_previewBorderRadius_value as LocalizedBorderRadiuses
-                LocalizedBorderRadiuses_serializer.write(valueSerializer, value_previewBorderRadius_value_2)
-            }
-        }
-        const value_borderRadius  = value.borderRadius
-        let value_borderRadius_type : int32 = RuntimeType.UNDEFINED
-        value_borderRadius_type = runtimeType(value_borderRadius)
-        valueSerializer.writeInt8((value_borderRadius_type).toChar())
-        if ((value_borderRadius_type) != (RuntimeType.UNDEFINED)) {
-            const value_borderRadius_value  = value_borderRadius!
-            let value_borderRadius_value_type : int32 = RuntimeType.UNDEFINED
-            value_borderRadius_value_type = runtimeType(value_borderRadius_value)
-            if ((RuntimeType.STRING == value_borderRadius_value_type) || (RuntimeType.NUMBER == value_borderRadius_value_type) || (RuntimeType.OBJECT == value_borderRadius_value_type)) {
-                valueSerializer.writeInt8((0).toChar())
-                const value_borderRadius_value_0  = value_borderRadius_value as Length
-                let value_borderRadius_value_0_type : int32 = RuntimeType.UNDEFINED
-                value_borderRadius_value_0_type = runtimeType(value_borderRadius_value_0)
-                if (RuntimeType.STRING == value_borderRadius_value_0_type) {
-                    valueSerializer.writeInt8((0).toChar())
-                    const value_borderRadius_value_0_0  = value_borderRadius_value_0 as string
-                    valueSerializer.writeString(value_borderRadius_value_0_0)
-                }
-                else if (RuntimeType.NUMBER == value_borderRadius_value_0_type) {
-                    valueSerializer.writeInt8((1).toChar())
-                    const value_borderRadius_value_0_1  = value_borderRadius_value_0 as number
-                    valueSerializer.writeNumber(value_borderRadius_value_0_1)
-                }
-                else if (RuntimeType.OBJECT == value_borderRadius_value_0_type) {
-                    valueSerializer.writeInt8((2).toChar())
-                    const value_borderRadius_value_0_2  = value_borderRadius_value_0 as Resource
-                    Resource_serializer.write(valueSerializer, value_borderRadius_value_0_2)
-                }
-            }
-            else if (TypeChecker.isBorderRadiuses(value_borderRadius_value, false, false, false, false)) {
-                valueSerializer.writeInt8((1).toChar())
-                const value_borderRadius_value_1  = value_borderRadius_value as BorderRadiuses
-                BorderRadiuses_serializer.write(valueSerializer, value_borderRadius_value_1)
-            }
-            else if (TypeChecker.isLocalizedBorderRadiuses(value_borderRadius_value, false, false, false, false)) {
-                valueSerializer.writeInt8((2).toChar())
-                const value_borderRadius_value_2  = value_borderRadius_value as LocalizedBorderRadiuses
-                LocalizedBorderRadiuses_serializer.write(valueSerializer, value_borderRadius_value_2)
-            }
-        }
-        const value_onAppear  = value.onAppear
-        let value_onAppear_type : int32 = RuntimeType.UNDEFINED
-        value_onAppear_type = runtimeType(value_onAppear)
-        valueSerializer.writeInt8((value_onAppear_type).toChar())
-        if ((value_onAppear_type) != (RuntimeType.UNDEFINED)) {
-            const value_onAppear_value  = value_onAppear!
-            valueSerializer.holdAndWriteCallback(value_onAppear_value)
-        }
-        const value_onDisappear  = value.onDisappear
-        let value_onDisappear_type : int32 = RuntimeType.UNDEFINED
-        value_onDisappear_type = runtimeType(value_onDisappear)
-        valueSerializer.writeInt8((value_onDisappear_type).toChar())
-        if ((value_onDisappear_type) != (RuntimeType.UNDEFINED)) {
-            const value_onDisappear_value  = value_onDisappear!
-            valueSerializer.holdAndWriteCallback(value_onDisappear_value)
-        }
-        const value_aboutToAppear  = value.aboutToAppear
-        let value_aboutToAppear_type : int32 = RuntimeType.UNDEFINED
-        value_aboutToAppear_type = runtimeType(value_aboutToAppear)
-        valueSerializer.writeInt8((value_aboutToAppear_type).toChar())
-        if ((value_aboutToAppear_type) != (RuntimeType.UNDEFINED)) {
-            const value_aboutToAppear_value  = value_aboutToAppear!
-            valueSerializer.holdAndWriteCallback(value_aboutToAppear_value)
-        }
-        const value_aboutToDisappear  = value.aboutToDisappear
-        let value_aboutToDisappear_type : int32 = RuntimeType.UNDEFINED
-        value_aboutToDisappear_type = runtimeType(value_aboutToDisappear)
-        valueSerializer.writeInt8((value_aboutToDisappear_type).toChar())
-        if ((value_aboutToDisappear_type) != (RuntimeType.UNDEFINED)) {
-            const value_aboutToDisappear_value  = value_aboutToDisappear!
-            valueSerializer.holdAndWriteCallback(value_aboutToDisappear_value)
-        }
-        const value_layoutRegionMargin  = value.layoutRegionMargin
-        let value_layoutRegionMargin_type : int32 = RuntimeType.UNDEFINED
-        value_layoutRegionMargin_type = runtimeType(value_layoutRegionMargin)
-        valueSerializer.writeInt8((value_layoutRegionMargin_type).toChar())
-        if ((value_layoutRegionMargin_type) != (RuntimeType.UNDEFINED)) {
-            const value_layoutRegionMargin_value  = value_layoutRegionMargin!
-            Padding_serializer.write(valueSerializer, value_layoutRegionMargin_value)
-        }
-        const value_previewAnimationOptions  = value.previewAnimationOptions
-        let value_previewAnimationOptions_type : int32 = RuntimeType.UNDEFINED
-        value_previewAnimationOptions_type = runtimeType(value_previewAnimationOptions)
-        valueSerializer.writeInt8((value_previewAnimationOptions_type).toChar())
-        if ((value_previewAnimationOptions_type) != (RuntimeType.UNDEFINED)) {
-            const value_previewAnimationOptions_value  = value_previewAnimationOptions!
-            ContextMenuAnimationOptions_serializer.write(valueSerializer, value_previewAnimationOptions_value)
-        }
-        const value_backgroundColor  = value.backgroundColor
-        let value_backgroundColor_type : int32 = RuntimeType.UNDEFINED
-        value_backgroundColor_type = runtimeType(value_backgroundColor)
-        valueSerializer.writeInt8((value_backgroundColor_type).toChar())
-        if ((value_backgroundColor_type) != (RuntimeType.UNDEFINED)) {
-            const value_backgroundColor_value  = value_backgroundColor!
-            let value_backgroundColor_value_type : int32 = RuntimeType.UNDEFINED
-            value_backgroundColor_value_type = runtimeType(value_backgroundColor_value)
-            if (TypeChecker.isColor(value_backgroundColor_value)) {
-                valueSerializer.writeInt8((0).toChar())
-                const value_backgroundColor_value_0  = value_backgroundColor_value as Color
-                valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_backgroundColor_value_0))
-            }
-            else if (RuntimeType.NUMBER == value_backgroundColor_value_type) {
-                valueSerializer.writeInt8((1).toChar())
-                const value_backgroundColor_value_1  = value_backgroundColor_value as number
-                valueSerializer.writeNumber(value_backgroundColor_value_1)
-            }
-            else if (RuntimeType.STRING == value_backgroundColor_value_type) {
-                valueSerializer.writeInt8((2).toChar())
-                const value_backgroundColor_value_2  = value_backgroundColor_value as string
-                valueSerializer.writeString(value_backgroundColor_value_2)
-            }
-            else if (RuntimeType.OBJECT == value_backgroundColor_value_type) {
-                valueSerializer.writeInt8((3).toChar())
-                const value_backgroundColor_value_3  = value_backgroundColor_value as Resource
-                Resource_serializer.write(valueSerializer, value_backgroundColor_value_3)
-            }
-        }
-        const value_backgroundBlurStyle  = value.backgroundBlurStyle
-        let value_backgroundBlurStyle_type : int32 = RuntimeType.UNDEFINED
-        value_backgroundBlurStyle_type = runtimeType(value_backgroundBlurStyle)
-        valueSerializer.writeInt8((value_backgroundBlurStyle_type).toChar())
-        if ((value_backgroundBlurStyle_type) != (RuntimeType.UNDEFINED)) {
-            const value_backgroundBlurStyle_value  = (value_backgroundBlurStyle as BlurStyle)
-            valueSerializer.writeInt32(TypeChecker.BlurStyle_ToNumeric(value_backgroundBlurStyle_value))
-        }
-        const value_backgroundBlurStyleOptions  = value.backgroundBlurStyleOptions
-        let value_backgroundBlurStyleOptions_type : int32 = RuntimeType.UNDEFINED
-        value_backgroundBlurStyleOptions_type = runtimeType(value_backgroundBlurStyleOptions)
-        valueSerializer.writeInt8((value_backgroundBlurStyleOptions_type).toChar())
-        if ((value_backgroundBlurStyleOptions_type) != (RuntimeType.UNDEFINED)) {
-            const value_backgroundBlurStyleOptions_value  = value_backgroundBlurStyleOptions!
-            BackgroundBlurStyleOptions_serializer.write(valueSerializer, value_backgroundBlurStyleOptions_value)
-        }
-        const value_backgroundEffect  = value.backgroundEffect
-        let value_backgroundEffect_type : int32 = RuntimeType.UNDEFINED
-        value_backgroundEffect_type = runtimeType(value_backgroundEffect)
-        valueSerializer.writeInt8((value_backgroundEffect_type).toChar())
-        if ((value_backgroundEffect_type) != (RuntimeType.UNDEFINED)) {
-            const value_backgroundEffect_value  = value_backgroundEffect!
-            BackgroundEffectOptions_serializer.write(valueSerializer, value_backgroundEffect_value)
-        }
-        const value_transition  = value.transition
-        let value_transition_type : int32 = RuntimeType.UNDEFINED
-        value_transition_type = runtimeType(value_transition)
-        valueSerializer.writeInt8((value_transition_type).toChar())
-        if ((value_transition_type) != (RuntimeType.UNDEFINED)) {
-            const value_transition_value  = value_transition!
-            TransitionEffect_serializer.write(valueSerializer, value_transition_value)
-        }
-        const value_enableHoverMode  = value.enableHoverMode
-        let value_enableHoverMode_type : int32 = RuntimeType.UNDEFINED
-        value_enableHoverMode_type = runtimeType(value_enableHoverMode)
-        valueSerializer.writeInt8((value_enableHoverMode_type).toChar())
-        if ((value_enableHoverMode_type) != (RuntimeType.UNDEFINED)) {
-            const value_enableHoverMode_value  = value_enableHoverMode!
-            valueSerializer.writeBoolean(value_enableHoverMode_value)
-        }
-        const value_outlineColor  = value.outlineColor
-        let value_outlineColor_type : int32 = RuntimeType.UNDEFINED
-        value_outlineColor_type = runtimeType(value_outlineColor)
-        valueSerializer.writeInt8((value_outlineColor_type).toChar())
-        if ((value_outlineColor_type) != (RuntimeType.UNDEFINED)) {
-            const value_outlineColor_value  = value_outlineColor!
-            let value_outlineColor_value_type : int32 = RuntimeType.UNDEFINED
-            value_outlineColor_value_type = runtimeType(value_outlineColor_value)
-            if ((TypeChecker.isColor(value_outlineColor_value)) || (RuntimeType.NUMBER == value_outlineColor_value_type) || (RuntimeType.STRING == value_outlineColor_value_type) || (RuntimeType.OBJECT == value_outlineColor_value_type)) {
-                valueSerializer.writeInt8((0).toChar())
-                const value_outlineColor_value_0  = value_outlineColor_value as ResourceColor
-                let value_outlineColor_value_0_type : int32 = RuntimeType.UNDEFINED
-                value_outlineColor_value_0_type = runtimeType(value_outlineColor_value_0)
-                if (TypeChecker.isColor(value_outlineColor_value_0)) {
-                    valueSerializer.writeInt8((0).toChar())
-                    const value_outlineColor_value_0_0  = value_outlineColor_value_0 as Color
-                    valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_outlineColor_value_0_0))
-                }
-                else if (RuntimeType.NUMBER == value_outlineColor_value_0_type) {
-                    valueSerializer.writeInt8((1).toChar())
-                    const value_outlineColor_value_0_1  = value_outlineColor_value_0 as number
-                    valueSerializer.writeNumber(value_outlineColor_value_0_1)
-                }
-                else if (RuntimeType.STRING == value_outlineColor_value_0_type) {
-                    valueSerializer.writeInt8((2).toChar())
-                    const value_outlineColor_value_0_2  = value_outlineColor_value_0 as string
-                    valueSerializer.writeString(value_outlineColor_value_0_2)
-                }
-                else if (RuntimeType.OBJECT == value_outlineColor_value_0_type) {
-                    valueSerializer.writeInt8((3).toChar())
-                    const value_outlineColor_value_0_3  = value_outlineColor_value_0 as Resource
-                    Resource_serializer.write(valueSerializer, value_outlineColor_value_0_3)
-                }
-            }
-            else if (TypeChecker.isEdgeColors(value_outlineColor_value, false, false, false, false)) {
-                valueSerializer.writeInt8((1).toChar())
-                const value_outlineColor_value_1  = value_outlineColor_value as EdgeColors
-                EdgeColors_serializer.write(valueSerializer, value_outlineColor_value_1)
-            }
-        }
-        const value_outlineWidth  = value.outlineWidth
-        let value_outlineWidth_type : int32 = RuntimeType.UNDEFINED
-        value_outlineWidth_type = runtimeType(value_outlineWidth)
-        valueSerializer.writeInt8((value_outlineWidth_type).toChar())
-        if ((value_outlineWidth_type) != (RuntimeType.UNDEFINED)) {
-            const value_outlineWidth_value  = value_outlineWidth!
-            let value_outlineWidth_value_type : int32 = RuntimeType.UNDEFINED
-            value_outlineWidth_value_type = runtimeType(value_outlineWidth_value)
-            if ((RuntimeType.STRING == value_outlineWidth_value_type) || (RuntimeType.NUMBER == value_outlineWidth_value_type) || (RuntimeType.OBJECT == value_outlineWidth_value_type)) {
-                valueSerializer.writeInt8((0).toChar())
-                const value_outlineWidth_value_0  = value_outlineWidth_value as Dimension
-                let value_outlineWidth_value_0_type : int32 = RuntimeType.UNDEFINED
-                value_outlineWidth_value_0_type = runtimeType(value_outlineWidth_value_0)
-                if (RuntimeType.STRING == value_outlineWidth_value_0_type) {
-                    valueSerializer.writeInt8((0).toChar())
-                    const value_outlineWidth_value_0_0  = value_outlineWidth_value_0 as string
-                    valueSerializer.writeString(value_outlineWidth_value_0_0)
-                }
-                else if (RuntimeType.NUMBER == value_outlineWidth_value_0_type) {
-                    valueSerializer.writeInt8((1).toChar())
-                    const value_outlineWidth_value_0_1  = value_outlineWidth_value_0 as number
-                    valueSerializer.writeNumber(value_outlineWidth_value_0_1)
-                }
-                else if (RuntimeType.OBJECT == value_outlineWidth_value_0_type) {
-                    valueSerializer.writeInt8((2).toChar())
-                    const value_outlineWidth_value_0_2  = value_outlineWidth_value_0 as Resource
-                    Resource_serializer.write(valueSerializer, value_outlineWidth_value_0_2)
-                }
-            }
-            else if (TypeChecker.isEdgeOutlineWidths(value_outlineWidth_value, false, false, false, false)) {
-                valueSerializer.writeInt8((1).toChar())
-                const value_outlineWidth_value_1  = value_outlineWidth_value as EdgeOutlineWidths
-                EdgeOutlineWidths_serializer.write(valueSerializer, value_outlineWidth_value_1)
-            }
-        }
-        const value_hapticFeedbackMode  = value.hapticFeedbackMode
-        let value_hapticFeedbackMode_type : int32 = RuntimeType.UNDEFINED
-        value_hapticFeedbackMode_type = runtimeType(value_hapticFeedbackMode)
-        valueSerializer.writeInt8((value_hapticFeedbackMode_type).toChar())
-        if ((value_hapticFeedbackMode_type) != (RuntimeType.UNDEFINED)) {
-            const value_hapticFeedbackMode_value  = (value_hapticFeedbackMode as HapticFeedbackMode)
-            valueSerializer.writeInt32(TypeChecker.HapticFeedbackMode_ToNumeric(value_hapticFeedbackMode_value))
-        }
-        const value_title  = value.title
-        let value_title_type : int32 = RuntimeType.UNDEFINED
-        value_title_type = runtimeType(value_title)
-        valueSerializer.writeInt8((value_title_type).toChar())
-        if ((value_title_type) != (RuntimeType.UNDEFINED)) {
-            const value_title_value  = value_title!
-            let value_title_value_type : int32 = RuntimeType.UNDEFINED
-            value_title_value_type = runtimeType(value_title_value)
-            if (RuntimeType.STRING == value_title_value_type) {
-                valueSerializer.writeInt8((0).toChar())
-                const value_title_value_0  = value_title_value as string
-                valueSerializer.writeString(value_title_value_0)
-            }
-            else if (RuntimeType.OBJECT == value_title_value_type) {
-                valueSerializer.writeInt8((1).toChar())
-                const value_title_value_1  = value_title_value as Resource
-                Resource_serializer.write(valueSerializer, value_title_value_1)
-            }
-        }
-        const value_showInSubWindow  = value.showInSubWindow
-        let value_showInSubWindow_type : int32 = RuntimeType.UNDEFINED
-        value_showInSubWindow_type = runtimeType(value_showInSubWindow)
-        valueSerializer.writeInt8((value_showInSubWindow_type).toChar())
-        if ((value_showInSubWindow_type) != (RuntimeType.UNDEFINED)) {
-            const value_showInSubWindow_value  = value_showInSubWindow!
-            valueSerializer.writeBoolean(value_showInSubWindow_value)
-        }
-    }
-    public static read(buffer: DeserializerBase): MenuOptions {
-        let valueDeserializer : DeserializerBase = buffer
-        const offset_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let offset_buf : Position | undefined
-        if ((offset_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            offset_buf = Position_serializer.read(valueDeserializer)
-        }
-        const offset_result : Position | undefined = offset_buf
-        const placement_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let placement_buf : Placement | undefined
-        if ((placement_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            placement_buf = TypeChecker.Placement_FromNumeric(valueDeserializer.readInt32())
-        }
-        const placement_result : Placement | undefined = placement_buf
-        const enableArrow_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let enableArrow_buf : boolean | undefined
-        if ((enableArrow_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            enableArrow_buf = valueDeserializer.readBoolean()
-        }
-        const enableArrow_result : boolean | undefined = enableArrow_buf
-        const arrowOffset_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let arrowOffset_buf : Length | undefined
-        if ((arrowOffset_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const arrowOffset_buf__selector : int32 = valueDeserializer.readInt8()
-            let arrowOffset_buf_ : string | number | Resource | undefined
-            if (arrowOffset_buf__selector == (0).toChar()) {
-                arrowOffset_buf_ = (valueDeserializer.readString() as string)
-            }
-            else if (arrowOffset_buf__selector == (1).toChar()) {
-                arrowOffset_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (arrowOffset_buf__selector == (2).toChar()) {
-                arrowOffset_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for arrowOffset_buf_ has to be chosen through deserialisation.")
-            }
-            arrowOffset_buf = (arrowOffset_buf_ as string | number | Resource)
-        }
-        const arrowOffset_result : Length | undefined = arrowOffset_buf
-        const preview_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let preview_buf : MenuPreviewMode | CustomBuilder | undefined
-        if ((preview_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const preview_buf__selector : int32 = valueDeserializer.readInt8()
-            let preview_buf_ : MenuPreviewMode | CustomBuilder | undefined
-            if (preview_buf__selector == (0).toChar()) {
-                preview_buf_ = TypeChecker.MenuPreviewMode_FromNumeric(valueDeserializer.readInt32())
-            }
-            else if (preview_buf__selector == (1).toChar()) {
-                const preview_buf__u_resource : CallbackResource = valueDeserializer.readCallbackResource()
-                const preview_buf__u_call : KPointer = valueDeserializer.readPointer()
-                const preview_buf__u_callSync : KPointer = valueDeserializer.readPointer()
-                preview_buf_ = ():void => { 
-    const preview_buf__u_argsSerializer : SerializerBase = SerializerBase.hold();
-    preview_buf__u_argsSerializer.writeInt32(preview_buf__u_resource.resourceId);
-    preview_buf__u_argsSerializer.writePointer(preview_buf__u_call);
-    preview_buf__u_argsSerializer.writePointer(preview_buf__u_callSync);
-    InteropNativeModule._CallCallback(737226752, preview_buf__u_argsSerializer.asBuffer(), preview_buf__u_argsSerializer.length());
-    preview_buf__u_argsSerializer.release();
-    return; }
-            }
-            else {
-                throw new Error("One of the branches for preview_buf_ has to be chosen through deserialisation.")
-            }
-            preview_buf = (preview_buf_ as MenuPreviewMode | CustomBuilder)
-        }
-        const preview_result : MenuPreviewMode | CustomBuilder | undefined = preview_buf
-        const previewBorderRadius_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let previewBorderRadius_buf : BorderRadiusType | undefined
-        if ((previewBorderRadius_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const previewBorderRadius_buf__selector : int32 = valueDeserializer.readInt8()
-            let previewBorderRadius_buf_ : Length | BorderRadiuses | LocalizedBorderRadiuses | undefined
-            if (previewBorderRadius_buf__selector == (0).toChar()) {
-                const previewBorderRadius_buf__u_selector : int32 = valueDeserializer.readInt8()
-                let previewBorderRadius_buf__u : string | number | Resource | undefined
-                if (previewBorderRadius_buf__u_selector == (0).toChar()) {
-                    previewBorderRadius_buf__u = (valueDeserializer.readString() as string)
-                }
-                else if (previewBorderRadius_buf__u_selector == (1).toChar()) {
-                    previewBorderRadius_buf__u = (valueDeserializer.readNumber() as number)
-                }
-                else if (previewBorderRadius_buf__u_selector == (2).toChar()) {
-                    previewBorderRadius_buf__u = Resource_serializer.read(valueDeserializer)
-                }
-                else {
-                    throw new Error("One of the branches for previewBorderRadius_buf__u has to be chosen through deserialisation.")
-                }
-                previewBorderRadius_buf_ = (previewBorderRadius_buf__u as string | number | Resource)
-            }
-            else if (previewBorderRadius_buf__selector == (1).toChar()) {
-                previewBorderRadius_buf_ = BorderRadiuses_serializer.read(valueDeserializer)
-            }
-            else if (previewBorderRadius_buf__selector == (2).toChar()) {
-                previewBorderRadius_buf_ = LocalizedBorderRadiuses_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for previewBorderRadius_buf_ has to be chosen through deserialisation.")
-            }
-            previewBorderRadius_buf = (previewBorderRadius_buf_ as Length | BorderRadiuses | LocalizedBorderRadiuses)
-        }
-        const previewBorderRadius_result : BorderRadiusType | undefined = previewBorderRadius_buf
-        const borderRadius_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let borderRadius_buf : Length | BorderRadiuses | LocalizedBorderRadiuses | undefined
-        if ((borderRadius_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const borderRadius_buf__selector : int32 = valueDeserializer.readInt8()
-            let borderRadius_buf_ : Length | BorderRadiuses | LocalizedBorderRadiuses | undefined
-            if (borderRadius_buf__selector == (0).toChar()) {
-                const borderRadius_buf__u_selector : int32 = valueDeserializer.readInt8()
-                let borderRadius_buf__u : string | number | Resource | undefined
-                if (borderRadius_buf__u_selector == (0).toChar()) {
-                    borderRadius_buf__u = (valueDeserializer.readString() as string)
-                }
-                else if (borderRadius_buf__u_selector == (1).toChar()) {
-                    borderRadius_buf__u = (valueDeserializer.readNumber() as number)
-                }
-                else if (borderRadius_buf__u_selector == (2).toChar()) {
-                    borderRadius_buf__u = Resource_serializer.read(valueDeserializer)
-                }
-                else {
-                    throw new Error("One of the branches for borderRadius_buf__u has to be chosen through deserialisation.")
-                }
-                borderRadius_buf_ = (borderRadius_buf__u as string | number | Resource)
-            }
-            else if (borderRadius_buf__selector == (1).toChar()) {
-                borderRadius_buf_ = BorderRadiuses_serializer.read(valueDeserializer)
-            }
-            else if (borderRadius_buf__selector == (2).toChar()) {
-                borderRadius_buf_ = LocalizedBorderRadiuses_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for borderRadius_buf_ has to be chosen through deserialisation.")
-            }
-            borderRadius_buf = (borderRadius_buf_ as Length | BorderRadiuses | LocalizedBorderRadiuses)
-        }
-        const borderRadius_result : Length | BorderRadiuses | LocalizedBorderRadiuses | undefined = borderRadius_buf
-        const onAppear_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let onAppear_buf : (() => void) | undefined
-        if ((onAppear_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const onAppear_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
-            const onAppear_buf__call : KPointer = valueDeserializer.readPointer()
-            const onAppear_buf__callSync : KPointer = valueDeserializer.readPointer()
-            onAppear_buf = ():void => { 
-    const onAppear_buf__argsSerializer : SerializerBase = SerializerBase.hold();
-    onAppear_buf__argsSerializer.writeInt32(onAppear_buf__resource.resourceId);
-    onAppear_buf__argsSerializer.writePointer(onAppear_buf__call);
-    onAppear_buf__argsSerializer.writePointer(onAppear_buf__callSync);
-    InteropNativeModule._CallCallback(-1867723152, onAppear_buf__argsSerializer.asBuffer(), onAppear_buf__argsSerializer.length());
-    onAppear_buf__argsSerializer.release();
-    return; }
-        }
-        const onAppear_result : (() => void) | undefined = onAppear_buf
-        const onDisappear_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let onDisappear_buf : (() => void) | undefined
-        if ((onDisappear_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const onDisappear_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
-            const onDisappear_buf__call : KPointer = valueDeserializer.readPointer()
-            const onDisappear_buf__callSync : KPointer = valueDeserializer.readPointer()
-            onDisappear_buf = ():void => { 
-    const onDisappear_buf__argsSerializer : SerializerBase = SerializerBase.hold();
-    onDisappear_buf__argsSerializer.writeInt32(onDisappear_buf__resource.resourceId);
-    onDisappear_buf__argsSerializer.writePointer(onDisappear_buf__call);
-    onDisappear_buf__argsSerializer.writePointer(onDisappear_buf__callSync);
-    InteropNativeModule._CallCallback(-1867723152, onDisappear_buf__argsSerializer.asBuffer(), onDisappear_buf__argsSerializer.length());
-    onDisappear_buf__argsSerializer.release();
-    return; }
-        }
-        const onDisappear_result : (() => void) | undefined = onDisappear_buf
-        const aboutToAppear_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let aboutToAppear_buf : (() => void) | undefined
-        if ((aboutToAppear_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const aboutToAppear_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
-            const aboutToAppear_buf__call : KPointer = valueDeserializer.readPointer()
-            const aboutToAppear_buf__callSync : KPointer = valueDeserializer.readPointer()
-            aboutToAppear_buf = ():void => { 
-    const aboutToAppear_buf__argsSerializer : SerializerBase = SerializerBase.hold();
-    aboutToAppear_buf__argsSerializer.writeInt32(aboutToAppear_buf__resource.resourceId);
-    aboutToAppear_buf__argsSerializer.writePointer(aboutToAppear_buf__call);
-    aboutToAppear_buf__argsSerializer.writePointer(aboutToAppear_buf__callSync);
-    InteropNativeModule._CallCallback(-1867723152, aboutToAppear_buf__argsSerializer.asBuffer(), aboutToAppear_buf__argsSerializer.length());
-    aboutToAppear_buf__argsSerializer.release();
-    return; }
-        }
-        const aboutToAppear_result : (() => void) | undefined = aboutToAppear_buf
-        const aboutToDisappear_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let aboutToDisappear_buf : (() => void) | undefined
-        if ((aboutToDisappear_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const aboutToDisappear_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
-            const aboutToDisappear_buf__call : KPointer = valueDeserializer.readPointer()
-            const aboutToDisappear_buf__callSync : KPointer = valueDeserializer.readPointer()
-            aboutToDisappear_buf = ():void => { 
-    const aboutToDisappear_buf__argsSerializer : SerializerBase = SerializerBase.hold();
-    aboutToDisappear_buf__argsSerializer.writeInt32(aboutToDisappear_buf__resource.resourceId);
-    aboutToDisappear_buf__argsSerializer.writePointer(aboutToDisappear_buf__call);
-    aboutToDisappear_buf__argsSerializer.writePointer(aboutToDisappear_buf__callSync);
-    InteropNativeModule._CallCallback(-1867723152, aboutToDisappear_buf__argsSerializer.asBuffer(), aboutToDisappear_buf__argsSerializer.length());
-    aboutToDisappear_buf__argsSerializer.release();
-    return; }
-        }
-        const aboutToDisappear_result : (() => void) | undefined = aboutToDisappear_buf
-        const layoutRegionMargin_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let layoutRegionMargin_buf : Padding | undefined
-        if ((layoutRegionMargin_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            layoutRegionMargin_buf = Padding_serializer.read(valueDeserializer)
-        }
-        const layoutRegionMargin_result : Padding | undefined = layoutRegionMargin_buf
-        const previewAnimationOptions_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let previewAnimationOptions_buf : ContextMenuAnimationOptions | undefined
-        if ((previewAnimationOptions_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            previewAnimationOptions_buf = ContextMenuAnimationOptions_serializer.read(valueDeserializer)
-        }
-        const previewAnimationOptions_result : ContextMenuAnimationOptions | undefined = previewAnimationOptions_buf
-        const backgroundColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let backgroundColor_buf : ResourceColor | undefined
-        if ((backgroundColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const backgroundColor_buf__selector : int32 = valueDeserializer.readInt8()
-            let backgroundColor_buf_ : Color | number | string | Resource | undefined
-            if (backgroundColor_buf__selector == (0).toChar()) {
-                backgroundColor_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-            }
-            else if (backgroundColor_buf__selector == (1).toChar()) {
-                backgroundColor_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (backgroundColor_buf__selector == (2).toChar()) {
-                backgroundColor_buf_ = (valueDeserializer.readString() as string)
-            }
-            else if (backgroundColor_buf__selector == (3).toChar()) {
-                backgroundColor_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for backgroundColor_buf_ has to be chosen through deserialisation.")
-            }
-            backgroundColor_buf = (backgroundColor_buf_ as Color | number | string | Resource)
-        }
-        const backgroundColor_result : ResourceColor | undefined = backgroundColor_buf
-        const backgroundBlurStyle_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let backgroundBlurStyle_buf : BlurStyle | undefined
-        if ((backgroundBlurStyle_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            backgroundBlurStyle_buf = TypeChecker.BlurStyle_FromNumeric(valueDeserializer.readInt32())
-        }
-        const backgroundBlurStyle_result : BlurStyle | undefined = backgroundBlurStyle_buf
-        const backgroundBlurStyleOptions_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let backgroundBlurStyleOptions_buf : BackgroundBlurStyleOptions | undefined
-        if ((backgroundBlurStyleOptions_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            backgroundBlurStyleOptions_buf = BackgroundBlurStyleOptions_serializer.read(valueDeserializer)
-        }
-        const backgroundBlurStyleOptions_result : BackgroundBlurStyleOptions | undefined = backgroundBlurStyleOptions_buf
-        const backgroundEffect_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let backgroundEffect_buf : BackgroundEffectOptions | undefined
-        if ((backgroundEffect_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            backgroundEffect_buf = BackgroundEffectOptions_serializer.read(valueDeserializer)
-        }
-        const backgroundEffect_result : BackgroundEffectOptions | undefined = backgroundEffect_buf
-        const transition_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let transition_buf : TransitionEffect | undefined
-        if ((transition_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            transition_buf = (TransitionEffect_serializer.read(valueDeserializer) as TransitionEffect)
-        }
-        const transition_result : TransitionEffect | undefined = transition_buf
-        const enableHoverMode_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let enableHoverMode_buf : boolean | undefined
-        if ((enableHoverMode_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            enableHoverMode_buf = valueDeserializer.readBoolean()
-        }
-        const enableHoverMode_result : boolean | undefined = enableHoverMode_buf
-        const outlineColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let outlineColor_buf : ResourceColor | EdgeColors | undefined
-        if ((outlineColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const outlineColor_buf__selector : int32 = valueDeserializer.readInt8()
-            let outlineColor_buf_ : ResourceColor | EdgeColors | undefined
-            if (outlineColor_buf__selector == (0).toChar()) {
-                const outlineColor_buf__u_selector : int32 = valueDeserializer.readInt8()
-                let outlineColor_buf__u : Color | number | string | Resource | undefined
-                if (outlineColor_buf__u_selector == (0).toChar()) {
-                    outlineColor_buf__u = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-                }
-                else if (outlineColor_buf__u_selector == (1).toChar()) {
-                    outlineColor_buf__u = (valueDeserializer.readNumber() as number)
-                }
-                else if (outlineColor_buf__u_selector == (2).toChar()) {
-                    outlineColor_buf__u = (valueDeserializer.readString() as string)
-                }
-                else if (outlineColor_buf__u_selector == (3).toChar()) {
-                    outlineColor_buf__u = Resource_serializer.read(valueDeserializer)
-                }
-                else {
-                    throw new Error("One of the branches for outlineColor_buf__u has to be chosen through deserialisation.")
-                }
-                outlineColor_buf_ = (outlineColor_buf__u as Color | number | string | Resource)
-            }
-            else if (outlineColor_buf__selector == (1).toChar()) {
-                outlineColor_buf_ = EdgeColors_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for outlineColor_buf_ has to be chosen through deserialisation.")
-            }
-            outlineColor_buf = (outlineColor_buf_ as ResourceColor | EdgeColors)
-        }
-        const outlineColor_result : ResourceColor | EdgeColors | undefined = outlineColor_buf
-        const outlineWidth_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let outlineWidth_buf : Dimension | EdgeOutlineWidths | undefined
-        if ((outlineWidth_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const outlineWidth_buf__selector : int32 = valueDeserializer.readInt8()
-            let outlineWidth_buf_ : Dimension | EdgeOutlineWidths | undefined
-            if (outlineWidth_buf__selector == (0).toChar()) {
-                const outlineWidth_buf__u_selector : int32 = valueDeserializer.readInt8()
-                let outlineWidth_buf__u : string | number | Resource | undefined
-                if (outlineWidth_buf__u_selector == (0).toChar()) {
-                    outlineWidth_buf__u = (valueDeserializer.readString() as string)
-                }
-                else if (outlineWidth_buf__u_selector == (1).toChar()) {
-                    outlineWidth_buf__u = (valueDeserializer.readNumber() as number)
-                }
-                else if (outlineWidth_buf__u_selector == (2).toChar()) {
-                    outlineWidth_buf__u = Resource_serializer.read(valueDeserializer)
-                }
-                else {
-                    throw new Error("One of the branches for outlineWidth_buf__u has to be chosen through deserialisation.")
-                }
-                outlineWidth_buf_ = (outlineWidth_buf__u as string | number | Resource)
-            }
-            else if (outlineWidth_buf__selector == (1).toChar()) {
-                outlineWidth_buf_ = EdgeOutlineWidths_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for outlineWidth_buf_ has to be chosen through deserialisation.")
-            }
-            outlineWidth_buf = (outlineWidth_buf_ as Dimension | EdgeOutlineWidths)
-        }
-        const outlineWidth_result : Dimension | EdgeOutlineWidths | undefined = outlineWidth_buf
-        const hapticFeedbackMode_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let hapticFeedbackMode_buf : HapticFeedbackMode | undefined
-        if ((hapticFeedbackMode_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            hapticFeedbackMode_buf = TypeChecker.HapticFeedbackMode_FromNumeric(valueDeserializer.readInt32())
-        }
-        const hapticFeedbackMode_result : HapticFeedbackMode | undefined = hapticFeedbackMode_buf
-        const title_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let title_buf : ResourceStr | undefined
-        if ((title_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const title_buf__selector : int32 = valueDeserializer.readInt8()
-            let title_buf_ : string | Resource | undefined
-            if (title_buf__selector == (0).toChar()) {
-                title_buf_ = (valueDeserializer.readString() as string)
-            }
-            else if (title_buf__selector == (1).toChar()) {
-                title_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for title_buf_ has to be chosen through deserialisation.")
-            }
-            title_buf = (title_buf_ as string | Resource)
-        }
-        const title_result : ResourceStr | undefined = title_buf
-        const showInSubWindow_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let showInSubWindow_buf : boolean | undefined
-        if ((showInSubWindow_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            showInSubWindow_buf = valueDeserializer.readBoolean()
-        }
-        const showInSubWindow_result : boolean | undefined = showInSubWindow_buf
-        let value : MenuOptions = ({offset: offset_result, placement: placement_result, enableArrow: enableArrow_result, arrowOffset: arrowOffset_result, preview: preview_result, previewBorderRadius: previewBorderRadius_result, borderRadius: borderRadius_result, onAppear: onAppear_result, onDisappear: onDisappear_result, aboutToAppear: aboutToAppear_result, aboutToDisappear: aboutToDisappear_result, layoutRegionMargin: layoutRegionMargin_result, previewAnimationOptions: previewAnimationOptions_result, backgroundColor: backgroundColor_result, backgroundBlurStyle: backgroundBlurStyle_result, backgroundBlurStyleOptions: backgroundBlurStyleOptions_result, backgroundEffect: backgroundEffect_result, transition: transition_result, enableHoverMode: enableHoverMode_result, outlineColor: outlineColor_result, outlineWidth: outlineWidth_result, hapticFeedbackMode: hapticFeedbackMode_result, title: title_result, showInSubWindow: showInSubWindow_result} as MenuOptions)
-        return value
     }
 }
 export class MouseEvent_serializer {
@@ -22215,652 +19765,6 @@ export class PickerTextStyle_serializer {
         }
         const font_result : Font | undefined = font_buf
         let value : PickerTextStyle = ({color: color_result, font: font_result} as PickerTextStyle)
-        return value
-    }
-}
-export class PopupCommonOptions_serializer {
-    public static write(buffer: SerializerBase, value: PopupCommonOptions): void {
-        let valueSerializer : SerializerBase = buffer
-        const value_placement  = value.placement
-        let value_placement_type : int32 = RuntimeType.UNDEFINED
-        value_placement_type = runtimeType(value_placement)
-        valueSerializer.writeInt8((value_placement_type).toChar())
-        if ((value_placement_type) != (RuntimeType.UNDEFINED)) {
-            const value_placement_value  = (value_placement as Placement)
-            valueSerializer.writeInt32(TypeChecker.Placement_ToNumeric(value_placement_value))
-        }
-        const value_popupColor  = value.popupColor
-        let value_popupColor_type : int32 = RuntimeType.UNDEFINED
-        value_popupColor_type = runtimeType(value_popupColor)
-        valueSerializer.writeInt8((value_popupColor_type).toChar())
-        if ((value_popupColor_type) != (RuntimeType.UNDEFINED)) {
-            const value_popupColor_value  = value_popupColor!
-            let value_popupColor_value_type : int32 = RuntimeType.UNDEFINED
-            value_popupColor_value_type = runtimeType(value_popupColor_value)
-            if (TypeChecker.isColor(value_popupColor_value)) {
-                valueSerializer.writeInt8((0).toChar())
-                const value_popupColor_value_0  = value_popupColor_value as Color
-                valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_popupColor_value_0))
-            }
-            else if (RuntimeType.NUMBER == value_popupColor_value_type) {
-                valueSerializer.writeInt8((1).toChar())
-                const value_popupColor_value_1  = value_popupColor_value as number
-                valueSerializer.writeNumber(value_popupColor_value_1)
-            }
-            else if (RuntimeType.STRING == value_popupColor_value_type) {
-                valueSerializer.writeInt8((2).toChar())
-                const value_popupColor_value_2  = value_popupColor_value as string
-                valueSerializer.writeString(value_popupColor_value_2)
-            }
-            else if (RuntimeType.OBJECT == value_popupColor_value_type) {
-                valueSerializer.writeInt8((3).toChar())
-                const value_popupColor_value_3  = value_popupColor_value as Resource
-                Resource_serializer.write(valueSerializer, value_popupColor_value_3)
-            }
-        }
-        const value_enableArrow  = value.enableArrow
-        let value_enableArrow_type : int32 = RuntimeType.UNDEFINED
-        value_enableArrow_type = runtimeType(value_enableArrow)
-        valueSerializer.writeInt8((value_enableArrow_type).toChar())
-        if ((value_enableArrow_type) != (RuntimeType.UNDEFINED)) {
-            const value_enableArrow_value  = value_enableArrow!
-            valueSerializer.writeBoolean(value_enableArrow_value)
-        }
-        const value_autoCancel  = value.autoCancel
-        let value_autoCancel_type : int32 = RuntimeType.UNDEFINED
-        value_autoCancel_type = runtimeType(value_autoCancel)
-        valueSerializer.writeInt8((value_autoCancel_type).toChar())
-        if ((value_autoCancel_type) != (RuntimeType.UNDEFINED)) {
-            const value_autoCancel_value  = value_autoCancel!
-            valueSerializer.writeBoolean(value_autoCancel_value)
-        }
-        const value_onStateChange  = value.onStateChange
-        let value_onStateChange_type : int32 = RuntimeType.UNDEFINED
-        value_onStateChange_type = runtimeType(value_onStateChange)
-        valueSerializer.writeInt8((value_onStateChange_type).toChar())
-        if ((value_onStateChange_type) != (RuntimeType.UNDEFINED)) {
-            const value_onStateChange_value  = value_onStateChange!
-            valueSerializer.holdAndWriteCallback(value_onStateChange_value)
-        }
-        const value_arrowOffset  = value.arrowOffset
-        let value_arrowOffset_type : int32 = RuntimeType.UNDEFINED
-        value_arrowOffset_type = runtimeType(value_arrowOffset)
-        valueSerializer.writeInt8((value_arrowOffset_type).toChar())
-        if ((value_arrowOffset_type) != (RuntimeType.UNDEFINED)) {
-            const value_arrowOffset_value  = value_arrowOffset!
-            let value_arrowOffset_value_type : int32 = RuntimeType.UNDEFINED
-            value_arrowOffset_value_type = runtimeType(value_arrowOffset_value)
-            if (RuntimeType.STRING == value_arrowOffset_value_type) {
-                valueSerializer.writeInt8((0).toChar())
-                const value_arrowOffset_value_0  = value_arrowOffset_value as string
-                valueSerializer.writeString(value_arrowOffset_value_0)
-            }
-            else if (RuntimeType.NUMBER == value_arrowOffset_value_type) {
-                valueSerializer.writeInt8((1).toChar())
-                const value_arrowOffset_value_1  = value_arrowOffset_value as number
-                valueSerializer.writeNumber(value_arrowOffset_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_arrowOffset_value_type) {
-                valueSerializer.writeInt8((2).toChar())
-                const value_arrowOffset_value_2  = value_arrowOffset_value as Resource
-                Resource_serializer.write(valueSerializer, value_arrowOffset_value_2)
-            }
-        }
-        const value_showInSubWindow  = value.showInSubWindow
-        let value_showInSubWindow_type : int32 = RuntimeType.UNDEFINED
-        value_showInSubWindow_type = runtimeType(value_showInSubWindow)
-        valueSerializer.writeInt8((value_showInSubWindow_type).toChar())
-        if ((value_showInSubWindow_type) != (RuntimeType.UNDEFINED)) {
-            const value_showInSubWindow_value  = value_showInSubWindow!
-            valueSerializer.writeBoolean(value_showInSubWindow_value)
-        }
-        const value_mask  = value.mask
-        let value_mask_type : int32 = RuntimeType.UNDEFINED
-        value_mask_type = runtimeType(value_mask)
-        valueSerializer.writeInt8((value_mask_type).toChar())
-        if ((value_mask_type) != (RuntimeType.UNDEFINED)) {
-            const value_mask_value  = value_mask!
-            let value_mask_value_type : int32 = RuntimeType.UNDEFINED
-            value_mask_value_type = runtimeType(value_mask_value)
-            if (RuntimeType.BOOLEAN == value_mask_value_type) {
-                valueSerializer.writeInt8((0).toChar())
-                const value_mask_value_0  = value_mask_value as boolean
-                valueSerializer.writeBoolean(value_mask_value_0)
-            }
-            else if (RuntimeType.OBJECT == value_mask_value_type) {
-                valueSerializer.writeInt8((1).toChar())
-                const value_mask_value_1  = value_mask_value as PopupMaskType
-                PopupMaskType_serializer.write(valueSerializer, value_mask_value_1)
-            }
-        }
-        const value_targetSpace  = value.targetSpace
-        let value_targetSpace_type : int32 = RuntimeType.UNDEFINED
-        value_targetSpace_type = runtimeType(value_targetSpace)
-        valueSerializer.writeInt8((value_targetSpace_type).toChar())
-        if ((value_targetSpace_type) != (RuntimeType.UNDEFINED)) {
-            const value_targetSpace_value  = value_targetSpace!
-            let value_targetSpace_value_type : int32 = RuntimeType.UNDEFINED
-            value_targetSpace_value_type = runtimeType(value_targetSpace_value)
-            if (RuntimeType.STRING == value_targetSpace_value_type) {
-                valueSerializer.writeInt8((0).toChar())
-                const value_targetSpace_value_0  = value_targetSpace_value as string
-                valueSerializer.writeString(value_targetSpace_value_0)
-            }
-            else if (RuntimeType.NUMBER == value_targetSpace_value_type) {
-                valueSerializer.writeInt8((1).toChar())
-                const value_targetSpace_value_1  = value_targetSpace_value as number
-                valueSerializer.writeNumber(value_targetSpace_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_targetSpace_value_type) {
-                valueSerializer.writeInt8((2).toChar())
-                const value_targetSpace_value_2  = value_targetSpace_value as Resource
-                Resource_serializer.write(valueSerializer, value_targetSpace_value_2)
-            }
-        }
-        const value_offset  = value.offset
-        let value_offset_type : int32 = RuntimeType.UNDEFINED
-        value_offset_type = runtimeType(value_offset)
-        valueSerializer.writeInt8((value_offset_type).toChar())
-        if ((value_offset_type) != (RuntimeType.UNDEFINED)) {
-            const value_offset_value  = value_offset!
-            Position_serializer.write(valueSerializer, value_offset_value)
-        }
-        const value_width  = value.width
-        let value_width_type : int32 = RuntimeType.UNDEFINED
-        value_width_type = runtimeType(value_width)
-        valueSerializer.writeInt8((value_width_type).toChar())
-        if ((value_width_type) != (RuntimeType.UNDEFINED)) {
-            const value_width_value  = value_width!
-            let value_width_value_type : int32 = RuntimeType.UNDEFINED
-            value_width_value_type = runtimeType(value_width_value)
-            if (RuntimeType.STRING == value_width_value_type) {
-                valueSerializer.writeInt8((0).toChar())
-                const value_width_value_0  = value_width_value as string
-                valueSerializer.writeString(value_width_value_0)
-            }
-            else if (RuntimeType.NUMBER == value_width_value_type) {
-                valueSerializer.writeInt8((1).toChar())
-                const value_width_value_1  = value_width_value as number
-                valueSerializer.writeNumber(value_width_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_width_value_type) {
-                valueSerializer.writeInt8((2).toChar())
-                const value_width_value_2  = value_width_value as Resource
-                Resource_serializer.write(valueSerializer, value_width_value_2)
-            }
-        }
-        const value_arrowPointPosition  = value.arrowPointPosition
-        let value_arrowPointPosition_type : int32 = RuntimeType.UNDEFINED
-        value_arrowPointPosition_type = runtimeType(value_arrowPointPosition)
-        valueSerializer.writeInt8((value_arrowPointPosition_type).toChar())
-        if ((value_arrowPointPosition_type) != (RuntimeType.UNDEFINED)) {
-            const value_arrowPointPosition_value  = (value_arrowPointPosition as ArrowPointPosition)
-            valueSerializer.writeInt32(TypeChecker.ArrowPointPosition_ToNumeric(value_arrowPointPosition_value))
-        }
-        const value_arrowWidth  = value.arrowWidth
-        let value_arrowWidth_type : int32 = RuntimeType.UNDEFINED
-        value_arrowWidth_type = runtimeType(value_arrowWidth)
-        valueSerializer.writeInt8((value_arrowWidth_type).toChar())
-        if ((value_arrowWidth_type) != (RuntimeType.UNDEFINED)) {
-            const value_arrowWidth_value  = value_arrowWidth!
-            let value_arrowWidth_value_type : int32 = RuntimeType.UNDEFINED
-            value_arrowWidth_value_type = runtimeType(value_arrowWidth_value)
-            if (RuntimeType.STRING == value_arrowWidth_value_type) {
-                valueSerializer.writeInt8((0).toChar())
-                const value_arrowWidth_value_0  = value_arrowWidth_value as string
-                valueSerializer.writeString(value_arrowWidth_value_0)
-            }
-            else if (RuntimeType.NUMBER == value_arrowWidth_value_type) {
-                valueSerializer.writeInt8((1).toChar())
-                const value_arrowWidth_value_1  = value_arrowWidth_value as number
-                valueSerializer.writeNumber(value_arrowWidth_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_arrowWidth_value_type) {
-                valueSerializer.writeInt8((2).toChar())
-                const value_arrowWidth_value_2  = value_arrowWidth_value as Resource
-                Resource_serializer.write(valueSerializer, value_arrowWidth_value_2)
-            }
-        }
-        const value_arrowHeight  = value.arrowHeight
-        let value_arrowHeight_type : int32 = RuntimeType.UNDEFINED
-        value_arrowHeight_type = runtimeType(value_arrowHeight)
-        valueSerializer.writeInt8((value_arrowHeight_type).toChar())
-        if ((value_arrowHeight_type) != (RuntimeType.UNDEFINED)) {
-            const value_arrowHeight_value  = value_arrowHeight!
-            let value_arrowHeight_value_type : int32 = RuntimeType.UNDEFINED
-            value_arrowHeight_value_type = runtimeType(value_arrowHeight_value)
-            if (RuntimeType.STRING == value_arrowHeight_value_type) {
-                valueSerializer.writeInt8((0).toChar())
-                const value_arrowHeight_value_0  = value_arrowHeight_value as string
-                valueSerializer.writeString(value_arrowHeight_value_0)
-            }
-            else if (RuntimeType.NUMBER == value_arrowHeight_value_type) {
-                valueSerializer.writeInt8((1).toChar())
-                const value_arrowHeight_value_1  = value_arrowHeight_value as number
-                valueSerializer.writeNumber(value_arrowHeight_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_arrowHeight_value_type) {
-                valueSerializer.writeInt8((2).toChar())
-                const value_arrowHeight_value_2  = value_arrowHeight_value as Resource
-                Resource_serializer.write(valueSerializer, value_arrowHeight_value_2)
-            }
-        }
-        const value_radius  = value.radius
-        let value_radius_type : int32 = RuntimeType.UNDEFINED
-        value_radius_type = runtimeType(value_radius)
-        valueSerializer.writeInt8((value_radius_type).toChar())
-        if ((value_radius_type) != (RuntimeType.UNDEFINED)) {
-            const value_radius_value  = value_radius!
-            let value_radius_value_type : int32 = RuntimeType.UNDEFINED
-            value_radius_value_type = runtimeType(value_radius_value)
-            if (RuntimeType.STRING == value_radius_value_type) {
-                valueSerializer.writeInt8((0).toChar())
-                const value_radius_value_0  = value_radius_value as string
-                valueSerializer.writeString(value_radius_value_0)
-            }
-            else if (RuntimeType.NUMBER == value_radius_value_type) {
-                valueSerializer.writeInt8((1).toChar())
-                const value_radius_value_1  = value_radius_value as number
-                valueSerializer.writeNumber(value_radius_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_radius_value_type) {
-                valueSerializer.writeInt8((2).toChar())
-                const value_radius_value_2  = value_radius_value as Resource
-                Resource_serializer.write(valueSerializer, value_radius_value_2)
-            }
-        }
-        const value_shadow  = value.shadow
-        let value_shadow_type : int32 = RuntimeType.UNDEFINED
-        value_shadow_type = runtimeType(value_shadow)
-        valueSerializer.writeInt8((value_shadow_type).toChar())
-        if ((value_shadow_type) != (RuntimeType.UNDEFINED)) {
-            const value_shadow_value  = value_shadow!
-            let value_shadow_value_type : int32 = RuntimeType.UNDEFINED
-            value_shadow_value_type = runtimeType(value_shadow_value)
-            if (RuntimeType.OBJECT == value_shadow_value_type) {
-                valueSerializer.writeInt8((0).toChar())
-                const value_shadow_value_0  = value_shadow_value as ShadowOptions
-                ShadowOptions_serializer.write(valueSerializer, value_shadow_value_0)
-            }
-            else if (TypeChecker.isShadowStyle(value_shadow_value)) {
-                valueSerializer.writeInt8((1).toChar())
-                const value_shadow_value_1  = value_shadow_value as ShadowStyle
-                valueSerializer.writeInt32(TypeChecker.ShadowStyle_ToNumeric(value_shadow_value_1))
-            }
-        }
-        const value_backgroundBlurStyle  = value.backgroundBlurStyle
-        let value_backgroundBlurStyle_type : int32 = RuntimeType.UNDEFINED
-        value_backgroundBlurStyle_type = runtimeType(value_backgroundBlurStyle)
-        valueSerializer.writeInt8((value_backgroundBlurStyle_type).toChar())
-        if ((value_backgroundBlurStyle_type) != (RuntimeType.UNDEFINED)) {
-            const value_backgroundBlurStyle_value  = (value_backgroundBlurStyle as BlurStyle)
-            valueSerializer.writeInt32(TypeChecker.BlurStyle_ToNumeric(value_backgroundBlurStyle_value))
-        }
-        const value_focusable  = value.focusable
-        let value_focusable_type : int32 = RuntimeType.UNDEFINED
-        value_focusable_type = runtimeType(value_focusable)
-        valueSerializer.writeInt8((value_focusable_type).toChar())
-        if ((value_focusable_type) != (RuntimeType.UNDEFINED)) {
-            const value_focusable_value  = value_focusable!
-            valueSerializer.writeBoolean(value_focusable_value)
-        }
-        const value_transition  = value.transition
-        let value_transition_type : int32 = RuntimeType.UNDEFINED
-        value_transition_type = runtimeType(value_transition)
-        valueSerializer.writeInt8((value_transition_type).toChar())
-        if ((value_transition_type) != (RuntimeType.UNDEFINED)) {
-            const value_transition_value  = value_transition!
-            TransitionEffect_serializer.write(valueSerializer, value_transition_value)
-        }
-        const value_onWillDismiss  = value.onWillDismiss
-        let value_onWillDismiss_type : int32 = RuntimeType.UNDEFINED
-        value_onWillDismiss_type = runtimeType(value_onWillDismiss)
-        valueSerializer.writeInt8((value_onWillDismiss_type).toChar())
-        if ((value_onWillDismiss_type) != (RuntimeType.UNDEFINED)) {
-            const value_onWillDismiss_value  = value_onWillDismiss!
-            let value_onWillDismiss_value_type : int32 = RuntimeType.UNDEFINED
-            value_onWillDismiss_value_type = runtimeType(value_onWillDismiss_value)
-            if (RuntimeType.BOOLEAN == value_onWillDismiss_value_type) {
-                valueSerializer.writeInt8((0).toChar())
-                const value_onWillDismiss_value_0  = value_onWillDismiss_value as boolean
-                valueSerializer.writeBoolean(value_onWillDismiss_value_0)
-            }
-            else if (RuntimeType.FUNCTION == value_onWillDismiss_value_type) {
-                valueSerializer.writeInt8((1).toChar())
-                const value_onWillDismiss_value_1  = value_onWillDismiss_value as ((value0: DismissPopupAction) => void)
-                valueSerializer.holdAndWriteCallback(value_onWillDismiss_value_1)
-            }
-        }
-        const value_enableHoverMode  = value.enableHoverMode
-        let value_enableHoverMode_type : int32 = RuntimeType.UNDEFINED
-        value_enableHoverMode_type = runtimeType(value_enableHoverMode)
-        valueSerializer.writeInt8((value_enableHoverMode_type).toChar())
-        if ((value_enableHoverMode_type) != (RuntimeType.UNDEFINED)) {
-            const value_enableHoverMode_value  = value_enableHoverMode!
-            valueSerializer.writeBoolean(value_enableHoverMode_value)
-        }
-        const value_followTransformOfTarget  = value.followTransformOfTarget
-        let value_followTransformOfTarget_type : int32 = RuntimeType.UNDEFINED
-        value_followTransformOfTarget_type = runtimeType(value_followTransformOfTarget)
-        valueSerializer.writeInt8((value_followTransformOfTarget_type).toChar())
-        if ((value_followTransformOfTarget_type) != (RuntimeType.UNDEFINED)) {
-            const value_followTransformOfTarget_value  = value_followTransformOfTarget!
-            valueSerializer.writeBoolean(value_followTransformOfTarget_value)
-        }
-    }
-    public static read(buffer: DeserializerBase): PopupCommonOptions {
-        let valueDeserializer : DeserializerBase = buffer
-        const placement_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let placement_buf : Placement | undefined
-        if ((placement_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            placement_buf = TypeChecker.Placement_FromNumeric(valueDeserializer.readInt32())
-        }
-        const placement_result : Placement | undefined = placement_buf
-        const popupColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let popupColor_buf : ResourceColor | undefined
-        if ((popupColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const popupColor_buf__selector : int32 = valueDeserializer.readInt8()
-            let popupColor_buf_ : Color | number | string | Resource | undefined
-            if (popupColor_buf__selector == (0).toChar()) {
-                popupColor_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-            }
-            else if (popupColor_buf__selector == (1).toChar()) {
-                popupColor_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (popupColor_buf__selector == (2).toChar()) {
-                popupColor_buf_ = (valueDeserializer.readString() as string)
-            }
-            else if (popupColor_buf__selector == (3).toChar()) {
-                popupColor_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for popupColor_buf_ has to be chosen through deserialisation.")
-            }
-            popupColor_buf = (popupColor_buf_ as Color | number | string | Resource)
-        }
-        const popupColor_result : ResourceColor | undefined = popupColor_buf
-        const enableArrow_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let enableArrow_buf : boolean | undefined
-        if ((enableArrow_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            enableArrow_buf = valueDeserializer.readBoolean()
-        }
-        const enableArrow_result : boolean | undefined = enableArrow_buf
-        const autoCancel_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let autoCancel_buf : boolean | undefined
-        if ((autoCancel_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            autoCancel_buf = valueDeserializer.readBoolean()
-        }
-        const autoCancel_result : boolean | undefined = autoCancel_buf
-        const onStateChange_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let onStateChange_buf : PopupStateChangeCallback | undefined
-        if ((onStateChange_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const onStateChange_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
-            const onStateChange_buf__call : KPointer = valueDeserializer.readPointer()
-            const onStateChange_buf__callSync : KPointer = valueDeserializer.readPointer()
-            onStateChange_buf = (event: PopupStateChangeParam):void => { 
-    const onStateChange_buf__argsSerializer : SerializerBase = SerializerBase.hold();
-    onStateChange_buf__argsSerializer.writeInt32(onStateChange_buf__resource.resourceId);
-    onStateChange_buf__argsSerializer.writePointer(onStateChange_buf__call);
-    onStateChange_buf__argsSerializer.writePointer(onStateChange_buf__callSync);
-    PopupStateChangeParam_serializer.write(onStateChange_buf__argsSerializer, event);
-    InteropNativeModule._CallCallback(-1444325632, onStateChange_buf__argsSerializer.asBuffer(), onStateChange_buf__argsSerializer.length());
-    onStateChange_buf__argsSerializer.release();
-    return; }
-        }
-        const onStateChange_result : PopupStateChangeCallback | undefined = onStateChange_buf
-        const arrowOffset_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let arrowOffset_buf : Length | undefined
-        if ((arrowOffset_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const arrowOffset_buf__selector : int32 = valueDeserializer.readInt8()
-            let arrowOffset_buf_ : string | number | Resource | undefined
-            if (arrowOffset_buf__selector == (0).toChar()) {
-                arrowOffset_buf_ = (valueDeserializer.readString() as string)
-            }
-            else if (arrowOffset_buf__selector == (1).toChar()) {
-                arrowOffset_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (arrowOffset_buf__selector == (2).toChar()) {
-                arrowOffset_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for arrowOffset_buf_ has to be chosen through deserialisation.")
-            }
-            arrowOffset_buf = (arrowOffset_buf_ as string | number | Resource)
-        }
-        const arrowOffset_result : Length | undefined = arrowOffset_buf
-        const showInSubWindow_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let showInSubWindow_buf : boolean | undefined
-        if ((showInSubWindow_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            showInSubWindow_buf = valueDeserializer.readBoolean()
-        }
-        const showInSubWindow_result : boolean | undefined = showInSubWindow_buf
-        const mask_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let mask_buf : boolean | PopupMaskType | undefined
-        if ((mask_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const mask_buf__selector : int32 = valueDeserializer.readInt8()
-            let mask_buf_ : boolean | PopupMaskType | undefined
-            if (mask_buf__selector == (0).toChar()) {
-                mask_buf_ = valueDeserializer.readBoolean()
-            }
-            else if (mask_buf__selector == (1).toChar()) {
-                mask_buf_ = PopupMaskType_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for mask_buf_ has to be chosen through deserialisation.")
-            }
-            mask_buf = (mask_buf_ as boolean | PopupMaskType)
-        }
-        const mask_result : boolean | PopupMaskType | undefined = mask_buf
-        const targetSpace_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let targetSpace_buf : Length | undefined
-        if ((targetSpace_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const targetSpace_buf__selector : int32 = valueDeserializer.readInt8()
-            let targetSpace_buf_ : string | number | Resource | undefined
-            if (targetSpace_buf__selector == (0).toChar()) {
-                targetSpace_buf_ = (valueDeserializer.readString() as string)
-            }
-            else if (targetSpace_buf__selector == (1).toChar()) {
-                targetSpace_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (targetSpace_buf__selector == (2).toChar()) {
-                targetSpace_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for targetSpace_buf_ has to be chosen through deserialisation.")
-            }
-            targetSpace_buf = (targetSpace_buf_ as string | number | Resource)
-        }
-        const targetSpace_result : Length | undefined = targetSpace_buf
-        const offset_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let offset_buf : Position | undefined
-        if ((offset_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            offset_buf = Position_serializer.read(valueDeserializer)
-        }
-        const offset_result : Position | undefined = offset_buf
-        const width_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let width_buf : Dimension | undefined
-        if ((width_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const width_buf__selector : int32 = valueDeserializer.readInt8()
-            let width_buf_ : string | number | Resource | undefined
-            if (width_buf__selector == (0).toChar()) {
-                width_buf_ = (valueDeserializer.readString() as string)
-            }
-            else if (width_buf__selector == (1).toChar()) {
-                width_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (width_buf__selector == (2).toChar()) {
-                width_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for width_buf_ has to be chosen through deserialisation.")
-            }
-            width_buf = (width_buf_ as string | number | Resource)
-        }
-        const width_result : Dimension | undefined = width_buf
-        const arrowPointPosition_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let arrowPointPosition_buf : ArrowPointPosition | undefined
-        if ((arrowPointPosition_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            arrowPointPosition_buf = TypeChecker.ArrowPointPosition_FromNumeric(valueDeserializer.readInt32())
-        }
-        const arrowPointPosition_result : ArrowPointPosition | undefined = arrowPointPosition_buf
-        const arrowWidth_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let arrowWidth_buf : Dimension | undefined
-        if ((arrowWidth_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const arrowWidth_buf__selector : int32 = valueDeserializer.readInt8()
-            let arrowWidth_buf_ : string | number | Resource | undefined
-            if (arrowWidth_buf__selector == (0).toChar()) {
-                arrowWidth_buf_ = (valueDeserializer.readString() as string)
-            }
-            else if (arrowWidth_buf__selector == (1).toChar()) {
-                arrowWidth_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (arrowWidth_buf__selector == (2).toChar()) {
-                arrowWidth_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for arrowWidth_buf_ has to be chosen through deserialisation.")
-            }
-            arrowWidth_buf = (arrowWidth_buf_ as string | number | Resource)
-        }
-        const arrowWidth_result : Dimension | undefined = arrowWidth_buf
-        const arrowHeight_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let arrowHeight_buf : Dimension | undefined
-        if ((arrowHeight_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const arrowHeight_buf__selector : int32 = valueDeserializer.readInt8()
-            let arrowHeight_buf_ : string | number | Resource | undefined
-            if (arrowHeight_buf__selector == (0).toChar()) {
-                arrowHeight_buf_ = (valueDeserializer.readString() as string)
-            }
-            else if (arrowHeight_buf__selector == (1).toChar()) {
-                arrowHeight_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (arrowHeight_buf__selector == (2).toChar()) {
-                arrowHeight_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for arrowHeight_buf_ has to be chosen through deserialisation.")
-            }
-            arrowHeight_buf = (arrowHeight_buf_ as string | number | Resource)
-        }
-        const arrowHeight_result : Dimension | undefined = arrowHeight_buf
-        const radius_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let radius_buf : Dimension | undefined
-        if ((radius_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const radius_buf__selector : int32 = valueDeserializer.readInt8()
-            let radius_buf_ : string | number | Resource | undefined
-            if (radius_buf__selector == (0).toChar()) {
-                radius_buf_ = (valueDeserializer.readString() as string)
-            }
-            else if (radius_buf__selector == (1).toChar()) {
-                radius_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (radius_buf__selector == (2).toChar()) {
-                radius_buf_ = Resource_serializer.read(valueDeserializer)
-            }
-            else {
-                throw new Error("One of the branches for radius_buf_ has to be chosen through deserialisation.")
-            }
-            radius_buf = (radius_buf_ as string | number | Resource)
-        }
-        const radius_result : Dimension | undefined = radius_buf
-        const shadow_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let shadow_buf : ShadowOptions | ShadowStyle | undefined
-        if ((shadow_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const shadow_buf__selector : int32 = valueDeserializer.readInt8()
-            let shadow_buf_ : ShadowOptions | ShadowStyle | undefined
-            if (shadow_buf__selector == (0).toChar()) {
-                shadow_buf_ = ShadowOptions_serializer.read(valueDeserializer)
-            }
-            else if (shadow_buf__selector == (1).toChar()) {
-                shadow_buf_ = TypeChecker.ShadowStyle_FromNumeric(valueDeserializer.readInt32())
-            }
-            else {
-                throw new Error("One of the branches for shadow_buf_ has to be chosen through deserialisation.")
-            }
-            shadow_buf = (shadow_buf_ as ShadowOptions | ShadowStyle)
-        }
-        const shadow_result : ShadowOptions | ShadowStyle | undefined = shadow_buf
-        const backgroundBlurStyle_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let backgroundBlurStyle_buf : BlurStyle | undefined
-        if ((backgroundBlurStyle_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            backgroundBlurStyle_buf = TypeChecker.BlurStyle_FromNumeric(valueDeserializer.readInt32())
-        }
-        const backgroundBlurStyle_result : BlurStyle | undefined = backgroundBlurStyle_buf
-        const focusable_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let focusable_buf : boolean | undefined
-        if ((focusable_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            focusable_buf = valueDeserializer.readBoolean()
-        }
-        const focusable_result : boolean | undefined = focusable_buf
-        const transition_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let transition_buf : TransitionEffect | undefined
-        if ((transition_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            transition_buf = (TransitionEffect_serializer.read(valueDeserializer) as TransitionEffect)
-        }
-        const transition_result : TransitionEffect | undefined = transition_buf
-        const onWillDismiss_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let onWillDismiss_buf : boolean | ((value0: DismissPopupAction) => void) | undefined
-        if ((onWillDismiss_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const onWillDismiss_buf__selector : int32 = valueDeserializer.readInt8()
-            let onWillDismiss_buf_ : boolean | ((value0: DismissPopupAction) => void) | undefined
-            if (onWillDismiss_buf__selector == (0).toChar()) {
-                onWillDismiss_buf_ = valueDeserializer.readBoolean()
-            }
-            else if (onWillDismiss_buf__selector == (1).toChar()) {
-                const onWillDismiss_buf__u_resource : CallbackResource = valueDeserializer.readCallbackResource()
-                const onWillDismiss_buf__u_call : KPointer = valueDeserializer.readPointer()
-                const onWillDismiss_buf__u_callSync : KPointer = valueDeserializer.readPointer()
-                onWillDismiss_buf_ = (value0: DismissPopupAction):void => { 
-    const onWillDismiss_buf__u_argsSerializer : SerializerBase = SerializerBase.hold();
-    onWillDismiss_buf__u_argsSerializer.writeInt32(onWillDismiss_buf__u_resource.resourceId);
-    onWillDismiss_buf__u_argsSerializer.writePointer(onWillDismiss_buf__u_call);
-    onWillDismiss_buf__u_argsSerializer.writePointer(onWillDismiss_buf__u_callSync);
-    DismissPopupAction_serializer.write(onWillDismiss_buf__u_argsSerializer, value0);
-    InteropNativeModule._CallCallback(-2004166751, onWillDismiss_buf__u_argsSerializer.asBuffer(), onWillDismiss_buf__u_argsSerializer.length());
-    onWillDismiss_buf__u_argsSerializer.release();
-    return; }
-            }
-            else {
-                throw new Error("One of the branches for onWillDismiss_buf_ has to be chosen through deserialisation.")
-            }
-            onWillDismiss_buf = (onWillDismiss_buf_ as boolean | ((value0: DismissPopupAction) => void))
-        }
-        const onWillDismiss_result : boolean | ((value0: DismissPopupAction) => void) | undefined = onWillDismiss_buf
-        const enableHoverMode_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let enableHoverMode_buf : boolean | undefined
-        if ((enableHoverMode_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            enableHoverMode_buf = valueDeserializer.readBoolean()
-        }
-        const enableHoverMode_result : boolean | undefined = enableHoverMode_buf
-        const followTransformOfTarget_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let followTransformOfTarget_buf : boolean | undefined
-        if ((followTransformOfTarget_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            followTransformOfTarget_buf = valueDeserializer.readBoolean()
-        }
-        const followTransformOfTarget_result : boolean | undefined = followTransformOfTarget_buf
-        let value : PopupCommonOptions = ({placement: placement_result, popupColor: popupColor_result, enableArrow: enableArrow_result, autoCancel: autoCancel_result, onStateChange: onStateChange_result, arrowOffset: arrowOffset_result, showInSubWindow: showInSubWindow_result, mask: mask_result, targetSpace: targetSpace_result, offset: offset_result, width: width_result, arrowPointPosition: arrowPointPosition_result, arrowWidth: arrowWidth_result, arrowHeight: arrowHeight_result, radius: radius_result, shadow: shadow_result, backgroundBlurStyle: backgroundBlurStyle_result, focusable: focusable_result, transition: transition_result, onWillDismiss: onWillDismiss_result, enableHoverMode: enableHoverMode_result, followTransformOfTarget: followTransformOfTarget_result} as PopupCommonOptions)
         return value
     }
 }
@@ -24363,6 +21267,3102 @@ export class ClickEvent_serializer {
         return ClickEventInternal.fromPtr(ptr)
     }
 }
+export class AsymmetricTransitionOption_serializer {
+    public static write(buffer: SerializerBase, value: AsymmetricTransitionOption): void {
+        let valueSerializer : SerializerBase = buffer
+        const value_appear  = value.appear
+        TransitionEffect_serializer.write(valueSerializer, value_appear)
+        const value_disappear  = value.disappear
+        TransitionEffect_serializer.write(valueSerializer, value_disappear)
+    }
+    public static read(buffer: DeserializerBase): AsymmetricTransitionOption {
+        let valueDeserializer : DeserializerBase = buffer
+        const appear_result : TransitionEffect = (TransitionEffect_serializer.read(valueDeserializer) as TransitionEffect)
+        const disappear_result : TransitionEffect = (TransitionEffect_serializer.read(valueDeserializer) as TransitionEffect)
+        let value : AsymmetricTransitionOption = ({appear: appear_result, disappear: disappear_result} as AsymmetricTransitionOption)
+        return value
+    }
+}
+export class ContentCoverOptions_serializer {
+    public static write(buffer: SerializerBase, value: ContentCoverOptions): void {
+        let valueSerializer : SerializerBase = buffer
+        const value_backgroundColor  = value.backgroundColor
+        let value_backgroundColor_type : int32 = RuntimeType.UNDEFINED
+        value_backgroundColor_type = runtimeType(value_backgroundColor)
+        valueSerializer.writeInt8((value_backgroundColor_type).toChar())
+        if ((value_backgroundColor_type) != (RuntimeType.UNDEFINED)) {
+            const value_backgroundColor_value  = value_backgroundColor!
+            let value_backgroundColor_value_type : int32 = RuntimeType.UNDEFINED
+            value_backgroundColor_value_type = runtimeType(value_backgroundColor_value)
+            if (TypeChecker.isColor(value_backgroundColor_value)) {
+                valueSerializer.writeInt8((0).toChar())
+                const value_backgroundColor_value_0  = value_backgroundColor_value as Color
+                valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_backgroundColor_value_0))
+            }
+            else if (RuntimeType.NUMBER == value_backgroundColor_value_type) {
+                valueSerializer.writeInt8((1).toChar())
+                const value_backgroundColor_value_1  = value_backgroundColor_value as number
+                valueSerializer.writeNumber(value_backgroundColor_value_1)
+            }
+            else if (RuntimeType.STRING == value_backgroundColor_value_type) {
+                valueSerializer.writeInt8((2).toChar())
+                const value_backgroundColor_value_2  = value_backgroundColor_value as string
+                valueSerializer.writeString(value_backgroundColor_value_2)
+            }
+            else if (RuntimeType.OBJECT == value_backgroundColor_value_type) {
+                valueSerializer.writeInt8((3).toChar())
+                const value_backgroundColor_value_3  = value_backgroundColor_value as Resource
+                Resource_serializer.write(valueSerializer, value_backgroundColor_value_3)
+            }
+        }
+        const value_onAppear  = value.onAppear
+        let value_onAppear_type : int32 = RuntimeType.UNDEFINED
+        value_onAppear_type = runtimeType(value_onAppear)
+        valueSerializer.writeInt8((value_onAppear_type).toChar())
+        if ((value_onAppear_type) != (RuntimeType.UNDEFINED)) {
+            const value_onAppear_value  = value_onAppear!
+            valueSerializer.holdAndWriteCallback(value_onAppear_value)
+        }
+        const value_onDisappear  = value.onDisappear
+        let value_onDisappear_type : int32 = RuntimeType.UNDEFINED
+        value_onDisappear_type = runtimeType(value_onDisappear)
+        valueSerializer.writeInt8((value_onDisappear_type).toChar())
+        if ((value_onDisappear_type) != (RuntimeType.UNDEFINED)) {
+            const value_onDisappear_value  = value_onDisappear!
+            valueSerializer.holdAndWriteCallback(value_onDisappear_value)
+        }
+        const value_onWillAppear  = value.onWillAppear
+        let value_onWillAppear_type : int32 = RuntimeType.UNDEFINED
+        value_onWillAppear_type = runtimeType(value_onWillAppear)
+        valueSerializer.writeInt8((value_onWillAppear_type).toChar())
+        if ((value_onWillAppear_type) != (RuntimeType.UNDEFINED)) {
+            const value_onWillAppear_value  = value_onWillAppear!
+            valueSerializer.holdAndWriteCallback(value_onWillAppear_value)
+        }
+        const value_onWillDisappear  = value.onWillDisappear
+        let value_onWillDisappear_type : int32 = RuntimeType.UNDEFINED
+        value_onWillDisappear_type = runtimeType(value_onWillDisappear)
+        valueSerializer.writeInt8((value_onWillDisappear_type).toChar())
+        if ((value_onWillDisappear_type) != (RuntimeType.UNDEFINED)) {
+            const value_onWillDisappear_value  = value_onWillDisappear!
+            valueSerializer.holdAndWriteCallback(value_onWillDisappear_value)
+        }
+        const value_modalTransition  = value.modalTransition
+        let value_modalTransition_type : int32 = RuntimeType.UNDEFINED
+        value_modalTransition_type = runtimeType(value_modalTransition)
+        valueSerializer.writeInt8((value_modalTransition_type).toChar())
+        if ((value_modalTransition_type) != (RuntimeType.UNDEFINED)) {
+            const value_modalTransition_value  = (value_modalTransition as ModalTransition)
+            valueSerializer.writeInt32(TypeChecker.ModalTransition_ToNumeric(value_modalTransition_value))
+        }
+        const value_onWillDismiss  = value.onWillDismiss
+        let value_onWillDismiss_type : int32 = RuntimeType.UNDEFINED
+        value_onWillDismiss_type = runtimeType(value_onWillDismiss)
+        valueSerializer.writeInt8((value_onWillDismiss_type).toChar())
+        if ((value_onWillDismiss_type) != (RuntimeType.UNDEFINED)) {
+            const value_onWillDismiss_value  = value_onWillDismiss!
+            valueSerializer.holdAndWriteCallback(value_onWillDismiss_value)
+        }
+        const value_transition  = value.transition
+        let value_transition_type : int32 = RuntimeType.UNDEFINED
+        value_transition_type = runtimeType(value_transition)
+        valueSerializer.writeInt8((value_transition_type).toChar())
+        if ((value_transition_type) != (RuntimeType.UNDEFINED)) {
+            const value_transition_value  = value_transition!
+            TransitionEffect_serializer.write(valueSerializer, value_transition_value)
+        }
+    }
+    public static read(buffer: DeserializerBase): ContentCoverOptions {
+        let valueDeserializer : DeserializerBase = buffer
+        const backgroundColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let backgroundColor_buf : ResourceColor | undefined
+        if ((backgroundColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            const backgroundColor_buf__selector : int32 = valueDeserializer.readInt8()
+            let backgroundColor_buf_ : Color | number | string | Resource | undefined
+            if (backgroundColor_buf__selector == (0).toChar()) {
+                backgroundColor_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (backgroundColor_buf__selector == (1).toChar()) {
+                backgroundColor_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (backgroundColor_buf__selector == (2).toChar()) {
+                backgroundColor_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (backgroundColor_buf__selector == (3).toChar()) {
+                backgroundColor_buf_ = Resource_serializer.read(valueDeserializer)
+            }
+            else {
+                throw new Error("One of the branches for backgroundColor_buf_ has to be chosen through deserialisation.")
+            }
+            backgroundColor_buf = (backgroundColor_buf_ as Color | number | string | Resource)
+        }
+        const backgroundColor_result : ResourceColor | undefined = backgroundColor_buf
+        const onAppear_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let onAppear_buf : (() => void) | undefined
+        if ((onAppear_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            const onAppear_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
+            const onAppear_buf__call : KPointer = valueDeserializer.readPointer()
+            const onAppear_buf__callSync : KPointer = valueDeserializer.readPointer()
+            onAppear_buf = ():void => { 
+    const onAppear_buf__argsSerializer : SerializerBase = SerializerBase.hold();
+    onAppear_buf__argsSerializer.writeInt32(onAppear_buf__resource.resourceId);
+    onAppear_buf__argsSerializer.writePointer(onAppear_buf__call);
+    onAppear_buf__argsSerializer.writePointer(onAppear_buf__callSync);
+    InteropNativeModule._CallCallback(-1867723152, onAppear_buf__argsSerializer.asBuffer(), onAppear_buf__argsSerializer.length());
+    onAppear_buf__argsSerializer.release();
+    return; }
+        }
+        const onAppear_result : (() => void) | undefined = onAppear_buf
+        const onDisappear_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let onDisappear_buf : (() => void) | undefined
+        if ((onDisappear_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            const onDisappear_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
+            const onDisappear_buf__call : KPointer = valueDeserializer.readPointer()
+            const onDisappear_buf__callSync : KPointer = valueDeserializer.readPointer()
+            onDisappear_buf = ():void => { 
+    const onDisappear_buf__argsSerializer : SerializerBase = SerializerBase.hold();
+    onDisappear_buf__argsSerializer.writeInt32(onDisappear_buf__resource.resourceId);
+    onDisappear_buf__argsSerializer.writePointer(onDisappear_buf__call);
+    onDisappear_buf__argsSerializer.writePointer(onDisappear_buf__callSync);
+    InteropNativeModule._CallCallback(-1867723152, onDisappear_buf__argsSerializer.asBuffer(), onDisappear_buf__argsSerializer.length());
+    onDisappear_buf__argsSerializer.release();
+    return; }
+        }
+        const onDisappear_result : (() => void) | undefined = onDisappear_buf
+        const onWillAppear_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let onWillAppear_buf : (() => void) | undefined
+        if ((onWillAppear_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            const onWillAppear_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
+            const onWillAppear_buf__call : KPointer = valueDeserializer.readPointer()
+            const onWillAppear_buf__callSync : KPointer = valueDeserializer.readPointer()
+            onWillAppear_buf = ():void => { 
+    const onWillAppear_buf__argsSerializer : SerializerBase = SerializerBase.hold();
+    onWillAppear_buf__argsSerializer.writeInt32(onWillAppear_buf__resource.resourceId);
+    onWillAppear_buf__argsSerializer.writePointer(onWillAppear_buf__call);
+    onWillAppear_buf__argsSerializer.writePointer(onWillAppear_buf__callSync);
+    InteropNativeModule._CallCallback(-1867723152, onWillAppear_buf__argsSerializer.asBuffer(), onWillAppear_buf__argsSerializer.length());
+    onWillAppear_buf__argsSerializer.release();
+    return; }
+        }
+        const onWillAppear_result : (() => void) | undefined = onWillAppear_buf
+        const onWillDisappear_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let onWillDisappear_buf : (() => void) | undefined
+        if ((onWillDisappear_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            const onWillDisappear_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
+            const onWillDisappear_buf__call : KPointer = valueDeserializer.readPointer()
+            const onWillDisappear_buf__callSync : KPointer = valueDeserializer.readPointer()
+            onWillDisappear_buf = ():void => { 
+    const onWillDisappear_buf__argsSerializer : SerializerBase = SerializerBase.hold();
+    onWillDisappear_buf__argsSerializer.writeInt32(onWillDisappear_buf__resource.resourceId);
+    onWillDisappear_buf__argsSerializer.writePointer(onWillDisappear_buf__call);
+    onWillDisappear_buf__argsSerializer.writePointer(onWillDisappear_buf__callSync);
+    InteropNativeModule._CallCallback(-1867723152, onWillDisappear_buf__argsSerializer.asBuffer(), onWillDisappear_buf__argsSerializer.length());
+    onWillDisappear_buf__argsSerializer.release();
+    return; }
+        }
+        const onWillDisappear_result : (() => void) | undefined = onWillDisappear_buf
+        const modalTransition_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let modalTransition_buf : ModalTransition | undefined
+        if ((modalTransition_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            modalTransition_buf = TypeChecker.ModalTransition_FromNumeric(valueDeserializer.readInt32())
+        }
+        const modalTransition_result : ModalTransition | undefined = modalTransition_buf
+        const onWillDismiss_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let onWillDismiss_buf : ((value0: DismissContentCoverAction) => void) | undefined
+        if ((onWillDismiss_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            const onWillDismiss_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
+            const onWillDismiss_buf__call : KPointer = valueDeserializer.readPointer()
+            const onWillDismiss_buf__callSync : KPointer = valueDeserializer.readPointer()
+            onWillDismiss_buf = (value0: DismissContentCoverAction):void => { 
+    const onWillDismiss_buf__argsSerializer : SerializerBase = SerializerBase.hold();
+    onWillDismiss_buf__argsSerializer.writeInt32(onWillDismiss_buf__resource.resourceId);
+    onWillDismiss_buf__argsSerializer.writePointer(onWillDismiss_buf__call);
+    onWillDismiss_buf__argsSerializer.writePointer(onWillDismiss_buf__callSync);
+    DismissContentCoverAction_serializer.write(onWillDismiss_buf__argsSerializer, value0);
+    InteropNativeModule._CallCallback(-1283506641, onWillDismiss_buf__argsSerializer.asBuffer(), onWillDismiss_buf__argsSerializer.length());
+    onWillDismiss_buf__argsSerializer.release();
+    return; }
+        }
+        const onWillDismiss_result : ((value0: DismissContentCoverAction) => void) | undefined = onWillDismiss_buf
+        const transition_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let transition_buf : TransitionEffect | undefined
+        if ((transition_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            transition_buf = (TransitionEffect_serializer.read(valueDeserializer) as TransitionEffect)
+        }
+        const transition_result : TransitionEffect | undefined = transition_buf
+        let value : ContentCoverOptions = ({backgroundColor: backgroundColor_result, onAppear: onAppear_result, onDisappear: onDisappear_result, onWillAppear: onWillAppear_result, onWillDisappear: onWillDisappear_result, modalTransition: modalTransition_result, onWillDismiss: onWillDismiss_result, transition: transition_result} as ContentCoverOptions)
+        return value
+    }
+}
+export class ContextMenuAnimationOptions_serializer {
+    public static write(buffer: SerializerBase, value: ContextMenuAnimationOptions): void {
+        let valueSerializer : SerializerBase = buffer
+        const value_scale  = value.scale
+        let value_scale_type : int32 = RuntimeType.UNDEFINED
+        value_scale_type = runtimeType(value_scale)
+        valueSerializer.writeInt8((value_scale_type).toChar())
+        if ((value_scale_type) != (RuntimeType.UNDEFINED)) {
+            const value_scale_value  = value_scale!
+            const value_scale_value_0  = value_scale_value[0]
+            valueSerializer.writeNumber(value_scale_value_0)
+            const value_scale_value_1  = value_scale_value[1]
+            valueSerializer.writeNumber(value_scale_value_1)
+        }
+        const value_transition  = value.transition
+        let value_transition_type : int32 = RuntimeType.UNDEFINED
+        value_transition_type = runtimeType(value_transition)
+        valueSerializer.writeInt8((value_transition_type).toChar())
+        if ((value_transition_type) != (RuntimeType.UNDEFINED)) {
+            const value_transition_value  = value_transition!
+            TransitionEffect_serializer.write(valueSerializer, value_transition_value)
+        }
+        const value_hoverScale  = value.hoverScale
+        let value_hoverScale_type : int32 = RuntimeType.UNDEFINED
+        value_hoverScale_type = runtimeType(value_hoverScale)
+        valueSerializer.writeInt8((value_hoverScale_type).toChar())
+        if ((value_hoverScale_type) != (RuntimeType.UNDEFINED)) {
+            const value_hoverScale_value  = value_hoverScale!
+            const value_hoverScale_value_0  = value_hoverScale_value[0]
+            valueSerializer.writeNumber(value_hoverScale_value_0)
+            const value_hoverScale_value_1  = value_hoverScale_value[1]
+            valueSerializer.writeNumber(value_hoverScale_value_1)
+        }
+    }
+    public static read(buffer: DeserializerBase): ContextMenuAnimationOptions {
+        let valueDeserializer : DeserializerBase = buffer
+        const scale_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let scale_buf : AnimationNumberRange | undefined
+        if ((scale_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            const scale_buf__value0 : number = (valueDeserializer.readNumber() as number)
+            const scale_buf__value1 : number = (valueDeserializer.readNumber() as number)
+            scale_buf = ([scale_buf__value0, scale_buf__value1] as AnimationNumberRange)
+        }
+        const scale_result : AnimationNumberRange | undefined = scale_buf
+        const transition_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let transition_buf : TransitionEffect | undefined
+        if ((transition_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            transition_buf = (TransitionEffect_serializer.read(valueDeserializer) as TransitionEffect)
+        }
+        const transition_result : TransitionEffect | undefined = transition_buf
+        const hoverScale_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let hoverScale_buf : AnimationNumberRange | undefined
+        if ((hoverScale_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            const hoverScale_buf__value0 : number = (valueDeserializer.readNumber() as number)
+            const hoverScale_buf__value1 : number = (valueDeserializer.readNumber() as number)
+            hoverScale_buf = ([hoverScale_buf__value0, hoverScale_buf__value1] as AnimationNumberRange)
+        }
+        const hoverScale_result : AnimationNumberRange | undefined = hoverScale_buf
+        let value : ContextMenuAnimationOptions = ({scale: scale_result, transition: transition_result, hoverScale: hoverScale_result} as ContextMenuAnimationOptions)
+        return value
+    }
+}
+export class ContextMenuOptions_serializer {
+    public static write(buffer: SerializerBase, value: ContextMenuOptions): void {
+        let valueSerializer : SerializerBase = buffer
+        const value_offset  = value.offset
+        let value_offset_type : int32 = RuntimeType.UNDEFINED
+        value_offset_type = runtimeType(value_offset)
+        valueSerializer.writeInt8((value_offset_type).toChar())
+        if ((value_offset_type) != (RuntimeType.UNDEFINED)) {
+            const value_offset_value  = value_offset!
+            Position_serializer.write(valueSerializer, value_offset_value)
+        }
+        const value_placement  = value.placement
+        let value_placement_type : int32 = RuntimeType.UNDEFINED
+        value_placement_type = runtimeType(value_placement)
+        valueSerializer.writeInt8((value_placement_type).toChar())
+        if ((value_placement_type) != (RuntimeType.UNDEFINED)) {
+            const value_placement_value  = (value_placement as Placement)
+            valueSerializer.writeInt32(TypeChecker.Placement_ToNumeric(value_placement_value))
+        }
+        const value_enableArrow  = value.enableArrow
+        let value_enableArrow_type : int32 = RuntimeType.UNDEFINED
+        value_enableArrow_type = runtimeType(value_enableArrow)
+        valueSerializer.writeInt8((value_enableArrow_type).toChar())
+        if ((value_enableArrow_type) != (RuntimeType.UNDEFINED)) {
+            const value_enableArrow_value  = value_enableArrow!
+            valueSerializer.writeBoolean(value_enableArrow_value)
+        }
+        const value_arrowOffset  = value.arrowOffset
+        let value_arrowOffset_type : int32 = RuntimeType.UNDEFINED
+        value_arrowOffset_type = runtimeType(value_arrowOffset)
+        valueSerializer.writeInt8((value_arrowOffset_type).toChar())
+        if ((value_arrowOffset_type) != (RuntimeType.UNDEFINED)) {
+            const value_arrowOffset_value  = value_arrowOffset!
+            let value_arrowOffset_value_type : int32 = RuntimeType.UNDEFINED
+            value_arrowOffset_value_type = runtimeType(value_arrowOffset_value)
+            if (RuntimeType.STRING == value_arrowOffset_value_type) {
+                valueSerializer.writeInt8((0).toChar())
+                const value_arrowOffset_value_0  = value_arrowOffset_value as string
+                valueSerializer.writeString(value_arrowOffset_value_0)
+            }
+            else if (RuntimeType.NUMBER == value_arrowOffset_value_type) {
+                valueSerializer.writeInt8((1).toChar())
+                const value_arrowOffset_value_1  = value_arrowOffset_value as number
+                valueSerializer.writeNumber(value_arrowOffset_value_1)
+            }
+            else if (RuntimeType.OBJECT == value_arrowOffset_value_type) {
+                valueSerializer.writeInt8((2).toChar())
+                const value_arrowOffset_value_2  = value_arrowOffset_value as Resource
+                Resource_serializer.write(valueSerializer, value_arrowOffset_value_2)
+            }
+        }
+        const value_preview  = value.preview
+        let value_preview_type : int32 = RuntimeType.UNDEFINED
+        value_preview_type = runtimeType(value_preview)
+        valueSerializer.writeInt8((value_preview_type).toChar())
+        if ((value_preview_type) != (RuntimeType.UNDEFINED)) {
+            const value_preview_value  = value_preview!
+            let value_preview_value_type : int32 = RuntimeType.UNDEFINED
+            value_preview_value_type = runtimeType(value_preview_value)
+            if (TypeChecker.isMenuPreviewMode(value_preview_value)) {
+                valueSerializer.writeInt8((0).toChar())
+                const value_preview_value_0  = value_preview_value as MenuPreviewMode
+                valueSerializer.writeInt32(TypeChecker.MenuPreviewMode_ToNumeric(value_preview_value_0))
+            }
+            else if (RuntimeType.FUNCTION == value_preview_value_type) {
+                valueSerializer.writeInt8((1).toChar())
+                const value_preview_value_1  = value_preview_value as CustomBuilder
+                valueSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(value_preview_value_1))
+            }
+        }
+        const value_previewBorderRadius  = value.previewBorderRadius
+        let value_previewBorderRadius_type : int32 = RuntimeType.UNDEFINED
+        value_previewBorderRadius_type = runtimeType(value_previewBorderRadius)
+        valueSerializer.writeInt8((value_previewBorderRadius_type).toChar())
+        if ((value_previewBorderRadius_type) != (RuntimeType.UNDEFINED)) {
+            const value_previewBorderRadius_value  = value_previewBorderRadius!
+            let value_previewBorderRadius_value_type : int32 = RuntimeType.UNDEFINED
+            value_previewBorderRadius_value_type = runtimeType(value_previewBorderRadius_value)
+            if ((RuntimeType.STRING == value_previewBorderRadius_value_type) || (RuntimeType.NUMBER == value_previewBorderRadius_value_type) || (RuntimeType.OBJECT == value_previewBorderRadius_value_type)) {
+                valueSerializer.writeInt8((0).toChar())
+                const value_previewBorderRadius_value_0  = value_previewBorderRadius_value as Length
+                let value_previewBorderRadius_value_0_type : int32 = RuntimeType.UNDEFINED
+                value_previewBorderRadius_value_0_type = runtimeType(value_previewBorderRadius_value_0)
+                if (RuntimeType.STRING == value_previewBorderRadius_value_0_type) {
+                    valueSerializer.writeInt8((0).toChar())
+                    const value_previewBorderRadius_value_0_0  = value_previewBorderRadius_value_0 as string
+                    valueSerializer.writeString(value_previewBorderRadius_value_0_0)
+                }
+                else if (RuntimeType.NUMBER == value_previewBorderRadius_value_0_type) {
+                    valueSerializer.writeInt8((1).toChar())
+                    const value_previewBorderRadius_value_0_1  = value_previewBorderRadius_value_0 as number
+                    valueSerializer.writeNumber(value_previewBorderRadius_value_0_1)
+                }
+                else if (RuntimeType.OBJECT == value_previewBorderRadius_value_0_type) {
+                    valueSerializer.writeInt8((2).toChar())
+                    const value_previewBorderRadius_value_0_2  = value_previewBorderRadius_value_0 as Resource
+                    Resource_serializer.write(valueSerializer, value_previewBorderRadius_value_0_2)
+                }
+            }
+            else if (TypeChecker.isBorderRadiuses(value_previewBorderRadius_value, false, false, false, false)) {
+                valueSerializer.writeInt8((1).toChar())
+                const value_previewBorderRadius_value_1  = value_previewBorderRadius_value as BorderRadiuses
+                BorderRadiuses_serializer.write(valueSerializer, value_previewBorderRadius_value_1)
+            }
+            else if (TypeChecker.isLocalizedBorderRadiuses(value_previewBorderRadius_value, false, false, false, false)) {
+                valueSerializer.writeInt8((2).toChar())
+                const value_previewBorderRadius_value_2  = value_previewBorderRadius_value as LocalizedBorderRadiuses
+                LocalizedBorderRadiuses_serializer.write(valueSerializer, value_previewBorderRadius_value_2)
+            }
+        }
+        const value_borderRadius  = value.borderRadius
+        let value_borderRadius_type : int32 = RuntimeType.UNDEFINED
+        value_borderRadius_type = runtimeType(value_borderRadius)
+        valueSerializer.writeInt8((value_borderRadius_type).toChar())
+        if ((value_borderRadius_type) != (RuntimeType.UNDEFINED)) {
+            const value_borderRadius_value  = value_borderRadius!
+            let value_borderRadius_value_type : int32 = RuntimeType.UNDEFINED
+            value_borderRadius_value_type = runtimeType(value_borderRadius_value)
+            if ((RuntimeType.STRING == value_borderRadius_value_type) || (RuntimeType.NUMBER == value_borderRadius_value_type) || (RuntimeType.OBJECT == value_borderRadius_value_type)) {
+                valueSerializer.writeInt8((0).toChar())
+                const value_borderRadius_value_0  = value_borderRadius_value as Length
+                let value_borderRadius_value_0_type : int32 = RuntimeType.UNDEFINED
+                value_borderRadius_value_0_type = runtimeType(value_borderRadius_value_0)
+                if (RuntimeType.STRING == value_borderRadius_value_0_type) {
+                    valueSerializer.writeInt8((0).toChar())
+                    const value_borderRadius_value_0_0  = value_borderRadius_value_0 as string
+                    valueSerializer.writeString(value_borderRadius_value_0_0)
+                }
+                else if (RuntimeType.NUMBER == value_borderRadius_value_0_type) {
+                    valueSerializer.writeInt8((1).toChar())
+                    const value_borderRadius_value_0_1  = value_borderRadius_value_0 as number
+                    valueSerializer.writeNumber(value_borderRadius_value_0_1)
+                }
+                else if (RuntimeType.OBJECT == value_borderRadius_value_0_type) {
+                    valueSerializer.writeInt8((2).toChar())
+                    const value_borderRadius_value_0_2  = value_borderRadius_value_0 as Resource
+                    Resource_serializer.write(valueSerializer, value_borderRadius_value_0_2)
+                }
+            }
+            else if (TypeChecker.isBorderRadiuses(value_borderRadius_value, false, false, false, false)) {
+                valueSerializer.writeInt8((1).toChar())
+                const value_borderRadius_value_1  = value_borderRadius_value as BorderRadiuses
+                BorderRadiuses_serializer.write(valueSerializer, value_borderRadius_value_1)
+            }
+            else if (TypeChecker.isLocalizedBorderRadiuses(value_borderRadius_value, false, false, false, false)) {
+                valueSerializer.writeInt8((2).toChar())
+                const value_borderRadius_value_2  = value_borderRadius_value as LocalizedBorderRadiuses
+                LocalizedBorderRadiuses_serializer.write(valueSerializer, value_borderRadius_value_2)
+            }
+        }
+        const value_onAppear  = value.onAppear
+        let value_onAppear_type : int32 = RuntimeType.UNDEFINED
+        value_onAppear_type = runtimeType(value_onAppear)
+        valueSerializer.writeInt8((value_onAppear_type).toChar())
+        if ((value_onAppear_type) != (RuntimeType.UNDEFINED)) {
+            const value_onAppear_value  = value_onAppear!
+            valueSerializer.holdAndWriteCallback(value_onAppear_value)
+        }
+        const value_onDisappear  = value.onDisappear
+        let value_onDisappear_type : int32 = RuntimeType.UNDEFINED
+        value_onDisappear_type = runtimeType(value_onDisappear)
+        valueSerializer.writeInt8((value_onDisappear_type).toChar())
+        if ((value_onDisappear_type) != (RuntimeType.UNDEFINED)) {
+            const value_onDisappear_value  = value_onDisappear!
+            valueSerializer.holdAndWriteCallback(value_onDisappear_value)
+        }
+        const value_aboutToAppear  = value.aboutToAppear
+        let value_aboutToAppear_type : int32 = RuntimeType.UNDEFINED
+        value_aboutToAppear_type = runtimeType(value_aboutToAppear)
+        valueSerializer.writeInt8((value_aboutToAppear_type).toChar())
+        if ((value_aboutToAppear_type) != (RuntimeType.UNDEFINED)) {
+            const value_aboutToAppear_value  = value_aboutToAppear!
+            valueSerializer.holdAndWriteCallback(value_aboutToAppear_value)
+        }
+        const value_aboutToDisappear  = value.aboutToDisappear
+        let value_aboutToDisappear_type : int32 = RuntimeType.UNDEFINED
+        value_aboutToDisappear_type = runtimeType(value_aboutToDisappear)
+        valueSerializer.writeInt8((value_aboutToDisappear_type).toChar())
+        if ((value_aboutToDisappear_type) != (RuntimeType.UNDEFINED)) {
+            const value_aboutToDisappear_value  = value_aboutToDisappear!
+            valueSerializer.holdAndWriteCallback(value_aboutToDisappear_value)
+        }
+        const value_layoutRegionMargin  = value.layoutRegionMargin
+        let value_layoutRegionMargin_type : int32 = RuntimeType.UNDEFINED
+        value_layoutRegionMargin_type = runtimeType(value_layoutRegionMargin)
+        valueSerializer.writeInt8((value_layoutRegionMargin_type).toChar())
+        if ((value_layoutRegionMargin_type) != (RuntimeType.UNDEFINED)) {
+            const value_layoutRegionMargin_value  = value_layoutRegionMargin!
+            Padding_serializer.write(valueSerializer, value_layoutRegionMargin_value)
+        }
+        const value_previewAnimationOptions  = value.previewAnimationOptions
+        let value_previewAnimationOptions_type : int32 = RuntimeType.UNDEFINED
+        value_previewAnimationOptions_type = runtimeType(value_previewAnimationOptions)
+        valueSerializer.writeInt8((value_previewAnimationOptions_type).toChar())
+        if ((value_previewAnimationOptions_type) != (RuntimeType.UNDEFINED)) {
+            const value_previewAnimationOptions_value  = value_previewAnimationOptions!
+            ContextMenuAnimationOptions_serializer.write(valueSerializer, value_previewAnimationOptions_value)
+        }
+        const value_backgroundColor  = value.backgroundColor
+        let value_backgroundColor_type : int32 = RuntimeType.UNDEFINED
+        value_backgroundColor_type = runtimeType(value_backgroundColor)
+        valueSerializer.writeInt8((value_backgroundColor_type).toChar())
+        if ((value_backgroundColor_type) != (RuntimeType.UNDEFINED)) {
+            const value_backgroundColor_value  = value_backgroundColor!
+            let value_backgroundColor_value_type : int32 = RuntimeType.UNDEFINED
+            value_backgroundColor_value_type = runtimeType(value_backgroundColor_value)
+            if (TypeChecker.isColor(value_backgroundColor_value)) {
+                valueSerializer.writeInt8((0).toChar())
+                const value_backgroundColor_value_0  = value_backgroundColor_value as Color
+                valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_backgroundColor_value_0))
+            }
+            else if (RuntimeType.NUMBER == value_backgroundColor_value_type) {
+                valueSerializer.writeInt8((1).toChar())
+                const value_backgroundColor_value_1  = value_backgroundColor_value as number
+                valueSerializer.writeNumber(value_backgroundColor_value_1)
+            }
+            else if (RuntimeType.STRING == value_backgroundColor_value_type) {
+                valueSerializer.writeInt8((2).toChar())
+                const value_backgroundColor_value_2  = value_backgroundColor_value as string
+                valueSerializer.writeString(value_backgroundColor_value_2)
+            }
+            else if (RuntimeType.OBJECT == value_backgroundColor_value_type) {
+                valueSerializer.writeInt8((3).toChar())
+                const value_backgroundColor_value_3  = value_backgroundColor_value as Resource
+                Resource_serializer.write(valueSerializer, value_backgroundColor_value_3)
+            }
+        }
+        const value_backgroundBlurStyle  = value.backgroundBlurStyle
+        let value_backgroundBlurStyle_type : int32 = RuntimeType.UNDEFINED
+        value_backgroundBlurStyle_type = runtimeType(value_backgroundBlurStyle)
+        valueSerializer.writeInt8((value_backgroundBlurStyle_type).toChar())
+        if ((value_backgroundBlurStyle_type) != (RuntimeType.UNDEFINED)) {
+            const value_backgroundBlurStyle_value  = (value_backgroundBlurStyle as BlurStyle)
+            valueSerializer.writeInt32(TypeChecker.BlurStyle_ToNumeric(value_backgroundBlurStyle_value))
+        }
+        const value_backgroundBlurStyleOptions  = value.backgroundBlurStyleOptions
+        let value_backgroundBlurStyleOptions_type : int32 = RuntimeType.UNDEFINED
+        value_backgroundBlurStyleOptions_type = runtimeType(value_backgroundBlurStyleOptions)
+        valueSerializer.writeInt8((value_backgroundBlurStyleOptions_type).toChar())
+        if ((value_backgroundBlurStyleOptions_type) != (RuntimeType.UNDEFINED)) {
+            const value_backgroundBlurStyleOptions_value  = value_backgroundBlurStyleOptions!
+            BackgroundBlurStyleOptions_serializer.write(valueSerializer, value_backgroundBlurStyleOptions_value)
+        }
+        const value_backgroundEffect  = value.backgroundEffect
+        let value_backgroundEffect_type : int32 = RuntimeType.UNDEFINED
+        value_backgroundEffect_type = runtimeType(value_backgroundEffect)
+        valueSerializer.writeInt8((value_backgroundEffect_type).toChar())
+        if ((value_backgroundEffect_type) != (RuntimeType.UNDEFINED)) {
+            const value_backgroundEffect_value  = value_backgroundEffect!
+            BackgroundEffectOptions_serializer.write(valueSerializer, value_backgroundEffect_value)
+        }
+        const value_transition  = value.transition
+        let value_transition_type : int32 = RuntimeType.UNDEFINED
+        value_transition_type = runtimeType(value_transition)
+        valueSerializer.writeInt8((value_transition_type).toChar())
+        if ((value_transition_type) != (RuntimeType.UNDEFINED)) {
+            const value_transition_value  = value_transition!
+            TransitionEffect_serializer.write(valueSerializer, value_transition_value)
+        }
+        const value_enableHoverMode  = value.enableHoverMode
+        let value_enableHoverMode_type : int32 = RuntimeType.UNDEFINED
+        value_enableHoverMode_type = runtimeType(value_enableHoverMode)
+        valueSerializer.writeInt8((value_enableHoverMode_type).toChar())
+        if ((value_enableHoverMode_type) != (RuntimeType.UNDEFINED)) {
+            const value_enableHoverMode_value  = value_enableHoverMode!
+            valueSerializer.writeBoolean(value_enableHoverMode_value)
+        }
+        const value_outlineColor  = value.outlineColor
+        let value_outlineColor_type : int32 = RuntimeType.UNDEFINED
+        value_outlineColor_type = runtimeType(value_outlineColor)
+        valueSerializer.writeInt8((value_outlineColor_type).toChar())
+        if ((value_outlineColor_type) != (RuntimeType.UNDEFINED)) {
+            const value_outlineColor_value  = value_outlineColor!
+            let value_outlineColor_value_type : int32 = RuntimeType.UNDEFINED
+            value_outlineColor_value_type = runtimeType(value_outlineColor_value)
+            if ((TypeChecker.isColor(value_outlineColor_value)) || (RuntimeType.NUMBER == value_outlineColor_value_type) || (RuntimeType.STRING == value_outlineColor_value_type) || (RuntimeType.OBJECT == value_outlineColor_value_type)) {
+                valueSerializer.writeInt8((0).toChar())
+                const value_outlineColor_value_0  = value_outlineColor_value as ResourceColor
+                let value_outlineColor_value_0_type : int32 = RuntimeType.UNDEFINED
+                value_outlineColor_value_0_type = runtimeType(value_outlineColor_value_0)
+                if (TypeChecker.isColor(value_outlineColor_value_0)) {
+                    valueSerializer.writeInt8((0).toChar())
+                    const value_outlineColor_value_0_0  = value_outlineColor_value_0 as Color
+                    valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_outlineColor_value_0_0))
+                }
+                else if (RuntimeType.NUMBER == value_outlineColor_value_0_type) {
+                    valueSerializer.writeInt8((1).toChar())
+                    const value_outlineColor_value_0_1  = value_outlineColor_value_0 as number
+                    valueSerializer.writeNumber(value_outlineColor_value_0_1)
+                }
+                else if (RuntimeType.STRING == value_outlineColor_value_0_type) {
+                    valueSerializer.writeInt8((2).toChar())
+                    const value_outlineColor_value_0_2  = value_outlineColor_value_0 as string
+                    valueSerializer.writeString(value_outlineColor_value_0_2)
+                }
+                else if (RuntimeType.OBJECT == value_outlineColor_value_0_type) {
+                    valueSerializer.writeInt8((3).toChar())
+                    const value_outlineColor_value_0_3  = value_outlineColor_value_0 as Resource
+                    Resource_serializer.write(valueSerializer, value_outlineColor_value_0_3)
+                }
+            }
+            else if (TypeChecker.isEdgeColors(value_outlineColor_value, false, false, false, false)) {
+                valueSerializer.writeInt8((1).toChar())
+                const value_outlineColor_value_1  = value_outlineColor_value as EdgeColors
+                EdgeColors_serializer.write(valueSerializer, value_outlineColor_value_1)
+            }
+        }
+        const value_outlineWidth  = value.outlineWidth
+        let value_outlineWidth_type : int32 = RuntimeType.UNDEFINED
+        value_outlineWidth_type = runtimeType(value_outlineWidth)
+        valueSerializer.writeInt8((value_outlineWidth_type).toChar())
+        if ((value_outlineWidth_type) != (RuntimeType.UNDEFINED)) {
+            const value_outlineWidth_value  = value_outlineWidth!
+            let value_outlineWidth_value_type : int32 = RuntimeType.UNDEFINED
+            value_outlineWidth_value_type = runtimeType(value_outlineWidth_value)
+            if ((RuntimeType.STRING == value_outlineWidth_value_type) || (RuntimeType.NUMBER == value_outlineWidth_value_type) || (RuntimeType.OBJECT == value_outlineWidth_value_type)) {
+                valueSerializer.writeInt8((0).toChar())
+                const value_outlineWidth_value_0  = value_outlineWidth_value as Dimension
+                let value_outlineWidth_value_0_type : int32 = RuntimeType.UNDEFINED
+                value_outlineWidth_value_0_type = runtimeType(value_outlineWidth_value_0)
+                if (RuntimeType.STRING == value_outlineWidth_value_0_type) {
+                    valueSerializer.writeInt8((0).toChar())
+                    const value_outlineWidth_value_0_0  = value_outlineWidth_value_0 as string
+                    valueSerializer.writeString(value_outlineWidth_value_0_0)
+                }
+                else if (RuntimeType.NUMBER == value_outlineWidth_value_0_type) {
+                    valueSerializer.writeInt8((1).toChar())
+                    const value_outlineWidth_value_0_1  = value_outlineWidth_value_0 as number
+                    valueSerializer.writeNumber(value_outlineWidth_value_0_1)
+                }
+                else if (RuntimeType.OBJECT == value_outlineWidth_value_0_type) {
+                    valueSerializer.writeInt8((2).toChar())
+                    const value_outlineWidth_value_0_2  = value_outlineWidth_value_0 as Resource
+                    Resource_serializer.write(valueSerializer, value_outlineWidth_value_0_2)
+                }
+            }
+            else if (TypeChecker.isEdgeOutlineWidths(value_outlineWidth_value, false, false, false, false)) {
+                valueSerializer.writeInt8((1).toChar())
+                const value_outlineWidth_value_1  = value_outlineWidth_value as EdgeOutlineWidths
+                EdgeOutlineWidths_serializer.write(valueSerializer, value_outlineWidth_value_1)
+            }
+        }
+        const value_hapticFeedbackMode  = value.hapticFeedbackMode
+        let value_hapticFeedbackMode_type : int32 = RuntimeType.UNDEFINED
+        value_hapticFeedbackMode_type = runtimeType(value_hapticFeedbackMode)
+        valueSerializer.writeInt8((value_hapticFeedbackMode_type).toChar())
+        if ((value_hapticFeedbackMode_type) != (RuntimeType.UNDEFINED)) {
+            const value_hapticFeedbackMode_value  = (value_hapticFeedbackMode as HapticFeedbackMode)
+            valueSerializer.writeInt32(TypeChecker.HapticFeedbackMode_ToNumeric(value_hapticFeedbackMode_value))
+        }
+    }
+    public static read(buffer: DeserializerBase): ContextMenuOptions {
+        let valueDeserializer : DeserializerBase = buffer
+        const offset_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let offset_buf : Position | undefined
+        if ((offset_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            offset_buf = Position_serializer.read(valueDeserializer)
+        }
+        const offset_result : Position | undefined = offset_buf
+        const placement_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let placement_buf : Placement | undefined
+        if ((placement_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            placement_buf = TypeChecker.Placement_FromNumeric(valueDeserializer.readInt32())
+        }
+        const placement_result : Placement | undefined = placement_buf
+        const enableArrow_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let enableArrow_buf : boolean | undefined
+        if ((enableArrow_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            enableArrow_buf = valueDeserializer.readBoolean()
+        }
+        const enableArrow_result : boolean | undefined = enableArrow_buf
+        const arrowOffset_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let arrowOffset_buf : Length | undefined
+        if ((arrowOffset_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            const arrowOffset_buf__selector : int32 = valueDeserializer.readInt8()
+            let arrowOffset_buf_ : string | number | Resource | undefined
+            if (arrowOffset_buf__selector == (0).toChar()) {
+                arrowOffset_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (arrowOffset_buf__selector == (1).toChar()) {
+                arrowOffset_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (arrowOffset_buf__selector == (2).toChar()) {
+                arrowOffset_buf_ = Resource_serializer.read(valueDeserializer)
+            }
+            else {
+                throw new Error("One of the branches for arrowOffset_buf_ has to be chosen through deserialisation.")
+            }
+            arrowOffset_buf = (arrowOffset_buf_ as string | number | Resource)
+        }
+        const arrowOffset_result : Length | undefined = arrowOffset_buf
+        const preview_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let preview_buf : MenuPreviewMode | CustomBuilder | undefined
+        if ((preview_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            const preview_buf__selector : int32 = valueDeserializer.readInt8()
+            let preview_buf_ : MenuPreviewMode | CustomBuilder | undefined
+            if (preview_buf__selector == (0).toChar()) {
+                preview_buf_ = TypeChecker.MenuPreviewMode_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (preview_buf__selector == (1).toChar()) {
+                const preview_buf__u_resource : CallbackResource = valueDeserializer.readCallbackResource()
+                const preview_buf__u_call : KPointer = valueDeserializer.readPointer()
+                const preview_buf__u_callSync : KPointer = valueDeserializer.readPointer()
+                preview_buf_ = ():void => { 
+    const preview_buf__u_argsSerializer : SerializerBase = SerializerBase.hold();
+    preview_buf__u_argsSerializer.writeInt32(preview_buf__u_resource.resourceId);
+    preview_buf__u_argsSerializer.writePointer(preview_buf__u_call);
+    preview_buf__u_argsSerializer.writePointer(preview_buf__u_callSync);
+    InteropNativeModule._CallCallback(737226752, preview_buf__u_argsSerializer.asBuffer(), preview_buf__u_argsSerializer.length());
+    preview_buf__u_argsSerializer.release();
+    return; }
+            }
+            else {
+                throw new Error("One of the branches for preview_buf_ has to be chosen through deserialisation.")
+            }
+            preview_buf = (preview_buf_ as MenuPreviewMode | CustomBuilder)
+        }
+        const preview_result : MenuPreviewMode | CustomBuilder | undefined = preview_buf
+        const previewBorderRadius_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let previewBorderRadius_buf : BorderRadiusType | undefined
+        if ((previewBorderRadius_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            const previewBorderRadius_buf__selector : int32 = valueDeserializer.readInt8()
+            let previewBorderRadius_buf_ : Length | BorderRadiuses | LocalizedBorderRadiuses | undefined
+            if (previewBorderRadius_buf__selector == (0).toChar()) {
+                const previewBorderRadius_buf__u_selector : int32 = valueDeserializer.readInt8()
+                let previewBorderRadius_buf__u : string | number | Resource | undefined
+                if (previewBorderRadius_buf__u_selector == (0).toChar()) {
+                    previewBorderRadius_buf__u = (valueDeserializer.readString() as string)
+                }
+                else if (previewBorderRadius_buf__u_selector == (1).toChar()) {
+                    previewBorderRadius_buf__u = (valueDeserializer.readNumber() as number)
+                }
+                else if (previewBorderRadius_buf__u_selector == (2).toChar()) {
+                    previewBorderRadius_buf__u = Resource_serializer.read(valueDeserializer)
+                }
+                else {
+                    throw new Error("One of the branches for previewBorderRadius_buf__u has to be chosen through deserialisation.")
+                }
+                previewBorderRadius_buf_ = (previewBorderRadius_buf__u as string | number | Resource)
+            }
+            else if (previewBorderRadius_buf__selector == (1).toChar()) {
+                previewBorderRadius_buf_ = BorderRadiuses_serializer.read(valueDeserializer)
+            }
+            else if (previewBorderRadius_buf__selector == (2).toChar()) {
+                previewBorderRadius_buf_ = LocalizedBorderRadiuses_serializer.read(valueDeserializer)
+            }
+            else {
+                throw new Error("One of the branches for previewBorderRadius_buf_ has to be chosen through deserialisation.")
+            }
+            previewBorderRadius_buf = (previewBorderRadius_buf_ as Length | BorderRadiuses | LocalizedBorderRadiuses)
+        }
+        const previewBorderRadius_result : BorderRadiusType | undefined = previewBorderRadius_buf
+        const borderRadius_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let borderRadius_buf : Length | BorderRadiuses | LocalizedBorderRadiuses | undefined
+        if ((borderRadius_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            const borderRadius_buf__selector : int32 = valueDeserializer.readInt8()
+            let borderRadius_buf_ : Length | BorderRadiuses | LocalizedBorderRadiuses | undefined
+            if (borderRadius_buf__selector == (0).toChar()) {
+                const borderRadius_buf__u_selector : int32 = valueDeserializer.readInt8()
+                let borderRadius_buf__u : string | number | Resource | undefined
+                if (borderRadius_buf__u_selector == (0).toChar()) {
+                    borderRadius_buf__u = (valueDeserializer.readString() as string)
+                }
+                else if (borderRadius_buf__u_selector == (1).toChar()) {
+                    borderRadius_buf__u = (valueDeserializer.readNumber() as number)
+                }
+                else if (borderRadius_buf__u_selector == (2).toChar()) {
+                    borderRadius_buf__u = Resource_serializer.read(valueDeserializer)
+                }
+                else {
+                    throw new Error("One of the branches for borderRadius_buf__u has to be chosen through deserialisation.")
+                }
+                borderRadius_buf_ = (borderRadius_buf__u as string | number | Resource)
+            }
+            else if (borderRadius_buf__selector == (1).toChar()) {
+                borderRadius_buf_ = BorderRadiuses_serializer.read(valueDeserializer)
+            }
+            else if (borderRadius_buf__selector == (2).toChar()) {
+                borderRadius_buf_ = LocalizedBorderRadiuses_serializer.read(valueDeserializer)
+            }
+            else {
+                throw new Error("One of the branches for borderRadius_buf_ has to be chosen through deserialisation.")
+            }
+            borderRadius_buf = (borderRadius_buf_ as Length | BorderRadiuses | LocalizedBorderRadiuses)
+        }
+        const borderRadius_result : Length | BorderRadiuses | LocalizedBorderRadiuses | undefined = borderRadius_buf
+        const onAppear_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let onAppear_buf : (() => void) | undefined
+        if ((onAppear_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            const onAppear_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
+            const onAppear_buf__call : KPointer = valueDeserializer.readPointer()
+            const onAppear_buf__callSync : KPointer = valueDeserializer.readPointer()
+            onAppear_buf = ():void => { 
+    const onAppear_buf__argsSerializer : SerializerBase = SerializerBase.hold();
+    onAppear_buf__argsSerializer.writeInt32(onAppear_buf__resource.resourceId);
+    onAppear_buf__argsSerializer.writePointer(onAppear_buf__call);
+    onAppear_buf__argsSerializer.writePointer(onAppear_buf__callSync);
+    InteropNativeModule._CallCallback(-1867723152, onAppear_buf__argsSerializer.asBuffer(), onAppear_buf__argsSerializer.length());
+    onAppear_buf__argsSerializer.release();
+    return; }
+        }
+        const onAppear_result : (() => void) | undefined = onAppear_buf
+        const onDisappear_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let onDisappear_buf : (() => void) | undefined
+        if ((onDisappear_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            const onDisappear_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
+            const onDisappear_buf__call : KPointer = valueDeserializer.readPointer()
+            const onDisappear_buf__callSync : KPointer = valueDeserializer.readPointer()
+            onDisappear_buf = ():void => { 
+    const onDisappear_buf__argsSerializer : SerializerBase = SerializerBase.hold();
+    onDisappear_buf__argsSerializer.writeInt32(onDisappear_buf__resource.resourceId);
+    onDisappear_buf__argsSerializer.writePointer(onDisappear_buf__call);
+    onDisappear_buf__argsSerializer.writePointer(onDisappear_buf__callSync);
+    InteropNativeModule._CallCallback(-1867723152, onDisappear_buf__argsSerializer.asBuffer(), onDisappear_buf__argsSerializer.length());
+    onDisappear_buf__argsSerializer.release();
+    return; }
+        }
+        const onDisappear_result : (() => void) | undefined = onDisappear_buf
+        const aboutToAppear_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let aboutToAppear_buf : (() => void) | undefined
+        if ((aboutToAppear_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            const aboutToAppear_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
+            const aboutToAppear_buf__call : KPointer = valueDeserializer.readPointer()
+            const aboutToAppear_buf__callSync : KPointer = valueDeserializer.readPointer()
+            aboutToAppear_buf = ():void => { 
+    const aboutToAppear_buf__argsSerializer : SerializerBase = SerializerBase.hold();
+    aboutToAppear_buf__argsSerializer.writeInt32(aboutToAppear_buf__resource.resourceId);
+    aboutToAppear_buf__argsSerializer.writePointer(aboutToAppear_buf__call);
+    aboutToAppear_buf__argsSerializer.writePointer(aboutToAppear_buf__callSync);
+    InteropNativeModule._CallCallback(-1867723152, aboutToAppear_buf__argsSerializer.asBuffer(), aboutToAppear_buf__argsSerializer.length());
+    aboutToAppear_buf__argsSerializer.release();
+    return; }
+        }
+        const aboutToAppear_result : (() => void) | undefined = aboutToAppear_buf
+        const aboutToDisappear_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let aboutToDisappear_buf : (() => void) | undefined
+        if ((aboutToDisappear_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            const aboutToDisappear_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
+            const aboutToDisappear_buf__call : KPointer = valueDeserializer.readPointer()
+            const aboutToDisappear_buf__callSync : KPointer = valueDeserializer.readPointer()
+            aboutToDisappear_buf = ():void => { 
+    const aboutToDisappear_buf__argsSerializer : SerializerBase = SerializerBase.hold();
+    aboutToDisappear_buf__argsSerializer.writeInt32(aboutToDisappear_buf__resource.resourceId);
+    aboutToDisappear_buf__argsSerializer.writePointer(aboutToDisappear_buf__call);
+    aboutToDisappear_buf__argsSerializer.writePointer(aboutToDisappear_buf__callSync);
+    InteropNativeModule._CallCallback(-1867723152, aboutToDisappear_buf__argsSerializer.asBuffer(), aboutToDisappear_buf__argsSerializer.length());
+    aboutToDisappear_buf__argsSerializer.release();
+    return; }
+        }
+        const aboutToDisappear_result : (() => void) | undefined = aboutToDisappear_buf
+        const layoutRegionMargin_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let layoutRegionMargin_buf : Padding | undefined
+        if ((layoutRegionMargin_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            layoutRegionMargin_buf = Padding_serializer.read(valueDeserializer)
+        }
+        const layoutRegionMargin_result : Padding | undefined = layoutRegionMargin_buf
+        const previewAnimationOptions_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let previewAnimationOptions_buf : ContextMenuAnimationOptions | undefined
+        if ((previewAnimationOptions_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            previewAnimationOptions_buf = ContextMenuAnimationOptions_serializer.read(valueDeserializer)
+        }
+        const previewAnimationOptions_result : ContextMenuAnimationOptions | undefined = previewAnimationOptions_buf
+        const backgroundColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let backgroundColor_buf : ResourceColor | undefined
+        if ((backgroundColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            const backgroundColor_buf__selector : int32 = valueDeserializer.readInt8()
+            let backgroundColor_buf_ : Color | number | string | Resource | undefined
+            if (backgroundColor_buf__selector == (0).toChar()) {
+                backgroundColor_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (backgroundColor_buf__selector == (1).toChar()) {
+                backgroundColor_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (backgroundColor_buf__selector == (2).toChar()) {
+                backgroundColor_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (backgroundColor_buf__selector == (3).toChar()) {
+                backgroundColor_buf_ = Resource_serializer.read(valueDeserializer)
+            }
+            else {
+                throw new Error("One of the branches for backgroundColor_buf_ has to be chosen through deserialisation.")
+            }
+            backgroundColor_buf = (backgroundColor_buf_ as Color | number | string | Resource)
+        }
+        const backgroundColor_result : ResourceColor | undefined = backgroundColor_buf
+        const backgroundBlurStyle_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let backgroundBlurStyle_buf : BlurStyle | undefined
+        if ((backgroundBlurStyle_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            backgroundBlurStyle_buf = TypeChecker.BlurStyle_FromNumeric(valueDeserializer.readInt32())
+        }
+        const backgroundBlurStyle_result : BlurStyle | undefined = backgroundBlurStyle_buf
+        const backgroundBlurStyleOptions_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let backgroundBlurStyleOptions_buf : BackgroundBlurStyleOptions | undefined
+        if ((backgroundBlurStyleOptions_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            backgroundBlurStyleOptions_buf = BackgroundBlurStyleOptions_serializer.read(valueDeserializer)
+        }
+        const backgroundBlurStyleOptions_result : BackgroundBlurStyleOptions | undefined = backgroundBlurStyleOptions_buf
+        const backgroundEffect_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let backgroundEffect_buf : BackgroundEffectOptions | undefined
+        if ((backgroundEffect_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            backgroundEffect_buf = BackgroundEffectOptions_serializer.read(valueDeserializer)
+        }
+        const backgroundEffect_result : BackgroundEffectOptions | undefined = backgroundEffect_buf
+        const transition_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let transition_buf : TransitionEffect | undefined
+        if ((transition_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            transition_buf = (TransitionEffect_serializer.read(valueDeserializer) as TransitionEffect)
+        }
+        const transition_result : TransitionEffect | undefined = transition_buf
+        const enableHoverMode_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let enableHoverMode_buf : boolean | undefined
+        if ((enableHoverMode_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            enableHoverMode_buf = valueDeserializer.readBoolean()
+        }
+        const enableHoverMode_result : boolean | undefined = enableHoverMode_buf
+        const outlineColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let outlineColor_buf : ResourceColor | EdgeColors | undefined
+        if ((outlineColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            const outlineColor_buf__selector : int32 = valueDeserializer.readInt8()
+            let outlineColor_buf_ : ResourceColor | EdgeColors | undefined
+            if (outlineColor_buf__selector == (0).toChar()) {
+                const outlineColor_buf__u_selector : int32 = valueDeserializer.readInt8()
+                let outlineColor_buf__u : Color | number | string | Resource | undefined
+                if (outlineColor_buf__u_selector == (0).toChar()) {
+                    outlineColor_buf__u = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+                }
+                else if (outlineColor_buf__u_selector == (1).toChar()) {
+                    outlineColor_buf__u = (valueDeserializer.readNumber() as number)
+                }
+                else if (outlineColor_buf__u_selector == (2).toChar()) {
+                    outlineColor_buf__u = (valueDeserializer.readString() as string)
+                }
+                else if (outlineColor_buf__u_selector == (3).toChar()) {
+                    outlineColor_buf__u = Resource_serializer.read(valueDeserializer)
+                }
+                else {
+                    throw new Error("One of the branches for outlineColor_buf__u has to be chosen through deserialisation.")
+                }
+                outlineColor_buf_ = (outlineColor_buf__u as Color | number | string | Resource)
+            }
+            else if (outlineColor_buf__selector == (1).toChar()) {
+                outlineColor_buf_ = EdgeColors_serializer.read(valueDeserializer)
+            }
+            else {
+                throw new Error("One of the branches for outlineColor_buf_ has to be chosen through deserialisation.")
+            }
+            outlineColor_buf = (outlineColor_buf_ as ResourceColor | EdgeColors)
+        }
+        const outlineColor_result : ResourceColor | EdgeColors | undefined = outlineColor_buf
+        const outlineWidth_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let outlineWidth_buf : Dimension | EdgeOutlineWidths | undefined
+        if ((outlineWidth_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            const outlineWidth_buf__selector : int32 = valueDeserializer.readInt8()
+            let outlineWidth_buf_ : Dimension | EdgeOutlineWidths | undefined
+            if (outlineWidth_buf__selector == (0).toChar()) {
+                const outlineWidth_buf__u_selector : int32 = valueDeserializer.readInt8()
+                let outlineWidth_buf__u : string | number | Resource | undefined
+                if (outlineWidth_buf__u_selector == (0).toChar()) {
+                    outlineWidth_buf__u = (valueDeserializer.readString() as string)
+                }
+                else if (outlineWidth_buf__u_selector == (1).toChar()) {
+                    outlineWidth_buf__u = (valueDeserializer.readNumber() as number)
+                }
+                else if (outlineWidth_buf__u_selector == (2).toChar()) {
+                    outlineWidth_buf__u = Resource_serializer.read(valueDeserializer)
+                }
+                else {
+                    throw new Error("One of the branches for outlineWidth_buf__u has to be chosen through deserialisation.")
+                }
+                outlineWidth_buf_ = (outlineWidth_buf__u as string | number | Resource)
+            }
+            else if (outlineWidth_buf__selector == (1).toChar()) {
+                outlineWidth_buf_ = EdgeOutlineWidths_serializer.read(valueDeserializer)
+            }
+            else {
+                throw new Error("One of the branches for outlineWidth_buf_ has to be chosen through deserialisation.")
+            }
+            outlineWidth_buf = (outlineWidth_buf_ as Dimension | EdgeOutlineWidths)
+        }
+        const outlineWidth_result : Dimension | EdgeOutlineWidths | undefined = outlineWidth_buf
+        const hapticFeedbackMode_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let hapticFeedbackMode_buf : HapticFeedbackMode | undefined
+        if ((hapticFeedbackMode_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            hapticFeedbackMode_buf = TypeChecker.HapticFeedbackMode_FromNumeric(valueDeserializer.readInt32())
+        }
+        const hapticFeedbackMode_result : HapticFeedbackMode | undefined = hapticFeedbackMode_buf
+        let value : ContextMenuOptions = ({offset: offset_result, placement: placement_result, enableArrow: enableArrow_result, arrowOffset: arrowOffset_result, preview: preview_result, previewBorderRadius: previewBorderRadius_result, borderRadius: borderRadius_result, onAppear: onAppear_result, onDisappear: onDisappear_result, aboutToAppear: aboutToAppear_result, aboutToDisappear: aboutToDisappear_result, layoutRegionMargin: layoutRegionMargin_result, previewAnimationOptions: previewAnimationOptions_result, backgroundColor: backgroundColor_result, backgroundBlurStyle: backgroundBlurStyle_result, backgroundBlurStyleOptions: backgroundBlurStyleOptions_result, backgroundEffect: backgroundEffect_result, transition: transition_result, enableHoverMode: enableHoverMode_result, outlineColor: outlineColor_result, outlineWidth: outlineWidth_result, hapticFeedbackMode: hapticFeedbackMode_result} as ContextMenuOptions)
+        return value
+    }
+}
+export class CustomPopupOptions_serializer {
+    public static write(buffer: SerializerBase, value: CustomPopupOptions): void {
+        let valueSerializer : SerializerBase = buffer
+        const value_builder  = value.builder
+        valueSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(value_builder))
+        const value_placement  = value.placement
+        let value_placement_type : int32 = RuntimeType.UNDEFINED
+        value_placement_type = runtimeType(value_placement)
+        valueSerializer.writeInt8((value_placement_type).toChar())
+        if ((value_placement_type) != (RuntimeType.UNDEFINED)) {
+            const value_placement_value  = (value_placement as Placement)
+            valueSerializer.writeInt32(TypeChecker.Placement_ToNumeric(value_placement_value))
+        }
+        const value_popupColor  = value.popupColor
+        let value_popupColor_type : int32 = RuntimeType.UNDEFINED
+        value_popupColor_type = runtimeType(value_popupColor)
+        valueSerializer.writeInt8((value_popupColor_type).toChar())
+        if ((value_popupColor_type) != (RuntimeType.UNDEFINED)) {
+            const value_popupColor_value  = value_popupColor!
+            let value_popupColor_value_type : int32 = RuntimeType.UNDEFINED
+            value_popupColor_value_type = runtimeType(value_popupColor_value)
+            if (TypeChecker.isColor(value_popupColor_value)) {
+                valueSerializer.writeInt8((0).toChar())
+                const value_popupColor_value_0  = value_popupColor_value as Color
+                valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_popupColor_value_0))
+            }
+            else if (RuntimeType.STRING == value_popupColor_value_type) {
+                valueSerializer.writeInt8((1).toChar())
+                const value_popupColor_value_1  = value_popupColor_value as string
+                valueSerializer.writeString(value_popupColor_value_1)
+            }
+            else if (RuntimeType.OBJECT == value_popupColor_value_type) {
+                valueSerializer.writeInt8((2).toChar())
+                const value_popupColor_value_2  = value_popupColor_value as Resource
+                Resource_serializer.write(valueSerializer, value_popupColor_value_2)
+            }
+            else if (RuntimeType.NUMBER == value_popupColor_value_type) {
+                valueSerializer.writeInt8((3).toChar())
+                const value_popupColor_value_3  = value_popupColor_value as number
+                valueSerializer.writeNumber(value_popupColor_value_3)
+            }
+        }
+        const value_enableArrow  = value.enableArrow
+        let value_enableArrow_type : int32 = RuntimeType.UNDEFINED
+        value_enableArrow_type = runtimeType(value_enableArrow)
+        valueSerializer.writeInt8((value_enableArrow_type).toChar())
+        if ((value_enableArrow_type) != (RuntimeType.UNDEFINED)) {
+            const value_enableArrow_value  = value_enableArrow!
+            valueSerializer.writeBoolean(value_enableArrow_value)
+        }
+        const value_autoCancel  = value.autoCancel
+        let value_autoCancel_type : int32 = RuntimeType.UNDEFINED
+        value_autoCancel_type = runtimeType(value_autoCancel)
+        valueSerializer.writeInt8((value_autoCancel_type).toChar())
+        if ((value_autoCancel_type) != (RuntimeType.UNDEFINED)) {
+            const value_autoCancel_value  = value_autoCancel!
+            valueSerializer.writeBoolean(value_autoCancel_value)
+        }
+        const value_onStateChange  = value.onStateChange
+        let value_onStateChange_type : int32 = RuntimeType.UNDEFINED
+        value_onStateChange_type = runtimeType(value_onStateChange)
+        valueSerializer.writeInt8((value_onStateChange_type).toChar())
+        if ((value_onStateChange_type) != (RuntimeType.UNDEFINED)) {
+            const value_onStateChange_value  = value_onStateChange!
+            valueSerializer.holdAndWriteCallback(value_onStateChange_value)
+        }
+        const value_arrowOffset  = value.arrowOffset
+        let value_arrowOffset_type : int32 = RuntimeType.UNDEFINED
+        value_arrowOffset_type = runtimeType(value_arrowOffset)
+        valueSerializer.writeInt8((value_arrowOffset_type).toChar())
+        if ((value_arrowOffset_type) != (RuntimeType.UNDEFINED)) {
+            const value_arrowOffset_value  = value_arrowOffset!
+            let value_arrowOffset_value_type : int32 = RuntimeType.UNDEFINED
+            value_arrowOffset_value_type = runtimeType(value_arrowOffset_value)
+            if (RuntimeType.STRING == value_arrowOffset_value_type) {
+                valueSerializer.writeInt8((0).toChar())
+                const value_arrowOffset_value_0  = value_arrowOffset_value as string
+                valueSerializer.writeString(value_arrowOffset_value_0)
+            }
+            else if (RuntimeType.NUMBER == value_arrowOffset_value_type) {
+                valueSerializer.writeInt8((1).toChar())
+                const value_arrowOffset_value_1  = value_arrowOffset_value as number
+                valueSerializer.writeNumber(value_arrowOffset_value_1)
+            }
+            else if (RuntimeType.OBJECT == value_arrowOffset_value_type) {
+                valueSerializer.writeInt8((2).toChar())
+                const value_arrowOffset_value_2  = value_arrowOffset_value as Resource
+                Resource_serializer.write(valueSerializer, value_arrowOffset_value_2)
+            }
+        }
+        const value_showInSubWindow  = value.showInSubWindow
+        let value_showInSubWindow_type : int32 = RuntimeType.UNDEFINED
+        value_showInSubWindow_type = runtimeType(value_showInSubWindow)
+        valueSerializer.writeInt8((value_showInSubWindow_type).toChar())
+        if ((value_showInSubWindow_type) != (RuntimeType.UNDEFINED)) {
+            const value_showInSubWindow_value  = value_showInSubWindow!
+            valueSerializer.writeBoolean(value_showInSubWindow_value)
+        }
+        const value_mask  = value.mask
+        let value_mask_type : int32 = RuntimeType.UNDEFINED
+        value_mask_type = runtimeType(value_mask)
+        valueSerializer.writeInt8((value_mask_type).toChar())
+        if ((value_mask_type) != (RuntimeType.UNDEFINED)) {
+            const value_mask_value  = value_mask!
+            let value_mask_value_type : int32 = RuntimeType.UNDEFINED
+            value_mask_value_type = runtimeType(value_mask_value)
+            if (RuntimeType.BOOLEAN == value_mask_value_type) {
+                valueSerializer.writeInt8((0).toChar())
+                const value_mask_value_0  = value_mask_value as boolean
+                valueSerializer.writeBoolean(value_mask_value_0)
+            }
+            else if (RuntimeType.OBJECT == value_mask_value_type) {
+                valueSerializer.writeInt8((1).toChar())
+                const value_mask_value_1  = value_mask_value as PopupMaskType
+                PopupMaskType_serializer.write(valueSerializer, value_mask_value_1)
+            }
+        }
+        const value_targetSpace  = value.targetSpace
+        let value_targetSpace_type : int32 = RuntimeType.UNDEFINED
+        value_targetSpace_type = runtimeType(value_targetSpace)
+        valueSerializer.writeInt8((value_targetSpace_type).toChar())
+        if ((value_targetSpace_type) != (RuntimeType.UNDEFINED)) {
+            const value_targetSpace_value  = value_targetSpace!
+            let value_targetSpace_value_type : int32 = RuntimeType.UNDEFINED
+            value_targetSpace_value_type = runtimeType(value_targetSpace_value)
+            if (RuntimeType.STRING == value_targetSpace_value_type) {
+                valueSerializer.writeInt8((0).toChar())
+                const value_targetSpace_value_0  = value_targetSpace_value as string
+                valueSerializer.writeString(value_targetSpace_value_0)
+            }
+            else if (RuntimeType.NUMBER == value_targetSpace_value_type) {
+                valueSerializer.writeInt8((1).toChar())
+                const value_targetSpace_value_1  = value_targetSpace_value as number
+                valueSerializer.writeNumber(value_targetSpace_value_1)
+            }
+            else if (RuntimeType.OBJECT == value_targetSpace_value_type) {
+                valueSerializer.writeInt8((2).toChar())
+                const value_targetSpace_value_2  = value_targetSpace_value as Resource
+                Resource_serializer.write(valueSerializer, value_targetSpace_value_2)
+            }
+        }
+        const value_offset  = value.offset
+        let value_offset_type : int32 = RuntimeType.UNDEFINED
+        value_offset_type = runtimeType(value_offset)
+        valueSerializer.writeInt8((value_offset_type).toChar())
+        if ((value_offset_type) != (RuntimeType.UNDEFINED)) {
+            const value_offset_value  = value_offset!
+            Position_serializer.write(valueSerializer, value_offset_value)
+        }
+        const value_width  = value.width
+        let value_width_type : int32 = RuntimeType.UNDEFINED
+        value_width_type = runtimeType(value_width)
+        valueSerializer.writeInt8((value_width_type).toChar())
+        if ((value_width_type) != (RuntimeType.UNDEFINED)) {
+            const value_width_value  = value_width!
+            let value_width_value_type : int32 = RuntimeType.UNDEFINED
+            value_width_value_type = runtimeType(value_width_value)
+            if (RuntimeType.STRING == value_width_value_type) {
+                valueSerializer.writeInt8((0).toChar())
+                const value_width_value_0  = value_width_value as string
+                valueSerializer.writeString(value_width_value_0)
+            }
+            else if (RuntimeType.NUMBER == value_width_value_type) {
+                valueSerializer.writeInt8((1).toChar())
+                const value_width_value_1  = value_width_value as number
+                valueSerializer.writeNumber(value_width_value_1)
+            }
+            else if (RuntimeType.OBJECT == value_width_value_type) {
+                valueSerializer.writeInt8((2).toChar())
+                const value_width_value_2  = value_width_value as Resource
+                Resource_serializer.write(valueSerializer, value_width_value_2)
+            }
+        }
+        const value_arrowPointPosition  = value.arrowPointPosition
+        let value_arrowPointPosition_type : int32 = RuntimeType.UNDEFINED
+        value_arrowPointPosition_type = runtimeType(value_arrowPointPosition)
+        valueSerializer.writeInt8((value_arrowPointPosition_type).toChar())
+        if ((value_arrowPointPosition_type) != (RuntimeType.UNDEFINED)) {
+            const value_arrowPointPosition_value  = (value_arrowPointPosition as ArrowPointPosition)
+            valueSerializer.writeInt32(TypeChecker.ArrowPointPosition_ToNumeric(value_arrowPointPosition_value))
+        }
+        const value_arrowWidth  = value.arrowWidth
+        let value_arrowWidth_type : int32 = RuntimeType.UNDEFINED
+        value_arrowWidth_type = runtimeType(value_arrowWidth)
+        valueSerializer.writeInt8((value_arrowWidth_type).toChar())
+        if ((value_arrowWidth_type) != (RuntimeType.UNDEFINED)) {
+            const value_arrowWidth_value  = value_arrowWidth!
+            let value_arrowWidth_value_type : int32 = RuntimeType.UNDEFINED
+            value_arrowWidth_value_type = runtimeType(value_arrowWidth_value)
+            if (RuntimeType.STRING == value_arrowWidth_value_type) {
+                valueSerializer.writeInt8((0).toChar())
+                const value_arrowWidth_value_0  = value_arrowWidth_value as string
+                valueSerializer.writeString(value_arrowWidth_value_0)
+            }
+            else if (RuntimeType.NUMBER == value_arrowWidth_value_type) {
+                valueSerializer.writeInt8((1).toChar())
+                const value_arrowWidth_value_1  = value_arrowWidth_value as number
+                valueSerializer.writeNumber(value_arrowWidth_value_1)
+            }
+            else if (RuntimeType.OBJECT == value_arrowWidth_value_type) {
+                valueSerializer.writeInt8((2).toChar())
+                const value_arrowWidth_value_2  = value_arrowWidth_value as Resource
+                Resource_serializer.write(valueSerializer, value_arrowWidth_value_2)
+            }
+        }
+        const value_arrowHeight  = value.arrowHeight
+        let value_arrowHeight_type : int32 = RuntimeType.UNDEFINED
+        value_arrowHeight_type = runtimeType(value_arrowHeight)
+        valueSerializer.writeInt8((value_arrowHeight_type).toChar())
+        if ((value_arrowHeight_type) != (RuntimeType.UNDEFINED)) {
+            const value_arrowHeight_value  = value_arrowHeight!
+            let value_arrowHeight_value_type : int32 = RuntimeType.UNDEFINED
+            value_arrowHeight_value_type = runtimeType(value_arrowHeight_value)
+            if (RuntimeType.STRING == value_arrowHeight_value_type) {
+                valueSerializer.writeInt8((0).toChar())
+                const value_arrowHeight_value_0  = value_arrowHeight_value as string
+                valueSerializer.writeString(value_arrowHeight_value_0)
+            }
+            else if (RuntimeType.NUMBER == value_arrowHeight_value_type) {
+                valueSerializer.writeInt8((1).toChar())
+                const value_arrowHeight_value_1  = value_arrowHeight_value as number
+                valueSerializer.writeNumber(value_arrowHeight_value_1)
+            }
+            else if (RuntimeType.OBJECT == value_arrowHeight_value_type) {
+                valueSerializer.writeInt8((2).toChar())
+                const value_arrowHeight_value_2  = value_arrowHeight_value as Resource
+                Resource_serializer.write(valueSerializer, value_arrowHeight_value_2)
+            }
+        }
+        const value_radius  = value.radius
+        let value_radius_type : int32 = RuntimeType.UNDEFINED
+        value_radius_type = runtimeType(value_radius)
+        valueSerializer.writeInt8((value_radius_type).toChar())
+        if ((value_radius_type) != (RuntimeType.UNDEFINED)) {
+            const value_radius_value  = value_radius!
+            let value_radius_value_type : int32 = RuntimeType.UNDEFINED
+            value_radius_value_type = runtimeType(value_radius_value)
+            if (RuntimeType.STRING == value_radius_value_type) {
+                valueSerializer.writeInt8((0).toChar())
+                const value_radius_value_0  = value_radius_value as string
+                valueSerializer.writeString(value_radius_value_0)
+            }
+            else if (RuntimeType.NUMBER == value_radius_value_type) {
+                valueSerializer.writeInt8((1).toChar())
+                const value_radius_value_1  = value_radius_value as number
+                valueSerializer.writeNumber(value_radius_value_1)
+            }
+            else if (RuntimeType.OBJECT == value_radius_value_type) {
+                valueSerializer.writeInt8((2).toChar())
+                const value_radius_value_2  = value_radius_value as Resource
+                Resource_serializer.write(valueSerializer, value_radius_value_2)
+            }
+        }
+        const value_shadow  = value.shadow
+        let value_shadow_type : int32 = RuntimeType.UNDEFINED
+        value_shadow_type = runtimeType(value_shadow)
+        valueSerializer.writeInt8((value_shadow_type).toChar())
+        if ((value_shadow_type) != (RuntimeType.UNDEFINED)) {
+            const value_shadow_value  = value_shadow!
+            let value_shadow_value_type : int32 = RuntimeType.UNDEFINED
+            value_shadow_value_type = runtimeType(value_shadow_value)
+            if (RuntimeType.OBJECT == value_shadow_value_type) {
+                valueSerializer.writeInt8((0).toChar())
+                const value_shadow_value_0  = value_shadow_value as ShadowOptions
+                ShadowOptions_serializer.write(valueSerializer, value_shadow_value_0)
+            }
+            else if (TypeChecker.isShadowStyle(value_shadow_value)) {
+                valueSerializer.writeInt8((1).toChar())
+                const value_shadow_value_1  = value_shadow_value as ShadowStyle
+                valueSerializer.writeInt32(TypeChecker.ShadowStyle_ToNumeric(value_shadow_value_1))
+            }
+        }
+        const value_backgroundBlurStyle  = value.backgroundBlurStyle
+        let value_backgroundBlurStyle_type : int32 = RuntimeType.UNDEFINED
+        value_backgroundBlurStyle_type = runtimeType(value_backgroundBlurStyle)
+        valueSerializer.writeInt8((value_backgroundBlurStyle_type).toChar())
+        if ((value_backgroundBlurStyle_type) != (RuntimeType.UNDEFINED)) {
+            const value_backgroundBlurStyle_value  = (value_backgroundBlurStyle as BlurStyle)
+            valueSerializer.writeInt32(TypeChecker.BlurStyle_ToNumeric(value_backgroundBlurStyle_value))
+        }
+        const value_focusable  = value.focusable
+        let value_focusable_type : int32 = RuntimeType.UNDEFINED
+        value_focusable_type = runtimeType(value_focusable)
+        valueSerializer.writeInt8((value_focusable_type).toChar())
+        if ((value_focusable_type) != (RuntimeType.UNDEFINED)) {
+            const value_focusable_value  = value_focusable!
+            valueSerializer.writeBoolean(value_focusable_value)
+        }
+        const value_transition  = value.transition
+        let value_transition_type : int32 = RuntimeType.UNDEFINED
+        value_transition_type = runtimeType(value_transition)
+        valueSerializer.writeInt8((value_transition_type).toChar())
+        if ((value_transition_type) != (RuntimeType.UNDEFINED)) {
+            const value_transition_value  = value_transition!
+            TransitionEffect_serializer.write(valueSerializer, value_transition_value)
+        }
+        const value_onWillDismiss  = value.onWillDismiss
+        let value_onWillDismiss_type : int32 = RuntimeType.UNDEFINED
+        value_onWillDismiss_type = runtimeType(value_onWillDismiss)
+        valueSerializer.writeInt8((value_onWillDismiss_type).toChar())
+        if ((value_onWillDismiss_type) != (RuntimeType.UNDEFINED)) {
+            const value_onWillDismiss_value  = value_onWillDismiss!
+            let value_onWillDismiss_value_type : int32 = RuntimeType.UNDEFINED
+            value_onWillDismiss_value_type = runtimeType(value_onWillDismiss_value)
+            if (RuntimeType.BOOLEAN == value_onWillDismiss_value_type) {
+                valueSerializer.writeInt8((0).toChar())
+                const value_onWillDismiss_value_0  = value_onWillDismiss_value as boolean
+                valueSerializer.writeBoolean(value_onWillDismiss_value_0)
+            }
+            else if (RuntimeType.FUNCTION == value_onWillDismiss_value_type) {
+                valueSerializer.writeInt8((1).toChar())
+                const value_onWillDismiss_value_1  = value_onWillDismiss_value as ((value0: DismissPopupAction) => void)
+                valueSerializer.holdAndWriteCallback(value_onWillDismiss_value_1)
+            }
+        }
+        const value_enableHoverMode  = value.enableHoverMode
+        let value_enableHoverMode_type : int32 = RuntimeType.UNDEFINED
+        value_enableHoverMode_type = runtimeType(value_enableHoverMode)
+        valueSerializer.writeInt8((value_enableHoverMode_type).toChar())
+        if ((value_enableHoverMode_type) != (RuntimeType.UNDEFINED)) {
+            const value_enableHoverMode_value  = value_enableHoverMode!
+            valueSerializer.writeBoolean(value_enableHoverMode_value)
+        }
+        const value_followTransformOfTarget  = value.followTransformOfTarget
+        let value_followTransformOfTarget_type : int32 = RuntimeType.UNDEFINED
+        value_followTransformOfTarget_type = runtimeType(value_followTransformOfTarget)
+        valueSerializer.writeInt8((value_followTransformOfTarget_type).toChar())
+        if ((value_followTransformOfTarget_type) != (RuntimeType.UNDEFINED)) {
+            const value_followTransformOfTarget_value  = value_followTransformOfTarget!
+            valueSerializer.writeBoolean(value_followTransformOfTarget_value)
+        }
+        const value_keyboardAvoidMode  = value.keyboardAvoidMode
+        let value_keyboardAvoidMode_type : int32 = RuntimeType.UNDEFINED
+        value_keyboardAvoidMode_type = runtimeType(value_keyboardAvoidMode)
+        valueSerializer.writeInt8((value_keyboardAvoidMode_type).toChar())
+        if ((value_keyboardAvoidMode_type) != (RuntimeType.UNDEFINED)) {
+            const value_keyboardAvoidMode_value  = (value_keyboardAvoidMode as KeyboardAvoidMode)
+            valueSerializer.writeInt32(TypeChecker.KeyboardAvoidMode_ToNumeric(value_keyboardAvoidMode_value))
+        }
+    }
+    public static read(buffer: DeserializerBase): CustomPopupOptions {
+        let valueDeserializer : DeserializerBase = buffer
+        const builder_buf_resource : CallbackResource = valueDeserializer.readCallbackResource()
+        const builder_buf_call : KPointer = valueDeserializer.readPointer()
+        const builder_buf_callSync : KPointer = valueDeserializer.readPointer()
+        const builder_result : CustomBuilder = ():void => { 
+    const builder_buf_argsSerializer : SerializerBase = SerializerBase.hold();
+    builder_buf_argsSerializer.writeInt32(builder_buf_resource.resourceId);
+    builder_buf_argsSerializer.writePointer(builder_buf_call);
+    builder_buf_argsSerializer.writePointer(builder_buf_callSync);
+    InteropNativeModule._CallCallback(737226752, builder_buf_argsSerializer.asBuffer(), builder_buf_argsSerializer.length());
+    builder_buf_argsSerializer.release();
+    return; }
+        const placement_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let placement_buf : Placement | undefined
+        if ((placement_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            placement_buf = TypeChecker.Placement_FromNumeric(valueDeserializer.readInt32())
+        }
+        const placement_result : Placement | undefined = placement_buf
+        const popupColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let popupColor_buf : Color | string | Resource | number | undefined
+        if ((popupColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            const popupColor_buf__selector : int32 = valueDeserializer.readInt8()
+            let popupColor_buf_ : Color | string | Resource | number | undefined
+            if (popupColor_buf__selector == (0).toChar()) {
+                popupColor_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (popupColor_buf__selector == (1).toChar()) {
+                popupColor_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (popupColor_buf__selector == (2).toChar()) {
+                popupColor_buf_ = Resource_serializer.read(valueDeserializer)
+            }
+            else if (popupColor_buf__selector == (3).toChar()) {
+                popupColor_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else {
+                throw new Error("One of the branches for popupColor_buf_ has to be chosen through deserialisation.")
+            }
+            popupColor_buf = (popupColor_buf_ as Color | string | Resource | number)
+        }
+        const popupColor_result : Color | string | Resource | number | undefined = popupColor_buf
+        const enableArrow_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let enableArrow_buf : boolean | undefined
+        if ((enableArrow_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            enableArrow_buf = valueDeserializer.readBoolean()
+        }
+        const enableArrow_result : boolean | undefined = enableArrow_buf
+        const autoCancel_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let autoCancel_buf : boolean | undefined
+        if ((autoCancel_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            autoCancel_buf = valueDeserializer.readBoolean()
+        }
+        const autoCancel_result : boolean | undefined = autoCancel_buf
+        const onStateChange_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let onStateChange_buf : PopupStateChangeCallback | undefined
+        if ((onStateChange_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            const onStateChange_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
+            const onStateChange_buf__call : KPointer = valueDeserializer.readPointer()
+            const onStateChange_buf__callSync : KPointer = valueDeserializer.readPointer()
+            onStateChange_buf = (event: PopupStateChangeParam):void => { 
+    const onStateChange_buf__argsSerializer : SerializerBase = SerializerBase.hold();
+    onStateChange_buf__argsSerializer.writeInt32(onStateChange_buf__resource.resourceId);
+    onStateChange_buf__argsSerializer.writePointer(onStateChange_buf__call);
+    onStateChange_buf__argsSerializer.writePointer(onStateChange_buf__callSync);
+    PopupStateChangeParam_serializer.write(onStateChange_buf__argsSerializer, event);
+    InteropNativeModule._CallCallback(-1444325632, onStateChange_buf__argsSerializer.asBuffer(), onStateChange_buf__argsSerializer.length());
+    onStateChange_buf__argsSerializer.release();
+    return; }
+        }
+        const onStateChange_result : PopupStateChangeCallback | undefined = onStateChange_buf
+        const arrowOffset_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let arrowOffset_buf : Length | undefined
+        if ((arrowOffset_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            const arrowOffset_buf__selector : int32 = valueDeserializer.readInt8()
+            let arrowOffset_buf_ : string | number | Resource | undefined
+            if (arrowOffset_buf__selector == (0).toChar()) {
+                arrowOffset_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (arrowOffset_buf__selector == (1).toChar()) {
+                arrowOffset_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (arrowOffset_buf__selector == (2).toChar()) {
+                arrowOffset_buf_ = Resource_serializer.read(valueDeserializer)
+            }
+            else {
+                throw new Error("One of the branches for arrowOffset_buf_ has to be chosen through deserialisation.")
+            }
+            arrowOffset_buf = (arrowOffset_buf_ as string | number | Resource)
+        }
+        const arrowOffset_result : Length | undefined = arrowOffset_buf
+        const showInSubWindow_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let showInSubWindow_buf : boolean | undefined
+        if ((showInSubWindow_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            showInSubWindow_buf = valueDeserializer.readBoolean()
+        }
+        const showInSubWindow_result : boolean | undefined = showInSubWindow_buf
+        const mask_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let mask_buf : boolean | PopupMaskType | undefined
+        if ((mask_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            const mask_buf__selector : int32 = valueDeserializer.readInt8()
+            let mask_buf_ : boolean | PopupMaskType | undefined
+            if (mask_buf__selector == (0).toChar()) {
+                mask_buf_ = valueDeserializer.readBoolean()
+            }
+            else if (mask_buf__selector == (1).toChar()) {
+                mask_buf_ = PopupMaskType_serializer.read(valueDeserializer)
+            }
+            else {
+                throw new Error("One of the branches for mask_buf_ has to be chosen through deserialisation.")
+            }
+            mask_buf = (mask_buf_ as boolean | PopupMaskType)
+        }
+        const mask_result : boolean | PopupMaskType | undefined = mask_buf
+        const targetSpace_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let targetSpace_buf : Length | undefined
+        if ((targetSpace_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            const targetSpace_buf__selector : int32 = valueDeserializer.readInt8()
+            let targetSpace_buf_ : string | number | Resource | undefined
+            if (targetSpace_buf__selector == (0).toChar()) {
+                targetSpace_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (targetSpace_buf__selector == (1).toChar()) {
+                targetSpace_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (targetSpace_buf__selector == (2).toChar()) {
+                targetSpace_buf_ = Resource_serializer.read(valueDeserializer)
+            }
+            else {
+                throw new Error("One of the branches for targetSpace_buf_ has to be chosen through deserialisation.")
+            }
+            targetSpace_buf = (targetSpace_buf_ as string | number | Resource)
+        }
+        const targetSpace_result : Length | undefined = targetSpace_buf
+        const offset_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let offset_buf : Position | undefined
+        if ((offset_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            offset_buf = Position_serializer.read(valueDeserializer)
+        }
+        const offset_result : Position | undefined = offset_buf
+        const width_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let width_buf : Dimension | undefined
+        if ((width_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            const width_buf__selector : int32 = valueDeserializer.readInt8()
+            let width_buf_ : string | number | Resource | undefined
+            if (width_buf__selector == (0).toChar()) {
+                width_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (width_buf__selector == (1).toChar()) {
+                width_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (width_buf__selector == (2).toChar()) {
+                width_buf_ = Resource_serializer.read(valueDeserializer)
+            }
+            else {
+                throw new Error("One of the branches for width_buf_ has to be chosen through deserialisation.")
+            }
+            width_buf = (width_buf_ as string | number | Resource)
+        }
+        const width_result : Dimension | undefined = width_buf
+        const arrowPointPosition_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let arrowPointPosition_buf : ArrowPointPosition | undefined
+        if ((arrowPointPosition_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            arrowPointPosition_buf = TypeChecker.ArrowPointPosition_FromNumeric(valueDeserializer.readInt32())
+        }
+        const arrowPointPosition_result : ArrowPointPosition | undefined = arrowPointPosition_buf
+        const arrowWidth_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let arrowWidth_buf : Dimension | undefined
+        if ((arrowWidth_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            const arrowWidth_buf__selector : int32 = valueDeserializer.readInt8()
+            let arrowWidth_buf_ : string | number | Resource | undefined
+            if (arrowWidth_buf__selector == (0).toChar()) {
+                arrowWidth_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (arrowWidth_buf__selector == (1).toChar()) {
+                arrowWidth_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (arrowWidth_buf__selector == (2).toChar()) {
+                arrowWidth_buf_ = Resource_serializer.read(valueDeserializer)
+            }
+            else {
+                throw new Error("One of the branches for arrowWidth_buf_ has to be chosen through deserialisation.")
+            }
+            arrowWidth_buf = (arrowWidth_buf_ as string | number | Resource)
+        }
+        const arrowWidth_result : Dimension | undefined = arrowWidth_buf
+        const arrowHeight_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let arrowHeight_buf : Dimension | undefined
+        if ((arrowHeight_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            const arrowHeight_buf__selector : int32 = valueDeserializer.readInt8()
+            let arrowHeight_buf_ : string | number | Resource | undefined
+            if (arrowHeight_buf__selector == (0).toChar()) {
+                arrowHeight_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (arrowHeight_buf__selector == (1).toChar()) {
+                arrowHeight_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (arrowHeight_buf__selector == (2).toChar()) {
+                arrowHeight_buf_ = Resource_serializer.read(valueDeserializer)
+            }
+            else {
+                throw new Error("One of the branches for arrowHeight_buf_ has to be chosen through deserialisation.")
+            }
+            arrowHeight_buf = (arrowHeight_buf_ as string | number | Resource)
+        }
+        const arrowHeight_result : Dimension | undefined = arrowHeight_buf
+        const radius_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let radius_buf : Dimension | undefined
+        if ((radius_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            const radius_buf__selector : int32 = valueDeserializer.readInt8()
+            let radius_buf_ : string | number | Resource | undefined
+            if (radius_buf__selector == (0).toChar()) {
+                radius_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (radius_buf__selector == (1).toChar()) {
+                radius_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (radius_buf__selector == (2).toChar()) {
+                radius_buf_ = Resource_serializer.read(valueDeserializer)
+            }
+            else {
+                throw new Error("One of the branches for radius_buf_ has to be chosen through deserialisation.")
+            }
+            radius_buf = (radius_buf_ as string | number | Resource)
+        }
+        const radius_result : Dimension | undefined = radius_buf
+        const shadow_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let shadow_buf : ShadowOptions | ShadowStyle | undefined
+        if ((shadow_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            const shadow_buf__selector : int32 = valueDeserializer.readInt8()
+            let shadow_buf_ : ShadowOptions | ShadowStyle | undefined
+            if (shadow_buf__selector == (0).toChar()) {
+                shadow_buf_ = ShadowOptions_serializer.read(valueDeserializer)
+            }
+            else if (shadow_buf__selector == (1).toChar()) {
+                shadow_buf_ = TypeChecker.ShadowStyle_FromNumeric(valueDeserializer.readInt32())
+            }
+            else {
+                throw new Error("One of the branches for shadow_buf_ has to be chosen through deserialisation.")
+            }
+            shadow_buf = (shadow_buf_ as ShadowOptions | ShadowStyle)
+        }
+        const shadow_result : ShadowOptions | ShadowStyle | undefined = shadow_buf
+        const backgroundBlurStyle_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let backgroundBlurStyle_buf : BlurStyle | undefined
+        if ((backgroundBlurStyle_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            backgroundBlurStyle_buf = TypeChecker.BlurStyle_FromNumeric(valueDeserializer.readInt32())
+        }
+        const backgroundBlurStyle_result : BlurStyle | undefined = backgroundBlurStyle_buf
+        const focusable_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let focusable_buf : boolean | undefined
+        if ((focusable_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            focusable_buf = valueDeserializer.readBoolean()
+        }
+        const focusable_result : boolean | undefined = focusable_buf
+        const transition_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let transition_buf : TransitionEffect | undefined
+        if ((transition_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            transition_buf = (TransitionEffect_serializer.read(valueDeserializer) as TransitionEffect)
+        }
+        const transition_result : TransitionEffect | undefined = transition_buf
+        const onWillDismiss_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let onWillDismiss_buf : boolean | ((value0: DismissPopupAction) => void) | undefined
+        if ((onWillDismiss_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            const onWillDismiss_buf__selector : int32 = valueDeserializer.readInt8()
+            let onWillDismiss_buf_ : boolean | ((value0: DismissPopupAction) => void) | undefined
+            if (onWillDismiss_buf__selector == (0).toChar()) {
+                onWillDismiss_buf_ = valueDeserializer.readBoolean()
+            }
+            else if (onWillDismiss_buf__selector == (1).toChar()) {
+                const onWillDismiss_buf__u_resource : CallbackResource = valueDeserializer.readCallbackResource()
+                const onWillDismiss_buf__u_call : KPointer = valueDeserializer.readPointer()
+                const onWillDismiss_buf__u_callSync : KPointer = valueDeserializer.readPointer()
+                onWillDismiss_buf_ = (value0: DismissPopupAction):void => { 
+    const onWillDismiss_buf__u_argsSerializer : SerializerBase = SerializerBase.hold();
+    onWillDismiss_buf__u_argsSerializer.writeInt32(onWillDismiss_buf__u_resource.resourceId);
+    onWillDismiss_buf__u_argsSerializer.writePointer(onWillDismiss_buf__u_call);
+    onWillDismiss_buf__u_argsSerializer.writePointer(onWillDismiss_buf__u_callSync);
+    DismissPopupAction_serializer.write(onWillDismiss_buf__u_argsSerializer, value0);
+    InteropNativeModule._CallCallback(-2004166751, onWillDismiss_buf__u_argsSerializer.asBuffer(), onWillDismiss_buf__u_argsSerializer.length());
+    onWillDismiss_buf__u_argsSerializer.release();
+    return; }
+            }
+            else {
+                throw new Error("One of the branches for onWillDismiss_buf_ has to be chosen through deserialisation.")
+            }
+            onWillDismiss_buf = (onWillDismiss_buf_ as boolean | ((value0: DismissPopupAction) => void))
+        }
+        const onWillDismiss_result : boolean | ((value0: DismissPopupAction) => void) | undefined = onWillDismiss_buf
+        const enableHoverMode_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let enableHoverMode_buf : boolean | undefined
+        if ((enableHoverMode_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            enableHoverMode_buf = valueDeserializer.readBoolean()
+        }
+        const enableHoverMode_result : boolean | undefined = enableHoverMode_buf
+        const followTransformOfTarget_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let followTransformOfTarget_buf : boolean | undefined
+        if ((followTransformOfTarget_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            followTransformOfTarget_buf = valueDeserializer.readBoolean()
+        }
+        const followTransformOfTarget_result : boolean | undefined = followTransformOfTarget_buf
+        const keyboardAvoidMode_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let keyboardAvoidMode_buf : KeyboardAvoidMode | undefined
+        if ((keyboardAvoidMode_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            keyboardAvoidMode_buf = TypeChecker.KeyboardAvoidMode_FromNumeric(valueDeserializer.readInt32())
+        }
+        const keyboardAvoidMode_result : KeyboardAvoidMode | undefined = keyboardAvoidMode_buf
+        let value : CustomPopupOptions = ({builder: builder_result, placement: placement_result, popupColor: popupColor_result, enableArrow: enableArrow_result, autoCancel: autoCancel_result, onStateChange: onStateChange_result, arrowOffset: arrowOffset_result, showInSubWindow: showInSubWindow_result, mask: mask_result, targetSpace: targetSpace_result, offset: offset_result, width: width_result, arrowPointPosition: arrowPointPosition_result, arrowWidth: arrowWidth_result, arrowHeight: arrowHeight_result, radius: radius_result, shadow: shadow_result, backgroundBlurStyle: backgroundBlurStyle_result, focusable: focusable_result, transition: transition_result, onWillDismiss: onWillDismiss_result, enableHoverMode: enableHoverMode_result, followTransformOfTarget: followTransformOfTarget_result, keyboardAvoidMode: keyboardAvoidMode_result} as CustomPopupOptions)
+        return value
+    }
+}
+export class MenuOptions_serializer {
+    public static write(buffer: SerializerBase, value: MenuOptions): void {
+        let valueSerializer : SerializerBase = buffer
+        const value_offset  = value.offset
+        let value_offset_type : int32 = RuntimeType.UNDEFINED
+        value_offset_type = runtimeType(value_offset)
+        valueSerializer.writeInt8((value_offset_type).toChar())
+        if ((value_offset_type) != (RuntimeType.UNDEFINED)) {
+            const value_offset_value  = value_offset!
+            Position_serializer.write(valueSerializer, value_offset_value)
+        }
+        const value_placement  = value.placement
+        let value_placement_type : int32 = RuntimeType.UNDEFINED
+        value_placement_type = runtimeType(value_placement)
+        valueSerializer.writeInt8((value_placement_type).toChar())
+        if ((value_placement_type) != (RuntimeType.UNDEFINED)) {
+            const value_placement_value  = (value_placement as Placement)
+            valueSerializer.writeInt32(TypeChecker.Placement_ToNumeric(value_placement_value))
+        }
+        const value_enableArrow  = value.enableArrow
+        let value_enableArrow_type : int32 = RuntimeType.UNDEFINED
+        value_enableArrow_type = runtimeType(value_enableArrow)
+        valueSerializer.writeInt8((value_enableArrow_type).toChar())
+        if ((value_enableArrow_type) != (RuntimeType.UNDEFINED)) {
+            const value_enableArrow_value  = value_enableArrow!
+            valueSerializer.writeBoolean(value_enableArrow_value)
+        }
+        const value_arrowOffset  = value.arrowOffset
+        let value_arrowOffset_type : int32 = RuntimeType.UNDEFINED
+        value_arrowOffset_type = runtimeType(value_arrowOffset)
+        valueSerializer.writeInt8((value_arrowOffset_type).toChar())
+        if ((value_arrowOffset_type) != (RuntimeType.UNDEFINED)) {
+            const value_arrowOffset_value  = value_arrowOffset!
+            let value_arrowOffset_value_type : int32 = RuntimeType.UNDEFINED
+            value_arrowOffset_value_type = runtimeType(value_arrowOffset_value)
+            if (RuntimeType.STRING == value_arrowOffset_value_type) {
+                valueSerializer.writeInt8((0).toChar())
+                const value_arrowOffset_value_0  = value_arrowOffset_value as string
+                valueSerializer.writeString(value_arrowOffset_value_0)
+            }
+            else if (RuntimeType.NUMBER == value_arrowOffset_value_type) {
+                valueSerializer.writeInt8((1).toChar())
+                const value_arrowOffset_value_1  = value_arrowOffset_value as number
+                valueSerializer.writeNumber(value_arrowOffset_value_1)
+            }
+            else if (RuntimeType.OBJECT == value_arrowOffset_value_type) {
+                valueSerializer.writeInt8((2).toChar())
+                const value_arrowOffset_value_2  = value_arrowOffset_value as Resource
+                Resource_serializer.write(valueSerializer, value_arrowOffset_value_2)
+            }
+        }
+        const value_preview  = value.preview
+        let value_preview_type : int32 = RuntimeType.UNDEFINED
+        value_preview_type = runtimeType(value_preview)
+        valueSerializer.writeInt8((value_preview_type).toChar())
+        if ((value_preview_type) != (RuntimeType.UNDEFINED)) {
+            const value_preview_value  = value_preview!
+            let value_preview_value_type : int32 = RuntimeType.UNDEFINED
+            value_preview_value_type = runtimeType(value_preview_value)
+            if (TypeChecker.isMenuPreviewMode(value_preview_value)) {
+                valueSerializer.writeInt8((0).toChar())
+                const value_preview_value_0  = value_preview_value as MenuPreviewMode
+                valueSerializer.writeInt32(TypeChecker.MenuPreviewMode_ToNumeric(value_preview_value_0))
+            }
+            else if (RuntimeType.FUNCTION == value_preview_value_type) {
+                valueSerializer.writeInt8((1).toChar())
+                const value_preview_value_1  = value_preview_value as CustomBuilder
+                valueSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(value_preview_value_1))
+            }
+        }
+        const value_previewBorderRadius  = value.previewBorderRadius
+        let value_previewBorderRadius_type : int32 = RuntimeType.UNDEFINED
+        value_previewBorderRadius_type = runtimeType(value_previewBorderRadius)
+        valueSerializer.writeInt8((value_previewBorderRadius_type).toChar())
+        if ((value_previewBorderRadius_type) != (RuntimeType.UNDEFINED)) {
+            const value_previewBorderRadius_value  = value_previewBorderRadius!
+            let value_previewBorderRadius_value_type : int32 = RuntimeType.UNDEFINED
+            value_previewBorderRadius_value_type = runtimeType(value_previewBorderRadius_value)
+            if ((RuntimeType.STRING == value_previewBorderRadius_value_type) || (RuntimeType.NUMBER == value_previewBorderRadius_value_type) || (RuntimeType.OBJECT == value_previewBorderRadius_value_type)) {
+                valueSerializer.writeInt8((0).toChar())
+                const value_previewBorderRadius_value_0  = value_previewBorderRadius_value as Length
+                let value_previewBorderRadius_value_0_type : int32 = RuntimeType.UNDEFINED
+                value_previewBorderRadius_value_0_type = runtimeType(value_previewBorderRadius_value_0)
+                if (RuntimeType.STRING == value_previewBorderRadius_value_0_type) {
+                    valueSerializer.writeInt8((0).toChar())
+                    const value_previewBorderRadius_value_0_0  = value_previewBorderRadius_value_0 as string
+                    valueSerializer.writeString(value_previewBorderRadius_value_0_0)
+                }
+                else if (RuntimeType.NUMBER == value_previewBorderRadius_value_0_type) {
+                    valueSerializer.writeInt8((1).toChar())
+                    const value_previewBorderRadius_value_0_1  = value_previewBorderRadius_value_0 as number
+                    valueSerializer.writeNumber(value_previewBorderRadius_value_0_1)
+                }
+                else if (RuntimeType.OBJECT == value_previewBorderRadius_value_0_type) {
+                    valueSerializer.writeInt8((2).toChar())
+                    const value_previewBorderRadius_value_0_2  = value_previewBorderRadius_value_0 as Resource
+                    Resource_serializer.write(valueSerializer, value_previewBorderRadius_value_0_2)
+                }
+            }
+            else if (TypeChecker.isBorderRadiuses(value_previewBorderRadius_value, false, false, false, false)) {
+                valueSerializer.writeInt8((1).toChar())
+                const value_previewBorderRadius_value_1  = value_previewBorderRadius_value as BorderRadiuses
+                BorderRadiuses_serializer.write(valueSerializer, value_previewBorderRadius_value_1)
+            }
+            else if (TypeChecker.isLocalizedBorderRadiuses(value_previewBorderRadius_value, false, false, false, false)) {
+                valueSerializer.writeInt8((2).toChar())
+                const value_previewBorderRadius_value_2  = value_previewBorderRadius_value as LocalizedBorderRadiuses
+                LocalizedBorderRadiuses_serializer.write(valueSerializer, value_previewBorderRadius_value_2)
+            }
+        }
+        const value_borderRadius  = value.borderRadius
+        let value_borderRadius_type : int32 = RuntimeType.UNDEFINED
+        value_borderRadius_type = runtimeType(value_borderRadius)
+        valueSerializer.writeInt8((value_borderRadius_type).toChar())
+        if ((value_borderRadius_type) != (RuntimeType.UNDEFINED)) {
+            const value_borderRadius_value  = value_borderRadius!
+            let value_borderRadius_value_type : int32 = RuntimeType.UNDEFINED
+            value_borderRadius_value_type = runtimeType(value_borderRadius_value)
+            if ((RuntimeType.STRING == value_borderRadius_value_type) || (RuntimeType.NUMBER == value_borderRadius_value_type) || (RuntimeType.OBJECT == value_borderRadius_value_type)) {
+                valueSerializer.writeInt8((0).toChar())
+                const value_borderRadius_value_0  = value_borderRadius_value as Length
+                let value_borderRadius_value_0_type : int32 = RuntimeType.UNDEFINED
+                value_borderRadius_value_0_type = runtimeType(value_borderRadius_value_0)
+                if (RuntimeType.STRING == value_borderRadius_value_0_type) {
+                    valueSerializer.writeInt8((0).toChar())
+                    const value_borderRadius_value_0_0  = value_borderRadius_value_0 as string
+                    valueSerializer.writeString(value_borderRadius_value_0_0)
+                }
+                else if (RuntimeType.NUMBER == value_borderRadius_value_0_type) {
+                    valueSerializer.writeInt8((1).toChar())
+                    const value_borderRadius_value_0_1  = value_borderRadius_value_0 as number
+                    valueSerializer.writeNumber(value_borderRadius_value_0_1)
+                }
+                else if (RuntimeType.OBJECT == value_borderRadius_value_0_type) {
+                    valueSerializer.writeInt8((2).toChar())
+                    const value_borderRadius_value_0_2  = value_borderRadius_value_0 as Resource
+                    Resource_serializer.write(valueSerializer, value_borderRadius_value_0_2)
+                }
+            }
+            else if (TypeChecker.isBorderRadiuses(value_borderRadius_value, false, false, false, false)) {
+                valueSerializer.writeInt8((1).toChar())
+                const value_borderRadius_value_1  = value_borderRadius_value as BorderRadiuses
+                BorderRadiuses_serializer.write(valueSerializer, value_borderRadius_value_1)
+            }
+            else if (TypeChecker.isLocalizedBorderRadiuses(value_borderRadius_value, false, false, false, false)) {
+                valueSerializer.writeInt8((2).toChar())
+                const value_borderRadius_value_2  = value_borderRadius_value as LocalizedBorderRadiuses
+                LocalizedBorderRadiuses_serializer.write(valueSerializer, value_borderRadius_value_2)
+            }
+        }
+        const value_onAppear  = value.onAppear
+        let value_onAppear_type : int32 = RuntimeType.UNDEFINED
+        value_onAppear_type = runtimeType(value_onAppear)
+        valueSerializer.writeInt8((value_onAppear_type).toChar())
+        if ((value_onAppear_type) != (RuntimeType.UNDEFINED)) {
+            const value_onAppear_value  = value_onAppear!
+            valueSerializer.holdAndWriteCallback(value_onAppear_value)
+        }
+        const value_onDisappear  = value.onDisappear
+        let value_onDisappear_type : int32 = RuntimeType.UNDEFINED
+        value_onDisappear_type = runtimeType(value_onDisappear)
+        valueSerializer.writeInt8((value_onDisappear_type).toChar())
+        if ((value_onDisappear_type) != (RuntimeType.UNDEFINED)) {
+            const value_onDisappear_value  = value_onDisappear!
+            valueSerializer.holdAndWriteCallback(value_onDisappear_value)
+        }
+        const value_aboutToAppear  = value.aboutToAppear
+        let value_aboutToAppear_type : int32 = RuntimeType.UNDEFINED
+        value_aboutToAppear_type = runtimeType(value_aboutToAppear)
+        valueSerializer.writeInt8((value_aboutToAppear_type).toChar())
+        if ((value_aboutToAppear_type) != (RuntimeType.UNDEFINED)) {
+            const value_aboutToAppear_value  = value_aboutToAppear!
+            valueSerializer.holdAndWriteCallback(value_aboutToAppear_value)
+        }
+        const value_aboutToDisappear  = value.aboutToDisappear
+        let value_aboutToDisappear_type : int32 = RuntimeType.UNDEFINED
+        value_aboutToDisappear_type = runtimeType(value_aboutToDisappear)
+        valueSerializer.writeInt8((value_aboutToDisappear_type).toChar())
+        if ((value_aboutToDisappear_type) != (RuntimeType.UNDEFINED)) {
+            const value_aboutToDisappear_value  = value_aboutToDisappear!
+            valueSerializer.holdAndWriteCallback(value_aboutToDisappear_value)
+        }
+        const value_layoutRegionMargin  = value.layoutRegionMargin
+        let value_layoutRegionMargin_type : int32 = RuntimeType.UNDEFINED
+        value_layoutRegionMargin_type = runtimeType(value_layoutRegionMargin)
+        valueSerializer.writeInt8((value_layoutRegionMargin_type).toChar())
+        if ((value_layoutRegionMargin_type) != (RuntimeType.UNDEFINED)) {
+            const value_layoutRegionMargin_value  = value_layoutRegionMargin!
+            Padding_serializer.write(valueSerializer, value_layoutRegionMargin_value)
+        }
+        const value_previewAnimationOptions  = value.previewAnimationOptions
+        let value_previewAnimationOptions_type : int32 = RuntimeType.UNDEFINED
+        value_previewAnimationOptions_type = runtimeType(value_previewAnimationOptions)
+        valueSerializer.writeInt8((value_previewAnimationOptions_type).toChar())
+        if ((value_previewAnimationOptions_type) != (RuntimeType.UNDEFINED)) {
+            const value_previewAnimationOptions_value  = value_previewAnimationOptions!
+            ContextMenuAnimationOptions_serializer.write(valueSerializer, value_previewAnimationOptions_value)
+        }
+        const value_backgroundColor  = value.backgroundColor
+        let value_backgroundColor_type : int32 = RuntimeType.UNDEFINED
+        value_backgroundColor_type = runtimeType(value_backgroundColor)
+        valueSerializer.writeInt8((value_backgroundColor_type).toChar())
+        if ((value_backgroundColor_type) != (RuntimeType.UNDEFINED)) {
+            const value_backgroundColor_value  = value_backgroundColor!
+            let value_backgroundColor_value_type : int32 = RuntimeType.UNDEFINED
+            value_backgroundColor_value_type = runtimeType(value_backgroundColor_value)
+            if (TypeChecker.isColor(value_backgroundColor_value)) {
+                valueSerializer.writeInt8((0).toChar())
+                const value_backgroundColor_value_0  = value_backgroundColor_value as Color
+                valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_backgroundColor_value_0))
+            }
+            else if (RuntimeType.NUMBER == value_backgroundColor_value_type) {
+                valueSerializer.writeInt8((1).toChar())
+                const value_backgroundColor_value_1  = value_backgroundColor_value as number
+                valueSerializer.writeNumber(value_backgroundColor_value_1)
+            }
+            else if (RuntimeType.STRING == value_backgroundColor_value_type) {
+                valueSerializer.writeInt8((2).toChar())
+                const value_backgroundColor_value_2  = value_backgroundColor_value as string
+                valueSerializer.writeString(value_backgroundColor_value_2)
+            }
+            else if (RuntimeType.OBJECT == value_backgroundColor_value_type) {
+                valueSerializer.writeInt8((3).toChar())
+                const value_backgroundColor_value_3  = value_backgroundColor_value as Resource
+                Resource_serializer.write(valueSerializer, value_backgroundColor_value_3)
+            }
+        }
+        const value_backgroundBlurStyle  = value.backgroundBlurStyle
+        let value_backgroundBlurStyle_type : int32 = RuntimeType.UNDEFINED
+        value_backgroundBlurStyle_type = runtimeType(value_backgroundBlurStyle)
+        valueSerializer.writeInt8((value_backgroundBlurStyle_type).toChar())
+        if ((value_backgroundBlurStyle_type) != (RuntimeType.UNDEFINED)) {
+            const value_backgroundBlurStyle_value  = (value_backgroundBlurStyle as BlurStyle)
+            valueSerializer.writeInt32(TypeChecker.BlurStyle_ToNumeric(value_backgroundBlurStyle_value))
+        }
+        const value_backgroundBlurStyleOptions  = value.backgroundBlurStyleOptions
+        let value_backgroundBlurStyleOptions_type : int32 = RuntimeType.UNDEFINED
+        value_backgroundBlurStyleOptions_type = runtimeType(value_backgroundBlurStyleOptions)
+        valueSerializer.writeInt8((value_backgroundBlurStyleOptions_type).toChar())
+        if ((value_backgroundBlurStyleOptions_type) != (RuntimeType.UNDEFINED)) {
+            const value_backgroundBlurStyleOptions_value  = value_backgroundBlurStyleOptions!
+            BackgroundBlurStyleOptions_serializer.write(valueSerializer, value_backgroundBlurStyleOptions_value)
+        }
+        const value_backgroundEffect  = value.backgroundEffect
+        let value_backgroundEffect_type : int32 = RuntimeType.UNDEFINED
+        value_backgroundEffect_type = runtimeType(value_backgroundEffect)
+        valueSerializer.writeInt8((value_backgroundEffect_type).toChar())
+        if ((value_backgroundEffect_type) != (RuntimeType.UNDEFINED)) {
+            const value_backgroundEffect_value  = value_backgroundEffect!
+            BackgroundEffectOptions_serializer.write(valueSerializer, value_backgroundEffect_value)
+        }
+        const value_transition  = value.transition
+        let value_transition_type : int32 = RuntimeType.UNDEFINED
+        value_transition_type = runtimeType(value_transition)
+        valueSerializer.writeInt8((value_transition_type).toChar())
+        if ((value_transition_type) != (RuntimeType.UNDEFINED)) {
+            const value_transition_value  = value_transition!
+            TransitionEffect_serializer.write(valueSerializer, value_transition_value)
+        }
+        const value_enableHoverMode  = value.enableHoverMode
+        let value_enableHoverMode_type : int32 = RuntimeType.UNDEFINED
+        value_enableHoverMode_type = runtimeType(value_enableHoverMode)
+        valueSerializer.writeInt8((value_enableHoverMode_type).toChar())
+        if ((value_enableHoverMode_type) != (RuntimeType.UNDEFINED)) {
+            const value_enableHoverMode_value  = value_enableHoverMode!
+            valueSerializer.writeBoolean(value_enableHoverMode_value)
+        }
+        const value_outlineColor  = value.outlineColor
+        let value_outlineColor_type : int32 = RuntimeType.UNDEFINED
+        value_outlineColor_type = runtimeType(value_outlineColor)
+        valueSerializer.writeInt8((value_outlineColor_type).toChar())
+        if ((value_outlineColor_type) != (RuntimeType.UNDEFINED)) {
+            const value_outlineColor_value  = value_outlineColor!
+            let value_outlineColor_value_type : int32 = RuntimeType.UNDEFINED
+            value_outlineColor_value_type = runtimeType(value_outlineColor_value)
+            if ((TypeChecker.isColor(value_outlineColor_value)) || (RuntimeType.NUMBER == value_outlineColor_value_type) || (RuntimeType.STRING == value_outlineColor_value_type) || (RuntimeType.OBJECT == value_outlineColor_value_type)) {
+                valueSerializer.writeInt8((0).toChar())
+                const value_outlineColor_value_0  = value_outlineColor_value as ResourceColor
+                let value_outlineColor_value_0_type : int32 = RuntimeType.UNDEFINED
+                value_outlineColor_value_0_type = runtimeType(value_outlineColor_value_0)
+                if (TypeChecker.isColor(value_outlineColor_value_0)) {
+                    valueSerializer.writeInt8((0).toChar())
+                    const value_outlineColor_value_0_0  = value_outlineColor_value_0 as Color
+                    valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_outlineColor_value_0_0))
+                }
+                else if (RuntimeType.NUMBER == value_outlineColor_value_0_type) {
+                    valueSerializer.writeInt8((1).toChar())
+                    const value_outlineColor_value_0_1  = value_outlineColor_value_0 as number
+                    valueSerializer.writeNumber(value_outlineColor_value_0_1)
+                }
+                else if (RuntimeType.STRING == value_outlineColor_value_0_type) {
+                    valueSerializer.writeInt8((2).toChar())
+                    const value_outlineColor_value_0_2  = value_outlineColor_value_0 as string
+                    valueSerializer.writeString(value_outlineColor_value_0_2)
+                }
+                else if (RuntimeType.OBJECT == value_outlineColor_value_0_type) {
+                    valueSerializer.writeInt8((3).toChar())
+                    const value_outlineColor_value_0_3  = value_outlineColor_value_0 as Resource
+                    Resource_serializer.write(valueSerializer, value_outlineColor_value_0_3)
+                }
+            }
+            else if (TypeChecker.isEdgeColors(value_outlineColor_value, false, false, false, false)) {
+                valueSerializer.writeInt8((1).toChar())
+                const value_outlineColor_value_1  = value_outlineColor_value as EdgeColors
+                EdgeColors_serializer.write(valueSerializer, value_outlineColor_value_1)
+            }
+        }
+        const value_outlineWidth  = value.outlineWidth
+        let value_outlineWidth_type : int32 = RuntimeType.UNDEFINED
+        value_outlineWidth_type = runtimeType(value_outlineWidth)
+        valueSerializer.writeInt8((value_outlineWidth_type).toChar())
+        if ((value_outlineWidth_type) != (RuntimeType.UNDEFINED)) {
+            const value_outlineWidth_value  = value_outlineWidth!
+            let value_outlineWidth_value_type : int32 = RuntimeType.UNDEFINED
+            value_outlineWidth_value_type = runtimeType(value_outlineWidth_value)
+            if ((RuntimeType.STRING == value_outlineWidth_value_type) || (RuntimeType.NUMBER == value_outlineWidth_value_type) || (RuntimeType.OBJECT == value_outlineWidth_value_type)) {
+                valueSerializer.writeInt8((0).toChar())
+                const value_outlineWidth_value_0  = value_outlineWidth_value as Dimension
+                let value_outlineWidth_value_0_type : int32 = RuntimeType.UNDEFINED
+                value_outlineWidth_value_0_type = runtimeType(value_outlineWidth_value_0)
+                if (RuntimeType.STRING == value_outlineWidth_value_0_type) {
+                    valueSerializer.writeInt8((0).toChar())
+                    const value_outlineWidth_value_0_0  = value_outlineWidth_value_0 as string
+                    valueSerializer.writeString(value_outlineWidth_value_0_0)
+                }
+                else if (RuntimeType.NUMBER == value_outlineWidth_value_0_type) {
+                    valueSerializer.writeInt8((1).toChar())
+                    const value_outlineWidth_value_0_1  = value_outlineWidth_value_0 as number
+                    valueSerializer.writeNumber(value_outlineWidth_value_0_1)
+                }
+                else if (RuntimeType.OBJECT == value_outlineWidth_value_0_type) {
+                    valueSerializer.writeInt8((2).toChar())
+                    const value_outlineWidth_value_0_2  = value_outlineWidth_value_0 as Resource
+                    Resource_serializer.write(valueSerializer, value_outlineWidth_value_0_2)
+                }
+            }
+            else if (TypeChecker.isEdgeOutlineWidths(value_outlineWidth_value, false, false, false, false)) {
+                valueSerializer.writeInt8((1).toChar())
+                const value_outlineWidth_value_1  = value_outlineWidth_value as EdgeOutlineWidths
+                EdgeOutlineWidths_serializer.write(valueSerializer, value_outlineWidth_value_1)
+            }
+        }
+        const value_hapticFeedbackMode  = value.hapticFeedbackMode
+        let value_hapticFeedbackMode_type : int32 = RuntimeType.UNDEFINED
+        value_hapticFeedbackMode_type = runtimeType(value_hapticFeedbackMode)
+        valueSerializer.writeInt8((value_hapticFeedbackMode_type).toChar())
+        if ((value_hapticFeedbackMode_type) != (RuntimeType.UNDEFINED)) {
+            const value_hapticFeedbackMode_value  = (value_hapticFeedbackMode as HapticFeedbackMode)
+            valueSerializer.writeInt32(TypeChecker.HapticFeedbackMode_ToNumeric(value_hapticFeedbackMode_value))
+        }
+        const value_title  = value.title
+        let value_title_type : int32 = RuntimeType.UNDEFINED
+        value_title_type = runtimeType(value_title)
+        valueSerializer.writeInt8((value_title_type).toChar())
+        if ((value_title_type) != (RuntimeType.UNDEFINED)) {
+            const value_title_value  = value_title!
+            let value_title_value_type : int32 = RuntimeType.UNDEFINED
+            value_title_value_type = runtimeType(value_title_value)
+            if (RuntimeType.STRING == value_title_value_type) {
+                valueSerializer.writeInt8((0).toChar())
+                const value_title_value_0  = value_title_value as string
+                valueSerializer.writeString(value_title_value_0)
+            }
+            else if (RuntimeType.OBJECT == value_title_value_type) {
+                valueSerializer.writeInt8((1).toChar())
+                const value_title_value_1  = value_title_value as Resource
+                Resource_serializer.write(valueSerializer, value_title_value_1)
+            }
+        }
+        const value_showInSubWindow  = value.showInSubWindow
+        let value_showInSubWindow_type : int32 = RuntimeType.UNDEFINED
+        value_showInSubWindow_type = runtimeType(value_showInSubWindow)
+        valueSerializer.writeInt8((value_showInSubWindow_type).toChar())
+        if ((value_showInSubWindow_type) != (RuntimeType.UNDEFINED)) {
+            const value_showInSubWindow_value  = value_showInSubWindow!
+            valueSerializer.writeBoolean(value_showInSubWindow_value)
+        }
+    }
+    public static read(buffer: DeserializerBase): MenuOptions {
+        let valueDeserializer : DeserializerBase = buffer
+        const offset_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let offset_buf : Position | undefined
+        if ((offset_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            offset_buf = Position_serializer.read(valueDeserializer)
+        }
+        const offset_result : Position | undefined = offset_buf
+        const placement_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let placement_buf : Placement | undefined
+        if ((placement_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            placement_buf = TypeChecker.Placement_FromNumeric(valueDeserializer.readInt32())
+        }
+        const placement_result : Placement | undefined = placement_buf
+        const enableArrow_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let enableArrow_buf : boolean | undefined
+        if ((enableArrow_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            enableArrow_buf = valueDeserializer.readBoolean()
+        }
+        const enableArrow_result : boolean | undefined = enableArrow_buf
+        const arrowOffset_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let arrowOffset_buf : Length | undefined
+        if ((arrowOffset_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            const arrowOffset_buf__selector : int32 = valueDeserializer.readInt8()
+            let arrowOffset_buf_ : string | number | Resource | undefined
+            if (arrowOffset_buf__selector == (0).toChar()) {
+                arrowOffset_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (arrowOffset_buf__selector == (1).toChar()) {
+                arrowOffset_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (arrowOffset_buf__selector == (2).toChar()) {
+                arrowOffset_buf_ = Resource_serializer.read(valueDeserializer)
+            }
+            else {
+                throw new Error("One of the branches for arrowOffset_buf_ has to be chosen through deserialisation.")
+            }
+            arrowOffset_buf = (arrowOffset_buf_ as string | number | Resource)
+        }
+        const arrowOffset_result : Length | undefined = arrowOffset_buf
+        const preview_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let preview_buf : MenuPreviewMode | CustomBuilder | undefined
+        if ((preview_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            const preview_buf__selector : int32 = valueDeserializer.readInt8()
+            let preview_buf_ : MenuPreviewMode | CustomBuilder | undefined
+            if (preview_buf__selector == (0).toChar()) {
+                preview_buf_ = TypeChecker.MenuPreviewMode_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (preview_buf__selector == (1).toChar()) {
+                const preview_buf__u_resource : CallbackResource = valueDeserializer.readCallbackResource()
+                const preview_buf__u_call : KPointer = valueDeserializer.readPointer()
+                const preview_buf__u_callSync : KPointer = valueDeserializer.readPointer()
+                preview_buf_ = ():void => { 
+    const preview_buf__u_argsSerializer : SerializerBase = SerializerBase.hold();
+    preview_buf__u_argsSerializer.writeInt32(preview_buf__u_resource.resourceId);
+    preview_buf__u_argsSerializer.writePointer(preview_buf__u_call);
+    preview_buf__u_argsSerializer.writePointer(preview_buf__u_callSync);
+    InteropNativeModule._CallCallback(737226752, preview_buf__u_argsSerializer.asBuffer(), preview_buf__u_argsSerializer.length());
+    preview_buf__u_argsSerializer.release();
+    return; }
+            }
+            else {
+                throw new Error("One of the branches for preview_buf_ has to be chosen through deserialisation.")
+            }
+            preview_buf = (preview_buf_ as MenuPreviewMode | CustomBuilder)
+        }
+        const preview_result : MenuPreviewMode | CustomBuilder | undefined = preview_buf
+        const previewBorderRadius_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let previewBorderRadius_buf : BorderRadiusType | undefined
+        if ((previewBorderRadius_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            const previewBorderRadius_buf__selector : int32 = valueDeserializer.readInt8()
+            let previewBorderRadius_buf_ : Length | BorderRadiuses | LocalizedBorderRadiuses | undefined
+            if (previewBorderRadius_buf__selector == (0).toChar()) {
+                const previewBorderRadius_buf__u_selector : int32 = valueDeserializer.readInt8()
+                let previewBorderRadius_buf__u : string | number | Resource | undefined
+                if (previewBorderRadius_buf__u_selector == (0).toChar()) {
+                    previewBorderRadius_buf__u = (valueDeserializer.readString() as string)
+                }
+                else if (previewBorderRadius_buf__u_selector == (1).toChar()) {
+                    previewBorderRadius_buf__u = (valueDeserializer.readNumber() as number)
+                }
+                else if (previewBorderRadius_buf__u_selector == (2).toChar()) {
+                    previewBorderRadius_buf__u = Resource_serializer.read(valueDeserializer)
+                }
+                else {
+                    throw new Error("One of the branches for previewBorderRadius_buf__u has to be chosen through deserialisation.")
+                }
+                previewBorderRadius_buf_ = (previewBorderRadius_buf__u as string | number | Resource)
+            }
+            else if (previewBorderRadius_buf__selector == (1).toChar()) {
+                previewBorderRadius_buf_ = BorderRadiuses_serializer.read(valueDeserializer)
+            }
+            else if (previewBorderRadius_buf__selector == (2).toChar()) {
+                previewBorderRadius_buf_ = LocalizedBorderRadiuses_serializer.read(valueDeserializer)
+            }
+            else {
+                throw new Error("One of the branches for previewBorderRadius_buf_ has to be chosen through deserialisation.")
+            }
+            previewBorderRadius_buf = (previewBorderRadius_buf_ as Length | BorderRadiuses | LocalizedBorderRadiuses)
+        }
+        const previewBorderRadius_result : BorderRadiusType | undefined = previewBorderRadius_buf
+        const borderRadius_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let borderRadius_buf : Length | BorderRadiuses | LocalizedBorderRadiuses | undefined
+        if ((borderRadius_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            const borderRadius_buf__selector : int32 = valueDeserializer.readInt8()
+            let borderRadius_buf_ : Length | BorderRadiuses | LocalizedBorderRadiuses | undefined
+            if (borderRadius_buf__selector == (0).toChar()) {
+                const borderRadius_buf__u_selector : int32 = valueDeserializer.readInt8()
+                let borderRadius_buf__u : string | number | Resource | undefined
+                if (borderRadius_buf__u_selector == (0).toChar()) {
+                    borderRadius_buf__u = (valueDeserializer.readString() as string)
+                }
+                else if (borderRadius_buf__u_selector == (1).toChar()) {
+                    borderRadius_buf__u = (valueDeserializer.readNumber() as number)
+                }
+                else if (borderRadius_buf__u_selector == (2).toChar()) {
+                    borderRadius_buf__u = Resource_serializer.read(valueDeserializer)
+                }
+                else {
+                    throw new Error("One of the branches for borderRadius_buf__u has to be chosen through deserialisation.")
+                }
+                borderRadius_buf_ = (borderRadius_buf__u as string | number | Resource)
+            }
+            else if (borderRadius_buf__selector == (1).toChar()) {
+                borderRadius_buf_ = BorderRadiuses_serializer.read(valueDeserializer)
+            }
+            else if (borderRadius_buf__selector == (2).toChar()) {
+                borderRadius_buf_ = LocalizedBorderRadiuses_serializer.read(valueDeserializer)
+            }
+            else {
+                throw new Error("One of the branches for borderRadius_buf_ has to be chosen through deserialisation.")
+            }
+            borderRadius_buf = (borderRadius_buf_ as Length | BorderRadiuses | LocalizedBorderRadiuses)
+        }
+        const borderRadius_result : Length | BorderRadiuses | LocalizedBorderRadiuses | undefined = borderRadius_buf
+        const onAppear_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let onAppear_buf : (() => void) | undefined
+        if ((onAppear_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            const onAppear_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
+            const onAppear_buf__call : KPointer = valueDeserializer.readPointer()
+            const onAppear_buf__callSync : KPointer = valueDeserializer.readPointer()
+            onAppear_buf = ():void => { 
+    const onAppear_buf__argsSerializer : SerializerBase = SerializerBase.hold();
+    onAppear_buf__argsSerializer.writeInt32(onAppear_buf__resource.resourceId);
+    onAppear_buf__argsSerializer.writePointer(onAppear_buf__call);
+    onAppear_buf__argsSerializer.writePointer(onAppear_buf__callSync);
+    InteropNativeModule._CallCallback(-1867723152, onAppear_buf__argsSerializer.asBuffer(), onAppear_buf__argsSerializer.length());
+    onAppear_buf__argsSerializer.release();
+    return; }
+        }
+        const onAppear_result : (() => void) | undefined = onAppear_buf
+        const onDisappear_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let onDisappear_buf : (() => void) | undefined
+        if ((onDisappear_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            const onDisappear_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
+            const onDisappear_buf__call : KPointer = valueDeserializer.readPointer()
+            const onDisappear_buf__callSync : KPointer = valueDeserializer.readPointer()
+            onDisappear_buf = ():void => { 
+    const onDisappear_buf__argsSerializer : SerializerBase = SerializerBase.hold();
+    onDisappear_buf__argsSerializer.writeInt32(onDisappear_buf__resource.resourceId);
+    onDisappear_buf__argsSerializer.writePointer(onDisappear_buf__call);
+    onDisappear_buf__argsSerializer.writePointer(onDisappear_buf__callSync);
+    InteropNativeModule._CallCallback(-1867723152, onDisappear_buf__argsSerializer.asBuffer(), onDisappear_buf__argsSerializer.length());
+    onDisappear_buf__argsSerializer.release();
+    return; }
+        }
+        const onDisappear_result : (() => void) | undefined = onDisappear_buf
+        const aboutToAppear_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let aboutToAppear_buf : (() => void) | undefined
+        if ((aboutToAppear_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            const aboutToAppear_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
+            const aboutToAppear_buf__call : KPointer = valueDeserializer.readPointer()
+            const aboutToAppear_buf__callSync : KPointer = valueDeserializer.readPointer()
+            aboutToAppear_buf = ():void => { 
+    const aboutToAppear_buf__argsSerializer : SerializerBase = SerializerBase.hold();
+    aboutToAppear_buf__argsSerializer.writeInt32(aboutToAppear_buf__resource.resourceId);
+    aboutToAppear_buf__argsSerializer.writePointer(aboutToAppear_buf__call);
+    aboutToAppear_buf__argsSerializer.writePointer(aboutToAppear_buf__callSync);
+    InteropNativeModule._CallCallback(-1867723152, aboutToAppear_buf__argsSerializer.asBuffer(), aboutToAppear_buf__argsSerializer.length());
+    aboutToAppear_buf__argsSerializer.release();
+    return; }
+        }
+        const aboutToAppear_result : (() => void) | undefined = aboutToAppear_buf
+        const aboutToDisappear_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let aboutToDisappear_buf : (() => void) | undefined
+        if ((aboutToDisappear_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            const aboutToDisappear_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
+            const aboutToDisappear_buf__call : KPointer = valueDeserializer.readPointer()
+            const aboutToDisappear_buf__callSync : KPointer = valueDeserializer.readPointer()
+            aboutToDisappear_buf = ():void => { 
+    const aboutToDisappear_buf__argsSerializer : SerializerBase = SerializerBase.hold();
+    aboutToDisappear_buf__argsSerializer.writeInt32(aboutToDisappear_buf__resource.resourceId);
+    aboutToDisappear_buf__argsSerializer.writePointer(aboutToDisappear_buf__call);
+    aboutToDisappear_buf__argsSerializer.writePointer(aboutToDisappear_buf__callSync);
+    InteropNativeModule._CallCallback(-1867723152, aboutToDisappear_buf__argsSerializer.asBuffer(), aboutToDisappear_buf__argsSerializer.length());
+    aboutToDisappear_buf__argsSerializer.release();
+    return; }
+        }
+        const aboutToDisappear_result : (() => void) | undefined = aboutToDisappear_buf
+        const layoutRegionMargin_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let layoutRegionMargin_buf : Padding | undefined
+        if ((layoutRegionMargin_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            layoutRegionMargin_buf = Padding_serializer.read(valueDeserializer)
+        }
+        const layoutRegionMargin_result : Padding | undefined = layoutRegionMargin_buf
+        const previewAnimationOptions_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let previewAnimationOptions_buf : ContextMenuAnimationOptions | undefined
+        if ((previewAnimationOptions_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            previewAnimationOptions_buf = ContextMenuAnimationOptions_serializer.read(valueDeserializer)
+        }
+        const previewAnimationOptions_result : ContextMenuAnimationOptions | undefined = previewAnimationOptions_buf
+        const backgroundColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let backgroundColor_buf : ResourceColor | undefined
+        if ((backgroundColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            const backgroundColor_buf__selector : int32 = valueDeserializer.readInt8()
+            let backgroundColor_buf_ : Color | number | string | Resource | undefined
+            if (backgroundColor_buf__selector == (0).toChar()) {
+                backgroundColor_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (backgroundColor_buf__selector == (1).toChar()) {
+                backgroundColor_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (backgroundColor_buf__selector == (2).toChar()) {
+                backgroundColor_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (backgroundColor_buf__selector == (3).toChar()) {
+                backgroundColor_buf_ = Resource_serializer.read(valueDeserializer)
+            }
+            else {
+                throw new Error("One of the branches for backgroundColor_buf_ has to be chosen through deserialisation.")
+            }
+            backgroundColor_buf = (backgroundColor_buf_ as Color | number | string | Resource)
+        }
+        const backgroundColor_result : ResourceColor | undefined = backgroundColor_buf
+        const backgroundBlurStyle_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let backgroundBlurStyle_buf : BlurStyle | undefined
+        if ((backgroundBlurStyle_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            backgroundBlurStyle_buf = TypeChecker.BlurStyle_FromNumeric(valueDeserializer.readInt32())
+        }
+        const backgroundBlurStyle_result : BlurStyle | undefined = backgroundBlurStyle_buf
+        const backgroundBlurStyleOptions_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let backgroundBlurStyleOptions_buf : BackgroundBlurStyleOptions | undefined
+        if ((backgroundBlurStyleOptions_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            backgroundBlurStyleOptions_buf = BackgroundBlurStyleOptions_serializer.read(valueDeserializer)
+        }
+        const backgroundBlurStyleOptions_result : BackgroundBlurStyleOptions | undefined = backgroundBlurStyleOptions_buf
+        const backgroundEffect_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let backgroundEffect_buf : BackgroundEffectOptions | undefined
+        if ((backgroundEffect_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            backgroundEffect_buf = BackgroundEffectOptions_serializer.read(valueDeserializer)
+        }
+        const backgroundEffect_result : BackgroundEffectOptions | undefined = backgroundEffect_buf
+        const transition_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let transition_buf : TransitionEffect | undefined
+        if ((transition_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            transition_buf = (TransitionEffect_serializer.read(valueDeserializer) as TransitionEffect)
+        }
+        const transition_result : TransitionEffect | undefined = transition_buf
+        const enableHoverMode_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let enableHoverMode_buf : boolean | undefined
+        if ((enableHoverMode_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            enableHoverMode_buf = valueDeserializer.readBoolean()
+        }
+        const enableHoverMode_result : boolean | undefined = enableHoverMode_buf
+        const outlineColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let outlineColor_buf : ResourceColor | EdgeColors | undefined
+        if ((outlineColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            const outlineColor_buf__selector : int32 = valueDeserializer.readInt8()
+            let outlineColor_buf_ : ResourceColor | EdgeColors | undefined
+            if (outlineColor_buf__selector == (0).toChar()) {
+                const outlineColor_buf__u_selector : int32 = valueDeserializer.readInt8()
+                let outlineColor_buf__u : Color | number | string | Resource | undefined
+                if (outlineColor_buf__u_selector == (0).toChar()) {
+                    outlineColor_buf__u = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+                }
+                else if (outlineColor_buf__u_selector == (1).toChar()) {
+                    outlineColor_buf__u = (valueDeserializer.readNumber() as number)
+                }
+                else if (outlineColor_buf__u_selector == (2).toChar()) {
+                    outlineColor_buf__u = (valueDeserializer.readString() as string)
+                }
+                else if (outlineColor_buf__u_selector == (3).toChar()) {
+                    outlineColor_buf__u = Resource_serializer.read(valueDeserializer)
+                }
+                else {
+                    throw new Error("One of the branches for outlineColor_buf__u has to be chosen through deserialisation.")
+                }
+                outlineColor_buf_ = (outlineColor_buf__u as Color | number | string | Resource)
+            }
+            else if (outlineColor_buf__selector == (1).toChar()) {
+                outlineColor_buf_ = EdgeColors_serializer.read(valueDeserializer)
+            }
+            else {
+                throw new Error("One of the branches for outlineColor_buf_ has to be chosen through deserialisation.")
+            }
+            outlineColor_buf = (outlineColor_buf_ as ResourceColor | EdgeColors)
+        }
+        const outlineColor_result : ResourceColor | EdgeColors | undefined = outlineColor_buf
+        const outlineWidth_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let outlineWidth_buf : Dimension | EdgeOutlineWidths | undefined
+        if ((outlineWidth_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            const outlineWidth_buf__selector : int32 = valueDeserializer.readInt8()
+            let outlineWidth_buf_ : Dimension | EdgeOutlineWidths | undefined
+            if (outlineWidth_buf__selector == (0).toChar()) {
+                const outlineWidth_buf__u_selector : int32 = valueDeserializer.readInt8()
+                let outlineWidth_buf__u : string | number | Resource | undefined
+                if (outlineWidth_buf__u_selector == (0).toChar()) {
+                    outlineWidth_buf__u = (valueDeserializer.readString() as string)
+                }
+                else if (outlineWidth_buf__u_selector == (1).toChar()) {
+                    outlineWidth_buf__u = (valueDeserializer.readNumber() as number)
+                }
+                else if (outlineWidth_buf__u_selector == (2).toChar()) {
+                    outlineWidth_buf__u = Resource_serializer.read(valueDeserializer)
+                }
+                else {
+                    throw new Error("One of the branches for outlineWidth_buf__u has to be chosen through deserialisation.")
+                }
+                outlineWidth_buf_ = (outlineWidth_buf__u as string | number | Resource)
+            }
+            else if (outlineWidth_buf__selector == (1).toChar()) {
+                outlineWidth_buf_ = EdgeOutlineWidths_serializer.read(valueDeserializer)
+            }
+            else {
+                throw new Error("One of the branches for outlineWidth_buf_ has to be chosen through deserialisation.")
+            }
+            outlineWidth_buf = (outlineWidth_buf_ as Dimension | EdgeOutlineWidths)
+        }
+        const outlineWidth_result : Dimension | EdgeOutlineWidths | undefined = outlineWidth_buf
+        const hapticFeedbackMode_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let hapticFeedbackMode_buf : HapticFeedbackMode | undefined
+        if ((hapticFeedbackMode_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            hapticFeedbackMode_buf = TypeChecker.HapticFeedbackMode_FromNumeric(valueDeserializer.readInt32())
+        }
+        const hapticFeedbackMode_result : HapticFeedbackMode | undefined = hapticFeedbackMode_buf
+        const title_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let title_buf : ResourceStr | undefined
+        if ((title_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            const title_buf__selector : int32 = valueDeserializer.readInt8()
+            let title_buf_ : string | Resource | undefined
+            if (title_buf__selector == (0).toChar()) {
+                title_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (title_buf__selector == (1).toChar()) {
+                title_buf_ = Resource_serializer.read(valueDeserializer)
+            }
+            else {
+                throw new Error("One of the branches for title_buf_ has to be chosen through deserialisation.")
+            }
+            title_buf = (title_buf_ as string | Resource)
+        }
+        const title_result : ResourceStr | undefined = title_buf
+        const showInSubWindow_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let showInSubWindow_buf : boolean | undefined
+        if ((showInSubWindow_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            showInSubWindow_buf = valueDeserializer.readBoolean()
+        }
+        const showInSubWindow_result : boolean | undefined = showInSubWindow_buf
+        let value : MenuOptions = ({offset: offset_result, placement: placement_result, enableArrow: enableArrow_result, arrowOffset: arrowOffset_result, preview: preview_result, previewBorderRadius: previewBorderRadius_result, borderRadius: borderRadius_result, onAppear: onAppear_result, onDisappear: onDisappear_result, aboutToAppear: aboutToAppear_result, aboutToDisappear: aboutToDisappear_result, layoutRegionMargin: layoutRegionMargin_result, previewAnimationOptions: previewAnimationOptions_result, backgroundColor: backgroundColor_result, backgroundBlurStyle: backgroundBlurStyle_result, backgroundBlurStyleOptions: backgroundBlurStyleOptions_result, backgroundEffect: backgroundEffect_result, transition: transition_result, enableHoverMode: enableHoverMode_result, outlineColor: outlineColor_result, outlineWidth: outlineWidth_result, hapticFeedbackMode: hapticFeedbackMode_result, title: title_result, showInSubWindow: showInSubWindow_result} as MenuOptions)
+        return value
+    }
+}
+export class PopupCommonOptions_serializer {
+    public static write(buffer: SerializerBase, value: PopupCommonOptions): void {
+        let valueSerializer : SerializerBase = buffer
+        const value_placement  = value.placement
+        let value_placement_type : int32 = RuntimeType.UNDEFINED
+        value_placement_type = runtimeType(value_placement)
+        valueSerializer.writeInt8((value_placement_type).toChar())
+        if ((value_placement_type) != (RuntimeType.UNDEFINED)) {
+            const value_placement_value  = (value_placement as Placement)
+            valueSerializer.writeInt32(TypeChecker.Placement_ToNumeric(value_placement_value))
+        }
+        const value_popupColor  = value.popupColor
+        let value_popupColor_type : int32 = RuntimeType.UNDEFINED
+        value_popupColor_type = runtimeType(value_popupColor)
+        valueSerializer.writeInt8((value_popupColor_type).toChar())
+        if ((value_popupColor_type) != (RuntimeType.UNDEFINED)) {
+            const value_popupColor_value  = value_popupColor!
+            let value_popupColor_value_type : int32 = RuntimeType.UNDEFINED
+            value_popupColor_value_type = runtimeType(value_popupColor_value)
+            if (TypeChecker.isColor(value_popupColor_value)) {
+                valueSerializer.writeInt8((0).toChar())
+                const value_popupColor_value_0  = value_popupColor_value as Color
+                valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_popupColor_value_0))
+            }
+            else if (RuntimeType.NUMBER == value_popupColor_value_type) {
+                valueSerializer.writeInt8((1).toChar())
+                const value_popupColor_value_1  = value_popupColor_value as number
+                valueSerializer.writeNumber(value_popupColor_value_1)
+            }
+            else if (RuntimeType.STRING == value_popupColor_value_type) {
+                valueSerializer.writeInt8((2).toChar())
+                const value_popupColor_value_2  = value_popupColor_value as string
+                valueSerializer.writeString(value_popupColor_value_2)
+            }
+            else if (RuntimeType.OBJECT == value_popupColor_value_type) {
+                valueSerializer.writeInt8((3).toChar())
+                const value_popupColor_value_3  = value_popupColor_value as Resource
+                Resource_serializer.write(valueSerializer, value_popupColor_value_3)
+            }
+        }
+        const value_enableArrow  = value.enableArrow
+        let value_enableArrow_type : int32 = RuntimeType.UNDEFINED
+        value_enableArrow_type = runtimeType(value_enableArrow)
+        valueSerializer.writeInt8((value_enableArrow_type).toChar())
+        if ((value_enableArrow_type) != (RuntimeType.UNDEFINED)) {
+            const value_enableArrow_value  = value_enableArrow!
+            valueSerializer.writeBoolean(value_enableArrow_value)
+        }
+        const value_autoCancel  = value.autoCancel
+        let value_autoCancel_type : int32 = RuntimeType.UNDEFINED
+        value_autoCancel_type = runtimeType(value_autoCancel)
+        valueSerializer.writeInt8((value_autoCancel_type).toChar())
+        if ((value_autoCancel_type) != (RuntimeType.UNDEFINED)) {
+            const value_autoCancel_value  = value_autoCancel!
+            valueSerializer.writeBoolean(value_autoCancel_value)
+        }
+        const value_onStateChange  = value.onStateChange
+        let value_onStateChange_type : int32 = RuntimeType.UNDEFINED
+        value_onStateChange_type = runtimeType(value_onStateChange)
+        valueSerializer.writeInt8((value_onStateChange_type).toChar())
+        if ((value_onStateChange_type) != (RuntimeType.UNDEFINED)) {
+            const value_onStateChange_value  = value_onStateChange!
+            valueSerializer.holdAndWriteCallback(value_onStateChange_value)
+        }
+        const value_arrowOffset  = value.arrowOffset
+        let value_arrowOffset_type : int32 = RuntimeType.UNDEFINED
+        value_arrowOffset_type = runtimeType(value_arrowOffset)
+        valueSerializer.writeInt8((value_arrowOffset_type).toChar())
+        if ((value_arrowOffset_type) != (RuntimeType.UNDEFINED)) {
+            const value_arrowOffset_value  = value_arrowOffset!
+            let value_arrowOffset_value_type : int32 = RuntimeType.UNDEFINED
+            value_arrowOffset_value_type = runtimeType(value_arrowOffset_value)
+            if (RuntimeType.STRING == value_arrowOffset_value_type) {
+                valueSerializer.writeInt8((0).toChar())
+                const value_arrowOffset_value_0  = value_arrowOffset_value as string
+                valueSerializer.writeString(value_arrowOffset_value_0)
+            }
+            else if (RuntimeType.NUMBER == value_arrowOffset_value_type) {
+                valueSerializer.writeInt8((1).toChar())
+                const value_arrowOffset_value_1  = value_arrowOffset_value as number
+                valueSerializer.writeNumber(value_arrowOffset_value_1)
+            }
+            else if (RuntimeType.OBJECT == value_arrowOffset_value_type) {
+                valueSerializer.writeInt8((2).toChar())
+                const value_arrowOffset_value_2  = value_arrowOffset_value as Resource
+                Resource_serializer.write(valueSerializer, value_arrowOffset_value_2)
+            }
+        }
+        const value_showInSubWindow  = value.showInSubWindow
+        let value_showInSubWindow_type : int32 = RuntimeType.UNDEFINED
+        value_showInSubWindow_type = runtimeType(value_showInSubWindow)
+        valueSerializer.writeInt8((value_showInSubWindow_type).toChar())
+        if ((value_showInSubWindow_type) != (RuntimeType.UNDEFINED)) {
+            const value_showInSubWindow_value  = value_showInSubWindow!
+            valueSerializer.writeBoolean(value_showInSubWindow_value)
+        }
+        const value_mask  = value.mask
+        let value_mask_type : int32 = RuntimeType.UNDEFINED
+        value_mask_type = runtimeType(value_mask)
+        valueSerializer.writeInt8((value_mask_type).toChar())
+        if ((value_mask_type) != (RuntimeType.UNDEFINED)) {
+            const value_mask_value  = value_mask!
+            let value_mask_value_type : int32 = RuntimeType.UNDEFINED
+            value_mask_value_type = runtimeType(value_mask_value)
+            if (RuntimeType.BOOLEAN == value_mask_value_type) {
+                valueSerializer.writeInt8((0).toChar())
+                const value_mask_value_0  = value_mask_value as boolean
+                valueSerializer.writeBoolean(value_mask_value_0)
+            }
+            else if (RuntimeType.OBJECT == value_mask_value_type) {
+                valueSerializer.writeInt8((1).toChar())
+                const value_mask_value_1  = value_mask_value as PopupMaskType
+                PopupMaskType_serializer.write(valueSerializer, value_mask_value_1)
+            }
+        }
+        const value_targetSpace  = value.targetSpace
+        let value_targetSpace_type : int32 = RuntimeType.UNDEFINED
+        value_targetSpace_type = runtimeType(value_targetSpace)
+        valueSerializer.writeInt8((value_targetSpace_type).toChar())
+        if ((value_targetSpace_type) != (RuntimeType.UNDEFINED)) {
+            const value_targetSpace_value  = value_targetSpace!
+            let value_targetSpace_value_type : int32 = RuntimeType.UNDEFINED
+            value_targetSpace_value_type = runtimeType(value_targetSpace_value)
+            if (RuntimeType.STRING == value_targetSpace_value_type) {
+                valueSerializer.writeInt8((0).toChar())
+                const value_targetSpace_value_0  = value_targetSpace_value as string
+                valueSerializer.writeString(value_targetSpace_value_0)
+            }
+            else if (RuntimeType.NUMBER == value_targetSpace_value_type) {
+                valueSerializer.writeInt8((1).toChar())
+                const value_targetSpace_value_1  = value_targetSpace_value as number
+                valueSerializer.writeNumber(value_targetSpace_value_1)
+            }
+            else if (RuntimeType.OBJECT == value_targetSpace_value_type) {
+                valueSerializer.writeInt8((2).toChar())
+                const value_targetSpace_value_2  = value_targetSpace_value as Resource
+                Resource_serializer.write(valueSerializer, value_targetSpace_value_2)
+            }
+        }
+        const value_offset  = value.offset
+        let value_offset_type : int32 = RuntimeType.UNDEFINED
+        value_offset_type = runtimeType(value_offset)
+        valueSerializer.writeInt8((value_offset_type).toChar())
+        if ((value_offset_type) != (RuntimeType.UNDEFINED)) {
+            const value_offset_value  = value_offset!
+            Position_serializer.write(valueSerializer, value_offset_value)
+        }
+        const value_width  = value.width
+        let value_width_type : int32 = RuntimeType.UNDEFINED
+        value_width_type = runtimeType(value_width)
+        valueSerializer.writeInt8((value_width_type).toChar())
+        if ((value_width_type) != (RuntimeType.UNDEFINED)) {
+            const value_width_value  = value_width!
+            let value_width_value_type : int32 = RuntimeType.UNDEFINED
+            value_width_value_type = runtimeType(value_width_value)
+            if (RuntimeType.STRING == value_width_value_type) {
+                valueSerializer.writeInt8((0).toChar())
+                const value_width_value_0  = value_width_value as string
+                valueSerializer.writeString(value_width_value_0)
+            }
+            else if (RuntimeType.NUMBER == value_width_value_type) {
+                valueSerializer.writeInt8((1).toChar())
+                const value_width_value_1  = value_width_value as number
+                valueSerializer.writeNumber(value_width_value_1)
+            }
+            else if (RuntimeType.OBJECT == value_width_value_type) {
+                valueSerializer.writeInt8((2).toChar())
+                const value_width_value_2  = value_width_value as Resource
+                Resource_serializer.write(valueSerializer, value_width_value_2)
+            }
+        }
+        const value_arrowPointPosition  = value.arrowPointPosition
+        let value_arrowPointPosition_type : int32 = RuntimeType.UNDEFINED
+        value_arrowPointPosition_type = runtimeType(value_arrowPointPosition)
+        valueSerializer.writeInt8((value_arrowPointPosition_type).toChar())
+        if ((value_arrowPointPosition_type) != (RuntimeType.UNDEFINED)) {
+            const value_arrowPointPosition_value  = (value_arrowPointPosition as ArrowPointPosition)
+            valueSerializer.writeInt32(TypeChecker.ArrowPointPosition_ToNumeric(value_arrowPointPosition_value))
+        }
+        const value_arrowWidth  = value.arrowWidth
+        let value_arrowWidth_type : int32 = RuntimeType.UNDEFINED
+        value_arrowWidth_type = runtimeType(value_arrowWidth)
+        valueSerializer.writeInt8((value_arrowWidth_type).toChar())
+        if ((value_arrowWidth_type) != (RuntimeType.UNDEFINED)) {
+            const value_arrowWidth_value  = value_arrowWidth!
+            let value_arrowWidth_value_type : int32 = RuntimeType.UNDEFINED
+            value_arrowWidth_value_type = runtimeType(value_arrowWidth_value)
+            if (RuntimeType.STRING == value_arrowWidth_value_type) {
+                valueSerializer.writeInt8((0).toChar())
+                const value_arrowWidth_value_0  = value_arrowWidth_value as string
+                valueSerializer.writeString(value_arrowWidth_value_0)
+            }
+            else if (RuntimeType.NUMBER == value_arrowWidth_value_type) {
+                valueSerializer.writeInt8((1).toChar())
+                const value_arrowWidth_value_1  = value_arrowWidth_value as number
+                valueSerializer.writeNumber(value_arrowWidth_value_1)
+            }
+            else if (RuntimeType.OBJECT == value_arrowWidth_value_type) {
+                valueSerializer.writeInt8((2).toChar())
+                const value_arrowWidth_value_2  = value_arrowWidth_value as Resource
+                Resource_serializer.write(valueSerializer, value_arrowWidth_value_2)
+            }
+        }
+        const value_arrowHeight  = value.arrowHeight
+        let value_arrowHeight_type : int32 = RuntimeType.UNDEFINED
+        value_arrowHeight_type = runtimeType(value_arrowHeight)
+        valueSerializer.writeInt8((value_arrowHeight_type).toChar())
+        if ((value_arrowHeight_type) != (RuntimeType.UNDEFINED)) {
+            const value_arrowHeight_value  = value_arrowHeight!
+            let value_arrowHeight_value_type : int32 = RuntimeType.UNDEFINED
+            value_arrowHeight_value_type = runtimeType(value_arrowHeight_value)
+            if (RuntimeType.STRING == value_arrowHeight_value_type) {
+                valueSerializer.writeInt8((0).toChar())
+                const value_arrowHeight_value_0  = value_arrowHeight_value as string
+                valueSerializer.writeString(value_arrowHeight_value_0)
+            }
+            else if (RuntimeType.NUMBER == value_arrowHeight_value_type) {
+                valueSerializer.writeInt8((1).toChar())
+                const value_arrowHeight_value_1  = value_arrowHeight_value as number
+                valueSerializer.writeNumber(value_arrowHeight_value_1)
+            }
+            else if (RuntimeType.OBJECT == value_arrowHeight_value_type) {
+                valueSerializer.writeInt8((2).toChar())
+                const value_arrowHeight_value_2  = value_arrowHeight_value as Resource
+                Resource_serializer.write(valueSerializer, value_arrowHeight_value_2)
+            }
+        }
+        const value_radius  = value.radius
+        let value_radius_type : int32 = RuntimeType.UNDEFINED
+        value_radius_type = runtimeType(value_radius)
+        valueSerializer.writeInt8((value_radius_type).toChar())
+        if ((value_radius_type) != (RuntimeType.UNDEFINED)) {
+            const value_radius_value  = value_radius!
+            let value_radius_value_type : int32 = RuntimeType.UNDEFINED
+            value_radius_value_type = runtimeType(value_radius_value)
+            if (RuntimeType.STRING == value_radius_value_type) {
+                valueSerializer.writeInt8((0).toChar())
+                const value_radius_value_0  = value_radius_value as string
+                valueSerializer.writeString(value_radius_value_0)
+            }
+            else if (RuntimeType.NUMBER == value_radius_value_type) {
+                valueSerializer.writeInt8((1).toChar())
+                const value_radius_value_1  = value_radius_value as number
+                valueSerializer.writeNumber(value_radius_value_1)
+            }
+            else if (RuntimeType.OBJECT == value_radius_value_type) {
+                valueSerializer.writeInt8((2).toChar())
+                const value_radius_value_2  = value_radius_value as Resource
+                Resource_serializer.write(valueSerializer, value_radius_value_2)
+            }
+        }
+        const value_shadow  = value.shadow
+        let value_shadow_type : int32 = RuntimeType.UNDEFINED
+        value_shadow_type = runtimeType(value_shadow)
+        valueSerializer.writeInt8((value_shadow_type).toChar())
+        if ((value_shadow_type) != (RuntimeType.UNDEFINED)) {
+            const value_shadow_value  = value_shadow!
+            let value_shadow_value_type : int32 = RuntimeType.UNDEFINED
+            value_shadow_value_type = runtimeType(value_shadow_value)
+            if (RuntimeType.OBJECT == value_shadow_value_type) {
+                valueSerializer.writeInt8((0).toChar())
+                const value_shadow_value_0  = value_shadow_value as ShadowOptions
+                ShadowOptions_serializer.write(valueSerializer, value_shadow_value_0)
+            }
+            else if (TypeChecker.isShadowStyle(value_shadow_value)) {
+                valueSerializer.writeInt8((1).toChar())
+                const value_shadow_value_1  = value_shadow_value as ShadowStyle
+                valueSerializer.writeInt32(TypeChecker.ShadowStyle_ToNumeric(value_shadow_value_1))
+            }
+        }
+        const value_backgroundBlurStyle  = value.backgroundBlurStyle
+        let value_backgroundBlurStyle_type : int32 = RuntimeType.UNDEFINED
+        value_backgroundBlurStyle_type = runtimeType(value_backgroundBlurStyle)
+        valueSerializer.writeInt8((value_backgroundBlurStyle_type).toChar())
+        if ((value_backgroundBlurStyle_type) != (RuntimeType.UNDEFINED)) {
+            const value_backgroundBlurStyle_value  = (value_backgroundBlurStyle as BlurStyle)
+            valueSerializer.writeInt32(TypeChecker.BlurStyle_ToNumeric(value_backgroundBlurStyle_value))
+        }
+        const value_focusable  = value.focusable
+        let value_focusable_type : int32 = RuntimeType.UNDEFINED
+        value_focusable_type = runtimeType(value_focusable)
+        valueSerializer.writeInt8((value_focusable_type).toChar())
+        if ((value_focusable_type) != (RuntimeType.UNDEFINED)) {
+            const value_focusable_value  = value_focusable!
+            valueSerializer.writeBoolean(value_focusable_value)
+        }
+        const value_transition  = value.transition
+        let value_transition_type : int32 = RuntimeType.UNDEFINED
+        value_transition_type = runtimeType(value_transition)
+        valueSerializer.writeInt8((value_transition_type).toChar())
+        if ((value_transition_type) != (RuntimeType.UNDEFINED)) {
+            const value_transition_value  = value_transition!
+            TransitionEffect_serializer.write(valueSerializer, value_transition_value)
+        }
+        const value_onWillDismiss  = value.onWillDismiss
+        let value_onWillDismiss_type : int32 = RuntimeType.UNDEFINED
+        value_onWillDismiss_type = runtimeType(value_onWillDismiss)
+        valueSerializer.writeInt8((value_onWillDismiss_type).toChar())
+        if ((value_onWillDismiss_type) != (RuntimeType.UNDEFINED)) {
+            const value_onWillDismiss_value  = value_onWillDismiss!
+            let value_onWillDismiss_value_type : int32 = RuntimeType.UNDEFINED
+            value_onWillDismiss_value_type = runtimeType(value_onWillDismiss_value)
+            if (RuntimeType.BOOLEAN == value_onWillDismiss_value_type) {
+                valueSerializer.writeInt8((0).toChar())
+                const value_onWillDismiss_value_0  = value_onWillDismiss_value as boolean
+                valueSerializer.writeBoolean(value_onWillDismiss_value_0)
+            }
+            else if (RuntimeType.FUNCTION == value_onWillDismiss_value_type) {
+                valueSerializer.writeInt8((1).toChar())
+                const value_onWillDismiss_value_1  = value_onWillDismiss_value as ((value0: DismissPopupAction) => void)
+                valueSerializer.holdAndWriteCallback(value_onWillDismiss_value_1)
+            }
+        }
+        const value_enableHoverMode  = value.enableHoverMode
+        let value_enableHoverMode_type : int32 = RuntimeType.UNDEFINED
+        value_enableHoverMode_type = runtimeType(value_enableHoverMode)
+        valueSerializer.writeInt8((value_enableHoverMode_type).toChar())
+        if ((value_enableHoverMode_type) != (RuntimeType.UNDEFINED)) {
+            const value_enableHoverMode_value  = value_enableHoverMode!
+            valueSerializer.writeBoolean(value_enableHoverMode_value)
+        }
+        const value_followTransformOfTarget  = value.followTransformOfTarget
+        let value_followTransformOfTarget_type : int32 = RuntimeType.UNDEFINED
+        value_followTransformOfTarget_type = runtimeType(value_followTransformOfTarget)
+        valueSerializer.writeInt8((value_followTransformOfTarget_type).toChar())
+        if ((value_followTransformOfTarget_type) != (RuntimeType.UNDEFINED)) {
+            const value_followTransformOfTarget_value  = value_followTransformOfTarget!
+            valueSerializer.writeBoolean(value_followTransformOfTarget_value)
+        }
+    }
+    public static read(buffer: DeserializerBase): PopupCommonOptions {
+        let valueDeserializer : DeserializerBase = buffer
+        const placement_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let placement_buf : Placement | undefined
+        if ((placement_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            placement_buf = TypeChecker.Placement_FromNumeric(valueDeserializer.readInt32())
+        }
+        const placement_result : Placement | undefined = placement_buf
+        const popupColor_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let popupColor_buf : ResourceColor | undefined
+        if ((popupColor_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            const popupColor_buf__selector : int32 = valueDeserializer.readInt8()
+            let popupColor_buf_ : Color | number | string | Resource | undefined
+            if (popupColor_buf__selector == (0).toChar()) {
+                popupColor_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (popupColor_buf__selector == (1).toChar()) {
+                popupColor_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (popupColor_buf__selector == (2).toChar()) {
+                popupColor_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (popupColor_buf__selector == (3).toChar()) {
+                popupColor_buf_ = Resource_serializer.read(valueDeserializer)
+            }
+            else {
+                throw new Error("One of the branches for popupColor_buf_ has to be chosen through deserialisation.")
+            }
+            popupColor_buf = (popupColor_buf_ as Color | number | string | Resource)
+        }
+        const popupColor_result : ResourceColor | undefined = popupColor_buf
+        const enableArrow_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let enableArrow_buf : boolean | undefined
+        if ((enableArrow_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            enableArrow_buf = valueDeserializer.readBoolean()
+        }
+        const enableArrow_result : boolean | undefined = enableArrow_buf
+        const autoCancel_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let autoCancel_buf : boolean | undefined
+        if ((autoCancel_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            autoCancel_buf = valueDeserializer.readBoolean()
+        }
+        const autoCancel_result : boolean | undefined = autoCancel_buf
+        const onStateChange_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let onStateChange_buf : PopupStateChangeCallback | undefined
+        if ((onStateChange_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            const onStateChange_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
+            const onStateChange_buf__call : KPointer = valueDeserializer.readPointer()
+            const onStateChange_buf__callSync : KPointer = valueDeserializer.readPointer()
+            onStateChange_buf = (event: PopupStateChangeParam):void => { 
+    const onStateChange_buf__argsSerializer : SerializerBase = SerializerBase.hold();
+    onStateChange_buf__argsSerializer.writeInt32(onStateChange_buf__resource.resourceId);
+    onStateChange_buf__argsSerializer.writePointer(onStateChange_buf__call);
+    onStateChange_buf__argsSerializer.writePointer(onStateChange_buf__callSync);
+    PopupStateChangeParam_serializer.write(onStateChange_buf__argsSerializer, event);
+    InteropNativeModule._CallCallback(-1444325632, onStateChange_buf__argsSerializer.asBuffer(), onStateChange_buf__argsSerializer.length());
+    onStateChange_buf__argsSerializer.release();
+    return; }
+        }
+        const onStateChange_result : PopupStateChangeCallback | undefined = onStateChange_buf
+        const arrowOffset_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let arrowOffset_buf : Length | undefined
+        if ((arrowOffset_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            const arrowOffset_buf__selector : int32 = valueDeserializer.readInt8()
+            let arrowOffset_buf_ : string | number | Resource | undefined
+            if (arrowOffset_buf__selector == (0).toChar()) {
+                arrowOffset_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (arrowOffset_buf__selector == (1).toChar()) {
+                arrowOffset_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (arrowOffset_buf__selector == (2).toChar()) {
+                arrowOffset_buf_ = Resource_serializer.read(valueDeserializer)
+            }
+            else {
+                throw new Error("One of the branches for arrowOffset_buf_ has to be chosen through deserialisation.")
+            }
+            arrowOffset_buf = (arrowOffset_buf_ as string | number | Resource)
+        }
+        const arrowOffset_result : Length | undefined = arrowOffset_buf
+        const showInSubWindow_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let showInSubWindow_buf : boolean | undefined
+        if ((showInSubWindow_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            showInSubWindow_buf = valueDeserializer.readBoolean()
+        }
+        const showInSubWindow_result : boolean | undefined = showInSubWindow_buf
+        const mask_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let mask_buf : boolean | PopupMaskType | undefined
+        if ((mask_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            const mask_buf__selector : int32 = valueDeserializer.readInt8()
+            let mask_buf_ : boolean | PopupMaskType | undefined
+            if (mask_buf__selector == (0).toChar()) {
+                mask_buf_ = valueDeserializer.readBoolean()
+            }
+            else if (mask_buf__selector == (1).toChar()) {
+                mask_buf_ = PopupMaskType_serializer.read(valueDeserializer)
+            }
+            else {
+                throw new Error("One of the branches for mask_buf_ has to be chosen through deserialisation.")
+            }
+            mask_buf = (mask_buf_ as boolean | PopupMaskType)
+        }
+        const mask_result : boolean | PopupMaskType | undefined = mask_buf
+        const targetSpace_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let targetSpace_buf : Length | undefined
+        if ((targetSpace_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            const targetSpace_buf__selector : int32 = valueDeserializer.readInt8()
+            let targetSpace_buf_ : string | number | Resource | undefined
+            if (targetSpace_buf__selector == (0).toChar()) {
+                targetSpace_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (targetSpace_buf__selector == (1).toChar()) {
+                targetSpace_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (targetSpace_buf__selector == (2).toChar()) {
+                targetSpace_buf_ = Resource_serializer.read(valueDeserializer)
+            }
+            else {
+                throw new Error("One of the branches for targetSpace_buf_ has to be chosen through deserialisation.")
+            }
+            targetSpace_buf = (targetSpace_buf_ as string | number | Resource)
+        }
+        const targetSpace_result : Length | undefined = targetSpace_buf
+        const offset_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let offset_buf : Position | undefined
+        if ((offset_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            offset_buf = Position_serializer.read(valueDeserializer)
+        }
+        const offset_result : Position | undefined = offset_buf
+        const width_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let width_buf : Dimension | undefined
+        if ((width_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            const width_buf__selector : int32 = valueDeserializer.readInt8()
+            let width_buf_ : string | number | Resource | undefined
+            if (width_buf__selector == (0).toChar()) {
+                width_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (width_buf__selector == (1).toChar()) {
+                width_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (width_buf__selector == (2).toChar()) {
+                width_buf_ = Resource_serializer.read(valueDeserializer)
+            }
+            else {
+                throw new Error("One of the branches for width_buf_ has to be chosen through deserialisation.")
+            }
+            width_buf = (width_buf_ as string | number | Resource)
+        }
+        const width_result : Dimension | undefined = width_buf
+        const arrowPointPosition_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let arrowPointPosition_buf : ArrowPointPosition | undefined
+        if ((arrowPointPosition_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            arrowPointPosition_buf = TypeChecker.ArrowPointPosition_FromNumeric(valueDeserializer.readInt32())
+        }
+        const arrowPointPosition_result : ArrowPointPosition | undefined = arrowPointPosition_buf
+        const arrowWidth_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let arrowWidth_buf : Dimension | undefined
+        if ((arrowWidth_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            const arrowWidth_buf__selector : int32 = valueDeserializer.readInt8()
+            let arrowWidth_buf_ : string | number | Resource | undefined
+            if (arrowWidth_buf__selector == (0).toChar()) {
+                arrowWidth_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (arrowWidth_buf__selector == (1).toChar()) {
+                arrowWidth_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (arrowWidth_buf__selector == (2).toChar()) {
+                arrowWidth_buf_ = Resource_serializer.read(valueDeserializer)
+            }
+            else {
+                throw new Error("One of the branches for arrowWidth_buf_ has to be chosen through deserialisation.")
+            }
+            arrowWidth_buf = (arrowWidth_buf_ as string | number | Resource)
+        }
+        const arrowWidth_result : Dimension | undefined = arrowWidth_buf
+        const arrowHeight_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let arrowHeight_buf : Dimension | undefined
+        if ((arrowHeight_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            const arrowHeight_buf__selector : int32 = valueDeserializer.readInt8()
+            let arrowHeight_buf_ : string | number | Resource | undefined
+            if (arrowHeight_buf__selector == (0).toChar()) {
+                arrowHeight_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (arrowHeight_buf__selector == (1).toChar()) {
+                arrowHeight_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (arrowHeight_buf__selector == (2).toChar()) {
+                arrowHeight_buf_ = Resource_serializer.read(valueDeserializer)
+            }
+            else {
+                throw new Error("One of the branches for arrowHeight_buf_ has to be chosen through deserialisation.")
+            }
+            arrowHeight_buf = (arrowHeight_buf_ as string | number | Resource)
+        }
+        const arrowHeight_result : Dimension | undefined = arrowHeight_buf
+        const radius_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let radius_buf : Dimension | undefined
+        if ((radius_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            const radius_buf__selector : int32 = valueDeserializer.readInt8()
+            let radius_buf_ : string | number | Resource | undefined
+            if (radius_buf__selector == (0).toChar()) {
+                radius_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (radius_buf__selector == (1).toChar()) {
+                radius_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (radius_buf__selector == (2).toChar()) {
+                radius_buf_ = Resource_serializer.read(valueDeserializer)
+            }
+            else {
+                throw new Error("One of the branches for radius_buf_ has to be chosen through deserialisation.")
+            }
+            radius_buf = (radius_buf_ as string | number | Resource)
+        }
+        const radius_result : Dimension | undefined = radius_buf
+        const shadow_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let shadow_buf : ShadowOptions | ShadowStyle | undefined
+        if ((shadow_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            const shadow_buf__selector : int32 = valueDeserializer.readInt8()
+            let shadow_buf_ : ShadowOptions | ShadowStyle | undefined
+            if (shadow_buf__selector == (0).toChar()) {
+                shadow_buf_ = ShadowOptions_serializer.read(valueDeserializer)
+            }
+            else if (shadow_buf__selector == (1).toChar()) {
+                shadow_buf_ = TypeChecker.ShadowStyle_FromNumeric(valueDeserializer.readInt32())
+            }
+            else {
+                throw new Error("One of the branches for shadow_buf_ has to be chosen through deserialisation.")
+            }
+            shadow_buf = (shadow_buf_ as ShadowOptions | ShadowStyle)
+        }
+        const shadow_result : ShadowOptions | ShadowStyle | undefined = shadow_buf
+        const backgroundBlurStyle_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let backgroundBlurStyle_buf : BlurStyle | undefined
+        if ((backgroundBlurStyle_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            backgroundBlurStyle_buf = TypeChecker.BlurStyle_FromNumeric(valueDeserializer.readInt32())
+        }
+        const backgroundBlurStyle_result : BlurStyle | undefined = backgroundBlurStyle_buf
+        const focusable_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let focusable_buf : boolean | undefined
+        if ((focusable_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            focusable_buf = valueDeserializer.readBoolean()
+        }
+        const focusable_result : boolean | undefined = focusable_buf
+        const transition_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let transition_buf : TransitionEffect | undefined
+        if ((transition_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            transition_buf = (TransitionEffect_serializer.read(valueDeserializer) as TransitionEffect)
+        }
+        const transition_result : TransitionEffect | undefined = transition_buf
+        const onWillDismiss_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let onWillDismiss_buf : boolean | ((value0: DismissPopupAction) => void) | undefined
+        if ((onWillDismiss_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            const onWillDismiss_buf__selector : int32 = valueDeserializer.readInt8()
+            let onWillDismiss_buf_ : boolean | ((value0: DismissPopupAction) => void) | undefined
+            if (onWillDismiss_buf__selector == (0).toChar()) {
+                onWillDismiss_buf_ = valueDeserializer.readBoolean()
+            }
+            else if (onWillDismiss_buf__selector == (1).toChar()) {
+                const onWillDismiss_buf__u_resource : CallbackResource = valueDeserializer.readCallbackResource()
+                const onWillDismiss_buf__u_call : KPointer = valueDeserializer.readPointer()
+                const onWillDismiss_buf__u_callSync : KPointer = valueDeserializer.readPointer()
+                onWillDismiss_buf_ = (value0: DismissPopupAction):void => { 
+    const onWillDismiss_buf__u_argsSerializer : SerializerBase = SerializerBase.hold();
+    onWillDismiss_buf__u_argsSerializer.writeInt32(onWillDismiss_buf__u_resource.resourceId);
+    onWillDismiss_buf__u_argsSerializer.writePointer(onWillDismiss_buf__u_call);
+    onWillDismiss_buf__u_argsSerializer.writePointer(onWillDismiss_buf__u_callSync);
+    DismissPopupAction_serializer.write(onWillDismiss_buf__u_argsSerializer, value0);
+    InteropNativeModule._CallCallback(-2004166751, onWillDismiss_buf__u_argsSerializer.asBuffer(), onWillDismiss_buf__u_argsSerializer.length());
+    onWillDismiss_buf__u_argsSerializer.release();
+    return; }
+            }
+            else {
+                throw new Error("One of the branches for onWillDismiss_buf_ has to be chosen through deserialisation.")
+            }
+            onWillDismiss_buf = (onWillDismiss_buf_ as boolean | ((value0: DismissPopupAction) => void))
+        }
+        const onWillDismiss_result : boolean | ((value0: DismissPopupAction) => void) | undefined = onWillDismiss_buf
+        const enableHoverMode_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let enableHoverMode_buf : boolean | undefined
+        if ((enableHoverMode_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            enableHoverMode_buf = valueDeserializer.readBoolean()
+        }
+        const enableHoverMode_result : boolean | undefined = enableHoverMode_buf
+        const followTransformOfTarget_buf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let followTransformOfTarget_buf : boolean | undefined
+        if ((followTransformOfTarget_buf_runtimeType) != (RuntimeType.UNDEFINED))
+        {
+            followTransformOfTarget_buf = valueDeserializer.readBoolean()
+        }
+        const followTransformOfTarget_result : boolean | undefined = followTransformOfTarget_buf
+        let value : PopupCommonOptions = ({placement: placement_result, popupColor: popupColor_result, enableArrow: enableArrow_result, autoCancel: autoCancel_result, onStateChange: onStateChange_result, arrowOffset: arrowOffset_result, showInSubWindow: showInSubWindow_result, mask: mask_result, targetSpace: targetSpace_result, offset: offset_result, width: width_result, arrowPointPosition: arrowPointPosition_result, arrowWidth: arrowWidth_result, arrowHeight: arrowHeight_result, radius: radius_result, shadow: shadow_result, backgroundBlurStyle: backgroundBlurStyle_result, focusable: focusable_result, transition: transition_result, onWillDismiss: onWillDismiss_result, enableHoverMode: enableHoverMode_result, followTransformOfTarget: followTransformOfTarget_result} as PopupCommonOptions)
+        return value
+    }
+}
 export class PopupOptions_serializer {
     public static write(buffer: SerializerBase, value: PopupOptions): void {
         let valueSerializer : SerializerBase = buffer
@@ -25055,6 +25055,17 @@ export class PopupOptions_serializer {
         const keyboardAvoidMode_result : KeyboardAvoidMode | undefined = keyboardAvoidMode_buf
         let value : PopupOptions = ({message: message_result, placement: placement_result, primaryButton: primaryButton_result, secondaryButton: secondaryButton_result, onStateChange: onStateChange_result, arrowOffset: arrowOffset_result, showInSubWindow: showInSubWindow_result, mask: mask_result, messageOptions: messageOptions_result, targetSpace: targetSpace_result, enableArrow: enableArrow_result, offset: offset_result, popupColor: popupColor_result, autoCancel: autoCancel_result, width: width_result, arrowPointPosition: arrowPointPosition_result, arrowWidth: arrowWidth_result, arrowHeight: arrowHeight_result, radius: radius_result, shadow: shadow_result, backgroundBlurStyle: backgroundBlurStyle_result, transition: transition_result, onWillDismiss: onWillDismiss_result, enableHoverMode: enableHoverMode_result, followTransformOfTarget: followTransformOfTarget_result, keyboardAvoidMode: keyboardAvoidMode_result} as PopupOptions)
         return value
+    }
+}
+export class TransitionEffect_serializer {
+    public static write(buffer: SerializerBase, value: TransitionEffect): void {
+        let valueSerializer : SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    public static read(buffer: DeserializerBase): TransitionEffect {
+        let valueDeserializer : DeserializerBase = buffer
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return TransitionEffectInternal.fromPtr(ptr)
     }
 }
 export interface AccessibilityHoverEvent {

@@ -50,64 +50,18 @@ export class ArkRectPeer extends ArkCommonShapeMethodPeer {
             const options_value  = options!
             let options_value_type : int32 = RuntimeType.UNDEFINED
             options_value_type = runtimeType(options_value)
-            if (TypeChecker.isRectOptions(options_value, true, true, false)) {
+            if (TypeChecker.isRectOptions(options_value, false, false, false)) {
                 thisSerializer.writeInt8((0).toChar())
                 const options_value_0  = options_value as RectOptions
                 RectOptions_serializer.write(thisSerializer, options_value_0)
             }
-            else if (TypeChecker.isRoundedRectOptions(options_value, true, true, false, false)) {
+            else if (TypeChecker.isRoundedRectOptions(options_value)) {
                 thisSerializer.writeInt8((1).toChar())
                 const options_value_1  = options_value as RoundedRectOptions
                 RoundedRectOptions_serializer.write(thisSerializer, options_value_1)
             }
         }
         ArkUIGeneratedNativeModule._RectInterface_setRectOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    setRadiusWidthAttribute(value: number | string | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (RuntimeType.NUMBER == value_value_type) {
-                thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as number
-                thisSerializer.writeNumber(value_value_0)
-            }
-            else if (RuntimeType.STRING == value_value_type) {
-                thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as string
-                thisSerializer.writeString(value_value_1)
-            }
-        }
-        ArkUIGeneratedNativeModule._RectAttribute_setRadiusWidth(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    setRadiusHeightAttribute(value: number | string | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (RuntimeType.NUMBER == value_value_type) {
-                thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as number
-                thisSerializer.writeNumber(value_value_0)
-            }
-            else if (RuntimeType.STRING == value_value_type) {
-                thisSerializer.writeInt8((1).toChar())
-                const value_value_1  = value_value as string
-                thisSerializer.writeString(value_value_1)
-            }
-        }
-        ArkUIGeneratedNativeModule._RectAttribute_setRadiusHeight(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setRadiusAttribute(value: number | string | Array<number | string> | undefined): void {
@@ -164,18 +118,8 @@ export interface RectOptions {
     radius?: Length | Array<RadiusItem>;
 }
 export interface RoundedRectOptions {
-    width?: number | string;
-    height?: number | string;
-    radiusWidth?: number | string;
-    radiusHeight?: number | string;
 }
 export interface RectAttribute extends CommonShapeMethod {
-    radiusWidth(value: number | string | undefined): this {
-        throw new Error("Unimplemented method radiusWidth")
-    }
-    radiusHeight(value: number | string | undefined): this {
-        throw new Error("Unimplemented method radiusHeight")
-    }
     radius(value: number | string | Array<number | string> | undefined): this {
         throw new Error("Unimplemented method radius")
     }
@@ -184,16 +128,8 @@ export interface RectAttribute extends CommonShapeMethod {
     }
 }
 export class ArkRectStyle extends ArkCommonShapeMethodStyle implements RectAttribute {
-    radiusWidth_value?: number | string | undefined
-    radiusHeight_value?: number | string | undefined
     radius_value?: number | string | Array<number | string> | undefined
     attributeModifier_value?: AttributeModifier<RectAttribute> | AttributeModifier<CommonMethod> | undefined
-    public radiusWidth(value: number | string | undefined): this {
-        return this
-    }
-    public radiusHeight(value: number | string | undefined): this {
-        return this
-    }
     public radius(value: number | string | Array<number | string> | undefined): this {
         return this
     }
@@ -202,10 +138,6 @@ export class ArkRectStyle extends ArkCommonShapeMethodStyle implements RectAttri
     }
     public apply(target: RectAttribute): void {
         super.apply(target)
-        if (this.radiusWidth_value !== undefined)
-            target.radiusWidth(this.radiusWidth_value!)
-        if (this.radiusHeight_value !== undefined)
-            target.radiusHeight(this.radiusHeight_value!)
         if (this.radius_value !== undefined)
             target.radius(this.radius_value!)
     }
@@ -219,22 +151,6 @@ export class ArkRectComponent extends ArkCommonShapeMethodComponent implements R
         if (this.checkPriority("setRectOptions")) {
             const options_casted = options as (RectOptions | RoundedRectOptions | undefined)
             this.getPeer()?.setRectOptionsAttribute(options_casted)
-            return this
-        }
-        return this
-    }
-    public radiusWidth(value: number | string | undefined): this {
-        if (this.checkPriority("radiusWidth")) {
-            const value_casted = value as (number | string | undefined)
-            this.getPeer()?.setRadiusWidthAttribute(value_casted)
-            return this
-        }
-        return this
-    }
-    public radiusHeight(value: number | string | undefined): this {
-        if (this.checkPriority("radiusHeight")) {
-            const value_casted = value as (number | string | undefined)
-            this.getPeer()?.setRadiusHeightAttribute(value_casted)
             return this
         }
         return this
@@ -302,29 +218,11 @@ export class ArkRectSet extends ArkCommonShapeMethodSet implements RectAttribute
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
-    _radiusWidth_flag?: boolean
-    _radiusWidth0_value?: number | string | undefined
-    _radiusHeight_flag?: boolean
-    _radiusHeight0_value?: number | string | undefined
     _radius_flag?: boolean
     _radius0_value?: number | string | Array<number | string> | undefined
     applyModifierPatch(component: RectAttribute): void {
-        if (this._radiusWidth_flag)
-            component.radiusWidth((this._radiusWidth0_value as number | string | undefined))
-        if (this._radiusHeight_flag)
-            component.radiusHeight((this._radiusHeight0_value as number | string | undefined))
         if (this._radius_flag)
             component.radius((this._radius0_value as number | string | Array<number | string> | undefined))
-    }
-    public radiusWidth(value: number | string | undefined): this {
-        this._radiusWidth_flag = true
-        this._radiusWidth0_value = value
-        return this
-    }
-    public radiusHeight(value: number | string | undefined): this {
-        this._radiusHeight_flag = true
-        this._radiusHeight0_value = value
-        return this
     }
     public radius(value: number | string | Array<number | string> | undefined): this {
         this._radius_flag = true
@@ -337,159 +235,9 @@ export class ArkRectSet extends ArkCommonShapeMethodSet implements RectAttribute
 }
 export class RoundedRectOptions_serializer {
     public static write(buffer: SerializerBase, value: RoundedRectOptions): void {
-        let valueSerializer : SerializerBase = buffer
-        const value_width  = value.width
-        let value_width_type : int32 = RuntimeType.UNDEFINED
-        value_width_type = runtimeType(value_width)
-        valueSerializer.writeInt8((value_width_type).toChar())
-        if ((value_width_type) != (RuntimeType.UNDEFINED)) {
-            const value_width_value  = value_width!
-            let value_width_value_type : int32 = RuntimeType.UNDEFINED
-            value_width_value_type = runtimeType(value_width_value)
-            if (RuntimeType.NUMBER == value_width_value_type) {
-                valueSerializer.writeInt8((0).toChar())
-                const value_width_value_0  = value_width_value as number
-                valueSerializer.writeNumber(value_width_value_0)
-            }
-            else if (RuntimeType.STRING == value_width_value_type) {
-                valueSerializer.writeInt8((1).toChar())
-                const value_width_value_1  = value_width_value as string
-                valueSerializer.writeString(value_width_value_1)
-            }
-        }
-        const value_height  = value.height
-        let value_height_type : int32 = RuntimeType.UNDEFINED
-        value_height_type = runtimeType(value_height)
-        valueSerializer.writeInt8((value_height_type).toChar())
-        if ((value_height_type) != (RuntimeType.UNDEFINED)) {
-            const value_height_value  = value_height!
-            let value_height_value_type : int32 = RuntimeType.UNDEFINED
-            value_height_value_type = runtimeType(value_height_value)
-            if (RuntimeType.NUMBER == value_height_value_type) {
-                valueSerializer.writeInt8((0).toChar())
-                const value_height_value_0  = value_height_value as number
-                valueSerializer.writeNumber(value_height_value_0)
-            }
-            else if (RuntimeType.STRING == value_height_value_type) {
-                valueSerializer.writeInt8((1).toChar())
-                const value_height_value_1  = value_height_value as string
-                valueSerializer.writeString(value_height_value_1)
-            }
-        }
-        const value_radiusWidth  = value.radiusWidth
-        let value_radiusWidth_type : int32 = RuntimeType.UNDEFINED
-        value_radiusWidth_type = runtimeType(value_radiusWidth)
-        valueSerializer.writeInt8((value_radiusWidth_type).toChar())
-        if ((value_radiusWidth_type) != (RuntimeType.UNDEFINED)) {
-            const value_radiusWidth_value  = value_radiusWidth!
-            let value_radiusWidth_value_type : int32 = RuntimeType.UNDEFINED
-            value_radiusWidth_value_type = runtimeType(value_radiusWidth_value)
-            if (RuntimeType.NUMBER == value_radiusWidth_value_type) {
-                valueSerializer.writeInt8((0).toChar())
-                const value_radiusWidth_value_0  = value_radiusWidth_value as number
-                valueSerializer.writeNumber(value_radiusWidth_value_0)
-            }
-            else if (RuntimeType.STRING == value_radiusWidth_value_type) {
-                valueSerializer.writeInt8((1).toChar())
-                const value_radiusWidth_value_1  = value_radiusWidth_value as string
-                valueSerializer.writeString(value_radiusWidth_value_1)
-            }
-        }
-        const value_radiusHeight  = value.radiusHeight
-        let value_radiusHeight_type : int32 = RuntimeType.UNDEFINED
-        value_radiusHeight_type = runtimeType(value_radiusHeight)
-        valueSerializer.writeInt8((value_radiusHeight_type).toChar())
-        if ((value_radiusHeight_type) != (RuntimeType.UNDEFINED)) {
-            const value_radiusHeight_value  = value_radiusHeight!
-            let value_radiusHeight_value_type : int32 = RuntimeType.UNDEFINED
-            value_radiusHeight_value_type = runtimeType(value_radiusHeight_value)
-            if (RuntimeType.NUMBER == value_radiusHeight_value_type) {
-                valueSerializer.writeInt8((0).toChar())
-                const value_radiusHeight_value_0  = value_radiusHeight_value as number
-                valueSerializer.writeNumber(value_radiusHeight_value_0)
-            }
-            else if (RuntimeType.STRING == value_radiusHeight_value_type) {
-                valueSerializer.writeInt8((1).toChar())
-                const value_radiusHeight_value_1  = value_radiusHeight_value as string
-                valueSerializer.writeString(value_radiusHeight_value_1)
-            }
-        }
     }
     public static read(buffer: DeserializerBase): RoundedRectOptions {
-        let valueDeserializer : DeserializerBase = buffer
-        const width_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let width_buf : number | string | undefined
-        if ((width_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const width_buf__selector : int32 = valueDeserializer.readInt8()
-            let width_buf_ : number | string | undefined
-            if (width_buf__selector == (0).toChar()) {
-                width_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (width_buf__selector == (1).toChar()) {
-                width_buf_ = (valueDeserializer.readString() as string)
-            }
-            else {
-                throw new Error("One of the branches for width_buf_ has to be chosen through deserialisation.")
-            }
-            width_buf = (width_buf_ as number | string)
-        }
-        const width_result : number | string | undefined = width_buf
-        const height_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let height_buf : number | string | undefined
-        if ((height_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const height_buf__selector : int32 = valueDeserializer.readInt8()
-            let height_buf_ : number | string | undefined
-            if (height_buf__selector == (0).toChar()) {
-                height_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (height_buf__selector == (1).toChar()) {
-                height_buf_ = (valueDeserializer.readString() as string)
-            }
-            else {
-                throw new Error("One of the branches for height_buf_ has to be chosen through deserialisation.")
-            }
-            height_buf = (height_buf_ as number | string)
-        }
-        const height_result : number | string | undefined = height_buf
-        const radiusWidth_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let radiusWidth_buf : number | string | undefined
-        if ((radiusWidth_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const radiusWidth_buf__selector : int32 = valueDeserializer.readInt8()
-            let radiusWidth_buf_ : number | string | undefined
-            if (radiusWidth_buf__selector == (0).toChar()) {
-                radiusWidth_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (radiusWidth_buf__selector == (1).toChar()) {
-                radiusWidth_buf_ = (valueDeserializer.readString() as string)
-            }
-            else {
-                throw new Error("One of the branches for radiusWidth_buf_ has to be chosen through deserialisation.")
-            }
-            radiusWidth_buf = (radiusWidth_buf_ as number | string)
-        }
-        const radiusWidth_result : number | string | undefined = radiusWidth_buf
-        const radiusHeight_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let radiusHeight_buf : number | string | undefined
-        if ((radiusHeight_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const radiusHeight_buf__selector : int32 = valueDeserializer.readInt8()
-            let radiusHeight_buf_ : number | string | undefined
-            if (radiusHeight_buf__selector == (0).toChar()) {
-                radiusHeight_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (radiusHeight_buf__selector == (1).toChar()) {
-                radiusHeight_buf_ = (valueDeserializer.readString() as string)
-            }
-            else {
-                throw new Error("One of the branches for radiusHeight_buf_ has to be chosen through deserialisation.")
-            }
-            radiusHeight_buf = (radiusHeight_buf_ as number | string)
-        }
-        const radiusHeight_result : number | string | undefined = radiusHeight_buf
-        let value : RoundedRectOptions = ({width: width_result, height: height_result, radiusWidth: radiusWidth_result, radiusHeight: radiusHeight_result} as RoundedRectOptions)
+        let value : RoundedRectOptions = ({} as RoundedRectOptions)
         return value
     }
 }

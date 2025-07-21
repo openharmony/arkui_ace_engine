@@ -49,11 +49,12 @@ npm_cmd("ui2abc_build") {
     ]
 
     deps = [
+        ":fast_arktsc_build",
         "$libarkts_root:es2panda"
     ]
 
     project_path = rebase_path(".")
-    run_tasks = [ "build:fast-arktsc:plugins" ]
+    run_tasks = [ "build:plugins" ]
 }
 
 action("ui2abc_panda_sdk") {

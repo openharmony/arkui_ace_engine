@@ -19,6 +19,8 @@
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { Resource_serializer, Resource } from "./../generated/resource"
 import { image_PixelMap_serializer, image } from "./../generated/ohos.multimedia.image"
+import { ColorFilter_serializer, ColorFilter, ResourceStr } from "./units"
+import { drawing_ColorFilter_serializer, drawing } from "./../generated/ohos.graphics.drawing"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
@@ -28,7 +30,6 @@ import { ImageSpanAlignment, ImageFit } from "./enums"
 import { ImageErrorCallback, ImageError } from "./image"
 import { AttributeModifier, UICommonBase, AttributeUpdater } from "./../handwritten"
 import { CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, ArkCommonMethodSet } from "./common"
-import { ResourceStr } from "./units"
 import { CallbackKind } from "./../generated/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -85,6 +86,29 @@ export class ArkImageSpanPeer extends ArkBaseSpanPeer {
         ArkUIGeneratedNativeModule._ImageSpanAttribute_setVerticalAlign(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setColorFilterAttribute(value: ColorFilter | drawing.ColorFilter | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8((value_type).toChar())
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (TypeChecker.isColorFilter(value_value)) {
+                thisSerializer.writeInt8((0).toChar())
+                const value_value_0  = value_value as ColorFilter
+                ColorFilter_serializer.write(thisSerializer, value_value_0)
+            }
+            else if (TypeChecker.isdrawing_ColorFilter(value_value)) {
+                thisSerializer.writeInt8((1).toChar())
+                const value_value_1  = value_value as drawing.ColorFilter
+                drawing_ColorFilter_serializer.write(thisSerializer, value_value_1)
+            }
+        }
+        ArkUIGeneratedNativeModule._ImageSpanAttribute_setColorFilter(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setObjectFitAttribute(value: ImageFit | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
@@ -138,6 +162,9 @@ export interface ImageSpanAttribute extends BaseSpan {
     verticalAlign(value: ImageSpanAlignment | undefined): this {
         throw new Error("Unimplemented method verticalAlign")
     }
+    colorFilter(value: ColorFilter | drawing.ColorFilter | undefined): this {
+        throw new Error("Unimplemented method colorFilter")
+    }
     objectFit(value: ImageFit | undefined): this {
         throw new Error("Unimplemented method objectFit")
     }
@@ -156,12 +183,16 @@ export interface ImageSpanAttribute extends BaseSpan {
 }
 export class ArkImageSpanStyle extends ArkBaseSpanStyle implements ImageSpanAttribute {
     verticalAlign_value?: ImageSpanAlignment | undefined
+    colorFilter_value?: ColorFilter | drawing.ColorFilter | undefined
     objectFit_value?: ImageFit | undefined
     onComplete_value?: ImageCompleteCallback | undefined
     onError_value?: ImageErrorCallback | undefined
     alt_value?: image.PixelMap | undefined
     attributeModifier_value?: AttributeModifier<ImageSpanAttribute> | AttributeModifier<CommonMethod> | undefined
     public verticalAlign(value: ImageSpanAlignment | undefined): this {
+        return this
+    }
+    public colorFilter(value: ColorFilter | drawing.ColorFilter | undefined): this {
         return this
     }
     public objectFit(value: ImageFit | undefined): this {
@@ -183,6 +214,8 @@ export class ArkImageSpanStyle extends ArkBaseSpanStyle implements ImageSpanAttr
         super.apply(target)
         if (this.verticalAlign_value !== undefined)
             target.verticalAlign(this.verticalAlign_value!)
+        if (this.colorFilter_value !== undefined)
+            target.colorFilter(this.colorFilter_value!)
         if (this.objectFit_value !== undefined)
             target.objectFit(this.objectFit_value!)
         if (this.onComplete_value !== undefined)
@@ -222,6 +255,14 @@ export class ArkImageSpanComponent extends ArkBaseSpanComponent implements Image
         if (this.checkPriority("verticalAlign")) {
             const value_casted = value as (ImageSpanAlignment | undefined)
             this.getPeer()?.setVerticalAlignAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public colorFilter(value: ColorFilter | drawing.ColorFilter | undefined): this {
+        if (this.checkPriority("colorFilter")) {
+            const value_casted = value as (ColorFilter | drawing.ColorFilter | undefined)
+            this.getPeer()?.setColorFilterAttribute(value_casted)
             return this
         }
         return this
@@ -315,6 +356,8 @@ export class ArkImageSpanSet extends ArkBaseSpanSet implements ImageSpanAttribut
     }
     _verticalAlign_flag?: boolean
     _verticalAlign0_value?: ImageSpanAlignment | undefined
+    _colorFilter_flag?: boolean
+    _colorFilter0_value?: ColorFilter | drawing.ColorFilter | undefined
     _objectFit_flag?: boolean
     _objectFit0_value?: ImageFit | undefined
     _onComplete_flag?: boolean
@@ -326,6 +369,8 @@ export class ArkImageSpanSet extends ArkBaseSpanSet implements ImageSpanAttribut
     applyModifierPatch(component: ImageSpanAttribute): void {
         if (this._verticalAlign_flag)
             component.verticalAlign((this._verticalAlign0_value as ImageSpanAlignment | undefined))
+        if (this._colorFilter_flag)
+            component.colorFilter((this._colorFilter0_value as ColorFilter | drawing.ColorFilter | undefined))
         if (this._objectFit_flag)
             component.objectFit((this._objectFit0_value as ImageFit | undefined))
         if (this._onComplete_flag)
@@ -338,6 +383,11 @@ export class ArkImageSpanSet extends ArkBaseSpanSet implements ImageSpanAttribut
     public verticalAlign(value: ImageSpanAlignment | undefined): this {
         this._verticalAlign_flag = true
         this._verticalAlign0_value = value
+        return this
+    }
+    public colorFilter(value: ColorFilter | drawing.ColorFilter | undefined): this {
+        this._colorFilter_flag = true
+        this._colorFilter0_value = value
         return this
     }
     public objectFit(value: ImageFit | undefined): this {

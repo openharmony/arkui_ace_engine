@@ -19,15 +19,16 @@
 import { Edges_serializer, BorderRadiuses_serializer, Edges, Dimension, BorderRadiuses, Length } from "./../component/units"
 import { SerializerBase, DeserializerBase, NativeBuffer, Finalizable, runtimeType, RuntimeType, MaterializedBase, registerCallback, wrapCallback, KPointer, toPeerPtr } from "@koalaui/interop"
 import { Resource_serializer, Resource } from "./resource"
-import { AnimateParam_serializer, AnimateParam, ICurve, FinishCallbackType, ExpectedFrameRateRange } from "./../component/common"
+import { AnimateParam_serializer, AnimateParam, FinishCallbackType, ExpectedFrameRateRange, CustomStyles } from "./../component/common"
+import { ExtendableComponent_serializer, ExtendableComponent, LifeCycle, ExtendableComponentInternal } from "./../component/extendableComponent"
 import { ComponentInfo_serializer, ComponentInfo, Offset_componentutils, TranslateResult, ScaleResult, RotateResult, Matrix4Result } from "./../component/idlize"
 import { uiEffect_BrightnessBlenderParam_serializer, uiEffect_BrightnessBlender_serializer, uiEffect } from "./ohos.graphics.uiEffect"
 import { text_FontDescriptor_serializer, text } from "./ohos.graphics.text"
 import { font_UIFontConfig_serializer, font } from "./ohos.font"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { BorderStyle, Curve, PlayMode } from "./../component/enums"
+import { BorderStyle, PlayMode } from "./../component/enums"
+import { curves } from "./ohos.curves"
 import { CompatibleInitCallback, CompatibleComponentInfo, CompatibleUpdateCallback } from "./../component/interop"
-import { ExtendableComponent, LifeCycle, ExtendableComponentInternal } from "./../component/extendableComponent"
 import { UIContext } from "./ohos.arkui.UIContext"
 import { Size } from "./arkui.Graphics"
 import { pointer } from "./ohos.multimodalInput.pointer"
@@ -164,6 +165,19 @@ export class GlobalScope {
         const retval  = ArkUIGeneratedNativeModule._GlobalScope_px2vp(value)
         return retval
     }
+    public static applyStyles<T>(self: T, customStyles: CustomStyles): T {
+        const self_casted = self as (T)
+        const customStyles_casted = customStyles as (CustomStyles)
+        return GlobalScope.applyStyles_serialize(self_casted, customStyles_casted)
+    }
+    static applyStyles_serialize<T>(self: T, customStyles: CustomStyles): T {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.writeCustomObject("T", (self as Object))
+        thisSerializer.holdAndWriteCallback(customStyles)
+        const retval  = ArkUIGeneratedNativeModule._GlobalScope_applyStyles(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        throw new Error("Object deserialization is not implemented.")
+    }
     public static setAppBgColor(value: string): void {
         const value_casted = value as (string)
         GlobalScope.setAppBgColor_serialize(value_casted)
@@ -172,16 +186,24 @@ export class GlobalScope {
     static setAppBgColor_serialize(value: string): void {
         ArkUIGeneratedNativeModule._GlobalScope_setAppBgColor(value)
     }
-    public static compatibleComponent(init: CompatibleInitCallback, update: CompatibleUpdateCallback): void {
+    public static compatibleComponent(init: CompatibleInitCallback, update: CompatibleUpdateCallback, component: ExtendableComponent | undefined): void {
         const init_casted = init as (CompatibleInitCallback)
         const update_casted = update as (CompatibleUpdateCallback)
-        GlobalScope.compatibleComponent_serialize(init_casted, update_casted)
+        const component_casted = component as (ExtendableComponent | undefined)
+        GlobalScope.compatibleComponent_serialize(init_casted, update_casted, component_casted)
         return
     }
-    static compatibleComponent_serialize(init: CompatibleInitCallback, update: CompatibleUpdateCallback): void {
+    static compatibleComponent_serialize(init: CompatibleInitCallback, update: CompatibleUpdateCallback, component: ExtendableComponent | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         thisSerializer.holdAndWriteCallback(init)
         thisSerializer.holdAndWriteCallback(update)
+        let component_type : int32 = RuntimeType.UNDEFINED
+        component_type = runtimeType(component)
+        thisSerializer.writeInt8((component_type).toChar())
+        if ((component_type) != (RuntimeType.UNDEFINED)) {
+            const component_value  = component!
+            ExtendableComponent_serializer.write(thisSerializer, component_value)
+        }
         ArkUIGeneratedNativeModule._GlobalScope_compatibleComponent(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
@@ -219,6 +241,19 @@ export class GlobalScope {
         const retval  = ArkUIGeneratedNativeModule._GlobalScope_getCompatibleState(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         throw new Error("Object deserialization is not implemented.")
+    }
+    public static compatibleWrappedBuilder(builder: object, args: object): void {
+        const builder_casted = builder as (object)
+        const args_casted = args as (object)
+        GlobalScope.compatibleWrappedBuilder_serialize(builder_casted, args_casted)
+        return
+    }
+    static compatibleWrappedBuilder_serialize(builder: object, args: object): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.writeCustomObject("object", builder)
+        thisSerializer.writeCustomObject("object", args)
+        ArkUIGeneratedNativeModule._GlobalScope_compatibleWrappedBuilder(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
     }
     public static getRectangleById(id: string): ComponentInfo {
         const id_casted = id as (string)

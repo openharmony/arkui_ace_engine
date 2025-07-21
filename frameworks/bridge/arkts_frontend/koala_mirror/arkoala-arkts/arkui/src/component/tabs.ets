@@ -30,7 +30,6 @@ import { EdgeEffect, Color, PageFlipMode } from "./enums"
 import { AttributeModifier, UICommonBase, AttributeUpdater } from "./../handwritten"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
-import { CommonModifier, CommonModifier_serializer } from "./../generated/arkui.CommonModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
 export interface TabContentTransitionProxy {
     from: number
@@ -521,18 +520,6 @@ export class ArkTabsPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TabsAttribute_setBarBackgroundBlurStyle0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setBarBackgroundEffectAttribute(value: BackgroundEffectOptions | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            BackgroundEffectOptions_serializer.write(thisSerializer, value_value)
-        }
-        ArkUIGeneratedNativeModule._TabsAttribute_setBarBackgroundEffect(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
     setPageFlipModeAttribute(value: PageFlipMode | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
@@ -543,6 +530,18 @@ export class ArkTabsPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt32(TypeChecker.PageFlipMode_ToNumeric(value_value))
         }
         ArkUIGeneratedNativeModule._TabsAttribute_setPageFlipMode(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setBarBackgroundEffectAttribute(value: BackgroundEffectOptions | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8((value_type).toChar())
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
+            const value_value  = value!
+            BackgroundEffectOptions_serializer.write(thisSerializer, value_value)
+        }
+        ArkUIGeneratedNativeModule._TabsAttribute_setBarBackgroundEffect(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnContentWillChangeAttribute(value: OnTabsContentWillChangeCallback | undefined): void {
@@ -653,7 +652,6 @@ export interface TabsOptions {
     barPosition?: BarPosition;
     index?: number;
     controller?: TabsController;
-    barModifier?: CommonModifier;
 }
 export interface TabsAnimationEvent {
     currentOffset: number;
@@ -743,11 +741,11 @@ export interface TabsAttribute extends CommonMethod {
     barBackgroundBlurStyle(value: BlurStyle | undefined): this {
         throw new Error("Unimplemented method barBackgroundBlurStyle")
     }
-    barBackgroundEffect(value: BackgroundEffectOptions | undefined): this {
-        throw new Error("Unimplemented method barBackgroundEffect")
-    }
     pageFlipMode(value: PageFlipMode | undefined): this {
         throw new Error("Unimplemented method pageFlipMode")
+    }
+    barBackgroundEffect(value: BackgroundEffectOptions | undefined): this {
+        throw new Error("Unimplemented method barBackgroundEffect")
     }
     onContentWillChange(value: OnTabsContentWillChangeCallback | undefined): this {
         throw new Error("Unimplemented method onContentWillChange")
@@ -791,8 +789,8 @@ export class ArkTabsStyle extends ArkCommonMethodStyle implements TabsAttribute 
     barGridAlign_value?: BarGridColumnOptions | undefined
     customContentTransition_value?: TabsCustomContentTransitionCallback | undefined
     barBackgroundBlurStyle_value?: BlurStyle | undefined
-    barBackgroundEffect_value?: BackgroundEffectOptions | undefined
     pageFlipMode_value?: PageFlipMode | undefined
+    barBackgroundEffect_value?: BackgroundEffectOptions | undefined
     onContentWillChange_value?: OnTabsContentWillChangeCallback | undefined
     attributeModifier_value?: AttributeModifier<TabsAttribute> | AttributeModifier<CommonMethod> | undefined
     public vertical(value: boolean | undefined): this {
@@ -861,10 +859,10 @@ export class ArkTabsStyle extends ArkCommonMethodStyle implements TabsAttribute 
     public barBackgroundBlurStyle(value: BlurStyle | undefined): this {
         return this
     }
-    public barBackgroundEffect(value: BackgroundEffectOptions | undefined): this {
+    public pageFlipMode(value: PageFlipMode | undefined): this {
         return this
     }
-    public pageFlipMode(value: PageFlipMode | undefined): this {
+    public barBackgroundEffect(value: BackgroundEffectOptions | undefined): this {
         return this
     }
     public onContentWillChange(value: OnTabsContentWillChangeCallback | undefined): this {
@@ -931,10 +929,10 @@ export class ArkTabsStyle extends ArkCommonMethodStyle implements TabsAttribute 
             target.customContentTransition(this.customContentTransition_value!)
         if (this.barBackgroundBlurStyle_value !== undefined)
             target.barBackgroundBlurStyle(this.barBackgroundBlurStyle_value!)
-        if (this.barBackgroundEffect_value !== undefined)
-            target.barBackgroundEffect(this.barBackgroundEffect_value!)
         if (this.pageFlipMode_value !== undefined)
             target.pageFlipMode(this.pageFlipMode_value!)
+        if (this.barBackgroundEffect_value !== undefined)
+            target.barBackgroundEffect(this.barBackgroundEffect_value!)
         if (this.onContentWillChange_value !== undefined)
             target.onContentWillChange(this.onContentWillChange_value!)
     }
@@ -1132,18 +1130,18 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements TabsAt
         }
         return this
     }
-    public barBackgroundEffect(value: BackgroundEffectOptions | undefined): this {
-        if (this.checkPriority("barBackgroundEffect")) {
-            const value_casted = value as (BackgroundEffectOptions | undefined)
-            this.getPeer()?.setBarBackgroundEffectAttribute(value_casted)
-            return this
-        }
-        return this
-    }
     public pageFlipMode(value: PageFlipMode | undefined): this {
         if (this.checkPriority("pageFlipMode")) {
             const value_casted = value as (PageFlipMode | undefined)
             this.getPeer()?.setPageFlipModeAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public barBackgroundEffect(value: BackgroundEffectOptions | undefined): this {
+        if (this.checkPriority("barBackgroundEffect")) {
+            const value_casted = value as (BackgroundEffectOptions | undefined)
+            this.getPeer()?.setBarBackgroundEffectAttribute(value_casted)
             return this
         }
         return this
@@ -1291,10 +1289,10 @@ export class ArkTabsSet extends ArkCommonMethodSet implements TabsAttribute {
     _barBackgroundBlurStyle_flag?: boolean
     _barBackgroundBlurStyle0_value?: BlurStyle | undefined
     _barBackgroundBlurStyle1_value?: BackgroundBlurStyleOptions | undefined
-    _barBackgroundEffect_flag?: boolean
-    _barBackgroundEffect0_value?: BackgroundEffectOptions | undefined
     _pageFlipMode_flag?: boolean
     _pageFlipMode0_value?: PageFlipMode | undefined
+    _barBackgroundEffect_flag?: boolean
+    _barBackgroundEffect0_value?: BackgroundEffectOptions | undefined
     _onContentWillChange_flag?: boolean
     _onContentWillChange0_value?: OnTabsContentWillChangeCallback | undefined
     _barMode_flag?: boolean
@@ -1350,10 +1348,10 @@ export class ArkTabsSet extends ArkCommonMethodSet implements TabsAttribute {
             component.customContentTransition((this._customContentTransition0_value as TabsCustomContentTransitionCallback | undefined))
         if (this._barBackgroundBlurStyle_flag)
             component.barBackgroundBlurStyle((this._barBackgroundBlurStyle0_value as BlurStyle | undefined), (this._barBackgroundBlurStyle1_value as BackgroundBlurStyleOptions | undefined))
-        if (this._barBackgroundEffect_flag)
-            component.barBackgroundEffect((this._barBackgroundEffect0_value as BackgroundEffectOptions | undefined))
         if (this._pageFlipMode_flag)
             component.pageFlipMode((this._pageFlipMode0_value as PageFlipMode | undefined))
+        if (this._barBackgroundEffect_flag)
+            component.barBackgroundEffect((this._barBackgroundEffect0_value as BackgroundEffectOptions | undefined))
         if (this._onContentWillChange_flag)
             component.onContentWillChange((this._onContentWillChange0_value as OnTabsContentWillChangeCallback | undefined))
         if (this._barMode_flag)
@@ -1472,14 +1470,14 @@ export class ArkTabsSet extends ArkCommonMethodSet implements TabsAttribute {
         this._barBackgroundBlurStyle1_value = options
         return this
     }
-    public barBackgroundEffect(value: BackgroundEffectOptions | undefined): this {
-        this._barBackgroundEffect_flag = true
-        this._barBackgroundEffect0_value = value
-        return this
-    }
     public pageFlipMode(value: PageFlipMode | undefined): this {
         this._pageFlipMode_flag = true
         this._pageFlipMode0_value = value
+        return this
+    }
+    public barBackgroundEffect(value: BackgroundEffectOptions | undefined): this {
+        this._barBackgroundEffect_flag = true
+        this._barBackgroundEffect0_value = value
         return this
     }
     public onContentWillChange(value: OnTabsContentWillChangeCallback | undefined): this {
@@ -1612,14 +1610,6 @@ export class TabsOptions_serializer {
             const value_controller_value  = value_controller!
             TabsController_serializer.write(valueSerializer, value_controller_value)
         }
-        const value_barModifier  = value.barModifier
-        let value_barModifier_type : int32 = RuntimeType.UNDEFINED
-        value_barModifier_type = runtimeType(value_barModifier)
-        valueSerializer.writeInt8((value_barModifier_type).toChar())
-        if ((value_barModifier_type) != (RuntimeType.UNDEFINED)) {
-            const value_barModifier_value  = value_barModifier!
-            CommonModifier_serializer.write(valueSerializer, value_barModifier_value)
-        }
     }
     public static read(buffer: DeserializerBase): TabsOptions {
         let valueDeserializer : DeserializerBase = buffer
@@ -1644,14 +1634,7 @@ export class TabsOptions_serializer {
             controller_buf = (TabsController_serializer.read(valueDeserializer) as TabsController)
         }
         const controller_result : TabsController | undefined = controller_buf
-        const barModifier_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let barModifier_buf : CommonModifier | undefined
-        if ((barModifier_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            barModifier_buf = CommonModifier_serializer.read(valueDeserializer)
-        }
-        const barModifier_result : CommonModifier | undefined = barModifier_buf
-        let value : TabsOptions = ({barPosition: barPosition_result, index: index_result, controller: controller_result, barModifier: barModifier_result} as TabsOptions)
+        let value : TabsOptions = ({barPosition: barPosition_result, index: index_result, controller: controller_result} as TabsOptions)
         return value
     }
 }

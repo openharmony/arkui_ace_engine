@@ -24,7 +24,8 @@ import { CallbackTransformer } from "./../CallbackTransformer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, ArkCommonMethodSet } from "./common"
-import { AnimationStatus, Curve, FillMode, PlayMode } from "./enums"
+import { AnimationStatus, FillMode, PlayMode } from "./enums"
+import { curves } from "./../generated/ohos.curves"
 import { AttributeModifier, UICommonBase, AttributeUpdater } from "./../handwritten"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
@@ -163,14 +164,14 @@ export class ArkAnimatorPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._AnimatorAttribute_setDuration(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setCurveAttribute(value: Curve | undefined): void {
+    setCurveAttribute(value: curves.Curve | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
         if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = (value as Curve)
-            thisSerializer.writeInt32(TypeChecker.Curve_ToNumeric(value_value))
+            const value_value  = (value as curves.Curve)
+            thisSerializer.writeInt32(TypeChecker.curves_Curve_ToNumeric(value_value))
         }
         ArkUIGeneratedNativeModule._AnimatorAttribute_setCurve(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -331,7 +332,7 @@ export interface AnimatorAttribute extends CommonMethod {
     duration(value: number | undefined): this {
         throw new Error("Unimplemented method duration")
     }
-    curve(value: Curve | undefined): this {
+    curve(value: curves.Curve | undefined): this {
         throw new Error("Unimplemented method curve")
     }
     delay(value: number | undefined): this {
@@ -374,7 +375,7 @@ export interface AnimatorAttribute extends CommonMethod {
 export class ArkAnimatorStyle extends ArkCommonMethodStyle implements AnimatorAttribute {
     state_value?: AnimationStatus | undefined
     duration_value?: number | undefined
-    curve_value?: Curve | undefined
+    curve_value?: curves.Curve | undefined
     delay_value?: number | undefined
     fillMode_value?: FillMode | undefined
     iterations_value?: number | undefined
@@ -393,7 +394,7 @@ export class ArkAnimatorStyle extends ArkCommonMethodStyle implements AnimatorAt
     public duration(value: number | undefined): this {
         return this
     }
-    public curve(value: Curve | undefined): this {
+    public curve(value: curves.Curve | undefined): this {
         return this
     }
     public delay(value: number | undefined): this {
@@ -493,9 +494,9 @@ export class ArkAnimatorComponent extends ArkCommonMethodComponent implements An
         }
         return this
     }
-    public curve(value: Curve | undefined): this {
+    public curve(value: curves.Curve | undefined): this {
         if (this.checkPriority("curve")) {
-            const value_casted = value as (Curve | undefined)
+            const value_casted = value as (curves.Curve | undefined)
             this.getPeer()?.setCurveAttribute(value_casted)
             return this
         }
@@ -649,7 +650,7 @@ export class ArkAnimatorSet extends ArkCommonMethodSet implements AnimatorAttrib
     _duration_flag?: boolean
     _duration0_value?: number | undefined
     _curve_flag?: boolean
-    _curve0_value?: Curve | undefined
+    _curve0_value?: curves.Curve | undefined
     _delay_flag?: boolean
     _delay0_value?: number | undefined
     _fillMode_flag?: boolean
@@ -678,7 +679,7 @@ export class ArkAnimatorSet extends ArkCommonMethodSet implements AnimatorAttrib
         if (this._duration_flag)
             component.duration((this._duration0_value as number | undefined))
         if (this._curve_flag)
-            component.curve((this._curve0_value as Curve | undefined))
+            component.curve((this._curve0_value as curves.Curve | undefined))
         if (this._delay_flag)
             component.delay((this._delay0_value as number | undefined))
         if (this._fillMode_flag)
@@ -712,7 +713,7 @@ export class ArkAnimatorSet extends ArkCommonMethodSet implements AnimatorAttrib
         this._duration0_value = value
         return this
     }
-    public curve(value: Curve | undefined): this {
+    public curve(value: curves.Curve | undefined): this {
         this._curve_flag = true
         this._curve0_value = value
         return this

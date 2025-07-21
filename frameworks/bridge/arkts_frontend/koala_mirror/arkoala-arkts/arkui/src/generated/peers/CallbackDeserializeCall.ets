@@ -21,12 +21,11 @@ import { image_PixelMap_serializer, image } from "./../ohos.multimedia.image"
 import { ButtonConfiguration_serializer, ButtonConfiguration, ButtonTriggerClickCallback } from "./../../component/button"
 import { Area_serializer, ConstraintSizeOptions_serializer, SizeOptions_serializer, Area, ConstraintSizeOptions, ResourceStr, SizeOptions, VoidCallback } from "./../../component/units"
 import { TextMenuItem_serializer, DeleteValue_serializer, EditableTextChangeValue_serializer, InsertValue_serializer, StyledStringChangeValue_serializer, TextRange_serializer, PreviewText_serializer, TextChangeOptions_serializer, TextMenuItem, DeleteValue, EditableTextChangeValue, InsertValue, StyledStringChangeValue, TextRange, EditableTextOnChangeCallback, PreviewText, TextChangeOptions, OnCreateMenuCallback, OnDidChangeCallback, OnMenuItemClickCallback } from "./../../component/textCommon"
-import { CalendarRequestedData_serializer, CalendarSelectedDate_serializer, CalendarRequestedData, CalendarSelectedDate } from "./../../component/calendar"
 import { CompatibleComponentInfo_serializer, CompatibleComponentInfo, CompatibleInitCallback, CompatibleUpdateCallback } from "./../../component/interop"
 import { ComputedBarAttribute_serializer, ComputedBarAttribute } from "./../../component/grid"
 import { CopyEvent_serializer, CutEvent_serializer, RichEditorChangeValue_serializer, RichEditorDeleteValue_serializer, RichEditorInsertValue_serializer, RichEditorRange_serializer, RichEditorSelection_serializer, RichEditorTextSpanResult_serializer, PasteEvent_serializer, CopyEvent, CutEvent, RichEditorChangeValue, RichEditorDeleteValue, RichEditorInsertValue, RichEditorRange, RichEditorSelection, RichEditorTextSpanResult, PasteEvent, MenuCallback, MenuOnAppearCallback, OnHoverCallback, PasteEventCallback, SubmitCallback } from "./../../component/richEditor"
 import { CustomSpanMeasureInfo_serializer, CustomSpanMetrics_serializer, CustomSpanDrawInfo_serializer, StyledString_serializer, UserDataSpan_serializer, CustomSpanMeasureInfo, CustomSpanMetrics, CustomSpanDrawInfo, StyledString, UserDataSpan, StyledStringMarshallCallback, StyledStringUnmarshallCallback } from "./../../component/styledString"
-import { DismissDialogAction_serializer, DismissDialogAction } from "./../../component/alertDialog"
+import { DismissDialogAction_serializer, DismissDialogAction } from "./../../component/actionSheet"
 import { DrawContext_serializer, DrawContext } from "./../arkui.Graphics"
 import { ErrorInformation_serializer, FormCallbackInfo_serializer, ErrorInformation, FormCallbackInfo } from "./../../component/formComponent"
 import { FullscreenInfo_serializer, PlaybackInfo_serializer, PreparedInfo_serializer, FullscreenInfo, PlaybackInfo, PreparedInfo } from "./../../component/video"
@@ -67,6 +66,9 @@ import { CallbackKind } from "./CallbackKind"
 import { int32, float32, int64 } from "@koalaui/common"
 import { ResourceHolder, KInt, KStringPtr, wrapSystemCallback, DeserializerBase, SerializerBase, CallbackResource, InteropNativeModule, KPointer, RuntimeType, KSerializerBuffer, NativeBuffer, runtimeType } from "@koalaui/interop"
 import { CallbackTransformer } from "./../../CallbackTransformer"
+import { LocationButtonOnClickResult } from "./../../component/locationButton"
+import { PasteButtonOnClickResult } from "./../../component/pasteButton"
+import { SaveButtonOnClickResult } from "./../../component/saveButton"
 import { HitTestMode, Edge, ScrollSource } from "./../../component/enums"
 import { MarqueeState } from "./../../component/text"
 import { CustomBuilder, PageMapBuilder } from "./../../component/builder"
@@ -75,11 +77,8 @@ import { SwipeActionState } from "./../../component/listItem"
 import { Context_getGroupDir_Callback } from "./../ohos.app.ability.common"
 import { GetItemMainSizeByIndex } from "./../../component/waterFlow"
 import { OnAlphabetIndexerPopupSelectCallback, OnAlphabetIndexerRequestPopupDataCallback, OnAlphabetIndexerSelectCallback } from "./../../component/alphabetIndexer"
-import { OnLazyLoadingFunc, OnTotalCountFunc } from "./../../component/repeat"
 import { OnLinearIndicatorChangeCallback } from "./../../component/linearindicator"
 import { PageTransitionCallback, RouteType } from "./../../component/pageTransition"
-import { PasteButtonCallback, PasteButtonOnClickResult } from "./../../component/pasteButton"
-import { SaveButtonCallback, SaveButtonOnClickResult } from "./../../component/saveButton"
 import { SearchSubmitCallback } from "./../../component/search"
 import { SearchValueCallback } from "./../searchOps"
 import { TextAreaSubmitCallback } from "./../../component/textArea"
@@ -238,17 +237,26 @@ export function deserializeAndCallCallback_Buffer_Void(thisDeserializer: Deseria
     let value : NativeBuffer = (thisDeserializer.readBuffer() as NativeBuffer)
     _call(value)
 }
-export function deserializeAndCallCallback_CalendarRequestedData_Void(thisDeserializer: DeserializerBase): void {
+export function deserializeAndCallCallback_ClickEvent_LocationButtonOnClickResult_Void(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
-    const _call  = (ResourceHolder.instance().get(_resourceId) as ((event: CalendarRequestedData) => void))
-    let event : CalendarRequestedData = CalendarRequestedData_serializer.read(thisDeserializer)
-    _call(event)
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((event: ClickEvent,result: LocationButtonOnClickResult) => void))
+    let event : ClickEvent = (ClickEvent_serializer.read(thisDeserializer) as ClickEvent)
+    let result : LocationButtonOnClickResult = TypeChecker.LocationButtonOnClickResult_FromNumeric(thisDeserializer.readInt32())
+    _call(event, result)
 }
-export function deserializeAndCallCallback_CalendarSelectedDate_Void(thisDeserializer: DeserializerBase): void {
+export function deserializeAndCallCallback_ClickEvent_PasteButtonOnClickResult_Void(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
-    const _call  = (ResourceHolder.instance().get(_resourceId) as ((event: CalendarSelectedDate) => void))
-    let event : CalendarSelectedDate = CalendarSelectedDate_serializer.read(thisDeserializer)
-    _call(event)
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((event: ClickEvent,result: PasteButtonOnClickResult) => void))
+    let event : ClickEvent = (ClickEvent_serializer.read(thisDeserializer) as ClickEvent)
+    let result : PasteButtonOnClickResult = TypeChecker.PasteButtonOnClickResult_FromNumeric(thisDeserializer.readInt32())
+    _call(event, result)
+}
+export function deserializeAndCallCallback_ClickEvent_SaveButtonOnClickResult_Void(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((event: ClickEvent,result: SaveButtonOnClickResult) => void))
+    let event : ClickEvent = (ClickEvent_serializer.read(thisDeserializer) as ClickEvent)
+    let result : SaveButtonOnClickResult = TypeChecker.SaveButtonOnClickResult_FromNumeric(thisDeserializer.readInt32())
+    _call(event, result)
 }
 export function deserializeAndCallCallback_ClickEvent_Void(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
@@ -370,13 +378,13 @@ export function deserializeAndCallCallback_DismissContentCoverAction_Void(thisDe
 export function deserializeAndCallCallback_DismissDialogAction_Void(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: DismissDialogAction) => void))
-    let value0 : DismissDialogAction = DismissDialogAction_serializer.read(thisDeserializer)
+    let value0 : DismissDialogAction = (DismissDialogAction_serializer.read(thisDeserializer) as DismissDialogAction)
     _call(value0)
 }
 export function deserializeAndCallCallback_DismissPopupAction_Void(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: DismissPopupAction) => void))
-    let value0 : DismissPopupAction = DismissPopupAction_serializer.read(thisDeserializer)
+    let value0 : DismissPopupAction = (DismissPopupAction_serializer.read(thisDeserializer) as DismissPopupAction)
     _call(value0)
 }
 export function deserializeAndCallCallback_DismissSheetAction_Void(thisDeserializer: DeserializerBase): void {
@@ -2607,12 +2615,6 @@ export function deserializeAndCallOnLargestContentfulPaintCallback(thisDeseriali
     let largestContentfulPaint : LargestContentfulPaint = LargestContentfulPaint_serializer.read(thisDeserializer)
     _call(largestContentfulPaint)
 }
-export function deserializeAndCallOnLazyLoadingFunc(thisDeserializer: DeserializerBase): void {
-    const _resourceId : int32 = thisDeserializer.readInt32()
-    const _call  = (ResourceHolder.instance().get(_resourceId) as OnLazyLoadingFunc)
-    let index : number = (thisDeserializer.readNumber() as number)
-    _call(index)
-}
 export function deserializeAndCallOnLinearIndicatorChangeCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as OnLinearIndicatorChangeCallback)
@@ -2902,24 +2904,6 @@ export function deserializeAndCallOnTimePickerChangeCallback(thisDeserializer: D
     let result : TimePickerResult = TimePickerResult_serializer.read(thisDeserializer)
     _call(result)
 }
-export function deserializeAndCallOnTotalCountFunc(thisDeserializer: DeserializerBase): void {
-    const _resourceId : int32 = thisDeserializer.readInt32()
-    const _call  = (ResourceHolder.instance().get(_resourceId) as OnTotalCountFunc)
-    const _continuation_buf_resource : CallbackResource = thisDeserializer.readCallbackResource()
-    const _continuation_buf_call : KPointer = thisDeserializer.readPointer()
-    const _continuation_buf_callSync : KPointer = thisDeserializer.readPointer()
-    let _continuation : ((value: number) => void) = (value: number):void => { 
-    const _continuation_buf_argsSerializer : SerializerBase = SerializerBase.hold();
-    _continuation_buf_argsSerializer.writeInt32(_continuation_buf_resource.resourceId);
-    _continuation_buf_argsSerializer.writePointer(_continuation_buf_call);
-    _continuation_buf_argsSerializer.writePointer(_continuation_buf_callSync);
-    _continuation_buf_argsSerializer.writeNumber(value);
-    InteropNativeModule._CallCallbackSync(36519084, _continuation_buf_argsSerializer.asBuffer(), _continuation_buf_argsSerializer.length());
-    _continuation_buf_argsSerializer.release();
-    return; }
-    const _callResult  = _call()
-    _continuation(_callResult)
-}
 export function deserializeAndCallOnViewportFitChangedCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as OnViewportFitChangedCallback)
@@ -2972,20 +2956,6 @@ export function deserializeAndCallPageTransitionCallback(thisDeserializer: Deser
     let type : RouteType = TypeChecker.RouteType_FromNumeric(thisDeserializer.readInt32())
     let progress : number = (thisDeserializer.readNumber() as number)
     _call(type, progress)
-}
-export function deserializeAndCallPasteButtonCallback(thisDeserializer: DeserializerBase): void {
-    const _resourceId : int32 = thisDeserializer.readInt32()
-    const _call  = (ResourceHolder.instance().get(_resourceId) as PasteButtonCallback)
-    let event : ClickEvent = (ClickEvent_serializer.read(thisDeserializer) as ClickEvent)
-    let result : PasteButtonOnClickResult = TypeChecker.PasteButtonOnClickResult_FromNumeric(thisDeserializer.readInt32())
-    const error_buf_runtimeType  = thisDeserializer.readInt8().toInt()
-    let error_buf : BusinessError | undefined
-    if ((error_buf_runtimeType) != (RuntimeType.UNDEFINED))
-    {
-        error_buf = BusinessError_serializer.read(thisDeserializer)
-    }
-    let error : BusinessError | undefined = error_buf
-    _call(event, result, error)
 }
 export function deserializeAndCallPasteEventCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
@@ -3106,20 +3076,6 @@ export function deserializeAndCallReuseIdCallback(thisDeserializer: Deserializer
     return; }
     const _callResult  = _call()
     _continuation(_callResult)
-}
-export function deserializeAndCallSaveButtonCallback(thisDeserializer: DeserializerBase): void {
-    const _resourceId : int32 = thisDeserializer.readInt32()
-    const _call  = (ResourceHolder.instance().get(_resourceId) as SaveButtonCallback)
-    let event : ClickEvent = (ClickEvent_serializer.read(thisDeserializer) as ClickEvent)
-    let result : SaveButtonOnClickResult = TypeChecker.SaveButtonOnClickResult_FromNumeric(thisDeserializer.readInt32())
-    const error_buf_runtimeType  = thisDeserializer.readInt8().toInt()
-    let error_buf : BusinessError | undefined
-    if ((error_buf_runtimeType) != (RuntimeType.UNDEFINED))
-    {
-        error_buf = BusinessError_serializer.read(thisDeserializer)
-    }
-    let error : BusinessError | undefined = error_buf
-    _call(event, result, error)
 }
 export function deserializeAndCallScrollOnScrollCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
@@ -3599,8 +3555,9 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.Kind_Callback_Boolean_HoverEvent_Void: return deserializeAndCallCallback_Boolean_HoverEvent_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_Boolean_Void: return deserializeAndCallCallback_Boolean_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_Buffer_Void: return deserializeAndCallCallback_Buffer_Void(thisDeserializer);
-        case CallbackKind.Kind_Callback_CalendarRequestedData_Void: return deserializeAndCallCallback_CalendarRequestedData_Void(thisDeserializer);
-        case CallbackKind.Kind_Callback_CalendarSelectedDate_Void: return deserializeAndCallCallback_CalendarSelectedDate_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_ClickEvent_LocationButtonOnClickResult_Void: return deserializeAndCallCallback_ClickEvent_LocationButtonOnClickResult_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_ClickEvent_PasteButtonOnClickResult_Void: return deserializeAndCallCallback_ClickEvent_PasteButtonOnClickResult_Void(thisDeserializer);
+        case CallbackKind.Kind_Callback_ClickEvent_SaveButtonOnClickResult_Void: return deserializeAndCallCallback_ClickEvent_SaveButtonOnClickResult_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_ClickEvent_Void: return deserializeAndCallCallback_ClickEvent_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_CompatibleComponentInfo_Void: return deserializeAndCallCallback_CompatibleComponentInfo_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_ComputedBarAttribute_Void: return deserializeAndCallCallback_ComputedBarAttribute_Void(thisDeserializer);
@@ -3811,7 +3768,6 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.Kind_OnIntelligentTrackingPreventionCallback: return deserializeAndCallOnIntelligentTrackingPreventionCallback(thisDeserializer);
         case CallbackKind.Kind_OnItemDragStartCallback: return deserializeAndCallOnItemDragStartCallback(thisDeserializer);
         case CallbackKind.Kind_OnLargestContentfulPaintCallback: return deserializeAndCallOnLargestContentfulPaintCallback(thisDeserializer);
-        case CallbackKind.Kind_OnLazyLoadingFunc: return deserializeAndCallOnLazyLoadingFunc(thisDeserializer);
         case CallbackKind.Kind_OnLinearIndicatorChangeCallback: return deserializeAndCallOnLinearIndicatorChangeCallback(thisDeserializer);
         case CallbackKind.Kind_OnMenuItemClickCallback: return deserializeAndCallOnMenuItemClickCallback(thisDeserializer);
         case CallbackKind.Kind_OnMoveHandler: return deserializeAndCallOnMoveHandler(thisDeserializer);
@@ -3842,12 +3798,10 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.Kind_OnTextPickerChangeCallback: return deserializeAndCallOnTextPickerChangeCallback(thisDeserializer);
         case CallbackKind.Kind_OnTextSelectionChangeCallback: return deserializeAndCallOnTextSelectionChangeCallback(thisDeserializer);
         case CallbackKind.Kind_OnTimePickerChangeCallback: return deserializeAndCallOnTimePickerChangeCallback(thisDeserializer);
-        case CallbackKind.Kind_OnTotalCountFunc: return deserializeAndCallOnTotalCountFunc(thisDeserializer);
         case CallbackKind.Kind_OnViewportFitChangedCallback: return deserializeAndCallOnViewportFitChangedCallback(thisDeserializer);
         case CallbackKind.Kind_OnWillScrollCallback: return deserializeAndCallOnWillScrollCallback(thisDeserializer);
         case CallbackKind.Kind_PageMapBuilder: return deserializeAndCallPageMapBuilder(thisDeserializer);
         case CallbackKind.Kind_PageTransitionCallback: return deserializeAndCallPageTransitionCallback(thisDeserializer);
-        case CallbackKind.Kind_PasteButtonCallback: return deserializeAndCallPasteButtonCallback(thisDeserializer);
         case CallbackKind.Kind_PasteEventCallback: return deserializeAndCallPasteEventCallback(thisDeserializer);
         case CallbackKind.Kind_PluginErrorCallback: return deserializeAndCallPluginErrorCallback(thisDeserializer);
         case CallbackKind.Kind_PopupStateChangeCallback: return deserializeAndCallPopupStateChangeCallback(thisDeserializer);
@@ -3858,7 +3812,6 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.Kind_RestrictedWorker_onexit_Callback: return deserializeAndCallRestrictedWorker_onexit_Callback(thisDeserializer);
         case CallbackKind.Kind_RestrictedWorker_onmessage_Callback: return deserializeAndCallRestrictedWorker_onmessage_Callback(thisDeserializer);
         case CallbackKind.Kind_ReuseIdCallback: return deserializeAndCallReuseIdCallback(thisDeserializer);
-        case CallbackKind.Kind_SaveButtonCallback: return deserializeAndCallSaveButtonCallback(thisDeserializer);
         case CallbackKind.Kind_ScrollOnScrollCallback: return deserializeAndCallScrollOnScrollCallback(thisDeserializer);
         case CallbackKind.Kind_ScrollOnWillScrollCallback: return deserializeAndCallScrollOnWillScrollCallback(thisDeserializer);
         case CallbackKind.Kind_SearchSubmitCallback: return deserializeAndCallSearchSubmitCallback(thisDeserializer);

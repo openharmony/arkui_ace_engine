@@ -18,8 +18,8 @@
 
 import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { Resource_serializer, Resource } from "./../generated/resource"
-import { RectResult_serializer, RectResult, NestedScrollOptions_serializer, EdgeEffectOptions_serializer, ArkScrollableCommonMethodPeer, ScrollableCommonMethod, NestedScrollOptions, CommonMethod, EdgeEffectOptions, ICurve, ArkScrollableCommonMethodComponent, ArkScrollableCommonMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, ArkScrollableCommonMethodSet, ArkCommonMethodSet, ICurve_serializer } from "./common"
-import { Edge, ScrollSource, BarState, Color, EdgeEffect, Curve } from "./enums"
+import { RectResult_serializer, RectResult, NestedScrollOptions_serializer, EdgeEffectOptions_serializer, ArkScrollableCommonMethodPeer, ScrollableCommonMethod, NestedScrollOptions, CommonMethod, EdgeEffectOptions, ArkScrollableCommonMethodComponent, ArkScrollableCommonMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, ArkScrollableCommonMethodSet, ArkCommonMethodSet } from "./common"
+import { Edge, ScrollSource, BarState, Color, EdgeEffect } from "./enums"
 import { Length, VoidCallback, Dimension } from "./units"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
@@ -32,6 +32,7 @@ import { AttributeModifier, UICommonBase, AttributeUpdater } from "./../handwrit
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
 import { LengthMetrics, LengthMetrics_serializer } from "./../generated/arkui.Graphics"
+import { curves, curves_ICurve_serializer } from "./../generated/ohos.curves"
 import { NodeAttach, remember } from "@koalaui/runtime"
 export class ScrollerInternal {
     public static fromPtr(ptr: KPointer): Scroller {
@@ -518,7 +519,7 @@ export interface ScrollToIndexOptions {
 }
 export interface ScrollAnimationOptions {
     duration?: number;
-    curve?: Curve | ICurve;
+    curve?: curves.Curve | curves.ICurve;
     canOverScroll?: boolean;
 }
 export interface OffsetOptions {
@@ -1120,15 +1121,15 @@ export class ScrollAnimationOptions_serializer {
             const value_curve_value  = value_curve!
             let value_curve_value_type : int32 = RuntimeType.UNDEFINED
             value_curve_value_type = runtimeType(value_curve_value)
-            if (TypeChecker.isCurve(value_curve_value)) {
+            if (TypeChecker.iscurves_Curve(value_curve_value)) {
                 valueSerializer.writeInt8((0).toChar())
-                const value_curve_value_0  = value_curve_value as Curve
-                valueSerializer.writeInt32(TypeChecker.Curve_ToNumeric(value_curve_value_0))
+                const value_curve_value_0  = value_curve_value as curves.Curve
+                valueSerializer.writeInt32(TypeChecker.curves_Curve_ToNumeric(value_curve_value_0))
             }
             else if (RuntimeType.OBJECT == value_curve_value_type) {
                 valueSerializer.writeInt8((1).toChar())
-                const value_curve_value_1  = value_curve_value as ICurve
-                ICurve_serializer.write(valueSerializer, value_curve_value_1)
+                const value_curve_value_1  = value_curve_value as curves.ICurve
+                curves_ICurve_serializer.write(valueSerializer, value_curve_value_1)
             }
         }
         const value_canOverScroll  = value.canOverScroll
@@ -1150,23 +1151,23 @@ export class ScrollAnimationOptions_serializer {
         }
         const duration_result : number | undefined = duration_buf
         const curve_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let curve_buf : Curve | ICurve | undefined
+        let curve_buf : curves.Curve | curves.ICurve | undefined
         if ((curve_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             const curve_buf__selector : int32 = valueDeserializer.readInt8()
-            let curve_buf_ : Curve | ICurve | undefined
+            let curve_buf_ : curves.Curve | curves.ICurve | undefined
             if (curve_buf__selector == (0).toChar()) {
-                curve_buf_ = TypeChecker.Curve_FromNumeric(valueDeserializer.readInt32())
+                curve_buf_ = TypeChecker.curves_Curve_FromNumeric(valueDeserializer.readInt32())
             }
             else if (curve_buf__selector == (1).toChar()) {
-                curve_buf_ = (ICurve_serializer.read(valueDeserializer) as ICurve)
+                curve_buf_ = (curves_ICurve_serializer.read(valueDeserializer) as curves.ICurve)
             }
             else {
                 throw new Error("One of the branches for curve_buf_ has to be chosen through deserialisation.")
             }
-            curve_buf = (curve_buf_ as Curve | ICurve)
+            curve_buf = (curve_buf_ as curves.Curve | curves.ICurve)
         }
-        const curve_result : Curve | ICurve | undefined = curve_buf
+        const curve_result : curves.Curve | curves.ICurve | undefined = curve_buf
         const canOverScroll_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let canOverScroll_buf : boolean | undefined
         if ((canOverScroll_buf_runtimeType) != (RuntimeType.UNDEFINED))

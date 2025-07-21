@@ -785,14 +785,25 @@ export class ArkSearchPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SearchAttribute_setKeyboardAppearance(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setSearchButtonAttribute(value: string | undefined, option?: SearchButtonOptions): void {
+    setSearchButtonAttribute(value: ResourceStr | undefined, option?: SearchButtonOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
         if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
-            thisSerializer.writeString(value_value)
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (RuntimeType.STRING == value_value_type) {
+                thisSerializer.writeInt8((0).toChar())
+                const value_value_0  = value_value as string
+                thisSerializer.writeString(value_value_0)
+            }
+            else if (RuntimeType.OBJECT == value_value_type) {
+                thisSerializer.writeInt8((1).toChar())
+                const value_value_1  = value_value as Resource
+                Resource_serializer.write(thisSerializer, value_value_1)
+            }
         }
         let option_type : int32 = RuntimeType.UNDEFINED
         option_type = runtimeType(option)
@@ -1031,7 +1042,7 @@ export interface SearchAttribute extends CommonMethod {
     keyboardAppearance(value: KeyboardAppearance | undefined): this {
         throw new Error("Unimplemented method keyboardAppearance")
     }
-    searchButton(value: string | undefined, option?: SearchButtonOptions): this {
+    searchButton(value: ResourceStr | undefined, option?: SearchButtonOptions): this {
         throw new Error("Unimplemented method searchButton")
     }
     inputFilter(value: ResourceStr | undefined, error?: ((value0: string) => void)): this {
@@ -1225,7 +1236,7 @@ export class ArkSearchStyle extends ArkCommonMethodStyle implements SearchAttrib
     public keyboardAppearance(value: KeyboardAppearance | undefined): this {
         return this
     }
-    public searchButton(value: string | undefined, option?: SearchButtonOptions): this {
+    public searchButton(value: ResourceStr | undefined, option?: SearchButtonOptions): this {
         return this
     }
     public inputFilter(value: ResourceStr | undefined, error?: ((value0: string) => void)): this {
@@ -1697,9 +1708,9 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements Sear
         }
         return this
     }
-    public searchButton(value: string | undefined, option?: SearchButtonOptions): this {
+    public searchButton(value: ResourceStr | undefined, option?: SearchButtonOptions): this {
         if (this.checkPriority("searchButton")) {
-            const value_casted = value as (string | undefined)
+            const value_casted = value as (ResourceStr | undefined)
             const option_casted = option as (SearchButtonOptions | undefined)
             this.getPeer()?.setSearchButtonAttribute(value_casted, option_casted)
             return this
@@ -1876,7 +1887,7 @@ export class ArkSearchSet extends ArkCommonMethodSet implements SearchAttribute 
     _keyboardAppearance_flag?: boolean
     _keyboardAppearance0_value?: KeyboardAppearance | undefined
     _searchButton_flag?: boolean
-    _searchButton0_value?: string | undefined
+    _searchButton0_value?: ResourceStr | undefined
     _searchButton1_value?: SearchButtonOptions | undefined
     _inputFilter_flag?: boolean
     _inputFilter0_value?: ResourceStr | undefined
@@ -1976,7 +1987,7 @@ export class ArkSearchSet extends ArkCommonMethodSet implements SearchAttribute 
         if (this._keyboardAppearance_flag)
             component.keyboardAppearance((this._keyboardAppearance0_value as KeyboardAppearance | undefined))
         if (this._searchButton_flag)
-            component.searchButton((this._searchButton0_value as string | undefined), (this._searchButton1_value as SearchButtonOptions | undefined))
+            component.searchButton((this._searchButton0_value as ResourceStr | undefined), (this._searchButton1_value as SearchButtonOptions | undefined))
         if (this._inputFilter_flag)
             component.inputFilter((this._inputFilter0_value as ResourceStr | undefined), (this._inputFilter1_value as ((value0: string) => void) | undefined))
         if (this._customKeyboard_flag)
@@ -2202,7 +2213,7 @@ export class ArkSearchSet extends ArkCommonMethodSet implements SearchAttribute 
         this._keyboardAppearance0_value = value
         return this
     }
-    public searchButton(value: string | undefined, option?: SearchButtonOptions): this {
+    public searchButton(value: ResourceStr | undefined, option?: SearchButtonOptions): this {
         this._searchButton_flag = true
         this._searchButton0_value = value
         this._searchButton1_value = option

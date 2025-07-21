@@ -168,6 +168,18 @@ export class ArkFormComponentPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._FormComponentAttribute_setOnLoad(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setOnUpdateAttribute(value: ((value0: FormCallbackInfo) => void) | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8((value_type).toChar())
+        if ((value_type) != (RuntimeType.UNDEFINED)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._FormComponentAttribute_setOnUpdate(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export enum FormDimension {
     DIMENSION_1_2 = 0,
@@ -242,6 +254,9 @@ export interface FormComponentAttribute extends CommonMethod {
     onLoad(value: VoidCallback | undefined): this {
         throw new Error("Unimplemented method onLoad")
     }
+    onUpdate(value: ((value0: FormCallbackInfo) => void) | undefined): this {
+        throw new Error("Unimplemented method onUpdate")
+    }
     attributeModifier(value: AttributeModifier<FormComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Unimplemented method attributeModifier")
     }
@@ -257,6 +272,7 @@ export class ArkFormComponentStyle extends ArkCommonMethodStyle implements FormC
     onRouter_value?: ((value0: Object) => void) | undefined
     onUninstall_value?: ((value0: FormCallbackInfo) => void) | undefined
     onLoad_value?: VoidCallback | undefined
+    onUpdate_value?: ((value0: FormCallbackInfo) => void) | undefined
     attributeModifier_value?: AttributeModifier<FormComponentAttribute> | AttributeModifier<CommonMethod> | undefined
     public size(value: FormSize | undefined): this {
         return this
@@ -288,6 +304,9 @@ export class ArkFormComponentStyle extends ArkCommonMethodStyle implements FormC
     public onLoad(value: VoidCallback | undefined): this {
         return this
     }
+    public onUpdate(value: ((value0: FormCallbackInfo) => void) | undefined): this {
+        return this
+    }
     public attributeModifier(value: AttributeModifier<FormComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
     }
@@ -313,6 +332,8 @@ export class ArkFormComponentStyle extends ArkCommonMethodStyle implements FormC
             target.onUninstall(this.onUninstall_value!)
         if (this.onLoad_value !== undefined)
             target.onLoad(this.onLoad_value!)
+        if (this.onUpdate_value !== undefined)
+            target.onUpdate(this.onUpdate_value!)
     }
 }
 
@@ -408,6 +429,14 @@ export class ArkFormComponentComponent extends ArkCommonMethodComponent implemen
         }
         return this
     }
+    public onUpdate(value: ((value0: FormCallbackInfo) => void) | undefined): this {
+        if (this.checkPriority("onUpdate")) {
+            const value_casted = value as (((value0: FormCallbackInfo) => void) | undefined)
+            this.getPeer()?.setOnUpdateAttribute(value_casted)
+            return this
+        }
+        return this
+    }
     public attributeModifier(value: AttributeModifier<FormComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         this._modifier = value as AttributeModifier<CommonMethod>
         return this
@@ -483,6 +512,8 @@ export class ArkFormComponentSet extends ArkCommonMethodSet implements FormCompo
     _onUninstall0_value?: ((value0: FormCallbackInfo) => void) | undefined
     _onLoad_flag?: boolean
     _onLoad0_value?: VoidCallback | undefined
+    _onUpdate_flag?: boolean
+    _onUpdate0_value?: ((value0: FormCallbackInfo) => void) | undefined
     applyModifierPatch(component: FormComponentAttribute): void {
         if (this._size_flag)
             component.size((this._size0_value as FormSize | undefined))
@@ -504,6 +535,8 @@ export class ArkFormComponentSet extends ArkCommonMethodSet implements FormCompo
             component.onUninstall((this._onUninstall0_value as ((value0: FormCallbackInfo) => void) | undefined))
         if (this._onLoad_flag)
             component.onLoad((this._onLoad0_value as VoidCallback | undefined))
+        if (this._onUpdate_flag)
+            component.onUpdate((this._onUpdate0_value as ((value0: FormCallbackInfo) => void) | undefined))
     }
     public size(value: FormSize | undefined): this {
         this._size_flag = true
@@ -553,6 +586,11 @@ export class ArkFormComponentSet extends ArkCommonMethodSet implements FormCompo
     public onLoad(value: VoidCallback | undefined): this {
         this._onLoad_flag = true
         this._onLoad0_value = value
+        return this
+    }
+    public onUpdate(value: ((value0: FormCallbackInfo) => void) | undefined): this {
+        this._onUpdate_flag = true
+        this._onUpdate0_value = value
         return this
     }
     public attributeModifier(value: AttributeModifier<FormComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {

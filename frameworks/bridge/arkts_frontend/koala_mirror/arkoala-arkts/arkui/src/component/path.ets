@@ -51,45 +51,21 @@ export class ArkPathPeer extends ArkCommonShapeMethodPeer {
         ArkUIGeneratedNativeModule._PathInterface_setPathOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setCommandsAttribute(value: string | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            thisSerializer.writeString(value_value)
-        }
-        ArkUIGeneratedNativeModule._PathAttribute_setCommands(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
 }
 export interface PathOptions {
-    width?: number | string;
-    height?: number | string;
-    commands?: string;
 }
 export interface PathAttribute extends CommonShapeMethod {
-    commands(value: string | undefined): this {
-        throw new Error("Unimplemented method commands")
-    }
     attributeModifier(value: AttributeModifier<PathAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Unimplemented method attributeModifier")
     }
 }
 export class ArkPathStyle extends ArkCommonShapeMethodStyle implements PathAttribute {
-    commands_value?: string | undefined
     attributeModifier_value?: AttributeModifier<PathAttribute> | AttributeModifier<CommonMethod> | undefined
-    public commands(value: string | undefined): this {
-        return this
-    }
     public attributeModifier(value: AttributeModifier<PathAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
     }
     public apply(target: PathAttribute): void {
         super.apply(target)
-        if (this.commands_value !== undefined)
-            target.commands(this.commands_value!)
     }
 }
 
@@ -101,14 +77,6 @@ export class ArkPathComponent extends ArkCommonShapeMethodComponent implements P
         if (this.checkPriority("setPathOptions")) {
             const options_casted = options as (PathOptions | undefined)
             this.getPeer()?.setPathOptionsAttribute(options_casted)
-            return this
-        }
-        return this
-    }
-    public commands(value: string | undefined): this {
-        if (this.checkPriority("commands")) {
-            const value_casted = value as (string | undefined)
-            this.getPeer()?.setCommandsAttribute(value_casted)
             return this
         }
         return this
@@ -168,16 +136,7 @@ export class ArkPathSet extends ArkCommonShapeMethodSet implements PathAttribute
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
-    _commands_flag?: boolean
-    _commands0_value?: string | undefined
     applyModifierPatch(component: PathAttribute): void {
-        if (this._commands_flag)
-            component.commands((this._commands0_value as string | undefined))
-    }
-    public commands(value: string | undefined): this {
-        this._commands_flag = true
-        this._commands0_value = value
-        return this
     }
     public attributeModifier(value: AttributeModifier<PathAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
@@ -185,100 +144,9 @@ export class ArkPathSet extends ArkCommonShapeMethodSet implements PathAttribute
 }
 export class PathOptions_serializer {
     public static write(buffer: SerializerBase, value: PathOptions): void {
-        let valueSerializer : SerializerBase = buffer
-        const value_width  = value.width
-        let value_width_type : int32 = RuntimeType.UNDEFINED
-        value_width_type = runtimeType(value_width)
-        valueSerializer.writeInt8((value_width_type).toChar())
-        if ((value_width_type) != (RuntimeType.UNDEFINED)) {
-            const value_width_value  = value_width!
-            let value_width_value_type : int32 = RuntimeType.UNDEFINED
-            value_width_value_type = runtimeType(value_width_value)
-            if (RuntimeType.NUMBER == value_width_value_type) {
-                valueSerializer.writeInt8((0).toChar())
-                const value_width_value_0  = value_width_value as number
-                valueSerializer.writeNumber(value_width_value_0)
-            }
-            else if (RuntimeType.STRING == value_width_value_type) {
-                valueSerializer.writeInt8((1).toChar())
-                const value_width_value_1  = value_width_value as string
-                valueSerializer.writeString(value_width_value_1)
-            }
-        }
-        const value_height  = value.height
-        let value_height_type : int32 = RuntimeType.UNDEFINED
-        value_height_type = runtimeType(value_height)
-        valueSerializer.writeInt8((value_height_type).toChar())
-        if ((value_height_type) != (RuntimeType.UNDEFINED)) {
-            const value_height_value  = value_height!
-            let value_height_value_type : int32 = RuntimeType.UNDEFINED
-            value_height_value_type = runtimeType(value_height_value)
-            if (RuntimeType.NUMBER == value_height_value_type) {
-                valueSerializer.writeInt8((0).toChar())
-                const value_height_value_0  = value_height_value as number
-                valueSerializer.writeNumber(value_height_value_0)
-            }
-            else if (RuntimeType.STRING == value_height_value_type) {
-                valueSerializer.writeInt8((1).toChar())
-                const value_height_value_1  = value_height_value as string
-                valueSerializer.writeString(value_height_value_1)
-            }
-        }
-        const value_commands  = value.commands
-        let value_commands_type : int32 = RuntimeType.UNDEFINED
-        value_commands_type = runtimeType(value_commands)
-        valueSerializer.writeInt8((value_commands_type).toChar())
-        if ((value_commands_type) != (RuntimeType.UNDEFINED)) {
-            const value_commands_value  = value_commands!
-            valueSerializer.writeString(value_commands_value)
-        }
     }
     public static read(buffer: DeserializerBase): PathOptions {
-        let valueDeserializer : DeserializerBase = buffer
-        const width_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let width_buf : number | string | undefined
-        if ((width_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const width_buf__selector : int32 = valueDeserializer.readInt8()
-            let width_buf_ : number | string | undefined
-            if (width_buf__selector == (0).toChar()) {
-                width_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (width_buf__selector == (1).toChar()) {
-                width_buf_ = (valueDeserializer.readString() as string)
-            }
-            else {
-                throw new Error("One of the branches for width_buf_ has to be chosen through deserialisation.")
-            }
-            width_buf = (width_buf_ as number | string)
-        }
-        const width_result : number | string | undefined = width_buf
-        const height_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let height_buf : number | string | undefined
-        if ((height_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const height_buf__selector : int32 = valueDeserializer.readInt8()
-            let height_buf_ : number | string | undefined
-            if (height_buf__selector == (0).toChar()) {
-                height_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else if (height_buf__selector == (1).toChar()) {
-                height_buf_ = (valueDeserializer.readString() as string)
-            }
-            else {
-                throw new Error("One of the branches for height_buf_ has to be chosen through deserialisation.")
-            }
-            height_buf = (height_buf_ as number | string)
-        }
-        const height_result : number | string | undefined = height_buf
-        const commands_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let commands_buf : string | undefined
-        if ((commands_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            commands_buf = (valueDeserializer.readString() as string)
-        }
-        const commands_result : string | undefined = commands_buf
-        let value : PathOptions = ({width: width_result, height: height_result, commands: commands_result} as PathOptions)
+        let value : PathOptions = ({} as PathOptions)
         return value
     }
 }

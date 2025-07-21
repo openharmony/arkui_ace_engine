@@ -20,8 +20,8 @@ import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { KInt, KPointer, KBoolean, NativeBuffer, KStringPtr, wrapCallback, SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, runtimeType, toPeerPtr, nullptr, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
-import { GlobalScope } from "./../generated/GlobalScope"
 import { ExtendableComponent, ExtendableComponentInternal } from "./extendableComponent"
+import { GlobalScope } from "./../generated/GlobalScope"
 import { CallbackKind } from "./../generated/peers/CallbackKind"
 import { TypeChecker } from "#components"
 import { CallbackTransformer } from "./../CallbackTransformer"
@@ -31,14 +31,17 @@ export interface CompatibleComponentInfo {
 }
 export type CompatibleInitCallback = () => CompatibleComponentInfo;
 export type CompatibleUpdateCallback = (component: object) => void;
-export function compatibleComponent(init: CompatibleInitCallback, update: CompatibleUpdateCallback): void {
-    GlobalScope.compatibleComponent(init, update)
+export function compatibleComponent(init: CompatibleInitCallback, update: CompatibleUpdateCallback, component?: ExtendableComponent | undefined): void {
+    GlobalScope.compatibleComponent(init, update, component)
 }
 export function bindCompatibleProvideCallback(component: ExtendableComponent, createCompatibleState: object, setCallback: object, compatibleComponent?: object | undefined): void {
     GlobalScope.bindCompatibleProvideCallback(component, createCompatibleState, setCallback, compatibleComponent)
 }
 export function getCompatibleState<T>(state: object, createCompatibleState: object): object {
     return GlobalScope.getCompatibleState(state, createCompatibleState)
+}
+export function compatibleWrappedBuilder(builder: object, args: object): void {
+    GlobalScope.compatibleWrappedBuilder(builder, args)
 }
 export class CompatibleComponentInfo_serializer {
     public static write(buffer: SerializerBase, value: CompatibleComponentInfo): void {

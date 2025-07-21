@@ -23,11 +23,12 @@ import { CallbackKind } from "./../generated/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { VoidCallback, Length, ResourceColor, VP, Font, Font_serializer } from "./units"
 import { IndicatorComponentController_serializer, IndicatorComponentController } from "./indicatorcomponent"
-import { ICurve_serializer, ArkCommonMethodPeer, CommonMethod, ICurve, ArkCommonMethodComponent, ArkCommonMethodStyle, ArkCommonMethodSet } from "./common"
+import { curves_ICurve_serializer, curves } from "./../generated/ohos.curves"
 import { Resource_serializer, Resource } from "./../generated/resource"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { EdgeEffect, Curve, PageFlipMode, Color } from "./enums"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, ArkCommonMethodSet } from "./common"
+import { EdgeEffect, PageFlipMode, Color } from "./enums"
 import { AttributeModifier, UICommonBase, AttributeUpdater } from "./../handwritten"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
@@ -446,7 +447,7 @@ export class ArkSwiperPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SwiperAttribute_setDisableSwipe(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setCurveAttribute(value: Curve | string | ICurve | undefined): void {
+    setCurveAttribute(value: curves.Curve | string | curves.ICurve | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
@@ -455,10 +456,10 @@ export class ArkSwiperPeer extends ArkCommonMethodPeer {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
-            if (TypeChecker.isCurve(value_value)) {
+            if (TypeChecker.iscurves_Curve(value_value)) {
                 thisSerializer.writeInt8((0).toChar())
-                const value_value_0  = value_value as Curve
-                thisSerializer.writeInt32(TypeChecker.Curve_ToNumeric(value_value_0))
+                const value_value_0  = value_value as curves.Curve
+                thisSerializer.writeInt32(TypeChecker.curves_Curve_ToNumeric(value_value_0))
             }
             else if (RuntimeType.STRING == value_value_type) {
                 thisSerializer.writeInt8((1).toChar())
@@ -467,8 +468,8 @@ export class ArkSwiperPeer extends ArkCommonMethodPeer {
             }
             else if (RuntimeType.OBJECT == value_value_type) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as ICurve
-                ICurve_serializer.write(thisSerializer, value_value_2)
+                const value_value_2  = value_value as curves.ICurve
+                curves_ICurve_serializer.write(thisSerializer, value_value_2)
             }
         }
         ArkUIGeneratedNativeModule._SwiperAttribute_setCurve(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
@@ -866,7 +867,7 @@ export interface SwiperAttribute extends CommonMethod {
     disableSwipe(value: boolean | undefined): this {
         throw new Error("Unimplemented method disableSwipe")
     }
-    curve(value: Curve | string | ICurve | undefined): this {
+    curve(value: curves.Curve | string | curves.ICurve | undefined): this {
         throw new Error("Unimplemented method curve")
     }
     onChange(value: ((value0: number) => void) | undefined): this {
@@ -942,7 +943,7 @@ export class ArkSwiperStyle extends ArkCommonMethodStyle implements SwiperAttrib
     cachedCount_value?: number | undefined
     effectMode_value?: EdgeEffect | undefined
     disableSwipe_value?: boolean | undefined
-    curve_value?: Curve | string | ICurve | undefined
+    curve_value?: curves.Curve | string | curves.ICurve | undefined
     onChange_value?: ((value0: number) => void) | undefined
     onSelected_value?: ((value0: number) => void) | undefined
     onUnselected_value?: ((value0: number) => void) | undefined
@@ -989,7 +990,7 @@ export class ArkSwiperStyle extends ArkCommonMethodStyle implements SwiperAttrib
     public disableSwipe(value: boolean | undefined): this {
         return this
     }
-    public curve(value: Curve | string | ICurve | undefined): this {
+    public curve(value: curves.Curve | string | curves.ICurve | undefined): this {
         return this
     }
     public onChange(value: ((value0: number) => void) | undefined): this {
@@ -1216,9 +1217,9 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements Swip
         }
         return this
     }
-    public curve(value: Curve | string | ICurve | undefined): this {
+    public curve(value: curves.Curve | string | curves.ICurve | undefined): this {
         if (this.checkPriority("curve")) {
-            const value_casted = value as (Curve | string | ICurve | undefined)
+            const value_casted = value as (curves.Curve | string | curves.ICurve | undefined)
             this.getPeer()?.setCurveAttribute(value_casted)
             return this
         }
@@ -1461,7 +1462,7 @@ export class ArkSwiperSet extends ArkCommonMethodSet implements SwiperAttribute 
     _disableSwipe_flag?: boolean
     _disableSwipe0_value?: boolean | undefined
     _curve_flag?: boolean
-    _curve0_value?: Curve | string | ICurve | undefined
+    _curve0_value?: curves.Curve | string | curves.ICurve | undefined
     _onChange_flag?: boolean
     _onChange0_value?: ((value0: number) => void) | undefined
     _onSelected_flag?: boolean
@@ -1527,7 +1528,7 @@ export class ArkSwiperSet extends ArkCommonMethodSet implements SwiperAttribute 
         if (this._disableSwipe_flag)
             component.disableSwipe((this._disableSwipe0_value as boolean | undefined))
         if (this._curve_flag)
-            component.curve((this._curve0_value as Curve | string | ICurve | undefined))
+            component.curve((this._curve0_value as curves.Curve | string | curves.ICurve | undefined))
         if (this._onChange_flag)
             component.onChange((this._onChange0_value as ((value0: number) => void) | undefined))
         if (this._onSelected_flag)
@@ -1619,7 +1620,7 @@ export class ArkSwiperSet extends ArkCommonMethodSet implements SwiperAttribute 
         this._disableSwipe0_value = value
         return this
     }
-    public curve(value: Curve | string | ICurve | undefined): this {
+    public curve(value: curves.Curve | string | curves.ICurve | undefined): this {
         this._curve_flag = true
         this._curve0_value = value
         return this

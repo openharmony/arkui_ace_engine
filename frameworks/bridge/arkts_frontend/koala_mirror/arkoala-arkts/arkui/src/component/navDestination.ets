@@ -33,11 +33,12 @@ import { ArkCommonMethodPeer, CommonMethod, LayoutSafeAreaType, LayoutSafeAreaEd
 import { ResourceStr, Length, ResourceColor } from "./units"
 import { CustomBuilder } from "./builder"
 import { AttributeModifier, UICommonBase, AttributeUpdater } from "./../handwritten"
-import { TitleHeight, Color, Curve } from "./enums"
+import { TitleHeight, Color } from "./enums"
 import { LengthMetrics } from "./../generated/arkui.Graphics"
 import { TextModifier } from "./../generated/arkui.TextModifier"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
+import { curves } from "./../generated/ohos.curves"
 import { NodeAttach, remember } from "@koalaui/runtime"
 export interface NavDestinationContext {
     pathInfo: NavPathInfo
@@ -827,7 +828,7 @@ export interface NestedScrollInfo {
 export interface NavDestinationTransition {
     onTransitionEnd?: (() => void);
     duration?: number;
-    curve?: Curve;
+    curve?: curves.Curve;
     delay?: number;
     event: (() => void);
 }
@@ -1774,8 +1775,8 @@ export class NavDestinationTransition_serializer {
         value_curve_type = runtimeType(value_curve)
         valueSerializer.writeInt8((value_curve_type).toChar())
         if ((value_curve_type) != (RuntimeType.UNDEFINED)) {
-            const value_curve_value  = (value_curve as Curve)
-            valueSerializer.writeInt32(TypeChecker.Curve_ToNumeric(value_curve_value))
+            const value_curve_value  = (value_curve as curves.Curve)
+            valueSerializer.writeInt32(TypeChecker.curves_Curve_ToNumeric(value_curve_value))
         }
         const value_delay  = value.delay
         let value_delay_type : int32 = RuntimeType.UNDEFINED
@@ -1815,12 +1816,12 @@ export class NavDestinationTransition_serializer {
         }
         const duration_result : number | undefined = duration_buf
         const curve_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let curve_buf : Curve | undefined
+        let curve_buf : curves.Curve | undefined
         if ((curve_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
-            curve_buf = TypeChecker.Curve_FromNumeric(valueDeserializer.readInt32())
+            curve_buf = TypeChecker.curves_Curve_FromNumeric(valueDeserializer.readInt32())
         }
-        const curve_result : Curve | undefined = curve_buf
+        const curve_result : curves.Curve | undefined = curve_buf
         const delay_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let delay_buf : number | undefined
         if ((delay_buf_runtimeType) != (RuntimeType.UNDEFINED))

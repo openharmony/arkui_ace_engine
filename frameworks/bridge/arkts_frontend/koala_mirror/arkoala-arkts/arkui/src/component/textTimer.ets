@@ -306,7 +306,6 @@ export interface TextTimerConfiguration extends CommonConfiguration<TextTimerCon
 }
 export interface TextTimerOptions {
     isCountDown?: boolean;
-    count?: number;
     controller?: TextTimerController;
 }
 export interface TextTimerAttribute extends CommonMethod {
@@ -681,14 +680,6 @@ export class TextTimerOptions_serializer {
             const value_isCountDown_value  = value_isCountDown!
             valueSerializer.writeBoolean(value_isCountDown_value)
         }
-        const value_count  = value.count
-        let value_count_type : int32 = RuntimeType.UNDEFINED
-        value_count_type = runtimeType(value_count)
-        valueSerializer.writeInt8((value_count_type).toChar())
-        if ((value_count_type) != (RuntimeType.UNDEFINED)) {
-            const value_count_value  = value_count!
-            valueSerializer.writeNumber(value_count_value)
-        }
         const value_controller  = value.controller
         let value_controller_type : int32 = RuntimeType.UNDEFINED
         value_controller_type = runtimeType(value_controller)
@@ -707,13 +698,6 @@ export class TextTimerOptions_serializer {
             isCountDown_buf = valueDeserializer.readBoolean()
         }
         const isCountDown_result : boolean | undefined = isCountDown_buf
-        const count_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let count_buf : number | undefined
-        if ((count_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            count_buf = (valueDeserializer.readNumber() as number)
-        }
-        const count_result : number | undefined = count_buf
         const controller_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let controller_buf : TextTimerController | undefined
         if ((controller_buf_runtimeType) != (RuntimeType.UNDEFINED))
@@ -721,7 +705,7 @@ export class TextTimerOptions_serializer {
             controller_buf = (TextTimerController_serializer.read(valueDeserializer) as TextTimerController)
         }
         const controller_result : TextTimerController | undefined = controller_buf
-        let value : TextTimerOptions = ({isCountDown: isCountDown_result, count: count_result, controller: controller_result} as TextTimerOptions)
+        let value : TextTimerOptions = ({isCountDown: isCountDown_result, controller: controller_result} as TextTimerOptions)
         return value
     }
 }

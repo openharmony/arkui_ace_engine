@@ -97,8 +97,6 @@ export class ArkBadgeStyle extends ArkCommonMethodStyle implements BadgeAttribut
         super.apply(target)
     }
 }
-export type BadgeParamWithStringType = string | Resource;
-export type BadgeStyleSizeType = number | string | Resource;
 
 export class ArkBadgeComponent extends ArkCommonMethodComponent implements BadgeAttribute {
     getPeer(): ArkBadgePeer {

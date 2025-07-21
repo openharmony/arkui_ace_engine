@@ -20,8 +20,7 @@ import { int32, int64, float32 } from "@koalaui/common"
 import { KInt, KPointer, KBoolean, NativeBuffer, KStringPtr, wrapCallback } from "@koalaui/interop"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
-import { Curve } from "./enums"
-import { ICurve } from "./common"
+import { curves } from "./../generated/ohos.curves"
 export enum RouteType {
     NONE = 0,
     None = 0,
@@ -45,7 +44,7 @@ export enum SlideEffect {
 export interface PageTransitionOptions {
     type?: RouteType;
     duration?: number;
-    curve?: Curve | string | ICurve;
+    curve?: curves.Curve | string | curves.ICurve;
     delay?: number;
 }
 export type PageTransitionCallback = (type: RouteType, progress: number) => void;

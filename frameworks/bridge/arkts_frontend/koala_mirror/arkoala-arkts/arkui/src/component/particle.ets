@@ -22,8 +22,8 @@ import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
 import { VP, Dimension, ResourceStr, ResourceColor } from "./units"
 import { Resource } from "./../generated/resource"
-import { ImageFit, Color, Curve } from "./enums"
-import { ICurve } from "./common"
+import { ImageFit, Color } from "./enums"
+import { curves } from "./../generated/ohos.curves"
 import { Vector2T, LengthMetrics } from "./../generated/arkui.Graphics"
 export interface VelocityOptions {
     speed: [ number, number ];
@@ -69,7 +69,7 @@ export interface ParticlePropertyAnimation<T = void> {
     to: T;
     startMillis: number;
     endMillis: number;
-    curve?: Curve | ICurve;
+    curve?: curves.Curve | curves.ICurve;
 }
 export enum ParticleType {
     POINT = "'point'",

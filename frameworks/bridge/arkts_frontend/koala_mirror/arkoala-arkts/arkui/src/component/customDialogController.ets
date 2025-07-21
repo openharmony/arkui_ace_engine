@@ -23,8 +23,10 @@ import { CallbackKind } from "./../generated/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
-import { DismissDialogAction, DialogAlignment, DismissDialogAction_serializer } from "./alertDialog"
+import { DismissDialogAction, DismissDialogAction_serializer } from "./actionSheet"
 import { CustomBuilder } from "./builder"
+import { ExtendableComponent, ExtendableComponent_serializer } from "./extendableComponent"
+import { DialogAlignment } from "./alertDialog"
 import { Offset, ResourceColor, Dimension, BorderRadiuses, EdgeWidths, EdgeColors, EdgeStyles, Offset_serializer, BorderRadiuses_serializer, EdgeWidths_serializer, EdgeColors_serializer, EdgeStyles_serializer } from "./units"
 import { Color, BorderStyle } from "./enums"
 import { Resource, Resource_serializer } from "./../generated/resource"
@@ -73,7 +75,7 @@ export class CustomDialogController implements MaterializedBase {
     }
 }
 export interface CustomDialogControllerOptions {
-    builder: CustomBuilder;
+    builder: CustomBuilder | ExtendableComponent;
     cancel?: (() => void);
     autoCancel?: boolean;
     alignment?: DialogAlignment;
@@ -127,7 +129,18 @@ export class CustomDialogControllerOptions_serializer {
     public static write(buffer: SerializerBase, value: CustomDialogControllerOptions): void {
         let valueSerializer : SerializerBase = buffer
         const value_builder  = value.builder
-        valueSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(value_builder))
+        let value_builder_type : int32 = RuntimeType.UNDEFINED
+        value_builder_type = runtimeType(value_builder)
+        if (RuntimeType.FUNCTION == value_builder_type) {
+            valueSerializer.writeInt8((0).toChar())
+            const value_builder_0  = value_builder as CustomBuilder
+            valueSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(value_builder_0))
+        }
+        else if (RuntimeType.OBJECT == value_builder_type) {
+            valueSerializer.writeInt8((1).toChar())
+            const value_builder_1  = value_builder as ExtendableComponent
+            ExtendableComponent_serializer.write(valueSerializer, value_builder_1)
+        }
         const value_cancel  = value.cancel
         let value_cancel_type : int32 = RuntimeType.UNDEFINED
         value_cancel_type = runtimeType(value_cancel)
@@ -609,17 +622,28 @@ export class CustomDialogControllerOptions_serializer {
     }
     public static read(buffer: DeserializerBase): CustomDialogControllerOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const builder_buf_resource : CallbackResource = valueDeserializer.readCallbackResource()
-        const builder_buf_call : KPointer = valueDeserializer.readPointer()
-        const builder_buf_callSync : KPointer = valueDeserializer.readPointer()
-        const builder_result : CustomBuilder = ():void => { 
-    const builder_buf_argsSerializer : SerializerBase = SerializerBase.hold();
-    builder_buf_argsSerializer.writeInt32(builder_buf_resource.resourceId);
-    builder_buf_argsSerializer.writePointer(builder_buf_call);
-    builder_buf_argsSerializer.writePointer(builder_buf_callSync);
-    InteropNativeModule._CallCallback(737226752, builder_buf_argsSerializer.asBuffer(), builder_buf_argsSerializer.length());
-    builder_buf_argsSerializer.release();
+        const builder_buf_selector : int32 = valueDeserializer.readInt8()
+        let builder_buf : CustomBuilder | ExtendableComponent | undefined
+        if (builder_buf_selector == (0).toChar()) {
+            const builder_buf_u_resource : CallbackResource = valueDeserializer.readCallbackResource()
+            const builder_buf_u_call : KPointer = valueDeserializer.readPointer()
+            const builder_buf_u_callSync : KPointer = valueDeserializer.readPointer()
+            builder_buf = ():void => { 
+    const builder_buf_u_argsSerializer : SerializerBase = SerializerBase.hold();
+    builder_buf_u_argsSerializer.writeInt32(builder_buf_u_resource.resourceId);
+    builder_buf_u_argsSerializer.writePointer(builder_buf_u_call);
+    builder_buf_u_argsSerializer.writePointer(builder_buf_u_callSync);
+    InteropNativeModule._CallCallback(737226752, builder_buf_u_argsSerializer.asBuffer(), builder_buf_u_argsSerializer.length());
+    builder_buf_u_argsSerializer.release();
     return; }
+        }
+        else if (builder_buf_selector == (1).toChar()) {
+            builder_buf = (ExtendableComponent_serializer.read(valueDeserializer) as ExtendableComponent)
+        }
+        else {
+            throw new Error("One of the branches for builder_buf has to be chosen through deserialisation.")
+        }
+        const builder_result : CustomBuilder | ExtendableComponent = (builder_buf as CustomBuilder | ExtendableComponent)
         const cancel_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let cancel_buf : (() => void) | undefined
         if ((cancel_buf_runtimeType) != (RuntimeType.UNDEFINED))

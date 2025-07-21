@@ -1,19 +1,34 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import { int32, float32 } from "@koalaui/common"
+export namespace curves {
+    export enum Curve {
+        LINEAR = 0,
+        Linear = 0,
+        EASE = 1,
+        Ease = 1,
+        EASE_IN = 2,
+        EaseIn = 2,
+        EASE_OUT = 3,
+        EaseOut = 3,
+        EASE_IN_OUT = 4,
+        EaseInOut = 4,
+        FAST_OUT_SLOW_IN = 5,
+        FastOutSlowIn = 5,
+        LINEAR_OUT_SLOW_IN = 6,
+        LinearOutSlowIn = 6,
+        FAST_OUT_LINEAR_IN = 7,
+        FastOutLinearIn = 7,
+        EXTREME_DECELERATION = 8,
+        ExtremeDeceleration = 8,
+        SHARP = 9,
+        Sharp = 9,
+        RHYTHM = 10,
+        Rhythm = 10,
+        SMOOTH = 11,
+        Smooth = 11,
+        FRICTION = 12,
+        Friction = 12
+    }
+}
 export namespace uniformTypeDescriptor {
     export enum UniformDataType {
         ENTITY = "general.entity",
@@ -983,7 +998,6 @@ export enum DragBehavior {
     MOVE = 1
 }
 export enum DragResult {
-    UNKNOWN = -1,
     DRAG_SUCCESSFUL = 0,
     DRAG_FAILED = 1,
     DRAG_CANCELED = 2,
@@ -1236,34 +1250,6 @@ export enum AnimationStatus {
     Paused = 2,
     STOPPED = 3,
     Stopped = 3
-}
-export enum Curve {
-    LINEAR = 0,
-    Linear = 0,
-    EASE = 1,
-    Ease = 1,
-    EASE_IN = 2,
-    EaseIn = 2,
-    EASE_OUT = 3,
-    EaseOut = 3,
-    EASE_IN_OUT = 4,
-    EaseInOut = 4,
-    FAST_OUT_SLOW_IN = 5,
-    FastOutSlowIn = 5,
-    LINEAR_OUT_SLOW_IN = 6,
-    LinearOutSlowIn = 6,
-    FAST_OUT_LINEAR_IN = 7,
-    FastOutLinearIn = 7,
-    EXTREME_DECELERATION = 8,
-    ExtremeDeceleration = 8,
-    SHARP = 9,
-    Sharp = 9,
-    RHYTHM = 10,
-    Rhythm = 10,
-    SMOOTH = 11,
-    Smooth = 11,
-    FRICTION = 12,
-    Friction = 12
 }
 export enum FillMode {
     NONE = 0,
@@ -1692,8 +1678,7 @@ export enum ClickEffectLevel {
 }
 export enum XComponentType {
     SURFACE = 0,
-    TEXTURE = 1,
-    NODE = 2
+    TEXTURE = 1
 }
 export enum NestedScrollMode {
     SELF_ONLY = 0,
@@ -2095,6 +2080,27 @@ export enum LoadingProgressStyle {
     ORBITAL = 2,
     Orbital = 2
 }
+export enum LocationIconStyle {
+    FULL_FILLED = 0,
+    LINES = 1
+}
+export enum LocationDescription {
+    CURRENT_LOCATION = 0,
+    ADD_LOCATION = 1,
+    SELECT_LOCATION = 2,
+    SHARE_LOCATION = 3,
+    SEND_LOCATION = 4,
+    LOCATING = 5,
+    LOCATION = 6,
+    SEND_CURRENT_LOCATION = 7,
+    RELOCATION = 8,
+    PUNCH_IN = 9,
+    CURRENT_POSITION = 10
+}
+export enum LocationButtonOnClickResult {
+    SUCCESS = 0,
+    TEMPORARY_AUTHORIZATION_FAILED = 1
+}
 export enum SubMenuExpandingMode {
     SIDE_EXPAND = 0,
     EMBEDDED_EXPAND = 1,
@@ -2314,8 +2320,7 @@ export enum SaveDescription {
     SAVE_TO_GALLERY = 8,
     EXPORT_TO_GALLERY = 9,
     QUICK_SAVE_TO_GALLERY = 10,
-    RESAVE_TO_GALLERY = 11,
-    SAVE_ALL = 12
+    RESAVE_TO_GALLERY = 11
 }
 export enum SaveButtonOnClickResult {
     SUCCESS = 0,

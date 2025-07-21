@@ -107,8 +107,6 @@ export class ArkPolylinePeer extends ArkCommonShapeMethodPeer {
     }
 }
 export interface PolylineOptions {
-    width?: string | number;
-    height?: string | number;
 }
 export interface PolylineAttribute extends CommonShapeMethod {
     points(value: Array<ShapePoint> | undefined): this {
@@ -226,85 +224,9 @@ export class ArkPolylineSet extends ArkCommonShapeMethodSet implements PolylineA
 }
 export class PolylineOptions_serializer {
     public static write(buffer: SerializerBase, value: PolylineOptions): void {
-        let valueSerializer : SerializerBase = buffer
-        const value_width  = value.width
-        let value_width_type : int32 = RuntimeType.UNDEFINED
-        value_width_type = runtimeType(value_width)
-        valueSerializer.writeInt8((value_width_type).toChar())
-        if ((value_width_type) != (RuntimeType.UNDEFINED)) {
-            const value_width_value  = value_width!
-            let value_width_value_type : int32 = RuntimeType.UNDEFINED
-            value_width_value_type = runtimeType(value_width_value)
-            if (RuntimeType.STRING == value_width_value_type) {
-                valueSerializer.writeInt8((0).toChar())
-                const value_width_value_0  = value_width_value as string
-                valueSerializer.writeString(value_width_value_0)
-            }
-            else if (RuntimeType.NUMBER == value_width_value_type) {
-                valueSerializer.writeInt8((1).toChar())
-                const value_width_value_1  = value_width_value as number
-                valueSerializer.writeNumber(value_width_value_1)
-            }
-        }
-        const value_height  = value.height
-        let value_height_type : int32 = RuntimeType.UNDEFINED
-        value_height_type = runtimeType(value_height)
-        valueSerializer.writeInt8((value_height_type).toChar())
-        if ((value_height_type) != (RuntimeType.UNDEFINED)) {
-            const value_height_value  = value_height!
-            let value_height_value_type : int32 = RuntimeType.UNDEFINED
-            value_height_value_type = runtimeType(value_height_value)
-            if (RuntimeType.STRING == value_height_value_type) {
-                valueSerializer.writeInt8((0).toChar())
-                const value_height_value_0  = value_height_value as string
-                valueSerializer.writeString(value_height_value_0)
-            }
-            else if (RuntimeType.NUMBER == value_height_value_type) {
-                valueSerializer.writeInt8((1).toChar())
-                const value_height_value_1  = value_height_value as number
-                valueSerializer.writeNumber(value_height_value_1)
-            }
-        }
     }
     public static read(buffer: DeserializerBase): PolylineOptions {
-        let valueDeserializer : DeserializerBase = buffer
-        const width_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let width_buf : string | number | undefined
-        if ((width_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const width_buf__selector : int32 = valueDeserializer.readInt8()
-            let width_buf_ : string | number | undefined
-            if (width_buf__selector == (0).toChar()) {
-                width_buf_ = (valueDeserializer.readString() as string)
-            }
-            else if (width_buf__selector == (1).toChar()) {
-                width_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else {
-                throw new Error("One of the branches for width_buf_ has to be chosen through deserialisation.")
-            }
-            width_buf = (width_buf_ as string | number)
-        }
-        const width_result : string | number | undefined = width_buf
-        const height_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let height_buf : string | number | undefined
-        if ((height_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const height_buf__selector : int32 = valueDeserializer.readInt8()
-            let height_buf_ : string | number | undefined
-            if (height_buf__selector == (0).toChar()) {
-                height_buf_ = (valueDeserializer.readString() as string)
-            }
-            else if (height_buf__selector == (1).toChar()) {
-                height_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else {
-                throw new Error("One of the branches for height_buf_ has to be chosen through deserialisation.")
-            }
-            height_buf = (height_buf_ as string | number)
-        }
-        const height_result : string | number | undefined = height_buf
-        let value : PolylineOptions = ({width: width_result, height: height_result} as PolylineOptions)
+        let value : PolylineOptions = ({} as PolylineOptions)
         return value
     }
 }

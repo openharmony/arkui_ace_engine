@@ -4684,10 +4684,10 @@ export class RichEditorController extends RichEditorBaseController implements Ma
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._RichEditorController_getFinalizer()
     }
-    public addTextSpan(value: string, options?: RichEditorTextSpanOptions): number {
-        const value_casted = value as (string)
+    public addTextSpan(content: ResourceStr, options?: RichEditorTextSpanOptions): number {
+        const content_casted = content as (ResourceStr)
         const options_casted = options as (RichEditorTextSpanOptions | undefined)
-        return this.addTextSpan_serialize(value_casted, options_casted)
+        return this.addTextSpan_serialize(content_casted, options_casted)
     }
     public addImageSpan(value: image.PixelMap | ResourceStr, options?: RichEditorImageSpanOptions): number {
         const value_casted = value as (image.PixelMap | ResourceStr)
@@ -4738,8 +4738,20 @@ export class RichEditorController extends RichEditorBaseController implements Ma
         const value_casted = value as (RichEditorRange)
         return this.toStyledString_serialize(value_casted)
     }
-    private addTextSpan_serialize(value: string, options?: RichEditorTextSpanOptions): number {
+    private addTextSpan_serialize(content: ResourceStr, options?: RichEditorTextSpanOptions): number {
         const thisSerializer : SerializerBase = SerializerBase.hold()
+        let content_type : int32 = RuntimeType.UNDEFINED
+        content_type = runtimeType(content)
+        if (RuntimeType.STRING == content_type) {
+            thisSerializer.writeInt8((0).toChar())
+            const content_0  = content as string
+            thisSerializer.writeString(content_0)
+        }
+        else if (RuntimeType.OBJECT == content_type) {
+            thisSerializer.writeInt8((1).toChar())
+            const content_1  = content as Resource
+            Resource_serializer.write(thisSerializer, content_1)
+        }
         let options_type : int32 = RuntimeType.UNDEFINED
         options_type = runtimeType(options)
         thisSerializer.writeInt8((options_type).toChar())
@@ -4747,7 +4759,7 @@ export class RichEditorController extends RichEditorBaseController implements Ma
             const options_value  = options!
             RichEditorTextSpanOptions_serializer.write(thisSerializer, options_value)
         }
-        const retval  = ArkUIGeneratedNativeModule._RichEditorController_addTextSpan(this.peer!.ptr, value, thisSerializer.asBuffer(), thisSerializer.length())
+        const retval  = ArkUIGeneratedNativeModule._RichEditorController_addTextSpan(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }

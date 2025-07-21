@@ -234,7 +234,7 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextAreaAttribute_setFontStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setFontWeightAttribute(value: number | FontWeight | string | undefined): void {
+    setFontWeightAttribute(value: number | FontWeight | ResourceStr | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
@@ -253,10 +253,21 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
                 const value_value_1  = value_value as FontWeight
                 thisSerializer.writeInt32(TypeChecker.FontWeight_ToNumeric(value_value_1))
             }
-            else if (RuntimeType.STRING == value_value_type) {
+            else if ((RuntimeType.STRING == value_value_type) || (RuntimeType.OBJECT == value_value_type)) {
                 thisSerializer.writeInt8((2).toChar())
-                const value_value_2  = value_value as string
-                thisSerializer.writeString(value_value_2)
+                const value_value_2  = value_value as ResourceStr
+                let value_value_2_type : int32 = RuntimeType.UNDEFINED
+                value_value_2_type = runtimeType(value_value_2)
+                if (RuntimeType.STRING == value_value_2_type) {
+                    thisSerializer.writeInt8((0).toChar())
+                    const value_value_2_0  = value_value_2 as string
+                    thisSerializer.writeString(value_value_2_0)
+                }
+                else if (RuntimeType.OBJECT == value_value_2_type) {
+                    thisSerializer.writeInt8((1).toChar())
+                    const value_value_2_1  = value_value_2 as Resource
+                    Resource_serializer.write(thisSerializer, value_value_2_1)
+                }
             }
         }
         ArkUIGeneratedNativeModule._TextAreaAttribute_setFontWeight(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
@@ -1097,7 +1108,7 @@ export interface TextAreaAttribute extends CommonMethod {
     fontStyle(value: FontStyle | undefined): this {
         throw new Error("Unimplemented method fontStyle")
     }
-    fontWeight(value: number | FontWeight | string | undefined): this {
+    fontWeight(value: number | FontWeight | ResourceStr | undefined): this {
         throw new Error("Unimplemented method fontWeight")
     }
     fontFamily(value: ResourceStr | undefined): this {
@@ -1269,7 +1280,7 @@ export class ArkTextAreaStyle extends ArkCommonMethodStyle implements TextAreaAt
     fontColor_value?: ResourceColor | undefined
     fontSize_value?: Length | undefined
     fontStyle_value?: FontStyle | undefined
-    fontWeight_value?: number | FontWeight | string | undefined
+    fontWeight_value?: number | FontWeight | ResourceStr | undefined
     fontFamily_value?: ResourceStr | undefined
     textOverflow_value?: TextOverflow | undefined
     textIndent_value?: Dimension | undefined
@@ -1343,7 +1354,7 @@ export class ArkTextAreaStyle extends ArkCommonMethodStyle implements TextAreaAt
     public fontStyle(value: FontStyle | undefined): this {
         return this
     }
-    public fontWeight(value: number | FontWeight | string | undefined): this {
+    public fontWeight(value: number | FontWeight | ResourceStr | undefined): this {
         return this
     }
     public fontFamily(value: ResourceStr | undefined): this {
@@ -1700,9 +1711,9 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements Te
         }
         return this
     }
-    public fontWeight(value: number | FontWeight | string | undefined): this {
+    public fontWeight(value: number | FontWeight | ResourceStr | undefined): this {
         if (this.checkPriority("fontWeight")) {
-            const value_casted = value as (number | FontWeight | string | undefined)
+            const value_casted = value as (number | FontWeight | ResourceStr | undefined)
             this.getPeer()?.setFontWeightAttribute(value_casted)
             return this
         }
@@ -2199,7 +2210,7 @@ export class ArkTextAreaSet extends ArkCommonMethodSet implements TextAreaAttrib
     _fontStyle_flag?: boolean
     _fontStyle0_value?: FontStyle | undefined
     _fontWeight_flag?: boolean
-    _fontWeight0_value?: number | FontWeight | string | undefined
+    _fontWeight0_value?: number | FontWeight | ResourceStr | undefined
     _fontFamily_flag?: boolean
     _fontFamily0_value?: ResourceStr | undefined
     _textOverflow_flag?: boolean
@@ -2325,7 +2336,7 @@ export class ArkTextAreaSet extends ArkCommonMethodSet implements TextAreaAttrib
         if (this._fontStyle_flag)
             component.fontStyle((this._fontStyle0_value as FontStyle | undefined))
         if (this._fontWeight_flag)
-            component.fontWeight((this._fontWeight0_value as number | FontWeight | string | undefined))
+            component.fontWeight((this._fontWeight0_value as number | FontWeight | ResourceStr | undefined))
         if (this._fontFamily_flag)
             component.fontFamily((this._fontFamily0_value as ResourceStr | undefined))
         if (this._textOverflow_flag)
@@ -2469,7 +2480,7 @@ export class ArkTextAreaSet extends ArkCommonMethodSet implements TextAreaAttrib
         this._fontStyle0_value = value
         return this
     }
-    public fontWeight(value: number | FontWeight | string | undefined): this {
+    public fontWeight(value: number | FontWeight | ResourceStr | undefined): this {
         this._fontWeight_flag = true
         this._fontWeight0_value = value
         return this

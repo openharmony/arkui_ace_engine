@@ -700,10 +700,10 @@ export class WebContextMenuParam implements MaterializedBase {
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._WebContextMenuParam_getFinalizer()
     }
-    public x(): number {
+    public x(): int32 {
         return this.x_serialize()
     }
-    public y(): number {
+    public y(): int32 {
         return this.y_serialize()
     }
     public getLinkUrl(): string {
@@ -733,20 +733,20 @@ export class WebContextMenuParam implements MaterializedBase {
     public isEditable(): boolean {
         return this.isEditable_serialize()
     }
-    public getEditStateFlags(): number {
+    public getEditStateFlags(): int32 {
         return this.getEditStateFlags_serialize()
     }
-    public getPreviewWidth(): number {
+    public getPreviewWidth(): int32 {
         return this.getPreviewWidth_serialize()
     }
-    public getPreviewHeight(): number {
+    public getPreviewHeight(): int32 {
         return this.getPreviewHeight_serialize()
     }
-    private x_serialize(): number {
+    private x_serialize(): int32 {
         const retval  = ArkUIGeneratedNativeModule._WebContextMenuParam_x(this.peer!.ptr)
         return retval
     }
-    private y_serialize(): number {
+    private y_serialize(): int32 {
         const retval  = ArkUIGeneratedNativeModule._WebContextMenuParam_y(this.peer!.ptr)
         return retval
     }
@@ -786,15 +786,15 @@ export class WebContextMenuParam implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._WebContextMenuParam_isEditable(this.peer!.ptr)
         return retval
     }
-    private getEditStateFlags_serialize(): number {
+    private getEditStateFlags_serialize(): int32 {
         const retval  = ArkUIGeneratedNativeModule._WebContextMenuParam_getEditStateFlags(this.peer!.ptr)
         return retval
     }
-    private getPreviewWidth_serialize(): number {
+    private getPreviewWidth_serialize(): int32 {
         const retval  = ArkUIGeneratedNativeModule._WebContextMenuParam_getPreviewWidth(this.peer!.ptr)
         return retval
     }
-    private getPreviewHeight_serialize(): number {
+    private getPreviewHeight_serialize(): int32 {
         const retval  = ArkUIGeneratedNativeModule._WebContextMenuParam_getPreviewHeight(this.peer!.ptr)
         return retval
     }
@@ -931,18 +931,18 @@ export class WebKeyboardController implements MaterializedBase {
         this.insertText_serialize(text_casted)
         return
     }
-    public deleteForward(length: number): void {
-        const length_casted = length as (number)
+    public deleteForward(length: int32): void {
+        const length_casted = length as (int32)
         this.deleteForward_serialize(length_casted)
         return
     }
-    public deleteBackward(length: number): void {
-        const length_casted = length as (number)
+    public deleteBackward(length: int32): void {
+        const length_casted = length as (int32)
         this.deleteBackward_serialize(length_casted)
         return
     }
-    public sendFunctionKey(key: number): void {
-        const key_casted = key as (number)
+    public sendFunctionKey(key: int32): void {
+        const key_casted = key as (int32)
         this.sendFunctionKey_serialize(key_casted)
         return
     }
@@ -953,13 +953,13 @@ export class WebKeyboardController implements MaterializedBase {
     private insertText_serialize(text: string): void {
         ArkUIGeneratedNativeModule._WebKeyboardController_insertText(this.peer!.ptr, text)
     }
-    private deleteForward_serialize(length: number): void {
+    private deleteForward_serialize(length: int32): void {
         ArkUIGeneratedNativeModule._WebKeyboardController_deleteForward(this.peer!.ptr, length)
     }
-    private deleteBackward_serialize(length: number): void {
+    private deleteBackward_serialize(length: int32): void {
         ArkUIGeneratedNativeModule._WebKeyboardController_deleteBackward(this.peer!.ptr, length)
     }
-    private sendFunctionKey_serialize(key: number): void {
+    private sendFunctionKey_serialize(key: int32): void {
         ArkUIGeneratedNativeModule._WebKeyboardController_sendFunctionKey(this.peer!.ptr, key)
     }
     private close_serialize(): void {
@@ -1485,14 +1485,14 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setBlurOnKeyboardHideMode(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setTextZoomRatioAttribute(value: number | undefined): void {
+    setTextZoomRatioAttribute(value: int32 | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
         if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
-            thisSerializer.writeNumber(value_value)
+            thisSerializer.writeInt32(value_value)
         }
         ArkUIGeneratedNativeModule._WebAttribute_setTextZoomRatio(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -1509,14 +1509,14 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setDatabaseAccess(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setInitialScaleAttribute(value: number | undefined): void {
+    setInitialScaleAttribute(value: double | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
         if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
-            thisSerializer.writeNumber(value_value)
+            thisSerializer.writeFloat64(value_value)
         }
         ArkUIGeneratedNativeModule._WebAttribute_setInitialScale(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -2061,50 +2061,50 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._WebAttribute_setWebCursiveFont(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setDefaultFixedFontSizeAttribute(value: number | undefined): void {
+    setDefaultFixedFontSizeAttribute(value: int32 | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
         if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
-            thisSerializer.writeNumber(value_value)
+            thisSerializer.writeInt32(value_value)
         }
         ArkUIGeneratedNativeModule._WebAttribute_setDefaultFixedFontSize(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setDefaultFontSizeAttribute(value: number | undefined): void {
+    setDefaultFontSizeAttribute(value: int32 | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
         if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
-            thisSerializer.writeNumber(value_value)
+            thisSerializer.writeInt32(value_value)
         }
         ArkUIGeneratedNativeModule._WebAttribute_setDefaultFontSize(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setMinFontSizeAttribute(value: number | undefined): void {
+    setMinFontSizeAttribute(value: int32 | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
         if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
-            thisSerializer.writeNumber(value_value)
+            thisSerializer.writeInt32(value_value)
         }
         ArkUIGeneratedNativeModule._WebAttribute_setMinFontSize(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setMinLogicalFontSizeAttribute(value: number | undefined): void {
+    setMinLogicalFontSizeAttribute(value: int32 | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8((value_type).toChar())
         if ((value_type) != (RuntimeType.UNDEFINED)) {
             const value_value  = value!
-            thisSerializer.writeNumber(value_value)
+            thisSerializer.writeInt32(value_value)
         }
         ArkUIGeneratedNativeModule._WebAttribute_setMinLogicalFontSize(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -2791,7 +2791,7 @@ export interface AdsBlockedDetails {
 }
 export interface WebKeyboardOptions {
     useSystemKeyboard: boolean;
-    enterKeyType?: number;
+    enterKeyType?: int32;
     customKeyboard?: CustomBuilder;
 }
 export interface WebKeyboardCallbackInfo {
@@ -2874,7 +2874,7 @@ export enum ThreatType {
     THREAT_WARNING = 3
 }
 export interface WebMediaOptions {
-    resumeInterval?: number;
+    resumeInterval?: int32;
     audioExclusive?: boolean;
 }
 export interface ScreenCaptureConfig {
@@ -3023,8 +3023,8 @@ export interface NativeEmbedInfo {
     type?: string;
     src?: string;
     position?: Position;
-    width?: number;
-    height?: number;
+    width?: int32;
+    height?: int32;
     url?: string;
     tag?: string;
     params?: Map<string, string>;
@@ -3045,20 +3045,20 @@ export interface NativeEmbedTouchInfo {
     result?: EventResult;
 }
 export interface FirstMeaningfulPaint {
-    navigationStartTime?: number;
-    firstMeaningfulPaintTime?: number;
+    navigationStartTime?: int64;
+    firstMeaningfulPaintTime?: int64;
 }
 export interface LargestContentfulPaint {
-    navigationStartTime?: number;
-    largestImagePaintTime?: number;
-    largestTextPaintTime?: number;
-    imageBPP?: number;
-    largestImageLoadStartTime?: number;
-    largestImageLoadEndTime?: number;
+    navigationStartTime?: int64;
+    largestImagePaintTime?: int64;
+    largestTextPaintTime?: int64;
+    imageBPP?: double;
+    largestImageLoadStartTime?: int64;
+    largestImageLoadEndTime?: int64;
 }
 export interface RenderProcessNotRespondingData {
     jsStack: string;
-    pid: number;
+    pid: int32;
     reason: RenderProcessNotRespondingReason;
 }
 export interface OnPageEndEvent {
@@ -3068,7 +3068,7 @@ export interface OnPageBeginEvent {
     url: string;
 }
 export interface OnProgressChangeEvent {
-    newProgress: number;
+    newProgress: int32;
 }
 export interface OnTitleReceiveEvent {
     title: string;
@@ -3131,8 +3131,8 @@ export interface OnResourceLoadEvent {
     url: string;
 }
 export interface OnScaleChangeEvent {
-    oldScale: number;
-    newScale: number;
+    oldScale: double;
+    newScale: double;
 }
 export interface OnHttpAuthRequestEvent {
     handler: HttpAuthHandler;
@@ -3158,8 +3158,8 @@ export interface OnSearchResultReceiveEvent {
     isDoneCounting: boolean;
 }
 export interface OnScrollEvent {
-    xOffset: number;
-    yOffset: number;
+    xOffset: double;
+    yOffset: double;
 }
 export interface OnSslErrorEventReceiveEvent {
     handler: SslErrorHandler;
@@ -3196,15 +3196,15 @@ export interface OnAudioStateChangedEvent {
     playing: boolean;
 }
 export interface OnFirstContentfulPaintEvent {
-    navigationStartTick: number;
-    firstContentfulPaintMs: number;
+    navigationStartTick: int64;
+    firstContentfulPaintMs: int64;
 }
 export interface OnLoadInterceptEvent {
     data: WebResourceRequest;
 }
 export interface OnOverScrollEvent {
-    xOffset: number;
-    yOffset: number;
+    xOffset: double;
+    yOffset: double;
 }
 export interface JavaScriptProxy {
     object_: Object;
@@ -3280,13 +3280,13 @@ export interface WebAttribute extends CommonMethod {
     blurOnKeyboardHideMode(value: BlurOnKeyboardHideMode | undefined): this {
         throw new Error("Unimplemented method blurOnKeyboardHideMode")
     }
-    textZoomRatio(value: number | undefined): this {
+    textZoomRatio(value: int32 | undefined): this {
         throw new Error("Unimplemented method textZoomRatio")
     }
     databaseAccess(value: boolean | undefined): this {
         throw new Error("Unimplemented method databaseAccess")
     }
-    initialScale(value: number | undefined): this {
+    initialScale(value: double | undefined): this {
         throw new Error("Unimplemented method initialScale")
     }
     metaViewport(value: boolean | undefined): this {
@@ -3424,16 +3424,16 @@ export interface WebAttribute extends CommonMethod {
     webCursiveFont(value: string | undefined): this {
         throw new Error("Unimplemented method webCursiveFont")
     }
-    defaultFixedFontSize(value: number | undefined): this {
+    defaultFixedFontSize(value: int32 | undefined): this {
         throw new Error("Unimplemented method defaultFixedFontSize")
     }
-    defaultFontSize(value: number | undefined): this {
+    defaultFontSize(value: int32 | undefined): this {
         throw new Error("Unimplemented method defaultFontSize")
     }
-    minFontSize(value: number | undefined): this {
+    minFontSize(value: int32 | undefined): this {
         throw new Error("Unimplemented method minFontSize")
     }
-    minLogicalFontSize(value: number | undefined): this {
+    minLogicalFontSize(value: int32 | undefined): this {
         throw new Error("Unimplemented method minLogicalFontSize")
     }
     defaultTextEncodingFormat(value: string | undefined): this {
@@ -3607,9 +3607,9 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     overviewModeAccess_value?: boolean | undefined
     overScrollMode_value?: OverScrollMode | undefined
     blurOnKeyboardHideMode_value?: BlurOnKeyboardHideMode | undefined
-    textZoomRatio_value?: number | undefined
+    textZoomRatio_value?: int32 | undefined
     databaseAccess_value?: boolean | undefined
-    initialScale_value?: number | undefined
+    initialScale_value?: double | undefined
     metaViewport_value?: boolean | undefined
     onPageEnd_value?: ((value0: OnPageEndEvent) => void) | undefined
     onPageBegin_value?: ((value0: OnPageBeginEvent) => void) | undefined
@@ -3655,10 +3655,10 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     webFixedFont_value?: string | undefined
     webFantasyFont_value?: string | undefined
     webCursiveFont_value?: string | undefined
-    defaultFixedFontSize_value?: number | undefined
-    defaultFontSize_value?: number | undefined
-    minFontSize_value?: number | undefined
-    minLogicalFontSize_value?: number | undefined
+    defaultFixedFontSize_value?: int32 | undefined
+    defaultFontSize_value?: int32 | undefined
+    minFontSize_value?: int32 | undefined
+    minLogicalFontSize_value?: int32 | undefined
     defaultTextEncodingFormat_value?: string | undefined
     forceDisplayScrollBar_value?: boolean | undefined
     blockNetwork_value?: boolean | undefined
@@ -3756,13 +3756,13 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     public blurOnKeyboardHideMode(value: BlurOnKeyboardHideMode | undefined): this {
         return this
     }
-    public textZoomRatio(value: number | undefined): this {
+    public textZoomRatio(value: int32 | undefined): this {
         return this
     }
     public databaseAccess(value: boolean | undefined): this {
         return this
     }
-    public initialScale(value: number | undefined): this {
+    public initialScale(value: double | undefined): this {
         return this
     }
     public metaViewport(value: boolean | undefined): this {
@@ -3900,16 +3900,16 @@ export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     public webCursiveFont(value: string | undefined): this {
         return this
     }
-    public defaultFixedFontSize(value: number | undefined): this {
+    public defaultFixedFontSize(value: int32 | undefined): this {
         return this
     }
-    public defaultFontSize(value: number | undefined): this {
+    public defaultFontSize(value: int32 | undefined): this {
         return this
     }
-    public minFontSize(value: number | undefined): this {
+    public minFontSize(value: int32 | undefined): this {
         return this
     }
-    public minLogicalFontSize(value: number | undefined): this {
+    public minLogicalFontSize(value: int32 | undefined): this {
         return this
     }
     public defaultTextEncodingFormat(value: string | undefined): this {
@@ -4460,9 +4460,9 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         }
         return this
     }
-    public textZoomRatio(value: number | undefined): this {
+    public textZoomRatio(value: int32 | undefined): this {
         if (this.checkPriority("textZoomRatio")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (int32 | undefined)
             this.getPeer()?.setTextZoomRatioAttribute(value_casted)
             return this
         }
@@ -4476,9 +4476,9 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         }
         return this
     }
-    public initialScale(value: number | undefined): this {
+    public initialScale(value: double | undefined): this {
         if (this.checkPriority("initialScale")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (double | undefined)
             this.getPeer()?.setInitialScaleAttribute(value_casted)
             return this
         }
@@ -4844,33 +4844,33 @@ export class ArkWebComponent extends ArkCommonMethodComponent implements WebAttr
         }
         return this
     }
-    public defaultFixedFontSize(value: number | undefined): this {
+    public defaultFixedFontSize(value: int32 | undefined): this {
         if (this.checkPriority("defaultFixedFontSize")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (int32 | undefined)
             this.getPeer()?.setDefaultFixedFontSizeAttribute(value_casted)
             return this
         }
         return this
     }
-    public defaultFontSize(value: number | undefined): this {
+    public defaultFontSize(value: int32 | undefined): this {
         if (this.checkPriority("defaultFontSize")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (int32 | undefined)
             this.getPeer()?.setDefaultFontSizeAttribute(value_casted)
             return this
         }
         return this
     }
-    public minFontSize(value: number | undefined): this {
+    public minFontSize(value: int32 | undefined): this {
         if (this.checkPriority("minFontSize")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (int32 | undefined)
             this.getPeer()?.setMinFontSizeAttribute(value_casted)
             return this
         }
         return this
     }
-    public minLogicalFontSize(value: number | undefined): this {
+    public minLogicalFontSize(value: int32 | undefined): this {
         if (this.checkPriority("minLogicalFontSize")) {
-            const value_casted = value as (number | undefined)
+            const value_casted = value as (int32 | undefined)
             this.getPeer()?.setMinLogicalFontSizeAttribute(value_casted)
             return this
         }
@@ -5368,11 +5368,11 @@ export class ArkWebSet extends ArkCommonMethodSet implements WebAttribute {
     _blurOnKeyboardHideMode_flag?: boolean
     _blurOnKeyboardHideMode0_value?: BlurOnKeyboardHideMode | undefined
     _textZoomRatio_flag?: boolean
-    _textZoomRatio0_value?: number | undefined
+    _textZoomRatio0_value?: int32 | undefined
     _databaseAccess_flag?: boolean
     _databaseAccess0_value?: boolean | undefined
     _initialScale_flag?: boolean
-    _initialScale0_value?: number | undefined
+    _initialScale0_value?: double | undefined
     _metaViewport_flag?: boolean
     _metaViewport0_value?: boolean | undefined
     _onPageEnd_flag?: boolean
@@ -5464,13 +5464,13 @@ export class ArkWebSet extends ArkCommonMethodSet implements WebAttribute {
     _webCursiveFont_flag?: boolean
     _webCursiveFont0_value?: string | undefined
     _defaultFixedFontSize_flag?: boolean
-    _defaultFixedFontSize0_value?: number | undefined
+    _defaultFixedFontSize0_value?: int32 | undefined
     _defaultFontSize_flag?: boolean
-    _defaultFontSize0_value?: number | undefined
+    _defaultFontSize0_value?: int32 | undefined
     _minFontSize_flag?: boolean
-    _minFontSize0_value?: number | undefined
+    _minFontSize0_value?: int32 | undefined
     _minLogicalFontSize_flag?: boolean
-    _minLogicalFontSize0_value?: number | undefined
+    _minLogicalFontSize0_value?: int32 | undefined
     _defaultTextEncodingFormat_flag?: boolean
     _defaultTextEncodingFormat0_value?: string | undefined
     _forceDisplayScrollBar_flag?: boolean
@@ -5609,11 +5609,11 @@ export class ArkWebSet extends ArkCommonMethodSet implements WebAttribute {
         if (this._blurOnKeyboardHideMode_flag)
             component.blurOnKeyboardHideMode((this._blurOnKeyboardHideMode0_value as BlurOnKeyboardHideMode | undefined))
         if (this._textZoomRatio_flag)
-            component.textZoomRatio((this._textZoomRatio0_value as number | undefined))
+            component.textZoomRatio((this._textZoomRatio0_value as int32 | undefined))
         if (this._databaseAccess_flag)
             component.databaseAccess((this._databaseAccess0_value as boolean | undefined))
         if (this._initialScale_flag)
-            component.initialScale((this._initialScale0_value as number | undefined))
+            component.initialScale((this._initialScale0_value as double | undefined))
         if (this._metaViewport_flag)
             component.metaViewport((this._metaViewport0_value as boolean | undefined))
         if (this._onPageEnd_flag)
@@ -5705,13 +5705,13 @@ export class ArkWebSet extends ArkCommonMethodSet implements WebAttribute {
         if (this._webCursiveFont_flag)
             component.webCursiveFont((this._webCursiveFont0_value as string | undefined))
         if (this._defaultFixedFontSize_flag)
-            component.defaultFixedFontSize((this._defaultFixedFontSize0_value as number | undefined))
+            component.defaultFixedFontSize((this._defaultFixedFontSize0_value as int32 | undefined))
         if (this._defaultFontSize_flag)
-            component.defaultFontSize((this._defaultFontSize0_value as number | undefined))
+            component.defaultFontSize((this._defaultFontSize0_value as int32 | undefined))
         if (this._minFontSize_flag)
-            component.minFontSize((this._minFontSize0_value as number | undefined))
+            component.minFontSize((this._minFontSize0_value as int32 | undefined))
         if (this._minLogicalFontSize_flag)
-            component.minLogicalFontSize((this._minLogicalFontSize0_value as number | undefined))
+            component.minLogicalFontSize((this._minLogicalFontSize0_value as int32 | undefined))
         if (this._defaultTextEncodingFormat_flag)
             component.defaultTextEncodingFormat((this._defaultTextEncodingFormat0_value as string | undefined))
         if (this._forceDisplayScrollBar_flag)
@@ -5893,7 +5893,7 @@ export class ArkWebSet extends ArkCommonMethodSet implements WebAttribute {
         this._blurOnKeyboardHideMode0_value = value
         return this
     }
-    public textZoomRatio(value: number | undefined): this {
+    public textZoomRatio(value: int32 | undefined): this {
         this._textZoomRatio_flag = true
         this._textZoomRatio0_value = value
         return this
@@ -5903,7 +5903,7 @@ export class ArkWebSet extends ArkCommonMethodSet implements WebAttribute {
         this._databaseAccess0_value = value
         return this
     }
-    public initialScale(value: number | undefined): this {
+    public initialScale(value: double | undefined): this {
         this._initialScale_flag = true
         this._initialScale0_value = value
         return this
@@ -6133,22 +6133,22 @@ export class ArkWebSet extends ArkCommonMethodSet implements WebAttribute {
         this._webCursiveFont0_value = value
         return this
     }
-    public defaultFixedFontSize(value: number | undefined): this {
+    public defaultFixedFontSize(value: int32 | undefined): this {
         this._defaultFixedFontSize_flag = true
         this._defaultFixedFontSize0_value = value
         return this
     }
-    public defaultFontSize(value: number | undefined): this {
+    public defaultFontSize(value: int32 | undefined): this {
         this._defaultFontSize_flag = true
         this._defaultFontSize0_value = value
         return this
     }
-    public minFontSize(value: number | undefined): this {
+    public minFontSize(value: int32 | undefined): this {
         this._minFontSize_flag = true
         this._minFontSize0_value = value
         return this
     }
-    public minLogicalFontSize(value: number | undefined): this {
+    public minLogicalFontSize(value: int32 | undefined): this {
         this._minLogicalFontSize_flag = true
         this._minLogicalFontSize0_value = value
         return this
@@ -6604,14 +6604,14 @@ export class OnFirstContentfulPaintEvent_serializer {
     public static write(buffer: SerializerBase, value: OnFirstContentfulPaintEvent): void {
         let valueSerializer : SerializerBase = buffer
         const value_navigationStartTick  = value.navigationStartTick
-        valueSerializer.writeNumber(value_navigationStartTick)
+        valueSerializer.writeInt64(value_navigationStartTick)
         const value_firstContentfulPaintMs  = value.firstContentfulPaintMs
-        valueSerializer.writeNumber(value_firstContentfulPaintMs)
+        valueSerializer.writeInt64(value_firstContentfulPaintMs)
     }
     public static read(buffer: DeserializerBase): OnFirstContentfulPaintEvent {
         let valueDeserializer : DeserializerBase = buffer
-        const navigationStartTick_result : number = (valueDeserializer.readNumber() as number)
-        const firstContentfulPaintMs_result : number = (valueDeserializer.readNumber() as number)
+        const navigationStartTick_result : int64 = valueDeserializer.readInt64()
+        const firstContentfulPaintMs_result : int64 = valueDeserializer.readInt64()
         let value : OnFirstContentfulPaintEvent = ({navigationStartTick: navigationStartTick_result, firstContentfulPaintMs: firstContentfulPaintMs_result} as OnFirstContentfulPaintEvent)
         return value
     }
@@ -6620,14 +6620,14 @@ export class OnOverScrollEvent_serializer {
     public static write(buffer: SerializerBase, value: OnOverScrollEvent): void {
         let valueSerializer : SerializerBase = buffer
         const value_xOffset  = value.xOffset
-        valueSerializer.writeNumber(value_xOffset)
+        valueSerializer.writeFloat64(value_xOffset)
         const value_yOffset  = value.yOffset
-        valueSerializer.writeNumber(value_yOffset)
+        valueSerializer.writeFloat64(value_yOffset)
     }
     public static read(buffer: DeserializerBase): OnOverScrollEvent {
         let valueDeserializer : DeserializerBase = buffer
-        const xOffset_result : number = (valueDeserializer.readNumber() as number)
-        const yOffset_result : number = (valueDeserializer.readNumber() as number)
+        const xOffset_result : double = valueDeserializer.readFloat64()
+        const yOffset_result : double = valueDeserializer.readFloat64()
         let value : OnOverScrollEvent = ({xOffset: xOffset_result, yOffset: yOffset_result} as OnOverScrollEvent)
         return value
     }
@@ -6636,11 +6636,11 @@ export class OnProgressChangeEvent_serializer {
     public static write(buffer: SerializerBase, value: OnProgressChangeEvent): void {
         let valueSerializer : SerializerBase = buffer
         const value_newProgress  = value.newProgress
-        valueSerializer.writeNumber(value_newProgress)
+        valueSerializer.writeInt32(value_newProgress)
     }
     public static read(buffer: DeserializerBase): OnProgressChangeEvent {
         let valueDeserializer : DeserializerBase = buffer
-        const newProgress_result : number = (valueDeserializer.readNumber() as number)
+        const newProgress_result : int32 = valueDeserializer.readInt32()
         let value : OnProgressChangeEvent = ({newProgress: newProgress_result} as OnProgressChangeEvent)
         return value
     }
@@ -6649,14 +6649,14 @@ export class OnScaleChangeEvent_serializer {
     public static write(buffer: SerializerBase, value: OnScaleChangeEvent): void {
         let valueSerializer : SerializerBase = buffer
         const value_oldScale  = value.oldScale
-        valueSerializer.writeNumber(value_oldScale)
+        valueSerializer.writeFloat64(value_oldScale)
         const value_newScale  = value.newScale
-        valueSerializer.writeNumber(value_newScale)
+        valueSerializer.writeFloat64(value_newScale)
     }
     public static read(buffer: DeserializerBase): OnScaleChangeEvent {
         let valueDeserializer : DeserializerBase = buffer
-        const oldScale_result : number = (valueDeserializer.readNumber() as number)
-        const newScale_result : number = (valueDeserializer.readNumber() as number)
+        const oldScale_result : double = valueDeserializer.readFloat64()
+        const newScale_result : double = valueDeserializer.readFloat64()
         let value : OnScaleChangeEvent = ({oldScale: oldScale_result, newScale: newScale_result} as OnScaleChangeEvent)
         return value
     }
@@ -6665,14 +6665,14 @@ export class OnScrollEvent_serializer {
     public static write(buffer: SerializerBase, value: OnScrollEvent): void {
         let valueSerializer : SerializerBase = buffer
         const value_xOffset  = value.xOffset
-        valueSerializer.writeNumber(value_xOffset)
+        valueSerializer.writeFloat64(value_xOffset)
         const value_yOffset  = value.yOffset
-        valueSerializer.writeNumber(value_yOffset)
+        valueSerializer.writeFloat64(value_yOffset)
     }
     public static read(buffer: DeserializerBase): OnScrollEvent {
         let valueDeserializer : DeserializerBase = buffer
-        const xOffset_result : number = (valueDeserializer.readNumber() as number)
-        const yOffset_result : number = (valueDeserializer.readNumber() as number)
+        const xOffset_result : double = valueDeserializer.readFloat64()
+        const yOffset_result : double = valueDeserializer.readFloat64()
         let value : OnScrollEvent = ({xOffset: xOffset_result, yOffset: yOffset_result} as OnScrollEvent)
         return value
     }
@@ -6881,7 +6881,7 @@ export class FirstMeaningfulPaint_serializer {
         valueSerializer.writeInt8((value_navigationStartTime_type).toChar())
         if ((value_navigationStartTime_type) != (RuntimeType.UNDEFINED)) {
             const value_navigationStartTime_value  = value_navigationStartTime!
-            valueSerializer.writeNumber(value_navigationStartTime_value)
+            valueSerializer.writeInt64(value_navigationStartTime_value)
         }
         const value_firstMeaningfulPaintTime  = value.firstMeaningfulPaintTime
         let value_firstMeaningfulPaintTime_type : int32 = RuntimeType.UNDEFINED
@@ -6889,25 +6889,25 @@ export class FirstMeaningfulPaint_serializer {
         valueSerializer.writeInt8((value_firstMeaningfulPaintTime_type).toChar())
         if ((value_firstMeaningfulPaintTime_type) != (RuntimeType.UNDEFINED)) {
             const value_firstMeaningfulPaintTime_value  = value_firstMeaningfulPaintTime!
-            valueSerializer.writeNumber(value_firstMeaningfulPaintTime_value)
+            valueSerializer.writeInt64(value_firstMeaningfulPaintTime_value)
         }
     }
     public static read(buffer: DeserializerBase): FirstMeaningfulPaint {
         let valueDeserializer : DeserializerBase = buffer
         const navigationStartTime_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let navigationStartTime_buf : number | undefined
+        let navigationStartTime_buf : int64 | undefined
         if ((navigationStartTime_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
-            navigationStartTime_buf = (valueDeserializer.readNumber() as number)
+            navigationStartTime_buf = valueDeserializer.readInt64()
         }
-        const navigationStartTime_result : number | undefined = navigationStartTime_buf
+        const navigationStartTime_result : int64 | undefined = navigationStartTime_buf
         const firstMeaningfulPaintTime_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let firstMeaningfulPaintTime_buf : number | undefined
+        let firstMeaningfulPaintTime_buf : int64 | undefined
         if ((firstMeaningfulPaintTime_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
-            firstMeaningfulPaintTime_buf = (valueDeserializer.readNumber() as number)
+            firstMeaningfulPaintTime_buf = valueDeserializer.readInt64()
         }
-        const firstMeaningfulPaintTime_result : number | undefined = firstMeaningfulPaintTime_buf
+        const firstMeaningfulPaintTime_result : int64 | undefined = firstMeaningfulPaintTime_buf
         let value : FirstMeaningfulPaint = ({navigationStartTime: navigationStartTime_result, firstMeaningfulPaintTime: firstMeaningfulPaintTime_result} as FirstMeaningfulPaint)
         return value
     }
@@ -7066,7 +7066,7 @@ export class LargestContentfulPaint_serializer {
         valueSerializer.writeInt8((value_navigationStartTime_type).toChar())
         if ((value_navigationStartTime_type) != (RuntimeType.UNDEFINED)) {
             const value_navigationStartTime_value  = value_navigationStartTime!
-            valueSerializer.writeNumber(value_navigationStartTime_value)
+            valueSerializer.writeInt64(value_navigationStartTime_value)
         }
         const value_largestImagePaintTime  = value.largestImagePaintTime
         let value_largestImagePaintTime_type : int32 = RuntimeType.UNDEFINED
@@ -7074,7 +7074,7 @@ export class LargestContentfulPaint_serializer {
         valueSerializer.writeInt8((value_largestImagePaintTime_type).toChar())
         if ((value_largestImagePaintTime_type) != (RuntimeType.UNDEFINED)) {
             const value_largestImagePaintTime_value  = value_largestImagePaintTime!
-            valueSerializer.writeNumber(value_largestImagePaintTime_value)
+            valueSerializer.writeInt64(value_largestImagePaintTime_value)
         }
         const value_largestTextPaintTime  = value.largestTextPaintTime
         let value_largestTextPaintTime_type : int32 = RuntimeType.UNDEFINED
@@ -7082,7 +7082,7 @@ export class LargestContentfulPaint_serializer {
         valueSerializer.writeInt8((value_largestTextPaintTime_type).toChar())
         if ((value_largestTextPaintTime_type) != (RuntimeType.UNDEFINED)) {
             const value_largestTextPaintTime_value  = value_largestTextPaintTime!
-            valueSerializer.writeNumber(value_largestTextPaintTime_value)
+            valueSerializer.writeInt64(value_largestTextPaintTime_value)
         }
         const value_imageBPP  = value.imageBPP
         let value_imageBPP_type : int32 = RuntimeType.UNDEFINED
@@ -7090,7 +7090,7 @@ export class LargestContentfulPaint_serializer {
         valueSerializer.writeInt8((value_imageBPP_type).toChar())
         if ((value_imageBPP_type) != (RuntimeType.UNDEFINED)) {
             const value_imageBPP_value  = value_imageBPP!
-            valueSerializer.writeNumber(value_imageBPP_value)
+            valueSerializer.writeFloat64(value_imageBPP_value)
         }
         const value_largestImageLoadStartTime  = value.largestImageLoadStartTime
         let value_largestImageLoadStartTime_type : int32 = RuntimeType.UNDEFINED
@@ -7098,7 +7098,7 @@ export class LargestContentfulPaint_serializer {
         valueSerializer.writeInt8((value_largestImageLoadStartTime_type).toChar())
         if ((value_largestImageLoadStartTime_type) != (RuntimeType.UNDEFINED)) {
             const value_largestImageLoadStartTime_value  = value_largestImageLoadStartTime!
-            valueSerializer.writeNumber(value_largestImageLoadStartTime_value)
+            valueSerializer.writeInt64(value_largestImageLoadStartTime_value)
         }
         const value_largestImageLoadEndTime  = value.largestImageLoadEndTime
         let value_largestImageLoadEndTime_type : int32 = RuntimeType.UNDEFINED
@@ -7106,53 +7106,53 @@ export class LargestContentfulPaint_serializer {
         valueSerializer.writeInt8((value_largestImageLoadEndTime_type).toChar())
         if ((value_largestImageLoadEndTime_type) != (RuntimeType.UNDEFINED)) {
             const value_largestImageLoadEndTime_value  = value_largestImageLoadEndTime!
-            valueSerializer.writeNumber(value_largestImageLoadEndTime_value)
+            valueSerializer.writeInt64(value_largestImageLoadEndTime_value)
         }
     }
     public static read(buffer: DeserializerBase): LargestContentfulPaint {
         let valueDeserializer : DeserializerBase = buffer
         const navigationStartTime_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let navigationStartTime_buf : number | undefined
+        let navigationStartTime_buf : int64 | undefined
         if ((navigationStartTime_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
-            navigationStartTime_buf = (valueDeserializer.readNumber() as number)
+            navigationStartTime_buf = valueDeserializer.readInt64()
         }
-        const navigationStartTime_result : number | undefined = navigationStartTime_buf
+        const navigationStartTime_result : int64 | undefined = navigationStartTime_buf
         const largestImagePaintTime_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let largestImagePaintTime_buf : number | undefined
+        let largestImagePaintTime_buf : int64 | undefined
         if ((largestImagePaintTime_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
-            largestImagePaintTime_buf = (valueDeserializer.readNumber() as number)
+            largestImagePaintTime_buf = valueDeserializer.readInt64()
         }
-        const largestImagePaintTime_result : number | undefined = largestImagePaintTime_buf
+        const largestImagePaintTime_result : int64 | undefined = largestImagePaintTime_buf
         const largestTextPaintTime_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let largestTextPaintTime_buf : number | undefined
+        let largestTextPaintTime_buf : int64 | undefined
         if ((largestTextPaintTime_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
-            largestTextPaintTime_buf = (valueDeserializer.readNumber() as number)
+            largestTextPaintTime_buf = valueDeserializer.readInt64()
         }
-        const largestTextPaintTime_result : number | undefined = largestTextPaintTime_buf
+        const largestTextPaintTime_result : int64 | undefined = largestTextPaintTime_buf
         const imageBPP_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let imageBPP_buf : number | undefined
+        let imageBPP_buf : double | undefined
         if ((imageBPP_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
-            imageBPP_buf = (valueDeserializer.readNumber() as number)
+            imageBPP_buf = valueDeserializer.readFloat64()
         }
-        const imageBPP_result : number | undefined = imageBPP_buf
+        const imageBPP_result : double | undefined = imageBPP_buf
         const largestImageLoadStartTime_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let largestImageLoadStartTime_buf : number | undefined
+        let largestImageLoadStartTime_buf : int64 | undefined
         if ((largestImageLoadStartTime_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
-            largestImageLoadStartTime_buf = (valueDeserializer.readNumber() as number)
+            largestImageLoadStartTime_buf = valueDeserializer.readInt64()
         }
-        const largestImageLoadStartTime_result : number | undefined = largestImageLoadStartTime_buf
+        const largestImageLoadStartTime_result : int64 | undefined = largestImageLoadStartTime_buf
         const largestImageLoadEndTime_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let largestImageLoadEndTime_buf : number | undefined
+        let largestImageLoadEndTime_buf : int64 | undefined
         if ((largestImageLoadEndTime_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
-            largestImageLoadEndTime_buf = (valueDeserializer.readNumber() as number)
+            largestImageLoadEndTime_buf = valueDeserializer.readInt64()
         }
-        const largestImageLoadEndTime_result : number | undefined = largestImageLoadEndTime_buf
+        const largestImageLoadEndTime_result : int64 | undefined = largestImageLoadEndTime_buf
         let value : LargestContentfulPaint = ({navigationStartTime: navigationStartTime_result, largestImagePaintTime: largestImagePaintTime_result, largestTextPaintTime: largestTextPaintTime_result, imageBPP: imageBPP_result, largestImageLoadStartTime: largestImageLoadStartTime_result, largestImageLoadEndTime: largestImageLoadEndTime_result} as LargestContentfulPaint)
         return value
     }
@@ -7728,14 +7728,14 @@ export class RenderProcessNotRespondingData_serializer {
         const value_jsStack  = value.jsStack
         valueSerializer.writeString(value_jsStack)
         const value_pid  = value.pid
-        valueSerializer.writeNumber(value_pid)
+        valueSerializer.writeInt32(value_pid)
         const value_reason  = value.reason
         valueSerializer.writeInt32(TypeChecker.RenderProcessNotRespondingReason_ToNumeric(value_reason))
     }
     public static read(buffer: DeserializerBase): RenderProcessNotRespondingData {
         let valueDeserializer : DeserializerBase = buffer
         const jsStack_result : string = (valueDeserializer.readString() as string)
-        const pid_result : number = (valueDeserializer.readNumber() as number)
+        const pid_result : int32 = valueDeserializer.readInt32()
         const reason_result : RenderProcessNotRespondingReason = TypeChecker.RenderProcessNotRespondingReason_FromNumeric(valueDeserializer.readInt32())
         let value : RenderProcessNotRespondingData = ({jsStack: jsStack_result, pid: pid_result, reason: reason_result} as RenderProcessNotRespondingData)
         return value
@@ -7951,7 +7951,7 @@ export class WebKeyboardOptions_serializer {
         valueSerializer.writeInt8((value_enterKeyType_type).toChar())
         if ((value_enterKeyType_type) != (RuntimeType.UNDEFINED)) {
             const value_enterKeyType_value  = value_enterKeyType!
-            valueSerializer.writeNumber(value_enterKeyType_value)
+            valueSerializer.writeInt32(value_enterKeyType_value)
         }
         const value_customKeyboard  = value.customKeyboard
         let value_customKeyboard_type : int32 = RuntimeType.UNDEFINED
@@ -7966,12 +7966,12 @@ export class WebKeyboardOptions_serializer {
         let valueDeserializer : DeserializerBase = buffer
         const useSystemKeyboard_result : boolean = valueDeserializer.readBoolean()
         const enterKeyType_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let enterKeyType_buf : number | undefined
+        let enterKeyType_buf : int32 | undefined
         if ((enterKeyType_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
-            enterKeyType_buf = (valueDeserializer.readNumber() as number)
+            enterKeyType_buf = valueDeserializer.readInt32()
         }
-        const enterKeyType_result : number | undefined = enterKeyType_buf
+        const enterKeyType_result : int32 | undefined = enterKeyType_buf
         const customKeyboard_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let customKeyboard_buf : CustomBuilder | undefined
         if ((customKeyboard_buf_runtimeType) != (RuntimeType.UNDEFINED))
@@ -8002,7 +8002,7 @@ export class WebMediaOptions_serializer {
         valueSerializer.writeInt8((value_resumeInterval_type).toChar())
         if ((value_resumeInterval_type) != (RuntimeType.UNDEFINED)) {
             const value_resumeInterval_value  = value_resumeInterval!
-            valueSerializer.writeNumber(value_resumeInterval_value)
+            valueSerializer.writeInt32(value_resumeInterval_value)
         }
         const value_audioExclusive  = value.audioExclusive
         let value_audioExclusive_type : int32 = RuntimeType.UNDEFINED
@@ -8016,12 +8016,12 @@ export class WebMediaOptions_serializer {
     public static read(buffer: DeserializerBase): WebMediaOptions {
         let valueDeserializer : DeserializerBase = buffer
         const resumeInterval_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let resumeInterval_buf : number | undefined
+        let resumeInterval_buf : int32 | undefined
         if ((resumeInterval_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
-            resumeInterval_buf = (valueDeserializer.readNumber() as number)
+            resumeInterval_buf = valueDeserializer.readInt32()
         }
-        const resumeInterval_result : number | undefined = resumeInterval_buf
+        const resumeInterval_result : int32 | undefined = resumeInterval_buf
         const audioExclusive_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let audioExclusive_buf : boolean | undefined
         if ((audioExclusive_buf_runtimeType) != (RuntimeType.UNDEFINED))
@@ -8157,7 +8157,7 @@ export class NativeEmbedInfo_serializer {
         valueSerializer.writeInt8((value_width_type).toChar())
         if ((value_width_type) != (RuntimeType.UNDEFINED)) {
             const value_width_value  = value_width!
-            valueSerializer.writeNumber(value_width_value)
+            valueSerializer.writeInt32(value_width_value)
         }
         const value_height  = value.height
         let value_height_type : int32 = RuntimeType.UNDEFINED
@@ -8165,7 +8165,7 @@ export class NativeEmbedInfo_serializer {
         valueSerializer.writeInt8((value_height_type).toChar())
         if ((value_height_type) != (RuntimeType.UNDEFINED)) {
             const value_height_value  = value_height!
-            valueSerializer.writeNumber(value_height_value)
+            valueSerializer.writeInt32(value_height_value)
         }
         const value_url  = value.url
         let value_url_type : int32 = RuntimeType.UNDEFINED
@@ -8229,19 +8229,19 @@ export class NativeEmbedInfo_serializer {
         }
         const position_result : Position | undefined = position_buf
         const width_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let width_buf : number | undefined
+        let width_buf : int32 | undefined
         if ((width_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
-            width_buf = (valueDeserializer.readNumber() as number)
+            width_buf = valueDeserializer.readInt32()
         }
-        const width_result : number | undefined = width_buf
+        const width_result : int32 | undefined = width_buf
         const height_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let height_buf : number | undefined
+        let height_buf : int32 | undefined
         if ((height_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
-            height_buf = (valueDeserializer.readNumber() as number)
+            height_buf = valueDeserializer.readInt32()
         }
-        const height_result : number | undefined = height_buf
+        const height_result : int32 | undefined = height_buf
         const url_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let url_buf : string | undefined
         if ((url_buf_runtimeType) != (RuntimeType.UNDEFINED))
