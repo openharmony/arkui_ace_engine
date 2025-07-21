@@ -4898,6 +4898,7 @@ ASSIGN_OPT(Opt_WithThemeOptions)
 ASSIGN_OPT(Opt_RichEditorSpan)
 ASSIGN_OPT(Opt_PopupButton)
 ASSIGN_OPT(Opt_PopupOptions)
+ASSIGN_OPT(Opt_RadioModifierBuilder)
 #undef ASSIGN_OPT
 }
 

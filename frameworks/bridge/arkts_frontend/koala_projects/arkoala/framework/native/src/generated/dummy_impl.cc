@@ -43946,6 +43946,33 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     } // RouterExtenderAccessor
+    namespace ContentModifierHelperAccessor {
+    void ContentModifierRadioImpl(Ark_NativePointer node,
+                                  const Ark_Object* contentModifier,
+                                  const RadioModifierBuilder* builder)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("contentModifierRadio(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, contentModifier);
+        out.append(", ");
+        WriteToString(&out, builder);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+
+    void ResetContentModifierRadioImpl(Ark_NativePointer node)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("resetContentModifierRadio(");
+        WriteToString(&out, node);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    } // ContentModifierHelperAccessor
     const GENERATED_ArkUIAlphabetIndexerOpsAccessor* GetAlphabetIndexerOpsAccessor()
     {
         static const GENERATED_ArkUIAlphabetIndexerOpsAccessor AlphabetIndexerOpsAccessorImpl {
@@ -47899,6 +47926,15 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return &RouterExtenderAccessorImpl;
     }
 
+    const GENERATED_ArkUIContentModifierHelperAccessor* GetContentModifierHelperAccessor()
+    {
+        static const GENERATED_ArkUIContentModifierHelperAccessor ContentModifierHelperAccessorImpl {
+            ContentModifierHelperAccessor::ContentModifierRadioImpl,
+            ContentModifierHelperAccessor::ResetContentModifierRadioImpl,
+        };
+        return &ContentModifierHelperAccessorImpl;
+    }
+
     const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
     {
         static const GENERATED_ArkUIAccessors accessorsImpl = {
@@ -48120,6 +48156,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetLinearIndicatorControllerAccessor,
             GetGlobalScopeAccessor,
             GetRouterExtenderAccessor,
+            GetContentModifierHelperAccessor,
         };
         return &accessorsImpl;
     }

@@ -438,6 +438,7 @@ const GENERATED_ArkUILinearIndicatorControllerAccessor* GetLinearIndicatorContro
 const GENERATED_ArkUIGlobalScopeAccessor* GetGlobalScopeAccessor();
 const GENERATED_ArkUIPromptActionAccessor* GetPromptActionAccessor();
 const GENERATED_ArkUIRouterExtenderAccessor* GetRouterExtenderAccessor();
+const GENERATED_ArkUIContentModifierHelperAccessor* GetContentModifierHelperAccessor();
 const GENERATED_ArkUIStateModifier* GetUIStateModifier();
 const GENERATED_ArkUINodeModifiers* GENERATED_GetArkUINodeModifiers()
 {
@@ -801,6 +802,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetGlobalScopeAccessor,
         GetPromptActionAccessor,
         GetRouterExtenderAccessor,
+        GetContentModifierHelperAccessor,
     };
     return &accessorsImpl;
 }
