@@ -30,7 +30,7 @@ void TextTimerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto constraint = layoutProperty->GetLayoutConstraint();
     auto& minSize = constraint->minSize;
     auto& maxSize = constraint->maxSize;
-    if (layoutPolicy.has_value() && layoutPolicy->IsFix()) {
+    if (layoutPolicy.has_value()) {
         if (layoutPolicy->IsWidthFix()) {
             maxSize.SetWidth(std::numeric_limits<float>::max());
             childConstraint.maxSize.SetWidth(std::numeric_limits<float>::max());
@@ -39,8 +39,6 @@ void TextTimerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             maxSize.SetHeight(std::numeric_limits<float>::max());
             childConstraint.maxSize.SetHeight(std::numeric_limits<float>::max());
         }
-    }
-    if (layoutPolicy.has_value() && layoutPolicy->IsMatch()) {
         if (layoutPolicy->IsWidthMatch()) {
             maxSize.SetWidth(constraint->parentIdealSize.Width().value());
             childConstraint.maxSize.SetWidth(constraint->parentIdealSize.Width().value());

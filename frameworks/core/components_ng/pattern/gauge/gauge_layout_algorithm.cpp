@@ -27,6 +27,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr float HALF_CIRCLE = 180.0f;
 constexpr float QUARTER_CIRCLE = 90.0f;
+constexpr float ZERO_MEASURE_CONTENT_SIZE = 0.0f;
 } // namespace
 
 GaugeLayoutAlgorithm::GaugeLayoutAlgorithm() = default;
@@ -55,6 +56,16 @@ void GaugeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         BoxLayoutAlgorithm::PerformMeasureSelfWithChildList(layoutWrapper, list);
         return;
     }
+    auto layoutProperty = AceType::DynamicCast<LayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
+    if (layoutPolicy.has_value() && (layoutPolicy->IsWrap() || layoutPolicy->IsFix())) {
+        auto layoutConstraint = layoutProperty->GetLayoutConstraint();
+        if (layoutConstraint) {
+            layoutConstraint->maxSize.SetWidth(ZERO_MEASURE_CONTENT_SIZE);
+            layoutConstraint->maxSize.SetHeight(ZERO_MEASURE_CONTENT_SIZE);
+        }
+    }
     BoxLayoutAlgorithm::Measure(layoutWrapper);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         MeasureLimitValueTextWidth(layoutWrapper);
@@ -77,8 +88,8 @@ std::optional<SizeF> GaugeLayoutAlgorithm::MeasureContent(
     auto layoutProperty = AceType::DynamicCast<LayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(layoutProperty, std::nullopt);
     auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
-    if (layoutPolicy.has_value() && layoutPolicy->IsWrap()) {
-        return std::nullopt;
+    if (layoutPolicy.has_value() && (layoutPolicy->IsWrap() || layoutPolicy->IsFix())) {
+        return SizeF(ZERO_MEASURE_CONTENT_SIZE, ZERO_MEASURE_CONTENT_SIZE);
     }
     auto pattern = host->GetPattern<GaugePattern>();
     CHECK_NULL_RETURN(pattern, std::nullopt);
