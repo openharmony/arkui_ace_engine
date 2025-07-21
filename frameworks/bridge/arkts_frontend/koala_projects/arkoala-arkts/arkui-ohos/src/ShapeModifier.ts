@@ -21,285 +21,291 @@ import { Resource } from 'global.resource';
 import { LineCapStyle, LineJoinStyle } from 'arkui/component/enums';
 
 export class ShapeModifier extends CommonMethodModifier implements ShapeAttribute, AttributeModifier<ShapeAttribute> {
+    _instanceId: number = -1;
+    setInstanceId(instanceId: number): void {
+        this._instanceId = instanceId
+    }
     applyNormalAttribute(instance: CommonShapeMethod): void { }
     applyPressedAttribute(instance: CommonShapeMethod): void { }
     applyFocusedAttribute(instance: CommonShapeMethod): void { }
     applyDisabledAttribute(instance: CommonShapeMethod): void { }
     applySelectedAttribute(instance: CommonShapeMethod): void { }
-    _viewPort_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _viewPort0_value?: ViewportRect | undefined
-    _stroke_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _stroke0_value?: ResourceColor | undefined
-    _fill_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _fill0_value?: ResourceColor | undefined
-    _strokeDashOffset_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _strokeDashOffset0_value?: number | string | undefined
-    _strokeDashArray_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _strokeDashArray0_value?: Array<Length> | undefined
-    _strokeLineCap_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _strokeLineCap0_value?: LineCapStyle | undefined
-    _strokeLineJoin_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _strokeLineJoin0_value?: LineJoinStyle | undefined
-    _strokeMiterLimit_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _strokeMiterLimit0_value?: number | string | undefined
-    _strokeOpacity_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _strokeOpacity0_value?: number | string | Resource | undefined
-    _fillOpacity_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _fillOpacity0_value?: number | string | Resource | undefined
-    _strokeWidth_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _strokeWidth0_value?: number | string | undefined
-    _antiAlias_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _antiAlias0_value?: boolean | undefined
-    _mesh_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _mesh0_value?: Array<number> | undefined
-    _mesh1_value?: number | undefined
-    _mesh2_value?: number | undefined
+    _viewPort_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _viewPort_0_0value?: ViewportRect | undefined
+    _stroke_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _stroke_0_0value?: ResourceColor | undefined
+    _fill_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _fill_0_0value?: ResourceColor | undefined
+    _strokeDashOffset_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _strokeDashOffset_0_0value?: number | string | undefined
+    _strokeDashArray_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _strokeDashArray_0_0value?: Array<Length> | undefined
+    _strokeLineCap_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _strokeLineCap_0_0value?: LineCapStyle | undefined
+    _strokeLineJoin_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _strokeLineJoin_0_0value?: LineJoinStyle | undefined
+    _strokeMiterLimit_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _strokeMiterLimit_0_0value?: number | string | undefined
+    _strokeOpacity_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _strokeOpacity_0_0value?: number | string | Resource | undefined
+    _fillOpacity_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _fillOpacity_0_0value?: number | string | Resource | undefined
+    _strokeWidth_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _strokeWidth_0_0value?: number | string | undefined
+    _antiAlias_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _antiAlias_0_0value?: boolean | undefined
+    _mesh_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _mesh_0_0value?: Array<number> | undefined
+    _mesh_0_1value?: number | undefined
+    _mesh_0_2value?: number | undefined
     applyModifierPatch(peer: ArkShapePeer): void {
-        if (this._viewPort_flag != AttributeUpdaterFlag.INITIAL)
+        super.applyModifierPatch(peer)
+        if (this._viewPort_0_flag != AttributeUpdaterFlag.INITIAL)
         {
-            switch (this._viewPort_flag) {
+            switch (this._viewPort_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.viewPortAttribute((this._viewPort0_value as ViewportRect | undefined));
-                    this._viewPort_flag = AttributeUpdaterFlag.RESET;
+                    peer.viewPortAttribute((this._viewPort_0_0value as ViewportRect | undefined));
+                    this._viewPort_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
                 case AttributeUpdaterFlag.SKIP: {
-                    this._viewPort_flag = AttributeUpdaterFlag.RESET;
+                    this._viewPort_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
                 default: {
-                    this._viewPort_flag = AttributeUpdaterFlag.INITIAL;
+                    this._viewPort_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.viewPortAttribute(undefined);
                 }
             }
         }
-        if (this._stroke_flag != AttributeUpdaterFlag.INITIAL)
+        if (this._stroke_0_flag != AttributeUpdaterFlag.INITIAL)
         {
-            switch (this._stroke_flag) {
+            switch (this._stroke_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.strokeAttribute((this._stroke0_value as ResourceColor | undefined));
-                    this._stroke_flag = AttributeUpdaterFlag.RESET;
+                    peer.strokeAttribute((this._stroke_0_0value as ResourceColor | undefined));
+                    this._stroke_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
                 case AttributeUpdaterFlag.SKIP: {
-                    this._stroke_flag = AttributeUpdaterFlag.RESET;
+                    this._stroke_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
                 default: {
-                    this._stroke_flag = AttributeUpdaterFlag.INITIAL;
+                    this._stroke_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.strokeAttribute(undefined);
                 }
             }
         }
-        if (this._fill_flag != AttributeUpdaterFlag.INITIAL)
+        if (this._fill_0_flag != AttributeUpdaterFlag.INITIAL)
         {
-            switch (this._fill_flag) {
+            switch (this._fill_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.fillAttribute((this._fill0_value as ResourceColor | undefined));
-                    this._fill_flag = AttributeUpdaterFlag.RESET;
+                    peer.fillAttribute((this._fill_0_0value as ResourceColor | undefined));
+                    this._fill_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
                 case AttributeUpdaterFlag.SKIP: {
-                    this._fill_flag = AttributeUpdaterFlag.RESET;
+                    this._fill_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
                 default: {
-                    this._fill_flag = AttributeUpdaterFlag.INITIAL;
+                    this._fill_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.fillAttribute(undefined);
                 }
             }
         }
-        if (this._strokeDashOffset_flag != AttributeUpdaterFlag.INITIAL)
+        if (this._strokeDashOffset_0_flag != AttributeUpdaterFlag.INITIAL)
         {
-            switch (this._strokeDashOffset_flag) {
+            switch (this._strokeDashOffset_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.strokeDashOffsetAttribute((this._strokeDashOffset0_value as number | string | undefined));
-                    this._strokeDashOffset_flag = AttributeUpdaterFlag.RESET;
+                    peer.strokeDashOffsetAttribute((this._strokeDashOffset_0_0value as number | string | undefined));
+                    this._strokeDashOffset_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
                 case AttributeUpdaterFlag.SKIP: {
-                    this._strokeDashOffset_flag = AttributeUpdaterFlag.RESET;
+                    this._strokeDashOffset_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
                 default: {
-                    this._strokeDashOffset_flag = AttributeUpdaterFlag.INITIAL;
+                    this._strokeDashOffset_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.strokeDashOffsetAttribute(undefined);
                 }
             }
         }
-        if (this._strokeDashArray_flag != AttributeUpdaterFlag.INITIAL)
+        if (this._strokeDashArray_0_flag != AttributeUpdaterFlag.INITIAL)
         {
-            switch (this._strokeDashArray_flag) {
+            switch (this._strokeDashArray_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.strokeDashArrayAttribute((this._strokeDashArray0_value as Array<Length> | undefined));
-                    this._strokeDashArray_flag = AttributeUpdaterFlag.RESET;
+                    peer.strokeDashArrayAttribute((this._strokeDashArray_0_0value as Array<Length> | undefined));
+                    this._strokeDashArray_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
                 case AttributeUpdaterFlag.SKIP: {
-                    this._strokeDashArray_flag = AttributeUpdaterFlag.RESET;
+                    this._strokeDashArray_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
                 default: {
-                    this._strokeDashArray_flag = AttributeUpdaterFlag.INITIAL;
+                    this._strokeDashArray_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.strokeDashArrayAttribute(undefined);
                 }
             }
         }
-        if (this._strokeLineCap_flag != AttributeUpdaterFlag.INITIAL)
+        if (this._strokeLineCap_0_flag != AttributeUpdaterFlag.INITIAL)
         {
-            switch (this._strokeLineCap_flag) {
+            switch (this._strokeLineCap_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.strokeLineCapAttribute((this._strokeLineCap0_value as LineCapStyle | undefined));
-                    this._strokeLineCap_flag = AttributeUpdaterFlag.RESET;
+                    peer.strokeLineCapAttribute((this._strokeLineCap_0_0value as LineCapStyle | undefined));
+                    this._strokeLineCap_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
                 case AttributeUpdaterFlag.SKIP: {
-                    this._strokeLineCap_flag = AttributeUpdaterFlag.RESET;
+                    this._strokeLineCap_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
                 default: {
-                    this._strokeLineCap_flag = AttributeUpdaterFlag.INITIAL;
+                    this._strokeLineCap_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.strokeLineCapAttribute(undefined);
                 }
             }
         }
-        if (this._strokeLineJoin_flag != AttributeUpdaterFlag.INITIAL)
+        if (this._strokeLineJoin_0_flag != AttributeUpdaterFlag.INITIAL)
         {
-            switch (this._strokeLineJoin_flag) {
+            switch (this._strokeLineJoin_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.strokeLineJoinAttribute((this._strokeLineJoin0_value as LineJoinStyle | undefined));
-                    this._strokeLineJoin_flag = AttributeUpdaterFlag.RESET;
+                    peer.strokeLineJoinAttribute((this._strokeLineJoin_0_0value as LineJoinStyle | undefined));
+                    this._strokeLineJoin_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
                 case AttributeUpdaterFlag.SKIP: {
-                    this._strokeLineJoin_flag = AttributeUpdaterFlag.RESET;
+                    this._strokeLineJoin_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
                 default: {
-                    this._strokeLineJoin_flag = AttributeUpdaterFlag.INITIAL;
+                    this._strokeLineJoin_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.strokeLineJoinAttribute(undefined);
                 }
             }
         }
-        if (this._strokeMiterLimit_flag != AttributeUpdaterFlag.INITIAL)
+        if (this._strokeMiterLimit_0_flag != AttributeUpdaterFlag.INITIAL)
         {
-            switch (this._strokeMiterLimit_flag) {
+            switch (this._strokeMiterLimit_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.strokeMiterLimitAttribute((this._strokeMiterLimit0_value as number | string | undefined));
-                    this._strokeMiterLimit_flag = AttributeUpdaterFlag.RESET;
+                    peer.strokeMiterLimitAttribute((this._strokeMiterLimit_0_0value as number | string | undefined));
+                    this._strokeMiterLimit_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
                 case AttributeUpdaterFlag.SKIP: {
-                    this._strokeMiterLimit_flag = AttributeUpdaterFlag.RESET;
+                    this._strokeMiterLimit_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
                 default: {
-                    this._strokeMiterLimit_flag = AttributeUpdaterFlag.INITIAL;
+                    this._strokeMiterLimit_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.strokeMiterLimitAttribute(undefined);
                 }
             }
         }
-        if (this._strokeOpacity_flag != AttributeUpdaterFlag.INITIAL)
+        if (this._strokeOpacity_0_flag != AttributeUpdaterFlag.INITIAL)
         {
-            switch (this._strokeOpacity_flag) {
+            switch (this._strokeOpacity_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.strokeOpacityAttribute((this._strokeOpacity0_value as number | string | Resource | undefined));
-                    this._strokeOpacity_flag = AttributeUpdaterFlag.RESET;
+                    peer.strokeOpacityAttribute((this._strokeOpacity_0_0value as number | string | Resource | undefined));
+                    this._strokeOpacity_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
                 case AttributeUpdaterFlag.SKIP: {
-                    this._strokeOpacity_flag = AttributeUpdaterFlag.RESET;
+                    this._strokeOpacity_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
                 default: {
-                    this._strokeOpacity_flag = AttributeUpdaterFlag.INITIAL;
+                    this._strokeOpacity_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.strokeOpacityAttribute(undefined);
                 }
             }
         }
-        if (this._fillOpacity_flag != AttributeUpdaterFlag.INITIAL)
+        if (this._fillOpacity_0_flag != AttributeUpdaterFlag.INITIAL)
         {
-            switch (this._fillOpacity_flag) {
+            switch (this._fillOpacity_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.fillOpacityAttribute((this._fillOpacity0_value as number | string | Resource | undefined));
-                    this._fillOpacity_flag = AttributeUpdaterFlag.RESET;
+                    peer.fillOpacityAttribute((this._fillOpacity_0_0value as number | string | Resource | undefined));
+                    this._fillOpacity_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
                 case AttributeUpdaterFlag.SKIP: {
-                    this._fillOpacity_flag = AttributeUpdaterFlag.RESET;
+                    this._fillOpacity_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
                 default: {
-                    this._fillOpacity_flag = AttributeUpdaterFlag.INITIAL;
+                    this._fillOpacity_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.fillOpacityAttribute(undefined);
                 }
             }
         }
-        if (this._strokeWidth_flag != AttributeUpdaterFlag.INITIAL)
+        if (this._strokeWidth_0_flag != AttributeUpdaterFlag.INITIAL)
         {
-            switch (this._strokeWidth_flag) {
+            switch (this._strokeWidth_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.strokeWidthAttribute((this._strokeWidth0_value as number | string | undefined));
-                    this._strokeWidth_flag = AttributeUpdaterFlag.RESET;
+                    peer.strokeWidthAttribute((this._strokeWidth_0_0value as number | string | undefined));
+                    this._strokeWidth_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
                 case AttributeUpdaterFlag.SKIP: {
-                    this._strokeWidth_flag = AttributeUpdaterFlag.RESET;
+                    this._strokeWidth_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
                 default: {
-                    this._strokeWidth_flag = AttributeUpdaterFlag.INITIAL;
+                    this._strokeWidth_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.strokeWidthAttribute(undefined);
                 }
             }
         }
-        if (this._antiAlias_flag != AttributeUpdaterFlag.INITIAL)
+        if (this._antiAlias_0_flag != AttributeUpdaterFlag.INITIAL)
         {
-            switch (this._antiAlias_flag) {
+            switch (this._antiAlias_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.antiAliasAttribute((this._antiAlias0_value as boolean | undefined));
-                    this._antiAlias_flag = AttributeUpdaterFlag.RESET;
+                    peer.antiAliasAttribute((this._antiAlias_0_0value as boolean | undefined));
+                    this._antiAlias_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
                 case AttributeUpdaterFlag.SKIP: {
-                    this._antiAlias_flag = AttributeUpdaterFlag.RESET;
+                    this._antiAlias_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
                 default: {
-                    this._antiAlias_flag = AttributeUpdaterFlag.INITIAL;
+                    this._antiAlias_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.antiAliasAttribute(undefined);
                 }
             }
         }
-        if (this._mesh_flag != AttributeUpdaterFlag.INITIAL)
+        if (this._mesh_0_flag != AttributeUpdaterFlag.INITIAL)
         {
-            switch (this._mesh_flag) {
+            switch (this._mesh_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    if (this._mesh0_value === undefined || this._mesh1_value === undefined || this._mesh2_value === undefined) {
+                    if (this._mesh_0_0value === undefined || this._mesh_0_1value === undefined || this._mesh_0_2value === undefined) {
                         return;
                     }
-                    peer.meshAttribute((this._mesh0_value as Array<number>), (this._mesh1_value as number), (this._mesh2_value as number));
-                    this._mesh_flag = AttributeUpdaterFlag.RESET;
+                    peer.meshAttribute((this._mesh_0_0value as Array<number>), (this._mesh_0_1value as number), (this._mesh_0_2value as number));
+                    this._mesh_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
                 case AttributeUpdaterFlag.SKIP: {
-                    this._mesh_flag = AttributeUpdaterFlag.RESET;
+                    this._mesh_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
                 default: {
-                    this._mesh_flag = AttributeUpdaterFlag.INITIAL;
+                    this._mesh_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.meshAttribute([], 0, 0);
                 }
             }
         }
     }
     mergeModifier(modifier: ShapeModifier): void {
-        if (modifier._viewPort_flag != AttributeUpdaterFlag.INITIAL)
+        super.mergeModifier(modifier)
+        if (modifier._viewPort_0_flag != AttributeUpdaterFlag.INITIAL)
         {
-            switch (modifier._viewPort_flag) {
+            switch (modifier._viewPort_0_flag) {
                 case AttributeUpdaterFlag.UPDATE:
                 case AttributeUpdaterFlag.SKIP: {
-                    this.viewPort(modifier._viewPort0_value);
+                    this.viewPort(modifier._viewPort_0_0value);
                     break;
                 }
                 default: {
@@ -307,12 +313,12 @@ export class ShapeModifier extends CommonMethodModifier implements ShapeAttribut
                 }
             }
         }
-        if (modifier._stroke_flag != AttributeUpdaterFlag.INITIAL)
+        if (modifier._stroke_0_flag != AttributeUpdaterFlag.INITIAL)
         {
-            switch (modifier._stroke_flag) {
+            switch (modifier._stroke_0_flag) {
                 case AttributeUpdaterFlag.UPDATE:
                 case AttributeUpdaterFlag.SKIP: {
-                    this.stroke(modifier._stroke0_value);
+                    this.stroke(modifier._stroke_0_0value);
                     break;
                 }
                 default: {
@@ -320,12 +326,12 @@ export class ShapeModifier extends CommonMethodModifier implements ShapeAttribut
                 }
             }
         }
-        if (modifier._fill_flag != AttributeUpdaterFlag.INITIAL)
+        if (modifier._fill_0_flag != AttributeUpdaterFlag.INITIAL)
         {
-            switch (modifier._fill_flag) {
+            switch (modifier._fill_0_flag) {
                 case AttributeUpdaterFlag.UPDATE:
                 case AttributeUpdaterFlag.SKIP: {
-                    this.fill(modifier._fill0_value);
+                    this.fill(modifier._fill_0_0value);
                     break;
                 }
                 default: {
@@ -333,12 +339,12 @@ export class ShapeModifier extends CommonMethodModifier implements ShapeAttribut
                 }
             }
         }
-        if (modifier._strokeDashOffset_flag != AttributeUpdaterFlag.INITIAL)
+        if (modifier._strokeDashOffset_0_flag != AttributeUpdaterFlag.INITIAL)
         {
-            switch (modifier._strokeDashOffset_flag) {
+            switch (modifier._strokeDashOffset_0_flag) {
                 case AttributeUpdaterFlag.UPDATE:
                 case AttributeUpdaterFlag.SKIP: {
-                    this.strokeDashOffset(modifier._strokeDashOffset0_value);
+                    this.strokeDashOffset(modifier._strokeDashOffset_0_0value);
                     break;
                 }
                 default: {
@@ -346,12 +352,12 @@ export class ShapeModifier extends CommonMethodModifier implements ShapeAttribut
                 }
             }
         }
-        if (modifier._strokeDashArray_flag != AttributeUpdaterFlag.INITIAL)
+        if (modifier._strokeDashArray_0_flag != AttributeUpdaterFlag.INITIAL)
         {
-            switch (modifier._strokeDashArray_flag) {
+            switch (modifier._strokeDashArray_0_flag) {
                 case AttributeUpdaterFlag.UPDATE:
                 case AttributeUpdaterFlag.SKIP: {
-                    this.strokeDashArray(modifier._strokeDashArray0_value);
+                    this.strokeDashArray(modifier._strokeDashArray_0_0value);
                     break;
                 }
                 default: {
@@ -359,12 +365,12 @@ export class ShapeModifier extends CommonMethodModifier implements ShapeAttribut
                 }
             }
         }
-        if (modifier._strokeLineCap_flag != AttributeUpdaterFlag.INITIAL)
+        if (modifier._strokeLineCap_0_flag != AttributeUpdaterFlag.INITIAL)
         {
-            switch (modifier._strokeLineCap_flag) {
+            switch (modifier._strokeLineCap_0_flag) {
                 case AttributeUpdaterFlag.UPDATE:
                 case AttributeUpdaterFlag.SKIP: {
-                    this.strokeLineCap(modifier._strokeLineCap0_value);
+                    this.strokeLineCap(modifier._strokeLineCap_0_0value);
                     break;
                 }
                 default: {
@@ -372,12 +378,12 @@ export class ShapeModifier extends CommonMethodModifier implements ShapeAttribut
                 }
             }
         }
-        if (modifier._strokeLineJoin_flag != AttributeUpdaterFlag.INITIAL)
+        if (modifier._strokeLineJoin_0_flag != AttributeUpdaterFlag.INITIAL)
         {
-            switch (modifier._strokeLineJoin_flag) {
+            switch (modifier._strokeLineJoin_0_flag) {
                 case AttributeUpdaterFlag.UPDATE:
                 case AttributeUpdaterFlag.SKIP: {
-                    this.strokeLineJoin(modifier._strokeLineJoin0_value);
+                    this.strokeLineJoin(modifier._strokeLineJoin_0_0value);
                     break;
                 }
                 default: {
@@ -385,12 +391,12 @@ export class ShapeModifier extends CommonMethodModifier implements ShapeAttribut
                 }
             }
         }
-        if (modifier._strokeMiterLimit_flag != AttributeUpdaterFlag.INITIAL)
+        if (modifier._strokeMiterLimit_0_flag != AttributeUpdaterFlag.INITIAL)
         {
-            switch (modifier._strokeMiterLimit_flag) {
+            switch (modifier._strokeMiterLimit_0_flag) {
                 case AttributeUpdaterFlag.UPDATE:
                 case AttributeUpdaterFlag.SKIP: {
-                    this.strokeMiterLimit(modifier._strokeMiterLimit0_value);
+                    this.strokeMiterLimit(modifier._strokeMiterLimit_0_0value);
                     break;
                 }
                 default: {
@@ -398,12 +404,12 @@ export class ShapeModifier extends CommonMethodModifier implements ShapeAttribut
                 }
             }
         }
-        if (modifier._strokeOpacity_flag != AttributeUpdaterFlag.INITIAL)
+        if (modifier._strokeOpacity_0_flag != AttributeUpdaterFlag.INITIAL)
         {
-            switch (modifier._strokeOpacity_flag) {
+            switch (modifier._strokeOpacity_0_flag) {
                 case AttributeUpdaterFlag.UPDATE:
                 case AttributeUpdaterFlag.SKIP: {
-                    this.strokeOpacity(modifier._strokeOpacity0_value);
+                    this.strokeOpacity(modifier._strokeOpacity_0_0value);
                     break;
                 }
                 default: {
@@ -411,12 +417,12 @@ export class ShapeModifier extends CommonMethodModifier implements ShapeAttribut
                 }
             }
         }
-        if (modifier._fillOpacity_flag != AttributeUpdaterFlag.INITIAL)
+        if (modifier._fillOpacity_0_flag != AttributeUpdaterFlag.INITIAL)
         {
-            switch (modifier._fillOpacity_flag) {
+            switch (modifier._fillOpacity_0_flag) {
                 case AttributeUpdaterFlag.UPDATE:
                 case AttributeUpdaterFlag.SKIP: {
-                    this.fillOpacity(modifier._fillOpacity0_value);
+                    this.fillOpacity(modifier._fillOpacity_0_0value);
                     break;
                 }
                 default: {
@@ -424,12 +430,12 @@ export class ShapeModifier extends CommonMethodModifier implements ShapeAttribut
                 }
             }
         }
-        if (modifier._strokeWidth_flag != AttributeUpdaterFlag.INITIAL)
+        if (modifier._strokeWidth_0_flag != AttributeUpdaterFlag.INITIAL)
         {
-            switch (modifier._strokeWidth_flag) {
+            switch (modifier._strokeWidth_0_flag) {
                 case AttributeUpdaterFlag.UPDATE:
                 case AttributeUpdaterFlag.SKIP: {
-                    this.strokeWidth(modifier._strokeWidth0_value);
+                    this.strokeWidth(modifier._strokeWidth_0_0value);
                     break;
                 }
                 default: {
@@ -437,12 +443,12 @@ export class ShapeModifier extends CommonMethodModifier implements ShapeAttribut
                 }
             }
         }
-        if (modifier._antiAlias_flag != AttributeUpdaterFlag.INITIAL)
+        if (modifier._antiAlias_0_flag != AttributeUpdaterFlag.INITIAL)
         {
-            switch (modifier._antiAlias_flag) {
+            switch (modifier._antiAlias_0_flag) {
                 case AttributeUpdaterFlag.UPDATE:
                 case AttributeUpdaterFlag.SKIP: {
-                    this.antiAlias(modifier._antiAlias0_value);
+                    this.antiAlias(modifier._antiAlias_0_0value);
                     break;
                 }
                 default: {
@@ -450,12 +456,12 @@ export class ShapeModifier extends CommonMethodModifier implements ShapeAttribut
                 }
             }
         }
-        if (modifier._mesh_flag != AttributeUpdaterFlag.INITIAL)
+        if (modifier._mesh_0_flag != AttributeUpdaterFlag.INITIAL)
         {
-            switch (modifier._mesh_flag) {
+            switch (modifier._mesh_0_flag) {
                 case AttributeUpdaterFlag.UPDATE:
                 case AttributeUpdaterFlag.SKIP: {
-                    this.mesh(modifier._mesh0_value, modifier._mesh1_value, modifier._mesh2_value);
+                    this.mesh(modifier._mesh_0_0value, modifier._mesh_0_1value, modifier._mesh_0_2value);
                     break;
                 }
                 default: {
@@ -465,160 +471,160 @@ export class ShapeModifier extends CommonMethodModifier implements ShapeAttribut
         }
     }
     viewPort(value: ViewportRect | undefined): this {
-        if (((this._viewPort_flag) == (AttributeUpdaterFlag.INITIAL)) || (false))
+        if (((this._viewPort_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
-            this._viewPort_flag = AttributeUpdaterFlag.UPDATE
-            this._viewPort0_value = value
+            this._viewPort_0_flag = AttributeUpdaterFlag.UPDATE
+            this._viewPort_0_0value = value
         }
         else
         {
-            this._viewPort_flag = AttributeUpdaterFlag.SKIP
+            this._viewPort_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
     stroke(value: ResourceColor | undefined): this {
-        if (((this._stroke_flag) == (AttributeUpdaterFlag.INITIAL)) || (false))
+        if (((this._stroke_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
-            this._stroke_flag = AttributeUpdaterFlag.UPDATE
-            this._stroke0_value = value
+            this._stroke_0_flag = AttributeUpdaterFlag.UPDATE
+            this._stroke_0_0value = value
         }
         else
         {
-            this._stroke_flag = AttributeUpdaterFlag.SKIP
+            this._stroke_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
     fill(value: ResourceColor | undefined): this {
-        if (((this._fill_flag) == (AttributeUpdaterFlag.INITIAL)) || (false))
+        if (((this._fill_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
-            this._fill_flag = AttributeUpdaterFlag.UPDATE
-            this._fill0_value = value
+            this._fill_0_flag = AttributeUpdaterFlag.UPDATE
+            this._fill_0_0value = value
         }
         else
         {
-            this._fill_flag = AttributeUpdaterFlag.SKIP
+            this._fill_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
     strokeDashOffset(value: number | string | undefined): this {
-        if (((this._strokeDashOffset_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._strokeDashOffset0_value) == (value)))
+        if (((this._strokeDashOffset_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._strokeDashOffset_0_0value) !== (value)))
         {
-            this._strokeDashOffset_flag = AttributeUpdaterFlag.UPDATE
-            this._strokeDashOffset0_value = value
+            this._strokeDashOffset_0_flag = AttributeUpdaterFlag.UPDATE
+            this._strokeDashOffset_0_0value = value
         }
         else
         {
-            this._strokeDashOffset_flag = AttributeUpdaterFlag.SKIP
+            this._strokeDashOffset_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
     strokeDashArray(value: Array<Length> | undefined): this {
-        if (((this._strokeDashArray_flag) == (AttributeUpdaterFlag.INITIAL)) || (false))
+        if (((this._strokeDashArray_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
-            this._strokeDashArray_flag = AttributeUpdaterFlag.UPDATE
-            this._strokeDashArray0_value = value
+            this._strokeDashArray_0_flag = AttributeUpdaterFlag.UPDATE
+            this._strokeDashArray_0_0value = value
         }
         else
         {
-            this._strokeDashArray_flag = AttributeUpdaterFlag.SKIP
+            this._strokeDashArray_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
     strokeLineCap(value: LineCapStyle | undefined): this {
-        if (((this._strokeLineCap_flag) == (AttributeUpdaterFlag.INITIAL)) || (false))
+        if (((this._strokeLineCap_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
-            this._strokeLineCap_flag = AttributeUpdaterFlag.UPDATE
-            this._strokeLineCap0_value = value
+            this._strokeLineCap_0_flag = AttributeUpdaterFlag.UPDATE
+            this._strokeLineCap_0_0value = value
         }
         else
         {
-            this._strokeLineCap_flag = AttributeUpdaterFlag.SKIP
+            this._strokeLineCap_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
     strokeLineJoin(value: LineJoinStyle | undefined): this {
-        if (((this._strokeLineJoin_flag) == (AttributeUpdaterFlag.INITIAL)) || (false))
+        if (((this._strokeLineJoin_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
-            this._strokeLineJoin_flag = AttributeUpdaterFlag.UPDATE
-            this._strokeLineJoin0_value = value
+            this._strokeLineJoin_0_flag = AttributeUpdaterFlag.UPDATE
+            this._strokeLineJoin_0_0value = value
         }
         else
         {
-            this._strokeLineJoin_flag = AttributeUpdaterFlag.SKIP
+            this._strokeLineJoin_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
     strokeMiterLimit(value: number | string | undefined): this {
-        if (((this._strokeMiterLimit_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._strokeMiterLimit0_value) == (value)))
+        if (((this._strokeMiterLimit_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._strokeMiterLimit_0_0value) !== (value)))
         {
-            this._strokeMiterLimit_flag = AttributeUpdaterFlag.UPDATE
-            this._strokeMiterLimit0_value = value
+            this._strokeMiterLimit_0_flag = AttributeUpdaterFlag.UPDATE
+            this._strokeMiterLimit_0_0value = value
         }
         else
         {
-            this._strokeMiterLimit_flag = AttributeUpdaterFlag.SKIP
+            this._strokeMiterLimit_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
     strokeOpacity(value: number | string | Resource | undefined): this {
-        if (((this._strokeOpacity_flag) == (AttributeUpdaterFlag.INITIAL)) || (false))
+        if (((this._strokeOpacity_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
-            this._strokeOpacity_flag = AttributeUpdaterFlag.UPDATE
-            this._strokeOpacity0_value = value
+            this._strokeOpacity_0_flag = AttributeUpdaterFlag.UPDATE
+            this._strokeOpacity_0_0value = value
         }
         else
         {
-            this._strokeOpacity_flag = AttributeUpdaterFlag.SKIP
+            this._strokeOpacity_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
     fillOpacity(value: number | string | Resource | undefined): this {
-        if (((this._fillOpacity_flag) == (AttributeUpdaterFlag.INITIAL)) || (false))
+        if (((this._fillOpacity_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
-            this._fillOpacity_flag = AttributeUpdaterFlag.UPDATE
-            this._fillOpacity0_value = value
+            this._fillOpacity_0_flag = AttributeUpdaterFlag.UPDATE
+            this._fillOpacity_0_0value = value
         }
         else
         {
-            this._fillOpacity_flag = AttributeUpdaterFlag.SKIP
+            this._fillOpacity_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
     strokeWidth(value: number | string | undefined): this {
-        if (((this._strokeWidth_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._strokeWidth0_value) == (value)))
+        if (((this._strokeWidth_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._strokeWidth_0_0value) !== (value)))
         {
-            this._strokeWidth_flag = AttributeUpdaterFlag.UPDATE
-            this._strokeWidth0_value = value
+            this._strokeWidth_0_flag = AttributeUpdaterFlag.UPDATE
+            this._strokeWidth_0_0value = value
         }
         else
         {
-            this._strokeWidth_flag = AttributeUpdaterFlag.SKIP
+            this._strokeWidth_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
     antiAlias(value: boolean | undefined): this {
-        if (((this._antiAlias_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._antiAlias0_value) == (value)))
+        if (((this._antiAlias_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._antiAlias_0_0value) !== (value)))
         {
-            this._antiAlias_flag = AttributeUpdaterFlag.UPDATE
-            this._antiAlias0_value = value
+            this._antiAlias_0_flag = AttributeUpdaterFlag.UPDATE
+            this._antiAlias_0_0value = value
         }
         else
         {
-            this._antiAlias_flag = AttributeUpdaterFlag.SKIP
+            this._antiAlias_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
     mesh(value: Array<number> | undefined, column: number | undefined, row: number | undefined): this {
-        if (((this._mesh_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._mesh0_value) == (value)) || ((this._mesh1_value) == (column)) || ((this._mesh2_value) == (row)))
+        if (((this._mesh_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._mesh_0_0value) !== (value)) || ((this._mesh_0_1value) !== (column)) || ((this._mesh_0_2value) !== (row)))
         {
-            this._mesh_flag = AttributeUpdaterFlag.UPDATE
-            this._mesh0_value = value
-            this._mesh1_value = column
-            this._mesh2_value = row
+            this._mesh_0_flag = AttributeUpdaterFlag.UPDATE
+            this._mesh_0_0value = value
+            this._mesh_0_1value = column
+            this._mesh_0_2value = row
         }
         else
         {
-            this._mesh_flag = AttributeUpdaterFlag.SKIP
+            this._mesh_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
