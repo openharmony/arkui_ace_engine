@@ -906,8 +906,6 @@ void AutoCapitalizationModeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //TextInputModelNG::SetAutoCapitalizationMode(frameNode, convValue);
 }
 void HalfLeadingImpl(Ark_NativePointer node,
                      const Opt_Boolean* value)
