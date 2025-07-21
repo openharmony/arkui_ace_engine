@@ -444,7 +444,7 @@ void ViewAbstractModelStatic::BindContextMenuStatic(const RefPtr<FrameNode>& tar
 
     // delete menu when target node destroy
     auto destructor = [id = targetNode->GetId(), containerId = Container::CurrentId()]() {
-        auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(containerId);
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(containerId, SubwindowType::TYPE_MENU);
         CHECK_NULL_VOID(subwindow);
         auto childContainerId = subwindow->GetChildContainerId();
         auto childContainer = AceEngine::Get().GetContainer(childContainerId);
