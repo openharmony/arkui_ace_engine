@@ -22,7 +22,7 @@
 #include "core/components_ng/render/render_context.h"
 #include "frameworks/base/geometry/ng/point_t.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_constants.h"
-#include "frameworks/core/components_ng/render/adapter/matrix2d.h"
+#include "frameworks/core/components_ng/render/adapter/matrix_util.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -306,7 +306,7 @@ shared_ptr<JsValue> SetPolyToPoly(const shared_ptr<JsRuntime>& runtime, const sh
     for (int i = dstIndex; i < dstLastIndex; i++) {
         totalPoint.push_back(dstPoint[i]);
     }
-    Matrix4 ret = OHOS::Ace::NG::SetMatrixPolyToPoly(matrix, totalPoint);
+    Matrix4 ret = OHOS::Ace::NG::MatrixUtil::SetMatrixPolyToPoly(matrix, totalPoint);
     thisObj->SetProperty(runtime, MATRIX_4X4, ConvertToJSValue(runtime, ret));
     return thisObj;
 }
@@ -365,11 +365,33 @@ shared_ptr<JsValue> Identity(const shared_ptr<JsRuntime>& runtime, const shared_
     return matrixObj;
 }
 
+shared_ptr<JsValue> InitTransfer(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
+    const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
+{
+    if (argc != 1) {
+        return runtime->NewNull();
+    }
+    auto value = argv[0];
+    if (!value->IsNumber(runtime)) {
+        return runtime->NewNull();
+    }
+    auto addr = static_cast<long>(argv[0]->ToInt64(runtime));
+    Matrix4_Obj* matrixObj = reinterpret_cast<Matrix4_Obj*>(addr);
+    if (!matrixObj) {
+        return runtime->NewNull();
+    }
+    shared_ptr<JsValue> matrixObjResult = runtime->NewObject();
+    matrixObjResult->SetProperty(runtime, MATRIX_4X4, ConvertToJSValue(runtime, matrixObj->matrix4x4));
+    AddCommonMatrixProperties(runtime, matrixObjResult);
+    return matrixObjResult;
+}
+
 void InitMatrix4Module(const shared_ptr<JsRuntime>& runtime, shared_ptr<JsValue>& moduleObj)
 {
     moduleObj->SetProperty(runtime, MATRIX_4X4, ConvertToJSValue(runtime, Matrix4::CreateIdentity()));
     moduleObj->SetProperty(runtime, MATRIX_INIT, runtime->NewFunction(Init));
     moduleObj->SetProperty(runtime, MATRIX_IDENTITY, runtime->NewFunction(Identity));
+    moduleObj->SetProperty(runtime, MATRIX_TRANSFER, runtime->NewFunction(InitTransfer));
 }
 
 } // namespace OHOS::Ace::Framework
