@@ -27,15 +27,6 @@ public:
     static RefPtr<DrawingLattice> CreateDrawingLattice(void* sptrAddr);
     static RefPtr<DrawingLattice> CreateDrawingLatticeFromNative(void* sptrAddr);
 
-    /**
-     * @description: Create ace lattice by drawing lattice ani
-     * @param aniAddr ani lattice of drawing lattice
-     * @return  ace lattice object
-     *
-     * only for arkts 1.2
-     */
-    static RefPtr<DrawingLattice> CreateDrawingLatticeFromAni(void* aniAddr);
-
     // define the return value as void is for tdd compilation
     virtual void* GetDrawingLatticeSptrAddr() = 0;
     virtual std::string DumpToString() = 0;
