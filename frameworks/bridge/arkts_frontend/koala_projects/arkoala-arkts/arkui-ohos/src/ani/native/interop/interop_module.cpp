@@ -21,7 +21,7 @@
  
 namespace OHOS::Ace::Ani {
 
-ani_long CreateViewStackProcessor(ani_env* env)
+ani_long CreateViewStackProcessor(ani_env* env, [[maybe_unused]] ani_object obj)
 {
     const auto* modifier = GetNodeAniModifier();
     if (!modifier) {
@@ -30,7 +30,7 @@ ani_long CreateViewStackProcessor(ani_env* env)
     return modifier->getInteropAniModifier()->createViewStackProcessor();
 }
 
-ani_long PopViewStackProcessor(ani_env* env)
+ani_long PopViewStackProcessor(ani_env* env, [[maybe_unused]] ani_object obj)
 {
     const auto* modifier = GetNodeAniModifier();
     if (!modifier) {
@@ -39,7 +39,7 @@ ani_long PopViewStackProcessor(ani_env* env)
     return modifier->getInteropAniModifier()->popViewStackProcessor();
 }
 
-void DeleteViewStackProcessor(ani_env* env, ani_long ptr)
+void DeleteViewStackProcessor(ani_env* env, [[maybe_unused]] ani_object obj, ani_long ptr)
 {
     const auto* modifier = GetNodeAniModifier();
     if (!modifier) {
