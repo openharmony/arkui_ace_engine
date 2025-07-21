@@ -21,6 +21,7 @@
 #include "base/utils/multi_thread.h"
 #include "core/common/builder_util.h"
 #include "core/common/color_inverter.h"
+#include "base/utils/multi_thread.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node.h"

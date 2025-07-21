@@ -7111,7 +7111,7 @@ struct ArkUIBasicAPI {
 };
 
 struct ArkUIMultiThreadManagerAPI {
-    void (*setIsFreeNodeScope)(ArkUI_Bool isFreeNodeScope);
+    void (*setIsThreadSafeNodeScope)(ArkUI_Bool isThreadSafeNodeScope);
     ArkUI_Bool (*checkNodeOnValidThread)(ArkUINodeHandle node);
     ArkUI_Bool (*checkOnUIThread)();
     ArkUI_Int32 (*postAsyncUITask)(ArkUI_Int32 contextId,

@@ -79,6 +79,7 @@ if (defined(enable_plugin_pattern_test_ng)) {
       "$ace_root/frameworks/core/components_ng/animation/geometry_transition.cpp",
       "$ace_root/frameworks/core/components_ng/base/extension_handler.cpp",
       "$ace_root/frameworks/core/components_ng/base/frame_node.cpp",
+      "$ace_root/frameworks/core/components_ng/base/frame_node_multi_thread.cpp",
       "$ace_root/frameworks/core/components_ng/base/geometry_node.cpp",
       "$ace_root/frameworks/core/components_ng/base/modifier.cpp",
       "$ace_root/frameworks/core/components_ng/base/ui_node.cpp",
@@ -138,6 +139,7 @@ if (defined(enable_plugin_pattern_test_ng)) {
       "$ace_root/frameworks/core/event/back_end_event_manager.cpp",
       "$ace_root/frameworks/core/event/touch_event.cpp",
       "$ace_root/frameworks/core/pipeline/base/constants.cpp",
+      "$ace_root/frameworks/core/pipeline/base/element_register_multi_thread.cpp",
       "$ace_root/frameworks/core/pipeline_ng/ui_task_scheduler.cpp",
       "$ace_root/test/mock/base/mock_frame_report.cpp",
       "$ace_root/test/mock/base/mock_frame_trace_adapter.cpp",
@@ -188,6 +190,11 @@ if (defined(enable_plugin_pattern_test_ng)) {
       "window_manager:screen_session_manager_client",
       "zlib:shared_libz",
     ]
+
+    if (defined(ffrt_support) && ffrt_support) {
+      defines = [ "FFRT_SUPPORT" ]
+      external_deps += [ "ffrt:libffrt" ]
+    }
 
     if (ace_use_rosen_drawing) {
       external_deps += [ "graphic_2d:2d_graphics" ]
