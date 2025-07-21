@@ -56,7 +56,6 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr float POSITION_FIVE = 5.0f;
 constexpr float RESULT_FIVE = 5.0f;
-constexpr float ARROW_HEIGHT = 8.0f;
 constexpr float RESULT_TEN = 10.0f;
 constexpr float BORDER_RADIUS_TEN = 10.0f;
 constexpr float MARGIN_START = 10.0f;
@@ -543,7 +542,7 @@ HWTEST_F(BubbleTestTwoNg, CoverParent001, TestSize.Level1)
     algorithm.targetSize_ = SizeF(SIZE_TWENTY, SIZE_TWENTY);
     position = algorithm.CoverParent(childSize, Placement::BOTTOM);
     EXPECT_FLOAT_EQ(position.GetX(), RESULT_TEN);
-    EXPECT_FLOAT_EQ(position.GetY(), RESULT_TEN + ARROW_HEIGHT);
+    EXPECT_FLOAT_EQ(position.GetY(), RESULT_TEN);
 
     algorithm.isHalfFoldHover_ = true;
     algorithm.avoidKeyboard_ = false;

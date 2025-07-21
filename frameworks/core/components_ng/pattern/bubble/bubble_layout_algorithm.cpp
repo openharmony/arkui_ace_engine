@@ -2019,7 +2019,7 @@ OffsetF BubbleLayoutAlgorithm::GetBubblePosition(const OffsetF& position, float 
         } else if (GetSimplePlacement(placement_) == Placement::RIGHT) {
             positionX -= BUBBLE_ARROW_HEIGHT.ConvertToPx();
         }
-    } else {
+    } else if (showArrow_) {
         UpdateContentPositionRange(xMin, xMax, yMin, yMax);
     }
     auto x = std::clamp(positionX, xMin, xMax);
