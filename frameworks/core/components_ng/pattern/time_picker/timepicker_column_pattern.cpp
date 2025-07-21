@@ -610,7 +610,7 @@ void TimePickerColumnPattern::GetAnimationColor(uint32_t index, uint32_t showCou
         if (!selectedMarkPaint_) {
             color = pickerTheme->GetOptionStyle(false, false).GetTextColor();
         } else if (selectedMark) {
-            color = pickerTheme->GetOptionStyle(true, false).GetTextColor();
+            color = pickerTheme->GetOptionStyle(true, true).GetTextColor();
         }
     } else if (selectedMark) {
         color = layoutProperty->GetSelectedColor().value_or(pickerTheme->GetOptionStyle(true, false).GetTextColor());
