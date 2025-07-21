@@ -36,6 +36,7 @@ export interface ArkCustomComponent {
     aboutToAppear(): void;
     aboutToDisappear(): void;
     onDidBuild(): void;
+    onCleanup(): void;
 
     // Page life cycle
     onPageShow(): void
@@ -54,6 +55,9 @@ export interface ArkCustomComponent {
     // Form recover
     onFormRecycle(): string
     onFormRecover(statusData: string): void;
+
+    // dump info
+    onDumpInspector(): string;
 
     readonly isCustomLayout: boolean;
 }

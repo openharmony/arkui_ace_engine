@@ -1754,6 +1754,14 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _PanelAttribute__onChangeEvent_mode(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _ParticleHelper_SetDisturbanceFields(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ParticleHelper_SetEmitterProperty(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ParticleHelper_ParticleConstruct(id: KInt, flags: KInt): KPointer
+    @ani.unsafe.Direct
+    native static _ParticleHelper_SetParticleOptions(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _PasteButton_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
     native static _PasteButtonInterface_setPasteButtonOptions0(ptr: KPointer): void
@@ -7184,4 +7192,8 @@ export class ArkUIGeneratedNativeModule {
     native static _RouterExtender_ShowAlertBeforeBackPage(message: KStringPtr): void
     @ani.unsafe.Direct
     native static _RouterExtender_HideAlertBeforeBackPage(): void
+    @ani.unsafe.Direct
+    native static _ContentModifierHelper_contentModifierRadio(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ContentModifierHelper_resetContentModifierRadio(node: KPointer): void
 }

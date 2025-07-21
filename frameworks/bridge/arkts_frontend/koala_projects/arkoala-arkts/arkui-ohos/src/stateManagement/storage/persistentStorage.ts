@@ -152,10 +152,10 @@ class PersistentStorage {
         toJson?: ToJSONType<T>,
         fromJson?: FromJSONType<T>
     ): boolean {
-        return PersistentStorage.getOrCreate().persistProp1(key, ttype, defaultValue, toJson, fromJson);
+        return PersistentStorage.getOrCreate().persistPropInternal(key, ttype, defaultValue, toJson, fromJson);
     }
 
-    private persistProp1<T>(
+    private persistPropInternal<T>(
         key: string,
         ttype: Type,
         defaultValue: T,
@@ -222,10 +222,10 @@ class PersistentStorage {
      * @since 20
      */
     public static deleteProp(key: string): void {
-        PersistentStorage.getOrCreate().deleteProp1(key);
+        PersistentStorage.getOrCreate().deletePropInternal(key);
     }
 
-    private deleteProp1(key: string): void {
+    private deletePropInternal(key: string): void {
         // Remove from AniStorage
         PersistentStorage.getOrCreate().storage_.delete(key);
         // Remove from TypedMap and need to unregister from AppStorage
@@ -246,10 +246,10 @@ class PersistentStorage {
      * @since 20
      */
     public static keys(): Array<string> {
-        return PersistentStorage.getOrCreate().keys1();
+        return PersistentStorage.getOrCreate().keysInternal();
     }
 
-    private keys1(): Array<string> {
+    private keysInternal(): Array<string> {
         return PersistentStorage.getOrCreate().map_.keys();
     }
 
@@ -339,6 +339,9 @@ class PersistentStorage {
                     const jsonString = JSON.stringify(newValue);
                     PersistentStorage.getOrCreate().storage_.set(key, jsonString);
                 } else {
+                    if (!toJson) {
+                        StateMgmtConsole.log(`Object Types for key ${key} requires toJson functions to be defined`);
+                    }
                     const jsonElement = toJson!(newValue);
                     // convert JsonElement to jsonString
                     const jsonString = JSON.stringifyJsonElement(jsonElement);

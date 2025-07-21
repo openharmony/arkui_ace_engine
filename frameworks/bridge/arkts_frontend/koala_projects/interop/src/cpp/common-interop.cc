@@ -24,6 +24,7 @@
 #include "common-interop.h"
 #include "interop-logging.h"
 #include "dynamic-loader.h"
+#include "securec.h"
 
 #ifdef KOALA_FOREIGN_NAPI
 #ifndef KOALA_FOREIGN_NAPI_OHOS
@@ -159,7 +160,9 @@ KOALA_INTEROP_1(StringMake, KNativePointer, KStringPtr)
 
 // For slow runtimes w/o fast encoders.
 KInt impl_ManagedStringWrite(const KStringPtr& string, KSerializerBuffer buffer, KInt offset) {
-    memcpy((uint8_t*)buffer + offset, string.c_str(), string.length() + 1);
+    if (memcpy_s((uint8_t*)buffer + offset, string.length() + 1, string.c_str(), string.length() + 1) != 0) {
+        return 0;
+    }
     return string.length() + 1;
 }
 KOALA_INTEROP_3(ManagedStringWrite, KInt, KStringPtr, KSerializerBuffer, KInt)
@@ -374,7 +377,7 @@ void impl_WriteByte(KNativePointer data, KInt index, KLong length, KInt value) {
 KOALA_INTEROP_DIRECT_V4(WriteByte, KNativePointer, KLong, KLong, KInt)
 
 void impl_CopyArray(KNativePointer data, KLong length, KByte* array) {
-    memcpy(data, array, length);
+    memcpy_s(data, length, array, length);
 }
 KOALA_INTEROP_V3(CopyArray, KNativePointer, KLong, KByte*)
 
@@ -595,6 +598,44 @@ void KoalaWork::Complete() {
     complete(handle);
     delete this;
 }
+
+#elif defined(KOALA_ETS_NAPI)
+static void DoExecute(void* work)
+{
+    reinterpret_cast<KoalaWork*>(work)->Execute();
+}
+static void DoComplete(void* work)
+{
+    reinterpret_cast<KoalaWork*>(work)->Complete();
+}
+
+KoalaWork::KoalaWork(InteropVMContext vmContext,
+    InteropNativePointer handle,
+    void (*execute)(InteropNativePointer handle),
+    void (*complete)(InteropNativePointer handle)
+): vmContext(vmContext), handle(handle), execute(execute), complete(complete) {
+     /* supress unused private fields */
+    (void)vmWork;
+}
+void KoalaWork::Queue() {
+    EtsEnv* env = reinterpret_cast<EtsEnv*>(vmContext);
+    ets_class cls = env->FindClass("std/concurrency/NativeAsyncWorkHelper");
+    ets_method queueMethod = env->GetStaticp_method(cls, "queue", nullptr);
+    env->CallStaticVoidMethod(cls, queueMethod, reinterpret_cast<int64_t>(DoExecute),
+                              reinterpret_cast<int64_t>(DoComplete),
+                              reinterpret_cast<int64_t>(this));
+}
+void KoalaWork::Execute() {
+    (*execute)(handle);
+}
+void KoalaWork::Cancel() {
+    INTEROP_FATAL("Cancelling async work is disabled for any VM except of Node");
+}
+void KoalaWork::Complete() {
+    (*complete)(handle);
+    delete this;
+}
+
 #else
 #ifdef KOALA_FOREIGN_NAPI
 static void DoExecute(napi_env env, void* handle) {

@@ -69,6 +69,11 @@ export interface AnimatorResult {
 }
 
 class AnimatorResultInner implements AnimatorResult {
+
+    static {
+        loadLibrary("animator_ani");
+    }
+
     animatorResult:long = 0;
     constructor(result:long) {
         if(this.animatorResult == 0){
@@ -83,7 +88,29 @@ class AnimatorResultInner implements AnimatorResult {
     public native update(options: AnimatorOptions): void;
     public native reset(options: AnimatorOptions): void;
     public native setExpectedFrameRateRange(rateRange: ExpectedFrameRateRange) : void;
-    
+
+    static animatorTransferStatic(input: Any): Object {
+        return AnimatorResultInner.nativeTransferStatic(ESValue.wrap(input));
+    }
+
+    private static native nativeTransferStatic(input: ESValue): Object;
+
+    static animatorTransferDynamic(input: Any): Any {
+        let animatorRet = input as AnimatorResultInner;
+        if (animatorRet) {
+            let addr = animatorRet.animatorResult;
+            let module = ESValue.load("@ohos.animator");
+            let initFunc = module.getProperty("__createTransfer__")
+            if (initFunc) {
+                let animatorRet = initFunc.invoke(ESObject.wrap(addr));
+                return animatorRet;
+            } else {
+                console.error("AceAnimation:: invoke func not exit")
+            }
+        }
+        return undefined;
+    }
+
     // set and get onFinish
     private native setOnFinish(value: () => void) : void;
     set onFinish(value: () => void) {

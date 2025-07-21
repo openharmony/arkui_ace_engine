@@ -32,6 +32,7 @@ extern "C" {
 #define EXTRA_INFO_MAX_LENGTH 1024
 #define ARKUI_ANI_MODIFIER_FUNCTION_NAME "GetArkUIAniModifiers"
 
+struct _ArkUIStyledString;
 struct _ArkUINode;
 struct _ArkUIContentSlot;
 struct _ArkUINodeContent;
@@ -54,6 +55,7 @@ typedef int ArkUI_Int32;
 typedef size_t ani_size;
 typedef _ArkUIContentSlot* ArkUIContentSlot;
 typedef _ArkUINodeContent* ArkUINodeContent;
+typedef _ArkUIStyledString* ArkUIStyledString;
 typedef struct WebviewControllerInfo {
     std::function<int32_t()> getWebIdFunc = nullptr;
     std::function<void(int32_t)> completeWindowNewFunc = nullptr;
@@ -212,6 +214,10 @@ struct ArkUIAniCommonModifier {
     void (*onMeasureInnerMeasure)(ani_env* env, ani_long ptr);
     void (*onLayoutInnerLayout)(ani_env* env, ani_long ptr);
     void (*setParallelScoped)(ani_boolean parallel);
+    void (*setCustomPropertyCallBack)(
+        ani_env* env, ArkUINodeHandle node, std::function<void()>&& func,
+        std::function<std::string(const std::string&)>&& getFunc);
+    std::optional<std::string> (*getCustomProperty)(ani_env* env, ArkUINodeHandle node, const std::string& key);
     void (*setOverlayComponent)(ani_long node, ani_long builderPtr, AniOverlayOptions options);
     ani_double (*vp2px)(ani_double value, ani_int instanceId);
     ani_double (*px2vp)(ani_double value, ani_int instanceId);
@@ -222,7 +228,8 @@ struct ArkUIAniCommonModifier {
 };
 struct ArkUIAniCustomNodeModifier {
     ani_long (*constructCustomNode)(ani_int, std::function<void()>&& onPageShow, std::function<void()>&& onPageHide,
-        std::function<bool()>&& onBackPress);
+        std::function<bool()>&& onBackPress, std::function<void()>&& onCleanupFunc,
+        std::function<std::string()>&& onDumpInspectorFunc);
     ani_object (*queryNavigationInfo)(ani_env* env, ani_long node);
     ani_object (*queryNavDestinationInfo)(ani_env* env, ani_long node);
     ani_object (*queryNavDestinationInfo0)(ani_env* env, ani_long node, ani_int isInner);
@@ -290,6 +297,10 @@ struct ArkUIAniImageSpanModifier {
     void (*setAltPixelMap)(ArkUINodeHandle node, void* pixelmap);
     void (*setDrawingColorFilter)(ArkUINodeHandle node, void* colorFilter);
 };
+struct ArkUIAniStyledStringModifier {
+    void (*setPixelMap)(ArkUIStyledString peer, void* nativePixelMap);
+    void* (*getPixelMap)(ArkUIStyledString peer);
+};
 struct ArkUIAniVideoModifier {
     void (*setPixelMap)(ArkUINodeHandle node, void* pixelMap);
 };
@@ -300,10 +311,10 @@ struct ArkUIAniRichEditorModifier {
     ani_long (*transferPixelMap)(void* pixelMap);
 };
 struct ArkUIAniStateMgmtModifier {
-    std::string (*persistentStorageGet)(std::string key);
-    void (*persistentStorageSet)(std::string key, std::string value);
-    bool (*persistentStorageHas)(std::string key);
-    void (*persistentStorageDelete)(std::string key);
+    std::string (*persistentStorageGet)(const std::string& key);
+    void (*persistentStorageSet)(const std::string& key, const std::string& value);
+    bool (*persistentStorageHas)(const std::string& key);
+    void (*persistentStorageDelete)(const std::string& key);
     void (*persistentStorageClear)();
     int32_t (*getColorMode)();
     float (*getFontWeightScale)();
@@ -344,6 +355,7 @@ struct ArkUIAniModifiers {
     const ArkUIAniAnimationModifier* (*getAnimationAniModifier)();
     const ArkUIAniInteropModifier* (*getInteropAniModifier)();
     const ArkUIAniDragControllerModifier* (*getDragControllerAniModifier)();
+    const ArkUIAniStyledStringModifier* (*getStyledStringAniModifier)();
     const ArkUIAniImageSpanModifier* (*getImageSpanAniModifier)();
     const ArkUIAniVideoModifier* (*getArkUIAniVideoModifier)();
     const ArkUIAniShapeModifier* (*getArkUIAniShapeModifier)();

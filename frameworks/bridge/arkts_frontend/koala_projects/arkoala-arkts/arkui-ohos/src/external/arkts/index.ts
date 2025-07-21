@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+import matrix4 from "@ohos.matrix4"
 import image from "@ohos.multimedia.image"
 import _Want from "@ohos.app.ability.Want"
 import webview from "@ohos.web.webview"
@@ -21,10 +22,16 @@ import pointer from '@ohos.multimodalInput.pointer'
 import unifiedDataChannel from "@ohos.data.unifiedDataChannel"
 import uniformTypeDescriptor from "@ohos.data.uniformTypeDescriptor"
 import uiEffect from "@ohos.graphics.uiEffect"
+import curves from "@ohos.curves"
 
 export * from "@ohos.base"
 export * from "@ohos.arkui.drawableDescriptor"
 
+export type TranslateOption = matrix4.TranslateOption
+export type ScaleOption = matrix4.ScaleOption
+export type RotateOption = matrix4.RotateOption
+export type PolyToPolyOptions = matrix4.PolyToPolyOptions
+export type Matrix4Transit = matrix4.Matrix4Transit
 export type Filter = uiEffect.Filter
 export type VisualEffect = uiEffect.VisualEffect
 export type BrightnessBlender = uiEffect.BrightnessBlender
@@ -32,6 +39,8 @@ export type PixelMap = image.PixelMap
 export type AbilityWant = _Want
 export type WebviewController = webview.WebviewController
 export type Context = common.Context
+export type ICurve = curves.ICurve
+export type Curve = curves.Curve
 export type PointerStyle = pointer.PointerStyle
 export type UnifiedData = unifiedDataChannel.UnifiedData
 export type Summary = unifiedDataChannel.Summary

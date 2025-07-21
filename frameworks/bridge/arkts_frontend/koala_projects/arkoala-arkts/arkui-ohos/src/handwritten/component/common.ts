@@ -9,6 +9,7 @@ import { ComponentContent } from 'arkui/ComponentContent'
 import { ArkCommonMethodComponent, CustomBuilder, OverlayOptions } from 'arkui/component'
 import { runtimeType, RuntimeType, toPeerPtr} from "@koalaui/interop"
 import { FrameNode } from "arkui/FrameNode"
+import { WrappedBuilder } from './builder'
 
 export function applyStyles<T extends CommonMethod>(this: T, customStyles: CustomStyles): T {
     customStyles(this);
@@ -205,4 +206,17 @@ export function hookOverlayImpl(node: ArkCommonMethodComponent, value: string | 
     }
     const value_const = value as (string | CustomBuilder| undefined)
     OverlayOps.setOverlayAttribute(node.getPeer().getPeerPtr(), value_const, options)
+}
+
+export type CustomBuilderT<T> =
+/** @memo */
+(t: T) => void;
+
+export interface ContentModifier<T> {
+    applyContent(): WrappedBuilder<CustomBuilderT<T>>;
+}
+
+export interface CommonConfiguration<T> {
+    enabled: boolean;
+    contentModifier: ContentModifier<T>;
 }

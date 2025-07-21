@@ -22,7 +22,7 @@ import { CallbackKind } from "./CallbackKind"
 import { Serializer } from "./Serializer"
 import { TypeChecker } from "#components"
 import { CallbackTransformer } from "./CallbackTransformer"
-import { AccessibilityCallback, AccessibilityFocusCallback, GestureRecognizerJudgeBeginCallback, HoverCallback, OnDragEventCallback, OnMoveHandler, OnScrollCallback, PopupStateChangeCallback, ReuseIdCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TransitionFinishCallback, VisibleAreaChangeCallback, AccessibilityHoverEvent, AccessibilityHoverEventInternal, AccessibilityRoleType, AccessibilitySamePageMode, AdaptiveColor, CommonMethod, BlurStyle, BlendApplyType, BlurStyleActivePolicy, PickerTextStyle, ChainStyle, ContentClipMode, DismissReason, DragBehavior, DragEvent, DragEventInternal, DragResult, Rectangle, DraggingSizeChangeEffect, DragPreviewMode, DrawModifier, EffectEdge, EffectType, FinishCallbackType, GestureModifier, GestureModifierInternal, UIGestureEvent, ScrollableCommonMethod, ItemDragInfo, CustomBuilder, NestedScrollOptions, EdgeEffectOptions, HapticFeedbackMode, HoverModeAreaType, ICurve, ICurveInternal, KeyboardAvoidMode, LayoutPolicy, LayoutSafeAreaEdge, LayoutSafeAreaType, ChildrenMainSize, ChildrenMainSizeInternal, RectResult, MenuPolicy, MenuPreviewMode, ModalTransition, OutlineStyle, PixelMapMock, PixelMapMockInternal, PopupStateChangeParam, PreDragStatus, ProgressMask, ProgressMaskInternal, RepeatMode, SelectionOptions, SafeAreaEdge, SafeAreaType, ScrollSizeMode, TextDecorationOptions, TextContentControllerBase, TextContentControllerBaseInternal, ShadowStyle, ShadowType, SheetKeyboardAvoidMode, SheetMode, SheetSize, SheetType, SourceTool, SourceType, BackgroundEffectOptions, BackgroundBlurStyleOptions, TranslateOptions, InputCounterOptions, ShadowOptions, CaretOffset, TextContentControllerOptions, ThemeColorMode, TouchTestInfo, TouchTestStrategy, TransitionEdge, TransitionEffect, TransitionEffectInternal, TransitionEffects, RotateOptions, ScaleOptions, AnimateParam, TransitionHierarchyStrategy, UICommonEvent, UICommonEventInternal, Callback_ClickEvent_Void, ClickEvent, ClickEventInternal, Callback_TouchEvent_Void, TouchEvent, TouchEventInternal, Callback_KeyEvent_Void, KeyEvent, KeyEventInternal, HoverEvent, HoverEventInternal, Callback_MouseEvent_Void, MouseEvent, MouseEventInternal, VisibleAreaEventOptions, SheetOptions, View, ViewInternal, Callback_KeyEvent_Boolean, Callback_Area_Area_Void, Callback_Array_TouchTestInfo_TouchResult, TouchResult, Callback_AxisEvent_Void, AxisEvent, AxisEventInternal, Callback_Boolean_HoverEvent_Void, Callback_CrownEvent_Void, CrownEvent, Callback_DismissContentCoverAction_Void, DismissContentCoverAction, Callback_DismissPopupAction_Void, DismissPopupAction, Callback_DismissSheetAction_Void, DismissSheetAction, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, DragItemInfo, Callback_DragEvent_String_Void, Callback_FocusAxisEvent_Void, FocusAxisEvent, FocusAxisEventInternal, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, Callback_HoverEvent_Void, Callback_Literal_Boolean_isVisible_Void, Literal_Boolean_isVisible, Callback_PreDragStatus_Void, Callback_SheetDismiss_Void, SheetDismiss, Callback_SheetType_Void, Callback_SpringBackAction_Void, SpringBackAction, Callback_TouchEvent_HitTestMode, BackgroundBrightnessOptions, BackgroundImageOptions, BlurOptions, ClickEffect, DateRange, DragInteractionOptions, DropOptions, ExpectedFrameRateRange, FocusMovement, ForegroundEffectOptions, GeometryTransitionOptions, InvertOptions, LinearGradient_common, Tuple_ResourceColor_Number, LinearGradientBlurOptions, FractionStop, LinearGradientOptions, LocalizedHorizontalAlignParam, LocalizedVerticalAlignParam, Measurable, MeasurableInternal, MeasureResult, SizeResult, MotionBlurAnchor, MotionBlurOptions, MotionPathOptions, OverlayOffset, PixelRoundPolicy, PixelStretchEffectOptions, PreviewConfiguration, RadialGradientOptions, Tuple_Length_Length, StateStyles, SweepGradientOptions, SystemAdaptiveOptions, TipsOptions, TouchObject, AlignRuleOption, HorizontalAlignOptions, VerticalAlignOptions, BlurStyleOptions, ContentCoverOptions, BindOptions, ContextMenuAnimationOptions, MultiShadowOptions, DragPreviewOptions, EventTarget, FadingEdgeOptions, BaseEvent, BaseEventInternal, ForegroundBlurStyleOptions, HistoricalPoint, LightSource, LocalizedAlignRuleOptions, MenuElement, OverlayOptions, PickerDialogButtonStyle, ReuseOptions, sharedTransitionOptions, SheetTitleOptions, TransitionOptions, BorderImageOption, CustomPopupOptions, Literal_ResourceColor_color, PointLightStyle, PopupMessageOptions, Type_SheetOptions_detents, ContextMenuOptions, BorderRadiusType, MenuOptions, PopupOptions, PopupButton, OnWillScrollCallback, ScrollResult, PopupMaskType, SelectedCallback, IndexCallback, IndexerSelectedCallback, RefreshingCallback, DividerStyle, BlendMode, PopupCommonOptions, DismissPopupActionInternal } from "./../common"
+import { AccessibilityCallback, AccessibilityFocusCallback, GestureRecognizerJudgeBeginCallback, HoverCallback, OnDragEventCallback, OnMoveHandler, OnScrollCallback, PopupStateChangeCallback, ReuseIdCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TransitionFinishCallback, VisibleAreaChangeCallback, AccessibilityHoverEvent, AccessibilityHoverEventInternal, AccessibilityRoleType, AccessibilitySamePageMode, AdaptiveColor, CommonMethod, BlurStyle, BlendApplyType, BlurStyleActivePolicy, PickerTextStyle, ChainStyle, ContentClipMode, DismissReason, DragBehavior, DragEvent, DragEventInternal, DragResult, Rectangle, DraggingSizeChangeEffect, DragPreviewMode, DrawModifier, EffectEdge, EffectType, FinishCallbackType, GestureModifier, GestureModifierInternal, UIGestureEvent, ScrollableCommonMethod, ItemDragInfo, CustomBuilder, NestedScrollOptions, EdgeEffectOptions, HapticFeedbackMode, HoverModeAreaType, ICurve, ICurveInternal, KeyboardAvoidMode, LayoutPolicy, LayoutSafeAreaEdge, LayoutSafeAreaType, ChildrenMainSize, ChildrenMainSizeInternal, RectResult, MenuPolicy, MenuPreviewMode, ModalTransition, OutlineStyle, PixelMapMock, PixelMapMockInternal, PopupStateChangeParam, PreDragStatus, ProgressMask, ProgressMaskInternal, RepeatMode, SelectionOptions, SafeAreaEdge, SafeAreaType, ScrollSizeMode, TextDecorationOptions, TextContentControllerBase, TextContentControllerBaseInternal, ShadowStyle, ShadowType, SheetKeyboardAvoidMode, SheetMode, SheetSize, SheetType, SourceTool, SourceType, BackgroundEffectOptions, BackgroundBlurStyleOptions, TranslateOptions, InputCounterOptions, ShadowOptions, CaretOffset, TextContentControllerOptions, ThemeColorMode, TouchTestInfo, TouchTestStrategy, TransitionEdge, TransitionEffect, TransitionEffectInternal, TransitionEffects, RotateOptions, ScaleOptions, AnimateParam, TransitionHierarchyStrategy, UICommonEvent, UICommonEventInternal, Callback_ClickEvent_Void, ClickEvent, ClickEventInternal, Callback_TouchEvent_Void, TouchEvent, TouchEventInternal, Callback_KeyEvent_Void, KeyEvent, KeyEventInternal, HoverEvent, HoverEventInternal, Callback_MouseEvent_Void, MouseEvent, MouseEventInternal, VisibleAreaEventOptions, SheetOptions, View, ViewInternal, Callback_KeyEvent_Boolean, Callback_Area_Area_Void, Callback_Array_TouchTestInfo_TouchResult, TouchResult, Callback_AxisEvent_Void, AxisEvent, AxisEventInternal, Callback_Boolean_HoverEvent_Void, Callback_CrownEvent_Void, CrownEvent, Callback_DismissContentCoverAction_Void, DismissContentCoverAction, Callback_DismissPopupAction_Void, DismissPopupAction, Callback_DismissSheetAction_Void, DismissSheetAction, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, DragItemInfo, Callback_DragEvent_String_Void, Callback_FocusAxisEvent_Void, FocusAxisEvent, FocusAxisEventInternal, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, Callback_HoverEvent_Void, Callback_Literal_Boolean_isVisible_Void, Literal_Boolean_isVisible, Callback_PreDragStatus_Void, Callback_SheetDismiss_Void, SheetDismiss, Callback_SheetType_Void, Callback_SpringBackAction_Void, SpringBackAction, Callback_TouchEvent_HitTestMode, BackgroundBrightnessOptions, BackgroundImageOptions, BlurOptions, ClickEffect, DateRange, DragInteractionOptions, DropOptions, ExpectedFrameRateRange, FocusMovement, ForegroundEffectOptions, GeometryTransitionOptions, InvertOptions, LinearGradient_common, Tuple_ResourceColor_Number, LinearGradientBlurOptions, FractionStop, LinearGradientOptions, LocalizedHorizontalAlignParam, LocalizedVerticalAlignParam, Measurable, MeasurableInternal, MeasureResult, SizeResult, MotionBlurAnchor, MotionBlurOptions, MotionPathOptions, OverlayOffset, PixelRoundPolicy, PixelStretchEffectOptions, PreviewConfiguration, RadialGradientOptions, Tuple_Length_Length, StateStyles, SweepGradientOptions, SystemAdaptiveOptions, TipsOptions, TouchObject, AlignRuleOption, HorizontalAlignOptions, VerticalAlignOptions, BlurStyleOptions, ContentCoverOptions, BindOptions, ContextMenuAnimationOptions, MultiShadowOptions, DragPreviewOptions, EventTarget, FadingEdgeOptions, BaseEvent, BaseEventInternal, ForegroundBlurStyleOptions, HistoricalPoint, LightSource, LocalizedAlignRuleOptions, MenuElement, OverlayOptions, PickerDialogButtonStyle, ReuseOptions, sharedTransitionOptions, SheetTitleOptions, TransitionOptions, BorderImageOption, CustomPopupOptions, Literal_ResourceColor_color, PointLightStyle, PopupMessageOptions, Type_SheetOptions_detents, ContextMenuOptions, BorderRadiusType, MenuOptions, PopupOptions, PopupButton, OnWillScrollCallback, ScrollResult, PopupMaskType, SelectedCallback, IndexCallback, IndexerSelectedCallback, RefreshingCallback, DividerStyle, BlendMode, PopupCommonOptions, DismissPopupActionInternal, ContentModifier } from "./../common"
 import { ButtonTriggerClickCallback, ButtonRole, ButtonStyleMode, ButtonType, ControlSize, ButtonOptions } from "./../button"
 import { Callback_Extender_OnFinish, Callback_Extender_OnProgress, DoubleAnimationParam } from "./../animationExtender"
 import { Callback_RangeUpdate, Context_getGroupDir_Callback, RestrictedWorker_onerror_Callback, RestrictedWorker_onexit_Callback, RestrictedWorker_onmessage_Callback, BuilderNodeOps, BuilderNodeOpsInternal, BuilderNodeOptions, ComponentContent, ComponentContentInternal, UnifiedData, UnifiedDataInternal, SystemBarStyle, Scene, SceneInternal, Context, ContextInternal, WorkerEventListener, WorkerEventListenerInternal, Event, ErrorEvent, MessageEvents, BaseContext, BaseContextInternal, PostMessageOptions, WorkerOptions, CustomColors, RestrictedWorker, RestrictedWorkerInternal, CustomTheme, Callback_CreateItem, LengthMetricsCustom } from "./../arkui-custom"
@@ -49,7 +49,7 @@ import { OnFoldStatusChangeCallback, OnHoverStatusChangeCallback, OnFoldStatusCh
 import { OnHoverCallback } from "./../sdk-stubs"
 import { OnLinearIndicatorChangeCallback, LinearIndicatorController, LinearIndicatorControllerInternal, LinearIndicatorStartOptions, LinearIndicatorStyle } from "./../linearindicator"
 import { OnNativeLoadCallback, XComponentController, XComponentControllerInternal, Literal_Number_surfaceHeight_surfaceWidth, SurfaceRect, SurfaceRotationOptions, NativeXComponentParameters, XComponentOptions } from "./../xcomponent"
-import { OnRadioChangeCallback, RadioIndicatorType, RadioOptions, RadioStyle } from "./../radio"
+import { OnRadioChangeCallback, RadioIndicatorType, RadioOptions, RadioStyle, RadioConfiguration } from "./../radio"
 import { OnRatingChangeCallback, RatingOptions, StarStyleOptions } from "./../rating"
 import { OnScrollEdgeCallback, OnScrollFrameBeginCallback, ScrollOnScrollCallback, ScrollOnWillScrollCallback, Scroller, ScrollerInternal, ScrollAlign, OffsetResult, OnScrollFrameBeginHandlerResult, ScrollAttribute, ScrollDirection, ScrollSnapOptions, OffsetOptions, ScrollOptions, ScrollEdgeOptions, ScrollPageOptions, Literal_Boolean_next_Axis_direction, ScrollToIndexOptions, ScrollAnimationOptions } from "./../scroll"
 import { OnScrollVisibleContentChangeCallback, ChainEdgeEffect, ScrollState, ListAttribute, ListItemAlign, ListDividerOptions, ChainAnimationOptions, StickyStyle, ScrollSnapAlign, Callback_Number_Number_Number_Void, VisibleListContentInfo, Callback_Number_Boolean, Callback_Number_Number_Boolean, ListItemGroupArea, ListScroller, ListScrollerInternal, CloseSwipeActionOptions, ListOptions } from "./../list"
@@ -61,7 +61,8 @@ import { PageTransitionCallback, RouteType, SlideEffect } from "./../pageTransit
 import { PasteButtonCallback, PasteButtonOnClickResult, PasteDescription, PasteIconStyle, PasteButtonOptions } from "./../pasteButton"
 import { PluginErrorCallback, PluginErrorData, PluginComponentTemplate, PluginComponentOptions } from "./../pluginComponent"
 import { IntentionCode } from '@ohos.multimodalInput.intentionCode'
-import { ReceiveCallback, BaseShape, BaseShapeInternal, CircleShape, CircleShapeInternal, ShapeSize, CommonShape, CommonShapeInternal, WebviewController, WebviewControllerInternal, Summary, EllipseShape, EllipseShapeInternal, ImageModifier, RectWidthStyle, RectHeightStyle, SymbolGlyphModifier, PathShape, PathShapeInternal, PathShapeOptions, PerfMonitorActionType, PerfMonitorSourceType, RectShape, RectShapeInternal, RectShapeOptions, RoundRectShapeOptions, ResolutionQuality, TextModifier, IndicatorStyle, WebHeader, WindowStatusType, AsyncCallback_image_PixelMap_Void, SnapshotOptions, LabelStyle } from "./../arkui-external"
+import { CircleShape, EllipseShape, PathShape, RectShape } from "@ohos/arkui/shape"
+import { ReceiveCallback, BaseShape, BaseShapeInternal, ShapeSize, CommonShape, CommonShapeInternal, WebviewController, WebviewControllerInternal, Summary, ImageModifier, RectWidthStyle, RectHeightStyle, SymbolGlyphModifier, PathShapeOptions, PerfMonitorActionType, PerfMonitorSourceType, RectShapeOptions, RoundRectShapeOptions, ResolutionQuality, TextModifier, IndicatorStyle, WebHeader, WindowStatusType, AsyncCallback_image_PixelMap_Void, SnapshotOptions, LabelStyle } from "./../arkui-external"
 import { SymbolEffect, SymbolEffectInternal, ReplaceSymbolEffect, ReplaceSymbolEffectInternal, ScaleSymbolEffect, ScaleSymbolEffectInternal } from "../symbolglyph"
 import { FontOptions, FontInfo, UIFontAdjustInfo, UIFontAliasInfo, UIFontFallbackInfo, UIFontConfig, UIFontGenericInfo, UIFontFallbackGroupInfo } from "@ohos/font"
 import { MeasureOptions } from "@ohos/measure"
@@ -141,7 +142,7 @@ import { RootSceneSession } from "./../rootScene"
 import { RRect, WindowAnimationTarget } from "./../remoteWindow"
 import { ScrollBarDirection, ScrollBarOptions } from "./../scrollBar"
 import { SecurityComponentLayoutDirection } from "./../securityComponent"
-import { ContentModifier, Callback_WrappedBuilder_Args_Void, CommonConfiguration, WrappedBuilder } from "./../arkui-wrapper-builder"
+import { Callback_WrappedBuilder_Args_Void, CommonConfiguration, WrappedBuilder } from "./../arkui-wrapper-builder"
 import { ShapeAttribute, ViewportRect } from "./../shape"
 import { SideBarContainerType, SideBarPosition, ButtonIconOptions, ButtonStyle } from "./../sidebar"
 import { SizeType, GridContainerOptions } from "./../gridContainer"
@@ -175,7 +176,6 @@ import { DrawCallback, RenderNode, RenderNodeInternal } from "../../RenderNode"
 import { RoundedRectOptions, RectOptions, RadiusItem } from "./../rect"
 import { RowOptions, RowOptionsV2 } from "./../row"
 import { StackOptions } from "./../stack"
-import { TransformationMatrix } from "./../arkui-common"
 import { FlexSpaceOptions, FlexOptions } from "./../flex"
 import { ImageFrameInfo } from "./../imageAnimator"
 import { MenuItemGroupOptions } from "./../menuItemGroup"
@@ -259,8 +259,8 @@ export class Deserializer extends DeserializerBase {
     }
     readCircleShape(): CircleShape {
         let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return CircleShapeInternal.fromPtr(ptr)
+        let value = valueDeserializer.readInt64() as Object as CircleShape
+        return value
     }
     readClientAuthenticationHandler(): ClientAuthenticationHandler {
         let valueDeserializer : Deserializer = this
@@ -327,8 +327,8 @@ export class Deserializer extends DeserializerBase {
     }
     readEllipseShape(): EllipseShape {
         let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return EllipseShapeInternal.fromPtr(ptr)
+        let value = valueDeserializer.readInt64() as Object as EllipseShape
+        return value
     }
     readEventResult(): EventResult {
         let valueDeserializer : Deserializer = this
@@ -496,8 +496,8 @@ export class Deserializer extends DeserializerBase {
     }
     readMatrix4Transit(): Matrix4Transit {
         let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return Matrix4TransitInternal.fromPtr(ptr)
+        let value : Matrix4Transit = valueDeserializer.readInt64() as Object as Matrix4Transit
+        return value
     }
     readNativeMediaPlayerConfig(): NativeMediaPlayerConfig {
         let valueDeserializer : Deserializer = this
@@ -657,8 +657,8 @@ export class Deserializer extends DeserializerBase {
     }
     readPathShape(): PathShape {
         let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return PathShapeInternal.fromPtr(ptr)
+        let value = valueDeserializer.readInt64() as Object as PathShape
+        return value
     }
     readPatternLockController(): PatternLockController {
         let valueDeserializer : Deserializer = this
@@ -750,8 +750,8 @@ export class Deserializer extends DeserializerBase {
     }
     readRectShape(): RectShape {
         let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return RectShapeInternal.fromPtr(ptr)
+        let value = valueDeserializer.readInt64() as Object as RectShape
+        return value
     }
     readRichEditorAttribute(): RichEditorAttribute {
         throw new Error("Interface with functions is not supported")
@@ -6885,7 +6885,7 @@ export class Deserializer extends DeserializerBase {
             stack_buf = (valueDeserializer.readString() as string)
         }
         const stack_result : string | undefined = stack_buf
-        const code_result : number = (valueDeserializer.readNumber() as number)
+        const code_result : int = (valueDeserializer.readInt32().toInt())
         let value : BusinessError = ({name: name_result, message: message_result, stack: stack_result, code: code_result} as BusinessError)
         return value
     }
@@ -7241,9 +7241,7 @@ export class Deserializer extends DeserializerBase {
     }
     readCommonConfiguration(): CommonConfiguration {
         let valueDeserializer : Deserializer = this
-        const enabled_result : boolean = valueDeserializer.readBoolean()
-        const contentModifier_result : ContentModifier = (valueDeserializer.readObject() as ContentModifier)
-        let value : CommonConfiguration = ({enabled: enabled_result, contentModifier: contentModifier_result} as CommonConfiguration)
+        let value : CommonConfiguration = {};
         return value
     }
     readCommonModifier(): CommonModifier {
@@ -8870,11 +8868,10 @@ export class Deserializer extends DeserializerBase {
     }
     readLeadingMarginPlaceholder(): LeadingMarginPlaceholder {
         let valueDeserializer : Deserializer = this
-        const pixelMap_result : PixelMap = (valueDeserializer.readPixelMap() as PixelMap)
         const size_buf_value0 : Dimension = (valueDeserializer.readLength() as Dimension)
         const size_buf_value1 : Dimension = (valueDeserializer.readLength() as Dimension)
         const size_result : [ Dimension, Dimension ] = ([size_buf_value0, size_buf_value1] as [ Dimension, Dimension ])
-        let value : LeadingMarginPlaceholder = ({pixelMap: pixelMap_result, size: size_result} as LeadingMarginPlaceholder)
+        let value : LeadingMarginPlaceholder = ({size: size_result} as LeadingMarginPlaceholder)
         return value
     }
     readLengthMetrics(): LengthMetrics {
@@ -10328,41 +10325,7 @@ export class Deserializer extends DeserializerBase {
         return value
     }
     readPolyToPolyOptions(): PolyToPolyOptions {
-        let valueDeserializer : Deserializer = this
-        const src_buf_length : int32 = valueDeserializer.readInt32()
-        let src_buf : Array<Point> = new Array<Point>(src_buf_length)
-        for (let src_buf_i = 0; src_buf_i < src_buf_length; src_buf_i++) {
-            src_buf[src_buf_i] = valueDeserializer.readPoint()
-        }
-        const src_result : Array<Point> = src_buf
-        const srcIndex_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let srcIndex_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (srcIndex_buf_runtimeType))
-        {
-            srcIndex_buf = (valueDeserializer.readNumber() as number)
-        }
-        const srcIndex_result : number | undefined = srcIndex_buf
-        const dst_buf_length : int32 = valueDeserializer.readInt32()
-        let dst_buf : Array<Point> = new Array<Point>(dst_buf_length)
-        for (let dst_buf_i = 0; dst_buf_i < dst_buf_length; dst_buf_i++) {
-            dst_buf[dst_buf_i] = valueDeserializer.readPoint()
-        }
-        const dst_result : Array<Point> = dst_buf
-        const dstIndex_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let dstIndex_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (dstIndex_buf_runtimeType))
-        {
-            dstIndex_buf = (valueDeserializer.readNumber() as number)
-        }
-        const dstIndex_result : number | undefined = dstIndex_buf
-        const pointCount_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let pointCount_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (pointCount_buf_runtimeType))
-        {
-            pointCount_buf = (valueDeserializer.readNumber() as number)
-        }
-        const pointCount_result : number | undefined = pointCount_buf
-        let value : PolyToPolyOptions = ({src: src_result, srcIndex: srcIndex_result, dst: dst_result, dstIndex: dstIndex_result, pointCount: pointCount_result} as PolyToPolyOptions)
+        let value : PolyToPolyOptions = ({} as PolyToPolyOptions)
         return value
     }
     readPopInfo(): PopInfo {
@@ -11745,6 +11708,27 @@ export class Deserializer extends DeserializerBase {
         let value : SurfaceRotationOptions = ({lock: lock_result} as SurfaceRotationOptions)
         return value
     }
+    readRadioConfiguration(): RadioConfiguration {
+        let valueDeserializer : Deserializer = this
+        const enabled_result : boolean = valueDeserializer.readBoolean()
+        const value_result : string = (valueDeserializer.readString() as string)
+        const checked_result : boolean = valueDeserializer.readBoolean()
+        const triggerChange_buf_resource : CallbackResource = valueDeserializer.readCallbackResource()
+        const triggerChange_buf_call : KPointer = valueDeserializer.readPointer()
+        const triggerChange_buf_callSync : KPointer = valueDeserializer.readPointer()
+        const triggerChange_result : ((value0: boolean) => void) = (value0: boolean):void => { 
+            const triggerChange_buf_argsSerializer : Serializer = Serializer.hold();
+            triggerChange_buf_argsSerializer.writeInt32(triggerChange_buf_resource.resourceId);
+            triggerChange_buf_argsSerializer.writePointer(triggerChange_buf_call);
+            triggerChange_buf_argsSerializer.writePointer(triggerChange_buf_callSync);
+            triggerChange_buf_argsSerializer.writeBoolean(value0);
+            InteropNativeModule._CallCallback(313269291, triggerChange_buf_argsSerializer.asBuffer(), triggerChange_buf_argsSerializer.length());
+            triggerChange_buf_argsSerializer.release();
+            return;
+        }
+        let value : RadioConfiguration = ({enabled: enabled_result, value: value_result, checked: checked_result, triggerChange: triggerChange_result} as RadioConfiguration)
+        return value
+    }
     readSweepGradientOptions(): SweepGradientOptions {
         let valueDeserializer : Deserializer = this
         const center_buf_value0 : Length = (valueDeserializer.readLength() as Length)
@@ -12369,15 +12353,9 @@ export class Deserializer extends DeserializerBase {
         let value : TouchResult = ({strategy: strategy_result, id: id_result} as TouchResult)
         return value
     }
-    readTransformationMatrix(): TransformationMatrix {
+    readTransformationMatrix(): Matrix4Transit {
         let valueDeserializer : Deserializer = this
-        const matrix4x4_buf_length : int32 = valueDeserializer.readInt32()
-        let matrix4x4_buf : Array<number> = new Array<number>(matrix4x4_buf_length)
-        for (let matrix4x4_buf_i = 0; matrix4x4_buf_i < matrix4x4_buf_length; matrix4x4_buf_i++) {
-            matrix4x4_buf[matrix4x4_buf_i] = (valueDeserializer.readNumber() as number)
-        }
-        const matrix4x4_result : Array<number> = matrix4x4_buf
-        let value : TransformationMatrix = ({matrix4x4: matrix4x4_result} as TransformationMatrix)
+        let value : Matrix4Transit = valueDeserializer.readInt64() as Object as Matrix4Transit
         return value
     }
     readTranslateOption(): TranslateOption {
@@ -13283,7 +13261,7 @@ export class Deserializer extends DeserializerBase {
                 curve_buf_ = (valueDeserializer.readString() as string)
             }
             else if (curve_buf__selector == 2) {
-                curve_buf_ = (valueDeserializer.readICurve() as ICurve)
+                curve_buf_ = (valueDeserializer.readInt64() as Object as ICurve)
             }
             else {
                 throw new Error("One of the branches for curve_buf_ has to be chosen through deserialisation.")

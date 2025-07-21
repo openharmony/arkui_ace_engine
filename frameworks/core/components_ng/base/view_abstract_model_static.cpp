@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/view_abstract_model_static.h"
 
+#include "base/utils/multi_thread.h"
 #include "core/common/ace_engine.h"
 #include "core/common/vibrator/vibrator_utils.h"
 #include "core/components_ng/base/view_abstract.h"
@@ -40,7 +41,7 @@ const std::string BLOOM_COLOR_SYS_RES_NAME = "sys.color.ohos_id_point_light_bloo
 const std::string ILLUMINATED_BORDER_WIDTH_SYS_RES_NAME = "sys.float.ohos_id_point_light_illuminated_border_width";
 constexpr int32_t LONG_PRESS_DURATION = 800;
 constexpr int32_t HOVER_IMAGE_LONG_PRESS_DURATION = 250;
-// constexpr char KEY_CONTEXT_MENU[] = "ContextMenu";
+constexpr char KEY_CONTEXT_MENU[] = "ContextMenu";
 constexpr char KEY_MENU[] = "Menu";
 
 void StartVibrator(const MenuParam& menuParam, bool isMenu, const std::string& menuHapticFeedback)
@@ -442,47 +443,47 @@ void ViewAbstractModelStatic::BindContextMenuStatic(const RefPtr<FrameNode>& tar
         RegisterContextMenuKeyEvent(targetNode, buildFunc, menuParam);
     }
 
-    // // delete menu when target node destroy
-    // auto destructor = [id = targetNode->GetId(), containerId = Container::CurrentId()]() {
-    //     auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(containerId);
-    //     CHECK_NULL_VOID(subwindow);
-    //     auto childContainerId = subwindow->GetChildContainerId();
-    //     auto childContainer = AceEngine::Get().GetContainer(childContainerId);
-    //     CHECK_NULL_VOID(childContainer);
-    //     auto pipeline = AceType::DynamicCast<NG::PipelineContext>(childContainer->GetPipelineContext());
-    //     CHECK_NULL_VOID(pipeline);
-    //     auto overlayManager = pipeline->GetOverlayManager();
-    //     CHECK_NULL_VOID(overlayManager);
-    //     overlayManager->DeleteMenu(id);
-    // };
-    // targetNode->PushDestroyCallbackWithTag(destructor, KEY_CONTEXT_MENU);
+    // delete menu when target node destroy
+    auto destructor = [id = targetNode->GetId(), containerId = Container::CurrentId()]() {
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(containerId, SubwindowType::TYPE_MENU);
+        CHECK_NULL_VOID(subwindow);
+        auto childContainerId = subwindow->GetChildContainerId();
+        auto childContainer = AceEngine::Get().GetContainer(childContainerId);
+        CHECK_NULL_VOID(childContainer);
+        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(childContainer->GetPipelineContext());
+        CHECK_NULL_VOID(pipeline);
+        auto overlayManager = pipeline->GetOverlayManager();
+        CHECK_NULL_VOID(overlayManager);
+        overlayManager->DeleteMenu(id);
+    };
+    targetNode->PushDestroyCallbackWithTag(destructor, KEY_CONTEXT_MENU);
 }
 
 void ViewAbstractModelStatic::BindDragWithContextMenuParamsStatic(FrameNode* targetNode, const NG::MenuParam& menuParam)
 {
-    // CHECK_NULL_VOID(targetNode);
+    CHECK_NULL_VOID(targetNode);
 
-    // auto gestureHub = targetNode->GetOrCreateGestureEventHub();
-    // if (gestureHub) {
-    //     if (menuParam.contextMenuRegisterType == ContextMenuRegisterType::CUSTOM_TYPE) {
-    //         gestureHub->SetBindMenuStatus(
-    //             true, menuParam.isShow, menuParam.previewMode.value_or(MenuPreviewMode::NONE));
-    //     } else if (menuParam.menuBindType == MenuBindingType::LONG_PRESS) {
-    //         gestureHub->SetBindMenuStatus(false, false, menuParam.previewMode.value_or(MenuPreviewMode::NONE));
-    //     }
-    //     gestureHub->SetPreviewMode(menuParam.previewMode.value_or(MenuPreviewMode::NONE));
-    //     gestureHub->SetContextMenuShowStatus(menuParam.isShow);
-    //     gestureHub->SetMenuBindingType(menuParam.menuBindType);
-    //     // set menu preview scale to drag.
-    //     if (menuParam.menuBindType != MenuBindingType::RIGHT_CLICK) {
-    //         auto menuPreviewScale = LessOrEqual(menuParam.previewAnimationOptions.scaleTo, 0.0)
-    //                                     ? DEFALUT_DRAG_PPIXELMAP_SCALE
-    //                                     : menuParam.previewAnimationOptions.scaleTo;
-    //         gestureHub->SetMenuPreviewScale(menuPreviewScale);
-    //     }
-    // } else {
-    //     TAG_LOGW(AceLogTag::ACE_DRAG, "Can not get gestureEventHub!");
-    // }
+    auto gestureHub = targetNode->GetOrCreateGestureEventHub();
+    if (gestureHub) {
+        if (menuParam.contextMenuRegisterType == ContextMenuRegisterType::CUSTOM_TYPE) {
+            gestureHub->SetBindMenuStatus(
+                true, menuParam.isShow, menuParam.previewMode);
+        } else if (menuParam.menuBindType == MenuBindingType::LONG_PRESS) {
+            gestureHub->SetBindMenuStatus(false, false, menuParam.previewMode);
+        }
+        gestureHub->SetPreviewMode(menuParam.previewMode);
+        gestureHub->SetContextMenuShowStatus(menuParam.isShow);
+        gestureHub->SetMenuBindingType(menuParam.menuBindType);
+        // set menu preview scale to drag.
+        if (menuParam.menuBindType != MenuBindingType::RIGHT_CLICK) {
+            auto menuPreviewScale = LessOrEqual(menuParam.previewAnimationOptions.scaleTo, 0.0)
+                                        ? DEFALUT_DRAG_PPIXELMAP_SCALE
+                                        : menuParam.previewAnimationOptions.scaleTo;
+            gestureHub->SetMenuPreviewScale(menuPreviewScale);
+        }
+    } else {
+        TAG_LOGW(AceLogTag::ACE_DRAG, "Can not get gestureEventHub!");
+    }
 }
 
 void ViewAbstractModelStatic::BindContentCover(FrameNode* frameNode, bool isShow,
@@ -654,16 +655,90 @@ void ViewAbstractModelStatic::SetAccessibilityVirtualNode(FrameNode* frameNode,
     std::function<RefPtr<NG::UINode>()>&& buildFunc)
 {
     CHECK_NULL_VOID(frameNode);
-    auto virtualNode = buildFunc();
+    auto weakNode = AceType::WeakClaim(frameNode);
+    auto SetAccessibilityVirtualNodeTask = []
+        (const WeakPtr<FrameNode>& weak, const std::function<RefPtr<NG::UINode>()>& buildFunc) {
+            auto node = weak.Upgrade();
+            CHECK_NULL_VOID(node);
+            CHECK_NULL_VOID(buildFunc);
+            auto virtualNode = buildFunc();
+            auto accessibilityProperty = node->GetAccessibilityProperty<AccessibilityProperty>();
+            CHECK_NULL_VOID(accessibilityProperty);
+            auto virtualFrameNode = AceType::DynamicCast<NG::FrameNode>(virtualNode);
+            CHECK_NULL_VOID(virtualFrameNode);
+            virtualFrameNode->SetAccessibilityNodeVirtual();
+            virtualFrameNode->SetAccessibilityVirtualNodeParent(node);
+            virtualFrameNode->SetFirstAccessibilityVirtualNode();
+            node->HasAccessibilityVirtualNode(true);
+            accessibilityProperty->SaveAccessibilityVirtualNode(virtualNode);
+    };
+    auto SetAccessibilityVirtualNodeMultiThread = [weakNode, SetAccessibilityVirtualNodeTask]
+        (const std::function<RefPtr<NG::UINode>()>& buildFunc) {
+            auto frameNodeRef = weakNode.Upgrade();
+            CHECK_NULL_VOID(frameNodeRef);
+            frameNodeRef->PostAfterAttachMainTreeTask([weakNode, buildFunc, SetAccessibilityVirtualNodeTask] {
+                SetAccessibilityVirtualNodeTask(weakNode, buildFunc);
+            });
+    };
+    FREE_NODE_CHECK(frameNode, SetAccessibilityVirtualNode, buildFunc);
+    SetAccessibilityVirtualNodeTask(weakNode, buildFunc);
+}
+
+void ViewAbstractModelStatic::SetAccessibilityDefaultFocus(FrameNode* frameNode, bool isFocus)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto weakNode = AceType::WeakClaim(frameNode);
+    auto AddToFocusList = [](const WeakPtr<FrameNode>& weak, bool focus) {
+        auto node = weak.Upgrade();
+        CHECK_NULL_VOID(node);
+        auto pipeline = node->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto accessibilityManager = pipeline->GetAccessibilityManager();
+        CHECK_NULL_VOID(accessibilityManager);
+        accessibilityManager->AddFrameNodeToDefaultFocusList(node, focus);
+    };
+    auto SetAccessibilityDefaultFocusMultiThread = [weakNode, AddToFocusList](bool isFocus) {
+        auto frameNodeRef = weakNode.Upgrade();
+        CHECK_NULL_VOID(frameNodeRef);
+        frameNodeRef->PostAfterAttachMainTreeTask([weakNode, isFocus, AddToFocusList] {
+            AddToFocusList(weakNode, isFocus);
+        });
+    };
+    FREE_NODE_CHECK(frameNode, SetAccessibilityDefaultFocus, isFocus);
+    AddToFocusList(weakNode, isFocus);
+}
+
+void ViewAbstractModelStatic::SetAccessibilityUseSamePage(FrameNode* frameNode, const std::string& pageMode)
+{
+    CHECK_NULL_VOID(frameNode);
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
-    auto virtualFrameNode = AceType::DynamicCast<NG::FrameNode>(virtualNode);
-    CHECK_NULL_VOID(virtualFrameNode);
-    virtualFrameNode->SetAccessibilityNodeVirtual();
-    virtualFrameNode->SetAccessibilityVirtualNodeParent(AceType::Claim(AceType::DynamicCast<NG::UINode>(frameNode)));
-    virtualFrameNode->SetFirstAccessibilityVirtualNode();
-    frameNode->HasAccessibilityVirtualNode(true);
-    accessibilityProperty->SaveAccessibilityVirtualNode(virtualNode);
+    if (pageMode == accessibilityProperty->GetAccessibilitySamePage()) {
+        return;
+    }
+    accessibilityProperty->SetAccessibilitySamePage(pageMode);
+
+    auto weakNode = AceType::WeakClaim(frameNode);
+    auto SendPageMode = [](const WeakPtr<FrameNode>& weak, const std::string& pageMode) {
+        auto node = weak.Upgrade();
+        CHECK_NULL_VOID(node);
+#ifdef WINDOW_SCENE_SUPPORTED
+        auto pipeline = node->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto uiExtManager = pipeline->GetUIExtensionManager();
+        CHECK_NULL_VOID(uiExtManager);
+        uiExtManager->SendPageModeToProvider(node->GetId(), pageMode);
+#endif
+    };
+    auto SetAccessibilityUseSamePageMultiThread = [weakNode, SendPageMode](const std::string& pageMode) {
+        auto frameNodeRef = weakNode.Upgrade();
+        CHECK_NULL_VOID(frameNodeRef);
+        frameNodeRef->PostAfterAttachMainTreeTask([weakNode, &pageMode, SendPageMode] {
+            SendPageMode(weakNode, pageMode);
+        });
+    };
+    FREE_NODE_CHECK(frameNode, SetAccessibilityUseSamePage, pageMode);
+    SendPageMode(weakNode, pageMode);
 }
 
 void ViewAbstractModelStatic::DisableOnAccessibilityHover(FrameNode* frameNode)

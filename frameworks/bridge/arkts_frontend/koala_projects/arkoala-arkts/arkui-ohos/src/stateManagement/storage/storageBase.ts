@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { AbstractProperty } from './storageProperty';
+import { SubscribedAbstractProperty } from './storageProperty';
 import { WatchFuncType, WatchIdType, IDecoratedV1Variable } from '../decorator';
 import { DecoratedV1VariableBase, DecoratedVariableBase } from '../decoratorImpl/decoratorBase';
 import { StateDecoratedVariable } from '../decoratorImpl/decoratorState';
@@ -38,15 +38,14 @@ export class StorageProperty<T> extends StateDecoratedVariable<T> implements IDe
         super(null, propName, initValue);
     }
 
-    public mkRef(propertyNameInAppStorage: string, ttype: Type): AbstractProperty<T> {
-        StateMgmtConsole.log(`mkRef('${propertyNameInAppStorage}')`);
+    public mkRef(propertyNameInAppStorage: string, ttype: Type): SubscribedAbstractProperty<T> {
         const get = (): T => {
             return this.get() as T;
         };
         const set = (newValue: T): void => {
             this.set(newValue);
         };
-        return new AbstractProperty<T>(propertyNameInAppStorage, ttype, get, set);
+        return new SubscribedAbstractProperty<T>(propertyNameInAppStorage, ttype, get, set);
     }
 
     public makeStorageLink(
@@ -85,7 +84,6 @@ export class StorageProperty<T> extends StateDecoratedVariable<T> implements IDe
     }
 
     public __unregister(registrationId: WatchIdType): void {
-        StateMgmtConsole.log(`ref/link/persitProp ${registrationId} unregistering.`);
         this.refRegistrations_.delete(registrationId);
         this._watchFuncs.delete(registrationId);
     }
@@ -120,12 +118,10 @@ export class StorageBase {
     public createAndSet<T>(key: string, ttype: Type, value: T): boolean {
         const typeOpt = this.key2Type.get(key);
         if (typeOpt !== undefined) {
-            StateMgmtConsole.log(`createAndSet: key '${key}': key is use already`);
             return false;
         }
 
         if (!ttype.assignableFrom(Type.of(value))) {
-            StateMgmtConsole.log(`createAndSet: key '${key}' value not assignable to type`);
             return false;
         }
 
@@ -139,7 +135,6 @@ export class StorageBase {
     public update<T>(key: string, value: T): boolean {
         const ttype: Type | undefined = this.key2Type.get(key);
         if (!ttype) {
-            StateMgmtConsole.log(`update: key '${key}' unknown`);
             // no value for key in DB, can not update
             return false;
         }
@@ -147,14 +142,10 @@ export class StorageBase {
             // attempt to set a value of a type incompatible with
             // fixed ttype for this key
             // can not update
-            StateMgmtConsole.log(
-                `update: key '${key}' expected type is ${ttype.toString()} incompatible with new value. Error.`
-            );
             return false;
         }
         const sp: StorageProperty<T> | undefined = this.repoAllTypes.get(key) as StorageProperty<T>;
         if (sp === undefined) {
-            StateMgmtConsole.log(`update: key '${key}' unknown. Internal error`);
             return false;
         }
         sp!.set(value);
@@ -166,34 +157,29 @@ export class StorageBase {
         const ttype: Type | undefined = this.key2Type.get(key);
         if (!ttype) {
             // no value for key in DB, can not read
-            // StateMgmtConsole.log(`get: key '${key}' unknown`);
             return undefined;
         }
         if (!expectedTtype.assignableFrom(ttype)) {
             // expected type is not compatible with permissible type
             // on file for key
-            // StateMgmtConsole.log(`get: key '${key}' expected type is ${expectedTtype.toString()}, get requests for ${ttype.toString()}`);
             return undefined;
         }
         // eventually this.backing_.get
         const sp: StorageProperty<T> | undefined = this.repoAllTypes.get(key) as StorageProperty<T>;
         if (sp === undefined) {
-            // StateMgmtConsole.log(`get: key '${key}' unknown. Internal error`);
             return undefined;
         }
         return sp ? sp.get() : undefined;
     }
 
-    public ref<T>(key: string, ttype: Type): AbstractProperty<T> | undefined {
+    public ref<T>(key: string, ttype: Type): SubscribedAbstractProperty<T> | undefined {
         const expectedTtype: Type | undefined = this.key2Type.get(key);
         if (expectedTtype === undefined || !expectedTtype!.equals(ttype)) {
-            StateMgmtConsole.log(`ref: key '${key}' unknown or type ${ttype.toString()} mismatch storage type`);
             return undefined;
         }
 
         const sp: StorageProperty<T> | undefined = this.repoAllTypes.get(key) as StorageProperty<T>;
         if (sp === undefined) {
-            StateMgmtConsole.log(`ref: key '${key}' unknown. Internal error`);
             return undefined;
         }
         const ap = sp.mkRef(key, ttype);

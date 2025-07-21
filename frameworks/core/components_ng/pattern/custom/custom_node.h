@@ -197,6 +197,13 @@ public:
         }
     }
 
+    // for ArkTs1.2
+    void SetOnCleanupFunc(std::function<void()>&& onCleanupFunc)
+    {
+        onCleanupFunc_ = onCleanupFunc;
+    }
+
+    bool FireOnCleanup();
 private:
     // for DFX
     void DumpComponentInfo(std::unique_ptr<JsonValue>& componentInfo);
@@ -216,6 +223,7 @@ private:
     std::function<void()> onPageHideFunc_ = nullptr;
     std::function<bool()> onBackPressFunc_ = nullptr;
     std::function<void()> pageTransitionFunc_ = nullptr;
+    std::function<void()> onCleanupFunc_ = nullptr;
 };
 } // namespace OHOS::Ace::NG
 

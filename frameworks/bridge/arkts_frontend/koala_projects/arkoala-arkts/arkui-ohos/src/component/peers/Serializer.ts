@@ -47,7 +47,7 @@ import { OnFoldStatusChangeCallback, OnHoverStatusChangeCallback, OnFoldStatusCh
 import { OnHoverCallback } from "./../sdk-stubs"
 import { OnLinearIndicatorChangeCallback, LinearIndicatorController, LinearIndicatorControllerInternal, LinearIndicatorStartOptions, LinearIndicatorStyle } from "./../linearindicator"
 import { OnNativeLoadCallback, XComponentController, XComponentControllerInternal, Literal_Number_surfaceHeight_surfaceWidth, SurfaceRect, SurfaceRotationOptions, NativeXComponentParameters, XComponentOptions } from "./../xcomponent"
-import { OnRadioChangeCallback, RadioIndicatorType, RadioOptions, RadioStyle } from "./../radio"
+import { OnRadioChangeCallback, RadioConfiguration, RadioIndicatorType, RadioOptions, RadioStyle } from "./../radio"
 import { OnRatingChangeCallback, RatingOptions, StarStyleOptions } from "./../rating"
 import { OnScrollEdgeCallback, OnScrollFrameBeginCallback, ScrollOnScrollCallback, ScrollOnWillScrollCallback, Scroller, ScrollerInternal, ScrollAlign, OffsetResult, OnScrollFrameBeginHandlerResult, ScrollAttribute, ScrollDirection, ScrollSnapOptions, OffsetOptions, ScrollOptions, ScrollEdgeOptions, ScrollPageOptions, Literal_Boolean_next_Axis_direction, ScrollToIndexOptions, ScrollAnimationOptions } from "./../scroll"
 import { OnScrollVisibleContentChangeCallback, ChainEdgeEffect, ScrollState, ListAttribute, ListItemAlign, ListDividerOptions, ChainAnimationOptions, StickyStyle, ScrollSnapAlign, Callback_Number_Number_Number_Void, VisibleListContentInfo, Callback_Number_Boolean, Callback_Number_Number_Boolean, ListItemGroupArea, ListScroller, ListScrollerInternal, CloseSwipeActionOptions, ListOptions } from "./../list"
@@ -59,7 +59,8 @@ import { PageTransitionCallback, RouteType, SlideEffect } from "./../pageTransit
 import { PasteButtonCallback, PasteButtonOnClickResult, PasteDescription, PasteIconStyle, PasteButtonOptions } from "./../pasteButton"
 import { PluginErrorCallback, PluginErrorData, PluginComponentTemplate, PluginComponentOptions } from "./../pluginComponent"
 import { IntentionCode } from '@ohos.multimodalInput.intentionCode'
-import { ReceiveCallback, BaseShape, BaseShapeInternal, CircleShape, CircleShapeInternal, ShapeSize, CommonShape, CommonShapeInternal, WebviewController, WebviewControllerInternal, Summary, EllipseShape, EllipseShapeInternal, ImageModifier, RectWidthStyle, RectHeightStyle, SymbolGlyphModifier, PathShape, PathShapeInternal, PathShapeOptions, PerfMonitorActionType, PerfMonitorSourceType, RectShape, RectShapeInternal, RectShapeOptions, RoundRectShapeOptions, ResolutionQuality, TextModifier, IndicatorStyle, WebHeader, WindowStatusType, AsyncCallback_image_PixelMap_Void, SnapshotOptions, LabelStyle } from "./../arkui-external"
+import { CircleShape, EllipseShape, PathShape, RectShape } from "@ohos/arkui/shape"
+import { ReceiveCallback, BaseShape, BaseShapeInternal, ShapeSize, CommonShape, CommonShapeInternal, WebviewController, WebviewControllerInternal, Summary, ImageModifier, RectWidthStyle, RectHeightStyle, SymbolGlyphModifier, PathShapeOptions, PerfMonitorActionType, PerfMonitorSourceType, RectShapeOptions, RoundRectShapeOptions, ResolutionQuality, TextModifier, IndicatorStyle, WebHeader, WindowStatusType, AsyncCallback_image_PixelMap_Void, SnapshotOptions, LabelStyle } from "./../arkui-external"
 import { SymbolEffect, SymbolEffectInternal, ReplaceSymbolEffect, ReplaceSymbolEffectInternal, ScaleSymbolEffect, ScaleSymbolEffectInternal } from "../symbolglyph"
 import { FontOptions, FontInfo, UIFontAdjustInfo, UIFontAliasInfo, UIFontFallbackInfo, UIFontConfig, UIFontGenericInfo, UIFontFallbackGroupInfo } from "@ohos/font"
 import { MeasureOptions } from "@ohos/measure"
@@ -260,7 +261,7 @@ export class Serializer extends SerializerBase {
     }
     writeCircleShape(value: CircleShape): void {
         let valueSerializer : Serializer = this
-        valueSerializer.writePointer(toPeerPtr(value))
+        valueSerializer.writeInt64(Object.values(value)[0] as int64)
     }
     writeClientAuthenticationHandler(value: ClientAuthenticationHandler): void {
         let valueSerializer : Serializer = this
@@ -316,7 +317,7 @@ export class Serializer extends SerializerBase {
     }
     writeEllipseShape(value: EllipseShape): void {
         let valueSerializer : Serializer = this
-        valueSerializer.writePointer(toPeerPtr(value))
+        valueSerializer.writeInt64(Object.values(value)[0] as int64)
     }
     writeEventResult(value: EventResult): void {
         let valueSerializer : Serializer = this
@@ -435,8 +436,8 @@ export class Serializer extends SerializerBase {
         valueSerializer.writePointer(toPeerPtr(value))
     }
     writeMatrix4Transit(value: Matrix4Transit): void {
-        let valueSerializer : Serializer = this
-        valueSerializer.writePointer(toPeerPtr(value))
+        let valueSerializer : Serializer = this        
+        valueSerializer.writeInt64(Object.values(value)[0] as int64)
     }
     writeNativeMediaPlayerConfig(value: NativeMediaPlayerConfig): void {
         let valueSerializer : Serializer = this
@@ -584,7 +585,7 @@ export class Serializer extends SerializerBase {
     }
     writePathShape(value: PathShape): void {
         let valueSerializer : Serializer = this
-        valueSerializer.writePointer(toPeerPtr(value))
+        valueSerializer.writeInt64(Object.values(value)[0] as int64)
     }
     writePatternLockController(value: PatternLockController): void {
         let valueSerializer : Serializer = this
@@ -671,7 +672,7 @@ export class Serializer extends SerializerBase {
     }
     writeRectShape(value: RectShape): void {
         let valueSerializer : Serializer = this
-        valueSerializer.writePointer(toPeerPtr(value))
+        valueSerializer.writeInt64(Object.values(value)[0] as int64)
     }
     writeRichEditorAttribute(value: RichEditorAttribute): void {
     }
@@ -1787,7 +1788,7 @@ export class Serializer extends SerializerBase {
             valueSerializer.writeString(value_stack_value)
         }
         const value_code  = value.code
-        valueSerializer.writeNumber(value_code)
+        valueSerializer.writeInt32(value_code)
     }
     writeButtonOptions(value: ButtonOptions): void {
         let valueSerializer : Serializer = this
@@ -3924,8 +3925,6 @@ export class Serializer extends SerializerBase {
     }
     writeLeadingMarginPlaceholder(value: LeadingMarginPlaceholder): void {
         let valueSerializer : Serializer = this
-        const value_pixelMap  = value.pixelMap
-        valueSerializer.writePixelMap(value_pixelMap)
         const value_size  = value.size
         const value_size_0  = value_size[0]
         valueSerializer.writeLength(value_size_0)
@@ -5407,43 +5406,6 @@ export class Serializer extends SerializerBase {
         }
     }
     writePolyToPolyOptions(value: PolyToPolyOptions): void {
-        let valueSerializer : Serializer = this
-        const value_src  = value.src
-        valueSerializer.writeInt32(value_src.length as int32)
-        for (let i = 0; i < value_src.length; i++) {
-            const value_src_element : Point = value_src[i]
-            valueSerializer.writePoint(value_src_element)
-        }
-        const value_srcIndex  = value.srcIndex
-        let value_srcIndex_type : int32 = RuntimeType.UNDEFINED
-        value_srcIndex_type = runtimeType(value_srcIndex)
-        valueSerializer.writeInt8(value_srcIndex_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_srcIndex_type)) {
-            const value_srcIndex_value  = value_srcIndex!
-            valueSerializer.writeNumber(value_srcIndex_value)
-        }
-        const value_dst  = value.dst
-        valueSerializer.writeInt32(value_dst.length as int32)
-        for (let i = 0; i < value_dst.length; i++) {
-            const value_dst_element : Point = value_dst[i]
-            valueSerializer.writePoint(value_dst_element)
-        }
-        const value_dstIndex  = value.dstIndex
-        let value_dstIndex_type : int32 = RuntimeType.UNDEFINED
-        value_dstIndex_type = runtimeType(value_dstIndex)
-        valueSerializer.writeInt8(value_dstIndex_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_dstIndex_type)) {
-            const value_dstIndex_value  = value_dstIndex!
-            valueSerializer.writeNumber(value_dstIndex_value)
-        }
-        const value_pointCount  = value.pointCount
-        let value_pointCount_type : int32 = RuntimeType.UNDEFINED
-        value_pointCount_type = runtimeType(value_pointCount)
-        valueSerializer.writeInt8(value_pointCount_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_pointCount_type)) {
-            const value_pointCount_value  = value_pointCount!
-            valueSerializer.writeNumber(value_pointCount_value)
-        }
     }
     writePopInfo(value: PopInfo): void {
         let valueSerializer : Serializer = this
@@ -6922,6 +6884,17 @@ export class Serializer extends SerializerBase {
         const value_surfaceHeight  = value.surfaceHeight
         valueSerializer.writeNumber(value_surfaceHeight)
     }
+    writeRadioConfiguration(value: RadioConfiguration): void {
+        let valueSerializer : Serializer = this
+        const value_enabled  = value.enabled
+        valueSerializer.writeBoolean(value_enabled)
+        const value_value  = value.value
+        valueSerializer.writeString(value_value)
+        const value_checked  = value.checked
+        valueSerializer.writeBoolean(value_checked)
+        const value_triggerChange  = value.triggerChange
+        valueSerializer.holdAndWriteCallback(value_triggerChange)
+    }
     writeSurfaceRotationOptions(value: SurfaceRotationOptions): void {
         let valueSerializer : Serializer = this
         const value_lock  = value.lock
@@ -7604,14 +7577,11 @@ export class Serializer extends SerializerBase {
             valueSerializer.writeString(value_id_value)
         }
     }
-    writeTransformationMatrix(value: TransformationMatrix): void {
+    writeTransformationMatrix(value: object): void {
         let valueSerializer : Serializer = this
-        const value_matrix4x4  = value.matrix4x4
-        valueSerializer.writeInt32(value_matrix4x4.length as int32)
-        for (let i = 0; i < value_matrix4x4.length; i++) {
-            const value_matrix4x4_element : number = value_matrix4x4[i]
-            valueSerializer.writeNumber(value_matrix4x4_element)
-        }
+        const value_curve_value  = value!
+        const value_curve_value_1  = value_curve_value as Matrix4Transit
+        valueSerializer.writeInt64(Object.values(value_curve_value_1)[0] as int64)
     }
     writeTranslateOption(value: TranslateOption): void {
         let valueSerializer : Serializer = this
@@ -8581,7 +8551,7 @@ export class Serializer extends SerializerBase {
             else if (RuntimeType.OBJECT == value_curve_value_type) {
                 valueSerializer.writeInt8(2 as int32)
                 const value_curve_value_2  = value_curve_value as ICurve
-                valueSerializer.writeICurve(value_curve_value_2)
+                valueSerializer.writeInt64(Object.values(value_curve_value_2)[0] as int64)
             }
         }
         const value_delay  = value.delay

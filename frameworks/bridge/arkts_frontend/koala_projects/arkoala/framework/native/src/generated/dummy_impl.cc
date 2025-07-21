@@ -27,6 +27,7 @@
 #include "logging.h"
 #include "dynamic-loader.h"
 #include "arkoala_api_generated.h"
+#include "securec.h"
 
 #undef max
 
@@ -60,7 +61,9 @@ void appendGroupedLog(int kind, const std::string& str) {
 
 void dummyClassFinalizer(KNativePointer* ptr) {
     char hex[20];
-    std::snprintf(hex, sizeof(hex), "0x%llx", (long long)ptr);
+    if (snprintf_s(hex, sizeof(hex), sizeof(hex) - 1, "0x%llx", (long long)ptr) < 0) {
+        return;
+    }
     string out("dummyClassFinalizer(");
     out.append(hex);
     out.append(")");
@@ -43414,7 +43417,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_ImageAttachment CtorImpl(const Ark_ImageAttachmentInterface* value)
+    Ark_ImageAttachment CtorImpl(const Ark_Union_ImageAttachmentInterface_Opt_AttachmentType* value)
     {
         if (!needGroupedLog(1))
             return (Ark_ImageAttachment) 100;
@@ -43946,6 +43949,33 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     } // RouterExtenderAccessor
+    namespace ContentModifierHelperAccessor {
+    void ContentModifierRadioImpl(Ark_NativePointer node,
+                                  const Ark_Object* contentModifier,
+                                  const RadioModifierBuilder* builder)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("contentModifierRadio(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, contentModifier);
+        out.append(", ");
+        WriteToString(&out, builder);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+
+    void ResetContentModifierRadioImpl(Ark_NativePointer node)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("resetContentModifierRadio(");
+        WriteToString(&out, node);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    } // ContentModifierHelperAccessor
     const GENERATED_ArkUIAlphabetIndexerOpsAccessor* GetAlphabetIndexerOpsAccessor()
     {
         static const GENERATED_ArkUIAlphabetIndexerOpsAccessor AlphabetIndexerOpsAccessorImpl {
@@ -47899,6 +47929,15 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return &RouterExtenderAccessorImpl;
     }
 
+    const GENERATED_ArkUIContentModifierHelperAccessor* GetContentModifierHelperAccessor()
+    {
+        static const GENERATED_ArkUIContentModifierHelperAccessor ContentModifierHelperAccessorImpl {
+            ContentModifierHelperAccessor::ContentModifierRadioImpl,
+            ContentModifierHelperAccessor::ResetContentModifierRadioImpl,
+        };
+        return &ContentModifierHelperAccessorImpl;
+    }
+
     const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
     {
         static const GENERATED_ArkUIAccessors accessorsImpl = {
@@ -48120,6 +48159,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetLinearIndicatorControllerAccessor,
             GetGlobalScopeAccessor,
             GetRouterExtenderAccessor,
+            GetContentModifierHelperAccessor,
         };
         return &accessorsImpl;
     }

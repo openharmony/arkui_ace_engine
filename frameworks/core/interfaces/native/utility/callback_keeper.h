@@ -28,6 +28,7 @@ template<typename TCallbackType>
 class AutoCallbackKeeper {
 public:
     AutoCallbackKeeper(std::function<void()>&& handler);
+    AutoCallbackKeeper(std::function<void(bool)>&& handler);
     ~AutoCallbackKeeper();
 
     TCallbackType ArkValue() const &;
@@ -39,6 +40,7 @@ private:
 namespace {
 using ReverseResultHandler = std::variant<
     std::function<void()>,
+    std::function<void(bool)>,
     std::function<void(const void *)>,
     std::function<void(Ark_Boolean)>,
     std::function<void(Ark_Number)>,
@@ -50,6 +52,7 @@ class CallbackKeeper : public BaseKeeper<ReverseResultHandler> {
 public:
     using AnyResultHandlerType = std::function<void(const void *)>;
     using ReverseHandler = std::function<void()>;
+    using BooleanHandlerType = std::function<void(bool)>;
 
     template <typename ArkResultType, typename ContinuationType, typename CallbackHelper, typename... Params>
     static void InvokeWithResultHandler(
@@ -98,6 +101,12 @@ public:
     }
 
     template <typename CallbackType>
+    static CallbackType DefineBooleanCallback(BooleanHandlerType handler, bool autoHold = true)
+    {
+        return RegisterReverseCallback<CallbackType, BooleanHandlerType>(handler, autoHold);
+    }
+
+    template <typename CallbackType>
     static void ReleaseReverseCallback(CallbackType callback)
     {
         Release(callback.resource.resourceId);
@@ -105,6 +114,12 @@ public:
 
     template <typename CallbackType = Callback_Void>
     static AutoCallbackKeeper<CallbackType> Claim(ReverseHandler &&handler)
+    {
+        return AutoCallbackKeeper<CallbackType>(std::move(handler));
+    }
+
+    template <typename CallbackType = Callback_Boolean_Void>
+    static AutoCallbackKeeper<CallbackType> Claim(BooleanHandlerType &&handler)
     {
         return AutoCallbackKeeper<CallbackType>(std::move(handler));
     }
@@ -140,6 +155,10 @@ private:
 template<typename TCallbackType>
 inline AutoCallbackKeeper<TCallbackType>::AutoCallbackKeeper(std::function<void()>&& handler)
     : arkCallback_(CallbackKeeper::DefineReverseCallback<TCallbackType>(std::move(handler))) {}
+
+template<typename TCallbackType>
+inline AutoCallbackKeeper<TCallbackType>::AutoCallbackKeeper(std::function<void(bool)>&& handler)
+    : arkCallback_(CallbackKeeper::DefineBooleanCallback<TCallbackType>(std::move(handler))) {}
 
 template<typename TCallbackType>
 inline AutoCallbackKeeper<TCallbackType>::~AutoCallbackKeeper()

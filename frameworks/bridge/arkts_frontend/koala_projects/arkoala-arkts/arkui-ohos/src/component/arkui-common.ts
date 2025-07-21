@@ -20,5 +20,5 @@ import { int32, int64, float32 } from "@koalaui/common"
 import { KInt, KPointer, KBoolean, NativeBuffer, KStringPtr, wrapCallback } from "@koalaui/interop"
 import { NodeAttach, remember } from "@koalaui/runtime"
 export interface TransformationMatrix {
-    matrix4x4: Array<number>;
+    matrix4Object: int64;
 }

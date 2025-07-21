@@ -283,4 +283,14 @@ void CustomNode::OnDestroyingStateChange(bool isDestroying, bool cleanStatus)
         context->AddPendingDeleteCustomNode(Claim(this));
     }
 }
+
+bool CustomNode::FireOnCleanup()
+{
+    auto callback = onCleanupFunc_;
+    if (callback) {
+        callback();
+        return true;
+    }
+    return false;
+}
 } // namespace OHOS::Ace::NG

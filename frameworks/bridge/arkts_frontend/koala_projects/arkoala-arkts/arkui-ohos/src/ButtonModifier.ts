@@ -16,7 +16,7 @@
 import { AttributeModifier } from 'arkui/component/common'
 import { ButtonAttribute } from 'arkui/component/button'
 
-import { AttributeUpdateFlag, CommonMethodModifier } from './CommonMethodModifier';
+import { AttributeUpdaterFlag, CommonMethodModifier } from './CommonMethodModifier';
 import { Length } from './component/units';
 import { PeerNode } from './PeerNode';
 import { ArkButtonPeer } from './component/button';
@@ -27,33 +27,33 @@ export class ButtonModifier extends CommonMethodModifier implements ButtonAttrib
     applyFocusedAttribute(instance: ButtonAttribute): void { }
     applyDisabledAttribute(instance: ButtonAttribute): void { }
     applySelectedAttribute(instance: ButtonAttribute): void { }
-    _fontSize_flag: AttributeUpdateFlag = AttributeUpdateFlag.INITIAL
+    _fontSize_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _fontSize0_value?: Length | undefined
     public fontSize(value: Length | undefined): this {
-        if (this._fontSize_flag === AttributeUpdateFlag.INITIAL || this._fontSize0_value !== value || !Type.of(value).isPrimitive()) {
+        if (this._fontSize_flag === AttributeUpdaterFlag.INITIAL || this._fontSize0_value !== value || !Type.of(value).isPrimitive()) {
             this._fontSize0_value = value
-            this._fontSize_flag = AttributeUpdateFlag.UPDATE
+            this._fontSize_flag = AttributeUpdaterFlag.UPDATE
         } else {
-            this._fontSize_flag = AttributeUpdateFlag.SKIP
+            this._fontSize_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
     applyModifierPatch(value: PeerNode): void {
         super.applyModifierPatch(value)
         const peerNode: ArkButtonPeer = value as ArkButtonPeer
-        if (this._fontSize_flag != AttributeUpdateFlag.INITIAL) {
+        if (this._fontSize_flag != AttributeUpdaterFlag.INITIAL) {
             switch (this._fontSize_flag) {
-                case AttributeUpdateFlag.UPDATE: {
+                case AttributeUpdaterFlag.UPDATE: {
                     peerNode.fontColorAttribute((this._fontSize0_value as Length | undefined))
-                    this._fontSize_flag = AttributeUpdateFlag.RESET
+                    this._fontSize_flag = AttributeUpdaterFlag.RESET
                     break
                 }
-                case AttributeUpdateFlag.SKIP: {
-                    this._fontSize_flag = AttributeUpdateFlag.RESET
+                case AttributeUpdaterFlag.SKIP: {
+                    this._fontSize_flag = AttributeUpdaterFlag.RESET
                     break
                 }
                 default: {
-                    this._fontSize_flag = AttributeUpdateFlag.INITIAL
+                    this._fontSize_flag = AttributeUpdaterFlag.INITIAL
                     peerNode.fontColorAttribute(undefined)
                 }
             }
@@ -63,10 +63,10 @@ export class ButtonModifier extends CommonMethodModifier implements ButtonAttrib
         super.mergeModifier(value)
         if (value instanceof ButtonModifier) {
             const buttonModifier = value as ButtonModifier;
-            if (buttonModifier._fontSize_flag != AttributeUpdateFlag.INITIAL) {
+            if (buttonModifier._fontSize_flag != AttributeUpdaterFlag.INITIAL) {
                 switch (buttonModifier._fontSize_flag) {
-                    case AttributeUpdateFlag.UPDATE:
-                    case AttributeUpdateFlag.SKIP: {
+                    case AttributeUpdaterFlag.UPDATE:
+                    case AttributeUpdaterFlag.SKIP: {
                         this.fontSize(buttonModifier._fontSize0_value)
                         break
                     }

@@ -1560,6 +1560,7 @@ NG::NavigationBackgroundOptions Convert(const Ark_MoreButtonOptions& src)
 
     if (src.backgroundBlurStyleOptions.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
         styleOptions = Converter::Convert<BlurStyleOption>(src.backgroundBlurStyleOptions.value);
+        options.blurStyleOption = styleOptions;
     }
 
     if (src.backgroundBlurStyle.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
@@ -1567,14 +1568,14 @@ NG::NavigationBackgroundOptions Convert(const Ark_MoreButtonOptions& src)
         if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
             blurStyle <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
             styleOptions.blurStyle = static_cast<BlurStyle>(blurStyle);
+            options.blurStyleOption = styleOptions;
         }
     }
 
     if (src.backgroundEffect.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
         effectOption = Converter::Convert<EffectOption>(src.backgroundEffect.value);
+        options.effectOption = effectOption;
     }
-    options.blurStyleOption = styleOptions;
-    options.effectOption = effectOption;
     return options;
 }
 
@@ -1826,6 +1827,17 @@ template<>
 RefPtr<Curve> Convert(const Ark_ICurve& src)
 {
     return src ? src->handler : nullptr;
+}
+
+template<>
+void AssignCast(std::optional<RefPtr<Curve>>& dst, const Ark_String& src)
+{
+    auto curve = Framework::CreateCurve(Converter::Convert<std::string>(src), false);
+    if (curve) {
+        dst = curve;
+    } else {
+        dst = std::nullopt;
+    }
 }
 
 void ParseDragPreviewMode(DragPreviewOption& previewOption, const Ark_DragPreviewOptions &src)
@@ -2283,17 +2295,18 @@ template<>
 BorderColorProperty Convert(const Ark_LocalizedEdgeColors& src)
 {
     BorderColorProperty dst;
-    LOGE("Converter::AssignTo(std::optional<BorderColorProperty> &, const Ark_LocalizedEdgeColors&)"
-        " handles invalid structure"
-    );
-    // the src.left/.right should be used instead .start/.end, interface_sdk-js/issues/IB0DVD
-    dst.startColor = OptConvert<Color>(src.start);
+    dst.leftColor = OptConvert<Color>(src.start);
     dst.topColor = OptConvert<Color>(src.top);
-    dst.endColor = OptConvert<Color>(src.end);
+    dst.rightColor = OptConvert<Color>(src.end);
     dst.bottomColor = OptConvert<Color>(src.bottom);
     dst.multiValued = true;
+
+    auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
+    dst.leftColor = isRightToLeft? OptConvert<Color>(src.end) : OptConvert<Color>(src.start);
+    dst.rightColor = isRightToLeft? OptConvert<Color>(src.start) : OptConvert<Color>(src.end);
     return dst;
 }
+
 
 template<>
 BorderColorProperty Convert(const Ark_ResourceColor& src)
@@ -2415,13 +2428,20 @@ BorderWidthProperty Convert(const Ark_LocalizedEdgeWidths& src)
     BorderWidthProperty widthProperty;
     widthProperty.topDimen = Converter::OptConvert<Dimension>(src.top);
     Validator::ValidateNonNegative(widthProperty.topDimen);
-    widthProperty.startDimen = Converter::OptConvert<Dimension>(src.start);
+    widthProperty.leftDimen = Converter::OptConvert<Dimension>(src.start);
     Validator::ValidateNonNegative(widthProperty.leftDimen);
     widthProperty.bottomDimen = Converter::OptConvert<Dimension>(src.bottom);
     Validator::ValidateNonNegative(widthProperty.bottomDimen);
-    widthProperty.endDimen = Converter::OptConvert<Dimension>(src.end);
+    widthProperty.rightDimen = Converter::OptConvert<Dimension>(src.end);
     Validator::ValidateNonNegative(widthProperty.rightDimen);
     widthProperty.multiValued = true;
+
+    auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
+    widthProperty.leftDimen =
+        isRightToLeft? Converter::OptConvert<Dimension>(src.end) : Converter::OptConvert<Dimension>(src.start);
+    widthProperty.rightDimen =
+        isRightToLeft? Converter::OptConvert<Dimension>(src.start) : Converter::OptConvert<Dimension>(src.end);
+
     return widthProperty;
 }
 
