@@ -13,17 +13,34 @@
  * limitations under the License.
  */
 
+#include "arkoala_api_generated.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#if !defined(PREVIEW)
+#include "core/components_ng/syntax/static/detached_free_root_proxy_node.h"
+#endif
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "arkoala_api_generated.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/interfaces/native/utility/callback_helper.h"
-#include "core/components_ng/base/view_abstract.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DragDropOpsAccessor {
+#if !defined(PREVIEW)
+RefPtr<OHOS::Ace::NG::DetachedFreeRootProxyNode> CreateProxyNode(const RefPtr<UINode>& uiNode)
+{
+    CHECK_NULL_RETURN(uiNode, nullptr);
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, nullptr);
+    auto instanceId = container->GetInstanceId();
+    auto proxyNode = AceType::MakeRefPtr<DetachedFreeRootProxyNode>(instanceId);
+    CHECK_NULL_RETURN(proxyNode, nullptr);
+    proxyNode->AddChild(uiNode);
+    return proxyNode;
+}
+#endif
+
 void RegisterOnDragStartImpl(Ark_NativePointer node, const Callback_onDragStart* onDragStart)
 {
     auto frameNode = reinterpret_cast<OHOS::Ace::NG::FrameNode*>(node);
@@ -43,7 +60,11 @@ void RegisterOnDragStartImpl(Ark_NativePointer node, const Callback_onDragStart*
         auto customNodeWeak = AceType::WeakClaim(node);
         auto customNode = customNodeWeak.Upgrade();
         CHECK_NULL_RETURN(customNode, dragDropInfo);
+#if !defined(PREVIEW)
+        dragDropInfo.customNode = CreateProxyNode(customNode);
+#else
         dragDropInfo.customNode = customNode;
+#endif
         return dragDropInfo;
     };
     ViewAbstract::SetOnDragStart(frameNode, std::move(onDragStartLambda));
@@ -65,9 +86,15 @@ void RegisterDragPreviewImpl(Ark_NativePointer node, const Opt_Union_CustomBuild
         },
         [node, frameNode, onlyForLifting, delayCreating](const CustomNodeBuilder& val) {
             CallbackHelper(val).BuildAsync([frameNode, onlyForLifting, delayCreating](const RefPtr<UINode>& uiNode) {
+#if !defined(PREVIEW)
+                ViewAbstract::SetDragPreview(frameNode, DragDropInfo { .customNode = CreateProxyNode(uiNode),
+                                                                       .onlyForLifting = onlyForLifting,
+                                                                       .delayCreating = delayCreating  });
+#else
                 ViewAbstract::SetDragPreview(frameNode, DragDropInfo { .customNode = uiNode,
                                                                        .onlyForLifting = onlyForLifting,
                                                                        .delayCreating = delayCreating  });
+#endif
                 }, node);
         },
         [node, frameNode, onlyForLifting, delayCreating](const Ark_DragItemInfo& value) {
@@ -79,7 +106,11 @@ void RegisterDragPreviewImpl(Ark_NativePointer node, const Opt_Union_CustomBuild
                 CallbackHelper(builder.value()).BuildAsync([frameNode, dragDropInfo = std::move(dragDropInfo)](
                     const RefPtr<UINode>& uiNode) {
                     DragDropInfo info;
+#if !defined(PREVIEW)
+                    info.customNode = CreateProxyNode(uiNode);
+#else
                     info.customNode = uiNode;
+#endif
                     info.onlyForLifting = dragDropInfo.onlyForLifting;
                     info.delayCreating = dragDropInfo.delayCreating;
                     ViewAbstract::SetDragPreview(frameNode, info);
