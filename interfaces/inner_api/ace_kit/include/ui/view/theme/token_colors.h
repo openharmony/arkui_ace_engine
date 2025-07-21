@@ -173,7 +173,7 @@ public:
         return resObjs_;
     }
 
-    void SetColorMode(ColorMode colorMode)
+    void SetColorMode(const ColorMode& colorMode)
     {
         colorMode_ = colorMode;
     }
