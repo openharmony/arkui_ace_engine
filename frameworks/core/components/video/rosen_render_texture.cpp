@@ -20,6 +20,7 @@
 #include "include/core/SkColor.h"
 #endif
 #ifdef ENABLE_ROSEN_BACKEND
+#include "core/pipeline/base/rs_node_adapter.h"
 #include "render_service_client/core/ui/rs_surface_node.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
 #endif
@@ -170,17 +171,8 @@ std::shared_ptr<RSNode> RosenRenderTexture::CreateRSNode() const
     struct Rosen::RSSurfaceNodeConfig surfaceNodeConfig = {.SurfaceNodeName = "RosenRenderTexture"};
     if (!SystemProperties::GetMultiInstanceEnabled()) {
         return OHOS::Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false);
-    } else {
-        auto pipelineContext = GetContext().Upgrade();
-        if (pipelineContext) {
-            auto rsUIDirector = pipelineContext->GetRSUIDirector();
-            if (rsUIDirector) {
-                auto rsContext = rsUIDirector->GetRSUIContext();
-                return OHOS::Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false, rsContext);
-            }
-        }
-        return OHOS::Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false);
     }
+    return RsNodeAdapter::CreateSurfaceNode(surfaceNodeConfig);
 }
 
 #ifdef OHOS_STANDARD_SYSTEM

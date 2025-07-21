@@ -2563,5 +2563,22 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg127, TestSize.Level1)
 
     EXPECT_FALSE(context_->commandTimeUpdate_);
 }
+
+/**
+ * @tc.name: PipelineContextTestNg128
+ * @tc.desc: Test SetIsTransFlag.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg128, TestSize.Level1)
+{
+    context_->SetIsTransFlag(true);
+    context_->SetIsTransFlag(false);
+    context_->SetIsTransFlag(true);
+    EXPECT_TRUE(context_->isTransFlag_);
+    context_->SetIsTransFlag(false);
+    context_->SetIsTransFlag(true);
+    context_->SetIsTransFlag(false);
+    EXPECT_FALSE(context_->isTransFlag_);
+}
 } // namespace NG
 } // namespace OHOS::Ace
