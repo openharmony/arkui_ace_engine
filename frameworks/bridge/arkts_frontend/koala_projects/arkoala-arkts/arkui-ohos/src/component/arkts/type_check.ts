@@ -163,6 +163,8 @@ import { MenuItemOptions } from "./../menuItem"
 import { OnHoverCallback } from "./../sdk-stubs"
 import { TerminationInfo } from "./../embeddedComponent"
 import { TextBackgroundStyle } from "./../span"
+import { PositionNumberInner, SizeNumberInner, DisturbanceFieldOptionsInner, ParticlePropertyAnimationNumberInner, ParticleOptionsInner, ParticlesInner, PositionLengthMetricsInner, ParticleAnnulusRegionInner, ParticlePropertyAnimationColorInner, ParticleColorUpdaterOptionsInner, ParticleColorPropertyUpdaterConfigsInner, ParticleUpdaterOptionsInner, ParticlePropertyUpdaterConfigsInner, EmitterPropertyInner, ParticleColorPropertyOptionsInner, ParticlePropertyOptionsInner, AccelerationOptionsInner, EmitterOptionsInner } from "./../particle_helper"
+import { VelocityOptions, ParticleColorOptions, PointParticleParameters, ImageParticleParameters, EmitterParticleOptions, ParticleConfigs, ParticlePropertyAnimation } from "./../particle"
 import promptAction from '@ohos/promptAction'
 import { LevelMode, ImmersiveMode, LevelOrder } from "@ohos/promptAction"
 import { PointerStyle, UniformDataType} from '#external'
@@ -2102,14 +2104,50 @@ export class TypeChecker {
     static isParagraphStyleInterface(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean): boolean {
         return value instanceof ParagraphStyleInterface
     }
+    static isParticleAnnulusRegionInner(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean): boolean {
+        return value instanceof ParticleAnnulusRegionInner
+    }
+    static isParticleColorOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean): boolean {
+        return value instanceof ParticleColorOptions
+    }
+    static isParticleColorPropertyOptionsInner(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
+        return value instanceof ParticleColorPropertyOptionsInner
+    }
+    static isParticleColorUpdaterOptionsInner(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof ParticleColorUpdaterOptionsInner
+    }
     static isParticleEmitterShape(value: Object | string | number | undefined): boolean {
         return value instanceof ParticleEmitterShape
+    }
+    static isParticleOptionsInner(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean): boolean {
+        return value instanceof ParticleOptionsInner
+    }
+    static isParticlePropertyAnimationColorInner(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean): boolean {
+        return value instanceof ParticlePropertyAnimationColorInner
+    }
+    static isParticlePropertyAnimationNumberInner(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean): boolean {
+        return value instanceof ParticlePropertyAnimationNumberInner
+    }
+    static isParticlePropertyOptionsInner(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof ParticlePropertyOptionsInner
+    }
+    static isParticlesInner(value: Object | string | number | undefined, arg0: boolean): boolean {
+        return value instanceof ParticlesInner
     }
     static isParticleType(value: Object | string | number | undefined): boolean {
         return value instanceof ParticleType
     }
     static isParticleUpdater(value: Object | string | number | undefined): boolean {
         return value instanceof ParticleUpdater
+    }
+    static isParticleUpdaterOptionsInner(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof ParticleUpdaterOptionsInner
+    }
+    static isArray_ParticlePropertyAnimationColorInner(value: Object | string | number | undefined): boolean {
+        return value instanceof Array
+    }
+    static isArray_ParticlePropertyAnimationNumberInner(value: Object | string | number | undefined): boolean {
+        return value instanceof Array
     }
     static isPasswordIcon(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
         return value instanceof PasswordIcon

@@ -397,7 +397,13 @@ auto g_bindMenuOptionsParam = [](
     if (!menuParam.placement.has_value()) {
         menuParam.placement = Placement::BOTTOM_LEFT;
     }
-    menuParam.borderRadius = OptConvert<BorderRadiusProperty>(menuOptions.borderRadius);
+    auto borderRadius = OptConvert<BorderRadiusProperty>(menuOptions.borderRadius);
+    if (borderRadius.has_value() && (borderRadius.value().radiusTopLeft.has_value()
+        || borderRadius.value().radiusTopRight.has_value()
+        || borderRadius.value().radiusBottomLeft.has_value()
+        || borderRadius.value().radiusBottomRight.has_value())) {
+        menuParam.borderRadius = borderRadius;
+    }
     menuParam.previewBorderRadius = OptConvert<BorderRadiusProperty>(menuOptions.previewBorderRadius);
     menuParam.layoutRegionMargin = OptConvert<PaddingProperty>(menuOptions.layoutRegionMargin);
     menuParam.layoutRegionMargin->start = menuParam.layoutRegionMargin->left;
@@ -1213,13 +1219,19 @@ void AssignCast(std::optional<TransitionType>& dst, const Ark_TransitionType& sr
 template<>
 ScaleOptions Convert(const Ark_ScaleOptions& src)
 {
-    ScaleOptions scaleOptions;
+    ScaleOptions scaleOptions(1.0f, 1.0f, 1.0f, 0.5_pct, 0.5_pct);
     auto coord = OptConvert<float>(src.x);
-    scaleOptions.xScale = coord.value_or(0.0);
+    if (coord.has_value()) {
+        scaleOptions.xScale = coord.value();
+    }
     coord = OptConvert<float>(src.y);
-    scaleOptions.yScale = coord.value_or(0.0);
+    if (coord.has_value()) {
+        scaleOptions.yScale = coord.value();
+    }
     coord = OptConvert<float>(src.z);
-    scaleOptions.zScale = coord.value_or(0.0);
+    if (coord.has_value()) {
+        scaleOptions.zScale = coord.value();
+    }
 
     auto center = OptConvert<Dimension>(src.centerX);
     if (center.has_value()) {
@@ -1235,18 +1247,23 @@ ScaleOptions Convert(const Ark_ScaleOptions& src)
 template<>
 RotateOptions Convert(const Ark_RotateOptions& src)
 {
-    RotateOptions rotateOptions;
-    auto coord = OptConvert<float>(src.x);
-    if (coord.has_value()) {
-        rotateOptions.xDirection = coord.value();
-    }
-    coord = OptConvert<float>(src.y);
-    if (coord.has_value()) {
-        rotateOptions.yDirection = coord.value();
-    }
-    coord = OptConvert<float>(src.z);
-    if (coord.has_value()) {
-        rotateOptions.zDirection = coord.value();
+    RotateOptions rotateOptions(0.0f, 0.0f, 0.0f, 0.0f, 0.5_pct, 0.5_pct, 0.5_pct);
+    // The value of centerZ is 50%, which is equivalent to 0 when finally set to the RS because not support percent.
+    auto coordX = OptConvert<float>(src.x);
+    auto coordY = OptConvert<float>(src.y);
+    auto coordZ = OptConvert<float>(src.z);
+    if (!coordX && !coordY && !coordZ) {
+        rotateOptions.zDirection = 1.0f;
+    } else {
+        if (coordX.has_value()) {
+            rotateOptions.xDirection = coordX.value();
+        }
+        if (coordY.has_value()) {
+            rotateOptions.yDirection = coordY.value();
+        }
+        if (coordZ.has_value()) {
+            rotateOptions.zDirection = coordZ.value();
+        }
     }
     auto angle = OptConvert<float>(src.angle);
     if (angle.has_value()) {
@@ -5602,6 +5619,7 @@ void BindContextMenuBase(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
+    menuParam.type = NG::MenuType::CONTEXT_MENU;
     auto type = Converter::OptConvertPtr<ResponseType>(responseType).value_or(ResponseType::LONG_PRESS);
     auto contentBuilder = [callback = CallbackHelper(*optValue), node, frameNode, type](
                               MenuParam menuParam, std::function<void()>&& previewBuildFunc) {

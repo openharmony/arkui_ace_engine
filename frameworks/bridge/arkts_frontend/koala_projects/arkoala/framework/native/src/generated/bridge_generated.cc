@@ -15357,6 +15357,56 @@ void impl_PanelAttribute__onChangeEvent_mode(Ark_NativePointer thisPtr, KSeriali
         GetNodeModifiers()->getPanelModifier()->set_onChangeEvent_mode(self, (const Callback_Opt_PanelMode_Void*)&callback_value);
 }
 KOALA_INTEROP_DIRECT_V3(PanelAttribute__onChangeEvent_mode, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_ParticleHelper_SetDisturbanceFields(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        const auto disturbanceFields_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Array_DisturbanceFieldOptionsInner disturbanceFields_value_buf = {};
+        disturbanceFields_value_buf.tag = disturbanceFields_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((INTEROP_RUNTIME_UNDEFINED) != (disturbanceFields_value_buf_runtimeType))
+        {
+            const Ark_Int32 disturbanceFields_value_buf__length = thisDeserializer.readInt32();
+            Array_DisturbanceFieldOptionsInner disturbanceFields_value_buf_ = {};
+            thisDeserializer.resizeArray<std::decay<decltype(disturbanceFields_value_buf_)>::type,
+        std::decay<decltype(*disturbanceFields_value_buf_.array)>::type>(&disturbanceFields_value_buf_, disturbanceFields_value_buf__length);
+            for (int disturbanceFields_value_buf__i = 0; disturbanceFields_value_buf__i < disturbanceFields_value_buf__length; disturbanceFields_value_buf__i++) {
+                disturbanceFields_value_buf_.array[disturbanceFields_value_buf__i] = thisDeserializer.readDisturbanceFieldOptionsInner();
+            }
+            disturbanceFields_value_buf.value = disturbanceFields_value_buf_;
+        }
+        Opt_Array_DisturbanceFieldOptionsInner disturbanceFields_value = disturbanceFields_value_buf;;
+        GetAccessors()->getParticleHelperAccessor()->SetDisturbanceFields(node, (const Opt_Array_DisturbanceFieldOptionsInner*)&disturbanceFields_value);
+}
+KOALA_INTEROP_DIRECT_V3(ParticleHelper_SetDisturbanceFields, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_ParticleHelper_SetEmitterProperty(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        const auto emitter_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Array_EmitterPropertyInner emitter_value_buf = {};
+        emitter_value_buf.tag = emitter_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((INTEROP_RUNTIME_UNDEFINED) != (emitter_value_buf_runtimeType))
+        {
+            const Ark_Int32 emitter_value_buf__length = thisDeserializer.readInt32();
+            Array_EmitterPropertyInner emitter_value_buf_ = {};
+            thisDeserializer.resizeArray<std::decay<decltype(emitter_value_buf_)>::type,
+        std::decay<decltype(*emitter_value_buf_.array)>::type>(&emitter_value_buf_, emitter_value_buf__length);
+            for (int emitter_value_buf__i = 0; emitter_value_buf__i < emitter_value_buf__length; emitter_value_buf__i++) {
+                emitter_value_buf_.array[emitter_value_buf__i] = thisDeserializer.readEmitterPropertyInner();
+            }
+            emitter_value_buf.value = emitter_value_buf_;
+        }
+        Opt_Array_EmitterPropertyInner emitter_value = emitter_value_buf;;
+        GetAccessors()->getParticleHelperAccessor()->SetEmitterProperty(node, (const Opt_Array_EmitterPropertyInner*)&emitter_value);
+}
+KOALA_INTEROP_DIRECT_V3(ParticleHelper_SetEmitterProperty, Ark_NativePointer, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_ParticleHelper_ParticleConstruct(Ark_Int32 id, Ark_Int32 flags) {
+        return GetAccessors()->getParticleHelperAccessor()->ParticleConstruct(id, flags);
+}
+KOALA_INTEROP_DIRECT_2(ParticleHelper_ParticleConstruct, Ark_NativePointer, Ark_Int32, Ark_Int32)
+void impl_ParticleHelper_SetParticleOptions(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        Ark_ParticlesInner particles_value = thisDeserializer.readParticlesInner();;
+        GetAccessors()->getParticleHelperAccessor()->SetParticleOptions(node, (const Ark_ParticlesInner*)&particles_value);
+}
+KOALA_INTEROP_DIRECT_V3(ParticleHelper_SetParticleOptions, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_PasteButton_construct(Ark_Int32 id, Ark_Int32 flags) {
         return GetNodeModifiers()->getPasteButtonModifier()->construct(id, flags);
 }
@@ -45204,43 +45254,8 @@ void impl_MutableStyledString_appendStyledString(Ark_NativePointer thisPtr, Ark_
 KOALA_INTEROP_DIRECT_V2(MutableStyledString_appendStyledString, Ark_NativePointer, Ark_NativePointer)
 Ark_NativePointer impl_ImageAttachment_ctor(KSerializerBuffer thisArray, int32_t thisLength) {
         Deserializer thisDeserializer(thisArray, thisLength);
-        const Ark_Int8 value_value_buf_selector = thisDeserializer.readInt8();
-        Ark_Union_ImageAttachmentInterface_Opt_AttachmentType value_value_buf = {};
-        value_value_buf.selector = value_value_buf_selector;
-        if (value_value_buf_selector == 0) {
-            value_value_buf.selector = 0;
-            value_value_buf.value0 = thisDeserializer.readImageAttachmentInterface();
-        }
-        else if (value_value_buf_selector == 1) {
-            value_value_buf.selector = 1;
-            const auto value_value_buf_u_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-            Opt_AttachmentType value_value_buf_u = {};
-            value_value_buf_u.tag = value_value_buf_u_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-            if ((INTEROP_RUNTIME_UNDEFINED) != (value_value_buf_u_runtimeType))
-            {
-                const Ark_Int8 value_value_buf_u__selector = thisDeserializer.readInt8();
-                Ark_AttachmentType value_value_buf_u_ = {};
-                value_value_buf_u_.selector = value_value_buf_u__selector;
-                if (value_value_buf_u__selector == 0) {
-                    value_value_buf_u_.selector = 0;
-                    value_value_buf_u_.value0 = thisDeserializer.readImageAttachmentInterface();
-                }
-                else if (value_value_buf_u__selector == 1) {
-                    value_value_buf_u_.selector = 1;
-                    value_value_buf_u_.value1 = thisDeserializer.readResourceImageAttachmentOptions();
-                }
-                else {
-                    INTEROP_FATAL("One of the branches for value_value_buf_u_ has to be chosen through deserialisation.");
-                }
-                value_value_buf_u.value = static_cast<Ark_AttachmentType>(value_value_buf_u_);
-            }
-            value_value_buf.value1 = value_value_buf_u;
-        }
-        else {
-            INTEROP_FATAL("One of the branches for value_value_buf has to be chosen through deserialisation.");
-        }
-        Ark_Union_ImageAttachmentInterface_Opt_AttachmentType value_value = static_cast<Ark_Union_ImageAttachmentInterface_Opt_AttachmentType>(value_value_buf);;
-        return GetAccessors()->getImageAttachmentAccessor()->ctor((const Ark_Union_ImageAttachmentInterface_Opt_AttachmentType*)&value_value);
+        Ark_ImageAttachmentInterface value_value = thisDeserializer.readImageAttachmentInterface();;
+        return GetAccessors()->getImageAttachmentAccessor()->ctor((const Ark_ImageAttachmentInterface*)&value_value);
 }
 KOALA_INTEROP_DIRECT_2(ImageAttachment_ctor, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_ImageAttachment_getFinalizer() {

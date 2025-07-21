@@ -214,6 +214,7 @@ generated_sources = [
   "implementation/pan_recognizer_accessor.cpp",
   "implementation/panel_modifier.cpp",
   "implementation/paragraph_style_accessor.cpp",
+  "implementation/particle_helper_accessor.cpp",
   "implementation/paste_button_modifier.cpp",
   "implementation/path2d_accessor.cpp",
   "implementation/path_modifier.cpp",

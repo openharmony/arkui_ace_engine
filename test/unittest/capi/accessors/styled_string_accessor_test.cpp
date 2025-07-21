@@ -414,9 +414,7 @@ struct StyledStringUnionString {
 struct StyledStringUnionImageAttachment {
     Ark_Union_String_ImageAttachment_CustomSpan* Union()
     {
-        auto content = Converter::ArkUnion<Ark_Union_ImageAttachmentInterface_Opt_AttachmentType,
-            Ark_ImageAttachmentInterface>(IMAGEATTACHMENT_TEST_VALUE);
-        peer = GeneratedModifier::GetImageAttachmentAccessor()->ctor(&content);
+        peer = GeneratedModifier::GetImageAttachmentAccessor()->ctor(&IMAGEATTACHMENT_TEST_VALUE);
         static Ark_Union_String_ImageAttachment_CustomSpan value = Converter::ArkUnion<
             Ark_Union_String_ImageAttachment_CustomSpan, Ark_ImageAttachment>(peer);
         return &value;

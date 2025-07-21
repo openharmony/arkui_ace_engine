@@ -2928,21 +2928,6 @@ void AssignUnionTo(std::optional<T>& dst,
     }
 }
 
-template<typename T>
-void AssignUnionTo(std::optional<T>& dst,
-                   const Ark_Union_ImageAttachmentInterface_Opt_AttachmentType& src)
-{
-    switch (src.selector) {
-        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
-        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
-        default:
-        {
-            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
-            return;
-        }
-    }
-}
-
 template<typename T, typename P>
 void AssignLiteralTo(std::optional<T>& dst, const P& src);
 
@@ -3520,6 +3505,8 @@ ASSIGN_OPT(Opt_PanelType)
 ASSIGN_OPT(Opt_PanGestureInterface)
 ASSIGN_OPT(Opt_PanGestureOptions)
 ASSIGN_OPT(Opt_PanRecognizer)
+ASSIGN_OPT(Opt_ParticleColorPropertyOptionsInner)
+ASSIGN_OPT(Opt_ParticleColorUpdaterOptionsInner)
 ASSIGN_OPT(Opt_ParticleEmitterShape)
 ASSIGN_OPT(Opt_ParticleType)
 ASSIGN_OPT(Opt_ParticleUpdater)
@@ -4422,6 +4409,7 @@ ASSIGN_OPT(Opt_PixelRoundPolicy)
 ASSIGN_OPT(Opt_PixelStretchEffectOptions)
 ASSIGN_OPT(Opt_PluginComponentTemplate)
 ASSIGN_OPT(Opt_PluginErrorData)
+ASSIGN_OPT(Opt_PointParticleParameters)
 ASSIGN_OPT(Opt_PolygonOptions)
 ASSIGN_OPT(Opt_PolylineOptions)
 ASSIGN_OPT(Opt_PolyToPolyOptions)
@@ -4683,6 +4671,7 @@ ASSIGN_OPT(Opt_HoverEvent)
 ASSIGN_OPT(Opt_IconOptions)
 ASSIGN_OPT(Opt_ImageAttachmentLayoutStyle)
 ASSIGN_OPT(Opt_ImageFrameInfo)
+ASSIGN_OPT(Opt_ImageParticleParameters)
 ASSIGN_OPT(Opt_IndicatorStyle)
 ASSIGN_OPT(Opt_SubTabBarIndicatorStyle)
 ASSIGN_OPT(Opt_JavaScriptProxy)
@@ -4911,7 +4900,6 @@ ASSIGN_OPT(Opt_Union_RichEditorTextSpanResult_RichEditorImageSpanResult)
 ASSIGN_OPT(Opt_Union_SubTabBarStyle_BottomTabBarStyle)
 ASSIGN_OPT(Opt_WithThemeOptions)
 ASSIGN_OPT(Opt_RichEditorSpan)
-ASSIGN_OPT(Opt_Union_ImageAttachmentInterface_Opt_AttachmentType)
 ASSIGN_OPT(Opt_PopupButton)
 ASSIGN_OPT(Opt_PopupOptions)
 #undef ASSIGN_OPT

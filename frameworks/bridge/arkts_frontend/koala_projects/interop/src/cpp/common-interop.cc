@@ -24,7 +24,6 @@
 #include "common-interop.h"
 #include "interop-logging.h"
 #include "dynamic-loader.h"
-#include "securec.h"
 
 #ifdef KOALA_FOREIGN_NAPI
 #ifndef KOALA_FOREIGN_NAPI_OHOS
@@ -160,9 +159,7 @@ KOALA_INTEROP_1(StringMake, KNativePointer, KStringPtr)
 
 // For slow runtimes w/o fast encoders.
 KInt impl_ManagedStringWrite(const KStringPtr& string, KSerializerBuffer buffer, KInt offset) {
-    if (memcpy_s((uint8_t*)buffer + offset, string.length() + 1, string.c_str(), string.length() + 1) != 0) {
-        return 0;
-    }
+    memcpy((uint8_t*)buffer + offset, string.c_str(), string.length() + 1);
     return string.length() + 1;
 }
 KOALA_INTEROP_3(ManagedStringWrite, KInt, KStringPtr, KSerializerBuffer, KInt)
@@ -377,7 +374,7 @@ void impl_WriteByte(KNativePointer data, KInt index, KLong length, KInt value) {
 KOALA_INTEROP_DIRECT_V4(WriteByte, KNativePointer, KLong, KLong, KInt)
 
 void impl_CopyArray(KNativePointer data, KLong length, KByte* array) {
-    memcpy_s(data, length, array, length);
+    memcpy(data, array, length);
 }
 KOALA_INTEROP_V3(CopyArray, KNativePointer, KLong, KByte*)
 
