@@ -117,3 +117,23 @@ function registerCallbackForCreateWatchID(callback: () => any) {
 function registerCallbackForMakeObserved(callback: (value: Object) => Object) {
     InteropExtractorModule.makeObserved = callback;
 }
+
+/**
+ * 
+ * @param staticBuilder ArkTS1.2builder, return the pointer of PeerNode
+ * @returns  Creates a dynamic builder function that wraps a static builder
+ */
+function createDynamicBuilder(
+    staticBuilder: (...args: any[]) => number
+): (...args: any[]) => void {
+    let func = function (...args: any[]): void {
+        this.observeComponentCreation2((elmtId: number, isInitialRender: boolean) => {
+            if (isInitialRender) {
+                let pointer = staticBuilder(...args);
+                ViewStackProcessor.push(pointer);
+            }
+        }, {});
+        ViewStackProcessor.pop();
+    };
+    return func;
+}
