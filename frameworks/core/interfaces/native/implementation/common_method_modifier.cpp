@@ -4625,7 +4625,7 @@ void AccessibilityDefaultFocusImpl(Ark_NativePointer node,
     if (convValue) {
         isFocus = *convValue;
     }
-    ViewAbstractModelNG::SetAccessibilityDefaultFocus(frameNode, isFocus);
+    ViewAbstractModelStatic::SetAccessibilityDefaultFocus(frameNode, isFocus);
 }
 void AccessibilityUseSamePageImpl(Ark_NativePointer node,
                                   const Opt_AccessibilitySamePageMode* value)
@@ -4634,11 +4634,11 @@ void AccessibilityUseSamePageImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<Ark_AccessibilitySamePageMode>(value);
     if (!convValue) {
-        ViewAbstractModelNG::SetAccessibilityUseSamePage(frameNode, "");
+        ViewAbstractModelStatic::SetAccessibilityUseSamePage(frameNode, "");
         return;
     }
     auto pageMode = AccessibilityStaticUtils::GetPageModeType(convValue.value());
-    ViewAbstractModelNG::SetAccessibilityUseSamePage(frameNode, pageMode);
+    ViewAbstractModelStatic::SetAccessibilityUseSamePage(frameNode, pageMode);
 }
 void AccessibilityScrollTriggerableImpl(Ark_NativePointer node,
                                         const Opt_Boolean* value)

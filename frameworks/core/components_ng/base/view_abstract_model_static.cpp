@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/view_abstract_model_static.h"
 
+#include "base/utils/multi_thread.h"
 #include "core/common/ace_engine.h"
 #include "core/common/vibrator/vibrator_utils.h"
 #include "core/components_ng/base/view_abstract.h"
@@ -654,16 +655,90 @@ void ViewAbstractModelStatic::SetAccessibilityVirtualNode(FrameNode* frameNode,
     std::function<RefPtr<NG::UINode>()>&& buildFunc)
 {
     CHECK_NULL_VOID(frameNode);
-    auto virtualNode = buildFunc();
+    auto weakNode = AceType::WeakClaim(frameNode);
+    auto SetAccessibilityVirtualNodeTask = []
+        (const WeakPtr<FrameNode>& weak, const std::function<RefPtr<NG::UINode>()>& buildFunc) {
+            auto node = weak.Upgrade();
+            CHECK_NULL_VOID(node);
+            CHECK_NULL_VOID(buildFunc);
+            auto virtualNode = buildFunc();
+            auto accessibilityProperty = node->GetAccessibilityProperty<AccessibilityProperty>();
+            CHECK_NULL_VOID(accessibilityProperty);
+            auto virtualFrameNode = AceType::DynamicCast<NG::FrameNode>(virtualNode);
+            CHECK_NULL_VOID(virtualFrameNode);
+            virtualFrameNode->SetAccessibilityNodeVirtual();
+            virtualFrameNode->SetAccessibilityVirtualNodeParent(node);
+            virtualFrameNode->SetFirstAccessibilityVirtualNode();
+            node->HasAccessibilityVirtualNode(true);
+            accessibilityProperty->SaveAccessibilityVirtualNode(virtualNode);
+    };
+    auto SetAccessibilityVirtualNodeMultiThread = [weakNode, SetAccessibilityVirtualNodeTask]
+        (const std::function<RefPtr<NG::UINode>()>& buildFunc) {
+            auto frameNodeRef = weakNode.Upgrade();
+            CHECK_NULL_VOID(frameNodeRef);
+            frameNodeRef->PostAfterAttachMainTreeTask([weakNode, buildFunc, SetAccessibilityVirtualNodeTask] {
+                SetAccessibilityVirtualNodeTask(weakNode, buildFunc);
+            });
+    };
+    FREE_NODE_CHECK(frameNode, SetAccessibilityVirtualNode, buildFunc);
+    SetAccessibilityVirtualNodeTask(weakNode, buildFunc);
+}
+
+void ViewAbstractModelStatic::SetAccessibilityDefaultFocus(FrameNode* frameNode, bool isFocus)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto weakNode = AceType::WeakClaim(frameNode);
+    auto AddToFocusList = [](const WeakPtr<FrameNode>& weak, bool focus) {
+        auto node = weak.Upgrade();
+        CHECK_NULL_VOID(node);
+        auto pipeline = node->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto accessibilityManager = pipeline->GetAccessibilityManager();
+        CHECK_NULL_VOID(accessibilityManager);
+        accessibilityManager->AddFrameNodeToDefaultFocusList(node, focus);
+    };
+    auto SetAccessibilityDefaultFocusMultiThread = [weakNode, AddToFocusList](bool isFocus) {
+        auto frameNodeRef = weakNode.Upgrade();
+        CHECK_NULL_VOID(frameNodeRef);
+        frameNodeRef->PostAfterAttachMainTreeTask([weakNode, isFocus, AddToFocusList] {
+            AddToFocusList(weakNode, isFocus);
+        });
+    };
+    FREE_NODE_CHECK(frameNode, SetAccessibilityDefaultFocus, isFocus);
+    AddToFocusList(weakNode, isFocus);
+}
+
+void ViewAbstractModelStatic::SetAccessibilityUseSamePage(FrameNode* frameNode, const std::string& pageMode)
+{
+    CHECK_NULL_VOID(frameNode);
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
-    auto virtualFrameNode = AceType::DynamicCast<NG::FrameNode>(virtualNode);
-    CHECK_NULL_VOID(virtualFrameNode);
-    virtualFrameNode->SetAccessibilityNodeVirtual();
-    virtualFrameNode->SetAccessibilityVirtualNodeParent(AceType::Claim(AceType::DynamicCast<NG::UINode>(frameNode)));
-    virtualFrameNode->SetFirstAccessibilityVirtualNode();
-    frameNode->HasAccessibilityVirtualNode(true);
-    accessibilityProperty->SaveAccessibilityVirtualNode(virtualNode);
+    if (pageMode == accessibilityProperty->GetAccessibilitySamePage()) {
+        return;
+    }
+    accessibilityProperty->SetAccessibilitySamePage(pageMode);
+
+    auto weakNode = AceType::WeakClaim(frameNode);
+    auto SendPageMode = [](const WeakPtr<FrameNode>& weak, const std::string& pageMode) {
+        auto node = weak.Upgrade();
+        CHECK_NULL_VOID(node);
+#ifdef WINDOW_SCENE_SUPPORTED
+        auto pipeline = node->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto uiExtManager = pipeline->GetUIExtensionManager();
+        CHECK_NULL_VOID(uiExtManager);
+        uiExtManager->SendPageModeToProvider(node->GetId(), pageMode);
+#endif
+    };
+    auto SetAccessibilityUseSamePageMultiThread = [weakNode, SendPageMode](const std::string& pageMode) {
+        auto frameNodeRef = weakNode.Upgrade();
+        CHECK_NULL_VOID(frameNodeRef);
+        frameNodeRef->PostAfterAttachMainTreeTask([weakNode, &pageMode, SendPageMode] {
+            SendPageMode(weakNode, pageMode);
+        });
+    };
+    FREE_NODE_CHECK(frameNode, SetAccessibilityUseSamePage, pageMode);
+    SendPageMode(weakNode, pageMode);
 }
 
 void ViewAbstractModelStatic::DisableOnAccessibilityHover(FrameNode* frameNode)
