@@ -264,7 +264,7 @@ export class ParticlePropertyAnimationColorInner_serializer {
         if (TypeChecker.isColor(value_from)) {
             valueSerializer.writeInt8(0)
             const value_from_0  = value_from as Color
-            valueSerializer.writeInt32(value_from_0.valueOf())
+            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_from_0))
         }
         else if (RuntimeType.NUMBER == value_from_type) {
             valueSerializer.writeInt8(1)
@@ -287,7 +287,7 @@ export class ParticlePropertyAnimationColorInner_serializer {
         if (TypeChecker.isColor(value_to)) {
             valueSerializer.writeInt8(0)
             const value_to_0  = value_to as Color
-            valueSerializer.writeInt32(value_to_0.valueOf())
+            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_to_0))
         }
         else if (RuntimeType.NUMBER == value_to_type) {
             valueSerializer.writeInt8(1)
@@ -638,7 +638,7 @@ export class ParticleColorPropertyOptionsInner_serializer {
         if (TypeChecker.isColor(value_range_0)) {
             valueSerializer.writeInt8(0)
             const value_range_0_0  = value_range_0 as Color
-            valueSerializer.writeInt32(value_range_0_0.valueOf())
+            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_range_0_0))
         }
         else if (RuntimeType.NUMBER == value_range_0_type) {
             valueSerializer.writeInt8(1)
@@ -661,7 +661,7 @@ export class ParticleColorPropertyOptionsInner_serializer {
         if (TypeChecker.isColor(value_range_1)) {
             valueSerializer.writeInt8(0)
             const value_range_1_0  = value_range_1 as Color
-            valueSerializer.writeInt32(value_range_1_0.valueOf())
+            valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_range_1_0))
         }
         else if (RuntimeType.NUMBER == value_range_1_type) {
             valueSerializer.writeInt8(1)
