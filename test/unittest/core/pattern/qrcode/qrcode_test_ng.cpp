@@ -629,6 +629,7 @@ HWTEST_F(QRCodeTestNg, QRCodeModifierOnDraw001, TestSize.Level1)
      */
     qrCodePaintMethod->UpdateContentModifier(paintWrapper);
     auto qrCodeModifier = AceType::DynamicCast<QRCodeModifier>(qrCodePaintMethod->GetContentModifier(paintWrapper));
+    qrCodeModifier->SetQrcodeSize(100.0f);
     qrCodeModifier->onDraw(context);
     EXPECT_EQ(qrCodeModifier->color_->Get(), Color::BLUE);
 }
