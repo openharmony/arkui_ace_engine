@@ -42,12 +42,12 @@ import { CustomBuilder } from "./builder"
 import { uniformTypeDescriptor } from "./../generated/ohos.data.uniformTypeDescriptor"
 import { SymbolGlyphModifier, SymbolGlyphModifier_serializer } from "./../generated/arkui.SymbolGlyphModifier"
 import { UIContext, UIContext_serializer } from "./../generated/ohos.arkui.UIContext"
+import { hookStateStyleImpl, CustomStyles, ContentModifier, UICommonBase, AttributeModifier, AttributeUpdater } from "./../handwritten"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder } from "@koalaui/builderLambda"
 import { Context } from "./../generated/application.Context"
 import { pointer } from "./../generated/ohos.multimodalInput.pointer"
 import { ButtonType, ButtonStyleMode, ButtonRole } from "./button"
-import { ContentModifier, UICommonBase, AttributeModifier, AttributeUpdater } from "./../handwritten"
 import { observer } from "./../generated/ohos.arkui.observer"
 import { promptAction } from "./../generated/ohos.promptAction"
 import { ScrollState } from "./list"
@@ -4578,18 +4578,6 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setGeometryTransition0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setStateStylesAttribute(value: StateStyles | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8((value_type).toChar())
-        if ((value_type) != (RuntimeType.UNDEFINED)) {
-            const value_value  = value!
-            StateStyles_serializer.write(thisSerializer, value_value)
-        }
-        ArkUIGeneratedNativeModule._CommonMethod_setStateStyles(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
     setRestoreIdAttribute(value: number | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
@@ -7311,7 +7299,6 @@ export interface SheetOptions extends BindOptions {
     placement?: Placement;
     placementOnTarget?: boolean;
 }
-export type CustomStyles = (instance: string) => void;
 export interface StateStyles {
     normal?: CustomStyles;
     pressed?: CustomStyles;
@@ -7577,208 +7564,612 @@ export interface BackgroundOptions {
     align?: Alignment;
 }
 export interface CommonMethod {
-    width(value: Length | LayoutPolicy | undefined): this
-    height(value: Length | LayoutPolicy | undefined): this
-    drawModifier(value: DrawModifier | undefined): this
-    responseRegion(value: Array<Rectangle> | Rectangle | undefined): this
-    mouseResponseRegion(value: Array<Rectangle> | Rectangle | undefined): this
-    size(value: SizeOptions | undefined): this
-    constraintSize(value: ConstraintSizeOptions | undefined): this
-    hitTestBehavior(value: HitTestMode | undefined): this
-    onChildTouchTest(value: ((value: Array<TouchTestInfo>) => TouchResult) | undefined): this
-    layoutWeight(value: number | string | undefined): this
-    chainWeight(value: ChainWeightOptions | undefined): this
-    padding(value: Padding | Length | LocalizedPadding | undefined): this
-    safeAreaPadding(value: Padding | LengthMetrics | LocalizedPadding | undefined): this
-    margin(value: Padding | Length | LocalizedPadding | undefined): this
-    backgroundColor(value: ResourceColor | undefined): this
-    pixelRound(value: PixelRoundPolicy | undefined): this
-    backgroundImageSize(value: SizeOptions | ImageSize | undefined): this
-    backgroundImagePosition(value: Position | Alignment | undefined): this
-    backgroundEffect(value: BackgroundEffectOptions | undefined): this
-    backgroundImageResizable(value: ResizableOptions | undefined): this
-    foregroundEffect(value: ForegroundEffectOptions | undefined): this
-    visualEffect(value: uiEffect.VisualEffect | undefined): this
-    backgroundFilter(value: uiEffect.Filter | undefined): this
-    foregroundFilter(value: uiEffect.Filter | undefined): this
-    compositingFilter(value: uiEffect.Filter | undefined): this
-    opacity(value: number | Resource | undefined): this
-    border(value: BorderOptions | undefined): this
-    borderStyle(value: BorderStyle | EdgeStyles | undefined): this
-    borderWidth(value: Length | EdgeWidths | LocalizedEdgeWidths | undefined): this
-    borderColor(value: ResourceColor | EdgeColors | LocalizedEdgeColors | undefined): this
-    borderRadius(value: Length | BorderRadiuses | LocalizedBorderRadiuses | undefined): this
-    borderImage(value: BorderImageOption | undefined): this
-    outline(value: OutlineOptions | undefined): this
-    outlineStyle(value: OutlineStyle | EdgeOutlineStyles | undefined): this
-    outlineWidth(value: Dimension | EdgeOutlineWidths | undefined): this
-    outlineColor(value: ResourceColor | EdgeColors | LocalizedEdgeColors | undefined): this
-    outlineRadius(value: Dimension | OutlineRadiuses | undefined): this
-    foregroundColor(value: ResourceColor | ColoringStrategy | undefined): this
-    onClick(value: ((event: ClickEvent) => void) | undefined): this
-    onHover(value: ((isHover: boolean,event: HoverEvent) => void) | undefined): this
-    onHoverMove(value: ((value0: HoverEvent) => void) | undefined): this
-    onAccessibilityHover(value: AccessibilityCallback | undefined): this
-    hoverEffect(value: HoverEffect | undefined): this
-    onMouse(value: ((event: MouseEvent) => void) | undefined): this
-    onTouch(value: ((event: TouchEvent) => void) | undefined): this
-    onKeyEvent(value: ((event: KeyEvent) => void) | undefined): this
-    onDigitalCrown(value: ((value0: CrownEvent) => void) | undefined): this
-    onKeyPreIme(value: ((value0: KeyEvent) => boolean) | undefined): this
-    onKeyEventDispatch(value: ((value0: KeyEvent) => boolean) | undefined): this
-    onFocusAxisEvent(value: ((value0: FocusAxisEvent) => void) | undefined): this
-    onAxisEvent(value: ((value0: AxisEvent) => void) | undefined): this
-    focusable(value: boolean | undefined): this
-    nextFocus(value: FocusMovement | undefined): this
-    tabStop(value: boolean | undefined): this
-    onFocus(value: (() => void) | undefined): this
-    onBlur(value: (() => void) | undefined): this
-    tabIndex(value: number | undefined): this
-    defaultFocus(value: boolean | undefined): this
-    groupDefaultFocus(value: boolean | undefined): this
-    focusOnTouch(value: boolean | undefined): this
-    focusBox(value: FocusBoxStyle | undefined): this
-    animation(value: AnimateParam | undefined): this
-    transition(value: TransitionEffect | undefined): this
-    motionBlur(value: MotionBlurOptions | undefined): this
-    brightness(value: number | undefined): this
-    contrast(value: number | undefined): this
-    grayscale(value: number | undefined): this
-    colorBlend(value: Color | string | Resource | undefined): this
-    saturate(value: number | undefined): this
-    sepia(value: number | undefined): this
-    invert(value: number | InvertOptions | undefined): this
-    hueRotate(value: number | string | undefined): this
-    useShadowBatching(value: boolean | undefined): this
-    useEffect(value: boolean | undefined): this
-    renderGroup(value: boolean | undefined): this
-    freeze(value: boolean | undefined): this
-    translate(value: TranslateOptions | undefined): this
-    scale(value: ScaleOptions | undefined): this
-    rotate(value: RotateOptions | undefined): this
-    transform(value: Object | undefined): this
-    onAppear(value: (() => void) | undefined): this
-    onDisAppear(value: (() => void) | undefined): this
-    onAttach(value: VoidCallback | undefined): this
-    onDetach(value: VoidCallback | undefined): this
-    onAreaChange(value: ((oldValue: Area,newValue: Area) => void) | undefined): this
-    visibility(value: Visibility | undefined): this
-    flexGrow(value: number | undefined): this
-    flexShrink(value: number | undefined): this
-    flexBasis(value: number | string | undefined): this
-    alignSelf(value: ItemAlign | undefined): this
-    displayPriority(value: number | undefined): this
-    zIndex(value: number | undefined): this
-    direction(value: Direction | undefined): this
-    align(value: Alignment | undefined): this
-    position(value: Position | Edges | LocalizedEdges | undefined): this
-    markAnchor(value: Position | LocalizedPosition | undefined): this
-    offset(value: Position | Edges | LocalizedEdges | undefined): this
-    enabled(value: boolean | undefined): this
-    alignRules(value: AlignRuleOption | undefined): this
-    alignRules(value: LocalizedAlignRuleOptions | undefined): this
-    aspectRatio(value: number | undefined): this
-    clickEffect(value: ClickEffect | undefined): this
-    onDragStart(value: ((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) | undefined): this
-    onDragEnter(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this
-    onDragMove(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this
-    onDragLeave(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this
-    onDrop(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this
-    onDragEnd(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this
-    allowDrop(value: Array<uniformTypeDescriptor.UniformDataType> | undefined): this
-    draggable(value: boolean | undefined): this
-    dragPreview(value: CustomBuilder | DragItemInfo | string | undefined): this
-    onPreDrag(value: ((value0: PreDragStatus) => void) | undefined): this
-    linearGradient(value: LinearGradientOptions | undefined): this
-    sweepGradient(value: SweepGradientOptions | undefined): this
-    radialGradient(value: RadialGradientOptions | undefined): this
-    motionPath(value: MotionPathOptions | undefined): this
-    shadow(value: ShadowOptions | ShadowStyle | undefined): this
-    clip(value: boolean | undefined): this
-    clipShape(value: CircleShape | EllipseShape | PathShape | RectShape | undefined): this
-    mask(value: ProgressMask | undefined): this
-    maskShape(value: CircleShape | EllipseShape | PathShape | RectShape | undefined): this
-    key(value: string | undefined): this
-    id(value: string | undefined): this
-    geometryTransition(value: string | undefined): this
-    stateStyles(value: StateStyles | undefined): this
-    restoreId(value: number | undefined): this
-    sphericalEffect(value: number | undefined): this
-    lightUpEffect(value: number | undefined): this
-    pixelStretchEffect(value: PixelStretchEffectOptions | undefined): this
-    accessibilityGroup(value: boolean | undefined): this
-    accessibilityText(value: string | undefined): this
-    accessibilityNextFocusId(value: string | undefined): this
-    accessibilityDefaultFocus(value: boolean | undefined): this
-    accessibilityUseSamePage(value: AccessibilitySamePageMode | undefined): this
-    accessibilityScrollTriggerable(value: boolean | undefined): this
-    accessibilityText(value: Resource | undefined): this
-    accessibilityRole(value: AccessibilityRoleType | undefined): this
-    onAccessibilityFocus(value: AccessibilityFocusCallback | undefined): this
-    accessibilityTextHint(value: string | undefined): this
-    accessibilityDescription(value: string | undefined): this
-    accessibilityDescription(value: Resource | undefined): this
-    accessibilityLevel(value: string | undefined): this
-    accessibilityVirtualNode(value: CustomBuilder | undefined): this
-    accessibilityChecked(value: boolean | undefined): this
-    accessibilitySelected(value: boolean | undefined): this
-    obscured(value: Array<ObscuredReasons> | undefined): this
-    reuseId(value: string | undefined): this
-    reuse(value: ReuseOptions | undefined): this
-    renderFit(value: RenderFit | undefined): this
-    gestureModifier(value: GestureModifier | undefined): this
-    backgroundBrightness(value: BackgroundBrightnessOptions | undefined): this
-    onGestureJudgeBegin(value: ((gestureInfo: GestureInfo,event: BaseGestureEvent) => GestureJudgeResult) | undefined): this
-    onGestureRecognizerJudgeBegin(value: GestureRecognizerJudgeBeginCallback | undefined): this
-    shouldBuiltInRecognizerParallelWith(value: ShouldBuiltInRecognizerParallelWithCallback | undefined): this
-    monopolizeEvents(value: boolean | undefined): this
-    onTouchIntercept(value: ((value0: TouchEvent) => HitTestMode) | undefined): this
-    onSizeChange(value: SizeChangeCallback | undefined): this
-    accessibilityFocusDrawLevel(value: FocusDrawLevel | undefined): this
-    customProperty(name: string | undefined, value: Object | undefined): this
-    expandSafeArea(types?: Array<SafeAreaType>, edges?: Array<SafeAreaEdge>): this
-    background(builder: CustomBuilder | undefined, options?: BackgroundOptions): this
-    backgroundImage(src: ResourceStr | image.PixelMap | undefined, repeat?: ImageRepeat): this
-    backgroundImage(src: ResourceStr | image.PixelMap | undefined, options?: BackgroundImageOptions): this
-    backgroundBlurStyle(style: BlurStyle | undefined, options?: BackgroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): this
-    backgroundEffect(options: BackgroundEffectOptions | undefined, sysOptions?: SystemAdaptiveOptions): this
-    foregroundBlurStyle(style: BlurStyle | undefined, options?: ForegroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): this
-    onClick(event: ((event: ClickEvent) => void) | undefined, distanceThreshold: number | undefined): this
-    focusScopeId(id: string | undefined, isGroup?: boolean, arrowStepOut?: boolean): this
-    focusScopePriority(scopeId: string | undefined, priority?: FocusPriority): this
-    transition(effect: TransitionEffect | undefined, onFinish: TransitionFinishCallback | undefined): this
-    gesture(gesture: GestureType | undefined, mask?: GestureMask): this
-    priorityGesture(gesture: GestureType | undefined, mask?: GestureMask): this
-    parallelGesture(gesture: GestureType | undefined, mask?: GestureMask): this
-    blur(blurRadius: number | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this
-    linearGradientBlur(value: number | undefined, options: LinearGradientBlurOptions | undefined): this
-    systemBarEffect(): this
-    useEffect(useEffect: boolean | undefined, effectType: EffectType | undefined): this
-    backdropBlur(radius: number | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this
-    sharedTransition(id: string | undefined, options?: sharedTransitionOptions): this
-    chainMode(direction: Axis | undefined, style: ChainStyle | undefined): this
-    onDrop(eventCallback: OnDragEventCallback | undefined, dropOptions?: DropOptions): this
-    dragPreview(preview: CustomBuilder | DragItemInfo | string | undefined, config?: PreviewConfiguration): this
-    dragPreviewOptions(value: DragPreviewOptions | undefined, options?: DragInteractionOptions): this
-    overlay(value: string | CustomBuilder | ComponentContent | undefined, options?: OverlayOptions): this
-    blendMode(value: BlendMode | undefined, type?: BlendApplyType): this
-    advancedBlendMode(effect: BlendMode | uiEffect.Blender | undefined, type?: BlendApplyType): this
-    geometryTransition(id: string | undefined, options?: GeometryTransitionOptions): this
-    bindTips(message: TipsMessageType | undefined, options?: TipsOptions): this
-    bindPopup(show: boolean | undefined, popup: PopupOptions | CustomPopupOptions | undefined): this
-    bindMenu(content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions): this
-    bindMenu(isShow: boolean | undefined, content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions): this
-    bindContextMenu(content: CustomBuilder | undefined, responseType: ResponseType | undefined, options?: ContextMenuOptions): this
-    bindContextMenu(isShown: boolean | undefined, content: CustomBuilder | undefined, options?: ContextMenuOptions): this
-    bindContentCover(isShow: boolean | undefined, builder: CustomBuilder | undefined, type?: ModalTransition): this
-    bindContentCover(isShow: boolean | undefined, builder: CustomBuilder | undefined, options?: ContentCoverOptions): this
-    bindSheet(isShow: boolean | undefined, builder: CustomBuilder | undefined, options?: SheetOptions): this
-    onVisibleAreaChange(ratios: Array<number> | undefined, event: VisibleAreaChangeCallback | undefined): this
-    onVisibleAreaApproximateChange(options: VisibleAreaEventOptions | undefined, event: VisibleAreaChangeCallback | undefined): this
-    keyboardShortcut(value: string | FunctionKey | undefined, keys: Array<ModifierKey> | undefined, action?: (() => void)): this
-    accessibilityGroup(isGroup: boolean | undefined, accessibilityOptions: AccessibilityOptions | undefined): this
-    onGestureRecognizerJudgeBegin(callback_: GestureRecognizerJudgeBeginCallback | undefined, exposeInnerGesture: boolean | undefined): this
-    attributeModifier(value: AttributeModifier<CommonMethod> | undefined): this
+    width(value: Length | LayoutPolicy | undefined): this {
+        throw new Error("Unimplemented method width")
+    }
+    height(value: Length | LayoutPolicy | undefined): this {
+        throw new Error("Unimplemented method height")
+    }
+    drawModifier(value: DrawModifier | undefined): this {
+        throw new Error("Unimplemented method drawModifier")
+    }
+    responseRegion(value: Array<Rectangle> | Rectangle | undefined): this {
+        throw new Error("Unimplemented method responseRegion")
+    }
+    mouseResponseRegion(value: Array<Rectangle> | Rectangle | undefined): this {
+        throw new Error("Unimplemented method mouseResponseRegion")
+    }
+    size(value: SizeOptions | undefined): this {
+        throw new Error("Unimplemented method size")
+    }
+    constraintSize(value: ConstraintSizeOptions | undefined): this {
+        throw new Error("Unimplemented method constraintSize")
+    }
+    hitTestBehavior(value: HitTestMode | undefined): this {
+        throw new Error("Unimplemented method hitTestBehavior")
+    }
+    onChildTouchTest(value: ((value: Array<TouchTestInfo>) => TouchResult) | undefined): this {
+        throw new Error("Unimplemented method onChildTouchTest")
+    }
+    layoutWeight(value: number | string | undefined): this {
+        throw new Error("Unimplemented method layoutWeight")
+    }
+    chainWeight(value: ChainWeightOptions | undefined): this {
+        throw new Error("Unimplemented method chainWeight")
+    }
+    padding(value: Padding | Length | LocalizedPadding | undefined): this {
+        throw new Error("Unimplemented method padding")
+    }
+    safeAreaPadding(value: Padding | LengthMetrics | LocalizedPadding | undefined): this {
+        throw new Error("Unimplemented method safeAreaPadding")
+    }
+    margin(value: Padding | Length | LocalizedPadding | undefined): this {
+        throw new Error("Unimplemented method margin")
+    }
+    backgroundColor(value: ResourceColor | undefined): this {
+        throw new Error("Unimplemented method backgroundColor")
+    }
+    pixelRound(value: PixelRoundPolicy | undefined): this {
+        throw new Error("Unimplemented method pixelRound")
+    }
+    backgroundImageSize(value: SizeOptions | ImageSize | undefined): this {
+        throw new Error("Unimplemented method backgroundImageSize")
+    }
+    backgroundImagePosition(value: Position | Alignment | undefined): this {
+        throw new Error("Unimplemented method backgroundImagePosition")
+    }
+    backgroundEffect(value: BackgroundEffectOptions | undefined): this {
+        throw new Error("Unimplemented method backgroundEffect")
+    }
+    backgroundImageResizable(value: ResizableOptions | undefined): this {
+        throw new Error("Unimplemented method backgroundImageResizable")
+    }
+    foregroundEffect(value: ForegroundEffectOptions | undefined): this {
+        throw new Error("Unimplemented method foregroundEffect")
+    }
+    visualEffect(value: uiEffect.VisualEffect | undefined): this {
+        throw new Error("Unimplemented method visualEffect")
+    }
+    backgroundFilter(value: uiEffect.Filter | undefined): this {
+        throw new Error("Unimplemented method backgroundFilter")
+    }
+    foregroundFilter(value: uiEffect.Filter | undefined): this {
+        throw new Error("Unimplemented method foregroundFilter")
+    }
+    compositingFilter(value: uiEffect.Filter | undefined): this {
+        throw new Error("Unimplemented method compositingFilter")
+    }
+    opacity(value: number | Resource | undefined): this {
+        throw new Error("Unimplemented method opacity")
+    }
+    border(value: BorderOptions | undefined): this {
+        throw new Error("Unimplemented method border")
+    }
+    borderStyle(value: BorderStyle | EdgeStyles | undefined): this {
+        throw new Error("Unimplemented method borderStyle")
+    }
+    borderWidth(value: Length | EdgeWidths | LocalizedEdgeWidths | undefined): this {
+        throw new Error("Unimplemented method borderWidth")
+    }
+    borderColor(value: ResourceColor | EdgeColors | LocalizedEdgeColors | undefined): this {
+        throw new Error("Unimplemented method borderColor")
+    }
+    borderRadius(value: Length | BorderRadiuses | LocalizedBorderRadiuses | undefined): this {
+        throw new Error("Unimplemented method borderRadius")
+    }
+    borderImage(value: BorderImageOption | undefined): this {
+        throw new Error("Unimplemented method borderImage")
+    }
+    outline(value: OutlineOptions | undefined): this {
+        throw new Error("Unimplemented method outline")
+    }
+    outlineStyle(value: OutlineStyle | EdgeOutlineStyles | undefined): this {
+        throw new Error("Unimplemented method outlineStyle")
+    }
+    outlineWidth(value: Dimension | EdgeOutlineWidths | undefined): this {
+        throw new Error("Unimplemented method outlineWidth")
+    }
+    outlineColor(value: ResourceColor | EdgeColors | LocalizedEdgeColors | undefined): this {
+        throw new Error("Unimplemented method outlineColor")
+    }
+    outlineRadius(value: Dimension | OutlineRadiuses | undefined): this {
+        throw new Error("Unimplemented method outlineRadius")
+    }
+    foregroundColor(value: ResourceColor | ColoringStrategy | undefined): this {
+        throw new Error("Unimplemented method foregroundColor")
+    }
+    onClick(value: ((event: ClickEvent) => void) | undefined): this {
+        throw new Error("Unimplemented method onClick")
+    }
+    onHover(value: ((isHover: boolean,event: HoverEvent) => void) | undefined): this {
+        throw new Error("Unimplemented method onHover")
+    }
+    onHoverMove(value: ((value0: HoverEvent) => void) | undefined): this {
+        throw new Error("Unimplemented method onHoverMove")
+    }
+    onAccessibilityHover(value: AccessibilityCallback | undefined): this {
+        throw new Error("Unimplemented method onAccessibilityHover")
+    }
+    hoverEffect(value: HoverEffect | undefined): this {
+        throw new Error("Unimplemented method hoverEffect")
+    }
+    onMouse(value: ((event: MouseEvent) => void) | undefined): this {
+        throw new Error("Unimplemented method onMouse")
+    }
+    onTouch(value: ((event: TouchEvent) => void) | undefined): this {
+        throw new Error("Unimplemented method onTouch")
+    }
+    onKeyEvent(value: ((event: KeyEvent) => void) | undefined): this {
+        throw new Error("Unimplemented method onKeyEvent")
+    }
+    onDigitalCrown(value: ((value0: CrownEvent) => void) | undefined): this {
+        throw new Error("Unimplemented method onDigitalCrown")
+    }
+    onKeyPreIme(value: ((value0: KeyEvent) => boolean) | undefined): this {
+        throw new Error("Unimplemented method onKeyPreIme")
+    }
+    onKeyEventDispatch(value: ((value0: KeyEvent) => boolean) | undefined): this {
+        throw new Error("Unimplemented method onKeyEventDispatch")
+    }
+    onFocusAxisEvent(value: ((value0: FocusAxisEvent) => void) | undefined): this {
+        throw new Error("Unimplemented method onFocusAxisEvent")
+    }
+    onAxisEvent(value: ((value0: AxisEvent) => void) | undefined): this {
+        throw new Error("Unimplemented method onAxisEvent")
+    }
+    focusable(value: boolean | undefined): this {
+        throw new Error("Unimplemented method focusable")
+    }
+    nextFocus(value: FocusMovement | undefined): this {
+        throw new Error("Unimplemented method nextFocus")
+    }
+    tabStop(value: boolean | undefined): this {
+        throw new Error("Unimplemented method tabStop")
+    }
+    onFocus(value: (() => void) | undefined): this {
+        throw new Error("Unimplemented method onFocus")
+    }
+    onBlur(value: (() => void) | undefined): this {
+        throw new Error("Unimplemented method onBlur")
+    }
+    tabIndex(value: number | undefined): this {
+        throw new Error("Unimplemented method tabIndex")
+    }
+    defaultFocus(value: boolean | undefined): this {
+        throw new Error("Unimplemented method defaultFocus")
+    }
+    groupDefaultFocus(value: boolean | undefined): this {
+        throw new Error("Unimplemented method groupDefaultFocus")
+    }
+    focusOnTouch(value: boolean | undefined): this {
+        throw new Error("Unimplemented method focusOnTouch")
+    }
+    focusBox(value: FocusBoxStyle | undefined): this {
+        throw new Error("Unimplemented method focusBox")
+    }
+    animation(value: AnimateParam | undefined): this {
+        throw new Error("Unimplemented method animation")
+    }
+    transition(value: TransitionEffect | undefined): this {
+        throw new Error("Unimplemented method transition")
+    }
+    motionBlur(value: MotionBlurOptions | undefined): this {
+        throw new Error("Unimplemented method motionBlur")
+    }
+    brightness(value: number | undefined): this {
+        throw new Error("Unimplemented method brightness")
+    }
+    contrast(value: number | undefined): this {
+        throw new Error("Unimplemented method contrast")
+    }
+    grayscale(value: number | undefined): this {
+        throw new Error("Unimplemented method grayscale")
+    }
+    colorBlend(value: Color | string | Resource | undefined): this {
+        throw new Error("Unimplemented method colorBlend")
+    }
+    saturate(value: number | undefined): this {
+        throw new Error("Unimplemented method saturate")
+    }
+    sepia(value: number | undefined): this {
+        throw new Error("Unimplemented method sepia")
+    }
+    invert(value: number | InvertOptions | undefined): this {
+        throw new Error("Unimplemented method invert")
+    }
+    hueRotate(value: number | string | undefined): this {
+        throw new Error("Unimplemented method hueRotate")
+    }
+    useShadowBatching(value: boolean | undefined): this {
+        throw new Error("Unimplemented method useShadowBatching")
+    }
+    useEffect(value: boolean | undefined): this {
+        throw new Error("Unimplemented method useEffect")
+    }
+    renderGroup(value: boolean | undefined): this {
+        throw new Error("Unimplemented method renderGroup")
+    }
+    freeze(value: boolean | undefined): this {
+        throw new Error("Unimplemented method freeze")
+    }
+    translate(value: TranslateOptions | undefined): this {
+        throw new Error("Unimplemented method translate")
+    }
+    scale(value: ScaleOptions | undefined): this {
+        throw new Error("Unimplemented method scale")
+    }
+    rotate(value: RotateOptions | undefined): this {
+        throw new Error("Unimplemented method rotate")
+    }
+    transform(value: Object | undefined): this {
+        throw new Error("Unimplemented method transform")
+    }
+    onAppear(value: (() => void) | undefined): this {
+        throw new Error("Unimplemented method onAppear")
+    }
+    onDisAppear(value: (() => void) | undefined): this {
+        throw new Error("Unimplemented method onDisAppear")
+    }
+    onAttach(value: VoidCallback | undefined): this {
+        throw new Error("Unimplemented method onAttach")
+    }
+    onDetach(value: VoidCallback | undefined): this {
+        throw new Error("Unimplemented method onDetach")
+    }
+    onAreaChange(value: ((oldValue: Area,newValue: Area) => void) | undefined): this {
+        throw new Error("Unimplemented method onAreaChange")
+    }
+    visibility(value: Visibility | undefined): this {
+        throw new Error("Unimplemented method visibility")
+    }
+    flexGrow(value: number | undefined): this {
+        throw new Error("Unimplemented method flexGrow")
+    }
+    flexShrink(value: number | undefined): this {
+        throw new Error("Unimplemented method flexShrink")
+    }
+    flexBasis(value: number | string | undefined): this {
+        throw new Error("Unimplemented method flexBasis")
+    }
+    alignSelf(value: ItemAlign | undefined): this {
+        throw new Error("Unimplemented method alignSelf")
+    }
+    displayPriority(value: number | undefined): this {
+        throw new Error("Unimplemented method displayPriority")
+    }
+    zIndex(value: number | undefined): this {
+        throw new Error("Unimplemented method zIndex")
+    }
+    direction(value: Direction | undefined): this {
+        throw new Error("Unimplemented method direction")
+    }
+    align(value: Alignment | undefined): this {
+        throw new Error("Unimplemented method align")
+    }
+    position(value: Position | Edges | LocalizedEdges | undefined): this {
+        throw new Error("Unimplemented method position")
+    }
+    markAnchor(value: Position | LocalizedPosition | undefined): this {
+        throw new Error("Unimplemented method markAnchor")
+    }
+    offset(value: Position | Edges | LocalizedEdges | undefined): this {
+        throw new Error("Unimplemented method offset")
+    }
+    enabled(value: boolean | undefined): this {
+        throw new Error("Unimplemented method enabled")
+    }
+    alignRules(value: AlignRuleOption | undefined): this {
+        throw new Error("Unimplemented method alignRules")
+    }
+    alignRules(value: LocalizedAlignRuleOptions | undefined): this {
+        throw new Error("Unimplemented method alignRules")
+    }
+    aspectRatio(value: number | undefined): this {
+        throw new Error("Unimplemented method aspectRatio")
+    }
+    clickEffect(value: ClickEffect | undefined): this {
+        throw new Error("Unimplemented method clickEffect")
+    }
+    onDragStart(value: ((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) | undefined): this {
+        throw new Error("Unimplemented method onDragStart")
+    }
+    onDragEnter(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this {
+        throw new Error("Unimplemented method onDragEnter")
+    }
+    onDragMove(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this {
+        throw new Error("Unimplemented method onDragMove")
+    }
+    onDragLeave(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this {
+        throw new Error("Unimplemented method onDragLeave")
+    }
+    onDrop(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this {
+        throw new Error("Unimplemented method onDrop")
+    }
+    onDragEnd(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this {
+        throw new Error("Unimplemented method onDragEnd")
+    }
+    allowDrop(value: Array<uniformTypeDescriptor.UniformDataType> | undefined): this {
+        throw new Error("Unimplemented method allowDrop")
+    }
+    draggable(value: boolean | undefined): this {
+        throw new Error("Unimplemented method draggable")
+    }
+    dragPreview(value: CustomBuilder | DragItemInfo | string | undefined): this {
+        throw new Error("Unimplemented method dragPreview")
+    }
+    onPreDrag(value: ((value0: PreDragStatus) => void) | undefined): this {
+        throw new Error("Unimplemented method onPreDrag")
+    }
+    linearGradient(value: LinearGradientOptions | undefined): this {
+        throw new Error("Unimplemented method linearGradient")
+    }
+    sweepGradient(value: SweepGradientOptions | undefined): this {
+        throw new Error("Unimplemented method sweepGradient")
+    }
+    radialGradient(value: RadialGradientOptions | undefined): this {
+        throw new Error("Unimplemented method radialGradient")
+    }
+    motionPath(value: MotionPathOptions | undefined): this {
+        throw new Error("Unimplemented method motionPath")
+    }
+    shadow(value: ShadowOptions | ShadowStyle | undefined): this {
+        throw new Error("Unimplemented method shadow")
+    }
+    clip(value: boolean | undefined): this {
+        throw new Error("Unimplemented method clip")
+    }
+    clipShape(value: CircleShape | EllipseShape | PathShape | RectShape | undefined): this {
+        throw new Error("Unimplemented method clipShape")
+    }
+    mask(value: ProgressMask | undefined): this {
+        throw new Error("Unimplemented method mask")
+    }
+    maskShape(value: CircleShape | EllipseShape | PathShape | RectShape | undefined): this {
+        throw new Error("Unimplemented method maskShape")
+    }
+    key(value: string | undefined): this {
+        throw new Error("Unimplemented method key")
+    }
+    id(value: string | undefined): this {
+        throw new Error("Unimplemented method id")
+    }
+    geometryTransition(value: string | undefined): this {
+        throw new Error("Unimplemented method geometryTransition")
+    }
+    stateStyles(value: StateStyles | undefined): this {
+        throw new Error("Unimplemented method stateStyles")
+    }
+    restoreId(value: number | undefined): this {
+        throw new Error("Unimplemented method restoreId")
+    }
+    sphericalEffect(value: number | undefined): this {
+        throw new Error("Unimplemented method sphericalEffect")
+    }
+    lightUpEffect(value: number | undefined): this {
+        throw new Error("Unimplemented method lightUpEffect")
+    }
+    pixelStretchEffect(value: PixelStretchEffectOptions | undefined): this {
+        throw new Error("Unimplemented method pixelStretchEffect")
+    }
+    accessibilityGroup(value: boolean | undefined): this {
+        throw new Error("Unimplemented method accessibilityGroup")
+    }
+    accessibilityText(value: string | undefined): this {
+        throw new Error("Unimplemented method accessibilityText")
+    }
+    accessibilityNextFocusId(value: string | undefined): this {
+        throw new Error("Unimplemented method accessibilityNextFocusId")
+    }
+    accessibilityDefaultFocus(value: boolean | undefined): this {
+        throw new Error("Unimplemented method accessibilityDefaultFocus")
+    }
+    accessibilityUseSamePage(value: AccessibilitySamePageMode | undefined): this {
+        throw new Error("Unimplemented method accessibilityUseSamePage")
+    }
+    accessibilityScrollTriggerable(value: boolean | undefined): this {
+        throw new Error("Unimplemented method accessibilityScrollTriggerable")
+    }
+    accessibilityText(value: Resource | undefined): this {
+        throw new Error("Unimplemented method accessibilityText")
+    }
+    accessibilityRole(value: AccessibilityRoleType | undefined): this {
+        throw new Error("Unimplemented method accessibilityRole")
+    }
+    onAccessibilityFocus(value: AccessibilityFocusCallback | undefined): this {
+        throw new Error("Unimplemented method onAccessibilityFocus")
+    }
+    accessibilityTextHint(value: string | undefined): this {
+        throw new Error("Unimplemented method accessibilityTextHint")
+    }
+    accessibilityDescription(value: string | undefined): this {
+        throw new Error("Unimplemented method accessibilityDescription")
+    }
+    accessibilityDescription(value: Resource | undefined): this {
+        throw new Error("Unimplemented method accessibilityDescription")
+    }
+    accessibilityLevel(value: string | undefined): this {
+        throw new Error("Unimplemented method accessibilityLevel")
+    }
+    accessibilityVirtualNode(value: CustomBuilder | undefined): this {
+        throw new Error("Unimplemented method accessibilityVirtualNode")
+    }
+    accessibilityChecked(value: boolean | undefined): this {
+        throw new Error("Unimplemented method accessibilityChecked")
+    }
+    accessibilitySelected(value: boolean | undefined): this {
+        throw new Error("Unimplemented method accessibilitySelected")
+    }
+    obscured(value: Array<ObscuredReasons> | undefined): this {
+        throw new Error("Unimplemented method obscured")
+    }
+    reuseId(value: string | undefined): this {
+        throw new Error("Unimplemented method reuseId")
+    }
+    reuse(value: ReuseOptions | undefined): this {
+        throw new Error("Unimplemented method reuse")
+    }
+    renderFit(value: RenderFit | undefined): this {
+        throw new Error("Unimplemented method renderFit")
+    }
+    gestureModifier(value: GestureModifier | undefined): this {
+        throw new Error("Unimplemented method gestureModifier")
+    }
+    backgroundBrightness(value: BackgroundBrightnessOptions | undefined): this {
+        throw new Error("Unimplemented method backgroundBrightness")
+    }
+    onGestureJudgeBegin(value: ((gestureInfo: GestureInfo,event: BaseGestureEvent) => GestureJudgeResult) | undefined): this {
+        throw new Error("Unimplemented method onGestureJudgeBegin")
+    }
+    onGestureRecognizerJudgeBegin(value: GestureRecognizerJudgeBeginCallback | undefined): this {
+        throw new Error("Unimplemented method onGestureRecognizerJudgeBegin")
+    }
+    shouldBuiltInRecognizerParallelWith(value: ShouldBuiltInRecognizerParallelWithCallback | undefined): this {
+        throw new Error("Unimplemented method shouldBuiltInRecognizerParallelWith")
+    }
+    monopolizeEvents(value: boolean | undefined): this {
+        throw new Error("Unimplemented method monopolizeEvents")
+    }
+    onTouchIntercept(value: ((value0: TouchEvent) => HitTestMode) | undefined): this {
+        throw new Error("Unimplemented method onTouchIntercept")
+    }
+    onSizeChange(value: SizeChangeCallback | undefined): this {
+        throw new Error("Unimplemented method onSizeChange")
+    }
+    accessibilityFocusDrawLevel(value: FocusDrawLevel | undefined): this {
+        throw new Error("Unimplemented method accessibilityFocusDrawLevel")
+    }
+    customProperty(name: string | undefined, value: Object | undefined): this {
+        throw new Error("Unimplemented method customProperty")
+    }
+    expandSafeArea(types?: Array<SafeAreaType>, edges?: Array<SafeAreaEdge>): this {
+        throw new Error("Unimplemented method expandSafeArea")
+    }
+    background(builder: CustomBuilder | undefined, options?: BackgroundOptions): this {
+        throw new Error("Unimplemented method background")
+    }
+    backgroundImage(src: ResourceStr | image.PixelMap | undefined, repeat?: ImageRepeat): this {
+        throw new Error("Unimplemented method backgroundImage")
+    }
+    backgroundImage(src: ResourceStr | image.PixelMap | undefined, options?: BackgroundImageOptions): this {
+        throw new Error("Unimplemented method backgroundImage")
+    }
+    backgroundBlurStyle(style: BlurStyle | undefined, options?: BackgroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): this {
+        throw new Error("Unimplemented method backgroundBlurStyle")
+    }
+    backgroundEffect(options: BackgroundEffectOptions | undefined, sysOptions?: SystemAdaptiveOptions): this {
+        throw new Error("Unimplemented method backgroundEffect")
+    }
+    foregroundBlurStyle(style: BlurStyle | undefined, options?: ForegroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): this {
+        throw new Error("Unimplemented method foregroundBlurStyle")
+    }
+    onClick(event: ((event: ClickEvent) => void) | undefined, distanceThreshold: number | undefined): this {
+        throw new Error("Unimplemented method onClick")
+    }
+    focusScopeId(id: string | undefined, isGroup?: boolean, arrowStepOut?: boolean): this {
+        throw new Error("Unimplemented method focusScopeId")
+    }
+    focusScopePriority(scopeId: string | undefined, priority?: FocusPriority): this {
+        throw new Error("Unimplemented method focusScopePriority")
+    }
+    transition(effect: TransitionEffect | undefined, onFinish: TransitionFinishCallback | undefined): this {
+        throw new Error("Unimplemented method transition")
+    }
+    gesture(gesture: GestureType | undefined, mask?: GestureMask): this {
+        throw new Error("Unimplemented method gesture")
+    }
+    priorityGesture(gesture: GestureType | undefined, mask?: GestureMask): this {
+        throw new Error("Unimplemented method priorityGesture")
+    }
+    parallelGesture(gesture: GestureType | undefined, mask?: GestureMask): this {
+        throw new Error("Unimplemented method parallelGesture")
+    }
+    blur(blurRadius: number | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {
+        throw new Error("Unimplemented method blur")
+    }
+    linearGradientBlur(value: number | undefined, options: LinearGradientBlurOptions | undefined): this {
+        throw new Error("Unimplemented method linearGradientBlur")
+    }
+    systemBarEffect(): this {
+        throw new Error("Unimplemented method systemBarEffect")
+    }
+    useEffect(useEffect: boolean | undefined, effectType: EffectType | undefined): this {
+        throw new Error("Unimplemented method useEffect")
+    }
+    backdropBlur(radius: number | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {
+        throw new Error("Unimplemented method backdropBlur")
+    }
+    sharedTransition(id: string | undefined, options?: sharedTransitionOptions): this {
+        throw new Error("Unimplemented method sharedTransition")
+    }
+    chainMode(direction: Axis | undefined, style: ChainStyle | undefined): this {
+        throw new Error("Unimplemented method chainMode")
+    }
+    onDrop(eventCallback: OnDragEventCallback | undefined, dropOptions?: DropOptions): this {
+        throw new Error("Unimplemented method onDrop")
+    }
+    dragPreview(preview: CustomBuilder | DragItemInfo | string | undefined, config?: PreviewConfiguration): this {
+        throw new Error("Unimplemented method dragPreview")
+    }
+    dragPreviewOptions(value: DragPreviewOptions | undefined, options?: DragInteractionOptions): this {
+        throw new Error("Unimplemented method dragPreviewOptions")
+    }
+    overlay(value: string | CustomBuilder | ComponentContent | undefined, options?: OverlayOptions): this {
+        throw new Error("Unimplemented method overlay")
+    }
+    blendMode(value: BlendMode | undefined, type?: BlendApplyType): this {
+        throw new Error("Unimplemented method blendMode")
+    }
+    advancedBlendMode(effect: BlendMode | uiEffect.Blender | undefined, type?: BlendApplyType): this {
+        throw new Error("Unimplemented method advancedBlendMode")
+    }
+    geometryTransition(id: string | undefined, options?: GeometryTransitionOptions): this {
+        throw new Error("Unimplemented method geometryTransition")
+    }
+    bindTips(message: TipsMessageType | undefined, options?: TipsOptions): this {
+        throw new Error("Unimplemented method bindTips")
+    }
+    bindPopup(show: boolean | undefined, popup: PopupOptions | CustomPopupOptions | undefined): this {
+        throw new Error("Unimplemented method bindPopup")
+    }
+    bindMenu(content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions): this {
+        throw new Error("Unimplemented method bindMenu")
+    }
+    bindMenu(isShow: boolean | undefined, content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions): this {
+        throw new Error("Unimplemented method bindMenu")
+    }
+    bindContextMenu(content: CustomBuilder | undefined, responseType: ResponseType | undefined, options?: ContextMenuOptions): this {
+        throw new Error("Unimplemented method bindContextMenu")
+    }
+    bindContextMenu(isShown: boolean | undefined, content: CustomBuilder | undefined, options?: ContextMenuOptions): this {
+        throw new Error("Unimplemented method bindContextMenu")
+    }
+    bindContentCover(isShow: boolean | undefined, builder: CustomBuilder | undefined, type?: ModalTransition): this {
+        throw new Error("Unimplemented method bindContentCover")
+    }
+    bindContentCover(isShow: boolean | undefined, builder: CustomBuilder | undefined, options?: ContentCoverOptions): this {
+        throw new Error("Unimplemented method bindContentCover")
+    }
+    bindSheet(isShow: boolean | undefined, builder: CustomBuilder | undefined, options?: SheetOptions): this {
+        throw new Error("Unimplemented method bindSheet")
+    }
+    onVisibleAreaChange(ratios: Array<number> | undefined, event: VisibleAreaChangeCallback | undefined): this {
+        throw new Error("Unimplemented method onVisibleAreaChange")
+    }
+    onVisibleAreaApproximateChange(options: VisibleAreaEventOptions | undefined, event: VisibleAreaChangeCallback | undefined): this {
+        throw new Error("Unimplemented method onVisibleAreaApproximateChange")
+    }
+    keyboardShortcut(value: string | FunctionKey | undefined, keys: Array<ModifierKey> | undefined, action?: (() => void)): this {
+        throw new Error("Unimplemented method keyboardShortcut")
+    }
+    accessibilityGroup(isGroup: boolean | undefined, accessibilityOptions: AccessibilityOptions | undefined): this {
+        throw new Error("Unimplemented method accessibilityGroup")
+    }
+    onGestureRecognizerJudgeBegin(callback_: GestureRecognizerJudgeBeginCallback | undefined, exposeInnerGesture: boolean | undefined): this {
+        throw new Error("Unimplemented method onGestureRecognizerJudgeBegin")
+    }
+    attributeModifier(value: AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkCommonMethodStyle implements CommonMethod {
     width_value?: Length | LayoutPolicy | undefined
@@ -8869,18 +9260,42 @@ export type FractionStop = [
     number
 ]
 export interface CommonShapeMethod extends CommonMethod {
-    stroke(value: ResourceColor | undefined): this
-    fill(value: ResourceColor | undefined): this
-    strokeDashOffset(value: number | string | undefined): this
-    strokeLineCap(value: LineCapStyle | undefined): this
-    strokeLineJoin(value: LineJoinStyle | undefined): this
-    strokeMiterLimit(value: number | string | undefined): this
-    strokeOpacity(value: number | string | Resource | undefined): this
-    fillOpacity(value: number | string | Resource | undefined): this
-    strokeWidth(value: Length | undefined): this
-    antiAlias(value: boolean | undefined): this
-    strokeDashArray(value: Array<Length> | undefined): this
-    attributeModifier(value: AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this
+    stroke(value: ResourceColor | undefined): this {
+        throw new Error("Unimplemented method stroke")
+    }
+    fill(value: ResourceColor | undefined): this {
+        throw new Error("Unimplemented method fill")
+    }
+    strokeDashOffset(value: number | string | undefined): this {
+        throw new Error("Unimplemented method strokeDashOffset")
+    }
+    strokeLineCap(value: LineCapStyle | undefined): this {
+        throw new Error("Unimplemented method strokeLineCap")
+    }
+    strokeLineJoin(value: LineJoinStyle | undefined): this {
+        throw new Error("Unimplemented method strokeLineJoin")
+    }
+    strokeMiterLimit(value: number | string | undefined): this {
+        throw new Error("Unimplemented method strokeMiterLimit")
+    }
+    strokeOpacity(value: number | string | Resource | undefined): this {
+        throw new Error("Unimplemented method strokeOpacity")
+    }
+    fillOpacity(value: number | string | Resource | undefined): this {
+        throw new Error("Unimplemented method fillOpacity")
+    }
+    strokeWidth(value: Length | undefined): this {
+        throw new Error("Unimplemented method strokeWidth")
+    }
+    antiAlias(value: boolean | undefined): this {
+        throw new Error("Unimplemented method antiAlias")
+    }
+    strokeDashArray(value: Array<Length> | undefined): this {
+        throw new Error("Unimplemented method strokeDashArray")
+    }
+    attributeModifier(value: AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkCommonShapeMethodStyle extends ArkCommonMethodStyle implements CommonShapeMethod {
     stroke_value?: ResourceColor | undefined
@@ -9014,23 +9429,57 @@ export enum ContentClipMode {
     SAFE_AREA = 2
 }
 export interface ScrollableCommonMethod extends CommonMethod {
-    scrollBar(value: BarState | undefined): this
-    scrollBarColor(value: Color | number | string | undefined): this
-    scrollBarWidth(value: number | string | undefined): this
-    nestedScroll(value: NestedScrollOptions | undefined): this
-    enableScrollInteraction(value: boolean | undefined): this
-    friction(value: number | Resource | undefined): this
-    onReachStart(value: (() => void) | undefined): this
-    onReachEnd(value: (() => void) | undefined): this
-    onScrollStart(value: (() => void) | undefined): this
-    onScrollStop(value: (() => void) | undefined): this
-    flingSpeedLimit(value: number | undefined): this
-    clipContent(value: ContentClipMode | RectShape | undefined): this
-    digitalCrownSensitivity(value: CrownSensitivity | undefined): this
-    backToTop(value: boolean | undefined): this
-    edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions): this
-    fadingEdge(enabled: boolean | undefined, options?: FadingEdgeOptions): this
-    attributeModifier(value: AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this
+    scrollBar(value: BarState | undefined): this {
+        throw new Error("Unimplemented method scrollBar")
+    }
+    scrollBarColor(value: Color | number | string | undefined): this {
+        throw new Error("Unimplemented method scrollBarColor")
+    }
+    scrollBarWidth(value: number | string | undefined): this {
+        throw new Error("Unimplemented method scrollBarWidth")
+    }
+    nestedScroll(value: NestedScrollOptions | undefined): this {
+        throw new Error("Unimplemented method nestedScroll")
+    }
+    enableScrollInteraction(value: boolean | undefined): this {
+        throw new Error("Unimplemented method enableScrollInteraction")
+    }
+    friction(value: number | Resource | undefined): this {
+        throw new Error("Unimplemented method friction")
+    }
+    onReachStart(value: (() => void) | undefined): this {
+        throw new Error("Unimplemented method onReachStart")
+    }
+    onReachEnd(value: (() => void) | undefined): this {
+        throw new Error("Unimplemented method onReachEnd")
+    }
+    onScrollStart(value: (() => void) | undefined): this {
+        throw new Error("Unimplemented method onScrollStart")
+    }
+    onScrollStop(value: (() => void) | undefined): this {
+        throw new Error("Unimplemented method onScrollStop")
+    }
+    flingSpeedLimit(value: number | undefined): this {
+        throw new Error("Unimplemented method flingSpeedLimit")
+    }
+    clipContent(value: ContentClipMode | RectShape | undefined): this {
+        throw new Error("Unimplemented method clipContent")
+    }
+    digitalCrownSensitivity(value: CrownSensitivity | undefined): this {
+        throw new Error("Unimplemented method digitalCrownSensitivity")
+    }
+    backToTop(value: boolean | undefined): this {
+        throw new Error("Unimplemented method backToTop")
+    }
+    edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions): this {
+        throw new Error("Unimplemented method edgeEffect")
+    }
+    fadingEdge(enabled: boolean | undefined, options?: FadingEdgeOptions): this {
+        throw new Error("Unimplemented method fadingEdge")
+    }
+    attributeModifier(value: AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkScrollableCommonMethodStyle extends ArkCommonMethodStyle implements ScrollableCommonMethod {
     public scrollBar(value: BarState | undefined): this {
@@ -10174,9 +10623,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public stateStyles(value: StateStyles | undefined): this {
         if (this.checkPriority("stateStyles")) {
-            const value_casted = value as (StateStyles | undefined)
-            this.getPeer()?.setStateStylesAttribute(value_casted)
-            return this
+            hookStateStyleImpl(this, value)
         }
         return this
     }
@@ -13188,9 +13635,6 @@ export function vp2px(value: number): number {
 export function px2vp(value: number): number {
     return GlobalScope.px2vp(value)
 }
-export function applyStyles<T>(self: T, customStyles: CustomStyles): T {
-    return GlobalScope.applyStyles(self, customStyles)
-}
 export class GestureModifier_serializer {
     public static write(buffer: SerializerBase, value: GestureModifier): void {
         let valueSerializer : SerializerBase = buffer
@@ -15091,172 +15535,6 @@ export class SpringBackAction_serializer {
     springBack_buf_argsSerializer.release();
     return; }
         let value : SpringBackAction = ({springBack: springBack_result} as SpringBackAction)
-        return value
-    }
-}
-export class StateStyles_serializer {
-    public static write(buffer: SerializerBase, value: StateStyles): void {
-        let valueSerializer : SerializerBase = buffer
-        const value_normal  = value.normal
-        let value_normal_type : int32 = RuntimeType.UNDEFINED
-        value_normal_type = runtimeType(value_normal)
-        valueSerializer.writeInt8((value_normal_type).toChar())
-        if ((value_normal_type) != (RuntimeType.UNDEFINED)) {
-            const value_normal_value  = value_normal!
-            valueSerializer.holdAndWriteCallback(value_normal_value)
-        }
-        const value_pressed  = value.pressed
-        let value_pressed_type : int32 = RuntimeType.UNDEFINED
-        value_pressed_type = runtimeType(value_pressed)
-        valueSerializer.writeInt8((value_pressed_type).toChar())
-        if ((value_pressed_type) != (RuntimeType.UNDEFINED)) {
-            const value_pressed_value  = value_pressed!
-            valueSerializer.holdAndWriteCallback(value_pressed_value)
-        }
-        const value_disabled  = value.disabled
-        let value_disabled_type : int32 = RuntimeType.UNDEFINED
-        value_disabled_type = runtimeType(value_disabled)
-        valueSerializer.writeInt8((value_disabled_type).toChar())
-        if ((value_disabled_type) != (RuntimeType.UNDEFINED)) {
-            const value_disabled_value  = value_disabled!
-            valueSerializer.holdAndWriteCallback(value_disabled_value)
-        }
-        const value_focused  = value.focused
-        let value_focused_type : int32 = RuntimeType.UNDEFINED
-        value_focused_type = runtimeType(value_focused)
-        valueSerializer.writeInt8((value_focused_type).toChar())
-        if ((value_focused_type) != (RuntimeType.UNDEFINED)) {
-            const value_focused_value  = value_focused!
-            valueSerializer.holdAndWriteCallback(value_focused_value)
-        }
-        const value_clicked  = value.clicked
-        let value_clicked_type : int32 = RuntimeType.UNDEFINED
-        value_clicked_type = runtimeType(value_clicked)
-        valueSerializer.writeInt8((value_clicked_type).toChar())
-        if ((value_clicked_type) != (RuntimeType.UNDEFINED)) {
-            const value_clicked_value  = value_clicked!
-            valueSerializer.holdAndWriteCallback(value_clicked_value)
-        }
-        const value_selected  = value.selected
-        let value_selected_type : int32 = RuntimeType.UNDEFINED
-        value_selected_type = runtimeType(value_selected)
-        valueSerializer.writeInt8((value_selected_type).toChar())
-        if ((value_selected_type) != (RuntimeType.UNDEFINED)) {
-            const value_selected_value  = value_selected!
-            valueSerializer.holdAndWriteCallback(value_selected_value)
-        }
-    }
-    public static read(buffer: DeserializerBase): StateStyles {
-        let valueDeserializer : DeserializerBase = buffer
-        const normal_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let normal_buf : CustomStyles | undefined
-        if ((normal_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const normal_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
-            const normal_buf__call : KPointer = valueDeserializer.readPointer()
-            const normal_buf__callSync : KPointer = valueDeserializer.readPointer()
-            normal_buf = (instance: string):void => { 
-    const normal_buf__argsSerializer : SerializerBase = SerializerBase.hold();
-    normal_buf__argsSerializer.writeInt32(normal_buf__resource.resourceId);
-    normal_buf__argsSerializer.writePointer(normal_buf__call);
-    normal_buf__argsSerializer.writePointer(normal_buf__callSync);
-    normal_buf__argsSerializer.writeString(instance);
-    InteropNativeModule._CallCallback(-1565709723, normal_buf__argsSerializer.asBuffer(), normal_buf__argsSerializer.length());
-    normal_buf__argsSerializer.release();
-    return; }
-        }
-        const normal_result : CustomStyles | undefined = normal_buf
-        const pressed_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let pressed_buf : CustomStyles | undefined
-        if ((pressed_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const pressed_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
-            const pressed_buf__call : KPointer = valueDeserializer.readPointer()
-            const pressed_buf__callSync : KPointer = valueDeserializer.readPointer()
-            pressed_buf = (instance: string):void => { 
-    const pressed_buf__argsSerializer : SerializerBase = SerializerBase.hold();
-    pressed_buf__argsSerializer.writeInt32(pressed_buf__resource.resourceId);
-    pressed_buf__argsSerializer.writePointer(pressed_buf__call);
-    pressed_buf__argsSerializer.writePointer(pressed_buf__callSync);
-    pressed_buf__argsSerializer.writeString(instance);
-    InteropNativeModule._CallCallback(-1565709723, pressed_buf__argsSerializer.asBuffer(), pressed_buf__argsSerializer.length());
-    pressed_buf__argsSerializer.release();
-    return; }
-        }
-        const pressed_result : CustomStyles | undefined = pressed_buf
-        const disabled_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let disabled_buf : CustomStyles | undefined
-        if ((disabled_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const disabled_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
-            const disabled_buf__call : KPointer = valueDeserializer.readPointer()
-            const disabled_buf__callSync : KPointer = valueDeserializer.readPointer()
-            disabled_buf = (instance: string):void => { 
-    const disabled_buf__argsSerializer : SerializerBase = SerializerBase.hold();
-    disabled_buf__argsSerializer.writeInt32(disabled_buf__resource.resourceId);
-    disabled_buf__argsSerializer.writePointer(disabled_buf__call);
-    disabled_buf__argsSerializer.writePointer(disabled_buf__callSync);
-    disabled_buf__argsSerializer.writeString(instance);
-    InteropNativeModule._CallCallback(-1565709723, disabled_buf__argsSerializer.asBuffer(), disabled_buf__argsSerializer.length());
-    disabled_buf__argsSerializer.release();
-    return; }
-        }
-        const disabled_result : CustomStyles | undefined = disabled_buf
-        const focused_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let focused_buf : CustomStyles | undefined
-        if ((focused_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const focused_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
-            const focused_buf__call : KPointer = valueDeserializer.readPointer()
-            const focused_buf__callSync : KPointer = valueDeserializer.readPointer()
-            focused_buf = (instance: string):void => { 
-    const focused_buf__argsSerializer : SerializerBase = SerializerBase.hold();
-    focused_buf__argsSerializer.writeInt32(focused_buf__resource.resourceId);
-    focused_buf__argsSerializer.writePointer(focused_buf__call);
-    focused_buf__argsSerializer.writePointer(focused_buf__callSync);
-    focused_buf__argsSerializer.writeString(instance);
-    InteropNativeModule._CallCallback(-1565709723, focused_buf__argsSerializer.asBuffer(), focused_buf__argsSerializer.length());
-    focused_buf__argsSerializer.release();
-    return; }
-        }
-        const focused_result : CustomStyles | undefined = focused_buf
-        const clicked_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let clicked_buf : CustomStyles | undefined
-        if ((clicked_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const clicked_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
-            const clicked_buf__call : KPointer = valueDeserializer.readPointer()
-            const clicked_buf__callSync : KPointer = valueDeserializer.readPointer()
-            clicked_buf = (instance: string):void => { 
-    const clicked_buf__argsSerializer : SerializerBase = SerializerBase.hold();
-    clicked_buf__argsSerializer.writeInt32(clicked_buf__resource.resourceId);
-    clicked_buf__argsSerializer.writePointer(clicked_buf__call);
-    clicked_buf__argsSerializer.writePointer(clicked_buf__callSync);
-    clicked_buf__argsSerializer.writeString(instance);
-    InteropNativeModule._CallCallback(-1565709723, clicked_buf__argsSerializer.asBuffer(), clicked_buf__argsSerializer.length());
-    clicked_buf__argsSerializer.release();
-    return; }
-        }
-        const clicked_result : CustomStyles | undefined = clicked_buf
-        const selected_buf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let selected_buf : CustomStyles | undefined
-        if ((selected_buf_runtimeType) != (RuntimeType.UNDEFINED))
-        {
-            const selected_buf__resource : CallbackResource = valueDeserializer.readCallbackResource()
-            const selected_buf__call : KPointer = valueDeserializer.readPointer()
-            const selected_buf__callSync : KPointer = valueDeserializer.readPointer()
-            selected_buf = (instance: string):void => { 
-    const selected_buf__argsSerializer : SerializerBase = SerializerBase.hold();
-    selected_buf__argsSerializer.writeInt32(selected_buf__resource.resourceId);
-    selected_buf__argsSerializer.writePointer(selected_buf__call);
-    selected_buf__argsSerializer.writePointer(selected_buf__callSync);
-    selected_buf__argsSerializer.writeString(instance);
-    InteropNativeModule._CallCallback(-1565709723, selected_buf__argsSerializer.asBuffer(), selected_buf__argsSerializer.length());
-    selected_buf__argsSerializer.release();
-    return; }
-        }
-        const selected_result : CustomStyles | undefined = selected_buf
-        let value : StateStyles = ({normal: normal_result, pressed: pressed_result, disabled: disabled_result, focused: focused_result, clicked: clicked_result, selected: selected_result} as StateStyles)
         return value
     }
 }

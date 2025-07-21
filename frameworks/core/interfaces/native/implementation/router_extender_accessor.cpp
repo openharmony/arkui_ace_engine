@@ -187,6 +187,21 @@ void BackImpl()
     delegate->BackExtender("", "");
 }
 
+void BackWithOptionsImpl(const Ark_String* url, const Opt_Object* params)
+{
+    CHECK_NULL_VOID(url);
+    CHECK_NULL_VOID(params);
+    std::string pushUrl = Converter::Convert<std::string>(*url);
+    std::string param;
+    if (params->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+    }
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto delegate = container->GetFrontend();
+    CHECK_NULL_VOID(delegate);
+    delegate->BackExtender(pushUrl, param);
+}
+
 Ark_NativePointer RunPageImpl(const Ark_String* url, const Opt_Boolean* recover, Ark_NativePointer jsView,
     const Opt_Callback_Void* finishCallback)
 {
@@ -232,6 +247,26 @@ void ClearImpl()
     CHECK_NULL_VOID(delegate);
     delegate->ClearExtender();
 }
+
+void ShowAlertBeforeBackPageImpl(const Ark_String* url)
+{
+    CHECK_NULL_VOID(url);
+    std::string message = Converter::Convert<std::string>(*url);
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto delegate = container->GetFrontend();
+    CHECK_NULL_VOID(delegate);
+    delegate->ShowAlertBeforeBackPageExtender(message);
+}
+
+void HideAlertBeforeBackPageImpl()
+{
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto delegate = container->GetFrontend();
+    CHECK_NULL_VOID(delegate);
+    delegate->HideAlertBeforeBackPageExtender();
+}
 }
 
 const GENERATED_ArkUIRouterExtenderAccessor* GetRouterExtenderAccessor()
@@ -241,8 +276,11 @@ const GENERATED_ArkUIRouterExtenderAccessor* GetRouterExtenderAccessor()
         RouterExtenderAccessor::ReplaceImpl,
         RouterExtenderAccessor::MoveCommonUnderPageNode,
         RouterExtenderAccessor::BackImpl,
+        RouterExtenderAccessor::BackWithOptionsImpl,
         RouterExtenderAccessor::RunPageImpl,
-        RouterExtenderAccessor::ClearImpl
+        RouterExtenderAccessor::ClearImpl,
+        RouterExtenderAccessor::ShowAlertBeforeBackPageImpl,
+        RouterExtenderAccessor::HideAlertBeforeBackPageImpl,
     };
     return &RouterExtenderAccessorImpl;
 }

@@ -127,11 +127,21 @@ export class ArkDividerPeer extends ArkCommonMethodPeer {
     }
 }
 export interface DividerAttribute extends CommonMethod {
-    vertical(value: boolean | undefined): this
-    color(value: ResourceColor | undefined): this
-    strokeWidth(value: number | string | undefined): this
-    lineCap(value: LineCapStyle | undefined): this
-    attributeModifier(value: AttributeModifier<DividerAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    vertical(value: boolean | undefined): this {
+        throw new Error("Unimplemented method vertical")
+    }
+    color(value: ResourceColor | undefined): this {
+        throw new Error("Unimplemented method color")
+    }
+    strokeWidth(value: number | string | undefined): this {
+        throw new Error("Unimplemented method strokeWidth")
+    }
+    lineCap(value: LineCapStyle | undefined): this {
+        throw new Error("Unimplemented method lineCap")
+    }
+    attributeModifier(value: AttributeModifier<DividerAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkDividerStyle extends ArkCommonMethodStyle implements DividerAttribute {
     vertical_value?: boolean | undefined

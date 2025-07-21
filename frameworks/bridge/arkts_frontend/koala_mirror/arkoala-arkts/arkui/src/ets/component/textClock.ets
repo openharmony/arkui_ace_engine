@@ -326,18 +326,42 @@ export interface TextClockOptions {
     controller?: TextClockController;
 }
 export interface TextClockAttribute extends CommonMethod {
-    format(value: ResourceStr | undefined): this
-    onDateChange(value: ((value: number) => void) | undefined): this
-    fontColor(value: ResourceColor | undefined): this
-    fontSize(value: Length | undefined): this
-    fontStyle(value: FontStyle | undefined): this
-    fontWeight(value: number | FontWeight | string | undefined): this
-    fontFamily(value: ResourceStr | undefined): this
-    textShadow(value: ShadowOptions | Array<ShadowOptions> | undefined): this
-    fontFeature(value: string | undefined): this
-    contentModifier(value: ContentModifier<TextClockConfiguration> | undefined): this
-    dateTimeOptions(value: intl.DateTimeOptions | undefined): this
-    attributeModifier(value: AttributeModifier<TextClockAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    format(value: ResourceStr | undefined): this {
+        throw new Error("Unimplemented method format")
+    }
+    onDateChange(value: ((value: number) => void) | undefined): this {
+        throw new Error("Unimplemented method onDateChange")
+    }
+    fontColor(value: ResourceColor | undefined): this {
+        throw new Error("Unimplemented method fontColor")
+    }
+    fontSize(value: Length | undefined): this {
+        throw new Error("Unimplemented method fontSize")
+    }
+    fontStyle(value: FontStyle | undefined): this {
+        throw new Error("Unimplemented method fontStyle")
+    }
+    fontWeight(value: number | FontWeight | string | undefined): this {
+        throw new Error("Unimplemented method fontWeight")
+    }
+    fontFamily(value: ResourceStr | undefined): this {
+        throw new Error("Unimplemented method fontFamily")
+    }
+    textShadow(value: ShadowOptions | Array<ShadowOptions> | undefined): this {
+        throw new Error("Unimplemented method textShadow")
+    }
+    fontFeature(value: string | undefined): this {
+        throw new Error("Unimplemented method fontFeature")
+    }
+    contentModifier(value: ContentModifier<TextClockConfiguration> | undefined): this {
+        throw new Error("Unimplemented method contentModifier")
+    }
+    dateTimeOptions(value: intl.DateTimeOptions | undefined): this {
+        throw new Error("Unimplemented method dateTimeOptions")
+    }
+    attributeModifier(value: AttributeModifier<TextClockAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkTextClockStyle extends ArkCommonMethodStyle implements TextClockAttribute {
     format_value?: ResourceStr | undefined

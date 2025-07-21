@@ -154,6 +154,7 @@ npm_cmd("arkui.abc") {
         "$target_out_dir/arkui.abc"
     ]
     deps = [
+      "$koala_root/incremental:incremental",
       "$koala_root/interop:interop",
     ]
     project_path = rebase_path("./arkui")

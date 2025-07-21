@@ -1229,9 +1229,9 @@ export class ArkUIGeneratedNativeModule {
     native static _GridAttribute_onScrollFrameBegin(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _GridAttribute_onWillScroll(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void 
-    @ani.unsafe.Quick
+    @ani.unsafe.Direct
     native static _GridAttribute_onDidScroll(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void 
-    @ani.unsafe.Quick
+    @ani.unsafe.Direct
     native static _GridAttribute_edgeEffect(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _GridItem_construct(id: KInt, flags: KInt): KPointer
@@ -7175,7 +7175,13 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _RouterExtender_RouterBack0attribute(): void
     @ani.unsafe.Direct
+    native static _RouterExtender_RouterBack1attribute(thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _RouterExtender_RouterRunPage(thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
     native static _RouterExtender_RouterClear(): void
+    @ani.unsafe.Quick
+    native static _RouterExtender_ShowAlertBeforeBackPage(message: KStringPtr): void
+    @ani.unsafe.Direct
+    native static _RouterExtender_HideAlertBeforeBackPage(): void
 }

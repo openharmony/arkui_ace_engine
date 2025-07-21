@@ -525,8 +525,6 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _CommonMethod_setGeometryTransition0(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _CommonMethod_setStateStyles(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
     native static _CommonMethod_setRestoreId(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _CommonMethod_setSphericalEffect(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
@@ -7083,8 +7081,6 @@ export class ArkUIGeneratedNativeModule {
     native static _GlobalScope_vp2px(value: number): number
     @ani.unsafe.Direct
     native static _GlobalScope_px2vp(value: number): number
-    @ani.unsafe.Direct
-    native static _GlobalScope_applyStyles(thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Quick
     native static _GlobalScope_setAppBgColor(value: KStringPtr): void
     @ani.unsafe.Direct

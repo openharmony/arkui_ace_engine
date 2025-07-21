@@ -248,13 +248,27 @@ export interface DataPanelConfiguration extends CommonConfiguration<DataPanelCon
     maxValue: number;
 }
 export interface DataPanelAttribute extends CommonMethod {
-    closeEffect(value: boolean | undefined): this
-    valueColors(value: Array<ResourceColor | LinearGradient> | undefined): this
-    trackBackgroundColor(value: ResourceColor | undefined): this
-    strokeWidth(value: Length | undefined): this
-    trackShadow(value: DataPanelShadowOptions | undefined): this
-    contentModifier(value: ContentModifier<DataPanelConfiguration> | undefined): this
-    attributeModifier(value: AttributeModifier<DataPanelAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    closeEffect(value: boolean | undefined): this {
+        throw new Error("Unimplemented method closeEffect")
+    }
+    valueColors(value: Array<ResourceColor | LinearGradient> | undefined): this {
+        throw new Error("Unimplemented method valueColors")
+    }
+    trackBackgroundColor(value: ResourceColor | undefined): this {
+        throw new Error("Unimplemented method trackBackgroundColor")
+    }
+    strokeWidth(value: Length | undefined): this {
+        throw new Error("Unimplemented method strokeWidth")
+    }
+    trackShadow(value: DataPanelShadowOptions | undefined): this {
+        throw new Error("Unimplemented method trackShadow")
+    }
+    contentModifier(value: ContentModifier<DataPanelConfiguration> | undefined): this {
+        throw new Error("Unimplemented method contentModifier")
+    }
+    attributeModifier(value: AttributeModifier<DataPanelAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkDataPanelStyle extends ArkCommonMethodStyle implements DataPanelAttribute {
     closeEffect_value?: boolean | undefined

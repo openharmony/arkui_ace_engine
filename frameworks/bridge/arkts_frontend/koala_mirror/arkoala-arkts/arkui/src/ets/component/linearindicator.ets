@@ -172,10 +172,18 @@ export interface LinearIndicatorStyle {
     trackColor?: ColorMetrics;
 }
 export interface LinearIndicatorAttribute extends CommonMethod {
-    indicatorStyle(value: LinearIndicatorStyle | undefined): this
-    indicatorLoop(value: boolean | undefined): this
-    onChange(value: OnLinearIndicatorChangeCallback | undefined): this
-    attributeModifier(value: AttributeModifier<LinearIndicatorAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    indicatorStyle(value: LinearIndicatorStyle | undefined): this {
+        throw new Error("Unimplemented method indicatorStyle")
+    }
+    indicatorLoop(value: boolean | undefined): this {
+        throw new Error("Unimplemented method indicatorLoop")
+    }
+    onChange(value: OnLinearIndicatorChangeCallback | undefined): this {
+        throw new Error("Unimplemented method onChange")
+    }
+    attributeModifier(value: AttributeModifier<LinearIndicatorAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkLinearIndicatorStyle extends ArkCommonMethodStyle implements LinearIndicatorAttribute {
     indicatorStyle_value?: LinearIndicatorStyle | undefined

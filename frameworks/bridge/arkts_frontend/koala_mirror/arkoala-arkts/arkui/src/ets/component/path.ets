@@ -70,8 +70,12 @@ export interface PathOptions {
     commands?: string;
 }
 export interface PathAttribute extends CommonShapeMethod {
-    commands(value: string | undefined): this
-    attributeModifier(value: AttributeModifier<PathAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this
+    commands(value: string | undefined): this {
+        throw new Error("Unimplemented method commands")
+    }
+    attributeModifier(value: AttributeModifier<PathAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkPathStyle extends ArkCommonShapeMethodStyle implements PathAttribute {
     commands_value?: string | undefined

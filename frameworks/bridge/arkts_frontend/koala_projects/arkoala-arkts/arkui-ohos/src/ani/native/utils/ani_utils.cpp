@@ -20,6 +20,7 @@
 namespace OHOS::Ace::Ani {
 ani_object AniUtils::CreateDouble(ani_env *env, double value)
 {
+    CHECK_NULL_RETURN(env, nullptr);
     static const char *className = "Lstd/core/Double;";
     ani_class persion_cls;
     if (ANI_OK != env->FindClass(className, &persion_cls)) {
@@ -38,6 +39,7 @@ ani_object AniUtils::CreateDouble(ani_env *env, double value)
 
 bool AniUtils::CheckType(ani_env *env, ani_object obj, const std::string& type)
 {
+    CHECK_NULL_RETURN(env, false);
     ani_boolean isUndefined;
     ani_status status = ANI_OK;
     if ((status = env->Reference_IsUndefined(obj, &isUndefined)) != ANI_OK) {
@@ -64,6 +66,7 @@ bool AniUtils::CheckType(ani_env *env, ani_object obj, const std::string& type)
 
 bool AniUtils::GetIntByName(ani_env *env, ani_object param, const char *name, int &value)
 {
+    CHECK_NULL_RETURN(env, false);
     ani_int res;
     ani_status status = env->Object_GetFieldByName_Int(param, name, &res);
     if (status != ANI_OK) {
@@ -76,6 +79,7 @@ bool AniUtils::GetIntByName(ani_env *env, ani_object param, const char *name, in
 
 bool AniUtils::GetBoolOrUndefined(ani_env *env, ani_object param, const char *name)
 {
+    CHECK_NULL_RETURN(env, false);
     ani_status status = ANI_ERROR;
     ani_boolean res;
     if ((status = env->Object_GetFieldByName_Boolean(param, name, &res)) != ANI_OK) {
@@ -87,6 +91,7 @@ bool AniUtils::GetBoolOrUndefined(ani_env *env, ani_object param, const char *na
 
 std::string AniUtils::ANIStringToStdString(ani_env* env, ani_string ani_str)
 {
+    CHECK_NULL_RETURN(env, "");
     ani_size strSize;
     env->String_GetUTF8Size(ani_str, &strSize);
 
@@ -103,6 +108,7 @@ std::string AniUtils::ANIStringToStdString(ani_env* env, ani_string ani_str)
 
 bool AniUtils::IsString(ani_env* env, ani_object obj)
 {
+    CHECK_NULL_RETURN(env, false);
     ani_class stringClass;
     env->FindClass("Lstd/core/String;", &stringClass);
 
@@ -113,6 +119,7 @@ bool AniUtils::IsString(ani_env* env, ani_object obj)
 
 bool AniUtils::IsNumber(ani_env* env, ani_object obj)
 {
+    CHECK_NULL_RETURN(env, false);
     ani_class numberClass;
     env->FindClass("Lstd/core/Double;", &numberClass);
 
@@ -123,6 +130,7 @@ bool AniUtils::IsNumber(ani_env* env, ani_object obj)
 
 bool AniUtils::IsUndefined(ani_env* env, ani_object obj)
 {
+    CHECK_NULL_RETURN(env, false);
     ani_boolean isUndefined;
     env->Reference_IsUndefined(obj, &isUndefined);
     return isUndefined;
@@ -130,6 +138,7 @@ bool AniUtils::IsUndefined(ani_env* env, ani_object obj)
 
 ani_object AniUtils::GetUndefined(ani_env* env)
 {
+    CHECK_NULL_RETURN(env, nullptr);
     ani_ref undefinedRef = nullptr;
     if (ANI_OK != env->GetUndefined(&undefinedRef)) {
         return nullptr;
@@ -140,9 +149,105 @@ ani_object AniUtils::GetUndefined(ani_env* env)
 std::optional<ani_string> AniUtils::StdStringToANIString(ani_env *env, std::string str)
 {
     ani_string result_string{};
+    CHECK_NULL_RETURN(env, result_string);
     if (env->String_NewUTF8(str.c_str(), str.size(), &result_string) != ANI_OK) {
         return {};
     }
     return result_string;
+}
+
+ani_error AniUtils::GetErrorObject(ani_env* env, const char *errMsg, int32_t code)
+{
+    CHECK_NULL_RETURN(env, nullptr);
+    ani_class errClass;
+    if (ANI_OK != env->FindClass("L@ohos/base/BusinessError;", &errClass)) {
+        HILOGE("Find class failed");
+        return nullptr;
+    }
+    ani_method ctor;
+    if (ANI_OK != env->Class_FindMethod(errClass, "<ctor>", ":V", &ctor)) {
+        HILOGE("Cannot find constructor for class.");
+        return nullptr;
+    }
+    ani_string errMessage;
+    if (ANI_OK != env->String_NewUTF8(errMsg, strlen(errMsg), &errMessage)) {
+        HILOGE("Convert string to ani string failed.");
+        return nullptr;
+    }
+    ani_object errObj;
+    if (ANI_OK != env->Object_New(errClass, ctor, &errObj)) {
+        HILOGE("Cannot create ani error object.");
+        return nullptr;
+    }
+    if (ANI_OK != env->Object_SetFieldByName_Double(errObj, "code", static_cast<ani_double>(code))) {
+        HILOGE("Set error code failed");
+        return nullptr;
+    }
+    if (ANI_OK != env->Object_SetPropertyByName_Ref(errObj, "message", errMessage)) {
+        HILOGE("Set error message failed");
+        return nullptr;
+    }
+    return static_cast<ani_error>(errObj);
+}
+
+void AniUtils::AniThrow(ani_env* env, const char *errMsg, int32_t code)
+{
+    CHECK_NULL_VOID(env);
+    auto errObj = GetErrorObject(env, errMsg, code);
+    if (errObj == nullptr) {
+        HILOGE("Get error object failed!");
+        return;
+    }
+    if (ANI_OK != env->ThrowError(errObj)) {
+        HILOGE("Throw ani error object failed!");
+        return;
+    }
+}
+
+bool AniUtils::IsClassObject(ani_env *env, ani_ref object_ref, const char *class_descriptor)
+{
+    CHECK_NULL_RETURN(env, false);
+    ani_class objectClass;
+    ani_status status = env->FindClass(class_descriptor, &objectClass);
+    if (status != ANI_OK) {
+        HILOGW("Find %{public}s class failed. status = %{public}d", class_descriptor, status);
+        return false;
+    }
+
+    ani_boolean isInstance;
+    status = env->Object_InstanceOf(static_cast<ani_object>(object_ref), objectClass, &isInstance);
+    if (status != ANI_OK) {
+        HILOGW("Object is not %{public}s instance. status = %{public}d", class_descriptor, status);
+        return false;
+    }
+    return static_cast<bool>(isInstance);
+}
+
+bool AniUtils::GetBigIntValue(ani_env* env, ani_object object, int64_t& longValue)
+{
+    CHECK_NULL_RETURN(env, false);
+    auto status = ANI_OK;
+    ani_long value;
+    if ((status = env->Object_CallMethodByName_Long(object, "unboxed", ":J", &value)) != ANI_OK) {
+        return false;
+    }
+    longValue = value;
+    return true;
+}
+
+bool AniUtils::GetEnumItem([[maybe_unused]] ani_env* env, ani_size index, const char* enumName, ani_enum_item& enumItem)
+{
+    CHECK_NULL_RETURN(env, false);
+    ani_enum enumType;
+    ani_status status = ANI_OK;
+    if ((status = env->FindEnum(enumName, &enumType)) != ANI_OK) {
+        HILOGE("Find %{public}s fail. status = %{public}d", enumName, status);
+        return false;
+    }
+    if ((status = env->Enum_GetEnumItemByIndex(enumType, index, &enumItem)) != ANI_OK) {
+        HILOGE("Get %{public}s Enum fail. status = %{public}d", enumName, status);
+        return false;
+    }
+    return true;
 }
 }

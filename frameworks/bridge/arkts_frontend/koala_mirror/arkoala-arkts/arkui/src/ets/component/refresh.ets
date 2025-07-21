@@ -147,14 +147,30 @@ export interface RefreshOptions {
     refreshingContent?: ComponentContent;
 }
 export interface RefreshAttribute extends CommonMethod {
-    onStateChange(value: ((state: RefreshStatus) => void) | undefined): this
-    onRefreshing(value: (() => void) | undefined): this
-    refreshOffset(value: number | undefined): this
-    pullToRefresh(value: boolean | undefined): this
-    onOffsetChange(value: ((value0: number) => void) | undefined): this
-    pullDownRatio(value: number | undefined): this
-    _onChangeEvent_refreshing(callback_: ((refreshing: boolean) => void)): void
-    attributeModifier(value: AttributeModifier<RefreshAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    onStateChange(value: ((state: RefreshStatus) => void) | undefined): this {
+        throw new Error("Unimplemented method onStateChange")
+    }
+    onRefreshing(value: (() => void) | undefined): this {
+        throw new Error("Unimplemented method onRefreshing")
+    }
+    refreshOffset(value: number | undefined): this {
+        throw new Error("Unimplemented method refreshOffset")
+    }
+    pullToRefresh(value: boolean | undefined): this {
+        throw new Error("Unimplemented method pullToRefresh")
+    }
+    onOffsetChange(value: ((value0: number) => void) | undefined): this {
+        throw new Error("Unimplemented method onOffsetChange")
+    }
+    pullDownRatio(value: number | undefined): this {
+        throw new Error("Unimplemented method pullDownRatio")
+    }
+    _onChangeEvent_refreshing(callback_: ((refreshing: boolean) => void)): void {
+        throw new Error("Unimplemented method _onChangeEvent_refreshing")
+    }
+    attributeModifier(value: AttributeModifier<RefreshAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkRefreshStyle extends ArkCommonMethodStyle implements RefreshAttribute {
     onStateChange_value?: ((state: RefreshStatus) => void) | undefined

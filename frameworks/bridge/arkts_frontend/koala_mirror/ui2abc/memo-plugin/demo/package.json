@@ -6,7 +6,7 @@
         "disasm": "$(find build -name '*.abc' -exec ../../../incremental/tools/panda/arkts/arkdisasm {} \\;)"
     },
     "devDependencies": {
-        "@koalaui/ets-tsc": "4.9.5-r5",
-        "@koalaui/fast-arktsc": "1.5.15"
+        "@koalaui/ets-tsc": "4.9.5-r6",
+        "@koalaui/fast-arktsc": "file:../../fast-arktsc"
     }
 }

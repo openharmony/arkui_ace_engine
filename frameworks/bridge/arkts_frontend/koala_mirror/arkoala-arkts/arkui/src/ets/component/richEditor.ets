@@ -909,40 +909,108 @@ export interface PreviewMenuOptions {
 }
 export type RichEditorSpan = RichEditorImageSpanResult | RichEditorTextSpanResult;
 export interface RichEditorAttribute extends CommonMethod {
-    onReady(value: VoidCallback | undefined): this
-    onSelect(value: ((value0: RichEditorSelection) => void) | undefined): this
-    onSelectionChange(value: ((value0: RichEditorRange) => void) | undefined): this
-    aboutToIMEInput(value: ((value0: RichEditorInsertValue) => boolean) | undefined): this
-    onIMEInputComplete(value: ((value0: RichEditorTextSpanResult) => void) | undefined): this
-    onDidIMEInput(value: ((value0: TextRange) => void) | undefined): this
-    aboutToDelete(value: ((value0: RichEditorDeleteValue) => boolean) | undefined): this
-    onDeleteComplete(value: VoidCallback | undefined): this
-    copyOptions(value: CopyOptions | undefined): this
-    onPaste(value: PasteEventCallback | undefined): this
-    enableDataDetector(value: boolean | undefined): this
-    enablePreviewText(value: boolean | undefined): this
-    dataDetectorConfig(value: TextDataDetectorConfig | undefined): this
-    caretColor(value: ResourceColor | undefined): this
-    selectedBackgroundColor(value: ResourceColor | undefined): this
-    onEditingChange(value: ((value0: boolean) => void) | undefined): this
-    enterKeyType(value: EnterKeyType | undefined): this
-    onSubmit(value: SubmitCallback | undefined): this
-    onWillChange(value: ((value0: RichEditorChangeValue) => boolean) | undefined): this
-    onDidChange(value: OnDidChangeCallback | undefined): this
-    onCut(value: ((value0: CutEvent) => void) | undefined): this
-    onCopy(value: ((value0: CopyEvent) => void) | undefined): this
-    editMenuOptions(value: EditMenuOptions | undefined): this
-    enableKeyboardOnFocus(value: boolean | undefined): this
-    enableHapticFeedback(value: boolean | undefined): this
-    barState(value: BarState | undefined): this
-    maxLength(value: number | undefined): this
-    maxLines(value: number | undefined): this
-    keyboardAppearance(value: KeyboardAppearance | undefined): this
-    stopBackPress(value: boolean | undefined): this
-    bindSelectionMenu(spanType: RichEditorSpanType | undefined, content: CustomBuilder | undefined, responseType: ResponseType | RichEditorResponseType | undefined, options?: SelectionMenuOptions): this
-    customKeyboard(value: CustomBuilder | undefined, options?: KeyboardOptions): this
-    placeholder(value: ResourceStr | undefined, style?: PlaceholderStyle): this
-    attributeModifier(value: AttributeModifier<RichEditorAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    onReady(value: VoidCallback | undefined): this {
+        throw new Error("Unimplemented method onReady")
+    }
+    onSelect(value: ((value0: RichEditorSelection) => void) | undefined): this {
+        throw new Error("Unimplemented method onSelect")
+    }
+    onSelectionChange(value: ((value0: RichEditorRange) => void) | undefined): this {
+        throw new Error("Unimplemented method onSelectionChange")
+    }
+    aboutToIMEInput(value: ((value0: RichEditorInsertValue) => boolean) | undefined): this {
+        throw new Error("Unimplemented method aboutToIMEInput")
+    }
+    onIMEInputComplete(value: ((value0: RichEditorTextSpanResult) => void) | undefined): this {
+        throw new Error("Unimplemented method onIMEInputComplete")
+    }
+    onDidIMEInput(value: ((value0: TextRange) => void) | undefined): this {
+        throw new Error("Unimplemented method onDidIMEInput")
+    }
+    aboutToDelete(value: ((value0: RichEditorDeleteValue) => boolean) | undefined): this {
+        throw new Error("Unimplemented method aboutToDelete")
+    }
+    onDeleteComplete(value: VoidCallback | undefined): this {
+        throw new Error("Unimplemented method onDeleteComplete")
+    }
+    copyOptions(value: CopyOptions | undefined): this {
+        throw new Error("Unimplemented method copyOptions")
+    }
+    onPaste(value: PasteEventCallback | undefined): this {
+        throw new Error("Unimplemented method onPaste")
+    }
+    enableDataDetector(value: boolean | undefined): this {
+        throw new Error("Unimplemented method enableDataDetector")
+    }
+    enablePreviewText(value: boolean | undefined): this {
+        throw new Error("Unimplemented method enablePreviewText")
+    }
+    dataDetectorConfig(value: TextDataDetectorConfig | undefined): this {
+        throw new Error("Unimplemented method dataDetectorConfig")
+    }
+    caretColor(value: ResourceColor | undefined): this {
+        throw new Error("Unimplemented method caretColor")
+    }
+    selectedBackgroundColor(value: ResourceColor | undefined): this {
+        throw new Error("Unimplemented method selectedBackgroundColor")
+    }
+    onEditingChange(value: ((value0: boolean) => void) | undefined): this {
+        throw new Error("Unimplemented method onEditingChange")
+    }
+    enterKeyType(value: EnterKeyType | undefined): this {
+        throw new Error("Unimplemented method enterKeyType")
+    }
+    onSubmit(value: SubmitCallback | undefined): this {
+        throw new Error("Unimplemented method onSubmit")
+    }
+    onWillChange(value: ((value0: RichEditorChangeValue) => boolean) | undefined): this {
+        throw new Error("Unimplemented method onWillChange")
+    }
+    onDidChange(value: OnDidChangeCallback | undefined): this {
+        throw new Error("Unimplemented method onDidChange")
+    }
+    onCut(value: ((value0: CutEvent) => void) | undefined): this {
+        throw new Error("Unimplemented method onCut")
+    }
+    onCopy(value: ((value0: CopyEvent) => void) | undefined): this {
+        throw new Error("Unimplemented method onCopy")
+    }
+    editMenuOptions(value: EditMenuOptions | undefined): this {
+        throw new Error("Unimplemented method editMenuOptions")
+    }
+    enableKeyboardOnFocus(value: boolean | undefined): this {
+        throw new Error("Unimplemented method enableKeyboardOnFocus")
+    }
+    enableHapticFeedback(value: boolean | undefined): this {
+        throw new Error("Unimplemented method enableHapticFeedback")
+    }
+    barState(value: BarState | undefined): this {
+        throw new Error("Unimplemented method barState")
+    }
+    maxLength(value: number | undefined): this {
+        throw new Error("Unimplemented method maxLength")
+    }
+    maxLines(value: number | undefined): this {
+        throw new Error("Unimplemented method maxLines")
+    }
+    keyboardAppearance(value: KeyboardAppearance | undefined): this {
+        throw new Error("Unimplemented method keyboardAppearance")
+    }
+    stopBackPress(value: boolean | undefined): this {
+        throw new Error("Unimplemented method stopBackPress")
+    }
+    bindSelectionMenu(spanType: RichEditorSpanType | undefined, content: CustomBuilder | undefined, responseType: ResponseType | RichEditorResponseType | undefined, options?: SelectionMenuOptions): this {
+        throw new Error("Unimplemented method bindSelectionMenu")
+    }
+    customKeyboard(value: CustomBuilder | undefined, options?: KeyboardOptions): this {
+        throw new Error("Unimplemented method customKeyboard")
+    }
+    placeholder(value: ResourceStr | undefined, style?: PlaceholderStyle): this {
+        throw new Error("Unimplemented method placeholder")
+    }
+    attributeModifier(value: AttributeModifier<RichEditorAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkRichEditorStyle extends ArkCommonMethodStyle implements RichEditorAttribute {
     onReady_value?: VoidCallback | undefined

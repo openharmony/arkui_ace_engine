@@ -144,10 +144,10 @@ void OnChange1Impl(Ark_NativePointer node,
 void CheckboxShape0Impl(Ark_NativePointer node,
                         const Opt_CheckBoxShape* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // CheckBoxGroupModelStatic::SetCheckboxGroupStyle(frameNode,
-    //     value ? Converter::OptConvert<OHOS::Ace::CheckBoxStyle>(*value) : std::nullopt);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CheckBoxGroupModelStatic::SetCheckboxGroupStyle(frameNode,
+        value ? Converter::OptConvert<OHOS::Ace::CheckBoxStyle>(*value) : std::nullopt);
 }
 void CheckboxShape1Impl(Ark_NativePointer node,
                         const Opt_CheckBoxShape* value)

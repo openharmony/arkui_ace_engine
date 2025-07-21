@@ -113,6 +113,24 @@ ani_long BuilderProxyNodeConstruct(ani_env* env, [[maybe_unused]] ani_object ani
     return reinterpret_cast<ani_long>(builderProxyNode);
 }
 
+void RemoveComponentFromFrameNode(ani_env* env, ani_object obj, ani_long node, ani_long content)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getArkUIAniComponentConentModifier() || !env) {
+        return;
+    }
+    modifier->getArkUIAniComponentConentModifier()->removeComponentFromFrameNode(node, content);
+}
+
+void AddComponentToFrameNode(ani_env* env, ani_object obj, ani_long node, ani_long content)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getArkUIAniComponentConentModifier() || !env) {
+        return;
+    }
+    modifier->getArkUIAniComponentConentModifier()->addComponentToFrameNode(node, content);
+}
+
 ani_object GetSharedLocalStorage([[maybe_unused]] ani_env* env)
 {
     const auto* modifier = GetNodeAniModifier();
@@ -273,5 +291,58 @@ void SetOverlayComponentContent(ani_env* env, ani_object obj, ani_long ptr, ani_
     AniOverlayOptions opt;
     ParseOverlayOptions(env, options, opt);
     modifier->getCommonAniModifier()->setOverlayComponent(ptr, buildNodePtr, opt);
+}
+ani_double Vp2px(ani_env* env, ani_object obj, ani_double value, ani_int instanceId)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return 0;
+    }
+    return modifier->getCommonAniModifier()->vp2px(value, instanceId);
+}
+
+ani_double Px2vp(ani_env* env, ani_object obj, ani_double value, ani_int instanceId)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return 0;
+    }
+    return modifier->getCommonAniModifier()->px2vp(value, instanceId);
+}
+
+ani_double Fp2px(ani_env* env, ani_object obj, ani_double value, ani_int instanceId)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return 0;
+    }
+    return modifier->getCommonAniModifier()->fp2px(value, instanceId);
+}
+
+ani_double Px2fp(ani_env* env, ani_object obj, ani_double value, ani_int instanceId)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return 0;
+    }
+    return modifier->getCommonAniModifier()->px2fp(value, instanceId);
+}
+
+ani_double Lpx2px(ani_env* env, ani_object obj, ani_double value, ani_int instanceId)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return 0;
+    }
+    return modifier->getCommonAniModifier()->lpx2px(value, instanceId);
+}
+
+ani_double Px2lpx(ani_env* env, ani_object obj, ani_double value, ani_int instanceId)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return 0;
+    }
+    return modifier->getCommonAniModifier()->px2lpx(value, instanceId);
 }
 } // namespace OHOS::Ace::Ani

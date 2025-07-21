@@ -44,6 +44,50 @@ ani_long ConstructCustomNode(ani_env* env, [[maybe_unused]] ani_object aniClass,
     ani_type type;
     env->Object_GetType(obj, &type);
 
+    ani_method onPageShowMethod;
+    env->Class_FindMethod(static_cast<ani_class>(type), "onPageShow", ":V", &onPageShowMethod);
+    auto&& onPageShow = [vm, weakRef, onPageShowMethod]() {
+        ani_env* env = nullptr;
+        vm->GetEnv(ANI_VERSION_1, &env);
+
+        ani_boolean released;
+        ani_ref localRef;
+        env->WeakReference_GetReference(*weakRef, &released, &localRef);
+        if (!released) {
+            env->Object_CallMethod_Void(static_cast<ani_object>(localRef), onPageShowMethod);
+        }
+    };
+
+    ani_method onPageHideMethod;
+    env->Class_FindMethod(static_cast<ani_class>(type), "onPageHide", ":V", &onPageHideMethod);
+    auto&& onPageHide = [vm, weakRef, onPageHideMethod]() {
+        ani_env* env = nullptr;
+        vm->GetEnv(ANI_VERSION_1, &env);
+
+        ani_boolean released;
+        ani_ref localRef;
+        env->WeakReference_GetReference(*weakRef, &released, &localRef);
+        if (!released) {
+            env->Object_CallMethod_Void(static_cast<ani_object>(localRef), onPageHideMethod);
+        }
+    };
+
+    ani_method onBackPressMethod;
+    env->Class_FindMethod(static_cast<ani_class>(type), "onBackPress", ":z", &onBackPressMethod);
+    auto&& onBackPress = [vm, weakRef, onBackPressMethod]() {
+        ani_env* env = nullptr;
+        vm->GetEnv(ANI_VERSION_1, &env);
+
+        ani_boolean released;
+        ani_ref localRef;
+        ani_boolean result = ani_boolean(false);
+        env->WeakReference_GetReference(*weakRef, &released, &localRef);
+        if (!released) {
+            env->Object_CallMethod_Boolean(static_cast<ani_object>(localRef), onBackPressMethod, &result);
+        }
+        return result;
+    };
+
     ani_method onDumpInspectorMethod;
     env->Class_FindMethod(static_cast<ani_class>(type), "onDumpInspector", ":Lstd/core/String;",
         &onDumpInspectorMethod);
@@ -61,7 +105,10 @@ ani_long ConstructCustomNode(ani_env* env, [[maybe_unused]] ani_object aniClass,
         return AniUtils::ANIStringToStdString(env, aniStr);
     };
 
-    ani_long customNode = modifier->getCustomNodeAniModifier()->constructCustomNode(id, std::move(onDumpInspector));
+    ani_long customNode = modifier->getCustomNodeAniModifier()->constructCustomNode(
+        id, std::move(onPageShow), std::move(onPageHide), std::move(onBackPress),
+        std::move(onDumpInspector)
+    );
     return customNode;
 }
 

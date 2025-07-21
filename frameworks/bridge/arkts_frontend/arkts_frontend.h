@@ -122,6 +122,8 @@ public:
         std::function<void()>&& finishCallback) override;
     void BackExtender(const std::string& url, const std::string& params) override;
     void ClearExtender() override;
+    void ShowAlertBeforeBackPageExtender(const std::string& url) override;
+    void HideAlertBeforeBackPageExtender() override;
 
     RefPtr<AcePage> GetPage(int32_t /*pageId*/) const override
     {
@@ -365,6 +367,7 @@ public:
         return pageRouterManager_;
     }
 
+    void* GetEnv() override;
     static void PreloadAceModule(void* aniEnv);
     static void* preloadArkTSRuntime;
 private:

@@ -598,34 +598,88 @@ export interface ImageSourceSize {
     height: number;
 }
 export interface ImageAttribute extends CommonMethod {
-    alt(value: string | Resource | image.PixelMap | undefined): this
-    matchTextDirection(value: boolean | undefined): this
-    fitOriginalSize(value: boolean | undefined): this
-    fillColor(value: ResourceColor | ColorContent | ColorMetrics | undefined): this
-    objectFit(value: ImageFit | undefined): this
-    imageMatrix(value: matrix4.Matrix4Transit | undefined): this
-    objectRepeat(value: ImageRepeat | undefined): this
-    autoResize(value: boolean | undefined): this
-    renderMode(value: ImageRenderMode | undefined): this
-    dynamicRangeMode(value: DynamicRangeMode | undefined): this
-    interpolation(value: ImageInterpolation | undefined): this
-    sourceSize(value: ImageSourceSize | undefined): this
-    syncLoad(value: boolean | undefined): this
-    colorFilter(value: ColorFilter | drawing.ColorFilter | undefined): this
-    copyOption(value: CopyOptions | undefined): this
+    alt(value: string | Resource | image.PixelMap | undefined): this {
+        throw new Error("Unimplemented method alt")
+    }
+    matchTextDirection(value: boolean | undefined): this {
+        throw new Error("Unimplemented method matchTextDirection")
+    }
+    fitOriginalSize(value: boolean | undefined): this {
+        throw new Error("Unimplemented method fitOriginalSize")
+    }
+    fillColor(value: ResourceColor | ColorContent | ColorMetrics | undefined): this {
+        throw new Error("Unimplemented method fillColor")
+    }
+    objectFit(value: ImageFit | undefined): this {
+        throw new Error("Unimplemented method objectFit")
+    }
+    imageMatrix(value: matrix4.Matrix4Transit | undefined): this {
+        throw new Error("Unimplemented method imageMatrix")
+    }
+    objectRepeat(value: ImageRepeat | undefined): this {
+        throw new Error("Unimplemented method objectRepeat")
+    }
+    autoResize(value: boolean | undefined): this {
+        throw new Error("Unimplemented method autoResize")
+    }
+    renderMode(value: ImageRenderMode | undefined): this {
+        throw new Error("Unimplemented method renderMode")
+    }
+    dynamicRangeMode(value: DynamicRangeMode | undefined): this {
+        throw new Error("Unimplemented method dynamicRangeMode")
+    }
+    interpolation(value: ImageInterpolation | undefined): this {
+        throw new Error("Unimplemented method interpolation")
+    }
+    sourceSize(value: ImageSourceSize | undefined): this {
+        throw new Error("Unimplemented method sourceSize")
+    }
+    syncLoad(value: boolean | undefined): this {
+        throw new Error("Unimplemented method syncLoad")
+    }
+    colorFilter(value: ColorFilter | drawing.ColorFilter | undefined): this {
+        throw new Error("Unimplemented method colorFilter")
+    }
+    copyOption(value: CopyOptions | undefined): this {
+        throw new Error("Unimplemented method copyOption")
+    }
     draggable(value: boolean | undefined): this
-    pointLight(value: PointLightStyle | undefined): this
-    edgeAntialiasing(value: number | undefined): this
-    onComplete(value: ImageOnCompleteCallback | undefined): this
-    onError(value: ImageErrorCallback | undefined): this
-    onFinish(value: (() => void) | undefined): this
-    enableAnalyzer(value: boolean | undefined): this
-    analyzerConfig(value: ImageAnalyzerConfig | undefined): this
-    resizable(value: ResizableOptions | undefined): this
-    privacySensitive(value: boolean | undefined): this
-    enhancedImageQuality(value: image.ResolutionQuality | undefined): this
-    orientation(value: ImageRotateOrientation | undefined): this
-    attributeModifier(value: AttributeModifier<ImageAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    pointLight(value: PointLightStyle | undefined): this {
+        throw new Error("Unimplemented method pointLight")
+    }
+    edgeAntialiasing(value: number | undefined): this {
+        throw new Error("Unimplemented method edgeAntialiasing")
+    }
+    onComplete(value: ImageOnCompleteCallback | undefined): this {
+        throw new Error("Unimplemented method onComplete")
+    }
+    onError(value: ImageErrorCallback | undefined): this {
+        throw new Error("Unimplemented method onError")
+    }
+    onFinish(value: (() => void) | undefined): this {
+        throw new Error("Unimplemented method onFinish")
+    }
+    enableAnalyzer(value: boolean | undefined): this {
+        throw new Error("Unimplemented method enableAnalyzer")
+    }
+    analyzerConfig(value: ImageAnalyzerConfig | undefined): this {
+        throw new Error("Unimplemented method analyzerConfig")
+    }
+    resizable(value: ResizableOptions | undefined): this {
+        throw new Error("Unimplemented method resizable")
+    }
+    privacySensitive(value: boolean | undefined): this {
+        throw new Error("Unimplemented method privacySensitive")
+    }
+    enhancedImageQuality(value: image.ResolutionQuality | undefined): this {
+        throw new Error("Unimplemented method enhancedImageQuality")
+    }
+    orientation(value: ImageRotateOrientation | undefined): this {
+        throw new Error("Unimplemented method orientation")
+    }
+    attributeModifier(value: AttributeModifier<ImageAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkImageStyle extends ArkCommonMethodStyle implements ImageAttribute {
     alt_value?: string | Resource | image.PixelMap | undefined

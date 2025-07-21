@@ -36,6 +36,7 @@ import { createStateManager } from "@koalaui/runtime"
 import { UIContextImpl, ContextRecord, DetachedRootEntryManager, DetachedRootEntry } from "arkui/handwritten/UIContextImpl"
 import { UIContextUtil } from "arkui/handwritten/UIContextUtil"
 import { flushBuilderRootNode } from "./BuilderNode"
+import { ObserveSingleton } from './stateManagement/base/observeSingleton';
 
 setCustomEventsChecker(checkArkoalaCallbacks)
 
@@ -185,12 +186,12 @@ export class Application {
     private rootState: ComputableState<PeerNode> | undefined = undefined
 
     constructor(useNativeLog: boolean, moduleName: string, startUrl: string, startParam: string, userView?: UserView, entryPoint?: EntryPoint) {
-        this.useNativeLog = useNativeLog
+        this.userView = userView
+        this.entryPoint = entryPoint
         this.moduleName = moduleName
         this.startUrl = startUrl
         this.startParam = startParam
-        this.userView = userView
-        this.entryPoint = entryPoint
+        this.useNativeLog = useNativeLog
     }
 
     static createMemoRootState(manager: StateManager,
@@ -293,15 +294,15 @@ export class Application {
         // NativeModule._NativeLog("ARKTS: updateState")
         let uiContextRouter = this.uiContext!.getRouter();
         let rootState = uiContextRouter.getStateRoot();
+        ObserveSingleton.instance.updateDirty();
         this.updateStates(this.manager!, rootState)
         while (StateUpdateLoop.len) {
             StateUpdateLoop.consume();
+            ObserveSingleton.instance.updateDirty();
             this.updateStates(this.manager!, rootState)
         }
         // Here we request to draw a frame and call custom components callbacks.
         rootState!.value;
-        let root = this.rootState!.value
-        ArkUINativeModule._MeasureLayoutAndDraw(root.peer.ptr);
         // Call callbacks and sync
         callScheduledCallbacks();
     }
@@ -357,7 +358,6 @@ export class Application {
         if (this.withLog) InteropNativeModule._NativeLog("ARKTS: render")
     }
     enter(arg0: int32, arg1: int32, foreignContext: pointer): boolean {
-        // TODO: maybe
         enterForeignContext(foreignContext)
         if (this.withLog) UserView.startNativeLog(1)
 
@@ -461,6 +461,13 @@ export class Application {
         registerNativeModuleLibraryName("TestNativeModule", "ArkoalaNative_ark.z")
         registerSyncCallbackProcessor()
         return new Application(useNativeLog, moduleName, startUrl, startParams, userView, entryPoint)
+    }
+
+    static registerNativeModulePreloader(): void {
+        registerNativeModuleLibraryName("InteropNativeModule", "ArkoalaNative_ark.z")
+        registerNativeModuleLibraryName("ArkUINativeModule", "ArkoalaNative_ark.z")
+        registerNativeModuleLibraryName("ArkUIGeneratedNativeModule", "ArkoalaNative_ark.z")
+        registerNativeModuleLibraryName("TestNativeModule", "ArkoalaNative_ark.z")
     }
 }
 

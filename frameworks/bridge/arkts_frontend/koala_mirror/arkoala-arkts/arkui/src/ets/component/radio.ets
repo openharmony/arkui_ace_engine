@@ -122,12 +122,24 @@ export interface RadioStyle {
 }
 export type OnRadioChangeCallback = (isChecked: boolean) => void;
 export interface RadioAttribute extends CommonMethod {
-    checked(value: boolean | undefined): this
-    onChange(value: OnRadioChangeCallback | undefined): this
-    radioStyle(value: RadioStyle | undefined): this
-    contentModifier(value: ContentModifier<RadioConfiguration> | undefined): this
-    _onChangeEvent_checked(callback_: ((checked: boolean | undefined) => void)): void
-    attributeModifier(value: AttributeModifier<RadioAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    checked(value: boolean | undefined): this {
+        throw new Error("Unimplemented method checked")
+    }
+    onChange(value: OnRadioChangeCallback | undefined): this {
+        throw new Error("Unimplemented method onChange")
+    }
+    radioStyle(value: RadioStyle | undefined): this {
+        throw new Error("Unimplemented method radioStyle")
+    }
+    contentModifier(value: ContentModifier<RadioConfiguration> | undefined): this {
+        throw new Error("Unimplemented method contentModifier")
+    }
+    _onChangeEvent_checked(callback_: ((checked: boolean | undefined) => void)): void {
+        throw new Error("Unimplemented method _onChangeEvent_checked")
+    }
+    attributeModifier(value: AttributeModifier<RadioAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkRadioStyle extends ArkCommonMethodStyle implements RadioAttribute {
     checked_value?: boolean | undefined

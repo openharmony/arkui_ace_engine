@@ -21,7 +21,7 @@
         "../interop"
     ],
     "devDependencies": {
-        "@koalaui/ets-tsc": "file:../incremental/tools/ets-tsc",
+        "@koalaui/ets-tsc": "4.9.5-r6",
         "@types/chai": "^4.3.1",
         "@types/mocha": "^9.1.0",
         "bin-links": "^4.0.4",
@@ -72,7 +72,7 @@
         "build:arkoala:m3": "npm run build:all -C ../ui2abc && npm run build:incremental:inc:ui2abc && npm run build:interop:inc -C ../interop && npm run -C arkui build:m3:cached && npm run -C arkui build:sdk-m3:cached",
         "build:arkoala:inc": "npm run build:arkoala:components:inc && npm run link:arkoala",
         "link:arkoala": "mkdir -p build && ../incremental/tools/panda/arkts/arklink --output build/arkoala.abc -- ./arkui/build/arkui.abc ./arkui-common/build/arkui-common.abc  ../incremental/runtime/build/incremental.abc ../interop/build/interop.abc",
-        "link:arkoala:m3": "mkdir -p build/bootPandaFiles && ../incremental/tools/panda/arkts/arklink --output build/bootPandaFiles/arkoala.abc -- ../incremental/runtime/build/incremental.abc ../interop/build/interop.abc ./arkui/build-m3-impl/arkui-m3.abc ./arkui-common/build-m3/arkui-common.abc",
+        "link:arkoala:m3": "mkdir -p build/bootPandaFiles && ../incremental/tools/panda/arkts/arklink --output build/bootPandaFiles/arkoala.abc -- ../incremental/runtime/build/incremental.abc ../interop/build/interop.abc ./arkui/build-m3-impl/arkui-m3.abc",
 
         "arkoala:m3:aot:host": "npm run compile --prefix ../ui2abc/fast-arktsc && node ../ui2abc/fast-arktsc --only-aot ./build/bootPandaFiles/arkoala.abc",
         "arkoala:m3:aot:arm32": "npm run compile --prefix ../ui2abc/fast-arktsc && node ../ui2abc/fast-arktsc --only-aot ./build/bootPandaFiles/arkoala.abc --aot-target arm",

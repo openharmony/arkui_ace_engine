@@ -90,8 +90,22 @@ export class RouterExtender {
     }
 
     public static routerBack(options?: router.RouterOptions): void {
-        if (options) {
+        if (options !== undefined) {
+            const thisSerializer : Serializer = Serializer.hold()
             const url = options.url as (string)
+            const url_value  = url!
+            thisSerializer.writeString(url_value)
+
+            const param = options.params as (Object | undefined)
+            let param_type: int32 = RuntimeType.UNDEFINED
+            param_type = runtimeType(param)
+            thisSerializer.writeInt8(param_type as int32)
+            if ((RuntimeType.UNDEFINED) != (param_type)) {
+                const param_value  = param!
+                thisSerializer.holdAndWriteObject(param_value)
+            }
+            ArkUIGeneratedNativeModule._RouterExtender_RouterBack1attribute(thisSerializer.asBuffer(), thisSerializer.length())
+            thisSerializer.release()
         } else {
             ArkUIGeneratedNativeModule._RouterExtender_RouterBack0attribute()
         }
@@ -131,5 +145,14 @@ export class RouterExtender {
 
     public static moveCommonUnderPageNode(commonNode: KPointer, pageNode: KPointer): void {
         ArkUIGeneratedNativeModule._RouterExtender_MoveCommonUnderPageNode(commonNode, pageNode)
+    }
+
+    public static routerShowAlertBeforeBackPage(options: router.EnableAlertOptions): void {
+        const message = options.message as string;
+        ArkUIGeneratedNativeModule._RouterExtender_ShowAlertBeforeBackPage(message);
+    }
+
+    public static routerHideAlertBeforeBackPage(): void {
+        ArkUIGeneratedNativeModule._RouterExtender_HideAlertBeforeBackPage();
     }
 }

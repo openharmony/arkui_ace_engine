@@ -602,6 +602,24 @@ export class RouterImpl extends Router {
         ArkUIAniModule._Common_Restore_InstanceId();
         return result;
     }
+
+    public showAlertBeforeBackPage(options: router.EnableAlertOptions): void {
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        this.router_!.showAlertBeforeBackPage(options);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
+    public hideAlertBeforeBackPage(): void {
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        this.router_!.hideAlertBeforeBackPage();
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
 }
 
 export class UIInspectorImpl extends UIInspector {
@@ -1473,40 +1491,22 @@ export class UIContextImpl extends UIContext {
 
     }
     public vp2px(value: number): number {
-        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        let result = GlobalScope.vp2px(value);
-        ArkUIAniModule._Common_Restore_InstanceId();
-        return result;
+         return ArkUIAniModule._Common_vp2px(value, this.instanceId_);
     }
     public px2vp(value: number): number {
-        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        let result = GlobalScope.px2vp(value);
-        ArkUIAniModule._Common_Restore_InstanceId();
-        return result;
+         return ArkUIAniModule._Common_px2vp(value, this.instanceId_);
     }
     public fp2px(value: number): number {
-        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        let result = GlobalScope.fp2px(value);
-        ArkUIAniModule._Common_Restore_InstanceId();
-        return result;
+         return ArkUIAniModule._Common_fp2px(value, this.instanceId_);
     }
     public px2fp(value: number): number {
-        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        let result = GlobalScope.px2fp(value);
-        ArkUIAniModule._Common_Restore_InstanceId();
-        return result;
+         return ArkUIAniModule._Common_px2fp(value, this.instanceId_);
     }
     public lpx2px(value: number): number {
-        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        let result = GlobalScope.lpx2px(value);
-        ArkUIAniModule._Common_Restore_InstanceId();
-        return result;
+          return ArkUIAniModule._Common_lpx2px(value, this.instanceId_);
     }
     public px2lpx(value: number): number {
-        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        let result = GlobalScope.px2lpx(value);
-        ArkUIAniModule._Common_Restore_InstanceId();
-        return result;
+         return ArkUIAniModule._Common_px2lpx(value, this.instanceId_);
     }
 
     private getWindowName_serialize(): string | undefined {

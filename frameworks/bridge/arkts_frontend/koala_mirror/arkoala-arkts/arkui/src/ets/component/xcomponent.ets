@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -323,13 +323,27 @@ export interface NativeXComponentParameters {
 }
 export type OnNativeLoadCallback = (event?: Object) => void;
 export interface XComponentAttribute extends CommonMethod {
-    onLoad(value: OnNativeLoadCallback | undefined): this
-    onDestroy(value: VoidCallback | undefined): this
-    enableAnalyzer(value: boolean | undefined): this
-    enableSecure(value: boolean | undefined): this
-    hdrBrightness(value: number | undefined): this
-    enableTransparentLayer(value: boolean | undefined): this
-    attributeModifier(value: AttributeModifier<XComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    onLoad(value: OnNativeLoadCallback | undefined): this {
+        throw new Error("Unimplemented method onLoad")
+    }
+    onDestroy(value: VoidCallback | undefined): this {
+        throw new Error("Unimplemented method onDestroy")
+    }
+    enableAnalyzer(value: boolean | undefined): this {
+        throw new Error("Unimplemented method enableAnalyzer")
+    }
+    enableSecure(value: boolean | undefined): this {
+        throw new Error("Unimplemented method enableSecure")
+    }
+    hdrBrightness(value: number | undefined): this {
+        throw new Error("Unimplemented method hdrBrightness")
+    }
+    enableTransparentLayer(value: boolean | undefined): this {
+        throw new Error("Unimplemented method enableTransparentLayer")
+    }
+    attributeModifier(value: AttributeModifier<XComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkXComponentStyle extends ArkCommonMethodStyle implements XComponentAttribute {
     onLoad_value?: OnNativeLoadCallback | undefined

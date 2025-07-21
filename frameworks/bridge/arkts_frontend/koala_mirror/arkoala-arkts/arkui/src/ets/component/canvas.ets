@@ -792,9 +792,15 @@ export interface TextMetrics {
     readonly height: number;
 }
 export interface CanvasAttribute extends CommonMethod {
-    onReady(value: VoidCallback | undefined): this
-    enableAnalyzer(value: boolean | undefined): this
-    attributeModifier(value: AttributeModifier<CanvasAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    onReady(value: VoidCallback | undefined): this {
+        throw new Error("Unimplemented method onReady")
+    }
+    enableAnalyzer(value: boolean | undefined): this {
+        throw new Error("Unimplemented method enableAnalyzer")
+    }
+    attributeModifier(value: AttributeModifier<CanvasAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkCanvasStyle extends ArkCommonMethodStyle implements CanvasAttribute {
     onReady_value?: VoidCallback | undefined

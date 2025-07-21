@@ -30,6 +30,8 @@ void SetDrawModifier(
     ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr, ani_int flag, ani_object drawModifier);
 void Invalidate(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr);
 ani_long BuilderProxyNodeConstruct(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_int id);
+void RemoveComponentFromFrameNode(ani_env* env, ani_object obj, ani_long node, ani_long content);
+void AddComponentToFrameNode(ani_env* env, ani_object obj, ani_long node, ani_long content);
 void SetBackgroundImagePixelMap([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, ani_object node,
     ani_object pixelMap, ani_int repeat);
 void SetCustomCallback(ani_env* env, ani_object obj, ani_long ptr,
@@ -41,6 +43,12 @@ void OnMeasureInnerMeasure(ani_env* env, ani_object obj, ani_long ptr);
 void OnLayoutInnerLayout(ani_env* env, ani_object obj, ani_long ptr);
 void SetParallelScoped(ani_env* env, ani_object obj, ani_boolean parallel);
 void SetOverlayComponentContent(ani_env* env, ani_object obj, ani_long ptr, ani_long buildNodePtr, ani_object options);
+ani_double Vp2px(ani_env* env, ani_object obj, ani_double value, ani_int instanceId);
+ani_double Px2vp(ani_env* env, ani_object obj, ani_double value, ani_int instanceId);
+ani_double Fp2px(ani_env* env, ani_object obj, ani_double value, ani_int instanceId);
+ani_double Px2fp(ani_env* env, ani_object obj, ani_double value, ani_int instanceId);
+ani_double Lpx2px(ani_env* env, ani_object obj, ani_double value, ani_int instanceId);
+ani_double Px2lpx(ani_env* env, ani_object obj, ani_double value, ani_int instanceId);
 } // namespace OHOS::Ace::Ani
 
 #endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_COMMON_MODULE

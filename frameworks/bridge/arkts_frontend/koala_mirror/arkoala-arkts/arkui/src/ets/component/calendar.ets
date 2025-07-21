@@ -344,20 +344,48 @@ export interface CalendarRequestedMonths {
     controller?: CalendarController;
 }
 export interface CalendarAttribute {
-    showLunar(value: boolean | undefined): this
-    showHoliday(value: boolean | undefined): this
-    needSlide(value: boolean | undefined): this
-    startOfWeek(value: number | undefined): this
-    offDays(value: number | undefined): this
-    direction(value: Axis | undefined): this
-    currentDayStyle(value: CurrentDayStyle | undefined): this
-    nonCurrentDayStyle(value: NonCurrentDayStyle | undefined): this
-    todayStyle(value: TodayStyle | undefined): this
-    weekStyle(value: WeekStyle | undefined): this
-    workStateStyle(value: WorkStateStyle | undefined): this
-    onSelectChange(value: ((event: CalendarSelectedDate) => void) | undefined): this
-    onRequestData(value: ((event: CalendarRequestedData) => void) | undefined): this
-    attributeModifier(value: AttributeModifier<CalendarAttribute> | undefined): this
+    showLunar(value: boolean | undefined): this {
+        throw new Error("Unimplemented method showLunar")
+    }
+    showHoliday(value: boolean | undefined): this {
+        throw new Error("Unimplemented method showHoliday")
+    }
+    needSlide(value: boolean | undefined): this {
+        throw new Error("Unimplemented method needSlide")
+    }
+    startOfWeek(value: number | undefined): this {
+        throw new Error("Unimplemented method startOfWeek")
+    }
+    offDays(value: number | undefined): this {
+        throw new Error("Unimplemented method offDays")
+    }
+    direction(value: Axis | undefined): this {
+        throw new Error("Unimplemented method direction")
+    }
+    currentDayStyle(value: CurrentDayStyle | undefined): this {
+        throw new Error("Unimplemented method currentDayStyle")
+    }
+    nonCurrentDayStyle(value: NonCurrentDayStyle | undefined): this {
+        throw new Error("Unimplemented method nonCurrentDayStyle")
+    }
+    todayStyle(value: TodayStyle | undefined): this {
+        throw new Error("Unimplemented method todayStyle")
+    }
+    weekStyle(value: WeekStyle | undefined): this {
+        throw new Error("Unimplemented method weekStyle")
+    }
+    workStateStyle(value: WorkStateStyle | undefined): this {
+        throw new Error("Unimplemented method workStateStyle")
+    }
+    onSelectChange(value: ((event: CalendarSelectedDate) => void) | undefined): this {
+        throw new Error("Unimplemented method onSelectChange")
+    }
+    onRequestData(value: ((event: CalendarRequestedData) => void) | undefined): this {
+        throw new Error("Unimplemented method onRequestData")
+    }
+    attributeModifier(value: AttributeModifier<CalendarAttribute> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkCalendarStyle implements CalendarAttribute {
     showLunar_value?: boolean | undefined

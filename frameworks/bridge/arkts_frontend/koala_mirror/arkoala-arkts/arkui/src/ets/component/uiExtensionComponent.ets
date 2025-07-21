@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -269,12 +269,24 @@ export interface UIExtensionOptions {
 }
 export type ReceiveCallback = ((value0: Map<string, Object>) => void);
 export interface UIExtensionComponentAttribute extends CommonMethod {
-    onRemoteReady(value: ((value0: UIExtensionProxy) => void) | undefined): this
-    onReceive(value: ((value0: Map<string, Object>) => void) | undefined): this
-    onError(value: ErrorCallback | undefined): this
-    onTerminated(value: ((value0: TerminationInfo) => void) | undefined): this
-    onDrawReady(value: (() => void) | undefined): this
-    attributeModifier(value: AttributeModifier<UIExtensionComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    onRemoteReady(value: ((value0: UIExtensionProxy) => void) | undefined): this {
+        throw new Error("Unimplemented method onRemoteReady")
+    }
+    onReceive(value: ((value0: Map<string, Object>) => void) | undefined): this {
+        throw new Error("Unimplemented method onReceive")
+    }
+    onError(value: ErrorCallback | undefined): this {
+        throw new Error("Unimplemented method onError")
+    }
+    onTerminated(value: ((value0: TerminationInfo) => void) | undefined): this {
+        throw new Error("Unimplemented method onTerminated")
+    }
+    onDrawReady(value: (() => void) | undefined): this {
+        throw new Error("Unimplemented method onDrawReady")
+    }
+    attributeModifier(value: AttributeModifier<UIExtensionComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkUIExtensionComponentStyle extends ArkCommonMethodStyle implements UIExtensionComponentAttribute {
     onRemoteReady_value?: ((value0: UIExtensionProxy) => void) | undefined

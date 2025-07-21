@@ -217,16 +217,34 @@ export interface ErrorInformation {
 }
 export interface FormComponentAttribute extends CommonMethod {
     size(value: FormSize | undefined): this
-    moduleName(value: string | undefined): this
-    dimension(value: FormDimension | undefined): this
-    allowUpdate(value: boolean | undefined): this
+    moduleName(value: string | undefined): this {
+        throw new Error("Unimplemented method moduleName")
+    }
+    dimension(value: FormDimension | undefined): this {
+        throw new Error("Unimplemented method dimension")
+    }
+    allowUpdate(value: boolean | undefined): this {
+        throw new Error("Unimplemented method allowUpdate")
+    }
     visibility(value: Visibility | undefined): this
-    onAcquired(value: ((value0: FormCallbackInfo) => void) | undefined): this
-    onError(value: ((value0: ErrorInformation) => void) | undefined): this
-    onRouter(value: ((value0: Object) => void) | undefined): this
-    onUninstall(value: ((value0: FormCallbackInfo) => void) | undefined): this
-    onLoad(value: VoidCallback | undefined): this
-    attributeModifier(value: AttributeModifier<FormComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    onAcquired(value: ((value0: FormCallbackInfo) => void) | undefined): this {
+        throw new Error("Unimplemented method onAcquired")
+    }
+    onError(value: ((value0: ErrorInformation) => void) | undefined): this {
+        throw new Error("Unimplemented method onError")
+    }
+    onRouter(value: ((value0: Object) => void) | undefined): this {
+        throw new Error("Unimplemented method onRouter")
+    }
+    onUninstall(value: ((value0: FormCallbackInfo) => void) | undefined): this {
+        throw new Error("Unimplemented method onUninstall")
+    }
+    onLoad(value: VoidCallback | undefined): this {
+        throw new Error("Unimplemented method onLoad")
+    }
+    attributeModifier(value: AttributeModifier<FormComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkFormComponentStyle extends ArkCommonMethodStyle implements FormComponentAttribute {
     size_value?: FormSize | undefined

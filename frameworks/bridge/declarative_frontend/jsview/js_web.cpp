@@ -215,7 +215,7 @@ private:
     RefPtr<FullScreenExitHandler> fullScreenExitHandler_;
 };
 
-class JSWebKeyboardController : public Referenced {
+class JSWebKeyboardController : public WebTransferBase<RefPtr<WebCustomKeyboardHandler>> {
 public:
     static void JSBind(BindingTarget globalObj)
     {
@@ -232,6 +232,7 @@ public:
     void SeWebKeyboardController(const RefPtr<WebCustomKeyboardHandler>& controller)
     {
         webKeyboardController_ = controller;
+        transferValues_ = std::make_tuple(webKeyboardController_);
     }
 
     void InsertText(const JSCallbackInfo& args)
@@ -663,7 +664,7 @@ private:
     RefPtr<WebGeolocation> webGeolocation_;
 };
 
-class JSWebPermissionRequest : public Referenced {
+class JSWebPermissionRequest : public WebTransferBase<RefPtr<WebPermissionRequest>> {
 public:
     static void JSBind(BindingTarget globalObj)
     {
@@ -679,6 +680,7 @@ public:
     void SetEvent(const WebPermissionRequestEvent& eventInfo)
     {
         webPermissionRequest_ = eventInfo.GetWebPermissionRequest();
+        transferValues_ = std::make_tuple(webPermissionRequest_);
     }
 
     void Deny(const JSCallbackInfo& args)
@@ -886,7 +888,7 @@ private:
     RefPtr<GestureEventResult> eventResult_;
 };
 
-class JSWebWindowNewHandler : public Referenced {
+class JSWebWindowNewHandler : public WebTransferBase<RefPtr<WebWindowNewHandler>> {
 public:
     struct ChildWindowInfo {
         int32_t parentWebId_ = -1;
@@ -904,6 +906,7 @@ public:
     void SetEvent(const WebWindowNewEvent& eventInfo)
     {
         handler_ = eventInfo.GetWebWindowNewHandler();
+        transferValues_ = std::make_tuple(handler_);
     }
 
     static JSRef<JSObject> PopController(int32_t id, int32_t* parentId = nullptr)
@@ -4252,6 +4255,7 @@ JSRef<JSVal> PermissionRequestEventToJSValue(const WebPermissionRequestEvent& ev
     JSRef<JSObject> permissionObj = JSClass<JSWebPermissionRequest>::NewInstance();
     auto permissionEvent = Referenced::Claim(permissionObj->Unwrap<JSWebPermissionRequest>());
     permissionEvent->SetEvent(eventInfo);
+    WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(permissionObj), static_cast<void *>(permissionEvent.GetRawPtr()));
     obj->SetPropertyObject("request", permissionObj);
     return JSRef<JSVal>::Cast(obj);
 }
@@ -4546,6 +4550,7 @@ JSRef<JSVal> WindowNewEventToJSValue(const WebWindowNewEvent& eventInfo)
     JSRef<JSObject> handlerObj = JSClass<JSWebWindowNewHandler>::NewInstance();
     auto handler = Referenced::Claim(handlerObj->Unwrap<JSWebWindowNewHandler>());
     handler->SetEvent(eventInfo);
+    WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(handlerObj), static_cast<void *>(handler.GetRawPtr()));
     obj->SetPropertyObject("handler", handlerObj);
     return JSRef<JSVal>::Cast(obj);
 }
@@ -5996,6 +6001,8 @@ JSRef<JSVal> InterceptKeyboardEventToJSValue(const InterceptKeyboardEvent& event
     JSRef<JSObject> webKeyboardControllerObj = JSClass<JSWebKeyboardController>::NewInstance();
     auto webKeyboardController = Referenced::Claim(webKeyboardControllerObj->Unwrap<JSWebKeyboardController>());
     webKeyboardController->SeWebKeyboardController(eventInfo.GetCustomKeyboardHandler());
+    WrapNapiValue(GetNapiEnv(), JSRef<JSVal>::Cast(webKeyboardControllerObj),
+        static_cast<void*>(webKeyboardController.GetRawPtr()));
     obj->SetPropertyObject("controller", webKeyboardControllerObj);
 
     JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
@@ -6247,4 +6254,8 @@ ARKWEB_CREATE_JS_OBJECT(SslSelectCertResult, JSWebSslSelectCert, SetResult, valu
 ARKWEB_CREATE_JS_OBJECT(WebResponse, JSWebResourceResponse, SetEvent, ReceivedHttpErrorEvent(nullptr, value))
 ARKWEB_CREATE_JS_OBJECT(WebRequest, JSWebResourceRequest, SetHttpErrorEvent, ReceivedHttpErrorEvent(value, nullptr))
 ARKWEB_CREATE_JS_OBJECT(DataResubmitted, JSDataResubmitted, SetHandler, value)
+ARKWEB_CREATE_JS_OBJECT(WebPermissionRequest, JSWebPermissionRequest, SetEvent, WebPermissionRequestEvent(value))
+ARKWEB_CREATE_JS_OBJECT(WebCustomKeyboardHandler, JSWebKeyboardController, SeWebKeyboardController, value)
+ARKWEB_CREATE_JS_OBJECT(
+    WebWindowNewHandler, JSWebWindowNewHandler, SetEvent, WebWindowNewEvent(std::string(), false, false, value))
 } // namespace OHOS::Ace::Framework

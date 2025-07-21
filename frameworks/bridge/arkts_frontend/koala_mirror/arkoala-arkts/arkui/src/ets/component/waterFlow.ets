@@ -361,19 +361,45 @@ export interface WaterFlowOptions {
     layoutMode?: WaterFlowLayoutMode;
 }
 export interface WaterFlowAttribute extends ScrollableCommonMethod {
-    columnsTemplate(value: string | undefined): this
-    itemConstraintSize(value: ConstraintSizeOptions | undefined): this
-    rowsTemplate(value: string | undefined): this
-    columnsGap(value: Length | undefined): this
-    rowsGap(value: Length | undefined): this
-    layoutDirection(value: FlexDirection | undefined): this
-    cachedCount(value: number | undefined): this
-    onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this
-    onScrollIndex(value: ((first: number,last: number) => void) | undefined): this
-    onWillScroll(value: OnWillScrollCallback | undefined): this
-    onDidScroll(value: OnScrollCallback | undefined): this
-    cachedCount(count: number | undefined, show: boolean | undefined): this
-    attributeModifier(value: AttributeModifier<WaterFlowAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this
+    columnsTemplate(value: string | undefined): this {
+        throw new Error("Unimplemented method columnsTemplate")
+    }
+    itemConstraintSize(value: ConstraintSizeOptions | undefined): this {
+        throw new Error("Unimplemented method itemConstraintSize")
+    }
+    rowsTemplate(value: string | undefined): this {
+        throw new Error("Unimplemented method rowsTemplate")
+    }
+    columnsGap(value: Length | undefined): this {
+        throw new Error("Unimplemented method columnsGap")
+    }
+    rowsGap(value: Length | undefined): this {
+        throw new Error("Unimplemented method rowsGap")
+    }
+    layoutDirection(value: FlexDirection | undefined): this {
+        throw new Error("Unimplemented method layoutDirection")
+    }
+    cachedCount(value: number | undefined): this {
+        throw new Error("Unimplemented method cachedCount")
+    }
+    onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this {
+        throw new Error("Unimplemented method onScrollFrameBegin")
+    }
+    onScrollIndex(value: ((first: number,last: number) => void) | undefined): this {
+        throw new Error("Unimplemented method onScrollIndex")
+    }
+    onWillScroll(value: OnWillScrollCallback | undefined): this {
+        throw new Error("Unimplemented method onWillScroll")
+    }
+    onDidScroll(value: OnScrollCallback | undefined): this {
+        throw new Error("Unimplemented method onDidScroll")
+    }
+    cachedCount(count: number | undefined, show: boolean | undefined): this {
+        throw new Error("Unimplemented method cachedCount")
+    }
+    attributeModifier(value: AttributeModifier<WaterFlowAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkWaterFlowStyle extends ArkScrollableCommonMethodStyle implements WaterFlowAttribute {
     columnsTemplate_value?: string | undefined

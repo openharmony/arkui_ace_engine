@@ -55,7 +55,9 @@ export interface FormLinkOptions {
     params?: Object;
 }
 export interface FormLinkAttribute extends CommonMethod {
-    attributeModifier(value: AttributeModifier<FormLinkAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    attributeModifier(value: AttributeModifier<FormLinkAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkFormLinkStyle extends ArkCommonMethodStyle implements FormLinkAttribute {
     attributeModifier_value?: AttributeModifier<FormLinkAttribute> | AttributeModifier<CommonMethod> | undefined

@@ -34,6 +34,7 @@
 #include "interop/interop_module.h"
 #include "web/web_module_methods.h"
 #include "video/video_module_methods.h"
+#include "rich_editor/rich_editor_module.h"
 #include "stateMgmt/stateMgmt_module.h"
 #include "shape/shape_module_methods.h"
 #include "xcomponent/xcomponent_module_methods.h"
@@ -232,6 +233,36 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_TransferSslErrorHandlerToDynamic",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::TransferSslErrorHandlerToDynamic)
+        },
+        ani_native_function {
+            "_TransferPermissionRequestToStatic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferPermissionRequestToStatic)
+        },
+        ani_native_function {
+            "_TransferControllerHandlerToStatic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferControllerHandlerToStatic)
+        },
+        ani_native_function {
+            "_TransferWebKeyboardControllerToStatic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferWebKeyboardControllerToStatic)
+        },
+        ani_native_function {
+            "_TransferPermissionRequestToDynamic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferPermissionRequestToDynamic)
+        },
+        ani_native_function {
+            "_TransferControllerHandlerToDynamic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferControllerHandlerToDynamic)
+        },
+        ani_native_function {
+            "_TransferWebKeyboardControllerToDynamic",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferWebKeyboardControllerToDynamic)
         },
         ani_native_function {
             "_ConvertUtils_ConvertFromPixelMapAni",
@@ -534,6 +565,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetShapePixelMap)
         },
         ani_native_function {
+            "_RichEditor_Transfer_PixelMap",
+            "L@ohos/multimedia/image/image/PixelMap;:J",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::RichEditorTransferPixelMap)
+        },
+        ani_native_function {
             "_PersistentStorage_Get",
             "Lstd/core/String;:Lstd/core/String;",
             reinterpret_cast<void*>(OHOS::Ace::Ani::PersistentStorage_Get)
@@ -594,6 +630,16 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetXComponentControllerCallback)
         },
         ani_native_function {
+            "_RemoveComponent_FromFrameNode",
+            "JJ:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::RemoveComponentFromFrameNode)
+        },
+        ani_native_function {
+            "_AddComponent_ToFrameNode",
+            "JJ:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::AddComponentToFrameNode)
+        },
+        ani_native_function {
             "_CheckIsUIThread",
             "I:I",
             reinterpret_cast<void*>(OHOS::Ace::Ani::CheckIsUIThread)
@@ -623,6 +669,36 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::ConstructConditionScope)
         },
+        ani_native_function {
+            "_Common_vp2px",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::Vp2px)
+        },
+        ani_native_function {
+            "_Common_px2vp",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::Px2vp)
+        },
+        ani_native_function {
+            "_Common_fp2px",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::Fp2px)
+        },
+        ani_native_function {
+            "_Common_px2fp",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::Px2fp)
+        },
+        ani_native_function {
+            "_Common_lpx2px",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::Lpx2px)
+        },
+        ani_native_function {
+            "_Common_px2lpx",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::Px2lpx)
+       }
     };
 
     auto bindRst = env->Class_BindNativeMethods(cls, methods.data(), methods.size());

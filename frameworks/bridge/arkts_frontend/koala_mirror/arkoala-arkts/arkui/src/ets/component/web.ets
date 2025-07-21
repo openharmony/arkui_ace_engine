@@ -3232,125 +3232,363 @@ export interface SelectionMenuOptionsExt {
     menuType?: MenuType;
 }
 export interface WebAttribute extends CommonMethod {
-    javaScriptAccess(value: boolean | undefined): this
-    fileAccess(value: boolean | undefined): this
-    onlineImageAccess(value: boolean | undefined): this
-    domStorageAccess(value: boolean | undefined): this
-    imageAccess(value: boolean | undefined): this
-    mixedMode(value: MixedMode | undefined): this
-    zoomAccess(value: boolean | undefined): this
-    geolocationAccess(value: boolean | undefined): this
-    javaScriptProxy(value: JavaScriptProxy | undefined): this
-    cacheMode(value: CacheMode | undefined): this
-    darkMode(value: WebDarkMode | undefined): this
-    forceDarkAccess(value: boolean | undefined): this
-    mediaOptions(value: WebMediaOptions | undefined): this
-    overviewModeAccess(value: boolean | undefined): this
-    overScrollMode(value: OverScrollMode | undefined): this
-    blurOnKeyboardHideMode(value: BlurOnKeyboardHideMode | undefined): this
-    textZoomRatio(value: number | undefined): this
-    databaseAccess(value: boolean | undefined): this
-    initialScale(value: number | undefined): this
-    metaViewport(value: boolean | undefined): this
-    onPageEnd(value: ((value0: OnPageEndEvent) => void) | undefined): this
-    onPageBegin(value: ((value0: OnPageBeginEvent) => void) | undefined): this
-    onProgressChange(value: ((value0: OnProgressChangeEvent) => void) | undefined): this
-    onTitleReceive(value: ((value0: OnTitleReceiveEvent) => void) | undefined): this
-    onGeolocationHide(value: (() => void) | undefined): this
-    onGeolocationShow(value: ((value0: OnGeolocationShowEvent) => void) | undefined): this
-    onRequestSelected(value: (() => void) | undefined): this
-    onAlert(value: ((value0: OnAlertEvent) => boolean) | undefined): this
-    onBeforeUnload(value: ((value0: OnBeforeUnloadEvent) => boolean) | undefined): this
-    onConfirm(value: ((value0: OnConfirmEvent) => boolean) | undefined): this
-    onPrompt(value: ((value0: OnPromptEvent) => boolean) | undefined): this
-    onConsole(value: ((value0: OnConsoleEvent) => boolean) | undefined): this
-    onErrorReceive(value: ((value0: OnErrorReceiveEvent) => void) | undefined): this
-    onHttpErrorReceive(value: ((value0: OnHttpErrorReceiveEvent) => void) | undefined): this
-    onDownloadStart(value: ((value0: OnDownloadStartEvent) => void) | undefined): this
-    onRefreshAccessedHistory(value: ((value0: OnRefreshAccessedHistoryEvent) => void) | undefined): this
-    onRenderExited(value: ((value0: OnRenderExitedEvent) => void) | undefined): this
-    onShowFileSelector(value: ((value0: OnShowFileSelectorEvent) => boolean) | undefined): this
-    onResourceLoad(value: ((value0: OnResourceLoadEvent) => void) | undefined): this
-    onFullScreenExit(value: (() => void) | undefined): this
-    onFullScreenEnter(value: OnFullScreenEnterCallback | undefined): this
-    onScaleChange(value: ((value0: OnScaleChangeEvent) => void) | undefined): this
-    onHttpAuthRequest(value: ((value0: OnHttpAuthRequestEvent) => boolean) | undefined): this
-    onInterceptRequest(value: ((value0: OnInterceptRequestEvent) => WebResourceResponse) | undefined): this
-    onPermissionRequest(value: ((value0: OnPermissionRequestEvent) => void) | undefined): this
-    onScreenCaptureRequest(value: ((value0: OnScreenCaptureRequestEvent) => void) | undefined): this
-    onContextMenuShow(value: ((value0: OnContextMenuShowEvent) => boolean) | undefined): this
-    onContextMenuHide(value: OnContextMenuHideCallback | undefined): this
-    mediaPlayGestureAccess(value: boolean | undefined): this
-    onSearchResultReceive(value: ((value0: OnSearchResultReceiveEvent) => void) | undefined): this
-    onScroll(value: ((value0: OnScrollEvent) => void) | undefined): this
-    onSslErrorEventReceive(value: ((value0: OnSslErrorEventReceiveEvent) => void) | undefined): this
-    onSslErrorEvent(value: OnSslErrorEventCallback | undefined): this
-    onClientAuthenticationRequest(value: ((value0: OnClientAuthenticationEvent) => void) | undefined): this
-    onWindowNew(value: ((value0: OnWindowNewEvent) => void) | undefined): this
-    onWindowExit(value: (() => void) | undefined): this
-    multiWindowAccess(value: boolean | undefined): this
-    onInterceptKeyEvent(value: ((event: KeyEvent) => boolean) | undefined): this
-    webStandardFont(value: string | undefined): this
-    webSerifFont(value: string | undefined): this
-    webSansSerifFont(value: string | undefined): this
-    webFixedFont(value: string | undefined): this
-    webFantasyFont(value: string | undefined): this
-    webCursiveFont(value: string | undefined): this
-    defaultFixedFontSize(value: number | undefined): this
-    defaultFontSize(value: number | undefined): this
-    minFontSize(value: number | undefined): this
-    minLogicalFontSize(value: number | undefined): this
-    defaultTextEncodingFormat(value: string | undefined): this
-    forceDisplayScrollBar(value: boolean | undefined): this
-    blockNetwork(value: boolean | undefined): this
-    horizontalScrollBarAccess(value: boolean | undefined): this
-    verticalScrollBarAccess(value: boolean | undefined): this
-    onTouchIconUrlReceived(value: ((value0: OnTouchIconUrlReceivedEvent) => void) | undefined): this
-    onFaviconReceived(value: ((value0: OnFaviconReceivedEvent) => void) | undefined): this
-    onPageVisible(value: ((value0: OnPageVisibleEvent) => void) | undefined): this
-    onDataResubmitted(value: ((value0: OnDataResubmittedEvent) => void) | undefined): this
-    pinchSmooth(value: boolean | undefined): this
-    allowWindowOpenMethod(value: boolean | undefined): this
-    onAudioStateChanged(value: ((value0: OnAudioStateChangedEvent) => void) | undefined): this
-    onFirstContentfulPaint(value: ((value0: OnFirstContentfulPaintEvent) => void) | undefined): this
-    onFirstMeaningfulPaint(value: OnFirstMeaningfulPaintCallback | undefined): this
-    onLargestContentfulPaint(value: OnLargestContentfulPaintCallback | undefined): this
-    onLoadIntercept(value: ((value0: OnLoadInterceptEvent) => boolean) | undefined): this
-    onControllerAttached(value: (() => void) | undefined): this
-    onOverScroll(value: ((value0: OnOverScrollEvent) => void) | undefined): this
-    onSafeBrowsingCheckResult(value: OnSafeBrowsingCheckResultCallback | undefined): this
-    onNavigationEntryCommitted(value: OnNavigationEntryCommittedCallback | undefined): this
-    onIntelligentTrackingPreventionResult(value: OnIntelligentTrackingPreventionCallback | undefined): this
-    javaScriptOnDocumentStart(value: Array<ScriptItem> | undefined): this
-    javaScriptOnDocumentEnd(value: Array<ScriptItem> | undefined): this
-    layoutMode(value: WebLayoutMode | undefined): this
-    nestedScroll(value: NestedScrollOptions | NestedScrollOptionsExt | undefined): this
-    enableNativeEmbedMode(value: boolean | undefined): this
-    onNativeEmbedLifecycleChange(value: ((event: NativeEmbedDataInfo) => void) | undefined): this
-    onNativeEmbedVisibilityChange(value: OnNativeEmbedVisibilityChangeCallback | undefined): this
-    onNativeEmbedGestureEvent(value: ((event: NativeEmbedTouchInfo) => void) | undefined): this
-    copyOptions(value: CopyOptions | undefined): this
-    onOverrideUrlLoading(value: OnOverrideUrlLoadingCallback | undefined): this
-    textAutosizing(value: boolean | undefined): this
-    enableNativeMediaPlayer(value: NativeMediaPlayerConfig | undefined): this
-    onRenderProcessNotResponding(value: OnRenderProcessNotRespondingCallback | undefined): this
-    onRenderProcessResponding(value: OnRenderProcessRespondingCallback | undefined): this
-    onViewportFitChanged(value: OnViewportFitChangedCallback | undefined): this
-    onInterceptKeyboardAttach(value: WebKeyboardCallback | undefined): this
-    onAdsBlocked(value: OnAdsBlockedCallback | undefined): this
-    keyboardAvoidMode(value: WebKeyboardAvoidMode | undefined): this
-    editMenuOptions(value: EditMenuOptions | undefined): this
-    enableHapticFeedback(value: boolean | undefined): this
-    optimizeParserBudget(value: boolean | undefined): this
-    enableFollowSystemFontWeight(value: boolean | undefined): this
-    enableWebAVSession(value: boolean | undefined): this
-    runJavaScriptOnDocumentStart(value: Array<ScriptItem> | undefined): this
-    runJavaScriptOnDocumentEnd(value: Array<ScriptItem> | undefined): this
-    runJavaScriptOnHeadEnd(value: Array<ScriptItem> | undefined): this
-    nativeEmbedOptions(value: EmbedOptions | undefined): this
-    registerNativeEmbedRule(tag: string | undefined, type: string | undefined): this
-    bindSelectionMenu(elementType: WebElementType | undefined, content: CustomBuilder | undefined, responseType: WebResponseType | undefined, options?: SelectionMenuOptionsExt): this
-    attributeModifier(value: AttributeModifier<WebAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    javaScriptAccess(value: boolean | undefined): this {
+        throw new Error("Unimplemented method javaScriptAccess")
+    }
+    fileAccess(value: boolean | undefined): this {
+        throw new Error("Unimplemented method fileAccess")
+    }
+    onlineImageAccess(value: boolean | undefined): this {
+        throw new Error("Unimplemented method onlineImageAccess")
+    }
+    domStorageAccess(value: boolean | undefined): this {
+        throw new Error("Unimplemented method domStorageAccess")
+    }
+    imageAccess(value: boolean | undefined): this {
+        throw new Error("Unimplemented method imageAccess")
+    }
+    mixedMode(value: MixedMode | undefined): this {
+        throw new Error("Unimplemented method mixedMode")
+    }
+    zoomAccess(value: boolean | undefined): this {
+        throw new Error("Unimplemented method zoomAccess")
+    }
+    geolocationAccess(value: boolean | undefined): this {
+        throw new Error("Unimplemented method geolocationAccess")
+    }
+    javaScriptProxy(value: JavaScriptProxy | undefined): this {
+        throw new Error("Unimplemented method javaScriptProxy")
+    }
+    cacheMode(value: CacheMode | undefined): this {
+        throw new Error("Unimplemented method cacheMode")
+    }
+    darkMode(value: WebDarkMode | undefined): this {
+        throw new Error("Unimplemented method darkMode")
+    }
+    forceDarkAccess(value: boolean | undefined): this {
+        throw new Error("Unimplemented method forceDarkAccess")
+    }
+    mediaOptions(value: WebMediaOptions | undefined): this {
+        throw new Error("Unimplemented method mediaOptions")
+    }
+    overviewModeAccess(value: boolean | undefined): this {
+        throw new Error("Unimplemented method overviewModeAccess")
+    }
+    overScrollMode(value: OverScrollMode | undefined): this {
+        throw new Error("Unimplemented method overScrollMode")
+    }
+    blurOnKeyboardHideMode(value: BlurOnKeyboardHideMode | undefined): this {
+        throw new Error("Unimplemented method blurOnKeyboardHideMode")
+    }
+    textZoomRatio(value: number | undefined): this {
+        throw new Error("Unimplemented method textZoomRatio")
+    }
+    databaseAccess(value: boolean | undefined): this {
+        throw new Error("Unimplemented method databaseAccess")
+    }
+    initialScale(value: number | undefined): this {
+        throw new Error("Unimplemented method initialScale")
+    }
+    metaViewport(value: boolean | undefined): this {
+        throw new Error("Unimplemented method metaViewport")
+    }
+    onPageEnd(value: ((value0: OnPageEndEvent) => void) | undefined): this {
+        throw new Error("Unimplemented method onPageEnd")
+    }
+    onPageBegin(value: ((value0: OnPageBeginEvent) => void) | undefined): this {
+        throw new Error("Unimplemented method onPageBegin")
+    }
+    onProgressChange(value: ((value0: OnProgressChangeEvent) => void) | undefined): this {
+        throw new Error("Unimplemented method onProgressChange")
+    }
+    onTitleReceive(value: ((value0: OnTitleReceiveEvent) => void) | undefined): this {
+        throw new Error("Unimplemented method onTitleReceive")
+    }
+    onGeolocationHide(value: (() => void) | undefined): this {
+        throw new Error("Unimplemented method onGeolocationHide")
+    }
+    onGeolocationShow(value: ((value0: OnGeolocationShowEvent) => void) | undefined): this {
+        throw new Error("Unimplemented method onGeolocationShow")
+    }
+    onRequestSelected(value: (() => void) | undefined): this {
+        throw new Error("Unimplemented method onRequestSelected")
+    }
+    onAlert(value: ((value0: OnAlertEvent) => boolean) | undefined): this {
+        throw new Error("Unimplemented method onAlert")
+    }
+    onBeforeUnload(value: ((value0: OnBeforeUnloadEvent) => boolean) | undefined): this {
+        throw new Error("Unimplemented method onBeforeUnload")
+    }
+    onConfirm(value: ((value0: OnConfirmEvent) => boolean) | undefined): this {
+        throw new Error("Unimplemented method onConfirm")
+    }
+    onPrompt(value: ((value0: OnPromptEvent) => boolean) | undefined): this {
+        throw new Error("Unimplemented method onPrompt")
+    }
+    onConsole(value: ((value0: OnConsoleEvent) => boolean) | undefined): this {
+        throw new Error("Unimplemented method onConsole")
+    }
+    onErrorReceive(value: ((value0: OnErrorReceiveEvent) => void) | undefined): this {
+        throw new Error("Unimplemented method onErrorReceive")
+    }
+    onHttpErrorReceive(value: ((value0: OnHttpErrorReceiveEvent) => void) | undefined): this {
+        throw new Error("Unimplemented method onHttpErrorReceive")
+    }
+    onDownloadStart(value: ((value0: OnDownloadStartEvent) => void) | undefined): this {
+        throw new Error("Unimplemented method onDownloadStart")
+    }
+    onRefreshAccessedHistory(value: ((value0: OnRefreshAccessedHistoryEvent) => void) | undefined): this {
+        throw new Error("Unimplemented method onRefreshAccessedHistory")
+    }
+    onRenderExited(value: ((value0: OnRenderExitedEvent) => void) | undefined): this {
+        throw new Error("Unimplemented method onRenderExited")
+    }
+    onShowFileSelector(value: ((value0: OnShowFileSelectorEvent) => boolean) | undefined): this {
+        throw new Error("Unimplemented method onShowFileSelector")
+    }
+    onResourceLoad(value: ((value0: OnResourceLoadEvent) => void) | undefined): this {
+        throw new Error("Unimplemented method onResourceLoad")
+    }
+    onFullScreenExit(value: (() => void) | undefined): this {
+        throw new Error("Unimplemented method onFullScreenExit")
+    }
+    onFullScreenEnter(value: OnFullScreenEnterCallback | undefined): this {
+        throw new Error("Unimplemented method onFullScreenEnter")
+    }
+    onScaleChange(value: ((value0: OnScaleChangeEvent) => void) | undefined): this {
+        throw new Error("Unimplemented method onScaleChange")
+    }
+    onHttpAuthRequest(value: ((value0: OnHttpAuthRequestEvent) => boolean) | undefined): this {
+        throw new Error("Unimplemented method onHttpAuthRequest")
+    }
+    onInterceptRequest(value: ((value0: OnInterceptRequestEvent) => WebResourceResponse) | undefined): this {
+        throw new Error("Unimplemented method onInterceptRequest")
+    }
+    onPermissionRequest(value: ((value0: OnPermissionRequestEvent) => void) | undefined): this {
+        throw new Error("Unimplemented method onPermissionRequest")
+    }
+    onScreenCaptureRequest(value: ((value0: OnScreenCaptureRequestEvent) => void) | undefined): this {
+        throw new Error("Unimplemented method onScreenCaptureRequest")
+    }
+    onContextMenuShow(value: ((value0: OnContextMenuShowEvent) => boolean) | undefined): this {
+        throw new Error("Unimplemented method onContextMenuShow")
+    }
+    onContextMenuHide(value: OnContextMenuHideCallback | undefined): this {
+        throw new Error("Unimplemented method onContextMenuHide")
+    }
+    mediaPlayGestureAccess(value: boolean | undefined): this {
+        throw new Error("Unimplemented method mediaPlayGestureAccess")
+    }
+    onSearchResultReceive(value: ((value0: OnSearchResultReceiveEvent) => void) | undefined): this {
+        throw new Error("Unimplemented method onSearchResultReceive")
+    }
+    onScroll(value: ((value0: OnScrollEvent) => void) | undefined): this {
+        throw new Error("Unimplemented method onScroll")
+    }
+    onSslErrorEventReceive(value: ((value0: OnSslErrorEventReceiveEvent) => void) | undefined): this {
+        throw new Error("Unimplemented method onSslErrorEventReceive")
+    }
+    onSslErrorEvent(value: OnSslErrorEventCallback | undefined): this {
+        throw new Error("Unimplemented method onSslErrorEvent")
+    }
+    onClientAuthenticationRequest(value: ((value0: OnClientAuthenticationEvent) => void) | undefined): this {
+        throw new Error("Unimplemented method onClientAuthenticationRequest")
+    }
+    onWindowNew(value: ((value0: OnWindowNewEvent) => void) | undefined): this {
+        throw new Error("Unimplemented method onWindowNew")
+    }
+    onWindowExit(value: (() => void) | undefined): this {
+        throw new Error("Unimplemented method onWindowExit")
+    }
+    multiWindowAccess(value: boolean | undefined): this {
+        throw new Error("Unimplemented method multiWindowAccess")
+    }
+    onInterceptKeyEvent(value: ((event: KeyEvent) => boolean) | undefined): this {
+        throw new Error("Unimplemented method onInterceptKeyEvent")
+    }
+    webStandardFont(value: string | undefined): this {
+        throw new Error("Unimplemented method webStandardFont")
+    }
+    webSerifFont(value: string | undefined): this {
+        throw new Error("Unimplemented method webSerifFont")
+    }
+    webSansSerifFont(value: string | undefined): this {
+        throw new Error("Unimplemented method webSansSerifFont")
+    }
+    webFixedFont(value: string | undefined): this {
+        throw new Error("Unimplemented method webFixedFont")
+    }
+    webFantasyFont(value: string | undefined): this {
+        throw new Error("Unimplemented method webFantasyFont")
+    }
+    webCursiveFont(value: string | undefined): this {
+        throw new Error("Unimplemented method webCursiveFont")
+    }
+    defaultFixedFontSize(value: number | undefined): this {
+        throw new Error("Unimplemented method defaultFixedFontSize")
+    }
+    defaultFontSize(value: number | undefined): this {
+        throw new Error("Unimplemented method defaultFontSize")
+    }
+    minFontSize(value: number | undefined): this {
+        throw new Error("Unimplemented method minFontSize")
+    }
+    minLogicalFontSize(value: number | undefined): this {
+        throw new Error("Unimplemented method minLogicalFontSize")
+    }
+    defaultTextEncodingFormat(value: string | undefined): this {
+        throw new Error("Unimplemented method defaultTextEncodingFormat")
+    }
+    forceDisplayScrollBar(value: boolean | undefined): this {
+        throw new Error("Unimplemented method forceDisplayScrollBar")
+    }
+    blockNetwork(value: boolean | undefined): this {
+        throw new Error("Unimplemented method blockNetwork")
+    }
+    horizontalScrollBarAccess(value: boolean | undefined): this {
+        throw new Error("Unimplemented method horizontalScrollBarAccess")
+    }
+    verticalScrollBarAccess(value: boolean | undefined): this {
+        throw new Error("Unimplemented method verticalScrollBarAccess")
+    }
+    onTouchIconUrlReceived(value: ((value0: OnTouchIconUrlReceivedEvent) => void) | undefined): this {
+        throw new Error("Unimplemented method onTouchIconUrlReceived")
+    }
+    onFaviconReceived(value: ((value0: OnFaviconReceivedEvent) => void) | undefined): this {
+        throw new Error("Unimplemented method onFaviconReceived")
+    }
+    onPageVisible(value: ((value0: OnPageVisibleEvent) => void) | undefined): this {
+        throw new Error("Unimplemented method onPageVisible")
+    }
+    onDataResubmitted(value: ((value0: OnDataResubmittedEvent) => void) | undefined): this {
+        throw new Error("Unimplemented method onDataResubmitted")
+    }
+    pinchSmooth(value: boolean | undefined): this {
+        throw new Error("Unimplemented method pinchSmooth")
+    }
+    allowWindowOpenMethod(value: boolean | undefined): this {
+        throw new Error("Unimplemented method allowWindowOpenMethod")
+    }
+    onAudioStateChanged(value: ((value0: OnAudioStateChangedEvent) => void) | undefined): this {
+        throw new Error("Unimplemented method onAudioStateChanged")
+    }
+    onFirstContentfulPaint(value: ((value0: OnFirstContentfulPaintEvent) => void) | undefined): this {
+        throw new Error("Unimplemented method onFirstContentfulPaint")
+    }
+    onFirstMeaningfulPaint(value: OnFirstMeaningfulPaintCallback | undefined): this {
+        throw new Error("Unimplemented method onFirstMeaningfulPaint")
+    }
+    onLargestContentfulPaint(value: OnLargestContentfulPaintCallback | undefined): this {
+        throw new Error("Unimplemented method onLargestContentfulPaint")
+    }
+    onLoadIntercept(value: ((value0: OnLoadInterceptEvent) => boolean) | undefined): this {
+        throw new Error("Unimplemented method onLoadIntercept")
+    }
+    onControllerAttached(value: (() => void) | undefined): this {
+        throw new Error("Unimplemented method onControllerAttached")
+    }
+    onOverScroll(value: ((value0: OnOverScrollEvent) => void) | undefined): this {
+        throw new Error("Unimplemented method onOverScroll")
+    }
+    onSafeBrowsingCheckResult(value: OnSafeBrowsingCheckResultCallback | undefined): this {
+        throw new Error("Unimplemented method onSafeBrowsingCheckResult")
+    }
+    onNavigationEntryCommitted(value: OnNavigationEntryCommittedCallback | undefined): this {
+        throw new Error("Unimplemented method onNavigationEntryCommitted")
+    }
+    onIntelligentTrackingPreventionResult(value: OnIntelligentTrackingPreventionCallback | undefined): this {
+        throw new Error("Unimplemented method onIntelligentTrackingPreventionResult")
+    }
+    javaScriptOnDocumentStart(value: Array<ScriptItem> | undefined): this {
+        throw new Error("Unimplemented method javaScriptOnDocumentStart")
+    }
+    javaScriptOnDocumentEnd(value: Array<ScriptItem> | undefined): this {
+        throw new Error("Unimplemented method javaScriptOnDocumentEnd")
+    }
+    layoutMode(value: WebLayoutMode | undefined): this {
+        throw new Error("Unimplemented method layoutMode")
+    }
+    nestedScroll(value: NestedScrollOptions | NestedScrollOptionsExt | undefined): this {
+        throw new Error("Unimplemented method nestedScroll")
+    }
+    enableNativeEmbedMode(value: boolean | undefined): this {
+        throw new Error("Unimplemented method enableNativeEmbedMode")
+    }
+    onNativeEmbedLifecycleChange(value: ((event: NativeEmbedDataInfo) => void) | undefined): this {
+        throw new Error("Unimplemented method onNativeEmbedLifecycleChange")
+    }
+    onNativeEmbedVisibilityChange(value: OnNativeEmbedVisibilityChangeCallback | undefined): this {
+        throw new Error("Unimplemented method onNativeEmbedVisibilityChange")
+    }
+    onNativeEmbedGestureEvent(value: ((event: NativeEmbedTouchInfo) => void) | undefined): this {
+        throw new Error("Unimplemented method onNativeEmbedGestureEvent")
+    }
+    copyOptions(value: CopyOptions | undefined): this {
+        throw new Error("Unimplemented method copyOptions")
+    }
+    onOverrideUrlLoading(value: OnOverrideUrlLoadingCallback | undefined): this {
+        throw new Error("Unimplemented method onOverrideUrlLoading")
+    }
+    textAutosizing(value: boolean | undefined): this {
+        throw new Error("Unimplemented method textAutosizing")
+    }
+    enableNativeMediaPlayer(value: NativeMediaPlayerConfig | undefined): this {
+        throw new Error("Unimplemented method enableNativeMediaPlayer")
+    }
+    onRenderProcessNotResponding(value: OnRenderProcessNotRespondingCallback | undefined): this {
+        throw new Error("Unimplemented method onRenderProcessNotResponding")
+    }
+    onRenderProcessResponding(value: OnRenderProcessRespondingCallback | undefined): this {
+        throw new Error("Unimplemented method onRenderProcessResponding")
+    }
+    onViewportFitChanged(value: OnViewportFitChangedCallback | undefined): this {
+        throw new Error("Unimplemented method onViewportFitChanged")
+    }
+    onInterceptKeyboardAttach(value: WebKeyboardCallback | undefined): this {
+        throw new Error("Unimplemented method onInterceptKeyboardAttach")
+    }
+    onAdsBlocked(value: OnAdsBlockedCallback | undefined): this {
+        throw new Error("Unimplemented method onAdsBlocked")
+    }
+    keyboardAvoidMode(value: WebKeyboardAvoidMode | undefined): this {
+        throw new Error("Unimplemented method keyboardAvoidMode")
+    }
+    editMenuOptions(value: EditMenuOptions | undefined): this {
+        throw new Error("Unimplemented method editMenuOptions")
+    }
+    enableHapticFeedback(value: boolean | undefined): this {
+        throw new Error("Unimplemented method enableHapticFeedback")
+    }
+    optimizeParserBudget(value: boolean | undefined): this {
+        throw new Error("Unimplemented method optimizeParserBudget")
+    }
+    enableFollowSystemFontWeight(value: boolean | undefined): this {
+        throw new Error("Unimplemented method enableFollowSystemFontWeight")
+    }
+    enableWebAVSession(value: boolean | undefined): this {
+        throw new Error("Unimplemented method enableWebAVSession")
+    }
+    runJavaScriptOnDocumentStart(value: Array<ScriptItem> | undefined): this {
+        throw new Error("Unimplemented method runJavaScriptOnDocumentStart")
+    }
+    runJavaScriptOnDocumentEnd(value: Array<ScriptItem> | undefined): this {
+        throw new Error("Unimplemented method runJavaScriptOnDocumentEnd")
+    }
+    runJavaScriptOnHeadEnd(value: Array<ScriptItem> | undefined): this {
+        throw new Error("Unimplemented method runJavaScriptOnHeadEnd")
+    }
+    nativeEmbedOptions(value: EmbedOptions | undefined): this {
+        throw new Error("Unimplemented method nativeEmbedOptions")
+    }
+    registerNativeEmbedRule(tag: string | undefined, type: string | undefined): this {
+        throw new Error("Unimplemented method registerNativeEmbedRule")
+    }
+    bindSelectionMenu(elementType: WebElementType | undefined, content: CustomBuilder | undefined, responseType: WebResponseType | undefined, options?: SelectionMenuOptionsExt): this {
+        throw new Error("Unimplemented method bindSelectionMenu")
+    }
+    attributeModifier(value: AttributeModifier<WebAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkWebStyle extends ArkCommonMethodStyle implements WebAttribute {
     javaScriptAccess_value?: boolean | undefined

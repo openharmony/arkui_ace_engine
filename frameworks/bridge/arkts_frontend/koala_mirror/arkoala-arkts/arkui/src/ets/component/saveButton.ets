@@ -95,8 +95,12 @@ export enum SaveButtonOnClickResult {
 }
 export type SaveButtonCallback = (event: ClickEvent, result: SaveButtonOnClickResult, error?: BusinessError) => void;
 export interface SaveButtonAttribute extends SecurityComponentMethod {
-    onClick(value: SaveButtonCallback | undefined): this
-    attributeModifier(value: AttributeModifier<SaveButtonAttribute> | AttributeModifier<SecurityComponentMethod> | undefined): this
+    onClick(value: SaveButtonCallback | undefined): this {
+        throw new Error("Unimplemented method onClick")
+    }
+    attributeModifier(value: AttributeModifier<SaveButtonAttribute> | AttributeModifier<SecurityComponentMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkSaveButtonStyle extends ArkSecurityComponentMethodStyle implements SaveButtonAttribute {
     onClick_value?: SaveButtonCallback | undefined

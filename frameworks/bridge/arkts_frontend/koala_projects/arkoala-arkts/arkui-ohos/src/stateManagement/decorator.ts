@@ -17,6 +17,8 @@ import { ObserveSingleton } from './base/observeSingleton';
 import { int32 } from '@koalaui/common';
 import { __StateMgmtFactoryImpl } from './base/stateMgmtFactory';
 import { ExtendableComponent } from '../component/extendableComponent';
+import { IBindingSource, ITrackedDecoratorRef } from './base/mutableStateMeta';
+import { IComputedDecoratorRef } from './decoratorImpl/decoratorComputed';
 
 export interface IDecoratedVariable {
     readonly varName: string;
@@ -107,7 +109,7 @@ export interface IMutableKeyedStateMeta {
 export interface IObserve {
     renderingComponent: number;
     renderingId: RenderIdType | undefined;
-    shouldAddRef(iObjectsRenderId: RenderIdType): boolean;
+    shouldAddRef(iObjectsRenderId: RenderIdType | undefined): boolean;
 }
 
 export const OBSERVE: IObserve = ObserveSingleton.instance;
@@ -214,6 +216,8 @@ export interface IStateMgmtFactory {
         ttype: Type,
         watchFunc?: WatchFuncType
     ): ILocalStoragePropRefDecoratedVariable<T>;
+    makeComputed<T>(computeFunction: ComputeCallback<T>, varName: string): IComputedDecoratedVariable<T>;
+    makeMonitor(pathLabmda: IMonitorPathInfo[], monitorFunction: MonitorCallback): IMonitorDecoratedVariable;
 }
 
 export type WatchFuncType = (propertyName: string) => void;
@@ -228,3 +232,27 @@ export interface IWatchSubscriberRegister {
 export interface ISubscribedWatches extends IWatchSubscriberRegister {
     executeOnSubscribingWatches(propertyName: string): void;
 }
+
+export interface IComputedDecoratedVariable<T> extends IComputedDecoratorRef, IDecoratedImmutableVariable<T> {}
+
+export interface IMonitor {
+    readonly dirty: Array<string>;
+    value<T>(path?: string): IMonitorValue<T> | undefined;
+}
+
+export interface IMonitorDecoratedVariable {}
+
+export interface IMonitorPathInfo {
+    path: string;
+    valueCallback: MonitorValueCallback;
+}
+
+export interface IMonitorValue<T> {
+    before: T;
+    now: T;
+    readonly path: string;
+}
+
+export type MonitorValueCallback = () => Any;
+export type MonitorCallback = (m: IMonitor) => void;
+export type ComputeCallback<T> = () => T;

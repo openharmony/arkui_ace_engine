@@ -1073,68 +1073,192 @@ export enum TextAreaType {
 }
 export type TextAreaSubmitCallback = (enterKeyType: EnterKeyType, event?: SubmitEvent) => void;
 export interface TextAreaAttribute extends CommonMethod {
-    placeholderColor(value: ResourceColor | undefined): this
-    placeholderFont(value: Font | undefined): this
-    enterKeyType(value: EnterKeyType | undefined): this
-    textAlign(value: TextAlign | undefined): this
-    caretColor(value: ResourceColor | undefined): this
-    fontColor(value: ResourceColor | undefined): this
-    fontSize(value: Length | undefined): this
-    fontStyle(value: FontStyle | undefined): this
-    fontWeight(value: number | FontWeight | string | undefined): this
-    fontFamily(value: ResourceStr | undefined): this
-    textOverflow(value: TextOverflow | undefined): this
-    textIndent(value: Dimension | undefined): this
-    caretStyle(value: CaretStyle | undefined): this
-    selectedBackgroundColor(value: ResourceColor | undefined): this
-    onSubmit(value: ((enterKey: EnterKeyType) => void) | TextAreaSubmitCallback | undefined): this
-    onChange(value: EditableTextOnChangeCallback | undefined): this
-    onTextSelectionChange(value: ((selectionStart: number,selectionEnd: number) => void) | undefined): this
-    onContentScroll(value: ((selectionStart: number,selectionEnd: number) => void) | undefined): this
-    onEditChange(value: ((isEditing: boolean) => void) | undefined): this
-    onCopy(value: ((value: string) => void) | undefined): this
-    onCut(value: ((value: string) => void) | undefined): this
-    onPaste(value: ((value: string,event: PasteEvent) => void) | undefined): this
-    copyOption(value: CopyOptions | undefined): this
-    enableKeyboardOnFocus(value: boolean | undefined): this
-    maxLength(value: number | undefined): this
-    style(value: TextContentStyle | undefined): this
-    barState(value: BarState | undefined): this
-    selectionMenuHidden(value: boolean | undefined): this
-    minFontSize(value: number | string | Resource | undefined): this
-    maxFontSize(value: number | string | Resource | undefined): this
-    minFontScale(value: number | Resource | undefined): this
-    maxFontScale(value: number | Resource | undefined): this
-    heightAdaptivePolicy(value: TextHeightAdaptivePolicy | undefined): this
-    maxLines(value: number | undefined): this
-    wordBreak(value: WordBreak | undefined): this
-    lineBreakStrategy(value: LineBreakStrategy | undefined): this
-    decoration(value: TextDecorationOptions | undefined): this
-    letterSpacing(value: number | string | Resource | undefined): this
-    lineSpacing(value: LengthMetrics | undefined): this
-    lineHeight(value: number | string | Resource | undefined): this
-    type(value: TextAreaType | undefined): this
-    enableAutoFill(value: boolean | undefined): this
-    contentType(value: ContentType | undefined): this
-    fontFeature(value: string | undefined): this
-    onWillInsert(value: ((value0: InsertValue) => boolean) | undefined): this
-    onDidInsert(value: ((value0: InsertValue) => void) | undefined): this
-    onWillDelete(value: ((value0: DeleteValue) => boolean) | undefined): this
-    onDidDelete(value: ((value0: DeleteValue) => void) | undefined): this
-    editMenuOptions(value: EditMenuOptions | undefined): this
-    enablePreviewText(value: boolean | undefined): this
-    enableHapticFeedback(value: boolean | undefined): this
-    autoCapitalizationMode(value: AutoCapitalizationMode | undefined): this
-    halfLeading(value: boolean | undefined): this
-    ellipsisMode(value: EllipsisMode | undefined): this
-    stopBackPress(value: boolean | undefined): this
-    onWillChange(value: ((value0: EditableTextChangeValue) => boolean) | undefined): this
-    keyboardAppearance(value: KeyboardAppearance | undefined): this
-    inputFilter(value: ResourceStr | undefined, error?: ((value: string) => void)): this
-    showCounter(value: boolean | undefined, options?: InputCounterOptions): this
-    customKeyboard(value: CustomBuilder | undefined, options?: KeyboardOptions): this
-    _onChangeEvent_text(callback_: ((text: ResourceStr | Resource | string) => void)): void
-    attributeModifier(value: AttributeModifier<TextAreaAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    placeholderColor(value: ResourceColor | undefined): this {
+        throw new Error("Unimplemented method placeholderColor")
+    }
+    placeholderFont(value: Font | undefined): this {
+        throw new Error("Unimplemented method placeholderFont")
+    }
+    enterKeyType(value: EnterKeyType | undefined): this {
+        throw new Error("Unimplemented method enterKeyType")
+    }
+    textAlign(value: TextAlign | undefined): this {
+        throw new Error("Unimplemented method textAlign")
+    }
+    caretColor(value: ResourceColor | undefined): this {
+        throw new Error("Unimplemented method caretColor")
+    }
+    fontColor(value: ResourceColor | undefined): this {
+        throw new Error("Unimplemented method fontColor")
+    }
+    fontSize(value: Length | undefined): this {
+        throw new Error("Unimplemented method fontSize")
+    }
+    fontStyle(value: FontStyle | undefined): this {
+        throw new Error("Unimplemented method fontStyle")
+    }
+    fontWeight(value: number | FontWeight | string | undefined): this {
+        throw new Error("Unimplemented method fontWeight")
+    }
+    fontFamily(value: ResourceStr | undefined): this {
+        throw new Error("Unimplemented method fontFamily")
+    }
+    textOverflow(value: TextOverflow | undefined): this {
+        throw new Error("Unimplemented method textOverflow")
+    }
+    textIndent(value: Dimension | undefined): this {
+        throw new Error("Unimplemented method textIndent")
+    }
+    caretStyle(value: CaretStyle | undefined): this {
+        throw new Error("Unimplemented method caretStyle")
+    }
+    selectedBackgroundColor(value: ResourceColor | undefined): this {
+        throw new Error("Unimplemented method selectedBackgroundColor")
+    }
+    onSubmit(value: ((enterKey: EnterKeyType) => void) | TextAreaSubmitCallback | undefined): this {
+        throw new Error("Unimplemented method onSubmit")
+    }
+    onChange(value: EditableTextOnChangeCallback | undefined): this {
+        throw new Error("Unimplemented method onChange")
+    }
+    onTextSelectionChange(value: ((selectionStart: number,selectionEnd: number) => void) | undefined): this {
+        throw new Error("Unimplemented method onTextSelectionChange")
+    }
+    onContentScroll(value: ((selectionStart: number,selectionEnd: number) => void) | undefined): this {
+        throw new Error("Unimplemented method onContentScroll")
+    }
+    onEditChange(value: ((isEditing: boolean) => void) | undefined): this {
+        throw new Error("Unimplemented method onEditChange")
+    }
+    onCopy(value: ((value: string) => void) | undefined): this {
+        throw new Error("Unimplemented method onCopy")
+    }
+    onCut(value: ((value: string) => void) | undefined): this {
+        throw new Error("Unimplemented method onCut")
+    }
+    onPaste(value: ((value: string,event: PasteEvent) => void) | undefined): this {
+        throw new Error("Unimplemented method onPaste")
+    }
+    copyOption(value: CopyOptions | undefined): this {
+        throw new Error("Unimplemented method copyOption")
+    }
+    enableKeyboardOnFocus(value: boolean | undefined): this {
+        throw new Error("Unimplemented method enableKeyboardOnFocus")
+    }
+    maxLength(value: number | undefined): this {
+        throw new Error("Unimplemented method maxLength")
+    }
+    style(value: TextContentStyle | undefined): this {
+        throw new Error("Unimplemented method style")
+    }
+    barState(value: BarState | undefined): this {
+        throw new Error("Unimplemented method barState")
+    }
+    selectionMenuHidden(value: boolean | undefined): this {
+        throw new Error("Unimplemented method selectionMenuHidden")
+    }
+    minFontSize(value: number | string | Resource | undefined): this {
+        throw new Error("Unimplemented method minFontSize")
+    }
+    maxFontSize(value: number | string | Resource | undefined): this {
+        throw new Error("Unimplemented method maxFontSize")
+    }
+    minFontScale(value: number | Resource | undefined): this {
+        throw new Error("Unimplemented method minFontScale")
+    }
+    maxFontScale(value: number | Resource | undefined): this {
+        throw new Error("Unimplemented method maxFontScale")
+    }
+    heightAdaptivePolicy(value: TextHeightAdaptivePolicy | undefined): this {
+        throw new Error("Unimplemented method heightAdaptivePolicy")
+    }
+    maxLines(value: number | undefined): this {
+        throw new Error("Unimplemented method maxLines")
+    }
+    wordBreak(value: WordBreak | undefined): this {
+        throw new Error("Unimplemented method wordBreak")
+    }
+    lineBreakStrategy(value: LineBreakStrategy | undefined): this {
+        throw new Error("Unimplemented method lineBreakStrategy")
+    }
+    decoration(value: TextDecorationOptions | undefined): this {
+        throw new Error("Unimplemented method decoration")
+    }
+    letterSpacing(value: number | string | Resource | undefined): this {
+        throw new Error("Unimplemented method letterSpacing")
+    }
+    lineSpacing(value: LengthMetrics | undefined): this {
+        throw new Error("Unimplemented method lineSpacing")
+    }
+    lineHeight(value: number | string | Resource | undefined): this {
+        throw new Error("Unimplemented method lineHeight")
+    }
+    type(value: TextAreaType | undefined): this {
+        throw new Error("Unimplemented method type")
+    }
+    enableAutoFill(value: boolean | undefined): this {
+        throw new Error("Unimplemented method enableAutoFill")
+    }
+    contentType(value: ContentType | undefined): this {
+        throw new Error("Unimplemented method contentType")
+    }
+    fontFeature(value: string | undefined): this {
+        throw new Error("Unimplemented method fontFeature")
+    }
+    onWillInsert(value: ((value0: InsertValue) => boolean) | undefined): this {
+        throw new Error("Unimplemented method onWillInsert")
+    }
+    onDidInsert(value: ((value0: InsertValue) => void) | undefined): this {
+        throw new Error("Unimplemented method onDidInsert")
+    }
+    onWillDelete(value: ((value0: DeleteValue) => boolean) | undefined): this {
+        throw new Error("Unimplemented method onWillDelete")
+    }
+    onDidDelete(value: ((value0: DeleteValue) => void) | undefined): this {
+        throw new Error("Unimplemented method onDidDelete")
+    }
+    editMenuOptions(value: EditMenuOptions | undefined): this {
+        throw new Error("Unimplemented method editMenuOptions")
+    }
+    enablePreviewText(value: boolean | undefined): this {
+        throw new Error("Unimplemented method enablePreviewText")
+    }
+    enableHapticFeedback(value: boolean | undefined): this {
+        throw new Error("Unimplemented method enableHapticFeedback")
+    }
+    autoCapitalizationMode(value: AutoCapitalizationMode | undefined): this {
+        throw new Error("Unimplemented method autoCapitalizationMode")
+    }
+    halfLeading(value: boolean | undefined): this {
+        throw new Error("Unimplemented method halfLeading")
+    }
+    ellipsisMode(value: EllipsisMode | undefined): this {
+        throw new Error("Unimplemented method ellipsisMode")
+    }
+    stopBackPress(value: boolean | undefined): this {
+        throw new Error("Unimplemented method stopBackPress")
+    }
+    onWillChange(value: ((value0: EditableTextChangeValue) => boolean) | undefined): this {
+        throw new Error("Unimplemented method onWillChange")
+    }
+    keyboardAppearance(value: KeyboardAppearance | undefined): this {
+        throw new Error("Unimplemented method keyboardAppearance")
+    }
+    inputFilter(value: ResourceStr | undefined, error?: ((value: string) => void)): this {
+        throw new Error("Unimplemented method inputFilter")
+    }
+    showCounter(value: boolean | undefined, options?: InputCounterOptions): this {
+        throw new Error("Unimplemented method showCounter")
+    }
+    customKeyboard(value: CustomBuilder | undefined, options?: KeyboardOptions): this {
+        throw new Error("Unimplemented method customKeyboard")
+    }
+    _onChangeEvent_text(callback_: ((text: ResourceStr | Resource | string) => void)): void {
+        throw new Error("Unimplemented method _onChangeEvent_text")
+    }
+    attributeModifier(value: AttributeModifier<TextAreaAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkTextAreaStyle extends ArkCommonMethodStyle implements TextAreaAttribute {
     placeholderColor_value?: ResourceColor | undefined

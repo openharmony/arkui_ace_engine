@@ -18,7 +18,7 @@ import { contextNode, remember, scheduleCallback } from "@koalaui/runtime"
 import { PeerNode, PeerNodeType } from "../PeerNode"
 import { rememberMutableState } from '@koalaui/runtime';
 import { KPointer } from "@koalaui/interop"
-import { ArkCommonMethodComponent, ResourceStr, CommonMethod, StateStylesOps } from '../component'
+import { ArkCommonMethodComponent, ResourceStr, CommonMethod, StateStylesOps, ArkCommonMethodPeer } from '../component'
 import { InteropNativeModule } from "@koalaui/interop"
 import { ArkCommonAttributeSet } from "./modifiers/ArkCommonModifier";
 import { PointerStyle, UnifiedData, Summary, PixelMap } from "#external"
@@ -46,6 +46,29 @@ export function hookBackgroundImageImpl(node: ArkCommonMethodComponent, src: Res
             return
         } else {
             node.getPeer()?.backgroundImage0Attribute(src_casted, repeat_casted)
+        }
+    }
+}
+
+export function hookModifierBackgroundImageImpl(node: ArkCommonMethodPeer, src: ResourceStr | PixelMap | undefined, repeat?: ImageRepeat | undefined): void {
+    const src_type = runtimeType(src)
+    const repeat_type = runtimeType(repeat)
+    if (((RuntimeType.STRING == src_type) || (RuntimeType.OBJECT == src_type) || (RuntimeType.OBJECT == src_type) || (RuntimeType.UNDEFINED == src_type)) && ((RuntimeType.NUMBER == repeat_type) || (RuntimeType.OBJECT == repeat_type))) {
+        const src_casted = src as (ResourceStr | PixelMap | undefined)
+        const repeat_casted = repeat as (ImageRepeat)
+        if (TypeChecker.isPixelMap(src_casted, false, false)) {
+            const src_0 = src as PixelMap
+            let repeatValue: int32 = 0
+            let repeat_type: int32 = RuntimeType.UNDEFINED
+            repeat_type = runtimeType(repeat)
+            if ((RuntimeType.UNDEFINED) != (repeat_type)) {
+                const repeat_value = (repeat as ImageRepeat)
+                repeatValue = TypeChecker.ImageRepeat_ToNumeric(repeat_value)
+            }
+            ArkUIAniModule._BackgroundImage_PixelMap(node.peer.ptr, src_0, repeatValue)
+            return
+        } else {
+            node.backgroundImage0Attribute(src_casted, repeat_casted)
         }
     }
 }

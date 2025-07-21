@@ -49,6 +49,8 @@ struct AppInfo {
     const char* checkCallbackEventMethodSig;
     const char* handleMessageMethodName;
     const char* handleMessageMethodSig;
+    const char* registerNativeModule;
+    const char* registerNativeModuleSig;
 };
 /* copied from arkcompiler_ets_frontend vmloader.cc*/
 const AppInfo KOALA_APP_INFO = {
@@ -66,15 +68,9 @@ const AppInfo KOALA_APP_INFO = {
     ":V",
     "handleMessage",
     "JILstd/core/String;:Z",
+    "registerNativeModulePreloader",
+    ":V",
 };
-
-// void TryEmitError(EtsEnv& env)
-// {
-//     if (env.ErrorCheck()) {
-//         env.ErrorDescribe();
-//         env.ErrorClear();
-//     }
-// }
 
 std::string GetErrorProperty(ani_env* aniEnv, ani_error aniError, const char* property)
 {
@@ -147,11 +143,6 @@ void RunArkoalaEventLoop(ani_env* env, ani_ref app)
         LOGE("[%{public}s] Call enter method failed", __func__);
         return;
     }
-    // auto terminate = env.CallBooleanMethod((ets_object)(app), (ets_method)(enter), (ets_int)0, (ets_int)0);
-    // TryEmitError(env);
-    // if (terminate) {
-    //     exit(0);
-    // }
 }
 
 // fire all arkoala callbacks at the tail of vsync (PipelineContext::FlushVsync)
@@ -372,6 +363,11 @@ ani_object ArktsFrontend::CallGetUIContextFunc(int32_t instanceId)
     return result;
 }
 
+void* ArktsFrontend::GetEnv()
+{
+    return ArktsAniUtils::GetAniEnv(vm_);
+}
+
 void* ArktsFrontend::PushExtender(
     const std::string& url, const std::string& params, bool recoverable, std::function<void()>&& finishCallback)
 {
@@ -422,6 +418,19 @@ void ArktsFrontend::ClearExtender()
 {
     CHECK_NULL_VOID(pageRouterManager_);
     pageRouterManager_->Clear();
+}
+
+void ArktsFrontend::ShowAlertBeforeBackPageExtender(const std::string& url)
+{
+    CHECK_NULL_VOID(pageRouterManager_);
+    auto dialogCallback = [](int32_t callbackType) {};
+    pageRouterManager_->EnableAlertBeforeBackPage(url, std::move(dialogCallback));
+}
+
+void ArktsFrontend::HideAlertBeforeBackPageExtender()
+{
+    CHECK_NULL_VOID(pageRouterManager_);
+    pageRouterManager_->DisableAlertBeforeBackPage();
 }
 
 bool ArktsFrontend::OnBackPressed()
@@ -505,6 +514,23 @@ void* ArktsFrontend::preloadArkTSRuntime = nullptr;
 void ArktsFrontend::PreloadAceModule(void* aniEnv)
 {
     ArktsFrontend::preloadArkTSRuntime = aniEnv;
+
+    auto* env = reinterpret_cast<ani_env*>(aniEnv);
+    ani_class appClass;
+    if (env->FindClass(KOALA_APP_INFO.className, &appClass) != ANI_OK) {
+        LOGE("PreloadAceModule: Cannot load main class %{public}s", KOALA_APP_INFO.className);
+        return;
+    }
+
+    ani_static_method create;
+    if (env->Class_FindStaticMethod(
+        appClass, KOALA_APP_INFO.registerNativeModule, KOALA_APP_INFO.registerNativeModuleSig, &create) != ANI_OK) {
+        LOGE("PreloadAceModule: Cannot find method %{public}s", KOALA_APP_INFO.registerNativeModule);
+        return;
+    }
+
+    ani_ref appLocal;
+    env->Class_CallStaticMethod_Void(appClass, create, &appLocal);
 }
 
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_PreloadAceArkTSModule(void* aniEnv)

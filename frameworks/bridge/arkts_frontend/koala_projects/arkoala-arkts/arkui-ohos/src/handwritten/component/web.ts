@@ -309,4 +309,63 @@ export class ArkWebTransfer {
         const value_casted = value as SslErrorHandler
         return ArkUIAniModule._TransferSslErrorHandlerToDynamic(value_casted.peer!.ptr)
     }
+    public static transferPermissionRequestStatic(value: Object | undefined | null): Object {
+        registerAllNativeModuleLibraryName()
+        if (value === undefined || value === null) {
+            throw new Error('dynamic object is null or undefined')
+        }
+        let result: PermissionRequest = new PermissionRequest()
+        if (!ArkUIAniModule._TransferPermissionRequestToStatic(result.peer!.ptr, value)) {
+            throw new Error('transfer failed')
+        }
+        return result as Object
+    }
+
+    public static transferPermissionRequestDynamic(value: Object): Object | undefined | null {
+        if (!TypeChecker.isPermissionRequest(value)) {
+            throw new Error('static object type mismatch')
+        }
+        const value_casted = value as PermissionRequest
+        return ArkUIAniModule._TransferPermissionRequestToDynamic(value_casted.peer!.ptr)
+    }
+
+    public static transferWebKeyboardControllerStatic(value: Object | undefined | null): Object {
+        registerAllNativeModuleLibraryName()
+        if (value === undefined || value === null) {
+            throw new Error('dynamic object is null or undefined')
+        }
+        let result: WebKeyboardController = new WebKeyboardController()
+        if (!ArkUIAniModule._TransferWebKeyboardControllerToStatic(result.peer!.ptr, value)) {
+            throw new Error('transfer failed')
+        }
+        return result as Object
+    }
+
+    public static transferWebKeyboardControllerDynamic(value: Object): Object | undefined | null {
+        if (!TypeChecker.isWebKeyboardController(value)) {
+            throw new Error('static object type mismatch')
+        }
+        const value_casted = value as WebKeyboardController
+        return ArkUIAniModule._TransferWebKeyboardControllerToDynamic(value_casted.peer!.ptr)
+    }
+
+    public static transferControllerHandlerStatic(value: Object | undefined | null): Object {
+        registerAllNativeModuleLibraryName()
+        if (value === undefined || value === null) {
+            throw new Error('dynamic object is null or undefined')
+        }
+        let result: ControllerHandler = new ControllerHandler()
+        if (!ArkUIAniModule._TransferControllerHandlerToStatic(result.peer!.ptr, value)) {
+            throw new Error('transfer failed')
+        }
+        return result as Object
+    }
+
+    public static transferControllerHandlerDynamic(value: Object): Object | undefined | null {
+        if (!TypeChecker.isControllerHandler(value)) {
+            throw new Error('static object type mismatch')
+        }
+        const value_casted = value as ControllerHandler
+        return ArkUIAniModule._TransferControllerHandlerToDynamic(value_casted.peer!.ptr)
+    }
 }

@@ -325,21 +325,51 @@ export class ArkAnimatorPeer extends ArkCommonMethodPeer {
     }
 }
 export interface AnimatorAttribute extends CommonMethod {
-    state(value: AnimationStatus | undefined): this
-    duration(value: number | undefined): this
-    curve(value: Curve | undefined): this
-    delay(value: number | undefined): this
-    fillMode(value: FillMode | undefined): this
-    iterations(value: number | undefined): this
-    playMode(value: PlayMode | undefined): this
-    motion(value: SpringMotion | FrictionMotion | ScrollMotion | undefined): this
-    onStart(value: (() => void) | undefined): this
-    onPause(value: (() => void) | undefined): this
-    onRepeat(value: (() => void) | undefined): this
-    onCancel(value: (() => void) | undefined): this
-    onFinish(value: (() => void) | undefined): this
-    onFrame(value: ((value: number) => void) | undefined): this
-    attributeModifier(value: AttributeModifier<AnimatorAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    state(value: AnimationStatus | undefined): this {
+        throw new Error("Unimplemented method state")
+    }
+    duration(value: number | undefined): this {
+        throw new Error("Unimplemented method duration")
+    }
+    curve(value: Curve | undefined): this {
+        throw new Error("Unimplemented method curve")
+    }
+    delay(value: number | undefined): this {
+        throw new Error("Unimplemented method delay")
+    }
+    fillMode(value: FillMode | undefined): this {
+        throw new Error("Unimplemented method fillMode")
+    }
+    iterations(value: number | undefined): this {
+        throw new Error("Unimplemented method iterations")
+    }
+    playMode(value: PlayMode | undefined): this {
+        throw new Error("Unimplemented method playMode")
+    }
+    motion(value: SpringMotion | FrictionMotion | ScrollMotion | undefined): this {
+        throw new Error("Unimplemented method motion")
+    }
+    onStart(value: (() => void) | undefined): this {
+        throw new Error("Unimplemented method onStart")
+    }
+    onPause(value: (() => void) | undefined): this {
+        throw new Error("Unimplemented method onPause")
+    }
+    onRepeat(value: (() => void) | undefined): this {
+        throw new Error("Unimplemented method onRepeat")
+    }
+    onCancel(value: (() => void) | undefined): this {
+        throw new Error("Unimplemented method onCancel")
+    }
+    onFinish(value: (() => void) | undefined): this {
+        throw new Error("Unimplemented method onFinish")
+    }
+    onFrame(value: ((value: number) => void) | undefined): this {
+        throw new Error("Unimplemented method onFrame")
+    }
+    attributeModifier(value: AttributeModifier<AnimatorAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkAnimatorStyle extends ArkCommonMethodStyle implements AnimatorAttribute {
     state_value?: AnimationStatus | undefined

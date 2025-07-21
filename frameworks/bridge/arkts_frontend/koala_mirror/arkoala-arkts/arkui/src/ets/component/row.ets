@@ -119,11 +119,21 @@ export interface RowOptionsV2 {
     _stub: int32;
 }
 export interface RowAttribute extends CommonMethod {
-    alignItems(value: VerticalAlign | undefined): this
-    justifyContent(value: FlexAlign | undefined): this
-    pointLight(value: PointLightStyle | undefined): this
-    reverse(value: boolean | undefined): this
-    attributeModifier(value: AttributeModifier<RowAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    alignItems(value: VerticalAlign | undefined): this {
+        throw new Error("Unimplemented method alignItems")
+    }
+    justifyContent(value: FlexAlign | undefined): this {
+        throw new Error("Unimplemented method justifyContent")
+    }
+    pointLight(value: PointLightStyle | undefined): this {
+        throw new Error("Unimplemented method pointLight")
+    }
+    reverse(value: boolean | undefined): this {
+        throw new Error("Unimplemented method reverse")
+    }
+    attributeModifier(value: AttributeModifier<RowAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkRowStyle extends ArkCommonMethodStyle implements RowAttribute {
     alignItems_value?: VerticalAlign | undefined

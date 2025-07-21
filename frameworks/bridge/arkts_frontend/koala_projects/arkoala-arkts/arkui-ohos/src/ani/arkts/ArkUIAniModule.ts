@@ -82,6 +82,9 @@ export class ArkUIAniModule {
     native static _TransferDataResubmissionHandlerToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
     native static _TransferClientAuthenticationHandlerToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
     native static _TransferSslErrorHandlerToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
+    native static _TransferPermissionRequestToStatic(ptr: KPointer, value: Object | undefined | null): boolean
+    native static _TransferControllerHandlerToStatic(ptr: KPointer, value: Object | undefined | null): boolean
+    native static _TransferWebKeyboardControllerToStatic(ptr: KPointer, value: Object | undefined | null): boolean
 
     native static _TransferScreenCaptureHandlerToDynamic(ptr: KPointer): Object | undefined | null
     native static _TransferJsGeolocationToDynamic(ptr: KPointer) : Object | undefined | null
@@ -98,6 +101,9 @@ export class ArkUIAniModule {
     native static _TransferDataResubmissionHandlerToDynamic(ptr: KPointer) : Object | undefined | null
     native static _TransferClientAuthenticationHandlerToDynamic(ptr: KPointer) : Object | undefined | null
     native static _TransferSslErrorHandlerToDynamic(ptr: KPointer) : Object | undefined | null
+    native static _TransferPermissionRequestToDynamic(ptr: KPointer) : Object | undefined | null
+    native static _TransferControllerHandlerToDynamic(ptr: KPointer) : Object | undefined | null
+    native static _TransferWebKeyboardControllerToDynamic(ptr: KPointer) : Object | undefined | null
 
     // for Drag
     native static _DragEvent_Set_Data(ptr: KLong, data : unifiedDataChannel.UnifiedData) : void
@@ -172,6 +178,9 @@ export class ArkUIAniModule {
     // for Shape
     native static _Shape_Transfer_PixelMap(ptr: KPointer, pixelmap: image.PixelMap): void;
 
+    // for RichEditor
+    native static _RichEditor_Transfer_PixelMap(pixelmap: image.PixelMap): KPointer;
+
     // for  stateMgmt
     native static _PersistentStorage_Get(key: string): string
     native static _PersistentStorage_Set(key: string, value: string): void
@@ -187,6 +196,9 @@ export class ArkUIAniModule {
 
     // for XComponent
     native static _XComponent_SetSurfaceCallback(ptr: KPointer, callback: XComponentControllerCallbackInternal): void;
+    // for ComponentContent
+    native static _RemoveComponent_FromFrameNode(ptr: KPointer, content: KPointer): void
+    native static _AddComponent_ToFrameNode(ptr: KPointer, content: KPointer): void
 
     native static _CheckIsUIThread(id: KInt): KBoolean
     native static _IsDebugMode(id: KInt): KBoolean
@@ -194,4 +206,11 @@ export class ArkUIAniModule {
     native static _OnLayout_InnerLayout(ptr: KPointer): void
     native static _SetParallelScoped(parallel: boolean): void
     native static _ConditionScopeNode_Construct(id: KInt): KPointer;
+
+    native static _Common_vp2px(value:number, instanceId: KInt): number
+    native static _Common_px2vp(value:number, instanceId: KInt): number
+    native static _Common_fp2px(value:number, instanceId: KInt): number
+    native static _Common_px2fp(value:number, instanceId: KInt): number
+    native static _Common_lpx2px(value:number, instanceId: KInt): number
+    native static _Common_px2lpx(value:number, instanceId: KInt): number
 }

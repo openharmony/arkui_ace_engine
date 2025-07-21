@@ -146,6 +146,7 @@ template("ace_core_interfaces_native_node") {
       "ani/ani_utils.cpp",
       "ani/animation_ani_modifier.cpp",
       "ani/common_ani_modifier.cpp",
+      "ani/component_content_ani_modifier.cpp",
       "ani/component_snapshot_ani_modifier.cpp",
       "ani/content_slot_ani_modifier.cpp",
       "ani/custom_node_ani_modifier.cpp",
@@ -159,6 +160,7 @@ template("ace_core_interfaces_native_node") {
       #"ani/web_ani_modifier.cpp",
       "ani/waterflow_ani_modifier.cpp",
       "ani/video_ani_modifier.cpp",
+      "ani/rich_editor_ani_modifier.cpp",
       "ani/shape_ani_modifier.cpp",
       "ani/stateMgmt_ani_modifier.cpp",
       "ani/xcomponent_ani_modifier.cpp",
@@ -250,7 +252,6 @@ template("ace_core_interfaces_native_node") {
     if (defined(config.pixel_map_support)) {
       external_deps += [
         "image_framework:image",
-        "image_framework:image_taihe",
       ]
     }
     if (defined(config.enable_drag_framework) && config.enable_drag_framework) {
@@ -258,7 +259,6 @@ template("ace_core_interfaces_native_node") {
       if (defined(global_parts_info.distributeddatamgr_udmf)) {
         external_deps += [ "udmf:udmf_client" ]
         external_deps += [ "udmf:libudmf" ]
-        external_deps += [ "udmf:udmf_taihe_native" ]
       }
     }
     if (build_ohos_sdk) {

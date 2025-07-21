@@ -410,20 +410,46 @@ export interface CircleStyleOptions {
     enableForeground?: boolean;
 }
 export interface PatternLockAttribute extends CommonMethod {
-    sideLength(value: Length | undefined): this
-    circleRadius(value: Length | undefined): this
+    sideLength(value: Length | undefined): this {
+        throw new Error("Unimplemented method sideLength")
+    }
+    circleRadius(value: Length | undefined): this {
+        throw new Error("Unimplemented method circleRadius")
+    }
     backgroundColor(value: ResourceColor | undefined): this
-    regularColor(value: ResourceColor | undefined): this
-    selectedColor(value: ResourceColor | undefined): this
-    activeColor(value: ResourceColor | undefined): this
-    pathColor(value: ResourceColor | undefined): this
-    pathStrokeWidth(value: number | string | undefined): this
-    onPatternComplete(value: ((input: Array<number>) => void) | undefined): this
-    autoReset(value: boolean | undefined): this
-    onDotConnect(value: ((value0: number) => void) | undefined): this
-    activateCircleStyle(value: CircleStyleOptions | undefined): this
-    skipUnselectedPoint(value: boolean | undefined): this
-    attributeModifier(value: AttributeModifier<PatternLockAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    regularColor(value: ResourceColor | undefined): this {
+        throw new Error("Unimplemented method regularColor")
+    }
+    selectedColor(value: ResourceColor | undefined): this {
+        throw new Error("Unimplemented method selectedColor")
+    }
+    activeColor(value: ResourceColor | undefined): this {
+        throw new Error("Unimplemented method activeColor")
+    }
+    pathColor(value: ResourceColor | undefined): this {
+        throw new Error("Unimplemented method pathColor")
+    }
+    pathStrokeWidth(value: number | string | undefined): this {
+        throw new Error("Unimplemented method pathStrokeWidth")
+    }
+    onPatternComplete(value: ((input: Array<number>) => void) | undefined): this {
+        throw new Error("Unimplemented method onPatternComplete")
+    }
+    autoReset(value: boolean | undefined): this {
+        throw new Error("Unimplemented method autoReset")
+    }
+    onDotConnect(value: ((value0: number) => void) | undefined): this {
+        throw new Error("Unimplemented method onDotConnect")
+    }
+    activateCircleStyle(value: CircleStyleOptions | undefined): this {
+        throw new Error("Unimplemented method activateCircleStyle")
+    }
+    skipUnselectedPoint(value: boolean | undefined): this {
+        throw new Error("Unimplemented method skipUnselectedPoint")
+    }
+    attributeModifier(value: AttributeModifier<PatternLockAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkPatternLockStyle extends ArkCommonMethodStyle implements PatternLockAttribute {
     sideLength_value?: Length | undefined

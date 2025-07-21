@@ -57,7 +57,9 @@ export interface CircleOptions {
     height?: string | number;
 }
 export interface CircleAttribute extends CommonShapeMethod {
-    attributeModifier(value: AttributeModifier<CircleAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this
+    attributeModifier(value: AttributeModifier<CircleAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkCircleStyle extends ArkCommonShapeMethodStyle implements CircleAttribute {
     attributeModifier_value?: AttributeModifier<CircleAttribute> | AttributeModifier<CommonMethod> | undefined

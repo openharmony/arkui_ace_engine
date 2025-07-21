@@ -1855,36 +1855,96 @@ export interface MoreButtonOptions {
     backgroundEffect?: BackgroundEffectOptions;
 }
 export interface NavigationAttribute extends CommonMethod {
-    navBarWidth(value: Length | undefined): this
-    navBarPosition(value: NavBarPosition | undefined): this
-    navBarWidthRange(value: [ Dimension, Dimension ] | undefined): this
-    minContentWidth(value: Dimension | undefined): this
-    mode(value: NavigationMode | undefined): this
-    backButtonIcon(value: string | image.PixelMap | Resource | SymbolGlyphModifier | undefined): this
-    hideNavBar(value: boolean | undefined): this
-    hideTitleBar(value: boolean | undefined): this
-    hideBackButton(value: boolean | undefined): this
-    titleMode(value: NavigationTitleMode | undefined): this
-    menus(value: Array<NavigationMenuItem> | CustomBuilder | undefined): this
-    hideToolBar(value: boolean | undefined): this
-    enableToolBarAdaptation(value: boolean | undefined): this
-    onTitleModeChange(value: ((titleMode: NavigationTitleMode) => void) | undefined): this
-    onNavBarStateChange(value: ((isVisible: boolean) => void) | undefined): this
-    onNavigationModeChange(value: ((mode: NavigationMode) => void) | undefined): this
-    navDestination(value: PageMapBuilder | undefined): this
-    customNavContentTransition(value: ((from: NavContentInfo,to: NavContentInfo,operation: NavigationOperation) => NavigationAnimatedTransition | undefined) | undefined): this
-    systemBarStyle(value: window.SystemBarStyle | undefined): this
-    recoverable(value: boolean | undefined): this
-    enableDragBar(value: boolean | undefined): this
-    enableModeChangeAnimation(value: boolean | undefined): this
-    backButtonIcon(icon: string | image.PixelMap | Resource | SymbolGlyphModifier | undefined, accessibilityText?: ResourceStr): this
-    title(value: ResourceStr | CustomBuilder | NavigationCommonTitle | NavigationCustomTitle | undefined, options?: NavigationTitleOptions): this
-    hideTitleBar(hide: boolean | undefined, animated: boolean | undefined): this
-    menus(items: Array<NavigationMenuItem> | CustomBuilder | undefined, options?: NavigationMenuOptions): this
-    toolbarConfiguration(value: Array<ToolbarItem> | CustomBuilder | undefined, options?: NavigationToolbarOptions): this
-    hideToolBar(hide: boolean | undefined, animated: boolean | undefined): this
-    ignoreLayoutSafeArea(types?: Array<LayoutSafeAreaType>, edges?: Array<LayoutSafeAreaEdge>): this
-    attributeModifier(value: AttributeModifier<NavigationAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    navBarWidth(value: Length | undefined): this {
+        throw new Error("Unimplemented method navBarWidth")
+    }
+    navBarPosition(value: NavBarPosition | undefined): this {
+        throw new Error("Unimplemented method navBarPosition")
+    }
+    navBarWidthRange(value: [ Dimension, Dimension ] | undefined): this {
+        throw new Error("Unimplemented method navBarWidthRange")
+    }
+    minContentWidth(value: Dimension | undefined): this {
+        throw new Error("Unimplemented method minContentWidth")
+    }
+    mode(value: NavigationMode | undefined): this {
+        throw new Error("Unimplemented method mode")
+    }
+    backButtonIcon(value: string | image.PixelMap | Resource | SymbolGlyphModifier | undefined): this {
+        throw new Error("Unimplemented method backButtonIcon")
+    }
+    hideNavBar(value: boolean | undefined): this {
+        throw new Error("Unimplemented method hideNavBar")
+    }
+    hideTitleBar(value: boolean | undefined): this {
+        throw new Error("Unimplemented method hideTitleBar")
+    }
+    hideBackButton(value: boolean | undefined): this {
+        throw new Error("Unimplemented method hideBackButton")
+    }
+    titleMode(value: NavigationTitleMode | undefined): this {
+        throw new Error("Unimplemented method titleMode")
+    }
+    menus(value: Array<NavigationMenuItem> | CustomBuilder | undefined): this {
+        throw new Error("Unimplemented method menus")
+    }
+    hideToolBar(value: boolean | undefined): this {
+        throw new Error("Unimplemented method hideToolBar")
+    }
+    enableToolBarAdaptation(value: boolean | undefined): this {
+        throw new Error("Unimplemented method enableToolBarAdaptation")
+    }
+    onTitleModeChange(value: ((titleMode: NavigationTitleMode) => void) | undefined): this {
+        throw new Error("Unimplemented method onTitleModeChange")
+    }
+    onNavBarStateChange(value: ((isVisible: boolean) => void) | undefined): this {
+        throw new Error("Unimplemented method onNavBarStateChange")
+    }
+    onNavigationModeChange(value: ((mode: NavigationMode) => void) | undefined): this {
+        throw new Error("Unimplemented method onNavigationModeChange")
+    }
+    navDestination(value: PageMapBuilder | undefined): this {
+        throw new Error("Unimplemented method navDestination")
+    }
+    customNavContentTransition(value: ((from: NavContentInfo,to: NavContentInfo,operation: NavigationOperation) => NavigationAnimatedTransition | undefined) | undefined): this {
+        throw new Error("Unimplemented method customNavContentTransition")
+    }
+    systemBarStyle(value: window.SystemBarStyle | undefined): this {
+        throw new Error("Unimplemented method systemBarStyle")
+    }
+    recoverable(value: boolean | undefined): this {
+        throw new Error("Unimplemented method recoverable")
+    }
+    enableDragBar(value: boolean | undefined): this {
+        throw new Error("Unimplemented method enableDragBar")
+    }
+    enableModeChangeAnimation(value: boolean | undefined): this {
+        throw new Error("Unimplemented method enableModeChangeAnimation")
+    }
+    backButtonIcon(icon: string | image.PixelMap | Resource | SymbolGlyphModifier | undefined, accessibilityText?: ResourceStr): this {
+        throw new Error("Unimplemented method backButtonIcon")
+    }
+    title(value: ResourceStr | CustomBuilder | NavigationCommonTitle | NavigationCustomTitle | undefined, options?: NavigationTitleOptions): this {
+        throw new Error("Unimplemented method title")
+    }
+    hideTitleBar(hide: boolean | undefined, animated: boolean | undefined): this {
+        throw new Error("Unimplemented method hideTitleBar")
+    }
+    menus(items: Array<NavigationMenuItem> | CustomBuilder | undefined, options?: NavigationMenuOptions): this {
+        throw new Error("Unimplemented method menus")
+    }
+    toolbarConfiguration(value: Array<ToolbarItem> | CustomBuilder | undefined, options?: NavigationToolbarOptions): this {
+        throw new Error("Unimplemented method toolbarConfiguration")
+    }
+    hideToolBar(hide: boolean | undefined, animated: boolean | undefined): this {
+        throw new Error("Unimplemented method hideToolBar")
+    }
+    ignoreLayoutSafeArea(types?: Array<LayoutSafeAreaType>, edges?: Array<LayoutSafeAreaEdge>): this {
+        throw new Error("Unimplemented method ignoreLayoutSafeArea")
+    }
+    attributeModifier(value: AttributeModifier<NavigationAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkNavigationStyle extends ArkCommonMethodStyle implements NavigationAttribute {
     navBarWidth_value?: Length | undefined

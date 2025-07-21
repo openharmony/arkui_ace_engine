@@ -72,8 +72,12 @@ export interface ScrollBarOptions {
     state?: BarState;
 }
 export interface ScrollBarAttribute extends CommonMethod {
-    enableNestedScroll(value: boolean | undefined): this
-    attributeModifier(value: AttributeModifier<ScrollBarAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    enableNestedScroll(value: boolean | undefined): this {
+        throw new Error("Unimplemented method enableNestedScroll")
+    }
+    attributeModifier(value: AttributeModifier<ScrollBarAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkScrollBarStyle extends ArkCommonMethodStyle implements ScrollBarAttribute {
     enableNestedScroll_value?: boolean | undefined

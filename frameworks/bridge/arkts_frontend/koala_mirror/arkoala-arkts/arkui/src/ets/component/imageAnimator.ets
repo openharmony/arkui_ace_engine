@@ -215,20 +215,48 @@ export interface ImageFrameInfo {
     duration?: number;
 }
 export interface ImageAnimatorAttribute extends CommonMethod {
-    images(value: Array<ImageFrameInfo> | undefined): this
-    state(value: AnimationStatus | undefined): this
-    duration(value: number | undefined): this
-    reverse(value: boolean | undefined): this
-    fixedSize(value: boolean | undefined): this
-    fillMode(value: FillMode | undefined): this
-    iterations(value: number | undefined): this
-    monitorInvisibleArea(value: boolean | undefined): this
-    onStart(value: (() => void) | undefined): this
-    onPause(value: (() => void) | undefined): this
-    onRepeat(value: (() => void) | undefined): this
-    onCancel(value: (() => void) | undefined): this
-    onFinish(value: (() => void) | undefined): this
-    attributeModifier(value: AttributeModifier<ImageAnimatorAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    images(value: Array<ImageFrameInfo> | undefined): this {
+        throw new Error("Unimplemented method images")
+    }
+    state(value: AnimationStatus | undefined): this {
+        throw new Error("Unimplemented method state")
+    }
+    duration(value: number | undefined): this {
+        throw new Error("Unimplemented method duration")
+    }
+    reverse(value: boolean | undefined): this {
+        throw new Error("Unimplemented method reverse")
+    }
+    fixedSize(value: boolean | undefined): this {
+        throw new Error("Unimplemented method fixedSize")
+    }
+    fillMode(value: FillMode | undefined): this {
+        throw new Error("Unimplemented method fillMode")
+    }
+    iterations(value: number | undefined): this {
+        throw new Error("Unimplemented method iterations")
+    }
+    monitorInvisibleArea(value: boolean | undefined): this {
+        throw new Error("Unimplemented method monitorInvisibleArea")
+    }
+    onStart(value: (() => void) | undefined): this {
+        throw new Error("Unimplemented method onStart")
+    }
+    onPause(value: (() => void) | undefined): this {
+        throw new Error("Unimplemented method onPause")
+    }
+    onRepeat(value: (() => void) | undefined): this {
+        throw new Error("Unimplemented method onRepeat")
+    }
+    onCancel(value: (() => void) | undefined): this {
+        throw new Error("Unimplemented method onCancel")
+    }
+    onFinish(value: (() => void) | undefined): this {
+        throw new Error("Unimplemented method onFinish")
+    }
+    attributeModifier(value: AttributeModifier<ImageAnimatorAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkImageAnimatorStyle extends ArkCommonMethodStyle implements ImageAnimatorAttribute {
     images_value?: Array<ImageFrameInfo> | undefined

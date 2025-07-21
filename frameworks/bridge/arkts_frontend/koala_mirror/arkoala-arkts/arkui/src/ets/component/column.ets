@@ -121,11 +121,21 @@ export interface ColumnOptionsV2 {
     _stub: int32;
 }
 export interface ColumnAttribute extends CommonMethod {
-    alignItems(value: HorizontalAlign | undefined): this
-    justifyContent(value: FlexAlign | undefined): this
-    pointLight(value: PointLightStyle | undefined): this
-    reverse(value: boolean | undefined): this
-    attributeModifier(value: AttributeModifier<ColumnAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    alignItems(value: HorizontalAlign | undefined): this {
+        throw new Error("Unimplemented method alignItems")
+    }
+    justifyContent(value: FlexAlign | undefined): this {
+        throw new Error("Unimplemented method justifyContent")
+    }
+    pointLight(value: PointLightStyle | undefined): this {
+        throw new Error("Unimplemented method pointLight")
+    }
+    reverse(value: boolean | undefined): this {
+        throw new Error("Unimplemented method reverse")
+    }
+    attributeModifier(value: AttributeModifier<ColumnAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkColumnStyle extends ArkCommonMethodStyle implements ColumnAttribute {
     alignItems_value?: HorizontalAlign | undefined

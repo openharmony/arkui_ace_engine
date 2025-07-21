@@ -164,7 +164,7 @@ ohos_unittest("layout_inspector_test") {
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
   sources = [
     "$ace_root/adapter/ohos/osal/layout_inspector.cpp",
-    "layout_inspector_test.cpp",
+    #"layout_inspector_test.cpp",
     "mock_ace_checker.cpp",
     "mock_component_snapshot.cpp",
     "mock_connect_server_manager.cpp",

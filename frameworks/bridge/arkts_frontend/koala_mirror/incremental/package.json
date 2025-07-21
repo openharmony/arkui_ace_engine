@@ -24,8 +24,11 @@
         "compile": "npm run compile -w ./compat && npm run compile -w ./common && npm run compile -w ./harness && npm run compile -w ./runtime && npm run compile -w ./demo-playground && npm run compile -w ./compiler-plugin"
     },
     "dependencies": {
+        "@koalaui/build-common": "file:./build-common",
+        "@koalaui/common": "file:./common",
+        "@koalaui/compat": "file:./compat",
         "@koalaui/fast-arktsc": "file:../ui2abc/fast-arktsc",
-        "@koalaui/ets-tsc": "file:./tools/ets-tsc",
+        "@koalaui/ets-tsc": "4.9.5-r6",
         "circular-dependency-plugin": "^5.2.2",
         "copy-webpack-plugin": "^12.0.2",
         "source-map-loader": "^5.0.0",

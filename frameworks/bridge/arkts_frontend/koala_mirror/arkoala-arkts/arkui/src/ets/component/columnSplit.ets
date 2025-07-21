@@ -74,9 +74,15 @@ export interface ColumnSplitDividerStyle {
     endMargin?: Dimension;
 }
 export interface ColumnSplitAttribute extends CommonMethod {
-    resizeable(value: boolean | undefined): this
-    divider(value: ColumnSplitDividerStyle | undefined): this
-    attributeModifier(value: AttributeModifier<ColumnSplitAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    resizeable(value: boolean | undefined): this {
+        throw new Error("Unimplemented method resizeable")
+    }
+    divider(value: ColumnSplitDividerStyle | undefined): this {
+        throw new Error("Unimplemented method divider")
+    }
+    attributeModifier(value: AttributeModifier<ColumnSplitAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkColumnSplitStyle extends ArkCommonMethodStyle implements ColumnSplitAttribute {
     resizeable_value?: boolean | undefined

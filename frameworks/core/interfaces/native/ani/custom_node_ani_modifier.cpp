@@ -28,16 +28,20 @@
 
 namespace OHOS::Ace::NG {
 
-ani_long ConstructCustomNode(ani_int id, std::function<std::string()>&& onDumpInspectorFunc)
+ani_long ConstructCustomNode(ani_int id, std::function<void()>&& onPageShow, std::function<void()>&& onPageHide,
+    std::function<bool()>&& onBackPress, std::function<std::string()>&& onDumpInspectorFunc)
 {
     std::string key = NG::ViewStackProcessor::GetInstance()->ProcessViewId(std::to_string(id));
-    auto customNode = NG::CustomNode::CreateCustomNode(id, key);
-    customNode->IncRefCount();
-    customNode->SetOnDumpInspectorFunc(std::move(onDumpInspectorFunc));
-    TAG_LOGI(AceLogTag::ACE_NATIVE_NODE, "ConstructCustomNode: customNode %{public}p %{public}d",
-        AceType::RawPtr(customNode), id);
+    struct KoalaPageInfo info {
+        .onPageShowFunc = std::move(onPageShow),
+        .onPageHideFunc = std::move(onPageHide),
+        .onBackPressedFunc = std::move(onBackPress),
+        .onDumpInspectorFunc = std::move(onDumpInspectorFunc),
+        .jsViewName = key
+    };
+    auto customNode = NG::CustomNodeStatic::ConstructCustomNode(id, std::move(info));
     if (customNode) {
-        return reinterpret_cast<ani_long>(AceType::RawPtr(customNode));
+        return reinterpret_cast<ani_long>(customNode);
     }
     return 0;
 }

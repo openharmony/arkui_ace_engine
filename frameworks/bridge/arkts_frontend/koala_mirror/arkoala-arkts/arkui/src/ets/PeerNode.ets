@@ -14,10 +14,10 @@
  */
 
 import { int32, KoalaCallsiteKey } from "@koalaui/common"
-import { Disposable, IncrementalNode, scheduleCallback } from "@koalaui/runtime"
+import { Disposable, IncrementalNode, scheduleCallback, GlobalStateManager, MutableState } from "@koalaui/runtime"
 import { NativePeerNode } from "./NativePeerNode"
 import { nullptr, pointer } from "@koalaui/interop"
-import { ArkRootPeer } from "./generated"
+import { ArkRootPeer, StateStylesOps } from "./generated"
 import { ReusablePool } from "./ReusablePool"
 
 export const PeerNodeType = 11
@@ -38,6 +38,7 @@ export class PeerNode extends IncrementalNode {
     // Pool to store recycled child scopes, grouped by type
     private _reusePool?: Map<string, ReusablePool>
     private _reusable: boolean = false
+    private _uiStateStyle?: MutableState<int32>;
 
     getPeerPtr(): pointer {
         return this.peer.ptr
@@ -175,6 +176,8 @@ export class PeerNode extends IncrementalNode {
             }
         }
         this.name = name
+
+        this._uiStateStyle = undefined
     }
     applyAttributes(attrs: Object) { }
 
@@ -194,6 +197,20 @@ export class PeerNode extends IncrementalNode {
         this._onRecycle = undefined
         this._onReuse = undefined
         super.dispose()
+    }
+
+    public getOrCreateStateStyleMutable(): MutableState<int32> | undefined {
+        if (this._uiStateStyle !== undefined) {
+            return this._uiStateStyle!;
+        }
+        else {
+            const manager = GlobalStateManager.instance
+            this._uiStateStyle = manager.mutableState<int32>(0 as int32, true)
+            StateStylesOps.onStateStyleChange(this.getPeerPtr(), (state: int32) => {
+                this._uiStateStyle!.value = state
+            })
+            return this._uiStateStyle!;
+        }
     }
 }
 

@@ -237,15 +237,33 @@ export interface MenuItemOptions {
     builder?: CustomBuilder;
 }
 export interface MenuItemAttribute extends CommonMethod {
-    selected(value: boolean | undefined): this
-    selectIcon(value: boolean | ResourceStr | SymbolGlyphModifier | undefined): this
-    onChange(value: ((selected: boolean) => void) | undefined): this
-    contentFont(value: Font | undefined): this
-    contentFontColor(value: ResourceColor | undefined): this
-    labelFont(value: Font | undefined): this
-    labelFontColor(value: ResourceColor | undefined): this
-    _onChangeEvent_selected(callback_: ((selected: boolean | undefined) => void)): void
-    attributeModifier(value: AttributeModifier<MenuItemAttribute> | AttributeModifier<CommonMethod> | undefined): this
+    selected(value: boolean | undefined): this {
+        throw new Error("Unimplemented method selected")
+    }
+    selectIcon(value: boolean | ResourceStr | SymbolGlyphModifier | undefined): this {
+        throw new Error("Unimplemented method selectIcon")
+    }
+    onChange(value: ((selected: boolean) => void) | undefined): this {
+        throw new Error("Unimplemented method onChange")
+    }
+    contentFont(value: Font | undefined): this {
+        throw new Error("Unimplemented method contentFont")
+    }
+    contentFontColor(value: ResourceColor | undefined): this {
+        throw new Error("Unimplemented method contentFontColor")
+    }
+    labelFont(value: Font | undefined): this {
+        throw new Error("Unimplemented method labelFont")
+    }
+    labelFontColor(value: ResourceColor | undefined): this {
+        throw new Error("Unimplemented method labelFontColor")
+    }
+    _onChangeEvent_selected(callback_: ((selected: boolean | undefined) => void)): void {
+        throw new Error("Unimplemented method _onChangeEvent_selected")
+    }
+    attributeModifier(value: AttributeModifier<MenuItemAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        throw new Error("Unimplemented method attributeModifier")
+    }
 }
 export class ArkMenuItemStyle extends ArkCommonMethodStyle implements MenuItemAttribute {
     selected_value?: boolean | undefined
