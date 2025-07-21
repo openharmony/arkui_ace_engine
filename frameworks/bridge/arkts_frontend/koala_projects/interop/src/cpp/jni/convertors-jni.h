@@ -27,7 +27,6 @@
 #include <tuple>
 
 #include "koala-types.h"
-#include "securec.h"
 
 #define KOALA_JNI_CALL(type) extern "C" JNIEXPORT type JNICALL
 
@@ -150,9 +149,7 @@ struct SlowInteropTypeConverter<KInteropBuffer> {
     static InteropType convertTo(JNIEnv* env, KInteropBuffer value) {
       jarray result = env->NewByteArray(value.length);
       void* data = env->GetPrimitiveArrayCritical(result, nullptr);
-      if (memcpy_s(data, value.length, value.data, value.length) != 0) {
-        return;
-      }
+      memcpy(data, value.data, value.length);
       env->ReleasePrimitiveArrayCritical(result, data, 0);
       return result;
     }
@@ -168,9 +165,7 @@ struct SlowInteropTypeConverter<KInteropReturnBuffer> {
     static InteropType convertTo(JNIEnv* env, KInteropReturnBuffer value) {
       jarray result = env->NewByteArray(value.length);
       void* data = env->GetPrimitiveArrayCritical(result, nullptr);
-      if (memcpy_s(data, value.length, value.data, value.length) != 0) {
-        return;
-      }
+      memcpy(data, value.data, value.length);
       env->ReleasePrimitiveArrayCritical(result, data, 0);
       value.dispose(value.data, value.length);
       return result;

@@ -5,7 +5,6 @@
 #include "events.h"
 #include "common-interop.h"
 #include "interop-types.h"
-#include "securec.h"
 
 static std::deque<EventBuffer> eventQueue;
 
@@ -20,10 +19,7 @@ KInt impl_CheckArkoalaGeneratedEvents(KByte* result, KInt size) {
     if (!eventQueue.size())
         return 0;
 
-    if (memcpy_s(result, sizeof(EventBuffer::buffer), eventQueue.front().buffer,
-        sizeof(EventBuffer::buffer)) != 0) {
-        return 0;
-    }
+    memcpy(result, eventQueue.front().buffer, sizeof(EventBuffer::buffer));
     eventQueue.pop_front();
     return 1;
 }
@@ -34,9 +30,7 @@ KInt impl_InjectEvent(KByte* data, KInt size) {
         return 0;
 
     EventBuffer event;
-    if (memcpy_s(event.buffer, sizeof(EventBuffer::buffer), data, size) != 0) {
-        return 0;
-    }
+    memcpy(event.buffer, data, size);
 
     sendEvent(&event);
     return 1;
