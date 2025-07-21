@@ -418,4 +418,30 @@ HWTEST_F(ImageAnimatorPatternTestNg, LayoutPolicyTest001, TestSize.Level1)
     EXPECT_TRUE(imageAnimatorPattern_->IsEnableMatchParent());
     EXPECT_TRUE(imageAnimatorPattern_->IsEnableFix());
 }
+
+/**
+ * @tc.name: RunAnimatorByStatusTest001
+ * @tc.desc: Test RunAnimatorByStatus of ImageAnimator.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAnimatorPatternTestNg, RunAnimatorByStatusTest001, TestSize.Level1)
+{
+    CreateImageAnimator(10);
+
+    pattern_->status_ = ControlledAnimator::ControlStatus::RUNNING;
+    pattern_->RunAnimatorByStatus(0);
+    EXPECT_EQ(pattern_->nowImageIndex_, 0);
+
+    pattern_->status_ = ControlledAnimator::ControlStatus::IDLE;
+    pattern_->RunAnimatorByStatus(1);
+    EXPECT_EQ(pattern_->nowImageIndex_, 1);
+
+    pattern_->status_ = ControlledAnimator::ControlStatus::PAUSED;
+    pattern_->RunAnimatorByStatus(3);
+    EXPECT_EQ(pattern_->nowImageIndex_, 3);
+
+    pattern_->status_ = ControlledAnimator::ControlStatus::STOPPED;
+    pattern_->RunAnimatorByStatus(5);
+    EXPECT_EQ(pattern_->nowImageIndex_, 5);
+}
 } // namespace OHOS::Ace::NG

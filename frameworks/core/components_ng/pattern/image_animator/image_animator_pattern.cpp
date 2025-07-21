@@ -280,10 +280,12 @@ void ImageAnimatorPattern::RunAnimatorByStatus(int32_t index)
         case ControlledAnimator::ControlStatus::PAUSED:
             controlledAnimator_->Pause();
             ResetFormAnimationFlag();
+            SetShowingIndex(index);
             break;
         case ControlledAnimator::ControlStatus::STOPPED:
             controlledAnimator_->Finish();
             ResetFormAnimationFlag();
+            SetShowingIndex(index);
             break;
         default:
             ResetFormAnimationStartTime();
