@@ -56,5 +56,8 @@ export interface ArkCustomComponent {
     onFormRecycle(): string
     onFormRecover(statusData: string): void;
 
+    // dump info
+    onDumpInspector(): string;
+
     readonly isCustomLayout: boolean;
 }

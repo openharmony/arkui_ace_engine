@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 // import { AceTrace } from '../../AceTrace';
+import { DecoratedV1VariableBase } from '../decoratorImpl/decoratorBase';
 import { InteropNativeModule } from '@koalaui/interop';
 
 export class StateMgmtConsole {
@@ -23,5 +24,46 @@ export class StateMgmtConsole {
     static traceEnd(): void {}
     static scopedTrace(str: string, cb: () => void): void {
         cb();
+    }
+}
+
+class ViewInfo {
+    componentName?: string;
+    isV2?: boolean;
+}
+
+class DecoratorInfo {
+    decorator?: string;
+    propertyName?: string;
+    value?: NullishType;
+}
+
+export class DumpInfo {
+    viewinfo: ViewInfo = new ViewInfo();
+    observedPropertiesInfo: Array<DecoratorInfo> = [];
+}
+
+export class StateMgmtDFX {
+    static getDecoratedVariableInfo(view: NullishType, dumpInfo: DumpInfo): void {
+        StateMgmtDFX.dumpV1VariableInfo(view, dumpInfo);
+    }
+
+    static dumpV1VariableInfo(view: NullishType, dumpInfo: DumpInfo): void {
+        if (view instanceof Object) {
+            Object.getOwnPropertyNames(view)
+                .filter((varName) => {
+                    return varName.startsWith('__backing');
+                })
+                .forEach((varName) => {
+                    const value = Reflect.get(view, varName);
+                    if (value && value instanceof DecoratedV1VariableBase) {
+                        dumpInfo.observedPropertiesInfo.push({
+                            decorator: value.decorator,
+                            propertyName: value.varName,
+                            value: value.get(),
+                        });
+                    }
+                });
+        }
     }
 }

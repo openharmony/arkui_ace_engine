@@ -16,7 +16,7 @@
 import { DecoratedVariableBase } from '../decoratorImpl/decoratorBase';
 import { LocalStorage } from '../storage/localStorage';
 import { StorageBase } from '../storage/storageBase';
-import { AbstractProperty, IStorageProperties } from '../storage/storageProperty';
+import { SubscribedAbstractProperty, IStorageProperties } from '../storage/storageProperty';
 import { StorageProperty } from '../storage/storageBase';
 import { ExtendableComponent } from '../../component/extendableComponent';
 import { WatchFuncType } from '../decorator';
@@ -146,18 +146,18 @@ export class InteropStorageBase extends StorageBase {
         }
         const state = storage! as StorageProperty<NullishType>;
         if (state.getProxy() === undefined) {
-            const setSource = ((value: NullishType): void => {
+            const setSource = (value: NullishType): void => {
                 state.set(value);
-            });
+            };
             const proxy = createState.invoke(ESValue.wrap(state!.get()), ESValue.wrap(setSource));
             state.setProxy(proxy);
-            const setProxyValue = ((value: NullishType): void => {
+            const setProxyValue = (value: NullishType): void => {
                 proxy.invokeMethod('set', ESValue.wrap(value));
-            });
+            };
             state.setProxyValue = setProxyValue;
-            const notifyCallback = ((propertyName: string): void => {
+            const notifyCallback = (propertyName: string): void => {
                 proxy.invokeMethod('notifyPropertyHasChangedPU');
-            });
+            };
             state.setNotifyCallback(notifyCallback);
         }
         return state.getProxy()!.unwrap();
@@ -238,17 +238,17 @@ export class InteropStorageBase extends StorageBase {
     }
 
     /**
-     *  Create an AbstractProperty if property with given name already exists in storage
+     *  Create an SubscribedAbstractProperty if property with given name already exists in storage
      * and if given ttype equals the type configured for this property in storage.
      *
      * @param { string } propName LocalStorage property name
      * @param {Type} ttype - data type
-     * @returns { AbstractProperty<T> | undefined } AbstractProperty object if aforementioned conditions are
+     * @returns { SubscribedAbstractProperty<T> | undefined } SubscribedAbstractProperty object if aforementioned conditions are
      * satisfied.
      * @syscap SystemCapability.ArkUI.ArkUI.Full
      * @since 20
      */
-    public ref<T>(key: string, ttype: Type): AbstractProperty<T> | undefined {
+    public ref<T>(key: string, ttype: Type): SubscribedAbstractProperty<T> | undefined {
         let value = super.ref<T>(key, ttype);
         if (value !== undefined) {
             return value;
@@ -340,14 +340,14 @@ export class InteropStorageBase extends StorageBase {
      * if given defaultValue is assignable to given type, then
      * - create new property with given name in storage
      * - configure its type to be the given ttype
-     * - create a AbstractProperty that refers to this storage property
+     * - create a SubscribedAbstractProperty that refers to this storage property
      *   and return it
      * otherwise create no new property in storage, and return undefined.
      *
      * case B: if property with given name already exists in storage
      * (defaultValue is not used):
      * if given type equals the type configured for this property in storage
-     * - create a AbstractProperty that refers to this storage property.
+     * - create a SubscribedAbstractProperty that refers to this storage property.
      *   and return it.
      * otherwise do not touch the storage property, return undefined.
      *
@@ -355,11 +355,11 @@ export class InteropStorageBase extends StorageBase {
      * @param { T } defaultValue If property does not exist in LocalStorage,
      *        create it with given default value.
      * @param {Type} ttype - data type
-     * @returns { AbstractProperty<T> } AbstractProperty object or undefined as defined above
+     * @returns { SubscribedAbstractProperty<T> } SubscribedAbstractProperty object or undefined as defined above
      * @syscap SystemCapability.ArkUI.ArkUI.Full
      * @since 20
      */
-    public setAndRef<T>(key: string, defaultValue: T, ttype: Type): AbstractProperty<T> | undefined {
+    public setAndRef<T>(key: string, defaultValue: T, ttype: Type): SubscribedAbstractProperty<T> | undefined {
         const ttypeOpt = super.getType(key);
         if (ttypeOpt === undefined) {
             // search ArkTS1.1 Storage.
@@ -396,7 +396,7 @@ export class InteropStorageBase extends StorageBase {
      * Another reason for failing is unknown property.
      * Developer advise:
      * instance of @StorageLink / @LocalStorageLink decorated variable is a subscriber of storage property,
-     * AbstractProperty instance created by ref, setAndRef, link, or setAndLink is also a subscriber.
+     * SubscribedAbstractProperty instance created by ref, setAndRef, link, or setAndLink is also a subscriber.
      *
      * @param { string } propName
      * @returns { boolean } false if method failed
@@ -560,9 +560,8 @@ export class InteropAppStorageBase extends InteropStorageBase {
 }
 
 export class InteropAppStorage extends LocalStorage {
-    constructor(){
+    constructor() {
         super();
         this.store_ = new InteropAppStorageBase();
     }
 }
-

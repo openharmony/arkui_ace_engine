@@ -180,6 +180,10 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
         }
     }
 
+    onDumpInspector(): string {
+        return this.instance.onDumpInspector();
+    }
+
     // Theme
     onWillApplyTheme(theme: Theme): void {
         // TODO: this.instance.onWillApplyTheme(theme);

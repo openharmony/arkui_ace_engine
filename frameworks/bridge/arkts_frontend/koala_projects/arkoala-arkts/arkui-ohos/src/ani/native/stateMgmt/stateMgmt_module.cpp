@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 #include "stateMgmt_module.h"
+#include "base/log/log_wrapper.h"
 #include "load.h"
 #include "utils/ani_utils.h"
-#include "base/log/log_wrapper.h"
 
 #include <memory>
 
@@ -89,7 +89,7 @@ ani_int Env_GetColorMode(ani_env* env)
 {
     const auto* modifier = GetNodeAniModifier();
     if (!modifier) {
-        return -1;
+        return 0;
     }
     auto ret = modifier->getStateMgmtAniModifier()->getColorMode();
     return ret;
@@ -99,7 +99,7 @@ ani_float Env_GetFontScale(ani_env* env)
 {
     const auto* modifier = GetNodeAniModifier();
     if (!modifier) {
-        return -1;
+        return 0;
     }
     auto ret = modifier->getStateMgmtAniModifier()->getFontScale();
     return ret;
@@ -109,7 +109,7 @@ ani_float Env_GetFontWeightScale(ani_env* env)
 {
     const auto* modifier = GetNodeAniModifier();
     if (!modifier) {
-        return -1;
+        return 0;
     }
     auto ret = modifier->getStateMgmtAniModifier()->getFontWeightScale();
     return ret;
