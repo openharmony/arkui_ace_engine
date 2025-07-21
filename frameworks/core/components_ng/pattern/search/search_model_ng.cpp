@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/search/search_model_ng.h"
 
+#include "base/utils/multi_thread.h"
 #include "base/utils/utf_helper.h"
 #include "base/utils/utils.h"
 #include "core/common/udmf/udmf_client.h"
@@ -968,6 +969,8 @@ void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode,
     const std::optional<std::u16string>& placeholder, const std::optional<std::u16string>& value, bool hasTextFieldNode,
     const RefPtr<SearchTheme>& searchTheme)
 {
+    FREE_NODE_CHECK(parentNode, CreateTextField, parentNode,
+        placeholder, value, hasTextFieldNode, searchTheme);  // call CreateTextFieldMultiThread() by multi thread
     CHECK_NULL_VOID(searchTheme);
     auto nodeId = parentNode->GetTextFieldId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(

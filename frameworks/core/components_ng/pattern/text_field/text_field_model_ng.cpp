@@ -20,6 +20,7 @@
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
 #include "core/common/ime/text_edit_controller.h"
 #include "core/common/ime/text_input_type.h"
@@ -268,6 +269,8 @@ void TextFieldModelNG::ResetDisableUnderlineColor()
 
 void TextFieldModelNG::ProcessDefaultStyleAndBehaviors(const RefPtr<FrameNode>& frameNode)
 {
+    FREE_NODE_CHECK(frameNode, ProcessDefaultStyleAndBehaviors,
+        frameNode);  // call ProcessDefaultStyleAndBehaviorsMultiThread() by multi thread
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto themeManager = pipeline->GetThemeManager();
