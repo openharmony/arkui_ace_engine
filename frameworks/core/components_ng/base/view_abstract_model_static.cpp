@@ -466,11 +466,11 @@ void ViewAbstractModelStatic::BindDragWithContextMenuParamsStatic(FrameNode* tar
     if (gestureHub) {
         if (menuParam.contextMenuRegisterType == ContextMenuRegisterType::CUSTOM_TYPE) {
             gestureHub->SetBindMenuStatus(
-                true, menuParam.isShow, menuParam.previewMode.value_or(MenuPreviewMode::NONE));
+                true, menuParam.isShow, menuParam.previewMode);
         } else if (menuParam.menuBindType == MenuBindingType::LONG_PRESS) {
-            gestureHub->SetBindMenuStatus(false, false, menuParam.previewMode.value_or(MenuPreviewMode::NONE));
+            gestureHub->SetBindMenuStatus(false, false, menuParam.previewMode);
         }
-        gestureHub->SetPreviewMode(menuParam.previewMode.value_or(MenuPreviewMode::NONE));
+        gestureHub->SetPreviewMode(menuParam.previewMode);
         gestureHub->SetContextMenuShowStatus(menuParam.isShow);
         gestureHub->SetMenuBindingType(menuParam.menuBindType);
         // set menu preview scale to drag.
