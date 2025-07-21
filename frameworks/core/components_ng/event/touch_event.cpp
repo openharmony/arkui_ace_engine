@@ -192,7 +192,7 @@ TouchLocationInfo TouchEventActuator::CreateTouchItemInfo(
     info.SetLocalLocation(Offset(localX, localY));
     info.SetScreenLocation(Offset(screenX, screenY));
     info.SetGlobalDisplayLocation(Offset(globalDisplayX, globalDisplayY));
-    info.SetTouchType(type);
+    info.SetTouchType((pointItem.originalId == event.originalId) ? type : TouchType::MOVE);
     info.SetForce(pointItem.force);
     info.SetPressedTime(pointItem.downTime);
     info.SetWidth(pointItem.width);
