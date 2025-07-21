@@ -226,7 +226,7 @@ struct ArkUIAniCommonModifier {
 };
 struct ArkUIAniCustomNodeModifier {
     ani_long (*constructCustomNode)(ani_int, std::function<void()>&& onPageShow, std::function<void()>&& onPageHide,
-        std::function<bool()>&& onBackPress);
+        std::function<bool()>&& onBackPress, std::function<void()>&& onCleanupFunc);
     ani_object (*queryNavigationInfo)(ani_env* env, ani_long node);
     ani_object (*queryNavDestinationInfo)(ani_env* env, ani_long node);
     ani_object (*queryNavDestinationInfo0)(ani_env* env, ani_long node, ani_int isInner);

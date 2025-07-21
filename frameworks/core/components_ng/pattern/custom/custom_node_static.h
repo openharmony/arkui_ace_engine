@@ -28,6 +28,7 @@ struct KoalaPageInfo {
     std::function<void()> onPageHideFunc;
     std::function<bool()> onBackPressedFunc;
     std::function<void()> pageTransitionFunc;
+    std::function<void()> onCleanupFunc;
 
     std::string jsViewName;
 };
