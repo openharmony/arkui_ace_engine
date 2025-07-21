@@ -1084,11 +1084,11 @@ std::map<AlignDirection, AlignRule> Convert(const Ark_LocalizedAlignRuleOptions&
     std::map<AlignDirection, AlignRule> rulesMap;
     auto rule = OptConvert<AlignRule>(src.start);
     if (rule.has_value()) {
-        rulesMap[AlignDirection::START] = rule.value();
+        rulesMap[AlignDirection::LEFT] = rule.value();
     }
     rule = OptConvert<AlignRule>(src.end);
     if (rule.has_value()) {
-        rulesMap[AlignDirection::END] = rule.value();
+        rulesMap[AlignDirection::RIGHT] = rule.value();
     }
     rule = OptConvert<AlignRule>(src.middle);
     if (rule.has_value()) {
