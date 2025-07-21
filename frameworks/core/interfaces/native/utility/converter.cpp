@@ -1516,6 +1516,7 @@ NG::NavigationBackgroundOptions Convert(const Ark_MoreButtonOptions& src)
 
     if (src.backgroundBlurStyleOptions.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
         styleOptions = Converter::Convert<BlurStyleOption>(src.backgroundBlurStyleOptions.value);
+        options.blurStyleOption = styleOptions;
     }
 
     if (src.backgroundBlurStyle.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
@@ -1523,14 +1524,14 @@ NG::NavigationBackgroundOptions Convert(const Ark_MoreButtonOptions& src)
         if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
             blurStyle <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
             styleOptions.blurStyle = static_cast<BlurStyle>(blurStyle);
+            options.blurStyleOption = styleOptions;
         }
     }
 
     if (src.backgroundEffect.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
         effectOption = Converter::Convert<EffectOption>(src.backgroundEffect.value);
+        options.effectOption = effectOption;
     }
-    options.blurStyleOption = styleOptions;
-    options.effectOption = effectOption;
     return options;
 }
 
