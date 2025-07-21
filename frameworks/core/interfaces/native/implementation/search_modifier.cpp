@@ -740,6 +740,12 @@ void OnWillChangeImpl(Ark_NativePointer node,
     }
     auto onWillChange = [callback = CallbackHelper(*optValue)](const ChangeValueInfo& value) -> bool {
         Converter::ConvContext ctx;
+        Ark_TextChangeOptions textChangeOptions = {
+            .rangeBefore = Converter::ArkValue<Ark_TextRange>(value.rangeBefore),
+            .rangeAfter = Converter::ArkValue<Ark_TextRange>(value.rangeAfter),
+            .oldContent = Converter::ArkValue<Ark_String>(value.oldContent, &ctx),
+            .oldPreviewText = Converter::ArkValue<Ark_PreviewText>(value.oldPreviewText, &ctx),
+        };
         Ark_EditableTextChangeValue changeValue = {
             .content = Converter::ArkValue<Ark_String>(value.value, &ctx),
             .previewText = {
@@ -748,10 +754,7 @@ void OnWillChangeImpl(Ark_NativePointer node,
             },
             .options = {
                 .tag = INTEROP_TAG_OBJECT,
-                .value.rangeBefore = Converter::ArkValue<Ark_TextRange>(value.rangeBefore),
-                .value.rangeAfter = Converter::ArkValue<Ark_TextRange>(value.rangeAfter),
-                .value.oldContent = Converter::ArkValue<Ark_String>(value.oldContent, &ctx),
-                .value.oldPreviewText = Converter::ArkValue<Ark_PreviewText>(value.oldPreviewText, &ctx),
+                .value = textChangeOptions
             }
         };
         return callback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(changeValue)
