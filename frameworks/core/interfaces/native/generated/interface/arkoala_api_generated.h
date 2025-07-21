@@ -3231,6 +3231,8 @@ typedef struct Ark_WithThemeOptions Ark_WithThemeOptions;
 typedef struct Opt_WithThemeOptions Opt_WithThemeOptions;
 typedef struct Ark_RichEditorSpan Ark_RichEditorSpan;
 typedef struct Opt_RichEditorSpan Opt_RichEditorSpan;
+typedef struct Ark_Union_ImageAttachmentInterface_Opt_AttachmentType Ark_Union_ImageAttachmentInterface_Opt_AttachmentType;
+typedef struct Opt_Union_ImageAttachmentInterface_Opt_AttachmentType Opt_Union_ImageAttachmentInterface_Opt_AttachmentType;
 typedef struct DrawCallbackFunc DrawCallbackFunc;
 typedef struct Opt_DrawCallbackFunc Opt_DrawCallbackFunc;
 typedef struct Ark_PopupButton Ark_PopupButton;
@@ -14907,7 +14909,7 @@ typedef struct Opt_TouchResult {
     Ark_TouchResult value;
 } Opt_TouchResult;
 typedef struct Ark_TransformationMatrix {
-    Array_Number matrix4x4;
+    int64_t matrix4Object;
 } Ark_TransformationMatrix;
 typedef struct Opt_TransformationMatrix {
     Ark_Tag tag;
@@ -19522,6 +19524,18 @@ typedef struct Opt_RichEditorSpan {
     Ark_Tag tag;
     Ark_RichEditorSpan value;
 } Opt_RichEditorSpan;
+typedef struct Ark_Union_ImageAttachmentInterface_Opt_AttachmentType {
+    /* kind: UnionType */
+    Ark_Int32 selector;
+    union {
+        Ark_ImageAttachmentInterface value0;
+        Opt_AttachmentType value1;
+    };
+} Ark_Union_ImageAttachmentInterface_Opt_AttachmentType;
+typedef struct Opt_Union_ImageAttachmentInterface_Opt_AttachmentType {
+    Ark_Tag tag;
+    Ark_Union_ImageAttachmentInterface_Opt_AttachmentType value;
+} Opt_Union_ImageAttachmentInterface_Opt_AttachmentType;
 
 typedef Opt_Length Opt_Dimension;
 
@@ -27447,7 +27461,7 @@ typedef struct GENERATED_ArkUIMutableStyledStringAccessor {
 
 typedef struct GENERATED_ArkUIImageAttachmentAccessor {
     void (*destroyPeer)(Ark_ImageAttachment peer);
-    Ark_ImageAttachment (*ctor)(const Ark_ImageAttachmentInterface* value);
+    Ark_ImageAttachment (*ctor)(const Ark_Union_ImageAttachmentInterface_Opt_AttachmentType* value);
     Ark_NativePointer (*getFinalizer)();
     Ark_PixelMap (*getValue)(Ark_ImageAttachment peer);
     Opt_SizeOptions (*getSize)(Ark_ImageAttachment peer);

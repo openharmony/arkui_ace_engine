@@ -46,7 +46,6 @@
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
-#include "core/common/multi_thread_build_manager.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
@@ -2493,7 +2492,7 @@ void FrameNode::RebuildRenderContextTree()
     needSyncRenderTree_ = false;
 }
 
-void FrameNode::MarkModifyDoneUnsafely()
+void FrameNode::MarkModifyDone()
 {
     // This function has a mirror function (XxxMultiThread) and needs to be modified synchronously.
     FREE_NODE_CHECK(this, MarkModifyDone);
@@ -2540,19 +2539,6 @@ void FrameNode::MarkModifyDoneUnsafely()
 #endif
 }
 
-void FrameNode::MarkModifyDone()
-{
-    if (!IsFreeState()) {
-        MarkModifyDoneUnsafely();
-    } else {
-        PostAfterAttachMainTreeTask([weak = WeakClaim(this)]() {
-            auto host = weak.Upgrade();
-            CHECK_NULL_VOID(host);
-            host->MarkModifyDoneUnsafely();
-        });
-    }
-}
-
 [[deprecated("using AfterMountToParent")]] void FrameNode::OnMountToParentDone()
 {
     // This function has a mirror function (XxxMultiThread) and needs to be modified synchronously.
@@ -2572,7 +2558,7 @@ void FrameNode::FlushUpdateAndMarkDirty()
     MarkDirtyNode();
 }
 
-void FrameNode::MarkDirtyNodeUnsafely(PropertyChangeFlag extraFlag)
+void FrameNode::MarkDirtyNode(PropertyChangeFlag extraFlag)
 {
     // This function has a mirror function (XxxMultiThread) and needs to be modified synchronously.
     FREE_NODE_CHECK(this, MarkDirtyNode, extraFlag);
@@ -2593,19 +2579,6 @@ void FrameNode::MarkDirtyNodeUnsafely(PropertyChangeFlag extraFlag)
         return;
     }
     MarkDirtyNode(IsMeasureBoundary(), IsRenderBoundary(), extraFlag);
-}
-
-void FrameNode::MarkDirtyNode(PropertyChangeFlag extraFlag)
-{
-    if (!IsFreeState()) {
-        MarkDirtyNodeUnsafely(extraFlag);
-    } else {
-        PostAfterAttachMainTreeTask([weak = WeakClaim(this), extraFlag]() {
-            auto host = weak.Upgrade();
-            CHECK_NULL_VOID(host);
-            host->MarkDirtyNodeUnsafely(extraFlag);
-        });
-    }
 }
 
 void FrameNode::ProcessFreezeNode()

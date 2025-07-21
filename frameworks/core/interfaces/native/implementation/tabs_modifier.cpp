@@ -528,7 +528,7 @@ void CustomContentTransitionImpl(Ark_NativePointer node,
             (const RefPtr<TabContentTransitionProxy>& proxy) {
             auto peer = new TabContentTransitionProxyPeer();
             CHECK_NULL_VOID(peer);
-            peer->SetHandler(proxy);
+            peer->SetHandler(AceType::WeakClaim(proxy.GetRawPtr()));
             arkCallback.InvokeSync(peer);
         };
         transitionInfo.timeout = optTimeout.value_or(0);

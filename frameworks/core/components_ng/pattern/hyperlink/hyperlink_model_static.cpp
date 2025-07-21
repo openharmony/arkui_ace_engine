@@ -46,12 +46,12 @@ void HyperlinkModelStatic::SetTextStyle(
     textLayoutProperty->UpdateContent((!content.has_value() || content.value().empty()) ? address : content.value());
     textLayoutProperty->UpdateAddress(address);
 
-    auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
+    auto context = frameNode->GetContext();
     CHECK_NULL_VOID(context);
     auto textTheme = context->GetTheme<TextTheme>();
     CHECK_NULL_VOID(textTheme);
     auto textStyle = textTheme->GetTextStyle();
-    auto theme = PipelineContext::GetCurrentContextSafelyWithCheck()->GetTheme<HyperlinkTheme>();
+    auto theme = context->GetTheme<HyperlinkTheme>();
     CHECK_NULL_VOID(theme);
 
     textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
@@ -64,5 +64,21 @@ void HyperlinkModelStatic::SetTextStyle(
     textLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MAX_LINES_FIRST);
     frameNode->MarkModifyDone();
     frameNode->MarkDirtyNode();
+
+    auto draggable = context->GetDraggable<HyperlinkTheme>();
+    HyperlinkModelStatic::SetDraggable(frameNode, draggable);
+}
+
+void HyperlinkModelStatic::SetDraggable(FrameNode* frameNode, bool draggable)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (draggable && !frameNode->IsDraggable()) {
+        auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+        CHECK_NULL_VOID(eventHub);
+        auto gestureEventHub = eventHub->GetGestureEventHub();
+        CHECK_NULL_VOID(gestureEventHub);
+        gestureEventHub->InitDragDropEvent();
+    }
+    frameNode->SetDraggable(draggable);
 }
 } // namespace OHOS::Ace::NG

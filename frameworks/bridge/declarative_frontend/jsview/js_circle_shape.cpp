@@ -54,7 +54,6 @@ void JSCircleShape::DestructorCallback(JSCircleShape* jsCircleShape)
 void JSCircleShape::JSBind(BindingTarget globalObj)
 {
     JSClass<JSCircleShape>::Declare("__CircleShape__");
-
     JSClass<JSCircleShape>::CustomMethod("width", &JSShapeAbstract::ObjectWidth);
     JSClass<JSCircleShape>::CustomMethod("height", &JSShapeAbstract::ObjectHeight);
     JSClass<JSCircleShape>::CustomMethod("size", &JSShapeAbstract::ObjectSize);
