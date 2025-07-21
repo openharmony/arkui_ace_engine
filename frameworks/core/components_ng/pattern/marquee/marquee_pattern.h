@@ -103,6 +103,13 @@ protected:
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
+    void OnAttachToMainTree() override;
+    void OnDetachFromMainTree() override;
+
+    void OnAttachToFrameNodeMultiThread() {}
+    void OnDetachFromFrameNodeMultiThread(FrameNode* frameNode) {}
+    void OnAttachToMainTreeMultiThread();
+    void OnDetachFromMainTreeMultiThread();
 
     void FireStartEvent() const;
     void FireBounceEvent() const;
