@@ -8870,11 +8870,10 @@ export class Deserializer extends DeserializerBase {
     }
     readLeadingMarginPlaceholder(): LeadingMarginPlaceholder {
         let valueDeserializer : Deserializer = this
-        const pixelMap_result : PixelMap = (valueDeserializer.readPixelMap() as PixelMap)
         const size_buf_value0 : Dimension = (valueDeserializer.readLength() as Dimension)
         const size_buf_value1 : Dimension = (valueDeserializer.readLength() as Dimension)
         const size_result : [ Dimension, Dimension ] = ([size_buf_value0, size_buf_value1] as [ Dimension, Dimension ])
-        let value : LeadingMarginPlaceholder = ({pixelMap: pixelMap_result, size: size_result} as LeadingMarginPlaceholder)
+        let value : LeadingMarginPlaceholder = ({size: size_result} as LeadingMarginPlaceholder)
         return value
     }
     readLengthMetrics(): LengthMetrics {

@@ -32,6 +32,7 @@ extern "C" {
 #define EXTRA_INFO_MAX_LENGTH 1024
 #define ARKUI_ANI_MODIFIER_FUNCTION_NAME "GetArkUIAniModifiers"
 
+struct _ArkUIStyledString;
 struct _ArkUINode;
 struct _ArkUIContentSlot;
 struct _ArkUINodeContent;
@@ -54,6 +55,7 @@ typedef int ArkUI_Int32;
 typedef size_t ani_size;
 typedef _ArkUIContentSlot* ArkUIContentSlot;
 typedef _ArkUINodeContent* ArkUINodeContent;
+typedef _ArkUIStyledString* ArkUIStyledString;
 typedef struct WebviewControllerInfo {
     std::function<int32_t()> getWebIdFunc = nullptr;
     std::function<void(int32_t)> completeWindowNewFunc = nullptr;
@@ -294,6 +296,10 @@ struct ArkUIAniImageSpanModifier {
     void (*setAltPixelMap)(ArkUINodeHandle node, void* pixelmap);
     void (*setDrawingColorFilter)(ArkUINodeHandle node, void* colorFilter);
 };
+struct ArkUIAniStyledStringModifier {
+    void (*setPixelMap)(ArkUIStyledString peer, void* nativePixelMap);
+    void* (*getPixelMap)(ArkUIStyledString peer);
+};
 struct ArkUIAniVideoModifier {
     void (*setPixelMap)(ArkUINodeHandle node, void* pixelMap);
 };
@@ -348,6 +354,7 @@ struct ArkUIAniModifiers {
     const ArkUIAniAnimationModifier* (*getAnimationAniModifier)();
     const ArkUIAniInteropModifier* (*getInteropAniModifier)();
     const ArkUIAniDragControllerModifier* (*getDragControllerAniModifier)();
+    const ArkUIAniStyledStringModifier* (*getStyledStringAniModifier)();
     const ArkUIAniImageSpanModifier* (*getImageSpanAniModifier)();
     const ArkUIAniVideoModifier* (*getArkUIAniVideoModifier)();
     const ArkUIAniShapeModifier* (*getArkUIAniShapeModifier)();
