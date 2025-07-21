@@ -116,23 +116,25 @@ ani_long NativeCustomComponent::ConstructCustomNode(ani_env* env, [[maybe_unused
         CalcDimension measureWidth;
         CalcDimension measureHeight;
 
-        ani_ref width_ref;
-        if (ANI_OK != env->Object_GetPropertyByName_Ref(static_cast<ani_object>(result_obj), "width", &width_ref)) {
+        ani_double widthValue = -1.0f;
+        if (ANI_OK != env->Object_GetPropertyByName_Double(static_cast<ani_object>(result_obj), "width",
+            &widthValue)) {
             TAG_LOGW(AceLogTag::ACE_LAYOUT, "app return width val of onMeasureSize API is empty or undefined");
         }
-        ani_object width_obj = static_cast<ani_object>(width_ref);
+        ani_object width_obj = AniUtils::CreateDouble(env, widthValue);
 
-        ani_ref height_ref;
-        if (ANI_OK != env->Object_GetPropertyByName_Ref(static_cast<ani_object>(result_obj), "height", &height_ref)) {
+        ani_double heightValue = -1.0f;
+        if (ANI_OK != env->Object_GetPropertyByName_Double(static_cast<ani_object>(result_obj), "height",
+            &heightValue)) {
             TAG_LOGW(AceLogTag::ACE_LAYOUT, "app return height val of onMeasureSize API is empty or undefined");
         }
-        ani_object height_obj = static_cast<ani_object>(height_ref);
+        ani_object height_obj = AniUtils::CreateDouble(env, heightValue);
 
         if (!OHOS::Ace::Ani::ParseAniDimensionVp(env, width_obj, measureWidth)) {
             measureWidth = { -1.0f };
         }
         if (!OHOS::Ace::Ani::ParseAniDimensionVp(env, height_obj, measureHeight)) {
-            measureWidth = { -1.0f };
+            measureHeight = { -1.0f };
         }
 
         NG::SizeF frameSize = { measureWidth.ConvertToPx(), measureHeight.ConvertToPx() };
