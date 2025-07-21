@@ -2181,6 +2181,43 @@ HWTEST_F(TextPatternTestNg, UpdateSpanItemDragStatus001, TestSize.Level1)
     EXPECT_EQ(textPattern->dragSpanItems_.empty(), true);
 }
 
+
+/**
+ * @tc.name: GetOrCreatePreviewMenuController001
+ * @tc.desc: Test GetOrCreatePreviewMenuController
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPatternTestNg, GetOrCreatePreviewMenuController001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    TextStyle textStyle;
+    WeakPtr<TextPattern> weakPattern = textPattern;
+    RefPtr<PreviewMenuController> controller = AceType::MakeRefPtr<PreviewMenuController>(weakPattern);
+    textPattern->previewController_ = controller;
+    textPattern->GetOrCreatePreviewMenuController();
+    EXPECT_NE(textPattern->blockPress_, true);
+}
+
+/**
+ * @tc.name: GetOrCreatePreviewMenuController002
+ * @tc.desc: Test GetOrCreatePreviewMenuController
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPatternTestNg, GetOrCreatePreviewMenuController002, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    TextStyle textStyle;
+    textPattern->previewController_ = nullptr;
+    textPattern->GetOrCreatePreviewMenuController();
+    EXPECT_NE(textPattern->blockPress_, true);
+}
+
 /**
  * @tc.name: AddPixelMapToUdmfData001
  * @tc.desc: Test AddPixelMapToUdmfData
