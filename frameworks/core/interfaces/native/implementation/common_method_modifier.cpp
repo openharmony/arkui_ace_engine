@@ -397,7 +397,13 @@ auto g_bindMenuOptionsParam = [](
     if (!menuParam.placement.has_value()) {
         menuParam.placement = Placement::BOTTOM_LEFT;
     }
-    menuParam.borderRadius = OptConvert<BorderRadiusProperty>(menuOptions.borderRadius);
+    auto borderRadius = OptConvert<BorderRadiusProperty>(menuOptions.borderRadius);
+    if (borderRadius.has_value() && (borderRadius.value().radiusTopLeft.has_value()
+        || borderRadius.value().radiusTopRight.has_value()
+        || borderRadius.value().radiusBottomLeft.has_value()
+        || borderRadius.value().radiusBottomRight.has_value())) {
+        menuParam.borderRadius = borderRadius;
+    }
     menuParam.previewBorderRadius = OptConvert<BorderRadiusProperty>(menuOptions.previewBorderRadius);
     menuParam.layoutRegionMargin = OptConvert<PaddingProperty>(menuOptions.layoutRegionMargin);
     menuParam.layoutRegionMargin->start = menuParam.layoutRegionMargin->left;
@@ -1213,13 +1219,19 @@ void AssignCast(std::optional<TransitionType>& dst, const Ark_TransitionType& sr
 template<>
 ScaleOptions Convert(const Ark_ScaleOptions& src)
 {
-    ScaleOptions scaleOptions;
+    ScaleOptions scaleOptions(1.0f, 1.0f, 1.0f, 0.5_pct, 0.5_pct);
     auto coord = OptConvert<float>(src.x);
-    scaleOptions.xScale = coord.value_or(0.0);
+    if (coord.has_value()) {
+        scaleOptions.xScale = coord.value();
+    }
     coord = OptConvert<float>(src.y);
-    scaleOptions.yScale = coord.value_or(0.0);
+    if (coord.has_value()) {
+        scaleOptions.yScale = coord.value();
+    }
     coord = OptConvert<float>(src.z);
-    scaleOptions.zScale = coord.value_or(0.0);
+    if (coord.has_value()) {
+        scaleOptions.zScale = coord.value();
+    }
 
     auto center = OptConvert<Dimension>(src.centerX);
     if (center.has_value()) {
@@ -1235,18 +1247,23 @@ ScaleOptions Convert(const Ark_ScaleOptions& src)
 template<>
 RotateOptions Convert(const Ark_RotateOptions& src)
 {
-    RotateOptions rotateOptions;
-    auto coord = OptConvert<float>(src.x);
-    if (coord.has_value()) {
-        rotateOptions.xDirection = coord.value();
-    }
-    coord = OptConvert<float>(src.y);
-    if (coord.has_value()) {
-        rotateOptions.yDirection = coord.value();
-    }
-    coord = OptConvert<float>(src.z);
-    if (coord.has_value()) {
-        rotateOptions.zDirection = coord.value();
+    RotateOptions rotateOptions(0.0f, 0.0f, 0.0f, 0.0f, 0.5_pct, 0.5_pct, 0.5_pct);
+    // The value of centerZ is 50%, which is equivalent to 0 when finally set to the RS because not support percent.
+    auto coordX = OptConvert<float>(src.x);
+    auto coordY = OptConvert<float>(src.y);
+    auto coordZ = OptConvert<float>(src.z);
+    if (!coordX && !coordY && !coordZ) {
+        rotateOptions.zDirection = 1.0f;
+    } else {
+        if (coordX.has_value()) {
+            rotateOptions.xDirection = coordX.value();
+        }
+        if (coordY.has_value()) {
+            rotateOptions.yDirection = coordY.value();
+        }
+        if (coordZ.has_value()) {
+            rotateOptions.zDirection = coordZ.value();
+        }
     }
     auto angle = OptConvert<float>(src.angle);
     if (angle.has_value()) {
@@ -3503,8 +3520,12 @@ void Transform0Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CommonMethodModelNG::SetTransform0(frameNode, convValue);
+    auto addr = value->value.matrix4Object;
+    auto convValue = reinterpret_cast<Matrix4 *>(addr);
+    if (!convValue) {
+        return;
+    }
+    ViewAbstract::SetTransformMatrix(frameNode, *convValue);
 }
 void Transform1Impl(Ark_NativePointer node,
                     const Opt_Object* value)
@@ -3750,17 +3771,16 @@ void PositionImpl(Ark_NativePointer node,
             break;
         }
         case CASE_1: {
-#ifdef WRONG_GEN
             auto result = Converter::ConvertOrDefault(optValue->value1, EdgesParam());
             ViewAbstractModelStatic::SetPositionEdges(frameNode, result);
-#endif
             break;
         }
-        case CASE_2:
-            LOGE("ARKOALA: LocalizedEdges is not fully support.");
+        case CASE_2: {
+            auto result = Converter::ConvertOrDefault(optValue->value2, EdgesParam());
             ViewAbstractModelStatic::SetPositionLocalizedEdges(frameNode, true);
+            ViewAbstractModelStatic::SetPositionEdges(frameNode, result);
             break;
-
+        }
         default:
             LOGE("ARKOALA:PositionImpl: Unexpected value->selector: %{public}d\n", optValue->selector);
             return;
@@ -3784,12 +3804,12 @@ void MarkAnchorImpl(Ark_NativePointer node,
     }
     ViewAbstractModelStatic::ResetMarkAnchorStart(frameNode);
 }
+
 void OffsetImpl(Ark_NativePointer node,
                 const Opt_Union_Position_Edges_LocalizedEdges* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-#ifdef WRONG_GEN
     auto varOpt = Converter::OptConvertPtr<OffsetOrEdgesParam>(value);
     CHECK_NULL_VOID(varOpt);
     if (auto offset = std::get_if<std::optional<OffsetT<Dimension>>>(&varOpt.value()); offset) {
@@ -3800,7 +3820,6 @@ void OffsetImpl(Ark_NativePointer node,
     } else {
         LOGE("ARKOALA CommonMethod::OffsetImpl: incorrect value");
     }
-#endif
 }
 void EnabledImpl(Ark_NativePointer node,
                  const Opt_Boolean* value)
@@ -4324,19 +4343,30 @@ void ClipShape0Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<RefPtr<BasicShape>>(value);
-    if (convValue.has_value() && convValue.value()) {
-        // TODO: Reset value
-        // ViewAbstract::SetClipShape(convValue.value());
+    auto addr = value->value.value0;
+    auto convValue = reinterpret_cast<CircleShapePeer* >(addr);
+    if (!convValue) {
+        return;
     }
+    if (!convValue->shape) {
+        return;
+    }
+    ViewAbstract::SetClipShape(frameNode, convValue->shape);
 }
 void ClipShape1Impl(Ark_NativePointer node,
                     const Opt_Union_CircleShape_EllipseShape_PathShape_RectShape* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CommonMethodModelNG::SetClipShape1(frameNode, convValue);
+    auto addr = value->value.value0;
+    auto convValue = reinterpret_cast<CircleShapePeer* >(addr);
+    if (!convValue) {
+        return;
+    }
+    if (!convValue->shape) {
+        return;
+    }
+    ViewAbstract::SetClipShape(frameNode, convValue->shape);
 }
 void Mask0Impl(Ark_NativePointer node,
                const Opt_ProgressMask* value)
@@ -4367,17 +4397,30 @@ void MaskShape0Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<RefPtr<BasicShape>>(value);
-    if (convValue.has_value() && convValue.value()) {
-        // TODO: Reset value
-        ViewAbstract::SetMask(convValue.value());
+    auto addr = value->value.value0;
+    auto convValue = reinterpret_cast<CircleShapePeer* >(addr);
+    if (!convValue) {
+        return;
     }
+    if (!convValue->shape) {
+        return;
+    }
+    ViewAbstract::SetMask(frameNode, convValue->shape);
 }
 void MaskShape1Impl(Ark_NativePointer node,
                     const Opt_Union_CircleShape_EllipseShape_PathShape_RectShape* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    auto addr = value->value.value0;
+    auto convValue = reinterpret_cast<CircleShapePeer* >(addr);
+    if (!convValue) {
+        return;
+    }
+    if (!convValue->shape) {
+        return;
+    }
+    ViewAbstract::SetMask(frameNode, convValue->shape);
 }
 void KeyImpl(Ark_NativePointer node,
              const Opt_String* value)
@@ -5576,6 +5619,7 @@ void BindContextMenuBase(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
+    menuParam.type = NG::MenuType::CONTEXT_MENU;
     auto type = Converter::OptConvertPtr<ResponseType>(responseType).value_or(ResponseType::LONG_PRESS);
     auto contentBuilder = [callback = CallbackHelper(*optValue), node, frameNode, type](
                               MenuParam menuParam, std::function<void()>&& previewBuildFunc) {
@@ -5751,7 +5795,7 @@ void BindSheetImpl(Ark_NativePointer node,
         Converter::VisitUnion(sheetOptions->title,
             [&sheetStyle](const Ark_SheetTitleOptions& value) {
                 sheetStyle.sheetTitle = OptConvert<std::string>(value.title);
-                sheetStyle.sheetSubtitle = OptConvert<std::string>(value.title);
+                sheetStyle.sheetSubtitle = OptConvert<std::string>(value.subtitle.value);
             },
             [frameNode, node, &cbs](const CustomNodeBuilder& value) {
                 cbs.titleBuilder = [callback = CallbackHelper(value), node]() {

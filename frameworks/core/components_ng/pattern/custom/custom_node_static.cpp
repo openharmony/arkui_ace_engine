@@ -23,7 +23,7 @@
 #include "core/components_ng/pattern/stage/page_pattern.h"
 
 namespace OHOS::Ace::NG {
-CustomNode* CustomNodeStatic::ConstructCustomNode(int32_t id, KoalaPageInfo&& info)
+CustomNode* CustomNodeStatic::ConstructCustomNode(int32_t id, NodeKoalaInfo&& info)
 {
     auto customNode = NG::CustomNode::CreateCustomNode(id, info.jsViewName);
     customNode->IncRefCount();
@@ -32,6 +32,7 @@ CustomNode* CustomNodeStatic::ConstructCustomNode(int32_t id, KoalaPageInfo&& in
     customNode->SetOnPageHideFunc(std::move(info.onPageHideFunc));
     customNode->SetOnBackPressedFunc(std::move(info.onBackPressedFunc));
     customNode->SetPageTransitionFunc(std::move(info.pageTransitionFunc));
+    customNode->SetOnCleanupFunc(std::move(info.onCleanupFunc));
     customNode->SetOnDumpInspectorFunc(std::move(info.onDumpInspectorFunc));
 
     return AceType::RawPtr(customNode);

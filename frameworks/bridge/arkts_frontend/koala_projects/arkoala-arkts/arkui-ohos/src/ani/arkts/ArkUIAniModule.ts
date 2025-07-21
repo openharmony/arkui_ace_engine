@@ -162,6 +162,10 @@ export class ArkUIAniModule {
     native static _DeleteViewStackProcessor(ptr: KPointer): void
 
     native static _BackgroundImage_PixelMap(ptr: KPointer, pixelmap: image.PixelMap, repeat: KInt): void
+    // for StyledString
+    native static _StyledString_SetPixelMap(peerPtr: KPointer, pixelmap: image.PixelMap): void
+    native static _StyledString_GetPixelMap(peerPtr: KPointer): image.PixelMap
+
     // for ImageSpan
     native static _ImageSpan_Set_PixelMap(ptr: KPointer, pixelmap: image.PixelMap): void
     native static _ImageSpan_SetAlt_PixelMap(ptr: KPointer, pixelmap: image.PixelMap): void
@@ -205,6 +209,9 @@ export class ArkUIAniModule {
     native static _OnMeasure_InnerMeasure(ptr: KPointer): void
     native static _OnLayout_InnerLayout(ptr: KPointer): void
     native static _SetParallelScoped(parallel: boolean): void
+    native static _Common_SetCustomPropertyCallBack(ptr: KPointer, removeCallback: () => void,
+        getCallback: (name: string) => string | undefined): void
+    native static _Common_getCustomProperty<T>(ptr: KPointer, key: string): string | undefined
     native static _ConditionScopeNode_Construct(id: KInt): KPointer;
 
     native static _Common_vp2px(value:number, instanceId: KInt): number

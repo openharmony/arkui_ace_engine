@@ -29,13 +29,15 @@
 namespace OHOS::Ace::NG {
 
 ani_long ConstructCustomNode(ani_int id, std::function<void()>&& onPageShow, std::function<void()>&& onPageHide,
-    std::function<bool()>&& onBackPress, std::function<std::string()>&& onDumpInspectorFunc)
+    std::function<bool()>&& onBackPress, std::function<void()>&& onCleanupFunc,
+    std::function<std::string()>&& onDumpInspectorFunc)
 {
     std::string key = NG::ViewStackProcessor::GetInstance()->ProcessViewId(std::to_string(id));
-    struct KoalaPageInfo info {
+    struct NodeKoalaInfo info {
         .onPageShowFunc = std::move(onPageShow),
         .onPageHideFunc = std::move(onPageHide),
         .onBackPressedFunc = std::move(onBackPress),
+        .onCleanupFunc = std::move(onCleanupFunc),
         .onDumpInspectorFunc = std::move(onDumpInspectorFunc),
         .jsViewName = key
     };

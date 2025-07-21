@@ -1828,6 +1828,17 @@ RefPtr<Curve> Convert(const Ark_ICurve& src)
     return src ? src->handler : nullptr;
 }
 
+template<>
+void AssignCast(std::optional<RefPtr<Curve>>& dst, const Ark_String& src)
+{
+    auto curve = Framework::CreateCurve(Converter::Convert<std::string>(src), false);
+    if (curve) {
+        dst = curve;
+    } else {
+        dst = std::nullopt;
+    }
+}
+
 void ParseDragPreviewMode(DragPreviewOption& previewOption, const Ark_DragPreviewOptions &src)
 {
     auto previewModeHandler = [&previewOption](DragPreviewMode mode) -> bool {

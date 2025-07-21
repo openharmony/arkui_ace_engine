@@ -938,6 +938,13 @@ std::string ParagraphStyleSpan::ToString() const
     return output;
 }
 
+void ParagraphStyleSpan::SetPixelMap(const RefPtr<PixelMap>& pixelMap)
+{
+    if (paragraphStyle_.leadingMargin.has_value()) {
+        paragraphStyle_.leadingMargin->pixmap = pixelMap;
+    }
+}
+
 RefPtr<SpanBase> ParagraphStyleSpan::GetSubSpan(int32_t start, int32_t end)
 {
     RefPtr<SpanBase> spanBase = MakeRefPtr<ParagraphStyleSpan>(paragraphStyle_, start, end);

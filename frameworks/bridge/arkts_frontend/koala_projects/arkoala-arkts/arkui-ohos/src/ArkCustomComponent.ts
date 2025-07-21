@@ -36,6 +36,7 @@ export interface ArkCustomComponent {
     aboutToAppear(): void;
     aboutToDisappear(): void;
     onDidBuild(): void;
+    onCleanup(): void;
 
     // Page life cycle
     onPageShow(): void
