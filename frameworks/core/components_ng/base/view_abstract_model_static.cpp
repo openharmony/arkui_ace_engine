@@ -40,7 +40,7 @@ const std::string BLOOM_COLOR_SYS_RES_NAME = "sys.color.ohos_id_point_light_bloo
 const std::string ILLUMINATED_BORDER_WIDTH_SYS_RES_NAME = "sys.float.ohos_id_point_light_illuminated_border_width";
 constexpr int32_t LONG_PRESS_DURATION = 800;
 constexpr int32_t HOVER_IMAGE_LONG_PRESS_DURATION = 250;
-// constexpr char KEY_CONTEXT_MENU[] = "ContextMenu";
+constexpr char KEY_CONTEXT_MENU[] = "ContextMenu";
 constexpr char KEY_MENU[] = "Menu";
 
 void StartVibrator(const MenuParam& menuParam, bool isMenu, const std::string& menuHapticFeedback)
@@ -442,47 +442,47 @@ void ViewAbstractModelStatic::BindContextMenuStatic(const RefPtr<FrameNode>& tar
         RegisterContextMenuKeyEvent(targetNode, buildFunc, menuParam);
     }
 
-    // // delete menu when target node destroy
-    // auto destructor = [id = targetNode->GetId(), containerId = Container::CurrentId()]() {
-    //     auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(containerId);
-    //     CHECK_NULL_VOID(subwindow);
-    //     auto childContainerId = subwindow->GetChildContainerId();
-    //     auto childContainer = AceEngine::Get().GetContainer(childContainerId);
-    //     CHECK_NULL_VOID(childContainer);
-    //     auto pipeline = AceType::DynamicCast<NG::PipelineContext>(childContainer->GetPipelineContext());
-    //     CHECK_NULL_VOID(pipeline);
-    //     auto overlayManager = pipeline->GetOverlayManager();
-    //     CHECK_NULL_VOID(overlayManager);
-    //     overlayManager->DeleteMenu(id);
-    // };
-    // targetNode->PushDestroyCallbackWithTag(destructor, KEY_CONTEXT_MENU);
+    // delete menu when target node destroy
+    auto destructor = [id = targetNode->GetId(), containerId = Container::CurrentId()]() {
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(containerId, SubwindowType::TYPE_MENU);
+        CHECK_NULL_VOID(subwindow);
+        auto childContainerId = subwindow->GetChildContainerId();
+        auto childContainer = AceEngine::Get().GetContainer(childContainerId);
+        CHECK_NULL_VOID(childContainer);
+        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(childContainer->GetPipelineContext());
+        CHECK_NULL_VOID(pipeline);
+        auto overlayManager = pipeline->GetOverlayManager();
+        CHECK_NULL_VOID(overlayManager);
+        overlayManager->DeleteMenu(id);
+    };
+    targetNode->PushDestroyCallbackWithTag(destructor, KEY_CONTEXT_MENU);
 }
 
 void ViewAbstractModelStatic::BindDragWithContextMenuParamsStatic(FrameNode* targetNode, const NG::MenuParam& menuParam)
 {
-    // CHECK_NULL_VOID(targetNode);
+    CHECK_NULL_VOID(targetNode);
 
-    // auto gestureHub = targetNode->GetOrCreateGestureEventHub();
-    // if (gestureHub) {
-    //     if (menuParam.contextMenuRegisterType == ContextMenuRegisterType::CUSTOM_TYPE) {
-    //         gestureHub->SetBindMenuStatus(
-    //             true, menuParam.isShow, menuParam.previewMode.value_or(MenuPreviewMode::NONE));
-    //     } else if (menuParam.menuBindType == MenuBindingType::LONG_PRESS) {
-    //         gestureHub->SetBindMenuStatus(false, false, menuParam.previewMode.value_or(MenuPreviewMode::NONE));
-    //     }
-    //     gestureHub->SetPreviewMode(menuParam.previewMode.value_or(MenuPreviewMode::NONE));
-    //     gestureHub->SetContextMenuShowStatus(menuParam.isShow);
-    //     gestureHub->SetMenuBindingType(menuParam.menuBindType);
-    //     // set menu preview scale to drag.
-    //     if (menuParam.menuBindType != MenuBindingType::RIGHT_CLICK) {
-    //         auto menuPreviewScale = LessOrEqual(menuParam.previewAnimationOptions.scaleTo, 0.0)
-    //                                     ? DEFALUT_DRAG_PPIXELMAP_SCALE
-    //                                     : menuParam.previewAnimationOptions.scaleTo;
-    //         gestureHub->SetMenuPreviewScale(menuPreviewScale);
-    //     }
-    // } else {
-    //     TAG_LOGW(AceLogTag::ACE_DRAG, "Can not get gestureEventHub!");
-    // }
+    auto gestureHub = targetNode->GetOrCreateGestureEventHub();
+    if (gestureHub) {
+        if (menuParam.contextMenuRegisterType == ContextMenuRegisterType::CUSTOM_TYPE) {
+            gestureHub->SetBindMenuStatus(
+                true, menuParam.isShow, menuParam.previewMode);
+        } else if (menuParam.menuBindType == MenuBindingType::LONG_PRESS) {
+            gestureHub->SetBindMenuStatus(false, false, menuParam.previewMode);
+        }
+        gestureHub->SetPreviewMode(menuParam.previewMode);
+        gestureHub->SetContextMenuShowStatus(menuParam.isShow);
+        gestureHub->SetMenuBindingType(menuParam.menuBindType);
+        // set menu preview scale to drag.
+        if (menuParam.menuBindType != MenuBindingType::RIGHT_CLICK) {
+            auto menuPreviewScale = LessOrEqual(menuParam.previewAnimationOptions.scaleTo, 0.0)
+                                        ? DEFALUT_DRAG_PPIXELMAP_SCALE
+                                        : menuParam.previewAnimationOptions.scaleTo;
+            gestureHub->SetMenuPreviewScale(menuPreviewScale);
+        }
+    } else {
+        TAG_LOGW(AceLogTag::ACE_DRAG, "Can not get gestureEventHub!");
+    }
 }
 
 void ViewAbstractModelStatic::BindContentCover(FrameNode* frameNode, bool isShow,
