@@ -1388,6 +1388,9 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
         menuProperty->UpdateShowInSubWindow(menuParam.isShowInSubWindow);
         if (menuParam.anchorPosition.has_value()) {
             menuProperty->UpdateAnchorPosition(menuParam.anchorPosition.value());
+            if (menuParam.previewMode != MenuPreviewMode::NONE) {
+                menuProperty->UpdateMenuPlacement(menuParam.placement.value_or(OHOS::Ace::Placement::BOTTOM));
+            }
         }
     }
     UpdateMenuPaintProperty(menuNode, menuParam, type);
@@ -1599,6 +1602,9 @@ void MenuView::UpdateMenuProperties(const RefPtr<FrameNode>& wrapperNode, const 
         menuProperty->UpdateShowInSubWindow(menuParam.isShowInSubWindow);
         if (menuParam.anchorPosition.has_value()) {
             menuProperty->UpdateAnchorPosition(menuParam.anchorPosition.value());
+            if (menuParam.placement.has_value() && menuParam.previewMode != MenuPreviewMode::NONE) {
+                menuProperty->UpdateMenuPlacement(menuParam.placement.value());
+            }
         }
     }
     UpdateMenuPaintProperty(menuNode, menuParam, type);
