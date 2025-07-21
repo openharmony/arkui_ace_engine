@@ -2054,7 +2054,6 @@ void UIContentImpl::SetAceApplicationInfo(std::shared_ptr<OHOS::AbilityRuntime::
     CapabilityRegistry::Register();
     ImageFileCache::GetInstance().SetImageCacheFilePath(context->GetCacheDir());
     XcollieInterface::GetInstance().SetTimerCount("HIT_EMPTY_WARNING", TIMEOUT_LIMIT, COUNT_LIMIT);
-    PerfMonitor::GetPerfMonitor()->SetApplicationInfo();
 
     auto task = [] {
         std::unordered_map<std::string, std::string> payload;
@@ -2440,6 +2439,8 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     container->SetModuleName(hapModuleInfo->moduleName);
     container->SetIsModule(hapModuleInfo->compileMode == AppExecFwk::CompileMode::ES_MODULE);
     container->SetApiTargetVersion(apiTargetVersion);
+
+    PerfMonitor::GetPerfMonitor()->SetApplicationInfo();
 
     // for atomic service
     container->SetInstallationFree(hapModuleInfo && hapModuleInfo->installationFree);
