@@ -331,22 +331,22 @@ void WorkStateStyleImpl(Ark_NativePointer node,
 void OnSelectChangeImpl(Ark_NativePointer node,
                         const Opt_Callback_CalendarSelectedDate_Void* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // auto optValue = Converter::GetOptPtr(value);
-    // if (!optValue) {
-    //     // TODO: Reset value
-    //     return;
-    // }
-    // auto onSelectChange = [arkCallback = CallbackHelper(*optValue)](const std::string& dataStr) {
-    //     const auto json = JsonUtil::ParseJsonString(dataStr);
-    //     arkCallback.Invoke(Ark_CalendarSelectedDate {
-    //         .year = Converter::ArkValue<Ark_Number>(json->GetInt("year")),
-    //         .month = Converter::ArkValue<Ark_Number>(json->GetInt("month")),
-    //         .day = Converter::ArkValue<Ark_Number>(json->GetInt("day")),
-    //     });
-    // };
-    // CalendarModelNG::SetOnSelectChange(frameNode, onSelectChange);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // TODO: Reset value
+        return;
+    }
+    auto onSelectChange = [arkCallback = CallbackHelper(*optValue)](const std::string& dataStr) {
+        const auto json = JsonUtil::ParseJsonString(dataStr);
+        arkCallback.Invoke(Ark_CalendarSelectedDate {
+            .year = Converter::ArkValue<Ark_Number>(json->GetInt("year")),
+            .month = Converter::ArkValue<Ark_Number>(json->GetInt("month")),
+            .day = Converter::ArkValue<Ark_Number>(json->GetInt("day")),
+        });
+    };
+    CalendarModelNG::SetOnSelectChange(frameNode, onSelectChange);
 }
 void OnRequestDataImpl(Ark_NativePointer node,
                        const Opt_Callback_CalendarRequestedData_Void* value)

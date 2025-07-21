@@ -274,6 +274,13 @@ void DescriptionImpl(Ark_NativePointer node,
 void TrackShadowImpl(Ark_NativePointer node,
                      const Opt_GaugeShadowOptions* value)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = value ? Converter::OptConvert<GaugeShadowOptions>(*value) : std::nullopt;
+    GaugeShadowOptions defaultOptions;
+    defaultOptions.isShadowVisible = false;
+    auto shadow = convValue.value_or(defaultOptions);
+    GaugeModelNG::SetShadowOptions(frameNode, shadow);
 }
 void IndicatorImpl(Ark_NativePointer node,
                    const Opt_GaugeIndicatorOptions* value)
@@ -309,6 +316,8 @@ void ContentModifierImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //GaugeModelNG::SetContentModifier(frameNode, convValue);
 }
 } // GaugeAttributeModifier
 const GENERATED_ArkUIGaugeModifier* GetGaugeModifier()

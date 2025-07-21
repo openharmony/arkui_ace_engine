@@ -67,7 +67,7 @@ public:
     static void SetTodayStyle(FrameNode* frameNode, const TodayStyleData& dataStyle);
     static void SetWeekStyle(FrameNode* frameNode, const WeekStyleData& dataStyle);
     static void SetWorkStateStyle(FrameNode* frameNode, const WorkStateStyleData& dataStyle);
-    // static void SetOnSelectChange(FrameNode* frameNode, std::function<void(const std::string&)>&& selectedChangeEvent);
+    static void SetOnSelectChange(FrameNode* frameNode, std::function<void(const std::string&)>&& selectedChangeEvent);
     static void SetOnRequestData(FrameNode* frameNode, std::function<void(const std::string&)>&& requestData);
 
 private:
