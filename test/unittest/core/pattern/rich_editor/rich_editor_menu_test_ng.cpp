@@ -1188,68 +1188,41 @@ HWTEST_F(RichEditorMenuTestNg, UpdateAIMenuOptions002, TestSize.Level1)
  */
 HWTEST_F(RichEditorMenuTestNg, UpdateAIMenuOptions003, TestSize.Level1)
 {
-    /**
-     * @tc.steps: step1. create frameNode and text textPattern
-     */
     ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto richEditorController = richEditorPattern->GetRichEditorController();
-    ASSERT_NE(richEditorController, nullptr);
-    richEditorPattern->textSelector_.Update(0, 42);
-
-    /**
-     * @tc.steps: step2. prepare spanItem with at least 2 ai entity
-     */
+    auto pattern = richEditorNode_->GetPattern<RichEditorPattern>();
     auto spanItem = AceType::MakeRefPtr<SpanItem>();
-    spanItem->content = std::get<std::u16string>(U16_TEXT_FOR_AI_INFO_2.content);
+    spanItem->content = std::get<std::u16string>(U16_TEXT_FOR_AI_INFO.content);
     spanItem->position = spanItem->content.length();
-    richEditorPattern->spans_.emplace_back(spanItem);
+    pattern->spans_.emplace_back(spanItem);
 
-    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    std::vector<RectF> selectedRects { RectF(0, 0, 20, 20), RectF(30, 30, 20, 20), RectF(60, 60, 20, 20) };
-    EXPECT_CALL(*paragraph, GetRectsForPlaceholders(_)).WillRepeatedly(SetArgReferee<0>(selectedRects));
-    richEditorPattern->paragraphs_.AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
+    auto mockParagraph = MockParagraph::GetOrCreateMockParagraph();
+    std::vector<RectF> rects { RectF(0, 0, 20, 20) };
+    EXPECT_CALL(*mockParagraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(rects));
+    pattern->pManager_->AddParagraph({ .paragraph = mockParagraph, .start = 0, .end = 100 });
 
-    richEditorPattern->SetTextDetectEnable(true);
-    richEditorPattern->copyOption_ = CopyOptions::InApp;
+    pattern->SetTextDetectEnable(true);
+    pattern->copyOption_ = CopyOptions::Local;
 
-    auto aiSpan1 = U16_TEXT_FOR_AI_INFO_2.aiSpans[0];
-    auto aiSpan2 = U16_TEXT_FOR_AI_INFO_2.aiSpans[1];
+    auto aiSpan1 = U16_TEXT_FOR_AI_INFO.aiSpans[0];
+    auto aiSpan2 = U16_TEXT_FOR_AI_INFO.aiSpans[1];
+
     std::map<int32_t, Ace::AISpan> aiSpanMap;
     aiSpanMap[aiSpan1.start] = aiSpan1;
     aiSpanMap[aiSpan2.start] = aiSpan2;
-    richEditorPattern->dataDetectorAdapter_->aiSpanMap_ = aiSpanMap;
-    richEditorPattern->textDetectEnable_ = true;
-    richEditorPattern->enabled_ = true;
+    pattern->dataDetectorAdapter_->aiSpanMap_ = aiSpanMap;
 
-    /**
-     * @tc.steps: step3. create GestureEvent and call PrepareAIMenuOptions function.
-     * @tc.expected: aiMenuOptions is been setted true.
-     */
-    richEditorPattern->UpdateAIMenuOptions();
-    EXPECT_EQ(richEditorPattern->isAskCeliaEnabled_, false);
-    EXPECT_EQ(richEditorPattern->isShowAIMenuOption_, false);
-    richEditorPattern->paragraphs_.Reset();
+    EXPECT_EQ(pattern->IsAskCeliaEnabled(), false);
 
-    /**
-     * @tc.steps: step4. unexpected input set 1.
-     * @tc.expected: aiMenuOptions is been setted true.
-     */
-    richEditorPattern->textSelector_.Update(-10, -42);
-    richEditorPattern->UpdateAIMenuOptions();
-    EXPECT_EQ(richEditorPattern->isAskCeliaEnabled_, false);
-    EXPECT_EQ(richEditorPattern->isShowAIMenuOption_, false);
-    richEditorPattern->paragraphs_.Reset();
+    pattern->textSelector_.Update(0, 22);
+    pattern->isEditing_ = false;
+    pattern->UpdateAIMenuOptions();
+    EXPECT_EQ(pattern->IsShowAIMenuOption(), true);
+    EXPECT_EQ(pattern->IsAskCeliaEnabled(), false);
 
-    /**
-     * @tc.steps: step5. unexpected input set 2.
-     * @tc.expected: aiMenuOptions is been setted true.
-     */
-    richEditorPattern->textSelector_.Update(42, 10);
-    richEditorPattern->UpdateAIMenuOptions();
-    EXPECT_EQ(richEditorPattern->isAskCeliaEnabled_, false);
-    richEditorPattern->paragraphs_.Reset();
+    pattern->isEditing_ = true;
+    pattern->UpdateAIMenuOptions();
+    EXPECT_EQ(pattern->IsShowAIMenuOption(), false);
+    EXPECT_EQ(pattern->IsAskCeliaEnabled(), true);
 }
 
 /**
