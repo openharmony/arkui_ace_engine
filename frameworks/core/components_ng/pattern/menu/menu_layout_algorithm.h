@@ -113,6 +113,7 @@ protected:
     float GetMenuBottomPositionY(const RefPtr<FrameNode>& menu);
     bool isContainerModal(const RefPtr<FrameNode>& node);
     float GetContainerModalOffsetY(const RefPtr<FrameNode>& node);
+    float CalcVerticalPosition(const SizeF& size);
 
     // position input is relative to main window left top point,
     // menu show position is relative to menuWrapper.

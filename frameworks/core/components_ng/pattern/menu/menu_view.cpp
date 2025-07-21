@@ -1382,12 +1382,12 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
     if (menuProperty) {
         menuProperty->UpdateTitle(menuParam.title);
         menuProperty->UpdatePositionOffset(menuParam.positionOffset);
-        if (menuParam.placement.has_value() && !menuParam.isAnchorPosition) {
+        if (menuParam.placement.has_value() && !menuParam.anchorPosition.has_value()) {
             menuProperty->UpdateMenuPlacement(menuParam.placement.value_or(OHOS::Ace::Placement::BOTTOM));
         }
         menuProperty->UpdateShowInSubWindow(menuParam.isShowInSubWindow);
-        if (menuParam.isAnchorPosition) {
-            menuProperty->UpdateAnchorPosition(menuParam.anchorPosition);
+        if (menuParam.anchorPosition.has_value()) {
+            menuProperty->UpdateAnchorPosition(menuParam.anchorPosition.value());
         }
     }
     UpdateMenuPaintProperty(menuNode, menuParam, type);
@@ -1593,12 +1593,12 @@ void MenuView::UpdateMenuProperties(const RefPtr<FrameNode>& wrapperNode, const 
     if (menuProperty) {
         menuProperty->UpdateTitle(menuParam.title);
         menuProperty->UpdatePositionOffset(menuParam.positionOffset);
-        if (menuParam.placement.has_value() && !menuParam.isAnchorPosition) {
+        if (menuParam.placement.has_value() && !menuParam.anchorPosition.has_value()) {
             menuProperty->UpdateMenuPlacement(menuParam.placement.value());
         }
         menuProperty->UpdateShowInSubWindow(menuParam.isShowInSubWindow);
-        if (menuParam.isAnchorPosition) {
-            menuProperty->UpdateAnchorPosition(menuParam.anchorPosition);
+        if (menuParam.anchorPosition.has_value()) {
+            menuProperty->UpdateAnchorPosition(menuParam.anchorPosition.value());
         }
     }
     UpdateMenuPaintProperty(menuNode, menuParam, type);

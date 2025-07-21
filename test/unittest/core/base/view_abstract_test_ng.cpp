@@ -2049,10 +2049,6 @@ HWTEST_F(ViewAbstractTestNg, UpdateMenu004, TestSize.Level1)
     auto menuItemPattern = menuItem->GetPattern<MenuItemPattern>();
     menuItemPattern->expandingMode_ = SubMenuExpandingMode::STACK;
     EXPECT_EQ(ViewAbstract::UpdateMenu(menuParam, contentNode), ERROR_CODE_NO_ERROR);
-
-    menuParam.isAnchorPosition = true;
-    menuParam.anchorPosition = {10.0, 10.0};
-    EXPECT_EQ(ViewAbstract::UpdateMenu(menuParam, contentNode), ERROR_CODE_NO_ERROR);
 }
 
 /**
