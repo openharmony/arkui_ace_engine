@@ -31,6 +31,7 @@ RefPtr<FrameNode> PaintProperty::GetHost() const
 
 void PaintProperty::UpdatePaintPropertyHost(const PaintProperty* renderProperty)
 {
+    CHECK_NULL_VOID(renderProperty);
     host_ = renderProperty->host_;
 }
 
