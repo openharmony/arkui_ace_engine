@@ -2763,6 +2763,7 @@ frameworks/core/components_ng/render/shape_painter.cpp @arkuilayout
 frameworks/core/components_ng/render/shape_painter.h @arkuilayout
 frameworks/core/components_ng/render/snapshot_param.h @arkuievent
 frameworks/core/components_ng/token_theme/ @arkuiframework
+frameworks/core/drawable/ @arkui_image
 frameworks/core/pipeline_ng/ @arkui_architecture
 
 [Native Node Interfaces]
