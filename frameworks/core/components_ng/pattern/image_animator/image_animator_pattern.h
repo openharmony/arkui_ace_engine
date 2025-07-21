@@ -48,6 +48,12 @@ public:
 
     void OnAttachToFrameNode() override;
 
+#if defined(ACE_STATIC)
+    void OnAttachToMainTree() override;
+    void OnAttachToFrameNodeMultiThread();
+    void OnAttachToMainTreeMultiThread();
+#endif
+
     bool IsAtomicNode() const override
     {
         return true;

@@ -18,7 +18,22 @@
 #include "base/utils/utils.h"
 #include "lattice_napi/js_lattice.h"
 
+#if defined(ACE_STATIC)
+#include "lattice_ani/ani_lattice.h"
+#endif
 namespace OHOS::Ace {
+
+#if defined(ACE_STATIC)
+RefPtr<DrawingLattice> DrawingLattice::CreateDrawingLatticeFromAni(void* aniAddr)
+{
+    CHECK_NULL_RETURN(aniAddr, nullptr);
+    auto* aniLattice = reinterpret_cast<OHOS::Rosen::Drawing::AniLattice*>(aniAddr);
+    CHECK_NULL_RETURN(aniLattice, nullptr);
+    auto lattice = aniLattice->GetLattice();
+    return AceType::MakeRefPtr<DrawingLatticeOhos>(lattice);
+}
+#endif
+
 RefPtr<DrawingLattice> DrawingLattice::CreateDrawingLattice(void* sptrAddr)
 {
     CHECK_NULL_RETURN(sptrAddr, nullptr);
