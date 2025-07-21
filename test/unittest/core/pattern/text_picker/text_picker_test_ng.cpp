@@ -1087,6 +1087,30 @@ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetSelectedTextStyle006, TestSize.Le
 }
 
 /**
+ * @tc.name: TextPickerModelNGSetSelectedTextStyle007
+ * @tc.desc: Test TextPickerModelNG SetSelectedTextStyle(set invalid minFontSize and maxFontSize).
+ * @tc.type: FUNC
+ */
+ HWTEST_F(TextPickerTestNg, TextPickerModelNGSetSelectedTextStyle007, TestSize.Level1)
+ {
+     auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+     TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+     PickerTextStyle textStyle;
+     textStyle.minFontSize = Dimension(-1);
+     textStyle.maxFontSize = Dimension(-1);
+     TextPickerModelNG::GetInstance()->SetSelectedTextStyle(theme, textStyle);
+     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+     ASSERT_NE(frameNode, nullptr);
+ 
+     auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+     ASSERT_NE(pickerProperty, nullptr);
+     ASSERT_TRUE(pickerProperty->HasSelectedMinFontSize());
+     ASSERT_TRUE(pickerProperty->HasSelectedMaxFontSize());
+     EXPECT_EQ(Dimension(), pickerProperty->GetSelectedMinFontSize().value());
+     EXPECT_EQ(Dimension(), pickerProperty->GetSelectedMaxFontSize().value());
+ }
+
+/**
  * @tc.name: TextPickerModelNGSetSelected001
  * @tc.desc: Test TextPickerModelNG SetSelected.
  * @tc.type: FUNC

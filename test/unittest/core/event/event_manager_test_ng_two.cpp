@@ -1200,4 +1200,46 @@ HWTEST_F(EventManagerTestNg, OnNonPointerEvent001, TestSize.Level1)
     ret = eventManager->OnNonPointerEvent(event4);
     EXPECT_FALSE(ret);
 }
+
+/**
+ * @tc.name: HandleMouseHoverAnimation001
+ * @tc.desc: Test HandleMouseHoverAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, HandleMouseHoverAnimation001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    MouseEvent event;
+    /**
+     * @tc.steps: step2. Test mock event.
+     * @tc.expected: currHoverNode is not null.
+     */
+    eventManager->currHoverNode_ = FrameNode::GetOrCreateFrameNode(CTRL, 0, nullptr);
+    eventManager->lastHoverNode_ = FrameNode::GetOrCreateFrameNode(CTRL, 1, nullptr);
+    event.action = MouseAction::WINDOW_LEAVE;
+    eventManager->DispatchMouseHoverAnimationNG(event, true);
+    EXPECT_EQ(eventManager->currHoverNode_.Upgrade(), nullptr);
+    eventManager->lastHoverNode_ = nullptr;
+    event.action = MouseAction::WINDOW_LEAVE;
+    eventManager->DispatchMouseHoverAnimationNG(event, true);
+    EXPECT_EQ(eventManager->currHoverNode_.Upgrade(), nullptr);
+    /**
+     * @tc.steps: step3. Test normal event.
+     * @tc.expected: currHoverNode is not null.
+     */
+    eventManager->currHoverNode_ = FrameNode::GetOrCreateFrameNode(CTRL, 0, nullptr);
+    eventManager->lastHoverNode_ = FrameNode::GetOrCreateFrameNode(CTRL, 1, nullptr);
+    event.action = MouseAction::WINDOW_LEAVE;
+    eventManager->DispatchMouseHoverAnimationNG(event, false);
+    EXPECT_EQ(eventManager->currHoverNode_.Upgrade(), nullptr);
+    eventManager->lastHoverNode_ = nullptr;
+    event.action = MouseAction::WINDOW_LEAVE;
+    eventManager->DispatchMouseHoverAnimationNG(event, false);
+    EXPECT_EQ(eventManager->currHoverNode_.Upgrade(), nullptr);
+}
 } // namespace OHOS::Ace::NG

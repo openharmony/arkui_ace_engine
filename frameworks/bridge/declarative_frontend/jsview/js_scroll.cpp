@@ -57,7 +57,7 @@ ScrollModel* ScrollModel::GetInstance()
 
 namespace OHOS::Ace::Framework {
 namespace {
-const std::vector<Axis> AXIS = { Axis::VERTICAL, Axis::HORIZONTAL, Axis::FREE, Axis::NONE, Axis::FREE };
+const std::vector<Axis> AXIS = { Axis::VERTICAL, Axis::HORIZONTAL, Axis::NONE, Axis::NONE, Axis::FREE };
 
 bool ParseJsDimensionArray(
     const JSRef<JSVal>& jsValue, std::vector<Dimension>& result, std::vector<RefPtr<ResourceObject>>& resObjs)

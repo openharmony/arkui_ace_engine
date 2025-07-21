@@ -1395,4 +1395,40 @@ HWTEST_F(UIExtensionComponentTestTwoNg, InitBusinessDataHandleCallback001, TestS
     pattern->InitBusinessDataHandleCallback();
     EXPECT_GT(pattern->businessDataUECConsumeCallbacks_.count(UIContentBusinessCode::SEND_PAGE_MODE_REQUEST), 0);
 }
+
+HWTEST_F(UIExtensionComponentTestTwoNg, OnAttachContextTest, TestSize.Level1)
+{
+    auto uiExtensionNodeId1 = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode1 = FrameNode::GetOrCreateFrameNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId1, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiExtensionNode1, nullptr);
+    EXPECT_EQ(uiExtensionNode1->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
+    auto pattern1 = uiExtensionNode1->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern1, nullptr);
+    EXPECT_EQ(pattern1->hasAttachContext_, false);
+
+    auto uiExtensionNodeId2 = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode2 = FrameNode::GetOrCreateFrameNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId2, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiExtensionNode2, nullptr);
+    EXPECT_EQ(uiExtensionNode2->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
+    auto pattern2 = uiExtensionNode2->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern2, nullptr);
+    EXPECT_EQ(pattern2->hasAttachContext_, false);
+
+    auto context = NG::PipelineContext::GetCurrentContext();
+    pattern1->instanceId_ = context->GetInstanceId();
+    pattern1->curWant_ = AceType::MakeRefPtr<WantWrapOhos>("123", "123");
+    pattern2->instanceId_ = context->GetInstanceId();
+    pattern2->curWant_ = AceType::MakeRefPtr<WantWrapOhos>("123", "123");
+
+    context->frontendType_ = FrontendType::ARK_TS;
+    PipelineContext* rawContext = AceType::RawPtr(context);
+    pattern1->OnAttachContext(rawContext);
+    EXPECT_EQ(pattern1->hasAttachContext_, true);
+
+    context->frontendType_ = FrontendType::DECLARATIVE_JS;
+    pattern2->OnAttachContext(rawContext);
+    EXPECT_EQ(pattern2->hasAttachContext_, false);
+}
 } // namespace OHOS::Ace::NG

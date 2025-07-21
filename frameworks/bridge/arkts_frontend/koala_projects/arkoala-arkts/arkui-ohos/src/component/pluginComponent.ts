@@ -42,7 +42,7 @@ export interface PluginComponentTemplate {
 }
 export interface PluginComponentOptions {
     template: PluginComponentTemplate;
-    data: string;
+    data: Object | undefined | null;
 }
 export interface PluginErrorData {
     errcode: number;

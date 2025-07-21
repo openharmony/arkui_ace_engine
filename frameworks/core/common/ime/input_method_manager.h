@@ -53,6 +53,8 @@ private:
 
     std::optional<bool> windowFocus_;
     WeakPtr<NG::FrameNode> curFocusNode_;
+    bool isLastFocusUIExtension_ = false;
+    int32_t lastFocusNodeId_ = -1;
     bool lastKeep_ = false;
 };
 } // namespace OHOS::Ace

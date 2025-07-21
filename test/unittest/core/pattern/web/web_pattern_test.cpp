@@ -464,6 +464,7 @@ HWTEST_F(WebPatternTest, ProcessVirtualKeyBoardHideAvoidMenu, TestSize.Level1)
     g_webPattern->isVirtualKeyBoardShow_ = WebPattern::VkState::VK_SHOW;
     result = g_webPattern->ProcessVirtualKeyBoardHideAvoidMenu(0, 1280, false);
     EXPECT_TRUE(result);
+
     g_webPattern->isVirtualKeyBoardShow_ = WebPattern::VkState::VK_SHOW;
     result = g_webPattern->ProcessVirtualKeyBoardHideAvoidMenu(0, 1280, true);
     EXPECT_FALSE(result);

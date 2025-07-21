@@ -7715,12 +7715,10 @@ void SwiperPattern::UpdateDefaultColor()
         swiperDigitalParameters_->selectedFontColor =
             swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor();
     }
-    if (swiperParameters_ && swiperParameters_->parametersByUser.count("dotIndicator") &&
-       !swiperParameters_->parametersByUser.count("colorVal")) {
+    if (swiperParameters_ && !swiperParameters_->parametersByUser.count("colorVal")) {
         swiperParameters_->colorVal = swiperIndicatorTheme->GetColor();
     }
-    if (swiperParameters_ && swiperParameters_->parametersByUser.count("dotIndicator") &&
-        !swiperParameters_->parametersByUser.count("selectedColorVal")) {
+    if (swiperParameters_ && !swiperParameters_->parametersByUser.count("selectedColorVal")) {
         swiperParameters_->selectedColorVal = swiperIndicatorTheme->GetSelectedColor();
     }
     if (swiperArrowParameters_ && !swiperArrowParameters_->parametersByUser.count("backgroundColor")) {
@@ -7743,15 +7741,12 @@ void SwiperPattern::OnColorModeChange(uint32_t colorMode)
 {
     UpdateDefaultColor();
     Pattern::OnColorModeChange(colorMode);
-    auto swiperNode = GetHost();
-    CHECK_NULL_VOID(swiperNode);
     if (!isBindIndicator_) {
         InitIndicator();
     } else if (NeedForceMeasure()) {
         MarkDirtyBindIndicatorNode();
     }
     InitArrow();
-    swiperNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void SwiperPattern::OnFontScaleConfigurationUpdate()

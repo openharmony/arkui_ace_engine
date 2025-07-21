@@ -3209,8 +3209,13 @@ void JsAccessibilityManager::InitializeCallback()
     bool isEnabled = false;
     client->IsEnabled(isEnabled);
     AceApplicationInfo::GetInstance().SetAccessibilityEnabled(isEnabled);
+    bool isScreenReadEnabled = false;
+    client->IsScreenReaderEnabled(isScreenReadEnabled);
+    AceApplicationInfo::GetInstance().SetAccessibilityScreenReadEnabled(isScreenReadEnabled);
 
-    client->SearchNeedEvents(eventWhiteList_);
+    std::vector<uint32_t> needEvents;
+    client->SearchNeedEvents(needEvents);
+    UpdateEventWhiteList(needEvents);
 
     SubscribeStateObserver(AccessibilityStateEventType::EVENT_ACCESSIBILITY_STATE_CHANGED);
     SubscribeStateObserver(AccessibilityStateEventType::EVENT_SCREEN_READER_STATE_CHANGED);
@@ -4868,16 +4873,24 @@ bool JsAccessibilityManager::DumpInfoParams(const std::vector<std::string>& para
         } else if (*arg == "-json") {
             argument.mode = DumpMode::TREE;
         } else {
-            if (argument.mode == DumpMode::NODE) {
-                argument.mode = DumpMode::HANDLE_EVENT;
+            if (HandleNodeModeParam(*arg, argument)) {
                 break;
-            } else {
-                argument.mode = DumpMode::NODE;
-                argument.nodeId = StringUtils::StringToLongInt(*arg);
             }
         }
     }
     return true;
+}
+
+bool JsAccessibilityManager::HandleNodeModeParam(const std::string& param, DumpInfoArgument& argument)
+{
+    if (argument.mode == DumpMode::NODE) {
+        argument.mode = DumpMode::HANDLE_EVENT;
+        return true;
+    } else {
+        argument.mode = DumpMode::NODE;
+        argument.nodeId = StringUtils::StringToLongInt(param);
+        return false;
+    }
 }
 
 void JsAccessibilityManager::OnDumpInfoNG(const std::vector<std::string>& params, uint32_t windowId, bool hasJson)
@@ -5685,7 +5698,7 @@ void JsAccessibilityManager::JsInteractionOperation::SearchElementInfoBySpecific
     }
 
     executor->PostTask(
-        [weak = GetHandler(), splitElementId, &param, requestId, &callback, windowId]() {
+        [weak = GetHandler(), splitElementId, param, requestId, &callback, windowId]() {
             auto jsAccessibilityManager = weak.Upgrade();
             if (!jsAccessibilityManager) {
                 std::list<AccessibilityElementInfo> infos;
@@ -5693,6 +5706,7 @@ void JsAccessibilityManager::JsInteractionOperation::SearchElementInfoBySpecific
                 callback.SetSearchElementInfoBySpecificPropertyResult(infos, treeInfos, requestId);
                 TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY,
                     "SetSearchElementInfoBySpecificPropertyResult, requestId: %{public}d", requestId);
+                return;
             }
             ACE_SCOPED_TRACE("SearchElementInfoBySpecificProperty");
             jsAccessibilityManager->SearchElementInfoBySpecificProperty(
@@ -7742,6 +7756,9 @@ void JsAccessibilityManager::RegisterInteractionOperationAsChildTree(
     TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "RegisterElementOperator result: %{public}d", retReg);
     Register(retReg == RET_OK);
     AceApplicationInfo::GetInstance().SetAccessibilityEnabled(retReg == RET_OK);
+    bool isScreenReadEnabled = false;
+    instance->IsScreenReaderEnabled(isScreenReadEnabled);
+    AceApplicationInfo::GetInstance().SetAccessibilityScreenReadEnabled(isScreenReadEnabled);
     parentElementId_ = parentElementId;
     parentTreeId_ = parentTreeId;
     parentWindowId_ = parentWindowId;
@@ -7780,6 +7797,7 @@ void JsAccessibilityManager::DeregisterInteractionOperationAsChildTree()
     currentFocusNodeId_ = -1;
     instance->DeregisterElementOperator(windowId, treeId_);
     AceApplicationInfo::GetInstance().SetAccessibilityEnabled(false);
+    AceApplicationInfo::GetInstance().SetAccessibilityScreenReadEnabled(false);
     parentElementId_ = INVALID_PARENT_ID;
     parentTreeId_ = 0;
     parentWindowId_ = 0;
@@ -7969,6 +7987,7 @@ void JsAccessibilityManager::JsAccessibilityStateObserver::OnStateChanged(const 
             } else if (eventType == AccessibilityStateEventType::EVENT_SCREEN_READER_STATE_CHANGED) {
                 jsAccessibilityManager->isScreenReaderEnabledInitialized_ = true;
                 jsAccessibilityManager->isScreenReaderEnabled_ = state;
+                AceApplicationInfo::GetInstance().SetAccessibilityScreenReadEnabled(state);
             } else if (eventType == AccessibilityStateEventType::EVENT_CONFIG_EVENT_CHANGED) {
                 std::vector<uint32_t> needEvents;
                 auto client = AccessibilitySystemAbilityClient::GetInstance();

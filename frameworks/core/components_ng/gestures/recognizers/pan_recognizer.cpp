@@ -292,6 +292,7 @@ void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
             TAG_LOGI(AceLogTag::ACE_GESTURE, "Pan gesture refereeState is not READY");
         }
     }
+    HandlePanExtAccept();
 }
 
 void PanRecognizer::HandleTouchDownEvent(const AxisEvent& event)
@@ -560,6 +561,16 @@ void PanRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
         }
         SendCallbackMsg(onActionUpdate_, GestureCallbackType::UPDATE);
     }
+}
+
+bool PanRecognizer::HandlePanExtAccept()
+{
+    if (onActionExtUpdate_ && *onActionExtUpdate_) {
+        auto callbackFunction = *onActionExtUpdate_;
+        GestureEvent info = GetGestureEventInfo();
+        callbackFunction(info);
+    }
+    return true;
 }
 
 bool PanRecognizer::HandlePanAccept()
@@ -992,6 +1003,7 @@ bool PanRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer)
 
     onActionStart_ = std::move(curr->onActionStart_);
     onActionUpdate_ = std::move(curr->onActionUpdate_);
+    onActionExtUpdate_ = std::move(curr->onActionExtUpdate_);
     onActionEnd_ = std::move(curr->onActionEnd_);
     onActionCancel_ = std::move(curr->onActionCancel_);
     ReconcileGestureInfoFrom(recognizer);

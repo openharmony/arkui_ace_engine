@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "base/utils/multi_thread.h"
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #include "base/log/dump_log.h"
@@ -528,7 +529,7 @@ void CheckBoxPattern::UpdateUIStatus(bool check)
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-void CheckBoxPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+void CheckBoxPattern::UpdateGroupStatus(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
     auto groupManager = GetGroupManager();
@@ -544,6 +545,19 @@ void CheckBoxPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveVisibleAreaChangeNode(frameNode->GetId());
+}
+
+
+void CheckBoxPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    THREAD_SAFE_NODE_CHECK(frameNode, OnDetachFromFrameNode);
+    UpdateGroupStatus(frameNode);
+}
+
+void CheckBoxPattern::OnDetachFromMainTree()
+{
+    auto host = GetHost();
+    THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree, host);
 }
 
 void CheckBoxPattern::CheckPageNode()

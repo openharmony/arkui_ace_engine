@@ -2755,4 +2755,24 @@ HWTEST_F(TextInputAreaTest, testFieldModelStatic038, TestSize.Level1)
     EXPECT_FALSE(layoutProperty->GetShowErrorText().has_value());
 }
 
+/**
+ * @tc.name: SetCapitalizationMode001
+ * @tc.desc: test search set CapitalizationMode default value
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, SetCapitalizationMode001, TestSize.Level1)
+{
+    TextFieldModelNG textFieldModelNG;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    EXPECT_NE(pattern, nullptr);
+
+    textFieldModelNG.SetCapitalizationMode(AutoCapitalizationMode::NONE);
+    EXPECT_EQ(AutoCapitalizationMode::NONE, pattern->GetAutoCapitalizationMode());
+
+    textFieldModelNG.SetAutoCapitalizationMode(frameNode, AutoCapitalizationMode::WORDS);
+    EXPECT_EQ(AutoCapitalizationMode::WORDS, pattern->GetAutoCapitalizationMode());
+}
+
 } // namespace OHOS::Ace::NG

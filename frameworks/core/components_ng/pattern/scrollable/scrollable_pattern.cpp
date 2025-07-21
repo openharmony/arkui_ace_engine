@@ -28,6 +28,7 @@
 #include "core/common/recorder/event_definition.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/base/observer_handler.h"
+#include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_scroll_notifier.h"
 #include "core/components_ng/pattern/scroll/effect/scroll_fade_effect.h"
 #include "core/components_ng/pattern/scroll/scroll_event_hub.h"
@@ -35,6 +36,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable.h"
 #include "core/components_ng/pattern/scrollable/scrollable_event_hub.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
+#include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/syntax/for_each_node.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
@@ -44,7 +46,9 @@
 #include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar.h"
 #include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar_overlay_modifier.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
+#ifdef ACE_STATIC
+#include "core/components_ng/syntax/arkoala_lazy_node.h"
+#endif
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -57,6 +61,9 @@ constexpr uint32_t MAX_VSYNC_DIFF_TIME = 100 * 1000 * 1000; //max 100ms
 constexpr uint32_t DEFAULT_VSYNC_DIFF_TIME = 16 * 1000 * 1000; // default is 16 ms
 constexpr uint32_t EVENTS_FIRED_INFO_COUNT = 50;
 constexpr uint32_t SCROLLABLE_FRAME_INFO_COUNT = 50;
+constexpr uint32_t DVSYNC_OFFSET_SIZE = 10;
+constexpr uint32_t DVSYNC_OFFSET_TIME = 18666667;
+constexpr uint32_t DVSYNC_DELAY_TIME_BASE = 27000000;
 constexpr Dimension LIST_FADINGEDGE = 32.0_vp;
 constexpr double ARC_INITWIDTH_VAL = 4.0;
 constexpr double ARC_INITWIDTH_HALF_VAL = 2.0;
@@ -489,6 +496,13 @@ bool ScrollablePattern::CoordinateWithNavigation(double& offset, int32_t source,
     return false;
 }
 
+void ScrollablePattern::SetUiDVSyncCommandTime(uint64_t time)
+{
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    context->SetUiDVSyncCommandTime(time);
+}
+
 void ScrollablePattern::SetUiDvsyncSwitch(bool on)
 {
     auto context = GetContext();
@@ -499,6 +513,7 @@ void ScrollablePattern::SetUiDvsyncSwitch(bool on)
         inScrollingStatus_ = false;
         context->SetUiDvsyncSwitch(true);
         switchOnStatus_ = true;
+        isNeedCollectOffset_ = true;
     } else if (!on && switchOnStatus_) {
         TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "ScrollablePattern::SetUiDvsyncSwitch SetUiDvsyncSwitch false");
         context->SetUiDvsyncSwitch(false);
@@ -611,6 +626,20 @@ void ScrollablePattern::OnTouchTestDone(const std::shared_ptr<BaseGestureEvent>&
             recognizer->SetPreventBegin(true);
         }
     }
+}
+
+void ScrollablePattern::SetHandleExtScrollCallback(const RefPtr<Scrollable>& scrollable)
+{
+    // move HandleScroll and HandleOverScroll to ScrollablePattern by setting callbacks to scrollable
+    CHECK_NULL_VOID(scrollable);
+    auto handleScroll = [weak = AceType::WeakClaim(this)]() -> ScrollResult {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            return pattern->HandleExtScroll(pattern->GetVelocity());
+        }
+        return {};
+    };
+    scrollable->SetHandleExtScrollCallback(std::move(handleScroll));
 }
 
 void ScrollablePattern::SetHandleScrollCallback(const RefPtr<Scrollable>& scrollable)
@@ -796,6 +825,7 @@ RefPtr<Scrollable> ScrollablePattern::CreateScrollable()
     scrollable->SetNodeTag(host->GetTag());
     scrollable->Initialize(host);
     SetHandleScrollCallback(scrollable);
+    SetHandleExtScrollCallback(scrollable);
     SetOverScrollCallback(scrollable);
     SetIsReverseCallback(scrollable);
     SetOnScrollStartRec(scrollable);
@@ -2147,10 +2177,22 @@ bool ScrollablePattern::HandleScrollImpl(float offset, int32_t source)
 
     // Now: HandleScroll moved to ScrollablePattern, directly call HandleScrollImpl in
     // ScrollablePattern::HandleScroll
+    auto context = GetContext();
     double overOffset = offset;
     if (!OnScrollPosition(overOffset, source)) {
         return false;
     }
+    if (isNeedCollectOffset_) {
+        uint64_t currentVsync = 0;
+        if (context != nullptr) {
+            currentVsync = context->GetVsyncTime();
+        }
+        offsets_.push({currentVsync, offset});
+        if (offsets_.size() > DVSYNC_OFFSET_SIZE) {
+            offsets_.pop();
+        }
+    }
+
     auto result = OnScrollCallback(overOffset, source);
     SelectOverlayScrollNotifier::NotifyOnScrollCallback(WeakClaim(this), overOffset, source);
     return result;
@@ -2284,16 +2326,24 @@ int32_t ScrollablePattern::ScrollToTarget(
     ACE_SCOPED_TRACE("ScrollToTarget, scrollable:%d, target:%d, offset:%f, align:%d", scrollable->GetId(),
         target->GetId(), targetOffset, targetAlign);
 
+    auto axis = pattern->GetAxis();
     auto scrollablePos = scrollable->GetTransformRelativeOffset();
     auto targetPos = target->GetTransformRelativeOffset();
-    auto offsetToScrollable = (targetPos - scrollablePos).GetMainOffset(pattern->GetAxis());
+    auto offsetToScrollable = (targetPos - scrollablePos).GetMainOffset(axis);
     auto scrollToOffset = pattern->GetTotalOffset();
     TAG_LOGI(AceLogTag::ACE_SCROLLABLE,
         "ScrollToTarget, scrollable:%{public}d, target:%{public}d, offset:%{public}f, align:%{public}d, "
         "currentOffset:%{public}f, offsetToScrollabl:%{public}f",
         scrollable->GetId(), target->GetId(), targetOffset, targetAlign, scrollToOffset, offsetToScrollable);
+
+    offsetToScrollable += targetOffset;
+    if (pattern->IsReverse()) {
+        offsetToScrollable += target->GetGeometryNode()->GetPaddingSize().MainSize(axis);
+        offsetToScrollable = pattern->GetMainContentSize() +
+                             ScrollableUtils::CheckHeightExpansion(scrollable->GetLayoutProperty(), axis) -
+                             offsetToScrollable;
+    }
     scrollToOffset += offsetToScrollable;
-    scrollToOffset += targetOffset;
     if (targetAlign == ScrollAlign::CENTER) {
         scrollToOffset -= pattern->GetMainContentSize() / 2;
     }
@@ -2497,6 +2547,59 @@ bool ScrollablePattern::HandleOutBoundary(float& offset, int32_t source, NestedS
     return NearZero(offset);
 }
 
+float ScrollablePattern::GetDVSyncOffset()
+{
+    auto context = GetContext();
+    CHECK_NULL_RETURN(context, 0);
+    if (offsets_.empty() || !isNeedCollectOffset_) {
+        return 0;
+    }
+    uint64_t currentVsync = context->GetVsyncTime();
+    uint64_t currentTime = GetSysTimestamp();
+    bool needUpdateCommandTime = false;
+    if (currentVsync >= offsets_.back().first && currentVsync - currentTime > DVSYNC_DELAY_TIME_BASE) {
+        currentTime += DVSYNC_OFFSET_TIME;
+        needUpdateCommandTime = true;
+    }
+    uint64_t commandTime = 0;
+    float dvsyncOffset = 0;
+    if (!needUpdateCommandTime || currentTime >= currentVsync) {
+        return dvsyncOffset;
+    }
+    while (!offsets_.empty()) {
+        if (offsets_.front().first >= currentTime) {
+            dvsyncOffset -= offsets_.front().second;
+            if (commandTime == 0) {
+                commandTime = offsets_.front().first;
+            }
+        }
+        offsets_.pop();
+    }
+    if (commandTime == 0) {
+        commandTime = currentTime;
+    }
+    std::queue<std::pair<uint64_t, float>> tmp;
+    std::swap(tmp, offsets_);
+    if (needUpdateCommandTime) {
+        AceScopedTrace aceScopedTrace("dvsyncTime %" PRIu64 " dvsyncOffset %f", commandTime, dvsyncOffset);
+        SetUiDVSyncCommandTime(commandTime);
+        isNeedCollectOffset_ = false;
+    }
+    return dvsyncOffset;
+}
+
+ScrollResult ScrollablePattern::HandleExtScroll(float velocity)
+{
+    float dvsyncOffset = GetDVSyncOffset();
+    if (dvsyncOffset != 0) {
+        isExtScroll_ = true;
+        HandleScroll(dvsyncOffset, SCROLL_FROM_ANIMATION, NestedState::CHILD_SCROLL, velocity);
+        isExtScroll_ = false;
+    }
+    ScrollResult result = { 0, true };
+    return result;
+}
+
 ScrollResult ScrollablePattern::HandleScroll(float offset, int32_t source, NestedState state, float velocity)
 {
     ScrollResult result = { 0, false };
@@ -2530,6 +2633,10 @@ ScrollResult ScrollablePattern::HandleScroll(float offset, int32_t source, Neste
         initOffset, offset, source, state, GetCanOverScroll(),
         static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
     UpdateNestedScrollVelocity(offset, state);
+    if (isExtScroll_) {
+        ResetForExtScroll();
+        isExtScroll_ = false;
+    }
     bool moved = HandleScrollImpl(offset, source);
     NotifyMoved(moved);
     return result;
@@ -4380,7 +4487,11 @@ void ScrollablePattern::GetRepeatCountInfo(
             totalChildCount += repeatRealCount;
         } else if (AceType::InstanceOf<FrameNode>(child) || AceType::InstanceOf<LazyForEachNode>(child) ||
                    AceType::InstanceOf<RepeatVirtualScrollNode>(child) || AceType::InstanceOf<ForEachNode>(child) ||
-                   AceType::InstanceOf<CustomNode>(child)) {
+                   AceType::InstanceOf<CustomNode>(child)
+#ifdef ACE_STATIC
+                   || InstanceOf<ArkoalaLazyNode>(child)
+#endif
+        ) {
             totalChildCount += child->FrameCount();
         } else {
             GetRepeatCountInfo(child, repeatDifference, firstRepeatCount, totalChildCount);

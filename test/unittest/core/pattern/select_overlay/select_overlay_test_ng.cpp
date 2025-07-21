@@ -6310,4 +6310,48 @@ HWTEST_F(SelectOverlayTestNg, AddCreateMenuExtensionMenuParams005, TestSize.Leve
      */
     EXPECT_NE(params[0].symbol, nullptr);
 }
+
+/**
+ * @tc.name: SelectOverlayLayoutAlgorithm.AdjustToInfo
+ * @tc.desc: test AdjustToInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, AdjustToInfo, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create selectOverlayNode and initialize selectOverlayInfo properties.
+     */
+    SelectOverlayInfo selectInfo;
+    selectInfo.computeMenuOffset = [](LayoutWrapper*, OffsetF&, const RectF, OffsetF&,
+        std::shared_ptr<SelectOverlayInfo>&) { return true; };
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+    ASSERT_NE(selectOverlayNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Create pattern and geometryNode.
+     */
+    auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    /**
+     * @tc.steps: step2. Call OnDirtyLayoutWrapperSwap function.
+     * @tc.expected: return false
+     */
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto layoutWrapperPtr = AccessibilityManager::RawPtr(layoutWrapper);
+    auto selectOverlayLayoutAlgorithm = pattern->CreateLayoutAlgorithm();
+    ASSERT_NE(selectOverlayLayoutAlgorithm, nullptr);
+    auto newNode = AceType::DynamicCast<SelectOverlayLayoutAlgorithm>(selectOverlayLayoutAlgorithm);
+    ASSERT_NE(newNode, nullptr);
+    auto menuOffset = OffsetF();
+    auto menuRect = RectF();
+    auto windowOffset = OffsetF();
+    auto ret = newNode->AdjustToInfo(layoutWrapperPtr, menuOffset, menuRect, windowOffset, infoPtr);
+    EXPECT_TRUE(ret);
+}
 } // namespace OHOS::Ace::NG

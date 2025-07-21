@@ -43,6 +43,7 @@
     "pages/List/AutoSort/AutoSort",
     "pages/List/DeleteAndShift/DeleteAndShift",
     "pages/List/DragAndDropSorting/DragAndDropSorting",
+    "pages/List/DragAndDropSorting/ListItemGroup",
     "pages/List/FadingEdge/FadingEdge",
     "pages/List/ListNestedGrid/ListGridDemo",
     "pages/List/LoopScrolling/LoopScrolling",
@@ -68,6 +69,7 @@
     "pages/grid/GridObjectSort",
     "pages/grid/GridPinchToZoom",
     "pages/grid/ItemDragWithVibrator",
+    "pages/grid/GridScrollWithSelect",
     "pages/Scroll/ScrollMainPage",
     "pages/Scroll/InfiniteScrolling",
     "pages/Scroll/CustomSnap",
@@ -75,6 +77,7 @@
     "pages/Scroll/RecycleView/Index",
     "pages/Scroll/ScrollNode",
     "pages/Scroll/ScrollWithLayoutWeight",
+    "pages/Scroll/FreeScroll",
     "pages/LazyVGridLayout/LazyVGridLayoutMainPage",
     "pages/LazyVGridLayout/LazyVGridLayoutAttribute"
   ]

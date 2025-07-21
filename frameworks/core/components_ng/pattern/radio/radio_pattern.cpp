@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/radio/radio_pattern.h"
 
 #include "base/log/dump_log.h"
+#include "base/utils/multi_thread.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -48,7 +49,7 @@ void RadioPattern::OnAttachToFrameNode()
     host->GetLayoutProperty()->UpdateAlignment(Alignment::CENTER);
 }
 
-void RadioPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+void RadioPattern::UpdateGroupStatus(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
     auto groupManager = GetGroupManager();
@@ -56,6 +57,18 @@ void RadioPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     auto radioEventHub = frameNode->GetOrCreateEventHub<NG::RadioEventHub>();
     CHECK_NULL_VOID(radioEventHub);
     groupManager->RemoveRadioFromGroup(radioEventHub->GetGroup(), frameNode->GetId());
+}
+
+void RadioPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    THREAD_SAFE_NODE_CHECK(frameNode, OnDetachFromFrameNode);
+    UpdateGroupStatus(frameNode);
+}
+
+void RadioPattern::OnDetachFromMainTree()
+{
+    auto host = GetHost();
+    THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree, host);
 }
 
 void RadioPattern::SetBuilderState()

@@ -228,7 +228,7 @@ void EventManager::CheckRefereeStateAndReTouchTest(const TouchEvent& touchPoint,
         if (!refereeNG_->IsReady()) {
             TAG_LOGW(AceLogTag::ACE_INPUTTRACKING,
                 "GestureReferee is contaminate by new comming recognizer, force clean gestureReferee.");
-            refereeNG_->ForceCleanGestureReferee();
+            refereeNG_->ForceCleanGestureRefereeState();
         }
 #ifdef OHOS_STANDARD_SYSTEM
         for (const auto& entry : reHitTestResult) {
@@ -1057,6 +1057,7 @@ void EventManager::CleanHoverStatusForDragBegin()
         UpdateHoverNode(falsifyEvent, testResult);
         DispatchMouseEventNG(falsifyEvent);
         DispatchMouseHoverEventNG(falsifyEvent);
+        DispatchMouseHoverAnimationNG(falsifyEvent);
     }
     mouseTestResults_.clear();
     pressMouseTestResultsMap_.clear();
@@ -1701,8 +1702,24 @@ void EventManager::DoSingleMouseActionRelease(const PressMouseInfo& pressMouseIn
     pressMouseTestResultsMap_.erase(pressMouseInfo);
 }
 
-void HandleMouseHoverAnimation(const RefPtr<NG::FrameNode>& hoverNodeCur, const RefPtr<NG::FrameNode>& hoverNodePre)
+void HandleMouseHoverAnimation(const MouseAction& action,
+    RefPtr<NG::FrameNode>& hoverNodeCur, const RefPtr<NG::FrameNode>& hoverNodePre)
 {
+    if (action == MouseAction::WINDOW_ENTER) {
+        if (hoverNodeCur) {
+            hoverNodeCur->AnimateHoverEffect(true);
+        }
+        return;
+    } else if (action == MouseAction::WINDOW_LEAVE) {
+        if (hoverNodeCur) {
+            hoverNodeCur->AnimateHoverEffect(false);
+        }
+        if (hoverNodePre) {
+            hoverNodePre->AnimateHoverEffect(false);
+        }
+        return;
+    }
+
     if (hoverNodeCur != hoverNodePre) {
         if (hoverNodeCur) {
             hoverNodeCur->AnimateHoverEffect(true);
@@ -1718,7 +1735,7 @@ void EventManager::DispatchMouseHoverAnimationNG(const MouseEvent& event, bool i
     auto hoverNodeCur = currHoverNode_.Upgrade();
     auto hoverNodePre = lastHoverNode_.Upgrade();
     if (isMockEvent) {
-        HandleMouseHoverAnimation(hoverNodeCur, hoverNodePre);
+        HandleMouseHoverAnimation(event.action, hoverNodeCur, hoverNodePre);
         return;
     }
     if (event.action == MouseAction::PRESS) {
@@ -1729,8 +1746,9 @@ void EventManager::DispatchMouseHoverAnimationNG(const MouseEvent& event, bool i
         if (hoverNodeCur) {
             hoverNodeCur->AnimateHoverEffect(true);
         }
-    } else if (event.button == MouseButton::NONE_BUTTON && event.action == MouseAction::MOVE) {
-        HandleMouseHoverAnimation(hoverNodeCur, hoverNodePre);
+    } else if (event.button == MouseButton::NONE_BUTTON &&
+        (event.action == MouseAction::MOVE || event.action == MouseAction::CANCEL)) {
+        HandleMouseHoverAnimation(event.action, hoverNodeCur, hoverNodePre);
     } else if (event.action == MouseAction::WINDOW_ENTER) {
         if (hoverNodeCur) {
             hoverNodeCur->AnimateHoverEffect(true);
@@ -1738,6 +1756,9 @@ void EventManager::DispatchMouseHoverAnimationNG(const MouseEvent& event, bool i
     } else if (event.action == MouseAction::WINDOW_LEAVE) {
         if (hoverNodeCur) {
             hoverNodeCur->AnimateHoverEffect(false);
+        }
+        if (hoverNodePre) {
+            hoverNodePre->AnimateHoverEffect(false);
         }
     }
 }

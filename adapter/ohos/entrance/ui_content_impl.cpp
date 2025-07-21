@@ -2378,6 +2378,14 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     if (vmType_ == VMType::ARK_NATIVE) {
         frontendType = FrontendType::ARK_TS;
     }
+    if (appInfo->arkTSMode == AbilityRuntime::CODE_LANGUAGE_ARKTS_HYBRID) {
+        if (vmType_ == VMType::ARK_NATIVE) {
+            frontendType = FrontendType::STATIC_HYBRID_DYNAMIC;
+        } else {
+            frontendType = FrontendType::DYNAMIC_HYBRID_STATIC;
+        }
+    }
+
     auto container = CreateContainer(info, frontendType, useNewPipe);
     CHECK_NULL_RETURN(container, UIContentErrorCode::NULL_POINTER);
     container->SetUIContentType(uIContentType_);
@@ -2675,7 +2683,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
             pipeline->SetMinPlatformVersion(appInfo->apiCompatibleVersion);
         }
     }
-    if (runtime_ && storageWrapper.napiStorage_.has_value()) {
+    if (runtime_ && storageWrapper.napiStorage_.has_value()) { // 1.1 SetLocalStorage
         auto storage = storageWrapper.napiStorage_.value();
         auto nativeEngine = reinterpret_cast<NativeEngine*>(runtime_);
         if (!storage) {
@@ -2687,10 +2695,10 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
             container->SetLocalStorage(reinterpret_cast<NativeReference*>(ref), context);
         }
     }
-    if (runtime_ && storageWrapper.aniStorage_.has_value()) {
+    if (runtime_ && storageWrapper.aniStorage_.has_value()) { // 1.2 SetAniLocalStorage
         auto storage = storageWrapper.aniStorage_.value();
         if (!storage) {
-            container->SetLocalStorage(nullptr, context);
+            container->SetAniLocalStorage(nullptr, context);
         } else {
             auto* env = reinterpret_cast<ani_env*>(runtime_);
             ani_ref ref;

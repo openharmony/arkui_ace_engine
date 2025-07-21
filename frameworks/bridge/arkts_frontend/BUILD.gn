@@ -32,8 +32,14 @@ ohos_source_set("arkts_frontend") {
   sources = [
     "arkts_ani_utils.cpp",
     "arkts_frontend.cpp",
+    "arkts_plugin_frontend.cpp",
     "entry/arkts_entry_loader.cpp",
   ]
+
+  if(ace_engine_feature_enable_static_instructive_code){
+    sources += [ "ani_context_module.cpp", ]
+  }
+
   external_deps = [
     "hilog:libhilog",
     "runtime_core:ani",

@@ -1116,6 +1116,8 @@ void PipelineContext::FlushDirtyPropertyNodes()
 }
 
 void PipelineContext::DumpForceColor(const std::vector<std::string>& params) const {}
+void PipelineContext::AddFrameCallback(FrameCallbackFunc&& frameCallbackFunc, IdleCallbackFunc&& idleCallbackFunc,
+    int64_t delayMillis) {}
 } // namespace OHOS::Ace::NG
 // pipeline_context ============================================================
 
@@ -1321,6 +1323,10 @@ void PipelineBase::AddAccessibilityCallbackEvent(AccessibilityCallbackEventId ev
 Dimension NG::PipelineContext::GetCustomTitleHeight()
 {
     return Dimension();
+}
+
+void PipelineBase::SetUiDVSyncCommandTime(uint64_t vsyncTime)
+{
 }
 
 void PipelineBase::SetFontScale(float fontScale)

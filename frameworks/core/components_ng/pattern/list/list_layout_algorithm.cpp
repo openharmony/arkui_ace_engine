@@ -1853,7 +1853,7 @@ void ListLayoutAlgorithm::UpdateOverlay(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(overlayNode);
     auto geometryNode = frameNode->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-    auto listFrameSize = geometryNode->GetFrameSize();
+    auto listFrameSize = geometryNode->GetFrameSize(true);
     auto overlayGeometryNode = overlayNode->GetGeometryNode();
     CHECK_NULL_VOID(overlayGeometryNode);
     overlayGeometryNode->SetFrameSize(listFrameSize);

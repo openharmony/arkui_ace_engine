@@ -2843,4 +2843,28 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorSetImagesTest002, TestSize.Level1)
     auto pattern = imageAnimatorModelNG.GetImageAnimatorPattern();
     EXPECT_EQ(pattern->durationTotal_, 1000);
 }
+
+/**
+ * @tc.name: ImageAnimatorSetImagesTest003
+ * @tc.desc: SetImages into ImageAnimatorPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAnimatorTestNg, ImageAnimatorSetImagesTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ImageAnimatorModelNG.
+     */
+
+    ImageAnimatorModelNG imageAnimatorModelNG;
+    imageAnimatorModelNG.Create();
+
+    /**
+     * @tc.steps: step2. set image's attributes and imageAnimatorView's attributes.
+     * @tc.expected: step2. related function is called.
+     */
+    std::vector<ImageProperties> images = {};
+    imageAnimatorModelNG.SetImages(std::move(images));
+    auto pattern = imageAnimatorModelNG.GetImageAnimatorPattern();
+    EXPECT_TRUE(pattern->images_.empty());
+}
 } // namespace OHOS::Ace::NG

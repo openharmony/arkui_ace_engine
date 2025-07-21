@@ -1748,4 +1748,36 @@ HWTEST_F(SwiperPatternTestNg, OnFontScaleConfigurationUpdate001, TestSize.Level1
     pipelineContext->OnFlushReloadFinish();
     EXPECT_EQ(pattern_->mainSizeIsMeasured_, false);
 }
+
+/**
+ * @tc.name: UpdateDefaultColor001
+ * @tc.desc: Text UpdateDefaultColor
+ */
+HWTEST_F(SwiperPatternTestNg, UpdateDefaultColor001, TestSize.Level1)
+{
+    SwiperParameters swiperParameters;
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    model.SetIndicatorType(AceType::RawPtr(frameNode_), SwiperIndicatorType::DOT);
+
+    pattern_->swiperParameters_ = nullptr;
+    pattern_->OnColorModeChange(static_cast<uint32_t>(ColorMode::DARK));
+
+    swiperParameters.colorVal = Color::RED;
+    swiperParameters.selectedColorVal = Color::RED;
+    pattern_->SetSwiperParameters(swiperParameters);
+    pattern_->OnColorModeChange(static_cast<uint32_t>(ColorMode::DARK));
+    EXPECT_NE(pattern_->swiperParameters_->colorVal, Color::RED);
+    EXPECT_NE(pattern_->swiperParameters_->selectedColorVal, Color::RED);
+
+    swiperParameters.parametersByUser.insert("colorVal");
+    swiperParameters.parametersByUser.insert("selectedColorVal");
+    swiperParameters.colorVal = Color::RED;
+    swiperParameters.selectedColorVal = Color::RED;
+    pattern_->SetSwiperParameters(swiperParameters);
+    pattern_->OnColorModeChange(static_cast<uint32_t>(ColorMode::DARK));
+    EXPECT_EQ(pattern_->swiperParameters_->colorVal.value(), Color::RED);
+    EXPECT_EQ(pattern_->swiperParameters_->selectedColorVal.value(), Color::RED);
+}
 } // namespace OHOS::Ace::NG

@@ -76,7 +76,28 @@ void LazyGridLayoutAlgorithm::SetFrameSize(LayoutWrapper* layoutWrapper, Optiona
         layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize.ConvertToSizeT());
         return;
     }
-    contentIdealSize.SetMainSize(totalMainSize_, axis_);
+
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
+    if (layoutPolicy.has_value()) {
+        auto isVertical = axis_ == Axis::VERTICAL;
+        auto widthLayoutPolicy = layoutPolicy.value().widthLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
+        auto heightLayoutPolicy = layoutPolicy.value().heightLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
+        auto layoutPolicySize = ConstrainIdealSizeByLayoutPolicy(
+            layoutProperty->GetLayoutConstraint().value(), widthLayoutPolicy, heightLayoutPolicy, axis_);
+        contentIdealSize.UpdateIllegalSizeWithCheck(layoutPolicySize.ConvertToSizeT());
+        auto isMainWrap = (isVertical ? heightLayoutPolicy : widthLayoutPolicy) == LayoutCalPolicy::WRAP_CONTENT;
+        auto isMainFix = (isVertical ? heightLayoutPolicy : widthLayoutPolicy) == LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+        if (isMainWrap) {
+            contentIdealSize.SetMainSize(totalMainSize_, axis_);
+            contentIdealSize.Constrain(layoutConstraint->minSize, layoutConstraint->maxSize);
+        } else if (isMainFix) {
+            contentIdealSize.SetMainSize(totalMainSize_, axis_);
+        }
+    } else {
+        contentIdealSize.SetMainSize(totalMainSize_, axis_);
+    }
+
     AddPaddingToSize(padding, contentIdealSize);
     frameSize.UpdateIllegalSizeWithCheck(contentIdealSize);
     if (layoutConstraint->selfIdealSize.Width()) {

@@ -994,8 +994,20 @@ bool WebDelegate::GetPendingSizeStatus()
 {
     return false;
 }
+
 void WebDelegate::HandleAccessibilityHoverEvent(
-    const NG::PointF& point, SourceType source, NG::AccessibilityHoverEventType eventType, TimeStamp time) {}
+    const NG::PointF& point, SourceType source, NG::AccessibilityHoverEventType eventType, TimeStamp time)
+{
+    std::string surfaceId = "";
+    if (point.GetX() >= 0 && point.GetY() >= 0) {
+        surfaceId = "existSurfaceId";
+    }
+    if (GetWebAccessibilityIdBySurfaceId(surfaceId) == -1) {
+        surfaceToWebAccessibilityMap.erase("hoverSurfaceId");
+    } else {
+        surfaceToWebAccessibilityMap["hoverSurfaceId"] = 1;
+    }
+}
 
 std::string WebDelegate::GetSurfaceIdByHtmlElementId(const std::string& htmlElementId)
 {

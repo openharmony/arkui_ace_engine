@@ -20,6 +20,9 @@
 #include "ui/base/utils/utils.h"
 
 #include "bridge/arkts_frontend/arkts_ani_utils.h"
+#ifdef ACE_STATIC
+#include "bridge/arkts_frontend/ani_context_module.h"
+#endif
 #include "bridge/arkts_frontend/entry/arkts_entry_loader.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/base/subwindow/subwindow_manager.h"
@@ -287,4 +290,28 @@ ani_object ArktsFrontend::CallGetUIContextFunc()
     }
     return result;
 }
+
+void* ArktsFrontend::GetEnv()
+{
+    return ArktsAniUtils::GetAniEnv(vm_);
+}
+
+void* ArktsFrontend::preloadArkTSRuntime = nullptr;
+void ArktsFrontend::PreloadAceModule(void* aniEnv)
+{
+    ArktsFrontend::preloadArkTSRuntime = aniEnv;
+}
+
+extern "C" ACE_FORCE_EXPORT void OHOS_ACE_PreloadAceArkTSModule(void* aniEnv)
+{
+    ArktsFrontend::PreloadAceModule(aniEnv);
+}
+
+#ifdef ACE_STATIC
+void ArktsFrontend::SetAniContext(int32_t instanceId, ani_ref* context)
+{
+    std::shared_ptr<ani_ref> shared_ptr(context);
+    Framework::AniContextModule::AddAniContext(instanceId, shared_ptr);
+}
+#endif
 } // namespace OHOS::Ace

@@ -190,6 +190,7 @@ std::pair<std::string, RefPtr<NG::UINode>> WaterFlowMockLazy::OnGetChildByIndex(
     ViewAbstract::SetWidth(CalcLength(CalcLength(FILL_LENGTH)));
     ViewAbstract::SetHeight(CalcLength(getHeight_(index)));
     auto node = ViewStackProcessor::GetInstance()->Finish();
+    node->nodeId_ = index;
     return { std::to_string(index), node };
 }
 

@@ -323,8 +323,12 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg103, TestSize.Level1)
 HWTEST_F(FrameNodeTestNg, FrameNodeTestNg104, TestSize.Level1)
 {
     auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
-    AceApplicationInfo::GetInstance().isAccessibilityEnabled_ = true;
+    AceApplicationInfo::GetInstance().SetAccessibilityScreenReadEnabled(true);
     frameNode->OnAccessibilityEvent(AccessibilityEventType::CLICK, "");
+    frameNode->UpdateAccessibilityNodeRect();
+    EXPECT_NE(frameNode->renderContext_, nullptr);
+
+    AceApplicationInfo::GetInstance().SetAccessibilityScreenReadEnabled(false);
     frameNode->UpdateAccessibilityNodeRect();
     EXPECT_NE(frameNode->renderContext_, nullptr);
 }

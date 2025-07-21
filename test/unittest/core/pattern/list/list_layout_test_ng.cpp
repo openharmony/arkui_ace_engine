@@ -3079,6 +3079,36 @@ HWTEST_F(ListLayoutTestNg, FadingEdge002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: FadingEdge003
+ * @tc.desc: Test FadingEdge property with safe area
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, FadingEdge003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set FadingEdge
+     * @tc.expected: Would create a overlayNode attach to list
+     */
+    const Dimension fadingEdgeLength = Dimension(10.0f);
+    ListModelNG model = CreateList();
+    ScrollableModelNG::SetFadingEdge(true, fadingEdgeLength);
+    CreateListItems(10);
+    CreateDone();
+    EXPECT_TRUE(frameNode_->GetOverlayNode());
+    auto geo = frameNode_->GetOverlayNode()->GetGeometryNode();
+    EXPECT_EQ(geo->GetFrameSize().Height(), 400.f);
+
+    /**
+     * @tc.steps: step2. Update Safe Area
+     * @tc.expected: overlay frame size expand safe area.
+     */
+    frameNode_->GetGeometryNode()->SetSelfAdjust(RectF(0, 0, 0, 10.f));
+    FlushUITasks(frameNode_);
+    geo = frameNode_->GetOverlayNode()->GetGeometryNode();
+    EXPECT_EQ(geo->GetFrameSize().Height(), 410.f);
+}
+
+/**
  * @tc.name: InitialIndex001
  * @tc.desc: Test the initialIndex and scrollToIndex priority.
  * @tc.type: FUNC

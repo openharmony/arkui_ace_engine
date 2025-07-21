@@ -323,8 +323,13 @@ public:
     virtual void CloseSelectionMenu() = 0;
     virtual bool IsEditing() = 0;
     virtual void StopEditing() = 0;
+#if defined(ACE_STATIC)
     virtual void SetSelection(int32_t selectionStart, int32_t selectionEnd,
         const std::optional<SelectionOptions>& options = std::nullopt, bool isForward = false) = 0;
+#else
+    virtual void SetSelection(int32_t selectionStart, int32_t selectionEnd,
+        const std::optional<SelectionOptions>& options = std::nullopt) = 0;
+#endif
     virtual WeakPtr<NG::LayoutInfoInterface> GetLayoutInfoInterface() = 0;
     virtual const PreviewTextInfo GetPreviewTextInfo() const = 0;
     virtual ColorMode GetColorMode() = 0;

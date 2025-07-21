@@ -4799,7 +4799,10 @@ void NavigationPattern::OnAllTransitionAnimationFinish()
         CHECK_NULL_VOID(geometryNode);
         geometryNode->ResetParentLayoutConstraint();
     };
-
+    if (!windowMgr->IsSetOrientationNeeded(targetOrientation)) {
+        restoreTask();
+        return;
+    }
     navigationMgr->AddBeforeOrientationChangeTask(std::move(restoreTask));
     windowMgr->SetRequestedOrientation(targetOrientation, false);
 }
@@ -5683,4 +5686,26 @@ void NavigationPattern::ClearNavigationCustomTransition()
     }
     ClearRecoveryList();
 }
+
+#if defined(ACE_STATIC)
+bool NavigationPattern::CheckNeedCreate(int32_t index)
+{
+    CHECK_NULL_RETURN(navigationStack_, false);
+    auto pathListSize = navigationStack_->Size();
+    RefPtr<UINode> uiNode = nullptr;
+    if (navigationStack_->IsFromRecovery(index)) {
+        return true;
+    }
+    if (navigationStack_->NeedBuildNewInstance(index)) {
+        return true;
+    }
+    if (index == pathListSize - 1 && addByNavRouter_) {
+        addByNavRouter_ = false;
+        uiNode = navigationStack_->Get();
+    } else {
+        uiNode = navigationStack_->Get(index);
+    }
+    return uiNode == nullptr;
+}
+#endif
 } // namespace OHOS::Ace::NG

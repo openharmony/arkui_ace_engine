@@ -1422,6 +1422,8 @@ private:
 
     void UpdateOcclusionCullingStatus();
 
+    void UpdateDVSyncTime(uint64_t nanoTimestamp, const std::string& abilityName, uint64_t vsyncPeriod);
+
     std::unique_ptr<UITaskScheduler> taskScheduler_ = std::make_unique<UITaskScheduler>();
 
     std::unordered_map<uint32_t, WeakPtr<ScheduleTask>> scheduleTasks_;
@@ -1613,6 +1615,8 @@ private:
     std::unordered_map<int32_t, bool> keyOcclusionNodes_;
     RefPtr<NodeRenderStatusMonitor> nodeRenderStatusMonitor_;
     Kit::ArkUIObjectLifecycleCallback objectLifecycleCallback_;
+    bool needUpdateTimeForDVSync_ = false;
+    uint64_t lastVSyncTime_ = 0;
 };
 
 /**

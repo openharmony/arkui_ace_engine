@@ -35,6 +35,9 @@ public:
     virtual ~ViewStackModel() = default;
 
     virtual void Push(const RefPtr<AceType>& node, bool isCustomView) = 0;
+#ifdef ACE_STATIC
+    virtual void PushPtr(int64_t ptr) {};
+#endif
     virtual void Pop() = 0;
     virtual void PopContainer() = 0;
     virtual void PushKey(const std::string& key) = 0;

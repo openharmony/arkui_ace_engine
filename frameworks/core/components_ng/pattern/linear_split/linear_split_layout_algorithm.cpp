@@ -649,6 +649,7 @@ void LinearSplitLayoutAlgorithm::MeasureAdaptiveLayoutChildren(LayoutWrapper* la
         auto childNode = child->GetHostNode();
         if (childNode && childNode->GetLayoutProperty() && childNode->GetLayoutProperty()->IsExpandConstraintNeeded()) {
             bundle.first.emplace_back(childNode);
+            child->SetDelaySelfLayoutForIgnore();
             child->GetGeometryNode()->SetParentLayoutConstraint(layoutConstraint);
             continue;
         }

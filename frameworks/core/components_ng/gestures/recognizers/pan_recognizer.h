@@ -163,6 +163,7 @@ private:
     double GetMainAxisDelta();
     RefPtr<DragEventActuator> GetDragEventActuator();
     bool HandlePanAccept();
+    bool HandlePanExtAccept();
     void GetGestureEventHalfInfo(GestureEvent* info);
     GestureEvent GetGestureEventInfo();
     void ResetDistanceMap();

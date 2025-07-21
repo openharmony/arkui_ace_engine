@@ -344,7 +344,6 @@ SwiperParameters GetDotIndicatorInfo(FrameNode* frameNode, const std::vector<std
     GetDotIndicatorSpaceAndIgnoreSize(dotIndicatorInfo, swiperIndicatorTheme, swiperParameters);
     ParseMaxDisplayCount(dotIndicatorInfo, swiperParameters);
     InitIndicatorParametersWithResObj(swiperParameters, resObjs);
-    swiperParameters.parametersByUser.insert("dotIndicator");
     return swiperParameters;
 }
 

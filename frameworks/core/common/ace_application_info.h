@@ -215,6 +215,14 @@ public:
     {
         return isAccessibilityEnabled_;
     }
+    void SetAccessibilityScreenReadEnabled(bool isEnabled)
+    {
+        isAccessibilityScreenReadEnabled_ = isEnabled;
+    }
+    bool IsAccessibilityScreenReadEnabled() const
+    {
+        return isAccessibilityScreenReadEnabled_;
+    }
     void SetPid(int32_t pid)
     {
         pid_ = pid;
@@ -330,6 +338,7 @@ protected:
 
     int userId_ = 0;
     bool isAccessibilityEnabled_ = false;
+    bool isAccessibilityScreenReadEnabled_ = false;
 
     int32_t apiVersion_ = 0;
     std::string versionName_;

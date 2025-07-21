@@ -217,12 +217,14 @@ struct BarrierInfo {
     }
 };
 
+#ifdef ACE_STATIC
 struct LocalizedBarrierInfo : public BarrierInfo {
     LocalizedBarrierInfo()
     {
         direction = BarrierDirection::START;
     }
 };
+#endif
 
 } // namespace OHOS::Ace
 

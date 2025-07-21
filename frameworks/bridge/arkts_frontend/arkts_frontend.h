@@ -269,9 +269,15 @@ public:
     }
 
     ani_object CallGetUIContextFunc();
+#ifdef ACE_STATIC
+    void SetAniContext(int32_t instanceId, ani_ref* context);
+#endif
     bool IsDrawChildrenCallbackFuncExist(const std::string& componentId) override { return false; }
     void OnDrawChildrenCompleted(const std::string& componentId) override {}
 
+    void* GetEnv() override;
+    static void PreloadAceModule(void* aniEnv);
+    static void* preloadArkTSRuntime;
 private:
     RefPtr<TaskExecutor> taskExecutor_;
     RefPtr<NG::PipelineContext> pipeline_;

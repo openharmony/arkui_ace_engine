@@ -316,6 +316,7 @@ HWTEST_F(ListItemPatternTestNg, OnRecycle001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     listItemPattern->OnRecycle();
     EXPECT_EQ(listItemPattern->swipeActionState_, SwipeActionState::COLLAPSED);
+    EXPECT_EQ(listItemPattern->curOffset_, 0.0f);
 }
 
 

@@ -310,6 +310,18 @@ struct NavDestinationTransition {
     std::function<void()> onTransitionEnd;
 };
 
+enum class LaunchMode {
+    STANDARD = 0,
+    MOVE_TO_TOP_SINGLETON,
+    POP_TO_TOP_SINGLETON,
+    NEW_INSTANCE,
+};
+
+struct NavigationOptions {
+    LaunchMode launchMode = LaunchMode::STANDARD;
+    bool animated = true;
+};
+
 using NavDestinationTransitionDelegate = std::function<std::optional<std::vector<NavDestinationTransition>>(
     NavigationOperation operation, bool isEnter)>;
 using NavDestinationOnNewParamCallback = std::function<void(napi_value param)>;

@@ -21,8 +21,6 @@ if (is_ohos_standard_system) {
     cflags = []
     if (ace_engine_feature_asbng_path_enable) {
       defines += [ "ATOMIC_SERVICE_ATTRIBUTION_ENABLE" ]
-      cflags +=
-          [ "-DACE_ENGINE_PLUGIN_PATH=\"${ace_engine_feature_asbng_path}\"" ]
     }
   }
 }
@@ -48,9 +46,6 @@ build_component_ng("window_scene") {
     "screen/screen_pattern.cpp",
   ]
 
-  if (ace_engine_feature_asbng_path_enable) {
-    sources += [ "scene/atomicservice_basic_engine_plugin.cpp" ]
-  }
   external_deps = [
     "hilog:libhilog",
     "hisysevent:libhisysevent",

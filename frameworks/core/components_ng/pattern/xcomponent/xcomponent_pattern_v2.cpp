@@ -16,6 +16,9 @@
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern_v2.h"
 
 #include "base/log/dump_log.h"
+#ifdef ACE_STATIC
+#include "base/utils/multi_thread.h"
+#endif
 #include "base/utils/utils.h"
 #include "core/accessibility/accessibility_session_adapter.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_accessibility_child_tree_callback.h"
@@ -94,6 +97,10 @@ void XComponentPatternV2::OnAttachToMainTree()
         XComponentPattern::OnAttachToMainTree();
         return;
     }
+#ifdef ACE_STATIC
+    auto host = GetHost();
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree, host);
+#endif
     isOnTree_ = true;
     if (autoInitialize_) {
         HandleSurfaceCreated();
@@ -211,6 +218,10 @@ void XComponentPatternV2::OnDetachFromMainTree()
         XComponentPattern::OnDetachFromMainTree();
         return;
     }
+#ifdef ACE_STATIC
+    auto host = GetHost();
+    THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree, host);
+#endif
     isOnTree_ = false;
     if (autoInitialize_) {
         HandleSurfaceDestroyed();
@@ -230,6 +241,9 @@ void XComponentPatternV2::OnDetachFromFrameNode(FrameNode* frameNode)
         XComponentPattern::OnDetachFromFrameNode(frameNode);
         return;
     }
+#ifdef ACE_STATIC
+    THREAD_SAFE_NODE_CHECK(frameNode, OnDetachFromFrameNode);
+#endif
     auto id = frameNode->GetId();
     auto pipeline = frameNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
@@ -254,6 +268,9 @@ void XComponentPatternV2::InitSurface()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+#ifdef ACE_STATIC
+    FREE_NODE_CHECK(host, InitSurface, host);
+#endif
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
 

@@ -272,6 +272,11 @@ ArkUINodeHandle GetOrCreateCustomNode(ArkUI_CharPtr tag)
     return reinterpret_cast<ArkUINodeHandle>(ViewModel::GetOrCreateCustomNode(tag));
 }
 
+ArkUINodeHandle CreateCustomNodeByNodeId(ArkUI_CharPtr tag, ArkUI_Int32 nodeId)
+{
+    return reinterpret_cast<ArkUINodeHandle>(ViewModel::CreateCustomNodeByNodeId(tag, nodeId));
+}
+
 ArkUI_Bool IsRightToLeft()
 {
     return AceApplicationInfo::GetInstance().IsRightToLeft();
@@ -445,7 +450,7 @@ const ComponentAsyncEventHandler scrollNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnScrollEdge,
     NodeModifier::SetOnScrollReachStart,
     NodeModifier::SetOnScrollReachEnd,
-    nullptr,
+    NodeModifier::SetOnWillStopDragging,
     NodeModifier::SetOnDidZoom,
     NodeModifier::SetOnZoomStart,
     NodeModifier::SetOnZoomStop,
@@ -673,7 +678,7 @@ const ResetComponentAsyncEventHandler SCROLL_NODE_RESET_ASYNC_EVENT_HANDLERS[] =
     NodeModifier::ResetOnScrollEdge,
     NodeModifier::ResetOnScrollReachStart,
     NodeModifier::ResetOnScrollReachEnd,
-    nullptr,
+    NodeModifier::ResetOnWillStopDragging,
     NodeModifier::ResetOnDidZoom,
     NodeModifier::ResetOnZoomStart,
     NodeModifier::ResetOnZoomStop,
@@ -2301,6 +2306,7 @@ ArkUIExtendedNodeAPI impl_extended = {
     .createNewScope = CreateNewScope,
     .registerOEMVisualEffect = RegisterOEMVisualEffect,
     .setOnNodeDestroyCallback = SetOnNodeDestroyCallback,
+    .createCustomNodeByNodeId = CreateCustomNodeByNodeId,
 };
 /* clang-format on */
 

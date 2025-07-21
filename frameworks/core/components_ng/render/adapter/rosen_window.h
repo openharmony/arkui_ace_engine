@@ -148,6 +148,7 @@ public:
 
     void NotifySnapshotUpdate() override;
 
+    void SetDVSyncUpdate(uint64_t dvsyncTime) override;
 private:
     OHOS::sptr<OHOS::Rosen::Window> rsWindow_;
     WeakPtr<TaskExecutor> taskExecutor_;

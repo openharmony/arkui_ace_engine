@@ -531,7 +531,7 @@ OptionalSizeF ConstrainIdealSizeByLayoutPolicy(const LayoutConstraintF& layoutCo
 
 OptionalSizeF CalcLayoutPolicySingleSide(const std::optional<NG::LayoutPolicyProperty>& childLayoutPolicy,
     const std::unique_ptr<MeasureProperty>& childCalcLayoutConstraint,
-    const std::optional<LayoutConstraintF>& parentConstraint)
+    const std::optional<LayoutConstraintF>& parentConstraint, const MagicItemProperty& magicItemProperty)
 {
     OptionalSizeF result;
     if (!parentConstraint.has_value()) {
@@ -540,7 +540,8 @@ OptionalSizeF CalcLayoutPolicySingleSide(const std::optional<NG::LayoutPolicyPro
     if (!childLayoutPolicy.has_value() || !childLayoutPolicy->IsMatch()) {
         return result;
     }
-    if (!childCalcLayoutConstraint || !childCalcLayoutConstraint->selfIdealSize.has_value()) {
+    if (!childCalcLayoutConstraint ||
+        (!childCalcLayoutConstraint->selfIdealSize.has_value() && !childCalcLayoutConstraint->minSize.has_value())) {
         return result;
     }
     auto isWidthPolicy = childLayoutPolicy->IsWidthMatch();
@@ -549,19 +550,32 @@ OptionalSizeF CalcLayoutPolicySingleSide(const std::optional<NG::LayoutPolicyPro
     if (childCalcLayoutConstraint->selfIdealSize.has_value()) {
         auto selfSize = ConvertToOptionalSize(childCalcLayoutConstraint->selfIdealSize.value(),
             parentConstraint->scaleProperty, parentConstraint->percentReference);
-        if (isHeightPolicy) {
-            if (selfSize.Width().has_value()) {
-                result.SetWidth(selfSize.Width().value());
+        if (isHeightPolicy && selfSize.Width().has_value()) {
+            result.SetWidth(selfSize.Width().value());
+        }
+        if (isWidthPolicy && selfSize.Height().has_value()) {
+            result.SetHeight(selfSize.Height().value());
+        }
+        if (magicItemProperty.HasAspectRatio()) {
+            auto aspectRatio = magicItemProperty.GetAspectRatioValue();
+            if (result.Width().has_value() && GreatNotEqual(aspectRatio, 0.0f)) {
+                result.SetHeight(result.Width().value() / aspectRatio);
             }
         }
-        if (isWidthPolicy) {
-            if (selfSize.Height().has_value()) {
-                result.SetHeight(selfSize.Height().value());
-            }
+        UpdateSingleSideByMaxOrMinCalcLayoutConstraint(
+            result, childCalcLayoutConstraint->maxSize, parentConstraint, true);
+        UpdateSingleSideByMaxOrMinCalcLayoutConstraint(
+            result, childCalcLayoutConstraint->minSize, parentConstraint, false);
+    } else if (childCalcLayoutConstraint->minSize.has_value()) {
+        auto minsize = ConvertToOptionalSize(childCalcLayoutConstraint->minSize.value(),
+            parentConstraint->scaleProperty, parentConstraint->percentReference);
+        if (isHeightPolicy && minsize.Width().has_value()) {
+            result.SetWidth(minsize.Width().value());
+        }
+        if (isWidthPolicy && minsize.Height().has_value()) {
+            result.SetHeight(minsize.Height().value());
         }
     }
-    UpdateSingleSideByMaxOrMinCalcLayoutConstraint(result, childCalcLayoutConstraint->maxSize, parentConstraint, true);
-    UpdateSingleSideByMaxOrMinCalcLayoutConstraint(result, childCalcLayoutConstraint->minSize, parentConstraint, false);
     return result;
 }
 

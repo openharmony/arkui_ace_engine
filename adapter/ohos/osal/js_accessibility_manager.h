@@ -403,7 +403,7 @@ public:
         AccessibilityEvent& event, const std::vector<std::string>& params);
     bool GetDumpInfoArgument(const std::vector<std::string>& params, DumpInfoArgument& argument);
     bool DumpInfoParams(const std::vector<std::string>& params, DumpInfoArgument& argument);
-
+    bool HandleNodeModeParam(const std::string& param, DumpInfoArgument& argument);
     void FireAccessibilityEventCallback(uint32_t eventId, int64_t parameter) override;
     AccessibilityWindowInfo GenerateWindowInfo(const RefPtr<NG::FrameNode>& node,
         const RefPtr<PipelineBase>& context) override;

@@ -481,7 +481,9 @@ void AceContainer::Initialize()
 {
     ContainerScope scope(instanceId_);
     // For DECLARATIVE_JS frontend use UI as JS Thread, so InitializeFrontend after UI thread created.
-    if (type_ != FrontendType::DECLARATIVE_JS && type_ != FrontendType::DECLARATIVE_CJ) {
+    // For STATIC_HYBRID_DYNAMIC and DYNAMIC_HYBRID_STATIC frontend, also initialize after AttachView
+    if (type_ != FrontendType::DECLARATIVE_JS && type_ != FrontendType::DECLARATIVE_CJ &&
+        type_ != FrontendType::STATIC_HYBRID_DYNAMIC && type_ != FrontendType::DYNAMIC_HYBRID_STATIC) {
         InitializeFrontend();
     }
 }
@@ -650,9 +652,17 @@ void AceContainer::InitializeFrontend()
             return;
         }
     } else if (type_ == FrontendType::ARK_TS) {
+        LOGI("Init ARK_TS Frontend");
         frontend_ = MakeRefPtr<ArktsFrontend>(sharedRuntime_);
+    } else if (type_ == FrontendType::STATIC_HYBRID_DYNAMIC) {
+        // initialize after AttachView
+        LOGI("Init STATIC_HYBRID_DYNAMIC Frontend");
+        InitializeStaticHybridDynamic(aceAbility);
+    } else if (type_ == FrontendType::DYNAMIC_HYBRID_STATIC) {
+        LOGI("Init DYNAMIC_HYBRID_STATIC Frontend");
+        InitializeDynamicHybridStatic(aceAbility);
     } else {
-        LOGE("Frontend type not supported");
+        LOGE("Frontend type not supported, error type: %{public}i", type_);
         EventReport::SendAppStartException(AppStartExcepType::FRONTEND_TYPE_ERR);
         return;
     }
@@ -663,6 +673,9 @@ void AceContainer::InitializeFrontend()
         frontend_->DisallowPopLastPage();
     }
     frontend_->Initialize(type_, taskExecutor_);
+    if (subFrontend_) {
+        subFrontend_->Initialize(type_, taskExecutor_);
+    }
 }
 
 RefPtr<AceContainer> AceContainer::GetContainer(int32_t instanceId)
@@ -2456,6 +2469,11 @@ void AceContainer::SetAniLocalStorage(void* storage, const std::shared_ptr<OHOS:
             ReleaseStorageReference(sharedRuntime, storage);
             return;
         }
+#ifdef ACE_STATIC
+        if (contextRef->GetBindingObject() && contextRef->GetBindingObject()->Get<ani_ref>()) {
+            arktsFrontend->SetAniContext(id, contextRef->GetBindingObject()->Get<ani_ref>());
+        }
+#endif
         arktsFrontend->RegisterLocalStorage(id, storage);
     }, TaskExecutor::TaskType::UI, "ArkUISetAniLocalStorage");
 }
@@ -3070,6 +3088,17 @@ void AceContainer::InitWindowCallback()
             CHECK_NULL_RETURN(container, nullptr);
             return container->GetTargetViewportConfig(
                 orientation, enableStatusBar, statusBarAnimation, enableNavIndicator);
+        });
+    windowManager->SetIsSetOrientationNeededCallback(
+        [window = uiWindow_](std::optional<Orientation> orientation) -> bool {
+            auto ori = Rosen::Orientation::INVALID;
+            if (orientation.has_value()) {
+                ori = static_cast<Rosen::Orientation>(static_cast<int32_t>(orientation.value()));
+            }
+            bool need = window->isNeededForciblySetOrientation(ori);
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "isNeededForciblySetOrientation ori:%{public}d, need:%{public}d",
+                static_cast<int32_t>(ori), need);
+            return need;
         });
     windowManager->SetSetRequestedOrientationCallback(
         [window = uiWindow_](std::optional<Orientation> orientation, bool needAnimation) {

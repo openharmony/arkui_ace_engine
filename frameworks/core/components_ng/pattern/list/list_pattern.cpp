@@ -4332,4 +4332,9 @@ void ListPattern::UpdateGroupFocusIndexForDataChange(int32_t groupIndexInList, i
         }
     }
 }
+
+void ListPattern::ResetForExtScroll()
+{
+    currentDelta_ = 0;
+}
 } // namespace OHOS::Ace::NG
