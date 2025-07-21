@@ -36,6 +36,7 @@ public:
     SheetObject(SheetType sheetType) : sheetType_(sheetType) {}
     virtual BorderWidthProperty PostProcessBorderWidth(const BorderWidthProperty& borderWidth);
     virtual void DirtyLayoutProcess(const RefPtr<LayoutAlgorithmWrapper>& layoutAlgorithmWrapper);
+    virtual void SetSheetAnimationOption(AnimationOption& option) const;
     virtual RefPtr<InterpolatingSpring> GetSheetTransitionCurve(float dragVelocity) const;
     virtual std::function<void()> GetSheetTransitionFinishEvent(bool isTransitionIn);
     virtual std::function<void()> GetSheetAnimationEvent(bool isTransitionIn, float offset);
@@ -52,7 +53,7 @@ public:
     virtual void HandleDragEnd(float dragVelocity);
     virtual void ModifyFireSheetTransition(float dragVelocity);
     virtual void CreatePropertyCallback();
-    virtual void BeforeCreateLayoutWrapper() {};
+    virtual void BeforeCreateLayoutWrapper();
     virtual SheetKeyboardAvoidMode GetAvoidKeyboardModeByDefault() const;
     virtual void AvoidKeyboardInDirtyLayoutProcess();
     virtual void AvoidKeyboard(bool forceAvoid);
