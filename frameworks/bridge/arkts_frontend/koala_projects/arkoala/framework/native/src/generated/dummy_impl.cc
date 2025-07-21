@@ -27,7 +27,6 @@
 #include "logging.h"
 #include "dynamic-loader.h"
 #include "arkoala_api_generated.h"
-#include "securec.h"
 
 #undef max
 
@@ -61,9 +60,7 @@ void appendGroupedLog(int kind, const std::string& str) {
 
 void dummyClassFinalizer(KNativePointer* ptr) {
     char hex[20];
-    if (snprintf_s(hex, sizeof(hex), sizeof(hex) - 1, "0x%llx", (long long)ptr) < 0) {
-        return;
-    }
+    std::snprintf(hex, sizeof(hex), "0x%llx", (long long)ptr);
     string out("dummyClassFinalizer(");
     out.append(hex);
     out.append(")");
@@ -43417,7 +43414,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_ImageAttachment CtorImpl(const Ark_Union_ImageAttachmentInterface_Opt_AttachmentType* value)
+    Ark_ImageAttachment CtorImpl(const Ark_ImageAttachmentInterface* value)
     {
         if (!needGroupedLog(1))
             return (Ark_ImageAttachment) 100;

@@ -98,7 +98,6 @@ RefPtr<SpanBase> Convert(const Ark_StyleOptions& src)
             }
             CHECK_NULL_VOID(peer->span);
             auto start = Converter::OptConvert<int32_t>(src.start).value_or(0);
-            start = std::max(0, start);
             auto end = Converter::OptConvert<int32_t>(src.length).value_or(0) + start;
             result = peer->span->GetSubSpan(start, end);
         },
