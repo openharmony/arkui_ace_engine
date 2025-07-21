@@ -1095,7 +1095,7 @@ void NavigationModelNG::SetBackButtonIconSrcAndTextRes(const std::function<void(
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
     CHECK_NULL_VOID(titleBarPattern);
     UpdateBackButtonIcon(nameList, frameNode, backButtonIconResObj);
-    UpdateBackButtonIconText(userDefinedAccessibilityText, titleBarNode, backButtonIconResObj);
+    UpdateBackButtonIconText(userDefinedAccessibilityText, titleBarNode, backButtonTextResObj);
 }
 
 void NavigationModelNG::UpdateBackButtonIcon(const std::vector<std::string>& nameList,

@@ -638,7 +638,7 @@ void NavDestinationModelNG::SetBackButtonIconSrcAndTextRes(
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationNode->GetTitleBarNode());
     CHECK_NULL_VOID(titleBarNode);
     UpdateBackButtonIcon(nameList, titleBarNode, backButtonIconResObj);
-    UpdateBackButtonIconText(userDefinedAccessibilityText, titleBarNode, backButtonIconResObj);
+    UpdateBackButtonIconText(userDefinedAccessibilityText, titleBarNode, backButtonTextResObj);
 }
 
 void NavDestinationModelNG::UpdateBackButtonIcon(const std::vector<std::string>& nameList,
