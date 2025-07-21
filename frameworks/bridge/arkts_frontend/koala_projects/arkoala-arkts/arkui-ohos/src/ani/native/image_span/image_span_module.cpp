@@ -17,34 +17,34 @@
 
 #include "load.h"
 #include "log/log.h"
-// #include "pixel_map_taihe_ani.h"
+#include "pixel_map_taihe_ani.h"
 #include "utils/convert_utils.h"
 
 namespace OHOS::Ace::Ani {
 
 void SetImageSpanPixelMap([[maybe_unused]] ani_env* env, ani_object aniClass, ani_object node, ani_object pixelMapAni)
 {
-    // auto* arkNode = reinterpret_cast<ArkUINodeHandle>(node);
-    // const auto* modifier = GetNodeAniModifier();
-    // if (!modifier || !modifier->getImageSpanAniModifier() || !env) {
-    //     return;
-    // }
-    // // only pass pointer to smart pointer, and do not operate on C pointer
-    // auto pixelMap = OHOS::Media::PixelMapTaiheAni::GetNativePixelMap(env, pixelMapAni);
-    // modifier->getImageSpanAniModifier()->setPixelMap(arkNode, &pixelMap);
+    auto* arkNode = reinterpret_cast<ArkUINodeHandle>(node);
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getImageSpanAniModifier() || !env) {
+        return;
+    }
+    // only pass pointer to smart pointer, and do not operate on C pointer
+    auto pixelMap = OHOS::Media::PixelMapTaiheAni::GetNativePixelMap(env, pixelMapAni);
+    modifier->getImageSpanAniModifier()->setPixelMap(arkNode, &pixelMap);
 }
 
 void SetImageSpanAltPixelMap([[maybe_unused]] ani_env* env, ani_object aniClass, ani_object node,
     ani_object pixelMapAni)
 {
-    // auto* arkNode = reinterpret_cast<ArkUINodeHandle>(node);
-    // const auto* modifier = GetNodeAniModifier();
-    // if (!modifier || !modifier->getImageSpanAniModifier() || !env) {
-    //     return;
-    // }
-    // // only pass pointer to smart pointer, and do not operate on C pointer
-    // auto pixelMap = OHOS::Media::PixelMapTaiheAni::GetNativePixelMap(env, pixelMapAni);
-    // modifier->getImageSpanAniModifier()->setAltPixelMap(arkNode, &pixelMap);
+    auto* arkNode = reinterpret_cast<ArkUINodeHandle>(node);
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getImageSpanAniModifier() || !env) {
+        return;
+    }
+    // only pass pointer to smart pointer, and do not operate on C pointer
+    auto pixelMap = OHOS::Media::PixelMapTaiheAni::GetNativePixelMap(env, pixelMapAni);
+    modifier->getImageSpanAniModifier()->setAltPixelMap(arkNode, &pixelMap);
 }
 
 void SetImageSpanDrawingColorFilter(ani_env* env, [[maybe_unused]] ani_object obj, ani_long node,
