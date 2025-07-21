@@ -2306,6 +2306,13 @@ HWTEST_F(TextInputUpdateTestNg, ChangeTextCallbackTest034, TestSize.Level1)
     std::u16string content = u"openharmony";
     pattern_->InitEditingValueText(content);
 
+    bool fireOnWillInsert = false;
+    auto onWillInsert = [&fireOnWillInsert](const InsertValueInfo& info) {
+        fireOnWillInsert = true;
+        return true;
+    };
+    eventHub_->SetOnWillInsertValueEvent(std::move(onWillInsert));
+
     /**
      * @tc.steps: step2. change text with ExecuteInsertValueCommand
      * @tc.expected: return value is valid

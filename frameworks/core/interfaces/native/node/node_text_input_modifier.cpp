@@ -1246,7 +1246,7 @@ void SetTextInputBackgroundColorWithColorSpace(ArkUINodeHandle node, ArkUI_Uint3
     CHECK_NULL_VOID(pattern);
     if (SystemProperties::ConfigChangePerform() && resRawPtr) {
         auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
-        pattern->RegisterResource<Color>("backgroundColor", resObj, Color(color));
+        pattern->RegisterResource<Color>("backgroundColor", resObj, backgroundColor);
     } else {
         pattern->UnRegisterResource("backgroundColor");
     }

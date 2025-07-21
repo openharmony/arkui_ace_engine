@@ -48,7 +48,7 @@ void SetMarqueeFontSize(ArkUINodeHandle node, ArkUI_Float32 fontSize, int unit, 
         pattern->RegisterResource<CalcDimension>("FontSize", resObj,
             Dimension(fontSize, static_cast<OHOS::Ace::DimensionUnit>(unit)));
     } else {
-        pattern->UnRegisterResource("TextColor");
+        pattern->UnRegisterResource("FontSize");
     }
 }
 
