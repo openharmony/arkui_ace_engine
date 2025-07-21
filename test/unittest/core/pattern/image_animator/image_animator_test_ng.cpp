@@ -1191,6 +1191,7 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorTest019, TestSize.Level1)
      */
     CreateImageAnimator(1);
     EXPECT_EQ(imageAnimatorPattern->images_.size(), 1);
+    imageAnimatorPattern->GenerateCachedImages();
     imageAnimatorPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
 
     /**

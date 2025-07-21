@@ -320,7 +320,7 @@ void ImageAnimatorPattern::OnModifyDone()
         LOGE("image size is less than 0.");
         return;
     }
-    if (size > 1) {
+    if (size > 0) {
         GenerateCachedImages();
     }
     auto index = nowImageIndex_;
