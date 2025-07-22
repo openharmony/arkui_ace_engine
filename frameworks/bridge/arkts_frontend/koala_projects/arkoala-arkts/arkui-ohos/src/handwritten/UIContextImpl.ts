@@ -399,74 +399,50 @@ export class DragControllerImpl extends DragController {
         return promise;
     }
 
-    private handleDragActionCreationForBuilder(customArray: Array<CustomBuilder | DragItemInfo>,
+    public createDragAction(customArray: Array<CustomBuilder | DragItemInfo>,
         dragInfo: dragController.DragInfo): dragController.DragAction {
-        let rootNodeArray: Array<KPointer> = [];
-        let peerNodeArray: Array<PeerNode> = [];
-        let dragItemInfoArray: Array<DragItemInfo> = [];
-        customArray.forEach((customBuilder) => {
-            const builder = customBuilder as CustomBuilder;
-            const peerNode = createUiDetachedRoot((): PeerNode => {
-                return ArkComponentRootPeer.create(undefined);
-            }, builder);
-            let rootNode = peerNode.peer.ptr;
-            rootNodeArray.push(rootNode);
-            peerNodeArray.push(peerNode);
-        });
-        let destroyCallback = (): void => {
-            peerNodeArray.forEach((peerNode) => {
-                destroyUiDetachedRoot(peerNode.peer.ptr, this.instanceId_);
-            });
-        };
-        return ArkUIAniModule._DragController_createDragAction(dragItemInfoArray, rootNodeArray,
-            destroyCallback, dragInfo);
-    }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
 
-    private handleDragActionCreationForDragItemInfo(customArray: Array<CustomBuilder | DragItemInfo>,
-        dragInfo: dragController.DragInfo): dragController.DragAction {
         let rootNodeArray: Array<KPointer> = [];
         let peerNodeArray: Array<PeerNode> = [];
         let dragItemInfoArray: Array<DragItemInfo> = [];
-        let destroyCallback = (): void => { };
-        customArray.forEach(item => {
-            if (item instanceof DragItemInfo) {
-                if (item.pixelMap !== undefined) {
-                    dragItemInfoArray.push(item);
+
+        for (let element of customArray) {
+            if (typeof element === "function") {
+                const builder = element as CustomBuilder;
+                const peerNode = createUiDetachedRoot((): PeerNode => {
+                    return ArkComponentRootPeer.create(undefined);
+                }, builder);
+                const rootNode = peerNode.peer.ptr;
+                rootNodeArray.push(rootNode);
+                peerNodeArray.push(peerNode);
+            } else if (element instanceof DragItemInfo) {
+                const dragItemInfo = element as DragItemInfo;
+                if (dragItemInfo.pixelMap !== undefined) {
+                    dragItemInfoArray.push(dragItemInfo);
                 } else {
                     const peerNode = createUiDetachedRoot((): PeerNode => {
                         return ArkComponentRootPeer.create(undefined);
-                    }, item.builder as CustomBuilder);
+                    }, dragItemInfo.builder as CustomBuilder);
                     const rootNode = peerNode.peer.ptr;
                     rootNodeArray.push(rootNode);
                     peerNodeArray.push(peerNode);
                 }
             }
-        });
-        destroyCallback = (): void => {
+        }
+
+        let destroyCallback = (): void => {
             peerNodeArray.forEach((peerNode) => {
                 destroyUiDetachedRoot(peerNode.peer.ptr, this.instanceId_);
             });
             rootNodeArray.length = 0;
             peerNodeArray.length = 0;
         };
-        return ArkUIAniModule._DragController_createDragAction(dragItemInfoArray, rootNodeArray,
+        
+        let dragAction = ArkUIAniModule._DragController_createDragAction(dragItemInfoArray, rootNodeArray,
             destroyCallback, dragInfo);
-    }
-
-    public createDragAction(customArray: Array<CustomBuilder | DragItemInfo>,
-        dragInfo: dragController.DragInfo): dragController.DragAction {
-        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-
-        let firstNonUndefinedElement = customArray.find((element) => element !== undefined);
-        if (typeof firstNonUndefinedElement === "function") {
-            let dragAction = this.handleDragActionCreationForBuilder(customArray, dragInfo);
-            ArkUIAniModule._Common_Restore_InstanceId();
-            return dragAction;
-        } else {
-            let dragAction = this.handleDragActionCreationForDragItemInfo(customArray, dragInfo);
-            ArkUIAniModule._Common_Restore_InstanceId();
-            return dragAction;
-        }
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return dragAction;
     }
 
     public getDragPreview(): dragController.DragPreview {

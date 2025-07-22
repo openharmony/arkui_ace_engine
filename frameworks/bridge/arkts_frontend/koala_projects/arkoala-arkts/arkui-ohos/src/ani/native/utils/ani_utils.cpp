@@ -156,49 +156,74 @@ std::optional<ani_string> AniUtils::StdStringToANIString(ani_env *env, std::stri
     return result_string;
 }
 
-ani_error AniUtils::GetErrorObject(ani_env* env, const char *errMsg, int32_t code)
+ani_object WrapBusinessError(ani_env* env, const char *msg, ani_int code)
 {
-    CHECK_NULL_RETURN(env, nullptr);
-    ani_class errClass;
-    if (ANI_OK != env->FindClass("L@ohos/base/BusinessError;", &errClass)) {
-        HILOGE("Find class failed");
+    ani_class cls {};
+    ani_method method {};
+    ani_object obj = nullptr;
+    ani_status status = ANI_ERROR;
+    if (env == nullptr) {
+        return nullptr;
+    }
+
+    ani_string aniMsg = nullptr;
+    if ((status = env->String_NewUTF8(msg, strlen(msg), &aniMsg)) != ANI_OK) {
+        return nullptr;
+    }
+
+    ani_ref undefRef;
+    if ((status = env->GetUndefined(&undefRef)) != ANI_OK) {
+        return nullptr;
+    }
+
+    if ((status = env->FindClass("Lescompat/Error;", &cls)) != ANI_OK) {
+        return nullptr;
+    }
+
+    if ((status = env->Class_FindMethod(cls, "<ctor>", "DLstd/core/String;Lescompat/ErrorOptions;:V", &method)) !=
+        ANI_OK) {
+        return nullptr;
+    }
+    ani_double dCode(code);
+    if ((status = env->Object_New(cls, method, &obj, dCode, aniMsg, undefRef)) != ANI_OK) {
+        return nullptr;
+    }
+    
+    return obj;
+}
+
+ani_ref AniUtils::CreateBusinessError(ani_env* env, const char *msg, ani_int code)
+{
+    ani_class cls;
+    ani_status status = ANI_OK;
+    if ((status = env->FindClass("L@ohos/base/BusinessError;", &cls)) != ANI_OK) {
         return nullptr;
     }
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(errClass, "<ctor>", ":V", &ctor)) {
-        HILOGE("Cannot find constructor for class.");
+    if ((status = env->Class_FindMethod(cls, "<ctor>", "DLescompat/Error;:V", &ctor)) != ANI_OK) {
         return nullptr;
     }
-    ani_string errMessage;
-    if (ANI_OK != env->String_NewUTF8(errMsg, strlen(errMsg), &errMessage)) {
-        HILOGE("Convert string to ani string failed.");
+    ani_object error = WrapBusinessError(env, msg, code);
+    if (error == nullptr) {
         return nullptr;
     }
-    ani_object errObj;
-    if (ANI_OK != env->Object_New(errClass, ctor, &errObj)) {
-        HILOGE("Cannot create ani error object.");
+    ani_object obj = nullptr;
+    ani_double dCode(code);
+    if ((status = env->Object_New(cls, ctor, &obj, dCode, error)) != ANI_OK) {
         return nullptr;
     }
-    if (ANI_OK != env->Object_SetFieldByName_Double(errObj, "code", static_cast<ani_double>(code))) {
-        HILOGE("Set error code failed");
-        return nullptr;
-    }
-    if (ANI_OK != env->Object_SetPropertyByName_Ref(errObj, "message", errMessage)) {
-        HILOGE("Set error message failed");
-        return nullptr;
-    }
-    return static_cast<ani_error>(errObj);
+    return reinterpret_cast<ani_ref>(obj);
 }
 
 void AniUtils::AniThrow(ani_env* env, const char *errMsg, int32_t code)
 {
     CHECK_NULL_VOID(env);
-    auto errObj = GetErrorObject(env, errMsg, code);
+    auto errObj = CreateBusinessError(env, errMsg, code);
     if (errObj == nullptr) {
         HILOGE("Get error object failed!");
         return;
     }
-    if (ANI_OK != env->ThrowError(errObj)) {
+    if (ANI_OK != env->ThrowError(static_cast<ani_error>(errObj))) {
         HILOGE("Throw ani error object failed!");
         return;
     }

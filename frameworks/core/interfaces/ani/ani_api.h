@@ -65,6 +65,25 @@ typedef struct WebviewControllerInfo {
     std::function<void(const std::string&)> setHapPathFunc = nullptr;
 } WebviewControllerInfo;
 
+class SharedPointerWrapper {
+public:
+    SharedPointerWrapper() : ptr_(nullptr) {}
+    SharedPointerWrapper(std::shared_ptr<void> ptr) : ptr_(ptr) {}
+
+    std::shared_ptr<void> GetSharedPtr() const
+    {
+        return ptr_;
+    }
+
+    operator void*() const
+    {
+        return ptr_.get();
+    }
+
+private:
+    std::shared_ptr<void> ptr_;
+};
+
 namespace OHOS::Ace::Ani {
 class DragAction;
 }
@@ -124,10 +143,10 @@ struct ArkUIDragControllerAsync {
     bool isArray = false;
     const char* extraParams;
     bool hasHandle = false;
-    void* touchPoint;
+    SharedPointerWrapper touchPoint;
     ani_ref unifiedData = nullptr;
-    ani_ref pixelMap = nullptr;
-    std::vector<ani_ref> pixelMapList;
+    SharedPointerWrapper pixelMap;
+    std::vector<SharedPointerWrapper> pixelMapList;
     ArkUINodeHandle customBuilderNode = nullptr;
     std::vector<ArkUINodeHandle> customBuilderNodeList;
     ani_fn_object asyncCallback = nullptr;
