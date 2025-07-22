@@ -823,6 +823,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         HandleOnAreaChangeEvent(nanoTimestamp);
         HandleVisibleAreaChangeEvent(nanoTimestamp);
     }
+    UpdateFormLinkInfos();
     FlushMouseEventInVsync();
     eventManager_->FlushCursorStyleRequests();
     if (isNeedFlushAnimationStartTime_) {
@@ -4477,7 +4478,6 @@ void PipelineContext::HandleOnAreaChangeEvent(uint64_t nanoTimestamp)
     }
 
     areaChangeNodeMinDepth_ = 0;
-    UpdateFormLinkInfos();
 }
 
 void PipelineContext::UpdateFormLinkInfos()
