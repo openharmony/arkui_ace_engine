@@ -1661,18 +1661,23 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
         }
     }
 
-    // update background
-    if (builderFunc_) {
-        auto builderNode = builderFunc_();
-        auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-            AceType::MakeRefPtr<LinearLayoutPattern>(true));
-        if (builderNode) {
-            builderNode->MountToParent(columnNode);
+    // if node has background, do update
+    if (renderContext_->HasBuilderBackgroundFlag()) {
+        bool isBuilderBackground = renderContext_->GetBuilderBackgroundFlag().value();
+        if (isBuilderBackground && builderFunc_) {
+            auto builderNode = builderFunc_();
+            auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+                ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+            if (builderNode) {
+                builderNode->MountToParent(columnNode);
+            }
+            SetBackgroundLayoutConstraint(columnNode);
+            renderContext_->CreateBackgroundPixelMap(columnNode);
+            builderFunc_ = nullptr;
+            backgroundNode_ = columnNode;
+        } else if (!isBuilderBackground) {
+            renderContext_->UpdateCustomBackground();
         }
-        SetBackgroundLayoutConstraint(columnNode);
-        renderContext_->CreateBackgroundPixelMap(columnNode);
-        builderFunc_ = nullptr;
-        backgroundNode_ = columnNode;
     }
 
     // update focus state
@@ -5179,18 +5184,23 @@ void FrameNode::SyncGeometryNode(bool needSyncRsNode, const DirtySwapConfig& con
         TriggerOnSizeChangeCallback();
     }
 
-    // update background
-    if (builderFunc_) {
-        auto builderNode = builderFunc_();
-        auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-            AceType::MakeRefPtr<LinearLayoutPattern>(true));
-        if (builderNode) {
-            builderNode->MountToParent(columnNode);
+    // if node has background, do update
+    if (renderContext_->HasBuilderBackgroundFlag()) {
+        bool isBuilderBackground = renderContext_->GetBuilderBackgroundFlag().value();
+        if (isBuilderBackground && builderFunc_) {
+            auto builderNode = builderFunc_();
+            auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+                ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+            if (builderNode) {
+                builderNode->MountToParent(columnNode);
+            }
+            SetBackgroundLayoutConstraint(columnNode);
+            renderContext_->CreateBackgroundPixelMap(columnNode);
+            builderFunc_ = nullptr;
+            backgroundNode_ = columnNode;
+        } else if (!isBuilderBackground) {
+            renderContext_->UpdateCustomBackground();
         }
-        SetBackgroundLayoutConstraint(columnNode);
-        renderContext_->CreateBackgroundPixelMap(columnNode);
-        builderFunc_ = nullptr;
-        backgroundNode_ = columnNode;
     }
 
     // update focus state

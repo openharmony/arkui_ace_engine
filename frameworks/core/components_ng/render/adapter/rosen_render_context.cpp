@@ -3367,6 +3367,12 @@ LoadSuccessNotifyTask RosenRenderContext::CreateBorderImageLoadSuccessCallback()
     };
 }
 
+void RosenRenderContext::UpdateCustomBackground()
+{
+    ModifyCustomBackground();
+    RequestNextFrame();
+}
+
 void RosenRenderContext::OnBackgroundAlignUpdate(const Alignment& align)
 {
     CHECK_NULL_VOID(rsNode_);
@@ -3422,16 +3428,6 @@ void RosenRenderContext::OnBuilderBackgroundFlagUpdate(bool isBuilderBackground)
     CHECK_NULL_VOID(rsNode_);
     auto transitionModifier = GetOrCreateTransitionModifier();
     transitionModifier->SetIsBuilderBackground(isBuilderBackground);
-}
-
-void RosenRenderContext::OnBackgroundIgnoresLayoutSafeAreaEdgesUpdate(uint32_t edges)
-{
-    CHECK_NULL_VOID(rsNode_);
-    // Builder background will be updated while pixel map is ready.
-    if (!GetBuilderBackgroundFlagValue(false)) {
-        ModifyCustomBackground();
-        RequestNextFrame();
-    }
 }
 
 void RosenRenderContext::CreateBackgroundPixelMap(const RefPtr<FrameNode>& customNode)

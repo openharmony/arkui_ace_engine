@@ -1937,52 +1937,6 @@ HWTEST_F(RosenRenderContextTest, OnBuilderBackgroundFlagUpdate001, TestSize.Leve
 }
 
 /**
- * @tc.name: OnBackgroundIgnoresLayoutSafeAreaEdgesUpdate001
- * @tc.desc: Test OnBackgroundIgnoresLayoutSafeAreaEdgesUpdate Func.
- * @tc.type: FUNC
- */
-HWTEST_F(RosenRenderContextTest, OnBackgroundIgnoresLayoutSafeAreaEdgesUpdate001, TestSize.Level1)
-{
-    auto frameNode = FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
-    ASSERT_NE(frameNode, nullptr);
-    RefPtr<RosenRenderContext> rosenRenderContext = InitRosenRenderContext(frameNode);
-    ASSERT_NE(rosenRenderContext, nullptr);
-    ASSERT_NE(rosenRenderContext->rsNode_, nullptr);
-    auto transitionModifier = rosenRenderContext->GetOrCreateTransitionModifier();
-    ASSERT_NE(transitionModifier, nullptr);
-    /**
-     * @tc.steps: step1. Call ignoresLayoutSafeAreaEdges to true.
-     * @tc.expected: step1. The transitionModifier->Modify() should be called.
-     */
-    uint32_t ignoresLayoutSafeAreaEdges = NG::LAYOUT_SAFE_AREA_EDGE_ALL;
-    transitionModifier->Modify();
-    bool flag = transitionModifier->flag_->Get();
-    rosenRenderContext->UpdateIsTransitionBackground(true);
-    rosenRenderContext->UpdateBuilderBackgroundFlag(false);
-    rosenRenderContext->OnBackgroundIgnoresLayoutSafeAreaEdgesUpdate(ignoresLayoutSafeAreaEdges);
-    EXPECT_NE(transitionModifier->flag_->Get(), flag);
-
-    /**
-     * @tc.steps: step2. Set ignoresLayoutSafeAreaEdges to false.
-     * @tc.expected: step2. The transitionModifier->Modify() should not be called.
-     */
-    flag = transitionModifier->flag_->Get();
-    rosenRenderContext->UpdateBuilderBackgroundFlag(true);
-    rosenRenderContext->OnBackgroundIgnoresLayoutSafeAreaEdgesUpdate(ignoresLayoutSafeAreaEdges);
-    EXPECT_EQ(flag, transitionModifier->flag_->Get());
-
-    /**
-     * @tc.steps: step3. Set ignoresLayoutSafeAreaEdges while rsNode_ is null.
-     * @tc.expected: step3. The transitionModifier->Modify() should not be called.
-     */
-    rosenRenderContext->rsNode_ = nullptr;
-    rosenRenderContext->UpdateBuilderBackgroundFlag(true);
-    flag = transitionModifier->flag_->Get();
-    rosenRenderContext->OnBackgroundIgnoresLayoutSafeAreaEdgesUpdate(ignoresLayoutSafeAreaEdges);
-    EXPECT_EQ(flag, transitionModifier->flag_->Get());
-}
-
-/**
  * @tc.name: OnBackgroundAlignUpdate001
  * @tc.desc: Test OnBackgroundAlignUpdate Func.
  * @tc.type: FUNC
@@ -2061,6 +2015,38 @@ HWTEST_F(RosenRenderContextTest, OnBackgroundPixelMapUpdate001, TestSize.Level1)
     rosenRenderContext->OnBackgroundPixelMapUpdate(pixelMap);
     EXPECT_EQ(transitionModifier->pixelMap_, nullptr);
     EXPECT_EQ(backgroundModifier->pixelMap_, nullptr);
+}
+
+/**
+ * @tc.name: UpdateCustomBackground001
+ * @tc.desc: Test UpdateCustomBackground Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, UpdateCustomBackground001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<RosenRenderContext> rosenRenderContext = InitRosenRenderContext(frameNode);
+    ASSERT_NE(rosenRenderContext, nullptr);
+    ASSERT_NE(rosenRenderContext->rsNode_, nullptr);
+
+    /**
+     * @tc.steps: step1. Create transition modifier and get the modifier flag.
+     * @tc.expected: step1. Creation successful.
+     */
+    rosenRenderContext->UpdateIsTransitionBackground(true);
+    auto transitionModifier = rosenRenderContext->GetOrCreateTransitionModifier();
+    ASSERT_NE(transitionModifier, nullptr);
+    transitionModifier->Modify();
+    ASSERT_NE(transitionModifier->flag_, nullptr);
+    bool flag = transitionModifier->flag_->Get();
+
+    /**
+     * @tc.steps: step2. Call UpdateCustomBackground function.
+     * @tc.expected: step2. The modifier flag is changed.
+     */
+    rosenRenderContext->UpdateCustomBackground();
+    EXPECT_NE(transitionModifier->flag_->Get(), flag);
 }
 
 /**
