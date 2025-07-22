@@ -48,6 +48,16 @@ ani_long ConstructCustomNode(ani_int id, std::function<void()>&& onPageShow, std
     return 0;
 }
 
+void RequestFrame()
+{
+    auto context = NG::PipelineContext::GetCurrentContextSafely();
+    if (context == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_STATE_MGMT, "RequestFrame-ani can not get current context.");
+        return;
+    }
+    context->RequestFrame();
+}
+
 RefPtr<UINode> GetTargetNode(const RefPtr<AceType>& node, const std::string& tag, bool isInner, bool needCheckParent)
 {
     // needChcekParent flag is intended to maintain the original logic unchanged, when tag is
@@ -238,11 +248,14 @@ ani_object QueryNavDestinationInfo0(ani_env* env, ani_long node, ani_int isInner
 
 const ArkUIAniCustomNodeModifier* GetCustomNodeAniModifier()
 {
-    static const ArkUIAniCustomNodeModifier impl = { .constructCustomNode = OHOS::Ace::NG::ConstructCustomNode,
+    static const ArkUIAniCustomNodeModifier impl = {
+        .constructCustomNode = OHOS::Ace::NG::ConstructCustomNode,
+        .requestFrame = OHOS::Ace::NG::RequestFrame,
         .queryNavigationInfo = OHOS::Ace::NG::QueryNavigationInfo,
         .queryRouterPageInfo = OHOS::Ace::NG::QueryRouterPageInfo,
         .queryNavDestinationInfo = OHOS::Ace::NG::QueryNavDestinationInfo,
-        .queryNavDestinationInfo0 = OHOS::Ace::NG::QueryNavDestinationInfo0 };
+        .queryNavDestinationInfo0 = OHOS::Ace::NG::QueryNavDestinationInfo0
+    };
     return &impl;
 }
 

@@ -14,6 +14,7 @@
  */
 
 import { int32 } from '@koalaui/common';
+import { uiObserver } from '@ohos/arkui/observer';
 import { CustomComponentV2 } from './customComponent';
 import { InteropNativeModule } from '@koalaui/interop';
 import {
@@ -23,7 +24,6 @@ import {
     StateMgmtDFX,
     DumpInfo
 } from '@ohos.arkui.stateManagement';
-import { uiObserver } from '@ohos/arkui/observer';
 import { UIContext } from '@ohos/arkui/UIContext';
 import { PeerNode } from '../PeerNode';
 

@@ -51,6 +51,7 @@ export class ArkUIAniModule {
     native static _Common_GetFocused_InstanceId(): KInt
     native static _Common_GetSharedLocalStorage(): LocalStorage
     native static _CustomNode_Construct(id: KInt, component: ArkCustomComponent): KPointer
+    native static _CustomNode_RequestFrame(): void
     native static _CustomNode_QueryNavigationInfo(ptr: KPointer): uiObserver.NavigationInfo
     native static _CustomNode_QueryNavDestinationInfo(ptr: KPointer): uiObserver.NavDestinationInfo
     native static _CustomNode_QueryNavDestinationInfo0(ptr: KPointer, isInner: boolean): uiObserver.NavDestinationInfo

@@ -23,6 +23,7 @@ namespace OHOS::Ace::Ani {
 
 ani_long ConstructCustomNode(ani_env* env, [[maybe_unused]] ani_object aniClass,
                              ani_int id, ani_object obj);
+void RequestFrame(ani_env* env);
 ani_object QueryNavigationInfo(ani_env* env, [[maybe_unused]] ani_object, ani_long pointer);
 ani_object QueryNavDestinationInfo(ani_env* env, [[maybe_unused]] ani_object, ani_long pointer);
 ani_object QueryNavDestinationInfo0(ani_env* env, [[maybe_unused]] ani_object, ani_long pointer, ani_boolean isInner);
