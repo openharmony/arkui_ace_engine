@@ -62,10 +62,14 @@ export class ComputedDecoratedVariable<T> implements IComputedDecoratedVariable<
         if (this.cachedValue_ === undefined) {
             this.cachedValue_ = this.runFunctionAndObserve();
         }
-        if (ObserveSingleton.instance.shouldAddRef(ObserveSingleton.InvalidRenderId)) {
+        if (this.shouldAddRef()) {
             this.meta_.addRef();
         }
         return this.cachedValue_ as T;
+    }
+
+    private shouldAddRef(): boolean {
+        return ObserveSingleton.instance.renderingComponent >= ObserveSingleton.RenderingComponentV2;
     }
 
     private runFunctionAndObserve(): T {
