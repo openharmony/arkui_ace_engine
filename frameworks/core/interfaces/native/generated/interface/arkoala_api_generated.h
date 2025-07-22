@@ -2431,8 +2431,8 @@ typedef struct Opt_TextRange Opt_TextRange;
 typedef struct TextShadowStylePeer TextShadowStylePeer;
 typedef struct TextShadowStylePeer* Ark_TextShadowStyle;
 typedef struct Opt_TextShadowStyle Opt_TextShadowStyle;
-typedef struct Ark_TextStyle_alert_dialog Ark_TextStyle_alert_dialog;
-typedef struct Opt_TextStyle_alert_dialog Opt_TextStyle_alert_dialog;
+typedef struct Ark_AlertDialogTextStyleOptions Ark_AlertDialogTextStyleOptions;
+typedef struct Opt_AlertDialogTextStyleOptions Opt_AlertDialogTextStyleOptions;
 typedef struct Ark_TextTimerOptions Ark_TextTimerOptions;
 typedef struct Opt_TextTimerOptions Opt_TextTimerOptions;
 typedef struct Ark_TimePickerOptions Ark_TimePickerOptions;
@@ -14991,13 +14991,13 @@ typedef struct Opt_TextShadowStyle {
     Ark_Tag tag;
     Ark_TextShadowStyle value;
 } Opt_TextShadowStyle;
-typedef struct Ark_TextStyle_alert_dialog {
+typedef struct Ark_AlertDialogTextStyleOptions {
     Opt_WordBreak wordBreak;
-} Ark_TextStyle_alert_dialog;
-typedef struct Opt_TextStyle_alert_dialog {
+} Ark_AlertDialogTextStyleOptions;
+typedef struct Opt_AlertDialogTextStyleOptions {
     Ark_Tag tag;
-    Ark_TextStyle_alert_dialog value;
-} Opt_TextStyle_alert_dialog;
+    Ark_AlertDialogTextStyleOptions value;
+} Opt_AlertDialogTextStyleOptions;
 typedef struct Ark_TextTimerOptions {
     Opt_Boolean isCountDown;
     Opt_Number count;
@@ -18677,7 +18677,7 @@ typedef struct Ark_AlertDialogParamWithButtons {
     Opt_Union_ResourceColor_EdgeColors_LocalizedEdgeColors borderColor;
     Opt_Union_BorderStyle_EdgeStyles borderStyle;
     Opt_Union_ShadowOptions_ShadowStyle shadow;
-    Opt_TextStyle_alert_dialog textStyle;
+    Opt_AlertDialogTextStyleOptions textStyle;
     Opt_Boolean enableHoverMode;
     Opt_HoverModeAreaType hoverModeArea;
     Opt_Callback_Void onDidAppear;
@@ -18720,7 +18720,7 @@ typedef struct Ark_AlertDialogParamWithConfirm {
     Opt_Union_ResourceColor_EdgeColors_LocalizedEdgeColors borderColor;
     Opt_Union_BorderStyle_EdgeStyles borderStyle;
     Opt_Union_ShadowOptions_ShadowStyle shadow;
-    Opt_TextStyle_alert_dialog textStyle;
+    Opt_AlertDialogTextStyleOptions textStyle;
     Opt_Boolean enableHoverMode;
     Opt_HoverModeAreaType hoverModeArea;
     Opt_Callback_Void onDidAppear;
@@ -18762,7 +18762,7 @@ typedef struct Ark_AlertDialogParamWithOptions {
     Opt_Union_ResourceColor_EdgeColors_LocalizedEdgeColors borderColor;
     Opt_Union_BorderStyle_EdgeStyles borderStyle;
     Opt_Union_ShadowOptions_ShadowStyle shadow;
-    Opt_TextStyle_alert_dialog textStyle;
+    Opt_AlertDialogTextStyleOptions textStyle;
     Opt_Boolean enableHoverMode;
     Opt_HoverModeAreaType hoverModeArea;
     Opt_Callback_Void onDidAppear;

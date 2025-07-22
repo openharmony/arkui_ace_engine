@@ -94,7 +94,7 @@ import { DrawContext, Rect, LengthMetricsUnit, LengthUnit, ShapeClip, RoundRect,
 import { DataOperationType } from "./../lazyForEach"
 import { DataPanelType, LinearGradient, LinearGradientInternal, ColorStop, DataPanelOptions, DataPanelShadowOptions } from "./../dataPanel"
 import { DatePickerMode, Callback_DatePickerResult_Void, DatePickerResult, DatePickerOptions, LunarSwitchStyle, DatePickerDialogOptions } from "./../datePicker"
-import { DialogAlignment, DialogButtonDirection, TextStyle_alert_dialog, AlertDialogButtonBaseOptions, AlertDialogButtonOptions, AlertDialogParamWithButtons, AlertDialogParam, AlertDialogParamWithConfirm, AlertDialogParamWithOptions } from "./../alertDialog"
+import { DialogAlignment, DialogButtonDirection, AlertDialogTextStyleOptions, AlertDialogButtonBaseOptions, AlertDialogButtonOptions, AlertDialogParamWithButtons, AlertDialogParam, AlertDialogParamWithConfirm, AlertDialogParamWithOptions } from "./../alertDialog"
 import { DistributionType, DisturbanceFieldShape, ParticleEmitterShape, ParticleType, ParticleUpdater } from "./../particle"
 import { DpiFollowStrategy, UIExtensionProxy, UIExtensionProxyInternal, Callback_UIExtensionProxy_Void, WindowModeFollowStrategy, Callback_Literal_Number_code__want_Void, Literal_Number_code__want, Callback_Map_String_Object_Void, UIExtensionOptions } from "./../uiExtensionComponent"
 import { EditMode, ListItemStyle, Sticky, SwipeActionState, SwipeEdgeEffect, Callback_SwipeActionState_Void, ListItemOptions, SwipeActionItem, SwipeActionOptions } from "./../listItem"
@@ -7341,7 +7341,7 @@ export class Serializer extends SerializerBase {
         let valueSerializer : Serializer = this
         valueSerializer.writePointer(toPeerPtr(value))
     }
-    writeTextStyle_alert_dialog(value: TextStyle_alert_dialog): void {
+    writeAlertDialogTextStyleOptions(value: AlertDialogTextStyleOptions): void {
         let valueSerializer : Serializer = this
         const value_wordBreak  = value.wordBreak
         let value_wordBreak_type : int32 = RuntimeType.UNDEFINED
@@ -18518,7 +18518,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_textStyle_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_textStyle_type)) {
             const value_textStyle_value  = value_textStyle!
-            valueSerializer.writeTextStyle_alert_dialog(value_textStyle_value)
+            valueSerializer.writeAlertDialogTextStyleOptions(value_textStyle_value)
         }
         const value_enableHoverMode  = value.enableHoverMode
         let value_enableHoverMode_type : int32 = RuntimeType.UNDEFINED
@@ -18944,7 +18944,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_textStyle_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_textStyle_type)) {
             const value_textStyle_value  = value_textStyle!
-            valueSerializer.writeTextStyle_alert_dialog(value_textStyle_value)
+            valueSerializer.writeAlertDialogTextStyleOptions(value_textStyle_value)
         }
         const value_enableHoverMode  = value.enableHoverMode
         let value_enableHoverMode_type : int32 = RuntimeType.UNDEFINED
@@ -19374,7 +19374,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_textStyle_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_textStyle_type)) {
             const value_textStyle_value  = value_textStyle!
-            valueSerializer.writeTextStyle_alert_dialog(value_textStyle_value)
+            valueSerializer.writeAlertDialogTextStyleOptions(value_textStyle_value)
         }
         const value_enableHoverMode  = value.enableHoverMode
         let value_enableHoverMode_type : int32 = RuntimeType.UNDEFINED

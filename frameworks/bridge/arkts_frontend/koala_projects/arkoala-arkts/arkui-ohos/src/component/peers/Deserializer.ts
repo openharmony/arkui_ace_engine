@@ -106,7 +106,7 @@ import { DrawContext, Rect, LengthMetricsUnit, LengthUnit, ColorMetrics, ColorMe
 import { DataOperationType } from "./../lazyForEach"
 import { DataPanelType, LinearGradient, LinearGradientInternal, ColorStop, DataPanelOptions, DataPanelShadowOptions } from "./../dataPanel"
 import { DatePickerMode, Callback_DatePickerResult_Void, DatePickerResult, DatePickerOptions, LunarSwitchStyle, DatePickerDialogOptions } from "./../datePicker"
-import { DialogAlignment, DialogButtonDirection, TextStyle_alert_dialog, AlertDialogButtonBaseOptions, AlertDialogButtonOptions, AlertDialogParamWithButtons, AlertDialogParam, AlertDialogParamWithConfirm, AlertDialogParamWithOptions } from "./../alertDialog"
+import { DialogAlignment, DialogButtonDirection, AlertDialogTextStyleOptions, AlertDialogButtonBaseOptions, AlertDialogButtonOptions, AlertDialogParamWithButtons, AlertDialogParam, AlertDialogParamWithConfirm, AlertDialogParamWithOptions } from "./../alertDialog"
 import { DistributionType, DisturbanceFieldShape, ParticleEmitterShape, ParticleType, ParticleUpdater } from "./../particle"
 import { DpiFollowStrategy, UIExtensionProxy, UIExtensionProxyInternal, Callback_UIExtensionProxy_Void, WindowModeFollowStrategy, Callback_Literal_Number_code__want_Void, Literal_Number_code__want, Callback_Map_String_Object_Void, UIExtensionOptions } from "./../uiExtensionComponent"
 import { EditMode, ListItemStyle, Sticky, SwipeActionState, SwipeEdgeEffect, Callback_SwipeActionState_Void, ListItemOptions, SwipeActionItem, SwipeActionOptions } from "./../listItem"
@@ -12145,7 +12145,7 @@ export class Deserializer extends DeserializerBase {
         let ptr : KPointer = valueDeserializer.readPointer()
         return TextShadowStyleInternal.fromPtr(ptr)
     }
-    readTextStyle_alert_dialog(): TextStyle_alert_dialog {
+    readAlertDialogTextStyleOptions(): AlertDialogTextStyleOptions {
         let valueDeserializer : Deserializer = this
         const wordBreak_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
         let wordBreak_buf : WordBreak | undefined
@@ -12154,7 +12154,7 @@ export class Deserializer extends DeserializerBase {
             wordBreak_buf = TypeChecker.WordBreak_FromNumeric(valueDeserializer.readInt32())
         }
         const wordBreak_result : WordBreak | undefined = wordBreak_buf
-        let value : TextStyle_alert_dialog = ({wordBreak: wordBreak_result} as TextStyle_alert_dialog)
+        let value : AlertDialogTextStyleOptions = ({wordBreak: wordBreak_result} as AlertDialogTextStyleOptions)
         return value
     }
     readTextTimerOptions(): TextTimerOptions {
@@ -22267,12 +22267,12 @@ export class Deserializer extends DeserializerBase {
         }
         const shadow_result : ShadowOptions | ShadowStyle | undefined = shadow_buf
         const textStyle_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let textStyle_buf : TextStyle_alert_dialog | undefined
+        let textStyle_buf : AlertDialogTextStyleOptions | undefined
         if ((RuntimeType.UNDEFINED) != (textStyle_buf_runtimeType))
         {
-            textStyle_buf = valueDeserializer.readTextStyle_alert_dialog()
+            textStyle_buf = valueDeserializer.readAlertDialogTextStyleOptions()
         }
-        const textStyle_result : TextStyle_alert_dialog | undefined = textStyle_buf
+        const textStyle_result : AlertDialogTextStyleOptions | undefined = textStyle_buf
         const enableHoverMode_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
         let enableHoverMode_buf : boolean | undefined
         if ((RuntimeType.UNDEFINED) != (enableHoverMode_buf_runtimeType))
@@ -22644,12 +22644,12 @@ export class Deserializer extends DeserializerBase {
         }
         const shadow_result : ShadowOptions | ShadowStyle | undefined = shadow_buf
         const textStyle_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let textStyle_buf : TextStyle_alert_dialog | undefined
+        let textStyle_buf : AlertDialogTextStyleOptions | undefined
         if ((RuntimeType.UNDEFINED) != (textStyle_buf_runtimeType))
         {
-            textStyle_buf = valueDeserializer.readTextStyle_alert_dialog()
+            textStyle_buf = valueDeserializer.readAlertDialogTextStyleOptions()
         }
-        const textStyle_result : TextStyle_alert_dialog | undefined = textStyle_buf
+        const textStyle_result : AlertDialogTextStyleOptions | undefined = textStyle_buf
         const enableHoverMode_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
         let enableHoverMode_buf : boolean | undefined
         if ((RuntimeType.UNDEFINED) != (enableHoverMode_buf_runtimeType))
@@ -23026,12 +23026,12 @@ export class Deserializer extends DeserializerBase {
         }
         const shadow_result : ShadowOptions | ShadowStyle | undefined = shadow_buf
         const textStyle_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let textStyle_buf : TextStyle_alert_dialog | undefined
+        let textStyle_buf : AlertDialogTextStyleOptions | undefined
         if ((RuntimeType.UNDEFINED) != (textStyle_buf_runtimeType))
         {
-            textStyle_buf = valueDeserializer.readTextStyle_alert_dialog()
+            textStyle_buf = valueDeserializer.readAlertDialogTextStyleOptions()
         }
-        const textStyle_result : TextStyle_alert_dialog | undefined = textStyle_buf
+        const textStyle_result : AlertDialogTextStyleOptions | undefined = textStyle_buf
         const enableHoverMode_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
         let enableHoverMode_buf : boolean | undefined
         if ((RuntimeType.UNDEFINED) != (enableHoverMode_buf_runtimeType))
