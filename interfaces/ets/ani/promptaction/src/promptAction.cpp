@@ -25,6 +25,7 @@
 #include "prompt_action_utils.h"
 #include "prompt_action_controller.h"
 
+#include "base/subwindow/subwindow_manager.h"
 #include "frameworks/base/error/error_code.h"
 #include "frameworks/base/utils/utils.h"
 #include "frameworks/base/utils/system_properties.h"
