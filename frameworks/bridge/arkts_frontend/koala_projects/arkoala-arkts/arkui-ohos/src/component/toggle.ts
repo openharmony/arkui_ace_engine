@@ -159,6 +159,111 @@ export class ArkTogglePeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
 }
+
+export class ArkToggleButtonPeer extends ArkCommonMethodPeer {
+    protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+        super(peerPtr, id, name, flags)
+    }
+    public static create(component: ComponentBase | undefined, flags: int32 = 0): ArkToggleButtonPeer {
+        const peerId = PeerNode.nextId()
+        const _peerPtr = ArkUIGeneratedNativeModule._Toggle_button_construct(peerId, flags)
+        const _peer = new ArkToggleButtonPeer(_peerPtr, peerId, "Button", flags)
+        component?.setPeer(_peer)
+        return _peer
+    }
+    setToggleOptionsAttribute(options: ToggleOptions): void {
+        const thisSerializer: Serializer = Serializer.hold()
+        thisSerializer.writeToggleOptions(options)
+        ArkUIGeneratedNativeModule._ToggleInterface_setToggleOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onChangeAttribute(value: ((isVisible: boolean) => void) | undefined): void {
+        const thisSerializer: Serializer = Serializer.hold()
+        let value_type: int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._ToggleAttribute_onChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    contentModifierAttribute(value: ContentModifier | undefined): void {
+        const thisSerializer: Serializer = Serializer.hold()
+        let value_type: int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value = value!
+            thisSerializer.holdAndWriteObject(value_value)
+        }
+        ArkUIGeneratedNativeModule._ToggleAttribute_contentModifier(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    selectedColorAttribute(value: ResourceColor | undefined): void { }
+    switchPointColorAttribute(value: ResourceColor | undefined): void { }
+    switchStyleAttribute(value: SwitchStyle | undefined): void { }
+    _onChangeEvent_isOnAttribute(callback: ((isVisible: boolean) => void)): void {
+        const thisSerializer: Serializer = Serializer.hold()
+        thisSerializer.holdAndWriteCallback(callback)
+        ArkUIGeneratedNativeModule._ToggleAttribute__onChangeEvent_isOn(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+}
+
+export class ArkToggleCheckboxPeer extends ArkCommonMethodPeer {
+    protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+        super(peerPtr, id, name, flags)
+    }
+    public static create(component: ComponentBase | undefined, flags: int32 = 0): ArkToggleCheckboxPeer {
+        const peerId = PeerNode.nextId()
+        const _peerPtr = ArkUIGeneratedNativeModule._Toggle_checkbox_construct(peerId, flags)
+        const _peer = new ArkToggleCheckboxPeer(_peerPtr, peerId, "Checkbox", flags)
+        component?.setPeer(_peer)
+        return _peer
+    }
+    setToggleOptionsAttribute(options: ToggleOptions): void {
+        const thisSerializer: Serializer = Serializer.hold()
+        thisSerializer.writeToggleOptions(options)
+        ArkUIGeneratedNativeModule._ToggleInterface_setToggleOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onChangeAttribute(value: ((isVisible: boolean) => void) | undefined): void {
+        const thisSerializer: Serializer = Serializer.hold()
+        let value_type: int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._ToggleAttribute_onChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    contentModifierAttribute(value: ContentModifier | undefined): void {
+        const thisSerializer: Serializer = Serializer.hold()
+        let value_type: int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value = value!
+            thisSerializer.holdAndWriteObject(value_value)
+        }
+        ArkUIGeneratedNativeModule._ToggleAttribute_contentModifier(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    selectedColorAttribute(value: ResourceColor | undefined): void { }
+    switchPointColorAttribute(value: ResourceColor | undefined): void { }
+    switchStyleAttribute(value: SwitchStyle | undefined): void { }
+    _onChangeEvent_isOnAttribute(callback: ((isVisible: boolean) => void)): void {
+        const thisSerializer: Serializer = Serializer.hold()
+        thisSerializer.holdAndWriteCallback(callback)
+        ArkUIGeneratedNativeModule._ToggleAttribute__onChangeEvent_isOn(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+}
+
 export enum ToggleType {
     CHECKBOX = 0,
     Checkbox = 0,
@@ -216,6 +321,136 @@ export class ArkToggleStyle extends ArkCommonMethodStyle implements ToggleAttrib
         throw new Error("Unimplmented")
         }
 }
+export class ArkToggleCheckboxComponent extends ArkCommonMethodComponent implements ToggleAttribute {
+    getPeer(): ArkToggleCheckboxPeer {
+        return (this.peer as ArkToggleCheckboxPeer)
+    }
+    ToggleOptionsIsOnIsBindable(options?: ToggleOptions): boolean {
+        if ((RuntimeType.UNDEFINED) != runtimeType(options)) {
+            const options_isOn  = options!.isOn;
+            if ((RuntimeType.UNDEFINED) != (runtimeType(options_isOn))) {
+                const options_isOn_value  = options_isOn!;
+                return TypeChecker.isBindableBoolean(options_isOn_value);
+            }
+        }
+        return false;
+    }
+    public setToggleOptions(options: ToggleOptions): this {
+        if (this.checkPriority("setToggleOptions")) {
+            const options_casted = options as (ToggleOptions)
+            this.getPeer()?.setToggleOptionsAttribute(options_casted)
+        }
+        if (this.ToggleOptionsIsOnIsBindable(options)) {
+            ToggleOpsHandWritten.hookToggleAttributeIsOnImpl(this.getPeer().peer.ptr,
+                (options!.isOn as Bindable<boolean>));
+        }
+        return this
+    }
+    public onChange(value: ((isVisible: boolean) => void) | undefined): this {
+        if (this.checkPriority("onChange")) {
+            const value_casted = value as (((isVisible: boolean) => void) | undefined)
+            this.getPeer()?.onChangeAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public contentModifier(value: ContentModifier | undefined): this {
+        if (this.checkPriority("contentModifier")) {
+            const value_casted = value as (ContentModifier | undefined)
+            this.getPeer()?.contentModifierAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public selectedColor(value: ResourceColor | undefined): this {
+        return this
+    }
+    public switchPointColor(value: ResourceColor | undefined): this {
+        return this
+    }
+    public switchStyle(value: SwitchStyle | undefined): this {
+        return this
+    }
+    public _onChangeEvent_isOn(callback: ((isVisible: boolean) => void)): void {
+        if (this.checkPriority("_onChangeEvent_isOn")) {
+            const callback_casted = callback as (((isVisible: boolean) => void))
+            this.getPeer()?._onChangeEvent_isOnAttribute(callback_casted)
+            return
+        }
+        return
+    }
+    
+    public applyAttributesFinish(): void {
+        // we call this function outside of class, so need to make it public
+        super.applyAttributesFinish()
+    }
+}
+
+export class ArkToggleButtonComponent extends ArkCommonMethodComponent implements ToggleAttribute {
+    getPeer(): ArkToggleButtonPeer {
+        return (this.peer as ArkToggleButtonPeer)
+    }
+    ToggleOptionsIsOnIsBindable(options?: ToggleOptions): boolean {
+        if ((RuntimeType.UNDEFINED) != runtimeType(options)) {
+            const options_isOn  = options!.isOn;
+            if ((RuntimeType.UNDEFINED) != (runtimeType(options_isOn))) {
+                const options_isOn_value  = options_isOn!;
+                return TypeChecker.isBindableBoolean(options_isOn_value);
+            }
+        }
+        return false;
+    }
+    public setToggleOptions(options: ToggleOptions): this {
+        if (this.checkPriority("setToggleOptions")) {
+            const options_casted = options as (ToggleOptions)
+            this.getPeer()?.setToggleOptionsAttribute(options_casted)
+        }
+        if (this.ToggleOptionsIsOnIsBindable(options)) {
+            ToggleOpsHandWritten.hookToggleAttributeIsOnImpl(this.getPeer().peer.ptr,
+                (options!.isOn as Bindable<boolean>));
+        }
+        return this
+    }
+    public onChange(value: ((isVisible: boolean) => void) | undefined): this {
+        if (this.checkPriority("onChange")) {
+            const value_casted = value as (((isVisible: boolean) => void) | undefined)
+            this.getPeer()?.onChangeAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public contentModifier(value: ContentModifier | undefined): this {
+        if (this.checkPriority("contentModifier")) {
+            const value_casted = value as (ContentModifier | undefined)
+            this.getPeer()?.contentModifierAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public selectedColor(value: ResourceColor | undefined): this {
+        return this
+    }
+    public switchPointColor(value: ResourceColor | undefined): this {
+        return this
+    }
+    public switchStyle(value: SwitchStyle | undefined): this {
+        return this
+    }
+    public _onChangeEvent_isOn(callback: ((isVisible: boolean) => void)): void {
+        if (this.checkPriority("_onChangeEvent_isOn")) {
+            const callback_casted = callback as (((isVisible: boolean) => void))
+            this.getPeer()?._onChangeEvent_isOnAttribute(callback_casted)
+            return
+        }
+        return
+    }
+
+    public applyAttributesFinish(): void {
+        // we call this function outside of class, so need to make it public
+        super.applyAttributesFinish()
+    }
+}
+
 export class ArkToggleComponent extends ArkCommonMethodComponent implements ToggleAttribute {
     getPeer(): ArkTogglePeer {
         return (this.peer as ArkTogglePeer)
@@ -303,13 +538,38 @@ export function Toggle(
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
-    const receiver = remember(() => {
-        return new ArkToggleComponent()
-    })
-    NodeAttach<ArkTogglePeer>((): ArkTogglePeer => ArkTogglePeer.create(receiver), (_: ArkTogglePeer) => {
-        receiver.setToggleOptions(options)
-        style?.(receiver)
-        content_?.()
-        receiver.applyAttributesFinish()
-    })
+    if (options.type == ToggleType.SWITCH) {
+        const receiver = remember(() => {
+            return new ArkToggleComponent()
+        })
+        
+        NodeAttach<ArkTogglePeer>((): ArkTogglePeer => ArkTogglePeer.create(receiver), (_: ArkTogglePeer) => {
+            receiver.setToggleOptions(options)
+            style?.(receiver)
+            content_?.()
+            receiver.applyAttributesFinish()
+        })
+    } else if (options.type === ToggleType.BUTTON) {
+        const receiver = remember(() => {
+            return new ArkToggleButtonComponent()
+        })
+        
+        NodeAttach<ArkToggleButtonPeer>((): ArkToggleButtonPeer => ArkToggleButtonPeer.create(receiver), (_: ArkToggleButtonPeer) => {
+            receiver.setToggleOptions(options)
+            style?.(receiver)
+            content_?.()
+            receiver.applyAttributesFinish()
+        })
+    } else if (options.type == ToggleType.CHECKBOX) {
+        const receiver = remember(() => {
+            return new ArkToggleCheckboxComponent()
+        })
+        
+        NodeAttach<ArkToggleCheckboxPeer>((): ArkToggleCheckboxPeer => ArkToggleCheckboxPeer.create(receiver), (_: ArkToggleCheckboxPeer) => {
+            receiver.setToggleOptions(options)
+            style?.(receiver)
+            content_?.()
+            receiver.applyAttributesFinish()
+        })
+    } 
 }

@@ -19104,8 +19104,6 @@ typedef struct Ark_LabelStyle {
     Opt_Union_Number_ResourceStr maxFontSize;
     Opt_TextHeightAdaptivePolicy heightAdaptivePolicy;
     Opt_Font font;
-    Opt_ResourceColor selectedColor;
-    Opt_ResourceColor unselectedColor;
 } Ark_LabelStyle;
 typedef struct Opt_LabelStyle {
     Ark_Tag tag;
@@ -23605,6 +23603,10 @@ typedef struct GENERATED_ArkUITimePickerModifier {
 typedef struct GENERATED_ArkUIToggleModifier {
     Ark_NativePointer (*construct)(Ark_Int32 id,
                                    Ark_Int32 flags);
+    Ark_NativePointer (*buttonConstruct)(Ark_Int32 id,
+                                         Ark_Int32 flags);
+    Ark_NativePointer (*checkboxConstruct)(Ark_Int32 id,
+                                           Ark_Int32 flags);
     void (*setToggleOptions)(Ark_NativePointer node,
                              const Ark_ToggleOptions* options);
     void (*setOnChange)(Ark_NativePointer node,
