@@ -4162,7 +4162,7 @@ void FrameNode::OnAccessibilityEvent(
 }
 
 void FrameNode::OnAccessibilityEvent(
-    AccessibilityEventType eventType, std::string beforeText, std::string latestContent)
+    AccessibilityEventType eventType, const std::string& beforeText, const std::string& latestContent)
 {
     if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
         AccessibilityEvent event;
@@ -4192,7 +4192,7 @@ void FrameNode::OnAccessibilityEvent(
 }
 
 void FrameNode::OnAccessibilityEvent(
-    AccessibilityEventType eventType, std::string textAnnouncedForAccessibility)
+    AccessibilityEventType eventType, const std::string& textAnnouncedForAccessibility)
 {
     if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
         if (eventType != AccessibilityEventType::ANNOUNCE_FOR_ACCESSIBILITY) {
@@ -5634,7 +5634,7 @@ void FrameNode::RecordExposureInner()
 }
 
 void FrameNode::AddFrameNodeSnapshot(
-    bool isHit, int32_t parentId, std::vector<RectF> responseRegionList, EventTreeType type)
+    bool isHit, int32_t parentId, const std::vector<RectF>& responseRegionList, EventTreeType type)
 {
     auto context = GetContext();
     CHECK_NULL_VOID(context);
