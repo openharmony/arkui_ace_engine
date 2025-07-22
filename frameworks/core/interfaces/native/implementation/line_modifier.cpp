@@ -80,24 +80,32 @@ void StartPointImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<ShapePoint>(*value);
-    if (!convValue) {
-        // TODO: Reset value
+    CHECK_NULL_VOID(value);
+    if (value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
         return;
     }
-    LineModelNG::StartPoint(frameNode, *convValue);
+    ShapePoint point = {0.0_vp, 0.0_vp};
+    auto x = Converter::OptConvertFromArkLength(value->value.value0, DimensionUnit::VP);
+    auto y = Converter::OptConvertFromArkLength(value->value.value1, DimensionUnit::VP);
+    point.first = x.value_or(0.0_vp);
+    point.second = y.value_or(0.0_vp);
+    LineModelNG::StartPoint(frameNode, point);
 }
 void EndPointImpl(Ark_NativePointer node,
                   const Opt_ShapePoint* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<ShapePoint>(*value);
-    if (!convValue) {
-        // TODO: Reset value
+    CHECK_NULL_VOID(value);
+    if (value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
         return;
     }
-    LineModelNG::EndPoint(frameNode, *convValue);
+    ShapePoint point = {0.0_vp, 0.0_vp};
+    auto x = Converter::OptConvertFromArkLength(value->value.value0, DimensionUnit::VP);
+    auto y = Converter::OptConvertFromArkLength(value->value.value1, DimensionUnit::VP);
+    point.first = x.value_or(0.0_vp);
+    point.second = y.value_or(0.0_vp);
+    LineModelNG::EndPoint(frameNode, point);
 }
 } // LineAttributeModifier
 const GENERATED_ArkUILineModifier* GetLineModifier()

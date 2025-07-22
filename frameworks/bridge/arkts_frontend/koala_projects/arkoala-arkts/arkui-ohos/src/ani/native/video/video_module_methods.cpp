@@ -16,22 +16,22 @@
 #include "video_module_methods.h"
 
 #include "base/utils/utils.h"
-// #include "pixel_map_taihe_ani.h"
+#include "pixel_map_taihe_ani.h"
 #include "load.h"
 
 namespace OHOS::Ace::Ani {
 
 void SetVideoPixelMap(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_object node, ani_object pixelMap)
 {
-    // CHECK_NULL_VOID(env);
-    // auto* arkNode = reinterpret_cast<ArkUINodeHandle>(node);
-    // CHECK_NULL_VOID(arkNode);
-    // const auto* modifier = GetNodeAniModifier();
-    // CHECK_NULL_VOID(modifier);
-    // auto videoModifier = modifier->getArkUIAniVideoModifier();
-    // CHECK_NULL_VOID(videoModifier);
-    // auto pixelMapValue = OHOS::Media::PixelMapTaiheAni::GetNativePixelMap(env, pixelMap);
-    // videoModifier->setPixelMap(arkNode, reinterpret_cast<void*>(&pixelMapValue));
+    CHECK_NULL_VOID(env);
+    auto* arkNode = reinterpret_cast<ArkUINodeHandle>(node);
+    CHECK_NULL_VOID(arkNode);
+    const auto* modifier = GetNodeAniModifier();
+    CHECK_NULL_VOID(modifier);
+    auto videoModifier = modifier->getArkUIAniVideoModifier();
+    CHECK_NULL_VOID(videoModifier);
+    auto pixelMapValue = OHOS::Media::PixelMapTaiheAni::GetNativePixelMap(env, pixelMap);
+    videoModifier->setPixelMap(arkNode, reinterpret_cast<void*>(&pixelMapValue));
 }
 
 } // namespace OHOS::Ace::Ani
