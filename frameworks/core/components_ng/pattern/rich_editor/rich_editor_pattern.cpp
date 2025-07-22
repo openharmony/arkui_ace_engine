@@ -11134,8 +11134,6 @@ void RichEditorPattern::StopEditing()
     CHECK_NULL_VOID(HasFocus());
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "StopEditing");
 
-    // The selection status disappears, the cursor is hidden, and the soft keyboard is exited
-    HandleBlurEvent();
 #ifdef IOS_PLATFORM
     CloseKeyboard(false);
 #endif
