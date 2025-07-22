@@ -46,10 +46,8 @@ template<>
 RectRadius Convert(const Ark_RadiusItem & src)
 {
     RectRadius radiusStruct;
-    Dimension radiusWidthValue = Converter::Convert<Dimension>(src.value0);
-    Dimension radiusHeightValue = Converter::Convert<Dimension>(src.value1);
-    radiusStruct.radiusWidth = radiusWidthValue;
-    radiusStruct.radiusHeight = radiusHeightValue;
+    radiusStruct.radiusWidth = Converter::OptConvertFromArkLength(src.value0, DimensionUnit::VP);
+    radiusStruct.radiusHeight = Converter::OptConvertFromArkLength(src.value1, DimensionUnit::VP);
     return radiusStruct;
 }
 
@@ -66,9 +64,9 @@ RectOptions Convert(const Ark_RectOptions& src)
         Converter::VisitUnion(
             src.radius.value,
             [&rectOptions](const Ark_Length& value) {
-                Dimension radiusValue = Converter::Convert<Dimension>(value);
-                rectOptions.radiusWidth = std::make_optional<Dimension>(radiusValue);
-                rectOptions.radiusHeight = std::make_optional<Dimension>(radiusValue);
+                auto radiusValue = Converter::OptConvertFromArkLength(value, DimensionUnit::VP);
+                rectOptions.radiusWidth = radiusValue;
+                rectOptions.radiusHeight = radiusValue;
             },
             [&rectOptions](const Array_RadiusItem& value) {
                 CHECK_NULL_VOID(value.array);
