@@ -175,7 +175,7 @@ bool SecurityComponentHandler::GetBorderRect(const RefPtr<FrameNode>& parentNode
     auto borderWidth = renderContext->GetBorderWidth();
     CHECK_NULL_RETURN(borderWidth, false);
     auto parentRect = renderContext->GetPaintRectWithTransform();
-    parentRect.SetOffset(parentNode->GetPositionToScreenWithTransform());
+    parentRect.SetOffset(parentNode->GetPositionToWindowWithTransform());
     auto borderColor = renderContext->GetBorderColor();
     auto leftIsTransparent = borderColor && borderColor->leftColor.has_value() &&
         (borderColor->leftColor.value() == Color::TRANSPARENT);
@@ -674,7 +674,7 @@ bool SecurityComponentHandler::CheckParentNodesEffect(RefPtr<FrameNode>& node,
     RefPtr<RenderContext> renderContext = node->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
     auto frameRect = renderContext->GetPaintRectWithTransform();
-    frameRect.SetOffset(node->GetPositionToScreenWithTransform());
+    frameRect.SetOffset(node->GetPositionToWindowWithTransform());
     auto visibleRect = frameRect;
     auto parent = node->GetParent();
     std::string scId = std::to_string(node->GetId());
@@ -721,7 +721,7 @@ void SecurityComponentHandler::GetVisibleRect(RefPtr<FrameNode>& node, RectF& vi
     auto renderContext = node->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     RectF parentRect = renderContext->GetPaintRectWithTransform();
-    parentRect.SetOffset(node->GetPositionToScreenWithTransform());
+    parentRect.SetOffset(node->GetPositionToWindowWithTransform());
     visibleRect = visibleRect.Constrain(parentRect);
 }
 
