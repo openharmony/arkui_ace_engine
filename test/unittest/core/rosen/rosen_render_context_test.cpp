@@ -1217,7 +1217,6 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest047, TestSize.Level1)
     auto rotationYUserModifier = std::make_shared<Rosen::RSAnimatableProperty<float>>(rotate);
     auto rotationZUserModifier = std::make_shared<Rosen::RSAnimatableProperty<float>>(rotate);
     auto cameraDistanceUserModifier = std::make_shared<Rosen::RSAnimatableProperty<float>>(rotate);
-#if defined(MODIFIER_NG)
     rosenRenderContext->rotationXUserModifier_ = std::make_shared<Rosen::ModifierNG::RSTransformModifier>();
     rosenRenderContext->rotationXUserModifier_->AttachProperty(
         Rosen::ModifierNG::RSPropertyType::ROTATION_X, rotationXUserModifier);
@@ -1235,22 +1234,6 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest047, TestSize.Level1)
     auto rotationYValue = rosenRenderContext->rotationYUserModifier_->GetRotationY();
     auto rotationZValue = rosenRenderContext->rotationZUserModifier_->GetRotation();
     auto cameraDistanceValue = rosenRenderContext->cameraDistanceUserModifier_->GetCameraDistance();
-#else
-    rosenRenderContext->rotationXUserModifier_ = std::make_shared<Rosen::RSRotationXModifier>(rotationXUserModifier);
-    rosenRenderContext->rotationYUserModifier_ = std::make_shared<Rosen::RSRotationYModifier>(rotationYUserModifier);
-    rosenRenderContext->rotationZUserModifier_ = std::make_shared<Rosen::RSRotationModifier>(rotationZUserModifier);
-    rosenRenderContext->cameraDistanceUserModifier_ =
-        std::make_shared<Rosen::RSCameraDistanceModifier>(cameraDistanceUserModifier);
-    rosenRenderContext->OnTransformRotateAngleUpdate({ rotateX, rotateY, rotateZ, perspective });
-    auto rotationXValue = std::static_pointer_cast<Rosen::RSAnimatableProperty<float>>(
-        rosenRenderContext->rotationXUserModifier_->GetProperty())->Get();
-    auto rotationYValue = std::static_pointer_cast<Rosen::RSAnimatableProperty<float>>(
-        rosenRenderContext->rotationYUserModifier_->GetProperty())->Get();
-    auto rotationZValue = std::static_pointer_cast<Rosen::RSAnimatableProperty<float>>(
-        rosenRenderContext->rotationZUserModifier_->GetProperty())->Get();
-    auto cameraDistanceValue = std::static_pointer_cast<Rosen::RSAnimatableProperty<float>>(
-        rosenRenderContext->cameraDistanceUserModifier_->GetProperty()) ->Get();
-#endif
     EXPECT_EQ(rotationXValue, -rotateX);
     EXPECT_EQ(rotationYValue, -rotateY);
     EXPECT_EQ(rotationZValue, rotateZ);
@@ -2081,7 +2064,6 @@ HWTEST_F(RosenRenderContextTest, OnTransform3DMatrixUpdate001, TestSize.Level1)
     Matrix4 matrix4(INDEX_1, INDEX_0, INDEX_0, INDEX_0, INDEX_0, INDEX_1, INDEX_0, INDEX_0, INDEX_0, INDEX_0, INDEX_1,
         INDEX_0, INDEX_100, INDEX_0, INDEX_0, INDEX_1);
     rosenRenderContext->OnTransform3DMatrixUpdate(matrix4);
-#if defined(MODIFIER_NG)
     auto perspectiveValue = rosenRenderContext->transformModifier_->GetPersp();
     auto xyTranslateValue = rosenRenderContext->transformModifier_->GetTranslate();
     auto translateZValue = rosenRenderContext->transformModifier_->GetTranslateZ();
@@ -2089,15 +2071,6 @@ HWTEST_F(RosenRenderContextTest, OnTransform3DMatrixUpdate001, TestSize.Level1)
     auto scaleZValue = rosenRenderContext->transformModifier_->GetScaleZ();
     auto skewValue = rosenRenderContext->transformModifier_->GetSkew();
     auto quaternionValue = rosenRenderContext->transformModifier_->GetQuaternion();
-#else
-    auto perspectiveValue = rosenRenderContext->transformModifier_->perspectiveValue.get()->Get();
-    auto xyTranslateValue = rosenRenderContext->transformModifier_->translateXYValue.get()->Get();
-    auto translateZValue = rosenRenderContext->transformModifier_->translateZValue.get()->Get();
-    auto scaleXYValue = rosenRenderContext->transformModifier_->scaleXYValue.get()->Get();
-    auto scaleZValue = rosenRenderContext->transformModifier_->scaleZValue.get()->Get();
-    auto skewValue = rosenRenderContext->transformModifier_->skewValue.get()->Get();
-    auto quaternionValue = rosenRenderContext->transformModifier_->quaternionValue.get()->Get();
-#endif
     EXPECT_NE(perspectiveValue[0], 0);
     EXPECT_EQ(perspectiveValue[1], 0);
     EXPECT_EQ(perspectiveValue[2], 0);
