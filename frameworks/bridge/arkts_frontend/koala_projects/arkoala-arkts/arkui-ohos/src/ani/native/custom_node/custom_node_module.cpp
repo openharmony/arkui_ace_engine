@@ -15,6 +15,7 @@
 
 #include "custom_node_module.h"
 #include "load.h"
+#include "utils/ani_utils.h"
 
 #include <memory>
  
@@ -28,6 +29,7 @@ ani_long ConstructCustomNode(ani_env* env, [[maybe_unused]] ani_object aniClass,
         return 0;
     }
 
+    // ani_object obj from ts is supposed to be processed here
     ani_vm* vm = nullptr;
     env->GetVM(&vm);
 
@@ -104,11 +106,40 @@ ani_long ConstructCustomNode(ani_env* env, [[maybe_unused]] ani_object aniClass,
         }
     };
 
-    // ani_object obj from ts is supposed to be processed here
+    ani_method onDumpInspectorMethod;
+    env->Class_FindMethod(static_cast<ani_class>(type), "onDumpInspector", ":Lstd/core/String;",
+        &onDumpInspectorMethod);
+    auto onDumpInspector = [vm, weakRef, onDumpInspectorMethod]() {
+        ani_env *env = nullptr;
+        vm->GetEnv(ANI_VERSION_1, &env);
+        ani_boolean released;
+        ani_ref localRef;
+        ani_ref result{};
+        env->WeakReference_GetReference(*weakRef, &released, &localRef);
+        if (!released) {
+            env->Object_CallMethod_Ref(static_cast<ani_object>(localRef), onDumpInspectorMethod, &result);
+        }
+        ani_string aniStr = static_cast<ani_string>(result);
+        return AniUtils::ANIStringToStdString(env, aniStr);
+    };
 
     ani_long customNode = modifier->getCustomNodeAniModifier()->constructCustomNode(
-        id, std::move(onPageShow), std::move(onPageHide), std::move(onBackPress), std::move(onCleanupFunc));
+        id, std::move(onPageShow), std::move(onPageHide), std::move(onBackPress),
+        std::move(onCleanupFunc), std::move(onDumpInspector)
+    );
+
     return customNode;
+}
+
+void RequestFrame(ani_env* env)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier) {
+        return;
+    }
+
+    modifier->getCustomNodeAniModifier()->requestFrame();
+    return;
 }
 
 ani_object QueryNavigationInfo(ani_env* env, [[maybe_unused]] ani_object, ani_long node)

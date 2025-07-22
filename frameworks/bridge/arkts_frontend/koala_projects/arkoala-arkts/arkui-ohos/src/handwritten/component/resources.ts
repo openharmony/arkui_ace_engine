@@ -20,6 +20,8 @@ enum ResourceType {
     SYMBOL = 40000
 }
 
+const re = new RegExp("^\\[\\S+?]");
+
 class ArkResource implements Resource {
     bundleName: string = "";
     moduleName: string = "";
@@ -78,12 +80,13 @@ class ArkResource implements Resource {
             }
             thisSerializer.writeInt32(param.length as int32);
             for (let i = 0; i < param.length; i++) {
-                thisSerializer.writeString(String(param[i]));
+                const param_value = String(param[i]).replace(re, "app"); // Process [hsp].type.name to app.type.name
+                thisSerializer.writeString(param_value);
             }
             const retval = ArkUIGeneratedNativeModule._SystemOps_getResourceId(bundleNamea, moduleNamea, thisSerializer.asBuffer(), thisSerializer.length());
             thisSerializer.release();
             this._id = retval;
-            if (this.params!.length > 0) {
+            if (this.id > -1 && this.params!.length > 0) {
                 this.params!.shift();
             }
         }

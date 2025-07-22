@@ -241,9 +241,9 @@ void CursorControl_restoreDefaultImpl()
     if (!pipelineContext->GetTaskExecutor()) {
         return;
     }
-    // pipelineContext->GetTaskExecutor()->PostSyncTask(
-    //     [pipelineContext]() { pipelineContext->RestoreDefault(); },
-    //     TaskExecutor::TaskType::UI, "ArkUIJsRestoreDefault");
+    pipelineContext->GetTaskExecutor()->PostSyncTask(
+        [pipelineContext]() { pipelineContext->RestoreDefault(0, MouseStyleChangeReason::USER_SET_MOUSESTYLE); },
+        TaskExecutor::TaskType::UI, "ArkUIJsRestoreDefault");
 }
 Ark_Boolean FocusControl_requestFocusImpl(const Ark_String* value)
 {

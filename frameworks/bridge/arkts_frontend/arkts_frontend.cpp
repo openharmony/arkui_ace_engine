@@ -466,6 +466,34 @@ void ArktsFrontend::OnHide()
     pagePattern->OnHide();
 }
 
+void ArktsFrontend::OpenStateMgmtInterop()
+{
+    auto* env = ArktsAniUtils::GetAniEnv(vm_);
+    CHECK_NULL_VOID(env);
+
+    ani_status state;
+
+    static const char* moduleName = "Larkui/component/interop;";
+    ani_module interopModule;
+    state = env->FindModule(moduleName, &interopModule);
+    if (state != ANI_OK) {
+        LOGE("Cannot find module arkui.component.interop %{public}d", state);
+        return;
+    }
+
+    ani_function fn;
+    state = env->Module_FindFunction(interopModule, "openInterop", ":V", &fn);
+    if (state != ANI_OK) {
+        LOGE("Cannot find function openInterop in module %{public}d", state);
+    }
+
+    state = env->Function_Call_Void(fn);
+    if (state != ANI_OK) {
+        LOGE("Function_Call openInterop failed %{public}d", state);
+    }
+    return;
+}
+
 bool ArktsFrontend::HandleMessage(void *frameNode, int32_t type, const std::string& param)
 {
     auto* env = ArktsAniUtils::GetAniEnv(vm_);

@@ -81,6 +81,7 @@ public:
     static void SetOnScroll(FrameNode* frameNode, OnScrollEvent&& onScroll);
 private:
     static void AddDragFrameNodeToManager(FrameNode* frameNode);
+    static void AddDragFrameNodeToManagerMultiThread(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GRID_GRID_MODEL_STATIC_H

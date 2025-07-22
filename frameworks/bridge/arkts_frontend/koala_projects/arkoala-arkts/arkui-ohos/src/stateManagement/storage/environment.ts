@@ -61,7 +61,7 @@ class Environment {
     private props_: Map<string, NullishType> = new Map<string, NullishType>();
     private readonly aniEnvironment: AniEnvironment = new AniEnvironment();
     private ttypeMap_: Map<string, Type> = new Map<string, Type>([
-        ['accessibilityEnabled', Type.from<string>()],
+        ['accessibilityEnabled', Type.from<boolean>()],
         ['layoutDirection', Type.from<string>()],
         ['languageCode', Type.from<string>()],
         ['colorMode', Type.from<number>()],
@@ -91,10 +91,10 @@ class Environment {
             return false; // Invalid key
         }
         const ttype = Environment.getOrCreate().ttypeMap_.get(key)!;
-        return Environment.getOrCreate().envProp1<T>(key, value, ttype);
+        return Environment.getOrCreate().envPropInternal<T>(key, value, ttype);
     }
 
-    private envProp1<T>(key: string, value: T, ttype: Type): boolean {
+    private envPropInternal<T>(key: string, value: T, ttype: Type): boolean {
         if (AppStorage.has(key, ttype)) {
             return false;
         }
@@ -146,10 +146,10 @@ class Environment {
     }
 
     public static keys(): Array<string> {
-        return Environment.getOrCreate().keys1();
+        return Environment.getOrCreate().keysInternal();
     }
 
-    public keys1(): Array<string> {
+    public keysInternal(): Array<string> {
         return Array.from(Environment.getOrCreate().props_.keys());
     }
 }

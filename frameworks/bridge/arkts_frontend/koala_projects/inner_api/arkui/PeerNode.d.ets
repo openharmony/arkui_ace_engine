@@ -16,7 +16,7 @@
 import { int32, KoalaCallsiteKey } from '@koalaui/common';
 import { IncrementalNode } from '@koalaui.runtime.tree.IncrementalNode';
 import { Disposable } from '@koalaui.runtime.states.Disposable';
-// import { pointer } from '@koalaui.interop';
+import { NativePeerNode } from 'arkui/NativePeerNode';
 import { int64 } from '@koalaui/compat';
 
 type pointer = int64
@@ -29,6 +29,7 @@ export const RepeatType = 14;
 export declare class PeerNode extends IncrementalNode {
     public readonly name: string;
     protected static currentId: int32;
+    public peer: NativePeerNode;
     constructor(peerPtr: pointer, id: int32, name: string, flags: int32, derivedNodeType?: int32);
     public static generateRootPeer(): int32;
     // peer: NativePeerNode

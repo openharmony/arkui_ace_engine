@@ -57,9 +57,9 @@ void SetAltPixelMap(ArkUINodeHandle node, void* pixelmap)
 
 void SetImageSpanColorFilter(ArkUINodeHandle node, void* aniColorFilter)
 {
-    // auto frameNode = reinterpret_cast<FrameNode*>(node);
-    // auto colorFilter = DrawingColorFilter::CreateDrawingColorFilterFromAni(aniColorFilter);
-    // ImageModelStatic::SetDrawingColorFilter(frameNode, colorFilter);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto colorFilter = DrawingColorFilter::CreateDrawingColorFilterFromNative(aniColorFilter);
+    ImageModelStatic::SetDrawingColorFilter(frameNode, colorFilter);
 }
 
 const ArkUIAniImageSpanModifier* GetImageSpanAniModifier()

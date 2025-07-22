@@ -28614,6 +28614,14 @@ Ark_NativePointer impl_Toggle_construct(Ark_Int32 id, Ark_Int32 flags) {
         return GetNodeModifiers()->getToggleModifier()->construct(id, flags);
 }
 KOALA_INTEROP_DIRECT_2(Toggle_construct, Ark_NativePointer, Ark_Int32, Ark_Int32)
+Ark_NativePointer impl_Toggle_button_construct(Ark_Int32 id, Ark_Int32 flags) {
+        return GetNodeModifiers()->getToggleModifier()->buttonConstruct(id, flags);
+}
+KOALA_INTEROP_DIRECT_2(Toggle_button_construct, Ark_NativePointer, Ark_Int32, Ark_Int32)
+Ark_NativePointer impl_Toggle_checkbox_construct(Ark_Int32 id, Ark_Int32 flags) {
+        return GetNodeModifiers()->getToggleModifier()->checkboxConstruct(id, flags);
+}
+KOALA_INTEROP_DIRECT_2(Toggle_checkbox_construct, Ark_NativePointer, Ark_Int32, Ark_Int32)
 void impl_ToggleInterface_setToggleOptions(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         Deserializer thisDeserializer(thisArray, thisLength);
@@ -45326,8 +45334,43 @@ void impl_MutableStyledString_appendStyledString(Ark_NativePointer thisPtr, Ark_
 KOALA_INTEROP_DIRECT_V2(MutableStyledString_appendStyledString, Ark_NativePointer, Ark_NativePointer)
 Ark_NativePointer impl_ImageAttachment_ctor(KSerializerBuffer thisArray, int32_t thisLength) {
         Deserializer thisDeserializer(thisArray, thisLength);
-        Ark_ImageAttachmentInterface value_value = thisDeserializer.readImageAttachmentInterface();;
-        return GetAccessors()->getImageAttachmentAccessor()->ctor((const Ark_ImageAttachmentInterface*)&value_value);
+        const Ark_Int8 value_value_buf_selector = thisDeserializer.readInt8();
+        Ark_Union_ImageAttachmentInterface_Opt_AttachmentType value_value_buf = {};
+        value_value_buf.selector = value_value_buf_selector;
+        if (value_value_buf_selector == 0) {
+            value_value_buf.selector = 0;
+            value_value_buf.value0 = thisDeserializer.readImageAttachmentInterface();
+        }
+        else if (value_value_buf_selector == 1) {
+            value_value_buf.selector = 1;
+            const auto value_value_buf_u_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+            Opt_AttachmentType value_value_buf_u = {};
+            value_value_buf_u.tag = value_value_buf_u_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+            if ((INTEROP_RUNTIME_UNDEFINED) != (value_value_buf_u_runtimeType))
+            {
+                const Ark_Int8 value_value_buf_u__selector = thisDeserializer.readInt8();
+                Ark_AttachmentType value_value_buf_u_ = {};
+                value_value_buf_u_.selector = value_value_buf_u__selector;
+                if (value_value_buf_u__selector == 0) {
+                    value_value_buf_u_.selector = 0;
+                    value_value_buf_u_.value0 = thisDeserializer.readImageAttachmentInterface();
+                }
+                else if (value_value_buf_u__selector == 1) {
+                    value_value_buf_u_.selector = 1;
+                    value_value_buf_u_.value1 = thisDeserializer.readResourceImageAttachmentOptions();
+                }
+                else {
+                    INTEROP_FATAL("One of the branches for value_value_buf_u_ has to be chosen through deserialisation.");
+                }
+                value_value_buf_u.value = static_cast<Ark_AttachmentType>(value_value_buf_u_);
+            }
+            value_value_buf.value1 = value_value_buf_u;
+        }
+        else {
+            INTEROP_FATAL("One of the branches for value_value_buf has to be chosen through deserialisation.");
+        }
+        Ark_Union_ImageAttachmentInterface_Opt_AttachmentType value_value = static_cast<Ark_Union_ImageAttachmentInterface_Opt_AttachmentType>(value_value_buf);;
+        return GetAccessors()->getImageAttachmentAccessor()->ctor((const Ark_Union_ImageAttachmentInterface_Opt_AttachmentType*)&value_value);
 }
 KOALA_INTEROP_DIRECT_2(ImageAttachment_ctor, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_ImageAttachment_getFinalizer() {

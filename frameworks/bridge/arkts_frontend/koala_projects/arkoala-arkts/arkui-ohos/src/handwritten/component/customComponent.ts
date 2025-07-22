@@ -13,18 +13,18 @@
  * limitations under the License.
  */
 
-import { __context, StateManager } from "@koalaui/runtime";
-import { int32 } from "@koalaui/common"
-import { UIContext } from "@ohos/arkui/UIContext"
-import { ContextRecord } from "arkui/handwritten/UIContextImpl";
-import { ArkStructBase } from "../ArkStructBase"
-import { ExtendableComponent, IExtendableComponent } from "./extendableComponent";
-import { GeometryInfo, Layoutable, Measurable, SizeResult, Theme } from "./common"
-import { ConstraintSizeOptions } from "./units"
+import { __context, StateManager } from '@koalaui/runtime';
+import { int32 } from '@koalaui/common';
+import { uiObserver } from '@ohos/arkui/observer';
+import { ArkStructBase } from '../ArkStructBase';
+import { ArkUIAniModule } from 'arkui.ani';
+import { ConstraintSizeOptions } from './units';
+import { ContextRecord } from 'arkui/handwritten/UIContextImpl';
+import { ExtendableComponent, IExtendableComponent } from './extendableComponent';
+import { GeometryInfo, Layoutable, Measurable, SizeResult, Theme } from './common';
 import { LocalStorage } from '@ohos.arkui.stateManagement';
-import { PeerNode } from "../PeerNode"
-import { ArkUIAniModule } from "arkui.ani"
-import { uiObserver } from '@ohos/arkui/observer'
+import { PeerNode } from '../PeerNode';
+import { UIContext } from '@ohos/arkui/UIContext';
 
 export interface PageLifeCycle {
     onPageShow(): void {}
@@ -98,7 +98,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
             const page = this.instance as PageLifeCycle;
             page.onPageShow();
         } else {
-            throw new Error("not an entry custom component");
+            throw new Error('not an entry custom component');
         }
     }
     onPageHide(): void {
@@ -106,7 +106,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
             const page = this.instance as PageLifeCycle;
             page.onPageHide();
         } else {
-            throw new Error("not an entry custom component");
+            throw new Error('not an entry custom component');
         }
     }
     onBackPress(): boolean {
@@ -114,7 +114,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
             const page = this.instance as PageLifeCycle;
             return page.onBackPress();
         } else {
-            throw new Error("not an entry custom component");
+            throw new Error('not an entry custom component');
         }
     }
     pageTransition(): void {
@@ -123,7 +123,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
             page.pageTransition();
         } else {
             // TODO: Avoid running problem
-            // throw new Error("not an entry custom component");
+            // throw new Error('not an entry custom component');
         }
     }
     onNewParam(param: object | undefined | null): void {
@@ -131,7 +131,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
             const page = this.instance as PageLifeCycle;
             page.onNewParam(param);
         } else {
-            throw new Error("not an entry custom component");
+            throw new Error('not an entry custom component');
         }
     }
 
@@ -150,7 +150,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
             const reusable = this.instance as ReusableV2LifeCycle;
             reusable.aboutToReuse();
         } else {
-            throw new Error("not an custom component");
+            throw new Error('not an custom component');
         }
     }
     aboutToRecycle(): void {
@@ -158,7 +158,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
             const component = this.instance as BaseCustomComponent<T_Options>;
             component.aboutToRecycle()
         } else {
-            throw new Error("not an custom component");
+            throw new Error('not an custom component');
         }
     }
 
@@ -168,7 +168,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
             const layout = this.instance as LayoutCallback;
             layout.onPlaceChildren(selfLayoutInfo, children, constraint);
         } else {
-            throw new Error("not a custom layout component");
+            throw new Error('not a custom layout component');
         }
     }
     onMeasureSize(selfLayoutInfo: GeometryInfo, children: Array<Measurable>, constraint: ConstraintSizeOptions): SizeResult {
@@ -176,8 +176,12 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
             const layout = this.instance as LayoutCallback;
             return layout.onMeasureSize(selfLayoutInfo, children, constraint);
         } else {
-            throw new Error("not a custom layout component");
+            throw new Error('not a custom layout component');
         }
+    }
+
+    onDumpInspector(): string {
+        return this.instance.onDumpInspector();
     }
 
     // Theme
@@ -194,7 +198,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
             const optionsCallback = this.instance as OptionsCallback<T_Options>;
             optionsCallback.__initializeStruct(initializers, content);
         } else {
-            throw new Error("not an options callback");
+            throw new Error('not an options callback');
         }
     }
 
@@ -205,7 +209,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
             const optionsCallback = this.instance as OptionsCallback<T_Options>;
             optionsCallback.__updateStruct(initializers);
         } else {
-            throw new Error("not an options callback");
+            throw new Error('not an options callback');
         }
     }
 

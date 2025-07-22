@@ -65,6 +65,25 @@ typedef struct WebviewControllerInfo {
     std::function<void(const std::string&)> setHapPathFunc = nullptr;
 } WebviewControllerInfo;
 
+class SharedPointerWrapper {
+public:
+    SharedPointerWrapper() : ptr_(nullptr) {}
+    SharedPointerWrapper(std::shared_ptr<void> ptr) : ptr_(ptr) {}
+
+    std::shared_ptr<void> GetSharedPtr() const
+    {
+        return ptr_;
+    }
+
+    operator void*() const
+    {
+        return ptr_.get();
+    }
+
+private:
+    std::shared_ptr<void> ptr_;
+};
+
 namespace OHOS::Ace::Ani {
 class DragAction;
 }
@@ -124,10 +143,10 @@ struct ArkUIDragControllerAsync {
     bool isArray = false;
     const char* extraParams;
     bool hasHandle = false;
-    void* touchPoint;
+    SharedPointerWrapper touchPoint;
     ani_ref unifiedData = nullptr;
-    ani_ref pixelMap = nullptr;
-    std::vector<ani_ref> pixelMapList;
+    SharedPointerWrapper pixelMap;
+    std::vector<SharedPointerWrapper> pixelMapList;
     ArkUINodeHandle customBuilderNode = nullptr;
     std::vector<ArkUINodeHandle> customBuilderNodeList;
     ani_fn_object asyncCallback = nullptr;
@@ -228,7 +247,9 @@ struct ArkUIAniCommonModifier {
 };
 struct ArkUIAniCustomNodeModifier {
     ani_long (*constructCustomNode)(ani_int, std::function<void()>&& onPageShow, std::function<void()>&& onPageHide,
-        std::function<bool()>&& onBackPress, std::function<void()>&& onCleanupFunc);
+        std::function<bool()>&& onBackPress, std::function<void()>&& onCleanupFunc,
+        std::function<std::string()>&& onDumpInspectorFunc);
+    void (*requestFrame)();
     ani_object (*queryNavigationInfo)(ani_env* env, ani_long node);
     ani_object (*queryNavDestinationInfo)(ani_env* env, ani_long node);
     ani_object (*queryNavDestinationInfo0)(ani_env* env, ani_long node, ani_int isInner);
@@ -310,10 +331,10 @@ struct ArkUIAniRichEditorModifier {
     ani_long (*transferPixelMap)(void* pixelMap);
 };
 struct ArkUIAniStateMgmtModifier {
-    std::string (*persistentStorageGet)(std::string key);
-    void (*persistentStorageSet)(std::string key, std::string value);
-    bool (*persistentStorageHas)(std::string key);
-    void (*persistentStorageDelete)(std::string key);
+    std::string (*persistentStorageGet)(const std::string& key);
+    void (*persistentStorageSet)(const std::string& key, const std::string& value);
+    bool (*persistentStorageHas)(const std::string& key);
+    void (*persistentStorageDelete)(const std::string& key);
     void (*persistentStorageClear)();
     int32_t (*getColorMode)();
     float (*getFontWeightScale)();

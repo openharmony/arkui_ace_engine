@@ -66,13 +66,13 @@ public:
     ParamType param_;
     OnPopCallback onPop_;
     int index_ = -1;
-    bool needUpdate_;
-    bool needBuildNewInstance_;
+    bool needUpdate_ = false;
+    bool needBuildNewInstance_ = false;
     std::optional<std::string> navDestinationId_;
-    bool isEntry_;
-    bool fromRecovery_;
-    int32_t mode_;
-    bool needDelete_;
+    bool isEntry_ = false;
+    bool fromRecovery_ = false;
+    int32_t mode_ = 0;
+    bool needDelete_ = false;
 
     void InvokeOnPop(const PopInfo& popInfo);
 };

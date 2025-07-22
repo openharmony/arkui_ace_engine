@@ -326,6 +326,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::ConstructCustomNode)
         },
         ani_native_function {
+            "_CustomNode_RequestFrame",
+            ":V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::RequestFrame)
+        },
+        ani_native_function {
             "_LazyForEachNode_Construct",
             "I:J",
             reinterpret_cast<void*>(OHOS::Ace::Ani::ConstructLazyForEachNode)

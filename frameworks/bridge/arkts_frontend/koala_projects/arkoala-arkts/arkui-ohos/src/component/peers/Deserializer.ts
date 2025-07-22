@@ -63,7 +63,8 @@ import { PasteButtonCallback, PasteButtonOnClickResult, PasteDescription, PasteI
 import { PluginErrorCallback, PluginErrorData, PluginComponentTemplate, PluginComponentOptions } from "./../pluginComponent"
 import { IntentionCode } from '@ohos.multimodalInput.intentionCode'
 import { CircleShape, EllipseShape, PathShape, RectShape } from "@ohos/arkui/shape"
-import { ReceiveCallback, BaseShape, BaseShapeInternal, ShapeSize, CommonShape, CommonShapeInternal, WebviewController, WebviewControllerInternal, Summary, ImageModifier, RectWidthStyle, RectHeightStyle, SymbolGlyphModifier, PathShapeOptions, PerfMonitorActionType, PerfMonitorSourceType, RectShapeOptions, RoundRectShapeOptions, ResolutionQuality, TextModifier, IndicatorStyle, WebHeader, WindowStatusType, AsyncCallback_image_PixelMap_Void, SnapshotOptions, LabelStyle } from "./../arkui-external"
+import { ReceiveCallback, BaseShape, BaseShapeInternal, ShapeSize, CommonShape, CommonShapeInternal, WebviewController, WebviewControllerInternal, Summary, ImageModifier, RectWidthStyle, RectHeightStyle, PathShapeOptions, PerfMonitorActionType, PerfMonitorSourceType, RectShapeOptions, RoundRectShapeOptions, ResolutionQuality, TextModifier, IndicatorStyle, WebHeader, WindowStatusType, AsyncCallback_image_PixelMap_Void, SnapshotOptions, LabelStyle } from "./../arkui-external"
+import { SymbolGlyphModifier } from "../../SymbolGlyphModifier"
 import { SymbolEffect, SymbolEffectInternal, ReplaceSymbolEffect, ReplaceSymbolEffectInternal, ScaleSymbolEffect, ScaleSymbolEffectInternal } from "../symbolglyph"
 import { FontOptions, FontInfo, UIFontAdjustInfo, UIFontAliasInfo, UIFontFallbackInfo, UIFontConfig, UIFontGenericInfo, UIFontFallbackGroupInfo } from "@ohos/font"
 import { MeasureOptions } from "@ohos/measure"
@@ -166,7 +167,7 @@ import { ASTCResource } from "./../mediaCachedImage"
 import { CircleOptions } from "./../circle"
 import { ColumnOptions, ColumnOptionsV2 } from "./../column"
 import { ColumnSplitDividerStyle } from "./../columnSplit"
-import { DateTimeOptions } from "./../arkui-intl"
+import { DateTimeOptions } from "@ohos/intl"
 import { EllipseOptions } from "./../ellipse"
 import { FormLinkOptions } from "./../formLink"
 import { GaugeOptions, GaugeIndicatorOptions, GaugeShadowOptions } from "./../gauge"
@@ -427,8 +428,7 @@ export class Deserializer extends DeserializerBase {
     }
     readICurve(): ICurve {
         let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return ICurveInternal.fromPtr(ptr)
+        return (valueDeserializer.readInt64() as Object as ICurve)
     }
     readImageAnalyzerController(): ImageAnalyzerController {
         let valueDeserializer : Deserializer = this
@@ -6975,7 +6975,7 @@ export class Deserializer extends DeserializerBase {
             stack_buf = (valueDeserializer.readString() as string)
         }
         const stack_result : string | undefined = stack_buf
-        const code_result : number = (valueDeserializer.readNumber() as number)
+        const code_result : int = (valueDeserializer.readInt32().toInt())
         let value : BusinessError = ({name: name_result, message: message_result, stack: stack_result, code: code_result} as BusinessError)
         return value
     }

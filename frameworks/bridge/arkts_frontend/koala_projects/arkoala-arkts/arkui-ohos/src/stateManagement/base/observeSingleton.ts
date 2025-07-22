@@ -97,7 +97,7 @@ export class ObserveSingleton implements IObserve {
         return handler !== undefined && StateMgmtTool.isInterfaceProxyHandler(handler);
     }
 
-    public shouldAddRef(iObjectsRenderId: RenderIdType | undefined): boolean {
+    public shouldAddRef(iObjectsRenderId: RenderIdType): boolean {
         return (
             this.renderingComponent >= ObserveSingleton.RenderingComponentV2 ||
             (this.renderingComponent === ObserveSingleton.RenderingComponentV1 && iObjectsRenderId === this.renderingId)

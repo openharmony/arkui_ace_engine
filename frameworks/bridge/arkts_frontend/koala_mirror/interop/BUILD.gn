@@ -37,12 +37,13 @@ npm_cmd("interop.abc") {
     run_tasks = [ "build:interop" ]
 
     deps = [
-        ":interop_install",
         "../ui2abc:fast_arktsc_build"
     ]
 
-    external_deps = ets2abc_build_deps
-    external_deps += static_linker_build_deps
+    external_deps = [
+        ets2abc_build_deps,
+        static_linker_build_deps
+    ]
 }
 
 group("interop") {

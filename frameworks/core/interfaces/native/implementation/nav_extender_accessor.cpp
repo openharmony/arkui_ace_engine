@@ -31,9 +31,8 @@ namespace NavExtenderAccessor {
 void SetUpdateStackCallbackImpl(Ark_NavPathStack peer,
                                 const NavExtender_OnUpdateStack* callback)
 {
-    auto stack = peer;
-    CHECK_NULL_VOID(stack);
-    auto navigationStack = stack->GetNavPathStack();
+    CHECK_NULL_VOID(peer);
+    auto navigationStack = peer->GetNavPathStack();
     CHECK_NULL_VOID(navigationStack);
     auto updater = [callback = CallbackHelper(*callback)]() {
         callback.Invoke();

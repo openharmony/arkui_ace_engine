@@ -2,14 +2,14 @@
     "compilerOptions": {
         "package": "@ohos.arkui",
         "outDir": "build-m3-impl",
-        "baseUrl": "./src/ets",
+        "baseUrl": "./src",
         "paths": {
             "#components": ["./generated/arkts"],
-            "@koalaui/interop": ["../../../../interop/src/arkts"],
-            "@koalaui/common": ["../../../../incremental/common/src"],
-            "@koalaui/compat": ["../../../../incremental/compat/src/arkts"],
-            "@koalaui/runtime": ["../../../../incremental/runtime/ets"],
-            "@koalaui/runtime/annotations": ["../../../../incremental/runtime/annotations"],
+            "@koalaui/interop": ["../../../interop/src/arkts"],
+            "@koalaui/common": ["../../../incremental/common/src"],
+            "@koalaui/compat": ["../../../incremental/compat/src/arkts"],
+            "@koalaui/runtime": ["../../../incremental/runtime/ets"],
+            "@koalaui/runtime/annotations": ["../../../incremental/runtime/annotations"],
             "@koalaui/builderLambda": ["./annotations"]
         },
         "plugins": [
@@ -21,11 +21,11 @@
         ]
     },
     "include": [
-        "./src/ets/**/*.ets"
+        "./src/**/*.ets"
     ],
     "exclude": [
-        "./src/ets/generated/ts/*.ets",
-        "./src/ets/sdk/**/*.ets"
+        "./src/generated/ts/*.ets",
+        "./src/sdk/**/*.ets"
     ],
     "dependencies": {
         "@koalaui/runtime": ["../../incremental/runtime/ui2abcconfig.json"]

@@ -29,14 +29,16 @@
 namespace OHOS::Ace::NG {
 
 ani_long ConstructCustomNode(ani_int id, std::function<void()>&& onPageShow, std::function<void()>&& onPageHide,
-    std::function<bool()>&& onBackPress, std::function<void()>&& onCleanupFunc)
+    std::function<bool()>&& onBackPress, std::function<void()>&& onCleanupFunc,
+    std::function<std::string()>&& onDumpInspectorFunc)
 {
     std::string key = NG::ViewStackProcessor::GetInstance()->ProcessViewId(std::to_string(id));
-    struct KoalaPageInfo info {
+    struct NodeKoalaInfo info {
         .onPageShowFunc = std::move(onPageShow),
         .onPageHideFunc = std::move(onPageHide),
         .onBackPressedFunc = std::move(onBackPress),
         .onCleanupFunc = std::move(onCleanupFunc),
+        .onDumpInspectorFunc = std::move(onDumpInspectorFunc),
         .jsViewName = key
     };
     auto customNode = NG::CustomNodeStatic::ConstructCustomNode(id, std::move(info));
@@ -44,6 +46,16 @@ ani_long ConstructCustomNode(ani_int id, std::function<void()>&& onPageShow, std
         return reinterpret_cast<ani_long>(customNode);
     }
     return 0;
+}
+
+void RequestFrame()
+{
+    auto context = NG::PipelineContext::GetCurrentContextSafely();
+    if (context == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_STATE_MGMT, "RequestFrame-ani can not get current context.");
+        return;
+    }
+    context->RequestFrame();
 }
 
 RefPtr<UINode> GetTargetNode(const RefPtr<AceType>& node, const std::string& tag, bool isInner, bool needCheckParent)
@@ -236,11 +248,14 @@ ani_object QueryNavDestinationInfo0(ani_env* env, ani_long node, ani_int isInner
 
 const ArkUIAniCustomNodeModifier* GetCustomNodeAniModifier()
 {
-    static const ArkUIAniCustomNodeModifier impl = { .constructCustomNode = OHOS::Ace::NG::ConstructCustomNode,
+    static const ArkUIAniCustomNodeModifier impl = {
+        .constructCustomNode = OHOS::Ace::NG::ConstructCustomNode,
+        .requestFrame = OHOS::Ace::NG::RequestFrame,
         .queryNavigationInfo = OHOS::Ace::NG::QueryNavigationInfo,
         .queryRouterPageInfo = OHOS::Ace::NG::QueryRouterPageInfo,
         .queryNavDestinationInfo = OHOS::Ace::NG::QueryNavDestinationInfo,
-        .queryNavDestinationInfo0 = OHOS::Ace::NG::QueryNavDestinationInfo0 };
+        .queryNavDestinationInfo0 = OHOS::Ace::NG::QueryNavDestinationInfo0
+    };
     return &impl;
 }
 

@@ -14,7 +14,7 @@
  */
 
 import { AttributeModifier, CommonMethod, CommonShapeMethod, ArkCommonShapeMethodPeer } from 'arkui/component/common';
-import { AttributeUpdateFlag, CommonMethodModifier } from './CommonMethodModifier';
+import { AttributeUpdaterFlag, CommonMethodModifier } from './CommonMethodModifier';
 import { ShapePoint } from 'arkui/component/line';
 import { ArkPolylinePeer, PolylineAttribute } from 'arkui/component/polyline';
 import { CommonShapeMethodModifier } from './CommonShapeMethodModifier';
@@ -25,34 +25,34 @@ export class PolylineModifier extends CommonShapeMethodModifier implements Polyl
     applyFocusedAttribute(instance: CommonShapeMethod): void { }
     applyDisabledAttribute(instance: CommonShapeMethod): void { }
     applySelectedAttribute(instance: CommonShapeMethod): void { }
-    _points_flag: AttributeUpdateFlag = AttributeUpdateFlag.INITIAL
+    _points_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _points0_value?: Array<ShapePoint> | undefined
     applyModifierPatch(peer: ArkPolylinePeer): void {
-        if (this._points_flag != AttributeUpdateFlag.INITIAL)
+        if (this._points_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._points_flag) {
-                case AttributeUpdateFlag.UPDATE: {
+                case AttributeUpdaterFlag.UPDATE: {
                     peer.pointsAttribute((this._points0_value as Array<ShapePoint> | undefined));
-                    this._points_flag = AttributeUpdateFlag.RESET;
+                    this._points_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
-                case AttributeUpdateFlag.SKIP: {
-                    this._points_flag = AttributeUpdateFlag.RESET;
+                case AttributeUpdaterFlag.SKIP: {
+                    this._points_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
                 default: {
-                    this._points_flag = AttributeUpdateFlag.INITIAL;
+                    this._points_flag = AttributeUpdaterFlag.INITIAL;
                     peer.pointsAttribute(undefined);
                 }
             }
         }
     }
     mergeModifier(modifier: PolylineModifier): void {
-        if (modifier._points_flag != AttributeUpdateFlag.INITIAL)
+        if (modifier._points_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._points_flag) {
-                case AttributeUpdateFlag.UPDATE:
-                case AttributeUpdateFlag.SKIP: {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
                     this.points(modifier._points0_value);
                     break;
                 }
@@ -63,14 +63,14 @@ export class PolylineModifier extends CommonShapeMethodModifier implements Polyl
         }
     }
     points(value: Array<ShapePoint> | undefined): this {
-        if (((this._points_flag) == (AttributeUpdateFlag.INITIAL)) || (false))
+        if (((this._points_flag) == (AttributeUpdaterFlag.INITIAL)) || (false))
         {
-            this._points_flag = AttributeUpdateFlag.UPDATE
+            this._points_flag = AttributeUpdaterFlag.UPDATE
             this._points0_value = value
         }
         else
         {
-            this._points_flag = AttributeUpdateFlag.SKIP
+            this._points_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

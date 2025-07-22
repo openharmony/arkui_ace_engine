@@ -3305,6 +3305,8 @@ typedef struct Ark_WithThemeOptions Ark_WithThemeOptions;
 typedef struct Opt_WithThemeOptions Opt_WithThemeOptions;
 typedef struct Ark_RichEditorSpan Ark_RichEditorSpan;
 typedef struct Opt_RichEditorSpan Opt_RichEditorSpan;
+typedef struct Ark_Union_ImageAttachmentInterface_Opt_AttachmentType Ark_Union_ImageAttachmentInterface_Opt_AttachmentType;
+typedef struct Opt_Union_ImageAttachmentInterface_Opt_AttachmentType Opt_Union_ImageAttachmentInterface_Opt_AttachmentType;
 typedef struct DrawCallbackFunc DrawCallbackFunc;
 typedef struct Opt_DrawCallbackFunc Opt_DrawCallbackFunc;
 typedef struct Ark_PopupButton Ark_PopupButton;
@@ -19146,8 +19148,6 @@ typedef struct Ark_LabelStyle {
     Opt_Union_Number_ResourceStr maxFontSize;
     Opt_TextHeightAdaptivePolicy heightAdaptivePolicy;
     Opt_Font font;
-    Opt_ResourceColor selectedColor;
-    Opt_ResourceColor unselectedColor;
 } Ark_LabelStyle;
 typedef struct Opt_LabelStyle {
     Ark_Tag tag;
@@ -19963,6 +19963,18 @@ typedef struct Opt_RichEditorSpan {
     Ark_Tag tag;
     Ark_RichEditorSpan value;
 } Opt_RichEditorSpan;
+typedef struct Ark_Union_ImageAttachmentInterface_Opt_AttachmentType {
+    /* kind: UnionType */
+    Ark_Int32 selector;
+    union {
+        Ark_ImageAttachmentInterface value0;
+        Opt_AttachmentType value1;
+    };
+} Ark_Union_ImageAttachmentInterface_Opt_AttachmentType;
+typedef struct Opt_Union_ImageAttachmentInterface_Opt_AttachmentType {
+    Ark_Tag tag;
+    Ark_Union_ImageAttachmentInterface_Opt_AttachmentType value;
+} Opt_Union_ImageAttachmentInterface_Opt_AttachmentType;
 
 typedef Opt_Length Opt_Dimension;
 
@@ -23635,6 +23647,10 @@ typedef struct GENERATED_ArkUITimePickerModifier {
 typedef struct GENERATED_ArkUIToggleModifier {
     Ark_NativePointer (*construct)(Ark_Int32 id,
                                    Ark_Int32 flags);
+    Ark_NativePointer (*buttonConstruct)(Ark_Int32 id,
+                                         Ark_Int32 flags);
+    Ark_NativePointer (*checkboxConstruct)(Ark_Int32 id,
+                                           Ark_Int32 flags);
     void (*setToggleOptions)(Ark_NativePointer node,
                              const Ark_ToggleOptions* options);
     void (*setOnChange)(Ark_NativePointer node,
@@ -27922,7 +27938,7 @@ typedef struct GENERATED_ArkUIMutableStyledStringAccessor {
 
 typedef struct GENERATED_ArkUIImageAttachmentAccessor {
     void (*destroyPeer)(Ark_ImageAttachment peer);
-    Ark_ImageAttachment (*ctor)(const Ark_ImageAttachmentInterface* value);
+    Ark_ImageAttachment (*ctor)(const Ark_Union_ImageAttachmentInterface_Opt_AttachmentType* value);
     Ark_NativePointer (*getFinalizer)();
     Ark_PixelMap (*getValue)(Ark_ImageAttachment peer);
     Opt_SizeOptions (*getSize)(Ark_ImageAttachment peer);
