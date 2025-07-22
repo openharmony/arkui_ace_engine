@@ -56,6 +56,7 @@ ohos_shared_library("arkoala_native_ani") {
   ]
 
   external_deps = [
+    "graphic_2d:drawing_ani",
     "hilog:libhilog",
     "image_framework:image",
     "image_framework:image_taihe",
