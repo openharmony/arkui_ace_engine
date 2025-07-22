@@ -4002,9 +4002,6 @@ void JsAccessibilityManager::SendEventToAccessibilityWithNodeInner(
     ACE_SCOPED_TRACE("SendAccessibilityAsyncEvent");
     CHECK_NULL_VOID(node);
     CHECK_NULL_VOID(context);
-    // set perf monitor
-    HiviewDFX::PerfMonitorAdapter::GetInstance().OnSceneChanged(HiviewDFX::ACCESSIBLE_FEATURE, true);
-
     int32_t windowId = static_cast<int32_t>(context->GetRealHostWindowId());
     if (windowId == 0) {
         return;
@@ -4097,9 +4094,6 @@ void JsAccessibilityManager::SendAccessibilityAsyncEvent(const AccessibilityEven
 void JsAccessibilityManager::SendAccessibilityAsyncEventInner(const AccessibilityEvent& accessibilityEvent)
 {
     ACE_ACCESS_SCOPED_TRACE("SendAccessibilityAsyncEvent");
-    // set perf monitor
-    HiviewDFX::PerfMonitorAdapter::GetInstance().OnSceneChanged(HiviewDFX::ACCESSIBLE_FEATURE, true);
-
     auto context = GetPipelineContext().Upgrade();
     CHECK_NULL_VOID(context);
     int32_t windowId = static_cast<int32_t>(context->GetRealHostWindowId());
