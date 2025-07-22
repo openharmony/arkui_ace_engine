@@ -2543,5 +2543,31 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg406, TestSize.Level1)
     context_->ContainerModalUnFocus();
     EXPECT_TRUE(context_->windowModal_ != WindowModal::CONTAINER_MODAL);
 }
+
+/**
+ * @tc.name: FlushMouseEventForHover001
+ * @tc.desc: Test FlushMouseEventForHover.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, FlushMouseEventForHover001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Construction input parameter, call FlushMouseEventForHover.
+     * @tc.expected: The value of button is correct.
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->isTransFlag_ = true;
+    MouseEvent mouseEvent;
+    mouseEvent.sourceType = SourceType::MOUSE;
+    mouseEvent.action = MouseAction::MOVE;
+    context_->lastMouseEvent_ = std::make_unique<MouseEvent>(mouseEvent);
+    context_->lastSourceType_ = SourceType::MOUSE;
+    context_->lastMouseEvent_->button = MouseButton::NONE_BUTTON;
+    context_->FlushMouseEventForHover();
+    EXPECT_EQ(context_->lastMouseEvent_->button, MouseButton::NONE_BUTTON);
+    context_->lastMouseEvent_->button = MouseButton::LEFT_BUTTON;
+    context_->FlushMouseEventForHover();
+    EXPECT_EQ(context_->lastMouseEvent_->button, MouseButton::LEFT_BUTTON);
+}
 } // namespace NG
 } // namespace OHOS::Ace
