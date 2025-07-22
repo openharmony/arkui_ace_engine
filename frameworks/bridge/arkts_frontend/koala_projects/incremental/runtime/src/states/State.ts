@@ -419,7 +419,7 @@ class ArrayStateImpl<Item> extends StateImpl<Array<Item>> implements ArrayState<
     }
 
     set length(value: number) {
-        this.mutable.length = value
+        this.mutable.length = value.toInt()
     }
 
     at(index: number): Item {
@@ -465,7 +465,7 @@ class ArrayStateImpl<Item> extends StateImpl<Array<Item>> implements ArrayState<
 
     splice(start: number, deleteCount: number | undefined, ...items: Item[]): Array<Item> {
         const array = this.mutable
-        return array.splice(start, deleteCount ?? array.length, ...items)
+        return array.splice(start, deleteCount ?? array.length.toDouble(), ...items)
     }
 
     unshift(...items: Item[]): number {
