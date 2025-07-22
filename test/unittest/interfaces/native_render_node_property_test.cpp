@@ -151,12 +151,12 @@ HWTEST_F(NativeRenderNodePropertyTest, NativeRenderNodePropertyTest005, TestSize
     auto rootRenderNode = OH_ArkUI_RenderNodeUtils_CreateNode();
     ASSERT_NE(rootRenderNode, nullptr);
     
-    int32_t getSize_width = 0;
-    int32_t getSize_height = 0;
+    int32_t getSizeWidth = 0;
+    int32_t getSizeHeight = 0;
     OH_ArkUI_RenderNodeUtils_SetSize(rootRenderNode, 300, 400);
-    OH_ArkUI_RenderNodeUtils_GetSize(rootRenderNode, &getSize_width, &getSize_height);
-    ASSERT_EQ(getSize_width, 300);
-    ASSERT_EQ(getSize_height, 400);
+    OH_ArkUI_RenderNodeUtils_GetSize(rootRenderNode, &getSizeWidth, &getSizeHeight);
+    ASSERT_EQ(getSizeWidth, 300);
+    ASSERT_EQ(getSizeHeight, 400);
 }
 
 /**
@@ -173,12 +173,12 @@ HWTEST_F(NativeRenderNodePropertyTest, NativeRenderNodePropertyTest006, TestSize
     auto rootRenderNode = OH_ArkUI_RenderNodeUtils_CreateNode();
     ASSERT_NE(rootRenderNode, nullptr);
     
-    int32_t setPosition_x = 0;
-    int32_t setPosition_y = 0;
+    int32_t setPositionX = 0;
+    int32_t setPositionY = 0;
     OH_ArkUI_RenderNodeUtils_SetPosition(rootRenderNode, 200, 1500);
-    OH_ArkUI_RenderNodeUtils_GetPosition(rootRenderNode, &setPosition_x, &setPosition_y);
-    ASSERT_EQ(setPosition_x, 200);
-    ASSERT_EQ(setPosition_y, 1500);
+    OH_ArkUI_RenderNodeUtils_GetPosition(rootRenderNode, &setPositionX, &setPositionY);
+    ASSERT_EQ(setPositionX, 200);
+    ASSERT_EQ(setPositionY, 1500);
 }
 
 /**
@@ -195,12 +195,12 @@ HWTEST_F(NativeRenderNodePropertyTest, NativeRenderNodePropertyTest007, TestSize
     auto rootRenderNode = OH_ArkUI_RenderNodeUtils_CreateNode();
     ASSERT_NE(rootRenderNode, nullptr);
     
-    float setPivot_x = 0;
-    float setPivot_y = 0;
+    float setPivotX = 0;
+    float setPivotY = 0;
     OH_ArkUI_RenderNodeUtils_SetPivot(rootRenderNode, 5655, 232);
-    OH_ArkUI_RenderNodeUtils_GetPivot(rootRenderNode, &setPivot_x, &setPivot_y);
-    ASSERT_EQ(setPivot_x, 5655);
-    ASSERT_EQ(setPivot_y, 232);
+    OH_ArkUI_RenderNodeUtils_GetPivot(rootRenderNode, &setPivotX, &setPivotY);
+    ASSERT_EQ(setPivotX, 5655);
+    ASSERT_EQ(setPivotY, 232);
 }
 
 /**
@@ -217,12 +217,12 @@ HWTEST_F(NativeRenderNodePropertyTest, NativeRenderNodePropertyTest008, TestSize
     auto rootRenderNode = OH_ArkUI_RenderNodeUtils_CreateNode();
     ASSERT_NE(rootRenderNode, nullptr);
     
-    float setScale_x = 0;
-    float setScale_y = 0;
+    float setScaleX = 0;
+    float setScaleY = 0;
     OH_ArkUI_RenderNodeUtils_SetScale(rootRenderNode, 36, 39);
-    OH_ArkUI_RenderNodeUtils_GetScale(rootRenderNode, &setScale_x, &setScale_y);
-    ASSERT_EQ(setScale_x, 36);
-    ASSERT_EQ(setScale_y, 39);
+    OH_ArkUI_RenderNodeUtils_GetScale(rootRenderNode, &setScaleX, &setScaleY);
+    ASSERT_EQ(setScaleX, 36);
+    ASSERT_EQ(setScaleY, 39);
 }
 
 /**
@@ -239,12 +239,12 @@ HWTEST_F(NativeRenderNodePropertyTest, NativeRenderNodePropertyTest009, TestSize
     auto rootRenderNode = OH_ArkUI_RenderNodeUtils_CreateNode();
     ASSERT_NE(rootRenderNode, nullptr);
     
-    float setTranslation_x = 0;
-    float setTranslation_y = 0;
+    float setTranslationX = 0;
+    float setTranslationY = 0;
     OH_ArkUI_RenderNodeUtils_SetTranslation(rootRenderNode, 33, 44);
-    OH_ArkUI_RenderNodeUtils_GetTranslation(rootRenderNode, &setTranslation_x, &setTranslation_y);
-    ASSERT_EQ(setTranslation_x, 33);
-    ASSERT_EQ(setTranslation_y, 44);
+    OH_ArkUI_RenderNodeUtils_GetTranslation(rootRenderNode, &setTranslationX, &setTranslationY);
+    ASSERT_EQ(setTranslationX, 33);
+    ASSERT_EQ(setTranslationY, 44);
 }
 
 /**
@@ -261,14 +261,14 @@ HWTEST_F(NativeRenderNodePropertyTest, NativeRenderNodePropertyTest010, TestSize
     auto rootRenderNode = OH_ArkUI_RenderNodeUtils_CreateNode();
     ASSERT_NE(rootRenderNode, nullptr);
     
-    float setRotation_x = 0;
-    float setRotation_y = 0;
-    float setRotation_z = 0;
+    float setRotationX = 0;
+    float setRotationY = 0;
+    float setRotationZ = 0;
     OH_ArkUI_RenderNodeUtils_SetRotation(rootRenderNode, 414, 55, 12);
-    OH_ArkUI_RenderNodeUtils_GetRotation(rootRenderNode, &setRotation_x, &setRotation_y, &setRotation_z);
-    ASSERT_EQ(setRotation_x, 414);
-    ASSERT_EQ(setRotation_y, 55);
-    ASSERT_EQ(setRotation_z, 12);
+    OH_ArkUI_RenderNodeUtils_GetRotation(rootRenderNode, &setRotationX, &setRotationY, &setRotationZ);
+    ASSERT_EQ(setRotationX, 414);
+    ASSERT_EQ(setRotationY, 55);
+    ASSERT_EQ(setRotationZ, 12);
 }
 
 /**
@@ -305,12 +305,12 @@ HWTEST_F(NativeRenderNodePropertyTest, NativeRenderNodePropertyTest012, TestSize
     auto rootRenderNode = OH_ArkUI_RenderNodeUtils_CreateNode();
     ASSERT_NE(rootRenderNode, nullptr);
     
-    int32_t shadowOffset_x = 0;
-    int32_t shadowOffset_y = 0;
+    int32_t shadowOffsetX = 0;
+    int32_t shadowOffsetY = 0;
     OH_ArkUI_RenderNodeUtils_SetShadowOffset(rootRenderNode, 27, 56);
-    OH_ArkUI_RenderNodeUtils_GetShadowOffset(rootRenderNode, &shadowOffset_x, &shadowOffset_y);
-    ASSERT_EQ(shadowOffset_x, 27);
-    ASSERT_EQ(shadowOffset_y, 56);
+    OH_ArkUI_RenderNodeUtils_GetShadowOffset(rootRenderNode, &shadowOffsetX, &shadowOffsetY);
+    ASSERT_EQ(shadowOffsetX, 27);
+    ASSERT_EQ(shadowOffsetY, 56);
 }
 
 /**
