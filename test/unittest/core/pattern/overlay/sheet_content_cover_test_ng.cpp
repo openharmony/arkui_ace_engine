@@ -548,7 +548,10 @@ HWTEST_F(SheetContentCoverObjectTestNG, GetAnimationOptionForOverlay001, TestSiz
      * @tc.expected: GetCurve is Curves::FRICTION, GetDuration is 200, GetFillMode is FillMode::FORWARDS.
      */
     auto option = object->GetAnimationOptionForOverlay(true, true);
-    EXPECT_EQ(option.GetCurve(), Curves::FRICTION);
+    auto curve = option.GetCurve();
+    auto springCurve = AceType::DynamicCast<InterpolatingSpring>(curve);
+    ASSERT_NE(springCurve, nullptr);
+    EXPECT_TRUE(springCurve->IsEqual(AceType::MakeRefPtr<InterpolatingSpring>(0.2f, 0.0f, 0.2f, 1.0f)));
     EXPECT_EQ(option.GetDuration(), 200);
     EXPECT_EQ(option.GetFillMode(), FillMode::FORWARDS);
 }
@@ -1169,6 +1172,326 @@ HWTEST_F(SheetContentCoverObjectTestNG, GetAnimationPropertyCallForOverlay006, T
     EXPECT_EQ(renderContext->GetTransformTranslate()->x.ConvertToPx(), 0.0f);
     EXPECT_EQ(renderContext->GetTransformTranslate()->y.ConvertToPx(), height);
     EXPECT_EQ(renderContext->GetTransformTranslate()->z.ConvertToPx(), 0.0f);
+}
+
+/**
+ * @tc.name: SetSheetAnimationOption001
+ * @tc.desc: Test SheetContentCoverObject::SetSheetAnimationOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetContentCoverObjectTestNG, SetSheetAnimationOption001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet pattern and layoutProperty.
+     */
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    /**
+     * @tc.steps: step2. create sheetStyle, set modalTransition is ModalTransition::ALPHA,
+     *                   set sheetType_ is SheetType::SHEET_CONTENT_COVER.
+     */
+    SheetStyle sheetStyle;
+    sheetStyle.modalTransition = ModalTransition::ALPHA;
+    sheetStyle.sheetType = SheetType::SHEET_CONTENT_COVER;
+    layoutProperty->UpdateSheetStyle(sheetStyle);
+    sheetPattern->sheetType_ = SheetType::SHEET_CONTENT_COVER;
+    /**
+     * @tc.steps: step3. InitSheetObject and create object.
+     */
+    sheetPattern->InitSheetObject();
+    auto object = AceType::DynamicCast<SheetContentCoverObject>(sheetPattern->GetSheetObject());
+    ASSERT_NE(object, nullptr);
+    /**
+     * @tc.steps: step4. parameter setting for test option.
+     * @tc.expected: GetDuration is 200, GetFillMode is FillMode::FORWARDS.
+     */
+    AnimationOption option;
+    object->SetSheetAnimationOption(option);
+    EXPECT_EQ(option.GetDuration(), 200);
+    EXPECT_EQ(option.GetFillMode(), FillMode::FORWARDS);
+}
+
+/**
+ * @tc.name: SetSheetAnimationOption002
+ * @tc.desc: Test SheetContentCoverObject::SetSheetAnimationOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetContentCoverObjectTestNG, SetSheetAnimationOption002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet pattern and layoutProperty.
+     */
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    /**
+     * @tc.steps: step2. create sheetStyle, set modalTransition is ModalTransition::NONE,
+     *                   set sheetType_ is SheetType::SHEET_CONTENT_COVER.
+     */
+    SheetStyle sheetStyle;
+    sheetStyle.modalTransition = ModalTransition::NONE;
+    sheetStyle.sheetType = SheetType::SHEET_CONTENT_COVER;
+    layoutProperty->UpdateSheetStyle(sheetStyle);
+    sheetPattern->sheetType_ = SheetType::SHEET_CONTENT_COVER;
+    /**
+     * @tc.steps: step3. InitSheetObject and create object.
+     */
+    sheetPattern->InitSheetObject();
+    auto object = AceType::DynamicCast<SheetContentCoverObject>(sheetPattern->GetSheetObject());
+    ASSERT_NE(object, nullptr);
+    /**
+     * @tc.steps: step4. parameter setting for test option.
+     * @tc.expected: GetDuration is 0
+     */
+    AnimationOption option;
+    object->SetSheetAnimationOption(option);
+    EXPECT_EQ(option.GetDuration(), 0);
+}
+
+/**
+ * @tc.name: SetSheetAnimationOption003
+ * @tc.desc: Test SheetContentCoverObject::SetSheetAnimationOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetContentCoverObjectTestNG, SetSheetAnimationOption003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet pattern and layoutProperty.
+     */
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    /**
+     * @tc.steps: step2. create sheetStyle, set modalTransition is ModalTransition::DEFAULT,
+     *                   set sheetType_ is SheetType::SHEET_CONTENT_COVER.
+     */
+    SheetStyle sheetStyle;
+    sheetStyle.modalTransition = ModalTransition::DEFAULT;
+    sheetStyle.sheetType = SheetType::SHEET_CONTENT_COVER;
+    layoutProperty->UpdateSheetStyle(sheetStyle);
+    sheetPattern->sheetType_ = SheetType::SHEET_CONTENT_COVER;
+    /**
+     * @tc.steps: step3. InitSheetObject and create object.
+     */
+    sheetPattern->InitSheetObject();
+    auto object = AceType::DynamicCast<SheetContentCoverObject>(sheetPattern->GetSheetObject());
+    ASSERT_NE(object, nullptr);
+    /**
+     * @tc.steps: step4. parameter setting for test option.
+     * @tc.expected: GetFillMode is FillMode::FORWARDS.
+     */
+    AnimationOption option;
+    object->SetSheetAnimationOption(option);
+    EXPECT_EQ(option.GetFillMode(), FillMode::FORWARDS);
+}
+
+/**
+ * @tc.name: GetSheetTransitionCurve001
+ * @tc.desc: Test SheetContentCoverObject::GetSheetTransitionCurve
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetContentCoverObjectTestNG, GetSheetTransitionCurve001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet pattern and layoutProperty.
+     */
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    /**
+     * @tc.steps: step2. create sheetStyle, set modalTransition is ModalTransition::ALPHA,
+     *                   set sheetType_ is SheetType::SHEET_CONTENT_COVER.
+     */
+    SheetStyle sheetStyle;
+    sheetStyle.modalTransition = ModalTransition::ALPHA;
+    sheetStyle.sheetType = SheetType::SHEET_CONTENT_COVER;
+    layoutProperty->UpdateSheetStyle(sheetStyle);
+    sheetPattern->sheetType_ = SheetType::SHEET_CONTENT_COVER;
+    /**
+     * @tc.steps: step3. InitSheetObject and create object.
+     */
+    sheetPattern->InitSheetObject();
+    auto object = AceType::DynamicCast<SheetContentCoverObject>(sheetPattern->GetSheetObject());
+    ASSERT_NE(object, nullptr);
+    /**
+     * @tc.steps: step4. parameter setting for test option.
+     * @tc.expected: curve = (0.2f, 0.0f, 0.2f, 1.0f).
+     */
+    auto curve = object->GetSheetTransitionCurve(0.0f);
+    EXPECT_TRUE(curve->IsEqual(AceType::MakeRefPtr<InterpolatingSpring>(0.2f, 0.0f, 0.2f, 1.0f)));
+}
+
+/**
+ * @tc.name: GetSheetTransitionCurve002
+ * @tc.desc: Test SheetContentCoverObject::GetSheetTransitionCurve
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetContentCoverObjectTestNG, GetSheetTransitionCurve002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet pattern and layoutProperty.
+     */
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    /**
+     * @tc.steps: step2. create sheetStyle, set modalTransition is ModalTransition::NONE,
+     *                   set sheetType_ is SheetType::SHEET_CONTENT_COVER.
+     */
+    SheetStyle sheetStyle;
+    sheetStyle.modalTransition = ModalTransition::NONE;
+    sheetStyle.sheetType = SheetType::SHEET_CONTENT_COVER;
+    layoutProperty->UpdateSheetStyle(sheetStyle);
+    sheetPattern->sheetType_ = SheetType::SHEET_CONTENT_COVER;
+    /**
+     * @tc.steps: step3. InitSheetObject and create object.
+     */
+    sheetPattern->InitSheetObject();
+    auto object = AceType::DynamicCast<SheetContentCoverObject>(sheetPattern->GetSheetObject());
+    ASSERT_NE(object, nullptr);
+    /**
+     * @tc.steps: step4. parameter setting for test option.
+     * @tc.expected: curve = (0.0f, 0.0f, 0.0f, 0.0f).
+     */
+    auto curve = object->GetSheetTransitionCurve(0.0f);
+    EXPECT_TRUE(curve->IsEqual(AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 0.0f, 0.0f, 0.0f)));
+}
+
+/**
+ * @tc.name: GetSheetTransitionCurve003
+ * @tc.desc: Test SheetContentCoverObject::GetSheetTransitionCurve
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetContentCoverObjectTestNG, GetSheetTransitionCurve003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet pattern and layoutProperty.
+     */
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    /**
+     * @tc.steps: step2. create sheetStyle, set modalTransition is ModalTransition::DEFAULT,
+     *                   set sheetType_ is SheetType::SHEET_CONTENT_COVER.
+     */
+    SheetStyle sheetStyle;
+    sheetStyle.modalTransition = ModalTransition::DEFAULT;
+    sheetStyle.sheetType = SheetType::SHEET_CONTENT_COVER;
+    layoutProperty->UpdateSheetStyle(sheetStyle);
+    sheetPattern->sheetType_ = SheetType::SHEET_CONTENT_COVER;
+    /**
+     * @tc.steps: step3. InitSheetObject and create object.
+     */
+    sheetPattern->InitSheetObject();
+    auto object = AceType::DynamicCast<SheetContentCoverObject>(sheetPattern->GetSheetObject());
+    ASSERT_NE(object, nullptr);
+    /**
+     * @tc.steps: step4. parameter setting for test option.
+     * @tc.expected: curve = (0.0f, 1.0f, 328.0f, 36.0f).
+     */
+    auto curve = object->GetSheetTransitionCurve(0.0f);
+    EXPECT_TRUE(curve->IsEqual(AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 328.0f, 36.0f)));
+}
+
+/**
+ * @tc.name: GetSheetTransitionFinishEvent001
+ * @tc.desc: Test SheetContentCoverObject::GetSheetTransitionFinishEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetContentCoverObjectTestNG, GetSheetTransitionFinishEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet pattern and object.
+     */
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->sheetType_ = SheetType::SHEET_CONTENT_COVER;
+    sheetPattern->InitSheetObject();
+    auto object = AceType::DynamicCast<SheetContentCoverObject>(sheetPattern->GetSheetObject());
+    ASSERT_NE(object, nullptr);
+    /**
+     * @tc.steps: step2. parameter setting for test option.
+     * @tc.expected: func is not nullptr.
+     */
+    auto func = object->GetSheetTransitionFinishEvent(true);
+    ASSERT_NE(func, nullptr);
+    sheetPattern->preDidHeight_ = 0.0f;
+    object->sheetHeight_ = 1.0f;
+    /**
+     * @tc.steps: step3. call func to verify it executes normally.
+     * @tc.expected: preDidHeight_ is 1.0f.
+     */
+    func();
+    EXPECT_EQ(sheetPattern->preDidHeight_, 1.0f);
+}
+
+/**
+ * @tc.name: GetSheetTransitionFinishEvent002
+ * @tc.desc: Test SheetContentCoverObject::GetSheetTransitionFinishEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetContentCoverObjectTestNG, GetSheetTransitionFinishEvent002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet pattern and object.
+     */
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->sheetType_ = SheetType::SHEET_CONTENT_COVER;
+    sheetPattern->InitSheetObject();
+    auto object = AceType::DynamicCast<SheetContentCoverObject>(sheetPattern->GetSheetObject());
+    ASSERT_NE(object, nullptr);
+    /**
+     * @tc.steps: step2. parameter setting for test option.
+     * @tc.expected: func is not nullptr.
+     */
+    auto func = object->GetSheetTransitionFinishEvent(false);
+    ASSERT_NE(func, nullptr);
+    /**
+     * @tc.steps: step3. call func to verify it executes normally.
+     * @tc.expected: isDismissProcess_ is false.
+     */
+    func();
+    EXPECT_EQ(sheetPattern->isDismissProcess_, false);
 }
 
 /**
