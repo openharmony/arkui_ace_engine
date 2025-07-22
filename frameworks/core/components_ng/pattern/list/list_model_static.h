@@ -82,6 +82,7 @@ public:
         const std::optional<EffectEdge>& effectEdge);
 private:
     static void AddDragFrameNodeToManager(FrameNode* frameNode);
+    static void AddDragFrameNodeToManagerMultiThread(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_LIST_MODEL_STATIC_H

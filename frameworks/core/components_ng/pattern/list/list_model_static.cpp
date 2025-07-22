@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/list/list_model_static.h"
 
+#include "base/utils/multi_thread.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
@@ -256,6 +257,7 @@ void ListModelStatic::SetContentEndOffset(FrameNode* frameNode, float endOffset)
 void ListModelStatic::AddDragFrameNodeToManager(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
+    FREE_NODE_CHECK(frameNode, AddDragFrameNodeToManager, frameNode);
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto dragDropManager = pipeline->GetDragDropManager();
@@ -264,6 +266,19 @@ void ListModelStatic::AddDragFrameNodeToManager(FrameNode* frameNode)
     dragDropManager->AddListDragFrameNode(frameNode->GetId(), AceType::WeakClaim(frameNode));
 }
 
+void ListModelStatic::AddDragFrameNodeToManagerMultiThread(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->PostAfterAttachMainTreeTask([weak = AceType::WeakClaim(frameNode)]() {
+        auto node = weak.Upgrade();
+        CHECK_NULL_VOID(node);
+        auto pipeline = node->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto dragDropManager = pipeline->GetDragDropManager();
+        CHECK_NULL_VOID(dragDropManager);
+        dragDropManager->AddListDragFrameNode(node->GetId(), AceType::WeakClaim(AceType::RawPtr(node)));
+    });
+}
 void ListModelStatic::SetOnScrollIndex(FrameNode* frameNode, OnScrollIndexEvent&& onScrollIndex)
 {
     CHECK_NULL_VOID(frameNode);
