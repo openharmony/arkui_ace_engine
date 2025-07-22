@@ -25,15 +25,13 @@ config("ani_config") {
 
 ohos_shared_library("drawable_descriptor_ani") {
   configs = [ ":ani_config" ]
-  sources = [
-    "./src/drawable_descriptor_inner.cpp",
-  ]
+  sources = [ "./src/drawable_descriptor_inner.cpp" ]
   deps = [ "$ace_root/build:libace_compatible" ]
   external_deps = [
     "cJSON:cjson",
     "graphic_2d:2d_graphics",
     "image_framework:image_native",
-    #"image_framework:image_taihe",
+    "image_framework:image_taihe",
     "resource_management:global_resmgr",
     "runtime_core:ani",
   ]

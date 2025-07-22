@@ -19,7 +19,7 @@
 #include "draw/canvas.h"
 #include "image/bitmap.h"
 #include "image/image_info.h"
-// #include "pixel_map_taihe_ani.h"
+#include "pixel_map_taihe_ani.h"
 #include "resource_manager.h"
 #include "securec.h"
 
