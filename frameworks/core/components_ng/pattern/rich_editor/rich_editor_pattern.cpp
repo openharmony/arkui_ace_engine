@@ -8273,10 +8273,10 @@ void RichEditorPattern::MouseRightFocus(const MouseInfo& info)
     CHECK_NULL_VOID(host);
     auto focusHub = host->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
-    focusHub->RequestFocusImmediately();
 
     auto selectRange = GetSpanRangeByLocalOffset(info.GetLocalLocation());
     if (InRangeRect(info.GetGlobalLocation(), selectRange)) {
+        focusHub->RequestFocusImmediately();
         selectedType_ = TextSpanType::IMAGE;
         textSelector_.Update(selectRange.first, selectRange.second);
         SetCaretPositionWithAffinity({ selectRange.second, TextAffinity::UPSTREAM });
@@ -8290,6 +8290,7 @@ void RichEditorPattern::MouseRightFocus(const MouseInfo& info)
     Offset textOffset = ConvertTouchOffsetToTextOffset(info.GetLocalLocation());
     auto position = paragraphs_.GetIndex(textOffset);
     SetCaretPosition(position);
+    focusHub->RequestFocusImmediately();
     CalcAndRecordLastClickCaretInfo(textOffset);
     auto [caretOffset, caretHeight] = CalculateCaretOffsetAndHeight();
     selectedType_ = TextSpanType::TEXT;
