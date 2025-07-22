@@ -5729,7 +5729,7 @@ export class Serializer extends SerializerBase {
         const value_moduleName  = value.moduleName
         valueSerializer.writeString(value_moduleName)
         const value_id  = value.id
-        valueSerializer.writeNumber(value_id)
+        valueSerializer.writeNumber(value_id as number)
         const value_params  = value.params
         let value_params_type : int32 = RuntimeType.UNDEFINED
         value_params_type = runtimeType(value_params)
@@ -5747,7 +5747,7 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_type_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_type_type)) {
             const value_type_value  = value_type!
-            valueSerializer.writeNumber(value_type_value)
+            valueSerializer.writeNumber(value_type_value as number)
         }
     }
     writeRichEditorDeleteValue(value: RichEditorDeleteValue): void {

@@ -10642,13 +10642,13 @@ export class Deserializer extends DeserializerBase {
         }
         const params_result : Array<Object | undefined> | undefined = params_buf
         const type_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let type_buf : number | undefined
+        let type_buf : int32 | undefined
         if ((RuntimeType.UNDEFINED) != (type_buf_runtimeType))
         {
-            type_buf = (valueDeserializer.readNumber() as number)
+            type_buf = (valueDeserializer.readNumber()! as int32)
         }
-        const type_result : number | undefined = type_buf
-        let value : Resource = ({bundleName: bundleName_result, moduleName: moduleName_result, id: id_result, params: params_result, type: type_result} as Resource)
+        const type_result : int32 | undefined = type_buf
+        let value : Resource = ({bundleName: bundleName_result, moduleName: moduleName_result, id: id_result as int32, params: params_result, type: type_result} as Resource)
         return value
     }
     readRichEditorDeleteValue(): RichEditorDeleteValue {
