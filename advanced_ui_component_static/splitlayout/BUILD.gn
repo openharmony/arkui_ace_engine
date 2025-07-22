@@ -17,10 +17,10 @@ import("//build/ohos.gni")
 generate_static_abc("split_layout_ets_abc") {
   base_url = "./"
   files = [ "./@ohos.arkui.advanced.SplitLayout.ets" ]
-  #ui_enable = "True"
+  ui_enable = "True"
   is_boot_abc = "True"
   device_dst_file = "/system/framework/split_layout_ets_abc.abc"
-  dst_file = target_out_dir + "/split_layout_ets_abc"
+  dst_file = target_out_dir + "/split_layout_ets_abc/modules_static.abc"
   out_puts = [ target_out_dir + "/split_layout_ets_abc/modules_static.abc" ]
 }
 
