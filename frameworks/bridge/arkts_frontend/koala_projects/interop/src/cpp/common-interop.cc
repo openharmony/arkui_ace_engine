@@ -346,19 +346,8 @@ KNativePointer impl_Malloc(KLong length) {
 }
 KOALA_INTEROP_DIRECT_1(Malloc, KNativePointer, KLong)
 
-void malloc_finalize(KNativePointer data) {
-    if (data) {
-        free(data);
-    }
-}
-
-KNativePointer impl_GetMallocFinalizer() {
-    return reinterpret_cast<KNativePointer>(malloc_finalize);
-}
-KOALA_INTEROP_DIRECT_0(GetMallocFinalizer, KNativePointer)
-
 void impl_Free(KNativePointer data) {
-    malloc_finalize(data);
+    return free(data);
 }
 KOALA_INTEROP_DIRECT_V1(Free, KNativePointer)
 
