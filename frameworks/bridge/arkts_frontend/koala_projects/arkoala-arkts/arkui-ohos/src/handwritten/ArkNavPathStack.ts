@@ -13,11 +13,10 @@
  * limitations under the License.
  */
 
-import {KPointer, toPeerPtr, runtimeType, RuntimeType, Finalizable, InteropNativeModule} from '@koalaui/interop'
+import { runtimeType, RuntimeType, InteropNativeModule} from '@koalaui/interop'
 import { int32 } from "@koalaui/common"
 import { LaunchMode, NavPathInfo, NavPathStack, NavigationOptions, PopInfo } from "../component/navigation"
 import { NavExtender } from "../component/navigationExtender"
-import { ArkUIGeneratedNativeModule } from "#components"
 
 export class PathStackUtils {
     static id: number = 0
@@ -33,7 +32,7 @@ export class PathStackUtils {
     static addNavPathInfo(info: NavPathInfo, launchMode: LaunchMode, isReplace: boolean = false): void {
         if (launchMode === LaunchMode.MOVE_TO_TOP_SINGLETON) {
             let index = PathStackUtils.infoArray.findIndex(element => element.name === info.name)
-            if (index != -1) {
+            if (index !== -1) {
                 PathStackUtils.infoArray[index] = info
                 let targetInfo = PathStackUtils.infoArray.splice(index, 1)
                 if (isReplace) {
