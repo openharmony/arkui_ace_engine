@@ -541,6 +541,7 @@
       OHOS::Ace::NG::NGGestureRecognizer::IsInResponseLinkRecognizers*;
       OHOS::Ace::TouchEventTarget::GetAttachedNode*;
       OHOS::Ace::PipelineBase::GetImageCache*;
+      OHOS::Ace::NG::PanRecognizer::GetDistance*;
     };
   local:
     *;
