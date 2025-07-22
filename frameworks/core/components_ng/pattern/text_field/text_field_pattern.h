@@ -1857,6 +1857,7 @@ private:
     void SetAccessibilityActionOverlayAndSelection();
     void SetAccessibilityEditAction();
     void SetAccessibilityMoveTextAction();
+    void SetAccessibilityErrorText();
     void SetAccessibilityClearAction();
     void SetAccessibilityPasswordIconAction();
     void SetAccessibilityUnitAction();
