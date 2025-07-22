@@ -60,20 +60,24 @@ void SetListItemGroupOptionsImpl(Ark_NativePointer node,
     ListItemGroupModelStatic::SetStyle(frameNode, style);
     auto header = Converter::OptConvert<CustomNodeBuilder>(arkOptions.value().header);
     if (header.has_value()) {
-        CallbackHelper(header.value()).BuildAsync([frameNode](const RefPtr<UINode>& uiNode) {
+        CallbackHelper(header.value()).BuildAsync([weak = AceType::WeakClaim(frameNode)](const RefPtr<UINode>& uiNode) {
+            auto headerNode = weak.Upgrade();
+            CHECK_NULL_VOID(headerNode);
             auto builder = [uiNode]() -> RefPtr<UINode> {
                 return uiNode;
             };
-            ListItemGroupModelStatic::SetHeader(frameNode, std::move(builder));
+            ListItemGroupModelStatic::SetHeader(AceType::RawPtr(headerNode), std::move(builder));
             }, node);
     }
     auto footer = Converter::OptConvert<CustomNodeBuilder>(arkOptions.value().footer);
     if (footer.has_value()) {
-        CallbackHelper(footer.value()).BuildAsync([frameNode](const RefPtr<UINode>& uiNode) {
+        CallbackHelper(footer.value()).BuildAsync([weak = AceType::WeakClaim(frameNode)](const RefPtr<UINode>& uiNode) {
+            auto footerNode = weak.Upgrade();
+            CHECK_NULL_VOID(footerNode);
             auto builder = [uiNode]() -> RefPtr<UINode> {
                 return uiNode;
             };
-            ListItemGroupModelStatic::SetFooter(frameNode, std::move(builder));
+            ListItemGroupModelStatic::SetFooter(AceType::RawPtr(footerNode), std::move(builder));
             }, node);
     }
 }
