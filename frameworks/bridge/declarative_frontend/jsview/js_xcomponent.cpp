@@ -243,6 +243,9 @@ void JSXComponent::Create(const JSCallbackInfo& info)
 void JSXComponent::ExtractInfoToXComponentOptions(
     XComponentOptions& options, JSRef<JSObject>& controllerObj, const JSCallbackInfo& info)
 {
+    if (!info[0]->IsObject()) {
+        return;
+    }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     auto id = paramObject->GetProperty("id");
     auto type = paramObject->GetProperty("type");
