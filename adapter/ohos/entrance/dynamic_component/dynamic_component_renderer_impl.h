@@ -107,6 +107,7 @@ private:
     void DeleteWorkerUsing(void *worker);
     void OnDestroyContent();
     void AfterDestroyContent();
+    void UnRegisterContainerHandler();
 
     void CreateIsolatedContent();
     void CreateDynamicContent();
