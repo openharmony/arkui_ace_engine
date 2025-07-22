@@ -1621,7 +1621,7 @@ void SwiperPattern::FireAnimationEndEvent(
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
-    ReportComponentChangeEvent("onAnimationEnd", currentIndex, true, info.currentOffset.value_or(0.0));
+    ReportComponentChangeEvent("onAnimationEnd", currentIndex, true, info.currentOffset.value_or(0.0f));
 }
 
 void SwiperPattern::FireGestureSwipeEvent(int32_t currentIndex, const AnimationCallbackInfo& info) const

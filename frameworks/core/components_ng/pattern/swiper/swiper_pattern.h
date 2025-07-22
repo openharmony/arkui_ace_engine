@@ -1321,7 +1321,7 @@ private:
     int32_t GetNodeId() const;
     bool GetTargetIndex(const std::string& command, int32_t& targetIndex);
     void ReportComponentChangeEvent(
-        const std::string& eventType, int32_t currentIndex, bool includeOffset, float offset = 0.0) const;
+        const std::string& eventType, int32_t currentIndex, bool includeOffset, float offset = 0.0f) const;
     void ReportTraceOnDragEnd() const;
     void UpdateBottomTypeOnMultiple(int32_t currentFirstIndex);
     void UpdateBottomTypeOnMultipleRTL(int32_t currentFirstIndex);
