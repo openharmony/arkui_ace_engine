@@ -1379,6 +1379,21 @@ class WebOnBeforeUnloadModifier extends
   }
 }
 
+class WebJavaScriptProxyModifier extends ModifierWithKey<JavaScriptProxy> {
+  constructor(value: JavaScriptProxy) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webJavaScriptProxyModifier')
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetJavaScriptProxy(node);
+    } else {
+      getUINativeModule().web.setJavaScriptProxy(node, this.value.object, this.value.name, this.value.methodList,
+        this.value.controller, this.value?.asyncMethodList, this.value?.permission);
+    }
+  }
+}
+
 class ArkWebComponent extends ArkComponent implements WebAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -1415,8 +1430,9 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
     modifierWithKey(this._modifiersWithKeys, WebGeolocationAccessModifier.identity, WebGeolocationAccessModifier, geolocationAccess);
     return this;
   }
-  javaScriptProxy(javaScriptProxy: { object: object; name: string; methodList: string[]; controller: any; }): this {
-    throw new Error('Method not implemented.');
+  javaScriptProxy(javaScriptProxy: JavaScriptProxy): this {
+    modifierWithKey(this._modifiersWithKeys, WebJavaScriptProxyModifier.identity, WebJavaScriptProxyModifier, javaScriptProxy);
+    return this;
   }
   password(password: boolean): this {
     throw new Error('Method not implemented.');

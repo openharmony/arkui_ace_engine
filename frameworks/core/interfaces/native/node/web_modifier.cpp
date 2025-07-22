@@ -2129,6 +2129,25 @@ void ResetOnBeforeUnload(ArkUINodeHandle node)
     WebModelNG::SetOnBeforeUnload(frameNode, nullptr, DialogEventType::DIALOG_EVENT_BEFORE_UNLOAD);
 }
 
+void SetJavaScriptProxy(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto* jsProxyCallback = reinterpret_cast<std::function<void()>*>(extraParam);
+        WebModelNG::SetJavaScriptProxy(frameNode, std::move(*jsProxyCallback));
+    } else {
+        WebModelNG::SetJavaScriptProxy(frameNode, nullptr);
+    }
+}
+
+void ResetJavaScriptProxy(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetJavaScriptProxy(frameNode, nullptr);
+}
+
 namespace NodeModifier {
 const ArkUIWebModifier* GetWebModifier()
 {
@@ -2332,6 +2351,8 @@ const ArkUIWebModifier* GetWebModifier()
         .resetOnFaviconReceived = ResetOnFaviconReceived,
         .setOnBeforeUnload = SetOnBeforeUnload,
         .resetOnBeforeUnload = ResetOnBeforeUnload,
+        .setJavaScriptProxy = SetJavaScriptProxy,
+        .resetJavaScriptProxy = ResetJavaScriptProxy,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -2539,6 +2560,8 @@ const CJUIWebModifier* GetCJUIWebModifier()
         .resetOnFaviconReceived = ResetOnFaviconReceived,
         .setOnBeforeUnload = SetOnBeforeUnload,
         .resetOnBeforeUnload = ResetOnBeforeUnload,
+        .setJavaScriptProxy = SetJavaScriptProxy,
+        .resetJavaScriptProxy = ResetJavaScriptProxy,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

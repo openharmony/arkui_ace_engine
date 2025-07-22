@@ -5083,6 +5083,8 @@ struct ArkUIWebModifier {
     void (*resetOnFaviconReceived)(ArkUINodeHandle node);
     void (*setOnBeforeUnload)(ArkUINodeHandle node, void* callback);
     void (*resetOnBeforeUnload)(ArkUINodeHandle node);
+    void (*setJavaScriptProxy)(ArkUINodeHandle node, void* callback);
+    void (*resetJavaScriptProxy)(ArkUINodeHandle node);
 };
 
 struct ArkUIBlankModifier {
