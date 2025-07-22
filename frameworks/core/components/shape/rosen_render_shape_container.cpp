@@ -309,6 +309,7 @@ void RosenRenderShapeContainer::DrawBitmapMesh(
     const SkScalar dx = width / column;
 
     SkPoint* texsPit = texsPoint;
+    CHECK_NULL_VOID(texsPit);
     SkScalar y = 0;
     for (int i = 0; i <= row; i++) {
         if (i == row) {
