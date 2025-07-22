@@ -681,15 +681,13 @@ void WindowSceneLayoutManager::GetUINodeInfo(const RefPtr<FrameNode>& node,
         oss << " localGeometry: [null],";
     }
     oss << " requestZIndex: " << context->GetZIndexValue(ZINDEX_DEFAULT_VALUE);
+    oss << " blendMode: [" << static_cast<int16_t>(context->GetBackBlendMode().value_or(BlendMode::NONE)) << ", "
+        << static_cast<int16_t>(context->GetBackBlendApplyType().value_or(BlendApplyType::FAST)) << ", "
+        << static_cast<int16_t>(rsNode->GetStagingProperties().GetColorBlendMode()) << ", "
+        << static_cast<int16_t>(rsNode->GetStagingProperties().GetColorBlendApplyType()) << "]";
     oss << " rsId: " << GetRSNodeId(node);
     oss << " frameNodeId: " << node->GetId();
-    oss << " parentFrameNodeId: " << parentId;
-    oss << " arkBlendMode: " << static_cast<int16_t>(context->GetBackBlendMode().value_or(BlendMode::NONE));
-    oss << " rsBlendMode: " << static_cast<int16_t>(rsNode->GetStagingProperties().GetColorBlendMode());
-    oss << " arkBlendApplyType: " << static_cast<int16_t>(
-        context->GetBackBlendApplyType().value_or(BlendApplyType::FAST));
-    oss << " rsBlendApplyType: " << static_cast<int16_t>(
-        rsNode_->GetStagingProperties().GetColorBlendApplyType()) << std::endl;
+    oss << " parentFrameNodeId: " << parentId << std::endl;
 }
 
 void WindowSceneLayoutManager::GetTotalUITreeInfo(std::string& info)
@@ -838,8 +836,6 @@ void WindowSceneLayoutManager::GetRSNodeInfo(const std::shared_ptr<RSNode>& rsNo
     } else {
         oss << "localGeometry: [null],";
     }
-    oss << " rsBlendMode: " << static_cast<int16_t>(rsNode->GetStagingProperties().GetColorBlendMode());
-    oss << " rsBlendApplyType: " << static_cast<int16_t>(rsNode_->GetStagingProperties().GetColorBlendApplyType());
     oss << std::endl;
 }
 } // namespace OHOS::Ace::NG
