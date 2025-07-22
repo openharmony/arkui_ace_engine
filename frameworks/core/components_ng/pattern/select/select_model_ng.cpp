@@ -905,7 +905,6 @@ void SelectModelNG::SetFontColor(FrameNode* frameNode, const Color& color)
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>(frameNode);
     CHECK_NULL_VOID(pattern);
     pattern->SetFontColor(color);
-    ACE_UPDATE_NODE_PAINT_PROPERTY(SelectPaintProperty, FontColorSetByUser, true, frameNode);
 }
 
 void SelectModelNG::SetSelectedOptionBgColor(FrameNode* frameNode, const Color& color)
@@ -1108,6 +1107,7 @@ void SelectModelNG::ResetFontColor()
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->ResetFontColor();
+    ACE_UPDATE_PAINT_PROPERTY(SelectPaintProperty, FontColorSetByUser, false);
 }
 
 void SelectModelNG::BackgroundColor(const Color& color)
@@ -1169,7 +1169,7 @@ void SelectModelNG::SetSelectedOptionTextModifier(
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSelectedOptionTextModifier(optionSelectedApply);
-    ACE_UPDATE_PAINT_PROPERTY(SelectPaintProperty, OptionTextModifierSetByUser, true);
+    ACE_UPDATE_PAINT_PROPERTY(SelectPaintProperty, SelectedOptionTextModifierSetByUser, true);
 }
 
 void SelectModelNG::SetShowInSubWindow(bool isShowInSubWindow)
