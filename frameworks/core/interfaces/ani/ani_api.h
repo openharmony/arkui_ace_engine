@@ -36,6 +36,9 @@ struct _ArkUIStyledString;
 struct _ArkUINode;
 struct _ArkUIContentSlot;
 struct _ArkUINodeContent;
+struct _ArkUICanvasRenderer;
+struct _ArkUIImageData;
+struct _ArkUIImageBitmap;
 typedef class __ani_ref* ani_ref;
 typedef class __ani_object* ani_object;
 typedef struct __ani_env ani_env;
@@ -56,6 +59,9 @@ typedef size_t ani_size;
 typedef _ArkUIContentSlot* ArkUIContentSlot;
 typedef _ArkUINodeContent* ArkUINodeContent;
 typedef _ArkUIStyledString* ArkUIStyledString;
+typedef _ArkUICanvasRenderer* ArkUICanvasRenderer;
+typedef _ArkUIImageData* ArkUIImageData;
+typedef _ArkUIImageBitmap* ArkUIImageBitmap;
 typedef struct WebviewControllerInfo {
     std::function<int32_t()> getWebIdFunc = nullptr;
     std::function<void(int32_t)> completeWindowNewFunc = nullptr;
@@ -337,6 +343,16 @@ struct ArkUIAniComponentConentModifier {
     void (*removeComponentFromFrameNode)(ani_long node, ani_long content);
     void (*addComponentToFrameNode)(ani_long node, ani_long content);
 };
+struct ArkUIAniCanvasModifier {
+    void (*setPixelMap)(ArkUICanvasRenderer peer, void* nativePixelMap);
+    void* (*getPixelMap)(ArkUICanvasRenderer peer, ani_double sx, ani_double sy, ani_double sw, ani_double sh);
+    void (*drawPixelMap0)(ArkUICanvasRenderer peer, void* nativePixelMap, ani_double dx, ani_double dy);
+    void (*drawPixelMap1)(
+        ArkUICanvasRenderer peer, void* nativePixelMap, ani_double dx, ani_double dy, ani_double dw, ani_double dh);
+    void (*drawPixelMap2)(ArkUICanvasRenderer peer, void* nativePixelMap, ani_double sx, ani_double sy, ani_double sw,
+        ani_double sh, ani_double dx, ani_double dy, ani_double dw, ani_double dh);
+    ArkUIImageBitmap (*imageBitmapConstruct)(const std::string& str, void* pixelMapPtr, ArkUI_Int32 unit);
+};
 
 struct ArkUIAniModifiers {
     ArkUI_Int32 version;
@@ -363,6 +379,7 @@ struct ArkUIAniModifiers {
     const ArkUIAniXComponentModifier* (*getArkUIAniXComponentModifier)();
     const ArkUIAniConditionScopeModifier* (*getArkUIAniConditionScopeModifier)();
     const ArkUIAniComponentConentModifier* (*getArkUIAniComponentConentModifier)();
+    const ArkUIAniCanvasModifier* (*getCanvasAniModifier)();
 };
 
 __attribute__((visibility("default"))) const ArkUIAniModifiers* GetArkUIAniModifiers(void);
