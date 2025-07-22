@@ -474,7 +474,6 @@ void ToastPattern::OnDetachFromFrameNode(FrameNode* node)
     auto current_context = PipelineContext::GetCurrentContextSafelyWithCheck();
     auto pipeline = parentContainerId < 0 ? current_context : PipelineContext::GetMainPipelineContext();
     CHECK_NULL_VOID(pipeline);
-    pipeline->RemoveWindowSizeChangeCallback(node->GetId());
     if (HasFoldDisplayModeChangedCallbackId()) {
         pipeline->UnRegisterFoldDisplayModeChangedCallback(foldDisplayModeChangedCallbackId_.value_or(-1));
     }
@@ -482,6 +481,8 @@ void ToastPattern::OnDetachFromFrameNode(FrameNode* node)
         pipeline->UnRegisterHalfFoldHoverChangedCallback(halfFoldHoverChangedCallbackId_.value_or(-1));
     }
     pipeline->UnRegisterRawKeyboardChangedCallback(rowKeyboardCallbackId_);
+    CHECK_NULL_VOID(node);
+    pipeline->RemoveWindowSizeChangeCallback(node->GetId());
 }
 
 double ToastPattern::GetTextMaxHeight()
