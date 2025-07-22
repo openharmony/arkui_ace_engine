@@ -31,7 +31,7 @@ import { CrownSensitivity } from "./enums"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ResourceColor, Offset, VoidCallback } from "./units"
 import { DialogAlignment } from "./alertDialog"
-import { DateTimeOptions } from "./arkui-intl"
+import { DateTimeOptions } from "@ohos/intl"
 
 export class DatePickerDialog {
     public static show(options?: DatePickerDialogOptions): undefined {

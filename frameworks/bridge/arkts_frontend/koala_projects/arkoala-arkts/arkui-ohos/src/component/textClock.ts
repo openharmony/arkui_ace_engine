@@ -30,7 +30,7 @@ import { Callback_Number_Void } from "./alphabetIndexer"
 import { ResourceColor, Length, ResourceStr } from "./units"
 import { FontStyle, FontWeight, Color } from "./enums"
 import { ContentModifier, CommonConfiguration } from "./arkui-wrapper-builder"
-import { DateTimeOptions } from "./arkui-intl"
+import { DateTimeOptions } from "@ohos/intl"
 import { Resource } from "global.resource"
 import { NodeAttach, remember } from "@koalaui/runtime"
 
