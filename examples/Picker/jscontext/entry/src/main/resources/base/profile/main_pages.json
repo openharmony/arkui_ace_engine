@@ -1,0 +1,18 @@
+{
+  "src": [
+    "pages/Index",
+    "pages/normal/normalIndex",
+    "pages/normal/loadAll",
+    "pages/sandbox/plugins",
+    "pages/sandbox/random20",
+    "pages/sandbox/random50",
+    "pages/sandbox/random100",
+    "pages/sandbox/loadAll",
+    "pages/sandbox/loadOne",
+    "pages/mixed/mixed20",
+    "pages/mixed/mixed50",
+    "pages/mixed/mixed100",
+    "pages/mixed/mixedAll",
+    "pages/mixed/plugins"
+  ]
+}
