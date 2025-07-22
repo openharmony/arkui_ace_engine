@@ -1490,6 +1490,10 @@ void UIExtensionPattern::SetOnResultCallback(const std::function<void(int32_t, c
 void UIExtensionPattern::FireOnResultCallback(int32_t code, const AAFwk::Want& want)
 {
     UIEXT_LOGI("OnResult the state is changing from '%{public}s' to 'DESTRUCTION'.", ToString(state_));
+    // Release the session.
+    if (sessionWrapper_ && sessionWrapper_->IsSessionValid()) {
+        sessionWrapper_->DestroySession();
+    }
     if (onResultCallback_ && (state_ != AbilityState::DESTRUCTION)) {
         ContainerScope scope(instanceId_);
         onResultCallback_(code, want);
@@ -1512,6 +1516,10 @@ void UIExtensionPattern::SetOnTerminatedCallback(
 void UIExtensionPattern::FireOnTerminatedCallback(int32_t code, const RefPtr<WantWrap>& wantWrap)
 {
     UIEXT_LOGI("OnTerminated the state is changing from '%{public}s' to 'DESTRUCTION'.", ToString(state_));
+    // Release the session.
+    if (sessionWrapper_ && sessionWrapper_->IsSessionValid()) {
+        sessionWrapper_->DestroySession();
+    }
     if (onTerminatedCallback_ && (state_ != AbilityState::DESTRUCTION)) {
         ContainerScope scope(instanceId_);
         onTerminatedCallback_(code, wantWrap);
