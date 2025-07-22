@@ -109,7 +109,7 @@ export interface IMutableKeyedStateMeta {
 export interface IObserve {
     renderingComponent: number;
     renderingId: RenderIdType | undefined;
-    shouldAddRef(iObjectsRenderId: RenderIdType | undefined): boolean;
+    shouldAddRef(iObjectsRenderId: RenderIdType): boolean;
 }
 
 export const OBSERVE: IObserve = ObserveSingleton.instance;
