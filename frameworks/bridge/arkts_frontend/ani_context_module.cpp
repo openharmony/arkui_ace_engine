@@ -18,6 +18,7 @@
 #include <ani.h>
 
 #include "base/log/log.h"
+#include "frameworks/base/subwindow/subwindow_manager.h"
 #include "frameworks/core/common/container.h"
 
 #ifdef PLUGIN_COMPONENT_SUPPORTED
@@ -43,7 +44,7 @@ std::shared_ptr<ani_ref> AniContextModule::GetAniContext()
 #endif
 
     if (currentInstance >= MIN_SUBCONTAINER_ID && currentInstance < MIN_PLUGIN_SUBCONTAINER_ID) {
-        // currentInstance = SubwindowManager::GetInstance()->GetParentContainerId(currentInstance);
+        currentInstance = SubwindowManager::GetInstance()->GetParentContainerId(currentInstance);
     }
 
     if (currentInstance <= 0) {
