@@ -14,10 +14,12 @@
  */
 
 #include "core/components_ng/pattern/marquee/marquee_layout_algorithm.h"
+
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/marquee/marquee_layout_property.h"
 #include "core/components_ng/pattern/marquee/marquee_pattern.h"
 #include "core/components_ng/pattern/text/text_base.h"
+#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -148,14 +150,18 @@ void MarqueeLayoutAlgorithm::HandleWidthConstraint(
             break;
         case LayoutCalPolicy::FIX_AT_IDEAL_SIZE: {
             context.optionalSize.SetWidth(childDimensionSize);
-            const auto& calcLayoutConstraint = context.layoutProperty->GetCalcLayoutConstraint();
-            if (calcLayoutConstraint && !calcLayoutConstraint->maxSize->Width().has_value()) {
-                context.layoutConstraint.maxSize.SetWidth(Infinity<float>());
+            OptionalSizeF frameIdealSize;
+            frameIdealSize.SetWidth(Infinity<float>());
+            frameIdealSize = UpdateOptionSizeByCalcLayoutConstraint(frameIdealSize,
+                context.layoutProperty->GetCalcLayoutConstraint(), context.layoutConstraint.percentReference);
+            if (frameIdealSize.Width().has_value()) {
+                context.layoutConstraint.maxSize.SetWidth(frameIdealSize.Width().value());
             }
             break;
         }
         case LayoutCalPolicy::MATCH_PARENT:
-            context.optionalSize.SetWidth(context.layoutConstraint.parentIdealSize.Width());
+            context.optionalSize.SetWidth(
+                context.layoutConstraint.parentIdealSize.Width().value_or(context.layoutConstraint.maxSize.Width()));
             break;
         default:
             break;
@@ -175,14 +181,18 @@ void MarqueeLayoutAlgorithm::HandleHeightConstraint(
             break;
         case LayoutCalPolicy::FIX_AT_IDEAL_SIZE: {
             context.optionalSize.SetHeight(childDimensionSize);
-            const auto& calcLayoutConstraint = context.layoutProperty->GetCalcLayoutConstraint();
-            if (calcLayoutConstraint && !calcLayoutConstraint->maxSize->Height().has_value()) {
-                context.layoutConstraint.maxSize.SetHeight(Infinity<float>());
+            OptionalSizeF frameIdealSize;
+            frameIdealSize.SetHeight(Infinity<float>());
+            frameIdealSize = UpdateOptionSizeByCalcLayoutConstraint(frameIdealSize,
+                context.layoutProperty->GetCalcLayoutConstraint(), context.layoutConstraint.percentReference);
+            if (frameIdealSize.Height().has_value()) {
+                context.layoutConstraint.maxSize.SetHeight(frameIdealSize.Height().value());
             }
             break;
         }
         case LayoutCalPolicy::MATCH_PARENT:
-            context.optionalSize.SetHeight(context.layoutConstraint.parentIdealSize.Height());
+            context.optionalSize.SetHeight(
+                context.layoutConstraint.parentIdealSize.Height().value_or(context.layoutConstraint.maxSize.Height()));
             break;
         default:
             break;
