@@ -523,4 +523,33 @@ HWTEST_F(WebPatternTest, UpdateScrollBarWithBorderRadius, TestSize.Level1)
     webPattern->UpdateScrollBarWithBorderRadius();
     EXPECT_FALSE(hasBorderRadiusValue);
 }
+
+/**
+ * @tc.name: IsShowHandle
+ * @tc.desc: Test IsShowHandle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTest, IsShowHandle, TestSize.Level1)
+{
+    std::string src = "web_test";
+    RefPtr<WebController> controller = AceType::MakeRefPtr<WebController>();
+    ASSERT_NE(controller, nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::WEB_ETS_TAG, nodeId, [src, controller]() { return AceType::MakeRefPtr<WebPattern>(src, controller); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    RefPtr<WebPattern> webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    auto result = webPattern->IsShowHandle();
+    EXPECT_FALSE(result);
+    webPattern->webSelectOverlay_ = AceType::MakeRefPtr<WebSelectOverlay>(webPattern);
+    ASSERT_NE(webPattern->webSelectOverlay_, nullptr);
+    webPattern->webSelectOverlay_->isShowHandle_ = true;
+    result = webPattern->IsShowHandle();
+    EXPECT_TRUE(result);
+}
 } // namespace OHOS::Ace::NG
