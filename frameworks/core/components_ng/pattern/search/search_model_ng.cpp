@@ -1005,8 +1005,7 @@ void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode,
     pattern->RegisterWindowSizeCallback();
     pattern->SetTextFadeoutCapacity(true);
     pattern->InitSurfacePositionChangedCallback();
-    auto colorMode = pipeline->GetColorMode();
-    pattern->SetOriginCursorColor(colorMode == ColorMode::DARK ? Color(0x4DFFFFFF) : Color(0x4D000000));
+    pattern->SetOriginCursorColor(pipeline->GetColorMode() == ColorMode::DARK ? Color(0x4DFFFFFF) : Color(0x4D000000));
     if (pipeline->GetHasPreviewTextOption()) {
         pattern->SetSupportPreviewText(pipeline->GetSupportPreviewText());
     }
@@ -1016,6 +1015,7 @@ void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode,
         CHECK_NULL_VOID(pattern);
         pattern->SetTextFieldNode(frameNode);
         frameNode->MountToParent(parentNode);
+        frameNode->SetDraggable(pipeline->GetDraggable<TextFieldTheme>());
     }
     InitSearchMaxFontScale(frameNode);
 }

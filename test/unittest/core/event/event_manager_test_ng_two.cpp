@@ -43,7 +43,7 @@ HWTEST_F(EventManagerTestNg, ExecuteTouchTestDoneCallbackTest001, TestSize.Level
     ResponseLinkResult responseLinkRecognizers;
     auto panHorizontal1 = AceType::MakeRefPtr<PanRecognizer>(
         DEFAULT_PAN_FINGER, PanDirection { PanDirection::HORIZONTAL }, DEFAULT_PAN_DISTANCE.ConvertToPx());
-
+    ASSERT_NE(panHorizontal1, nullptr);
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG, 0, nullptr);
     ASSERT_NE(frameNode, nullptr);
     auto eventHub = frameNode->GetOrCreateGestureEventHub();

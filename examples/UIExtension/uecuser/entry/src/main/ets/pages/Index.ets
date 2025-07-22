@@ -23,8 +23,8 @@ struct Second {
   @State message2: string = 'Hello World 2'
   @State message3: string = 'Hello World 3'
   @State visible: Visibility = Visibility.Hidden
-  @State wid: number = 300
-  @State hei: number = 300
+  @State uecWidth: number = 300
+  @State uecHeight: number = 300
   private proxy: UIExtensionProxy | null = null;
   private initPlaceholder = new ComponentContent(this.getUIContext(), wrapBuilder(LoadingBuilder), new Params);
   private areaChangePlaceholder = new ComponentContent(this.getUIContext(),
@@ -49,8 +49,8 @@ struct Second {
               'FOLD_TO_EXPAND' : this.areaChangePlaceholder,
             }
           })
-          .width(this.wid)
-          .height(this.hei)
+          .width(this.uecWidth)
+          .height(this.uecHeight)
           .border({width: 5, color: Color.Blue})
           .onReceive((data) => {
             console.info('Lee onReceive, for test')

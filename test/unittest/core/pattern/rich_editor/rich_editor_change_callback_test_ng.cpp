@@ -1220,44 +1220,6 @@ HWTEST_F(RichEditorChangeCallbackTestNg, HandleOnEditChanged005, TestSize.Level1
 }
 
 /**
- * @tc.name: StopEditingTest
- * @tc.desc: test StopEditing
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorChangeCallbackTestNg, StopEditingTest, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. get richEditor controller
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto richEditorController = richEditorPattern->GetRichEditorController();
-    ASSERT_NE(richEditorController, nullptr);
-    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
-    ASSERT_NE(focusHub, nullptr);
-
-    /**
-     * @tc.steps: step2. initalize span properties
-     */
-    TextSpanOptions options2;
-    options2.value = INIT_VALUE_1;
-
-    /**
-     * @tc.steps: step3. test add span
-     */
-    richEditorController->AddTextSpan(options2);
-    focusHub->RequestFocusImmediately();
-    EXPECT_TRUE(focusHub->IsCurrentFocus());
-    richEditorPattern->caretTwinkling_ = true;
-    richEditorController->StopEditing();
-
-    EXPECT_FALSE(richEditorPattern->caretTwinkling_);
-
-    ClearSpan();
-}
-
-/**
  * @tc.name: OnSubmitTest
  * @tc.desc: test OnSubmitTest
  * @tc.type: FUNC

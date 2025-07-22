@@ -1390,6 +1390,45 @@ HWTEST_F(RichEditorDragTestNg, HandleDragStart001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleDragStart002
+ * @tc.desc: test HandleDragStart
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorDragTestNg, HandleDragStart002, TestSize.Level1)
+{
+    auto richEditorPattern = GetRichEditorPattern();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto dragEvent = AceType::MakeRefPtr<Ace::DragEvent>();
+    std::string extraParams = "text";
+    auto& dragRange = richEditorPattern->dragRange_;
+    auto& selector = richEditorPattern->textSelector_;
+
+    // drag selected text
+    selector.baseOffset = 0;
+    selector.destinationOffset = 4;
+    selector.aiStart.reset();
+    selector.aiEnd.reset();
+    dragRange.first = -1;
+    dragRange.second = -1;
+    richEditorPattern->isDragSponsor_ = false;
+    richEditorPattern->HandleDragStart(dragEvent, extraParams);
+    EXPECT_EQ(dragRange.first, 0);
+    EXPECT_EQ(dragRange.second, 4);
+
+    // drag ai span
+    selector.baseOffset = -1;
+    selector.destinationOffset = -1;
+    selector.aiStart = 0;
+    selector.aiEnd = 4;
+    dragRange.first = -1;
+    dragRange.second = -1;
+    richEditorPattern->isDragSponsor_ = false;
+    richEditorPattern->HandleDragStart(dragEvent, extraParams);
+    EXPECT_EQ(dragRange.first, 0);
+    EXPECT_EQ(dragRange.second, 4);
+}
+
+/**
  * @tc.name: HandleDraggableFlag005
  * @tc.desc: test HandleDraggableFlag
  * @tc.type: FUNC
