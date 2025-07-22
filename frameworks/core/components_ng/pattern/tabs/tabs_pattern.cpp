@@ -883,14 +883,6 @@ void TabsPattern::OnColorModeChange(uint32_t colorMode)
         CHECK_NULL_VOID(dividerRenderProperty);
         dividerRenderProperty->UpdateDividerColor(currentDivider.color);
     }
-    auto tabBarRenderContext = tabBarNode->GetRenderContext();
-    CHECK_NULL_VOID(tabBarRenderContext);
-    if (!tabsLayoutProperty->HasBarBackgroundColorSetByUser() ||
-        (tabsLayoutProperty->HasBarBackgroundColorSetByUser() &&
-            !tabsLayoutProperty->GetBarBackgroundColorSetByUserValue())) {
-        Color backgroundColor = Color::BLACK.BlendOpacity(0.0f);
-        tabBarRenderContext->UpdateBackgroundColor(backgroundColor);
-    }
     tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 } // namespace OHOS::Ace::NG
