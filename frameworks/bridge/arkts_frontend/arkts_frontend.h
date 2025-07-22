@@ -32,7 +32,6 @@
 #include "frameworks/bridge/declarative_frontend/ng/page_router_manager.h"
 #include "frameworks/bridge/declarative_frontend/ng/page_router_manager_factory.h"
 
-typedef struct __EtsEnv ets_env; // only include ets_napi.h in .cpp files
 typedef struct __ani_env ani_env;
 typedef class __ani_ref* ani_ref;
 typedef class __ani_object* ani_object;
