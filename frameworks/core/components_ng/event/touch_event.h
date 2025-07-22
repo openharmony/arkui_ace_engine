@@ -154,6 +154,14 @@ public:
         commonTouchEventCallback_ = touchEventActuator->commonTouchEventCallback_;
     }
 
+    void SetStopPass(bool stopPass) {
+        stopPass_ = stopPass;
+    }
+
+    bool GetStopPass() {
+        return stopPass_;
+    }
+
 private:
     bool TriggerTouchCallBack(const TouchEvent& changedPoint);
     bool ShouldResponse() override;
@@ -172,6 +180,7 @@ private:
     // if isFlushTouchEventsEnd_ is true, web_pattern start to send touch event list to chromium
     bool isFlushTouchEventsEnd_ = false;
     std::map<int32_t, TimeStamp> firstInputTimeWithId_;
+    bool stopPass_ = false;
 };
 
 } // namespace OHOS::Ace::NG

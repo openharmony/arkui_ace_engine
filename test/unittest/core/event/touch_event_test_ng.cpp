@@ -606,6 +606,32 @@ HWTEST_F(TouchEventTestNg, TouchEventTest006, TestSize.Level1)
 }
 
 /**
+ * @tc.name: StopPass001
+ * @tc.desc: test functions GetStopPass SetStopPass.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TouchEventTestNg, StopPass001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TouchEventActuator.
+     */
+    auto touchEventActuator = AceType::MakeRefPtr<TouchEventActuator>();
+
+    /**
+     * @tc.steps: step2. call GetStopPass.
+     * @tc.expected: Execute function return value is false.
+     */
+    EXPECT_FALSE(touchEventActuator->GetStopPass());
+
+    /**
+     * @tc.steps: step3. call SetStopPass(true).
+     * @tc.expected: Execute function return value is true.
+     */
+    touchEventActuator->SetStopPass(true);
+    EXPECT_TRUE(touchEventActuator->GetStopPass());
+}
+
+/**
  * @tc.name: TouchEventOriginalIdTest001
  * @tc.desc: TriggerTouchCallBack.
  * @tc.type: FUNC
