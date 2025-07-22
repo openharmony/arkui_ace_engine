@@ -73,7 +73,7 @@ export class StateDecoratedVariable<T> extends DecoratedV1VariableBase<T> implem
         if (isDynamicObject(newValue)) {
             newValue = getObservedObject(newValue, this);
         }
-        if (typeof this.setProxyValue === 'function') {
+        if (this.setProxyValue) {
             this.setProxyValue!(newValue);
         }
         const value = UIUtils.makeObserved(newValue);
@@ -141,15 +141,6 @@ export class StateDecoratedVariable<T> extends DecoratedV1VariableBase<T> implem
     }
 
     public setProxyValue?: CompatibleStateChangeCallback<T>;
-
-    public setNotifyCallback(callback: WatchFuncType): void {
-        const func = new WatchFunc(callback);
-        const id = func.id();
-        const value = this.backing_.get(false);
-        if (StateMgmtTool.isIObservedObject(value as NullableObject)) {
-            (value as IObservedObject).addWatchSubscriber(id);
-        }
-    }
 
     public fireChange(): void {
         this.backing_.fireChange();
