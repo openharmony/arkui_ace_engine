@@ -1426,7 +1426,6 @@ HWTEST_F(RichEditorDragTestNg, HandleDragStart002, TestSize.Level1)
     richEditorPattern->HandleDragStart(dragEvent, extraParams);
     EXPECT_EQ(dragRange.first, 0);
     EXPECT_EQ(dragRange.second, 4);
-
 }
 
 /**
