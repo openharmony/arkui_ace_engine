@@ -185,6 +185,11 @@ RichEditorPattern::~RichEditorPattern()
 #endif
 }
 
+void RichEditorPattern::RecreateUndoManager()
+{
+    undoManager_ = RichEditorUndoManager::Create(isSpanStringMode_, WeakClaim(this));
+}
+
 void RichEditorPattern::SetStyledString(const RefPtr<SpanString>& value)
 {
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetStyledString, len=%{public}d", value->GetLength());
