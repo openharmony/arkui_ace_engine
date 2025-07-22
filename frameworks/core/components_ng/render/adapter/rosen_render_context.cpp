@@ -4545,7 +4545,9 @@ bool RosenRenderContext::AddNodeToRsTree()
         TAG_LOGD(AceLogTag::ACE_DEFAULT_DOMAIN, "AddNodeToRsTree node(%{public}d, %{public}s)", node->GetId(),
             node->GetTag().c_str());
     }
-
+    if (node->GetRenderContext()) {
+        node->GetRenderContext()->SetRSUIContext(node->GetContext());
+    }
     std::list<RefPtr<FrameNode>> childNodes;
     // get not be deleted children of node
     GetLiveChildren(node, childNodes);
