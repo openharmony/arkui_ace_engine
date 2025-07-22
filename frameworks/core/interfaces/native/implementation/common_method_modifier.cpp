@@ -3344,7 +3344,7 @@ void Rotate0Impl(Ark_NativePointer node,
         [&convValue](const Ark_String& str) {
             std::string degreeStr = Converter::Convert<std::string>(str);
             float angle = static_cast<float>(StringUtils::StringToDegree(degreeStr));
-            int32_t indA = 3;
+            uint32_t indA = 3;
             if (convValue->vec5f.size() > indA) {
                 convValue->vec5f[indA] = angle;
             }
