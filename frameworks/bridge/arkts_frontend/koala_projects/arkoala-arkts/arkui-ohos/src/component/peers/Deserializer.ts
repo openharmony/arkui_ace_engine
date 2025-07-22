@@ -424,8 +424,7 @@ export class Deserializer extends DeserializerBase {
     }
     readICurve(): ICurve {
         let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return ICurveInternal.fromPtr(ptr)
+        return (valueDeserializer.readInt64() as Object as ICurve)
     }
     readImageAnalyzerController(): ImageAnalyzerController {
         let valueDeserializer : Deserializer = this

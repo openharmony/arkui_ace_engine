@@ -381,7 +381,8 @@ export class Serializer extends SerializerBase {
     }
     writeICurve(value: ICurve): void {
         let valueSerializer : Serializer = this
-        valueSerializer.writePointer(toPeerPtr(value))
+        // @ts-ignore
+        valueSerializer.writeInt64(Object.values(value)[0] as int64)
     }
     writeImageAnalyzerController(value: ImageAnalyzerController): void {
         let valueSerializer : Serializer = this

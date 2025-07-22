@@ -3116,11 +3116,11 @@ void Transition0Impl(Ark_NativePointer node,
     Converter::VisitUnionPtr(value,
         [frameNode](const Ark_TransitionOptions& value) {
             auto convValue = Converter::Convert<TransitionOptions>(value);
-            // ViewAbstract::SetTransition(frameNode, convValue);
+            ViewAbstract::SetTransition(frameNode, convValue);
         },
         [frameNode](const Ark_TransitionEffect& value) {
             auto convValue = Converter::Convert<RefPtr<NG::ChainedTransitionEffect>>(value);
-             // ViewAbstract::SetChainedTransition(frameNode, convValue);
+            ViewAbstract::SetChainedTransition(frameNode, convValue);
         },
         []() {}
     );
@@ -3146,9 +3146,9 @@ void Transition1Impl(Ark_NativePointer node,
     }
     auto effectPeer = *optValue;
     if (effectPeer && effectPeer->handler) {
-        // ViewAbstract::SetChainedTransition(frameNode, effectPeer->handler, std::move(finishCallback));
+        ViewAbstract::SetChainedTransition(frameNode, effectPeer->handler, std::move(finishCallback));
     } else {
-        // ViewAbstract::CleanTransition(frameNode);
+        ViewAbstract::CleanTransition(frameNode);
     }
 }
 void MotionBlur0Impl(Ark_NativePointer node,
@@ -3157,7 +3157,9 @@ void MotionBlur0Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<MotionBlurOption>(value);
-    // ViewAbstract::SetMotionBlur(frameNode, convValue);
+    if (convValue) {
+        ViewAbstract::SetMotionBlur(frameNode, *convValue);
+    }
 }
 void MotionBlur1Impl(Ark_NativePointer node,
                      const Opt_MotionBlurOptions* value)
@@ -3166,7 +3168,9 @@ void MotionBlur1Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto convValue = Converter::OptConvertPtr<MotionBlurOption>(value);
-    // ViewAbstract::SetMotionBlur(frameNode, convValue);
+    if (convValue) {
+        ViewAbstract::SetMotionBlur(frameNode, *convValue);
+    }
 }
 void Brightness0Impl(Ark_NativePointer node,
                      const Opt_Number* value)
@@ -4296,7 +4300,11 @@ void MotionPathImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<MotionPathOption>(value);
-    // ViewAbstract::SetMotionPath(frameNode, convValue);
+    if (convValue) {
+        ViewAbstract::SetMotionPath(frameNode, *convValue);
+    } else {
+        ViewAbstract::SetMotionPath(frameNode, MotionPathOption());
+    }
 }
 void Shadow0Impl(Ark_NativePointer node,
                  const Opt_Union_ShadowOptions_ShadowStyle* value)
