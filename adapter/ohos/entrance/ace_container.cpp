@@ -4381,8 +4381,8 @@ bool AceContainer::SetSystemBarEnabled(SystemBarType type, bool enable, bool ani
     property.enable_ = enable;
     property.enableAnimation_ = animation;
     property.settingFlag_ = static_cast<Rosen::SystemBarSettingFlag>(
-        static_cast<int32_t>(property.settingFlag_) |
-        static_cast<int32_t>(Rosen::SystemBarSettingFlag::ENABLE_SETTING));
+        static_cast<uint32_t>(property.settingFlag_) |
+        static_cast<uint32_t>(Rosen::SystemBarSettingFlag::ENABLE_SETTING));
     TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Set SystemBar: type:%{public}d, enable:%{public}d, animation:%{public}d",
         static_cast<int32_t>(type), enable, animation);
     if (Rosen::WMError::WM_OK != uiWindow_->SetSpecificBarProperty(winType, property)) {
