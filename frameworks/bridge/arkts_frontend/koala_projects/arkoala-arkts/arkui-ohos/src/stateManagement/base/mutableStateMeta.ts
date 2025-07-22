@@ -14,12 +14,13 @@
  */
 
 import { int32 } from '@koalaui/common';
-import { MutableState, StateImpl } from '@koalaui/runtime';
+import { ArkUIAniModule } from 'arkui.ani';
 import { IMutableStateMeta, IMutableKeyedStateMeta } from '../decorator';
-import { RenderIdType } from '../decorator';
+import { MutableState, StateImpl } from '@koalaui/runtime';
 import { ObserveSingleton } from './observeSingleton';
-import { StateMgmtConsole } from '../tools/stateMgmtDFX';
+import { RenderIdType } from '../decorator';
 import { StateMgmtTool } from '#stateMgmtTool';
+
 class MutableStateMetaBase {
     public readonly info_: string;
 
@@ -85,6 +86,7 @@ export class MutableStateMeta extends MutableStateMetaBase implements IMutableSt
         });
         if (this.shouldFireChange()) {
         	this.__metaDependency!.value += 1;
+            ArkUIAniModule._CustomNode_RequestFrame();
 		}
     }
 
