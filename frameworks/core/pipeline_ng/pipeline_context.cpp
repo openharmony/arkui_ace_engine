@@ -4259,6 +4259,8 @@ MouseEvent ConvertAxisToMouse(const AxisEvent& event)
     MouseEvent result;
     result.x = event.x;
     result.y = event.y;
+    result.globalDisplayX = event.globalDisplayX;
+    result.globalDisplayY = event.globalDisplayY;
     result.action = MouseAction::MOVE;
     result.button = MouseButton::NONE_BUTTON;
     result.time = event.time;
