@@ -243,16 +243,20 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
   }
 
   private syncFromSource(): void {
+    const isTrack = this.shouldInstallTrackedObjectReadCb;
     this.shouldInstallTrackedObjectReadCb = TrackedObject.needsPropertyReadCb(this.source_.getUnmonitored());
     this.syncPeerHasChanged(this.source_ as ObservedPropertyAbstractPU<any>, true);
-    let raw = ObservedObject.GetRawObject(this.source_.getUnmonitored());
-    if (this.shouldInstallTrackedObjectReadCb) {
-      Object.keys(raw)
+    let newValue = ObservedObject.GetRawObject(this.source_.getUnmonitored());
+    let oldValue = ObservedObject.GetRawObject(this.fakeSourceBackup_.getUnmonitored());
+    if (isTrack && this.shouldInstallTrackedObjectReadCb) {
+      Object.keys(newValue)
         .forEach(propName => {
           // Collect only @Track'ed changed properties
-          if (typeof propName === 'string' && Reflect.has(raw as undefined as object, `${TrackedObject.___TRACKED_PREFIX}${propName}`)) {
+          if (typeof propName === 'string' && Reflect.has(newValue as undefined as object, `${TrackedObject.___TRACKED_PREFIX}${propName}`)) {
             // if the source is track property, need to notify the property update
-            this.syncPeerTrackedPropertyHasChanged(this.source_ as ObservedPropertyAbstractPU<any>, propName, true);
+            if (oldValue[propName] !== newValue[propName]) {
+              this.syncPeerTrackedPropertyHasChanged(this.source_ as ObservedPropertyAbstractPU<any>, propName, true);
+            }
           }
         });
     }
