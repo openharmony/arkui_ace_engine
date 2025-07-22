@@ -22,15 +22,17 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonShapeMethodPeer, CommonShapeMethod, ArkCommonShapeMethodComponent, ArkCommonShapeMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod } from "./common"
+import { ArkCommonShapeMethodPeer, CommonShapeMethod, ArkCommonShapeMethodComponent, ArkCommonShapeMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod, AttributeModifier } from "./common"
 import { Length } from "./units"
 import { Point } from "./point"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ShapePoint } from './line'
+import { PolylineModifier } from "../PolylineModifier"
 
 export class ArkPolylinePeer extends ArkCommonShapeMethodPeer {
+    _attributeSet?: PolylineModifier
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -80,6 +82,7 @@ export interface PolylineOptions {
 export type PolylineInterface = (options?: PolylineOptions) => PolylineAttribute;
 export interface PolylineAttribute extends CommonShapeMethod {
     points(value: Array<ShapePoint> | undefined): this
+    attributeModifier(value: AttributeModifier<PolylineAttribute> | AttributeModifier<CommonMethod> | undefined): this { return this; }
 }
 export class ArkPolylineStyle extends ArkCommonShapeMethodStyle implements PolylineAttribute {
     points_value?: Array<ShapePoint> | undefined
@@ -111,6 +114,11 @@ export class ArkPolylineComponent extends ArkCommonShapeMethodComponent implemen
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+
+    public attributeModifier(modifier: AttributeModifier<PolylineAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        hookPolylineAttributeModifier(this, modifier);
+        return this
     }
 }
 /** @memo */

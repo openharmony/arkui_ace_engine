@@ -22,15 +22,17 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonShapeMethodPeer, CommonShapeMethod, ArkCommonShapeMethodComponent, ArkCommonShapeMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod } from "./common"
+import { ArkCommonShapeMethodPeer, CommonShapeMethod, ArkCommonShapeMethodComponent, ArkCommonShapeMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod, AttributeModifier } from "./common"
 import { Point } from "./point"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ShapePoint } from "./line"
 import { Length } from "./units"
+import { PolygonModifier } from "../PolygonModifier"
 
 export class ArkPolygonPeer extends ArkCommonShapeMethodPeer {
+    _attributeSet?: PolygonModifier
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -80,6 +82,7 @@ export interface PolygonOptions {
 export type PolygonInterface = (options?: PolygonOptions) => PolygonAttribute;
 export interface PolygonAttribute extends CommonShapeMethod {
     points(value: Array<ShapePoint> | undefined): this
+    attributeModifier(value: AttributeModifier<PolygonAttribute> | AttributeModifier<CommonMethod> | undefined): this { return this; }
 }
 export class ArkPolygonStyle extends ArkCommonShapeMethodStyle implements PolygonAttribute {
     points_value?: Array<ShapePoint> | undefined
@@ -111,6 +114,11 @@ export class ArkPolygonComponent extends ArkCommonShapeMethodComponent implement
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+
+    public attributeModifier(modifier: AttributeModifier<PolygonAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        hookPolygonAttributeModifier(this, modifier);
+        return this
     }
 }
 /** @memo */

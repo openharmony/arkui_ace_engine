@@ -22,11 +22,12 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonShapeMethodPeer, CommonShapeMethod, ArkCommonShapeMethodComponent, ArkCommonShapeMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod } from "./common"
+import { ArkCommonShapeMethodPeer, CommonShapeMethod, ArkCommonShapeMethodComponent, ArkCommonShapeMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod, AttributeModifier } from "./common"
 import { Length } from "./units"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { RectModifier } from "../RectModifier"
 
 export type RadiusItem = [
     Length,
@@ -34,6 +35,7 @@ export type RadiusItem = [
 ]
 
 export class ArkRectPeer extends ArkCommonShapeMethodPeer {
+    _attributeSet?: RectModifier
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -173,6 +175,7 @@ export interface RectAttribute extends CommonShapeMethod {
     radiusWidth(value: number | string | undefined): this
     radiusHeight(value: number | string | undefined): this
     radius(value: number | string | Array<number | string> | undefined): this
+    attributeModifier(value: AttributeModifier<RectAttribute> | AttributeModifier<CommonMethod> | undefined): this { return this; }
 }
 export class ArkRectStyle extends ArkCommonShapeMethodStyle implements RectAttribute {
     radiusWidth_value?: number | string | undefined
@@ -228,6 +231,11 @@ export class ArkRectComponent extends ArkCommonShapeMethodComponent implements R
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+
+    public attributeModifier(modifier: AttributeModifier<RectAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        hookRectAttributeModifier(this, modifier);
+        return this
     }
 }
 /** @memo */

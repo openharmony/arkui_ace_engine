@@ -22,12 +22,13 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonShapeMethodPeer, CommonShapeMethod, ArkCommonShapeMethodComponent, ArkCommonShapeMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod } from "./common"
+import { ArkCommonShapeMethodPeer, CommonShapeMethod, ArkCommonShapeMethodComponent, ArkCommonShapeMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod, AttributeModifier } from "./common"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 
 export class ArkEllipsePeer extends ArkCommonShapeMethodPeer {
+    _attributeSet?: EllipseModifier
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -57,6 +58,7 @@ export interface EllipseOptions {
 }
 export type EllipseInterface = (options?: EllipseOptions) => EllipseAttribute;
 export interface EllipseAttribute extends CommonShapeMethod {
+    attributeModifier(modifier: AttributeModifier<EllipseAttribute> | AttributeModifier<CommonMethod> | undefined): this { return this; }
 }
 export class ArkEllipseStyle extends ArkCommonShapeMethodStyle implements EllipseAttribute {
 }
@@ -76,6 +78,10 @@ export class ArkEllipseComponent extends ArkCommonShapeMethodComponent implement
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+    public attributeModifier(modifier: AttributeModifier<EllipseAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        hookEllipseAttributeModifier(this, modifier);
+        return this
     }
 }
 /** @memo */

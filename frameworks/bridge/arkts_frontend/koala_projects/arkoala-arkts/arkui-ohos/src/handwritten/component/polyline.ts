@@ -14,31 +14,14 @@
  */
 
 
-import { runtimeType, RuntimeType } from "@koalaui/interop"
-import { PixelMap } from "#external"
-import { ArkUIAniModule } from "arkui.ani"
 import { ArkCommonMethodComponent, AttributeModifier, CommonMethod } from './common';
 import { applyAttributeModifierBase, applyCommonModifier } from "../handwritten/modifiers/ArkCommonModifier";
 import { CommonModifier } from '../CommonModifier';
-import { ShapeModifier } from '../ShapeModifier';
+import { PolylineModifier } from '../PolylineModifier';
 import { runtimeType, RuntimeType } from "@koalaui/interop"
 
 
-function hookSetShapeOptions(component: ArkShapeComponent, value?: PixelMap): void {
-    const value_casted = value as (PixelMap | undefined);
-    const value_type = runtimeType(value)
-    if ((RuntimeType.UNDEFINED) != (value_type)) {
-        const pixelMap = value_casted as PixelMap;
-        const peer = component.getPeer();
-        if (peer !== undefined) {
-            ArkUIAniModule._Shape_Transfer_PixelMap(peer.getPeerPtr() as KPointer, pixelMap);
-        }
-    } else {
-        component.getPeer()?.setShapeOptions1Attribute()
-    }
-}
-
-function hookShapeAttributeModifier(component: ArkShapeComponent, modifier: AttributeModifier<ShapeAttribute> | AttributeModifier<CommonMethod> | undefined): void {
+function hookPolylineAttributeModifier(component: ArkPolylineComponent, modifier: AttributeModifier<PolylineAttribute> | AttributeModifier<CommonMethod> | undefined): void {
     if (modifier === undefined) {
         return;
     }
@@ -47,12 +30,12 @@ function hookShapeAttributeModifier(component: ArkShapeComponent, modifier: Attr
         applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
         return;
     }
-    let attributeSet = (): ShapeModifier => {
-        let isShapeModifier: boolean = modifier instanceof ShapeModifier;
-        let initModifier = component.getPeer()._attributeSet ? component.getPeer()._attributeSet! : new ShapeModifier();
-        if (isShapeModifier) {
-            let shapeModifier = modifier as object as ShapeModifier;
-            initModifier.mergeModifier(shapeModifier);
+    let attributeSet = (): PolylineModifier => {
+        let isPolylineModifier: boolean = modifier instanceof PolylineModifier;
+        let initModifier = component.getPeer()._attributeSet ? component.getPeer()._attributeSet! : new PolylineModifier();
+        if (isPolylineModifier) {
+            let polylineModifier = modifier as object as PolylineModifier;
+            initModifier.mergeModifier(polylineModifier);
             component.getPeer()._attributeSet = initModifier;
             return initModifier;
         } else {
@@ -62,10 +45,10 @@ function hookShapeAttributeModifier(component: ArkShapeComponent, modifier: Attr
     }
     let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
     };
-    let updaterReceiver = (): ArkShapeComponent => {
-        let componentNew: ArkShapeComponent = new ArkShapeComponent();
+    let updaterReceiver = (): ArkPolylineComponent => {
+        let componentNew: ArkPolylineComponent = new ArkPolylineComponent();
         componentNew.setPeer(component.getPeer());
         return componentNew;
     };
-    applyAttributeModifierBase(modifier as Object as AttributeModifier<ShapeAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<PolylineAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
 }
