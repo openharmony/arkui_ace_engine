@@ -8882,12 +8882,6 @@ Offset RichEditorPattern::ConvertGlobalToTextOffset(const Offset& globalOffset)
     return ConvertTouchOffsetToTextOffset(localOffset);
 }
 
-bool RichEditorPattern::CheckAIPreviewMenuEnable()
-{
-    return dataDetectorAdapter_ && dataDetectorAdapter_->enablePreviewMenu_ && NeedShowAIDetect() &&
-           copyOption_ != CopyOptions::None;
-}
-
 void RichEditorPattern::InitAiSelection(const Offset& globalOffset, bool isBetweenSelection)
 {
     ResetAISelected(AIResetSelectionReason::INIT_SELECTION);
