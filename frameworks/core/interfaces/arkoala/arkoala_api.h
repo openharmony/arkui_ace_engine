@@ -2150,9 +2150,9 @@ struct ArkUITabBarBackgroundEffect {
 };
 
 struct ArkUIDrawingContext {
-    ArkUICanvasHandle canvas;
     ArkUI_Float32 width;
     ArkUI_Float32 height;
+    ArkUICanvasHandle canvas;
 };
 
 struct ArkUIDirtySwapConfig {
@@ -7069,7 +7069,7 @@ struct ArkUINDKRenderNodeModifier {
     ArkUI_Int32 (*clearChildren)(ArkUIRenderNodeHandle node);
     ArkUI_Int32 (*getChild)(ArkUIRenderNodeHandle node, ArkUI_Int32 index, ArkUIRenderNodeHandle* child,
         ArkUI_Int32* childId);
-    ArkUI_Int32 (*getChildren)(ArkUIRenderNodeHandle node, ArkUIRenderNodeHandle** child, ArkUI_Int32** childId,
+    ArkUI_Int32 (*getChildren)(ArkUIRenderNodeHandle node, ArkUIRenderNodeHandle** child, ArkUI_Uint32** childId,
         ArkUI_Int32* count);
     ArkUI_Int32 (*getFirstChild)(ArkUIRenderNodeHandle node, ArkUIRenderNodeHandle* child, ArkUI_Int32* childId);
     ArkUI_Int32 (*getNextSibling)(ArkUIRenderNodeHandle node, ArkUIRenderNodeHandle* slibing, ArkUI_Int32* childId);
