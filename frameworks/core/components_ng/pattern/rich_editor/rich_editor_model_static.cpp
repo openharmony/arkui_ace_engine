@@ -58,6 +58,7 @@ void RichEditorModelStatic::SetStyledStringMode(FrameNode* frameNode, bool isSty
     auto richEditorPattern = frameNode->GetPattern<RichEditorPattern>();
     richEditorPattern->SetSpanStringMode(isStyledStringMode);
     if (isStyledStringMode) {
+        richEditorPattern->RecreateUndoManager();
         richEditorPattern->SetRichEditorStyledStringController(AceType::MakeRefPtr<RichEditorStyledStringController>());
         richEditorPattern->GetRichEditorStyledStringController()->SetPattern(WeakPtr(richEditorPattern));
     } else {
