@@ -84,7 +84,7 @@ import hilog from '@ohos.hilog'
             }
             dynamicValue.setProperty('navigationId', ESValue.wrap(staticValue.navigationId));
             dynamicValue.setProperty('pathStack', ESValue.wrap(staticValue.pathStack));
-            return staticValue as Any;
+            return dynamicValue as Any;
         }
     }
 
@@ -210,7 +210,7 @@ import hilog from '@ohos.hilog'
             dynamicValue.setProperty('index', ESValue.wrap(staticValue.index));
             dynamicValue.setProperty('param', ESValue.wrap(staticValue.param));
             dynamicValue.setProperty('navDestinationId', ESValue.wrap(staticValue.navDestinationId));
-            return staticValue as Any;
+            return dynamicValue as Any;
         }
     }
 
@@ -301,7 +301,7 @@ import hilog from '@ohos.hilog'
             dynamicValue.setProperty('path', ESValue.wrap(staticValue.path));
             dynamicValue.setProperty('state', ESValue.wrap(staticValue.state));
             dynamicValue.setProperty('pageId', ESValue.wrap(staticValue.pageId));
-            return dynamicValue;
+            return dynamicValue as Any;
         }
     }
 
