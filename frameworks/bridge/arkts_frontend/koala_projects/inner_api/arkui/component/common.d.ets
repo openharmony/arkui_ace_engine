@@ -76,8 +76,6 @@ import {
 import { CustomBuilder } from 'arkui.component.builder';
 import { PeerNode } from 'arkui.PeerNode';
 import { ComponentBase } from 'arkui.ComponentBase';
-import { int32 } from '@koalaui.compat';
-import { KPointer } from '@koalaui.interop';
 import {
     LayoutPolicy,
     CrownEvent,
@@ -170,6 +168,9 @@ import uiEffect from '@ohos.graphics.uiEffect';
 import image from '@ohos.multimedia.image';
 import uniformTypeDescriptor from '@ohos.data.uniformTypeDescriptor';
 import drawing from '@ohos.graphics.drawing';
+
+type KPointer = LockGrantedCallback;
+type int32 = int;
 
 type PixelMap = image.PixelMap;
 type UniformDataType = uniformTypeDescriptor.UniformDataType;
@@ -430,8 +431,8 @@ export interface CommonMethod {
 }
 
 export declare class ArkCommonMethodPeer extends PeerNode {
-    protected constructor(peerPtr: KPointer, id: int32, name?: string, flags?: int32);
-    public static create(component: ComponentBase | undefined, flags?: int32): ArkCommonMethodPeer;
+    protected constructor(peerPtr: KPointer, id: int32, name: string, flags: int32);
+    public static create(component: ComponentBase | undefined, flags: int32): ArkCommonMethodPeer;
     public width0Attribute(value: Length | undefined): void;
     public width1Attribute(value: Length | LayoutPolicy | undefined): void;
     public height0Attribute(value: Length | undefined): void;
