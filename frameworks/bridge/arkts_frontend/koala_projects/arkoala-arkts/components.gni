@@ -79,6 +79,7 @@ arkui_files = [
   "arkui-preprocessed/arkui/SymbolGlyphModifier.ets",
   "arkui-preprocessed/arkui/TextModifier.ets",
   "arkui-preprocessed/arkui/UserView.ets",
+  "arkui-preprocessed/arkui/VideoModifier.ets",
   "arkui-preprocessed/arkui/ani/arkts/ArkUIAniCustomNodeModule.ets",
   "arkui-preprocessed/arkui/ani/arkts/ArkUIAniModule.ets",
   "arkui-preprocessed/arkui/ani/arkts/index.ets",
