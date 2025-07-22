@@ -79,6 +79,7 @@ private:
         memcpy(newData, data, position);
         free(data);
         data = newData;
+        dataLength = newLength;
     }
 public:
     SerializerBase(CallbackResourceHolder* resourceHolder = nullptr):
