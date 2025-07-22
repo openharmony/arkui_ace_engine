@@ -595,6 +595,17 @@ bool ListModelNG::GetShowCached(FrameNode* frameNode)
     return show;
 }
 
+void ListModelNG::SetCacheRange(FrameNode* frameNode, int32_t min, int32_t max)
+{
+    CacheRange range { min, max };
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, CacheRange, range, frameNode);
+}
+
+void ListModelNG::ResetCacheRange(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY(ListLayoutProperty, CacheRange, frameNode);
+}
+
 void ListModelNG::SetScrollEnabled(FrameNode* frameNode, bool enableScrollInteraction)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ScrollEnabled, enableScrollInteraction, frameNode);
