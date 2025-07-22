@@ -22,24 +22,22 @@
 namespace OHOS::Ace::NG {
 void AccessibilityProperty::SetAccessibilityGroupMultiThread()
 {
-    NotifyComponentChangeEventMultiThread(AccessibilityEventType::ELEMENT_INFO_CHANGE);
+    // no need send event when node is free
 }
 
 void AccessibilityProperty::SetAccessibilityTextWithEventMultiThread()
 {
-    NotifyComponentChangeEventMultiThread(AccessibilityEventType::TEXT_CHANGE);
+    // no need send event when node is free
 }
 
 void AccessibilityProperty::SetAccessibilityDescriptionWithEventMultiThread()
 {
-    NotifyComponentChangeEventMultiThread(AccessibilityEventType::TEXT_CHANGE);
+    // no need send event when node is free
 }
 
 void AccessibilityProperty::SetAccessibilityLevelMultiThread(const std::string& backupLevel)
 {
-    if (backupLevel != accessibilityLevel_.value_or("")) {
-        NotifyComponentChangeEventMultiThread(AccessibilityEventType::ELEMENT_INFO_CHANGE);
-    }
+    // no need send event when node is free
 }
 
 void AccessibilityProperty::NotifyComponentChangeEventMultiThread(AccessibilityEventType eventType)
