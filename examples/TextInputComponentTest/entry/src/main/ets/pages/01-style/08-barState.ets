@@ -24,7 +24,7 @@ struct struct_01_style_08_barState {
           TextInput({ text: '没有设置 barState ' }).style(TextInputStyle.Inline)
           TextInput({ text: ' .barState(BarState.Auto) ' }).style(TextInputStyle.Inline).barState(BarState.Auto)
           TextInput({ text: ' .barState(undefined) ' }).style(TextInputStyle.Inline).barState(undefined)
-        }.borderWidth(2)
+        }
 
       }
     }

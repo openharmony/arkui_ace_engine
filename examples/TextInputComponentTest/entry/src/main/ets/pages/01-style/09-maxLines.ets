@@ -30,7 +30,7 @@ struct struct_01_style_09_maxLines {
           TextInput({ text: ` .maxLines(0) ${this.message}` }).style(TextInputStyle.Inline).maxLines(0)
           TextInput({ text: ` .maxLines(0.5) ${this.message}` }).style(TextInputStyle.Inline).maxLines(0.5)
           TextInput({ text: ` .maxLines(-5) ${this.message}` }).style(TextInputStyle.Inline).maxLines(-5)
-        }.borderWidth(2)
+        }
 
       }
     }
