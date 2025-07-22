@@ -41,6 +41,6 @@ export { ButtonModifier } from './ButtonModifier';
 
 // export { TextModifier } from './handwritten/modifiers/ArkTextModifier'
 
-// export { SymbolGlyphModifier } from "./handwritten/modifiers/ArkSymbolGlyphModifier"
+export { SymbolGlyphModifier } from "./SymbolGlyphModifier"
 
 // export { GridItemModifier } from './handwritten/modifiers/ArkGridItemModifier'

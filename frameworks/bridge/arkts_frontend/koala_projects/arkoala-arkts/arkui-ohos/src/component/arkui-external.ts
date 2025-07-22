@@ -484,8 +484,6 @@ export enum WindowStatusType {
 }
 export interface ImageModifier {
 }
-export interface SymbolGlyphModifier {
-}
 export interface IndicatorStyle {
     height?: Length;
     width?: Length;
