@@ -28,24 +28,20 @@ public:
     void AddTargetController(const WeakPtr<SwiperController> &handler)
     {
         CHECK_NULL_VOID(!handler.Invalid());
-        handlers_.push_back(handler);
+        handler_ = handler;
     }
 
     void TriggerShowNext()
     {
-        for (auto &handler: handlers_) {
-            if (auto controller = handler.Upgrade(); controller) {
-                controller->ShowNext();
-            }
+        if (auto controller = handler_.Upgrade(); controller) {
+            controller->ShowNext();
         }
     }
 
     void TriggerShowPrevious()
     {
-        for (auto &handler: handlers_) {
-            if (auto controller = handler.Upgrade(); controller) {
-                controller->ShowPrevious();
-            }
+        if (auto controller = handler_.Upgrade(); controller) {
+            controller->ShowPrevious();
         }
     }
 
@@ -53,60 +49,48 @@ public:
     {
         index = index < 0 ? 0 : index;
         bool useAnim = useAnimationOpt && *useAnimationOpt;
-        for (auto &handler: handlers_) {
-            if (auto controller = handler.Upgrade(); controller) {
-                controller->ChangeIndex(index, useAnim);
-            }
+        if (auto controller = handler_.Upgrade(); controller) {
+            controller->ChangeIndex(index, useAnim);
         }
     }
 
     void SetFinishCallback(const CommonFunc &callbackFunc)
     {
-        for (auto &handler: handlers_) {
-            if (auto controller = handler.Upgrade(); controller) {
-                controller->SetFinishCallback(callbackFunc);
-            }
+        if (auto controller = handler_.Upgrade(); controller) {
+            controller->SetFinishCallback(callbackFunc);
         }
     }
 
     void TriggerFinishAnimation()
     {
-        for (auto &handler: handlers_) {
-            if (auto controller = handler.Upgrade(); controller) {
-                controller->FinishAnimation();
-            }
+        if (auto controller = handler_.Upgrade(); controller) {
+            controller->FinishAnimation();
         }
     }
 
     void TriggerChangeIndex(int32_t index, const SwiperAnimationMode& animationMode)
     {
         index = index < 0 ? 0 : index;
-        for (auto &handler: handlers_) {
-            if (auto controller = handler.Upgrade(); controller) {
-                controller->ChangeIndex(index, animationMode);
-            }
+        if (auto controller = handler_.Upgrade(); controller) {
+            controller->ChangeIndex(index, animationMode);
         }
     }
 
     void TriggerPreloadItems(const std::set<int32_t>& indexSet) const
     {
-        for (auto &handler: handlers_) {
-            if (auto controller = handler.Upgrade(); controller) {
-                controller->PreloadItems(indexSet);
-            }
+        if (auto controller = handler_.Upgrade(); controller) {
+            controller->PreloadItems(indexSet);
         }
     }
 
     void TriggerSetPreloadFinishCallback(PreloadItemsFinishFunc&& preloadFinishCallback) const
     {
-        for (auto &handler: handlers_) {
-            if (auto controller = handler.Upgrade(); controller) {
-                controller->SetPreloadFinishCallback(preloadFinishCallback);
-            }
+        if (auto controller = handler_.Upgrade(); controller) {
+            controller->SetPreloadFinishCallback(preloadFinishCallback);
         }
     }
 private:
-    std::vector<Ace::WeakPtr<SwiperController>> handlers_;
+    Ace::WeakPtr<SwiperController> handler_;
 };
 } // namespace OHOS::Ace::NG::GeneratedModifier
 
