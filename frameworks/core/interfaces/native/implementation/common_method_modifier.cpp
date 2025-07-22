@@ -2219,32 +2219,24 @@ void VisualEffectImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CommonMethodModelNG::SetVisualEffect(frameNode, convValue);
 }
 void BackgroundFilterImpl(Ark_NativePointer node,
                           const Opt_Filter* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CommonMethodModelNG::SetBackgroundFilter(frameNode, convValue);
 }
 void ForegroundFilterImpl(Ark_NativePointer node,
                           const Opt_Filter* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CommonMethodModelNG::SetForegroundFilter(frameNode, convValue);
 }
 void CompositingFilterImpl(Ark_NativePointer node,
                            const Opt_Filter* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CommonMethodModelNG::SetCompositingFilter(frameNode, convValue);
 }
 void Opacity0Impl(Ark_NativePointer node,
                   const Opt_Union_Number_Resource* value)
@@ -2544,8 +2536,6 @@ void Outline1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CommonMethodModelNG::SetOutline1(frameNode, convValue);
 }
 void OutlineStyle0Impl(Ark_NativePointer node,
                        const Opt_Union_OutlineStyle_EdgeOutlineStyles* value)
@@ -2560,8 +2550,6 @@ void OutlineStyle1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CommonMethodModelNG::SetOutlineStyle1(frameNode, convValue);
 }
 void OutlineWidth0Impl(Ark_NativePointer node,
                        const Opt_Union_Dimension_EdgeOutlineWidths* value)
@@ -2576,8 +2564,6 @@ void OutlineWidth1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CommonMethodModelNG::SetOutlineWidth1(frameNode, convValue);
 }
 void OutlineColor0Impl(Ark_NativePointer node,
                        const Opt_Union_ResourceColor_EdgeColors_LocalizedEdgeColors* value)
@@ -2592,8 +2578,6 @@ void OutlineColor1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CommonMethodModelNG::SetOutlineColor1(frameNode, convValue);
 }
 void OutlineRadius0Impl(Ark_NativePointer node,
                         const Opt_Union_Dimension_OutlineRadiuses* value)
@@ -2608,8 +2592,6 @@ void OutlineRadius1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CommonMethodModelNG::SetOutlineRadius1(frameNode, convValue);
 }
 void ForegroundColor0Impl(Ark_NativePointer node,
                           const Opt_Union_ResourceColor_ColoringStrategy* value)
@@ -3267,8 +3249,6 @@ void Saturate1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CommonMethodModelNG::SetSaturate1(frameNode, convValue);
 }
 void Sepia0Impl(Ark_NativePointer node,
                 const Opt_Number* value)
@@ -3284,8 +3264,6 @@ void Sepia1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CommonMethodModelNG::SetSepia1(frameNode, convValue);
 }
 void Invert0Impl(Ark_NativePointer node,
                  const Opt_Union_Number_InvertOptions* value)
@@ -3303,8 +3281,6 @@ void Invert1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CommonMethodModelNG::SetInvert1(frameNode, convValue);
 }
 void HueRotate0Impl(Ark_NativePointer node,
                     const Opt_Union_Number_String* value)
@@ -3367,9 +3343,6 @@ void UseEffect2Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(useEffect);
-    //auto convValue = Converter::OptConvert<type>(useEffect); // for enums
-    //CommonMethodModelNG::SetUseEffect2(frameNode, convValue);
 }
 void RenderGroup0Impl(Ark_NativePointer node,
                       const Opt_Boolean* value)
@@ -3388,8 +3361,6 @@ void RenderGroup1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CommonMethodModelNG::SetRenderGroup1(frameNode, convValue);
 }
 void Freeze0Impl(Ark_NativePointer node,
                  const Opt_Boolean* value)
@@ -3415,7 +3386,7 @@ void Translate0Impl(Ark_NativePointer node,
     CalcDimension x = options.x.value_or(CalcDimension(0.0));
     CalcDimension y = options.y.value_or(CalcDimension(0.0));
     CalcDimension z = options.z.value_or(CalcDimension(0.0));
-    ViewAbstract::SetTranslate(frameNode, TranslateOptions(x, y, z));
+    ViewAbstractModelStatic::SetTranslate(frameNode, TranslateOptions(x, y, z));
 }
 void Translate1Impl(Ark_NativePointer node,
                     const Opt_TranslateOptions* value)
@@ -4336,16 +4307,12 @@ void Clip1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CommonMethodModelNG::SetClip1(frameNode, convValue);
 }
 void Clip2Impl(Ark_NativePointer node,
                const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CommonMethodModelNG::SetClip1(frameNode, convValue);
 }
 void ClipShape0Impl(Ark_NativePointer node,
                     const Opt_Union_CircleShape_EllipseShape_PathShape_RectShape* value)
@@ -4398,8 +4365,6 @@ void Mask2Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CommonMethodModelNG::SetMask1(frameNode, convValue);
 }
 void MaskShape0Impl(Ark_NativePointer node,
                     const Opt_Union_CircleShape_EllipseShape_PathShape_RectShape* value)
@@ -4463,7 +4428,7 @@ void GeometryTransition0Impl(Ark_NativePointer node,
     auto id = Converter::OptConvertPtr<std::string>(value).value_or("");
     bool followWithoutTransition {false};
     bool doRegisterSharedTransition {false};
-    // ViewAbstract::SetGeometryTransition(frameNode, id, followWithoutTransition, doRegisterSharedTransition);
+    ViewAbstractModelStatic::SetGeometryTransition(frameNode, id, followWithoutTransition, doRegisterSharedTransition);
 }
 void GeometryTransition1Impl(Ark_NativePointer node,
                              const Opt_String* id,
@@ -5130,7 +5095,7 @@ void BackgroundBlurStyle0Impl(Ark_NativePointer node,
     if (auto style = Converter::OptConvertPtr<BlurStyle>(value); style) {
         convValue.blurStyle = *style;
     }
-    ViewAbstract::SetBackgroundBlurStyle(frameNode, convValue);
+    ViewAbstractModelStatic::SetBackgroundBlurStyle(frameNode, convValue);
 }
 void BackgroundBlurStyle1Impl(Ark_NativePointer node,
                               const Opt_BlurStyle* style,
@@ -5282,9 +5247,6 @@ void LinearGradientBlur1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(blurRadius);
-    //auto convValue = Converter::OptConvert<type>(blurRadius); // for enums
-    //CommonMethodModelNG::SetLinearGradientBlur1(frameNode, convValue);
 }
 void SystemBarEffectImpl(Ark_NativePointer node)
 {
@@ -5440,9 +5402,6 @@ void BlendMode1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(mode);
-    //auto convValue = Converter::OptConvert<type>(mode); // for enums
-    //CommonMethodModelNG::SetBlendMode1(frameNode, convValue);
 }
 void AdvancedBlendModeImpl(Ark_NativePointer node,
                            const Opt_Union_BlendMode_Blender* effect,

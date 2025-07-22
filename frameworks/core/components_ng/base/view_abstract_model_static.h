@@ -214,11 +214,14 @@ public:
     }
 
     static void SetBackgroundEffect(FrameNode* frameNode,
-        const std::optional<EffectOption>& effectOption, const std::optional<SysOptions>& sysOptions)
-    {
-        ViewAbstract::SetBackgroundEffect(frameNode, effectOption.value_or(EffectOption()),
-            sysOptions.value_or(DEFAULT_SYS_OPTIONS));
-    }
+        const std::optional<EffectOption>& effectOption, const std::optional<SysOptions>& sysOptions);
+
+    static void SetBackgroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& bgBlurStyle);
+
+    static void SetTranslate(FrameNode* frameNode, const NG::TranslateOptions& value);
+
+    static void SetGeometryTransition(FrameNode* frameNode, const std::string& id,
+        bool followWithoutTransition, bool doRegisterSharedTransition);
 
     static void SetFrontBlur(FrameNode* frameNode, const std::optional<float>& radius,
         const std::optional<BlurOption>& blurOption, const std::optional<SysOptions>& sysOptions)
@@ -324,6 +327,10 @@ public:
     static void SetDragPreview(FrameNode* frameNode, const std::optional<DragDropInfo>& DragDropInfo);
     static void SetBackgroundImage(FrameNode* frameNode, const std::optional<ImageSourceInfo>& src);
     static void SetBackgroundImageRepeat(FrameNode* frameNode, const std::optional<ImageRepeat>& imageRepeat);
+    static constexpr SysOptions DEFAULT_SYS_OPTIONS = {
+        .disableSystemAdaptation = false
+    };
+
 private:
     static bool CheckMenuIsShow(const MenuParam& menuParam, int32_t targetId, const RefPtr<FrameNode>& targetNode);
     static void RegisterContextMenuKeyEvent(
@@ -332,11 +339,17 @@ private:
         std::function<void()>&& buildFunc, const MenuParam& menuParam, std::function<void()>&& previewBuildFunc);
     static void BindContextMenuSingle(FrameNode* targetNode,
         std::function<void()>&& buildFunc, const MenuParam& menuParam, std::function<void()>&& previewBuildFunc);
-
-    static constexpr SysOptions DEFAULT_SYS_OPTIONS = {
-        .disableSystemAdaptation = false
-    };
 };
+
+
+// multi thread function start
+void SetBackgroundBlurStyleMultiThread(FrameNode* frameNode, const BlurStyleOption& bgBlurStyle);
+void SetBackgroundEffectMultiThread(FrameNode* frameNode,
+    const std::optional<EffectOption>& effectOption, const std::optional<SysOptions>& sysOptions);
+void SetTranslateMultiThread(FrameNode* frameNode, const NG::TranslateOptions& value);
+void SetGeometryTransitionMultiThread(FrameNode* frameNode, const std::string& id,
+    bool followWithoutTransition, bool doRegisterSharedTransition);
+// multi thread function end
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_VIEW_ABSTRACT_MODEL_STATIC_H
