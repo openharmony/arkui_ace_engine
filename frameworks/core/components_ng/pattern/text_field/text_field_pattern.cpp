@@ -7018,6 +7018,25 @@ RefPtr<TextFieldTheme> TextFieldPattern::GetTheme() const
     return theme;
 }
 
+void TextFieldPattern::InitTheme()
+{
+    auto tmpHost = GetHost();
+    CHECK_NULL_VOID(tmpHost);
+    auto context = tmpHost->GetContext();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<TextFieldTheme>(tmpHost->GetThemeScopeId());
+    textFieldTheme_ = theme;
+    // for normal app add version protection, enable keyboard as default start from API 10 or higher
+    if (context->GetMinPlatformVersion() > KEYBOARD_DEFAULT_API) {
+        if (theme) {
+            independentControlKeyboard_ = theme->GetIndependentControlKeyboard();
+            needToRequestKeyboardOnFocus_ = !independentControlKeyboard_;
+        } else {
+            needToRequestKeyboardOnFocus_ = true;
+        }
+    }
+}
+
 std::string TextFieldPattern::GetTextColor() const
 {
     auto theme = GetTheme();
@@ -8489,18 +8508,6 @@ void TextFieldPattern::OnAttachToFrameNode()
         frameNode->OnAccessibilityEvent(AccessibilityEventType::TEXT_SELECTION_UPDATE);
     };
     selectController_->SetOnAccessibility(std::move(onTextSelectorChange));
-
-    auto theme = pipeline->GetTheme<TextFieldTheme>(frameNode->GetThemeScopeId());
-    textFieldTheme_ = theme;
-    // for normal app add version protection, enable keyboard as default start from API 10 or higher
-    if (pipeline->GetMinPlatformVersion() > KEYBOARD_DEFAULT_API) {
-        if (theme) {
-            independentControlKeyboard_ = theme->GetIndependentControlKeyboard();
-            needToRequestKeyboardOnFocus_ = !independentControlKeyboard_;
-        } else {
-            needToRequestKeyboardOnFocus_ = true;
-        }
-    }
 }
 
 bool TextFieldPattern::NeedPaintSelect()

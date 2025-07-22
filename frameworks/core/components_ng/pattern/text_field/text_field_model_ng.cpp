@@ -49,6 +49,7 @@ void TextFieldModelNG::CreateNode(
     std::set<std::string> allowDropSet({ DROP_TYPE_PLAIN_TEXT, DROP_TYPE_HYPERLINK, DROP_TYPE_STYLED_STRING });
     frameNode->SetAllowDrop(allowDropSet);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    pattern->InitTheme();
     pattern->SetModifyDoneStatus(false);
     pattern->ResetContextAttr();
     auto textValue = pattern->GetTextUtf16Value();
@@ -135,6 +136,7 @@ void TextFieldModelNG::UpdateTextFieldPattern(
 {
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
+    pattern->InitTheme();
     pattern->SetModifyDoneStatus(false);
     auto textValue = pattern->GetTextUtf16Value();
     if (value.has_value() && value.value() != textValue) {
