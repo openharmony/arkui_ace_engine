@@ -1431,4 +1431,40 @@ HWTEST_F(UIExtensionComponentTestTwoNg, OnAttachContextTest, TestSize.Level1)
     pattern2->OnAttachContext(rawContext);
     EXPECT_EQ(pattern2->hasAttachContext_, false);
 }
+
+HWTEST_F(UIExtensionComponentTestTwoNg, OnWindowSceneVisibleChangeTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create UIExtensionPattern.
+     * @tc.expected: UIExtensionPattern is not null.
+     */
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiExtensionNode, nullptr);
+    EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
+    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->instanceId_ = 100;
+    auto pipelineContext = PipelineContext::GetContextByContainerId(pattern->instanceId_);
+    ASSERT_NE(pipelineContext, nullptr);
+
+    /**
+     * @tc.steps: step2. create taskExecutor to fire task callBack.
+     * @tc.expected: taskExecutor is not null.
+     */
+    pipelineContext->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto taskExecutor = pipelineContext->GetTaskExecutor();
+    ASSERT_NE(taskExecutor, nullptr);
+
+    /**
+     * @tc.steps: step3. trigger OnWindowSceneVisibleChange.
+     * @tc.expected: IsWindowSceneVisible() is equals to OnWindowSceneVisibleChange paramter.
+     */
+    pattern->OnWindowSceneVisibleChange(true);
+    EXPECT_EQ(pattern->IsWindowSceneVisible(), true);
+    pattern->OnWindowSceneVisibleChange(false);
+    EXPECT_EQ(pattern->IsWindowSceneVisible(), false);
+}
 } // namespace OHOS::Ace::NG
