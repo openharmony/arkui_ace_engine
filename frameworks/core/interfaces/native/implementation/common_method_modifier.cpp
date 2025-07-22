@@ -394,7 +394,9 @@ auto g_bindMenuOptionsParam = [](
     if (menuParam.enableArrow.has_value() && !menuParam.placement.has_value() && menuParam.enableArrow.value()) {
         menuParam.placement = Placement::TOP;
     }
-    if (!menuParam.placement.has_value()) {
+    if (!menuParam.placement.has_value() && (menuParam.type == NG::MenuType::MENU ||
+        (menuParam.type == NG::MenuType::CONTEXT_MENU &&
+        menuParam.contextMenuRegisterType == NG::ContextMenuRegisterType::CUSTOM_TYPE))) {
         menuParam.placement = Placement::BOTTOM_LEFT;
     }
     auto borderRadius = OptConvert<BorderRadiusProperty>(menuOptions.borderRadius);
@@ -419,7 +421,6 @@ auto g_bindMenuOptionsParam = [](
 auto g_bindContextMenuParams = [](MenuParam& menuParam, const std::optional<Ark_ContextMenuOptions>& menuOption,
     Ark_NativePointer node, FrameNode* frameNode) {
     CHECK_NULL_VOID(menuOption);
-    menuParam.placement = Placement::BOTTOM_LEFT;
     menuParam.type = NG::MenuType::CONTEXT_MENU;
     auto weakNode = AceType::WeakClaim(frameNode);
     g_bindMenuOptionsParam(menuOption.value(), menuParam, weakNode);
