@@ -20,57 +20,63 @@ import { ArkPolygonPeer, PolygonAttribute } from 'arkui/component/polygon';
 import { CommonShapeMethodModifier } from './CommonShapeMethodModifier';
 
 export class PolygonModifier extends CommonShapeMethodModifier implements PolygonAttribute, AttributeModifier<PolygonAttribute> {
+    _instanceId: number = -1;
+    setInstanceId(instanceId: number): void {
+        this._instanceId = instanceId
+    }
     applyNormalAttribute(instance: CommonShapeMethod): void { }
     applyPressedAttribute(instance: CommonShapeMethod): void { }
     applyFocusedAttribute(instance: CommonShapeMethod): void { }
     applyDisabledAttribute(instance: CommonShapeMethod): void { }
     applySelectedAttribute(instance: CommonShapeMethod): void { }
-    _points_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _points0_value?: Array<ShapePoint> | undefined
+    _points_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _points_0_0value?: Array<ShapePoint> | undefined
     applyModifierPatch(peer: ArkPolygonPeer): void {
-        if (this._points_flag != AttributeUpdaterFlag.INITIAL)
+        super.applyModifierPatch(peer)
+        if (this._points_0_flag != AttributeUpdaterFlag.INITIAL)
         {
-            switch (this._points_flag) {
+            switch (this._points_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.pointsAttribute((this._points0_value as Array<ShapePoint> | undefined));
-                    this._points_flag = AttributeUpdaterFlag.RESET;
+                    peer.pointsAttribute((this._points_0_0value as Array<ShapePoint> | undefined));
+                    this._points_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
                 case AttributeUpdaterFlag.SKIP: {
-                    this._points_flag = AttributeUpdaterFlag.RESET;
+                    this._points_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
                 default: {
-                    this._points_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.pointsAttribute(undefined);
+                    this._points_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.pointsAttribute((undefined as Array<ShapePoint> | undefined));
                 }
             }
         }
     }
     mergeModifier(modifier: PolygonModifier): void {
-        if (modifier._points_flag != AttributeUpdaterFlag.INITIAL)
+        super.mergeModifier(modifier)
+        if (modifier._points_0_flag != AttributeUpdaterFlag.INITIAL)
         {
-            switch (modifier._points_flag) {
+            switch (modifier._points_0_flag) {
                 case AttributeUpdaterFlag.UPDATE:
                 case AttributeUpdaterFlag.SKIP: {
-                    this.points(modifier._points0_value);
+                    this.points(modifier._points_0_0value);
                     break;
                 }
                 default: {
-                    this.points(undefined);
+                    this.points((undefined as Array<ShapePoint> | undefined));
                 }
             }
         }
     }
     points(value: Array<ShapePoint> | undefined): this {
-        if (((this._points_flag) == (AttributeUpdaterFlag.INITIAL)) || (false))
+        if (((this._points_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
-            this._points_flag = AttributeUpdaterFlag.UPDATE
-            this._points0_value = value
+            this._points_0_flag = AttributeUpdaterFlag.UPDATE
+            this._points_0_0value = value
         }
         else
         {
-            this._points_flag = AttributeUpdaterFlag.SKIP
+            this._points_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

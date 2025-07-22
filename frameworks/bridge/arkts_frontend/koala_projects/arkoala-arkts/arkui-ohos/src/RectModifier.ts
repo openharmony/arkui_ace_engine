@@ -19,80 +19,86 @@ import { RectAttribute, ArkRectPeer } from 'arkui/component/rect';
 import { CommonShapeMethodModifier } from './CommonShapeMethodModifier';
 
 export class RectModifier extends CommonShapeMethodModifier implements RectAttribute, AttributeModifier<RectAttribute> {
+    _instanceId: number = -1;
+    setInstanceId(instanceId: number): void {
+        this._instanceId = instanceId
+    }
     applyNormalAttribute(instance: CommonShapeMethod): void { }
     applyPressedAttribute(instance: CommonShapeMethod): void { }
     applyFocusedAttribute(instance: CommonShapeMethod): void { }
     applyDisabledAttribute(instance: CommonShapeMethod): void { }
     applySelectedAttribute(instance: CommonShapeMethod): void { }
-    _radiusWidth_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _radiusWidth0_value?: number | string | undefined
-    _radiusHeight_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _radiusHeight0_value?: number | string | undefined
-    _radius_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _radius0_value?: number | string | Array<number | string> | undefined
+    _radiusWidth_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _radiusWidth_0_0value?: number | string | undefined
+    _radiusHeight_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _radiusHeight_0_0value?: number | string | undefined
+    _radius_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _radius_0_0value?: number | string | Array<number | string> | undefined
     applyModifierPatch(peer: ArkRectPeer): void {
-        if (this._radiusWidth_flag != AttributeUpdaterFlag.INITIAL)
+        super.applyModifierPatch(peer)
+        if (this._radiusWidth_0_flag != AttributeUpdaterFlag.INITIAL)
         {
-            switch (this._radiusWidth_flag) {
+            switch (this._radiusWidth_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.radiusWidthAttribute((this._radiusWidth0_value as number | string | undefined));
-                    this._radiusWidth_flag = AttributeUpdaterFlag.RESET;
+                    peer.radiusWidthAttribute((this._radiusWidth_0_0value as number | string | undefined));
+                    this._radiusWidth_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
                 case AttributeUpdaterFlag.SKIP: {
-                    this._radiusWidth_flag = AttributeUpdaterFlag.RESET;
+                    this._radiusWidth_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
                 default: {
-                    this._radiusWidth_flag = AttributeUpdaterFlag.INITIAL;
+                    this._radiusWidth_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.radiusWidthAttribute(undefined);
                 }
             }
         }
-        if (this._radiusHeight_flag != AttributeUpdaterFlag.INITIAL)
+        if (this._radiusHeight_0_flag != AttributeUpdaterFlag.INITIAL)
         {
-            switch (this._radiusHeight_flag) {
+            switch (this._radiusHeight_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.radiusHeightAttribute((this._radiusHeight0_value as number | string | undefined));
-                    this._radiusHeight_flag = AttributeUpdaterFlag.RESET;
+                    peer.radiusHeightAttribute((this._radiusHeight_0_0value as number | string | undefined));
+                    this._radiusHeight_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
                 case AttributeUpdaterFlag.SKIP: {
-                    this._radiusHeight_flag = AttributeUpdaterFlag.RESET;
+                    this._radiusHeight_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
                 default: {
-                    this._radiusHeight_flag = AttributeUpdaterFlag.INITIAL;
+                    this._radiusHeight_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.radiusHeightAttribute(undefined);
                 }
             }
         }
-        if (this._radius_flag != AttributeUpdaterFlag.INITIAL)
+        if (this._radius_0_flag != AttributeUpdaterFlag.INITIAL)
         {
-            switch (this._radius_flag) {
+            switch (this._radius_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.radiusAttribute((this._radius0_value as number | string | Array<number | string> | undefined));
-                    this._radius_flag = AttributeUpdaterFlag.RESET;
+                    peer.radiusAttribute((this._radius_0_0value as number | string | Array<number | string> | undefined));
+                    this._radius_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
                 case AttributeUpdaterFlag.SKIP: {
-                    this._radius_flag = AttributeUpdaterFlag.RESET;
+                    this._radius_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
                 default: {
-                    this._radius_flag = AttributeUpdaterFlag.INITIAL;
+                    this._radius_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.radiusAttribute(undefined);
                 }
             }
         }
     }
     mergeModifier(modifier: RectModifier): void {
-        if (modifier._radiusWidth_flag != AttributeUpdaterFlag.INITIAL)
+        super.mergeModifier(modifier)
+        if (modifier._radiusWidth_0_flag != AttributeUpdaterFlag.INITIAL)
         {
-            switch (modifier._radiusWidth_flag) {
+            switch (modifier._radiusWidth_0_flag) {
                 case AttributeUpdaterFlag.UPDATE:
                 case AttributeUpdaterFlag.SKIP: {
-                    this.radiusWidth(modifier._radiusWidth0_value);
+                    this.radiusWidth(modifier._radiusWidth_0_0value);
                     break;
                 }
                 default: {
@@ -100,12 +106,12 @@ export class RectModifier extends CommonShapeMethodModifier implements RectAttri
                 }
             }
         }
-        if (modifier._radiusHeight_flag != AttributeUpdaterFlag.INITIAL)
+        if (modifier._radiusHeight_0_flag != AttributeUpdaterFlag.INITIAL)
         {
-            switch (modifier._radiusHeight_flag) {
+            switch (modifier._radiusHeight_0_flag) {
                 case AttributeUpdaterFlag.UPDATE:
                 case AttributeUpdaterFlag.SKIP: {
-                    this.radiusHeight(modifier._radiusHeight0_value);
+                    this.radiusHeight(modifier._radiusHeight_0_0value);
                     break;
                 }
                 default: {
@@ -113,12 +119,12 @@ export class RectModifier extends CommonShapeMethodModifier implements RectAttri
                 }
             }
         }
-        if (modifier._radius_flag != AttributeUpdaterFlag.INITIAL)
+        if (modifier._radius_0_flag != AttributeUpdaterFlag.INITIAL)
         {
-            switch (modifier._radius_flag) {
+            switch (modifier._radius_0_flag) {
                 case AttributeUpdaterFlag.UPDATE:
                 case AttributeUpdaterFlag.SKIP: {
-                    this.radius(modifier._radius0_value);
+                    this.radius(modifier._radius_0_0value);
                     break;
                 }
                 default: {
@@ -128,38 +134,38 @@ export class RectModifier extends CommonShapeMethodModifier implements RectAttri
         }
     }
     radiusWidth(value: number | string | undefined): this {
-        if (((this._radiusWidth_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._radiusWidth0_value) == (value)))
+        if (((this._radiusWidth_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._radiusWidth_0_0value) !== (value)))
         {
-            this._radiusWidth_flag = AttributeUpdaterFlag.UPDATE
-            this._radiusWidth0_value = value
+            this._radiusWidth_0_flag = AttributeUpdaterFlag.UPDATE
+            this._radiusWidth_0_0value = value
         }
         else
         {
-            this._radiusWidth_flag = AttributeUpdaterFlag.SKIP
+            this._radiusWidth_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
     radiusHeight(value: number | string | undefined): this {
-        if (((this._radiusHeight_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._radiusHeight0_value) == (value)))
+        if (((this._radiusHeight_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._radiusHeight_0_0value) !== (value)))
         {
-            this._radiusHeight_flag = AttributeUpdaterFlag.UPDATE
-            this._radiusHeight0_value = value
+            this._radiusHeight_0_flag = AttributeUpdaterFlag.UPDATE
+            this._radiusHeight_0_0value = value
         }
         else
         {
-            this._radiusHeight_flag = AttributeUpdaterFlag.SKIP
+            this._radiusHeight_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
     radius(value: number | string | Array<number | string> | undefined): this {
-        if (((this._radius_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._radius0_value) == (value)))
+        if (((this._radius_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._radius_0_0value) !== (value)))
         {
-            this._radius_flag = AttributeUpdaterFlag.UPDATE
-            this._radius0_value = value
+            this._radius_0_flag = AttributeUpdaterFlag.UPDATE
+            this._radius_0_0value = value
         }
         else
         {
-            this._radius_flag = AttributeUpdaterFlag.SKIP
+            this._radius_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
