@@ -1113,39 +1113,12 @@ void ParseAllBorderRadiusesResObj(NG::BorderRadiusProperty& borderRadius, const 
     const RefPtr<ResourceObject>& bottomRightResObj)
 {
     borderRadius.resMap_.clear();
-    if (topLeftResObj != nullptr) {
-        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderRadiusProperty& borderRadius) {
-            CalcDimension result;
-            ResourceParseUtils::ParseResDimensionVp(resObj, result);
-            borderRadius.radiusTopLeft = result;
-        };
-        borderRadius.AddResource("borderRadius.topLeft", topLeftResObj, std::move(updateFunc));
-    }
-    if (topRightResObj != nullptr) {
-        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderRadiusProperty& borderRadius) {
-            CalcDimension result;
-            ResourceParseUtils::ParseResDimensionVp(resObj, result);
-            borderRadius.radiusTopRight = result;
-        };
-        borderRadius.AddResource("borderRadius.topRight", topRightResObj, std::move(updateFunc));
-    }
-    if (bottomLeftResObj != nullptr) {
-        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderRadiusProperty& borderRadius) {
-            CalcDimension result;
-            ResourceParseUtils::ParseResDimensionVp(resObj, result);
-            borderRadius.radiusBottomLeft = result;
-        };
-        borderRadius.AddResource("borderRadius.bottomLeft", bottomLeftResObj, std::move(updateFunc));
-    }
-    if (bottomRightResObj != nullptr) {
-        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderRadiusProperty& borderRadius) {
-            CalcDimension result;
-            ResourceParseUtils::ParseResDimensionVp(resObj, result);
-            borderRadius.radiusBottomRight = result;
-        };
-        borderRadius.AddResource("borderRadius.bottomRight", bottomRightResObj, std::move(updateFunc));
-    }
+    ViewAbstractModelNG::RegisterRadiusesResObj("borderRadius.topLeft", borderRadius, topLeftResObj);
+    ViewAbstractModelNG::RegisterRadiusesResObj("borderRadius.topRight", borderRadius, topRightResObj);
+    ViewAbstractModelNG::RegisterRadiusesResObj("borderRadius.bottomLeft", borderRadius, bottomLeftResObj);
+    ViewAbstractModelNG::RegisterRadiusesResObj("borderRadius.bottomRight", borderRadius, bottomRightResObj);
 }
+
 /**
  * @param values radius values
  * value[0] : radius value for TopLeft，value[1] : radius value for TopRight
@@ -1189,38 +1162,10 @@ void ParseEdgeWidthsResObjFunc(NG::BorderWidthProperty& borderWidth, RefPtr<Reso
     RefPtr<ResourceObject> rightResObj, RefPtr<ResourceObject> bottomResObj, RefPtr<ResourceObject> leftResObj)
 {
     borderWidth.resMap_.clear();
-    if (leftResObj != nullptr) {
-        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderWidthProperty& borderWidth) {
-            CalcDimension result;
-            ResourceParseUtils::ParseResDimensionVp(resObj, result);
-            borderWidth.leftDimen = result;
-        };
-        borderWidth.AddResource("borderWidth.left", leftResObj, std::move(updateFunc));
-    }
-    if (rightResObj != nullptr) {
-        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderWidthProperty& borderWidth) {
-            CalcDimension result;
-            ResourceParseUtils::ParseResDimensionVp(resObj, result);
-            borderWidth.rightDimen = result;
-        };
-        borderWidth.AddResource("borderWidth.right", rightResObj, std::move(updateFunc));
-    }
-    if (topResObj != nullptr) {
-        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderWidthProperty& borderWidth) {
-            CalcDimension result;
-            ResourceParseUtils::ParseResDimensionVp(resObj, result);
-            borderWidth.topDimen = result;
-        };
-        borderWidth.AddResource("borderWidth.top", topResObj, std::move(updateFunc));
-    }
-    if (bottomResObj != nullptr) {
-        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderWidthProperty& borderWidth) {
-            CalcDimension result;
-            ResourceParseUtils::ParseResDimensionVp(resObj, result);
-            borderWidth.bottomDimen = result;
-        };
-        borderWidth.AddResource("borderWidth.bottom", bottomResObj, std::move(updateFunc));
-    }
+    ViewAbstractModelNG::RegisterEdgesWidthResObj("borderWidth.left", borderWidth, leftResObj);
+    ViewAbstractModelNG::RegisterEdgesWidthResObj("borderWidth.right", borderWidth, rightResObj);
+    ViewAbstractModelNG::RegisterEdgesWidthResObj("borderWidth.top", borderWidth, topResObj);
+    ViewAbstractModelNG::RegisterEdgesWidthResObj("borderWidth.bottom", borderWidth, bottomResObj);
 }
 
 void CheckDimensionUnit(CalcDimension& checkDimension, bool notPercent, bool notNegative)
@@ -1528,38 +1473,10 @@ void ParseLocationPropsEdgesResObj(OHOS::Ace::EdgesParam& edges, RefPtr<Resource
     RefPtr<ResourceObject> leftResObj, RefPtr<ResourceObject> bottomResObj, RefPtr<ResourceObject> rightResObj)
 {
     edges.resMap_.clear();
-    if (topResObj != nullptr) {
-        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, EdgesParam& edges) {
-            CalcDimension result;
-            ResourceParseUtils::ParseResDimensionVpNG(resObj, result);
-            edges.SetTop(result);
-        };
-        edges.AddResource("edges.top", topResObj, std::move(updateFunc));
-    }
-    if (leftResObj != nullptr) {
-        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, EdgesParam& edges) {
-            CalcDimension result;
-            ResourceParseUtils::ParseResDimensionVpNG(resObj, result);
-            edges.SetLeft(result);
-        };
-        edges.AddResource("edges.left", leftResObj, std::move(updateFunc));
-    }
-    if (bottomResObj != nullptr) {
-        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, EdgesParam& edges) {
-            CalcDimension result;
-            ResourceParseUtils::ParseResDimensionVpNG(resObj, result);
-            edges.SetBottom(result);
-        };
-        edges.AddResource("edges.bottom", bottomResObj, std::move(updateFunc));
-    }
-    if (rightResObj != nullptr) {
-        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, EdgesParam& edges) {
-            CalcDimension result;
-            ResourceParseUtils::ParseResDimensionVpNG(resObj, result);
-            edges.SetRight(result);
-        };
-        edges.AddResource("edges.right", rightResObj, std::move(updateFunc));
-    }
+    ViewAbstractModelNG::RegisterLocationPropsEdgesResObj("edges.top", edges, topResObj);
+    ViewAbstractModelNG::RegisterLocationPropsEdgesResObj("edges.left", edges, leftResObj);
+    ViewAbstractModelNG::RegisterLocationPropsEdgesResObj("edges.bottom", edges, bottomResObj);
+    ViewAbstractModelNG::RegisterLocationPropsEdgesResObj("edges.right", edges, rightResObj);
 }
 
 void SetPositionEdges(ArkUINodeHandle node, const int32_t useEdges, const ArkUIStringAndFloat* options, void* rawPtr)
@@ -2648,38 +2565,10 @@ void ParseLocalizedBorderColor(NG::BorderColorProperty& borderColors, RefPtr<Res
     RefPtr<ResourceObject> startResObj, RefPtr<ResourceObject> bottomResObj, RefPtr<ResourceObject> endResObj)
 {
     borderColors.resMap_.clear();
-    if (startResObj != nullptr) {
-        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderColorProperty& borderColors) {
-            Color result;
-            ResourceParseUtils::ParseResColor(resObj, result);
-            borderColors.startColor = result;
-        };
-        borderColors.AddResource("borderColor.start", startResObj, std::move(updateFunc));
-    }
-    if (endResObj != nullptr) {
-        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderColorProperty& borderColors) {
-            Color result;
-            ResourceParseUtils::ParseResColor(resObj, result);
-            borderColors.endColor = result;
-        };
-        borderColors.AddResource("borderColor.end", endResObj, std::move(updateFunc));
-    }
-    if (topResObj != nullptr) {
-        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderColorProperty& borderColors) {
-            Color result;
-            ResourceParseUtils::ParseResColor(resObj, result);
-            borderColors.topColor = result;
-        };
-        borderColors.AddResource("borderColor.top", topResObj, std::move(updateFunc));
-    }
-    if (bottomResObj != nullptr) {
-        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderColorProperty& borderColors) {
-            Color result;
-            ResourceParseUtils::ParseResColor(resObj, result);
-            borderColors.bottomColor = result;
-        };
-        borderColors.AddResource("borderColor.bottom", bottomResObj, std::move(updateFunc));
-    }
+    ViewAbstractModelNG::RegisterLocalizedBorderColor("borderColor.start", borderColors, startResObj);
+    ViewAbstractModelNG::RegisterLocalizedBorderColor("borderColor.end", borderColors, endResObj);
+    ViewAbstractModelNG::RegisterLocalizedBorderColor("borderColor.top", borderColors, topResObj);
+    ViewAbstractModelNG::RegisterLocalizedBorderColor("borderColor.bottom", borderColors, bottomResObj);
 }
 
 /**
@@ -3550,56 +3439,6 @@ void ResetOffset(ArkUINodeHandle node)
     ViewAbstract::SetOffset(frameNode, { xVal, yVal });
 }
 
-NG::CalcLength ConvertCalcLength(CalcDimension& target)
-{
-    NG::CalcLength targetLength = (target.Unit() == DimensionUnit::CALC) ?
-        NG::CalcLength(target.IsNonNegative() ? target.CalcValue() : CalcDimension().CalcValue()) :
-        NG::CalcLength(target.IsNonNegative() ? target : CalcDimension());
-    return targetLength;
-}
-
-void GetEdgePaddingsOrSafeAreaPaddings(NG::PaddingProperty& paddings, RefPtr<ResourceObject> topResObj,
-    RefPtr<ResourceObject> rightResObj, RefPtr<ResourceObject> bottomResObj, RefPtr<ResourceObject> leftResObj)
-{
-    paddings.resMap_.clear();
-    if (topResObj != nullptr) {
-        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::PaddingProperty& paddings) {
-            CalcDimension result;
-            ResourceParseUtils::ParseResDimensionVpNG(resObj, result);
-            NG::CalcLength resultLength = ConvertCalcLength(result);
-            paddings.top = resultLength;
-        };
-        paddings.AddResource("top", topResObj, std::move(updateFunc));
-    }
-    if (rightResObj != nullptr) {
-        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::PaddingProperty& paddings) {
-            CalcDimension result;
-            ResourceParseUtils::ParseResDimensionVpNG(resObj, result);
-            NG::CalcLength resultLength = ConvertCalcLength(result);
-            paddings.right = resultLength;
-        };
-        paddings.AddResource("right", rightResObj, std::move(updateFunc));
-    }
-    if (bottomResObj != nullptr) {
-        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::PaddingProperty& paddings) {
-            CalcDimension result;
-            ResourceParseUtils::ParseResDimensionVpNG(resObj, result);
-            NG::CalcLength resultLength = ConvertCalcLength(result);
-            paddings.bottom = resultLength;
-        };
-        paddings.AddResource("bottom", bottomResObj, std::move(updateFunc));
-    }
-    if (leftResObj != nullptr) {
-        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::PaddingProperty& paddings) {
-            CalcDimension result;
-            ResourceParseUtils::ParseResDimensionVpNG(resObj, result);
-            NG::CalcLength resultLength = ConvertCalcLength(result);
-            paddings.left = resultLength;
-        };
-        paddings.AddResource("left", leftResObj, std::move(updateFunc));
-    }
-}
-
 void SetPadding(ArkUINodeHandle node, const struct ArkUISizeType* top, const struct ArkUISizeType* right,
     const struct ArkUISizeType* bottom, const struct ArkUISizeType* left, void* rawPtr)
 {
@@ -3637,7 +3476,10 @@ void SetPadding(ArkUINodeHandle node, const struct ArkUISizeType* top, const str
     paddings.right = std::optional<CalcLength>(rightDimen);
     if (SystemProperties::ConfigChangePerform() && rawPtr) {
         auto objs = *(reinterpret_cast<const std::vector<RefPtr<ResourceObject>>*>(rawPtr));
-        GetEdgePaddingsOrSafeAreaPaddings(paddings, objs[NUM_0], objs[NUM_1], objs[NUM_2], objs[NUM_3]);
+        ViewAbstractModelNG::RegisterEdgeMarginsResObj("margin.top", paddings, objs[NUM_0]);
+        ViewAbstractModelNG::RegisterEdgeMarginsResObj("margin.right", paddings, objs[NUM_1]);
+        ViewAbstractModelNG::RegisterEdgeMarginsResObj("margin.bottom", paddings, objs[NUM_2]);
+        ViewAbstractModelNG::RegisterEdgeMarginsResObj("margin.left", paddings, objs[NUM_3]);
     }
     ViewAbstract::SetPadding(frameNode, paddings);
 }
@@ -3698,7 +3540,10 @@ void SetSafeAreaPadding(
     }
     if (SystemProperties::ConfigChangePerform() && rawPtr) {
         auto objs = *(reinterpret_cast<const std::vector<RefPtr<ResourceObject>>*>(rawPtr));
-        GetEdgePaddingsOrSafeAreaPaddings(paddings, objs[NUM_0], objs[NUM_1], objs[NUM_2], objs[NUM_3]);
+        ViewAbstractModelNG::RegisterEdgeMarginsResObj("margin.top", paddings, objs[NUM_0]);
+        ViewAbstractModelNG::RegisterEdgeMarginsResObj("margin.right", paddings, objs[NUM_1]);
+        ViewAbstractModelNG::RegisterEdgeMarginsResObj("margin.bottom", paddings, objs[NUM_2]);
+        ViewAbstractModelNG::RegisterEdgeMarginsResObj("margin.left", paddings, objs[NUM_3]);
     }
     ViewAbstract::SetSafeAreaPadding(frameNode, paddings);
 }
@@ -4132,7 +3977,10 @@ void SetMargin(ArkUINodeHandle node, const struct ArkUISizeType* top, const stru
     paddings.right = std::optional<CalcLength>(rightDimen);
     if (SystemProperties::ConfigChangePerform() && rawPtr) {
         auto objs = *(reinterpret_cast<const std::vector<RefPtr<ResourceObject>>*>(rawPtr));
-        GetEdgePaddingsOrSafeAreaPaddings(paddings, objs[NUM_0], objs[NUM_1], objs[NUM_2], objs[NUM_3]);
+        ViewAbstractModelNG::RegisterEdgeMarginsResObj("margin.top", paddings, objs[NUM_0]);
+        ViewAbstractModelNG::RegisterEdgeMarginsResObj("margin.bottom", paddings, objs[NUM_2]);
+        ViewAbstractModelNG::RegisterEdgeMarginsResObj("margin.left", paddings, objs[NUM_3]);
+        ViewAbstractModelNG::RegisterEdgeMarginsResObj("margin.right", paddings, objs[NUM_1]);
     }
     ViewAbstract::SetMargin(frameNode, paddings);
 }

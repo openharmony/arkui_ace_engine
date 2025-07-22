@@ -1916,6 +1916,16 @@ public:
     static void SetAccessibilityUseSamePage(FrameNode* frameNode, const std::string& pageMode);
     static void SetAccessibilityScrollTriggerable(FrameNode* frameNode, bool triggerable, bool resetValue);
     static void SetAccessibilityFocusDrawLevel(FrameNode* frameNode, int32_t drawLevel);
+    static void RegisterRadiusesResObj(
+        const std::string& key, NG::BorderRadiusProperty& borderRadius, const RefPtr<ResourceObject>& resObj);
+    static void RegisterLocationPropsEdgesResObj(
+        const std::string& key, EdgesParam& edges, const RefPtr<ResourceObject>& resObj);
+    static void RegisterEdgesWidthResObj(
+        const std::string& key, NG::BorderWidthProperty& borderWidth, const RefPtr<ResourceObject>& resObj);
+    static void RegisterEdgeMarginsResObj(
+        const std::string& key, NG::MarginProperty& margins, const RefPtr<ResourceObject>& resObj);
+    static void RegisterLocalizedBorderColor(
+        const std::string& key, NG::BorderColorProperty& borderColors, const RefPtr<ResourceObject>& resObj);
     static void SetKeyboardShortcut(FrameNode* frameNode, const std::string& value,
         const std::vector<ModifierKey>& keys, std::function<void()>&& onKeyboardShortcutAction)
     {
