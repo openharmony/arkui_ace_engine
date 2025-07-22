@@ -2214,6 +2214,7 @@ private:
     std::u16string bodyTextInPreivewing_;
     PreviewRange lastCursorRange_ = {};
     std::u16string lastTextValue_ = u"";
+    float lastCursorLeft_ = 0.0f;
     float lastCursorTop_ = 0.0f;
     bool showKeyBoardOnFocus_ = true;
     bool isTextSelectionMenuShow_ = true;
