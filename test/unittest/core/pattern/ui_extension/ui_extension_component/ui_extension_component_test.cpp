@@ -1883,6 +1883,7 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentTest016, TestSize.Level
      */
     int32_t instanceId = 1;
     pattern->RegisterPipelineEvent(instanceId);
+    EXPECT_NE(pattern->surfacePositionCallBackId_, 0);
 
     /**
      * @tc.steps: step3. test UnRegisterPipelineEvent.
