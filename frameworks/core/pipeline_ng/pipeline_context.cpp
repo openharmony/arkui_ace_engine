@@ -6360,7 +6360,8 @@ void PipelineContext::SetIsTransFlag(bool result)
 void PipelineContext::FlushMouseEventForHover()
 {
     if (!isTransFlag_ || !lastMouseEvent_ || lastMouseEvent_->sourceType != SourceType::MOUSE ||
-        lastMouseEvent_->action == MouseAction::PRESS || lastSourceType_ == SourceType::TOUCH) {
+        lastMouseEvent_->action == MouseAction::PRESS || lastSourceType_ == SourceType::TOUCH ||
+        lastMouseEvent_->button != MouseButton::NONE_BUTTON) {
         return;
     }
     if (lastMouseEvent_->action == MouseAction::WINDOW_LEAVE) {
