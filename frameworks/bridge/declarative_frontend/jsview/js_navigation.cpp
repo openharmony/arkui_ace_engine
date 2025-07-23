@@ -304,12 +304,12 @@ void JSNavigation::ParseCommonAndCustomTitle(const JSRef<JSObject>& jsObj)
             return;
         }
     }
-    if (SystemProperties::ConfigChangePerform() && heightResObj) {
-        NavigationModel::GetInstance()->SetTitleHeight(heightResObj);
-        return;
-    }
     if (!isValid || titleHeight.Value() < 0) {
         NavigationModel::GetInstance()->SetTitleHeight(Dimension(), true);
+        return;
+    }
+    if (SystemProperties::ConfigChangePerform() && heightResObj) {
+        NavigationModel::GetInstance()->SetTitleHeight(titleHeight, heightResObj);
         return;
     }
     NavigationModel::GetInstance()->SetTitleHeight(titleHeight);

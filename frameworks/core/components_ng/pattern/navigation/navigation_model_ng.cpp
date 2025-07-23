@@ -630,7 +630,7 @@ void NavigationModelNG::SetCustomTitle(const RefPtr<AceType>& customNode)
     CHECK_NULL_VOID(titleBarNode);
 
     if (!navBarNode->GetPrevTitleIsCustomValue(false)) {
-        titleBarNode->RemoveChild(titleBarNode->GetTitle());
+                titleBarNode->RemoveChild(titleBarNode->GetTitle());
         titleBarNode->RemoveChild(titleBarNode->GetSubtitle());
         titleBarNode->SetTitle(nullptr);
         titleBarNode->SetSubtitle(nullptr);
@@ -671,9 +671,8 @@ void NavigationModelNG::SetTitleHeight(const Dimension& height, bool isValid)
     navBarLayoutProperty->UpdateTitleMode(static_cast<NG::NavigationTitleMode>(NavigationTitleMode::MINI));
 }
 
-void NavigationModelNG::SetTitleHeight(const RefPtr<ResourceObject>& resObj)
+void NavigationModelNG::SetTitleHeight(const Dimension& height, const RefPtr<ResourceObject>& resObj)
 {
-    CalcDimension height = ParseTitleHeight(resObj);
     SetTitleHeight(height);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -689,7 +688,7 @@ void NavigationModelNG::SetTitleHeight(const RefPtr<ResourceObject>& resObj)
         CHECK_NULL_VOID(titleBarNode);
         auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
         CHECK_NULL_VOID(titleBarLayoutProperty);
-        CalcDimension height = ParseTitleHeight(resObj);
+        CalcDimension height = ParseTitleHeight(titleBarNode, resObj);
         titleBarLayoutProperty->UpdateTitleHeight(height);
         SetHideBackButton(true);
         titleBarNode->MarkModifyDone();
@@ -700,15 +699,9 @@ void NavigationModelNG::SetTitleHeight(const RefPtr<ResourceObject>& resObj)
     titleBarPattern->AddResObj("navigation.title.customtitle", resObj, std::move(updateFunc));
 }
 
-CalcDimension NavigationModelNG::ParseTitleHeight(const RefPtr<ResourceObject>& resObj)
+CalcDimension NavigationModelNG::ParseTitleHeight(
+    const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& resObj)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_RETURN(frameNode, Dimension());
-    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
-    CHECK_NULL_RETURN(navigationGroupNode, Dimension());
-    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
-    CHECK_NULL_RETURN(navBarNode, Dimension());
-    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
     CHECK_NULL_RETURN(titleBarNode, Dimension());
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
     CHECK_NULL_RETURN(titleBarPattern, Dimension());
@@ -731,13 +724,13 @@ CalcDimension NavigationModelNG::ParseTitleHeight(const RefPtr<ResourceObject>& 
     if (heightString.empty()) {
         bool isValid = ResourceParseUtils::ParseResDimensionVpNG(resObj, height);
         titleBarPattern->AddResCache(key, height.ToString());
-        if (!isValid || height.Value() < 0) {
+                if (!isValid || height.Value() < 0) {
             return Dimension();
         }
     } else {
         height = StringUtils::StringToCalcDimension(heightString);
     }
-    return height;
+        return height;
 }
 
 void CreateSymbolBackIcon(const RefPtr<FrameNode>& backButtonNode, NavigationGroupNode* navigationGroupNode)
