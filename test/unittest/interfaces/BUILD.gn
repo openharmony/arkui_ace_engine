@@ -1280,6 +1280,7 @@ ohos_unittest("native_render_node_property_test") {
     "$ace_root/interfaces/native/node/native_node_napi.cpp",
     "$ace_root/interfaces/native/node/node_extened.cpp",
     "$ace_root/interfaces/native/node/node_model.cpp",
+    "$ace_root/interfaces/native/node/node_model_safely.cpp",
     "$ace_root/interfaces/native/node/node_node_relative_container.cpp",
     "$ace_root/interfaces/native/node/node_transition.cpp",
     "$ace_root/interfaces/native/node/node_utils.cpp",
@@ -1304,19 +1305,19 @@ ohos_unittest("native_render_node_property_test") {
   ]
 
   deps = [
-    "$ace_root/test/unittest::ace_base",
-    "$ace_root/test/unittest::ace_components_base",
-    "$ace_root/test/unittest::ace_components_event",
-    "$ace_root/test/unittest::ace_components_gestures",
-    "$ace_root/test/unittest::ace_components_layout",
-    "$ace_root/test/unittest::ace_components_manager",
-    "$ace_root/test/unittest::ace_components_mock",
-    "$ace_root/test/unittest::ace_components_pattern",
-    "$ace_root/test/unittest::ace_components_property",
-    "$ace_root/test/unittest::ace_components_render",
-    "$ace_root/test/unittest::ace_components_syntax",
-    "$ace_root/test/unittest::ace_core_animation",
-    "$ace_root/test/unittest::ace_core_extra",
+    "$ace_root/test/unittest:ace_base",
+    "$ace_root/test/unittest:ace_components_base",
+    "$ace_root/test/unittest:ace_components_event",
+    "$ace_root/test/unittest:ace_components_gestures",
+    "$ace_root/test/unittest:ace_components_layout",
+    "$ace_root/test/unittest:ace_components_manager",
+    "$ace_root/test/unittest:ace_components_mock",
+    "$ace_root/test/unittest:ace_components_pattern",
+    "$ace_root/test/unittest:ace_components_property",
+    "$ace_root/test/unittest:ace_components_render",
+    "$ace_root/test/unittest:ace_components_syntax",
+    "$ace_root/test/unittest:ace_core_animation",
+    "$ace_root/test/unittest:ace_core_extra",
   ]
 
   external_deps = [
@@ -1328,8 +1329,8 @@ ohos_unittest("native_render_node_property_test") {
     "graphic_2d:librender_service_client",
     "graphic_2d:native_drawing_ndk",
     "hilog:libhilog",
-    "image_framwork:image",
-    "image_framwork:image_native",
+    "image_framework:image",
+    "image_framework:image_native",
     "napi:ace_napi",
     "resource_management:global_resmgr",
   ]
