@@ -187,6 +187,7 @@ void OnLayoutInnerLayout(ani_env* env, ani_long ptr)
 void SetParallelScoped(ani_boolean parallel)
 {
     MultiThreadBuildManager::SetIsThreadSafeNodeScope(parallel);
+    MultiThreadBuildManager::SetIsParallelizeUI(parallel);
 }
 
 static void SetCustomPropertyCallBack(

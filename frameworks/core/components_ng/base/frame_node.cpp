@@ -457,6 +457,10 @@ FrameNode::FrameNode(
     layoutProperty_->SetHost(WeakClaim(this));
     layoutSeperately_ = true;
     paintProperty_->SetHost(WeakClaim(this));
+
+    if (IsThreadSafeNode()) {
+        MultiThreadBuildManager::CheckTag(tag);
+    }
 }
 
 FrameNode::~FrameNode()

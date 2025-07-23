@@ -103,6 +103,17 @@ export function ParallelizeUI(
     /** @memo */
     content_?: () => void,
 ) {
+    const enable = rememberDisposable<boolean>(() => {
+        if (options?.enable == false) {
+            return false
+        }
+        return true;
+
+    }, () => { })
+    if (enable == false) {
+        content_?.()
+        return;
+    }
     Serializer.setMultithreadMode()
     const receiver = rememberDisposable<ParallelNode>(() => {
         return new ParallelNode();
