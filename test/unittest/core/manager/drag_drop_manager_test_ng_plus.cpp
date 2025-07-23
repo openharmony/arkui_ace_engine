@@ -15,6 +15,8 @@
 
 #include "test/unittest/core/manager/drag_drop_manager_test_ng.h"
 
+#include "test/mock/base/mock_task_executor.h"
+
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
@@ -70,5 +72,42 @@ HWTEST_F(DragDropManagerTestNgPlus, DragDropManagerTestNgPlus002, TestSize.Level
     EXPECT_NE(frameNodeNull, nullptr);
     auto result = dragDropManager->IsUIExtensionOrDynamicComponent(frameNodeNull);
     EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: DragDropManagerTestNgPlus005
+ * @tc.desc: Test PostStopDrag Funcition When requestId_ == requestId and requestId_ != requestId.
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNgPlus, DragDropManagerTestNgPlus005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a frameNode and dragEvent.
+     */
+    auto mockTaskExecutor = AceType::MakeRefPtr<MockTaskExecutor>();
+    MockPipelineContext::GetCurrentContext()->taskExecutor_ = mockTaskExecutor;
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    ASSERT_NE(dragEvent, nullptr);
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+    DragPointerEvent pointerEvent;
+
+    /**
+     * @tc.steps: step1. test PostStopDrag.
+     */
+    dragEvent->SetRequestIdentify(1);
+    DragDropGlobalController::GetInstance().requestId_ = 0;
+    DragDropGlobalController::GetInstance().SetIsOnOnDropPhase(true);
+    dragDropManager->PostStopDrag(frameNode, pointerEvent, dragEvent, "");
+    EXPECT_TRUE(DragDropGlobalController::GetInstance().IsOnOnDropPhase());
+
+    DragDropGlobalController::GetInstance().requestId_ = 1;
+    dragDropManager->PostStopDrag(frameNode, pointerEvent, dragEvent, "");
+    EXPECT_FALSE(DragDropGlobalController::GetInstance().IsOnOnDropPhase());
 }
 }
