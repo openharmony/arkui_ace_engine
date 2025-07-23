@@ -342,8 +342,7 @@ void Unmarshalling0Impl(Ark_VMContext vmContext,
                 copy(buff.begin(), buff.end(), reinterpret_cast<uint8_t*>(arkBuffer.data));
                 auto arkResult = arkCallback.InvokeWithObtainResult<Ark_UserDataSpan,
                     Callback_StyledStringMarshallingValue_Void>(arkBuffer);
-                LOGE("StyledStringAccessor::Unmarshalling0Impl. Ark_UserDataSpan is not implemented. %{public}p",
-                    arkResult.handle);
+                LOGE("StyledStringAccessor::Unmarshalling0Impl. Ark_UserDataSpan is not implemented.");
                 return AceType::MakeRefPtr<ExtSpan>(spanStart, spanLength); // Ark_UserDataSpan is temporarily ignored.
             };
         }
