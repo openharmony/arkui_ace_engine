@@ -194,4 +194,734 @@ HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest004, TestSize.Level1)
     ASSERT_EQ(w, 100); //100 represents rsNodeFirstChild.
 }
 
+/**
+ * @tc.name: NativeRenderNodeTest090
+ * @tc.desc: Test CreateFloatProperty and SetFloatPropertyValue functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest090, TestSize.Level1)
+{
+    auto floatProperty = OH_ArkUI_RenderNodeUtils_CreateFloatProperty(2.0f);
+    ASSERT_NE(floatProperty, nullptr);
+    auto result = OH_ArkUI_RenderNodeUtils_SetFloatPropertyValue(floatProperty, 3.0f);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    OH_ArkUI_RenderNodeUtils_DisposeFloatProperty(floatProperty);
+}
+
+/**
+ * @tc.name: NativeRenderNodeTest091
+ * @tc.desc: Test GetFloatPropertyValue function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest091, TestSize.Level1)
+{
+    auto floatProperty = OH_ArkUI_RenderNodeUtils_CreateFloatProperty(4.0f);
+    ASSERT_NE(floatProperty, nullptr);
+    float value = 0.0f;
+    auto result = OH_ArkUI_RenderNodeUtils_GetFloatPropertyValue(floatProperty, &value);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(value, 4.0f);
+    OH_ArkUI_RenderNodeUtils_DisposeFloatProperty(floatProperty);
+}
+
+/**
+ * @tc.name: NativeRenderNodeTest092
+ * @tc.desc: Test AttachFloatProperty and AttachVector2Property functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest092, TestSize.Level1)
+{
+    auto contentModifier = OH_ArkUI_RenderNodeUtils_CreateContentModifier();
+    ASSERT_NE(contentModifier, nullptr);
+
+    auto floatProperty = OH_ArkUI_RenderNodeUtils_CreateFloatProperty(1.0f);
+    ASSERT_NE(floatProperty, nullptr);
+    auto result = OH_ArkUI_RenderNodeUtils_AttachFloatProperty(contentModifier, floatProperty);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+
+    auto vector2Property = OH_ArkUI_RenderNodeUtils_CreateVector2Property(10.0f, 20.0f);
+    ASSERT_NE(vector2Property, nullptr);
+    result = OH_ArkUI_RenderNodeUtils_AttachVector2Property(contentModifier, vector2Property);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+
+    OH_ArkUI_RenderNodeUtils_DisposeVector2Property(vector2Property);
+    OH_ArkUI_RenderNodeUtils_DisposeFloatProperty(floatProperty);
+    OH_ArkUI_RenderNodeUtils_DisposeContentModifier(contentModifier);
+}
+
+/**
+ * @tc.name: NativeRenderNodeTest093
+ * @tc.desc: Test AttachColorProperty and AttachFloatAnimatableProperty functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest093, TestSize.Level1)
+{
+    auto contentModifier = OH_ArkUI_RenderNodeUtils_CreateContentModifier();
+    ASSERT_NE(contentModifier, nullptr);
+
+    auto colorProperty = OH_ArkUI_RenderNodeUtils_CreateColorProperty(0xFF0000FF);
+    ASSERT_NE(colorProperty, nullptr);
+    auto result = OH_ArkUI_RenderNodeUtils_AttachColorProperty(contentModifier, colorProperty);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+
+    auto floatAnimProperty = OH_ArkUI_RenderNodeUtils_CreateFloatAnimatableProperty(2.5f);
+    ASSERT_NE(floatAnimProperty, nullptr);
+    result = OH_ArkUI_RenderNodeUtils_AttachFloatAnimatableProperty(contentModifier, floatAnimProperty);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+
+    OH_ArkUI_RenderNodeUtils_DisposeFloatAnimatableProperty(floatAnimProperty);
+    OH_ArkUI_RenderNodeUtils_DisposeColorProperty(colorProperty);
+    OH_ArkUI_RenderNodeUtils_DisposeContentModifier(contentModifier);
+}
+
+/**
+ * @tc.name: NativeRenderNodeTest094
+ * @tc.desc: Test AttachVector2AnimatableProperty and AttachColorAnimatableProperty functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest094, TestSize.Level1)
+{
+    auto contentModifier = OH_ArkUI_RenderNodeUtils_CreateContentModifier();
+    ASSERT_NE(contentModifier, nullptr);
+
+    auto vector2AnimProperty = OH_ArkUI_RenderNodeUtils_CreateVector2AnimatableProperty(100.0f, 200.0f);
+    ASSERT_NE(vector2AnimProperty, nullptr);
+    auto result = OH_ArkUI_RenderNodeUtils_AttachVector2AnimatableProperty(contentModifier, vector2AnimProperty);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+
+    auto colorAnimProperty = OH_ArkUI_RenderNodeUtils_CreateColorAnimatableProperty(0xFF00FFFF);
+    ASSERT_NE(colorAnimProperty, nullptr);
+    result = OH_ArkUI_RenderNodeUtils_AttachColorAnimatableProperty(contentModifier, colorAnimProperty);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+
+    OH_ArkUI_RenderNodeUtils_DisposeColorAnimatableProperty(colorAnimProperty);
+    OH_ArkUI_RenderNodeUtils_DisposeVector2AnimatableProperty(vector2AnimProperty);
+    OH_ArkUI_RenderNodeUtils_DisposeContentModifier(contentModifier);
+}
+
+/**
+ * @tc.name: NativeRenderNodeTest100
+ * @tc.desc: Test DisposeFloatProperty function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest100, TestSize.Level1)
+{
+    auto floatProperty = OH_ArkUI_RenderNodeUtils_CreateFloatProperty(1.5f);
+    ASSERT_NE(floatProperty, nullptr);
+    OH_ArkUI_RenderNodeUtils_DisposeFloatProperty(floatProperty);
+}
+
+/**
+ * @tc.name: NativeRenderNodeTest101
+ * @tc.desc: Test CreateVector2Property and SetVector2PropertyValue functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest101, TestSize.Level1)
+{
+    auto vector2Property = OH_ArkUI_RenderNodeUtils_CreateVector2Property(10.0f, 20.0f);
+    ASSERT_NE(vector2Property, nullptr);
+    auto result = OH_ArkUI_RenderNodeUtils_SetVector2PropertyValue(vector2Property, 30.0f, 40.0f);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    OH_ArkUI_RenderNodeUtils_DisposeVector2Property(vector2Property);
+}
+
+/**
+ * @tc.name: NativeRenderNodeTest102
+ * @tc.desc: Test GetVector2PropertyValue and DisposeVector2Property functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest102, TestSize.Level1)
+{
+    auto vector2Property = OH_ArkUI_RenderNodeUtils_CreateVector2Property(50.0f, 60.0f);
+    ASSERT_NE(vector2Property, nullptr);
+    float x = 0.0f, y = 0.0f;
+    auto result = OH_ArkUI_RenderNodeUtils_GetVector2PropertyValue(vector2Property, &x, &y);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(x, 50.0f);
+    ASSERT_EQ(y, 60.0f);
+    OH_ArkUI_RenderNodeUtils_DisposeVector2Property(vector2Property);
+}
+
+/**
+ * @tc.name: NativeRenderNodeTest103
+ * @tc.desc: Test CreateColorProperty and SetColorPropertyValue functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest103, TestSize.Level1)
+{
+    auto colorProperty = OH_ArkUI_RenderNodeUtils_CreateColorProperty(0xFF0000FF);
+    ASSERT_NE(colorProperty, nullptr);
+    auto result = OH_ArkUI_RenderNodeUtils_SetColorPropertyValue(colorProperty, 0xFF00FF00);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    OH_ArkUI_RenderNodeUtils_DisposeColorProperty(colorProperty);
+}
+
+/**
+ * @tc.name: NativeRenderNodeTest104
+ * @tc.desc: Test GetColorPropertyValue and DisposeColorProperty functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest104, TestSize.Level1)
+{
+    auto colorProperty = OH_ArkUI_RenderNodeUtils_CreateColorProperty(0xFFFF0000);
+    ASSERT_NE(colorProperty, nullptr);
+    uint32_t color = 0;
+    auto result = OH_ArkUI_RenderNodeUtils_GetColorPropertyValue(colorProperty, &color);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    OH_ArkUI_RenderNodeUtils_DisposeColorProperty(colorProperty);
+}
+
+/**
+ * @tc.name: NativeRenderNodeTest105
+ * @tc.desc: Test CreateFloatAnimatableProperty and SetFloatAnimatablePropertyValue functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest105, TestSize.Level1)
+{
+    auto floatAnimProperty = OH_ArkUI_RenderNodeUtils_CreateFloatAnimatableProperty(2.5f);
+    ASSERT_NE(floatAnimProperty, nullptr);
+    auto result = OH_ArkUI_RenderNodeUtils_SetFloatAnimatablePropertyValue(floatAnimProperty, 3.5f);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    OH_ArkUI_RenderNodeUtils_DisposeFloatAnimatableProperty(floatAnimProperty);
+}
+
+/**
+ * @tc.name: NativeRenderNodeTest106
+ * @tc.desc: Test GetFloatAnimatablePropertyValue and DisposeFloatAnimatableProperty functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest106, TestSize.Level1)
+{
+    auto floatAnimProperty = OH_ArkUI_RenderNodeUtils_CreateFloatAnimatableProperty(4.5f);
+    ASSERT_NE(floatAnimProperty, nullptr);
+    float value = 0.0f;
+    auto result = OH_ArkUI_RenderNodeUtils_GetFloatAnimatablePropertyValue(floatAnimProperty, &value);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(value, 4.5f);
+    OH_ArkUI_RenderNodeUtils_DisposeFloatAnimatableProperty(floatAnimProperty);
+}
+
+/**
+ * @tc.name: NativeRenderNodeTest107
+ * @tc.desc: Test CreateVector2AnimatableProperty and SetVector2AnimatablePropertyValue functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest107, TestSize.Level1)
+{
+    auto vector2AnimProperty = OH_ArkUI_RenderNodeUtils_CreateVector2AnimatableProperty(100.0f, 200.0f);
+    ASSERT_NE(vector2AnimProperty, nullptr);
+    auto result = OH_ArkUI_RenderNodeUtils_SetVector2AnimatablePropertyValue(vector2AnimProperty, 300.0f, 400.0f);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    OH_ArkUI_RenderNodeUtils_DisposeVector2AnimatableProperty(vector2AnimProperty);
+}
+
+/**
+ * @tc.name: NativeRenderNodeTest108
+ * @tc.desc: Test GetVector2AnimatablePropertyValue and DisposeVector2AnimatableProperty functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest108, TestSize.Level1)
+{
+    auto vector2AnimProperty = OH_ArkUI_RenderNodeUtils_CreateVector2AnimatableProperty(500.0f, 600.0f);
+    ASSERT_NE(vector2AnimProperty, nullptr);
+    float x = 0.0f, y = 0.0f;
+    auto result = OH_ArkUI_RenderNodeUtils_GetVector2AnimatablePropertyValue(vector2AnimProperty, &x, &y);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(x, 500.0f);
+    ASSERT_EQ(y, 600.0f);
+    OH_ArkUI_RenderNodeUtils_DisposeVector2AnimatableProperty(vector2AnimProperty);
+}
+
+/**
+ * @tc.name: NativeRenderNodeTest109
+ * @tc.desc: Test CreateColorAnimatableProperty and SetColorAnimatablePropertyValue functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest109, TestSize.Level1)
+{
+    auto colorAnimProperty = OH_ArkUI_RenderNodeUtils_CreateColorAnimatableProperty(0xFF00FFFF);
+    ASSERT_NE(colorAnimProperty, nullptr);
+    OH_ArkUI_RenderNodeUtils_SetColorAnimatablePropertyValue(colorAnimProperty, 0xFFFFFF00);
+    OH_ArkUI_RenderNodeUtils_DisposeColorAnimatableProperty(colorAnimProperty);
+}
+
+/**
+ * @tc.name: NativeRenderNodeTest110
+ * @tc.desc: Test GetColorAnimatablePropertyValue and DisposeColorAnimatableProperty functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest110, TestSize.Level1)
+{
+    auto colorAnimProperty = OH_ArkUI_RenderNodeUtils_CreateColorAnimatableProperty(0xFFFF00FF);
+    ASSERT_NE(colorAnimProperty, nullptr);
+    uint32_t color = 0;
+    auto result = OH_ArkUI_RenderNodeUtils_GetColorAnimatablePropertyValue(colorAnimProperty, &color);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    OH_ArkUI_RenderNodeUtils_DisposeColorAnimatableProperty(colorAnimProperty);
+}
+
+/**
+ * @tc.name: NativeRenderNodeTest111
+ * @tc.desc: Test SetContentModifierOnDraw function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest111, TestSize.Level1)
+{
+    auto contentModifier = OH_ArkUI_RenderNodeUtils_CreateContentModifier();
+    ASSERT_NE(contentModifier, nullptr);
+
+    static bool drawCallbackCalled = false;
+    auto drawCallback = [](ArkUI_DrawContext* context, void* userData) {
+        drawCallbackCalled = true;
+    };
+
+    int userData = 123;
+    auto result = OH_ArkUI_RenderNodeUtils_SetContentModifierOnDraw(contentModifier, &userData, drawCallback);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    OH_ArkUI_RenderNodeUtils_DisposeContentModifier(contentModifier);
+}
+
+/**
+ * @tc.name: NativeRenderNodeTest112
+ * @tc.desc: Test CreateRectShapeOption and DisposeRectShapeOption functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest112, TestSize.Level1)
+{
+    auto rectShape = OH_ArkUI_RenderNodeUtils_CreateRectShapeOption();
+    ASSERT_NE(rectShape, nullptr);
+    OH_ArkUI_RenderNodeUtils_DisposeRectShapeOption(rectShape);
+}
+
+/**
+ * @tc.name: NativeRenderNodeTest113
+ * @tc.desc: Test SetRectShapeOptionEdgeValue function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest113, TestSize.Level1)
+{
+    auto rectShape = OH_ArkUI_RenderNodeUtils_CreateRectShapeOption();
+    ASSERT_NE(rectShape, nullptr);
+    OH_ArkUI_RenderNodeUtils_SetRectShapeOptionEdgeValue(rectShape, 10.0f, ARKUI_EDGE_DIRECTION_TOP);
+    OH_ArkUI_RenderNodeUtils_SetRectShapeOptionEdgeValue(rectShape, 20.0f, ARKUI_EDGE_DIRECTION_LEFT);
+    OH_ArkUI_RenderNodeUtils_DisposeRectShapeOption(rectShape);
+}
+
+/**
+ * @tc.name: NativeRenderNodeTest114
+ * @tc.desc: Test CreateNodeBorderStyleOption and DisposeNodeBorderStyleOption functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest114, TestSize.Level1)
+{
+    auto borderStyle = OH_ArkUI_RenderNodeUtils_CreateNodeBorderStyleOption();
+    ASSERT_NE(borderStyle, nullptr);
+    OH_ArkUI_RenderNodeUtils_DisposeNodeBorderStyleOption(borderStyle);
+}
+
+/**
+ * @tc.name: NativeRenderNodeTest115
+ * @tc.desc: Test SetNodeBorderStyleOptionEdgeStyle function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest115, TestSize.Level1)
+{
+    auto borderStyle = OH_ArkUI_RenderNodeUtils_CreateNodeBorderStyleOption();
+    ASSERT_NE(borderStyle, nullptr);
+    OH_ArkUI_RenderNodeUtils_SetNodeBorderStyleOptionEdgeStyle(
+        borderStyle, ARKUI_BORDER_STYLE_SOLID, ARKUI_EDGE_DIRECTION_TOP);
+    OH_ArkUI_RenderNodeUtils_SetNodeBorderStyleOptionEdgeStyle(
+        borderStyle, ARKUI_BORDER_STYLE_DASHED, ARKUI_EDGE_DIRECTION_LEFT);
+    OH_ArkUI_RenderNodeUtils_DisposeNodeBorderStyleOption(borderStyle);
+}
+
+/**
+ * @tc.name: NativeRenderNodeTest116
+ * @tc.desc: Test CreateNodeBorderWidthOption and DisposeNodeBorderWidthOption functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest116, TestSize.Level1)
+{
+    auto borderWidth = OH_ArkUI_RenderNodeUtils_CreateNodeBorderWidthOption();
+    ASSERT_NE(borderWidth, nullptr);
+    OH_ArkUI_RenderNodeUtils_DisposeNodeBorderWidthOption(borderWidth);
+}
+
+/**
+ * @tc.name: NativeRenderNodeTest117
+ * @tc.desc: Test SetNodeBorderWidthOptionEdgeWidth function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest117, TestSize.Level1)
+{
+    auto borderWidth = OH_ArkUI_RenderNodeUtils_CreateNodeBorderWidthOption();
+    ASSERT_NE(borderWidth, nullptr);
+    OH_ArkUI_RenderNodeUtils_SetNodeBorderWidthOptionEdgeWidth(borderWidth, 5.0f, ARKUI_EDGE_DIRECTION_TOP);
+    OH_ArkUI_RenderNodeUtils_SetNodeBorderWidthOptionEdgeWidth(borderWidth, 8.0f, ARKUI_EDGE_DIRECTION_RIGHT);
+    OH_ArkUI_RenderNodeUtils_DisposeNodeBorderWidthOption(borderWidth);
+}
+
+/**
+ * @tc.name: NativeRenderNodeTest118
+ * @tc.desc: Test CreateNodeBorderColorOption and DisposeNodeBorderColorOption functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest118, TestSize.Level1)
+{
+    auto borderColor = OH_ArkUI_RenderNodeUtils_CreateNodeBorderColorOption();
+    ASSERT_NE(borderColor, nullptr);
+    OH_ArkUI_RenderNodeUtils_DisposeNodeBorderColorOption(borderColor);
+}
+
+/**
+ * @tc.name: NativeRenderNodeTest119
+ * @tc.desc: Test SetNodeBorderColorOptionEdgeColor function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest119, TestSize.Level1)
+{
+    auto borderColor = OH_ArkUI_RenderNodeUtils_CreateNodeBorderColorOption();
+    ASSERT_NE(borderColor, nullptr);
+    OH_ArkUI_RenderNodeUtils_SetNodeBorderColorOptionEdgeColor(borderColor, 0xFF0000FF, ARKUI_EDGE_DIRECTION_TOP);
+    OH_ArkUI_RenderNodeUtils_SetNodeBorderColorOptionEdgeColor(borderColor, 0xFF00FF00, ARKUI_EDGE_DIRECTION_BOTTOM);
+    OH_ArkUI_RenderNodeUtils_DisposeNodeBorderColorOption(borderColor);
+}
+
+/**
+ * @tc.name: NativeRenderNodeTest120
+ * @tc.desc: Test CreateNodeBorderRadiusOption and DisposeNodeBorderRadiusOption functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest120, TestSize.Level1)
+{
+    auto borderRadius = OH_ArkUI_RenderNodeUtils_CreateNodeBorderRadiusOption();
+    ASSERT_NE(borderRadius, nullptr);
+    OH_ArkUI_RenderNodeUtils_DisposeNodeBorderRadiusOption(borderRadius);
+}
+
+/**
+ * @tc.name: NativeRenderNodeTest121
+ * @tc.desc: Test SetNodeBorderRadiusOptionEdgeRadius function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest121, TestSize.Level1)
+{
+    auto borderRadius = OH_ArkUI_RenderNodeUtils_CreateNodeBorderRadiusOption();
+    ASSERT_NE(borderRadius, nullptr);
+    OH_ArkUI_RenderNodeUtils_SetNodeBorderRadiusOptionEdgeRadius(borderRadius, 10, ARKUI_EDGE_DIRECTION_TOP);
+    OH_ArkUI_RenderNodeUtils_SetNodeBorderRadiusOptionEdgeRadius(borderRadius, 15, ARKUI_EDGE_DIRECTION_LEFT);
+    OH_ArkUI_RenderNodeUtils_DisposeNodeBorderRadiusOption(borderRadius);
+}
+
+/**
+ * @tc.name: NativeRenderNodeTest122
+ * @tc.desc: Test CreateCircleShapeOption and DisposeCircleShapeOption functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest122, TestSize.Level1)
+{
+    auto circleShape = OH_ArkUI_RenderNodeUtils_CreateCircleShapeOption();
+    ASSERT_NE(circleShape, nullptr);
+    OH_ArkUI_RenderNodeUtils_DisposeCircleShapeOption(circleShape);
+}
+
+/**
+ * @tc.name: NativeRenderNodeTest123
+ * @tc.desc: Test SetCircleShapeOptionCenterX and SetCircleShapeOptionCenterY functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest123, TestSize.Level1)
+{
+    auto circleShape = OH_ArkUI_RenderNodeUtils_CreateCircleShapeOption();
+    ASSERT_NE(circleShape, nullptr);
+    OH_ArkUI_RenderNodeUtils_SetCircleShapeOptionCenterX(circleShape, 100.0f);
+    OH_ArkUI_RenderNodeUtils_SetCircleShapeOptionCenterY(circleShape, 200.0f);
+    OH_ArkUI_RenderNodeUtils_DisposeCircleShapeOption(circleShape);
+}
+
+/**
+ * @tc.name: NativeRenderNodeTest124
+ * @tc.desc: Test SetCircleShapeOptionRadius function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest124, TestSize.Level1)
+{
+    auto circleShape = OH_ArkUI_RenderNodeUtils_CreateCircleShapeOption();
+    ASSERT_NE(circleShape, nullptr);
+    OH_ArkUI_RenderNodeUtils_SetCircleShapeOptionRadius(circleShape, 50.0f);
+    OH_ArkUI_RenderNodeUtils_DisposeCircleShapeOption(circleShape);
+}
+
+/**
+ * @tc.name: NativeRenderNodeTest125
+ * @tc.desc: Test CreateRoundRectShapeOption and DisposeRoundRectShapeOption functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest125, TestSize.Level1)
+{
+    auto roundRectShape = OH_ArkUI_RenderNodeUtils_CreateRoundRectShapeOption();
+    ASSERT_NE(roundRectShape, nullptr);
+    OH_ArkUI_RenderNodeUtils_DisposeRoundRectShapeOption(roundRectShape);
+}
+
+/**
+ * @tc.name: NativeRenderNodeTest126
+ * @tc.desc: Test SetRoundRectShapeOptionEdgeValue and SetRoundRectShapeOptionCornerXY functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest126, TestSize.Level1)
+{
+    auto roundRectShape = OH_ArkUI_RenderNodeUtils_CreateRoundRectShapeOption();
+    ASSERT_NE(roundRectShape, nullptr);
+    OH_ArkUI_RenderNodeUtils_SetRoundRectShapeOptionEdgeValue(roundRectShape, 100.0f, ARKUI_EDGE_DIRECTION_TOP);
+    OH_ArkUI_RenderNodeUtils_SetRoundRectShapeOptionCornerXY(
+        roundRectShape, 10.0f, 10.0f, ARKUI_CORNER_DIRECTION_TOP_LEFT);
+    OH_ArkUI_RenderNodeUtils_DisposeRoundRectShapeOption(roundRectShape);
+}
+
+/**
+ * @tc.name: NativeRenderNodeTest127
+ * @tc.desc: Test CreateCommandPathOption and DisposeCommandPathOption functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest127, TestSize.Level1)
+{
+    auto commandPath = OH_ArkUI_RenderNodeUtils_CreateCommandPathOption();
+    ASSERT_NE(commandPath, nullptr);
+    OH_ArkUI_RenderNodeUtils_DisposeCommandPathOption(commandPath);
+}
+
+/**
+ * @tc.name: NativeRenderNodeTest128
+ * @tc.desc: Test SetCommandPathOptionCommands function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest128, TestSize.Level1)
+{
+    auto commandPath = OH_ArkUI_RenderNodeUtils_CreateCommandPathOption();
+    ASSERT_NE(commandPath, nullptr);
+    char* commands = const_cast<char*>("M 100 100 L 200 100 L 200 200 Z");
+    OH_ArkUI_RenderNodeUtils_SetCommandPathOptionCommands(commandPath, commands);
+    OH_ArkUI_RenderNodeUtils_DisposeCommandPathOption(commandPath);
+}
+
+/**
+ * @tc.name: NativeRenderNodeTest129
+ * @tc.desc: Test CreateRenderNodeMaskOptionFromRectShape and CreateRenderNodeMaskOptionFromRoundRectShape functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest129, TestSize.Level1)
+{
+    auto rectShape = OH_ArkUI_RenderNodeUtils_CreateRectShapeOption();
+    ASSERT_NE(rectShape, nullptr);
+    auto maskFromRect = OH_ArkUI_RenderNodeUtils_CreateRenderNodeMaskOptionFromRectShape(rectShape);
+    ASSERT_NE(maskFromRect, nullptr);
+
+    auto roundRectShape = OH_ArkUI_RenderNodeUtils_CreateRoundRectShapeOption();
+    ASSERT_NE(roundRectShape, nullptr);
+    auto maskFromRoundRect = OH_ArkUI_RenderNodeUtils_CreateRenderNodeMaskOptionFromRoundRectShape(roundRectShape);
+    ASSERT_NE(maskFromRoundRect, nullptr);
+
+    OH_ArkUI_RenderNodeUtils_DisposeRenderNodeMaskOption(maskFromRect);
+    OH_ArkUI_RenderNodeUtils_DisposeRenderNodeMaskOption(maskFromRoundRect);
+    OH_ArkUI_RenderNodeUtils_DisposeRectShapeOption(rectShape);
+    OH_ArkUI_RenderNodeUtils_DisposeRoundRectShapeOption(roundRectShape);
+}
+
+/**
+ * @tc.name: NativeRenderNodeTest130
+ * @tc.desc: Test CreateRenderNodeMaskOptionFromCircleShape and CreateRenderNodeMaskOptionFromOvalShape functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest130, TestSize.Level1)
+{
+    auto circleShape = OH_ArkUI_RenderNodeUtils_CreateCircleShapeOption();
+    ASSERT_NE(circleShape, nullptr);
+    auto maskFromCircle = OH_ArkUI_RenderNodeUtils_CreateRenderNodeMaskOptionFromCircleShape(circleShape);
+    ASSERT_NE(maskFromCircle, nullptr);
+
+    auto ovalShape = OH_ArkUI_RenderNodeUtils_CreateRectShapeOption();
+    ASSERT_NE(ovalShape, nullptr);
+    auto maskFromOval = OH_ArkUI_RenderNodeUtils_CreateRenderNodeMaskOptionFromOvalShape(ovalShape);
+    ASSERT_NE(maskFromOval, nullptr);
+
+    OH_ArkUI_RenderNodeUtils_DisposeRenderNodeMaskOption(maskFromCircle);
+    OH_ArkUI_RenderNodeUtils_DisposeRenderNodeMaskOption(maskFromOval);
+    OH_ArkUI_RenderNodeUtils_DisposeCircleShapeOption(circleShape);
+    OH_ArkUI_RenderNodeUtils_DisposeRectShapeOption(ovalShape);
+}
+
+/**
+ * @tc.name: NativeRenderNodeTest131
+ * @tc.desc: Test CreateRenderNodeMaskOptionFromCommandPath and DisposeRenderNodeMaskOption functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest131, TestSize.Level1)
+{
+    auto commandPath = OH_ArkUI_RenderNodeUtils_CreateCommandPathOption();
+    ASSERT_NE(commandPath, nullptr);
+    auto maskFromPath = OH_ArkUI_RenderNodeUtils_CreateRenderNodeMaskOptionFromCommandPath(commandPath);
+    ASSERT_NE(maskFromPath, nullptr);
+
+    OH_ArkUI_RenderNodeUtils_DisposeRenderNodeMaskOption(maskFromPath);
+    OH_ArkUI_RenderNodeUtils_DisposeCommandPathOption(commandPath);
+}
+
+/**
+ * @tc.name: NativeRenderNodeTest132
+ * @tc.desc: Test SetRenderNodeMaskOptionFillColor and SetRenderNodeMaskOptionStrokeColor functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest132, TestSize.Level1)
+{
+    auto rectShape = OH_ArkUI_RenderNodeUtils_CreateRectShapeOption();
+    ASSERT_NE(rectShape, nullptr);
+    auto mask = OH_ArkUI_RenderNodeUtils_CreateRenderNodeMaskOptionFromRectShape(rectShape);
+    ASSERT_NE(mask, nullptr);
+
+    OH_ArkUI_RenderNodeUtils_SetRenderNodeMaskOptionFillColor(mask, 0xFF0000FF);
+    OH_ArkUI_RenderNodeUtils_SetRenderNodeMaskOptionStrokeColor(mask, 0xFF00FF00);
+
+    OH_ArkUI_RenderNodeUtils_DisposeRenderNodeMaskOption(mask);
+    OH_ArkUI_RenderNodeUtils_DisposeRectShapeOption(rectShape);
+}
+
+/**
+ * @tc.name: NativeRenderNodeTest133
+ * @tc.desc: Test SetRenderNodeMaskOptionStrokeWidth function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest133, TestSize.Level1)
+{
+    auto rectShape = OH_ArkUI_RenderNodeUtils_CreateRectShapeOption();
+    ASSERT_NE(rectShape, nullptr);
+    auto mask = OH_ArkUI_RenderNodeUtils_CreateRenderNodeMaskOptionFromRectShape(rectShape);
+    ASSERT_NE(mask, nullptr);
+
+    OH_ArkUI_RenderNodeUtils_SetRenderNodeMaskOptionStrokeWidth(mask, 5.0f);
+
+    OH_ArkUI_RenderNodeUtils_DisposeRenderNodeMaskOption(mask);
+    OH_ArkUI_RenderNodeUtils_DisposeRectShapeOption(rectShape);
+}
+
+/**
+ * @tc.name: NativeRenderNodeTest134
+ * @tc.desc: Test CreateRenderNodeClipOptionFromRectShape and CreateRenderNodeClipOptionFromRoundRectShape functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest134, TestSize.Level1)
+{
+    auto rectShape = OH_ArkUI_RenderNodeUtils_CreateRectShapeOption();
+    ASSERT_NE(rectShape, nullptr);
+    auto clipFromRect = OH_ArkUI_RenderNodeUtils_CreateRenderNodeClipOptionFromRectShape(rectShape);
+    ASSERT_NE(clipFromRect, nullptr);
+
+    auto roundRectShape = OH_ArkUI_RenderNodeUtils_CreateRoundRectShapeOption();
+    ASSERT_NE(roundRectShape, nullptr);
+    auto clipFromRoundRect = OH_ArkUI_RenderNodeUtils_CreateRenderNodeClipOptionFromRoundRectShape(roundRectShape);
+    ASSERT_NE(clipFromRoundRect, nullptr);
+
+    OH_ArkUI_RenderNodeUtils_DisposeRenderNodeClipOption(clipFromRect);
+    OH_ArkUI_RenderNodeUtils_DisposeRenderNodeClipOption(clipFromRoundRect);
+    OH_ArkUI_RenderNodeUtils_DisposeRectShapeOption(rectShape);
+    OH_ArkUI_RenderNodeUtils_DisposeRoundRectShapeOption(roundRectShape);
+}
+
+/**
+ * @tc.name: NativeRenderNodeTest135
+ * @tc.desc: Test CreateRenderNodeClipOptionFromCircleShape and CreateRenderNodeClipOptionFromOvalShape functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest135, TestSize.Level1)
+{
+    auto circleShape = OH_ArkUI_RenderNodeUtils_CreateCircleShapeOption();
+    ASSERT_NE(circleShape, nullptr);
+    auto clipFromCircle = OH_ArkUI_RenderNodeUtils_CreateRenderNodeClipOptionFromCircleShape(circleShape);
+    ASSERT_NE(clipFromCircle, nullptr);
+
+    auto ovalShape = OH_ArkUI_RenderNodeUtils_CreateRectShapeOption();
+    ASSERT_NE(ovalShape, nullptr);
+    auto clipFromOval = OH_ArkUI_RenderNodeUtils_CreateRenderNodeClipOptionFromOvalShape(ovalShape);
+    ASSERT_NE(clipFromOval, nullptr);
+
+    OH_ArkUI_RenderNodeUtils_DisposeRenderNodeClipOption(clipFromCircle);
+    OH_ArkUI_RenderNodeUtils_DisposeRenderNodeClipOption(clipFromOval);
+    OH_ArkUI_RenderNodeUtils_DisposeCircleShapeOption(circleShape);
+    OH_ArkUI_RenderNodeUtils_DisposeRectShapeOption(ovalShape);
+}
+
+/**
+ * @tc.name: NativeRenderNodeTest136
+ * @tc.desc: Test CreateRenderNodeClipOptionFromCommandPath and DisposeRenderNodeClipOption functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest136, TestSize.Level1)
+{
+    auto commandPath = OH_ArkUI_RenderNodeUtils_CreateCommandPathOption();
+    ASSERT_NE(commandPath, nullptr);
+    auto clipFromPath = OH_ArkUI_RenderNodeUtils_CreateRenderNodeClipOptionFromCommandPath(commandPath);
+    ASSERT_NE(clipFromPath, nullptr);
+
+    OH_ArkUI_RenderNodeUtils_DisposeRenderNodeClipOption(clipFromPath);
+    OH_ArkUI_RenderNodeUtils_DisposeCommandPathOption(commandPath);
+}
+
+/**
+ * @tc.name: NativeRenderNodeTest137
+ * @tc.desc: Test SetMask function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest137, TestSize.Level1)
+{
+    auto renderNode = OH_ArkUI_RenderNodeUtils_CreateNode();
+    ASSERT_NE(renderNode, nullptr);
+
+    auto rectShape = OH_ArkUI_RenderNodeUtils_CreateRectShapeOption();
+    ASSERT_NE(rectShape, nullptr);
+    OH_ArkUI_RenderNodeUtils_SetRectShapeOptionEdgeValue(rectShape, 100.0f, ARKUI_EDGE_DIRECTION_TOP);
+    OH_ArkUI_RenderNodeUtils_SetRectShapeOptionEdgeValue(rectShape, 100.0f, ARKUI_EDGE_DIRECTION_LEFT);
+    OH_ArkUI_RenderNodeUtils_SetRectShapeOptionEdgeValue(rectShape, 200.0f, ARKUI_EDGE_DIRECTION_RIGHT);
+    OH_ArkUI_RenderNodeUtils_SetRectShapeOptionEdgeValue(rectShape, 200.0f, ARKUI_EDGE_DIRECTION_BOTTOM);
+
+    auto maskOption = OH_ArkUI_RenderNodeUtils_CreateRenderNodeMaskOptionFromRectShape(rectShape);
+    ASSERT_NE(maskOption, nullptr);
+    OH_ArkUI_RenderNodeUtils_SetRenderNodeMaskOptionFillColor(maskOption, 0xFF0000FF);
+    OH_ArkUI_RenderNodeUtils_SetRenderNodeMaskOptionStrokeColor(maskOption, 0xFF00FF00);
+    OH_ArkUI_RenderNodeUtils_SetRenderNodeMaskOptionStrokeWidth(maskOption, 2.0f);
+
+    auto result = OH_ArkUI_RenderNodeUtils_SetMask(renderNode, maskOption);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+
+    OH_ArkUI_RenderNodeUtils_DisposeRenderNodeMaskOption(maskOption);
+    OH_ArkUI_RenderNodeUtils_DisposeRectShapeOption(rectShape);
+    OH_ArkUI_RenderNodeUtils_DisposeNode(renderNode);
+}
+
+/**
+ * @tc.name: NativeRenderNodeTest138
+ * @tc.desc: Test SetClip function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest138, TestSize.Level1)
+{
+    auto renderNode = OH_ArkUI_RenderNodeUtils_CreateNode();
+    ASSERT_NE(renderNode, nullptr);
+
+    auto circleShape = OH_ArkUI_RenderNodeUtils_CreateCircleShapeOption();
+    ASSERT_NE(circleShape, nullptr);
+    OH_ArkUI_RenderNodeUtils_SetCircleShapeOptionCenterX(circleShape, 50.0f);
+    OH_ArkUI_RenderNodeUtils_SetCircleShapeOptionCenterY(circleShape, 50.0f);
+    OH_ArkUI_RenderNodeUtils_SetCircleShapeOptionRadius(circleShape, 30.0f);
+
+    auto clipOption = OH_ArkUI_RenderNodeUtils_CreateRenderNodeClipOptionFromCircleShape(circleShape);
+    ASSERT_NE(clipOption, nullptr);
+
+    auto result = OH_ArkUI_RenderNodeUtils_SetClip(renderNode, clipOption);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+
+    OH_ArkUI_RenderNodeUtils_DisposeRenderNodeClipOption(clipOption);
+    OH_ArkUI_RenderNodeUtils_DisposeCircleShapeOption(circleShape);
+    OH_ArkUI_RenderNodeUtils_DisposeNode(renderNode);
+}
+
 } // namespace OHOS::Ace

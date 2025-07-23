@@ -1256,6 +1256,7 @@ ohos_unittest("native_render_node_test") {
     "c_utils:utils",
     "ets_runtime:libark_jsruntime",
     "googletest:gmock_main",
+    "graphic_2d:2d_graphics",
     "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
     "graphic_2d:native_drawing_ndk",
