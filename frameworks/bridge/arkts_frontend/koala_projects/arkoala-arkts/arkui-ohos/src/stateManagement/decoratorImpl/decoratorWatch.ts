@@ -88,7 +88,7 @@ export class SubscribedWatches implements ISubscribedWatches {
         return this.subscribers_.delete(id);
     }
     public executeOnSubscribingWatches(propertyName: string): void {
-        Array.from(this.subscribers_).forEach((watchId: WatchIdType) => {
+        this.subscribers_.forEach((watchId: WatchIdType) => {
             if (!WatchFunc.execWatchById(watchId, propertyName)) {
                 // lazy delete WatchIds from subscribers_ Set
                 // whose watchId has been removed from watchId2WatchFunc by

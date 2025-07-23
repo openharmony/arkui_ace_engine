@@ -48,7 +48,6 @@ import { WatchFunc } from './decoratorWatch';
 
 */
 
-// TODO UiUtils.deepCopy
 function deepCopy<T>(value: T): T {
     // if T is @Observed + @Track obect need generate addRef for each
     // @Track property otherwise there will be no parent to child upddate
