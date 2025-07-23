@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -52,7 +52,7 @@ HWTEST_F(ScrollModelNGTestNg, ScrollModelNGTestNg001, TestSize.Level1)
 
 /**
  * @tc.name: ScrollModelNGTestNg002
- * @tc.desc: Test SetEnablePaging When enablePaging is True
+ * @tc.desc: Test SetEnablePaging When enablePaging is true
  * @tc.type: FUNC
  */
 HWTEST_F(ScrollModelNGTestNg, ScrollModelNGTestNg002, TestSize.Level1)

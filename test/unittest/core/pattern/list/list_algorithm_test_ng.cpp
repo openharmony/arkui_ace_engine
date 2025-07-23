@@ -1763,3 +1763,4 @@ HWTEST_F(ListAlgorithmTestNg, CheckAndUpdateCurOffset004, TestSize.Level1)
     EXPECT_EQ(listItemLayoutAlgorithm->curOffset_, -2.0f);
 }
 } // namespace OHOS::Ace::NG
+
