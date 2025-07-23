@@ -26,6 +26,9 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
+namespace {
+const std::u16string PLACEHOLDER_TEXT = u"Placeholder text";
+} // namespace
 
 class RichEditorEditTestNg : public RichEditorCommonTestNg {
 public:
@@ -1060,7 +1063,7 @@ HWTEST_F(RichEditorEditTestNg, SetPlaceholder002, TestSize.Level1)
 {
     auto frameNode = AceType::MakeRefPtr<FrameNode>("frameNode", 1, AceType::MakeRefPtr<RichEditorPattern>());
     PlaceholderOptions options;
-    std::u16string value = u"Placeholder text";
+    std::u16string value = PLACEHOLDER_TEXT;
     options.value = value;
     options.fontSize = Dimension(12.0);
     options.fontStyle = OHOS::Ace::FontStyle::ITALIC;
@@ -1083,7 +1086,7 @@ HWTEST_F(RichEditorEditTestNg, SetPlaceholder003, TestSize.Level1)
 {
     auto frameNode = AceType::MakeRefPtr<FrameNode>("frameNode", 1, AceType::MakeRefPtr<RichEditorPattern>());
     PlaceholderOptions options;
-    options.value = u"Placeholder text";
+    options.value = PLACEHOLDER_TEXT;
     options.fontSize = Dimension(12.0);
     options.fontStyle = OHOS::Ace::FontStyle::ITALIC;
     options.fontWeight = FontWeight::BOLD;
@@ -1105,7 +1108,7 @@ HWTEST_F(RichEditorEditTestNg, SetPlaceholder004, TestSize.Level1)
 {
     auto frameNode = AceType::MakeRefPtr<FrameNode>("frameNode", 1, AceType::MakeRefPtr<RichEditorPattern>());
     PlaceholderOptions options;
-    options.value = u"Placeholder text";
+    options.value = PLACEHOLDER_TEXT;
     options.fontSize = Dimension(12.0);
     options.fontStyle = OHOS::Ace::FontStyle::ITALIC;
     options.fontWeight = FontWeight::BOLD;
@@ -1127,7 +1130,7 @@ HWTEST_F(RichEditorEditTestNg, SetPlaceholder005, TestSize.Level1)
 {
     auto frameNode = AceType::MakeRefPtr<FrameNode>("frameNode", 1, AceType::MakeRefPtr<RichEditorPattern>());
     PlaceholderOptions options;
-    options.value = u"Placeholder text";
+    options.value = PLACEHOLDER_TEXT;
     options.fontSize = Dimension(12.0);
     options.fontStyle = OHOS::Ace::FontStyle::ITALIC;
     options.fontWeight = FontWeight::BOLD;
@@ -1149,7 +1152,7 @@ HWTEST_F(RichEditorEditTestNg, SetPlaceholder006, TestSize.Level1)
 {
     auto frameNode = AceType::MakeRefPtr<FrameNode>("frameNode", 1, AceType::MakeRefPtr<RichEditorPattern>());
     PlaceholderOptions options;
-    options.value = u"Placeholder text";
+    options.value = PLACEHOLDER_TEXT;
     options.fontSize = Dimension(12.0);
     options.fontStyle = OHOS::Ace::FontStyle::ITALIC;
     options.fontWeight = FontWeight::BOLD;
@@ -1240,6 +1243,43 @@ HWTEST_F(RichEditorEditTestNg, SetPlaceholder011, TestSize.Level1)
     ASSERT_NE(textLayoutProperty, nullptr);
     EXPECT_FALSE(options.fontWeight.has_value());
     frameNode.Reset();
+}
+
+/**
+ * @tc.name: IsHint001
+ * @tc.desc: Test IsHint.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestNg, IsHint001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get pattern
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto accProp = richEditorNode_->GetAccessibilityProperty<RichEditorAccessibilityProperty>();
+    ASSERT_NE(accProp, nullptr);
+
+    EXPECT_FALSE(accProp->IsHint());
+
+    /**
+     * @tc.steps: step2. set placeholder
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNode>("frameNode", 1, AceType::MakeRefPtr<RichEditorPattern>());
+    PlaceholderOptions placeholder;
+    placeholder.value = PLACEHOLDER_TEXT;
+    RichEditorModelNG::SetPlaceholder(Referenced::RawPtr(frameNode), placeholder);
+    auto textLayoutProperty = frameNode->GetLayoutProperty<RichEditorLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    EXPECT_EQ(textLayoutProperty->GetPlaceholder(), PLACEHOLDER_TEXT);
+
+    /**
+     * @tc.steps: step3. set text span
+     */
+    AddSpan(INIT_VALUE_1);
+    EXPECT_EQ(richEditorPattern->GetTextContentLength(), 6);
+    EXPECT_FALSE(accProp->IsHint());
 }
 
 /**
