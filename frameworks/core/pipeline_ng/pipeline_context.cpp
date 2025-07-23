@@ -867,6 +867,7 @@ void PipelineContext::FlushMouseEventVoluntarily()
     event.sourceType = SourceType::MOUSE;
     event.deviceId = lastMouseEvent_->deviceId;
     event.sourceTool = SourceTool::MOUSE;
+    event.targetDisplayId = lastMouseEvent_->targetDisplayId;
 
     auto scaleEvent = event.CreateScaleEvent(viewScale_);
     TouchRestrict touchRestrict { TouchRestrict::NONE };
@@ -3892,6 +3893,7 @@ void PipelineContext::UpdateLastMoveEvent(const MouseEvent& event)
     lastMouseEvent_->pointerEvent = event.pointerEvent;
     lastMouseEvent_->deviceId = event.deviceId;
     lastMouseEvent_->sourceTool = event.sourceTool;
+    lastMouseEvent_->targetDisplayId = event.targetDisplayId;
     lastSourceType_ = event.sourceType;
 }
 
@@ -6400,6 +6402,7 @@ void PipelineContext::FlushMouseEventForHover()
     event.touchEventId = lastMouseEvent_->touchEventId;
     event.mockFlushEvent = true;
     event.pointerEvent = lastMouseEvent_->pointerEvent;
+    event.targetDisplayId = lastMouseEvent_->targetDisplayId;
     TAG_LOGD(AceLogTag::ACE_MOUSE,
         "the mock mouse event action: %{public}d x: %{public}f y: %{public}f", event.action, event.x, event.y);
     TouchRestrict touchRestrict { TouchRestrict::NONE };

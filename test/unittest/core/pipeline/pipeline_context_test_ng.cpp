@@ -2220,9 +2220,11 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg111, TestSize.Level1)
 {
     MouseEvent mouseEvent;
     context_->lastMouseEvent_ = std::make_unique<MouseEvent>(mouseEvent);
+    mouseEvent.targetDisplayId = 10;
     mouseEvent.mockFlushEvent = false;
     context_->UpdateLastMoveEvent(mouseEvent);
     EXPECT_EQ(context_->lastMouseEvent_->isMockWindowTransFlag, false);
+    EXPECT_EQ(context_->lastMouseEvent_->targetDisplayId, 10);
 }
 
 /**
