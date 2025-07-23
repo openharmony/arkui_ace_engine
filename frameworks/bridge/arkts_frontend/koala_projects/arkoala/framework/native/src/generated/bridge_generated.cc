@@ -34621,6 +34621,16 @@ KInteropReturnBuffer impl_FrameNode_getUserConfigSize(Ark_NativePointer thisPtr)
         return _retSerializer.toReturnBuffer();
 }
 KOALA_INTEROP_1(FrameNode_getUserConfigSize, KInteropReturnBuffer, Ark_NativePointer)
+Ark_NativePointer impl_FrameNode_createByRawPtr(Ark_NativePointer thisPtr) {
+        void* self = reinterpret_cast<void*>(thisPtr);
+        return GetAccessors()->getFrameNodeAccessor()->createByRawPtr(self); 
+}
+KOALA_INTEROP_1(FrameNode_createByRawPtr, Ark_NativePointer, Ark_NativePointer)
+Ark_NativePointer impl_FrameNode_unWrapRawPtr(Ark_NativePointer thisPtr) {
+        Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
+        return GetAccessors()->getFrameNodeAccessor()->unWrapRawPtr(self); 
+}
+KOALA_INTEROP_1(FrameNode_unWrapRawPtr, Ark_NativePointer, Ark_NativePointer)
 Ark_NativePointer impl_Matrix4Transit_ctor() {
         return GetAccessors()->getMatrix4TransitAccessor()->ctor();
 }

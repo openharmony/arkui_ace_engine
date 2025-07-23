@@ -25051,6 +25051,8 @@ typedef struct GENERATED_ArkUIFrameNodeAccessor {
     void (*disposeTree)(Ark_FrameNode peer);
     void (*setCrossLanguageOptions)(Ark_FrameNode peer, Ark_Boolean attributeSettings);
     Ark_Boolean (*getCrossLanguageOptions)(Ark_FrameNode peer);
+    Ark_FrameNode (*createByRawPtr)(void* rawPtr);
+    void* (*unWrapRawPtr)(Ark_FrameNode rawPtr);
 } GENERATED_ArkUIFrameNodeAccessor;
 
 typedef struct GENERATED_ArkUILengthMetricsAccessor {
