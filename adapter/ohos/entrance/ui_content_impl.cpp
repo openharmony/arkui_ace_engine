@@ -2037,6 +2037,7 @@ void UIContentImpl::SetAceApplicationInfo(std::shared_ptr<OHOS::AbilityRuntime::
     AceApplicationInfo::GetInstance().SetApiTargetVersion(context->GetApplicationInfo()->apiTargetVersion);
     AceApplicationInfo::GetInstance().SetAppVersionName(context->GetApplicationInfo()->versionName);
     AceApplicationInfo::GetInstance().SetAppVersionCode(context->GetApplicationInfo()->versionCode);
+    AceApplicationInfo::GetInstance().SetDebugForParallel(context->GetApplicationInfo()->debug);
     AceApplicationInfo::GetInstance().SetUid(IPCSkeleton::GetCallingUid());
     AceApplicationInfo::GetInstance().SetPid(IPCSkeleton::GetCallingRealPid());
     CapabilityRegistry::Register();
@@ -2660,10 +2661,10 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
             container->SetLocalStorage(reinterpret_cast<NativeReference*>(ref), context);
         }
     }
-    if (runtime_ && storageWrapper.aniStorage_.has_value()) {
+    if (runtime_ && storageWrapper.aniStorage_.has_value()) { // 1.2 SetAniLocalStorage
         auto storage = storageWrapper.aniStorage_.value();
         if (!storage) {
-            container->SetLocalStorage(nullptr, context);
+            container->SetAniLocalStorage(nullptr, context);
         } else {
             auto* env = reinterpret_cast<ani_env*>(runtime_);
             ani_ref ref;

@@ -29,7 +29,7 @@ npm_cmd("incremental_install") {
     install = true
 }
 
-npm_cmd("incremental.abc") {
+npm_cmd("incremental_build") {
     outputs = [
         "$target_out_dir/incremental.abc"
     ]
@@ -40,16 +40,18 @@ npm_cmd("incremental.abc") {
       "$koala_root/ui2abc:ui2abc"
     ]
 
-    external_deps = ets2abc_build_deps
-    external_deps += static_linker_build_deps
-    external_deps += [
-        "ets_frontend:libes2panda_public(${host_toolchain})",
+    external_deps = [
+        ets2abc_build_deps,
+        static_linker_build_deps,
+        "ets_frontend:libes2panda_public(${host_toolchain})"
     ]
+    built_file_path = rebase_path("./runtime/build/incremental.abc")
+    target_out_path = rebase_path("$target_out_dir/incremental.abc")
 }
 
-group("incremental") {
+group("incremental_abc") {
     deps = [
       "../ui2abc:fast_arktsc_build",
-      ":incremental.abc"
+      ":incremental_build"
     ]
 }

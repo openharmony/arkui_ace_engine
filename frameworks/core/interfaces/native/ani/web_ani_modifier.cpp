@@ -336,7 +336,7 @@ bool TransferWebResourceRequestToStatic(void* peer, void* nativePtr)
     CHECK_NULL_RETURN(objectPeer, false);
     auto* transfer = reinterpret_cast<WebTransferBase<RefPtr<WebRequest>>*>(nativePtr);
     CHECK_NULL_RETURN(transfer, false);
-    objectPeer->handler = transfer->get<0>();
+    objectPeer->webRequest = transfer->get<0>();
     return true;
 #else
     return false;
@@ -348,7 +348,7 @@ napi_value TransferWebResourceRequestToDynamic(napi_env env, void* peer)
 #ifdef WEB_SUPPORTED
     auto* objectPeer = reinterpret_cast<WebResourceRequestPeer *>(peer);
     CHECK_NULL_RETURN(objectPeer, nullptr);
-    return OHOS::Ace::Framework::CreateJSWebResourceRequestObject(env, objectPeer->handler);
+    return OHOS::Ace::Framework::CreateJSWebResourceRequestObject(env, objectPeer->webRequest);
 #else
     return nullptr;
 #endif // WEB_SUPPORTED
@@ -361,7 +361,7 @@ bool TransferConsoleMessageToStatic(void* peer, void* nativePtr)
     CHECK_NULL_RETURN(objectPeer, false);
     auto* transfer = reinterpret_cast<WebTransferBase<RefPtr<WebConsoleLog>>*>(nativePtr);
     CHECK_NULL_RETURN(transfer, false);
-    objectPeer->handler = transfer->get<0>();
+    objectPeer->webConsoleLog = transfer->get<0>();
     return true;
 #else
     return false;
@@ -373,7 +373,7 @@ napi_value TransferConsoleMessageToDynamic(napi_env env, void* peer)
 #ifdef WEB_SUPPORTED
     auto* objectPeer = reinterpret_cast<ConsoleMessagePeer *>(peer);
     CHECK_NULL_RETURN(objectPeer, nullptr);
-    return OHOS::Ace::Framework::CreateJSWebConsoleLogObject(env, objectPeer->handler);
+    return OHOS::Ace::Framework::CreateJSWebConsoleLogObject(env, objectPeer->webConsoleLog);
 #else
     return nullptr;
 #endif // WEB_SUPPORTED

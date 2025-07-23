@@ -155,10 +155,6 @@ export class InteropStorageBase extends StorageBase {
                 proxy.invokeMethod('set', ESValue.wrap(value));
             };
             state.setProxyValue = setProxyValue;
-            const notifyCallback = (propertyName: string): void => {
-                proxy.invokeMethod('notifyPropertyHasChangedPU');
-            };
-            state.setNotifyCallback(notifyCallback);
         }
         return state.getProxy()!.unwrap();
     }

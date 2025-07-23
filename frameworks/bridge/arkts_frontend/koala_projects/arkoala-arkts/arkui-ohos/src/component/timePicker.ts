@@ -25,13 +25,14 @@ import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { ArkCommonMethodPeer, CommonMethod, PickerTextStyle, PickerDialogButtonStyle, Rectangle, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, ShadowOptions, ShadowStyle, HoverModeAreaType, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { DateTimeOptions } from "./arkui-intl"
+import { ArkCommonMethodPeer, CommonMethod, PickerTextStyle, PickerDialogButtonStyle, Rectangle, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, ShadowOptions, ShadowStyle, HoverModeAreaType, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable } from "./common"
+import { DateTimeOptions } from "@ohos/intl"
 import { CrownSensitivity } from "./enums"
 import { Callback_Date_Void } from "./calendarPicker"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { DialogAlignment } from "./alertDialog"
 import { Offset, ResourceColor } from "./units"
+import { TimePickerOpsHandWritten } from "./../handwritten"
 
 export class TimePickerDialog {
     public static show(options?: TimePickerDialogOptions): undefined {
@@ -320,7 +321,7 @@ export enum TimePickerFormat {
     HOUR_MINUTE_SECOND = 1
 }
 export interface TimePickerOptions {
-    selected?: Date;
+    selected?: Date | Bindable<Date>;
     format?: TimePickerFormat;
     start?: Date;
     end?: Date;
@@ -424,10 +425,24 @@ export class ArkTimePickerComponent extends ArkCommonMethodComponent implements 
     getPeer(): ArkTimePickerPeer {
         return (this.peer as ArkTimePickerPeer)
     }
+    IsTimePickerOptionValueBindable(options?: TimePickerOptions): boolean {
+        if (RuntimeType.UNDEFINED != runtimeType(options)) {
+            const options_selected = options!.selected
+            if (RuntimeType.UNDEFINED != runtimeType(options_selected)) {
+                const options_selected_value = options_selected!
+                return TypeChecker.isBindableNumber(options_selected_value)
+            }
+        }
+        return false
+    }
     public setTimePickerOptions(options?: TimePickerOptions): this {
         if (this.checkPriority("setTimePickerOptions")) {
             const options_casted = options as (TimePickerOptions | undefined)
             this.getPeer()?.setTimePickerOptionsAttribute(options_casted)
+
+            if (this.IsTimePickerOptionValueBindable(options)) {
+                TimePickerOpsHandWritten.hookTimePickerSelectedImpl(this.getPeer().peer.ptr, (options!.selected as Bindable<Date>))
+            }
             return this
         }
         return this

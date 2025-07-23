@@ -97,7 +97,7 @@ export interface AlertDialogButtonBaseOptions {
 export interface AlertDialogButtonOptions extends AlertDialogButtonBaseOptions {
     primary?: boolean;
 }
-export interface TextStyle_alert_dialog {
+export interface AlertDialogTextStyleOptions {
     wordBreak?: WordBreak;
 }
 export interface AlertDialogParam {
@@ -125,7 +125,7 @@ export interface AlertDialogParam {
     borderColor?: ResourceColor | EdgeColors | LocalizedEdgeColors;
     borderStyle?: BorderStyle | EdgeStyles;
     shadow?: ShadowOptions | ShadowStyle;
-    textStyle?: TextStyle_alert_dialog;
+    textStyle?: AlertDialogTextStyleOptions;
     enableHoverMode?: boolean;
     hoverModeArea?: HoverModeAreaType;
     onDidAppear?: ((data: undefined) => void);

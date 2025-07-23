@@ -17,6 +17,7 @@
 
 #include "ani.h"
 #include "animation/animation_ani_impl.h"
+#include "canvas/canvas_module.h"
 #include "common/common_module.h"
 #include "componentSnapshot/componentSnapshot_module.h"
 #include "content_slot/content_slot_module.h"
@@ -324,6 +325,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_CustomNode_Construct",
             "ILarkui/ArkCustomComponent/ArkCustomComponent;:J",
             reinterpret_cast<void*>(OHOS::Ace::Ani::ConstructCustomNode)
+        },
+        ani_native_function {
+            "_CustomNode_RequestFrame",
+            ":V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::RequestFrame)
         },
         ani_native_function {
             "_LazyForEachNode_Construct",
@@ -719,7 +725,42 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_Common_px2lpx",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::Px2lpx)
-       }
+       },
+       ani_native_function {
+            "_CanvasRenderer_SetPixelMap",
+            "JL@ohos/multimedia/image/image/PixelMap;:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CanvasModule::SetPixelMap)
+        },
+        ani_native_function {
+            "_CanvasRenderer_GetPixelMap",
+            "JDDDD:L@ohos/multimedia/image/image/PixelMap;",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CanvasModule::GetPixelMap)
+        },
+        ani_native_function {
+            "_CanvasRenderer_DrawPixelMap0",
+            "JL@ohos/multimedia/image/image/PixelMap;DD:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CanvasModule::DrawPixelMap0)
+        },
+        ani_native_function {
+            "_CanvasRenderer_DrawPixelMap1",
+            "JL@ohos/multimedia/image/image/PixelMap;DDDD:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CanvasModule::DrawPixelMap1)
+        },
+        ani_native_function {
+            "_CanvasRenderer_DrawPixelMap2",
+            "JL@ohos/multimedia/image/image/PixelMap;DDDDDDDD:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CanvasModule::DrawPixelMap2)
+        },
+        ani_native_function {
+            "_ImageBitmap_Construct0",
+            "Lstd/core/String;I:J",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CanvasModule::ImageBitmapConstruct0)
+        },
+        ani_native_function {
+            "_ImageBitmap_Construct1",
+            "L@ohos/multimedia/image/image/PixelMap;I:J",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CanvasModule::ImageBitmapConstruct1)
+        }
     };
 
     auto bindRst = env->Class_BindNativeMethods(cls, methods.data(), methods.size());

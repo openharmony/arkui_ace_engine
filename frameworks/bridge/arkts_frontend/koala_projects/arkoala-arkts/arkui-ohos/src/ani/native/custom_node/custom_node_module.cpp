@@ -131,6 +131,17 @@ ani_long ConstructCustomNode(ani_env* env, [[maybe_unused]] ani_object aniClass,
     return customNode;
 }
 
+void RequestFrame(ani_env* env)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier) {
+        return;
+    }
+
+    modifier->getCustomNodeAniModifier()->requestFrame();
+    return;
+}
+
 ani_object QueryNavigationInfo(ani_env* env, [[maybe_unused]] ani_object, ani_long node)
 {
     const auto* modifier = GetNodeAniModifier();

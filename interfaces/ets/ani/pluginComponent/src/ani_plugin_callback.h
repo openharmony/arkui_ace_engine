@@ -60,7 +60,7 @@ public:
     bool RequestStrictEquals(CallBackType eventType, const AAFwk::Want& want, ACECallbackInfo& cbInfo,
         const std::shared_ptr<AceJSPluginRequestParam>& param);
 
-    size_t GetID(void);
+    size_t GetID(void) const;
     int32_t GetContainerId() override;
     void OnPushEvent(const AAFwk::Want& want, const PluginComponentTemplate& pluginTemplate, const std::string& data,
         const std::string& extraData) override;

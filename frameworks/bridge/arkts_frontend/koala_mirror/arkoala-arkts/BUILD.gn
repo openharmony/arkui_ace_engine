@@ -19,6 +19,7 @@ import("//foundation/arkui/ace_engine/frameworks/bridge/arkts_frontend/koala_mir
 koala_root = ".."
 koala_path = ""
 interop_root = "$koala_root/interop"
+ui2abc_root = "$koala_root/ui2abc"
 framework_root = "./framework/native/src"
 # Improve: napi_headers
 napi_headers = "./node_modules/node-api-headers/include/"
@@ -149,21 +150,21 @@ npm_cmd("arkoala_install") {
     install = true
 }
 
-npm_cmd("arkui.abc") {
+npm_cmd("arkui_build") {
     outputs = [
         "$target_out_dir/arkui.abc"
     ]
     deps = [
-      "$koala_root/incremental:incremental",
+      "$koala_root/incremental:incremental_abc",
       "$koala_root/interop:interop",
     ]
     project_path = rebase_path("./arkui")
-    target_out_path = rebase_path("$target_out_dir")
+    target_out_path = rebase_path("$target_out_dir/arkui.abc")
     built_file_path = rebase_path("./arkui/build-m3-impl/arkui-m3.abc")
     run_tasks = [ "build:m3" ]
 }
 
-npm_cmd("arkoala.abc") {
+npm_cmd("arkoala_link") {
     outputs = [
         "$target_out_dir/arkoala.abc"
     ]
@@ -173,19 +174,31 @@ npm_cmd("arkoala.abc") {
     run_tasks = [ "link:arkoala:m3" ]
 
     deps = [
-      ":arkui.abc"
+      ":arkui_build"
     ]
 
-    external_deps = ets2abc_build_deps
-    external_deps += static_linker_build_deps
+    external_deps = [
+        ets2abc_build_deps,
+        static_linker_build_deps
+    ]
 }
 
 ohos_prebuilt_etc("arkoala_build") {
     source = "$target_out_dir/arkoala.abc"
-    deps = [ ":arkoala.abc" ]
+    deps = [
+        ":install_all",
+        ":arkoala_link"
+    ]
     module_install_dir = "framework"
     subsystem_name = ace_engine_subsystem
     part_name = ace_engine_part
+}
+
+group("install_all") {
+  deps = [
+    ":arkoala_install",
+    "$ui2abc_root:ui2abc_install_all"
+  ]
 }
 
 group("arkoala") {

@@ -895,7 +895,4 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
         }
         return this
     }
-    public attributeModifier(value: AttributeModifier<VideoAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("Not implemented")
-    }
 }

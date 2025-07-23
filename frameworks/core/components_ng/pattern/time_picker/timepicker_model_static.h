@@ -25,6 +25,7 @@ public:
     static void SetHasSecond(FrameNode* frameNode, bool hasSecond);
     static void SetDigitalCrownSensitivity(FrameNode* frameNode, const std::optional<int32_t>& valueOpt);
     static void SetChangeEvent(FrameNode* frameNode, TimeChangeEvent&& onChange);
+    static void SetSelectedTime(FrameNode* frameNode, const int64_t& value);
 };
 
 } // namespace OHOS::Ace::NG

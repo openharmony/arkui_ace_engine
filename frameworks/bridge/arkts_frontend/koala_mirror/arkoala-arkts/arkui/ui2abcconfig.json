@@ -2,7 +2,7 @@
     "compilerOptions": {
         "package": "@ohos.arkui",
         "outDir": "build-m3",
-        "baseUrl": "./ets",
+        "baseUrl": "src",
         "paths": {
             "#components": ["./generated/arkts"],
             "#stateMgmtTool": ["./stateManagement/tools/arkts"],
@@ -24,13 +24,13 @@
         ]
     },
     "include": [
-        "./src/ets/ani/arkts/ArkUIAniModule.ts",
-        "./src/ets/component/interop.ts",
-        "./src/ets/stateManagement/**/*.ts",
-        "./src/ets/**/*.ets"
+        "./src/ani/arkts/ArkUIAniModule.ts",
+        "./src/component/interop.ts",
+        "./src/stateManagement/**/*.ts",
+        "./src/**/*.ets"
     ],
     "exclude": [
-        "ets/generated/ts/*.ts"
+        "generated/ts/*.ts"
     ],
     "dependencies": {
         "@koalaui/runtime": ["../../incremental/runtime/ui2abcconfig.json"]

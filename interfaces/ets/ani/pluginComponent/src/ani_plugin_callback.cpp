@@ -88,7 +88,7 @@ void ANIPluginCallback::SetRequestParam(const std::shared_ptr<AceJSPluginRequest
     requestParam_ = param;
 }
 
-size_t ANIPluginCallback::GetID(void)
+size_t ANIPluginCallback::GetID(void) const
 {
     return uuid_;
 }

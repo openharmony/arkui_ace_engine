@@ -48,7 +48,6 @@ import { WatchFunc } from './decoratorWatch';
 
 */
 
-// TODO UiUtils.deepCopy
 function deepCopy<T>(value: T): T {
     // if T is @Observed + @Track obect need generate addRef for each
     // @Track property otherwise there will be no parent to child upddate
@@ -92,7 +91,7 @@ export class PropDecoratedVariable<T> extends DecoratedV1VariableBase<T> impleme
             if (isDynamicObject(newValue)) {
                 newValue = getObservedObject(newValue, this);
             }
-            if (typeof this.setProxyValue === 'function') {
+            if (this.setProxyValue) {
                 this.setProxyValue!(newValue);
             }
             // @Watch
@@ -146,15 +145,6 @@ export class PropDecoratedVariable<T> extends DecoratedV1VariableBase<T> impleme
     }
 
     public setProxyValue?: CompatibleStateChangeCallback<T>;
-
-    public setNotifyCallback(callback: WatchFuncType): void {
-        const func = new WatchFunc(callback);
-        const id = func.id();
-        const value = this.__localValue.get(false);
-        if (StateMgmtTool.isIObservedObject(value as NullableObject)) {
-            (value as IObservedObject).addWatchSubscriber(id);
-        }
-    }
 
     public fireChange(): void {
         this.__localValue.fireChange();

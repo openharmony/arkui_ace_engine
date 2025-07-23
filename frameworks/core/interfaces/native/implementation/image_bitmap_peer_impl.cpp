@@ -28,10 +28,12 @@ ImageBitmapPeer::ImageBitmapPeer()
     svgDom_ = nullptr;
 }
 void ImageBitmapPeer::SetOptions(
-    const std::string& textString, const OHOS::Ace::RefPtr<OHOS::Ace::PixelMap>& pixelMap)
+    const std::string& textString, const OHOS::Ace::RefPtr<OHOS::Ace::PixelMap>& pixelMap, int32_t unitValue)
 {
     ContainerScope scope(Container::CurrentIdSafely());
     SetInstanceId(OHOS::Ace::Container::CurrentId());
+    OHOS::Ace::CanvasUnit unit = static_cast<OHOS::Ace::CanvasUnit>(unitValue);
+    SetUnit(unit);
     if (!textString.empty()) {
         auto context = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(context);

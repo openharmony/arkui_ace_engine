@@ -31,7 +31,7 @@ void DragEventSetData([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object
 {
     auto dragEvent = reinterpret_cast<ani_ref>(pointer);
     auto dataValue = OHOS::UDMF::AniConverter::UnwrapUnifiedData(env, data);
-    auto unifiedData = reinterpret_cast<void*>(dataValue.get());
+    auto unifiedData = reinterpret_cast<void*>(&dataValue);
     if (!dragEvent || !unifiedData) {
         return;
     }

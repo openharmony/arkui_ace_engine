@@ -370,6 +370,7 @@ public:
     void* GetEnv() override;
     static void PreloadAceModule(void* aniEnv);
     static void* preloadArkTSRuntime;
+    void OpenStateMgmtInterop();
 private:
     RefPtr<TaskExecutor> taskExecutor_;
     RefPtr<NG::PipelineContext> pipeline_;

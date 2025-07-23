@@ -254,60 +254,6 @@ export class CanvasPatternInternal implements MaterializedBase,CanvasPattern {
         return obj
     }
 }
-export class ImageBitmapInternal {
-    public static fromPtr(ptr: KPointer): ImageBitmap {
-        const obj : ImageBitmap = new ImageBitmap(undefined)
-        obj.peer = new Finalizable(ptr, ImageBitmap.getFinalizer())
-        return obj
-    }
-}
-export class ImageBitmap implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
-    get height(): number {
-        return this.getHeight()
-    }
-    get width(): number {
-        return this.getWidth()
-    }
-    static ctor_imagebitmap(src: string): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._ImageBitmap_ctor(src)
-        return retval
-    }
-    constructor(src?: string) {
-        if ((src) !== (undefined))
-        {
-            const ctorPtr : KPointer = ImageBitmap.ctor_imagebitmap((src)!)
-            this.peer = new Finalizable(ctorPtr, ImageBitmap.getFinalizer())
-        }
-    }
-    static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._ImageBitmap_getFinalizer()
-    }
-    public close(): void {
-        this.close_serialize()
-        return
-    }
-    private getHeight(): number {
-        return this.getHeight_serialize()
-    }
-    private getWidth(): number {
-        return this.getWidth_serialize()
-    }
-    private close_serialize(): void {
-        ArkUIGeneratedNativeModule._ImageBitmap_close(this.peer!.ptr)
-    }
-    private getHeight_serialize(): number {
-        const retval  = ArkUIGeneratedNativeModule._ImageBitmap_getHeight(this.peer!.ptr)
-        return retval
-    }
-    private getWidth_serialize(): number {
-        const retval  = ArkUIGeneratedNativeModule._ImageBitmap_getWidth(this.peer!.ptr)
-        return retval
-    }
-}
 export class ImageDataInternal {
     public static fromPtr(ptr: KPointer): ImageData {
         const obj : ImageData = new ImageData(undefined, undefined, undefined)
@@ -496,8 +442,8 @@ export class OffscreenCanvas implements MaterializedBase {
         this.setWidth_serialize(width_casted)
         return
     }
-    getContext(contextType: string, options: RenderingContextSettings): OffscreenCanvasRenderingContext2D {
-        throw new Error("TBD")
+    getContext(contextType: string, options?: RenderingContextSettings): OffscreenCanvasRenderingContext2D {
+        return hookGetContext(this, contextType, options)
     }
     private transferToImageBitmap_serialize(): ImageBitmap {
         const retval  = ArkUIGeneratedNativeModule._OffscreenCanvas_transferToImageBitmap(this.peer!.ptr)
@@ -991,46 +937,14 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._CanvasRenderer_getFinalizer()
     }
-    public drawImage(image: ImageBitmap | PixelMap, sx: number, sy: number, sw?: number, sh?: number, dx?: number, dy?: number, dw?: number, dh?: number): void {
-        const image_type = runtimeType(image)
-        const sx_type = runtimeType(sx)
-        const sy_type = runtimeType(sy)
-        const sw_type = runtimeType(sw)
-        const sh_type = runtimeType(sh)
-        const dx_type = runtimeType(dx)
-        const dy_type = runtimeType(dy)
-        const dw_type = runtimeType(dw)
-        const dh_type = runtimeType(dh)
-        if ((TypeChecker.isImageBitmap(image, false, false)) || (TypeChecker.isPixelMap(image, false, false))) {
-            const image_casted = image as (ImageBitmap | PixelMap)
-            const dx_casted = sx as (number)
-            const dy_casted = sy as (number)
-            this.drawImage0_serialize(image_casted, dx_casted, dy_casted)
-            return
-        }
-        if ((TypeChecker.isImageBitmap(image, false, false)) || (TypeChecker.isPixelMap(image, false, false))) {
-            const image_casted = image as (ImageBitmap | PixelMap)
-            const dx_casted = sx as (number)
-            const dy_casted = sy as (number)
-            const dw_casted = sw as (number)
-            const dh_casted = sh as (number)
-            this.drawImage1_serialize(image_casted, dx_casted, dy_casted, dw_casted, dh_casted)
-            return
-        }
-        if ((TypeChecker.isImageBitmap(image, false, false)) || (TypeChecker.isPixelMap(image, false, false))) {
-            const image_casted = image as (ImageBitmap | PixelMap)
-            const sx_casted = sx as (number)
-            const sy_casted = sy as (number)
-            const sw_casted = sw as (number)
-            const sh_casted = sh as (number)
-            const dx_casted = dx as (number)
-            const dy_casted = dy as (number)
-            const dw_casted = dw as (number)
-            const dh_casted = dh as (number)
-            this.drawImage2_serialize(image_casted, sx_casted, sy_casted, sw_casted, sh_casted, dx_casted, dy_casted, dw_casted, dh_casted)
-            return
-        }
-        throw new Error("Can not select appropriate overload")
+    public drawImage(image: ImageBitmap | PixelMap, dx: number, dy: number): void {
+        hookDrawImage(this, image, dx, dy)
+    }
+    public drawImage(image: ImageBitmap | PixelMap, dx: number, dy: number, dw: number, dh: number): void {
+        hookDrawImage(this, image, dx, dy, dw, dh)
+    }
+    public drawImage(image: ImageBitmap | PixelMap, sx: number, sy: number, sw: number, sh: number, dx: number, dy: number, dw: number, dh: number): void {
+        hookDrawImage(this, image, sx, sy, sw, sh, dx, dy, dw, dh)
     }
     public beginPath(): void {
         this.beginPath_serialize()
@@ -1107,11 +1021,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         return this.getImageData_serialize(sx_casted, sy_casted, sw_casted, sh_casted)
     }
     public getPixelMap(sx: number, sy: number, sw: number, sh: number): PixelMap {
-        const sx_casted = sx as (number)
-        const sy_casted = sy as (number)
-        const sw_casted = sw as (number)
-        const sh_casted = sh as (number)
-        return this.getPixelMap_serialize(sx_casted, sy_casted, sw_casted, sh_casted)
+        return hookGetPixelMap(this, sx, sy, sw, sh)
     }
     public putImageData(imagedata: ImageData, dx: number | string, dy: number | string): void {
         const imagedata_casted = imagedata as (ImageData)
@@ -1241,9 +1151,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         return
     }
     public setPixelMap(value?: PixelMap): void {
-        const value_casted = value as (PixelMap | undefined)
-        this.setPixelMap_serialize(value_casted)
-        return
+        hookSetPixelMap(this, value)
     }
     public transferFromImageBitmap(bitmap: ImageBitmap): void {
         const bitmap_casted = bitmap as (ImageBitmap)
@@ -1429,63 +1337,6 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         const textBaseline_casted = textBaseline as (CanvasTextBaseline)
         this.setTextBaseline_serialize(textBaseline_casted)
         return
-    }
-    private drawImage0_serialize(image: ImageBitmap | PixelMap, dx: number, dy: number): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        let image_type : int32 = RuntimeType.UNDEFINED
-        image_type = runtimeType(image)
-        if (TypeChecker.isImageBitmap(image, false, false)) {
-            thisSerializer.writeInt8(0 as int32)
-            const image_0  = image as ImageBitmap
-            thisSerializer.writeImageBitmap(image_0)
-        }
-        else if (TypeChecker.isPixelMap(image, false, false)) {
-            thisSerializer.writeInt8(1 as int32)
-            const pixelMap = image as PixelMap
-            let ptr = ArkUIAniModule._ConvertUtils_ConvertFromPixelMapAni(pixelMap)
-            const ptr_value: KPointer  = ptr as KPointer
-            thisSerializer.writePointer(ptr_value)
-        }
-        ArkUIGeneratedNativeModule._CanvasRenderer_drawImage0(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length(), dx, dy)
-        thisSerializer.release()
-    }
-    private drawImage1_serialize(image: ImageBitmap | PixelMap, dx: number, dy: number, dw: number, dh: number): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        let image_type : int32 = RuntimeType.UNDEFINED
-        image_type = runtimeType(image)
-        if (TypeChecker.isImageBitmap(image, false, false)) {
-            thisSerializer.writeInt8(0 as int32)
-            const image_0  = image as ImageBitmap
-            thisSerializer.writeImageBitmap(image_0)
-        }
-        else if (TypeChecker.isPixelMap(image, false, false)) {
-            thisSerializer.writeInt8(1 as int32)
-            const pixelMap = image as PixelMap
-            let ptr = ArkUIAniModule._ConvertUtils_ConvertFromPixelMapAni(pixelMap)
-            const ptr_value: KPointer  = ptr as KPointer
-            thisSerializer.writePointer(ptr_value)
-        }
-        ArkUIGeneratedNativeModule._CanvasRenderer_drawImage1(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length(), dx, dy, dw, dh)
-        thisSerializer.release()
-    }
-    private drawImage2_serialize(image: ImageBitmap | PixelMap, sx: number, sy: number, sw: number, sh: number, dx: number, dy: number, dw: number, dh: number): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        let image_type : int32 = RuntimeType.UNDEFINED
-        image_type = runtimeType(image)
-        if (TypeChecker.isImageBitmap(image, false, false)) {
-            thisSerializer.writeInt8(0 as int32)
-            const image_0  = image as ImageBitmap
-            thisSerializer.writeImageBitmap(image_0)
-        }
-        else if (TypeChecker.isPixelMap(image, false, false)) {
-            thisSerializer.writeInt8(1 as int32)
-            const pixelMap = image as PixelMap
-            let ptr = ArkUIAniModule._ConvertUtils_ConvertFromPixelMapAni(pixelMap)
-            const ptr_value: KPointer  = ptr as KPointer
-            thisSerializer.writePointer(ptr_value)
-        }
-        ArkUIGeneratedNativeModule._CanvasRenderer_drawImage2(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length(), sx, sy, sw, sh, dx, dy, dw, dh)
-        thisSerializer.release()
     }
     private beginPath_serialize(): void {
         ArkUIGeneratedNativeModule._CanvasRenderer_beginPath(this.peer!.ptr)

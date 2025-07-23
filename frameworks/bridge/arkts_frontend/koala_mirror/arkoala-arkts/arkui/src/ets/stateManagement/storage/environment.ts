@@ -47,7 +47,7 @@ class AniEnvironment implements IAniEnvironment {
 
 interface EnvPropsOptions {
     key: string;
-    defaultValue: NullishType;
+    defaultValue: number | string | boolean;
 }
 
 /**
@@ -139,7 +139,7 @@ class Environment {
     public static envProps(properties: EnvPropsOptions[]): void {
         properties.forEach((prop) => {
             const key: string = prop.key;
-            const defaultValue: NullishType = prop.defaultValue;
+            const defaultValue: number | string | boolean = prop.defaultValue;
             const ttype = Environment.getOrCreate().ttypeMap_.get(key)!;
             Environment.envProp(key, defaultValue);
         });

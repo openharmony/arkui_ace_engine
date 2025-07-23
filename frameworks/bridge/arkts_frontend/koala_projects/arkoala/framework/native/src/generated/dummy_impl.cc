@@ -28573,6 +28573,25 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return nullptr;
     }
     } // CheckboxOpsAccessor
+    namespace DatePickerSelectedOpsAccessor {
+    Ark_NativePointer RegisterDatePickerSelectedCallbackImpl(Ark_NativePointer node,
+                                                             const Ark_Int64 selected,
+                                                             const DatePickerSelectedCallback* callback)
+    {
+        if (!needGroupedLog(1))
+            return nullptr;
+        string out("registerDatePickerSelectedCallback(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, selected);
+        out.append(", ");
+        WriteToString(&out, callback);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    } // DatePickerSelectedOpsAccessor
     namespace MenuItemOpsAccessor {
     Ark_NativePointer RegisterSelectedCallbackImpl(Ark_NativePointer node,
                                                    Ark_Boolean value,
@@ -29275,6 +29294,63 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return nullptr;
     }
     } // TextFieldOpsAccessor
+    namespace TextPickerSelectedOpsAccessor {
+    Ark_NativePointer RegisterTextPickerSelectedCallbackImpl(Ark_NativePointer node,
+                                                             const Ark_Union_Number_Array_Number* selected,
+                                                             const TextPickerSelectedCallback* callback)
+    {
+        if (!needGroupedLog(1))
+            return nullptr;
+        string out("registerTextPickerSelectedCallback(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, selected);
+        out.append(", ");
+        WriteToString(&out, callback);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    } // TextPickerSelectedOpsAccessor
+    namespace TextPickerValueOpsAccessor {
+    Ark_NativePointer RegisterTextPickerValueCallbackImpl(Ark_NativePointer node,
+                                                          const Ark_Union_String_Array_String* value,
+                                                          const TextPickerValueCallback* callback)
+    {
+        if (!needGroupedLog(1))
+            return nullptr;
+        string out("registerTextPickerValueCallback(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, value);
+        out.append(", ");
+        WriteToString(&out, callback);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    } // TextPickerValueOpsAccessor
+    namespace TimePickerSelectedOpsAccessor {
+    Ark_NativePointer RegisterTimePickerSelectedCallbackImpl(Ark_NativePointer node,
+                                                             Ark_Int64 selected,
+                                                             const TimePickerSelectedCallback* callback)
+    {
+        if (!needGroupedLog(1))
+            return nullptr;
+        string out("registerTimePickerSelectedCallback(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, selected);
+        out.append(", ");
+        WriteToString(&out, callback);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    } // TimePickerSelectedOpsAccessor
     namespace ActionSheetAccessor {
     void ShowImpl(const Ark_ActionSheetOptions* value)
     {
@@ -45001,6 +45077,38 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return &TextFieldOpsAccessorImpl;
     }
 
+    const GENERATED_ArkUIDatePickerSelectedOpsAccessor* GetDatePickerSelectedOpsAccessor()
+    {
+        static const GENERATED_ArkUIDatePickerSelectedOpsAccessor DatePickerSelectedOpsAccessorImpl {
+            DatePickerSelectedOpsAccessor::RegisterDatePickerSelectedCallbackImpl,
+        };
+        return &DatePickerSelectedOpsAccessorImpl;
+    }
+
+    const GENERATED_ArkUITextPickerSelectedOpsAccessor* GetTextPickerSelectedOpsAccessor()
+    {
+        static const GENERATED_ArkUITextPickerSelectedOpsAccessor TextPickerSelectedOpsAccessorImpl {
+            TextPickerSelectedOpsAccessor::RegisterTextPickerSelectedCallbackImpl,
+        };
+        return &TextPickerSelectedOpsAccessorImpl;
+    }
+
+    const GENERATED_ArkUITextPickerValueOpsAccessor* GetTextPickerValueOpsAccessor()
+    {
+        static const GENERATED_ArkUITextPickerValueOpsAccessor TextPickerValueOpsAccessorImpl {
+            TextPickerValueOpsAccessor::RegisterTextPickerValueCallbackImpl,
+        };
+        return &TextPickerValueOpsAccessorImpl;
+    }
+
+    const GENERATED_ArkUITimePickerSelectedOpsAccessor* GetTimePickerSelectedOpsAccessor()
+    {
+        static const GENERATED_ArkUITimePickerSelectedOpsAccessor TimePickerSelectedOpsAccessorImpl {
+            TimePickerSelectedOpsAccessor::RegisterTimePickerSelectedCallbackImpl,
+        };
+        return &TimePickerSelectedOpsAccessorImpl;
+    }
+
     const GENERATED_ArkUIActionSheetAccessor* GetActionSheetAccessor()
     {
         static const GENERATED_ArkUIActionSheetAccessor ActionSheetAccessorImpl {
@@ -47998,10 +48106,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetIUIContextAccessor,
             GetFilterAccessor,
             GetVisualEffectAccessor,
+            GetDatePickerSelectedOpsAccessor,
             GetNavExtenderAccessor,
             GetSearchOpsAccessor,
             GetEventEmulatorAccessor,
             GetTextFieldOpsAccessor,
+            GetTextPickerSelectedOpsAccessor,
+            GetTextPickerValueOpsAccessor,
+            GetTimePickerSelectedOpsAccessor,
             GetActionSheetAccessor,
             GetAlertDialogAccessor,
             GetPromptActionAccessor,

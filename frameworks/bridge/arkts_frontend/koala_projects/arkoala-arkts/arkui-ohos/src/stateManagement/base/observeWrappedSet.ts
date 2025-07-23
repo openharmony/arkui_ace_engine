@@ -118,7 +118,7 @@ export class WrappedSet<K> extends Set<K> implements IObservedObject, ObserveWra
      *
      * @returns number of unique elements in the Set
      */
-    public get size(): number {
+    public get size(): int {
         if (this.shouldAddRef()) {
             this.meta_.addRef(CONSTANT.OB_LENGTH);
         }

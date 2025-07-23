@@ -72,8 +72,10 @@ DialogProperties BuildDialogProperties(const Ark_DatePickerDialogOptions options
     dialogProps.backgroundColor = Converter::OptConvert<Color>(options.backgroundColor);
     dialogProps.shadow = Converter::OptConvert<Shadow>(options.shadow);
     dialogProps.maskRect = Converter::OptConvert<DimensionRect>(options.maskRect);
-    // dialogProps.enableHoverMode =
-    //     Converter::OptConvert<bool>(options.enableHoverMode).value_or(dialogProps.enableHoverMode);
+    auto enableHoverMode = Converter::OptConvert<bool>(options.enableHoverMode);
+    if (enableHoverMode.has_value()) {
+        dialogProps.enableHoverMode = enableHoverMode.value();
+    }
     dialogProps.hoverModeArea = Converter::OptConvert<HoverModeAreaType>(options.hoverModeArea);
     BuildDialogPropertiesCallbacks(options, dialogProps);
     return dialogProps;

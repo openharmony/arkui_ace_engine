@@ -1380,6 +1380,9 @@ void ScrollablePattern::HandleScrollBarOutBoundary(float scrollBarOutBoundaryExt
 
 void ScrollablePattern::SetFriction(double friction)
 {
+    auto host = GetHost();
+    // call ScrollPageMultiThread by multi thread
+    FREE_NODE_CHECK(host, SetFriction, friction);
     if (LessOrEqual(friction, 0.0)) {
         friction =
             Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN) ? API11_FRICTION : FRICTION;
@@ -4380,7 +4383,8 @@ void ScrollablePattern::GetRepeatCountInfo(
             repeatDifference += repeatVirtualCount - repeatRealCount;
             totalChildCount += repeatRealCount;
         } else if (AceType::InstanceOf<FrameNode>(child) || AceType::InstanceOf<LazyForEachNode>(child) ||
-                   AceType::InstanceOf<RepeatVirtualScrollNode>(child) || AceType::InstanceOf<ForEachNode>(child) || AceType::InstanceOf<ArkoalaLazyNode>(child)) {
+                   AceType::InstanceOf<RepeatVirtualScrollNode>(child) || AceType::InstanceOf<ForEachNode>(child) ||
+                   AceType::InstanceOf<CustomNode>(child) || AceType::InstanceOf<ArkoalaLazyNode>(child)) {
             totalChildCount += child->FrameCount();
         } else {
             GetRepeatCountInfo(child, repeatDifference, firstRepeatCount, totalChildCount);
