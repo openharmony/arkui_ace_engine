@@ -73,7 +73,7 @@ export class SwiperController implements MaterializedBase {
             const useAnimation_casted = useAnimation as (boolean | undefined)
             return this.changeIndex0_serialize(index_casted, useAnimation_casted)
         }
-        if ((RuntimeType.NUMBER == useAnimation_type) || (RuntimeType.BOOLEAN == useAnimation_type) || (RuntimeType.UNDEFINED == useAnimation_type)) {
+        if ((RuntimeType.OBJECT == useAnimation_type) || (RuntimeType.NUMBER == useAnimation_type) || (RuntimeType.BOOLEAN == useAnimation_type) || (RuntimeType.UNDEFINED == useAnimation_type)) {
             const index_casted = index as (number)
             const animationMode_casted = useAnimation as (SwiperAnimationMode | boolean | undefined)
             return this.changeIndex1_serialize(index_casted, animationMode_casted)
