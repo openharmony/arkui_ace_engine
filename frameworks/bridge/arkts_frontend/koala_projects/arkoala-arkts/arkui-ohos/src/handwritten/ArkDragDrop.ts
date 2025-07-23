@@ -90,11 +90,11 @@ export function hookRegisterOnDragStartImpl(node: ArkCommonMethodComponent, onDr
                 let customNode = createBuilderNodeTree()
                 ArkUIAniModule._DragEvent_Set_CustomNode(toPeerPtr(dragEvent), customNode)
             } 
-            const value_pixelMap = itemInfo.pixelMap as PixelMap
+            const value_pixelMap = itemInfo.pixelMap
             let value_pixelMap_type: int32 = RuntimeType.UNDEFINED
             value_pixelMap_type = runtimeType(value_pixelMap)
             if ((RuntimeType.UNDEFINED) !== (value_pixelMap_type)) {
-                ArkUIAniModule._DragEvent_Set_PixelMap(toPeerPtr(dragEvent), value_pixelMap)
+                ArkUIAniModule._DragEvent_Set_PixelMap(toPeerPtr(dragEvent), value_pixelMap as PixelMap)
             }
         }
     })
