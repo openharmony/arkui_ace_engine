@@ -92,6 +92,7 @@ constexpr int32_t USED_ID_FIND_FLAG = 3;
 constexpr int32_t USED_JSON_PARAM = 4;
 constexpr int32_t MAX_FRAME_COUNT_WITHOUT_JS_UNREGISTRATION = 100;
 constexpr int32_t RATIO_OF_VSYNC_PERIOD = 2;
+constexpr int32_t MAX_DVSYNC_TIME_USE_COUNT = 5;
 #ifndef IS_RELEASE_VERSION
 constexpr int32_t SINGLE_FRAME_TIME_MICROSEC = 16600;
 #endif
@@ -694,11 +695,12 @@ void PipelineContext::UpdateDVSyncTime(uint64_t nanoTimestamp, const std::string
     }
     if (commandTimeUpdate_) {
         int64_t now = GetSysTimestamp();
-        if (DVSyncChangeTime_ < now) {
+        if (DVSyncChangeTime_ < now || dvsyncTimeUseCount_ >= MAX_DVSYNC_TIME_USE_COUNT) {
             commandTimeUpdate_ = false;
         }
         if (commandTimeUpdate_) {
             window_->RecordFrameTime(DVSyncChangeTime_, abilityName);
+            dvsyncTimeUseCount_++;
             if (dvsyncTimeUpdate_) {
                 window_->SetDVSyncUpdate(nanoTimestamp);
                 dvsyncTimeUpdate_ = false;

@@ -205,7 +205,7 @@ public:
     void HandleDragUpdate(const GestureEvent& info);
     void HandleDragEnd(const GestureEvent& info, bool isFromPanEnd = false);
     void HandleScrollEnd(const std::optional<float>& velocity);
-    ScrollResult HandleExtScroll();
+    void HandleExtScroll();
     bool HandleOverScroll(double velocity);
     ScrollResult HandleScroll(double offset, int32_t source, NestedState state);
     void ProcessAxisUpdateEvent(float mainDelta, bool fromScrollBar = false);
