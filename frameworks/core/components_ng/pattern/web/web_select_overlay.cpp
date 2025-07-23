@@ -359,6 +359,13 @@ void WebSelectOverlay::SetMenuOptions(SelectOverlayInfo& selectInfo,
         selectInfo.menuInfo.showSearch = false;
         selectInfo.menuInfo.showTranslate = false;
     }
+    if (!(flags & OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_CUT) ||
+        (copyOption == OHOS::NWeb::NWebPreference::CopyOptionMode::NONE) ||
+        !pattern->IsShowAIWrite()) {
+        selectInfo.menuInfo.showAIWrite = false;
+    } else {
+        selectInfo.menuInfo.showAIWrite = true;
+    }
     // should be the last
     canShowAIMenu_ = (copyOption != OHOS::NWeb::NWebPreference::CopyOptionMode::NONE) &&
                      (copyOption != OHOS::NWeb::NWebPreference::CopyOptionMode::IN_APP);
@@ -867,6 +874,11 @@ void WebSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuType ty
         case OptionMenuActionId::SEARCH:
             HandleOnSearch();
             pattern->CloseSelectOverlay();
+            SelectCancel();
+            break;
+        case OptionMenuActionId::AI_WRITE:
+            pattern->GetHandleInfo(webSelectInfo_);
+            pattern->HandleOnAIWrite();
             SelectCancel();
             break;
         case OptionMenuActionId::DISAPPEAR:

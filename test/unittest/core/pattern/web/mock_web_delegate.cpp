@@ -1236,6 +1236,18 @@ std::string WebDelegate::GetSelectInfo() const
 {
     return "";
 }
+std::string WebDelegate::GetAllTextInfo() const
+{
+    return "";
+}
+int WebDelegate::GetSelectStartIndex() const
+{
+    return 0;
+}
+int WebDelegate::GetSelectEndIndex() const
+{
+    return 0;
+}
 Offset WebDelegate::GetPosition(const std::string& embedId)
 {
     return Offset();
