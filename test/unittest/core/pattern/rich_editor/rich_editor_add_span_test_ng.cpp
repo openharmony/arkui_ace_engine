@@ -168,6 +168,14 @@ HWTEST_F(RichEditorAddSpanTestNg, AddImageSpan002, TestSize.Level1)
     EXPECT_EQ(index, 1);
     EXPECT_EQ(richEditorPattern->caretPosition_, 2);
     EXPECT_FALSE(richEditorPattern->textSelector_.IsValid());
+
+    GestureEventFunc callback = [](GestureEvent& info) {
+        info.SetPreventDefault(true);
+    };
+    options.userGestureOption.onClick = callback;
+    options.offset = 2;
+    index = richEditorPattern->AddImageSpan(options, TextChangeReason::UNKNOWN, false, 0);
+    EXPECT_EQ(index, 2);
 }
 
 /**
