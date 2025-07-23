@@ -19230,14 +19230,23 @@ export class TypeChecker {
     static isBindableNumber(value: Object | string | number | undefined): boolean {
         throw new Error("Can not discriminate value typeof Bindable<number>")
     }
+    static isBindableArrayNumber(value: Object | string | number | undefined): boolean {
+        throw new Error("Can not discriminate value typeof Bindable<Array<number>>")
+    }
     static isBindableString(value: Object | string | number | undefined): boolean {
         throw new Error("Can not discriminate value typeof Bindable<String>")
+    }
+    static isBindableArrayString(value: Object | string | number | undefined): boolean {
+        throw new Error("Can not discriminate value typeof Bindable<Array<String>>")
     }
     static isBindableResource(value: Object | string | number | undefined): boolean {
         throw new Error("Can not discriminate value typeof Bindable<Resource>")
     }
     static isBindableResourceStr(value: Object | string | number | undefined): boolean {
         throw new Error("Can not discriminate value typeof Bindable<ResourceStr>")
+    }
+    static isBindableDate(value: Object | string | number | undefined): boolean {
+        throw new Error("Can not discriminate value typeof Bindable<Date>")
     }
     static isWebOptions(value: Object | string | number | undefined | boolean, duplicated_src: boolean, duplicated_controller: boolean, duplicated_renderMode: boolean, duplicated_incognitoMode: boolean, duplicated_sharedRenderProcessToken: boolean): boolean {
         if ((!duplicated_src) && (value?.hasOwnProperty("src"))) {
