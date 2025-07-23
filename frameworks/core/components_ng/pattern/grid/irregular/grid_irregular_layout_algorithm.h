@@ -35,7 +35,7 @@ class GridIrregularLayoutAlgorithm : public GridLayoutBaseAlgorithm {
 public:
     explicit GridIrregularLayoutAlgorithm(
         GridLayoutInfo info, bool canOverScrollStart = false, bool canOverScrollEnd = false)
-        : GridLayoutBaseAlgorithm(info), canOverScrollStart_(canOverScrollStart),
+        : GridLayoutBaseAlgorithm(std::move(info)), canOverScrollStart_(canOverScrollStart),
           canOverScrollEnd_(canOverScrollEnd) {};
 
     ~GridIrregularLayoutAlgorithm() override = default;
@@ -145,7 +145,7 @@ private:
      * @return item index to jump to after skipping.
      */
     int32_t SkipLinesBackward() const;
-    
+
     bool IsIrregularLine(int32_t lineIndex) const override;
 
     /**
