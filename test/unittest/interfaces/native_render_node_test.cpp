@@ -925,4 +925,404 @@ HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest138, TestSize.Level1)
     OH_ArkUI_RenderNodeUtils_DisposeNode(renderNode);
 }
 
+/**
+ * @tc.name: NativeRenderNodeTest201
+ * @tc.desc: Test renderNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest201, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootCustomNode = nodeAPI->createNode(ARKUI_NODE_CUSTOM);
+    ASSERT_NE(rootCustomNode, nullptr);
+    auto rootRenderNode = OH_ArkUI_RenderNodeUtils_CreateNode();
+    ASSERT_NE(rootRenderNode, nullptr);
+    auto result = OH_ArkUI_RenderNodeUtils_AddRenderNode(rootCustomNode, rootRenderNode);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+ 
+    ArkUI_NodeBorderStyleOption* borderStyle = OH_ArkUI_RenderNodeUtils_CreateNodeBorderStyleOption();
+    ASSERT_NE(borderStyle, nullptr);
+    result = OH_ArkUI_RenderNodeUtils_SetBorderStyle(rootRenderNode, borderStyle);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    OH_ArkUI_RenderNodeUtils_DisposeNodeBorderStyleOption(borderStyle);
+ 
+    ArkUI_NodeBorderStyleOption* borderStyle1 = OH_ArkUI_RenderNodeUtils_CreateNodeBorderStyleOption();
+    ASSERT_NE(borderStyle1, nullptr);
+    result = OH_ArkUI_RenderNodeUtils_GetBorderStyle(rootRenderNode, &borderStyle1);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(borderStyle1->leftStyle, ArkUI_BorderStyle::ARKUI_BORDER_STYLE_NONE);
+    ASSERT_EQ(borderStyle1->rightStyle, ArkUI_BorderStyle::ARKUI_BORDER_STYLE_NONE);
+    ASSERT_EQ(borderStyle1->topStyle, ArkUI_BorderStyle::ARKUI_BORDER_STYLE_NONE);
+    ASSERT_EQ(borderStyle1->bottomStyle, ArkUI_BorderStyle::ARKUI_BORDER_STYLE_NONE);
+    OH_ArkUI_RenderNodeUtils_DisposeNodeBorderStyleOption(borderStyle1);
+}
+ 
+/**
+ * @tc.name: NativeRenderNodeTest202
+ * @tc.desc: Test renderNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest202, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootCustomNode = nodeAPI->createNode(ARKUI_NODE_CUSTOM);
+    ASSERT_NE(rootCustomNode, nullptr);
+    auto rootRenderNode = OH_ArkUI_RenderNodeUtils_CreateNode();
+    ASSERT_NE(rootRenderNode, nullptr);
+    auto result = OH_ArkUI_RenderNodeUtils_AddRenderNode(rootCustomNode, rootRenderNode);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+ 
+    ArkUI_NodeBorderWidthOption* borderWidth = OH_ArkUI_RenderNodeUtils_CreateNodeBorderWidthOption();
+    ASSERT_NE(borderWidth, nullptr);
+    result = OH_ArkUI_RenderNodeUtils_SetBorderWidth(rootRenderNode, borderWidth);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    OH_ArkUI_RenderNodeUtils_DisposeNodeBorderWidthOption(borderWidth);
+ 
+    ArkUI_NodeBorderWidthOption* borderWidth1 = OH_ArkUI_RenderNodeUtils_CreateNodeBorderWidthOption();
+    ASSERT_NE(borderWidth1, nullptr);
+    result = OH_ArkUI_RenderNodeUtils_GetBorderWidth(rootRenderNode, &borderWidth1);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(borderWidth1->leftWidth, 0.0f);
+    ASSERT_EQ(borderWidth1->rightWidth, 0.0f);
+    ASSERT_EQ(borderWidth1->topWidth, 0.0f);
+    ASSERT_EQ(borderWidth1->bottomWidth, 0.0f);
+    OH_ArkUI_RenderNodeUtils_DisposeNodeBorderWidthOption(borderWidth1);
+}
+ 
+/**
+ * @tc.name: NativeRenderNodeTest203
+ * @tc.desc: Test renderNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest203, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootCustomNode = nodeAPI->createNode(ARKUI_NODE_CUSTOM);
+    ASSERT_NE(rootCustomNode, nullptr);
+    auto rootRenderNode = OH_ArkUI_RenderNodeUtils_CreateNode();
+    ASSERT_NE(rootRenderNode, nullptr);
+    auto result = OH_ArkUI_RenderNodeUtils_AddRenderNode(rootCustomNode, rootRenderNode);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+ 
+    ArkUI_NodeBorderColorOption* borderColor = OH_ArkUI_RenderNodeUtils_CreateNodeBorderColorOption();
+    ASSERT_NE(borderColor, nullptr);
+    result = OH_ArkUI_RenderNodeUtils_SetBorderColor(rootRenderNode, borderColor);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    OH_ArkUI_RenderNodeUtils_DisposeNodeBorderColorOption(borderColor);
+ 
+    ArkUI_NodeBorderColorOption* borderColor1 = OH_ArkUI_RenderNodeUtils_CreateNodeBorderColorOption();
+    ASSERT_NE(borderColor1, nullptr);
+    result = OH_ArkUI_RenderNodeUtils_GetBorderColor(rootRenderNode, &borderColor1);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(borderColor1->leftColor, 0);
+    ASSERT_EQ(borderColor1->rightColor, 0);
+    ASSERT_EQ(borderColor1->topColor, 0);
+    ASSERT_EQ(borderColor1->bottomColor, 0);
+    OH_ArkUI_RenderNodeUtils_DisposeNodeBorderColorOption(borderColor1);
+}
+ 
+/**
+ * @tc.name: NativeRenderNodeTest204
+ * @tc.desc: Test renderNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest204, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootCustomNode = nodeAPI->createNode(ARKUI_NODE_CUSTOM);
+    ASSERT_NE(rootCustomNode, nullptr);
+    auto rootRenderNode = OH_ArkUI_RenderNodeUtils_CreateNode();
+    ASSERT_NE(rootRenderNode, nullptr);
+    auto result = OH_ArkUI_RenderNodeUtils_AddRenderNode(rootCustomNode, rootRenderNode);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+ 
+    ArkUI_NodeBorderRadiusOption* borderRadius = OH_ArkUI_RenderNodeUtils_CreateNodeBorderRadiusOption();
+    ASSERT_NE(borderRadius, nullptr);
+    result = OH_ArkUI_RenderNodeUtils_SetBorderRadius(rootRenderNode, borderRadius);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    OH_ArkUI_RenderNodeUtils_DisposeNodeBorderRadiusOption(borderRadius);
+ 
+    ArkUI_NodeBorderRadiusOption* borderRadius1 = OH_ArkUI_RenderNodeUtils_CreateNodeBorderRadiusOption();
+    ASSERT_NE(borderRadius1, nullptr);
+    result = OH_ArkUI_RenderNodeUtils_GetBorderRadius(rootRenderNode, &borderRadius1);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(borderRadius1->leftRadius, 0.0f);
+    ASSERT_EQ(borderRadius1->rightRadius, 0.0f);
+    ASSERT_EQ(borderRadius1->topRadius, 0.0f);
+    ASSERT_EQ(borderRadius1->bottomRadius, 0.0f);
+    OH_ArkUI_RenderNodeUtils_DisposeNodeBorderRadiusOption(borderRadius1);
+}
+ 
+/**
+ * @tc.name: NativeRenderNodeTest205
+ * @tc.desc: Test renderNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest205, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootCustomNode = nodeAPI->createNode(ARKUI_NODE_CUSTOM);
+    ASSERT_NE(rootCustomNode, nullptr);
+    auto rootRenderNode = OH_ArkUI_RenderNodeUtils_CreateNode();
+    ASSERT_NE(rootRenderNode, nullptr);
+    auto result = OH_ArkUI_RenderNodeUtils_AddRenderNode(rootCustomNode, rootRenderNode);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+ 
+    result = OH_ArkUI_RenderNodeUtils_SetMarkNodeGroup(rootRenderNode, true);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+}
+ 
+/**
+ * @tc.name: NativeRenderNodeTest206
+ * @tc.desc: Test renderNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest206, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootCustomNode = nodeAPI->createNode(ARKUI_NODE_CUSTOM);
+    ASSERT_NE(rootCustomNode, nullptr);
+    auto rootRenderNode = OH_ArkUI_RenderNodeUtils_CreateNode();
+    ASSERT_NE(rootRenderNode, nullptr);
+    auto result = OH_ArkUI_RenderNodeUtils_AddRenderNode(rootCustomNode, rootRenderNode);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+ 
+    result = OH_ArkUI_RenderNodeUtils_SetBounds(rootRenderNode, 50, 50, 100, 100);  // set x, y=50, width, height=100
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+ 
+    int32_t x = 0;
+    int32_t y = 0;
+    int32_t width = 0;
+    int32_t height = 0;
+    result = OH_ArkUI_RenderNodeUtils_GetBounds(rootRenderNode, &x, &y, &width, &height);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(x, 50);  // expect x equals to 50
+    ASSERT_EQ(y, 50);  // expect y equals to 50
+    ASSERT_EQ(width, 100);  // expect width equals to 100
+    ASSERT_EQ(height, 100);  // expect height equals to 100
+}
+ 
+/**
+ * @tc.name: NativeRenderNodeTest207
+ * @tc.desc: Test renderNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest207, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootCustomNode = nodeAPI->createNode(ARKUI_NODE_CUSTOM);
+    ASSERT_NE(rootCustomNode, nullptr);
+    auto rootRenderNode = OH_ArkUI_RenderNodeUtils_CreateNode();
+    ASSERT_NE(rootRenderNode, nullptr);
+    auto result = OH_ArkUI_RenderNodeUtils_AddRenderNode(rootCustomNode, rootRenderNode);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+ 
+    result = OH_ArkUI_RenderNodeUtils_SetDrawRegion(rootRenderNode, 50, 50, 100, 100);  // set x, y=50, w, h=100
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+}
+ 
+/**
+ * @tc.name: NativeRenderNodeTest208
+ * @tc.desc: Test renderNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest208, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootCustomNode = nodeAPI->createNode(ARKUI_NODE_CUSTOM);
+    ASSERT_NE(rootCustomNode, nullptr);
+    auto rootRenderNode = OH_ArkUI_RenderNodeUtils_CreateNode();
+    ASSERT_NE(rootRenderNode, nullptr);
+    auto result = OH_ArkUI_RenderNodeUtils_AddRenderNode(rootCustomNode, rootRenderNode);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+ 
+    ArkUI_RenderContentModifierHandle modifier = OH_ArkUI_RenderNodeUtils_CreateContentModifier();
+    ASSERT_NE(modifier, nullptr);
+    result = OH_ArkUI_RenderNodeUtils_AttachContentModifier(rootRenderNode, modifier);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    OH_ArkUI_RenderNodeUtils_DisposeContentModifier(modifier);
+}
+ 
+/**
+ * @tc.name: NativeRenderNodeTest209
+ * @tc.desc: Test renderNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest209, TestSize.Level1)
+{
+    ArkUI_RenderContentModifierHandle modifier = OH_ArkUI_RenderNodeUtils_CreateContentModifier();
+    ASSERT_NE(modifier, nullptr);
+ 
+    ArkUI_FloatPropertyHandle property = OH_ArkUI_RenderNodeUtils_CreateFloatProperty(0.5f);  // set value=0.5f
+    ASSERT_NE(property, nullptr);
+    float value = 0.0f;
+    auto result = OH_ArkUI_RenderNodeUtils_GetFloatPropertyValue(property, &value);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(value, 0.5f);  // expect value equals to 0.5f
+    result = OH_ArkUI_RenderNodeUtils_SetFloatPropertyValue(property, 1.5f);  // set value=1.5f
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    result = OH_ArkUI_RenderNodeUtils_GetFloatPropertyValue(property, &value);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(value, 1.5f);  // expect value equals to 1.5f
+ 
+    result = OH_ArkUI_RenderNodeUtils_AttachFloatProperty(modifier, property);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    OH_ArkUI_RenderNodeUtils_DisposeFloatProperty(property);
+    OH_ArkUI_RenderNodeUtils_DisposeContentModifier(modifier);
+}
+ 
+/**
+ * @tc.name: NativeRenderNodeTest210
+ * @tc.desc: Test renderNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest210, TestSize.Level1)
+{
+    ArkUI_RenderContentModifierHandle modifier = OH_ArkUI_RenderNodeUtils_CreateContentModifier();
+    ASSERT_NE(modifier, nullptr);
+ 
+    ArkUI_Vector2PropertyHandle property = OH_ArkUI_RenderNodeUtils_CreateVector2Property(0.5f, 0.5f);  // set x, y=0.5f
+    ASSERT_NE(property, nullptr);
+    float x = 0.0f;
+    float y = 0.0f;
+    auto result = OH_ArkUI_RenderNodeUtils_GetVector2PropertyValue(property, &x, &y);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(x, 0.5f);  // expect x equals to 0.5f
+    ASSERT_EQ(y, 0.5f);  // expect y equals to 0.5f
+    result = OH_ArkUI_RenderNodeUtils_SetVector2PropertyValue(property, 1.5f, 1.5f);  // set x, y=1.5f
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    result = OH_ArkUI_RenderNodeUtils_GetVector2PropertyValue(property, &x, &y);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(x, 1.5f);  // expect x equals to 1.5f
+    ASSERT_EQ(y, 1.5f);  // expect y equals to 1.5f
+ 
+    result = OH_ArkUI_RenderNodeUtils_AttachVector2Property(modifier, property);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    OH_ArkUI_RenderNodeUtils_DisposeVector2Property(property);
+    OH_ArkUI_RenderNodeUtils_DisposeContentModifier(modifier);
+}
+ 
+/**
+ * @tc.name: NativeRenderNodeTest211
+ * @tc.desc: Test renderNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest211, TestSize.Level1)
+{
+    ArkUI_RenderContentModifierHandle modifier = OH_ArkUI_RenderNodeUtils_CreateContentModifier();
+    ASSERT_NE(modifier, nullptr);
+ 
+    ArkUI_ColorPropertyHandle property =
+        OH_ArkUI_RenderNodeUtils_CreateColorProperty(0xFF0000FF);  // set value=0xFF0000FF
+    ASSERT_NE(property, nullptr);
+    uint32_t value = 0;
+    auto result = OH_ArkUI_RenderNodeUtils_GetColorPropertyValue(property, &value);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    result = OH_ArkUI_RenderNodeUtils_SetColorPropertyValue(property, 0xFF00FF00);  // set value=0xFF00FF00
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    result = OH_ArkUI_RenderNodeUtils_GetColorPropertyValue(property, &value);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+ 
+    result = OH_ArkUI_RenderNodeUtils_AttachColorProperty(modifier, property);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    OH_ArkUI_RenderNodeUtils_DisposeColorProperty(property);
+    OH_ArkUI_RenderNodeUtils_DisposeContentModifier(modifier);
+}
+ 
+/**
+ * @tc.name: NativeRenderNodeTest212
+ * @tc.desc: Test renderNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest212, TestSize.Level1)
+{
+    ArkUI_RenderContentModifierHandle modifier = OH_ArkUI_RenderNodeUtils_CreateContentModifier();
+    ASSERT_NE(modifier, nullptr);
+ 
+    ArkUI_FloatAnimatablePropertyHandle property =
+        OH_ArkUI_RenderNodeUtils_CreateFloatAnimatableProperty(0.5f);  // set value=0.5f
+    ASSERT_NE(property, nullptr);
+    float value = 0.0f;
+    auto result = OH_ArkUI_RenderNodeUtils_GetFloatAnimatablePropertyValue(property, &value);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(value, 0.5f);  // expect value equals to 0.5f
+    result = OH_ArkUI_RenderNodeUtils_SetFloatAnimatablePropertyValue(property, 1.5f);  // set value=1.5f
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    result = OH_ArkUI_RenderNodeUtils_GetFloatAnimatablePropertyValue(property, &value);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(value, 1.5f);  // expect value equals to 1.5f
+ 
+    result = OH_ArkUI_RenderNodeUtils_AttachFloatAnimatableProperty(modifier, property);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    OH_ArkUI_RenderNodeUtils_DisposeFloatAnimatableProperty(property);
+    OH_ArkUI_RenderNodeUtils_DisposeContentModifier(modifier);
+}
+ 
+/**
+ * @tc.name: NativeRenderNodeTest213
+ * @tc.desc: Test renderNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest213, TestSize.Level1)
+{
+    ArkUI_RenderContentModifierHandle modifier = OH_ArkUI_RenderNodeUtils_CreateContentModifier();
+    ASSERT_NE(modifier, nullptr);
+ 
+    ArkUI_Vector2AnimatablePropertyHandle property =
+        OH_ArkUI_RenderNodeUtils_CreateVector2AnimatableProperty(0.5f, 0.5f);  // set x, y=0.5f
+    ASSERT_NE(property, nullptr);
+    float x = 0.0f;
+    float y = 0.0f;
+    auto result = OH_ArkUI_RenderNodeUtils_GetVector2AnimatablePropertyValue(property, &x, &y);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(x, 0.5f);  // expect x equals to 0.5f
+    ASSERT_EQ(y, 0.5f);  // expect y equals to 0.5f
+    result = OH_ArkUI_RenderNodeUtils_SetVector2AnimatablePropertyValue(property, 1.5f, 1.5f);  // set x, y=1.5f
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    result = OH_ArkUI_RenderNodeUtils_GetVector2AnimatablePropertyValue(property, &x, &y);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(x, 1.5f);  // expect x equals to 1.5f
+    ASSERT_EQ(y, 1.5f);  // expect y equals to 1.5f
+ 
+    result = OH_ArkUI_RenderNodeUtils_AttachVector2AnimatableProperty(modifier, property);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    OH_ArkUI_RenderNodeUtils_DisposeVector2AnimatableProperty(property);
+    OH_ArkUI_RenderNodeUtils_DisposeContentModifier(modifier);
+}
+ 
+/**
+ * @tc.name: NativeRenderNodeTest214
+ * @tc.desc: Test renderNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest214, TestSize.Level1)
+{
+    ArkUI_RenderContentModifierHandle modifier = OH_ArkUI_RenderNodeUtils_CreateContentModifier();
+    ASSERT_NE(modifier, nullptr);
+ 
+    ArkUI_ColorAnimatablePropertyHandle property =
+        OH_ArkUI_RenderNodeUtils_CreateColorAnimatableProperty(0xFF0000FF);  // set value=0xFF0000FF
+    ASSERT_NE(property, nullptr);
+    uint32_t value = 0;
+    auto result = OH_ArkUI_RenderNodeUtils_GetColorAnimatablePropertyValue(property, &value);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    result = OH_ArkUI_RenderNodeUtils_SetColorAnimatablePropertyValue(property, 0xFF00FF00);  // set value=0xFF00FF00
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    result = OH_ArkUI_RenderNodeUtils_GetColorAnimatablePropertyValue(property, &value);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+ 
+    result = OH_ArkUI_RenderNodeUtils_AttachColorAnimatableProperty(modifier, property);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    OH_ArkUI_RenderNodeUtils_DisposeColorAnimatableProperty(property);
+    OH_ArkUI_RenderNodeUtils_DisposeContentModifier(modifier);
+}
+
 } // namespace OHOS::Ace
