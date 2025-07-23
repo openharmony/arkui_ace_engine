@@ -42,7 +42,6 @@ arkui_files = [
   "arkui-preprocessed/arkui/ArkCustomComponent.ets",
   "arkui-preprocessed/arkui/ArkNavigation.ets",
   "arkui-preprocessed/arkui/ArkStructBase.ets",
-  "arkui-preprocessed/arkui/ArkTestComponent.ets",
   "arkui-preprocessed/arkui/ArkUIEntry.ets",
   "arkui-preprocessed/arkui/AttributeUpdater.ets",
   "arkui-preprocessed/arkui/BlankModifier.ets",
