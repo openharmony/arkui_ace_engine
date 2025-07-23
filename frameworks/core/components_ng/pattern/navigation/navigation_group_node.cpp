@@ -1444,6 +1444,11 @@ bool NavigationGroupNode::UpdateNavDestinationVisibility(const RefPtr<NavDestina
     auto pattern = AceType::DynamicCast<NavDestinationPattern>(navDestination->GetPattern());
     if (navDestination->GetPattern<NavDestinationPattern>()->GetCustomNode() != remainChild &&
         !navDestination->IsOnAnimation()) {
+        // if curNode is visible, need remove in hideNodes_.
+        hideNodes_.erase(
+            std::remove_if(hideNodes_.begin(), hideNodes_.end(),
+                [navDestination](const auto& pair) { return navDestination == pair.first && !pair.second; }),
+            hideNodes_.end());
         navDestination->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
         navDestination->SetJSViewActive(true);
     }
