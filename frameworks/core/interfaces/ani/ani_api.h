@@ -18,11 +18,9 @@
 
 #include <cstdint>
 #include <functional>
+#include <memory>
+#include <optional>
 #include <string>
-
-#include "core/common/ace_engine.h"
-#include "core/components_ng/render/adapter/component_snapshot.h"
-#include "core/components_ng/render/snapshot_param.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -31,6 +29,8 @@ extern "C" {
 #define ARKUI_ANI_API_VERSION 100
 #define EXTRA_INFO_MAX_LENGTH 1024
 #define ARKUI_ANI_MODIFIER_FUNCTION_NAME "GetArkUIAniModifiers"
+const float DEFAULT_SNAPSHOT_SCALE = 1.f;
+const int32_t DEFAULT_DELAY_TIME = 300;
 
 struct _ArkUIStyledString;
 struct _ArkUINode;
@@ -96,6 +96,11 @@ class DragAction;
 enum class ArkUIDragStatus { STARTED, ENDED };
 enum class ArkUIDragResult { DRAG_SUCCESS, DRAG_FAIL, DRAG_CANCEL };
 enum class ArkUIDragBehavior { UNKNOWN, COPY, MOVE };
+enum ArkUISnapshotRegionMode {
+    COMMON,
+    LOCALIZED,
+    NO_REGION
+};
 
 struct ArkUIDragInfo {
     void* pixelMap;
@@ -162,6 +167,36 @@ struct ArkUIDragControllerAsync {
     std::function<void(std::shared_ptr<ArkUIDragControllerAsync>, const ArkUIDragNotifyMessage&,
         const ArkUIDragStatus)> callBackJsFunction;
     OHOS::Ace::Ani::DragAction* dragAction = nullptr;
+};
+
+struct ArkUILocalizedSnapshotRegion {
+    double start = -1.f;
+    double top = -1.f;
+    double end = -1.f;
+    double bottom = -1.f;
+};
+
+struct ArkUIComponentSnapshotOptions {
+    float scale = DEFAULT_SNAPSHOT_SCALE;
+    bool waitUntilRenderFinished = false;
+    ArkUILocalizedSnapshotRegion snapshotRegion;
+    ArkUISnapshotRegionMode regionMode = ArkUISnapshotRegionMode::NO_REGION;
+};
+
+struct ArkUISnapshotParam {
+    int32_t delay = DEFAULT_DELAY_TIME;
+    bool checkImageStatus = false;
+    ArkUIComponentSnapshotOptions options;
+};
+
+struct ArkUIComponentSnapshotAsync {
+    int32_t errCode = -1;
+    ani_env* env = nullptr;
+    ani_resolver deferred = nullptr;
+    ani_object callbackRef = nullptr;
+    ani_object destroyCallbackRef = nullptr;
+    std::shared_ptr<void> pixelMap;
+    std::function<void(std::shared_ptr<ArkUIComponentSnapshotAsync>)> callBackJsFunction;
 };
 
 struct ArkUIAniImageModifier {
@@ -279,14 +314,10 @@ struct ArkUIAniListModifier {
     void (*setListChildrenMainSize)(ani_env* env, ani_long ptr, ani_object obj);
 };
 struct ArkUIAniComponentSnapshotModifier {
-    int32_t (*getCurrentIdSafely)();
-    OHOS::Ace::RefPtr<OHOS::Ace::Container> (*getContainer)(int32_t instanceId);
-    void (*createFromBuilder)(ArkUINodeHandle node,
-    OHOS::Ace::NG::ComponentSnapshot::JsCallback&& callback,
-    OHOS::Ace::NG::SnapshotParam param);
-    void (*createFromComponent)(ArkUINodeHandle node,
-    OHOS::Ace::NG::ComponentSnapshot::JsCallback&& callback,
-    OHOS::Ace::NG::SnapshotParam param);
+    void (*createFromBuilder)(
+        ArkUINodeHandle node, const ArkUIComponentSnapshotAsync& asyncCtx, const ArkUISnapshotParam& param);
+    void (*createFromComponent)(
+        ArkUINodeHandle node, const ArkUIComponentSnapshotAsync& asyncCtx, const ArkUISnapshotParam& param);
 };
 struct ArkUIAniAnimationModifier {
     bool (*hasAnimatableProperty)(ani_env* env, ArkUINodeHandle node, ani_string name);
