@@ -242,7 +242,7 @@ int32_t OH_ArkUI_RenderNodeUtils_GetChildren(
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
     ArkUIRenderNodeHandle* renderNode;
-    int32_t* nodeId;
+    uint32_t* nodeId;
     int32_t nodeCount = 0;
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getChildren(
         node->renderNodeHandle, &renderNode, &nodeId, &nodeCount);

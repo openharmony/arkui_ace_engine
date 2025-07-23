@@ -53,7 +53,6 @@ template("ace_core_pipeline_source_set") {
       "base/render_element.cpp",
       "base/render_node.cpp",
       "base/rs_node_adapter.cpp",
-      "base/rs_render_node.cpp",
       "base/sole_child_element.cpp",
 
       # factories

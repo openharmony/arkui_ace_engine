@@ -131,6 +131,7 @@ HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest003, TestSize.Level1)
     ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
     ASSERT_EQ(count, 2); //2 represents the number of sub-nodes that have been added by the sub-nodes.
     auto nodeForDispose = OH_ArkUI_RenderNodeUtils_CreateNode();
+    ASSERT_NE(nodeForDispose, nullptr);
     result = OH_ArkUI_RenderNodeUtils_DisposeNode(nodeForDispose);
     ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
     OH_ArkUI_RenderNodeUtils_InsertChildAfter(rootRenderNode, rsNodeThirdChild, rsNodeSecondChild);
