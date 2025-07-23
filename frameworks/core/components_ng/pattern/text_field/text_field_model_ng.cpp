@@ -758,19 +758,6 @@ void TextFieldModelNG::SetShowError(const std::u16string& errorText, bool visibl
 
 void TextFieldModelNG::SetShowCounter(bool value)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetCounterState(false);
-    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    if (value && !pattern->IsNormalInlineState() && !pattern->IsInPasswordMode() &&
-        layoutProperty->HasMaxLength()) {
-        pattern->AddCounterNode();
-    } else {
-        pattern->CleanCounterNode();
-    }
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowCounter, value);
 }
 
@@ -1519,18 +1506,7 @@ void TextFieldModelNG::SetEnableAutoFillAnimation(FrameNode* frameNode, bool ena
 void TextFieldModelNG::SetShowCounter(FrameNode* frameNode, bool value)
 {
     CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetCounterState(false);
-    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowCounter, value, frameNode);
-    if (value && !pattern->IsNormalInlineState() && !pattern->IsInPasswordMode() &&
-        layoutProperty->HasMaxLength()) {
-        pattern->AddCounterNode();
-    } else {
-        pattern->CleanCounterNode();
-    }
 }
 
 void TextFieldModelNG::SetShowError(FrameNode* frameNode, const std::u16string& errorText, bool visible)
