@@ -45,7 +45,7 @@ public:
     void SetTitlebarOptions(NavigationTitlebarOptions&& opt) override;
     void SetCustomTitle(const RefPtr<AceType>& customNode) override;
     void SetTitleHeight(const Dimension& height, bool isValid = true) override;
-    void SetTitleHeight(const RefPtr<ResourceObject>& resObj) override;
+    void SetTitleHeight(const Dimension& height, const RefPtr<ResourceObject>& resObj) override;
     void SetTitleMode(NG::NavigationTitleMode mode) override;
     void SetSubtitle(const std::string& subtitle) override;
     void SetEnableModeChangeAnimation(bool isEnable) override;
@@ -173,7 +173,8 @@ public:
     static void SetToolBarItems(FrameNode* frameNode, std::vector<NG::BarItem>&& toolBarItems);
     static RefPtr<NG::NavigationStack> GetNavigationStack(FrameNode* frameNode);
     static void SetOnNavBarStateChange(FrameNode* frameNode, std::function<void(bool)>&& onNavBarStateChange);
-    static CalcDimension ParseTitleHeight(const RefPtr<ResourceObject>& resObj);
+    static CalcDimension ParseTitleHeight(
+        const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& resObj);
     static void ResetResObj(FrameNode* frameNode, NavigationPatternType type, const std::string& key);
     static void SetBeforeCreateLayoutWrapperCallBack(
         FrameNode* frameNode, std::function<void()>&& beforeCreateLayoutWrapper);
