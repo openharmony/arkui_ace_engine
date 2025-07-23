@@ -2037,6 +2037,7 @@ void UIContentImpl::SetAceApplicationInfo(std::shared_ptr<OHOS::AbilityRuntime::
     AceApplicationInfo::GetInstance().SetApiTargetVersion(context->GetApplicationInfo()->apiTargetVersion);
     AceApplicationInfo::GetInstance().SetAppVersionName(context->GetApplicationInfo()->versionName);
     AceApplicationInfo::GetInstance().SetAppVersionCode(context->GetApplicationInfo()->versionCode);
+    AceApplicationInfo::GetInstance().SetDebugForParallel(context->GetApplicationInfo()->debug);
     AceApplicationInfo::GetInstance().SetUid(IPCSkeleton::GetCallingUid());
     AceApplicationInfo::GetInstance().SetPid(IPCSkeleton::GetCallingRealPid());
     CapabilityRegistry::Register();
