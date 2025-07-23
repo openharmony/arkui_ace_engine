@@ -21,7 +21,6 @@
 #include "arkoala_api_generated.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/validators.h"
-#include "core/interfaces/native/implementation/theme/ani_button_theme.h"
 
 namespace OHOS::Ace::NG {
 struct ButtonOptions {
@@ -128,7 +127,6 @@ void SetButtonOptions1Impl(Ark_NativePointer node,
     } else {
         ButtonModelStatic::SetButtonStyle(frameNode, std::nullopt);
     }
-    AniButtonTheme::ApplyTheme(ButtonRole::NORMAL, ButtonStyleMode::EMPHASIZE, true);
 }
 void SetButtonOptions2Impl(Ark_NativePointer node,
                            const Ark_ResourceStr* label,
@@ -144,7 +142,6 @@ void SetButtonOptions2Impl(Ark_NativePointer node,
     }
     auto labelString = Converter::OptConvert<std::string>(*label);
     ButtonModelStatic::SetLabel(frameNode, labelString.value_or("").c_str());
-    AniButtonTheme::ApplyTheme(ButtonRole::NORMAL, ButtonStyleMode::EMPHASIZE, true);
 }
 } // ButtonInterfaceModifier
 namespace ButtonAttributeModifier {
