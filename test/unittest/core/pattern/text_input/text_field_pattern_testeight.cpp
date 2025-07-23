@@ -1809,14 +1809,13 @@ HWTEST_F(TextFieldPatternTestEight, OnAttachToFrameNode001, TestSize.Level0)
 }
 
 /**
- * @tc.name: OnAttachToFrameNode002
- * @tc.desc: test OnAttachToFrameNode
+ * @tc.name: InitTheme001
+ * @tc.desc: test InitTheme
  * @tc.type: FUNC
  */
-HWTEST_F(TextFieldPatternTestEight, OnAttachToFrameNode002, TestSize.Level0)
+HWTEST_F(TextFieldPatternTestEight, InitTheme001, TestSize.Level0)
 {
     CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) { model.SetType(TextInputType::VISIBLE_PASSWORD); });
-    GetFocus();
 
     auto frameNode = pattern_->GetHost();
     auto pipeline = frameNode->GetContext();
@@ -1827,7 +1826,7 @@ HWTEST_F(TextFieldPatternTestEight, OnAttachToFrameNode002, TestSize.Level0)
     MockPipelineContext::GetCurrentContext()->SetMinPlatformVersion(
         static_cast<int32_t>(PlatformVersion::VERSION_NINE));
 
-    pattern_->OnAttachToFrameNode();
+    pattern_->InitTheme();
 
     auto theme = pattern_->GetTheme();
     EXPECT_NE(theme, nullptr);
