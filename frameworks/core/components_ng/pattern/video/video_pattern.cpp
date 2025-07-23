@@ -2376,8 +2376,9 @@ void VideoPattern::SetVideoController(const RefPtr<VideoControllerV2>& videoCont
 
     // if pattern is attached to frame node
     auto frameNode = frameNode_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
     // full screen node is not supposed to register js controller event
-    if (frameNode && !InstanceOf<VideoFullScreenPattern>(this)) {
+    if (!InstanceOf<VideoFullScreenPattern>(this)) {
         SetMethodCall();
     }
 }
