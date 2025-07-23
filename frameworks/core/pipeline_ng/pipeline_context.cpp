@@ -4401,6 +4401,9 @@ bool PipelineContext::HasDifferentDirectionGesture() const
 void PipelineContext::AddVisibleAreaChangeNode(const int32_t nodeId)
 {
     onVisibleAreaChangeNodeIds_.emplace(nodeId);
+    auto frameNode = DynamicCast<FrameNode>(ElementRegister::GetInstance()->GetUINodeById(nodeId));
+    CHECK_NULL_VOID(frameNode);
+    frameNode->ClearCachedIsFrameDisappear();
 }
 
 void PipelineContext::AddVisibleAreaChangeNode(const RefPtr<FrameNode>& node,
@@ -4412,6 +4415,7 @@ void PipelineContext::AddVisibleAreaChangeNode(const RefPtr<FrameNode>& node,
     addInfo.callback = callback;
     addInfo.isCurrentVisible = false;
     onVisibleAreaChangeNodeIds_.emplace(node->GetId());
+    node->ClearCachedIsFrameDisappear();
     if (isUserCallback) {
         node->SetVisibleAreaUserCallback(ratios, addInfo);
     } else {
@@ -4447,6 +4451,9 @@ void PipelineContext::AddOnAreaChangeNode(int32_t nodeId)
 {
     onAreaChangeNodeIds_.emplace(nodeId);
     isOnAreaChangeNodesCacheVaild_ = false;
+    auto frameNode = DynamicCast<FrameNode>(ElementRegister::GetInstance()->GetUINodeById(nodeId));
+    CHECK_NULL_VOID(frameNode);
+    frameNode->ClearCachedGlobalOffset();
 }
 
 void PipelineContext::RemoveOnAreaChangeNode(int32_t nodeId)
