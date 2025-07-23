@@ -579,6 +579,24 @@ Ark_Boolean GetCrossLanguageOptionsImpl(Ark_FrameNode peer)
     return frameNode->isCrossLanguageAttributeSetting();
 }
 
+Ark_FrameNode CreateByRawPtrImpl(void* rawPtr)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(rawPtr);
+    auto peer = FrameNodePeer::Create(frameNode);
+    auto nodeId = frameNode->GetId();
+    peer->node->SetExclusiveEventForChild(true);
+    peer->node->SetIsArkTsFrameNode(true);
+    FrameNodePeer::peerMap_.emplace(nodeId, *peer);
+    return peer;
+}
+
+void* unWrapRawPtrImpl(Ark_FrameNode peerNode)
+{
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peerNode);
+    auto frameNodeRaw = Referenced::RawPtr(frameNode);
+    return reinterpret_cast<void*>(frameNodeRaw);
+}
+
 Ark_Number GetIdByFrameNodeImpl(Ark_FrameNode peer, Ark_FrameNode node)
 {
     const auto errValue = Converter::ArkValue<Ark_Number>(-1);
@@ -953,6 +971,7 @@ const GENERATED_ArkUIFrameNodeAccessor* GetFrameNodeAccessor()
         FrameNodeAccessor::GetInspectorInfoImpl, FrameNodeAccessor::OnDrawImpl,
         FrameNodeAccessor::InvalidateImpl, FrameNodeAccessor::DisposeTreeImpl,
         FrameNodeAccessor::SetCrossLanguageOptionsImpl, FrameNodeAccessor::GetCrossLanguageOptionsImpl,
+        FrameNodeAccessor::CreateByRawPtrImpl, FrameNodeAccessor::unWrapRawPtrImpl
     };
     return &FrameNodeAccessorImpl;
 }
