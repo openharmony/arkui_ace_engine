@@ -408,20 +408,6 @@ bool SecurityComponentHandler::CheckLinearGradientBlur(const RefPtr<FrameNode>& 
     }
 }
 
-bool SecurityComponentHandler::CheckGrayScale(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext,
-    std::string& message)
-{
-    if (renderContext->GetFrontGrayScale().has_value() &&
-        GreatNotEqual(renderContext->GetFrontGrayScale().value().ConvertToVp(), 0.0f)) {
-        SC_LOG_ERROR("SecurityComponentCheckFail: Parent %{public}s grayscale is set, security component is invalid",
-            node->GetTag().c_str());
-        message = ", attribute grayscale of parent component " + node->GetTag() + "(id = " +
-            std::to_string(node->GetId()) + ") is set";
-        return true;
-    }
-    return false;
-}
-
 bool SecurityComponentHandler::CheckSaturate(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext,
     std::string& message)
 {
@@ -604,7 +590,7 @@ bool SecurityComponentHandler::CheckRenderEffect(RefPtr<FrameNode>& node, std::s
 
     if (CheckOpacity(node, renderContext, message) || CheckBrightness(node, renderContext, message) ||
         CheckVisibility(node, layoutProperty, message) || CheckBlur(node, renderContext, message) ||
-        CheckGrayScale(node, renderContext, message) || CheckSaturate(node, renderContext, message) ||
+        CheckSaturate(node, renderContext, message) ||
         CheckContrast(node, renderContext, message) || CheckInvert(node, renderContext, message) ||
         CheckSepia(node, renderContext, message) || CheckHueRotate(node, renderContext, message) ||
         CheckColorBlend(node, renderContext, message) || CheckClipMask(node, renderContext, message) ||
