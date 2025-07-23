@@ -175,6 +175,12 @@ ace_unittest("axis_event_test_ng") {
   sources = [ "axis_event_test_ng.cpp" ]
 }
 
+ace_unittest("focus_event_handler_test_ng") {
+  type = "new"
+  module_output = "events"
+  sources = [ "focus_event_handler_test_ng.cpp" ]
+}
+
 group("core_event_unittest") {
   testonly = true
   deps = [
@@ -196,5 +202,6 @@ group("core_event_unittest") {
     ":scrollable_event_test_ng",
     ":state_style_test_ng",
     ":touch_event_test_ng",
+    ":focus_event_handler_test_ng",
   ]
 }
