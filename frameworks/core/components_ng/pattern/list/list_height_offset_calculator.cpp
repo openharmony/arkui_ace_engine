@@ -135,26 +135,20 @@ void ListHeightOffsetCalculator::CalculatePosMapNode()
 
 int32_t ListHeightOffsetCalculator::GetPosMapStartIndex()
 {
-    if (!posMap_) {
-        return -1;
-    }
-    return posMap_->GetStartIndexAndPos().first;
+    return posMap_ ? posMap_->GetStartIndexAndPos().first : -1;
 }
 
 int32_t ListHeightOffsetCalculator::GetPosMapEndIndex()
 {
-    if (!posMap_) {
-        return -1;
-    }
-    return posMap_->GetEndIndexAndPos().first;
+    return posMap_ ? posMap_->GetEndIndexAndPos().first : -1;
 }
 
 void ListHeightOffsetCalculator::CalculateLazyForEachNodeWithPosMap(RefPtr<UINode> node)
 {
-    auto repeat2 = AceType::DynamicCast<RepeatVirtualScroll2Node>(node);
+    auto repeatV2 = AceType::DynamicCast<RepeatVirtualScroll2Node>(node);
     int32_t count = 0;
-    if (repeat2) {
-        auto totalCount = repeat2->GetTotalCount();
+    if (repeatV2) {
+        auto totalCount = repeatV2->GetTotalCount();
         count = (totalCount <= INT_MAX) ? static_cast<int32_t>(totalCount) : INT_MAX;
     } else {
         count = node->FrameCount();
