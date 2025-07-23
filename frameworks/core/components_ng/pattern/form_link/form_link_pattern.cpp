@@ -15,8 +15,8 @@
 
 #include "core/components_ng/pattern/form_link/form_link_pattern.h"
 
-#include "core/pipeline_ng/pipeline_context.h"
 #include "base/log/log_wrapper.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
