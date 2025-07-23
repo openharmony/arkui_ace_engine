@@ -595,7 +595,7 @@ class ObservableMap<T, V> extends Map<T, V> {
         return ObservableHandler.find(this)
     }
 
-    override get size(): number {
+    override get size(): int {
         this.handler?.onAccess()
         return super.size
     }
@@ -699,7 +699,7 @@ class ObservableSet<T> extends Set<T> {
         return new Set<T>(this.elements.keys()).toString()
     }
 
-    override get size(): number {
+    override get size(): int {
         this.handler?.onAccess()
         return this.elements.size
     }
