@@ -382,7 +382,7 @@ HWTEST_F(WaterFlowSWTest, ScrollToTagetTest001, TestSize.Level1)
     CreateDone();
 
     EXPECT_CALL(*MockPipelineContext::pipeline_, GetSafeArea)
-        .Times(2)
+        .Times(1)
         .WillRepeatedly(Return(SafeAreaInsets { {}, { .start = 0, .end = 100 }, {}, {} }));
     layoutProperty_->UpdateSafeAreaExpandOpts({ .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL });
 
