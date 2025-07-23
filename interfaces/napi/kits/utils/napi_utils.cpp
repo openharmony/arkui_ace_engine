@@ -590,11 +590,11 @@ bool ParseColorFromResourceObject(napi_env env, napi_value value, Color& colorRe
         return false;
     }
     if (resourceInfo.type == static_cast<int32_t>(ResourceType::STRING)) {
-        auto colorString = resourceWrapper->GetString(resourceInfo.type);
+        auto colorString = resourceWrapper->GetString(resourceInfo.resId);
         return Color::ParseColorString(colorString, colorResult);
     }
     if (resourceInfo.type == static_cast<int32_t>(ResourceType::INTEGER)) {
-        auto colorInt = resourceWrapper->GetInt(resourceInfo.type);
+        auto colorInt = resourceWrapper->GetInt(resourceInfo.resId);
         colorResult = Color(CompleteColorAlphaIfIncomplete(colorInt));
         return true;
     }
