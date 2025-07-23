@@ -4344,6 +4344,7 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
             container->SetApiTargetVersion(appInfo->apiTargetVersion);
         }
 
+        container->SetBundleName(context->GetBundleName());
         container->SetBundlePath(context->GetBundleCodeDir());
         container->SetFilesDataPath(context->GetFilesDir());
     } else {
