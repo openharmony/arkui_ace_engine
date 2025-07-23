@@ -22,7 +22,7 @@
 #include "native_node.h"
 #include "native_render.h"
 #include "native_type.h"
-#include "interfaces/native/node/node_extended.h"
+#include "interfaces/native/node/node_extened.h"
 #include "interfaces/native/node/node_model.h"
 #include "interfaces/native/node/render_node.h"
 #include "interfaces/native/node/styled_string.h"
