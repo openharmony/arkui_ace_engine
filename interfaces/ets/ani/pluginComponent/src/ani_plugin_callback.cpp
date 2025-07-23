@@ -78,7 +78,7 @@ void ANIPluginCallback::SetWant(const AAFwk::Want& want)
     want_ = want;
 }
 
-AAFwk::Want& ANIPluginCallback::GetWant() const
+const AAFwk::Want& ANIPluginCallback::GetWant() const
 {
     return want_;
 }

@@ -31,6 +31,7 @@
 #include "core/common/resource/resource_wrapper.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/theme/shadow_theme.h"
+#include "core/components_ng/pattern/toast/toast_layout_property.h"
 #include "frameworks/base/log/log_wrapper.h"
 
 bool GetToastBottom(ani_env* env, ani_object object, std::string& result);

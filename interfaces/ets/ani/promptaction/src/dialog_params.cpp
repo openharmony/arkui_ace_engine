@@ -449,7 +449,8 @@ bool GetShowDialogOptions(ani_env* env, ani_object object, OHOS::Ace::DialogProp
     GetBackgroundBlurStyleOptions(env, object, dialogProps.blurStyleOption);
     GetBackgroundEffectOptions(env, object, dialogProps.effectOption);
     GetShadowParamOpt(env, object, dialogProps.shadow);
-    GetBoolParam(env, object, "enableHoverMode", dialogProps.enableHoverMode);
+    bool enableHoverMode = dialogProps.enableHoverMode.value_or(false);
+    GetBoolParam(env, object, "enableHoverMode", enableHoverMode);
     GetHoverModeAreaParamOpt(env, object, dialogProps.hoverModeArea);
     GetFunctionParam(env, object, "onDidAppear", dialogProps.onDidAppear);
     GetFunctionParam(env, object, "onDidDisappear", dialogProps.onDidDisappear);
@@ -930,7 +931,8 @@ bool GetBaseDialogOptions(ani_env* env, ani_object object, OHOS::Ace::DialogProp
     GetFunctionParam(env, object, "onWillAppear", dialogProps.onWillAppear);
     GetFunctionParam(env, object, "onWillDisappear", dialogProps.onWillDisappear);
     GetKeyboardAvoidMode(env, object, dialogProps.keyboardAvoidMode);
-    GetBoolParam(env, object, "enableHoverMode", dialogProps.enableHoverMode);
+    bool enableHoverMode = dialogProps.enableHoverMode.value_or(false);
+    GetBoolParam(env, object, "enableHoverMode", enableHoverMode);
     GetHoverModeAreaParamOpt(env, object, dialogProps.hoverModeArea);
     GetBackgroundBlurStyleOptions(env, object, dialogProps.blurStyleOption);
     GetBackgroundEffectOptions(env, object, dialogProps.effectOption);
