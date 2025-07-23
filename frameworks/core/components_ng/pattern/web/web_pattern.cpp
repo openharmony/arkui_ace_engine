@@ -2820,6 +2820,9 @@ bool WebPattern::WebOnKeyEvent(const KeyEvent& keyEvent)
     TAG_LOGD(AceLogTag::ACE_WEB,
         "WebPattern::WebOnKeyEvent keyEvent:%{public}s", keyEvent.ToString().c_str());
     webKeyEvent_.push_back(keyEvent);
+    if (keyEvent.code == KeyCode::KEY_TAB && keyEvent.action == KeyAction::DOWN) {
+        tabKeyEvent_ = keyEvent;
+    }
     std::vector<int32_t> pressedCodes;
     for (auto pCode : keyEvent.pressedCodes) {
         pressedCodes.push_back(static_cast<int32_t>(pCode));
@@ -2873,6 +2876,30 @@ void WebPattern::KeyboardReDispatch(
     }
     TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::KeyboardReDispatch erase key");
     webKeyEvent_.erase((++keyEvent).base());
+}
+
+void WebPattern::OnTakeFocus(const std::shared_ptr<OHOS::NWeb::NWebKeyEvent>& event)
+{
+    CHECK_NULL_VOID(event);
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto taskExecutor = pipelineContext->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    if (static_cast<int32_t>(tabKeyEvent_.code) != event->GetKeyCode() ||
+        static_cast<int32_t>(tabKeyEvent_.action) != event->GetAction()) {
+        return;
+    }
+    taskExecutor->PostTask([context = AceType::WeakClaim(pipelineContext),
+        event = tabKeyEvent_] () {
+        auto pipelineContext = context.Upgrade();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->ReDispatch(const_cast<KeyEvent&>(event));
+        },
+        TaskExecutor::TaskType::UI, "ArkUIWebKeyboardReDispatch");
 }
 
 void WebPattern::WebRequestFocus()
