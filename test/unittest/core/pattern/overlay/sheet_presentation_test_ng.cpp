@@ -1400,6 +1400,7 @@ HWTEST_F(SheetPresentationTestNg, SetSheetOuterBorderWidth001, TestSize.Level1)
     sheetTheme->sheetInnerBorderWidth_ = Dimension(10.0);
     SheetPresentationTestNg::SetSheetTheme(sheetTheme);
     SheetPresentationTestNg::SetSheetType(sheetPattern, SheetType::SHEET_CENTER);
+    sheetPattern->sheetType_ = SheetType::SHEET_CENTER;
     sheetPattern->InitSheetObject();
     ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
     sheetPattern->SetSheetOuterBorderWidth(sheetTheme, sheetStyle);
