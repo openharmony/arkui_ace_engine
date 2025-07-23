@@ -93,6 +93,8 @@ public:
         auto newData = malloc(this->dataLength);
         if (newData) {
             this->data = reinterpret_cast<uint8_t*>(newData);
+        } else {
+            this->data = nullptr;
         }
     }
 
