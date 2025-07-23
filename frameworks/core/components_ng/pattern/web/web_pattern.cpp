@@ -8521,4 +8521,9 @@ void WebPattern::SetTouchHandleExistState(bool touchHandleExist)
         delegate_->SetTouchHandleExistState(touchHandleExist);
     }
 }
+
+bool WebPattern::IsShowHandle()
+{
+    return webSelectOverlay_ && webSelectOverlay_->IsShowHandle();
+}
 } // namespace OHOS::Ace::NG
