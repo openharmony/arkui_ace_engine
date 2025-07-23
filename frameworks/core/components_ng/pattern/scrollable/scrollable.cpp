@@ -668,7 +668,7 @@ void Scrollable::HandleExtScroll()
 {
     if (handleExtScrollCallback_ != nullptr) {
         // call NestableScrollContainer::HandleExtScroll
-        return handleExtScrollCallback_();
+        handleExtScrollCallback_();
     }
 }
 
