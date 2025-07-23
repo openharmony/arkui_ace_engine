@@ -31,6 +31,13 @@ struct MoveOffsetParam {
 
 struct ScrollableUtils {
     /**
+     * @brief Disable lazyForEach prebuild cache item.
+     *
+     * @param node The host node.
+     */
+    static void DisableLazyForEachBuildCache(const RefPtr<UINode>& node);
+
+    /**
      * @brief Checks if contentHeight needs to expand based on safeArea property.
      *
      * @param layoutProps The layout properties to check.

@@ -96,6 +96,8 @@ public:
     static void SetShowCached(FrameNode* frameNode, bool show);
     static int32_t GetCachedCount(FrameNode* frameNode);
     static bool GetShowCached(FrameNode* frameNode);
+    static void SetCacheRange(FrameNode* frameNode, int32_t min, int32_t max);
+    static void ResetCacheRange(FrameNode* frameNode);
     static int32_t GetScrollEnabled(FrameNode* frameNode);
     static void SetScrollEnabled(FrameNode* frameNode, bool enableScrollInteraction);
     static int32_t GetSticky(FrameNode* frameNode);
