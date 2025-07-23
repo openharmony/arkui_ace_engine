@@ -24,6 +24,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ImageDataAccessor {
 void DestroyPeerImpl(Ark_ImageData peer)
 {
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_ImageData CtorImpl(const Ark_Number* width,
                        const Ark_Number* height,
@@ -44,7 +45,7 @@ Ark_ImageData CtorImpl(const Ark_Number* width,
             imgData.data = std::move(dataOpt.value());
         }
     }
-    return ImageDataPeer::Create(imgData);
+    return PeerUtils::CreatePeer<ImageDataPeer>(imgData);
 }
 Ark_NativePointer GetFinalizerImpl()
 {

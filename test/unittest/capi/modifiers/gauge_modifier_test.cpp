@@ -415,18 +415,14 @@ const auto COLORS_RES_BY_NAME = Converter::ArkUnion<Ark_ResourceColor, Ark_Resou
     CreateResource(RES_COLOR_NAME));
 const auto COLORS_RES_BY_ID = Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(
     CreateResource(RES_COLOR_ID));
-LinearGradientPeer linearGradient1 {
-    .colorStops {
-        std::make_pair(Color::WHITE, 20.0_vp),
-        std::make_pair(Color::RED, 10.0_vp),
-        std::make_pair(Color::GRAY, 1.5_vp),
-    }
+const std::vector<std::pair<std::optional<OHOS::Ace::Color>, OHOS::Ace::Dimension>> COLORS_LG_PEER1 {
+    std::make_pair(Color::WHITE, 20.0_vp),
+    std::make_pair(Color::RED, 10.0_vp),
+    std::make_pair(Color::GRAY, 1.5_vp),
 };
-LinearGradientPeer linearGradient2 {
-    .colorStops {
-        std::make_pair(Color::BLACK, 5.5_fp),
-        std::make_pair(Color::GREEN, 100.0_px),
-    }
+const std::vector<std::pair<std::optional<OHOS::Ace::Color>, OHOS::Ace::Dimension>> COLORS_LG_PEER2 {
+    std::make_pair(Color::BLACK, 5.5_fp),
+    std::make_pair(Color::GREEN, 100.0_px),
 };
 
 const std::vector<Ark_Tuple_Union_ResourceColor_LinearGradient_Number> COLORS_ARRAY {
@@ -443,113 +439,117 @@ const std::vector<Ark_Tuple_Union_ResourceColor_LinearGradient_Number> COLORS_AR
 };
 Converter::ArkArrayHolder<Array_Tuple_Union_ResourceColor_LinearGradient_Number> arkColorsArray(COLORS_ARRAY);
 
-const std::vector<Ark_Tuple_Union_ResourceColor_LinearGradient_Number> GRADIENT_ARRAY {
-    {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_LinearGradient>(&linearGradient1),
-        Converter::ArkValue<Ark_Number>(0.25f)},
-    {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_LinearGradient>(&linearGradient2),
-        Converter::ArkValue<Ark_Number>(0.75f)},
-};
-Converter::ArkArrayHolder<Array_Tuple_Union_ResourceColor_LinearGradient_Number> arkGradientArray(GRADIENT_ARRAY);
+Array_Tuple_Union_ResourceColor_LinearGradient_Number GetGradientArray()
+{
+    const std::vector<Ark_Tuple_Union_ResourceColor_LinearGradient_Number> gradientArray {
+        {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_LinearGradient>(
+            PeerUtils::CreatePeer<LinearGradientPeer>(COLORS_LG_PEER1)),
+            Converter::ArkValue<Ark_Number>(0.25f)},
+        {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_LinearGradient>(
+            PeerUtils::CreatePeer<LinearGradientPeer>(COLORS_LG_PEER2)),
+            Converter::ArkValue<Ark_Number>(0.75f)},
+    };
+    return Converter::ArkValue<Array_Tuple_Union_ResourceColor_LinearGradient_Number>(gradientArray, Converter::FC);
+}
 
-const std::vector<Ark_Tuple_Union_ResourceColor_LinearGradient_Number> COLORS_BIG_ARRAY {
-    {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(COLORS_ENUM_RED),
-        Converter::ArkValue<Ark_Number>(1.0f)},
-    {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_LinearGradient>(&linearGradient1),
-        Converter::ArkValue<Ark_Number>(2.0f)},
-    {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_LinearGradient>(&linearGradient2),
-        Converter::ArkValue<Ark_Number>(1.0f)},
-    {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(COLORS_ENUM_RED),
-        Converter::ArkValue<Ark_Number>(2.0f)},
-    {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(COLORS_NUMBER_GREEN),
-        Converter::ArkValue<Ark_Number>(1.0f)},
-    {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(COLORS_STRING_BLUE),
-        Converter::ArkValue<Ark_Number>(2.0f)},
-    {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(COLORS_ENUM_RED),
-        Converter::ArkValue<Ark_Number>(1.0f)},
-    {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(COLORS_NUMBER_GREEN),
-        Converter::ArkValue<Ark_Number>(2.0f)},
-    {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(COLORS_STRING_BLUE),
-        Converter::ArkValue<Ark_Number>(1.0f)},
-    {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(COLORS_ENUM_RED),
-        Converter::ArkValue<Ark_Number>(2.0f)},
-};
-Converter::ArkArrayHolder<Array_Tuple_Union_ResourceColor_LinearGradient_Number> arkColorsBigArray(COLORS_BIG_ARRAY);
+Array_Tuple_Union_ResourceColor_LinearGradient_Number GetColorsBigArray()
+{
+    const std::vector<Ark_Tuple_Union_ResourceColor_LinearGradient_Number> colorsBigArray {
+        {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(COLORS_ENUM_RED),
+            Converter::ArkValue<Ark_Number>(1.0f)},
+        {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_LinearGradient>(
+            PeerUtils::CreatePeer<LinearGradientPeer>(COLORS_LG_PEER1)),
+            Converter::ArkValue<Ark_Number>(2.0f)},
+        {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_LinearGradient>(
+            PeerUtils::CreatePeer<LinearGradientPeer>(COLORS_LG_PEER2)),
+            Converter::ArkValue<Ark_Number>(1.0f)},
+        {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(COLORS_ENUM_RED),
+            Converter::ArkValue<Ark_Number>(2.0f)},
+        {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(COLORS_NUMBER_GREEN),
+            Converter::ArkValue<Ark_Number>(1.0f)},
+        {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(COLORS_STRING_BLUE),
+            Converter::ArkValue<Ark_Number>(2.0f)},
+        {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(COLORS_ENUM_RED),
+            Converter::ArkValue<Ark_Number>(1.0f)},
+        {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(COLORS_NUMBER_GREEN),
+            Converter::ArkValue<Ark_Number>(2.0f)},
+        {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(COLORS_STRING_BLUE),
+            Converter::ArkValue<Ark_Number>(1.0f)},
+        {Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_ResourceColor>(COLORS_ENUM_RED),
+            Converter::ArkValue<Ark_Number>(2.0f)},
+    };
+    return Converter::ArkValue<Array_Tuple_Union_ResourceColor_LinearGradient_Number>(colorsBigArray, Converter::FC);
+}
+const std::string COLORS_BIG_ARRAY_RESULT =
+                "[[[[\"#FFFF0000\",\"0.000000\"]],1],"
+                "[[[\"#FFC0C0C0\",\"1.500000\"],"
+                "[\"#FFFF0000\",\"10.000000\"],"
+                "[\"#FFFFFFFF\",\"20.000000\"]],2],"
+                "[[[\"#FF000000\",\"5.500000\"],"
+                "[\"#FF00FF00\",\"100.000000\"]],1],"
+                "[[[\"#FFFF0000\",\"0.000000\"]],2],"
+                "[[[\"#F000FF00\",\"0.000000\"]],1],"
+                "[[[\"#800000FF\",\"0.000000\"]],2],"
+                "[[[\"#FFFF0000\",\"0.000000\"]],1],"
+                "[[[\"#F000FF00\",\"0.000000\"]],2],"
+                "[[[\"#800000FF\",\"0.000000\"]],1]]";
+const std::string GRADIENT_ARRAY_RESULT =
+                "[[[[\"#FFC0C0C0\",\"1.500000\"],"
+                "[\"#FFFF0000\",\"10.000000\"],"
+                "[\"#FFFFFFFF\",\"20.000000\"]],0.25],"
+                "[[[\"#FF000000\",\"5.500000\"],"
+                "[\"#FF00FF00\",\"100.000000\"]],0.75]]";
+using GaugeColorsValues = std::vector<std::tuple<std::string, Ark_Type_GaugeAttribute_colors_colors, std::string>>;
+using ArkColorColor = Ark_Type_GaugeAttribute_colors_colors;
 
 // Valid values for attribute of method 'colors'
-const std::vector<std::tuple<std::string, Ark_Type_GaugeAttribute_colors_colors, std::string>> colorsValidValues {
-    {
-        "ARK_COLOR_RED",
-        Converter::ArkUnion<Ark_Type_GaugeAttribute_colors_colors, Ark_ResourceColor>(COLORS_ENUM_RED),
-        "#FFFF0000"
-    },
-    {
-        "0xF000FF00",
-        Converter::ArkUnion<Ark_Type_GaugeAttribute_colors_colors, Ark_ResourceColor>(COLORS_NUMBER_GREEN),
-        "#F000FF00"
-    },
-    {
-        "rgba(0, 0, 255, 0.5)",
-        Converter::ArkUnion<Ark_Type_GaugeAttribute_colors_colors, Ark_ResourceColor>(COLORS_STRING_BLUE),
-        "#800000FF"
-    },
-    {
-        "RES_COLOR_NAME",
-        Converter::ArkUnion<Ark_Type_GaugeAttribute_colors_colors, Ark_ResourceColor>(COLORS_RES_BY_NAME),
-        COLOR_BY_NAME.ColorToString()
-    },
-    {
-        "RES_COLOR_ID",
-        Converter::ArkUnion<Ark_Type_GaugeAttribute_colors_colors, Ark_ResourceColor>(COLORS_RES_BY_ID),
-        COLOR_BY_ID.ColorToString()
-    },
-    {
-        "LINEAR_GRADIENT1",
-        Converter::ArkUnion<Ark_Type_GaugeAttribute_colors_colors, Ark_LinearGradient>(&linearGradient1),
-        "[[\"#FFC0C0C0\",\"1.500000\"],[\"#FFFF0000\",\"10.000000\"],[\"#FFFFFFFF\",\"20.000000\"]]"
-    },
-    {
-        "LINEAR_GRADIENT2",
-        Converter::ArkUnion<Ark_Type_GaugeAttribute_colors_colors, Ark_LinearGradient>(&linearGradient2),
-        "[[\"#FF000000\",\"5.500000\"],[\"#FF00FF00\",\"100.000000\"]]"
-    },
-    {
-        "COLORS_ARRAY",
-        Converter::ArkUnion<Ark_Type_GaugeAttribute_colors_colors,
-            Array_Tuple_Union_ResourceColor_LinearGradient_Number>(arkColorsArray.ArkValue()),
-        "[[[[\"#FFFF0000\",\"0.000000\"]],1],"
-            "[[[\"#F000FF00\",\"0.000000\"]],0.25],"
-            "[[[\"#800000FF\",\"0.000000\"]],0.5],"
-            "[[[\"#FF5A0F78\",\"0.000000\"]],1],"
-            "[[[\"#ABCDEF01\",\"0.000000\"]],1]]"
-    },
-    {
-        "GRADIENT_ARRAY",
-        Converter::ArkUnion<Ark_Type_GaugeAttribute_colors_colors,
-            Array_Tuple_Union_ResourceColor_LinearGradient_Number>(arkGradientArray.ArkValue()),
-        "[[[[\"#FFC0C0C0\",\"1.500000\"],"
-            "[\"#FFFF0000\",\"10.000000\"],"
-            "[\"#FFFFFFFF\",\"20.000000\"]],0.25],"
-            "[[[\"#FF000000\",\"5.500000\"],"
-            "[\"#FF00FF00\",\"100.000000\"]],0.75]]"
-    },
-    {
-        "COLORS_BIG_ARRAY",
-        Converter::ArkUnion<Ark_Type_GaugeAttribute_colors_colors,
-            Array_Tuple_Union_ResourceColor_LinearGradient_Number>(arkColorsBigArray.ArkValue()),
-        "[[[[\"#FFFF0000\",\"0.000000\"]],1],"
-            "[[[\"#FFC0C0C0\",\"1.500000\"],"
-            "[\"#FFFF0000\",\"10.000000\"],"
-            "[\"#FFFFFFFF\",\"20.000000\"]],2],"
-            "[[[\"#FF000000\",\"5.500000\"],"
-            "[\"#FF00FF00\",\"100.000000\"]],1],"
-            "[[[\"#FFFF0000\",\"0.000000\"]],2],"
-            "[[[\"#F000FF00\",\"0.000000\"]],1],"
-            "[[[\"#800000FF\",\"0.000000\"]],2],"
-            "[[[\"#FFFF0000\",\"0.000000\"]],1],"
-            "[[[\"#F000FF00\",\"0.000000\"]],2],"
-            "[[[\"#800000FF\",\"0.000000\"]],1]]"
-    },
-};
+GaugeColorsValues CreateColorsValidValues()
+{
+    GaugeColorsValues colorsValidValues {
+        {
+            "ARK_COLOR_RED", Converter::ArkUnion<ArkColorColor, Ark_ResourceColor>(COLORS_ENUM_RED), "#FFFF0000"
+        }, {
+            "0xF000FF00", Converter::ArkUnion<ArkColorColor, Ark_ResourceColor>(COLORS_NUMBER_GREEN), "#F000FF00"
+        }, {
+            "rgba(0, 0, 255, 0.5)", Converter::ArkUnion<ArkColorColor, Ark_ResourceColor>(COLORS_STRING_BLUE),
+            "#800000FF"
+        }, {
+            "RES_COLOR_NAME", Converter::ArkUnion<ArkColorColor, Ark_ResourceColor>(COLORS_RES_BY_NAME),
+            COLOR_BY_NAME.ColorToString()
+        }, {
+            "RES_COLOR_ID", Converter::ArkUnion<ArkColorColor, Ark_ResourceColor>(COLORS_RES_BY_ID),
+            COLOR_BY_ID.ColorToString()
+        }, {
+            "LINEAR_GRADIENT1",
+            Converter::ArkUnion<ArkColorColor, Ark_LinearGradient>(
+                PeerUtils::CreatePeer<LinearGradientPeer>(COLORS_LG_PEER1)),
+            "[[\"#FFC0C0C0\",\"1.500000\"],[\"#FFFF0000\",\"10.000000\"],[\"#FFFFFFFF\",\"20.000000\"]]"
+        }, {
+            "LINEAR_GRADIENT2",
+            Converter::ArkUnion<ArkColorColor, Ark_LinearGradient>(
+                PeerUtils::CreatePeer<LinearGradientPeer>(COLORS_LG_PEER2)),
+            "[[\"#FF000000\",\"5.500000\"],[\"#FF00FF00\",\"100.000000\"]]"
+        }, {
+            "COLORS_ARRAY",
+            Converter::ArkUnion<ArkColorColor,
+                Array_Tuple_Union_ResourceColor_LinearGradient_Number>(arkColorsArray.ArkValue()),
+            "[[[[\"#FFFF0000\",\"0.000000\"]],1],[[[\"#F000FF00\",\"0.000000\"]],0.25],"
+                "[[[\"#800000FF\",\"0.000000\"]],0.5],[[[\"#FF5A0F78\",\"0.000000\"]],1],"
+                "[[[\"#ABCDEF01\",\"0.000000\"]],1]]"
+        }, {
+            "GRADIENT_ARRAY",
+            Converter::ArkUnion<ArkColorColor,
+                Array_Tuple_Union_ResourceColor_LinearGradient_Number>(GetGradientArray()),
+            GRADIENT_ARRAY_RESULT
+        }, {
+            "COLORS_BIG_ARRAY",
+            Converter::ArkUnion<ArkColorColor,
+                Array_Tuple_Union_ResourceColor_LinearGradient_Number>(GetColorsBigArray()),
+            COLORS_BIG_ARRAY_RESULT
+        },
+    };
+    return colorsValidValues;
+}
 } // namespace
 
 /*
@@ -559,6 +559,7 @@ const std::vector<std::tuple<std::string, Ark_Type_GaugeAttribute_colors_colors,
  */
 HWTEST_F(GaugeModifierTest, setColorsTestValidValues, TestSize.Level1)
 {
+    auto colorsValidValues = CreateColorsValidValues();
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
