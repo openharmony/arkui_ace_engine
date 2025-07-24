@@ -1732,7 +1732,7 @@ void ScrollPattern::TriggerScrollBarDisplay()
 Offset ScrollPattern::GetFreeScrollOffset() const
 {
     if (freeScroll_) {
-        auto res = freeScroll_->GetOffset();
+        auto&& res = freeScroll_->GetLayoutOffset();
         return { Dimension(-res.GetX()).ConvertToVp(), Dimension(-res.GetY()).ConvertToVp() };
     }
     return {};

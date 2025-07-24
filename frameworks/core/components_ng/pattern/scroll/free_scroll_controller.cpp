@@ -89,14 +89,14 @@ void FreeScrollController::InitializePanRecognizer()
     freePanGesture_->SetRecognizerType(GestureTypeName::PAN_GESTURE);
     freePanGesture_->SetIsSystemGesture(true);
     freePanGesture_->SetIsAllowMouse(false);
-    freePanGesture_->SetSysGestureJudge([](const RefPtr<GestureInfo>& gestureInfo,
-                                           const std::shared_ptr<BaseGestureEvent>& info) {
-        if (gestureInfo->GetInputEventType() == InputEventType::AXIS &&
-            (info->IsKeyPressed(KeyCode::KEY_CTRL_LEFT) || info->IsKeyPressed(KeyCode::KEY_CTRL_RIGHT))) {
-            return GestureJudgeResult::REJECT;
-        }
-        return GestureJudgeResult::CONTINUE;
-    });
+    freePanGesture_->SetSysGestureJudge(
+        [](const RefPtr<GestureInfo>& gestureInfo, const std::shared_ptr<BaseGestureEvent>& info) {
+            if (gestureInfo->GetInputEventType() == InputEventType::AXIS &&
+                (info->IsKeyPressed(KeyCode::KEY_CTRL_LEFT) || info->IsKeyPressed(KeyCode::KEY_CTRL_RIGHT))) {
+                return GestureJudgeResult::REJECT;
+            }
+            return GestureJudgeResult::CONTINUE;
+        });
 }
 
 namespace {
@@ -277,7 +277,7 @@ void FreeScrollController::HandleOffsetUpdate(const OffsetF& currentValue)
         return; // callbacks and checks already handled in HandlePanUpdate
     }
 
-    FireOnWillScroll(currentValue - prevOffset_, ToScrollState(state_), ToScrollSource(state_));
+    FireOnWillScroll(currentValue - actualOffset_, ToScrollState(state_), ToScrollSource(state_));
     const bool reachedEdge = CheckCrashEdge(currentValue, pattern_.GetViewPortExtent() - pattern_.GetViewSize());
     if (state_ == State::FLING && reachedEdge) {
         // change friction during animation and transition to BOUNCE animation
@@ -402,13 +402,14 @@ OffsetF FreeScrollController::GetOffset() const
 
 void FreeScrollController::OnLayoutFinished(const OffsetF& adjustedOffset, const SizeF& scrollableArea)
 {
-    if (offset_ && offset_->Get() != adjustedOffset && !InAnimation(state_)) {
+    if (offset_ && offset_->Get() != adjustedOffset &&
+        !InAnimation(state_)) { // modifying animatableProperty during animation not allowed
         offset_->Set(adjustedOffset);
     }
-    if (adjustedOffset != prevOffset_) {
+    if (adjustedOffset != actualOffset_) {
         // Fire onDidScroll only if the offset has changed.
-        FireOnDidScroll(adjustedOffset - prevOffset_, ToScrollState(state_));
-        prevOffset_ = adjustedOffset;
+        FireOnDidScroll(adjustedOffset - actualOffset_, ToScrollState(state_));
+        actualOffset_ = adjustedOffset;
     }
     auto props = pattern_.GetLayoutProperty<ScrollLayoutProperty>();
     CHECK_NULL_VOID(props);
@@ -424,7 +425,7 @@ void FreeScrollController::OnLayoutFinished(const OffsetF& adjustedOffset, const
 
 void FreeScrollController::SetOffset(OffsetF newPos, bool allowOverScroll)
 {
-    if (state_ == State::FLING) {
+    if (InAnimation(state_)) {
         StopScrollAnimation();
     }
     if (!allowOverScroll) {
@@ -544,8 +545,8 @@ bool FreeScrollController::CheckCrashEdge(const OffsetF& newOffset, const SizeF&
         }
     };
 
-    checkEdge(prevOffset_.GetX(), newOffset.GetX(), -scrollableArea.Width(), ScrollEdge::LEFT, ScrollEdge::RIGHT);
-    checkEdge(prevOffset_.GetY(), newOffset.GetY(), -scrollableArea.Height(), ScrollEdge::TOP, ScrollEdge::BOTTOM);
+    checkEdge(actualOffset_.GetX(), newOffset.GetX(), -scrollableArea.Width(), ScrollEdge::LEFT, ScrollEdge::RIGHT);
+    checkEdge(actualOffset_.GetY(), newOffset.GetY(), -scrollableArea.Height(), ScrollEdge::TOP, ScrollEdge::BOTTOM);
 
     if (!edges.empty()) {
         FireOnScrollEdge(edges);
