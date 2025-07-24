@@ -242,14 +242,7 @@ void WindowPattern::OnAttachToFrameNode()
     AddChild(host, appWindow_, appWindowName_, 0);
     auto surfaceNode = session_->GetSurfaceNode();
     CHECK_NULL_VOID(surfaceNode);
-    int32_t imageFit = 0;
-    auto isPersistentImageFit = Rosen::SceneSessionManager::GetInstance().GetPersistentImageFit(
-        session_->GetPersistentId(), imageFit);
-    if (isPersistentImageFit) {
-        CreateSnapshotWindow();
-        AddChild(host, snapshotWindow_, snapshotWindowName_);
-        surfaceNode->SetIsNotifyUIBufferAvailable(false);
-        surfaceNode->SetBufferAvailableCallback(callback_);
+    if (IsAddSnapshotWindow(surfaceNode)) {
         return;
     }
     if (!surfaceNode->IsBufferAvailable()) {
@@ -259,6 +252,21 @@ void WindowPattern::OnAttachToFrameNode()
         return;
     }
     attachToFrameNodeFlag_ = true;
+}
+
+bool IsAddSnapshotWindow(const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode)
+{
+    int32_t imageFit = 0;
+    if (Rosen::SceneSessionManager::GetInstance().GetPersistentImageFit(
+        session_->GetPersistentId(), imageFit) == false) {
+        return false;
+    } else {
+        CreateSnapshotWindow();
+        AddChild(host, snapshotWindow_, snapshotWindowName_);
+        surfaceNode->SetIsNotifyUIBufferAvailable(false);
+        surfaceNode->SetBufferAvailableCallback(callback_);
+        return true;
+    }
 }
 
 void WindowPattern::CreateBlankWindow(RefPtr<FrameNode>& window)

@@ -131,6 +131,7 @@ private:
     void UpdateStartingWindowProperty(const Rosen::SessionInfo& sessionInfo,
         Color &color, ImageSourceInfo &sourceInfo);
     bool CheckAndAddStartingWindowAboveLocked();
+    bool IsAddSnapshotWindow(const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode);
     void HideStartingWindow();
     CancelableCallback<void()> interruptStartingTask_;
 
