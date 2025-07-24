@@ -1047,7 +1047,7 @@ void SheetWrapperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(sheetPageNode);
     auto sheetPagePattern = sheetPageNode->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetPagePattern);
-    auto sheetType = sheetPagePattern->GetSheetType();
+    auto sheetType = sheetPagePattern->GetSheetTypeNoProcess();
     if (sheetType == SheetType::SHEET_POPUP) {
         TAG_LOGI(AceLogTag::ACE_SHEET, "before popup sheet page, origin size [%{public}f, %{public}f]",
             sheetWidth_, sheetHeight_);

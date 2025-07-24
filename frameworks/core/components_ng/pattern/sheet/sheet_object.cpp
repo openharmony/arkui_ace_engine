@@ -158,7 +158,7 @@ void SheetObject::ClipSheetNode()
     CHECK_NULL_VOID(layoutProperty);
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
     pattern->ResetClipShape();
-    auto sheetType = pattern->GetSheetType();
+    auto sheetType = pattern->GetSheetTypeNoProcess();
     BorderRadiusProperty borderRadius(sheetTheme->GetSheetRadius());
     pattern->CalculateSheetRadius(borderRadius);
     if (pattern->IsSheetBottom()) {
@@ -299,7 +299,7 @@ void SheetObject::HandleDragUpdate(const GestureEvent& info)
 {
     auto sheetPattern = GetPattern();
     CHECK_NULL_VOID(sheetPattern);
-    auto sheetType = sheetPattern->GetSheetType();
+    auto sheetType = sheetType_;
     if (sheetType == SheetType::SHEET_POPUP) {
         return;
     }
@@ -351,7 +351,7 @@ void SheetObject::HandleDragEnd(float dragVelocity)
     sheetPattern->SetIsDragging(false);
     auto sheetDetentsSize = sheetPattern->GetSheetDetentHeight().size();
     if ((sheetDetentsSize == 0) ||
-        (sheetPattern->GetSheetType() == SheetType::SHEET_POPUP) ||
+        (sheetType_ == SheetType::SHEET_POPUP) ||
         sheetPattern->IsShowInSubWindowTwoInOne()) {
         return;
     }
@@ -461,7 +461,7 @@ ScrollResult SheetObject::HandleScrollWithSheet(float scrollOffset)
     ScrollResult result = {scrollOffset, true};
     auto sheetPattern = GetPattern();
     CHECK_NULL_RETURN(sheetPattern, result);
-    auto sheetType = sheetPattern->GetSheetType();
+    auto sheetType = sheetType_;
     auto sheetDetentsSize = sheetPattern->GetSheetDetentHeight().size();
     if ((sheetType == SheetType::SHEET_POPUP) || (sheetDetentsSize == 0) || sheetPattern->IsShowInSubWindowTwoInOne()) {
         isSheetNeedScroll_ = false;
