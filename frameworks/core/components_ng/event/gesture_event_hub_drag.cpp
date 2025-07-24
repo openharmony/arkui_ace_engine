@@ -1629,12 +1629,18 @@ void GestureEventHub::UpdateMenuNode(
     CHECK_NULL_VOID(menuWrapperNode);
     auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
-    if (frameNode->GetDragPreviewOption().sizeChangeEffect == DraggingSizeChangeEffect::DEFAULT ||
-        menuWrapperPattern->HasTransitionEffect() || menuWrapperPattern->IsHide()) {
-        return;
-    }
+    auto animationInfo = menuWrapperPattern->GetPreviewMenuAnimationInfo();
+    auto rate = animationInfo.clipRate;
     auto menuNode = menuWrapperPattern->GetMenu();
     CHECK_NULL_VOID(menuNode);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    bool isMenuNotShow =
+        menuWrapperPattern->GetMenuStatus() == MenuStatus::SHOW && rate == -1.0f && menuPattern->GetIsShowHoverImage();
+    if (frameNode->GetDragPreviewOption().sizeChangeEffect == DraggingSizeChangeEffect::DEFAULT ||
+        menuWrapperPattern->HasTransitionEffect() || menuWrapperPattern->IsHide() || isMenuNotShow) {
+        return;
+    }
     auto scrollNode = AceType::DynamicCast<FrameNode>(menuNode->GetChildByIndex(0));
     CHECK_NULL_VOID(scrollNode);
     data.scrollNode = scrollNode;
@@ -1663,10 +1669,7 @@ void GestureEventHub::UpdateMenuNode(
     data.menuPositionBottom =
         imageNodeOffset.GetY() + imageNodeSize.Height() - menuNodeOffset.GetY() - menuNodeSize.Height();
     auto menuParam = menuWrapperPattern->GetMenuParam();
-    auto menuPattern = menuNode->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(menuPattern);
-    auto placement = menuPattern->GetLastPlacement().value_or(Placement::NONE);
-    data.menuPosition = placement;
+    data.menuPosition = menuPattern->GetLastPlacement().value_or(Placement::NONE);
     auto newMenuNode = menuPattern->DuplicateMenuNode(menuNode, menuParam);
     CHECK_NULL_VOID(newMenuNode);
     data.menuNode = newMenuNode;
