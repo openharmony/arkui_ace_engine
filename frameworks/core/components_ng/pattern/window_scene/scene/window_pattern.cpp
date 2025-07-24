@@ -242,6 +242,16 @@ void WindowPattern::OnAttachToFrameNode()
     AddChild(host, appWindow_, appWindowName_, 0);
     auto surfaceNode = session_->GetSurfaceNode();
     CHECK_NULL_VOID(surfaceNode);
+    int32_t imageFit = 0;
+    auto isPersistentImageFit = Rosen::SceneSessionManager::GetInstance().GetPersistentImageFit(
+        session_->GetPersistentId(), imageFit);
+    if (isPersistentImageFit) {
+        CreateSnapshotWindow();
+        AddChild(host, snapshotWindow_, snapshotWindowName_);
+        surfaceNode->SetIsNotifyUIBufferAvailable(false);
+        surfaceNode->SetBufferAvailableCallback(callback_);
+        return;
+    }
     if (!surfaceNode->IsBufferAvailable()) {
         CreateStartingWindow();
         AddChild(host, startingWindow_, startingWindowName_);
