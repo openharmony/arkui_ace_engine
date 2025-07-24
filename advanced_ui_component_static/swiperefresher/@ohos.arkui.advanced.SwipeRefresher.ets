@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,28 +13,28 @@
  * limitations under the License.
  */
 
+import {
+  Component, Flex, FlexAlign, ItemAlign, LoadingProgress, Text, $r, LocalizedMargin, Padding, ResourceStr
+} from '@ohos.arkui.component';
+import { PropRef } from '@ohos.arkui.stateManagement';
 import { LengthMetrics } from '@ohos.arkui.node';
 import common from '@ohos.app.ability.common';
 import { BusinessError } from '@ohos.base';
 import hilog from '@ohos.hilog';
 import { UIContext } from '@ohos.arkui.UIContext';
-import {
-  Component, Flex, FlexAlign, ItemAlign, LoadingProgress, Text, $r, LocalizedMargin, Padding, ResourceStr
-} from '@ohos.arkui.component';
-import { Prop } from '@ohos.arkui.stateManagement';
 
-const DEFAULT_MARGIN: number = 16
-const ITEM_SPACE: number = 4
-const MIN_SIZE: number = 24
-const MID_SIZE: number = 40
-const MAX_SIZE: number = 48
-const MAX_FONT_SIZE: number = 2
+const DEFAULT_MARGIN: number = 16;
+const ITEM_SPACE: number = 4;
+const MIN_SIZE: number = 24;
+const MID_SIZE: number = 40;
+const MAX_SIZE: number = 48;
+const MAX_FONT_SIZE: number = 2;
 
 @Component
 export struct SwipeRefresher {
-  @Prop
+  @PropRef
   content: ResourceStr = '';
-  @Prop
+  @PropRef
   isLoading: boolean = false;
   maxAppFontScale: number = 1;
   isFollowingSystemFontScale: boolean = false;
