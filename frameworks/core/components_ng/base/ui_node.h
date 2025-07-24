@@ -254,6 +254,7 @@ public:
     virtual bool IsContextTransparent();
 
     bool DumpTreeById(int32_t depth, const std::string& id, bool hasJson = false);
+    bool DumpTreeByComponentName(const std::string& name);
 
     const std::string& GetTag() const
     {

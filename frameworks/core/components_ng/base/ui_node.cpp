@@ -1154,6 +1154,28 @@ void UINode::DumpTree(int32_t depth, bool hasJson)
     }
 }
 
+bool UINode::DumpTreeByComponentName(const std::string& name)
+{
+    if (auto customNode = DynamicCast<CustomNode>(this)) {
+        const std::string& tag = customNode->GetCustomTag();
+        if (tag.size() >= name.size() && StringUtils::StartWith(tag, name)) {
+            DumpTree(0);
+            return true;
+        }
+    }
+    for (const auto& item : GetChildren()) {
+        if (item->DumpTreeByComponentName(name)) {
+            return true;
+        }
+    }
+    for (const auto& [item, index, branch] : disappearingChildren_) {
+        if (item->DumpTreeByComponentName(name)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void UINode::DumpTreeJsonForDiff(std::unique_ptr<JsonValue>& json)
 {
     auto currentNode = JsonUtil::Create(true);
