@@ -6898,7 +6898,6 @@ void WebPattern::UpdateFocusedAccessibilityId(int64_t accessibilityId)
             renderContext->ResetAccessibilityFocusRect();
             renderContext->UpdateAccessibilityFocus(false);
         } else {
-            renderContext->UpdateAccessibilityFocus(false);
             renderContext->UpdateAccessibilityFocusRect(rect);
             renderContext->UpdateAccessibilityFocus(true);
         }
