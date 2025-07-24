@@ -351,7 +351,7 @@ void OnRenderExited(const CallbackHelper<Callback_OnRenderExitedEvent_Void>& ark
     Ark_OnRenderExitedEvent parameter;
     parameter.renderExitReason = Converter::ArkValue<Ark_RenderExitReason>(
         static_cast<Converter::RenderExitReason>(eventInfo->GetExitedReason()));
-    arkCallback.Invoke(parameter);
+    arkCallback.InvokeSync(parameter);
 }
 
 bool OnShowFileSelector(const CallbackHelper<Callback_OnShowFileSelectorEvent_Boolean>& arkCallback,
@@ -683,7 +683,7 @@ void OnWindowNew(const CallbackHelper<Callback_OnWindowNewEvent_Void>& arkCallba
     auto peer = new ControllerHandlerPeer();
     peer->handler = eventInfo->GetWebWindowNewHandler();
     parameter.handler = peer;
-    arkCallback.Invoke(parameter);
+    arkCallback.InvokeSync(parameter);
 }
 
 void OnWindowExit(const CallbackHelper<Callback_Void>& arkCallback,
@@ -693,7 +693,7 @@ void OnWindowExit(const CallbackHelper<Callback_Void>& arkCallback,
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
-    arkCallback.Invoke();
+    arkCallback.InvokeSync();
 }
 
 bool OnInterceptKey(const CallbackHelper<Callback_KeyEvent_Boolean>& arkCallback,
@@ -828,7 +828,7 @@ void OnPageVisible(const CallbackHelper<Callback_OnPageVisibleEvent_Void>& arkCa
         CHECK_NULL_VOID(eventInfo);
         Ark_OnPageVisibleEvent parameter;
         parameter.url = Converter::ArkValue<Ark_String>(eventInfo->GetUrl());
-        arkCallback.Invoke(parameter);
+        arkCallback.InvokeSync(parameter);
     };
 #ifdef ARKUI_CAPI_UNITTEST
     func();
@@ -1161,7 +1161,7 @@ void OnRenderProcessNotResponding(const CallbackHelper<OnRenderProcessNotRespond
     parameter.pid = Converter::ArkValue<Ark_Int32>(eventInfo->GetPid());
     parameter.reason = Converter::ArkValue<Ark_RenderProcessNotRespondingReason>(
         static_cast<RenderProcessNotRespondingReason>(eventInfo->GetReason()));
-    arkCallback.Invoke(parameter);
+    arkCallback.InvokeSync(parameter);
 }
 
 void OnRenderProcessResponding(const CallbackHelper<OnRenderProcessRespondingCallback>& arkCallback,
@@ -1171,7 +1171,7 @@ void OnRenderProcessResponding(const CallbackHelper<OnRenderProcessRespondingCal
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
-    arkCallback.Invoke();
+    arkCallback.InvokeSync();
 }
 
 void OnViewportFitChanged(const CallbackHelper<OnViewportFitChangedCallback>& arkCallback,
