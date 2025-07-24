@@ -41,6 +41,7 @@ using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
+const std::string BUBBLE_MESSAGE = "Hello World";
 const std::u16string TIPS_MSG_1 = u"tips 123";
 const std::u16string TIPS_MSG_2 = u"tips 1\ntips 2\nend";
 const std::u16string TIPS_MSG_3 = std::u16string(2500, u'A');
@@ -61,6 +62,16 @@ constexpr Dimension TIPS_MARGIN_SPACE = 8.0_vp;
 constexpr Dimension MOUSE_WIDTH = 16.0_vp;
 constexpr Dimension MOUSE_HEIGHT = 24.0_vp;
 constexpr Dimension KEYBOARD_SPACE = 8.0_vp;
+constexpr Dimension RADIUS = 8.0_vp;
+constexpr float ARROW_WIDTH_PX = 30.0f;
+constexpr float ARROW_HEIGHT_PX = 30.0f;
+constexpr float FULL_SCREEN_WIDTH = 720.0f;
+constexpr float FULL_SCREEN_HEIGHT = 1136.0f;
+constexpr float LP_SCREEN_WIDTH = 2160.0f;
+constexpr float LP_SCREEN_HEIGHT = 3840.0f;
+constexpr float BUBBLE_WIDTH = 200.0f;
+constexpr float BUBBLE_HEIGHT = 50.0f;
+const SizeF FULL_SCREEN_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 const SizeF WRAPPER_SIZE = { 1000.0f, 1000.0f };
 const SafeAreaInsets::Inset KEYBOARD_INSET = { .start = 500.f, .end = 1000.f };
 } // namespace
@@ -75,6 +86,13 @@ protected:
     static RefPtr<FrameNode> CreateTargetNode();
     static RefPtr<FrameNode> CreateTipsNode(const RefPtr<PopupParam>& param, const std::u16string& spanString);
     static RefPtr<PopupParam> CreateTipsParamForCursor();
+    static RefPtr<PopupParam> CreateTipsParamWithArrow();
+    static RefPtr<FrameNode> CreateTipsNodeWithArrow(
+        const RefPtr<PopupParam>& param, const std::u16string& spanString);
+    static void UpdateLayoutPropWidthArrow(RefPtr<FrameNode> frameNode);
+    static void UpdateConstraintFullScreen(RefPtr<LayoutWrapperNode> layoutWrapper);
+    static void UpdateConstraintLPScreen(RefPtr<LayoutWrapperNode> layoutWrapper);
+    static void AddTextNodeToTips(RefPtr<FrameNode> frameNode, RefPtr<LayoutWrapperNode> layoutWrapper);
     SizeF ConstructParagraphs(const std::u16string& text, int32_t lineCount);
     RefPtr<BubbleLayoutAlgorithm> MeasureTipsRegion(const std::u16string& text, const Offset& mouseOffset);
     static LayoutConstraintF childLayoutConstraint;
@@ -168,6 +186,102 @@ RefPtr<PopupParam> BubbleTipsTestNg::CreateTipsParamForCursor()
     tipsParam->SetShowInSubWindow(true);
     tipsParam->SetKeyBoardAvoidMode(PopupKeyboardAvoidMode::DEFAULT);
     return tipsParam;
+}
+
+RefPtr<FrameNode> BubbleTipsTestNg::CreateTipsNodeWithArrow(
+    const RefPtr<PopupParam>& param, const std::u16string& spanString)
+{
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto frameNode =
+        BubbleView::CreateBubbleNode(targetTag, targetId, param, AceType::MakeRefPtr<SpanString>(spanString));
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    CHECK_NULL_RETURN(bubblePattern, frameNode);
+    auto bubbleLayoutAlgorithm = AceType::DynamicCast<BubbleLayoutAlgorithm>(bubblePattern->CreateLayoutAlgorithm());
+    CHECK_NULL_RETURN(bubbleLayoutAlgorithm, frameNode);
+    bubbleLayoutAlgorithm->targetTag_ = targetTag;
+    bubbleLayoutAlgorithm->targetNodeId_ = targetId;
+    return frameNode;
+}
+
+RefPtr<PopupParam> BubbleTipsTestNg::CreateTipsParamWithArrow()
+{
+    auto tipsParam = AceType::MakeRefPtr<PopupParam>();
+    CHECK_NULL_RETURN(tipsParam, nullptr);
+    tipsParam->SetTipsFlag(true);
+    tipsParam->SetIsShow(true);
+    tipsParam->SetMessage(BUBBLE_MESSAGE);
+    tipsParam->SetUseCustomComponent(false);
+    Dimension arrowWidth = Dimension(ARROW_WIDTH_PX, DimensionUnit::LPX);
+    Dimension arrowHeight = Dimension(ARROW_HEIGHT_PX, DimensionUnit::LPX);
+    tipsParam->SetArrowWidth(arrowWidth);
+    tipsParam->SetArrowHeight(arrowHeight);
+    tipsParam->SetEnableArrow(true);
+    tipsParam->SetShowInSubWindow(true);
+    return tipsParam;
+}
+
+void BubbleTipsTestNg::UpdateLayoutPropWidthArrow(RefPtr<FrameNode> frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    Dimension arrowWidth = Dimension(ARROW_WIDTH_PX, DimensionUnit::LPX);
+    Dimension arrowHeight = Dimension(ARROW_HEIGHT_PX, DimensionUnit::LPX);
+    auto layoutProp = frameNode->GetLayoutProperty<BubbleLayoutProperty>();
+    CHECK_NULL_VOID(layoutProp);
+    layoutProp->UpdateShowInSubWindow(true);
+    layoutProp->UpdateIsTips(true);
+    layoutProp->UpdateEnableArrow(true);
+    layoutProp->UpdateArrowWidth(arrowWidth);
+    layoutProp->UpdateArrowHeight(arrowHeight);
+    layoutProp->UpdateRadius(RADIUS);
+}
+
+void BubbleTipsTestNg::UpdateConstraintFullScreen(RefPtr<LayoutWrapperNode> layoutWrapper)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    layoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(FULL_SCREEN_WIDTH), CalcLength(FULL_SCREEN_HEIGHT)));
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = FULL_SCREEN_SIZE;
+    parentLayoutConstraint.percentReference = FULL_SCREEN_SIZE;
+    parentLayoutConstraint.selfIdealSize.SetSize(SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
+    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
+}
+
+void BubbleTipsTestNg::UpdateConstraintLPScreen(RefPtr<LayoutWrapperNode> layoutWrapper)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    layoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(LP_SCREEN_WIDTH), CalcLength(LP_SCREEN_HEIGHT)));
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = FULL_SCREEN_SIZE;
+    parentLayoutConstraint.percentReference = FULL_SCREEN_SIZE;
+    parentLayoutConstraint.selfIdealSize.SetSize(SizeF(LP_SCREEN_WIDTH, LP_SCREEN_HEIGHT));
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
+    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
+}
+
+void BubbleTipsTestNg::AddTextNodeToTips(RefPtr<FrameNode> frameNode, RefPtr<LayoutWrapperNode> layoutWrapper)
+{
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(layoutWrapper);
+    auto textFrameNode = BubbleView::CreateMessage(BUBBLE_MESSAGE, true);
+    CHECK_NULL_VOID(layoutWrapper);
+    RefPtr<GeometryNode> textGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    textGeometryNode->Reset();
+    RefPtr<LayoutWrapperNode> textLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, textGeometryNode, textFrameNode->GetLayoutProperty());
+    textLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
+    textLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(BUBBLE_WIDTH), CalcLength(BUBBLE_HEIGHT)));
+    auto boxLayoutAlgorithm = textFrameNode->GetPattern<Pattern>()->CreateLayoutAlgorithm();
+    CHECK_NULL_VOID(boxLayoutAlgorithm);
+    textLayoutWrapper->SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(boxLayoutAlgorithm));
+    frameNode->AddChild(textFrameNode);
+    layoutWrapper->AppendChild(textLayoutWrapper);
 }
 
 SizeF BubbleTipsTestNg::ConstructParagraphs(const std::u16string& text, int32_t lineCount)
@@ -1000,5 +1114,62 @@ HWTEST_F(BubbleTipsTestNg, PopBubble002, TestSize.Level1)
     overlayManager->UpdatePopupMap(id, popupInfo);
     bubblePattern->PopBubble(true);
     EXPECT_EQ(overlayManager->GetPopupInfo(id).markNeedUpdate, false);
+}
+
+/**
+ * @tc.name: PopBubble003
+ * @tc.desc: Test Bubble Algorithm
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTipsTestNg, PopBubble003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create targetNode and get frameNode.
+     */
+    auto parm = CreateTipsParamWithArrow();
+    ASSERT_NE(parm, nullptr);
+    auto frameNode = CreateTipsNodeWithArrow(parm, TIPS_MSG_1);
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. get layout property, layoutAlgorithm and create layoutWrapper.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+    auto bubbleLayoutAlgorithm = AceType::DynamicCast<BubbleLayoutAlgorithm>(bubblePattern->CreateLayoutAlgorithm());
+    ASSERT_NE(bubbleLayoutAlgorithm, nullptr);
+    bubbleLayoutAlgorithm->childSize_ = SizeF(BUBBLE_WIDTH, BUBBLE_HEIGHT);
+    /**
+     * @tc.steps: step3. update layoutWrapper and layoutProperty. create bubble child and child's layoutWrapper.
+     */
+    UpdateLayoutPropWidthArrow(frameNode);
+    UpdateConstraintFullScreen(layoutWrapper);
+    AddTextNodeToTips(frameNode, layoutWrapper);
+    /**
+     * @tc.steps: step4. use layoutAlgorithm to measure and layout.
+     * @tc.expected: step4. check whether arrow is show.
+     */
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto designWidthScale = pipeline->designWidthScale_;
+    pipeline->designWidthScale_ = 2.0f;
+    bubbleLayoutAlgorithm->Measure(AceType::RawPtr(layoutWrapper));
+    OffsetF offset(0.0f, 0.0f);
+    bubbleLayoutAlgorithm->UpdateChildPosition(offset);
+    EXPECT_FLOAT_EQ(offset.GetY(), 0.0f);
+    //  TipsWidth - Radius *2 > ArrowWidth : 200 - 24 * 2 > 60
+    EXPECT_EQ(bubbleLayoutAlgorithm->showArrow_, true);
+
+    UpdateConstraintLPScreen(layoutWrapper);
+    pipeline->designWidthScale_ = 8.0f;
+    bubbleLayoutAlgorithm->Measure(AceType::RawPtr(layoutWrapper));
+    bubbleLayoutAlgorithm->UpdateChildPosition(offset);
+    EXPECT_FLOAT_EQ(offset.GetY(), -240.0f);
+    //  TipsWidth - Radius *2 < ArrowWidth : 200 - 24 * 2 < 240
+    EXPECT_EQ(bubbleLayoutAlgorithm->showArrow_, false);
+    pipeline->designWidthScale_ = designWidthScale;
 }
 } // namespace OHOS::Ace::NG
