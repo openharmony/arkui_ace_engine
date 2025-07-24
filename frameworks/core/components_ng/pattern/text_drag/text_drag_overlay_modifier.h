@@ -50,10 +50,7 @@ public:
         isHandlesShow_ = isHandlesShow;
     }
 
-    void SetAnimateFlag(bool isAnimate)
-    {
-        isAnimating_ = isAnimate;
-    }
+    void SetAnimateFlag(bool isAnimate);
 
     void SetShadowOpacity(float opacity)
     {
@@ -130,6 +127,10 @@ public:
         const OffsetF& endPoint);
     void PaintSelBackground(RSCanvas& canvas, const RefPtr<TextDragPattern>& textDragPattern);
     void PaintImage(RSCanvas& canvas);
+    bool IsAnimating()
+    {
+        return isAnimating_;
+    }
 
 protected:
     WeakPtr<Pattern> pattern_;

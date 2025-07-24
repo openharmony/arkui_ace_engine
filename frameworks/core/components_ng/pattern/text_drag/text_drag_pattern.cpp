@@ -397,6 +397,7 @@ Dimension TextDragPattern::GetDragCornerRadius()
 
 void TextDragPattern::OnDetachFromMainTree()
 {
+    ResetAnimatingParagraph();
     CHECK_NULL_VOID(onDetachFromMainTree_);
     onDetachFromMainTree_();
 }
