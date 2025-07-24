@@ -29706,13 +29706,13 @@ void impl_ContentModifierHelper_contentModifierButton(Ark_NativePointer node, KS
         GetAccessors()->getContentModifierHelperAccessor()->contentModifierButton(node, static_cast<Ark_Object*>(&contentModifier_value), static_cast<ButtonModifierBuilder*>(&builder_value));
 }
 KOALA_INTEROP_DIRECT_V3(ContentModifierHelper_contentModifierButton, Ark_NativePointer, KSerializerBuffer, int32_t)
-void impl_ContentModifierHelper_contentModifierCheckBox(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
+void impl_ContentModifierHelper_contentModifierCheckbox(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         Ark_Object contentModifier_value = static_cast<Ark_ContentModifier>(thisDeserializer.readObject());;
         CheckBoxModifierBuilder builder_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Ark_CheckBoxConfiguration config, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_CheckBoxModifierBuilder)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Ark_CheckBoxConfiguration config, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_CheckBoxModifierBuilder))))};;
-        GetAccessors()->getContentModifierHelperAccessor()->contentModifierCheckBox(node, static_cast<Ark_Object*>(&contentModifier_value), static_cast<CheckBoxModifierBuilder*>(&builder_value));
+        GetAccessors()->getContentModifierHelperAccessor()->contentModifierCheckbox(node, static_cast<Ark_Object*>(&contentModifier_value), static_cast<CheckBoxModifierBuilder*>(&builder_value));
 }
-KOALA_INTEROP_DIRECT_V3(ContentModifierHelper_contentModifierCheckBox, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_DIRECT_V3(ContentModifierHelper_contentModifierCheckbox, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_ContentModifierHelper_contentModifierDataPanel(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         Ark_Object contentModifier_value = static_cast<Ark_ContentModifier>(thisDeserializer.readObject());;

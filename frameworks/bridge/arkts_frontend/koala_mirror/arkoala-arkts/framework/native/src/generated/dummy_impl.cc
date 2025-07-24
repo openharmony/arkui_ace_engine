@@ -27557,7 +27557,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void ContentModifierCheckBoxImpl(Ark_NativePointer node,
+    void ContentModifierCheckboxImpl(Ark_NativePointer node,
                                      const Ark_Object* contentModifier,
                                      const CheckBoxModifierBuilder* builder)
     {
@@ -27565,7 +27565,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         {
             return;
         }
-        string out("contentModifierCheckBox(");
+        string out("contentModifierCheckbox(");
         WriteToString(&out, node);
         out.append(", ");
         WriteToString(&out, contentModifier);

@@ -22,16 +22,15 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable, ContentModifier, CommonConfiguration, CustomBuilderT } from "./common"
 import { Callback_Boolean_Void } from "./navigation"
-import { ContentModifier, CommonConfiguration } from "./arkui-wrapper-builder"
 import { ResourceColor } from "./units"
 import { Color } from "./enums"
 import { Resource } from "global.resource"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { ToggleOpsHandWritten } from "./../handwritten"
+import { ToggleOpsHandWritten, hookToggleContentModifier } from "./../handwritten"
 
 export class ArkTogglePeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -62,7 +61,7 @@ export class ArkTogglePeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._ToggleAttribute_onChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    contentModifierAttribute(value: ContentModifier | undefined): void {
+    contentModifierAttribute(value: ContentModifier<ToggleConfiguration> | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
@@ -189,7 +188,7 @@ export class ArkToggleButtonPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._ToggleAttribute_onChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    contentModifierAttribute(value: ContentModifier | undefined): void {
+    contentModifierAttribute(value: ContentModifier<ToggleConfiguration> | undefined): void {
         const thisSerializer: Serializer = Serializer.hold()
         let value_type: int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
@@ -241,7 +240,7 @@ export class ArkToggleCheckboxPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._ToggleAttribute_onChange(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    contentModifierAttribute(value: ContentModifier | undefined): void {
+    contentModifierAttribute(value: ContentModifier<ToggleConfiguration> | undefined): void {
         const thisSerializer: Serializer = Serializer.hold()
         let value_type: int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
@@ -278,7 +277,7 @@ export interface SwitchStyle {
     pointColor?: ResourceColor;
     trackBorderRadius?: number | Resource;
 }
-export interface ToggleConfiguration extends CommonConfiguration {
+export interface ToggleConfiguration extends CommonConfiguration<ToggleConfiguration> {
     isOn: boolean;
     enabled: boolean;
     triggerChange: ((isVisible: boolean) => void);
@@ -290,7 +289,7 @@ export interface ToggleOptions {
 export type ToggleInterface = (options: ToggleOptions) => ToggleAttribute;
 export interface ToggleAttribute extends CommonMethod {
     onChange(value: ((isVisible: boolean) => void) | undefined): this
-    contentModifier(value: ContentModifier | undefined): this
+    contentModifier(value: ContentModifier<ToggleConfiguration> | undefined): this
     selectedColor(value: ResourceColor | undefined): this
     switchPointColor(value: ResourceColor | undefined): this
     switchStyle(value: SwitchStyle | undefined): this
@@ -298,14 +297,14 @@ export interface ToggleAttribute extends CommonMethod {
 }
 export class ArkToggleStyle extends ArkCommonMethodStyle implements ToggleAttribute {
     onChange_value?: ((isVisible: boolean) => void) | undefined
-    contentModifier_value?: ContentModifier | undefined
+    contentModifier_value?: ContentModifier<ToggleConfiguration> | undefined
     selectedColor_value?: ResourceColor | undefined
     switchPointColor_value?: ResourceColor | undefined
     switchStyle_value?: SwitchStyle | undefined
     public onChange(value: ((isVisible: boolean) => void) | undefined): this {
         return this
     }
-    public contentModifier(value: ContentModifier | undefined): this {
+    public contentModifier(value: ContentModifier<ToggleConfiguration> | undefined): this {
         return this
     }
     public selectedColor(value: ResourceColor | undefined): this {
@@ -354,9 +353,9 @@ export class ArkToggleCheckboxComponent extends ArkCommonMethodComponent impleme
         }
         return this
     }
-    public contentModifier(value: ContentModifier | undefined): this {
+    public contentModifier(value: ContentModifier<ToggleConfiguration> | undefined): this {
         if (this.checkPriority("contentModifier")) {
-            const value_casted = value as (ContentModifier | undefined)
+            const value_casted = value as (ContentModifier<ToggleConfiguration> | undefined)
             this.getPeer()?.contentModifierAttribute(value_casted)
             return this
         }
@@ -419,9 +418,9 @@ export class ArkToggleButtonComponent extends ArkCommonMethodComponent implement
         }
         return this
     }
-    public contentModifier(value: ContentModifier | undefined): this {
+    public contentModifier(value: ContentModifier<ToggleConfiguration> | undefined): this {
         if (this.checkPriority("contentModifier")) {
-            const value_casted = value as (ContentModifier | undefined)
+            const value_casted = value as (ContentModifier<ToggleConfiguration> | undefined)
             this.getPeer()?.contentModifierAttribute(value_casted)
             return this
         }
@@ -484,11 +483,9 @@ export class ArkToggleComponent extends ArkCommonMethodComponent implements Togg
         }
         return this
     }
-    public contentModifier(value: ContentModifier | undefined): this {
+    public contentModifier(value: ContentModifier<ToggleConfiguration> | undefined): this {
         if (this.checkPriority("contentModifier")) {
-            const value_casted = value as (ContentModifier | undefined)
-            this.getPeer()?.contentModifierAttribute(value_casted)
-            return this
+            hookToggleContentModifier(this, value)
         }
         return this
     }

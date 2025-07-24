@@ -44026,12 +44026,50 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // RouterExtenderAccessor
     namespace ContentModifierHelperAccessor {
+    void ContentModifierButtonImpl(Ark_NativePointer node,
+                                   const Ark_Object* contentModifier,
+                                   const ButtonModifierBuilder* builder)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("contentModifierButton(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, contentModifier);
+        out.append(", ");
+        WriteToString(&out, builder);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void ResetContentModifierButtonImpl(Ark_NativePointer node) {}
+    void ContentModifierCheckBoxImpl(Ark_NativePointer node,
+                                     const Ark_Object* contentModifier,
+                                     const CheckBoxModifierBuilder* builder)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("contentModifierCheckbox(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, contentModifier);
+        out.append(", ");
+        WriteToString(&out, builder);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void ResetContentModifierCheckBoxImpl(Ark_NativePointer node) {}
     void ContentModifierRadioImpl(Ark_NativePointer node,
                                   const Ark_Object* contentModifier,
                                   const RadioModifierBuilder* builder)
     {
         if (!needGroupedLog(1))
+        {
             return;
+        }
         string out("contentModifierRadio(");
         WriteToString(&out, node);
         out.append(", ");
@@ -44041,16 +44079,61 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-
-    void ResetContentModifierRadioImpl(Ark_NativePointer node)
+    void ResetContentModifierRadioImpl(Ark_NativePointer node) {}
+    void ContentModifierRatingImpl(Ark_NativePointer node,
+                                   const Ark_Object* contentModifier,
+                                   const RatingModifierBuilder* builder)
     {
         if (!needGroupedLog(1))
+        {
             return;
-        string out("resetContentModifierRadio(");
+        }
+        string out("contentModifierRating(");
         WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, contentModifier);
+        out.append(", ");
+        WriteToString(&out, builder);
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void ResetContentModifierRatingImpl(Ark_NativePointer node) {}
+    void ContentModifierSliderImpl(Ark_NativePointer node,
+                                   const Ark_Object* contentModifier,
+                                   const SliderModifierBuilder* builder)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("contentModifierSlider(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, contentModifier);
+        out.append(", ");
+        WriteToString(&out, builder);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void ResetContentModifierSliderImpl(Ark_NativePointer node) {}
+    void ContentModifierToggleImpl(Ark_NativePointer node,
+                                   const Ark_Object* contentModifier,
+                                   const ToggleModifierBuilder* builder)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("contentModifierToggle(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, contentModifier);
+        out.append(", ");
+        WriteToString(&out, builder);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void ResetContentModifierToggleImpl(Ark_NativePointer node) {}
     } // ContentModifierHelperAccessor
     const GENERATED_ArkUIAlphabetIndexerOpsAccessor* GetAlphabetIndexerOpsAccessor()
     {
@@ -48040,8 +48123,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     const GENERATED_ArkUIContentModifierHelperAccessor* GetContentModifierHelperAccessor()
     {
         static const GENERATED_ArkUIContentModifierHelperAccessor ContentModifierHelperAccessorImpl {
+            ContentModifierHelperAccessor::ContentModifierButtonImpl,
+            ContentModifierHelperAccessor::ResetContentModifierButtonImpl,
+            ContentModifierHelperAccessor::ContentModifierCheckBoxImpl,
+            ContentModifierHelperAccessor::ResetContentModifierCheckBoxImpl,
             ContentModifierHelperAccessor::ContentModifierRadioImpl,
             ContentModifierHelperAccessor::ResetContentModifierRadioImpl,
+            ContentModifierHelperAccessor::ContentModifierRatingImpl,
+            ContentModifierHelperAccessor::ResetContentModifierRatingImpl,
+            ContentModifierHelperAccessor::ContentModifierSliderImpl,
+            ContentModifierHelperAccessor::ResetContentModifierSliderImpl,
+            ContentModifierHelperAccessor::ContentModifierToggleImpl,
+            ContentModifierHelperAccessor::ResetContentModifierToggleImpl,
         };
         return &ContentModifierHelperAccessorImpl;
     }

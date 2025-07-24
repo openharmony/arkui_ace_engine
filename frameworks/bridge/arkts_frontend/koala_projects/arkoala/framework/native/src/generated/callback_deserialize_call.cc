@@ -7368,6 +7368,72 @@ void deserializeAndCallSyncCallback_String_SurfaceRect_Void(Ark_VMContext vmCont
     Ark_SurfaceRect rect = thisDeserializer.readSurfaceRect();
     _callSync(vmContext, _resourceId, surfaceId, rect);
 }
+void deserializeAndCallButtonModifierBuilder(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Ark_ButtonConfiguration config, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_NativePointer parentNode = thisDeserializer.readPointer();
+    Ark_ButtonConfiguration config = thisDeserializer.readButtonConfiguration();
+    Callback_Pointer_Void _continuation = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativePointer value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Pointer_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Pointer_Void))))};
+    _call(_resourceId, parentNode, config, _continuation);
+}
+void deserializeAndCallSyncButtonModifierBuilder(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Ark_ButtonConfiguration config, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointer());
+    Ark_NativePointer parentNode = thisDeserializer.readPointer();
+    Ark_ButtonConfiguration config = thisDeserializer.readButtonConfiguration();
+    Callback_Pointer_Void _continuation = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativePointer value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Pointer_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Pointer_Void))))};
+    _callSync(vmContext, _resourceId, parentNode, config, _continuation);
+}
+void deserializeAndCallCheckBoxModifierBuilder(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Ark_CheckBoxConfiguration config, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_NativePointer parentNode = thisDeserializer.readPointer();
+    Ark_CheckBoxConfiguration config = thisDeserializer.readCheckBoxConfiguration();
+    Callback_Pointer_Void _continuation = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativePointer value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Pointer_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Pointer_Void))))};
+    _call(_resourceId, parentNode, config, _continuation);
+}
+void deserializeAndCallSyncCheckBoxModifierBuilder(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Ark_CheckBoxConfiguration config, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointer());
+    Ark_NativePointer parentNode = thisDeserializer.readPointer();
+    Ark_CheckBoxConfiguration config = thisDeserializer.readCheckBoxConfiguration();
+    Callback_Pointer_Void _continuation = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativePointer value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Pointer_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Pointer_Void))))};
+    _callSync(vmContext, _resourceId, parentNode, config, _continuation);
+}
+void deserializeAndCallToggleModifierBuilder(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Ark_ToggleConfiguration config, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_NativePointer parentNode = thisDeserializer.readPointer();
+    Ark_ToggleConfiguration config = thisDeserializer.readTogglefiguration();
+    Callback_Pointer_Void _continuation = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativePointer value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Pointer_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Pointer_Void))))};
+    _call(_resourceId, parentNode, config, _continuation);
+}
+void deserializeAndCallSyncToggleModifierBuilder(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Ark_ToggleConfiguration config, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointer());
+    Ark_NativePointer parentNode = thisDeserializer.readPointer();
+    Ark_ToggleConfiguration config = thisDeserializer.readTogglefiguration();
+    Callback_Pointer_Void _continuation = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativePointer value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Pointer_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Pointer_Void))))};
+    _callSync(vmContext, _resourceId, parentNode, config, _continuation);
+}
 void deserializeAndCallRadioModifierBuilder(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
@@ -7387,6 +7453,50 @@ void deserializeAndCallSyncRadioModifierBuilder(Ark_VMContext vmContext, KSerial
     const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Ark_RadioConfiguration config, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointer());
     Ark_NativePointer parentNode = thisDeserializer.readPointer();
     Ark_RadioConfiguration config = thisDeserializer.readRadioConfiguration();
+    Callback_Pointer_Void _continuation = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativePointer value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Pointer_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Pointer_Void))))};
+    _callSync(vmContext, _resourceId, parentNode, config, _continuation);
+}
+void deserializeAndCallRatingModifierBuilder(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Ark_RatingConfiguration config, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_NativePointer parentNode = thisDeserializer.readPointer();
+    Ark_RatingConfiguration config = thisDeserializer.readRatingfiguration();
+    Callback_Pointer_Void _continuation = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativePointer value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Pointer_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Pointer_Void))))};
+    _call(_resourceId, parentNode, config, _continuation);
+}
+void deserializeAndCallSyncRatingModifierBuilder(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Ark_RatingConfiguration config, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointer());
+    Ark_NativePointer parentNode = thisDeserializer.readPointer();
+    Ark_RatingConfiguration config = thisDeserializer.readRatingfiguration();
+    Callback_Pointer_Void _continuation = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativePointer value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Pointer_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Pointer_Void))))};
+    _callSync(vmContext, _resourceId, parentNode, config, _continuation);
+}
+void deserializeAndCallSliderModifierBuilder(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Ark_SliderConfiguration config, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_NativePointer parentNode = thisDeserializer.readPointer();
+    Ark_SliderConfiguration config = thisDeserializer.readSliderfiguration();
+    Callback_Pointer_Void _continuation = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativePointer value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Pointer_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Pointer_Void))))};
+    _call(_resourceId, parentNode, config, _continuation);
+}
+void deserializeAndCallSyncSliderModifierBuilder(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Ark_SliderConfiguration config, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointer());
+    Ark_NativePointer parentNode = thisDeserializer.readPointer();
+    Ark_SliderConfiguration config = thisDeserializer.readSliderfiguration();
     Callback_Pointer_Void _continuation = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativePointer value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Pointer_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Pointer_Void))))};
     _callSync(vmContext, _resourceId, parentNode, config, _continuation);
 }
@@ -7706,6 +7816,11 @@ void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark
         case 219587748/*Kind_WithThemeInterface*/: return deserializeAndCallWithThemeInterface(thisArray, thisLength);
         case -1736208400/*Kind_Callback_String_SurfaceRect_Void*/: return deserializeAndCallCallback_String_SurfaceRect_Void(thisArray, thisLength);
         case -327322091/*Kind_RadioModifierBuilder*/: return deserializeAndCallRadioModifierBuilder(thisArray, thisLength);
+        case -2004118094/*Kind_ButtonModifierBuilder*/: return deserializeAndCallButtonModifierBuilder(thisArray, thisLength);
+        case 1317697111/*Kind_CheckBoxModifierBuilder*/: return deserializeAndCallCheckBoxModifierBuilder(thisArray, thisLength);
+        case -879751946/*Kind_ToggleModifierBuilder*/: return deserializeAndCallToggleModifierBuilder(thisArray, thisLength);
+        case 1013330403/*Kind_RatingModifierBuilder*/: return deserializeAndCallRatingModifierBuilder(thisArray, thisLength);
+        case 553138561/*Kind_SliderModifierBuilder*/: return deserializeAndCallSliderModifierBuilder(thisArray, thisLength);
     }
     printf("Unknown callback kind\n");
 }
@@ -8025,6 +8140,11 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
         case 219587748/*Kind_WithThemeInterface*/: return deserializeAndCallSyncWithThemeInterface(vmContext, thisArray, thisLength);
         case -1736208400/*Kind_Callback_String_SurfaceRect_Void*/: return deserializeAndCallSyncCallback_String_SurfaceRect_Void(vmContext, thisArray, thisLength);
         case -327322091/*Kind_RadioModifierBuilder*/: return deserializeAndCallSyncRadioModifierBuilder(vmContext, thisArray, thisLength);
+        case -2004118094/*Kind_ButtonModifierBuilder*/: return deserializeAndCallSyncButtonModifierBuilder(vmContext, thisArray, thisLength);
+        case 1317697111/*Kind_CheckBoxModifierBuilder*/: return deserializeAndCallSyncCheckBoxModifierBuilder(vmContext, thisArray, thisLength);
+        case -879751946/*Kind_ToggleModifierBuilder*/: return deserializeAndCallSyncToggleModifierBuilder(vmContext, thisArray, thisLength);
+        case 1013330403/*Kind_RatingModifierBuilder*/: return deserializeAndCallSyncRatingModifierBuilder(vmContext, thisArray, thisLength);
+        case 553138561/*Kind_SliderModifierBuilder*/: return deserializeAndCallSyncSliderModifierBuilder(vmContext, thisArray, thisLength);
     }
     printf("Unknown callback kind\n");
 }

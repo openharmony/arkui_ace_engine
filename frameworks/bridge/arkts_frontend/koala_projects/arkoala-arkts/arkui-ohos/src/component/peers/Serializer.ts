@@ -22,7 +22,7 @@ import { CallbackKind } from "./CallbackKind"
 import { TypeChecker } from "#components"
 import { CallbackTransformer } from "./CallbackTransformer"
 import { SingleLengthDetent, DoubleLengthDetents, TripleLengthDetents, AccessibilityCallback, AccessibilityFocusCallback, Bindable, GestureRecognizerJudgeBeginCallback, HoverCallback, OnDragEventCallback, OnMoveHandler, OnScrollCallback, PopupStateChangeCallback, ReuseIdCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TransitionFinishCallback, VisibleAreaChangeCallback, AccessibilityHoverEvent, AccessibilityHoverEventInternal, AccessibilityRoleType, AccessibilitySamePageMode, AdaptiveColor, CommonMethod, BlurStyle, BlendApplyType, BlurStyleActivePolicy, PickerTextStyle, ChainStyle, ContentClipMode, DismissReason, DragBehavior, DragEvent, DragEventInternal, DragResult, Rectangle, DraggingSizeChangeEffect, DragPreviewMode, DrawModifier, EffectEdge, EffectType, FinishCallbackType, GestureModifier, GestureModifierInternal, UIGestureEvent, ScrollableCommonMethod, ItemDragInfo, CustomBuilder, NestedScrollOptions, EdgeEffectOptions, HapticFeedbackMode, HoverModeAreaType, ICurve, ICurveInternal, KeyboardAvoidMode, LayoutPolicy, LayoutSafeAreaEdge, LayoutSafeAreaType, ChildrenMainSize, ChildrenMainSizeInternal, RectResult, MenuPolicy, MenuPreviewMode, ModalTransition, OutlineStyle, PixelMapMock, PixelMapMockInternal, PopupStateChangeParam, PreDragStatus, ProgressMask, ProgressMaskInternal, RepeatMode, SelectionOptions, SafeAreaEdge, SafeAreaType, ScrollSizeMode, TextDecorationOptions, TextContentControllerBase, TextContentControllerBaseInternal, ShadowStyle, ShadowType, SheetKeyboardAvoidMode, SheetMode, SheetSize, SheetType, SourceTool, SourceType, BackgroundEffectOptions, BackgroundBlurStyleOptions, TranslateOptions, InputCounterOptions, ShadowOptions, CaretOffset, TextContentControllerOptions, ThemeColorMode, TouchTestInfo, TouchTestStrategy, TransitionEdge, TransitionEffect, TransitionEffectInternal, TransitionEffects, RotateOptions, ScaleOptions, AnimateParam, TransitionHierarchyStrategy, UICommonEvent, UICommonEventInternal, Callback_ClickEvent_Void, ClickEvent, ClickEventInternal, Callback_TouchEvent_Void, TouchEvent, TouchEventInternal, Callback_KeyEvent_Void, KeyEvent, KeyEventInternal, HoverEvent, HoverEventInternal, Callback_MouseEvent_Void, MouseEvent, MouseEventInternal, VisibleAreaEventOptions, SheetOptions, View, ViewInternal, Callback_KeyEvent_Boolean, Callback_Area_Area_Void, Callback_Array_TouchTestInfo_TouchResult, TouchResult, Callback_AxisEvent_Void, AxisEvent, AxisEventInternal, Callback_Boolean_HoverEvent_Void, Callback_CrownEvent_Void, CrownEvent, Callback_DismissContentCoverAction_Void, DismissContentCoverAction, Callback_DismissPopupAction_Void, DismissPopupAction, Callback_DismissSheetAction_Void, DismissSheetAction, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, DragItemInfo, Callback_DragEvent_String_Void, Callback_FocusAxisEvent_Void, FocusAxisEvent, FocusAxisEventInternal, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, Callback_HoverEvent_Void, Callback_Literal_Boolean_isVisible_Void, Literal_Boolean_isVisible, Callback_PreDragStatus_Void, Callback_SheetDismiss_Void, SheetDismiss, Callback_SheetType_Void, Callback_SpringBackAction_Void, SpringBackAction, Callback_TouchEvent_HitTestMode, BackgroundBrightnessOptions, BackgroundImageOptions, BlurOptions, ClickEffect, DateRange, DragInteractionOptions, DropOptions, ExpectedFrameRateRange, FocusMovement, ForegroundEffectOptions, GeometryTransitionOptions, InvertOptions, LinearGradient_common, Tuple_ResourceColor_Number, LinearGradientBlurOptions, FractionStop, LinearGradientOptions, LocalizedHorizontalAlignParam, LocalizedVerticalAlignParam, Measurable, MeasurableInternal, MeasureResult, SizeResult, MotionBlurAnchor, MotionBlurOptions, MotionPathOptions, OverlayOffset, PixelRoundPolicy, PixelStretchEffectOptions, PreviewConfiguration, RadialGradientOptions, Tuple_Length_Length, StateStyles, SweepGradientOptions, SystemAdaptiveOptions, TipsOptions, TouchObject, AlignRuleOption, HorizontalAlignOptions, VerticalAlignOptions, BlurStyleOptions, ContentCoverOptions, BindOptions, ContextMenuAnimationOptions, MultiShadowOptions, DragPreviewOptions, EventTarget, FadingEdgeOptions, BaseEvent, BaseEventInternal, ForegroundBlurStyleOptions, HistoricalPoint, LightSource, LocalizedAlignRuleOptions, MenuElement, OverlayOptions, PickerDialogButtonStyle, ReuseOptions, sharedTransitionOptions, SheetTitleOptions, TransitionOptions, BorderImageOption, CustomPopupOptions, Literal_ResourceColor_color, PointLightStyle, PopupMessageOptions, Type_SheetOptions_detents, ContextMenuOptions, BorderRadiusType, MenuOptions, PopupOptions, Literal_String_value_Callback_Void_action, ScrollResult, PopupMaskType, DividerStyle, BlendMode, PopupCommonOptions, PopupButton } from "./../common"
-import { ButtonTriggerClickCallback, ButtonRole, ButtonStyleMode, ButtonType, ControlSize, ButtonOptions, ButtonLabelStyle } from "./../button"
+import { ButtonTriggerClickCallback, ButtonRole, ButtonStyleMode, ButtonType, ControlSize, ButtonOptions, ButtonLabelStyle, ButtonConfiguration } from "./../button"
 import { Callback_Extender_OnFinish, Callback_Extender_OnProgress, DoubleAnimationParam } from "./../animationExtender"
 import { Callback_RangeUpdate, Context_getGroupDir_Callback, RestrictedWorker_onerror_Callback, RestrictedWorker_onexit_Callback, RestrictedWorker_onmessage_Callback, BuilderNodeOps, BuilderNodeOpsInternal, BuilderNodeOptions, ComponentContent, ComponentContentInternal, UnifiedData, UnifiedDataInternal, SystemBarStyle, Scene, SceneInternal, Context, ContextInternal, WorkerEventListener, WorkerEventListenerInternal, Event, ErrorEvent, MessageEvents, BaseContext, BaseContextInternal, PostMessageOptions, WorkerOptions, CustomColors, RestrictedWorker, RestrictedWorkerInternal, CustomTheme } from "./../arkui-custom"
 import { UIContext, TargetInfo } from "@ohos/arkui/UIContext"
@@ -41,7 +41,7 @@ import { NavDestinationTransitionDelegate, NavDestinationActiveReason, NavDestin
 import { NavExtender_OnUpdateStack } from "./../navigationExtender"
 import { OnAdsBlockedCallback, OnContextMenuHideCallback, OnFirstMeaningfulPaintCallback, OnFullScreenEnterCallback, OnIntelligentTrackingPreventionCallback, OnLargestContentfulPaintCallback, OnNativeEmbedVisibilityChangeCallback, OnNavigationEntryCommittedCallback, OnOverrideUrlLoadingCallback, OnRenderProcessNotRespondingCallback, OnRenderProcessRespondingCallback, OnSafeBrowsingCheckResultCallback, OnSslErrorEventCallback, OnViewportFitChangedCallback, WebKeyboardCallback, BlurOnKeyboardHideMode, CacheMode, ClientAuthenticationHandler, ClientAuthenticationHandlerInternal, ConsoleMessage, ConsoleMessageInternal, MessageLevel, ContextMenuEditStateFlags, ContextMenuInputFieldType, ContextMenuMediaType, ContextMenuSourceType, ControllerHandler, ControllerHandlerInternal, DataResubmissionHandler, DataResubmissionHandlerInternal, EventResult, EventResultInternal, FileSelectorMode, FileSelectorParam, FileSelectorParamInternal, FileSelectorResult, FileSelectorResultInternal, FullScreenExitHandler, FullScreenExitHandlerInternal, HitTestType, HttpAuthHandler, HttpAuthHandlerInternal, JsGeolocation, JsGeolocationInternal, JsResult, JsResultInternal, MixedMode, NativeEmbedStatus, NativeMediaPlayerConfig, OnAudioStateChangedEvent, OnConsoleEvent, OnDataResubmittedEvent, OnFirstContentfulPaintEvent, OnOverScrollEvent, OnProgressChangeEvent, OnScaleChangeEvent, OnScrollEvent, OnSearchResultReceiveEvent, OnShowFileSelectorEvent, OverScrollMode, PermissionRequest, PermissionRequestInternal, ProtectedResourceType, RenderExitReason, RenderMode, RenderProcessNotRespondingReason, ScreenCaptureHandler, ScreenCaptureHandlerInternal, ScreenCaptureConfig, SslError, SslErrorHandler, SslErrorHandlerInternal, ThreatType, ViewportFit, WebAttribute, JavaScriptProxy, WebDarkMode, WebMediaOptions, Callback_OnPageEndEvent_Void, OnPageEndEvent, Callback_OnPageBeginEvent_Void, OnPageBeginEvent, Callback_OnProgressChangeEvent_Void, Callback_OnTitleReceiveEvent_Void, OnTitleReceiveEvent, Callback_OnGeolocationShowEvent_Void, OnGeolocationShowEvent, Callback_OnAlertEvent_Boolean, OnAlertEvent, Callback_OnBeforeUnloadEvent_Boolean, OnBeforeUnloadEvent, Callback_OnConfirmEvent_Boolean, OnConfirmEvent, Callback_OnPromptEvent_Boolean, OnPromptEvent, Callback_OnConsoleEvent_Boolean, Callback_OnErrorReceiveEvent_Void, OnErrorReceiveEvent, Callback_OnHttpErrorReceiveEvent_Void, OnHttpErrorReceiveEvent, Callback_OnDownloadStartEvent_Void, OnDownloadStartEvent, Callback_OnRefreshAccessedHistoryEvent_Void, OnRefreshAccessedHistoryEvent, Type_WebAttribute_onUrlLoadIntercept_callback, Literal_Union_String_WebResourceRequest_data, WebResourceRequest, WebResourceRequestInternal, Callback_Literal_Function_handler_Object_error_Void, Literal_Function_handler_Object_error, Callback_OnRenderExitedEvent_Void, OnRenderExitedEvent, Callback_OnShowFileSelectorEvent_Boolean, Callback_Literal_Object_detail_Boolean, Literal_Object_detail, Type_WebAttribute_onFileSelectorShow_callback, Literal_Function_callback__Object_fileSelector, Callback_OnResourceLoadEvent_Void, OnResourceLoadEvent, FullScreenEnterEvent, Callback_OnScaleChangeEvent_Void, Callback_OnHttpAuthRequestEvent_Boolean, OnHttpAuthRequestEvent, Callback_OnInterceptRequestEvent_WebResourceResponse, OnInterceptRequestEvent, WebResourceResponse, WebResourceResponseInternal, Callback_OnPermissionRequestEvent_Void, OnPermissionRequestEvent, Callback_OnScreenCaptureRequestEvent_Void, OnScreenCaptureRequestEvent, Callback_OnContextMenuShowEvent_Boolean, OnContextMenuShowEvent, Callback_OnSearchResultReceiveEvent_Void, Callback_OnScrollEvent_Void, Callback_OnSslErrorEventReceiveEvent_Void, OnSslErrorEventReceiveEvent, SslErrorEvent, Callback_OnClientAuthenticationEvent_Void, OnClientAuthenticationEvent, Callback_OnWindowNewEvent_Void, OnWindowNewEvent, Callback_OnTouchIconUrlReceivedEvent_Void, OnTouchIconUrlReceivedEvent, Callback_OnFaviconReceivedEvent_Void, OnFaviconReceivedEvent, Callback_OnPageVisibleEvent_Void, OnPageVisibleEvent, Callback_OnDataResubmittedEvent_Void, Callback_OnAudioStateChangedEvent_Void, Callback_OnFirstContentfulPaintEvent_Void, FirstMeaningfulPaint, LargestContentfulPaint, Callback_OnLoadInterceptEvent_Boolean, OnLoadInterceptEvent, Callback_OnOverScrollEvent_Void, LoadCommittedDetails, IntelligentTrackingPreventionDetails, ScriptItem, WebLayoutMode, NestedScrollOptionsExt, Callback_NativeEmbedDataInfo_Void, NativeEmbedDataInfo, NativeEmbedVisibilityInfo, Callback_NativeEmbedTouchInfo_Void, NativeEmbedTouchInfo, RenderProcessNotRespondingData, ExpandedMenuItemOptions, WebKeyboardCallbackInfo, AdsBlockedDetails, WebKeyboardAvoidMode, EmbedOptions, WebElementType, WebResponseType, SelectionMenuOptionsExt, WebCaptureMode, WebContextMenuParam, WebContextMenuParamInternal, WebContextMenuResult, WebContextMenuResultInternal, WebController, WebControllerInternal, Literal_String_script_Callback_String_Void_callback_, Literal_String_baseUrl_data_encoding_historyUrl_mimeType, Literal_Union_String_Resource_url_Array_Header_headers, Header, Literal_Object_object__String_name_Array_String_methodList, WebCookie, WebCookieInternal, WebKeyboardController, WebKeyboardControllerInternal, WebNavigationType, WebResourceError, WebResourceErrorInternal, Callback_Literal_String_plainText_Void, Literal_String_plainText, WebKeyboardOptions, WebOptionsSerializer, NativeEmbedInfo } from "./../web"
 import { OnAlphabetIndexerPopupSelectCallback, OnAlphabetIndexerRequestPopupDataCallback, OnAlphabetIndexerSelectCallback, AlphabetIndexerAttribute, Callback_Number_Void, IndexerAlign, Callback_Opt_Number_Void, AlphabetIndexerOptions } from "./../alphabetIndexer"
-import { OnCheckboxChangeCallback, Callback_Opt_Boolean_Void, CheckboxOptions } from "./../checkbox"
+import { OnCheckboxChangeCallback, Callback_Opt_Boolean_Void, CheckboxOptions, CheckBoxConfiguration } from "./../checkbox"
 import { OnCheckboxGroupChangeCallback, SelectStatus, CheckboxGroupResult, CheckboxGroupOptions } from "./../checkboxgroup"
 import { OnContentScrollCallback, OnPasteCallback, OnSubmitCallback, OnTextSelectionChangeCallback, ContentType, EnterKeyType, InputType, SubmitEvent, SubmitEventInternal, TextInputAttribute, TextInputStyle, PasswordIcon, UnderlineColor, TextInputController, TextInputControllerInternal, TextInputOptions } from "./../textInput"
 import { OnFoldStatusChangeCallback, OnHoverStatusChangeCallback, OnFoldStatusChangeInfo, HoverEventParam, FolderStackOptions } from "./../folderStack"
@@ -49,7 +49,7 @@ import { OnHoverCallback } from "./../sdk-stubs"
 import { OnLinearIndicatorChangeCallback, LinearIndicatorController, LinearIndicatorControllerInternal, LinearIndicatorStartOptions, LinearIndicatorStyle } from "./../linearindicator"
 import { OnNativeLoadCallback, XComponentController, XComponentControllerInternal, Literal_Number_surfaceHeight_surfaceWidth, SurfaceRect, SurfaceRotationOptions, NativeXComponentParameters, XComponentOptions } from "./../xcomponent"
 import { OnRadioChangeCallback, RadioConfiguration, RadioIndicatorType, RadioOptions, RadioStyle } from "./../radio"
-import { OnRatingChangeCallback, RatingOptions, StarStyleOptions } from "./../rating"
+import { OnRatingChangeCallback, RatingConfiguration, RatingOptions, StarStyleOptions } from "./../rating"
 import { OnScrollEdgeCallback, OnScrollFrameBeginCallback, ScrollOnScrollCallback, ScrollOnWillScrollCallback, Scroller, ScrollerInternal, ScrollAlign, OffsetResult, OnScrollFrameBeginHandlerResult, ScrollAttribute, ScrollDirection, ScrollSnapOptions, OffsetOptions, ScrollOptions, ScrollEdgeOptions, ScrollPageOptions, Literal_Boolean_next_Axis_direction, ScrollToIndexOptions, ScrollAnimationOptions } from "./../scroll"
 import { OnScrollVisibleContentChangeCallback, ChainEdgeEffect, ScrollState, ListAttribute, ListItemAlign, ListDividerOptions, ChainAnimationOptions, StickyStyle, ScrollSnapAlign, Callback_Number_Number_Number_Void, VisibleListContentInfo, Callback_Number_Boolean, Callback_Number_Number_Boolean, ListItemGroupArea, ListScroller, ListScrollerInternal, CloseSwipeActionOptions, ListOptions } from "./../list"
 import { OnSelectCallback, ArrowPosition, AvoidanceMode, MenuAlignType, SelectAttribute, Callback_Number_String_Void, MenuOutlineOptions, Callback_Opt_Union_Number_Resource_Void, Callback_Opt_ResourceStr_Void, MenuItemConfiguration, MenuItemConfigurationInternal, SelectOption } from "./../select"
@@ -69,7 +69,7 @@ import { MeasureOptions } from "@ohos/measure"
 import { SaveButtonCallback, SaveButtonOnClickResult, SaveDescription, SaveIconStyle, SaveButtonOptions } from "./../saveButton"
 import { SearchSubmitCallback, CancelButtonStyle, SearchAttribute, IconOptions, CancelButtonOptions, CancelButtonSymbolOptions, SearchType, Callback_InsertValue_Boolean, Callback_InsertValue_Void, Callback_DeleteValue_Boolean, Callback_DeleteValue_Void, Callback_EditableTextChangeValue_Boolean, SearchButtonOptions, SearchController, SearchControllerInternal, SearchOptions } from "./../search"
 import { SearchValueCallback } from "./../searchops"
-import { SliderTriggerChangeCallback, SliderAttribute, Callback_Number_SliderChangeMode_Void, SliderChangeMode, SliderBlockStyle, SliderInteraction, SlideRange, SliderBlockType, SliderStyle, SliderOptions } from "./../slider"
+import { SliderTriggerChangeCallback, SliderAttribute, Callback_Number_SliderChangeMode_Void, SliderChangeMode, SliderBlockStyle, SliderInteraction, SlideRange, SliderBlockType, SliderStyle, SliderOptions, SliderConfiguration } from "./../slider"
 import { StyledStringMarshallCallback, StyledStringUnmarshallCallback, CustomSpan, CustomSpanInternal, CustomSpanMeasureInfo, CustomSpanMetrics, CustomSpanDrawInfo, GestureStyle, GestureStyleInternal, GestureStyleInterface, StyledString, StyledStringInternal, MutableStyledString, MutableStyledStringInternal, ImageAttachment, ImageAttachmentInternal, StyleOptions, StyledStringKey, SpanStyle, UserDataSpan, DecorationStyleInterface, UrlStyle, UrlStyleInternal, BaselineOffsetStyle, BaselineOffsetStyleInternal, LetterSpacingStyle, LetterSpacingStyleInternal, LineHeightStyle, LineHeightStyleInternal, TextShadowStyle, TextShadowStyleInternal, DecorationStyle, DecorationStyleInternal, ImageAttachmentLayoutStyle, ParagraphStyle, ParagraphStyleInternal, ParagraphStyleInterface, TextStyle, TextStyle_styled_stringInternal, TextStyleInterface, BackgroundColorStyle, BackgroundColorStyleInternal, ColorFilterType, ImageAttachmentInterface, AttachmentType, ResourceImageAttachmentOptions, StyledStringValue } from "./../styledString"
 import { TextAreaSubmitCallback, TextAreaAttribute, Callback_EnterKeyType_Void, Callback_String_PasteEvent_Void, TextAreaType, Callback_ResourceStr_Void, TextAreaController, TextAreaControllerInternal, TextAreaOptions } from "./../textArea"
 import { TextFieldValueCallback } from "./../textfieldops"
@@ -143,7 +143,7 @@ import { SizeType, GridContainerOptions } from "./../gridContainer"
 import { SubMenuExpandingMode } from "./../menu"
 import { TextClockController, TextClockControllerInternal, TextClockOptions } from "./../textClock"
 import { TextTimerController, TextTimerControllerInternal, TextTimerOptions } from "./../textTimer"
-import { ToggleType, ToggleOptions, SwitchStyle } from "./../toggle"
+import { ToggleType, ToggleOptions, SwitchStyle, ToggleConfiguration } from "./../toggle"
 import { UniformDataType } from "./../arkui-uniformtypedescriptor"
 import { WindowSceneAttribute } from "./../windowScene"
 import { Callback_Array_String_Void, Callback_Array_TextMenuItem_Void, Callback_Buffer_Void, Callback_ComputedBarAttribute_Void, Callback_CustomBuilder_Void, Callback_GestureJudgeResult_Void, Callback_GestureRecognizer_Void, Callback_HitTestMode_Void, Callback_Literal_Number_offsetRemain_Void, Callback_OffsetResult_Void, Callback_OnScrollFrameBeginHandlerResult_Void, Callback_Opt_Array_NavDestinationTransition_Void, Callback_Opt_Array_String_Void, Callback_Opt_NavigationAnimatedTransition_Void, Callback_Opt_StyledString_Opt_Array_String_Void, Callback_Opt_TabContentAnimatedTransition_Void, Callback_Pointer_Void, Callback_StyledStringMarshallingValue_Void, Callback_TouchResult_Void, Callback_Tuple_Number_Number_Number_Number_Void, Callback_Tuple_Number_Number_Void, Callback_Union_CustomBuilder_DragItemInfo_Void, Callback_WebKeyboardOptions_Void, Callback_WebResourceResponse_Void, Callback_WithThemeAttribute_Void } from "./../generatorSynthetic"
@@ -6903,6 +6903,72 @@ export class Serializer extends SerializerBase {
         const value_triggerChange  = value.triggerChange
         valueSerializer.holdAndWriteCallback(value_triggerChange)
     }
+    writeButtonConfiguration(value: ButtonConfiguration): void {
+        let valueSerializer : Serializer = this
+        const value_enabled  = value.enabled
+        valueSerializer.writeBoolean(value_enabled)
+        const value_label  = value.label
+        valueSerializer.writeString(value_label)
+        const value_pressed  = value.pressed
+        valueSerializer.writeBoolean(value_pressed)
+        const value_triggerClick  = value.triggerClick
+        valueSerializer.holdAndWriteCallback(value_triggerClick)
+    }
+
+    writeCheckBoxConfiguration(value: CheckBoxConfiguration): void {
+        let valueSerializer : Serializer = this
+        const value_enabled  = value.enabled
+        valueSerializer.writeBoolean(value_enabled)
+        const value_name  = value.name
+        valueSerializer.writeString(value_name)
+        const value_selected  = value.selected
+        valueSerializer.writeBoolean(value_selected)
+        const value_triggerChange  = value.triggerChange
+        valueSerializer.holdAndWriteCallback(value_triggerChange)
+    }
+
+    writeRatingConfiguration(value: RatingConfiguration): void {
+        let valueSerializer : Serializer = this
+        const value_enabled  = value.enabled
+        valueSerializer.writeBoolean(value_enabled)
+        const value_rating  = value.rating
+        valueSerializer.writeNumber(value_rating)
+        const value_indicator  = value.indicator
+        valueSerializer.writeBoolean(value_indicator)
+        const value_stars  = value.stars
+        valueSerializer.writeNumber(value_stars)
+        const value_stepSize  = value.stepSize
+        valueSerializer.writeNumber(value_stepSize)
+        const value_triggerChange  = value.triggerChange
+        valueSerializer.holdAndWriteCallback(value_triggerChange)
+    }
+
+    writeToggleConfiguration(value: ToggleConfiguration): void {
+        let valueSerializer : Serializer = this
+        const value_enabled = value.enabled;
+        valueSerializer.writeBoolean(value_enabled);
+        const value_isOn = value.isOn;
+        valueSerializer.writeBoolean(value_isOn);
+        const value_triggerChange = value.triggerChange;
+        valueSerializer.holdAndWriteCallback(value_triggerChange)
+    }
+
+    writeSliderConfiguration(value: SliderConfiguration): void {
+        let valueSerializer : Serializer = this
+        const value_enabled  = value.enabled
+        valueSerializer.writeBoolean(value_enabled)
+        const value_value  = value.value
+        valueSerializer.writeNumber(value_value)
+        const value_min  = value.min
+        valueSerializer.writeNumber(value_min)
+        const value_max  = value.max
+        valueSerializer.writeNumber(value_max)
+        const value_step  = value.step
+        valueSerializer.writeNumber(value_step)
+        const value_triggerChange  = value.triggerChange
+        valueSerializer.holdAndWriteCallback(value_triggerChange)
+    }
+
     writeSurfaceRotationOptions(value: SurfaceRotationOptions): void {
         let valueSerializer : Serializer = this
         const value_lock  = value.lock

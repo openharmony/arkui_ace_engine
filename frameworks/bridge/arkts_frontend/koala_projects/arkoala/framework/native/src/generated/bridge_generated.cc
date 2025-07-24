@@ -45783,17 +45783,72 @@ void impl_RouterExtender_HideAlertBeforeBackPage() {
     GetAccessors()->getRouterExtenderAccessor()->hideAlertBeforeBackPage();
 }
 KOALA_INTEROP_DIRECT_V0(RouterExtender_HideAlertBeforeBackPage)
+void impl_ContentModifierHelper_contentModifierButton(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
+       Deserializer thisDeserializer(thisArray, thisLength);
+        Ark_Object contentModifier_value = static_cast<Ark_ContentModifier>(thisDeserializer.readObject());
+        ButtonModifierBuilder builder_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Ark_ButtonConfiguration config, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_ButtonModifierBuilder)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Ark_ButtonConfiguration config, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_ButtonModifierBuilder))))};;
+        GetAccessors()->getContentModifierHelperAccessor()->contentModifierButton(node, static_cast<Ark_Object*>(&contentModifier_value), static_cast<ButtonModifierBuilder*>(&builder_value));
+}
+KOALA_INTEROP_DIRECT_V3(ContentModifierHelper_contentModifierButton, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_ContentModifierHelper_contentModifierCheckbox(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        Ark_Object contentModifier_value = static_cast<Ark_ContentModifier>(thisDeserializer.readObject());
+        CheckBoxModifierBuilder builder_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Ark_CheckBoxConfiguration config, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_CheckBoxModifierBuilder)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Ark_CheckBoxConfiguration config, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_CheckBoxModifierBuilder))))};;
+        GetAccessors()->getContentModifierHelperAccessor()->contentModifierCheckbox(node, static_cast<Ark_Object*>(&contentModifier_value), static_cast<CheckBoxModifierBuilder*>(&builder_value));
+}
+KOALA_INTEROP_DIRECT_V3(ContentModifierHelper_contentModifierCheckbox, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_ContentModifierHelper_contentModifierRadio(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
     Deserializer thisDeserializer(thisArray, thisLength);
-    Ark_Object contentModifier_value = static_cast<Ark_ContentModifier>(thisDeserializer.readObject());;
+    Ark_Object contentModifier_value = static_cast<Ark_ContentModifier>(thisDeserializer.readObject());
     RadioModifierBuilder builder_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Ark_RadioConfiguration config, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_RadioModifierBuilder)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Ark_RadioConfiguration config, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_RadioModifierBuilder))))};;
     GetAccessors()->getContentModifierHelperAccessor()->contentModifierRadio(node, (const Ark_Object*)&contentModifier_value, (const RadioModifierBuilder*)&builder_value);
 }
 KOALA_INTEROP_DIRECT_V3(ContentModifierHelper_contentModifierRadio, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_ContentModifierHelper_contentModifierRating(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        Ark_Object contentModifier_value = static_cast<Ark_ContentModifier>(thisDeserializer.readObject());
+        RatingModifierBuilder builder_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Ark_RatingConfiguration config, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_RatingModifierBuilder)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Ark_RatingConfiguration config, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_RatingModifierBuilder))))};;
+        GetAccessors()->getContentModifierHelperAccessor()->contentModifierRating(node, static_cast<Ark_Object*>(&contentModifier_value), static_cast<RatingModifierBuilder*>(&builder_value));
+}
+KOALA_INTEROP_DIRECT_V3(ContentModifierHelper_contentModifierRating, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_ContentModifierHelper_contentModifierSlider(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        Ark_Object contentModifier_value = static_cast<Ark_ContentModifier>(thisDeserializer.readObject());
+        SliderModifierBuilder builder_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Ark_SliderConfiguration config, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_SliderModifierBuilder)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Ark_SliderConfiguration config, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_SliderModifierBuilder))))};;
+        GetAccessors()->getContentModifierHelperAccessor()->contentModifierSlider(node, static_cast<Ark_Object*>(&contentModifier_value), static_cast<SliderModifierBuilder*>(&builder_value));
+}
+KOALA_INTEROP_DIRECT_V3(ContentModifierHelper_contentModifierSlider, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_ContentModifierHelper_contentModifierToggle(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        Ark_Object contentModifier_value = static_cast<Ark_ContentModifier>(thisDeserializer.readObject());;
+        ToggleModifierBuilder builder_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Ark_ToggleConfiguration config, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_ToggleModifierBuilder)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Ark_ToggleConfiguration config, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_ToggleModifierBuilder))))};;
+        GetAccessors()->getContentModifierHelperAccessor()->contentModifierToggle(node, static_cast<Ark_Object*>(&contentModifier_value), static_cast<ToggleModifierBuilder*>(&builder_value));
+}
+KOALA_INTEROP_DIRECT_V3(ContentModifierHelper_contentModifierToggle, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_ContentModifierHelper_resetContentModifierButton(Ark_NativePointer node) {
+        GetAccessors()->getContentModifierHelperAccessor()->resetContentModifierButton(node);
+}
+KOALA_INTEROP_DIRECT_V1(ContentModifierHelper_resetContentModifierButton, Ark_NativePointer)
+void impl_ContentModifierHelper_resetContentModifierCheckbox(Ark_NativePointer node) {
+        GetAccessors()->getContentModifierHelperAccessor()->resetContentModifierCheckbox(node);
+}
+KOALA_INTEROP_DIRECT_V1(ContentModifierHelper_resetContentModifierCheckbox, Ark_NativePointer)
 void impl_ContentModifierHelper_resetContentModifierRadio(Ark_NativePointer node) {
-    GetAccessors()->getContentModifierHelperAccessor()->resetContentModifierRadio(node);
+        GetAccessors()->getContentModifierHelperAccessor()->resetContentModifierRadio(node);
 }
 KOALA_INTEROP_DIRECT_V1(ContentModifierHelper_resetContentModifierRadio, Ark_NativePointer)
+void impl_ContentModifierHelper_resetContentModifierRating(Ark_NativePointer node) {
+        GetAccessors()->getContentModifierHelperAccessor()->resetContentModifierRating(node);
+}
+KOALA_INTEROP_DIRECT_V1(ContentModifierHelper_resetContentModifierRating, Ark_NativePointer)
+void impl_ContentModifierHelper_resetContentModifierSlider(Ark_NativePointer node) {
+        GetAccessors()->getContentModifierHelperAccessor()->resetContentModifierSlider(node);
+}
+KOALA_INTEROP_DIRECT_V1(ContentModifierHelper_resetContentModifierSlider, Ark_NativePointer)
+void impl_ContentModifierHelper_resetContentModifierToggle(Ark_NativePointer node) {
+        GetAccessors()->getContentModifierHelperAccessor()->resetContentModifierToggle(node);
+}
+KOALA_INTEROP_DIRECT_V1(ContentModifierHelper_resetContentModifierToggle, Ark_NativePointer)
 Ark_Int64 impl_UIStateGet(Ark_NativePointer thisPtr) {
         return GetNodeModifiers()->getUIStateModifier()->getUIState(thisPtr);
 }

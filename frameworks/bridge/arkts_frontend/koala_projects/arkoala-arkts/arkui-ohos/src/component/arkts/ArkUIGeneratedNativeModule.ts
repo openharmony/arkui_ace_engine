@@ -7208,4 +7208,24 @@ export class ArkUIGeneratedNativeModule {
     native static _ContentModifierHelper_contentModifierRadio(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _ContentModifierHelper_resetContentModifierRadio(node: KPointer): void
+    @ani.unsafe.Direct
+    native static _ContentModifierHelper_contentModifierButton(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ContentModifierHelper_resetContentModifierButton(node: KPointer): void
+    @ani.unsafe.Direct
+    native static _ContentModifierHelper_contentModifierCheckbox(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ContentModifierHelper_resetContentModifierCheckbox(node: KPointer): void
+    @ani.unsafe.Direct
+    native static _ContentModifierHelper_contentModifierRating(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ContentModifierHelper_resetContentModifierRating(node: KPointer): void
+    @ani.unsafe.Direct
+    native static _ContentModifierHelper_contentModifierSlider(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ContentModifierHelper_resetContentModifierSlider(node: KPointer): void
+    @ani.unsafe.Direct
+    native static _ContentModifierHelper_contentModifierToggle(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ContentModifierHelper_resetContentModifierToggle(node: KPointer): void
 }
