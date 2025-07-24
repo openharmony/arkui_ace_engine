@@ -7815,8 +7815,8 @@ void WebPattern::DumpGpuInfo()
     std::ostringstream oss;
     oss << std::fixed << std::setprecision(DECIMAL_POINTS) << totalSize; // 转换成保留两位小数的字符串
     std::string formattedSize = oss.str();                               // 获取格式化后的字符串
-    DumpLog::GetInstance().Print("------------GpuMemoryInfo-----------");
-    DumpLog::GetInstance().Print("Total Gpu Memory size: " + formattedSize + "(MB)");
+    DumpLog::GetInstance().AddDesc("------------GpuMemoryInfo-----------");
+    DumpLog::GetInstance().AddDesc("Total Gpu Memory size: " + formattedSize + "(MB)");
 }
 
 void WebPattern::DumpSurfaceInfo()
