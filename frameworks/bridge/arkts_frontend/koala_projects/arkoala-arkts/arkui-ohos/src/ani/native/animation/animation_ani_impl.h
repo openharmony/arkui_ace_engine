@@ -21,6 +21,14 @@
 namespace OHOS::Ace::Ani {
 void SetOrCreateAnimatableProperty(
     ani_env* env, ani_object aniClass, ani_long node, ani_string name, ani_object property, ani_fn_object callback);
+void CreatePageTransitionEnter(ani_env* env, ani_object aniClass, ani_object options);
+void PageTransitionSetOnEnter(ani_env* env, ani_object aniClass, ani_fn_object onEnter);
+void CreatePageTransitionExit(ani_env* env, ani_object aniClass, ani_object options);
+void PageTransitionSetOnExit(ani_env* env, ani_object aniClass, ani_fn_object onExit);
+void PageTransitionSetSlide(ani_env* env, ani_object aniClass, ani_object slide);
+void PageTransitionSetTranslate(ani_env* env, ani_object aniClass, ani_object options);
+void PageTransitionSetScale(ani_env* env, ani_object aniClass, ani_object options);
+void PageTransitionSetOpacity(ani_env* env, ani_object aniClass, ani_double opacity);
 } // namespace OHOS::Ace::Ani
 
 #endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_ANIMATION_ANI_IMPL_H

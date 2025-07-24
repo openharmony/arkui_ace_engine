@@ -457,6 +457,46 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetOrCreateAnimatableProperty)
         },
         ani_native_function {
+            "_Animation_CreatePageTransitionEnter",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CreatePageTransitionEnter)
+        },
+        ani_native_function {
+            "_Animation_PageTransitionSetOnEnter",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::PageTransitionSetOnEnter)
+        },
+        ani_native_function {
+            "_Animation_CreatePageTransitionExit",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CreatePageTransitionExit)
+        },
+        ani_native_function {
+            "_Animation_PageTransitionSetOnExit",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::PageTransitionSetOnExit)
+        },
+        ani_native_function {
+            "_Animation_PageTransitionSetSlide",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::PageTransitionSetSlide)
+        },
+        ani_native_function {
+            "_Animation_PageTransitionSetTranslate",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::PageTransitionSetTranslate)
+        },
+        ani_native_function {
+            "_Animation_PageTransitionSetScale",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::PageTransitionSetScale)
+        },
+        ani_native_function {
+            "_Animation_PageTransitionSetOpacity",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::PageTransitionSetOpacity)
+        },
+        ani_native_function {
             "_CreateViewStackProcessor",
             ":J",
             reinterpret_cast<void*>(OHOS::Ace::Ani::CreateViewStackProcessor)
