@@ -1385,6 +1385,7 @@ void FrameNode::NotifyColorModeChange(uint32_t colorMode)
     FireColorNDKCallback();
 
     if (GetLocalColorMode() != ColorMode::COLOR_MODE_UNDEFINED) {
+        UINode::NotifyColorModeChange(colorMode);
         return;
     }
 

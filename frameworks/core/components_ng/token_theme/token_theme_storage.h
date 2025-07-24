@@ -50,7 +50,9 @@ public:
 
     RefPtr<TokenTheme> ObtainSystemTheme();
     
-    void SetIsThemeColorAvailable(bool isDark, int32_t idx, bool isColorAvailable);
+    void SetIsThemeColorAvailable(bool isDark, int32_t index, bool isColorAvailable);
+
+    void SetIsThemeColorSetByUser(int32_t themeId, bool isDark, int32_t index, bool isColorSetByUser);
 
 private:
     static constexpr int32_t SYSTEM_THEME_LIGHT_ID = -1;
@@ -60,6 +62,8 @@ private:
     TokenThemeStorage();
     RefPtr<TokenTheme> CreateSystemTokenTheme(ColorMode colorMode);
     ColorMode CheckLocalAndSystemColorMode();
+    void ResetThemeColor(int32_t themeId, RefPtr<TokenTheme>& theme, RefPtr<TokenTheme>& defaultTheme,
+        ColorMode& colorMode);
 
     // key: scope id, value: theme id
     std::unordered_map<TokenThemeScopeId, int32_t> themeScopeMap_;
@@ -70,6 +74,8 @@ private:
 
     std::vector<bool> darkThemeColorsAvailable_ = std::vector<bool> (TokenColors::TOTAL_NUMBER, false);
     std::vector<bool> lightThemeColorsAvailable_ = std::vector<bool> (TokenColors::TOTAL_NUMBER, false);
+
+    std::unordered_map<int32_t, std::map<bool, std::vector<bool>>> themeColorSetByUser_;
 
     inline static RefPtr<TokenTheme> defaultLightTheme_ = nullptr;
     inline static RefPtr<TokenTheme> defaultDarkTheme_ = nullptr;
