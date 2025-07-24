@@ -18,20 +18,11 @@
 
 #include <memory>
 
-#if defined(MODIFIER_NG)
 #include "render_service_client/core/modifier_ng/custom/rs_content_style_modifier.h"
-#else
-#include "render_service_client/core/modifier/rs_extended_modifier.h"
-#endif
 #include "ui/view/draw/content_modifier.h"
 
-#if defined(MODIFIER_NG)
 using RSDrawingContext = OHOS::Rosen::ModifierNG::RSDrawingContext;
 using RSContentStyleModifier = OHOS::Rosen::ModifierNG::RSContentStyleModifier;
-#else
-using RSDrawingContext = OHOS::Rosen::RSDrawingContext;
-using RSContentStyleModifier = OHOS::Rosen::RSContentStyleModifier;
-#endif
 
 namespace OHOS::Ace::Kit {
 class ContentModifierAdapter : public RSContentStyleModifier {
