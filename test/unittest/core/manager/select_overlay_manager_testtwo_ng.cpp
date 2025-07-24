@@ -1039,4 +1039,33 @@ HWTEST_F(SelectOverlayManagerTestTwoNg, DestroySelectOverlayNode002, TestSize.Le
     content.DestroySelectOverlayNode(menuNode);
     EXPECT_TRUE(content.shareOverlayInfo_->isUsingMouse);
 }
+
+/**
+ * @tc.name: CreateSelectOverlayNode001
+ * @tc.desc: test SelectOverlayNode.cpp CreateSelectOverlayNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestTwoNg, CreateSelectOverlayNode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init SelectContentOverlayManager
+     */
+    Init();
+    auto content = SelectContentOverlayManager(root_);
+    SelectOverlayInfo selectInfo;
+    selectInfo.enableHandleLevel = true;
+    selectInfo.menuInfo.showCut = true;
+    selectInfo.menuInfo.showCopyAll = true;
+    selectInfo.menuInfo.showAIWrite = true;
+
+    /**
+     * @tc.steps: step2. CreateSelectOverlayNode
+     */
+    content.shareOverlayInfo_ = std::make_shared<SelectOverlayInfo>(selectInfo);
+    ASSERT_NE(content.shareOverlayInfo_, nullptr);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(content.shareOverlayInfo_);
+    ASSERT_NE(frameNode, nullptr);
+    auto size = frameNode->GetChildren().size();
+    EXPECT_EQ(size, 1);
+}
 } // namespace OHOS::Ace::NG

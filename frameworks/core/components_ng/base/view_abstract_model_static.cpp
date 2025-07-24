@@ -21,6 +21,7 @@
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
+#include "core/components_ng/pattern/menu/menu_view_static.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
@@ -62,82 +63,82 @@ void StartVirator(const MenuParam& menuParam, bool isMenu, const std::string& me
     }
 }
  
-NG::OffsetF UpdateMenuPostionStatic(const NG::OffsetF& menuPosition, const MenuParam& menuParam,
-    const RefPtr<FrameNode>& targetNode)
-{
-    if (menuParam.anchorPosition.has_value()) {
-        NG::OffsetF targetNodePosition = targetNode->GetPositionToWindowWithTransform();
-        return { menuParam.anchorPosition->GetX() + menuParam.positionOffset.GetX() +
-                 targetNodePosition.GetX(),
-                 menuParam.anchorPosition->GetY() + menuParam.positionOffset.GetY() +
-                 targetNodePosition.GetY() };
-    }
-    return menuPosition;
-}
+// NG::OffsetF UpdateMenuPostionStatic(const NG::OffsetF& menuPosition, const MenuParam& menuParam,
+//     const RefPtr<FrameNode>& targetNode)
+// {
+//     if (menuParam.anchorPosition.has_value()) {
+//         NG::OffsetF targetNodePosition = targetNode->GetPositionToWindowWithTransform();
+//         return { menuParam.anchorPosition->GetX() + menuParam.positionOffset.GetX() +
+//                  targetNodePosition.GetX(),
+//                  menuParam.anchorPosition->GetY() + menuParam.positionOffset.GetY() +
+//                  targetNodePosition.GetY() };
+//     }
+//     return menuPosition;
+// }
  
-static void BindGestureForMenuHoverScale(const RefPtr<FrameNode>& targetNode, const MenuParam& menuParam)
-{
-    CHECK_NULL_VOID(targetNode);
-    auto gestureHub = targetNode->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
+// static void BindGestureForMenuHoverScale(const RefPtr<FrameNode>& targetNode, const MenuParam& menuParam)
+// {
+    // CHECK_NULL_VOID(targetNode);
+    // auto gestureHub = targetNode->GetOrCreateGestureEventHub();
+    // CHECK_NULL_VOID(gestureHub);
  
-    // bind touch evnet for hoverScaleInterruption
-    auto targetId = targetNode->GetId();
-    gestureHub->RegisterMenuOnTouch([targetId](const TouchEventInfo& info) {
-        if (MenuViewStatic::GetMenuHoverScaleStatus(targetId) == MenuHoverScaleStatus::DISABLE) {
-            return;
-        }
+    // // bind touch evnet for hoverScaleInterruption
+    // auto targetId = targetNode->GetId();
+    // gestureHub->RegisterMenuOnTouch([targetId](const TouchEventInfo& info) {
+    //     if (MenuViewStatic::GetMenuHoverScaleStatus(targetId) == MenuHoverScaleStatus::DISABLE) {
+    //         return;
+    //     }
  
-        const auto& touches = info.GetTouches();
-        CHECK_EQUAL_VOID(touches.empty(), true);
-        auto touchType = touches.front().GetTouchType();
-        if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
-            auto hoverStatus = MenuViewStatic::GetMenuHoverScaleStatus(targetId);
-            TAG_LOGI(AceLogTag::ACE_MENU, "target touch up or cancel, hoverStatus: %{public}d", hoverStatus);
-            if (hoverStatus == MenuHoverScaleStatus::HOVER) {
-                MenuViewStatic::SetMenuHoverScaleStatus(targetId, MenuHoverScaleStatus::INTERRUPT);
-                SubwindowManager::GetInstance()->HideMenuNG();
-            }
-        }
-    });
+    //     const auto& touches = info.GetTouches();
+    //     CHECK_EQUAL_VOID(touches.empty(), true);
+    //     auto touchType = touches.front().GetTouchType();
+    //     if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
+    //         auto hoverStatus = MenuViewStatic::GetMenuHoverScaleStatus(targetId);
+    //         TAG_LOGI(AceLogTag::ACE_MENU, "target touch up or cancel, hoverStatus: %{public}d", hoverStatus);
+    //         if (hoverStatus == MenuHoverScaleStatus::HOVER) {
+    //             MenuViewStatic::SetMenuHoverScaleStatus(targetId, MenuHoverScaleStatus::INTERRUPT);
+    //             // SubwindowManager::GetInstance()->HideMenuNG();
+    //         }
+    //     }
+    // });
  
-    auto gesture = AceType::MakeRefPtr<NG::LongPressGesture>(1, false, HOVER_IMAGE_INTERRUPT_DURATION, false, true);
-    CHECK_NULL_VOID(gesture);
-    gesture->SetTag(KEY_CONTEXT_MENU_HOVER);
-    auto weakTarget = AceType::WeakClaim(AceType::RawPtr(targetNode));
-    gesture->SetOnActionId([targetId](GestureEvent& info) {
-        TAG_LOGI(AceLogTag::ACE_MENU, "long press 500ms for menu hoverScale");
-        MenuViewStatic::SetMenuHoverScaleStatus(targetId, MenuHoverScaleStatus::MENU_SHOW);
-    });
-    gestureHub->AddGesture(gesture);
-}
+    // auto gesture = AceType::MakeRefPtr<NG::LongPressGesture>(1, false, HOVER_IMAGE_INTERRUPT_DURATION, false, true);
+    // CHECK_NULL_VOID(gesture);
+    // gesture->SetTag(KEY_CONTEXT_MENU_HOVER);
+    // auto weakTarget = AceType::WeakClaim(AceType::RawPtr(targetNode));
+    // gesture->SetOnActionId([targetId](GestureEvent& info) {
+    //     TAG_LOGI(AceLogTag::ACE_MENU, "long press 500ms for menu hoverScale");
+    //     MenuViewStatic::SetMenuHoverScaleStatus(targetId, MenuHoverScaleStatus::MENU_SHOW);
+    // });
+    // gestureHub->AddGesture(gesture);
+// }
  
-static void BindGestureJudgeForMenuHoverScale(const RefPtr<FrameNode>& targetNode,
-    std::function<void(const NG::OffsetF&)>& contextMenuShow, std::function<void()> startVibratorCall)
-{
-    CHECK_NULL_VOID(targetNode);
-    auto gestureHub = targetNode->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
+// static void BindGestureJudgeForMenuHoverScale(const RefPtr<FrameNode>& targetNode,
+//     std::function<void(const NG::OffsetF&)>& contextMenuShow, std::function<void()> startVibratorCall)
+// {
+    // CHECK_NULL_VOID(targetNode);
+    // auto gestureHub = targetNode->GetOrCreateGestureEventHub();
+    // CHECK_NULL_VOID(gestureHub);
  
-    auto targetId = targetNode->GetId();
-    if (MenuViewStatic::GetMenuHoverScaleStatus(targetId) == MenuHoverScaleStatus::DISABLE) {
-        gestureHub->SetOnGestureJudgeNativeBeginForMenu(
-            [](const RefPtr<NG::GestureInfo>& gestureInfo,
-                const std::shared_ptr<BaseGestureEvent>& info) -> GestureJudgeResult {
-                CHECK_NULL_RETURN(gestureInfo, GestureJudgeResult::CONTINUE);
-                if (gestureInfo->GetType() == GestureTypeName::CONTEXT_MENU_HOVER) {
-                    return GestureJudgeResult::CONTINUE;
-                } else if (gestureInfo->GetTag() == KEY_CONTEXT_MENU_HOVER) {
-                    return GestureJudgeResult::REJECT;
-                }
-                return GestureJudgeResult::CONTINUE;
-            });
-        return;
-    }
-    if (menuParam.hapticFeedbackMode == HapticFeedbackMode::AUTO && menuParam.previewMode != MenuPreviewMode::NONE) {
-        VibratorUtils::StartViratorDirectly(menuHapticFeedback);
-    }
-}
+    // auto targetId = targetNode->GetId();
+    // if (MenuViewStatic::GetMenuHoverScaleStatus(targetId) == MenuHoverScaleStatus::DISABLE) {
+    //     gestureHub->SetOnGestureJudgeNativeBeginForMenu(
+    //         [](const RefPtr<NG::GestureInfo>& gestureInfo,
+    //             const std::shared_ptr<BaseGestureEvent>& info) -> GestureJudgeResult {
+    //             CHECK_NULL_RETURN(gestureInfo, GestureJudgeResult::CONTINUE);
+    //             if (gestureInfo->GetType() == GestureTypeName::CONTEXT_MENU_HOVER) {
+    //                 return GestureJudgeResult::CONTINUE;
+    //             } else if (gestureInfo->GetTag() == KEY_CONTEXT_MENU_HOVER) {
+    //                 return GestureJudgeResult::REJECT;
+    //             }
+    //             return GestureJudgeResult::CONTINUE;
+    //         });
+    //     return;
+    // }
+    // if (menuParam.hapticFeedbackMode == HapticFeedbackMode::AUTO && menuParam.previewMode != MenuPreviewMode::NONE) {
+    //     VibratorUtils::StartViratorDirectly(menuHapticFeedback);
+    // }
+// }
 
 // void UpdateIsShowStatusForMenu(int32_t targetId, bool isShow)
 // {

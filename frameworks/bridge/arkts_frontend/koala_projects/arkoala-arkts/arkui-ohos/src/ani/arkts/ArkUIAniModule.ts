@@ -15,7 +15,7 @@
 
 import { KPointer, KInt } from "@koalaui/interop"
 import image from "@ohos.multimedia.image"
-// import webview from "@ohos.web.webview"
+import webview from "@ohos.web.webview"
 import common from "@ohos.app.ability.common"
 import { DrawContext } from "arkui/Graphics"
 import { DrawModifier } from "arkui/component"
@@ -27,8 +27,8 @@ export class ArkUIAniModule {
 
     native static _Image_Transfer_PixelMap(ptr: KPointer, pixelmap: image.PixelMap): void
 
-    // native static _Web_SetWebOptions(ptr: KPointer, webviewController: webview.WebviewController): void
-    // native static _Web_SetWebController_ControllerHandler(ptr: KPointer, webviewController: webview.WebviewController): void
+    native static _Web_SetWebOptions(ptr: KPointer, webviewController: webview.WebviewController): void
+    native static _Web_SetWebController_ControllerHandler(ptr: KPointer, webviewController: webview.WebviewController): void
     native static _ConvertUtils_ConvertFromPixelMapAni(pixelmap: image.PixelMap): KPointer
 
     native static _ConvertUtils_ConvertToPixelMapAni(ptr: KPointer): image.PixelMap

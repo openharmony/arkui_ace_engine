@@ -4,8 +4,6 @@ State management TypeScript library for ArkUI declarative front-end.
 Supports both older 'full update' for Component to Element classes
 and newer 'partial update' for minimal scope NG UINode updates.
 
-Developed at UI Frameworks Team at the Huawei R&D Center Helsinki, Finland.
-
 ## Building just state mgmt
 
 The implementation is in Typescript.

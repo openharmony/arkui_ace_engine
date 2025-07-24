@@ -57,6 +57,7 @@ export class LocalStorage {
     constructor() {
         this.storage_ = new Map<string, StateDecoratedVariable<NullableObject>>();
     }
+
     private getInfo(): string {
         return '@LocalStorage';
     }

@@ -252,6 +252,7 @@ arkui_files = [
   "arkui-preprocessed/arkui/handwritten/ArkNavPathStack.ets",
   "arkui-preprocessed/arkui/handwritten/ArkPageTransition.ets",
   "arkui-preprocessed/arkui/handwritten/ArkPageTransitionData.ets",
+  "arkui-preprocessed/arkui/handwritten/ArkRouterExtenderMaterialized.ets",
   "arkui-preprocessed/arkui/handwritten/ArkStateStyle.ets",
   "arkui-preprocessed/arkui/handwritten/ForeignFunctions.ets",
   "arkui-preprocessed/arkui/handwritten/GridItemOpsHandWritten.ets",

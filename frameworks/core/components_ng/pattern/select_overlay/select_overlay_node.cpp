@@ -876,6 +876,12 @@ void GetOptionsParamsHasSymbol(
         params.back().symbolId = theme->GetAIMenuSymbolId();
         params.back().isAIMenuOption = true;
     }
+    if (TextSystemMenu::IsShowAskCelia() && info->menuInfo.isAskCeliaEnabled) {
+        params.emplace_back(theme->GetAskCelia(),
+            GetMenuCallbackWithContainerId(info->menuCallback.onAskCelia), "", true);
+        params.back().symbolId = theme->GetAskCeliaSymbolId();
+        params.back().isAskCeliaOption = true;
+    }
 }
 
 std::vector<OptionParam> GetOptionsParams(const std::shared_ptr<SelectOverlayInfo>& info)
