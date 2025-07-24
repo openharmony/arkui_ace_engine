@@ -69,9 +69,9 @@ template("arkts_frontend") {
       "runtime_core:ani",
     ]
 
-    #if (current_os == "ohos") {
-    #external_deps += [ "graphic_2d:drawing_ani" ]
-    #}
+    if (current_os == "ohos") {
+      external_deps += [ "graphic_2d:drawing_ani" ]
+    }
   }
 }
 
