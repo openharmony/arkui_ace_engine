@@ -408,7 +408,7 @@ public:
     {
         return false;
     }
-    virtual bool FreeScrollToEdge(ScrollEdgeType type, bool smooth, const std::optional<float>& velocity)
+    virtual bool FreeScrollToEdge(ScrollEdgeType type, bool smooth, std::optional<float> velocity)
     {
         return false;
     }
