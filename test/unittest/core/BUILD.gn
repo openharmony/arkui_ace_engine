@@ -99,6 +99,7 @@ group("linux_core_unittest") {
     "pattern/checkboxgroup:checkboxgroup_test_ng",
     "pattern/common_view:common_view_test_ng",
     "pattern/container_modal:container_modal_pattern_enhance_test_ng",
+    "pattern/render_node:render_node_test_ng",
     "pattern/container_modal:container_modal_test_ng",
     "pattern/container_modal:container_modal_toolbar_test_ng",
     "pattern/counter:counter_test_ng",
