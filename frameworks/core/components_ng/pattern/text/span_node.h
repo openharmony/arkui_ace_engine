@@ -888,6 +888,12 @@ public:
     PlaceholderSpanPattern() = default;
     ~PlaceholderSpanPattern() override = default;
 
+    bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) 
+    {
+        Pattern::OnDirtyLayoutWrapperSwap(dirty, config);
+        auto geometryNode = 
+    }
+
     bool IsAtomicNode() const override
     {
         return false;

@@ -1481,4 +1481,6 @@ HWTEST_F(RichEditorSpanTest, AddTextSpan001, TestSize.Level1)
     EXPECT_EQ(res, 0);
 }
 
+
+
 } // namespace OHOS::Ace::NG
