@@ -58,11 +58,13 @@ void AssembleUiExtensionParams(
     auto missionId = AceApplicationInfo::GetInstance().GetMissionId();
     params.try_emplace("bundleName", AceApplicationInfo::GetInstance().GetProcessName());
     params.try_emplace("abilityName", AceApplicationInfo::GetInstance().GetAbilityName());
-    params.try_emplace("module", Container::Current()->GetModuleName());
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    params.try_emplace("module", container->GetModuleName());
     if (missionId != -1) {
         params.try_emplace("missionId", std::to_string(missionId));
     }
-    auto frontend = Container::Current()->GetFrontend();
+    auto frontend = container->GetFrontend();
     if (frontend) {
         auto info = frontend->GetTopNavDestinationInfo(false, true);
         params.try_emplace("TopNavPathInfo", info);

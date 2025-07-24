@@ -21,7 +21,9 @@ namespace OHOS::Ace::NG {
 void StageLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     // apply safe area to page nodes
-    auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto layoutConstraint = layoutProperty->CreateChildConstraint();
     auto pipeline = PipelineContext::GetCurrentContext();
     childInsets_ = pipeline->GetSafeArea();
     LayoutWrapper::ApplySafeArea(childInsets_, layoutConstraint);
