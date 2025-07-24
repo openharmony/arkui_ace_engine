@@ -1473,6 +1473,9 @@ bool DragDropManager::PostStopDrag(const RefPtr<FrameNode>& dragFrameNode, const
     taskScheduler->PostDelayedTask(
         [pointerEvent, event, extraParams, nodeWeak = WeakClaim(AceType::RawPtr(dragFrameNode)),
             weakManager = WeakClaim(this)]() {
+            if (!DragDropGlobalController::GetInstance().IsCurrentDrag(event->GetRequestIdentify())) {
+                return;
+            }
             if (!DragDropGlobalController::GetInstance().IsOnOnDropPhase() || !event) {
                 return;
             }

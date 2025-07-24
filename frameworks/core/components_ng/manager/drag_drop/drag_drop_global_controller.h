@@ -74,6 +74,8 @@ public:
     void SetCallAnsyncDragEnd(std::function<void(DragStartRequestStatus)> callSyncDragEnd);
 
     std::function<void(DragStartRequestStatus)> GetCallAnsyncEnd();
+
+    bool IsCurrentDrag(int32_t requestId) const;
 private:
     DragDropGlobalController() = default;
 
