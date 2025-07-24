@@ -1725,6 +1725,46 @@ HWTEST_F(SwiperPatternTestNg, HandleTouchBottomLoopOnRTL001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SwipeToWithoutAnimation001
+ * @tc.desc: Test SwipeToWithoutAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperPatternTestNg, SwipeToWithoutAnimation001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create swiper, jumpIndexByUser_ is nullopt.
+     * @tc.expected: jumpIndexByUser_ is nullopt.
+     */
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    EXPECT_EQ(pattern_->jumpIndexByUser_, std::nullopt);
+
+    /**
+     * @tc.steps: step2. The call to the SwipeToWithoutAnimation interface is triggered but not
+                  by the user using the changindex interface.
+     * @tc.expected: jumpIndexByUser_ is not changed.
+     */
+    pattern_->SwipeToWithoutAnimation(1, false);
+    EXPECT_EQ(pattern_->jumpIndexByUser_, std::nullopt);
+
+    /**
+     * @tc.steps: step3. The call to the SwipeToWithoutAnimation interface is triggered
+                  by the user using the changindex interface.
+     * @tc.expected: jumpIndexByUser_ is changed.
+     */
+    pattern_->SwipeToWithoutAnimation(1, true);
+    EXPECT_EQ(pattern_->jumpIndexByUser_, 1);
+
+    /**
+     * @tc.steps: step4. After executing the BeforeCreateLayoutWrapper interface, the jumpindex will be reset.
+     * @tc.expected: jumpIndexByUser_ is nullopt.
+     */
+    pattern_->BeforeCreateLayoutWrapper();
+    EXPECT_EQ(pattern_->jumpIndexByUser_, std::nullopt);
+}
+
+/**
  * @tc.name: OnFontScaleConfigurationUpdate001
  * @tc.desc: Test SwiperPattern OnFontScaleConfigurationUpdate
  * @tc.type: FUNC
