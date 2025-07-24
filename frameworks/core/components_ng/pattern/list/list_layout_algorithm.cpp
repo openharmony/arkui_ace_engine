@@ -210,6 +210,10 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     size.MinusHeight(expandHeight);
     layoutWrapper->GetGeometryNode()->SetFrameSize(size);
 
+    if (listLayoutProperty->HasCacheRange()) {
+        ScrollableUtils::DisableLazyForEachBuildCache(layoutWrapper->GetHostNode());
+    }
+
     // set list cache info.
     SetCacheCount(layoutWrapper, listLayoutProperty->GetCachedCountWithDefault());
     isLayouted_ = false;
@@ -2415,6 +2419,25 @@ std::tuple<int32_t, int32_t, int32_t, int32_t> ListLayoutAlgorithm::LayoutCached
     return { startIndex, endIndex, cachedForward, cachedBackward };
 }
 
+void CheckMinCacheRange(LayoutWrapper* layoutWrapper, std::list<PredictLayoutItem>& list,
+    int32_t cacheCount, int32_t start, int32_t end)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto prop = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(prop);
+    int32_t minCacheCount = prop->GetMinCacheCount();
+    if (minCacheCount >= cacheCount) {
+        return;
+    }
+    for (auto it = list.begin(); it != list.end();) {
+        if (it->index < start - minCacheCount || it->index > end + minCacheCount) {
+            it = list.erase(it);
+        } else {
+            ++it;
+        }
+    }
+}
+
 std::list<PredictLayoutItem> ListLayoutAlgorithm::LayoutCachedItemV2(LayoutWrapper* layoutWrapper, int32_t cacheCount,
     bool show)
 {
@@ -2429,6 +2452,8 @@ std::list<PredictLayoutItem> ListLayoutAlgorithm::LayoutCachedItemV2(LayoutWrapp
         startIndex =
             LayoutCachedBackward(layoutWrapper, cacheCount, cachedBackward, startIndex, predictBuildList, show);
     }
+    CheckMinCacheRange(layoutWrapper, predictBuildList, cacheCount,
+        itemPosition_.begin()->first, itemPosition_.rbegin()->first);
     int32_t cacheStart = itemPosition_.begin()->first - startIndex;
     int32_t cacheEnd = endIndex - itemPosition_.rbegin()->first;
     if (isStackFromEnd_) {

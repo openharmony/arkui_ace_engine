@@ -269,16 +269,16 @@ UserMouseOptions Convert(const ::OnHoverCallback& src)
 template<>
 ImageSpanOptions Convert(const Ark_RichEditorImageSpanOptions& src)
 {
-    return {
-        {
-            .offset = Converter::OptConvert<int32_t>(src.offset),
-            .userGestureOption = Converter::OptConvert<UserGestureOptions>(src.gesture).value_or(UserGestureOptions {}),
+    ImageSpanOptions ret;
+    if (auto imageOffset = Converter::OptConvert<int32_t>(src.offset); imageOffset) {
+        ret.offset = imageOffset.value() >= 0 ? imageOffset.value() : 0;
+    }
+    ret.userGestureOption = Converter::OptConvert<UserGestureOptions>(src.gesture).value_or(UserGestureOptions {});
 #ifdef WRONG_GEN
-            .userMouseOption = Converter::OptConvert<UserMouseOptions>(src.onHover).value_or(UserMouseOptions {})
+    ret.userMouseOption = Converter::OptConvert<UserMouseOptions>(src.onHover).value_or(UserMouseOptions {});
 #endif
-        },
-        .imageAttribute = Converter::OptConvert<ImageSpanAttribute>(src.imageStyle),
-    };
+    ret.imageAttribute = Converter::OptConvert<ImageSpanAttribute>(src.imageStyle);
+    return ret;
 }
 
 template<>

@@ -1582,7 +1582,7 @@ void DragEventActuator::HideTextAnimation(bool startDrag, double globalX, double
         }
         // 长按ai菜单预览回落时，执行弹出ai菜单操作
         pattern->ShowAIEntityMenuForCancel();
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto manager = pipeline->GetOverlayManager();
         CHECK_NULL_VOID(manager);

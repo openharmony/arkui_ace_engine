@@ -1372,6 +1372,8 @@ void GetTouchPoints(const std::shared_ptr<BaseGestureEvent>& info, std::array<Ar
         points[i].windowY = fingureIterator.globalLocation_.GetY();
         points[i].screenX = fingureIterator.screenLocation_.GetX();
         points[i].screenY = fingureIterator.screenLocation_.GetY();
+        points[i].globalDisplayX = fingureIterator.globalDisplayLocation_.GetX();
+        points[i].globalDisplayY = fingureIterator.globalDisplayLocation_.GetY();
         points[i].operatingHand = fingureIterator.operatingHand_;
         points[i].tiltX = info->GetTiltX().value_or(0.0f);
         points[i].tiltY = info->GetTiltY().value_or(0.0f);
@@ -1389,6 +1391,8 @@ void GetTouchPoints(const std::shared_ptr<BaseGestureEvent>& info, std::array<Ar
         rawInputEvent.actionTouchPoint.windowY = rawInputEvent.touchPointes[0].windowY;
         rawInputEvent.actionTouchPoint.screenX = rawInputEvent.touchPointes[0].screenX;
         rawInputEvent.actionTouchPoint.screenY = rawInputEvent.touchPointes[0].screenY;
+        rawInputEvent.actionTouchPoint.globalDisplayX = rawInputEvent.touchPointes[0].globalDisplayX;
+        rawInputEvent.actionTouchPoint.globalDisplayY = rawInputEvent.touchPointes[0].globalDisplayY;
         rawInputEvent.actionTouchPoint.operatingHand = rawInputEvent.touchPointes[0].operatingHand;
         rawInputEvent.actionTouchPoint.tiltX = rawInputEvent.touchPointes[0].tiltX;
         rawInputEvent.actionTouchPoint.tiltY = rawInputEvent.touchPointes[0].tiltY;

@@ -20,6 +20,7 @@
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
 #include "core/common/ime/text_edit_controller.h"
 #include "core/common/ime/text_input_type.h"
@@ -49,6 +50,7 @@ void TextFieldModelNG::CreateNode(
     std::set<std::string> allowDropSet({ DROP_TYPE_PLAIN_TEXT, DROP_TYPE_HYPERLINK, DROP_TYPE_STYLED_STRING });
     frameNode->SetAllowDrop(allowDropSet);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    pattern->InitTheme();
     pattern->SetModifyDoneStatus(false);
     pattern->ResetContextAttr();
     auto textValue = pattern->GetTextUtf16Value();
@@ -135,6 +137,7 @@ void TextFieldModelNG::UpdateTextFieldPattern(
 {
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
+    pattern->InitTheme();
     pattern->SetModifyDoneStatus(false);
     auto textValue = pattern->GetTextUtf16Value();
     if (value.has_value() && value.value() != textValue) {
@@ -268,6 +271,8 @@ void TextFieldModelNG::ResetDisableUnderlineColor()
 
 void TextFieldModelNG::ProcessDefaultStyleAndBehaviors(const RefPtr<FrameNode>& frameNode)
 {
+    FREE_NODE_CHECK(frameNode, ProcessDefaultStyleAndBehaviors,
+        frameNode);  // call ProcessDefaultStyleAndBehaviorsMultiThread() by multi thread
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto themeManager = pipeline->GetThemeManager();
@@ -753,19 +758,6 @@ void TextFieldModelNG::SetShowError(const std::u16string& errorText, bool visibl
 
 void TextFieldModelNG::SetShowCounter(bool value)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetCounterState(false);
-    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    if (value && !pattern->IsNormalInlineState() && !pattern->IsInPasswordMode() &&
-        layoutProperty->HasMaxLength()) {
-        pattern->AddCounterNode();
-    } else {
-        pattern->CleanCounterNode();
-    }
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowCounter, value);
 }
 
@@ -1514,18 +1506,7 @@ void TextFieldModelNG::SetEnableAutoFillAnimation(FrameNode* frameNode, bool ena
 void TextFieldModelNG::SetShowCounter(FrameNode* frameNode, bool value)
 {
     CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetCounterState(false);
-    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowCounter, value, frameNode);
-    if (value && !pattern->IsNormalInlineState() && !pattern->IsInPasswordMode() &&
-        layoutProperty->HasMaxLength()) {
-        pattern->AddCounterNode();
-    } else {
-        pattern->CleanCounterNode();
-    }
 }
 
 void TextFieldModelNG::SetShowError(FrameNode* frameNode, const std::u16string& errorText, bool visible)

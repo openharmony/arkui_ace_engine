@@ -629,7 +629,6 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(CustomBackground, CustomBackgroundColor, Color);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(CustomBackground, IsTransitionBackground, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(CustomBackground, BuilderBackgroundFlag, bool);
-    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(CustomBackground, BackgroundIgnoresLayoutSafeAreaEdges, uint32_t);
 
     // Graphics
     ACE_DEFINE_PROPERTY_GROUP(Graphics, GraphicsProperty);
@@ -840,6 +839,8 @@ public:
 
     virtual void SetNeedUseCmdlistDrawRegion(bool needUseCmdlistDrawRegion) {}
 
+    virtual void UpdateCustomBackground() {}
+
 protected:
     RenderContext() = default;
     std::shared_ptr<SharedTransitionOption> sharedTransitionOption_;
@@ -866,7 +867,6 @@ protected:
     virtual void OnCustomBackgroundColorUpdate(const Color& color) {}
     virtual void OnIsTransitionBackgroundUpdate(bool isTransitionBackground) {}
     virtual void OnBuilderBackgroundFlagUpdate(bool isBuilderBackground) {}
-    virtual void OnBackgroundIgnoresLayoutSafeAreaEdgesUpdate(uint32_t edges) {}
 
     virtual void OnBorderImageUpdate(const RefPtr<BorderImage>& borderImage) {}
     virtual void OnBorderImageSourceUpdate(const ImageSourceInfo& borderImageSourceInfo) {}

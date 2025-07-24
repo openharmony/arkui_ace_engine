@@ -86,8 +86,6 @@ private:
     static float GetBorderRadius(RefPtr<FrameNode>& node, const NG::GradientDirection direction);
     static bool CheckLinearGradientBlur(const RefPtr<FrameNode>& parentNode, RefPtr<FrameNode>& node,
         bool& isBlured, double& blurRadius);
-    static bool CheckGrayScale(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext,
-        std::string& message);
     static bool CheckSaturate(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext,
         std::string& message);
     static bool CheckContrast(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext,

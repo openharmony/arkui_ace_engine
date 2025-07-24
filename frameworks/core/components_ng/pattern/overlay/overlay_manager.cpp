@@ -8806,10 +8806,34 @@ RefPtr<FrameNode> OverlayManager::GetLastChildNotRemoving(const RefPtr<UINode>& 
         auto& child = *iter;
         if (child->GetTag() == V2::ATOMIC_SERVICE_ETS_TAG) {
             auto atomicNode = child;
-            CHECK_NULL_RETURN(atomicNode, nullptr);
-            auto serviceContainer = FindChildNodeByKey(atomicNode, "AtomicServiceContainerId");
-            return GetLastChildNotRemoving(serviceContainer);
+            return GetLastChildNotRemovingForAtm(atomicNode);
         } else if (!child->IsRemoving()) {
+            return DynamicCast<FrameNode>(child);
+        }
+    }
+    return nullptr;
+}
+
+RefPtr<FrameNode> OverlayManager::GetLastChildNotRemovingForAtm(const RefPtr<UINode>& atomicNode)
+{
+    CHECK_NULL_RETURN(atomicNode, nullptr);
+    auto serviceContainer = FindChildNodeByKey(atomicNode, "AtomicServiceContainerId");
+    CHECK_NULL_RETURN(serviceContainer, nullptr);
+    const auto& children = serviceContainer->GetChildren();
+    auto hasFindMenubar = false;
+    for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
+        auto& child = *iter;
+        CHECK_NULL_CONTINUE(child);
+        if (!hasFindMenubar && (child->GetInspectorId().value_or("") == "AtomicServiceMenubarRowId" ||
+            FindChildNodeByKey(child, "AtomicServiceMenubarRowId"))) {
+            hasFindMenubar = true;
+            continue;
+        }
+        if (child->GetInspectorId().value_or("") == "AtomicServiceStageId" ||
+            FindChildNodeByKey(child, "AtomicServiceStageId")) {
+            return nullptr;
+        }
+        if (!child->IsRemoving()) {
             return DynamicCast<FrameNode>(child);
         }
     }

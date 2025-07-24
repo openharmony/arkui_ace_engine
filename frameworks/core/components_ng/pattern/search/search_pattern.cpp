@@ -17,6 +17,7 @@
 
 #include <cstdint>
 #include "base/geometry/dimension.h"
+#include "base/utils/multi_thread.h"
 #include "base/utils/utf_helper.h"
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
@@ -3407,5 +3408,12 @@ void SearchPattern::InitMargin(const RefPtr<SearchLayoutProperty>& property)
         margin.bottom = CalcLength(UP_AND_DOWN_PADDING.ConvertToPx());
     }
     property->UpdateMargin(margin);
+}
+
+void SearchPattern::OnAttachToMainTree()
+{
+    auto host = GetHost();
+    // call OnAttachToMainTreeMultiThread() by multi thread Pattern::OnAttachToMainTree()
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
 }
 } // namespace OHOS::Ace::NG

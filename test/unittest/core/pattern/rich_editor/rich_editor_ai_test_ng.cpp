@@ -620,7 +620,7 @@ HWTEST_F(RichEditorAITestOneNg, UpdateAIStyle, TestSize.Level1)
 
     auto& spans = richEditorPattern->spans_;
     auto spanItem = AceType::MakeRefPtr<SpanItem>();
-    spanItem->aiSpanResultCount = 1;
+    spanItem->aiSpanResultCount = 0;
     spans.push_back(spanItem);
 
     TextDetectConfig textDetectConfig;
@@ -630,8 +630,12 @@ HWTEST_F(RichEditorAITestOneNg, UpdateAIStyle, TestSize.Level1)
     textDetectConfig.entityDecorationColor = Color::BLACK;
     textDetectConfig.entityDecorationStyle = TextDecorationStyle ::DOUBLE;
     richEditorPattern->SetTextDetectConfig(textDetectConfig);
+    EXPECT_FALSE(spanItem->needReLayout);
 
-    EXPECT_EQ(spanItem->aiSpanResultCount, 0);
+    spanItem->aiSpanResultCount = 1;
+    textDetectConfig.entityDecorationColor = Color::BLUE;
+    richEditorPattern->SetTextDetectConfig(textDetectConfig);
+    EXPECT_TRUE(spanItem->needReLayout);
 }
 
 /**

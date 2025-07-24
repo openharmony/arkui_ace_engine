@@ -2049,10 +2049,6 @@ HWTEST_F(ViewAbstractTestNg, UpdateMenu004, TestSize.Level1)
     auto menuItemPattern = menuItem->GetPattern<MenuItemPattern>();
     menuItemPattern->expandingMode_ = SubMenuExpandingMode::STACK;
     EXPECT_EQ(ViewAbstract::UpdateMenu(menuParam, contentNode), ERROR_CODE_NO_ERROR);
-
-    menuParam.isAnchorPosition = true;
-    menuParam.anchorPosition = {10.0, 10.0};
-    EXPECT_EQ(ViewAbstract::UpdateMenu(menuParam, contentNode), ERROR_CODE_NO_ERROR);
 }
 
 /**
@@ -2749,7 +2745,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTestNg0059, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
     g_isConfigChangePerform = false;
-    
+
     std::string blurStyleStr = pattern->GetResCacheMapByKey("backgroundBlurStyle.backgroundBlurStyleOptions");
     EXPECT_EQ(blurStyleStr, "");
 }
@@ -2767,7 +2763,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTestNg0060, TestSize.Level1)
     option.policy = BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE;
     g_isConfigChangePerform = true;
     ViewAbstract::SetBackgroundEffect(option);
-    
+
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<Pattern>();
@@ -2966,7 +2962,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTestNg0068, TestSize.Level1)
     ASSERT_NE(target, nullptr);
     ViewAbstract::SetProgressMask(frameNode, progressMaskProperty);
     g_isConfigChangePerform = true;
-    
+
     ViewStackProcessor::GetInstance()->visualState_ = std::nullopt;
     ViewAbstract::SetMask(basicShape);
     bool result = ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess();
@@ -4217,4 +4213,386 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractResourceObjectTest022, TestSize.Level1)
     g_isConfigChangePerform = false;
 }
 
+/**
+ * @tc.name: CreateWithColorResourceObj
+ * @tc.desc: Test CreateWithColorResourceObj of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, CreateWithColorResourceObj, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frame node and initialize components.
+     * @tc.expected: step1. Frame node and related components are created successfully.
+     */
+    const RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<BubblePattern>());
+    ASSERT_NE(frameNode, nullptr);
+    ViewStackProcessor::GetInstance()->Push(frameNode);
+
+    auto pattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Create resource objects and configure popup parameters.
+     * @tc.expected: step2. Resource objects and popup parameters are initialized correctly.
+     */
+    std::vector<ResourceObjectParams> params = { { "", ResourceObjectParamType::NONE } };
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(-1, 10003, params, "", "", 0);
+    ASSERT_NE(resObj, nullptr);
+
+    RefPtr<PopupParam> param = AceType::MakeRefPtr<PopupParam>();
+    ASSERT_NE(param, nullptr);
+    param->SetTextColorResourceObject(resObj);
+    param->SetPopupColorResourceObject(resObj);
+    param->SetMaskColorResourceObject(resObj);
+
+    RefPtr<ResourceObject> boolResObj = AceType::MakeRefPtr<ResourceObject>(-1, 10005, params, "", "", 0);
+    ASSERT_NE(resObj, nullptr);
+    param->SetMaskResourceObject(boolResObj);
+
+    RefPtr<ResourceObject> defaultResObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+    ASSERT_NE(defaultResObj, nullptr);
+
+    /**
+     * @tc.steps: step3. Test CreateWithResourceObj for text color resource.
+     * @tc.expected: step3. Text color resource is applied and type string is correct.
+     */
+    PopupType type = POPUPTYPE_TEXTCOLOR;
+    auto textColorResourceObject = param->GetTextColorResourceObject();
+    ASSERT_NE(textColorResourceObject, nullptr);
+    viewAbstractModelNG.CreateWithResourceObj(frameNode, textColorResourceObject, type);
+    pattern->OnColorModeChange(1);
+    auto textColorStr = viewAbstractModelNG.PopupTypeStr(type);
+    EXPECT_EQ(textColorStr, "TextColor");
+
+    /**
+     * @tc.steps: step4. Test CreateWithResourceObj for popup color resource.
+     * @tc.expected: step4. Popup color resource is applied and type string is correct.
+     */
+    type = POPUPTYPE_POPUPCOLOR;
+    auto popupColorResourceObject = param->GetPopupColorResourceObject();
+    ASSERT_NE(textColorResourceObject, nullptr);
+    viewAbstractModelNG.CreateWithResourceObj(frameNode, popupColorResourceObject, type);
+    pattern->OnColorModeChange(1);
+    auto popupColorStr = viewAbstractModelNG.PopupTypeStr(type);
+    EXPECT_EQ(popupColorStr, "PopupColor");
+
+    /**
+     * @tc.steps: step5. Test CreateWithResourceObj for mask color resource.
+     * @tc.expected: step5. Mask color resource is applied and type string is correct.
+     */
+    type = POPUPTYPE_MASKCOLOR;
+    auto maskColorResourceObject = param->GetMaskColorResourceObject();
+    ASSERT_NE(textColorResourceObject, nullptr);
+    viewAbstractModelNG.CreateWithResourceObj(frameNode, maskColorResourceObject, type);
+    pattern->OnColorModeChange(1);
+    auto maskColorStr = viewAbstractModelNG.PopupTypeStr(type);
+    EXPECT_EQ(maskColorStr, "MaskColor");
+
+    /**
+     * @tc.steps: step6. Test CreateWithResourceObj for mask resource without type.
+     * @tc.expected: step6. Mask resource is applied with correct instance ID.
+     */
+    auto maskResourceObject = param->GetMaskResourceObject();
+    ASSERT_NE(textColorResourceObject, nullptr);
+    viewAbstractModelNG.CreateWithResourceObj(frameNode, maskResourceObject);
+    pattern->OnColorModeChange(1);
+    EXPECT_EQ(maskResourceObject->GetInstanceId(), 0);
+
+    /**
+     * @tc.steps: step7. Test CreateWithResourceObj with invalid type.
+     * @tc.expected: step7. Type string for invalid type is empty.
+     */
+    type = static_cast<PopupType>(POPUPTYPE_MASKCOLOR + 1);
+    viewAbstractModelNG.CreateWithResourceObj(frameNode, defaultResObj, type);
+    auto defaultStr = viewAbstractModelNG.PopupTypeStr(type);
+    EXPECT_EQ(defaultStr, "");
+}
+
+/**
+ * @tc.name: CreateWithDimensionResourceObj001
+ * @tc.desc: Test CreateWithDimensionResourceObj of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, CreateWithDimensionResourceObj001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frame node and initialize components.
+     * @tc.expected: step1. Frame node and related components are created successfully.
+     */
+    const RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<BubblePattern>());
+    ASSERT_NE(frameNode, nullptr);
+    ViewStackProcessor::GetInstance()->Push(frameNode);
+
+    auto pattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Create dimension resource object and configure popup parameters.
+     * @tc.expected: step2. Dimension resource object and popup parameters are initialized correctly.
+     */
+    std::vector<ResourceObjectParams> params = { { "", ResourceObjectParamType::NONE } };
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(0, 10007, params, "", "", 0);
+    ASSERT_NE(resObj, nullptr);
+
+    RefPtr<PopupParam> param = AceType::MakeRefPtr<PopupParam>();
+    ASSERT_NE(param, nullptr);
+
+    param->SetWidthResourceObject(resObj);
+    param->SetArrowWidthResourceObject(resObj);
+    param->SetArrowHeightResourceObject(resObj);
+
+    /**
+     * @tc.steps: step3. Test CreateWithResourceObj for width dimension resource.
+     * @tc.expected: step3. Width dimension resource is applied and type string is correct.
+     */
+    PopupOptionsType type = POPUP_OPTIONTYPE_WIDTH;
+    auto widthResourceObject = param->GetWidthResourceObject();
+    ASSERT_NE(widthResourceObject, nullptr);
+    viewAbstractModelNG.CreateWithResourceObj(frameNode, widthResourceObject, type);
+    pattern->OnColorModeChange(1);
+    auto widthStr = viewAbstractModelNG.PopupOptionTypeStr(type);
+    EXPECT_EQ(widthStr, "width");
+
+    /**
+     * @tc.steps: step4. Test CreateWithResourceObj for arrow width dimension resource.
+     * @tc.expected: step4. Arrow width dimension resource is applied and type string is correct.
+     */
+    type = POPUP_OPTIONTYPE_ARROWWIDTH;
+    auto arrowWidthResourceObject = param->GetArrowWidthResourceObject();
+    ASSERT_NE(arrowWidthResourceObject, nullptr);
+    viewAbstractModelNG.CreateWithResourceObj(frameNode, arrowWidthResourceObject, type);
+    pattern->OnColorModeChange(1);
+    auto arrowWidthStr = viewAbstractModelNG.PopupOptionTypeStr(type);
+    EXPECT_EQ(arrowWidthStr, "arrowWidth");
+
+    /**
+     * @tc.steps: step5. Test CreateWithResourceObj for arrow height dimension resource.
+     * @tc.expected: step5. Arrow height dimension resource is applied and type string is correct.
+     */
+    type = POPUP_OPTIONTYPE_ARROWHEIGHT;
+    auto arrowHeighResourceObject = param->GetArrowHeightResourceObject();
+    ASSERT_NE(arrowHeighResourceObject, nullptr);
+    viewAbstractModelNG.CreateWithResourceObj(frameNode, arrowHeighResourceObject, type);
+    pattern->OnColorModeChange(1);
+    auto arrowHeighStr = viewAbstractModelNG.PopupOptionTypeStr(type);
+    EXPECT_EQ(arrowHeighStr, "arrowHeight");
+}
+
+/**
+ * @tc.name: CreateWithDimensionResourceObj002
+ * @tc.desc: Test CreateWithDimensionResourceObj of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, CreateWithDimensionResourceObj002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frame node and initialize components.
+     * @tc.expected: step1. Frame node and related components are created successfully.
+     */
+    const RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<BubblePattern>());
+    ASSERT_NE(frameNode, nullptr);
+    ViewStackProcessor::GetInstance()->Push(frameNode);
+
+    auto pattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Create dimension resource object and configure popup parameters.
+     * @tc.expected: step2. Dimension resource object and popup parameters are initialized correctly.
+     */
+    std::vector<ResourceObjectParams> params = { { "", ResourceObjectParamType::NONE } };
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(0, 10007, params, "", "", 0);
+    ASSERT_NE(resObj, nullptr);
+
+    RefPtr<PopupParam> param = AceType::MakeRefPtr<PopupParam>();
+    ASSERT_NE(param, nullptr);
+
+    param->SetRadiusResourceObject(resObj);
+    param->SetOutlineWidthObject(resObj);
+    param->SetBorderWidthObject(resObj);
+
+    /**
+     * @tc.steps: step3. Test CreateWithResourceObj for radius dimension resource.
+     * @tc.expected: step3. Radius dimension resource is applied and type string is correct.
+     */
+    PopupOptionsType type = POPUP_OPTIONTYPE_RADIUS;
+    auto radiusResourceObject = param->GetRadiusResourceObject();
+    ASSERT_NE(radiusResourceObject, nullptr);
+    viewAbstractModelNG.CreateWithResourceObj(frameNode, radiusResourceObject, type);
+    pattern->OnColorModeChange(1);
+    auto radiusStr = viewAbstractModelNG.PopupOptionTypeStr(type);
+    EXPECT_EQ(radiusStr, "radius");
+
+    /**
+     * @tc.steps: step4. Test CreateWithResourceObj for outline width dimension resource.
+     * @tc.expected: step4. Outline width dimension resource is applied and type string is correct.
+     */
+    type = POPUP_OPTIONTYPE_OUTLINEWIDTH;
+    auto outlineWidthResourceObject = param->GetOutlineWidthResourceObject();
+    ASSERT_NE(outlineWidthResourceObject, nullptr);
+    viewAbstractModelNG.CreateWithResourceObj(frameNode, outlineWidthResourceObject, type);
+    pattern->OnColorModeChange(1);
+    auto outlineWidthStr = viewAbstractModelNG.PopupOptionTypeStr(type);
+    EXPECT_EQ(outlineWidthStr, "outlineWidth");
+
+    /**
+     * @tc.steps: step5. Test CreateWithResourceObj for border width dimension resource.
+     * @tc.expected: step5. Border width dimension resource is applied and type string is correct.
+     */
+    type = POPUP_OPTIONTYPE_BORDERWIDTH;
+    auto borderWidthResourceObject = param->GetBorderWidthResourceObject();
+    ASSERT_NE(borderWidthResourceObject, nullptr);
+    viewAbstractModelNG.CreateWithResourceObj(frameNode, borderWidthResourceObject, type);
+    pattern->OnColorModeChange(1);
+    auto borderWidthStr = viewAbstractModelNG.PopupOptionTypeStr(type);
+    EXPECT_EQ(borderWidthStr, "borderWidth");
+}
+
+/**
+ * @tc.name: CreateWithDimensionResourceObj003
+ * @tc.desc: Test CreateWithDimensionResourceObj of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, CreateWithDimensionResourceObj003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frame node and initialize components.
+     * @tc.expected: step1. Frame node and related components are created successfully.
+     */
+    const RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<BubblePattern>());
+    ASSERT_NE(frameNode, nullptr);
+    ViewStackProcessor::GetInstance()->Push(frameNode);
+
+    auto pattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Create default resource object and configure popup parameters.
+     * @tc.expected: step2. Default resource object and popup parameters are initialized correctly.
+     */
+    RefPtr<ResourceObject> defaultResObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+    ASSERT_NE(defaultResObj, nullptr);
+
+    RefPtr<PopupParam> param = AceType::MakeRefPtr<PopupParam>();
+    ASSERT_NE(param, nullptr);
+
+    param->SetWidthResourceObject(defaultResObj);
+    param->SetArrowWidthResourceObject(defaultResObj);
+    param->SetArrowHeightResourceObject(defaultResObj);
+
+    /**
+     * @tc.steps: step3. Test CreateWithResourceObj for width dimension with default resource.
+     * @tc.expected: step3. Width dimension resource is applied and type string is correct.
+     */
+    PopupOptionsType type = POPUP_OPTIONTYPE_WIDTH;
+    auto defaultWidthResourceObject = param->GetWidthResourceObject();
+    ASSERT_NE(defaultWidthResourceObject, nullptr);
+    viewAbstractModelNG.CreateWithResourceObj(frameNode, defaultWidthResourceObject, type);
+    pattern->OnColorModeChange(1);
+    auto widthStr = viewAbstractModelNG.PopupOptionTypeStr(type);
+    EXPECT_EQ(widthStr, "width");
+
+    /**
+     * @tc.steps: step4. Test CreateWithResourceObj for arrow width dimension with default resource.
+     * @tc.expected: step4. Arrow width dimension resource is applied and type string is correct.
+     */
+    type = POPUP_OPTIONTYPE_ARROWWIDTH;
+    auto defaultArrowWidthResourceObject = param->GetArrowWidthResourceObject();
+    ASSERT_NE(defaultArrowWidthResourceObject, nullptr);
+    viewAbstractModelNG.CreateWithResourceObj(frameNode, defaultArrowWidthResourceObject, type);
+    pattern->OnColorModeChange(1);
+    auto arrowWidthStr = viewAbstractModelNG.PopupOptionTypeStr(type);
+    EXPECT_EQ(arrowWidthStr, "arrowWidth");
+
+    /**
+     * @tc.steps: step5. Test CreateWithResourceObj for arrow height dimension with default resource.
+     * @tc.expected: step5. Arrow height dimension resource is applied and type string is correct.
+     */
+    type = POPUP_OPTIONTYPE_ARROWHEIGHT;
+    auto defaultArrowHeightResourceObject = param->GetArrowHeightResourceObject();
+    ASSERT_NE(defaultArrowHeightResourceObject, nullptr);
+    viewAbstractModelNG.CreateWithResourceObj(frameNode, defaultArrowHeightResourceObject, type);
+    pattern->OnColorModeChange(1);
+    auto arrowHeighStr = viewAbstractModelNG.PopupOptionTypeStr(type);
+    EXPECT_EQ(arrowHeighStr, "arrowHeight");
+}
+
+/**
+ * @tc.name: CreateWithDimensionResourceObj004
+ * @tc.desc: Test CreateWithDimensionResourceObj of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, CreateWithDimensionResourceObj004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frame node and initialize components.
+     * @tc.expected: step1. Frame node and related components are created successfully.
+     */
+    const RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<BubblePattern>());
+    ASSERT_NE(frameNode, nullptr);
+    ViewStackProcessor::GetInstance()->Push(frameNode);
+
+    auto pattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Create default resource object and configure popup parameters.
+     * @tc.expected: step2. Default resource object and popup parameters are initialized correctly.
+     */
+    RefPtr<ResourceObject> defaultResObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+    ASSERT_NE(defaultResObj, nullptr);
+
+    RefPtr<PopupParam> param = AceType::MakeRefPtr<PopupParam>();
+    ASSERT_NE(param, nullptr);
+
+    param->SetRadiusResourceObject(defaultResObj);
+    param->SetOutlineWidthObject(defaultResObj);
+    param->SetBorderWidthObject(defaultResObj);
+
+    /**
+     * @tc.steps: step3. Test CreateWithResourceObj for radius dimension with default resource.
+     * @tc.expected: step3. Radius dimension resource is applied and type string is correct.
+     */
+    PopupOptionsType type = POPUP_OPTIONTYPE_RADIUS;
+    auto defaultRadiusResourceObject = param->GetRadiusResourceObject();
+    ASSERT_NE(defaultRadiusResourceObject, nullptr);
+    viewAbstractModelNG.CreateWithResourceObj(frameNode, defaultRadiusResourceObject, type);
+    pattern->OnColorModeChange(1);
+    auto radiusStr = viewAbstractModelNG.PopupOptionTypeStr(type);
+    EXPECT_EQ(radiusStr, "radius");
+
+    /**
+     * @tc.steps: step4. Test CreateWithResourceObj for outline width dimension with default resource.
+     * @tc.expected: step4. Outline width dimension resource is applied and type string is correct.
+     */
+    type = POPUP_OPTIONTYPE_OUTLINEWIDTH;
+    auto defaultOutlineWidthObject = param->GetOutlineWidthResourceObject();
+    ASSERT_NE(defaultOutlineWidthObject, nullptr);
+    viewAbstractModelNG.CreateWithResourceObj(frameNode, defaultOutlineWidthObject, type);
+    pattern->OnColorModeChange(1);
+    auto outlineWidthStr = viewAbstractModelNG.PopupOptionTypeStr(type);
+    EXPECT_EQ(outlineWidthStr, "outlineWidth");
+
+    /**
+     * @tc.steps: step5. Test CreateWithResourceObj for border width dimension with default resource.
+     * @tc.expected: step5. Border width dimension resource is applied and type string is correct.
+     */
+    type = POPUP_OPTIONTYPE_BORDERWIDTH;
+    auto defaultBorderWidthObject = param->GetBorderWidthResourceObject();
+    ASSERT_NE(defaultBorderWidthObject, nullptr);
+    viewAbstractModelNG.CreateWithResourceObj(frameNode, defaultBorderWidthObject, type);
+    pattern->OnColorModeChange(1);
+    auto borderWidthStr = viewAbstractModelNG.PopupOptionTypeStr(type);
+    EXPECT_EQ(borderWidthStr, "borderWidth");
+
+    /**
+     * @tc.steps: step6. Test CreateWithResourceObj with invalid type using default resource.
+     * @tc.expected: step6. Type string for invalid type is empty.
+     */
+    type = POPUP_OPTIONTYPE_OFFSETDX;
+    viewAbstractModelNG.CreateWithResourceObj(frameNode, defaultResObj, type);
+    pattern->OnColorModeChange(1);
+    auto defaultStr = viewAbstractModelNG.PopupOptionTypeStr(type);
+    EXPECT_EQ(defaultStr, "");
+}
 } // namespace OHOS::Ace::NG

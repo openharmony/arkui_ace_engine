@@ -66,6 +66,14 @@ void SheetObject::DirtyLayoutProcess(const RefPtr<LayoutAlgorithmWrapper>& layou
     pattern->CheckBuilderChange();
 }
 
+void SheetObject::SetSheetAnimationOption(AnimationOption& option) const
+{
+    option.SetFillMode(FillMode::FORWARDS);
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_EIGHTEEN)) {
+        option.SetDuration(SHEET_ANIMATION_DURATION);
+    }
+}
+
 RefPtr<InterpolatingSpring> SheetObject::GetSheetTransitionCurve(float dragVelocity) const
 {
     return AceType::MakeRefPtr<InterpolatingSpring>(
@@ -244,7 +252,7 @@ AnimationOption SheetObject::GetAnimationOptionForOverlay(bool isTransitionIn, b
     const RefPtr<InterpolatingSpring> curve =
         AceType::MakeRefPtr<InterpolatingSpring>(0.0f, CURVE_MASS, CURVE_STIFFNESS, CURVE_DAMPING);
     option.SetCurve(curve);
-    sheetPattern->SetSheetAnimationOption(option);
+    SetSheetAnimationOption(option);
     if (isTransitionIn && sheetPattern->IsFoldStatusChanged()) {
         option.SetDuration(0);
         option.SetCurve(Curves::LINEAR);
@@ -652,6 +660,19 @@ void SheetObject::CreatePropertyCallback()
     };
     auto property = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));
     sheetPattern->SetProperty(property);
+}
+
+void SheetObject::BeforeCreateLayoutWrapper()
+{
+    auto pattern = GetPattern();
+    CHECK_NULL_VOID(pattern);
+    auto host = pattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto scrollNode = pattern->GetSheetScrollNode();
+    CHECK_NULL_VOID(scrollNode);
+    auto scrollLayoutProperty = scrollNode->GetLayoutProperty<ScrollLayoutProperty>();
+    CHECK_NULL_VOID(scrollLayoutProperty);
+    scrollLayoutProperty->ResetSafeAreaPadding();
 }
 
 SheetKeyboardAvoidMode SheetObject::GetAvoidKeyboardModeByDefault() const

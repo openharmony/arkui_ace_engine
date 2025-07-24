@@ -2083,4 +2083,469 @@ HWTEST_F(ToggleTestNg, SetSelectedColor002, TestSize.Level1)
     EXPECT_FALSE(paintProperty->GetSelectedColorSetByUserValue(true));
     g_isConfigChangePerform = false;
 }
+
+/**
+ * @tc.name: ColorTypeToStringTest001
+ * @tc.desc: test ColorTypeToString.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleTestNg, ColorTypeToStringTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Prepare test data pairs of ToggleColorType and expected string values.
+     * @tc.expected: step1. Test data contains valid color type to string mappings.
+     */
+    std::vector<std::pair<ToggleColorType, std::string>> types = { { ToggleColorType::SELECTED_COLOR, "SelectedColor" },
+        { ToggleColorType::SWITCH_POINT_COLOR, "SwitchPointColor" },
+        { ToggleColorType::UN_SELECTED_COLOR, "UnselectedColor" }, { static_cast<ToggleColorType>(3), "Unknown" } };
+
+    /**
+     * @tc.steps: step2. Iterate through each test pair and call ColorTypeToString.
+     * @tc.expected: step2. The function returns the expected string for each color type.
+     */
+    for (const auto& [type, val] : types) {
+        auto ret = ToggleModelNG::ColorTypeToString(type);
+        EXPECT_EQ(val, ret);
+    }
+}
+
+/**
+ * @tc.name: DimensionTypeToStringTest001
+ * @tc.desc: test DimensionTypeToString.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleTestNg, DimensionTypeToStringTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Prepare test data pairs of ToggleDimensionType and expected string values.
+     * @tc.expected: step1. Test data contains valid dimension type to string mappings.
+     */
+    std::vector<std::pair<ToggleDimensionType, std::string>> types = {
+        { ToggleDimensionType::POINT_RADIUS, "PointRadius" },
+        { ToggleDimensionType::TRACK_BORDER_RADIUS, "TrackBorderRadius" },
+        { static_cast<ToggleDimensionType>(2), "Unknown" } };
+
+    /**
+     * @tc.steps: step2. Iterate through each test pair and call DimensionTypeToString.
+     * @tc.expected: step2. The function returns the expected string for each dimension type.
+     */
+    for (const auto& [type, val] : types) {
+        auto ret = ToggleModelNG::DimensionTypeToString(type);
+        EXPECT_EQ(val, ret);
+    }
+}
+
+/**
+ * @tc.name: SetCheckboxDefaultColorTest001
+ * @tc.desc: test SetCheckboxDefaultColor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleTestNg, SetCheckboxDefaultColorTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a toggle model and verify frame node and paint property setup.
+     * @tc.expected: step1. Frame node and paint property are created and valid, selected color is not set initially.
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(TOGGLE_TYPE[2], IS_ON);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<SwitchPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto colorRet = paintProperty->GetSelectedColor();
+    EXPECT_FALSE(colorRet.has_value());
+
+    /**
+     * @tc.steps: step2. Create a checkbox and mock theme manager to provide checkbox theme.
+     * @tc.expected: step2. Checkbox theme is retrieved successfully from the mock manager.
+     */
+    ToggleModelNG toggleModelNG2;
+    toggleModelNG2.Create(TOGGLE_TYPE[0], IS_ON);
+    auto checkboxFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(checkboxFrameNode, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto checkboxTheme = AceType::MakeRefPtr<CheckboxTheme>();
+    ASSERT_NE(checkboxTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(checkboxTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(checkboxTheme));
+    auto color = checkboxTheme->GetActiveColor();
+
+    /**
+     * @tc.steps: step3. Test default color setting with invalid and valid color types.
+     * @tc.expected: step3. Selected color is updated to theme's active color when valid type is used.
+     */
+    toggleModelNG.SetCheckboxDefaultColor(checkboxFrameNode, static_cast<ToggleColorType>(3));
+    toggleModelNG.SetCheckboxDefaultColor(checkboxFrameNode, ToggleColorType::SELECTED_COLOR);
+    colorRet = paintProperty->GetSelectedColor();
+    EXPECT_EQ(colorRet.value_or(Color::BLACK), color);
+}
+
+/**
+ * @tc.name: SetCheckboxDefaultColorTest002
+ * @tc.desc: test SetCheckboxDefaultColor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleTestNg, SetCheckboxDefaultColorTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a toggle model and verify frame node and paint property setup.
+     * @tc.expected: step1. Frame node and paint property are created and valid, selected color is not set initially.
+     */
+    ToggleModelNG toggleModelNG;
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto toggleNode = FrameNode::CreateFrameNode(V2::TOGGLE_ETS_TAG, 1, AceType::MakeRefPtr<ToggleButtonPattern>());
+    EXPECT_NE(toggleNode, nullptr);
+    auto pattern = AceType::DynamicCast<ToggleButtonPattern>(toggleNode->GetPattern());
+    EXPECT_NE(pattern, nullptr);
+    auto paintProperty = pattern->GetPaintProperty<ToggleButtonPaintProperty>();
+    EXPECT_NE(paintProperty, nullptr);
+    stack->Push(toggleNode);
+
+    /**
+     * @tc.steps: step2. Test default color setting for BACKGROUND_COLOR type.
+     * @tc.expected: step2. Background color is reset and no longer has a valid value after setting default color.
+     */
+    paintProperty->UpdateBackgroundColor(Color::BLACK);
+    EXPECT_TRUE(paintProperty->GetBackgroundColor().has_value());
+    toggleModelNG.SetCheckboxDefaultColor(AceType::RawPtr(toggleNode), ToggleColorType::BACKGROUND_COLOR);
+    EXPECT_FALSE(paintProperty->GetBackgroundColor().has_value());
+}
+
+/**
+ * @tc.name: SetSwitchDefaultColorTest001
+ * @tc.desc: test SetSwitchDefaultColor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleTestNg, SetSwitchDefaultColorTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a toggle model and verify initial color properties are not set.
+     * @tc.expected: step1. Frame node and paint property are valid, all color properties are initially unset.
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(TOGGLE_TYPE[2], IS_ON);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<SwitchPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto colorRet = paintProperty->GetUnselectedColor();
+    EXPECT_FALSE(colorRet.has_value());
+    colorRet = paintProperty->GetSwitchPointColor();
+    EXPECT_FALSE(colorRet.has_value());
+    colorRet = paintProperty->GetSelectedColor();
+    EXPECT_FALSE(colorRet.has_value());
+
+    /**
+     * @tc.steps: step2. Mock theme manager to provide switch theme.
+     * @tc.expected: step2. Mock theme manager returns valid switch theme instances.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto switchTheme = AceType::MakeRefPtr<SwitchTheme>();
+    ASSERT_NE(switchTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SwitchTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<SwitchTheme>()));
+
+    /**
+     * @tc.steps: step3. Test setting default colors for different color types.
+     * @tc.expected: step3. Each color property is updated to the corresponding theme color when set.
+     */
+    toggleModelNG.SetSwitchDefaultColor(frameNode, static_cast<ToggleColorType>(3));
+    auto color = switchTheme->GetActiveColor();
+    toggleModelNG.SetSwitchDefaultColor(frameNode, ToggleColorType::SELECTED_COLOR);
+    colorRet = paintProperty->GetSelectedColor();
+    EXPECT_EQ(colorRet.value_or(Color::BLACK), color);
+    color = switchTheme->GetPointColor();
+    toggleModelNG.SetSwitchDefaultColor(frameNode, ToggleColorType::SWITCH_POINT_COLOR);
+    colorRet = paintProperty->GetSwitchPointColor();
+    EXPECT_EQ(colorRet.value_or(Color::BLACK), color);
+    color = switchTheme->GetInactiveColor();
+    toggleModelNG.SetSwitchDefaultColor(frameNode, ToggleColorType::UN_SELECTED_COLOR);
+    colorRet = paintProperty->GetUnselectedColor();
+    EXPECT_EQ(colorRet.value_or(Color::BLACK), color);
+
+    auto toggleNode = FrameNode::CreateFrameNode(V2::TOGGLE_ETS_TAG, 1, AceType::MakeRefPtr<ToggleButtonPattern>());
+    EXPECT_NE(toggleNode, nullptr);
+    auto pattern = AceType::DynamicCast<ToggleButtonPattern>(toggleNode->GetPattern());
+    EXPECT_NE(pattern, nullptr);
+    auto paintProp = pattern->GetPaintProperty<ToggleButtonPaintProperty>();
+    EXPECT_NE(paintProp, nullptr);
+    toggleModelNG.SetSwitchDefaultColor(AceType::RawPtr(toggleNode), ToggleColorType::BACKGROUND_COLOR);
+    EXPECT_FALSE(paintProp->GetBackgroundColor().has_value());
+}
+
+/**
+ * @tc.name: SetButtonDefaultColorTest001
+ * @tc.desc: test SetButtonDefaultColor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleTestNg, SetButtonDefaultColorTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a toggle model and verify initial selected color is not set.
+     * @tc.expected: step1. Frame node and paint property are valid, selected color is initially unset.
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(TOGGLE_TYPE[2], IS_ON);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<SwitchPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto colorRet = paintProperty->GetSelectedColor();
+    EXPECT_FALSE(colorRet.has_value());
+
+    /**
+     * @tc.steps: step2. Create a button toggle and mock theme manager to provide toggle theme.
+     * @tc.expected: step2. Button frame node is valid and theme manager returns valid toggle theme.
+     */
+    ToggleModelNG toggleModelNG2;
+    toggleModelNG2.Create(TOGGLE_TYPE[1], IS_ON);
+    auto buttonFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(buttonFrameNode, nullptr);
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto buttonTheme = AceType::MakeRefPtr<ToggleTheme>();
+    ASSERT_NE(buttonTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<ToggleTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<ToggleTheme>()));
+    auto color = buttonTheme->GetCheckedColor();
+
+    /**
+     * @tc.steps: step3. Test setting default color with invalid and valid color types.
+     * @tc.expected: step3. Selected color is updated to theme's checked color when valid type is used.
+     */
+    toggleModelNG.SetButtonDefaultColor(buttonFrameNode, static_cast<ToggleColorType>(3));
+    toggleModelNG.SetButtonDefaultColor(buttonFrameNode, ToggleColorType::SELECTED_COLOR);
+    colorRet = paintProperty->GetSelectedColor();
+    EXPECT_EQ(colorRet.value_or(Color::BLACK), color);
+}
+
+/**
+ * @tc.name: SetButtonDefaultColorTest002
+ * @tc.desc: test SetButtonDefaultColor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleTestNg, SetButtonDefaultColorTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a toggle model and verify frame node and paint property setup.
+     * @tc.expected: step1. Frame node and paint property are created and valid, selected color is not set initially.
+     */
+    ToggleModelNG toggleModelNG;
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto toggleNode = FrameNode::CreateFrameNode(V2::TOGGLE_ETS_TAG, 1, AceType::MakeRefPtr<ToggleButtonPattern>());
+    EXPECT_NE(toggleNode, nullptr);
+    auto pattern = AceType::DynamicCast<ToggleButtonPattern>(toggleNode->GetPattern());
+    EXPECT_NE(pattern, nullptr);
+    auto paintProperty = pattern->GetPaintProperty<ToggleButtonPaintProperty>();
+    EXPECT_NE(paintProperty, nullptr);
+    stack->Push(toggleNode);
+
+    /**
+     * @tc.steps: step2. Test default color setting for BACKGROUND_COLOR type.
+     * @tc.expected: step2. Background color is reset and no longer has a valid value after setting default color.
+     */
+    paintProperty->UpdateBackgroundColor(Color::BLACK);
+    EXPECT_TRUE(paintProperty->GetBackgroundColor().has_value());
+    toggleModelNG.SetButtonDefaultColor(AceType::RawPtr(toggleNode), ToggleColorType::BACKGROUND_COLOR);
+    EXPECT_FALSE(paintProperty->GetBackgroundColor().has_value());
+}
+
+/**
+ * @tc.name: CreateWithSwitchResourceObj
+ * @tc.desc: Test CreateWithSwitchResourceObj.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleTestNg, CreateWithSwitchResourceObj, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a switch toggle and prepare resource objects.
+     * @tc.expected: step1. Frame node is created and marked as modified.
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(TOGGLE_TYPE[2], IS_ON);
+    auto switchFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(switchFrameNode, nullptr);
+    switchFrameNode->MarkModifyDone();
+
+    /**
+     * @tc.steps: step2. Attempt to create resource with null object and verify no resource is added.
+     * @tc.expected: step2. Resource map does not contain the key after null resource creation.
+     */
+    auto resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    std::string key = "toggle" + toggleModelNG.ColorTypeToString(ToggleColorType::SELECTED_COLOR);
+    toggleModelNG.CreateWithSwitchResourceObj(
+        const_cast<FrameNode*>(switchFrameNode), ToggleColorType::SELECTED_COLOR, nullptr, key);
+    auto pattern = switchFrameNode->GetPattern<SwitchPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->resourceMgr_ = AceType::MakeRefPtr<PatternResourceManager>();
+    auto resMgr = pattern->resourceMgr_;
+    ASSERT_NE(resMgr, nullptr);
+    auto count = resMgr->resMap_.count(key);
+    EXPECT_EQ(count, 0);
+
+    /**
+     * @tc.steps: step3. Create resource with valid objects for different color types.
+     * @tc.expected: step3. Resource map contains exactly one entry after valid resource creation.
+     */
+    ResourceObjectParams params { .value = "", .type = ResourceObjectParamType::NONE };
+    RefPtr<ResourceObject> resObjWithParams =
+        AceType::MakeRefPtr<ResourceObject>(-1, 10003, std::vector<ResourceObjectParams> { params }, "", "", 100000);
+    toggleModelNG.CreateWithSwitchResourceObj(
+        const_cast<FrameNode*>(switchFrameNode), ToggleColorType::SELECTED_COLOR, resObj, key);
+    toggleModelNG.CreateWithSwitchResourceObj(
+        const_cast<FrameNode*>(switchFrameNode), ToggleColorType::SWITCH_POINT_COLOR, resObjWithParams, key);
+    toggleModelNG.CreateWithSwitchResourceObj(
+        const_cast<FrameNode*>(switchFrameNode), ToggleColorType::UN_SELECTED_COLOR, resObjWithParams, key);
+    toggleModelNG.CreateWithSwitchResourceObj(
+        const_cast<FrameNode*>(switchFrameNode), static_cast<ToggleColorType>(3), resObjWithParams, key);
+    count = resMgr->resMap_.count(key);
+    EXPECT_EQ(count, 1);
+}
+
+/**
+ * @tc.name: CreateWithCheckBoxResourceObj
+ * @tc.desc: Test CreateWithCheckBoxResourceObj.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleTestNg, CreateWithCheckBoxResourceObj, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a checkbox toggle and prepare resource objects.
+     * @tc.expected: step1. Frame node is created and marked as modified.
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(TOGGLE_TYPE[0], IS_ON);
+    auto switchFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(switchFrameNode, nullptr);
+    switchFrameNode->MarkModifyDone();
+
+    /**
+     * @tc.steps: step2. Attempt to create resource with null object and verify no resource is added.
+     * @tc.expected: step2. Resource map does not contain the key after null resource creation.
+     */
+    auto resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    std::string key = "toggle" + toggleModelNG.ColorTypeToString(ToggleColorType::SELECTED_COLOR);
+    toggleModelNG.CreateWithCheckBoxResourceObj(
+        const_cast<FrameNode*>(switchFrameNode), ToggleColorType::SELECTED_COLOR, nullptr, key);
+    auto pattern = switchFrameNode->GetPattern<CheckBoxPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->resourceMgr_ = AceType::MakeRefPtr<PatternResourceManager>();
+    auto resMgr = pattern->resourceMgr_;
+    ASSERT_NE(resMgr, nullptr);
+    auto count = resMgr->resMap_.count(key);
+    EXPECT_EQ(count, 0);
+
+    /**
+     * @tc.steps: step3. Create resource with valid objects for different color types.
+     * @tc.expected: step3. Resource map contains exactly one entry after valid resource creation.
+     */
+    ResourceObjectParams params { .value = "", .type = ResourceObjectParamType::NONE };
+    RefPtr<ResourceObject> resObjWithParams =
+        AceType::MakeRefPtr<ResourceObject>(-1, 10003, std::vector<ResourceObjectParams> { params }, "", "", 100000);
+    toggleModelNG.CreateWithCheckBoxResourceObj(
+        const_cast<FrameNode*>(switchFrameNode), ToggleColorType::SELECTED_COLOR, resObj, key);
+    toggleModelNG.CreateWithCheckBoxResourceObj(
+        const_cast<FrameNode*>(switchFrameNode), ToggleColorType::SWITCH_POINT_COLOR, resObj, key);
+    count = resMgr->resMap_.count(key);
+    EXPECT_EQ(count, 1);
+}
+
+/**
+ * @tc.name: CreateWithButtonResourceObj
+ * @tc.desc: Test CreateWithButtonResourceObj.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleTestNg, CreateWithButtonResourceObj, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a button toggle and prepare resource objects.
+     * @tc.expected: step1. Frame node is created and marked as modified.
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(TOGGLE_TYPE[1], IS_ON);
+    auto switchFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(switchFrameNode, nullptr);
+    switchFrameNode->MarkModifyDone();
+
+    /**
+     * @tc.steps: step2. Attempt to create resource with null object and verify no resource is added.
+     * @tc.expected: step2. Resource map does not contain the key after null resource creation.
+     */
+    auto resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    std::string key = "toggle" + toggleModelNG.ColorTypeToString(ToggleColorType::SELECTED_COLOR);
+    toggleModelNG.CreateWithButtonResourceObj(
+        const_cast<FrameNode*>(switchFrameNode), ToggleColorType::SELECTED_COLOR, nullptr, key);
+    auto pattern = switchFrameNode->GetPattern<ToggleButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->resourceMgr_ = AceType::MakeRefPtr<PatternResourceManager>();
+    auto resMgr = pattern->resourceMgr_;
+    ASSERT_NE(resMgr, nullptr);
+    auto count = resMgr->resMap_.count(key);
+    EXPECT_EQ(count, 0);
+
+    /**
+     * @tc.steps: step3. Create resource with valid objects for different color types.
+     * @tc.expected: step3. Resource map contains exactly one entry after valid resource creation.
+     */
+    ResourceObjectParams params { .value = "", .type = ResourceObjectParamType::NONE };
+    RefPtr<ResourceObject> resObjWithParams =
+        AceType::MakeRefPtr<ResourceObject>(-1, 10003, std::vector<ResourceObjectParams> { params }, "", "", 100000);
+    toggleModelNG.CreateWithButtonResourceObj(
+        const_cast<FrameNode*>(switchFrameNode), ToggleColorType::SELECTED_COLOR, resObj, key);
+    toggleModelNG.CreateWithButtonResourceObj(
+        const_cast<FrameNode*>(switchFrameNode), ToggleColorType::SWITCH_POINT_COLOR, resObj, key);
+    count = resMgr->resMap_.count(key);
+    EXPECT_EQ(count, 1);
+}
+
+/**
+ * @tc.name: CreateWithDimensionVpResourceObj
+ * @tc.desc: Test CreateWithDimensionVpResourceObj.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleTestNg, CreateWithDimensionVpResourceObj, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a switch toggle and prepare resource objects.
+     * @tc.expected: step1. Frame node is created and marked as modified.
+     */
+    ToggleModelNG toggleModelNG;
+    toggleModelNG.Create(TOGGLE_TYPE[2], IS_ON);
+    auto switchFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(switchFrameNode, nullptr);
+    switchFrameNode->MarkModifyDone();
+
+    /**
+     * @tc.steps: step2. Attempt to create resource with null object and verify no resource is added.
+     * @tc.expected: step2. Resource map does not contain the key after null resource creation.
+     */
+    auto resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    std::string key = "toggle" + toggleModelNG.DimensionTypeToString(ToggleDimensionType::POINT_RADIUS);
+    toggleModelNG.CreateWithDimensionVpResourceObj(nullptr, ToggleDimensionType::POINT_RADIUS);
+    auto pattern = switchFrameNode->GetPattern<SwitchPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->resourceMgr_ = AceType::MakeRefPtr<PatternResourceManager>();
+    auto resMgr = pattern->resourceMgr_;
+    ASSERT_NE(resMgr, nullptr);
+    auto count = resMgr->resMap_.count(key);
+    EXPECT_EQ(count, 0);
+
+    /**
+     * @tc.steps: step3. Create resource with valid objects for different dimension types.
+     * @tc.expected: step3. Resource map contains exactly one entry after valid resource creation.
+     */
+    ResourceObjectParams params { .value = "", .type = ResourceObjectParamType::NONE };
+    RefPtr<ResourceObject> resObjWithParams =
+        AceType::MakeRefPtr<ResourceObject>(-1, 10003, std::vector<ResourceObjectParams> { params }, "", "", 100000);
+    toggleModelNG.CreateWithDimensionVpResourceObj(resObjWithParams, ToggleDimensionType::POINT_RADIUS);
+    toggleModelNG.CreateWithDimensionVpResourceObj(resObjWithParams, ToggleDimensionType::TRACK_BORDER_RADIUS);
+    toggleModelNG.CreateWithDimensionVpResourceObj(resObjWithParams, static_cast<ToggleDimensionType>(2));
+    count = resMgr->resMap_.count(key);
+    EXPECT_EQ(count, 1);
+}
 } // namespace OHOS::Ace::NG

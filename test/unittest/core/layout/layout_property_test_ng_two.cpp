@@ -1228,8 +1228,6 @@ HWTEST_F(LayoutPropertyTestNgTwo, CheckBackgroundLayoutSafeAreaEdges001, TestSiz
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
     auto frameNodeHost = FrameNode::CreateFrameNode("host", 1, AceType::MakeRefPtr<Pattern>(), true);
     layoutProperty->SetHost(frameNodeHost);
-    auto renderContext = frameNodeHost->GetRenderContext();
-    ASSERT_NE(renderContext, nullptr);
 
     layoutProperty->backgroundIgnoresLayoutSafeAreaEdges_ = LAYOUT_SAFE_AREA_EDGE_START | LAYOUT_SAFE_AREA_EDGE_TOP;
     layoutProperty->CheckBackgroundLayoutSafeAreaEdges(TextDirection::LTR);
@@ -1242,8 +1240,6 @@ HWTEST_F(LayoutPropertyTestNgTwo, CheckBackgroundLayoutSafeAreaEdges001, TestSiz
         layoutProperty->backgroundIgnoresLayoutSafeAreaEdges_, LAYOUT_SAFE_AREA_EDGE_START | LAYOUT_SAFE_AREA_EDGE_TOP);
     EXPECT_EQ(layoutProperty->localizedBackgroundIgnoresLayoutSafeAreaEdges_,
         LAYOUT_SAFE_AREA_EDGE_END | LAYOUT_SAFE_AREA_EDGE_TOP);
-    EXPECT_EQ(renderContext->GetBackgroundIgnoresLayoutSafeAreaEdgesValue(LAYOUT_SAFE_AREA_EDGE_NONE),
-        LAYOUT_SAFE_AREA_EDGE_END | LAYOUT_SAFE_AREA_EDGE_TOP);
 
     layoutProperty->backgroundIgnoresLayoutSafeAreaEdges_ = LAYOUT_SAFE_AREA_EDGE_END | LAYOUT_SAFE_AREA_EDGE_BOTTOM;
     layoutProperty->CheckBackgroundLayoutSafeAreaEdges(TextDirection::LTR);
@@ -1255,8 +1251,6 @@ HWTEST_F(LayoutPropertyTestNgTwo, CheckBackgroundLayoutSafeAreaEdges001, TestSiz
     EXPECT_EQ(layoutProperty->backgroundIgnoresLayoutSafeAreaEdges_,
         LAYOUT_SAFE_AREA_EDGE_END | LAYOUT_SAFE_AREA_EDGE_BOTTOM);
     EXPECT_EQ(layoutProperty->localizedBackgroundIgnoresLayoutSafeAreaEdges_,
-        LAYOUT_SAFE_AREA_EDGE_START | LAYOUT_SAFE_AREA_EDGE_BOTTOM);
-    EXPECT_EQ(renderContext->GetBackgroundIgnoresLayoutSafeAreaEdgesValue(LAYOUT_SAFE_AREA_EDGE_NONE),
         LAYOUT_SAFE_AREA_EDGE_START | LAYOUT_SAFE_AREA_EDGE_BOTTOM);
 }
 

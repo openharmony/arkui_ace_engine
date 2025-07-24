@@ -400,7 +400,6 @@ public:
     void CreateBackgroundPixelMap(const RefPtr<FrameNode>& customNode) override;
     void OnIsTransitionBackgroundUpdate(bool isTransitionBackground) override {}
     void OnBuilderBackgroundFlagUpdate(bool isBuilderBackground) override;
-    void OnBackgroundIgnoresLayoutSafeAreaEdgesUpdate(uint32_t edges) override;
 
     void ColorToRSColor(const Color& color, OHOS::Rosen::RSColor& rsColor);
     void OnBackgroundColorUpdate(const Color& value) override;
@@ -538,6 +537,8 @@ public:
     void RemoveFromTree() override;
 
     void SetNeedUseCmdlistDrawRegion(bool needUseCmdlistDrawRegion) override;
+
+    void UpdateCustomBackground() override;
 
 protected:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
@@ -757,6 +758,8 @@ protected:
     // Use rect to update the drawRegion rect at index.
     void UpdateDrawRegion(uint32_t index, const std::shared_ptr<Rosen::RectF>& rect);
     void NotifyHostTransformUpdated(bool changed = true);
+    void NotifyHostTransformUpdatedMultiThread(bool changed = true);
+    void SetFrontBlurFilterMultiThread();
     void InitAccessibilityFocusModidifer(const RoundRect&, const Color&, float);
     void InitFocusStateModidifer(const RoundRect&, const Color&, float);
     void InitFocusAnimationModidifer(const RoundRect&, const Color&, float);

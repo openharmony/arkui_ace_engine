@@ -58,6 +58,7 @@ private:
     TextAlign GetCounterNodeAlignment();
     void HandleNonTextArea();
     void HandleTextArea();
+    std::string GetAccessibilityText(const std::string& originStr, uint32_t textLength, uint32_t maxLength);
 };
 
 class ACE_EXPORT ErrorDecorator : public TextComponentDecorator {

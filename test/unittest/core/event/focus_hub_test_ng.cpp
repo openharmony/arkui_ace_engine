@@ -1959,7 +1959,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0042, TestSize.Level1)
     ASSERT_NE(focusHub, nullptr);
     KeyEvent keyEvent;
     focusHub->SetOnClickCallback([](GestureEvent&) { return; });
-    focusHub->OnClick(keyEvent);
+    EXPECT_TRUE(focusHub->OnClick(keyEvent));
 }
 
 /**

@@ -29,7 +29,10 @@ namespace {
 constexpr int32_t IDLE_TASK_DELAY_MILLISECOND = 51;
 constexpr float ONE_SECOND_IN_NANO = 1000000000.0f;
 #ifdef VSYNC_TIMEOUT_CHECK
-constexpr int32_t VSYNC_TASK_DELAY_MILLISECOND = 3000;
+constexpr int32_t VSYNC_TASK_DELAY_MILLISECOND = 3000; // if vsync not received in 3s,report an system warning.
+constexpr int32_t VSYNC_RECOVER_DELAY_MILLISECOND = 500; // if vsync not received in 500ms, We simulate a fake Vsync.
+constexpr char VSYNC_TIMEOUT_CHECK_TASKNAME[] = "ArkUIVsyncTimeoutCheck";
+constexpr char VSYNC_RECOVER_TASKNAME[] = "ArkUIVsyncRecover";
 #endif
 
 #ifdef PREVIEW
@@ -38,12 +41,11 @@ constexpr float PREVIEW_REFRESH_RATE = 30.0f;
 } // namespace
 
 namespace OHOS::Ace::NG {
-
 RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<TaskExecutor> taskExecutor, int32_t id)
     : rsWindow_(window), taskExecutor_(taskExecutor), id_(id)
 {
     vsyncCallback_ = std::make_shared<OHOS::Rosen::VsyncCallback>();
-    vsyncCallback_->onCallback = [weakTask = taskExecutor_, id = id_](int64_t timeStampNanos, int64_t frameCount) {
+    vsyncCallback_->onCallback = [weakTask = taskExecutor_, id = id_](uint64_t timeStampNanos, uint64_t frameCount) {
         auto taskExecutor = weakTask.Upgrade();
         auto onVsync = [id, timeStampNanos, frameCount] {
             int64_t ts = GetSysTimestamp();
@@ -58,11 +60,11 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
             auto window = container->GetWindow();
             CHECK_NULL_VOID(window);
             int64_t refreshPeriod = window->GetVSyncPeriod();
-            window->OnVsync(static_cast<uint64_t>(timeStampNanos), static_cast<uint64_t>(frameCount));
+            window->OnVsync(timeStampNanos, frameCount);
             ArkUIPerfMonitor::GetPerfMonitor(id)->FinishPerf();
             auto pipeline = container->GetPipelineContext();
             CHECK_NULL_VOID(pipeline);
-            int64_t deadline = std::min(ts, timeStampNanos) + refreshPeriod;
+            int64_t deadline = std::min(ts, static_cast<int64_t>(timeStampNanos)) + refreshPeriod;
             bool dvsyncOn = window->GetUiDvsyncSwitch();
             if (dvsyncOn) {
                 int64_t frameBufferCount = (refreshPeriod != 0 && timeStampNanos - ts > 0) ?
@@ -174,6 +176,40 @@ bool RosenWindow::GetIsRequestFrame()
     return isRequestVsync_;
 }
 
+void RosenWindow::ForceFlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
+{
+    if (vsyncCallback_->onCallback) {
+        LOGI("ArkUI force flush vsync for recover pipelinecontext.");
+        vsyncCallback_->onCallback(nanoTimestamp, UINT64_MAX);
+    }
+}
+
+void RosenWindow::PostVsyncTimeoutDFXTask(const RefPtr<TaskExecutor>& taskExecutor)
+{
+#ifdef VSYNC_TIMEOUT_CHECK
+    CHECK_NULL_VOID(taskExecutor);
+    auto windowId = rsWindow_->GetWindowId();
+    static auto task = [windowId, instanceId = id_, timeStamp = lastRequestVsyncTime_]() {
+        LOGE("ArkUI request vsync,but no vsync received in 3 seconds");
+        EventReport::SendVsyncException(VsyncExcepType::UI_VSYNC_TIMEOUT, windowId, instanceId, timeStamp);
+    };
+    taskExecutor->PostDelayedTaskWithoutTraceId(task, TaskExecutor::TaskType::JS,
+        VSYNC_TASK_DELAY_MILLISECOND, VSYNC_TIMEOUT_CHECK_TASKNAME);
+
+    static auto recoverTask = [ weakWindow = weak_from_this() ] {
+        LOGW("ArkUI request vsync, but no vsync received in 500ms");
+        auto window = weakWindow.lock();
+        if (window) {
+            uint64_t nanoTimestamp = GetSysTimestamp();
+            // force flush vsync with now time stamp and UINT64_MAX as frameCount.
+            window->ForceFlushVsync(nanoTimestamp, UINT64_MAX);
+        }
+    };
+    taskExecutor->PostDelayedTaskWithoutTraceId(recoverTask, TaskExecutor::TaskType::UI,
+        VSYNC_RECOVER_DELAY_MILLISECOND, VSYNC_RECOVER_TASKNAME);
+#endif
+}
+
 void RosenWindow::RequestFrame()
 {
     if (!forceVsync_ && !onShow_) {
@@ -191,18 +227,7 @@ void RosenWindow::RequestFrame()
         }
         rsWindow_->RequestVsync(vsyncCallback_);
         lastRequestVsyncTime_ = static_cast<uint64_t>(GetSysTimestamp());
-#ifdef VSYNC_TIMEOUT_CHECK
-        if (taskExecutor) {
-            auto windowId = rsWindow_->GetWindowId();
-            auto instanceId = Container::CurrentIdSafely();
-            auto task = [windowId, instanceId, timeStamp = lastRequestVsyncTime_]() {
-                LOGE("ArkUI request vsync,but no vsync was received within 3 seconds");
-                EventReport::SendVsyncException(VsyncExcepType::UI_VSYNC_TIMEOUT, windowId, instanceId, timeStamp);
-            };
-            taskExecutor->PostDelayedTaskWithoutTraceId(task, TaskExecutor::TaskType::JS,
-                VSYNC_TASK_DELAY_MILLISECOND, "ArkUIVsyncTimeoutCheck");
-        }
-#endif
+        PostVsyncTimeoutDFXTask(taskExecutor);
     }
     if (taskExecutor) {
         taskExecutor->PostDelayedTask(
@@ -293,7 +318,6 @@ void RosenWindow::FlushTasks(std::function<void()> callback)
     } else {
         rsUIDirector_->SendMessages(callback);
     }
-    
     JankFrameReport::GetInstance().JsAnimationToRsRecord();
 }
 
@@ -354,15 +378,22 @@ std::string RosenWindow::GetWindowName() const
     return windowName;
 }
 
-void RosenWindow::OnVsync(uint64_t nanoTimestamp, uint32_t frameCount)
+void RosenWindow::RemoveVsyncTimeoutDFXTask(uint64_t frameCount)
 {
-    Window::OnVsync(nanoTimestamp, frameCount);
-    auto taskExecutor = taskExecutor_.Upgrade();
 #ifdef VSYNC_TIMEOUT_CHECK
-        if (taskExecutor) {
-            taskExecutor->RemoveTask(TaskExecutor::TaskType::JS, "ArkUIVsyncTimeoutCheck");
-        }
+    auto taskExecutor = taskExecutor_.Upgrade();
+    // frameCount is UINT64_MAX means fake vsync task, no need remove DFX task.
+    if (taskExecutor && frameCount != UINT64_MAX) {
+        taskExecutor->RemoveTask(TaskExecutor::TaskType::JS, VSYNC_TIMEOUT_CHECK_TASKNAME);
+        taskExecutor->RemoveTask(TaskExecutor::TaskType::JS, VSYNC_RECOVER_TASKNAME);
+    }
 #endif
+}
+
+void RosenWindow::OnVsync(uint64_t nanoTimestamp, uint64_t frameCount)
+{
+    RemoveVsyncTimeoutDFXTask(frameCount);
+    Window::OnVsync(nanoTimestamp, frameCount);
 }
 
 uint32_t RosenWindow::GetStatusBarHeight() const

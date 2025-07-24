@@ -487,6 +487,11 @@ private:
     bool needDoInternalDropAnimation_ = false;
     RefPtr<DataLoadParams> dataLoadParams_ = nullptr;
     bool useDataLoadParams_ { false };
+#if defined(ACE_STATIC)
+    RefPtr<PixelMap> dragDropInfoPixelMap_;
+    void* dragDropInfoCustomNode_;
+    std::string dragDropInfoExtraInfo_;
+#endif
 };
 
 class NotifyDragEvent : public DragEvent {

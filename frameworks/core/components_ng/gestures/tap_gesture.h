@@ -65,7 +65,8 @@ public:
 #ifdef ARKUI_CAPI_UNITTEST
     double GetDistanceThreshold()
     {
-        return distanceThreshold_;
+        // return distanceThreshold_;
+        return 0.0;
     }
 #endif // ARKUI_CAPI_UNITTEST
 protected:

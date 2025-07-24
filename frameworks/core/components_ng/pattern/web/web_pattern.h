@@ -869,6 +869,7 @@ public:
     void OnShowMagnifier();
     void OnHideMagnifier();
     void SetTouchHandleExistState(bool touchHandleExist);
+    bool IsShowHandle();
 protected:
     void ModifyWebSrc(const std::string& webSrc)
     {

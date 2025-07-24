@@ -1067,14 +1067,6 @@ float SheetPresentationPattern::UpdateSheetTransitionOffset()
     return offset;
 }
 
-void SheetPresentationPattern::SetSheetAnimationOption(AnimationOption& option) const
-{
-    option.SetFillMode(FillMode::FORWARDS);
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_EIGHTEEN)) {
-        option.SetDuration(SHEET_ANIMATION_DURATION);
-    }
-}
-
 void SheetPresentationPattern::SheetTransition(bool isTransitionIn, float dragVelocity)
 {
     if ((HasOnHeightDidChange() && IsSheetBottomStyle() && isTransitionIn && isNeedProcessHeight_)
@@ -1088,7 +1080,7 @@ void SheetPresentationPattern::SheetTransition(bool isTransitionIn, float dragVe
     AnimationOption option;
     const RefPtr<InterpolatingSpring> curve = sheetObject_->GetSheetTransitionCurve(dragVelocity);
     option.SetCurve(curve);
-    SetSheetAnimationOption(option);
+    sheetObject_->SetSheetAnimationOption(option);
     auto offset = UpdateSheetTransitionOffset();
     if (!isTransitionIn) {
         const auto& overlayManager = GetOverlayManager();

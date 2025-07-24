@@ -2460,6 +2460,54 @@ HWTEST_F(ListLayoutTestNg, ListCacheCount001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ListCacheCount002
+ * @tc.desc: Window size drag not load cached node
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListCacheCount002, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetCachedCount(2);
+    CreateItemsInLazyForEach(10, 100.0f, nullptr); /* 10: item count */
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. SetCacheRange
+     * @tc.expected: 1 ListItem cached.
+     */
+    ListModelNG::SetCacheRange(AceType::RawPtr(frameNode_), 1, 3);
+    auto listPattern = frameNode_->GetPattern<ListPattern>();
+    FlushIdleTask(listPattern);
+    EXPECT_EQ(listPattern->cachedItemPosition_.size(), 1);
+
+    /**
+     * @tc.steps: step2. ResetCacheRange
+     * @tc.expected: 2 ListItem cached.
+     */
+    ListModelNG::ResetCacheRange(AceType::RawPtr(frameNode_));
+    FlushUITasks(frameNode_);
+    FlushIdleTask(listPattern);
+    EXPECT_EQ(listPattern->cachedItemPosition_.size(), 2);
+
+    /**
+     * @tc.steps: step3. SetCachedCount 4
+     * @tc.expected: 4 ListItem cached.
+     */
+    ListModelNG::SetCachedCount(AceType::RawPtr(frameNode_), 4);
+    FlushUITasks(frameNode_);
+    FlushIdleTask(listPattern);
+    EXPECT_EQ(listPattern->cachedItemPosition_.size(), 4);
+
+    /**
+     * @tc.steps: step4. SetCacheRange
+     * @tc.expected: 3 ListItem cached.
+     */
+    ListModelNG::SetCacheRange(AceType::RawPtr(frameNode_), 1, 3);
+    FlushUITasks(frameNode_);
+    FlushIdleTask(listPattern);
+    EXPECT_EQ(listPattern->cachedItemPosition_.size(), 3);
+}
+/**
  * @tc.name: SetHeaderFooterComponent01
  * @tc.desc: Test HeaderComponent/FooterComponent of ListItemGroup
  * @tc.type: FUNC

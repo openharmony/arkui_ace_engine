@@ -18,6 +18,6 @@
 namespace OHOS::Ace {
 RefPtr<Subwindow> Subwindow::CreateSubwindow(int32_t /*instanceId*/)
 {
-    return AceType::MakeRefPtr<::testing::NiceMock<MockSubwindow>>();
+    return AceType::MakeRefPtr<MockSubwindow>();
 }
 } // namespace OHOS::Ace

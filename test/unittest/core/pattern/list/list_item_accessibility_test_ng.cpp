@@ -23,9 +23,7 @@ namespace OHOS::Ace::NG {
 using namespace testing;
 using namespace testing::ext;
 
-class ListItemAccessibilityTestNg : public TestNG {
-public:
-};
+class ListItemAccessibilityTestNg : public TestNG {};
 
 /**
  * @tc.name: SetSpecificSupportAction001

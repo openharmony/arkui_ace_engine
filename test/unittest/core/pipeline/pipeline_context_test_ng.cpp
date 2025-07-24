@@ -1233,6 +1233,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg024, TestSize.Level1)
     ResetEventFlag(DISPATCH_TOUCH_EVENT_TOUCH_EVENT_FLAG);
     context_->FlushTouchEvents();
     EXPECT_FALSE(GetEventFlag(DISPATCH_TOUCH_EVENT_TOUCH_EVENT_FLAG));
+    EXPECT_FALSE(context_->touchAccelarate_);
 }
 
 /**

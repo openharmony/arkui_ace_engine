@@ -842,7 +842,7 @@ HWTEST_F(ScrollLayoutTestNg, UseInitialOffset002, TestSize.Level1)
 HWTEST_F(ScrollLayoutTestNg, UseInitialOffset003, TestSize.Level1)
 {
     auto scrollLayoutAlgorithm = AceType::MakeRefPtr<ScrollLayoutAlgorithm>(1.0f);
-    auto axis = Axis::NONE;
+    auto axis = Axis::FREE;
     auto selfSize = SizeF(1.0f, 1.0f);
     frameNode_ = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<ScrollPattern>(); });

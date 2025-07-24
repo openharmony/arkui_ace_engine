@@ -93,7 +93,7 @@ class ManagerInterface;
 class NavigationController;
 enum class FrontendType;
 using SharePanelCallback = std::function<void(const std::string& bundleName, const std::string& abilityName)>;
-using AceVsyncCallback = std::function<void(uint64_t, uint32_t)>;
+using AceVsyncCallback = std::function<void(uint64_t, uint64_t)>;
 
 class ACE_FORCE_EXPORT PipelineBase : public AceType {
     DECLARE_ACE_TYPE(PipelineBase, AceType);
@@ -219,7 +219,7 @@ public:
     virtual bool OnRotationEvent(const RotationEvent& event) const = 0;
 
     // Called by window when received vsync signal.
-    virtual void OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount);
+    virtual void OnVsyncEvent(uint64_t nanoTimestamp, uint64_t frameCount);
 
     // Called by viewr
     virtual void OnDragEvent(const DragPointerEvent& pointerEvent, DragEventAction action,
@@ -1613,7 +1613,7 @@ protected:
     {
         return false;
     }
-    virtual void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) = 0;
+    virtual void FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount) = 0;
     virtual void SetRootRect(double width, double height, double offset = 0.0) = 0;
     virtual void FlushPipelineWithoutAnimation() = 0;
 

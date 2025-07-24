@@ -303,6 +303,56 @@ HWTEST_F(SwiperIndicatorTestNg, HandleLongPress001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleTouchEvent001
+ * @tc.desc: Test SwiperIndicator HandleTouchEvent001
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, HandleTouchEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper.
+     */
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+
+    /**
+     * @tc.steps: step2. isPressed_ is false, and input UP event.
+     * @tc.expected: not call HandleTouchUp
+     */
+    auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
+    auto frameNode = indicatorPattern->GetHost();
+    EXPECT_EQ(indicatorPattern->isPressed_, false);
+    indicatorPattern->HandleTouchEvent(CreateTouchEventInfo(TouchType::UP, FIRST_POINT));
+    EXPECT_EQ(indicatorPattern->isPressed_, false);
+    EXPECT_NE(frameNode->layoutProperty_->GetPropertyChangeFlag(), PROPERTY_UPDATE_RENDER);
+
+    /**
+     * @tc.steps: step3. isPressed_ is true, and input DOWN event.
+     * @tc.expected: not call HandleTouchUp
+     */
+    indicatorPattern->isPressed_ = true;
+    indicatorPattern->HandleTouchEvent(CreateTouchEventInfo(TouchType::DOWN, FIRST_POINT));
+    EXPECT_EQ(indicatorPattern->isPressed_, true);
+
+    /**
+     * @tc.steps: step4. isPressed_ is true, and input UP event.
+     * @tc.expected: call HandleTouchUp
+     */
+    indicatorPattern->isPressed_ = true;
+    indicatorPattern->HandleTouchEvent(CreateTouchEventInfo(TouchType::UP, FIRST_POINT));
+    EXPECT_EQ(indicatorPattern->isPressed_, false);
+
+    /**
+     * @tc.steps: step5. isPressed_ is true, and input CANCEL event.
+     * @tc.expected: call HandleTouchUp
+     */
+    indicatorPattern->isPressed_ = true;
+    indicatorPattern->HandleTouchEvent(CreateTouchEventInfo(TouchType::CANCEL, FIRST_POINT));
+    EXPECT_EQ(indicatorPattern->isPressed_, false);
+}
+
+/**
  * @tc.name: SetDotIndicatorStyle001
  * @tc.desc: Test SwiperModelNG SetDotIndicatorStyle
  * @tc.type: FUNC

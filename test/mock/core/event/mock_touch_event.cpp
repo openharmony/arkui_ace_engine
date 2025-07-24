@@ -27,10 +27,3 @@ TimeStamp GetTouchEventOriginTimeStamp(const TouchEvent& event)
 
 void UpdatePressedKeyCodes(std::vector<KeyCode>& pressedKeyCodes) {}
 } // namespace OHOS::Ace::Platform
-
-namespace OHOS::Ace::NG {
-TouchEvent ConvertToTouchEvent(const std::shared_ptr<MMI::PointerEvent>& srcPointerEvent)
-{
-    return TouchEvent();
-}
-} // namespace OHOS::Ace::NG

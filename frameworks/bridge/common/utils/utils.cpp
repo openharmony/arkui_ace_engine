@@ -385,8 +385,8 @@ RefPtr<Curve> CreateCurve(int curveType, bool useDefault)
         { static_cast<int>(ArkUI_AnimationCurve::ARKUI_CURVE_LINEAR_OUT_SLOW_IN), Curves::LINEAR_OUT_SLOW_IN },
         { static_cast<int>(ArkUI_AnimationCurve::ARKUI_CURVE_FAST_OUT_LINEAR_IN), Curves::FAST_OUT_LINEAR_IN },
         { static_cast<int>(ArkUI_AnimationCurve::ARKUI_CURVE_EXTREME_DECELERATION), Curves::EXTREME_DECELERATION },
-        { static_cast<int>(ArkUI_AnimationCurve::ARKUI_CURVE_SHARP), Curves::SHARP },
         { static_cast<int>(ArkUI_AnimationCurve::ARKUI_CURVE_RHYTHM), Curves::RHYTHM },
+        { static_cast<int>(ArkUI_AnimationCurve::ARKUI_CURVE_SHARP), Curves::SHARP },
         { static_cast<int>(ArkUI_AnimationCurve::ARKUI_CURVE_SMOOTH), Curves::SMOOTH },
         { static_cast<int>(ArkUI_AnimationCurve::ARKUI_CURVE_FRICTION), Curves::FRICTION },
     };

@@ -24,7 +24,6 @@
 #include "core/components_ng/pattern/web/web_pattern.h"
 #undef protected
 #undef private
-#undef protected
 
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 

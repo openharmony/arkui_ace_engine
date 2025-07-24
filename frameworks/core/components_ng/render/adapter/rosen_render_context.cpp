@@ -74,6 +74,7 @@
 #include "core/components_ng/render/image_painter.h"
 #include "interfaces/inner_api/ace_kit/include/ui/view/draw/modifier.h"
 #include "core/pipeline/pipeline_base.h"
+#include "base/utils/multi_thread.h"
 
 namespace OHOS::Ace::NG {
 
@@ -1098,6 +1099,8 @@ void RosenRenderContext::UpdateWindowActiveState(bool isActive)
 
 void RosenRenderContext::SetFrontBlurFilter()
 {
+    auto host = GetHost();
+    FREE_NODE_CHECK(host, SetFrontBlurFilter);
     CHECK_NULL_VOID(rsNode_);
     auto context = GetPipelineContext();
     CHECK_NULL_VOID(context);
@@ -3364,6 +3367,12 @@ LoadSuccessNotifyTask RosenRenderContext::CreateBorderImageLoadSuccessCallback()
     };
 }
 
+void RosenRenderContext::UpdateCustomBackground()
+{
+    ModifyCustomBackground();
+    RequestNextFrame();
+}
+
 void RosenRenderContext::OnBackgroundAlignUpdate(const Alignment& align)
 {
     CHECK_NULL_VOID(rsNode_);
@@ -3419,16 +3428,6 @@ void RosenRenderContext::OnBuilderBackgroundFlagUpdate(bool isBuilderBackground)
     CHECK_NULL_VOID(rsNode_);
     auto transitionModifier = GetOrCreateTransitionModifier();
     transitionModifier->SetIsBuilderBackground(isBuilderBackground);
-}
-
-void RosenRenderContext::OnBackgroundIgnoresLayoutSafeAreaEdgesUpdate(uint32_t edges)
-{
-    CHECK_NULL_VOID(rsNode_);
-    // Builder background will be updated while pixel map is ready.
-    if (!GetBuilderBackgroundFlagValue(false)) {
-        ModifyCustomBackground();
-        RequestNextFrame();
-    }
 }
 
 void RosenRenderContext::CreateBackgroundPixelMap(const RefPtr<FrameNode>& customNode)
@@ -4542,7 +4541,9 @@ bool RosenRenderContext::AddNodeToRsTree()
         TAG_LOGD(AceLogTag::ACE_DEFAULT_DOMAIN, "AddNodeToRsTree node(%{public}d, %{public}s)", node->GetId(),
             node->GetTag().c_str());
     }
-
+    if (node->GetRenderContext()) {
+        node->GetRenderContext()->SetRSUIContext(node->GetContext());
+    }
     std::list<RefPtr<FrameNode>> childNodes;
     // get not be deleted children of node
     GetLiveChildren(node, childNodes);
@@ -7350,6 +7351,7 @@ void RosenRenderContext::NotifyHostTransformUpdated(bool changed)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    FREE_NODE_CHECK(host, NotifyHostTransformUpdated, changed);
     host->NotifyTransformInfoChanged();
     host->OnNodeTransformInfoUpdate(changed);
     host->UpdateAccessibilityNodeRect();

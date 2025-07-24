@@ -14,7 +14,6 @@
  */
 
 #include "mock_pipeline_context.h"
-#include "test/mock/core/common/mock_font_manager.h"
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -152,14 +151,13 @@ RefPtr<MockPipelineContext> MockPipelineContext::pipeline_;
 // mock_pipeline_context =======================================================
 void MockPipelineContext::SetUp()
 {
-    pipeline_ = AceType::MakeRefPtr<::testing::NiceMock<MockPipelineContext>>();
+    pipeline_ = AceType::MakeRefPtr<MockPipelineContext>();
     pipeline_->eventManager_ = AceType::MakeRefPtr<EventManager>();
     pipeline_->windowManager_ = AceType::MakeRefPtr<WindowManager>();
     pipeline_->rootWidth_ = DISPLAY_WIDTH;
     pipeline_->rootHeight_ = DISPLAY_HEIGHT;
     pipeline_->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     pipeline_->SetupRootElement();
-    pipeline_->fontManager_ = MockFontManager::Create();
     windowRect_ = { 0., 0., NG::DISPLAY_WIDTH, NG::DISPLAY_HEIGHT };
     hasModalButtonsRect_ = true;
 }
@@ -178,20 +176,10 @@ RefPtr<MockPipelineContext> MockPipelineContext::GetCurrent()
     return pipeline_;
 }
 
-void MockPipelineContext::ResetFontManager()
-{
-    pipeline_->fontManager_ = MockFontManager::Create();
-}
-
 void MockPipelineContext::SetRootSize(double rootWidth, double rootHeight)
 {
     rootWidth_ = rootWidth;
     rootHeight_ = rootHeight;
-}
-
-void MockPipelineContext::SetDensity(double density)
-{
-    density_ = density;
 }
 
 void MockPipelineContext::SetInstanceId(int32_t instanceId)
@@ -384,7 +372,6 @@ void PipelineContext::OnIdle(int64_t deadline)
 void PipelineContext::Destroy()
 {
     dragDropManager_.Reset();
-    fontManager_.Reset();
     rootNode_.Reset();
 }
 
@@ -453,16 +440,7 @@ void PipelineContext::OnTransformHintChanged(uint32_t transform) {}
 
 void PipelineContext::SetRootRect(double width, double height, double offset) {}
 
-void PipelineContext::FlushBuild()
-{
-    FlushOnceVsyncTask();
-    isRebuildFinished_ = false;
-    FlushDirtyNodeUpdate();
-    isRebuildFinished_ = true;
-    FlushBuildFinishCallbacks();
-}
-
-void PipelineContext::FlushDirtyNodeUpdate() {}
+void PipelineContext::FlushBuild() {}
 
 void PipelineContext::FlushBuildFinishCallbacks()
 {
@@ -502,7 +480,7 @@ void PipelineContext::DetachNode(RefPtr<UINode>) {}
 
 void PipelineContext::Finish(bool autoFinish) const {}
 
-void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) {}
+void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount) {}
 
 void PipelineContext::FlushPipelineWithoutAnimation() {}
 
@@ -622,18 +600,7 @@ void PipelineContext::FlushReload(const ConfigurationChange& configurationChange
 
 void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) {}
 
-void PipelineContext::AddAnimationClosure(std::function<void()>&& animation)
-{
-    animationClosuresList_.emplace_back(std::move(animation));
-}
-
-void PipelineContext::FlushAnimationClosure()
-{
-    decltype(animationClosuresList_) temp(std::move(animationClosuresList_));
-    for (const auto& animation : temp) {
-        animation();
-    }
-}
+void PipelineContext::AddAnimationClosure(std::function<void()>&& animation) {}
 
 void PipelineContext::SetCloseButtonStatus(bool isEnabled) {}
 
@@ -733,7 +700,7 @@ void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
 
 void PipelineContext::AddIgnoreLayoutSafeAreaBundle(IgnoreLayoutSafeAreaBundle&& bundle)
 {
-    if (MockPipelineContext::GetCurrent()->UseFlushUITasks()) 
+    if (MockPipelineContext::GetCurrent()->UseFlushUITasks())
     {
         taskScheduler_->AddIgnoreLayoutSafeAreaBundle(std::move(bundle));
     }
@@ -1120,8 +1087,6 @@ bool PipelineContext::HasOnAreaChangeNode(int32_t nodeId)
 
 void PipelineContext::UnregisterTouchEventListener(const WeakPtr<NG::Pattern>& pattern) {}
 
-void PipelineContext::FlushDirtyPropertyNodes() {}
-
 int32_t PipelineContext::GetContainerModalTitleHeight()
 {
     return g_containerModalTitleHeight;
@@ -1152,7 +1117,6 @@ void PipelineContext::FlushDirtyPropertyNodes()
 
 void PipelineContext::DumpForceColor(const std::vector<std::string>& params) const {}
 void PipelineContext::AddFrameCallback(FrameCallbackFunc&& frameCallbackFunc, IdleCallbackFunc&& idleCallbackFunc,
-void PipelineContext::AddFrameCallback(FrameCallbackFunc&& frameCallbackFunc, FrameCallbackFunc&& idleCallbackFunc,
     int64_t delayMillis) {}
 } // namespace OHOS::Ace::NG
 // pipeline_context ============================================================
@@ -1209,7 +1173,7 @@ void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea, double positio
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, bool forceChange)
 {}
 
-void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount) {}
+void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint64_t frameCount) {}
 
 bool PipelineBase::ReachResponseDeadline() const
 {
@@ -1291,9 +1255,7 @@ RefPtr<AccessibilityManager> PipelineBase::GetAccessibilityManager() const
     if (instanceId_ == IGNORE_POSITION_TRANSITION_SWITCH) {
         return nullptr;
     }
-    static RefPtr<AccessibilityManager> testAccessibilityManager =
-        AceType::MakeRefPtr<::testing::NiceMock<MockAccessibilityManager>>();
-    return testAccessibilityManager;
+    return AceType::MakeRefPtr<MockAccessibilityManager>();
 }
 
 #ifdef WINDOW_SCENE_SUPPORTED
@@ -1372,29 +1334,6 @@ void PipelineBase::SetFontScale(float fontScale)
     fontScale_ = fontScale;
 }
 
-void PipelineBase::RegisterFont(const std::string& familyName, const std::string& familySrc,
-    const std::string& bundleName, const std::string& moduleName)
-{
-    if (fontManager_) {
-        fontManager_->RegisterFont(familyName, familySrc, AceType::Claim(this), bundleName, moduleName);
-    }
-}
-
-void PipelineBase::GetSystemFontList(std::vector<std::string>& fontList)
-{
-    if (fontManager_) {
-        fontManager_->GetSystemFontList(fontList);
-    }
-}
-
-bool PipelineBase::GetSystemFont(const std::string& fontName, FontInfo& fontInfo)
-{
-    if (fontManager_) {
-        return fontManager_->GetSystemFont(fontName, fontInfo);
-    }
-    return false;
-}
-
 bool NG::PipelineContext::CatchInteractiveAnimations(const std::function<void()>& animationCallback)
 {
     return false;
@@ -1469,8 +1408,6 @@ RefPtr<Kit::UIContext> NG::PipelineContext::GetUIContext()
 NG::ScopedLayout::ScopedLayout(PipelineContext* pipeline) {}
 NG::ScopedLayout::~ScopedLayout() {}
 
-void PipelineBase::StartImplicitAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,
-    const std::function<void()>& finishCallback, const std::optional<int32_t>& count) {}
 void NG::PipelineContext::SetDisplayWindowRectInfo(const Rect& displayWindowRectInfo)
 {
     auto offSetPosX_ = displayWindowRectInfo_.Left() - displayWindowRectInfo.Left();

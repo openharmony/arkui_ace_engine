@@ -1499,6 +1499,8 @@ HWTEST_F(MenuViewTestNg, Create002, TestSize.Level1)
     theme->doubleBorderEnable_ = true;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
     menuParam.enableArrow = false;
+    menuParam.previewMode = MenuPreviewMode::IMAGE;
+    menuParam.anchorPosition = OffsetF(10.0f, 10.0f);
     /**
      * @tc.steps: step1. create menu wrapper node
      * @tc.expected: Objects are created successfully.
@@ -1518,7 +1520,8 @@ HWTEST_F(MenuViewTestNg, UpdateMenuProperties002, TestSize.Level1)
 {
     MenuParam menuParam;
     menuParam.anchorPosition = OffsetF(10.0f, 10.0f);
-    menuParam.isAnchorPosition = true;
+    menuParam.previewMode = MenuPreviewMode::IMAGE;
+    menuParam.placement = OHOS::Ace::Placement::TOP;
     ASSERT_NE(wrapperNode_, nullptr);
     ASSERT_NE(menuFrameNode_, nullptr);
     MenuView::UpdateMenuProperties(wrapperNode_, menuFrameNode_, menuParam, MenuType::MENU);

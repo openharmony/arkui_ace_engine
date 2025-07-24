@@ -3409,6 +3409,7 @@ void AceContainer::ProcessColorModeUpdate(
     configurationChange.colorModeUpdate = true;
     if (SystemProperties::ConfigChangePerform()) {
         // reread all cache color of ark theme when configuration updates
+        ContainerScope scope(instanceId_);
         NG::TokenThemeStorage::GetInstance()->CacheResetColor();
     } else {
         // clear cache of ark theme instances when configuration updates

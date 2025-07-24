@@ -220,6 +220,10 @@ private:
     static void CreateTextField(const RefPtr<SearchNode>& parentNode, const std::optional<std::u16string>& placeholder,
         const std::optional<std::u16string>& value, bool hasTextFieldNode,
         const RefPtr<SearchTheme>& searchTheme = nullptr);
+    static void CreateTextFieldMultiThread(const RefPtr<SearchNode>& parentNode,
+        const std::optional<std::u16string>& placeholder,
+        const std::optional<std::u16string>& value, bool hasTextFieldNode,
+        const RefPtr<SearchTheme>& searchTheme = nullptr);
     static void CreateButton(const RefPtr<SearchNode>& parentNode, bool hasButtonNode,
         const RefPtr<SearchTheme>& searchTheme = nullptr);
     static void CreateCancelButton(const RefPtr<SearchNode>& parentNode, bool hasCancelButtonNode,
@@ -228,6 +232,7 @@ private:
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
     RefPtr<FrameNode> GetSearchTextFieldFrameNode() const;
     static void TextFieldUpdateContext(const RefPtr<FrameNode>& frameNode);
+    static void TextFieldUpdateContextMultiThread(const RefPtr<FrameNode>& frameNode);
     static void CreateDivider(const RefPtr<SearchNode>& parentNode, bool hasDividerNode);
 };
 

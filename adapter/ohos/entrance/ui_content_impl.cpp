@@ -2054,7 +2054,6 @@ void UIContentImpl::SetAceApplicationInfo(std::shared_ptr<OHOS::AbilityRuntime::
     CapabilityRegistry::Register();
     ImageFileCache::GetInstance().SetImageCacheFilePath(context->GetCacheDir());
     XcollieInterface::GetInstance().SetTimerCount("HIT_EMPTY_WARNING", TIMEOUT_LIMIT, COUNT_LIMIT);
-    PerfMonitor::GetPerfMonitor()->SetApplicationInfo();
 
     auto task = [] {
         std::unordered_map<std::string, std::string> payload;
@@ -2441,6 +2440,8 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     container->SetIsModule(hapModuleInfo->compileMode == AppExecFwk::CompileMode::ES_MODULE);
     container->SetApiTargetVersion(apiTargetVersion);
 
+    PerfMonitor::GetPerfMonitor()->SetApplicationInfo();
+
     // for atomic service
     container->SetInstallationFree(hapModuleInfo && hapModuleInfo->installationFree);
     if (hapModuleInfo->installationFree) {
@@ -2777,12 +2778,14 @@ void UIContentImpl::InitializeDisplayAvailableRect(const RefPtr<Platform::AceCon
     auto& DMManager = Rosen::DisplayManager::GetInstance();
     auto window = container->GetUIWindow(instanceId_);
     uint64_t displayId = 0;
-    if (window && window->GetDisplayId() != DISPLAY_ID_INVALID) {
-        displayId = window->GetDisplayId();
-        listenedDisplayId_ = displayId;
-    } else if (window) {
-        TAG_LOGW(AceLogTag::ACE_WINDOW, "initialize display available rect invalid. window name is %{public}s",
-            window->GetWindowName().c_str());
+    if (window) {
+        if (window->GetDisplayId() != DISPLAY_ID_INVALID) {
+            displayId = window->GetDisplayId();
+            listenedDisplayId_ = displayId;
+        } else {
+            TAG_LOGW(AceLogTag::ACE_WINDOW, "initialize display available rect invalid. window name is %{public}s",
+                window->GetWindowName().c_str());
+        }
     }
     availableAreaChangedListener_ = new AvailableAreaChangedListener(instanceId_);
     DMManager.RegisterAvailableAreaListener(availableAreaChangedListener_, displayId);

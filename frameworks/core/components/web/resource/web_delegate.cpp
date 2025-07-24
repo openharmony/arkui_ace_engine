@@ -6556,9 +6556,16 @@ void WebDelegate::OnGetTouchHandleHotZone(std::shared_ptr<OHOS::NWeb::NWebTouchH
     auto theme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_VOID(theme);
     auto touchHandleSize = theme->GetHandleHotZoneRadius().ConvertToPx();
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
     if (hotZone) {
-        hotZone->SetWidth(touchHandleSize);
-        hotZone->SetHeight(touchHandleSize);
+        if (webPattern->IsShowHandle()) {
+            hotZone->SetWidth(touchHandleSize);
+            hotZone->SetHeight(touchHandleSize);
+        } else {
+            hotZone->SetWidth(theme->GetHandleLineWidth().ConvertToPx());
+            hotZone->SetHeight(0);
+        }
     }
 }
 

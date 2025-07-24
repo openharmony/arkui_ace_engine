@@ -18,6 +18,7 @@
 #include "core/accessibility/accessibility_constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "frameworks/base/utils/multi_thread.h"
 
 namespace OHOS::Ace::NG {
 constexpr uint64_t ACTIONS = std::numeric_limits<uint64_t>::max();
@@ -991,6 +992,8 @@ void AccessibilityProperty::SetAccessibilityGroup(bool accessibilityGroup)
         return;
     }
     accessibilityGroup_ = accessibilityGroup;
+    auto frameNode = host_.Upgrade();
+    FREE_NODE_CHECK(frameNode, SetAccessibilityGroup);
     NotifyComponentChangeEvent(AccessibilityEventType::ELEMENT_INFO_CHANGE);
 }
 
@@ -1015,6 +1018,8 @@ void AccessibilityProperty::SetAccessibilityText(const std::string& text)
         return;
     }
     accessibilityText_ = text;
+    auto frameNode = host_.Upgrade();
+    FREE_NODE_CHECK(frameNode, SetAccessibilityTextWithEvent);
     NotifyComponentChangeEvent(AccessibilityEventType::TEXT_CHANGE);
 }
 
@@ -1048,6 +1053,8 @@ void AccessibilityProperty::SetAccessibilityDescription(const std::string& acces
         return;
     }
     accessibilityDescription_ = accessibilityDescription;
+    auto frameNode = host_.Upgrade();
+    FREE_NODE_CHECK(frameNode, SetAccessibilityDescriptionWithEvent);
     NotifyComponentChangeEvent(AccessibilityEventType::TEXT_CHANGE);
 }
 
@@ -1116,7 +1123,8 @@ void AccessibilityProperty::SetAccessibilityLevel(const std::string& accessibili
     } else {
         accessibilityLevel_ = Level::AUTO;
     }
-
+    auto frameNode = host_.Upgrade();
+    FREE_NODE_CHECK(frameNode, SetAccessibilityLevel, backupLevel);
     if (backupLevel != accessibilityLevel_.value_or("")) {
         NotifyComponentChangeEvent(AccessibilityEventType::ELEMENT_INFO_CHANGE);
     }

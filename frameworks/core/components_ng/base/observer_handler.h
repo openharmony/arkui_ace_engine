@@ -222,8 +222,7 @@ public:
     using DensityHandleFunc = void (*)(AbilityContextInfo&, double);
     using DensityHandleFuncForAni = std::function<void(AbilityContextInfo&, double)>;
     void SetHandleDensityChangeFunc(DensityHandleFunc func);
-        void SetHandleDensityChangeFuncForAni(DensityHandleFuncForAni func);
-
+    void SetHandleDensityChangeFuncForAni(DensityHandleFuncForAni func);
     void SetLayoutDoneHandleFunc(DrawCommandSendHandleFunc func);
     void HandleLayoutDoneCallBack();
     void SetDrawCommandSendHandleFunc(LayoutDoneHandleFunc func);

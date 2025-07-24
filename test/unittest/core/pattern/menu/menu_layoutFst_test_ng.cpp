@@ -1756,6 +1756,13 @@ HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg042, TestSize.Level1)
     menuLayoutAlgorithm->wrapperRect_ = Rect(0, 0, size_f.Width(), size_f.Height());
     auto result = menuLayoutAlgorithm->VerticalLayout(size, clickPosition, false);
     EXPECT_FLOAT_EQ(result, clickPosition);
+
+    result = menuLayoutAlgorithm->VerticalLayout(size, clickPosition, true);
+    EXPECT_FLOAT_EQ(result, clickPosition);
+
+    clickPosition = 80.0f;
+    result = menuLayoutAlgorithm->VerticalLayout(size, clickPosition, false);
+    EXPECT_FLOAT_EQ(result, 100.0f);
 }
 
 /**
