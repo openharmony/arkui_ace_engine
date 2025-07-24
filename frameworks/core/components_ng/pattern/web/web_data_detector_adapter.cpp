@@ -346,6 +346,7 @@ void WebDataDetectorAdapter::ParseAIResultByType(std::shared_ptr<DataDetectorReq
         mat.clean = item->GetString("oriText"); // u8 string
         mat.end = mat.start + UtfUtils::Str8DebugToStr16(mat.clean).length(); // u16 offset not include
         mat.entityType = detectType;
+        mat.params = ParseExtraParams(detectType, item);
         int pos = MatchInOffsets(mat, requestContext->detectOffsets);
         if (pos < 0) {
             continue;
@@ -408,6 +409,46 @@ void WebDataDetectorAdapter::SendResultToJS(const std::string& resultStr)
     pattern->RunJavascriptAsync(jsCode,  [](std::string result) {});
 }
 
+std::map<std::string, std::string> WebDataDetectorAdapter::AttrsToParams(const std::unique_ptr<JsonValue>& attrs)
+{
+    if (!attrs || !attrs->IsObject()) {
+        return {};
+    }
+    std::map<std::string, std::string> params;
+    for (auto key : extraParamKeys_) {
+        auto value = attrs->GetString(key);
+        if (!value.empty()) {
+            params[key] = value;
+        }
+    }
+    return params;
+}
+
+std::map<std::string, std::string> WebDataDetectorAdapter::ParseExtraParams(
+    const std::string& detectType, const std::unique_ptr<JsonValue>& item)
+{
+    if (!item || !item->IsObject()) {
+        return {};
+    }
+    auto type = ConvertTypeFromString(detectType);
+    if (type == TextDataDetectType::INVALID) {
+        return {};
+    }
+    std::map<std::string, std::string> params;
+    switch (type) {
+        case TextDataDetectType::DATE_TIME: {
+            auto startTimestamp = item->GetInt64("startTimestamp", -1);
+            if (startTimestamp != -1) {
+                params["startTimestamp"] = std::to_string(startTimestamp);
+            }
+            break;
+        }
+        default:
+            break;
+    }
+    return params;
+}
+
 int32_t WebDataDetectorAdapter::MatchInOffsets(
     EntityMatch& match, const std::vector<std::pair<size_t, size_t>>& detectOffsets)
 {
@@ -454,6 +495,10 @@ std::string WebDataDetectorAdapter::GetResultJsonString(const std::string& reque
 
             auto attrsJson = JsonUtil::Create(false);
             attrsJson->Put("OhosArkWebType", match.entityType.c_str());
+            for (auto [k, v] : match.params) {
+                attrsJson->Put(k.c_str(), v.c_str());
+                extraParamKeys_.insert(k);
+            }
 
             matchJson->PutRef("attrs", std::move(attrsJson));
             matchArray->PutRef(std::move(matchJson));
@@ -483,7 +528,7 @@ void WebDataDetectorAdapter::ProcessClick(const std::string& jsonStr)
     auto outerHTML = msg->GetString("outerHTML");
     auto entityType = msg->GetString("entityType");
     if (auto touchTest = msg->GetBool("touchTest")) {
-        SetPreviewMenuAttr(ConvertTypeFromString(entityType), content);
+        SetPreviewMenuAttr(ConvertTypeFromString(entityType), content, AttrsToParams(msg->GetObject("attrs")));
         return;
     }
     SetPreviewMenuAttr();
@@ -892,7 +937,7 @@ bool WebDataDetectorAdapter::GetPreviewMenuBuilder(
         ViewStackProcessor::GetInstance()->Push(menuNode);
     };
     previewBuilder = [menuType = previewMenuType_, menuContent = previewMenuContent_,
-                         instanceId = Container::CurrentIdSafely()]() {
+                         menuExtraParams = previewMenuExtraParams_, instanceId = Container::CurrentIdSafely()]() {
         ContainerScope scope(instanceId);
         // arkui create preview menu static func
         PreviewMenuController::CreatePreviewMenu(menuType, menuContent, nullptr);
@@ -941,10 +986,12 @@ RefPtr<FrameNode> WebDataDetectorAdapter::GetPreviewMenuNode(const AIMenuInfo& i
     return overlayManager->BuildAIEntityMenu(menuOptions);
 }
 
-void WebDataDetectorAdapter::SetPreviewMenuAttr(TextDataDetectType type, const std::string& content)
+void WebDataDetectorAdapter::SetPreviewMenuAttr(
+    TextDataDetectType type, const std::string& content, const std::map<std::string, std::string>& params)
 {
     previewMenuType_ = type;
     previewMenuContent_ = (type != TextDataDetectType::INVALID) ? content : "";
+    previewMenuExtraParams_ = (type != TextDataDetectType::INVALID) ? params : std::map<std::string, std::string>();
 }
 
 TextDataDetectType WebDataDetectorAdapter::ConvertTypeFromString(const std::string& type)
