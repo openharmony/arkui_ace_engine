@@ -26,6 +26,7 @@
 #include "core/components_ng/pattern/linear_layout/column_model_ng.h"
 #include "core/components_ng/pattern/linear_split/linear_split_model.h"
 #include "core/components_ng/pattern/linear_split/linear_split_pattern.h"
+#include "test/mock/base/mock_system_properties.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_render_context.h"
 
@@ -1325,5 +1326,26 @@ HWTEST_F(LinearSplitTestNg, IgnoreLayoutSafeArea002, TestSize.Level1)
     EXPECT_EQ(column->GetGeometryNode()->GetFrameSize(), SizeF(100.0f, 100.0f));
     EXPECT_EQ(column->GetGeometryNode()->GetFrameOffset(), OffsetF(0.0f, 100.0f))
         << column->GetGeometryNode()->GetFrameRect().ToString();
+}
+
+/**
+ * @tc.name: RegisterResObj
+ * @tc.desc: Test RegisterResObj of linear_split
+ * @tc.type: FUNC
+ */
+HWTEST_F(LinearSplitTestNg, RegisterResObj, TestSize.Level1)
+{
+    g_isConfigChangePerform = true;
+    SystemProperties::ConfigChangePerform();
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+    NG::ColumnSplitDivider divider;
+    LinearSplitModelNG::RegisterResObj(resObj, divider, "columnSplit.divider.startMargin");
+    divider.ReloadResources();
+    EXPECT_EQ(divider.resMap_.size(), 1);
+    LinearSplitModelNG::RegisterResObj(resObj, divider, "columnSplit.divider.endMargin");
+    divider.ReloadResources();
+    EXPECT_EQ(divider.resMap_.size(), 2);
 }
 } // namespace OHOS::Ace::NG

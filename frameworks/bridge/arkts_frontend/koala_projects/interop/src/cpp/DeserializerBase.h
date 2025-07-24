@@ -347,8 +347,9 @@ public:
         toClean.push_back(keys);
       }
       values = malloc(length * sizeof(V));
-      memset(values, 0, length * sizeof(V));
-      toClean.push_back(values);
+      if (values && memset_s(values, length * sizeof(V), 0, length * sizeof(V)) == 0) {
+        toClean.push_back(values);
+      }
     }
     map->size = length;
     map->keys = reinterpret_cast<K *>(keys);

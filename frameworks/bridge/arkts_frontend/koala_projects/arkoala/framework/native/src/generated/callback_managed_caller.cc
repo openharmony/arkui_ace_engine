@@ -6041,7 +6041,8 @@ void callManagedOnTextPickerChangeCallback(Ark_Int32 resourceId, Ark_Union_Strin
         argsSerializer.writeInt8(1);
         const auto selectItem_1 = selectItem.value1;
         argsSerializer.writeInt32(selectItem_1.length);
-        for (size_t i = 0; i < static_cast<size_t>(selectItem_1.length); i++) {
+        const int maxLen = std::min(selectItem_1.length, INT_MAX);
+        for (int i = 0; i < maxLen; i++) {
             const Ark_String selectItem_1_element = selectItem_1.array[i];
             argsSerializer.writeString(selectItem_1_element);
         }
@@ -6081,7 +6082,8 @@ void callManagedOnTextPickerChangeCallbackSync(Ark_VMContext vmContext, Ark_Int3
         argsSerializer.writeInt8(1);
         const auto selectItem_1 = selectItem.value1;
         argsSerializer.writeInt32(selectItem_1.length);
-        for (size_t i = 0; i < static_cast<size_t>(selectItem_1.length); i++) {
+        const int maxLen = std::min(selectItem_1.length, INT_MAX);
+        for (int i = 0; i < maxLen; i++) {
             const Ark_String selectItem_1_element = selectItem_1.array[i];
             argsSerializer.writeString(selectItem_1_element);
         }
@@ -6929,7 +6931,8 @@ void callManagedTextPickerScrollStopCallback(Ark_Int32 resourceId, Ark_Union_Str
         argsSerializer.writeInt8(1);
         const auto value_1 = value.value1;
         argsSerializer.writeInt32(value_1.length);
-        for (size_t i = 0; i < static_cast<size_t>(value_1.length); i++) {
+        const int maxLen = std::min(value_1.length, INT_MAX);
+        for (int i = 0; i < maxLen; i++) {
             const Ark_String value_1_element = value_1.array[i];
             argsSerializer.writeString(value_1_element);
         }

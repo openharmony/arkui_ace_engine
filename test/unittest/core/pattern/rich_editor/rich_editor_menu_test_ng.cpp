@@ -1190,6 +1190,7 @@ HWTEST_F(RichEditorMenuTestNg, UpdateAIMenuOptions003, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto pattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern->IsSupportAskCelia());
     auto spanItem = AceType::MakeRefPtr<SpanItem>();
     spanItem->content = std::get<std::u16string>(U16_TEXT_FOR_AI_INFO.content);
     spanItem->position = spanItem->content.length();

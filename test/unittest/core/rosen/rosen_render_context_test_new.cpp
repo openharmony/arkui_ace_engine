@@ -21,9 +21,7 @@
 #include "core/components_ng/render/drawing.h"
 
 #include "core/components_ng/pattern/stage/page_pattern.h"
-#if defined(MODIFIER_NG)
 #include "modifier_ng/background/rs_background_shader_modifier.h"
-#endif
 
 #undef private
 #undef protected
@@ -610,11 +608,7 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew019, TestSize.Level1)
     EXPECT_EQ(rosenRenderContext->GetRSNode()->GetStagingProperties().GetShadowOffsetY(), 0.0);
 }
 
-#if defined(MODIFIER_NG)
 using RSModifier = Rosen::ModifierNG::RSModifier;
-#else
-using RSModifier = Rosen::RSModifier;
-#endif
 
 /**
  * @tc.name: RosenRenderContextTestNew020
@@ -627,12 +621,8 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew020, TestSize.Level1)
         FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<PagePattern>(nullptr); });
     auto rosenRenderContext = InitRosenRenderContext(frameNode);
     auto property = std::make_shared<Rosen::RSProperty<bool>>();
-#if defined(MODIFIER_NG)
     std::shared_ptr<RSModifier> modifier = std::make_shared<Rosen::ModifierNG::RSBackgroundShaderModifier>();
     modifier->AttachProperty(Rosen::ModifierNG::RSPropertyType::BACKGROUND_SHADER, property);
-#else
-    std::shared_ptr<RSModifier> modifier = std::make_shared<Rosen::RSBackgroundShaderModifier>(property);
-#endif
     rosenRenderContext->AddModifier(modifier);
     rosenRenderContext->paintRect_ = RectF(1.0, 1.0, 1.0, 1.0);
     BrightnessOption option;
@@ -680,12 +670,8 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew021, TestSize.Level1)
         FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<PagePattern>(nullptr); });
     auto rosenRenderContext = InitRosenRenderContext(frameNode);
     auto property = std::make_shared<Rosen::RSProperty<bool>>();
-#if defined(MODIFIER_NG)
     std::shared_ptr<RSModifier> modifier = std::make_shared<Rosen::ModifierNG::RSBackgroundShaderModifier>();
     modifier->AttachProperty(Rosen::ModifierNG::RSPropertyType::BACKGROUND_SHADER, property);
-#else
-    std::shared_ptr<RSModifier> modifier = std::make_shared<Rosen::RSBackgroundShaderModifier>(property);
-#endif
     rosenRenderContext->AddModifier(modifier);
     rosenRenderContext->paintRect_ = RectF(1.0, 1.0, 1.0, 1.0);
     rosenRenderContext->OnBackBlendApplyTypeUpdate(BlendApplyType::OFFSCREEN);

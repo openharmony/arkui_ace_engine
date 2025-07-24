@@ -20,9 +20,7 @@
 #include "ui/base/utils/utils.h"
 
 #include "bridge/arkts_frontend/arkts_ani_utils.h"
-#ifdef ACE_STATIC
 #include "bridge/arkts_frontend/ani_context_module.h"
-#endif
 #include "bridge/arkts_frontend/entry/arkts_entry_loader.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/base/subwindow/subwindow_manager.h"
@@ -222,64 +220,68 @@ ani_object LegacyLoadPage(ani_env* env)
 
 UIContentErrorCode ArktsFrontend::RunPage(const std::string& url, const std::string& params)
 {
-    auto* env = ArktsAniUtils::GetAniEnv(vm_);
-    CHECK_NULL_RETURN(env, UIContentErrorCode::INVALID_URL);
+    auto* env_ = ArktsAniUtils::GetAniEnv(vm_);
+    CHECK_NULL_RETURN(env_, UIContentErrorCode::INVALID_URL);
 
     ani_class appClass;
-    EntryLoader entryLoader(url, env);
+    EntryLoader entryLoader(url, env_);
 
-    if (env->FindClass(KOALA_APP_INFO.className, &appClass) != ANI_OK) {
+    pageRouterManager_ = NG::PageRouterManagerFactory::CreateManager();
+
+    if (env_->FindClass(KOALA_APP_INFO.className, &appClass) != ANI_OK) {
         LOGE("Cannot load main class %{public}s", KOALA_APP_INFO.className);
         return UIContentErrorCode::INVALID_URL;
     }
 
     ani_static_method create;
-    if (env->Class_FindStaticMethod(
+    if (env_->Class_FindStaticMethod(
             appClass, KOALA_APP_INFO.createMethodName, KOALA_APP_INFO.createMethodSig, &create) != ANI_OK) {
         LOGE("Cannot find create method %{public}s", KOALA_APP_INFO.createMethodName);
+        // TryEmitError(*env_);
         return UIContentErrorCode::INVALID_URL;
     }
 
-    std::string appUrl = "ComExampleTrivialApplication"; // TODO: use passed in url and params
-    std::string appParams = "ArkTSLoaderParam";
     ani_string aniUrl;
-    env->String_NewUTF8(appUrl.c_str(), appUrl.size(), &aniUrl);
+    env_->String_NewUTF8(url.c_str(), url.size(), &aniUrl);
     ani_string aniParams;
-    env->String_NewUTF8(appParams.c_str(), appParams.size(), &aniParams);
+    env_->String_NewUTF8(params.c_str(), params.size(), &aniParams);
 
     ani_ref appLocal;
     ani_ref optionalEntry;
-    env->GetUndefined(&optionalEntry);
+    env_->GetUndefined(&optionalEntry);
     auto entryPointObj = entryLoader.GetPageEntryObj();
-    auto legacyEntryPointObj = LegacyLoadPage(env);
-    if (env->Class_CallStaticMethod_Ref(appClass, create, &appLocal, aniUrl, aniParams, false,
+    auto legacyEntryPointObj = LegacyLoadPage(env_);
+    std::string moduleName = Container::Current()->GetModuleName();
+    ani_string module;
+    env_->String_NewUTF8(moduleName.c_str(), moduleName.size(), &module);
+    if (env_->Class_CallStaticMethod_Ref(appClass, create, &appLocal, aniUrl, aniParams, false, module,
             legacyEntryPointObj ? legacyEntryPointObj : optionalEntry,
             entryPointObj ? entryPointObj : optionalEntry) != ANI_OK) {
         LOGE("createApplication returned null");
+        // TryEmitError(*env_);
         return UIContentErrorCode::INVALID_URL;
     }
 
-    env->GlobalReference_Create(appLocal, &app_);
+    env_->GlobalReference_Create(appLocal, &app_);
 
     ani_method start;
-    if (env->Class_FindMethod(appClass, KOALA_APP_INFO.startMethodName, KOALA_APP_INFO.startMethodSig, &start) !=
+    if (env_->Class_FindMethod(appClass, KOALA_APP_INFO.startMethodName, KOALA_APP_INFO.startMethodSig, &start) !=
         ANI_OK) {
         LOGE("find start method returned null");
+        // TryEmitError(*env_);
         return UIContentErrorCode::INVALID_URL;
     }
 
     ani_long result;
-    if (env->Object_CallMethod_Long(static_cast<ani_object>(app_), start, &result) != ANI_OK) {
+    if (env_->Object_CallMethod_Long(static_cast<ani_object>(app_), start, &result) != ANI_OK) {
         LOGE("call start method returned null");
+        // TryEmitError(*env_);
         return UIContentErrorCode::INVALID_URL;
     }
 
     // TODO: init event loop
     CHECK_NULL_RETURN(pipeline_, UIContentErrorCode::NULL_POINTER);
-    pipeline_->SetVsyncListener([vm = vm_, app = app_]() {
-        auto* env = ArktsAniUtils::GetAniEnv(vm);
-        RunArkoalaEventLoop(env, app);
-    });
+    pipeline_->SetVsyncListener([env = env_, app = app_]() { RunArkoalaEventLoop(env, app); });
 
     return UIContentErrorCode::NO_ERRORS;
 }
@@ -358,11 +360,10 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_PreloadAceArkTSModule(void* aniEnv)
     ArktsFrontend::PreloadAceModule(aniEnv);
 }
 
-#ifdef ACE_STATIC
 void ArktsFrontend::SetAniContext(int32_t instanceId, ani_ref* context)
 {
     std::shared_ptr<ani_ref> shared_ptr(context);
     Framework::AniContextModule::AddAniContext(instanceId, shared_ptr);
 }
-#endif
+
 } // namespace OHOS::Ace
