@@ -19,6 +19,7 @@ class ArkSystemTheme extends ArkThemeBase {
             undefined,
             ThemeColorMode.SYSTEM,
             new ArkSystemColors(),
+            new ArkSystemColors(),
             new ArkSystemShapes(),
             new ArkSystemTypography()
         );

@@ -24,6 +24,7 @@ let themeCounter = 0;
 class ArkThemeBase implements ThemeInternal {
     // Theme tokens
     colors: Colors;
+    darkColors: Colors;
     shapes: Shapes;
     typography: Typography;
 
@@ -77,6 +78,7 @@ class ArkThemeBase implements ThemeInternal {
         customTheme: CustomThemeInternal,
         colorMode: ThemeColorMode,
         colors: Colors,
+        darkColors: Colors,
         shapes: Shapes,
         typography: Typography
     ) {
@@ -87,6 +89,7 @@ class ArkThemeBase implements ThemeInternal {
         this.colorMode = colorMode;
 
         this.colors = colors;
+        this.darkColors = darkColors;
         this.shapes = shapes;
         this.typography = typography;
     }
@@ -186,6 +189,15 @@ class ArkThemeBase implements ThemeInternal {
         if (customTheme.colors) {
             copyTheme.colors = {};
             Object.assign(copyTheme.colors, customTheme.colors);
+        }
+        if (customTheme.darkColors) {
+            copyTheme.darkColors = {};
+            // For properties missing in darkColors, use the values from colors
+            Object.assign(copyTheme.darkColors, customTheme?.colors, customTheme.darkColors);
+        } else if (customTheme.colors) {
+            // If the user does not provide darkColors, use the values from colors
+            copyTheme.darkColors = {};
+            Object.assign(copyTheme.darkColors, customTheme.colors);
         }
         if (customTheme.shapes) {
             copyTheme.shapes = {};
