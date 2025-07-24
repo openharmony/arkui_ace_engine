@@ -44,7 +44,6 @@ void FormLinkTest::TearDownTestSuite()
     MockPipelineContext::TearDown();
 }
 
-
 /**
  * @tc.name: FormLinkPatternTest001
  * @tc.desc: Test FormLinkPatternTest in Form Pattern.
