@@ -310,5 +310,10 @@ export enum CallbackKind {
     Kind_WebKeyboardCallback = -1829763354,
     Kind_WithThemeInterface = 219587748,
     Kind_Callback_String_SurfaceRect_Void = -1736208400,
-    Kind_RadioModifierBuilder = -327322091
+    Kind_RadioModifierBuilder = -327322091,
+    Kind_ButtonModifierBuilder = -2004118094,
+    Kind_CheckBoxModifierBuilder = 1317697111,
+    Kind_ToggleModifierBuilder = -879751946,    
+    Kind_RatingModifierBuilder = 1013330403,
+    Kind_SliderModifierBuilder = 553138561,
 }

@@ -12700,7 +12700,6 @@ typedef struct Opt_BusinessError {
 typedef struct Ark_ButtonConfiguration {
     /* kind: Interface */
     Ark_Boolean enabled;
-    Ark_ContentModifier contentModifier;
     Ark_String label;
     Ark_Boolean pressed;
     ButtonTriggerClickCallback triggerClick;
@@ -12752,7 +12751,6 @@ typedef struct Opt_ChainWeightOptions {
 typedef struct Ark_CheckBoxConfiguration {
     /* kind: Interface */
     Ark_Boolean enabled;
-    Ark_ContentModifier contentModifier;
     Ark_String name;
     Ark_Boolean selected;
     Callback_Boolean_Void triggerChange;
@@ -14472,7 +14470,6 @@ typedef struct Opt_ProgressOptions {
 typedef struct Ark_RadioConfiguration {
     /* kind: Interface */
     Ark_Boolean enabled;
-    Ark_ContentModifier contentModifier;
     Ark_String value;
     Ark_Boolean checked;
     Callback_Boolean_Void triggerChange;
@@ -14495,7 +14492,6 @@ typedef struct Opt_RadioOptions {
 typedef struct Ark_RatingConfiguration {
     /* kind: Interface */
     Ark_Boolean enabled;
-    Ark_ContentModifier contentModifier;
     Ark_Number rating;
     Ark_Boolean indicator;
     Ark_Number stars;
@@ -14820,7 +14816,6 @@ typedef struct Opt_SlideRange {
 typedef struct Ark_SliderConfiguration {
     /* kind: Interface */
     Ark_Boolean enabled;
-    Ark_ContentModifier contentModifier;
     Ark_Number value;
     Ark_Number min;
     Ark_Number max;
@@ -15185,9 +15180,7 @@ typedef struct Opt_TipsMessageType {
 typedef struct Ark_ToggleConfiguration {
     /* kind: Interface */
     Ark_Boolean enabled;
-    Ark_ContentModifier contentModifier;
     Ark_Boolean isOn;
-    Ark_Boolean toggleEnabled;
     Callback_Boolean_Void triggerChange;
 } Ark_ToggleConfiguration;
 typedef struct Opt_ToggleConfiguration {
@@ -24333,42 +24326,27 @@ typedef struct GENERATED_ArkUIContentModifierHelperAccessor {
     void (*contentModifierButton)(Ark_NativePointer node,
                                   const Ark_Object* contentModifier,
                                   const ButtonModifierBuilder* builder);
-    void (*contentModifierCheckBox)(Ark_NativePointer node,
+    void (*resetContentModifierButton)(Ark_NativePointer node);
+    void (*contentModifierCheckbox)(Ark_NativePointer node,
                                     const Ark_Object* contentModifier,
                                     const CheckBoxModifierBuilder* builder);
-    void (*contentModifierDataPanel)(Ark_NativePointer node,
-                                     const Ark_Object* contentModifier,
-                                     const DataPanelModifierBuilder* builder);
-    void (*contentModifierGauge)(Ark_NativePointer node,
-                                 const Ark_Object* contentModifier,
-                                 const GaugeModifierBuilder* builder);
-    void (*contentModifierLoadingProgress)(Ark_NativePointer node,
-                                           const Ark_Object* contentModifier,
-                                           const LoadingProgressModifierBuilder* builder);
-    void (*contentModifierProgress)(Ark_NativePointer node,
-                                    const Ark_Object* contentModifier,
-                                    const ProgressModifierBuilder* builder);
+    void (*resetContentModifierCheckbox)(Ark_NativePointer node);
     void (*contentModifierRadio)(Ark_NativePointer node,
-                                 const Ark_Object* contentModifier,
+                                const Ark_Object* contentModifier,
                                  const RadioModifierBuilder* builder);
+    void (*resetContentModifierRadio)(Ark_NativePointer node);
     void (*contentModifierRating)(Ark_NativePointer node,
                                   const Ark_Object* contentModifier,
                                   const RatingModifierBuilder* builder);
-    void (*contentModifierMenuItem)(Ark_NativePointer node,
-                                    const Ark_Object* contentModifier,
-                                    const MenuItemModifierBuilder* builder);
+    void (*resetContentModifierRating)(Ark_NativePointer node);
     void (*contentModifierSlider)(Ark_NativePointer node,
                                   const Ark_Object* contentModifier,
                                   const SliderModifierBuilder* builder);
-    void (*contentModifierTextClock)(Ark_NativePointer node,
-                                     const Ark_Object* contentModifier,
-                                     const TextClockModifierBuilder* builder);
-    void (*contentModifierTextTimer)(Ark_NativePointer node,
-                                     const Ark_Object* contentModifier,
-                                     const TextTimerModifierBuilder* builder);
+    void (*resetContentModifierSlider)(Ark_NativePointer node);
     void (*contentModifierToggle)(Ark_NativePointer node,
                                   const Ark_Object* contentModifier,
                                   const ToggleModifierBuilder* builder);
+    void (*resetContentModifieToggle)(Ark_NativePointer node);
 } GENERATED_ArkUIContentModifierHelperAccessor;
 
 typedef struct GENERATED_ArkUIContextAccessor {

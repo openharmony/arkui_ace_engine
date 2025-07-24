@@ -4924,6 +4924,11 @@ ASSIGN_OPT(Opt_Union_ImageAttachmentInterface_Opt_AttachmentType)
 ASSIGN_OPT(Opt_PopupButton)
 ASSIGN_OPT(Opt_PopupOptions)
 ASSIGN_OPT(Opt_RadioModifierBuilder)
+ASSIGN_OPT(Opt_ButtonModifierBuilder)
+ASSIGN_OPT(Opt_CheckBoxModifierBuilder)
+ASSIGN_OPT(Opt_RatingModifierBuilder)
+ASSIGN_OPT(Opt_ToggleModifierBuilder)
+ASSIGN_OPT(Opt_SliderModifierBuilder)
 #undef ASSIGN_OPT
 }
 

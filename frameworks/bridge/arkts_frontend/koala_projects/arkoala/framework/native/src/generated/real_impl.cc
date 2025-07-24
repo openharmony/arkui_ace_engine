@@ -21374,6 +21374,56 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     void ResetContentModifierRadioImpl(Ark_NativePointer node)
     {
     }
+
+    void ContentModifierButtonImpl(Ark_NativePointer node,
+                                   const Ark_Object* contentModifier,
+                                   const ButtonModifierBuilder* builder)
+    {
+    }
+
+    void ResetContentModifierButtonImpl(Ark_NativePointer node)
+    {
+    }
+
+    void ContentModifierCheckBoxImpl(Ark_NativePointer node,
+                                     const Ark_Object* contentModifier,
+                                     const CheckBoxModifierBuilder* builder)
+    {
+    }
+
+    void ResetContentModifierCheckBoxImpl(Ark_NativePointer node)
+    {
+    }
+
+    void ContentModifierRatingImpl(Ark_NativePointer node,
+                                   const Ark_Object* contentModifier,
+                                   const RatingModifierBuilder* builder)
+    {
+    }
+
+    void ResetContentModifierRatingImpl(Ark_NativePointer node)
+    {
+    }
+
+    void ContentModifierSliderImpl(Ark_NativePointer node,
+                                   const Ark_Object* contentModifier,
+                                   const SliderModifierBuilder* builder)
+    {
+    }
+
+    void ResetContentModifierSliderImpl(Ark_NativePointer node)
+    {
+    }
+
+    void ContentModifierToggleImpl(Ark_NativePointer node,
+                                   const Ark_Object* contentModifier,
+                                   const ToggleModifierBuilder* builder)
+    {
+    }
+
+    void ResetContentModifierToggleImpl(Ark_NativePointer node)
+    {
+    } 
     }
     const GENERATED_ArkUIAlphabetIndexerOpsAccessor* GetAlphabetIndexerOpsAccessor()
     {
@@ -25450,6 +25500,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUIContentModifierHelperAccessor ContentModifierHelperAccessorImpl {
             ContentModifierHelperAccessor::ContentModifierRadioImpl,
             ContentModifierHelperAccessor::ResetContentModifierRadioImpl,
+            ContentModifierHelperAccessor::ContentModifierButtonImpl,
+            ContentModifierHelperAccessor::ResetContentModifierButtonImpl,
+            ContentModifierHelperAccessor::ContentModifierCheckBoxImpl,
+            ContentModifierHelperAccessor::ResetContentModifierCheckBoxImpl,
+            ContentModifierHelperAccessor::ContentModifierRatingImpl,
+            ContentModifierHelperAccessor::ResetContentModifierRatingImpl,
+            ContentModifierHelperAccessor::ContentModifierSliderImpl,
+            ContentModifierHelperAccessor::ResetContentModifieSliderImpl,
+            ContentModifierHelperAccessor::ContentModifierToggleImpl,
+            ContentModifierHelperAccessor::ResetContentModifieToggleImpl,
         };
         return &ContentModifierHelperAccessorImpl;
     }

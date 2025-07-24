@@ -1088,10 +1088,12 @@ typedef struct AsyncCallback_Array_TextMenuItem_Array_TextMenuItem AsyncCallback
 typedef struct Opt_AsyncCallback_Array_TextMenuItem_Array_TextMenuItem Opt_AsyncCallback_Array_TextMenuItem_Array_TextMenuItem;
 typedef struct AsyncCallback_image_PixelMap_Void AsyncCallback_image_PixelMap_Void;
 typedef struct Opt_AsyncCallback_image_PixelMap_Void Opt_AsyncCallback_image_PixelMap_Void;
-typedef struct AsyncCallback_TextMenuItem_TextRange_Boolean AsyncCallback_TextMenuItem_TextRange_Boolean;
-typedef struct Opt_AsyncCallback_TextMenuItem_TextRange_Boolean Opt_AsyncCallback_TextMenuItem_TextRange_Boolean;
+typedef struct ButtonModifierBuilder ButtonModifierBuilder;
+typedef struct Opt_ButtonModifierBuilder Opt_ButtonModifierBuilder;
 typedef struct ButtonTriggerClickCallback ButtonTriggerClickCallback;
 typedef struct Opt_ButtonTriggerClickCallback Opt_ButtonTriggerClickCallback;
+typedef struct AsyncCallback_TextMenuItem_TextRange_Boolean AsyncCallback_TextMenuItem_TextRange_Boolean;
+typedef struct Opt_AsyncCallback_TextMenuItem_TextRange_Boolean Opt_AsyncCallback_TextMenuItem_TextRange_Boolean;
 typedef struct Callback_Any_Void Callback_Any_Void;
 typedef struct Opt_Callback_Any_Void Opt_Callback_Any_Void;
 typedef struct Callback_Area_Area_Void Callback_Area_Area_Void;
@@ -1447,6 +1449,8 @@ typedef struct Opt_Callback_WithThemeAttribute_Void Opt_Callback_WithThemeAttrib
 typedef struct Callback_WrappedBuilder_Args_Void Callback_WrappedBuilder_Args_Void;
 typedef struct Opt_Callback_WrappedBuilder_Args_Void Opt_Callback_WrappedBuilder_Args_Void;
 typedef struct ContentDidScrollCallback ContentDidScrollCallback;
+typedef struct CheckBoxModifierBuilder CheckBoxModifierBuilder;
+typedef struct Opt_CheckBoxModifierBuilder Opt_CheckBoxModifierBuilder;
 typedef struct Opt_ContentDidScrollCallback Opt_ContentDidScrollCallback;
 typedef struct ContentWillScrollCallback ContentWillScrollCallback;
 typedef struct Opt_ContentWillScrollCallback Opt_ContentWillScrollCallback;
@@ -1672,6 +1676,8 @@ typedef struct SideBarWidthCallback SideBarWidthCallback;
 typedef struct Opt_SideBarWidthCallback Opt_SideBarWidthCallback;
 typedef struct SizeChangeCallback SizeChangeCallback;
 typedef struct Opt_SizeChangeCallback Opt_SizeChangeCallback;
+typedef struct SliderModifierBuilder SliderModifierBuilder;
+typedef struct Opt_SliderModifierBuilder Opt_SliderModifierBuilder;
 typedef struct SliderTriggerChangeCallback SliderTriggerChangeCallback;
 typedef struct Opt_SliderTriggerChangeCallback Opt_SliderTriggerChangeCallback;
 typedef struct StepperIndexCallback StepperIndexCallback;
@@ -1696,6 +1702,8 @@ typedef struct TextPickerValueCallback TextPickerValueCallback;
 typedef struct Opt_TextPickerValueCallback Opt_TextPickerValueCallback;
 typedef struct TextTimerAttribute_onTimer_event_type TextTimerAttribute_onTimer_event_type;
 typedef struct Opt_TextTimerAttribute_onTimer_event_type Opt_TextTimerAttribute_onTimer_event_type;
+typedef struct ToggleModifierBuilder ToggleModifierBuilder;
+typedef struct Opt_ToggleModifierBuilder Opt_ToggleModifierBuilder;
 typedef struct TimePickerSelectedCallback TimePickerSelectedCallback;
 typedef struct Opt_TimePickerSelectedCallback Opt_TimePickerSelectedCallback;
 typedef struct TransitionFinishCallback TransitionFinishCallback;
@@ -1774,6 +1782,8 @@ typedef struct Ark_BrightnessBlender Ark_BrightnessBlender;
 typedef struct Opt_BrightnessBlender Opt_BrightnessBlender;
 typedef struct Ark_BusinessError Ark_BusinessError;
 typedef struct Opt_BusinessError Opt_BusinessError;
+typedef struct Ark_ButtonConfiguration Ark_ButtonConfiguration;
+typedef struct Opt_ButtonConfiguration Opt_ButtonConfiguration;
 typedef struct Ark_ButtonOptions Ark_ButtonOptions;
 typedef struct Opt_ButtonOptions Opt_ButtonOptions;
 typedef struct Ark_CalendarDay Ark_CalendarDay;
@@ -1790,6 +1800,8 @@ typedef struct Ark_ChainAnimationOptions Ark_ChainAnimationOptions;
 typedef struct Opt_ChainAnimationOptions Opt_ChainAnimationOptions;
 typedef struct Ark_ChainWeightOptions Ark_ChainWeightOptions;
 typedef struct Opt_ChainWeightOptions Opt_ChainWeightOptions;
+typedef struct Ark_CheckBoxConfiguration Ark_CheckBoxConfiguration;
+typedef struct Opt_CheckBoxConfiguration Opt_CheckBoxConfiguration;
 typedef struct Ark_CheckboxGroupOptions Ark_CheckboxGroupOptions;
 typedef struct Opt_CheckboxGroupOptions Opt_CheckboxGroupOptions;
 typedef struct Ark_CheckboxGroupResult Ark_CheckboxGroupResult;
@@ -2288,12 +2300,16 @@ typedef struct Ark_RadioConfiguration Ark_RadioConfiguration;
 typedef struct Opt_RadioConfiguration Opt_RadioConfiguration;
 typedef struct RadioModifierBuilder RadioModifierBuilder;
 typedef struct Opt_RadioModifierBuilder Opt_RadioModifierBuilder;
+typedef struct RatingModifierBuilder RatingModifierBuilder;
+typedef struct Opt_RatingModifierBuilder Opt_RatingModifierBuilder;
 typedef struct Ark_ProgressStyleOptions Ark_ProgressStyleOptions;
 typedef struct Opt_ProgressStyleOptions Opt_ProgressStyleOptions;
 typedef struct Ark_RadialGradientOptions Ark_RadialGradientOptions;
 typedef struct Opt_RadialGradientOptions Opt_RadialGradientOptions;
 typedef struct Ark_RadioOptions Ark_RadioOptions;
 typedef struct Opt_RadioOptions Opt_RadioOptions;
+typedef struct Ark_RatingConfiguration Ark_RatingConfiguration;
+typedef struct Opt_RatingConfiguration Opt_RatingConfiguration;
 typedef struct Ark_RatingOptions Ark_RatingOptions;
 typedef struct Opt_RatingOptions Opt_RatingOptions;
 typedef struct Ark_Rectangle Ark_Rectangle;
@@ -2382,6 +2398,8 @@ typedef struct Ark_SizeOptions Ark_SizeOptions;
 typedef struct Opt_SizeOptions Opt_SizeOptions;
 typedef struct Ark_SlideRange Ark_SlideRange;
 typedef struct Opt_SlideRange Opt_SlideRange;
+typedef struct Ark_SliderConfiguration Ark_SliderConfiguration;
+typedef struct Opt_SliderConfiguration Opt_SliderConfiguration;
 typedef struct Ark_SliderOptions Ark_SliderOptions;
 typedef struct Opt_SliderOptions Opt_SliderOptions;
 typedef struct Ark_SnapshotOptions Ark_SnapshotOptions;
@@ -2449,6 +2467,8 @@ typedef struct Ark_TimePickerOptions Ark_TimePickerOptions;
 typedef struct Opt_TimePickerOptions Opt_TimePickerOptions;
 typedef struct Ark_TipsMessageType Ark_TipsMessageType;
 typedef struct Opt_TipsMessageType Opt_TipsMessageType;
+typedef struct Ark_ToggleConfiguration Ark_ToggleConfiguration;
+typedef struct Opt_ToggleConfiguration Opt_ToggleConfiguration;
 typedef struct Ark_TipsOptions Ark_TipsOptions;
 typedef struct Opt_TipsOptions Opt_TipsOptions;
 typedef struct Ark_ToggleOptions Ark_ToggleOptions;
@@ -9272,6 +9292,26 @@ typedef struct Opt_AsyncCallback_image_PixelMap_Void {
     Ark_Tag tag;
     AsyncCallback_image_PixelMap_Void value;
 } Opt_AsyncCallback_image_PixelMap_Void;
+typedef struct ButtonModifierBuilder {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Ark_ButtonConfiguration config, const Callback_Pointer_Void continuation);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Ark_ButtonConfiguration config, const Callback_Pointer_Void continuation);
+} ButtonModifierBuilder;
+typedef struct Opt_ButtonModifierBuilder {
+    Ark_Tag tag;
+    ButtonModifierBuilder value;
+} Opt_ButtonModifierBuilder;
+typedef struct ButtonTriggerClickCallback {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_Number xPos, const Ark_Number yPos);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number xPos, const Ark_Number yPos);
+} ButtonTriggerClickCallback;
+typedef struct Opt_ButtonTriggerClickCallback {
+    Ark_Tag tag;
+    ButtonTriggerClickCallback value;
+} Opt_ButtonTriggerClickCallback;
 typedef struct AsyncCallback_TextMenuItem_TextRange_Boolean {
     Ark_CallbackResource resource;
     void (*call)(const Ark_Int32 resourceId, const Ark_TextMenuItem menuItem, const Ark_TextRange range, const Callback_Boolean_Void continuation);
@@ -9281,15 +9321,6 @@ typedef struct Opt_AsyncCallback_TextMenuItem_TextRange_Boolean {
     Ark_Tag tag;
     AsyncCallback_TextMenuItem_TextRange_Boolean value;
 } Opt_AsyncCallback_TextMenuItem_TextRange_Boolean;
-typedef struct ButtonTriggerClickCallback {
-    Ark_CallbackResource resource;
-    void (*call)(const Ark_Int32 resourceId, const Ark_Number xPos, const Ark_Number yPos);
-    void (*callSync)(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_Number xPos, const Ark_Number yPos);
-} ButtonTriggerClickCallback;
-typedef struct Opt_ButtonTriggerClickCallback {
-    Ark_Tag tag;
-    ButtonTriggerClickCallback value;
-} Opt_ButtonTriggerClickCallback;
 typedef struct Callback_Any_Void {
     Ark_CallbackResource resource;
     void (*call)(const Ark_Int32 resourceId, const Ark_Object info);
@@ -10860,6 +10891,16 @@ typedef struct Opt_Callback_Void {
     Ark_Tag tag;
     Callback_Void value;
 } Opt_Callback_Void;
+typedef struct CheckBoxModifierBuilder {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Ark_CheckBoxConfiguration config, const Callback_Pointer_Void continuation);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Ark_CheckBoxConfiguration config, const Callback_Pointer_Void continuation);
+} CheckBoxModifierBuilder;
+typedef struct Opt_CheckBoxModifierBuilder {
+    Ark_Tag tag;
+    CheckBoxModifierBuilder value;
+} Opt_CheckBoxModifierBuilder;
 typedef struct Callback_WebKeyboardOptions_Void {
     Ark_CallbackResource resource;
     void (*call)(const Ark_Int32 resourceId, const Ark_WebKeyboardOptions value);
@@ -11677,6 +11718,16 @@ typedef struct Opt_ReceiveCallback {
     Ark_Tag tag;
     ReceiveCallback value;
 } Opt_ReceiveCallback;
+typedef struct RatingModifierBuilder {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Ark_RatingConfiguration config, const Callback_Pointer_Void continuation);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Ark_RatingConfiguration config, const Callback_Pointer_Void continuation);
+} RatingModifierBuilder;
+typedef struct Opt_RatingModifierBuilder {
+    Ark_Tag tag;
+    RatingModifierBuilder value;
+} Opt_RatingModifierBuilder;
 typedef struct RefreshingCallback {
     Ark_CallbackResource resource;
     void (*call)(const Ark_Int32 resourceId, const Ark_Boolean refreshing);
@@ -11902,6 +11953,16 @@ typedef struct Opt_SizeChangeCallback {
     Ark_Tag tag;
     SizeChangeCallback value;
 } Opt_SizeChangeCallback;
+typedef struct SliderModifierBuilder {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Ark_SliderConfiguration config, const Callback_Pointer_Void continuation);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Ark_SliderConfiguration config, const Callback_Pointer_Void continuation);
+} SliderModifierBuilder;
+typedef struct Opt_SliderModifierBuilder {
+    Ark_Tag tag;
+    SliderModifierBuilder value;
+} Opt_SliderModifierBuilder;
 typedef struct SliderTriggerChangeCallback {
     Ark_CallbackResource resource;
     void (*call)(const Ark_Int32 resourceId, const Ark_Number value, Ark_SliderChangeMode mode);
@@ -12019,6 +12080,16 @@ typedef struct Opt_TextTimerAttribute_onTimer_event_type {
     Ark_Tag tag;
     TextTimerAttribute_onTimer_event_type value;
 } Opt_TextTimerAttribute_onTimer_event_type;
+typedef struct ToggleModifierBuilder {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Ark_ToggleConfiguration config, const Callback_Pointer_Void continuation);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Ark_ToggleConfiguration config, const Callback_Pointer_Void continuation);
+} ToggleModifierBuilder;
+typedef struct Opt_ToggleModifierBuilder {
+    Ark_Tag tag;
+    ToggleModifierBuilder value;
+} Opt_ToggleModifierBuilder;
 typedef struct TimePickerSelectedCallback {
     Ark_CallbackResource resource;
     void (*call)(const Ark_Int32 resourceId, const Ark_Date selected);
@@ -12308,6 +12379,16 @@ typedef struct Opt_BusinessError {
     Ark_Tag tag;
     Ark_BusinessError value;
 } Opt_BusinessError;
+typedef struct Ark_ButtonConfiguration {
+    Ark_Boolean enabled;
+    Ark_String label;
+    Ark_Boolean pressed;
+    ButtonTriggerClickCallback triggerClick;
+} Ark_ButtonConfiguration;
+typedef struct Opt_ButtonConfiguration {
+    Ark_Tag tag;
+    Ark_ButtonConfiguration value;
+} Opt_ButtonConfiguration;
 typedef struct Ark_ButtonOptions {
     Opt_ButtonType type;
     Opt_Boolean stateEffect;
@@ -12394,6 +12475,16 @@ typedef struct Opt_ChainWeightOptions {
     Ark_Tag tag;
     Ark_ChainWeightOptions value;
 } Opt_ChainWeightOptions;
+typedef struct Ark_CheckBoxConfiguration {
+    Ark_Boolean enabled;
+    Ark_String name;
+    Ark_Boolean selected;
+    Callback_Boolean_Void triggerChange;
+} Ark_CheckBoxConfiguration;
+typedef struct Opt_CheckBoxConfiguration {
+    Ark_Tag tag;
+    Ark_CheckBoxConfiguration value;
+} Opt_CheckBoxConfiguration;
 typedef struct Ark_CheckboxGroupOptions {
     Opt_String group;
 } Ark_CheckboxGroupOptions;
@@ -14427,6 +14518,18 @@ typedef struct Opt_RadioOptions {
     Ark_Tag tag;
     Ark_RadioOptions value;
 } Opt_RadioOptions;
+typedef struct Ark_RatingConfiguration {
+    Ark_Boolean enabled;
+    Ark_Number rating;
+    Ark_Boolean indicator;
+    Ark_Number stars;
+    Ark_Number stepSize;
+    Callback_Number_Void triggerChange;
+} Ark_RatingConfiguration;
+typedef struct Opt_RatingConfiguration {
+    Ark_Tag tag;
+    Ark_RatingConfiguration value;
+} Opt_RatingConfiguration;
 typedef struct Ark_RatingOptions {
     Ark_Number rating;
     Opt_Boolean indicator;
@@ -14786,6 +14889,18 @@ typedef struct Opt_SlideRange {
     Ark_Tag tag;
     Ark_SlideRange value;
 } Opt_SlideRange;
+typedef struct Ark_SliderConfiguration {
+    Ark_Boolean enabled;
+    Ark_Number value;
+    Ark_Number min;
+    Ark_Number max;
+    Ark_Number step;
+    SliderTriggerChangeCallback triggerChange;
+} Ark_SliderConfiguration;
+typedef struct Opt_SliderConfiguration {
+    Ark_Tag tag;
+    Ark_SliderConfiguration value;
+} Opt_SliderConfiguration;
 typedef struct Ark_SliderOptions {
     Opt_Number value;
     Opt_Number min;
@@ -15081,6 +15196,15 @@ typedef struct Opt_TipsMessageType {
     Ark_Tag tag;
     Ark_TipsMessageType value;
 } Opt_TipsMessageType;
+typedef struct Ark_ToggleConfiguration {
+    Ark_Boolean enabled;
+    Ark_Boolean isOn;
+    Callback_Boolean_Void triggerChange;
+} Ark_ToggleConfiguration;
+typedef struct Opt_ToggleConfiguration {
+    Ark_Tag tag;
+    Ark_ToggleConfiguration value;
+} Opt_ToggleConfiguration;
 typedef struct Ark_TipsOptions {
     Opt_Number appearingTime;
     Opt_Number disappearingTime;
@@ -28110,10 +28234,30 @@ typedef struct GENERATED_ArkUIRouterExtenderAccessor {
 } GENERATED_ArkUIRouterExtenderAccessor;
 
 typedef struct GENERATED_ArkUIContentModifierHelperAccessor {
+    void (*contentModifierButton)(Ark_NativePointer node,
+                                  const Ark_Object* contentModifier,
+                                  const ButtonModifierBuilder* builder);
+    void (*resetContentModifierButton)(Ark_NativePointer node);
+    void (*contentModifierCheckbox)(Ark_NativePointer node,
+                                    const Ark_Object* contentModifier,
+                                    const CheckBoxModifierBuilder* builder);
+    void (*resetContentModifierCheckbox)(Ark_NativePointer node);
     void (*contentModifierRadio)(Ark_NativePointer node,
                                 const Ark_Object* contentModifier,
-                                const RadioModifierBuilder* builder);
+                                 const RadioModifierBuilder* builder);
     void (*resetContentModifierRadio)(Ark_NativePointer node);
+    void (*contentModifierRating)(Ark_NativePointer node,
+                                  const Ark_Object* contentModifier,
+                                  const RatingModifierBuilder* builder);
+    void (*resetContentModifierRating)(Ark_NativePointer node);
+    void (*contentModifierSlider)(Ark_NativePointer node,
+                                  const Ark_Object* contentModifier,
+                                  const SliderModifierBuilder* builder);
+    void (*resetContentModifierSlider)(Ark_NativePointer node);
+    void (*contentModifierToggle)(Ark_NativePointer node,
+                                  const Ark_Object* contentModifier,
+                                  const ToggleModifierBuilder* builder);
+    void (*resetContentModifierToggle)(Ark_NativePointer node);
 } GENERATED_ArkUIContentModifierHelperAccessor;
 
 /**
