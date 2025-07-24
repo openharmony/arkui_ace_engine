@@ -113,6 +113,9 @@ export class CommonMethodModifier implements CommonMethod {
    _groupDefaultFocus_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
    _groupDefaultFocus_value?: boolean | undefined
 
+   _focusOnTouch_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+   _focusOnTouch_value?: boolean | undefined
+
    _focusBox_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
    _focusBox_value?: FocusBoxStyle | undefined
 
@@ -408,6 +411,15 @@ export class CommonMethodModifier implements CommonMethod {
        this._groupDefaultFocus_flag = AttributeUpdaterFlag.UPDATE
      } else {
        this._groupDefaultFocus_flag = AttributeUpdaterFlag.SKIP
+     }
+     return this
+   }
+   public focusOnTouch(value: boolean | undefined): this {
+     if (this._focusOnTouch_flag === AttributeUpdaterFlag.INITIAL || this._focusOnTouch_value !== value) {
+       this._focusOnTouch_value = value
+       this._focusOnTouch_flag = AttributeUpdaterFlag.UPDATE
+     } else {
+       this._focusOnTouch_flag = AttributeUpdaterFlag.SKIP
      }
      return this
    }
@@ -1038,6 +1050,23 @@ export class CommonMethodModifier implements CommonMethod {
          default: {
            this._groupDefaultFocus_flag = AttributeUpdaterFlag.INITIAL
            peerNode.groupDefaultFocusAttribute(undefined)
+         }
+       }
+     }
+     if (this._focusOnTouch_flag != AttributeUpdaterFlag.INITIAL) {
+       switch (this._focusOnTouch_flag) {
+         case AttributeUpdaterFlag.UPDATE: {
+           peerNode.focusOnTouchAttribute((this._focusOnTouch_value as (boolean | undefined)))
+           this._focusOnTouch_flag = AttributeUpdaterFlag.RESET
+           break
+         }
+         case AttributeUpdaterFlag.SKIP: {
+           this._focusOnTouch_flag = AttributeUpdaterFlag.RESET
+           break
+         }
+         default: {
+           this._focusOnTouch_flag = AttributeUpdaterFlag.INITIAL
+           peerNode.focusOnTouchAttribute(undefined)
          }
        }
      }
@@ -1761,6 +1790,18 @@ if (value._backgroundImage_flag != AttributeUpdaterFlag.INITIAL) {
          }
          default: {
            this.groupDefaultFocus(undefined)
+         }
+       }
+     }
+     if (value._focusOnTouch_flag != AttributeUpdaterFlag.INITIAL) {
+       switch (value._focusOnTouch_flag) {
+         case AttributeUpdaterFlag.UPDATE:
+         case AttributeUpdaterFlag.SKIP: {
+           this.focusOnTouch(value._focusOnTouch_value)
+           break
+         }
+         default: {
+           this.focusOnTouch(undefined)
          }
        }
      }

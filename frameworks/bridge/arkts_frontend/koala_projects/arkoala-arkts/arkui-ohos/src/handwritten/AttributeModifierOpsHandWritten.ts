@@ -23,6 +23,8 @@ import { TextModifier } from '../TextModifier';
 import { ButtonModifier } from "../ButtonModifier";
 import { SymbolGlyphModifier } from '../SymbolGlyphModifier';
 import { Resource } from "global.resource"
+import { ColumnModifier } from '../ColumnModifier';
+import { ArkColumnComponent, ColumnAttribute, ArkColumnPeer } from '../component/column'
 import { runtimeType, RuntimeType } from "@koalaui/interop"
 export function hookButtonAttributeModifier(component: ArkButtonComponent, modifier: AttributeModifier<ButtonAttribute> | AttributeModifier<CommonMethod> | undefined): void {
     if (modifier === undefined) {
@@ -146,4 +148,36 @@ export function hookSymbolGlyphAttributeModifier(component: ArkSymbolGlyphCompon
         return componentNew;
     };
     applyAttributeModifierBase(modifier as Object as AttributeModifier<SymbolGlyphAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
+}
+export function hookColumnAttributeModifier(component: ArkColumnComponent,
+    modifier: AttributeModifier<ColumnAttribute> | AttributeModifier<CommonMethod> | undefined): void {
+    if (modifier === undefined) {
+        return;
+    }
+    let isCommonModifier: boolean = modifier instanceof CommonModifier;
+    if (isCommonModifier) {
+        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
+        return;
+    }
+    let attributeSet = (): ColumnModifier => {
+        let isColumnModifier: boolean = modifier instanceof ColumnModifier;
+        let initModifier = component.getPeer()._attributeSet ? component.getPeer()._attributeSet! : new ColumnModifier();
+        if (isColumnModifier) {
+            let ColumnModifier = modifier as object as ColumnModifier;
+            initModifier.mergeModifier(ColumnModifier);
+            component.getPeer()._attributeSet = initModifier;
+            return initModifier;
+        } else {
+            component.getPeer()._attributeSet = initModifier;
+            return initModifier;
+        }
+    }
+    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+    };
+    let updaterReceiver = (): ArkColumnComponent => {
+        let componentNew: ArkColumnComponent = new ArkColumnComponent();
+        componentNew.setPeer(component.getPeer());
+        return componentNew;
+    };
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<ColumnAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
 }

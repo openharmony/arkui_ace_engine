@@ -29,9 +29,11 @@ import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Resource } from "global.resource"
 import { ArkColumnNode } from '../handwritten/modifiers/ArkColumnNode';
-import { ArkColumnAttributeSet, ColumnModifier } from '../ColumnModifier';
+import { ColumnModifier } from '../ColumnModifier'
+import { hookColumnAttributeModifier } from '../handwritten'
 
 export class ArkColumnPeer extends ArkCommonMethodPeer {
+    _attributeSet?:ColumnModifier;
     constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -134,10 +136,11 @@ export interface ColumnOptionsV2 {
     stub: string;
 }
 export interface ColumnAttribute extends CommonMethod {
-    alignItems(value: HorizontalAlign | undefined): this
-    justifyContent(value: FlexAlign | undefined): this
-    pointLight(value: PointLightStyle | undefined): this
-    reverse(value: boolean | undefined): this
+    alignItems(value: HorizontalAlign | undefined): this {return this;}
+    justifyContent(value: FlexAlign | undefined): this {return this;}
+    pointLight(value: PointLightStyle | undefined): this {return this;}
+    reverse(value: boolean | undefined): this {return this;}
+    attributeModifier(value: AttributeModifier<ColumnAttribute> | AttributeModifier<CommonMethod>| undefined): this { return this;}
 }
 export class ArkColumnStyle extends ArkCommonMethodStyle implements ColumnAttribute {
     alignItems_value?: HorizontalAlign | undefined
@@ -211,6 +214,11 @@ export class ArkColumnComponent extends ArkCommonMethodComponent implements Colu
         return this
     }
     
+    public attributeModifier(modifier: AttributeModifier<ColumnAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        hookColumnAttributeModifier(this, modifier)
+        return this
+    }
+
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
