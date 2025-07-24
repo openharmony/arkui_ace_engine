@@ -117,7 +117,15 @@ class AniStorage implements IAniStorage {
 class PersistentStorage {
     private static instance_: PersistentStorage | undefined = undefined;
     private map_: TypedMap = new TypedMap();
-    private simpleTypeSet: Set<Type> = new Set<Type>([Type.from<number>(), Type.from<string>(), Type.from<boolean>()]);
+    private simpleTypeSet: Set<Type> = new Set<Type>([
+        Type.from<int>(),
+        Type.from<long>(),
+        Type.from<float>(),
+        Type.from<double>(),
+        Type.from<number>(),
+        Type.from<string>(),
+        Type.from<boolean>(),
+    ]);
     private readonly storage_: IAniStorage = new AniStorage();
 
     private static getOrCreate(): PersistentStorage {
@@ -176,7 +184,7 @@ class PersistentStorage {
             }
 
             // case 1: property exists in storage already and start to persist it
-            if (AppStorage.keySets().has(key)) {
+            if (AppStorage.has(key)) {
                 const success = PersistentStorage.getOrCreate().__startToPersistStorageProperty<T>(key, ttype, toJson);
                 if (!success) {
                     StateMgmtConsole.log(`Failed to start persistence for existing key ${key}`);

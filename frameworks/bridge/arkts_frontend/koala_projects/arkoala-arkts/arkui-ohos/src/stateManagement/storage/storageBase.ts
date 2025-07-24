@@ -64,23 +64,12 @@ export class StorageProperty<T> extends StateDecoratedVariable<T> implements IDe
         return new StorageLinkDecoratedVariable<T>(owner, propertyNameInAppStorage, varName, this, get, set, watchFunc);
     }
 
-    public registerWatch<T>(link: DecoratedV1VariableBase<T>): WatchIdType {
-        const weakLink = new WeakRef<DecoratedV1VariableBase<T>>(link);
-        const watchObj = new WatchFunc((_: string) => {});
-        const watchFunc: WatchFuncType = (_: string) => {
-            const link = weakLink.deref();
-            if (link) {
-                link.execWatchFuncs();
-            } else {
-                this._watchFuncs.delete(watchObj.id());
-            }
-        };
-        watchObj.setFunc(watchFunc);
-        this._watchFuncs.set(watchObj.id(), watchObj);
-        link.setMyTriggerFromSourceWatchId(watchObj.id());
-        this.finalizationRegistry_.register(link, watchObj.id());
-        this.refRegistrations_.add(watchObj.id());
-        return watchObj.id();
+    public registerWatchToStorageSource(link: DecoratedV1VariableBase<T>): WatchIdType {
+        const watchId = this.registerWatchToSource(link as IDecoratedV1Variable<T>);
+        link.setMyTriggerFromSourceWatchId(watchId);
+        this.finalizationRegistry_.register(link, watchId);
+        this.refRegistrations_.add(watchId);
+        return watchId;
     }
 
     public __unregister(registrationId: WatchIdType): void {
@@ -184,7 +173,7 @@ export class StorageBase {
         }
         const ap = sp.mkRef(key, ttype);
 
-        sp.registerWatch<T>(ap);
+        sp.registerWatchToStorageSource(ap);
         return ap;
     }
 
@@ -226,7 +215,7 @@ export class StorageBase {
         );
         const sLink = sp.makeStorageLink(owner, key, varName, watchFunc);
 
-        sp.registerWatch<T>(sLink);
+        sp.registerWatchToStorageSource(sLink);
         return sLink;
     }
 
