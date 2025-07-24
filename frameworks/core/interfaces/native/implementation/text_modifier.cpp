@@ -35,7 +35,7 @@ struct FontSettingOptions {
 };
 
 struct TextOptions {
-    TextControllerPeer* peer;
+    TextControllerPeer* peer = nullptr;
 };
 
 template<>
@@ -517,7 +517,6 @@ void OnCopyImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
         return;
     }
     auto onCopy = [arkCallback = CallbackHelper(*optValue)](const std::u16string& param) {
@@ -577,7 +576,6 @@ void OnTextSelectionChangeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
         return;
     }
     auto onSelectionChange = [arkCallback = CallbackHelper(*optValue)](int32_t start, int32_t end) {
@@ -612,7 +610,6 @@ void OnMarqueeStateChangeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
         return;
     }
     auto modelCallback = [callbackHelper = CallbackHelper(*optValue)](int32_t marqueeState) {
@@ -643,7 +640,6 @@ void EditMenuOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
         return;
     }
     auto onCreateMenuCallback = [arkCreateMenu = CallbackHelper(optValue->onCreateMenu)](

@@ -67,7 +67,9 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved) {
         }
         registerNatives(env, nativeModule, JniExports::getInstance()->getMethods(*it));
     }
-    if (!setKoalaJniCallbackDispatcher(env, defaultNativeModule, callCallbackFromNative, callCallbackFromNativeSig)) return JNI_ERR;
+    if (!setKoalaJniCallbackDispatcher(env, defaultNativeModule, callCallbackFromNative, callCallbackFromNativeSig)) {
+        return JNI_ERR;
+    }
     return JNI_VERSION_1_8;
 }
 

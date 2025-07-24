@@ -214,7 +214,7 @@ Ark_Boolean GetModifierKeyStateImpl(Ark_VMContext vmContext,
     CHECK_NULL_RETURN(info, defaultValue);
     auto eventKeys = info->GetPressedKeyCodes();
     auto keysStr = Converter::Convert<std::vector<std::string>>(*keys);
-    return Converter::ArkValue<Ark_Boolean>(AccessorUtils::CheckKeysPressed(keysStr, eventKeys));
+    return Converter::ArkValue<Ark_Boolean>(OHOS::Ace::NG::AccessorUtils::CheckKeysPressed(keysStr, eventKeys));
 }
 void ExecuteDropAnimationImpl(Ark_DragEvent peer,
                               const Callback_Void* customDropAnimation)

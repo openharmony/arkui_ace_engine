@@ -21,10 +21,6 @@
 
 #include "convertors-jsc.h"
 
-// See https://github.com/BabylonJS/BabylonNative/blob/master/Dependencies/napi/napi-direct/source/js_native_api_javascriptcore.cc
-// for convertors logic.
-
-
 KInt* getInt32Elements(JSContextRef context, const JSValueRef arguments) {
     return getTypedElements<KInt>(context, arguments);
 }

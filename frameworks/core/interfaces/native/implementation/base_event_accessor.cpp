@@ -52,7 +52,7 @@ Ark_Boolean GetModifierKeyStateImpl(Ark_VMContext vmContext,
     CHECK_NULL_RETURN(keys, DefaultValueBoolean);
     auto eventKeys = peer->GetBaseInfo()->GetPressedKeyCodes();
     auto keysStr = Converter::Convert<std::vector<std::string>>(*keys);
-    return Converter::ArkValue<Ark_Boolean>(AccessorUtils::CheckKeysPressed(keysStr, eventKeys));
+    return Converter::ArkValue<Ark_Boolean>(OHOS::Ace::NG::AccessorUtils::CheckKeysPressed(keysStr, eventKeys));
 }
 Ark_EventTarget GetTargetImpl(Ark_BaseEvent peer)
 {

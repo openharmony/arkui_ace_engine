@@ -56,8 +56,12 @@ export class Finalizable {
         const handle = undefined
 
         if (this.managed) {
-            if (this.ptr == nullptr) throw new Error("Can't have nullptr ptr ${}")
-            if (this.finalizer == nullptr) throw new Error("Managed finalizer is 0")
+            if (this.ptr == nullptr) {
+                throw new Error("Can't have nullptr ptr ${}")
+            }
+            if (this.finalizer == nullptr) {
+                throw new Error("Managed finalizer is 0")
+            }
 
             const thunk = new NativeThunk(ptr, finalizer, handle)
             finalizerRegister(this, thunk)
@@ -80,15 +84,18 @@ export class Finalizable {
 
     release(): pointer {
         finalizerUnregister(this)
-        if (this.cleaner)
+        if (this.cleaner) {
             this.cleaner!.obj = nullptr
+        }
         let result = this.ptr
         this.ptr = nullptr
         return result
     }
 
     resetPeer(pointer: pointer) {
-        if (this.managed) throw new Error("Can only reset peer for an unmanaged object")
+        if (this.managed) {
+            throw new Error("Can only reset peer for an unmanaged object")
+        }
         this.ptr = pointer
     }
 

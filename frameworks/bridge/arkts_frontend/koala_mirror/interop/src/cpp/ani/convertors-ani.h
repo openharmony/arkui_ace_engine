@@ -134,15 +134,17 @@ template<>
 struct InteropTypeConverter<KInteropBuffer> {
     using InteropType = ani_fixedarray_byte;
     static inline KInteropBuffer convertFrom(ani_env* env, InteropType value) {
-      if (value == nullptr) return KInteropBuffer();
-      ani_size length = 0;
-      CHECK_ANI_FATAL(env->FixedArray_GetLength(value, &length));
-      KByte* data = new KByte[length];
-      CHECK_ANI_FATAL(env->FixedArray_GetRegion_Byte(value, 0, length, (ani_byte*)data));
-      KInteropBuffer result = { 0 };
-      result.data = data;
-      result.length = length;
-      return result;
+        if (value == nullptr) {
+            return KInteropBuffer();
+        }
+        ani_size length = 0;
+        CHECK_ANI_FATAL(env->FixedArray_GetLength(value, &length));
+        KByte* data = new KByte[length];
+        CHECK_ANI_FATAL(env->FixedArray_GetRegion_Byte(value, 0, length, (ani_byte*)data));
+        KInteropBuffer result = { 0 };
+        result.data = data;
+        result.length = length;
+        return result;
     }
     static inline InteropType convertTo(ani_env* env, KInteropBuffer value) {
       ani_fixedarray_byte result;
@@ -184,7 +186,9 @@ template<>
 struct InteropTypeConverter<KStringPtr> {
     using InteropType = ani_string;
     static KStringPtr convertFrom(ani_env* env, InteropType value) {
-        if (value == nullptr) return KStringPtr();
+        if (value == nullptr) {
+            return KStringPtr();
+        }
         KStringPtr result;
         // Notice that we use UTF length for buffer size, but counter is expressed in number of Unicode chars.
         ani_size lengthUtf8 = 0;
@@ -219,12 +223,14 @@ template<>
 struct InteropTypeConverter<KInt*> {
     using InteropType = ani_array_int;
     static KInt* convertFrom(ani_env* env, InteropType value) {
-      if (!value) return nullptr;
-      ani_size length = 0;
-      CHECK_ANI_FATAL(env->Array_GetLength(value, &length));
-      KInt* data = new KInt[length];
-      CHECK_ANI_FATAL(env->Array_GetRegion_Int(value, 0, length, (ani_int*)data));
-      return data;
+        if (!value) {
+            return nullptr;
+        }
+        ani_size length = 0;
+        CHECK_ANI_FATAL(env->Array_GetLength(value, &length));
+        KInt* data = new KInt[length];
+        CHECK_ANI_FATAL(env->Array_GetRegion_Int(value, 0, length, (ani_int*)data));
+        return data;
     }
     static InteropType convertTo(ani_env* env, KInt* value) = delete;
     static void release(ani_env* env, InteropType value, KInt* converted) {
@@ -241,12 +247,14 @@ template<>
 struct InteropTypeConverter<KFloat*> {
     using InteropType = ani_array_float;
     static KFloat* convertFrom(ani_env* env, InteropType value) {
-      if (!value) return nullptr;
-      ani_size length = 0;
-      CHECK_ANI_FATAL(env->Array_GetLength(value, &length));
-      KFloat* data = new KFloat[length];
-      CHECK_ANI_FATAL(env->Array_GetRegion_Float(value, 0, length, (ani_float*)data));
-      return data;
+        if (!value) {
+            return nullptr;
+        }
+        ani_size length = 0;
+        CHECK_ANI_FATAL(env->Array_GetLength(value, &length));
+        KFloat* data = new KFloat[length];
+        CHECK_ANI_FATAL(env->Array_GetRegion_Float(value, 0, length, (ani_float*)data));
+        return data;
     }
     static InteropType convertTo(ani_env* env, KFloat* value) = delete;
     static void release(ani_env* env, InteropType value, KFloat* converted) {
@@ -263,14 +271,16 @@ template<>
 struct InteropTypeConverter<KByte*> {
     using InteropType = ani_array_byte;
     static KByte* convertFrom(ani_env* env, InteropType value) {
-      if (!value) return nullptr;
-      ani_size length = 0;
-      CHECK_ANI_FATAL(env->Array_GetLength(value, &length));
-      KByte* data = new KByte[length];
-      if (length > 0) {
-          CHECK_ANI_FATAL(env->Array_GetRegion_Byte(value, 0, length, (ani_byte*)data));
-      }
-      return data;
+        if (!value) {
+            return nullptr;
+        }
+        ani_size length = 0;
+        CHECK_ANI_FATAL(env->Array_GetLength(value, &length));
+        KByte* data = new KByte[length];
+        if (length > 0) {
+            CHECK_ANI_FATAL(env->Array_GetRegion_Byte(value, 0, length, (ani_byte*)data));
+        }
+        return data;
     }
     static InteropType convertTo(ani_env* env, KByte* value) = delete;
     static void release(ani_env* env, InteropType value, KByte* converted) {
@@ -323,20 +333,24 @@ struct InteropTypeConverter<KLength> {
     ani_boolean isInstanceOf;
     CHECK_ANI_FATAL(env->Object_InstanceOf(valueObj, double_class, &isInstanceOf));
     if (isInstanceOf) {
-      static ani_method double_p = nullptr;
-      if (!double_p) CHECK_ANI_FATAL(env->Class_FindMethod(double_class, "unboxed", ":D", &double_p));
-      ani_double result;
-      CHECK_ANI_FATAL(env->Object_CallMethod_Double(valueObj, double_p, &result));
-      return KLength{ 1, (KFloat) result, 1, 0 };
+        static ani_method double_p = nullptr;
+        if (!double_p) {
+            CHECK_ANI_FATAL(env->Class_FindMethod(double_class, "unboxed", ":D", &double_p));
+        }
+        ani_double result;
+        CHECK_ANI_FATAL(env->Object_CallMethod_Double(valueObj, double_p, &result));
+        return KLength{ 1, (KFloat) result, 1, 0 };
     }
 
     CHECK_ANI_FATAL(env->Object_InstanceOf(valueObj, int_class, &isInstanceOf));
     if (isInstanceOf) {
-      static ani_method int_p = nullptr;
-      if (!int_p) CHECK_ANI_FATAL(env->Class_FindMethod(int_class, "unboxed", ":I", &int_p));
-      ani_int result;
-      CHECK_ANI_FATAL(env->Object_CallMethod_Int(valueObj, int_p, &result));
-      return KLength{ 1, (KFloat) result, 1, 0 };
+        static ani_method int_p = nullptr;
+        if (!int_p) {
+            CHECK_ANI_FATAL(env->Class_FindMethod(int_class, "unboxed", ":I", &int_p));
+        }
+        ani_int result;
+        CHECK_ANI_FATAL(env->Object_CallMethod_Int(valueObj, int_p, &result));
+        return KLength{ 1, (KFloat) result, 1, 0 };
     }
 
     CHECK_ANI_FATAL(env->Object_InstanceOf(valueObj, string_class, &isInstanceOf));
@@ -351,11 +365,13 @@ struct InteropTypeConverter<KLength> {
 
     CHECK_ANI_FATAL(env->Object_InstanceOf(valueObj, resource_class, &isInstanceOf));
     if (isInstanceOf) {
-      static ani_method resource_p = nullptr;
-      if (!resource_p) CHECK_ANI_FATAL(env->Class_FindMethod(resource_class, "<get>id",":D", &resource_p));
-      ani_double result;
-      CHECK_ANI_FATAL(env->Object_CallMethod_Double(valueObj, resource_p, &result));
-      return KLength{ 3, 0, 1, (KInt) result };
+        static ani_method resource_p = nullptr;
+        if (!resource_p) {
+            CHECK_ANI_FATAL(env->Class_FindMethod(resource_class, "<get>id", ":D", &resource_p));
+        }
+        ani_double result;
+        CHECK_ANI_FATAL(env->Object_CallMethod_Double(valueObj, resource_p, &result));
+        return KLength{ 3, 0, 1, (KInt) result };
     }
 
     return KLength( { 0, 0, 0, 0});

@@ -29,6 +29,7 @@ struct StyledStringPeer {
 
     static void Destroy(StyledStringPeer *peer)
     {
+        CHECK_NULL_VOID(peer);
         delete peer;
     }
 

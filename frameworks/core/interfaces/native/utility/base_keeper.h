@@ -28,10 +28,10 @@ template<typename ResourceDataT>
 class BaseKeeper {
 protected:
     struct ResourceData {
-        int counter;
+        int32_t counter = 0;
         ResourceDataT data;
     };
-    typedef typename std::unordered_map<Ark_Int32, ResourceData> ResourceMapType;
+    using ResourceMapType = std::unordered_map<Ark_Int32, ResourceData>;
     typedef typename ResourceMapType::iterator ResourceMapIteratorType;
 
     static void Hold(Ark_Int32 resourceId)

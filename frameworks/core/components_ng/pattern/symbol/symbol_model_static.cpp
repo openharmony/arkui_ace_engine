@@ -13,9 +13,10 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/pattern/symbol/symbol_model_static.h"
+
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/symbol/symbol_model_ng.h"
-#include "core/components_ng/pattern/symbol/symbol_model_static.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {

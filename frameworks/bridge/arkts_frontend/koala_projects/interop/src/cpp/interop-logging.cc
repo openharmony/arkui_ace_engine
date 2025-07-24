@@ -30,7 +30,9 @@ void startGroupedLog(int index) {
     if (index >= (int)groupedLogs.size()) {
         groupedLogs.resize(index + 1);
         for (int i = 0; i <= index; i++) {
-            if (!groupedLogs[i]) groupedLogs[i] = new Log();
+            if (!groupedLogs[i]) {
+                groupedLogs[i] = new Log();
+            }
         }
     }
     groupedLogs[index]->isActive = true;

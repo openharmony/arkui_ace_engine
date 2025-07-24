@@ -23,6 +23,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextShadowStyleAccessor {
 void DestroyPeerImpl(Ark_TextShadowStyle peer)
 {
+    CHECK_NULL_VOID(peer);
     PeerUtils::DestroyPeer(peer);
 }
 Ark_TextShadowStyle CtorImpl(const Ark_Union_ShadowOptions_Array_ShadowOptions* value)

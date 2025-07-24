@@ -39,7 +39,7 @@ class InteropProfiler {
 
   public:
     static InteropProfiler* instance() {
-        if (!_instance) _instance = new InteropProfiler();
+        if (!_instance) { _instance = new InteropProfiler(); }
         return _instance;
     }
 

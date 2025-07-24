@@ -23,6 +23,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace UrlStyleAccessor {
 void DestroyPeerImpl(Ark_UrlStyle peer)
 {
+    CHECK_NULL_VOID(peer);
     PeerUtils::DestroyPeer(peer);
 }
 Ark_UrlStyle CtorImpl(const Ark_String* url)
