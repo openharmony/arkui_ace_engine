@@ -609,6 +609,7 @@ HWTEST_F(RichEditorClickTestNg, HandleUserClickEvent001, TestSize.Level1)
     EXPECT_CALL(*paragraph, GetHeight).WillRepeatedly(Return(50));
     GestureEvent info = GestureEvent();
     info.SetLocalLocation(Offset(3, 3));
+    info.SetGlobalDisplayLocation(Offset(3, 3));
     richEditorPattern->contentRect_ = RectF(0, 0, 20.0, 20.0);
     auto gestureFunc = [](RefPtr<SpanItem> item, GestureEvent& info) -> bool { return true; };
     richEditorPattern->HandleUserGestureEvent(info, std::move(gestureFunc));
