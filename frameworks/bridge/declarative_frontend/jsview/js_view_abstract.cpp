@@ -1872,7 +1872,7 @@ void UpdateInfoById(NG::MenuOptionsParam& menuOptionsParam, std::string_view id)
             break;
         default:
             menuOptionsParam.labelInfo = menuOptionsParam.labelInfo.value_or("");
-            menuOptionsParam.symbolId = 0;
+            menuOptionsParam.symbolId = menuOptionsParam.symbolId.value_or(0);
             break;
     }
 }
@@ -13003,9 +13003,7 @@ std::vector<NG::MenuOptionsParam> JSViewAbstract::ParseMenuItems(const JSRef<JSA
         std::string icon;
         ParseJsMedia(jsStartIcon, icon);
         menuOptionsParam.icon = icon;
-        if (!showShortcut) {
-           ParseMenuItemsSymbolId(jsStartIcon, menuOptionsParam);
-        }
+        ParseMenuItemsSymbolId(jsStartIcon, menuOptionsParam);
         menuParams.emplace_back(menuOptionsParam);
     }
     return menuParams;

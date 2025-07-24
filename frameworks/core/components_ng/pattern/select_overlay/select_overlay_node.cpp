@@ -1484,6 +1484,19 @@ RefPtr<UINode> FindAccessibleFocusNodeInExtMenu(const RefPtr<FrameNode>& extensi
     }
     return nullptr;
 }
+
+std::function<void(WeakPtr<NG::FrameNode>)> GetCustomMenuItemSymbolFunc(const MenuOptionsParam& item)
+{
+    std::function<void(WeakPtr<NG::FrameNode>)> symbolFunc = nullptr;
+    if (item.symbolId.has_value() && item.symbolId.value() != 0) {
+        auto symbolId = item.symbolId.value();
+        symbolFunc = [symbolId](WeakPtr<NG::FrameNode> weak) {
+            auto symbolNode = weak.Upgrade();
+            SymbolModelNG::InitialSymbol(AceType::RawPtr(symbolNode), symbolId);
+        };
+    }
+    return symbolFunc;
+}
 } // namespace
 
 SelectOverlayNode::SelectOverlayNode(const RefPtr<Pattern>& pattern)
@@ -2258,11 +2271,11 @@ void SelectOverlayNode::AddCreateMenuExtensionMenuParams(const std::vector<MenuO
                     SymbolModelNG::SetFontColor(RawPtr(symbolNode), symbolColor);
                 }
             };
+        } else {
+            symbol = GetCustomMenuItemSymbolFunc(item);
         }
         auto param = OptionParam(content, GetSystemIconPath(item.id, item.icon.value_or(" ")), callback, symbol);
-        if (item.id == OH_DEFAULT_PASTE) {
-            param.isPasteOption = true;
-        }
+        param.isPasteOption = item.id == OH_DEFAULT_PASTE;
         param.isAIMenuOption = IsAIMenuOption(item.id) ? true : false;
         param.isAskCeliaOption = IsAskCeliaOption(item.id) ? true : false;
         params.emplace_back(param);
