@@ -214,21 +214,20 @@ std::string CounterDecorator::GetAccessibilityText(
     std::string result = originStr;
     std::string textLengthStr = std::to_string(textLength);
     std::string maxLengthStr = std::to_string(maxLength);
-    std::string toFindStr = "%d";
+    std::string toFindStrFirst = "%1$d";
+    std::string toFindStrSecond = "%2$d";
 
-    size_t pos = result.find(toFindStr);
-    if (pos != std::string::npos) {
-        result.replace(pos, toFindStr.length(), textLengthStr);
-    } else {
+    size_t pos = result.find(toFindStrFirst);
+    if (pos == std::string::npos) {
         return "";
     }
+    result.replace(pos, toFindStrFirst.length(), textLengthStr);
 
-    pos = result.find(toFindStr, pos + textLengthStr.length());
-    if (pos != std::string::npos) {
-        result.replace(pos, toFindStr.length(), maxLengthStr);
-    } else {
+    pos = result.find(toFindStrSecond, pos + textLengthStr.length());
+    if (pos == std::string::npos) {
         return "";
     }
+    result.replace(pos, toFindStrSecond.length(), maxLengthStr);
 
     return result;
 }
