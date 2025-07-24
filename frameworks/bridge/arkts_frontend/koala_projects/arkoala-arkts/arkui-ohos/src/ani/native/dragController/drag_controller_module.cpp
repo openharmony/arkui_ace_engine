@@ -19,6 +19,7 @@
 #include "udmf_ani_converter_utils.h"
 #include "utils/ani_utils.h"
 
+#include "core/common/ace_engine.h"
 #include "core/interfaces/native/implementation/drag_event_peer.h"
 
 namespace OHOS::Ace::Ani {

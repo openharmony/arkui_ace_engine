@@ -30,6 +30,7 @@
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_controller_func_wrapper.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
+#include "core/components_ng/render/adapter/component_snapshot.h"
 #include "core/interfaces/native/implementation/drag_event_peer.h"
 #include "core/pipeline/pipeline_base.h"
 #include "frameworks/base/error/error_code.h"

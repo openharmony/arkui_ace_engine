@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_ANI_CANVAS_ANI_MODIFIER
 
 #include "core/interfaces/ani/ani_api.h"
+#include "core/common/ace_engine.h"
 
 namespace OHOS::Ace::NG {
 const ArkUIAniCanvasModifier* GetCanvasAniModifier();

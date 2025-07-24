@@ -19,6 +19,7 @@
 
 #include "common/common_module.h"
 #include "load.h"
+#include "utils/ani_utils.h"
 
 namespace OHOS::Ace::Ani {
 void SetListChildrenMainSize(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr, ani_object childrenSize)
