@@ -174,7 +174,7 @@ RefPtr<FrameNode> GetLastPage()
 }
 
 void ShowPreviewBgDisappearAnimationProc(const RefPtr<RenderContext>& previewRenderContext,
-    const RefPtr<MenuTheme>& menuTheme, bool isShowHoverImage)
+    const RefPtr<MenuTheme>& menuTheme, bool isShowHoverImage, const RefPtr<PipelineBase>& context)
 {
     auto shadow = previewRenderContext->GetBackShadow();
     if (!shadow.has_value()) {
@@ -199,7 +199,7 @@ void ShowPreviewBgDisappearAnimationProc(const RefPtr<RenderContext>& previewRen
         BorderRadiusProperty borderRadius;
         borderRadius.SetRadius(0.0_vp);
         previewRenderContext->UpdateBorderRadius(borderRadius);
-    });
+    }, nullptr, nullptr, context);
 }
 
 void UpdateHoverImagePreviewOpacityAnimation(const RefPtr<MenuTheme>& menuTheme,
@@ -233,6 +233,7 @@ void ShowPreviewDisappearAnimationProc(const RefPtr<MenuWrapperPattern>& menuWra
     CHECK_NULL_VOID(previewChild);
     auto previewRenderContext = previewChild->GetRenderContext();
     CHECK_NULL_VOID(previewRenderContext);
+    auto context = previewChild->GetContextRefPtr();
     if (menuWrapperPattern->HasPreviewTransitionEffect()) {
         auto layoutProperty = previewChild->GetLayoutProperty();
         layoutProperty->UpdateVisibility(VisibleType::INVISIBLE, true);
@@ -268,7 +269,8 @@ void ShowPreviewDisappearAnimationProc(const RefPtr<MenuWrapperPattern>& menuWra
             previewScale = menuPattern->GetTargetSize().Width() / previewSize.Width();
         }
     }
-    ShowPreviewBgDisappearAnimationProc(previewRenderContext, menuTheme, menuWrapperPattern->GetIsShowHoverImage());
+    ShowPreviewBgDisappearAnimationProc(
+        previewRenderContext, menuTheme, menuWrapperPattern->GetIsShowHoverImage(), context);
 
     CHECK_NULL_VOID(!menuPattern->GetIsShowHoverImage());
     AnimationUtils::Animate(scaleOption,
@@ -277,7 +279,7 @@ void ShowPreviewDisappearAnimationProc(const RefPtr<MenuWrapperPattern>& menuWra
         previewRenderContext->UpdatePosition(
             OffsetT<Dimension>(Dimension(previewPosition.GetX()), Dimension(previewPosition.GetY())));
         previewRenderContext->UpdateTransformScale(VectorF(previewScale, previewScale));
-    });
+    }, nullptr, nullptr, context);
 }
 
 void StopHoverImageDelayAnimation(
@@ -340,6 +342,7 @@ void UpdateHoverImageDisappearScaleAndPosition(const RefPtr<MenuWrapperPattern>&
     CHECK_NULL_VOID(stackNode);
     auto stackContext = stackNode->GetRenderContext();
     CHECK_NULL_VOID(stackContext);
+    auto context = stackNode->GetContextRefPtr();
 
     auto flexNode = menuWrapperPattern->GetHoverImageFlexNode();
     CHECK_NULL_VOID(flexNode);
@@ -375,9 +378,10 @@ void UpdateHoverImageDisappearScaleAndPosition(const RefPtr<MenuWrapperPattern>&
         CHECK_NULL_VOID(flexContext);
         flexContext->UpdatePosition(
             OffsetT<Dimension>(Dimension(previewPosition.GetX()), Dimension(previewPosition.GetY())));
-    }, option.GetOnFinishEvent());
+    }, option.GetOnFinishEvent(), nullptr, context);
 
-    ShowPreviewBgDisappearAnimationProc(stackContext, menuTheme, menuWrapperPattern->GetHoverImageStackNode());
+    ShowPreviewBgDisappearAnimationProc(
+        stackContext, menuTheme, menuWrapperPattern->GetHoverImageStackNode(), context);
 }
 
 void ShowPreviewDisappearAnimation(const RefPtr<MenuWrapperPattern>& menuWrapperPattern)
@@ -7180,6 +7184,7 @@ void OverlayManager::ShowFilterDisappearAnimation(const RefPtr<FrameNode>& filte
     CHECK_NULL_VOID(filterNode);
     auto filterContext = filterNode->GetRenderContext();
     CHECK_NULL_VOID(filterContext);
+    auto context = filterNode->GetContextRefPtr();
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
@@ -7207,7 +7212,7 @@ void OverlayManager::ShowFilterDisappearAnimation(const RefPtr<FrameNode>& filte
             filterContext->UpdateBackBlurStyle(styleOption);
             filterContext->UpdateBackgroundColor(Color::TRANSPARENT);
         },
-        option.GetOnFinishEvent());
+        option.GetOnFinishEvent(), nullptr, context);
 }
 
 void OverlayManager::RemoveFilterAnimation()
