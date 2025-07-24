@@ -624,15 +624,26 @@ MotionPathOption Convert(const Ark_MotionPathOptions& src)
 template<>
 OHOS::Ace::SharedTransitionOption Convert(const Ark_sharedTransitionOptions& src)
 {
-    OHOS::Ace::SharedTransitionOption o = { .duration = INT_MIN };
+    OHOS::Ace::SharedTransitionOption o;
+    constexpr int32_t defaultDuration = 1000;
+    o.duration = defaultDuration;
     if (auto opt = Converter::OptConvert<RefPtr<Curve>>(src.curve); opt) {
         o.curve = *opt;
     }
+    if (!o.curve) {
+        o.curve = Curves::LINEAR;
+    }
     if (auto opt = Converter::OptConvert<int32_t>(src.duration); opt) {
         o.duration = *opt;
+        if (o.duration < 0) {
+            o.duration = defaultDuration;
+        }
     }
     if (auto opt = Converter::OptConvert<int32_t>(src.delay); opt) {
         o.delay = *opt;
+        if (o.delay < 0) {
+            o.delay = 0;
+        }
     }
     if (auto opt = Converter::OptConvert<MotionPathOption>(src.motionPath); opt) {
         o.motionPathOption = *opt;
@@ -5338,11 +5349,11 @@ void SharedTransitionImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    auto modelOptions = std::make_shared<SharedTransitionOption>();
+    std::shared_ptr<SharedTransitionOption> modelOptions;
     if (auto transOpt = Converter::OptConvertPtr<SharedTransitionOption>(options); transOpt) {
-        *modelOptions = std::move(*transOpt);
+        modelOptions = std::make_shared<SharedTransitionOption>(*transOpt);
     }
-    // ViewAbstract::SetSharedTransition(frameNode, *modelId, modelOptions);
+    ViewAbstract::SetSharedTransition(frameNode, *modelId, modelOptions);
 }
 void ChainModeImpl(Ark_NativePointer node,
                    const Opt_Axis* direction,

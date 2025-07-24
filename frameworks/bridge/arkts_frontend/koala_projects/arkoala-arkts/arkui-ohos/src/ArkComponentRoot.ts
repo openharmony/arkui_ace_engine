@@ -68,8 +68,6 @@ export function ArkComponentRoot(
                     component.aboutToDisappear()
                 })
             )
-            // Do we need it here?
-            component.pageTransition()
             if (shown.value) {
                 InteropNativeModule._NativeLog(`ArkTS ArkComponentRoot NodeAttach before WithRouterTransitionState`)
                 InteropNativeModule._NativeLog("AceRouter:ArkComponentRoot NodeAttach, UpdateRouter page visibility state")

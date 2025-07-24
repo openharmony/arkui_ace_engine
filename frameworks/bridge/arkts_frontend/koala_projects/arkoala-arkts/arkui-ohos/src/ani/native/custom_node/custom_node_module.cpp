@@ -88,6 +88,19 @@ ani_long ConstructCustomNode(ani_env* env, [[maybe_unused]] ani_object aniClass,
         return result;
     };
 
+    ani_method pageTransitionMethod;
+    env->Class_FindMethod(static_cast<ani_class>(type), "pageTransition", ":V", &pageTransitionMethod);
+    auto pageTransition = [vm, weakRef, pageTransitionMethod]() {
+        ani_env* env = nullptr;
+        vm->GetEnv(ANI_VERSION_1, &env);
+        ani_boolean released;
+        ani_ref localRef;
+        env->WeakReference_GetReference(*weakRef, &released, &localRef);
+        if (!released) {
+            env->Object_CallMethod_Void(static_cast<ani_object>(localRef), pageTransitionMethod);
+        }
+    };
+
     ani_method onCleanupMethod;
     env->Class_FindMethod(static_cast<ani_class>(type), "onCleanup", nullptr, &onCleanupMethod);
     auto onCleanupFunc = [vm, weakRef, onCleanupMethod]() {
@@ -124,10 +137,9 @@ ani_long ConstructCustomNode(ani_env* env, [[maybe_unused]] ani_object aniClass,
     };
 
     ani_long customNode = modifier->getCustomNodeAniModifier()->constructCustomNode(
-        id, std::move(onPageShow), std::move(onPageHide), std::move(onBackPress),
+        id, std::move(onPageShow), std::move(onPageHide), std::move(onBackPress), std::move(pageTransition),
         std::move(onCleanupFunc), std::move(onDumpInspector)
     );
-
     return customNode;
 }
 

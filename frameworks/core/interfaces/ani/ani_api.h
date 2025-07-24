@@ -253,8 +253,8 @@ struct ArkUIAniCommonModifier {
 };
 struct ArkUIAniCustomNodeModifier {
     ani_long (*constructCustomNode)(ani_int, std::function<void()>&& onPageShow, std::function<void()>&& onPageHide,
-        std::function<bool()>&& onBackPress, std::function<void()>&& onCleanupFunc,
-        std::function<std::string()>&& onDumpInspectorFunc);
+        std::function<bool()>&& onBackPress, std::function<void()>&& pageTransitionFunc,
+        std::function<void()>&& onCleanupFunc, std::function<std::string()>&& onDumpInspectorFunc);
     void (*requestFrame)();
     ani_object (*queryNavigationInfo)(ani_env* env, ani_long node);
     ani_object (*queryNavDestinationInfo)(ani_env* env, ani_long node);
@@ -294,6 +294,14 @@ struct ArkUIAniAnimationModifier {
         ani_env* env, ArkUINodeHandle node, ani_string propertyName, ani_object property);
     void (*createAnimatableProperty)(
         ani_env* env, ArkUINodeHandle node, ani_string propertyName, ani_object property, ani_fn_object callback);
+    void (*createPageTransitionEnter)(ani_env* env, ani_object options);
+    void (*pageTransitionSetOnEnter)(ani_env* env, ani_fn_object callback);
+    void (*createPageTransitionExit)(ani_env* env, ani_object options);
+    void (*pageTransitionSetOnExit)(ani_env* env, ani_fn_object callback);
+    void (*pageTransitionSetSlide)(ani_env* env, ani_object slide);
+    void (*pageTransitionSetTranslate)(ani_env* env, ani_object options);
+    void (*pageTransitionSetScale)(ani_env* env, ani_object options);
+    void (*pageTransitionSetOpacity)(ani_env* env, ani_double opacity);
 };
 struct ArkUIAniInteropModifier {
     ani_long (*createViewStackProcessor)();

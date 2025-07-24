@@ -23,8 +23,8 @@ import { LocalStorage } from '@ohos.arkui.stateManagement';
 import { DrawContext } from "arkui/Graphics"
 import { AnimatableArithmetic, DrawModifier, AsyncCallback, Callback, DragItemInfo, ResourceColor } from "arkui/component"
 import { ArkCustomComponent } from "arkui/ArkCustomComponent"
-import { WaterFlowOptions,WaterFlowSections, XComponentControllerCallbackInternal, OverlayOptions } from "arkui/component"
-import { ChildrenMainSize } from "arkui/component"
+import { WaterFlowOptions, WaterFlowSections, XComponentControllerCallbackInternal, OverlayOptions } from "arkui/component"
+import { ChildrenMainSize, PageTransitionOptions, PageTransitionCallback, SlideEffect, ScaleOptions, TranslateOptions } from "arkui/component"
 import { HookDragInfo } from "arkui/handwritten"
 import { dragController } from "@ohos/arkui/dragController"
 import { componentSnapshot } from "@ohos/arkui/componentSnapshot"
@@ -155,6 +155,14 @@ export class ArkUIAniModule {
 
     native static _Animation_SetOrCreateAnimatableProperty<T>(ptr: KPointer, propertyName: string, property: number | AnimatableArithmetic<T>,
         callback: (value: number | AnimatableArithmetic<T>) => void): void
+    native static _Animation_CreatePageTransitionEnter(options: PageTransitionOptions): void
+    native static _Animation_CreatePageTransitionExit(options: PageTransitionOptions): void
+    native static _Animation_PageTransitionSetOnEnter(event: PageTransitionCallback): void
+    native static _Animation_PageTransitionSetOnExit(event: PageTransitionCallback): void
+    native static _Animation_PageTransitionSetSlide(value: SlideEffect): void
+    native static _Animation_PageTransitionSetTranslate(value: TranslateOptions): void
+    native static _Animation_PageTransitionSetScale(value: ScaleOptions): void
+    native static _Animation_PageTransitionSetOpacity(value: number): void
 
     native static _CreateViewStackProcessor(): KPointer
 
