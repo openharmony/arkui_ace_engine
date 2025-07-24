@@ -589,14 +589,6 @@ void TimePickerModelNG::SetSelectedTime(FrameNode* frameNode, const PickerTime& 
     timePickerRowPattern->SetSelectedTime(value);
 }
 
-void TimePickerModelNG::SetHasSecond(FrameNode* frameNode, bool hasSecond)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
-    CHECK_NULL_VOID(timePickerRowPattern);
-    timePickerRowPattern->SetHasSecond(hasSecond);
-}
-
 void TimePickerModelNG::SetDisappearTextStyle(
     FrameNode* frameNode, const RefPtr<PickerTheme>& theme, const PickerTextStyle& value)
 {
@@ -919,15 +911,6 @@ void TimePickerModelNG::HasUserDefinedOpacity()
     CHECK_NULL_VOID(renderContext);
     timePickerRowPattern->SetUserDefinedOpacity(renderContext->GetOpacityValue(1.0));
 }
-
-void TimePickerModelNG::SetChangeEvent(FrameNode* frameNode, TimeChangeEvent&& onChange)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<TimePickerEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetChangeEvent(std::move(onChange));
-}
-
 void TimePickerModelNG::SetDigitalCrownSensitivity(int32_t crownSensitivity)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -935,13 +918,8 @@ void TimePickerModelNG::SetDigitalCrownSensitivity(int32_t crownSensitivity)
     SetDigitalCrownSensitivity(frameNode, crownSensitivity);
 }
 
-void TimePickerModelNG::SetDigitalCrownSensitivity(FrameNode* frameNode, const std::optional<int32_t>& valueOpt)
+void TimePickerModelNG::SetDigitalCrownSensitivity(FrameNode* frameNode, int32_t crownSensitivity)
 {
-    if (!valueOpt) {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, DigitalCrownSensitivity, frameNode);
-        return;
-    }
-    auto crownSensitivity = *valueOpt;
     if (crownSensitivity < CROWN_SENSITIVITY_MIN || crownSensitivity > CROWN_SENSITIVITY_MAX) {
         return;
     }

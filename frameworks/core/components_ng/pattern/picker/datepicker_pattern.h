@@ -34,9 +34,6 @@
 #include "core/components_ng/pattern/picker/datepicker_row_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_dialog_view.h"
-#ifdef SUPPORT_DIGITAL_CROWN
-#include "core/event/crown_event.h"
-#endif
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;
@@ -227,7 +224,6 @@ public:
 
     void SetShowLunar(bool value)
     {
-        isForceUpdate_ = value != lunar_;
         lunar_ = value;
     }
 
@@ -468,6 +464,7 @@ public:
 
     void SetMode(const DatePickerMode& value)
     {
+        isForceUpdate_ = value != datePickerMode_;
         datePickerMode_ = value;
     }
 

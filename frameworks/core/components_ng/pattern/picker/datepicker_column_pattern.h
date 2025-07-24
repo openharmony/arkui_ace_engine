@@ -106,17 +106,6 @@ public:
 
 private:
     void OnModifyDone() override;
-    void OnAttachToFrameNode() override;
-    void OnDetachFromFrameNode(FrameNode* frameNode) override;
-    void OnAttachToMainTree() override;
-    void OnDetachFromMainTree() override;
-
-    void OnAttachToFrameNodeMultiThread() {}
-    void OnDetachFromFrameNodeMultiThread(FrameNode* frameNode) {}
-    void OnAttachToMainTreeMultiThread();
-    void OnDetachFromMainTreeMultiThread();
-
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void SetDividerHeight(uint32_t showOptionCount);
     void InitSelectorButtonProperties(const RefPtr<PickerTheme>& pickerTheme);
     void UpdateSelectorButtonProps(bool haveFocus, bool needMarkDirty);
@@ -144,13 +133,7 @@ private:
     uint32_t GetOptionCount() const override;
     bool GetOptionItemCount(uint32_t& itemCounts) override;
     bool IsLanscape(uint32_t itemCount) override;
-    void UnregisterWindowStateChangedCallback(FrameNode* frameNode) override;
-    void OnWindowHide() override;
-    void OnWindowShow() override;
 
-    float localDownDistance_ = 0.0f;
-    RefPtr<TouchEventImpl> touchListener_;
-    RefPtr<InputEvent> mouseEvent_;
     std::map<WeakPtr<FrameNode>, std::vector<PickerDateF>> options_;
     int32_t currentChildIndex_ = 0;
     float gradientHeight_ = 0.0f;
