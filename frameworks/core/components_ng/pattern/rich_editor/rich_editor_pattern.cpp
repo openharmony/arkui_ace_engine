@@ -2242,7 +2242,11 @@ UpdateSpanStyle RichEditorPattern::GetUpdateSpanStyle()
 
 void RichEditorPattern::MarkAISpanStyleChanged()
 {
-    std::for_each(spans_.begin(), spans_.end(), [](const auto& span) { span->aiSpanResultCount = 0; });
+    std::for_each(spans_.begin(), spans_.end(), [](const auto& span) {
+        if (span->aiSpanResultCount != 0) {
+            span->needReLayout = true;
+        }
+    });
     TextPattern::MarkAISpanStyleChanged();
 }
 
