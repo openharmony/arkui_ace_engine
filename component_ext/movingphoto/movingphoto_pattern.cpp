@@ -1825,6 +1825,7 @@ void MovingPhotoPattern::RefreshMovingPhotoSceneManager()
     autoPlayPeriodStartTime_ = -1;
     autoPlayPeriodEndTime_ = -1;
 }
+
 void MovingPhotoPattern::NotifyTransition()
 {
     TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingphoto NotifyTransition start.");

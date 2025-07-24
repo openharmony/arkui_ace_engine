@@ -48,7 +48,8 @@ public:
     void StartPlayback()
     {
         if (startPlaybackImpl_) {
-            startPlaybackImpl_();
+            auto startPlaybackImpl = startPlaybackImpl_;
+            startPlaybackImpl();
         }
     }
 
@@ -60,7 +61,8 @@ public:
     void StopPlayback()
     {
         if (stopPlaybackImpl_) {
-            stopPlaybackImpl_();
+            auto stopPlaybackImpl = stopPlaybackImpl_;
+            stopPlaybackImpl();
         }
     }
 
@@ -72,7 +74,8 @@ public:
     void RefreshMovingPhoto()
     {
         if (refreshMovingPhotoImpl_) {
-            refreshMovingPhotoImpl_();
+            auto refreshMovingPhotoImpl = refreshMovingPhotoImpl_;
+            refreshMovingPhotoImpl();
         }
     }
 
@@ -84,7 +87,8 @@ public:
     void Pause()
     {
         if (pauseImpl_) {
-            pauseImpl_();
+            auto pauseImpl = pauseImpl_;
+            pauseImpl();
         }
     }
 
@@ -96,7 +100,8 @@ public:
     void Reset()
     {
         if (resetImpl_) {
-            resetImpl_();
+            auto resetImpl = resetImpl_;
+            resetImpl();
         }
     }
 
@@ -108,7 +113,8 @@ public:
     void Restart()
     {
         if (restartImpl_) {
-            restartImpl_();
+            auto restartImpl = restartImpl_;
+            restartImpl();
         }
     }
 
@@ -120,7 +126,8 @@ public:
     void SetPlaybackPeriod(int64_t startTime, int64_t endTime)
     {
         if (setPlaybackPeriodFucImpl_) {
-            setPlaybackPeriodFucImpl_(startTime, endTime);
+            auto setPlaybackPeriodFucImpl = setPlaybackPeriodFucImpl_;
+            setPlaybackPeriodFucImpl(startTime, endTime);
         }
     }
 
@@ -132,7 +139,8 @@ public:
     void EnableTransition(bool enabled)
     {
         if (enableTransitionImpl_) {
-            enableTransitionImpl_(enabled);
+            auto enableTransitionImpl = enableTransitionImpl_;
+            enableTransitionImpl(enabled);
         }
     }
 
@@ -144,7 +152,8 @@ public:
     void EnableAutoPlay(bool enabled)
     {
         if (enableAutoPlayImpl_) {
-            enableAutoPlayImpl_(enabled);
+            auto enableAutoPlayImpl = enableAutoPlayImpl_;
+            enableAutoPlayImpl(enabled);
         }
     }
 
@@ -157,7 +166,8 @@ public:
     void NotifyTransition()
     {
         if (notifyTransitionImpl_) {
-            notifyTransitionImpl_();
+            auto notifyTransitionImpl = notifyTransitionImpl_;
+            notifyTransitionImpl();
         }
     }
 
