@@ -17,8 +17,6 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
-struct GestureModifierPeer {};
-
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace GestureModifierAccessor {
 void DestroyPeerImpl(Ark_GestureModifier peer)
@@ -48,7 +46,4 @@ const GENERATED_ArkUIGestureModifierAccessor* GetGestureModifierAccessor()
     return &GestureModifierAccessorImpl;
 }
 
-struct GestureModifierPeer {
-    virtual ~GestureModifierPeer() = default;
-};
 }

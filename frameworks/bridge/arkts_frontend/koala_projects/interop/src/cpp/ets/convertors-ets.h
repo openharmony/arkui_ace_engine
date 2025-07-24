@@ -1800,7 +1800,8 @@ void getKoalaEtsNapiCallbackDispatcher(ets_class* clazz, ets_method* method);
   getKoalaEtsNapiCallbackDispatcher(&clazz, &method);                                 \
   EtsEnv* etsEnv = reinterpret_cast<EtsEnv*>(vmContext);                              \
   etsEnv->PushLocalFrame(1);                                                          \
-  etsEnv->CallStaticIntMethod(clazz, method, id, args, length);                   \
+  long long args_casted = reinterpret_cast<long long>(args);                          \
+  etsEnv->CallStaticIntMethod(clazz, method, id, args_casted, length);                \
   etsEnv->PopLocalFrame(nullptr);                                                     \
 }
 
@@ -1809,9 +1810,10 @@ void getKoalaEtsNapiCallbackDispatcher(ets_class* clazz, ets_method* method);
   ets_class clazz = nullptr;                                                          \
   ets_method method = nullptr;                                                        \
   getKoalaEtsNapiCallbackDispatcher(&clazz, &method);                                 \
-  EtsEnv* etsEnv = reinterpret_cast<EtsEnv*>(venv);                              \
-  etsEnv->PushLocalFrame(1);                                                      \
-  int32_t rv = etsEnv->CallStaticIntMethod(clazz, method, id, args, length);      \
+  EtsEnv* etsEnv = reinterpret_cast<EtsEnv*>(venv);                                   \
+  etsEnv->PushLocalFrame(1);                                                          \
+  long long args_casted = reinterpret_cast<long long>(args);                          \
+  int32_t rv = etsEnv->CallStaticIntMethod(clazz, method, id, args_casted, length);   \
   etsEnv->PopLocalFrame(nullptr);                                                     \
   return rv;                                                                          \
 }

@@ -1,0 +1,54 @@
+{
+  "rootElement": {
+    "nodeId": 1297,
+    "kind": "ComponentRoot",
+    "children": [
+      {
+        "nodeId": 1298,
+        "kind": "Rating",
+        "children": []
+      },
+      {
+        "nodeId": 1299,
+        "kind": "Rating",
+        "children": [],
+        "setRatingOptions_options": {
+          "rating": 3
+        },
+        "stars_value": 6,
+        "stepSize_value": 0.5,
+        "starStyle_value": {
+          "backgroundUri": "background",
+          "foregroundUri": "foreground",
+          "secondaryUri": "secondary"
+        }
+      },
+      {
+        "nodeId": 1300,
+        "kind": "Rating",
+        "children": [],
+        "setRatingOptions_options": {
+          "rating": 4,
+          "indicator": true
+        },
+        "stars_value": 8,
+        "stepSize_value": 1,
+        "starStyle_value": {
+          "backgroundUri": "background",
+          "foregroundUri": "foreground"
+        }
+      },
+      {
+        "nodeId": 1301,
+        "kind": "Rating",
+        "children": [],
+        "setRatingOptions_options": {
+          "rating": 5,
+          "indicator": false
+        },
+        "stars_value": 10,
+        "stepSize_value": 2
+      }
+    ]
+  }
+}

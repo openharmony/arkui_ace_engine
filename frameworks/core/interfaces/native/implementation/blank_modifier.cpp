@@ -18,9 +18,6 @@
 #include "core/components_ng/pattern/blank/blank_model_ng.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/validators.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/utility/converter.h"
-#include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace BlankModifier {
@@ -48,11 +45,10 @@ void SetBlankOptionsImpl(Ark_NativePointer node,
 
 namespace BlankAttributeModifier {
 void ColorImpl(Ark_NativePointer node,
-               const Ark_ResourceColor* value)
+               const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
     auto color = Converter::OptConvert<Color>(*value);
     if (color) {
         BlankModelNG::SetColor(frameNode, color.value());

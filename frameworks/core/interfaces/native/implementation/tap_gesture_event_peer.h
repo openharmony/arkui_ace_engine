@@ -19,5 +19,8 @@
 
 struct TapGestureEventPeer
     : public OHOS::Ace::NG::GeneratedModifier::SomeGestureEventPeer<OHOS::Ace::TapGestureEvent> {
+protected:
+    TapGestureEventPeer() = default;
     ~TapGestureEventPeer() override = default;
+    friend OHOS::Ace::NG::PeerUtils;
 };

@@ -75,20 +75,27 @@ export function RepeatWithKey(
  *
  * @see RepeatWithKey
  */
-/** @memo */
-export function RepeatByArray<T>(
-    array: ReadonlyArray<T>,
-    key: (element: T, index: int32) => KoalaCallsiteKey,
-    /** @memo */
-    action: (element: T, index: int32) => void
-) {
-    const length = array.length
+export function RepeatByArray<T>(__memo_context: __memo_context_type, __memo_id: __memo_id_type, array: ReadonlyArray<T>, key: (element: T, index: int32) => KoalaCallsiteKey, 
+
+action: (__memo_context: __memo_context_type, __memo_id: __memo_id_type, element: T, index: int32) => void) {
+    const __memo_scope = __memo_context.scope<void>(__memo_id + (0x0fdcc5e8c3 as __memo_id_type), 3);
+    const __memo_parameter_array = __memo_scope.param(0, array);
+    const __memo_parameter_key = __memo_scope.param(1, key);
+    const __memo_parameter_action = __memo_scope.param(2, action);
+    if (__memo_scope.unchanged) {
+        __memo_scope.cached;
+        return;
+    }
+    const length = __memo_parameter_array.value.length;
     for (let i = 0; i < length; i++) {
-        const e: T = array[i]
-        memoEntry2<T, int32, void>(__context(), key(e, i), action, e, i)
+        const e: T = __memo_parameter_array.value[i];
+        memoEntry2<T, int32, void>(__memo_context, __memo_parameter_key.value(e, i), __memo_parameter_action.value, e, i);
+    }
+    {
+        __memo_scope.recache();
+        return;
     }
 }
-
 /**
  * Sequentially repeats the {@link action} for every element in the given range.
  *
@@ -98,17 +105,25 @@ export function RepeatByArray<T>(
  * @param key - the function to provide a key for the element
  * @param action - the memo function to be invoked for every element
  */
-/** @memo */
-export function RepeatRange<T>(
-    start: int32,
-    end: int32,
-    element: (index: int32) => T,
-    key: (element: T, index: int32) => KoalaCallsiteKey,
-    /** @memo */
-    action: (element: T, index: int32) => void
-) {
-    for (let i: int32 = start; i < end; i++) {
-        const e: T = element(i)
-        memoEntry2<T, int32, void>(__context(), key(e, i), action, e, i)
+export function RepeatRange<T>(__memo_context: __memo_context_type, __memo_id: __memo_id_type, start: int32, end: int32, element: (index: int32) => T, key: (element: T, index: int32) => KoalaCallsiteKey, 
+
+action: (__memo_context: __memo_context_type, __memo_id: __memo_id_type, element: T, index: int32) => void) {
+    const __memo_scope = __memo_context.scope<void>(__memo_id + (0xa7aa10bbac as __memo_id_type), 5);
+    const __memo_parameter_start = __memo_scope.param(0, start);
+    const __memo_parameter_end = __memo_scope.param(1, end);
+    const __memo_parameter_element = __memo_scope.param(2, element);
+    const __memo_parameter_key = __memo_scope.param(3, key);
+    const __memo_parameter_action = __memo_scope.param(4, action);
+    if (__memo_scope.unchanged) {
+        __memo_scope.cached;
+        return;
+    }
+    for (let i: int32 = __memo_parameter_start.value; i < __memo_parameter_end.value; i++) {
+        const e: T = __memo_parameter_element.value(i);
+        memoEntry2<T, int32, void>(__memo_context, __memo_parameter_key.value(e, i), __memo_parameter_action.value, e, i);
+    }
+    {
+        __memo_scope.recache();
+        return;
     }
 }

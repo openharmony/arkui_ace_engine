@@ -1,0 +1,181 @@
+From 1ee8630c12f7b7e5e2d9d40c79a612637f000057 Mon Sep 17 00:00:00 2001
+From: Dmitrii <naumov.dmitrii@huawei.com>
+Date: Fri, 15 Dec 2023 12:12:12 +0300
+Subject: [PATCH] @Component-argument-object-literal-unsupported
+
+---
+ .../@componentParent/@componentParent.ts      | 162 ------------------
+ 1 file changed, 162 deletions(-)
+ delete mode 100644 compiler/test/utForPartialUpdate/render_decorator/@componentParent/@componentParent.ts
+
+diff --git a/compiler/test/utForPartialUpdate/render_decorator/@componentParent/@componentParent.ts b/compiler/test/utForPartialUpdate/render_decorator/@componentParent/@componentParent.ts
+deleted file mode 100644
+index 7be4392c..00000000
+--- a/compiler/test/utForPartialUpdate/render_decorator/@componentParent/@componentParent.ts
++++ /dev/null
+@@ -1,162 +0,0 @@
+-/*
+- * Copyright (c) 2022 Huawei Device Co., Ltd.
+- * Licensed under the Apache License, Version 2.0 (the "License");
+- * you may not use this file except in compliance with the License.
+- * You may obtain a copy of the License at
+- *
+- *     http://www.apache.org/licenses/LICENSE-2.0
+- *
+- * Unless required by applicable law or agreed to in writing, software
+- * distributed under the License is distributed on an "AS IS" BASIS,
+- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+- * See the License for the specific language governing permissions and
+- * limitations under the License.
+- */
+-
+-exports.source = `
+-import {componentParent, componentParentObj} from './test/pages/import@ComponentConst'
+-@Entry
+-@Component({freezeWhenInactive: true})
+-struct Index {
+-  build() {
+-    Row(){
+-      ComA()
+-      ComB()
+-    }
+-  }
+-}
+-
+-@Component({freezeWhenInactive: componentParent})
+-struct ComA {
+-  build() {
+-
+-  }
+-}
+-
+-@Component({freezeWhenInactive: componentParentObj.componentParent})
+-struct ComB {
+-  build() {
+-
+-  }
+-}
+-`
+-
+-exports.expectResult =
+-`"use strict";
+-Object.defineProperty(exports, "__esModule", { value: true });
+-const import_ComponentConst_1 = require("./test/pages/import@ComponentConst");
+-class Index extends ViewPU {
+-    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
+-        super(parent, __localStorage, elmtId, extraInfo);
+-        if (typeof paramsLambda === "function") {
+-            this.paramsGenerator_ = paramsLambda;
+-        }
+-        if (super["initAllowComponentFreeze"] && typeof super["initAllowComponentFreeze"] === "function") {
+-            super["initAllowComponentFreeze"](true);
+-        }
+-        this.setInitiallyProvidedValue(params);
+-    }
+-    setInitiallyProvidedValue(params) {
+-    }
+-    updateStateVars(params) {
+-    }
+-    purgeVariableDependenciesOnElmtId(rmElmtId) {
+-    }
+-    aboutToBeDeleted() {
+-        SubscriberManager.Get().delete(this.id__());
+-        this.aboutToBeDeletedInternal();
+-    }
+-    initialRender() {
+-        this.observeComponentCreation2((elmtId, isInitialRender) => {
+-            Row.create();
+-        }, Row);
+-        {
+-            this.observeComponentCreation2((elmtId, isInitialRender) => {
+-                if (isInitialRender) {
+-                    let paramsLambda = () => {
+-                        return {};
+-                    };
+-                    ViewPU.create(new ComA(this, {}, undefined, elmtId, paramsLambda, { page: "@componentParent.ets", line: 8 }));
+-                }
+-                else {
+-                    this.updateStateVarsOfChildByElmtId(elmtId, {});
+-                }
+-            }, null);
+-        }
+-        {
+-            this.observeComponentCreation2((elmtId, isInitialRender) => {
+-                if (isInitialRender) {
+-                    let paramsLambda = () => {
+-                        return {};
+-                    };
+-                    ViewPU.create(new ComB(this, {}, undefined, elmtId, paramsLambda, { page: "@componentParent.ets", line: 9 }));
+-                }
+-                else {
+-                    this.updateStateVarsOfChildByElmtId(elmtId, {});
+-                }
+-            }, null);
+-        }
+-        Row.pop();
+-    }
+-    rerender() {
+-        this.updateDirtyElements();
+-    }
+-}
+-class ComA extends ViewPU {
+-    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
+-        super(parent, __localStorage, elmtId, extraInfo);
+-        if (typeof paramsLambda === "function") {
+-            this.paramsGenerator_ = paramsLambda;
+-        }
+-        if (super["initAllowComponentFreeze"] && typeof super["initAllowComponentFreeze"] === "function") {
+-            super["initAllowComponentFreeze"](import_ComponentConst_1.componentParent);
+-        }
+-        this.setInitiallyProvidedValue(params);
+-    }
+-    setInitiallyProvidedValue(params) {
+-    }
+-    updateStateVars(params) {
+-    }
+-    purgeVariableDependenciesOnElmtId(rmElmtId) {
+-    }
+-    aboutToBeDeleted() {
+-        SubscriberManager.Get().delete(this.id__());
+-        this.aboutToBeDeletedInternal();
+-    }
+-    initialRender() {
+-    }
+-    rerender() {
+-        this.updateDirtyElements();
+-    }
+-}
+-class ComB extends ViewPU {
+-    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
+-        super(parent, __localStorage, elmtId, extraInfo);
+-        if (typeof paramsLambda === "function") {
+-            this.paramsGenerator_ = paramsLambda;
+-        }
+-        if (super["initAllowComponentFreeze"] && typeof super["initAllowComponentFreeze"] === "function") {
+-            super["initAllowComponentFreeze"](import_ComponentConst_1.componentParentObj.componentParent);
+-        }
+-        this.setInitiallyProvidedValue(params);
+-    }
+-    setInitiallyProvidedValue(params) {
+-    }
+-    updateStateVars(params) {
+-    }
+-    purgeVariableDependenciesOnElmtId(rmElmtId) {
+-    }
+-    aboutToBeDeleted() {
+-        SubscriberManager.Get().delete(this.id__());
+-        this.aboutToBeDeletedInternal();
+-    }
+-    initialRender() {
+-    }
+-    rerender() {
+-        this.updateDirtyElements();
+-    }
+-}
+-ViewStackProcessor.StartGetAccessRecordingFor(ViewStackProcessor.AllocateNewElmetIdForNextComponent());
+-loadDocument(new Index(undefined, {}));
+-ViewStackProcessor.StopGetAccessRecording();
+-`
+-- 
+2.25.1
+

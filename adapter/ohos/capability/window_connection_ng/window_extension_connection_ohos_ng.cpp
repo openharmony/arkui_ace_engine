@@ -162,6 +162,10 @@ void WindowExtensionConnectionAdapterOhosNG::ConnectExtension(const RefPtr<NG::F
         static_cast<uint32_t>(size.Height()),
     };
     auto renderProperty = node->GetPaintProperty<NG::AbilityComponentRenderProperty>();
+    if (!renderProperty->HasWant()) {
+        LOGE("fail to get want value");
+        return;
+    }
     std::string want = renderProperty->GetWantValue();
     AppExecFwk::ElementName element;
     WantConverterNG(want, element);

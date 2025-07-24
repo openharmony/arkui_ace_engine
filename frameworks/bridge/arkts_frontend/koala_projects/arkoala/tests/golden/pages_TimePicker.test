@@ -1,0 +1,33 @@
+{
+  "rootElement": {
+    "nodeId": 1315,
+    "kind": "ComponentRoot",
+    "children": [
+      {
+        "nodeId": 1316,
+        "kind": "TimePicker",
+        "children": [],
+        "setTimePickerOptions_options": {},
+        "disappearTextStyle_value": {},
+        "textStyle_value": {
+          "color": "#ff008000",
+          "font": {}
+        },
+        "selectedTextStyle_value": {
+          "color": 333,
+          "font": {
+            "family": "Arial",
+            "style": 0
+          }
+        },
+        "loop_value": 0,
+        "useMilitaryTime_value": 1
+      },
+      {
+        "nodeId": 1317,
+        "kind": "TimePicker",
+        "children": []
+      }
+    ]
+  }
+}

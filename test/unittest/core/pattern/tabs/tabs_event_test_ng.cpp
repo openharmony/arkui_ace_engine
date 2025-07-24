@@ -1459,5 +1459,4 @@ HWTEST_F(TabsEventTestNg, SetOnSelectedEvent001, TestSize.Level1)
     ChangeIndex(3);
     EXPECT_EQ(currentIndex, 3);
 }
-
 } // namespace OHOS::Ace::NG

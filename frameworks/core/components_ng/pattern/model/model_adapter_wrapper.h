@@ -17,13 +17,16 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_MODEL_MODEL_ADAPTER_WRAPPER_H
 
 #include <memory>
-
+#ifdef ARKUI_CAPI_UNITTEST
+#include "test/unittest/capi/stubs/mock_shader_input_buffer.h"
+#include "test/unittest/capi/stubs/mock_custom_render_descriptor.h"
+#else
 #include "custom/shader_input_buffer.h"
 #include "graphics_task.h"
 #include "ohos/graphics_manager.h"
 #include "ohos/texture_layer.h"
 #include "widget_adapter.h"
-
+#endif // ARKUI_CAPI_UNITTEST
 #include "base/geometry/animatable_float.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"

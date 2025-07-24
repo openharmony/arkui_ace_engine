@@ -18,18 +18,18 @@
 
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
-import { unsafeCast, int32, float32, int64 } from "@koalaui/common"
-import { Serializer } from "./../generated/peers/Serializer"
-import { CallbackKind } from "./../generated/peers/CallbackKind"
-import { Deserializer } from "./../generated/peers/Deserializer"
-import { CallbackTransformer } from "./../generated/peers/CallbackTransformer"
+import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
+import { Serializer } from "./peers/Serializer"
+import { CallbackKind } from "./peers/CallbackKind"
+import { Deserializer } from "./peers/Deserializer"
+import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { Callback_Void } from "./abilityComponent"
-import { DialogAlignment } from "./alertDialog"
+import { CustomBuilder, Rectangle, AnimateParam, ShadowOptions, ShadowStyle, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, KeyboardAvoidMode, HoverModeAreaType } from "./common"
+import { DialogAlignment, LevelOrder } from "./alertDialog"
 import { Offset, ResourceColor, Dimension, BorderRadiuses, EdgeWidths, EdgeColors, EdgeStyles } from "./units"
-import { Rectangle, AnimateParam, ShadowOptions, ShadowStyle, BlurStyle, KeyboardAvoidMode, HoverModeAreaType } from "./common"
-import { Callback_DismissDialogAction_Void, DismissDialogAction } from "./actionSheet"
+import { Callback_DismissDialogAction_Void, DismissDialogAction, LevelMode, ImmersiveMode } from "./actionSheet"
 import { BorderStyle } from "./enums"
+import { LengthMetrics } from "../Graphics"
 export class CustomDialogControllerInternal {
     public static fromPtr(ptr: KPointer): CustomDialogController {
         const obj : CustomDialogController = new CustomDialogController(undefined)
@@ -55,7 +55,6 @@ export class CustomDialogController implements MaterializedBase {
             const ctorPtr : KPointer = CustomDialogController.ctor_customdialogcontroller((value)!)
             this.peer = new Finalizable(ctorPtr, CustomDialogController.getFinalizer())
         }
-        // /*TODO: API required*/ if (value) value.builder.buildOptions.controller = this
     }
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._CustomDialogController_getFinalizer()
@@ -76,7 +75,7 @@ export class CustomDialogController implements MaterializedBase {
     }
 }
 export interface CustomDialogControllerOptions {
-    builder: object;
+    builder: CustomBuilder;
     cancel?: (() => void);
     autoCancel?: boolean;
     alignment?: DialogAlignment;
@@ -99,7 +98,19 @@ export interface CustomDialogControllerOptions {
     borderStyle?: BorderStyle | EdgeStyles;
     shadow?: ShadowOptions | ShadowStyle;
     backgroundBlurStyle?: BlurStyle;
+    backgroundBlurStyleOptions?: BackgroundBlurStyleOptions;
+    backgroundEffect?: BackgroundEffectOptions;
     keyboardAvoidMode?: KeyboardAvoidMode;
     enableHoverMode?: boolean;
     hoverModeArea?: HoverModeAreaType;
+    onDidAppear?: (() => void);
+    onDidDisappear?: (() => void);
+    onWillAppear?: (() => void);
+    onWillDisappear?: (() => void);
+    keyboardAvoidDistance?: LengthMetrics;
+    levelMode?: LevelMode;
+    levelUniqueId?: number;
+    immersiveMode?: ImmersiveMode;
+    levelOrder?: LevelOrder;
+    focusable?: boolean;
 }

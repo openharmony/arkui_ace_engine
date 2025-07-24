@@ -94,8 +94,7 @@ std::vector<ButtonInfo> BuildButtonInfos(const Ark_CalendarDialogOptions options
 void ShowImpl(const Opt_CalendarDialogOptions* options)
 {
     CHECK_NULL_VOID(options);
-    if (options->tag == ARK_TAG_UNDEFINED) { return; }
-    auto arkOptionsOpt =  Converter::OptConvert<Ark_CalendarDialogOptions>(options->value);
+    auto arkOptionsOpt = Converter::OptConvert<Ark_CalendarDialogOptions>(*options);
     if (!arkOptionsOpt.has_value()) { return; }
 
     Ark_CalendarDialogOptions arkOptions = *arkOptionsOpt;

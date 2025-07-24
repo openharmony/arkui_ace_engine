@@ -20,17 +20,14 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-const GENERATED_ArkUIPanGestureOptionsAccessor* GetPanGestureOptionsAccessor();
 namespace PanRecognizerAccessor {
 void DestroyPeerImpl(Ark_PanRecognizer peer)
 {
-    if (peer) {
-        delete peer;
-    }
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_PanRecognizer CtorImpl()
 {
-    return nullptr;
+    return PeerUtils::CreatePeer<PanRecognizerPeer>();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -39,11 +36,11 @@ Ark_NativePointer GetFinalizerImpl()
 Ark_PanGestureOptions GetPanGestureOptionsImpl(Ark_PanRecognizer peer)
 {
     CHECK_NULL_RETURN(peer, nullptr);
-    auto panGestureOptionsPeer = GetPanGestureOptionsAccessor()->ctor(nullptr);
-    auto options = peer->GetOptions();
-    CHECK_NULL_RETURN(options, panGestureOptionsPeer);
+    auto panGestureOptionsPeer = PeerUtils::CreatePeer<PanGestureOptionsPeer>();
+    auto options = peer->GetPanGestureOptions();
+    CHECK_NULL_RETURN(options, reinterpret_cast<Ark_PanGestureOptions>(panGestureOptionsPeer));
     panGestureOptionsPeer->handler = options;
-    return panGestureOptionsPeer;
+    return reinterpret_cast<Ark_PanGestureOptions>(panGestureOptionsPeer);
 }
 } // PanRecognizerAccessor
 const GENERATED_ArkUIPanRecognizerAccessor* GetPanRecognizerAccessor()
@@ -57,7 +54,4 @@ const GENERATED_ArkUIPanRecognizerAccessor* GetPanRecognizerAccessor()
     return &PanRecognizerAccessorImpl;
 }
 
-struct PanRecognizerPeer {
-    virtual ~PanRecognizerPeer() = default;
-};
 }

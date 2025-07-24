@@ -1,0 +1,51 @@
+{
+  "rootElement": {
+    "nodeId": 1067,
+    "kind": "ComponentRoot",
+    "children": [
+      {
+        "nodeId": 1068,
+        "kind": "Column",
+        "children": [
+          {
+            "nodeId": 1069,
+            "kind": "Text",
+            "children": [],
+            "setTextOptions_content": "MenuItem Test"
+          },
+          {
+            "nodeId": 1070,
+            "kind": "Menu",
+            "children": [
+              {
+                "nodeId": 1071,
+                "kind": "MenuItem",
+                "children": [],
+                "setMenuItemOptions_value": {
+                  "content": "content",
+                  "labelInfo": "label"
+                },
+                "selected_value": 1,
+                "contentFont_value": {
+                  "size": "20px",
+                  "weight": 2,
+                  "family": "Arial, Times",
+                  "style": 1
+                },
+                "contentFontColor_value": "#abcdef",
+                "labelFont_value": {
+                  "size": "10fp",
+                  "weight": 2,
+                  "family": "Monospace",
+                  "style": 0
+                },
+                "labelFontColor_value": "#fedcba",
+                "selectIcon_value": true
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

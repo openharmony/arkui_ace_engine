@@ -24,11 +24,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextMenuItemIdAccessor {
 void DestroyPeerImpl(Ark_TextMenuItemId peer)
 {
-    delete peer;
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_TextMenuItemId CtorImpl()
 {
-    return new TextMenuItemIdPeer();
+    return PeerUtils::CreatePeer<TextMenuItemIdPeer>();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -88,6 +88,24 @@ Ark_TextMenuItemId GetAI_WRITERImpl()
     peer->id = "OH_DEFAULT_AI_WRITE";
     return peer;
 }
+Ark_TextMenuItemId GetTRANSLATEImpl()
+{
+    auto peer = CtorImpl();
+    peer->id = "OH_DEFAULT_TRANSLATE";
+    return peer;
+}
+Ark_TextMenuItemId GetSEARCHImpl()
+{
+    auto peer = CtorImpl();
+    peer->id = "OH_DEFAULT_SEARCH";
+    return peer;
+}
+Ark_TextMenuItemId GetSHAREImpl()
+{
+    auto peer = CtorImpl();
+    peer->id = "OH_DEFAULT_SHARE";
+    return peer;
+}
 } // TextMenuItemIdAccessor
 const GENERATED_ArkUITextMenuItemIdAccessor* GetTextMenuItemIdAccessor()
 {
@@ -104,6 +122,9 @@ const GENERATED_ArkUITextMenuItemIdAccessor* GetTextMenuItemIdAccessor()
         TextMenuItemIdAccessor::GetCOLLABORATION_SERVICEImpl,
         TextMenuItemIdAccessor::GetCAMERA_INPUTImpl,
         TextMenuItemIdAccessor::GetAI_WRITERImpl,
+        TextMenuItemIdAccessor::GetTRANSLATEImpl,
+        TextMenuItemIdAccessor::GetSEARCHImpl,
+        TextMenuItemIdAccessor::GetSHAREImpl,
     };
     return &TextMenuItemIdAccessorImpl;
 }

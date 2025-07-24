@@ -19,17 +19,17 @@
 namespace OHOS::Ace {
 RefPtr<PixelMap> PixelMap::CreatePixelMap(void* /*rawPtr*/)
 {
-    return AceType::MakeRefPtr<MockPixelMap>();
+    return AceType::MakeRefPtr<::testing::NiceMock<MockPixelMap>>();
 }
 
 RefPtr<PixelMap> PixelMap::DecodeTlv(std::vector<uint8_t>& buff)
 {
-    return AceType::MakeRefPtr<MockPixelMap>();
+    return AceType::MakeRefPtr<::testing::NiceMock<MockPixelMap>>();
 }
 
 RefPtr<PixelMap> PixelMap::CreatePixelMapFromDataAbility(void* /*rawPtr*/)
 {
-    return AceType::MakeRefPtr<MockPixelMap>();
+    return AceType::MakeRefPtr<::testing::NiceMock<MockPixelMap>>();
 }
 
 void* PixelMap::GetReleaseContext(const RefPtr<PixelMap>& pixelMap)

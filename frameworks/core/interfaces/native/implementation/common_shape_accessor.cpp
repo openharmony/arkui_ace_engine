@@ -59,7 +59,4 @@ const GENERATED_ArkUICommonShapeAccessor* GetCommonShapeAccessor()
     return &CommonShapeAccessorImpl;
 }
 
-struct CommonShapePeer {
-    virtual ~CommonShapePeer() = default;
-};
 }

@@ -13,21 +13,10 @@
  * limitations under the License.
  */
 
-import { int32 } from "@koalaui/common"
-import { NodeAttach, remember } from "@koalaui/runtime"
-import { AttributeModifier, ImageAttribute, DrawableDescriptor, DrawingLattice } from "../..";
-import { ResourceStr, ResourceColor } from "../../component/units"
-import { Resource } from "../../../global/resource/resource";
-import { CommonMethod } from "../../component/common"
-import { ArkImagePeer } from "../../generated/peers/ArkImagePeer";
-import { ArkCommonMethodPeer } from "../../generated/peers/ArkCommonPeer";
-import { PixelMap } from "../../generated/ArkPixelMapMaterialized"
-import { ArkCommonAttributeSet, modifierNullWithKey, modifierWithKey, ModifierWithKey } from "./ArkCommonModifier";
-import { ImageAIOptions, ImageFit, ImageRepeat, ImageRenderMode, DynamicRangeMode, ImageInterpolation, ImageSourceSize, ImageContent, ColorFilter, DrawingColorFilter, CopyOptions, PointLightStyle, Type_ImageAttribute_onComplete_callback_event, ImageErrorCallback, ImageAnalyzerConfig, ResizableOptions, ResolutionQuality } from "../../generated";
+import { AttributeModifier, ImageAttribute } from "../..";
+import { ArkCommonAttributeSet } from "./ArkCommonModifier";
 
-
-export class ArkImageAttributeSet extends ArkCommonAttributeSet {
-}
+export class ArkImageAttributeSet extends ArkCommonAttributeSet { }
 
 export class ImageModifier implements AttributeModifier<ImageAttribute> {
 

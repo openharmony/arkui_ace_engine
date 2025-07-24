@@ -151,11 +151,11 @@ public:
         return color4f_;
     }
 
-    uint32_t red_;
-    uint32_t green_;
-    uint32_t blue_;
-    uint32_t alpha_;
     TestingColor4f color4f_;
+    uint32_t red_{0};
+    uint32_t green_{0};
+    uint32_t blue_{0};
+    uint32_t alpha_{0};
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_COLOR_H

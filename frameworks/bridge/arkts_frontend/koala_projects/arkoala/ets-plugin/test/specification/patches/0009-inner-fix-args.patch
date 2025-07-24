@@ -1,0 +1,32 @@
+From 64ec413c299984e71c1892339e83e47f07075494 Mon Sep 17 00:00:00 2001
+From: Dmitrii <naumov.dmitrii@huawei.com>
+Date: Fri, 15 Dec 2023 12:18:00 +0300
+Subject: [PATCH] inner-fix-args
+
+---
+ .../render_decorator/@builder/handleCustomBuilder.ts          | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/compiler/test/utForPartialUpdate/render_decorator/@builder/handleCustomBuilder.ts b/compiler/test/utForPartialUpdate/render_decorator/@builder/handleCustomBuilder.ts
+index 8d63a329..52642a88 100644
+--- a/compiler/test/utForPartialUpdate/render_decorator/@builder/handleCustomBuilder.ts
++++ b/compiler/test/utForPartialUpdate/render_decorator/@builder/handleCustomBuilder.ts
+@@ -45,13 +45,13 @@ struct Index {
+       Row()
+         .onDragStart((event: DragEvent, extraParams: string) => {
+           console.log('Text onDragStarts, ' + extraParams)
+-          return this.judge ? this.inner : global()
++          return this.judge ? this.inner("222") : global()
+         })
+       Row()
+         .onDragStart((event: DragEvent, extraParams: string) => {
+           console.log('Text onDragStarts, ' + extraParams)
+           return {
+-            builder: this.judge ? this.inner() : undefined
++            builder: this.judge ? this.inner("333") : undefined
+           }
+         })
+       Text('Text')
+-- 
+2.25.1
+

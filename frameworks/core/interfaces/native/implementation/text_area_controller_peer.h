@@ -28,7 +28,5 @@ struct TextAreaControllerPeer : public TextContentControllerBasePeer {
     {
         controller_ = controller;
     }
-
-    virtual ~TextAreaControllerPeer() = default;
 };
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_TEXT_AREA_CONTROLLER_PEER_H

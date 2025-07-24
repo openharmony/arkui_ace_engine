@@ -22,6 +22,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/web/web_event_hub.h"
 #if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
+#include "base/web/webview/ohos_nweb/include/nweb_helper.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
 #else
 #include "core/components_ng/pattern/web/cross_platform/web_pattern.h"
@@ -1444,7 +1445,7 @@ void WebModelNG::SetDataDetectorConfig(const TextDetectConfig& config)
 void WebModelNG::SetJsEnabled(FrameNode* frameNode, bool isJsEnabled)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
     CHECK_NULL_VOID(webPattern);
     webPattern->UpdateJsEnabled(isJsEnabled);
 }
@@ -1452,7 +1453,7 @@ void WebModelNG::SetJsEnabled(FrameNode* frameNode, bool isJsEnabled)
 void WebModelNG::SetFileAccessEnabled(FrameNode* frameNode, bool isFileAccessEnabled)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
     CHECK_NULL_VOID(webPattern);
     webPattern->UpdateFileAccessEnabled(isFileAccessEnabled);
 }
@@ -1460,7 +1461,7 @@ void WebModelNG::SetFileAccessEnabled(FrameNode* frameNode, bool isFileAccessEna
 void WebModelNG::SetDomStorageAccessEnabled(FrameNode* frameNode, bool isDomStorageAccessEnabled)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
     CHECK_NULL_VOID(webPattern);
     webPattern->UpdateDomStorageAccessEnabled(isDomStorageAccessEnabled);
 }
@@ -1476,7 +1477,7 @@ void WebModelNG::SetMixedMode(FrameNode* frameNode, MixedModeContent mixedConten
 void WebModelNG::SetZoomAccessEnabled(FrameNode* frameNode, bool isZoomAccessEnabled)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
     CHECK_NULL_VOID(webPattern);
     webPattern->UpdateZoomAccessEnabled(isZoomAccessEnabled);
 }
@@ -1500,7 +1501,7 @@ void WebModelNG::SetDarkMode(FrameNode* frameNode, WebDarkMode mode)
 void WebModelNG::SetMultiWindowAccessEnabled(FrameNode* frameNode, bool isMultiWindowAccessEnable)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
     CHECK_NULL_VOID(webPattern);
     webPattern->UpdateMultiWindowAccessEnabled(isMultiWindowAccessEnable);
 }
@@ -1508,7 +1509,7 @@ void WebModelNG::SetMultiWindowAccessEnabled(FrameNode* frameNode, bool isMultiW
 void WebModelNG::SetAllowWindowOpenMethod(FrameNode* frameNode, bool isAllowWindowOpenMethod)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
     CHECK_NULL_VOID(webPattern);
     webPattern->UpdateAllowWindowOpenMethod(isAllowWindowOpenMethod);
 }

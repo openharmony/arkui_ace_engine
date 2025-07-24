@@ -76,8 +76,12 @@ private:
         assert(ownData);
         assert(newLength > dataLength);
         auto* newData = reinterpret_cast<uint8_t*>(malloc(newLength));
-        if (position >= 0 && position <= newLength && data != NULL) {
-            memcpy(newData, data, position);
+        if (newData == NULL) {
+            return;
+        }
+        if (data == NULL || memcpy_s(newData, newLength, data, position) != 0) {
+            free(newData);
+            return;
         }
         free(data);
         data = newData;
@@ -115,11 +119,11 @@ public:
     }
 
     inline void check(int more) {
-        if (position + static_cast<uint32_t>(more) > dataLength) {
+        if (position + more > dataLength) {
             if (ownData) {
                 resize(dataLength * 3 / 2 + 2);
             } else {
-                fprintf(stderr, "Buffer overrun: %u > %u\n", position + more, dataLength);
+                fprintf(stderr, "Buffer overrun: %d > %d\n", position + more, dataLength);
                 assert(false);
             }
         }
@@ -133,9 +137,6 @@ public:
 
     void writeInt32(InteropInt32 value) {
         check(4);
-        if (data == NULL) {
-            return;
-        }
 #ifdef KOALA_NO_UNALIGNED_ACCESS
         memcpy(data + position, &value, 4);
 #else
@@ -146,9 +147,6 @@ public:
 
     void writeInt64(InteropInt64 value) {
         check(8);
-        if (data == NULL) {
-            return;
-        }
 #ifdef KOALA_NO_UNALIGNED_ACCESS
         memcpy(data + position, &value, 8);
 #else
@@ -159,9 +157,6 @@ public:
 
     void writeUInt64(InteropUInt64 value) {
         check(8);
-        if (data == NULL) {
-            return;
-        }
 #ifdef KOALA_NO_UNALIGNED_ACCESS
         memcpy(data + position, &value, 8);
 #else
@@ -172,9 +167,6 @@ public:
 
     void writeFloat32(InteropFloat32 value) {
         check(4);
-        if (data == NULL) {
-            return;
-        }
 #ifdef KOALA_NO_UNALIGNED_ACCESS
         memcpy(data + position, &value, 4);
 #else
@@ -185,9 +177,6 @@ public:
 
     void writePointer(InteropNativePointer value) {
         check(8);
-        if (data == NULL) {
-            return;
-        }
         int64_t value64 = static_cast<int64_t>(reinterpret_cast<uintptr_t>(value));
 #ifdef KOALA_NO_UNALIGNED_ACCESS
         if (memcpy_s(data + position, 8, &value64, 8) != 0) {

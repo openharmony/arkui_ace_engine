@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,15 +12,46 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include <tuple>
 #include <string>
 
+#include "interop-types.h"
 #include "dynamic-loader.h"
-#include "callbacks.h"
 #include "interop-logging.h"
-#include "arkoala_api_generated.h"
 #include "securec.h"
+
+#ifndef GENERATED_FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_ANY_API_H
+#define GENERATED_FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_ANY_API_H
+#include <stdint.h>
+// todo remove after migration to OH_AnyAPI to be consistant between arkoala and ohos apis
+struct Ark_AnyAPI {
+    int32_t version;
+};
+struct OH_AnyAPI {
+    int32_t version;
+};
+#endif
+#ifndef GENERATED_FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_GENERIC_SERVICE_API_H
+#define GENERATED_FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_GENERIC_SERVICE_API_H
+#include <stdint.h>
+#define GENERIC_SERVICE_API_VERSION 1
+enum GENERIC_SERVICE_APIKind {
+    GENERIC_SERVICE_API_KIND = 14,
+};
+
+typedef struct ServiceLogger {
+    void (*startGroupedLog)(int kind);
+    void (*stopGroupedLog)(int kind);
+    void (*appendGroupedLog)(int kind, const char* str);
+    const char* (*getGroupedLog)(int kind);
+    int (*needGroupedLog)(int kind);
+} ServiceLogger;
+
+typedef struct GenericServiceAPI {
+    int32_t version;
+    void (*setLogger)(const ServiceLogger* logger);
+} GenericServiceAPI;
+#endif
 
 // TODO: rework for generic OHOS case.
 void* FindModule(int kind) {
@@ -43,21 +74,34 @@ void* FindModule(int kind) {
         if (module) {
             LOGE("ACE module at: %s", libraryName.c_str());
             return module;
-        } else {}
+        } else {
+        }
     }
     return nullptr;
 }
 
-static GENERATED_ArkUIAnyAPI* impls[GENERATED_Ark_APIVariantKind::GENERATED_COUNT] = { 0 };
+static const int API_KIND_MAX = 100;
+static const OH_AnyAPI* impls[API_KIND_MAX + 1] = { 0 };
 const char* getArkAnyAPIFuncName = "GENERATED_GetArkAnyAPI";
 
-const GENERATED_ArkUIAnyAPI* GetAnyImpl(int kind, int version, std::string* result) {
+#ifdef KOALA_LIBACE_LINKED
+extern "C" const OH_AnyAPI* GENERATED_GetArkAnyAPI(int kind, int version);
+#endif
+const OH_AnyAPI* GetAnyImpl(int kind, int version, std::string* result) {
+    if (kind > API_KIND_MAX) {
+        INTEROP_FATAL("Try to get api with kind more than expected: kind=%d, max=%d", kind, API_KIND_MAX);
+    }
     if (!impls[kind]) {
         static const GroupLogger* logger = GetDefaultLogger();
 
-        GENERATED_ArkUIAnyAPI* impl = nullptr;
-        typedef GENERATED_ArkUIAnyAPI* (*GetAPI_t)(int, int);
+        const OH_AnyAPI* impl = nullptr;
+        typedef const OH_AnyAPI* (*GetAPI_t)(int, int);
+
+#ifdef KOALA_LIBACE_LINKED
+        static GetAPI_t getAPI = GENERATED_GetArkAnyAPI;
+#else
         static GetAPI_t getAPI = nullptr;
+#endif
 
         char* envValue = getenv("__LIBACE_ENTRY_POINT");
         if (envValue) {
@@ -85,7 +129,7 @@ const GENERATED_ArkUIAnyAPI* GetAnyImpl(int kind, int version, std::string* resu
             }
         }
         // Provide custom logger and callback caller to loaded libs.
-        auto service = (const GenericServiceAPI*)(*getAPI)(GENERIC_SERVICE, GENERIC_SERVICE_API_VERSION);
+        auto service = (const GenericServiceAPI*)(*getAPI)(GENERIC_SERVICE_API_KIND, GENERIC_SERVICE_API_VERSION);
         if (service) {
             if (logger) service->setLogger(reinterpret_cast<const ServiceLogger*>(logger));
         }
@@ -114,16 +158,4 @@ const GENERATED_ArkUIAnyAPI* GetAnyImpl(int kind, int version, std::string* resu
         impls[kind] = impl;
     }
     return impls[kind];
-}
-
-const GENERATED_ArkUIBasicNodeAPI* GetArkUIBasicNodeAPI() {
-    return reinterpret_cast<const GENERATED_ArkUIBasicNodeAPI*>(
-        GetAnyImpl(static_cast<int>(GENERATED_Ark_APIVariantKind::GENERATED_BASIC),
-        GENERATED_ARKUI_BASIC_NODE_API_VERSION, nullptr));
-}
-
-const GENERATED_ArkUIExtendedNodeAPI* GetArkUIExtendedNodeAPI() {
-    return reinterpret_cast<const GENERATED_ArkUIExtendedNodeAPI*>(
-        GetAnyImpl(static_cast<int>(GENERATED_Ark_APIVariantKind::GENERATED_EXTENDED),
-        GENERATED_ARKUI_EXTENDED_NODE_API_VERSION, nullptr));
 }

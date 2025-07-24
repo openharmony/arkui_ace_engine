@@ -39,27 +39,30 @@ void SetLoadingProgressOptionsImpl(Ark_NativePointer node)
 } // LoadingProgressInterfaceModifier
 namespace LoadingProgressAttributeModifier {
 void ColorImpl(Ark_NativePointer node,
-               const Ark_ResourceColor* value)
+               const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
     auto color = Converter::OptConvert<Color>(*value);
     LoadingProgressModelStatic::SetColor(frameNode, color);
 }
 void EnableLoadingImpl(Ark_NativePointer node,
-                       Ark_Boolean value)
+                       const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    LoadingProgressModelNG::SetEnableLoading(frameNode, Converter::Convert<bool>(value));
+    auto convValue = Converter::OptConvert<bool>(*value);
+    if (!convValue) {
+        // TODO: Reset value
+        return;
+    }
+    LoadingProgressModelNG::SetEnableLoading(frameNode, *convValue);
 }
 void ContentModifierImpl(Ark_NativePointer node,
-                         const Ark_CustomObject* value)
+                         const Opt_ContentModifier* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
     LOGE("ARKOALA LoadingProgressAttributeModifier::ContentModifierImpl -> Method is not implemented");
 }
 } // LoadingProgressAttributeModifier

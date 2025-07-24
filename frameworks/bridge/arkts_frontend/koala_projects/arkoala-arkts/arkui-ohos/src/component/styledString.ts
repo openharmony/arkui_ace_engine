@@ -18,19 +18,21 @@
 
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
-import { unsafeCast, int32, float32, int64 } from "@koalaui/common"
-import { Serializer } from "./../generated/peers/Serializer"
-import { CallbackKind } from "./../generated/peers/CallbackKind"
-import { Deserializer } from "./../generated/peers/Deserializer"
-import { CallbackTransformer } from "./../generated/peers/CallbackTransformer"
-import { ResourceColor, SizeOptions, ResourceStr, Margin, Padding, BorderRadiuses } from "./units"
+import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
+import { Serializer } from "./peers/Serializer"
+import { CallbackKind } from "./peers/CallbackKind"
+import { Deserializer } from "./peers/Deserializer"
+import { CallbackTransformer } from "./peers/CallbackTransformer"
+import { ResourceColor, SizeOptions, ColorFilter, ColorFilterInternal, ResourceStr, Padding, BorderRadiuses } from "./units"
 import { FontStyle, Color, TextDecorationType, TextDecorationStyle, TextAlign, TextOverflow, WordBreak, ImageSpanAlignment, ImageFit, FontWeight } from "./enums"
-import { Resource } from "global/resource";
-import { LengthMetrics, LengthMetricsInternal } from "../Graphics"
-import { ShadowOptions, DrawContext, Callback_ClickEvent_Void, ClickEvent } from "./common"
+import { Resource } from "global/resource"
+import { DrawContext } from "./../Graphics"
+import { LengthMetrics } from "../Graphics"
+import { ShadowOptions, Callback_ClickEvent_Void, ClickEvent } from "./common"
 import { TextBackgroundStyle } from "./span"
 import { LeadingMarginPlaceholder } from "./richEditor"
-import { PixelMap, PixelMapInternal } from "./../generated/ArkPixelMapMaterialized"
+import { PixelMap, PixelMapInternal } from "./arkui-pixelmap"
+import { DrawingColorFilter, DrawingColorFilterInternal } from "./arkui-drawing"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Callback_GestureEvent_Void, GestureEvent } from "./gesture"
 export class StyledStringInternal {
@@ -57,7 +59,7 @@ export class StyledString implements MaterializedBase {
             const value_0  = value as string
             thisSerializer.writeString(value_0)
         }
-        else if (TypeChecker.isImageAttachment(value, false, false, false, false, false)) {
+        else if (TypeChecker.isImageAttachment(value, false, false, false, false, false, false)) {
             thisSerializer.writeInt8(1 as int32)
             const value_1  = value as ImageAttachment
             thisSerializer.writeImageAttachment(value_1)
@@ -85,7 +87,7 @@ export class StyledString implements MaterializedBase {
     constructor(value?: string | ImageAttachment | CustomSpan, styles?: Array<StyleOptions>) {
         if (((value) !== (undefined)) || ((styles) !== (undefined)))
         {
-            const ctorPtr : KPointer = StyledString.ctor_styledstring((value)!, (styles)!)
+            const ctorPtr : KPointer = StyledString.ctor_styledstring((value)!, styles)
             this.peer = new Finalizable(ctorPtr, StyledString.getFinalizer())
         }
     }
@@ -118,13 +120,17 @@ export class StyledString implements MaterializedBase {
         const styledString_casted = styledString as (StyledString)
         return StyledString.toHtml_serialize(styledString_casted)
     }
-    public static marshalling(styledString: StyledString): NativeBuffer {
+    public static marshalling(styledString: StyledString, callback_?: StyledStringMarshallCallback): NativeBuffer {
+        const styledString_type = runtimeType(styledString)
+        const callback__type = runtimeType(callback_)
         const styledString_casted = styledString as (StyledString)
-        return StyledString.marshalling_serialize(styledString_casted)
+        return StyledString.marshalling1_serialize(styledString_casted)
     }
-    public static unmarshalling(buffer: NativeBuffer): Promise<StyledString> {
+    public static unmarshalling(buffer: NativeBuffer, callback_?: StyledStringUnmarshallCallback): Promise<StyledString> {
+        const buffer_type = runtimeType(buffer)
+        const callback__type = runtimeType(callback_)
         const buffer_casted = buffer as (NativeBuffer)
-        return StyledString.unmarshalling_serialize(buffer_casted)
+        return StyledString.unmarshalling1_serialize(buffer_casted)
     }
     private getLength(): number {
         return this.getLength_serialize()
@@ -140,11 +146,11 @@ export class StyledString implements MaterializedBase {
         thisSerializer.writeInt8(styledKey_type as int32)
         if ((RuntimeType.UNDEFINED) != (styledKey_type)) {
             const styledKey_value  = (styledKey as StyledStringKey)
-            thisSerializer.writeInt32(styledKey_value.valueOf())
+            thisSerializer.writeInt32(TypeChecker.StyledStringKey_ToNumeric(styledKey_value))
         }
         const retval  = ArkUIGeneratedNativeModule._StyledString_getStyles(this.peer!.ptr, start, length, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const buffer_length : int32 = retvalDeserializer.readInt32()
         let buffer : Array<SpanStyle> = new Array<SpanStyle>(buffer_length)
         for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
@@ -182,15 +188,31 @@ export class StyledString implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._StyledString_toHtml(toPeerPtr(styledString))
         return retval
     }
-    private static marshalling_serialize(styledString: StyledString): NativeBuffer {
-        const retval  = ArkUIGeneratedNativeModule._StyledString_marshalling(toPeerPtr(styledString))
-        return new Deserializer(retval, retval.length).readBuffer()
+    private static marshalling0_serialize(styledString: StyledString, callback_: StyledStringMarshallCallback): NativeBuffer {
+        const thisSerializer : Serializer = Serializer.hold()
+        thisSerializer.holdAndWriteCallback(callback_)
+        const retval  = ArkUIGeneratedNativeModule._StyledString_marshalling0(toPeerPtr(styledString), thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return new Deserializer(retval, retval.length as int32).readBuffer()
     }
-    private static unmarshalling_serialize(buffer: NativeBuffer): Promise<StyledString> {
+    private static marshalling1_serialize(styledString: StyledString): NativeBuffer {
+        const retval  = ArkUIGeneratedNativeModule._StyledString_marshalling1(toPeerPtr(styledString))
+        return new Deserializer(retval, retval.length as int32).readBuffer()
+    }
+    private static unmarshalling0_serialize(buffer: NativeBuffer, callback_: StyledStringUnmarshallCallback): Promise<StyledString> {
+        const thisSerializer : Serializer = Serializer.hold()
+        thisSerializer.writeBuffer(buffer)
+        thisSerializer.holdAndWriteCallback(callback_)
+        const retval  = thisSerializer.holdAndWriteCallbackForPromise<StyledString>()[0]
+        ArkUIGeneratedNativeModule._StyledString_unmarshalling0(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    private static unmarshalling1_serialize(buffer: NativeBuffer): Promise<StyledString> {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeBuffer(buffer)
         const retval  = thisSerializer.holdAndWriteCallbackForPromise<StyledString>()[0]
-        ArkUIGeneratedNativeModule._StyledString_unmarshalling(thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._StyledString_unmarshalling1(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
@@ -200,13 +222,13 @@ export class StyledString implements MaterializedBase {
     }
 }
 export class TextStyle_styled_stringInternal {
-    public static fromPtr(ptr: KPointer): TextStyle_styled_string {
-        const obj : TextStyle_styled_string = new TextStyle_styled_string(undefined)
-        obj.peer = new Finalizable(ptr, TextStyle_styled_string.getFinalizer())
+    public static fromPtr(ptr: KPointer): TextStyle {
+        const obj : TextStyle = new TextStyle(undefined)
+        obj.peer = new Finalizable(ptr, TextStyle.getFinalizer())
         return obj
     }
 }
-export class TextStyle_styled_string implements MaterializedBase {
+export class TextStyle implements MaterializedBase {
     peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
@@ -240,44 +262,44 @@ export class TextStyle_styled_string implements MaterializedBase {
         return retval
     }
     constructor(value?: TextStyleInterface) {
-        const ctorPtr : KPointer = TextStyle_styled_string.ctor_textstyle_styled_string((value)!)
-        this.peer = new Finalizable(ctorPtr, TextStyle_styled_string.getFinalizer())
+        const ctorPtr : KPointer = TextStyle.ctor_textstyle_styled_string(value)
+        this.peer = new Finalizable(ctorPtr, TextStyle.getFinalizer())
     }
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._TextStyle_styled_string_getFinalizer()
     }
-    private getFontColor(): ResourceColor {
+    private getFontColor(): ResourceColor | undefined {
         return this.getFontColor_serialize()
     }
-    private getFontFamily(): string {
+    private getFontFamily(): string | undefined {
         return this.getFontFamily_serialize()
     }
-    private getFontSize(): number {
+    private getFontSize(): number | undefined {
         return this.getFontSize_serialize()
     }
-    private getFontWeight(): number {
+    private getFontWeight(): number | undefined {
         return this.getFontWeight_serialize()
     }
-    private getFontStyle(): FontStyle {
+    private getFontStyle(): FontStyle | undefined {
         return this.getFontStyle_serialize()
     }
-    private getFontColor_serialize(): ResourceColor {
+    private getFontColor_serialize(): ResourceColor | undefined {
         const retval  = ArkUIGeneratedNativeModule._TextStyle_styled_string_getFontColor(this.peer!.ptr)
         throw new Error("Object deserialization is not implemented.")
     }
-    private getFontFamily_serialize(): string {
+    private getFontFamily_serialize(): string | undefined {
         const retval  = ArkUIGeneratedNativeModule._TextStyle_styled_string_getFontFamily(this.peer!.ptr)
-        return retval
+        throw new Error("Object deserialization is not implemented.")
     }
-    private getFontSize_serialize(): number {
+    private getFontSize_serialize(): number | undefined {
         const retval  = ArkUIGeneratedNativeModule._TextStyle_styled_string_getFontSize(this.peer!.ptr)
-        return retval
+        throw new Error("Object deserialization is not implemented.")
     }
-    private getFontWeight_serialize(): number {
+    private getFontWeight_serialize(): number | undefined {
         const retval  = ArkUIGeneratedNativeModule._TextStyle_styled_string_getFontWeight(this.peer!.ptr)
-        return retval
+        throw new Error("Object deserialization is not implemented.")
     }
-    private getFontStyle_serialize(): FontStyle {
+    private getFontStyle_serialize(): FontStyle | undefined {
         const retval  = ArkUIGeneratedNativeModule._TextStyle_styled_string_getFontStyle(this.peer!.ptr)
         throw new Error("Object deserialization is not implemented.")
     }
@@ -323,21 +345,21 @@ export class DecorationStyle implements MaterializedBase {
     private getType(): TextDecorationType {
         return this.getType_serialize()
     }
-    private getColor(): ResourceColor {
+    private getColor(): ResourceColor | undefined {
         return this.getColor_serialize()
     }
-    private getStyle(): TextDecorationStyle {
+    private getStyle(): TextDecorationStyle | undefined {
         return this.getStyle_serialize()
     }
     private getType_serialize(): TextDecorationType {
         const retval  = ArkUIGeneratedNativeModule._DecorationStyle_getType(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        return TypeChecker.TextDecorationType_FromNumeric(retval)
     }
-    private getColor_serialize(): ResourceColor {
+    private getColor_serialize(): ResourceColor | undefined {
         const retval  = ArkUIGeneratedNativeModule._DecorationStyle_getColor(this.peer!.ptr)
         throw new Error("Object deserialization is not implemented.")
     }
-    private getStyle_serialize(): TextDecorationStyle {
+    private getStyle_serialize(): TextDecorationStyle | undefined {
         const retval  = ArkUIGeneratedNativeModule._DecorationStyle_getStyle(this.peer!.ptr)
         throw new Error("Object deserialization is not implemented.")
     }
@@ -468,7 +490,7 @@ export class TextShadowStyle implements MaterializedBase {
     }
     private getTextShadow_serialize(): Array<ShadowOptions> {
         const retval  = ArkUIGeneratedNativeModule._TextShadowStyle_getTextShadow(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const buffer_length : int32 = retvalDeserializer.readInt32()
         let buffer : Array<ShadowOptions> = new Array<ShadowOptions>(buffer_length)
         for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
@@ -515,7 +537,7 @@ export class BackgroundColorStyle implements MaterializedBase {
     }
     private getTextBackgroundStyle_serialize(): TextBackgroundStyle {
         const retval  = ArkUIGeneratedNativeModule._BackgroundColorStyle_getTextBackgroundStyle(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const returnResult : TextBackgroundStyle = retvalDeserializer.readTextBackgroundStyle()
         return returnResult
     }
@@ -546,7 +568,7 @@ export class GestureStyle implements MaterializedBase {
         return retval
     }
     constructor(value?: GestureStyleInterface) {
-        const ctorPtr : KPointer = GestureStyle.ctor_gesturestyle((value)!)
+        const ctorPtr : KPointer = GestureStyle.ctor_gesturestyle(value)
         this.peer = new Finalizable(ctorPtr, GestureStyle.getFinalizer())
     }
     static getFinalizer(): KPointer {
@@ -583,6 +605,9 @@ export class ParagraphStyle implements MaterializedBase {
     get leadingMargin(): number | LeadingMarginPlaceholder | undefined {
         throw new Error("Not implemented")
     }
+    get paragraphSpacing(): number | undefined {
+        return this.getParagraphSpacing()
+    }
     static ctor_paragraphstyle(value?: ParagraphStyleInterface): KPointer {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
@@ -597,52 +622,59 @@ export class ParagraphStyle implements MaterializedBase {
         return retval
     }
     constructor(value?: ParagraphStyleInterface) {
-        const ctorPtr : KPointer = ParagraphStyle.ctor_paragraphstyle((value)!)
+        const ctorPtr : KPointer = ParagraphStyle.ctor_paragraphstyle(value)
         this.peer = new Finalizable(ctorPtr, ParagraphStyle.getFinalizer())
     }
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._ParagraphStyle_getFinalizer()
     }
-    private getTextAlign(): TextAlign {
+    private getTextAlign(): TextAlign | undefined {
         return this.getTextAlign_serialize()
     }
-    private getTextIndent(): number {
+    private getTextIndent(): number | undefined {
         return this.getTextIndent_serialize()
     }
-    private getMaxLines(): number {
+    private getMaxLines(): number | undefined {
         return this.getMaxLines_serialize()
     }
-    private getOverflow(): TextOverflow {
+    private getOverflow(): TextOverflow | undefined {
         return this.getOverflow_serialize()
     }
-    private getWordBreak(): WordBreak {
+    private getWordBreak(): WordBreak | undefined {
         return this.getWordBreak_serialize()
     }
-    private getLeadingMargin(): number | LeadingMarginPlaceholder {
+    private getLeadingMargin(): number | LeadingMarginPlaceholder | undefined {
         return this.getLeadingMargin_serialize()
     }
-    private getTextAlign_serialize(): TextAlign {
+    private getParagraphSpacing(): number | undefined {
+        return this.getParagraphSpacing_serialize()
+    }
+    private getTextAlign_serialize(): TextAlign | undefined {
         const retval  = ArkUIGeneratedNativeModule._ParagraphStyle_getTextAlign(this.peer!.ptr)
         throw new Error("Object deserialization is not implemented.")
     }
-    private getTextIndent_serialize(): number {
+    private getTextIndent_serialize(): number | undefined {
         const retval  = ArkUIGeneratedNativeModule._ParagraphStyle_getTextIndent(this.peer!.ptr)
-        return retval
+        throw new Error("Object deserialization is not implemented.")
     }
-    private getMaxLines_serialize(): number {
+    private getMaxLines_serialize(): number | undefined {
         const retval  = ArkUIGeneratedNativeModule._ParagraphStyle_getMaxLines(this.peer!.ptr)
-        return retval
+        throw new Error("Object deserialization is not implemented.")
     }
-    private getOverflow_serialize(): TextOverflow {
+    private getOverflow_serialize(): TextOverflow | undefined {
         const retval  = ArkUIGeneratedNativeModule._ParagraphStyle_getOverflow(this.peer!.ptr)
         throw new Error("Object deserialization is not implemented.")
     }
-    private getWordBreak_serialize(): WordBreak {
+    private getWordBreak_serialize(): WordBreak | undefined {
         const retval  = ArkUIGeneratedNativeModule._ParagraphStyle_getWordBreak(this.peer!.ptr)
         throw new Error("Object deserialization is not implemented.")
     }
-    private getLeadingMargin_serialize(): number | LeadingMarginPlaceholder {
+    private getLeadingMargin_serialize(): number | LeadingMarginPlaceholder | undefined {
         const retval  = ArkUIGeneratedNativeModule._ParagraphStyle_getLeadingMargin(this.peer!.ptr)
+        throw new Error("Object deserialization is not implemented.")
+    }
+    private getParagraphSpacing_serialize(): number | undefined {
+        const retval  = ArkUIGeneratedNativeModule._ParagraphStyle_getParagraphSpacing(this.peer!.ptr)
         throw new Error("Object deserialization is not implemented.")
     }
 }
@@ -719,6 +751,249 @@ export class UrlStyle implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._UrlStyle_getUrl(this.peer!.ptr)
         return retval
     }
+}
+export class ImageAttachmentInternal {
+    public static fromPtr(ptr: KPointer): ImageAttachment {
+        const obj : ImageAttachment = new ImageAttachment(undefined)
+        obj.peer = new Finalizable(ptr, ImageAttachment.getFinalizer())
+        return obj
+    }
+}
+export class ImageAttachment implements MaterializedBase {
+    peer?: Finalizable | undefined = undefined
+    public getPeer(): Finalizable | undefined {
+        return this.peer
+    }
+    get value(): PixelMap {
+        return this.getValue()
+    }
+    get size(): SizeOptions | undefined {
+        throw new Error("Not implemented")
+    }
+    get verticalAlign(): ImageSpanAlignment | undefined {
+        return this.getVerticalAlign()
+    }
+    get objectFit(): ImageFit | undefined {
+        return this.getObjectFit()
+    }
+    get layoutStyle(): ImageAttachmentLayoutStyle | undefined {
+        throw new Error("Not implemented")
+    }
+    get colorFilter(): ColorFilterType | undefined {
+        throw new Error("Not implemented")
+    }
+    static ctor_imageattachment(value: ImageAttachmentInterface): KPointer {
+        const thisSerializer : Serializer = Serializer.hold()
+        thisSerializer.writeImageAttachmentInterface(value)
+        const retval  = ArkUIGeneratedNativeModule._ImageAttachment_ctor(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    constructor(value?: ImageAttachmentInterface) {
+        if ((value) !== (undefined))
+        {
+            const ctorPtr : KPointer = ImageAttachment.ctor_imageattachment((value)!)
+            this.peer = new Finalizable(ctorPtr, ImageAttachment.getFinalizer())
+        }
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._ImageAttachment_getFinalizer()
+    }
+    private getValue(): PixelMap {
+        return this.getValue_serialize()
+    }
+    private getSize(): SizeOptions | undefined {
+        return this.getSize_serialize()
+    }
+    private getVerticalAlign(): ImageSpanAlignment | undefined {
+        return this.getVerticalAlign_serialize()
+    }
+    private getObjectFit(): ImageFit | undefined {
+        return this.getObjectFit_serialize()
+    }
+    private getLayoutStyle(): ImageAttachmentLayoutStyle | undefined {
+        return this.getLayoutStyle_serialize()
+    }
+    private getColorFilter(): ColorFilterType | undefined {
+        return this.getColorFilter_serialize()
+    }
+    private getValue_serialize(): PixelMap {
+        const retval  = ArkUIGeneratedNativeModule._ImageAttachment_getValue(this.peer!.ptr)
+        const obj : PixelMap = PixelMapInternal.fromPtr(retval)
+        return obj
+    }
+    private getSize_serialize(): SizeOptions | undefined {
+        const retval  = ArkUIGeneratedNativeModule._ImageAttachment_getSize(this.peer!.ptr)
+        throw new Error("Object deserialization is not implemented.")
+    }
+    private getVerticalAlign_serialize(): ImageSpanAlignment | undefined {
+        const retval  = ArkUIGeneratedNativeModule._ImageAttachment_getVerticalAlign(this.peer!.ptr)
+        throw new Error("Object deserialization is not implemented.")
+    }
+    private getObjectFit_serialize(): ImageFit | undefined {
+        const retval  = ArkUIGeneratedNativeModule._ImageAttachment_getObjectFit(this.peer!.ptr)
+        throw new Error("Object deserialization is not implemented.")
+    }
+    private getLayoutStyle_serialize(): ImageAttachmentLayoutStyle | undefined {
+        const retval  = ArkUIGeneratedNativeModule._ImageAttachment_getLayoutStyle(this.peer!.ptr)
+        throw new Error("Object deserialization is not implemented.")
+    }
+    private getColorFilter_serialize(): ColorFilterType | undefined {
+        const retval  = ArkUIGeneratedNativeModule._ImageAttachment_getColorFilter(this.peer!.ptr)
+        throw new Error("Object deserialization is not implemented.")
+    }
+}
+export class CustomSpanInternal {
+    public static fromPtr(ptr: KPointer): CustomSpan {
+        const obj : CustomSpan = new CustomSpan()
+        obj.peer = new Finalizable(ptr, CustomSpan.getFinalizer())
+        return obj
+    }
+}
+export class CustomSpan implements MaterializedBase {
+    peer?: Finalizable | undefined = undefined
+    public getPeer(): Finalizable | undefined {
+        return this.peer
+    }
+    static ctor_customspan(): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._CustomSpan_ctor()
+        return retval
+    }
+    constructor() {
+        const ctorPtr : KPointer = CustomSpan.ctor_customspan()
+        this.peer = new Finalizable(ctorPtr, CustomSpan.getFinalizer())
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._CustomSpan_getFinalizer()
+    }
+    public onMeasure(measureInfo: CustomSpanMeasureInfo): CustomSpanMetrics {
+        const measureInfo_casted = measureInfo as (CustomSpanMeasureInfo)
+        return this.onMeasure_serialize(measureInfo_casted)
+    }
+    public onDraw(context: DrawContext, drawInfo: CustomSpanDrawInfo): void {
+        const context_casted = context as (DrawContext)
+        const drawInfo_casted = drawInfo as (CustomSpanDrawInfo)
+        this.onDraw_serialize(context_casted, drawInfo_casted)
+        return
+    }
+    public invalidate(): void {
+        this.invalidate_serialize()
+        return
+    }
+    private onMeasure_serialize(measureInfo: CustomSpanMeasureInfo): CustomSpanMetrics {
+        const thisSerializer : Serializer = Serializer.hold()
+        thisSerializer.writeCustomSpanMeasureInfo(measureInfo)
+        const retval  = ArkUIGeneratedNativeModule._CustomSpan_onMeasure(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
+        const returnResult : CustomSpanMetrics = retvalDeserializer.readCustomSpanMetrics()
+        return returnResult
+    }
+    private onDraw_serialize(context: DrawContext, drawInfo: CustomSpanDrawInfo): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        thisSerializer.writeDrawContext(context)
+        thisSerializer.writeCustomSpanDrawInfo(drawInfo)
+        ArkUIGeneratedNativeModule._CustomSpan_onDraw(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private invalidate_serialize(): void {
+        ArkUIGeneratedNativeModule._CustomSpan_invalidate(this.peer!.ptr)
+    }
+}
+export type StyledStringMarshallingValue = UserDataSpan;
+export type StyledStringMarshallCallback = (marshallableVal: UserDataSpan) => NativeBuffer;
+export type StyledStringUnmarshallCallback = (buf: NativeBuffer) => UserDataSpan;
+export interface StyleOptions {
+    start?: number;
+    length?: number;
+    styledKey: StyledStringKey;
+    styledValue: StyledStringValue;
+}
+export interface SpanStyle {
+    start: number;
+    length: number;
+    styledKey: StyledStringKey;
+    styledValue: StyledStringValue;
+}
+export interface TextStyleInterface {
+    fontColor?: ResourceColor;
+    fontFamily?: ResourceStr;
+    fontSize?: LengthMetrics;
+    fontWeight?: number | FontWeight | string;
+    fontStyle?: FontStyle;
+}
+export interface DecorationStyleInterface {
+    type: TextDecorationType;
+    color?: ResourceColor;
+    style?: TextDecorationStyle;
+}
+export interface GestureStyleInterface {
+    onClick?: ((event: ClickEvent) => void);
+    onLongPress?: ((event: GestureEvent) => void);
+}
+export interface ParagraphStyleInterface {
+    textAlign?: TextAlign;
+    textIndent?: LengthMetrics;
+    maxLines?: number;
+    overflow?: TextOverflow;
+    wordBreak?: WordBreak;
+    leadingMargin?: LengthMetrics | LeadingMarginPlaceholder;
+    paragraphSpacing?: LengthMetrics;
+}
+export type StyledStringValue = TextStyle | DecorationStyle | BaselineOffsetStyle | LetterSpacingStyle | TextShadowStyle | GestureStyle | ImageAttachment | ParagraphStyle | LineHeightStyle | UrlStyle | CustomSpan | UserDataSpan | BackgroundColorStyle;
+export enum StyledStringKey {
+    FONT = 0,
+    DECORATION = 1,
+    BASELINE_OFFSET = 2,
+    LETTER_SPACING = 3,
+    TEXT_SHADOW = 4,
+    LINE_HEIGHT = 5,
+    BACKGROUND_COLOR = 6,
+    URL = 7,
+    GESTURE = 100,
+    PARAGRAPH_STYLE = 200,
+    IMAGE = 300,
+    CUSTOM_SPAN = 400,
+    USER_DATA = 500
+}
+export interface ResourceImageAttachmentOptions {
+    resourceValue: ResourceStr | undefined;
+    size?: SizeOptions;
+    verticalAlign?: ImageSpanAlignment;
+    objectFit?: ImageFit;
+    layoutStyle?: ImageAttachmentLayoutStyle;
+    colorFilter?: ColorFilterType;
+    syncLoad?: boolean;
+}
+export interface ImageAttachmentInterface {
+    value: PixelMap;
+    size?: SizeOptions;
+    verticalAlign?: ImageSpanAlignment;
+    objectFit?: ImageFit;
+    layoutStyle?: ImageAttachmentLayoutStyle;
+    colorFilter?: ColorFilterType;
+}
+export type AttachmentType = ImageAttachmentInterface | ResourceImageAttachmentOptions;
+export type ColorFilterType = ColorFilter | DrawingColorFilter;
+export interface ImageAttachmentLayoutStyle {
+    margin?: LengthMetrics | Padding;
+    padding?: LengthMetrics | Padding;
+    borderRadius?: LengthMetrics | BorderRadiuses;
+}
+export interface CustomSpanMetrics {
+    width: number;
+    height?: number;
+}
+export interface CustomSpanDrawInfo {
+    x: number;
+    lineTop: number;
+    lineBottom: number;
+    baseline: number;
+}
+export interface CustomSpanMeasureInfo {
+    fontSize: number;
+}
+export interface UserDataSpan {
 }
 export class MutableStyledStringInternal {
     public static fromPtr(ptr: KPointer): MutableStyledString {
@@ -826,7 +1101,7 @@ export class MutableStyledString extends StyledString implements MaterializedBas
         thisSerializer.release()
     }
     private removeStyle_serialize(start: number, length: number, styledKey: StyledStringKey): void {
-        ArkUIGeneratedNativeModule._MutableStyledString_removeStyle(this.peer!.ptr, start, length, styledKey.valueOf())
+        ArkUIGeneratedNativeModule._MutableStyledString_removeStyle(this.peer!.ptr, start, length, TypeChecker.StyledStringKey_ToNumeric(styledKey))
     }
     private removeStyles_serialize(start: number, length: number): void {
         ArkUIGeneratedNativeModule._MutableStyledString_removeStyles(this.peer!.ptr, start, length)
@@ -843,225 +1118,4 @@ export class MutableStyledString extends StyledString implements MaterializedBas
     private appendStyledString_serialize(other: StyledString): void {
         ArkUIGeneratedNativeModule._MutableStyledString_appendStyledString(this.peer!.ptr, toPeerPtr(other))
     }
-}
-export class ImageAttachmentInternal {
-    public static fromPtr(ptr: KPointer): ImageAttachment {
-        const obj : ImageAttachment = new ImageAttachment(undefined)
-        obj.peer = new Finalizable(ptr, ImageAttachment.getFinalizer())
-        return obj
-    }
-}
-export class ImageAttachment implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
-    get value(): PixelMap {
-        return this.getValue()
-    }
-    get size(): SizeOptions | undefined {
-        throw new Error("Not implemented")
-    }
-    get verticalAlign(): ImageSpanAlignment | undefined {
-        return this.getVerticalAlign()
-    }
-    get objectFit(): ImageFit | undefined {
-        return this.getObjectFit()
-    }
-    get layoutStyle(): ImageAttachmentLayoutStyle | undefined {
-        throw new Error("Not implemented")
-    }
-    static ctor_imageattachment(value: ImageAttachmentInterface): KPointer {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeImageAttachmentInterface(value)
-        const retval  = ArkUIGeneratedNativeModule._ImageAttachment_ctor(thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-        return retval
-    }
-    constructor(value?: ImageAttachmentInterface) {
-        if ((value) !== (undefined))
-        {
-            const ctorPtr : KPointer = ImageAttachment.ctor_imageattachment((value)!)
-            this.peer = new Finalizable(ctorPtr, ImageAttachment.getFinalizer())
-        }
-    }
-    static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._ImageAttachment_getFinalizer()
-    }
-    private getValue(): PixelMap {
-        return this.getValue_serialize()
-    }
-    private getSize(): SizeOptions {
-        return this.getSize_serialize()
-    }
-    private getVerticalAlign(): ImageSpanAlignment {
-        return this.getVerticalAlign_serialize()
-    }
-    private getObjectFit(): ImageFit {
-        return this.getObjectFit_serialize()
-    }
-    private getLayoutStyle(): ImageAttachmentLayoutStyle {
-        return this.getLayoutStyle_serialize()
-    }
-    private getValue_serialize(): PixelMap {
-        const retval  = ArkUIGeneratedNativeModule._ImageAttachment_getValue(this.peer!.ptr)
-        const obj : PixelMap = PixelMapInternal.fromPtr(retval)
-        return obj
-    }
-    private getSize_serialize(): SizeOptions {
-        const retval  = ArkUIGeneratedNativeModule._ImageAttachment_getSize(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
-        const returnResult : SizeOptions = retvalDeserializer.readSizeOptions()
-        return returnResult
-    }
-    private getVerticalAlign_serialize(): ImageSpanAlignment {
-        const retval  = ArkUIGeneratedNativeModule._ImageAttachment_getVerticalAlign(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
-    }
-    private getObjectFit_serialize(): ImageFit {
-        const retval  = ArkUIGeneratedNativeModule._ImageAttachment_getObjectFit(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
-    }
-    private getLayoutStyle_serialize(): ImageAttachmentLayoutStyle {
-        const retval  = ArkUIGeneratedNativeModule._ImageAttachment_getLayoutStyle(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
-        const returnResult : ImageAttachmentLayoutStyle = retvalDeserializer.readImageAttachmentLayoutStyle()
-        return returnResult
-    }
-}
-export class CustomSpanInternal {
-    public static fromPtr(ptr: KPointer): CustomSpan {
-        const obj : CustomSpan = new CustomSpan()
-        obj.peer = new Finalizable(ptr, CustomSpan.getFinalizer())
-        return obj
-    }
-}
-export class CustomSpan implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
-    static ctor_customspan(): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._CustomSpan_ctor()
-        return retval
-    }
-    constructor() {
-        const ctorPtr : KPointer = CustomSpan.ctor_customspan()
-        this.peer = new Finalizable(ctorPtr, CustomSpan.getFinalizer())
-    }
-    static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._CustomSpan_getFinalizer()
-    }
-    public onMeasure(measureInfo: CustomSpanMeasureInfo): CustomSpanMetrics {
-        const measureInfo_casted = measureInfo as (CustomSpanMeasureInfo)
-        return this.onMeasure_serialize(measureInfo_casted)
-    }
-    public onDraw(context: DrawContext, drawInfo: CustomSpanDrawInfo): void {
-        const context_casted = context as (DrawContext)
-        const drawInfo_casted = drawInfo as (CustomSpanDrawInfo)
-        this.onDraw_serialize(context_casted, drawInfo_casted)
-        return
-    }
-    public invalidate(): void {
-        this.invalidate_serialize()
-        return
-    }
-    private onMeasure_serialize(measureInfo: CustomSpanMeasureInfo): CustomSpanMetrics {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeCustomSpanMeasureInfo(measureInfo)
-        const retval  = ArkUIGeneratedNativeModule._CustomSpan_onMeasure(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
-        const returnResult : CustomSpanMetrics = retvalDeserializer.readCustomSpanMetrics()
-        return returnResult
-    }
-    private onDraw_serialize(context: DrawContext, drawInfo: CustomSpanDrawInfo): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeDrawContext(context)
-        thisSerializer.writeCustomSpanDrawInfo(drawInfo)
-        ArkUIGeneratedNativeModule._CustomSpan_onDraw(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    private invalidate_serialize(): void {
-        ArkUIGeneratedNativeModule._CustomSpan_invalidate(this.peer!.ptr)
-    }
-}
-export interface StyleOptions {
-    start?: number;
-    length?: number;
-    styledKey: StyledStringKey;
-    styledValue: StyledStringValue;
-}
-export interface SpanStyle {
-    start: number;
-    length: number;
-    styledKey: StyledStringKey;
-    styledValue: StyledStringValue;
-}
-export interface TextStyleInterface {
-    fontColor?: ResourceColor;
-    fontFamily?: ResourceStr;
-    fontSize?: LengthMetrics;
-    fontWeight?: number | FontWeight | string;
-    fontStyle?: FontStyle;
-}
-export interface DecorationStyleInterface {
-    type: TextDecorationType;
-    color?: ResourceColor;
-    style?: TextDecorationStyle;
-}
-export interface GestureStyleInterface {
-    onClick?: ((event: ClickEvent) => void);
-    onLongPress?: ((event: GestureEvent) => void);
-}
-export interface ParagraphStyleInterface {
-    textAlign?: TextAlign;
-    textIndent?: LengthMetrics;
-    maxLines?: number;
-    overflow?: TextOverflow;
-    wordBreak?: WordBreak;
-    leadingMargin?: LengthMetrics | LeadingMarginPlaceholder;
-}
-export type StyledStringValue = TextStyle_styled_string | DecorationStyle | BaselineOffsetStyle | LetterSpacingStyle | TextShadowStyle | GestureStyle | ImageAttachment | ParagraphStyle | LineHeightStyle | UrlStyle | CustomSpan | UserDataSpan | BackgroundColorStyle;
-export enum StyledStringKey {
-    FONT = 0,
-    DECORATION = 1,
-    BASELINE_OFFSET = 2,
-    LETTER_SPACING = 3,
-    TEXT_SHADOW = 4,
-    LINE_HEIGHT = 5,
-    BACKGROUND_COLOR = 6,
-    URL = 7,
-    GESTURE = 100,
-    PARAGRAPH_STYLE = 200,
-    IMAGE = 300,
-    CUSTOM_SPAN = 400,
-    USER_DATA = 500
-}
-export interface ImageAttachmentInterface {
-    value: PixelMap;
-    size?: SizeOptions;
-    verticalAlign?: ImageSpanAlignment;
-    objectFit?: ImageFit;
-    layoutStyle?: ImageAttachmentLayoutStyle;
-}
-export interface ImageAttachmentLayoutStyle {
-    margin?: LengthMetrics | Margin;
-    padding?: LengthMetrics | Padding;
-    borderRadius?: LengthMetrics | BorderRadiuses;
-}
-export interface CustomSpanMetrics {
-    width: number;
-    height?: number;
-}
-export interface CustomSpanDrawInfo {
-    x: number;
-    lineTop: number;
-    lineBottom: number;
-    baseline: number;
-}
-export interface CustomSpanMeasureInfo {
-    fontSize: number;
-}
-export interface UserDataSpan {
 }

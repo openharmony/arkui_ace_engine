@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 
+#include "arkoala_api_generated.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
-#include "core/interfaces/native/utility/callback_helper.h"
-#include "core/interfaces/native/implementation/dialog_common.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/action_sheet/action_sheet_model_ng.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
-#include "core/components_ng/base/view_abstract.h"
-#include "arkoala_api_generated.h"
+#include "core/interfaces/native/implementation/dialog_common.h"
+#include "core/interfaces/native/utility/callback_helper.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG::Converter {
 template<>
@@ -36,15 +36,21 @@ ActionSheetInfo Convert(const Ark_SheetInfo& src)
 {
     ActionSheetInfo info;
     auto title = Converter::OptConvert<std::string>(src.title);
-    if (title) { info.title = *title; }
+    if (title) {
+        info.title = *title;
+    }
     auto icon = Converter::OptConvert<std::string>(src.icon);
-    if (icon) { info.icon = *icon; }
-    
+    if (icon) {
+        info.icon = *icon;
+    }
+
     auto action = Converter::OptConvert<VoidCallback>(src.action);
-    auto onClick = [callback = CallbackHelper(*action)](GestureEvent& info) {
-        callback.Invoke();
-    };
-    info.action = AceType::MakeRefPtr<NG::ClickEvent>(std::move(onClick));
+    if (action.has_value()) {
+        auto onClick = [callback = CallbackHelper(*action)](GestureEvent& gestureInfo) { callback.Invoke(); };
+        info.action = AceType::MakeRefPtr<NG::ClickEvent>(std::move(onClick));
+    } else {
+        info.action = nullptr;
+    }
     return info;
 }
 } // namespace OHOS::Ace::NG::Converter
@@ -65,7 +71,7 @@ void CreateConfirmButton(DialogProperties& dialogProps, const Ark_ActionSheetOpt
         auto arkCallbackOpt = Converter::OptConvert<VoidCallback>(confirmInfoOpt->action);
         if (arkCallbackOpt) {
             auto gestureEvent = [arkCallback = CallbackHelper(*arkCallbackOpt)](
-                                     const GestureEvent& info) -> void { arkCallback.Invoke(); };
+                                    const GestureEvent& info) -> void { arkCallback.Invoke(); };
             confirmInfo.action = AceType::MakeRefPtr<NG::ClickEvent>(std::move(gestureEvent));
         }
         confirmInfo.enabled = Converter::OptConvert<bool>(confirmInfoOpt->enabled).value_or(confirmInfo.enabled);
@@ -132,9 +138,9 @@ void ShowImpl(const Ark_ActionSheetOptions* value)
         auto cancelFunc = [arkCallback = CallbackHelper(*cancelCallbackOpt)]() -> void { arkCallback.Invoke(); };
         dialogProps.onCancel = cancelFunc;
     }
-    dialogProps.onLanguageChange = [value, updateDialogProperties = UpdateDynamicDialogProperties](
+    dialogProps.onLanguageChange = [actionSheetValue = *value, updateDialogProperties = UpdateDynamicDialogProperties](
         DialogProperties& dialogProps) {
-        updateDialogProperties(dialogProps, *value);
+        updateDialogProperties(dialogProps, actionSheetValue);
     };
     OHOS::Ace::NG::ActionSheetModelNG sheetModel;
     sheetModel.ShowActionSheet(dialogProps);

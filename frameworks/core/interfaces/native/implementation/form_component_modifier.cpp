@@ -70,10 +70,6 @@ template<>
 OptRequestFormInfo Convert(const Ark_FormInfo& src)
 {
     OptRequestFormInfo dst;
-    auto id = Converter::OptConvert<Dimension>(src.id);
-    if (id) {
-        dst.id = (int64_t)(*id).Value();
-    }
     dst.name = Converter::Convert<std::string>(src.name);
     dst.bundle = Converter::Convert<std::string>(src.bundle);
     dst.ability = Converter::Convert<std::string>(src.ability);
@@ -125,16 +121,6 @@ void AssignCast(std::optional<int32_t>& dst, const Ark_FormDimension& src)
         default: LOGE("Unexpected enum value in Ark_FormDimension: %{public}d", src);
     }
 }
-template<>
-void AssignCast(std::optional<VisibleType>& dst, const Ark_Visibility& src)
-{
-    switch (src) {
-        case ARK_VISIBILITY_VISIBLE: dst = VisibleType::VISIBLE; break;
-        case ARK_VISIBILITY_HIDDEN: dst = VisibleType::INVISIBLE; break;
-        case ARK_VISIBILITY_NONE: dst = VisibleType::GONE; break;
-        default: LOGE("Unexpected enum value in Ark_Visibility: %{public}d", src);
-    }
-}
 } // namespace OHOS::Ace::NG::Converter
 } // namespace OHOS::Ace::NG
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -143,7 +129,10 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
 #ifdef FORM_SUPPORTED
-    return {};
+    auto frameNode = FormModelNG::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 #else
     return {};
 #endif
@@ -162,8 +151,6 @@ void SetFormComponentOptionsImpl(Ark_NativePointer node,
     if (formInfo.dimension) {
         FormModelNG::SetDimension(frameNode, *formInfo.dimension);
     }
-    LOGE("ARKOALA FormComponentInterfaceModifier::OnAcquiredImpl - Ark_Number width of int32_t is not enough "
-         "for implementation of int64_t functionality.");
     LOGE("ARKOALA FormComponentInterfaceModifier::SetFormComponentOptionsImpl - CustomObject is not supported "
          "the type Ark_FormInfo::Opt_Want::Opt_Map_String_CustomObject::Ark_CustomObject.");
 #endif // FORM_SUPPORTED
@@ -171,69 +158,83 @@ void SetFormComponentOptionsImpl(Ark_NativePointer node,
 } // FormComponentInterfaceModifier
 namespace FormComponentAttributeModifier {
 void SizeImpl(Ark_NativePointer node,
-              const Ark_SizeOptions* value)
+              const Opt_SizeOptions* value)
 {
 #ifdef FORM_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto dimension = Converter::Convert<LiteralDimension>(*value);
-    FormModelNG::SetSize(frameNode, dimension.width, dimension.height);
+    auto dimension = Converter::OptConvert<LiteralDimension>(*value);
+    if (!dimension) {
+        // TODO: Reset value
+        return;
+    }
+    FormModelNG::SetSize(frameNode, dimension->width, dimension->height);
 #endif // FORM_SUPPORTED
 }
 void ModuleNameImpl(Ark_NativePointer node,
-                    const Ark_String* value)
+                    const Opt_String* value)
 {
 #ifdef FORM_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto name = Converter::Convert<std::string>(*value);
-    FormModelNG::SetModuleName(frameNode, name);
+    auto convValue = Converter::OptConvert<std::string>(*value);
+    if (!convValue) {
+        // TODO: Reset value
+        return;
+    }
+    FormModelNG::SetModuleName(frameNode, *convValue);
 #endif // FORM_SUPPORTED
 }
 void DimensionImpl(Ark_NativePointer node,
-                   Ark_FormDimension value)
+                   const Opt_FormDimension* value)
 {
 #ifdef FORM_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto opt = Converter::OptConvert<int32_t>(value);
+    auto opt = Converter::OptConvert<int32_t>(*value);
+    // TODO: Reset value
     CHECK_NULL_VOID(opt);
     FormModelNG::SetDimension(frameNode, *opt);
 #endif // FORM_SUPPORTED
 }
 void AllowUpdateImpl(Ark_NativePointer node,
-                     Ark_Boolean value)
+                     const Opt_Boolean* value)
 {
 #ifdef FORM_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::Convert<bool>(value);
-    FormModelNG::AllowUpdate(frameNode, convValue);
+    auto convValue = Converter::OptConvert<bool>(*value);
+    if (!convValue) {
+        // TODO: Reset value
+        return;
+    }
+    FormModelNG::AllowUpdate(frameNode, *convValue);
 #endif // FORM_SUPPORTED
 }
 void VisibilityImpl(Ark_NativePointer node,
-                    Ark_Visibility value)
+                    const Opt_Visibility* value)
 {
 #ifdef FORM_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto opt = Converter::OptConvert<VisibleType>(value);
+    auto opt = Converter::OptConvert<VisibleType>(*value);
     CHECK_NULL_VOID(opt);
     FormModelNG::SetVisibility(frameNode, *opt);
 #endif // FORM_SUPPORTED
 }
 void OnAcquiredImpl(Ark_NativePointer node,
-                    const Callback_FormCallbackInfo_Void* value)
+                    const Opt_Callback_FormCallbackInfo_Void* value)
 {
 #ifdef FORM_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-
-    auto onAcquired = [arkCallback = CallbackHelper(*value)](const std::string& param) {
-        uint32_t id = FORM_ON_ACQUIRED_ID_INVALID;
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // TODO: Reset value
+        return;
+    }
+    auto onAcquired = [arkCallback = CallbackHelper(*optValue)](const std::string& param) {
+        int64_t id = FORM_ON_ACQUIRED_ID_INVALID;
         std::string idString = FORM_ON_ACQUIRED_ID_STRING_INVALID;
         auto sourceJson = JsonUtil::ParseJsonString(param);
         if (sourceJson && !sourceJson->IsNull()) {
@@ -241,29 +242,30 @@ void OnAcquiredImpl(Ark_NativePointer node,
             auto jsonId = sourceJson->GetString(FORM_COMPONENT_ID_KEY, FORM_ON_ACQUIRED_ID_STRING_INVALID);
             idString = sourceJson->GetString(FORM_COMPONENT_ID_STRING_KEY, FORM_ON_ACQUIRED_ID_STRING_INVALID);
             int64_t result = std::strtoul(jsonId.c_str(), &endptr, 10);
-            if (*endptr == '\0' && result >= MIN_UNSIGNED_NUMBER_OF_ARK && result < MAX_UNSIGNED_NUMBER_OF_ARK) {
-                id = static_cast<uint32_t>(result);
+            if (*endptr == '\0') {
+                id = result;
             }
         }
         Ark_FormCallbackInfo parameter = {
-            .id = Converter::ArkValue<Ark_Number>(id),
+            .id = Converter::ArkValue<Ark_Int64>(id),
             .idString = Converter::ArkValue<Ark_String>(idString) };
         arkCallback.Invoke(parameter);
     };
-    LOGE("ARKOALA FormComponentInterfaceModifier::OnAcquiredImpl - Ark_Number width of int32_t is not enough "
-        "for implementation of int64_t functionality.");
-    // FormModelNG::SetOnAcquired(frameNode, onAcquired);
+    FormModelNG::SetOnAcquired(frameNode, onAcquired);
 #endif // FORM_SUPPORTED
 }
 void OnErrorImpl(Ark_NativePointer node,
-                 const Callback_Literal_Number_errcode_String_msg_Void* value)
+                 const Opt_Callback_Literal_Number_errcode_String_msg_Void* value)
 {
 #ifdef FORM_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-
-    auto onError = [arkCallback = CallbackHelper(*value)](const std::string& param) {
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // TODO: Reset value
+        return;
+    }
+    auto onError = [arkCallback = CallbackHelper(*optValue)](const std::string& param) {
         int32_t code = FORM_ON_ERROR_CODE_INVALID;
         std::string msg = FORM_EMPTY_STRING;
         auto sourceJson = JsonUtil::ParseJsonString(param);
@@ -271,9 +273,9 @@ void OnErrorImpl(Ark_NativePointer node,
             char* endptr;
             auto jsonCode = sourceJson->GetString(FORM_ON_ERROR_CODE_KEY, FORM_EMPTY_STRING);
             msg = sourceJson->GetString(FORM_ON_ERROR_MSG_KEY, FORM_EMPTY_STRING);
-            int64_t result = std::strtol(jsonCode.c_str(), &endptr, 10);
+            int32_t result = std::strtol(jsonCode.c_str(), &endptr, 10);
             if (*endptr == '\0' && result >= MIN_SIGNED_NUMBER_OF_ARK && result <= MAX_SIGNED_NUMBER_OF_ARK) {
-                code = static_cast<int32_t>(result);
+                code =result;
             }
         }
         Ark_Literal_Number_errcode_String_msg parameter = {
@@ -282,32 +284,32 @@ void OnErrorImpl(Ark_NativePointer node,
         };
         arkCallback.Invoke(parameter);
     };
-    LOGE("ARKOALA FormComponentInterfaceModifier::OnErrorImpl - Ark_Number width of int32_t is not enough "
-        "for implementation of int64_t functionality.");
-    // FormModelNG::SetOnError(frameNode, onError);
+    FormModelNG::SetOnError(frameNode, onError);
 #endif // FORM_SUPPORTED
 }
 void OnRouterImpl(Ark_NativePointer node,
-                  const Callback_Any_Void* value)
+                  const Opt_Callback_Any_Void* value)
 {
 #ifdef FORM_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    LOGE("ARKOALA FormComponentInterfaceModifier::OnRouterImpl - CustomObject is not supported "
-        "the type Callback_Any_Void includes Ark_CustomObject.");
+    LOGE("ARKOALA FormComponentInterfaceModifier::OnRouterImpl - Callback_Any_Void  is not supported "
+        "the type Callback_Any_Void should be replaced by Callback_String_Void.");
 #endif // FORM_SUPPORTED
 }
 void OnUninstallImpl(Ark_NativePointer node,
-                     const Callback_FormCallbackInfo_Void* value)
+                     const Opt_Callback_FormCallbackInfo_Void* value)
 {
 #ifdef FORM_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-
-    auto onUninstall = [arkCallback = CallbackHelper(*value)](const std::string& param) {
-        uint32_t id = FORM_ON_ACQUIRED_ID_INVALID;
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // TODO: Reset value
+        return;
+    }
+    auto onUninstall = [arkCallback = CallbackHelper(*optValue)](const std::string& param) {
+        int64_t id = FORM_ON_ACQUIRED_ID_INVALID;
         std::string idString = FORM_ON_ACQUIRED_ID_STRING_INVALID;
         auto sourceJson = JsonUtil::ParseJsonString(param);
         if (sourceJson && !sourceJson->IsNull()) {
@@ -315,32 +317,34 @@ void OnUninstallImpl(Ark_NativePointer node,
             auto jsonId = sourceJson->GetString(FORM_COMPONENT_ID_KEY, FORM_ON_ACQUIRED_ID_STRING_INVALID);
             idString = sourceJson->GetString(FORM_COMPONENT_ID_STRING_KEY, FORM_ON_ACQUIRED_ID_STRING_INVALID);
             int64_t result = std::strtoul(jsonId.c_str(), &endptr, 10);
-            if (*endptr == '\0' && result >= MIN_UNSIGNED_NUMBER_OF_ARK && result < MAX_UNSIGNED_NUMBER_OF_ARK) {
-                id = static_cast<uint32_t>(result);
+            if (*endptr == '\0') {
+                id = result;
             }
         }
         Ark_FormCallbackInfo parameter = {
-            .id = Converter::ArkValue<Ark_Number>(id),
+            .id = Converter::ArkValue<Ark_Int64>(id),
             .idString = Converter::ArkValue<Ark_String>(idString)
         };
         arkCallback.Invoke(parameter);
     };
-    LOGE("ARKOALA FormComponentInterfaceModifier::OnAcquiredImpl - Ark_Number width of int32_t is not enough "
-        "for implementation of int64_t functionality.");
-    // FormModelNG::SetOnUninstall(frameNode, onUninstall);
+    FormModelNG::SetOnUninstall(frameNode, onUninstall);
 #endif // FORM_SUPPORTED
 }
 void OnLoadImpl(Ark_NativePointer node,
-                const Callback_Void* value)
+                const Opt_Callback_Void* value)
 {
 #ifdef FORM_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto onLoad = [arkCallback = CallbackHelper(*value)](const std::string& param) {
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // TODO: Reset value
+        return;
+    }
+    auto onLoad = [arkCallback = CallbackHelper(*optValue)](const std::string& param) {
         arkCallback.Invoke();
     };
-    // FormModelNG::SetOnLoad(frameNode, std::move(onLoad));
+    FormModelNG::SetOnLoad(frameNode, std::move(onLoad));
 #endif // FORM_SUPPORTED
 }
 } // FormComponentAttributeModifier

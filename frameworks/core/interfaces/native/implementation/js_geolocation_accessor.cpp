@@ -22,8 +22,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace JsGeolocationAccessor {
 void DestroyPeerImpl(Ark_JsGeolocation peer)
 {
-    CHECK_NULL_VOID(peer);
-    peer->webGeolocation = nullptr;
     delete peer;
 }
 Ark_JsGeolocation CtorImpl()
@@ -59,7 +57,4 @@ const GENERATED_ArkUIJsGeolocationAccessor* GetJsGeolocationAccessor()
     return &JsGeolocationAccessorImpl;
 }
 
-struct JsGeolocationPeer {
-    virtual ~JsGeolocationPeer() = default;
-};
 }

@@ -1,0 +1,34 @@
+{
+  "rootElement": {
+    "nodeId": 1180,
+    "kind": "ComponentRoot",
+    "children": [
+      {
+        "nodeId": 1181,
+        "kind": "Scroll",
+        "children": [],
+        "scrollable_value": 1,
+        "scrollBar_value": 1,
+        "scrollBarColor_value": "0xabcdef",
+        "scrollBarWidth_value": 15,
+        "edgeEffect_edgeEffect": 2,
+        "nestedScroll_value": {
+          "scrollForward": 1,
+          "scrollBackward": 2
+        },
+        "enableScrollInteraction_value": 0,
+        "friction_value": 5.5,
+        "enablePaging_value": 1,
+        "scrollSnap_value": {
+          "snapAlign": 2,
+          "snapPagination": [
+            "15fp",
+            18
+          ],
+          "enableSnapToStart": true,
+          "enableSnapToEnd": false
+        }
+      }
+    ]
+  }
+}

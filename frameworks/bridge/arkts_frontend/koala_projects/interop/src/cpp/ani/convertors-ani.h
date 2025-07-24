@@ -1872,9 +1872,10 @@ void getKoalaANICallbackDispatcher(ani_class* clazz, ani_static_method* method);
   ani_class clazz = nullptr;                                                           \
   ani_static_method method = nullptr;                                                  \
   getKoalaANICallbackDispatcher(&clazz, &method);                                      \
-  ani_env* env = reinterpret_cast<ani_env*>(venv);                            \
+  ani_env* env = reinterpret_cast<ani_env*>(venv);                                     \
   ani_int result = 0;                                                                  \
-  env->Class_CallStaticMethod_Int(clazz, method, &result, id, args, length); \
+  long long args_casted = reinterpret_cast<long long>(args);                           \
+  env->Class_CallStaticMethod_Int(clazz, method, &result, id, args_casted, length);    \
 }
 
 #define KOALA_INTEROP_CALL_INT(venv, id, length, args)                                       \
@@ -1884,7 +1885,8 @@ void getKoalaANICallbackDispatcher(ani_class* clazz, ani_static_method* method);
     getKoalaANICallbackDispatcher(&clazz, &method);                                          \
     ani_env* env = reinterpret_cast<ani_env*>(venv);                                         \
     ani_int result = 0;                                                                      \
-    env->Class_CallStaticMethod_Int(clazz, method, &result, id, args, length);       \
+    long long args_casted = reinterpret_cast<long long>(args);                               \
+    env->Class_CallStaticMethod_Int(clazz, method, &result, id, args_casted, length);        \
     return result;                                                                           \
 }
 

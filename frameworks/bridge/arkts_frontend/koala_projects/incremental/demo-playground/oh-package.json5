@@ -1,0 +1,27 @@
+{
+  "name": "simple-koala-setup",
+  "description": "",
+  "main": "build/src/index.js",
+  "bin": "lib/js/index.js",
+  "dependencies": {
+    "node-loader": "^2.0.0"
+  },
+  "private": true,
+  "keywords": [],
+  "pkg": {
+    "scripts": "lib/js/app.js",
+    "outputPath": "dist"
+  },
+  "scripts": {
+      "compile": "WEBPACK_NO_MINIMIZE=true webpack --config webpack.config.node.js",
+      "compile:unmemoize": "tsc -b tsconfig-unmemoize.json",
+      "compile:run-unmemoized": "npm run compile -- --env tsconfig=tsconfig-run-unmemoized.json --env unmemoized=unmemoized",
+      "compile:unmemoizing": "npm run compile:unmemoize && npm run compile:run-unmemoized",
+      "compile:arkts": "bash ../tools/panda/arkts/arktsc --arktsconfig arktsconfig.json",
+      "compile:arkts:unmemoizing": "npm run compile:unmemoize && bash ../tools/panda/arkts/arktsc --arktsconfig arktsconfig-run-unmemoized.json",
+      "run": "npm run compile && node lib/js/app.js",
+      "run:unmemoizing": "npm run compile:unmemoizing && node lib/unmemoized/js/app.js",
+      "clean:unmemoized": "rimraf unmemoized",
+      "clean": "rimraf build lib unmemoized"
+  }
+}

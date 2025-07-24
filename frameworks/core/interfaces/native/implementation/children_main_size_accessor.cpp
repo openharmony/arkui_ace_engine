@@ -122,7 +122,4 @@ const GENERATED_ArkUIChildrenMainSizeAccessor* GetChildrenMainSizeAccessor()
     return &ChildrenMainSizeAccessorImpl;
 }
 
-struct ChildrenMainSizePeer {
-    virtual ~ChildrenMainSizePeer() = default;
-};
 }

@@ -747,7 +747,7 @@ void WindowPattern::DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent
     session_->TransferPointerEvent(pointerEvent);
     if (pointerEvent->GetPointerAction() >= MMI::PointerEvent::POINTER_ACTION_PULL_DOWN &&
         pointerEvent->GetPointerAction() <= MMI::PointerEvent::POINTER_ACTION_PULL_UP) {
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         if (pipeline) {
             auto manager = pipeline->GetDragDropManager();
             CHECK_NULL_VOID(manager);

@@ -26,6 +26,7 @@
 #include "base/utils/noncopyable.h"
 #include "core/common/frontend.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "frameworks/bridge/common/accessibility/accessibility_node_manager.h"
 
 typedef struct __EtsEnv ets_env; // only include ets_napi.h in .cpp files
 typedef struct __ani_env ani_env;
@@ -209,7 +210,7 @@ public:
 
     RefPtr<AccessibilityManager> GetAccessibilityManager() const override
     {
-        return nullptr;
+        return accessibilityManager_;
     }
     WindowConfig& GetWindowConfig() override
     {
@@ -291,6 +292,8 @@ private:
     
     std::map<std::string, RefPtr<InspectorEvent>> layoutCallbacks_;
     std::map<std::string, RefPtr<InspectorEvent>> drawCallbacks_;
+    RefPtr<Framework::AccessibilityNodeManager> accessibilityManager_
+        = Framework::AccessibilityNodeManager::Create();
 };
 
 } // namespace OHOS::Ace
