@@ -554,6 +554,8 @@ void MenuLayoutAlgorithm::InitWrapperRect(
         dumpInfo_.wrapperRect = wrapperRect_;
         width_ = wrapperRect_.Width();
         height_ = wrapperRect_.Height();
+        TAG_LOGI(
+            AceLogTag::ACE_MENU, "InitWrapperRect with menuWindowRect : %{public}s", wrapperRect_.ToString().c_str());
         return;
     }
     wrapperRect_.SetRect(0, 0, param_.menuWindowRect.Width(), param_.menuWindowRect.Height());
@@ -576,6 +578,9 @@ void MenuLayoutAlgorithm::InitWrapperRect(
     dumpInfo_.bottom = bottom_;
     dumpInfo_.left = left_;
     dumpInfo_.right = right_;
+    TAG_LOGI(AceLogTag::ACE_MENU,
+        "safeAreaInsets: (top: %{public}f, bottom: %{public}f, left: %{public}f, right: %{public}f)", top_, bottom_,
+        left_, right_);
     auto windowManager = pipelineContext->GetWindowManager();
     auto isContainerModal = pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL && windowManager &&
                             windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
@@ -588,6 +593,7 @@ void MenuLayoutAlgorithm::InitWrapperRect(
     wrapperRect_.SetRect(left_, top_, width_ - left_ - right_, height_ - top_ - bottom_);
     wrapperSize_ = SizeF(wrapperRect_.Width(), wrapperRect_.Height());
     dumpInfo_.wrapperRect = wrapperRect_;
+    TAG_LOGI(AceLogTag::ACE_MENU, "InitWrapperRect with safeAreaInsets : %{public}s", wrapperRect_.ToString().c_str());
 }
 
 void MenuLayoutAlgorithm::UpdateWrapperRectForHoverMode(
@@ -623,6 +629,8 @@ void MenuLayoutAlgorithm::UpdateWrapperRectForHoverMode(
     } else {
         wrapperRect_.SetRect(left_, top_ + windowsOffsetY, width_ - left_ - right_, height_ - top_ - bottom_);
     }
+    dumpInfo_.wrapperRect = wrapperRect_;
+    TAG_LOGI(AceLogTag::ACE_MENU, "Update wrapperRect for hoverMode : %{public}s", wrapperRect_.ToString().c_str());
 }
 
 uint32_t MenuLayoutAlgorithm::GetBottomBySafeAreaManager(const RefPtr<SafeAreaManager>& safeAreaManager,
@@ -3532,7 +3540,7 @@ Rect MenuLayoutAlgorithm::GetMenuWindowRectInfo(const RefPtr<MenuPattern>& menuP
     CHECK_NULL_RETURN(menuPattern, menuWindowRect);
     auto host = menuPattern->GetHost();
     CHECK_NULL_RETURN(host, menuWindowRect);
-    auto pipelineContext = DialogManager::GetMainPipelineContext(host);
+    auto pipelineContext = DialogManager::GetMainPipelineContext(host, isTargetNodeInSubwindow_);
     CHECK_NULL_RETURN(pipelineContext, menuWindowRect);
     auto rect = pipelineContext->GetDisplayWindowRectInfo();
     displayWindowRect_ = RectF(rect.Left(), rect.Top(), rect.Width(), rect.Height());
