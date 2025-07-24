@@ -1217,7 +1217,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg164, TestSize.Level1)
 {
     /**
      * @tc.steps1: Call the function FlushFrameCallback.
-     * @tc.expected: Test the member frameCallbackFuncs_ is not empty.
+     * @tc.expected: Test the member frameCallbackFuncs_ is empty.
      */
     ASSERT_NE(context_, nullptr);
     uint64_t nanoTimestamp = 1;
@@ -1225,8 +1225,16 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg164, TestSize.Level1)
         return;
     };
     context_->frameCallbackFuncs_.push_back(callback);
-    context_->FlushFrameCallback(nanoTimestamp);
+    context_->FlushFrameCallback(nanoTimestamp, 0);
     EXPECT_TRUE(context_->frameCallbackFuncs_.empty());
+    /**
+     * @tc.steps2: Call the function FlushFrameCallback with UINT64_MAX as framecount .
+     * @tc.expected: frameCallbackFuncs_ size is 1.
+     */
+    context_->frameCallbackFuncs_.push_back(callback);
+    context_->FlushFrameCallback(nanoTimestamp, UINT64_MAX);
+    EXPECT_EQ(context_->frameCallbackFuncs_.size(), 1);
+    context_->frameCallbackFuncs_.clear();
 }
 
 /**
@@ -1242,13 +1250,21 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg165, TestSize.Level1)
      */
     ASSERT_NE(context_, nullptr);
     uint64_t nanoTimestamp = 1;
-    uint32_t frameCount = 1;
+    uint64_t frameCount = 1;
     FrameCallbackFuncFromCAPI frameCallback = [](uint64_t nanoTimestamp, uint32_t frameCount) {
         return;
     };
     context_->frameCallbackFuncsFromCAPI_.push_back(frameCallback);
     context_->FlushFrameCallbackFromCAPI(nanoTimestamp, frameCount);
     EXPECT_TRUE(context_->frameCallbackFuncsFromCAPI_.empty());
+    /**
+     * @tc.steps2: Call the function FlushFrameCallbackFromCAPI with UINT64_MAX as framecount .
+     * @tc.expected: frameCallbackFuncsFromCAPI_ size is 1.
+     */
+    context_->frameCallbackFuncsFromCAPI_.push_back(frameCallback);
+    context_->FlushFrameCallbackFromCAPI(nanoTimestamp, UINT64_MAX);
+    EXPECT_EQ(context_->frameCallbackFuncsFromCAPI_.size(), 1);
+    context_->frameCallbackFuncsFromCAPI_.clear();
 }
 
 /**

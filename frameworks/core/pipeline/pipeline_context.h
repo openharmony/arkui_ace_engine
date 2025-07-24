@@ -826,7 +826,7 @@ public:
     }
 protected:
     bool OnDumpInfo(const std::vector<std::string>& params) const override;
-    void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
+    void FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount) override;
     void FlushPipelineWithoutAnimation() override;
     void DispatchDisplaySync(uint64_t nanoTimestamp) override;
     void FlushAnimation(uint64_t nanoTimestamp) override;
