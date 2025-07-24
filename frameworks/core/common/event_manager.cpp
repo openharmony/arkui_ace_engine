@@ -2039,16 +2039,14 @@ void EventManager::AddGestureSnapshot(
         info->nodeId = frameNode->GetId();
     }
     info->depth = depth;
-
     if (info->type == "TouchEventActuator") {
         auto touchEventActuator = AceType::DynamicCast<NG::TouchEventActuator>(target);
         if (touchEventActuator) {
             std::stringstream oss;
-            oss << "StopProgation: " << std::to_string(touchEventActuator->GetStopPass());
+            oss << "NeedProgation: " << std::to_string(touchEventActuator->IsNeedPropagation());
             info->customInfo = oss.str();
         }
     }
-    
     auto& eventTree = GetEventTreeRecord(type);
     eventTree.AddGestureSnapshot(finger, std::move(info));
 

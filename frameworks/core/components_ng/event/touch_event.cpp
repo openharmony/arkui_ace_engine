@@ -36,15 +36,15 @@ void TouchEventActuator::OnFlushTouchEventsEnd()
 
 bool TouchEventActuator::HandleEvent(const TouchEvent& point)
 {
-    bool stopPass = true;
+    bool isNeedPropagation = false;
     // if current node is forbidden by monopolize, upper nodes should not response either
     if (!ShouldResponse()) {
-        SetStopPass(stopPass);
+        SetNeedPropagation(isNeedPropagation);
         return false;
     }
-    stopPass = TriggerTouchCallBack(point);
-    SetStopPass(!stopPass);
-    return stopPass;
+    isNeedPropagation = TriggerTouchCallBack(point);
+    SetNeedPropagation(isNeedPropagation);
+    return isNeedPropagation;
 }
 
 bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
