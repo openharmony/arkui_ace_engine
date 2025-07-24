@@ -143,16 +143,12 @@ public:
         }
     }
 
-    std::string GetId(FrameNode* frameNode = nullptr) const
+    std::string GetId() const
     {
         if (id_.has_value()) {
             return id_.value();
         }
-        if (frameNode) {
-            return "nodeId:" + std::to_string(frameNode->GetId());
-        }
-        auto host = GetHost();
-        return "nodeId:" + (host ? std::to_string(host->GetId()) : "-1");
+        return "nodeId_" + nodeId_;
     }
 
     void SetId(const std::string& id)
@@ -391,6 +387,7 @@ protected:
     void RegisterTransformHintCallback(PipelineContext* context);
 
     std::optional<std::string> id_;
+    std::string nodeId_ = "-1";
     XComponentType type_;
     bool hasGotSurfaceHolder_ = false;
     bool hasGotNativeXComponent_ = false;
