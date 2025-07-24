@@ -85,6 +85,8 @@ const DIALOG_DIVIDER_SHOW = getNumberByResourceId(125831202, 1, true);
 const ALERT_BUTTON_STYLE = getNumberByResourceId(125831085, 2, true);
 // 'sys.float.alert_title_alignment'
 const ALERT_TITLE_ALIGNMENT = getEnumNumberByResourceId(125831126, 1);
+// 'sys.float.dialog_content_font_size'
+const CONTENT_FONT_SIZE = getNumberByResourceId(125835677, BODY_L);
 const SCROLL_BAR_OFFSET = 20;
 const SELECT_DIALOG_SCROLL_BAR_OFFSET = 4;
 let AdvancedDialogV2Button = class AdvancedDialogV2Button {
@@ -357,7 +359,7 @@ export class TipsDialogV2 extends ViewV2 {
           Checkbox.pop();
           this.observeComponentCreation2((elmtId, isInitialRender) => {
             Text.create(this.checkTips);
-            Text.fontSize(`${BODY_L}fp`);
+            Text.fontSize(`${CONTENT_FONT_SIZE}fp`);
             Text.fontWeight(FontWeight.Regular);
             Text.fontColor(this.fontColorWithTheme);
             Text.maxLines(CONTENT_MAX_LINES);
@@ -482,7 +484,7 @@ export class TipsDialogV2 extends ViewV2 {
     this.checkedInner = this.checked;
   }
   getContentFontSize() {
-    return BODY_L + 'fp';
+    return CONTENT_FONT_SIZE + 'fp';
   }
   updateStateVars(params) {
     if (params === undefined) {
@@ -1189,7 +1191,7 @@ export class ConfirmDialogV2 extends ViewV2 {
       Text.focusBox({
         strokeWidth: LengthMetrics.px(0)
       });
-      Text.fontSize(`${BODY_L}fp`);
+      Text.fontSize(`${CONTENT_FONT_SIZE}fp`);
       Text.fontWeight(FontWeight.Medium);
       Text.fontColor(this.fontColorWithTheme);
       Text.textAlign(TextAlign.Center);
@@ -1540,7 +1542,7 @@ export class AlertDialogV2 extends ViewV2 {
       Text.focusBox({
         strokeWidth: LengthMetrics.px(0)
       });
-      Text.fontSize(`${BODY_L}fp`);
+      Text.fontSize(`${CONTENT_FONT_SIZE}fp`);
       Text.fontWeight(this.getFontWeight());
       Text.fontColor(this.fontColorWithTheme);
       Text.margin({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) });
@@ -2881,7 +2883,7 @@ export class LoadingDialogV2 extends ViewV2 {
     }, Row);
     this.observeComponentCreation2((elmtId, isInitialRender) => {
       Text.create(this.content);
-      Text.fontSize(`${BODY_L}fp`);
+      Text.fontSize(`${CONTENT_FONT_SIZE}fp`);
       Text.fontWeight(FontWeight.Regular);
       Text.fontColor(this.fontColorWithTheme);
       Text.layoutWeight(LOADING_TEXT_LAYOUT_WEIGHT);
