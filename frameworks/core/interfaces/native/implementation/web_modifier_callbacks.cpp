@@ -65,7 +65,7 @@ void OnPageEnd(const CallbackHelper<Callback_OnPageEndEvent_Void>& arkCallback,
     CHECK_NULL_VOID(eventInfo);
     Ark_OnPageEndEvent parameter;
     parameter.url = Converter::ArkValue<Ark_String>(eventInfo->GetLoadedUrl());
-    arkCallback.Invoke(parameter);
+    arkCallback.InvokeSync(parameter);
 }
 
 void OnPageBegin(const CallbackHelper<Callback_OnPageBeginEvent_Void>& arkCallback,
@@ -79,7 +79,7 @@ void OnPageBegin(const CallbackHelper<Callback_OnPageBeginEvent_Void>& arkCallba
     CHECK_NULL_VOID(eventInfo);
     Ark_OnPageBeginEvent parameter;
     parameter.url = Converter::ArkValue<Ark_String>(eventInfo->GetLoadedUrl());
-    arkCallback.Invoke(parameter);
+    arkCallback.InvokeSync(parameter);
 }
 
 void OnProgressChange(const CallbackHelper<Callback_OnProgressChangeEvent_Void>& arkCallback,
@@ -93,7 +93,7 @@ void OnProgressChange(const CallbackHelper<Callback_OnProgressChangeEvent_Void>&
     CHECK_NULL_VOID(eventInfo);
     Ark_OnProgressChangeEvent parameter;
     parameter.newProgress = Converter::ArkValue<Ark_Int32>(eventInfo->GetNewProgress());
-    arkCallback.Invoke(parameter);
+    arkCallback.InvokeSync(parameter);
 }
 
 void OnTitleReceive(const CallbackHelper<Callback_OnTitleReceiveEvent_Void>& arkCallback,
@@ -265,7 +265,7 @@ void OnErrorReceive(const CallbackHelper<Callback_OnErrorReceiveEvent_Void>& ark
     auto requestPeer = new WebResourceRequestPeer();
     requestPeer->webRequest = eventInfo->GetRequest();
     parameter.request = requestPeer;
-    arkCallback.Invoke(parameter);
+    arkCallback.InvokeSync(parameter);
 }
 
 void OnHttpErrorReceive(const CallbackHelper<Callback_OnHttpErrorReceiveEvent_Void>& arkCallback,
