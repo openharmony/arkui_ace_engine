@@ -359,12 +359,9 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
     auto renderContext = parentFrameNode->GetRenderContext();
     OHOS::Security::SecurityComponent::SecCompBase buttonInfo;
     ASSERT_NE(renderContext, nullptr);
-    renderContext->UpdateFrontGrayScale(0.0_vp);
+    renderContext->UpdateFrontBlurRadius(0.0_px);
     std::string message;
     ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo, message));
-    ASSERT_EQ(renderContext->GetFrontGrayScale().value().ConvertToVp(), 0.0f);
-    renderContext->UpdateFrontGrayScale(1.0_vp);
-    ASSERT_TRUE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo, message));
 }
 
 /**
@@ -374,30 +371,6 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
  * @tc.author:
  */
 HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest014, TestSize.Level1)
-{
-    RefPtr<FrameNode> parentFrameNode = CreateSecurityComponent(0, 0,
-        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
-    ASSERT_NE(parentFrameNode, nullptr);
-    RefPtr<FrameNode> childFrameNode = CreateSecurityComponent(0, 0,
-        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
-    ASSERT_NE(childFrameNode, nullptr);
-    parentFrameNode->AddChild(childFrameNode);
-
-    auto renderContext = parentFrameNode->GetRenderContext();
-    OHOS::Security::SecurityComponent::SecCompBase buttonInfo;
-    ASSERT_NE(renderContext, nullptr);
-    renderContext->UpdateFrontBlurRadius(0.0_px);
-    std::string message;
-    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo, message));
-}
-
-/**
- * @tc.name: SecurityComponentCheckParentNodesEffectTest015
- * @tc.desc: Test security component CheckParentNodesEffect
- * @tc.type: FUNC
- * @tc.author:
- */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest015, TestSize.Level1)
 {
     RefPtr<FrameNode> parentFrameNode = CreateSecurityComponent(0, 0,
         static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
@@ -419,12 +392,12 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
 }
 
 /**
- * @tc.name: SecurityComponentCheckParentNodesEffectTest016
+ * @tc.name: SecurityComponentCheckParentNodesEffectTest015
  * @tc.desc: Test security component CheckParentNodesEffect
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest016, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest015, TestSize.Level1)
 {
     RefPtr<FrameNode> parentFrameNode = CreateSecurityComponent(0, 0,
         static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
@@ -446,12 +419,12 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
 }
 
 /**
- * @tc.name: SecurityComponentCheckParentNodesEffectTest017
+ * @tc.name: SecurityComponentCheckParentNodesEffectTest016
  * @tc.desc: Test security component CheckParentNodesEffect
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest017, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest016, TestSize.Level1)
 {
     RefPtr<FrameNode> parentFrameNode = CreateSecurityComponent(0, 0,
         static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
@@ -481,12 +454,12 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
 }
 
 /**
- * @tc.name: SecurityComponentCheckParentNodesEffectTest018
+ * @tc.name: SecurityComponentCheckParentNodesEffectTest017
  * @tc.desc: Test security component CheckParentNodesEffect
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest018, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest017, TestSize.Level1)
 {
     RefPtr<FrameNode> parentFrameNode = CreateSecurityComponent(0, 0,
         static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
@@ -513,12 +486,12 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
 }
 
 /**
- * @tc.name: SecurityComponentCheckParentNodesEffectTest019
+ * @tc.name: SecurityComponentCheckParentNodesEffectTest018
  * @tc.desc: Test security component CheckParentNodesEffect
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest019, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest018, TestSize.Level1)
 {
     RefPtr<FrameNode> parentFrameNode = CreateSecurityComponent(0, 0,
         static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
@@ -537,12 +510,12 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
 }
 
 /**
- * @tc.name: SecurityComponentCheckParentNodesEffectTest020
+ * @tc.name: SecurityComponentCheckParentNodesEffectTest019
  * @tc.desc: Test security component CheckParentNodesEffect
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest020, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest019, TestSize.Level1)
 {
     RefPtr<FrameNode> parentFrameNode = CreateSecurityComponent(0, 0,
         static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
@@ -565,12 +538,12 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
 }
 
 /**
- * @tc.name: SecurityComponentCheckParentNodesEffectTest021
+ * @tc.name: SecurityComponentCheckParentNodesEffectTest020
  * @tc.desc: Test security component CheckParentNodesEffect
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest021, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest020, TestSize.Level1)
 {
     RefPtr<FrameNode> node = CreateSecurityComponent(0, 0,
         static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
@@ -604,12 +577,12 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
 }
 
 /**
- * @tc.name: SecurityComponentCheckParentNodesEffectTest022
+ * @tc.name: SecurityComponentCheckParentNodesEffectTest021
  * @tc.desc: Test security component CheckParentNodesEffect
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest022, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest021, TestSize.Level1)
 {
     float radius = 0.0;
     float deltaY = 1.0;
@@ -631,12 +604,12 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
 }
 
 /**
- * @tc.name: SecurityComponentCheckParentNodesEffectTest023
+ * @tc.name: SecurityComponentCheckParentNodesEffectTest022
  * @tc.desc: Test security component CheckParentNodesEffect
  * @tc.type: FUNC
  * @tc.author:
  */
-HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest023, TestSize.Level1)
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest022, TestSize.Level1)
 {
     RectF parentRect = RectF(0.0, 0.0, 0.0, 0.0);
     RectF rect = RectF(0.0, 0.0, 0.0, 0.0);

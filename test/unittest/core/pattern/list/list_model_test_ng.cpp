@@ -16,6 +16,7 @@
 #include <cstdint>
 
 #include "list_test_ng.h"
+#include "ui/base/geometry/ng/offset_t.h"
 
 namespace OHOS::Ace::NG {
 constexpr char SCROLLBAR_COLOR_BLUE[] = "#FF0000FF";
@@ -48,6 +49,7 @@ HWTEST_F(ListModelTestNg, SetScrollBarColor, TestSize.Level1)
      */
     model.SetScrollBarColor(SCROLLBAR_COLOR_BLUE);
     EXPECT_EQ(paintProperty->GetScrollBarColor()->GetValue(), Color::FromString(SCROLLBAR_COLOR_BLUE).GetValue());
+    CreateDone();
 }
 
 /**
@@ -76,6 +78,7 @@ HWTEST_F(ListModelTestNg, SetScrollBarWidth, TestSize.Level1)
      */
     model.SetScrollBarWidth("2.0vp");
     EXPECT_EQ(paintProperty->GetScrollBarWidth(), 2.0_vp);
+    CreateDone();
 }
 
 /**
@@ -111,6 +114,7 @@ HWTEST_F(ListModelTestNg, SetLaneConstrain, TestSize.Level1)
     model.SetLaneConstrain(laneMinLength, laneMaxLength);
     EXPECT_EQ(layoutProperty->GetLaneMinLength(), 100.0_vp);
     EXPECT_EQ(layoutProperty->GetLaneMaxLength(), 300.0_vp);
+    CreateDone();
 }
 
 /**
@@ -144,6 +148,7 @@ HWTEST_F(ListModelTestNg, GetSticky, TestSize.Level1)
      */
     auto result = model.GetSticky(listNode);
     EXPECT_EQ(result, static_cast<int32_t>(layoutProperty->GetStickyStyleValue()));
+    CreateDone();
 }
 
 /**
@@ -177,6 +182,7 @@ HWTEST_F(ListModelTestNg, GetFocusWrapMode, TestSize.Level1)
      */
     auto result = model.GetFocusWrapMode(listNode);
     EXPECT_EQ(result, FocusWrapMode::WRAP_WITH_ARROW);
+    CreateDone();
 }
 
 /**
@@ -205,6 +211,7 @@ HWTEST_F(ListModelTestNg, SetFocusWrapMode_TwoParameters, TestSize.Level1)
      */
     model.SetFocusWrapMode(listNode, FocusWrapMode::WRAP_WITH_ARROW);
     EXPECT_EQ(model.GetFocusWrapMode(listNode), FocusWrapMode::WRAP_WITH_ARROW);
+    CreateDone();
 }
 
 /**
@@ -242,6 +249,7 @@ HWTEST_F(ListModelTestNg, SetOnScrollBegin, TestSize.Level1)
     auto onScrollBegin = onScrollBeginEvent(Dimension(10.0), Dimension(5.0));
     EXPECT_EQ(onScrollBegin.dx.Value(), 10.0);
     EXPECT_EQ(onScrollBegin.dy.Value(), 5.0);
+    CreateDone();
 }
 
 /**
@@ -278,6 +286,7 @@ HWTEST_F(ListModelTestNg, SetOnScrollIndex, TestSize.Level1)
     auto onScrollIndexEvent = eventHub->GetOnScrollIndex();
     onScrollIndexEvent(0, 8, 10);
     EXPECT_EQ(data, 7);
+    CreateDone();
 }
 
 /**
@@ -310,5 +319,344 @@ HWTEST_F(ListModelTestNg, SetOnReachStart_OneParameter, TestSize.Level1)
     auto onReachStartEvent = eventHub->GetOnReachStart();
     onReachStartEvent();
     EXPECT_TRUE(onStart);
+    CreateDone();
+}
+
+/**
+ * @tc.name: SetOnReachEnd_TwoParameters
+ * @tc.desc: Test ListModelNG SetOnReachEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, SetOnReachEnd_TwoParameters, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ListModelNG model;
+    model.Create(false);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    auto pattern = listNode->GetPattern<ListPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<ListEventHub> listEventHub = AceType::MakeRefPtr<ListEventHub>();
+    listNode->eventHub_ = listEventHub;
+    auto eventHub = listNode->GetEventHub<ListEventHub>();
+    bool onEnd = false;
+    auto onReachEnd = [&onEnd]() { onEnd = true; };
+
+    /**
+     * @tc.steps: step2. Calling the SetOnReachEnd function
+     * @tc.expected: The onEnd from false to true
+     */
+    model.SetOnReachEnd(listNode, std::move(onReachEnd));
+    auto onReachEndEvent = eventHub->GetOnReachEnd();
+    onReachEndEvent();
+    EXPECT_TRUE(onEnd);
+    CreateDone();
+}
+
+/**
+ * @tc.name: SetOnItemMove_OneParameter
+ * @tc.desc: Test ListModelNG SetOnItemMove
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, SetOnItemMove_OneParameter, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ListModelNG model;
+    model.Create(false);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    auto pattern = listNode->GetPattern<ListPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<ListEventHub> listEventHub = AceType::MakeRefPtr<ListEventHub>();
+    listNode->eventHub_ = listEventHub;
+    auto eventHub = listNode->GetEventHub<ListEventHub>();
+    auto onItemMove = [](int32_t from, int32_t to) {
+        if (from == 0 || to == 0) {
+            return false;
+        }
+        return true;
+    };
+
+    /**
+     * @tc.steps: step2. Calling the SetOnItemMove function
+     * @tc.expected: The onItemMoveEvent return true
+     */
+    model.SetOnItemMove(std::move(onItemMove));
+    auto onItemMoveEvent = eventHub->GetOnItemMove();
+    auto result = onItemMoveEvent(2, 4);
+    EXPECT_TRUE(result);
+    CreateDone();
+}
+
+/**
+ * @tc.name: SetOnItemDragEnter_OneParameter
+ * @tc.desc: Test ListModelNG SetOnItemDragEnter
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, SetOnItemDragEnter_OneParameter, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ListModelNG model;
+    model.Create(false);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    auto pattern = listNode->GetPattern<ListPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<ListEventHub> listEventHub = AceType::MakeRefPtr<ListEventHub>();
+    listNode->eventHub_ = listEventHub;
+    auto eventHub = listNode->GetEventHub<ListEventHub>();
+
+    /**
+     * @tc.steps: step2. Set the ItemDragInfo and onItemDragEnter
+     */
+    ItemDragInfo info;
+    info.SetX(8.0);
+    info.SetY(10.0);
+    OffsetT<double> offset(2.0, 4.0);
+    auto onItemDragEnter = [&offset](const ItemDragInfo& info) {
+        offset.SetX(info.GetX());
+        offset.SetY(info.GetY());
+    };
+
+    /**
+     * @tc.steps: step3. Calling the SetOnItemDragEnter function
+     * @tc.expected: The onItemDragEnterEvent from {2.0 4.0} to {8.0, 10.0}
+     */
+    model.SetOnItemDragEnter(std::move(onItemDragEnter));
+    auto onItemDragEnterEvent = eventHub->GetOnItemDragEnter();
+    onItemDragEnterEvent(info);
+    EXPECT_EQ(offset.GetX(), 8.0);
+    EXPECT_EQ(offset.GetY(), 10.0);
+    CreateDone();
+}
+
+/**
+ * @tc.name: SetOnItemDragLeave_OneParameter
+ * @tc.desc: Test ListModelNG SetOnItemDragLeave
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, SetOnItemDragLeave_OneParameter, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ListModelNG model;
+    model.Create(false);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    auto pattern = listNode->GetPattern<ListPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<ListEventHub> listEventHub = AceType::MakeRefPtr<ListEventHub>();
+    listNode->eventHub_ = listEventHub;
+    auto eventHub = listNode->GetEventHub<ListEventHub>();
+
+    /**
+     * @tc.steps: step2. Set the ItemDragInfo and onItemDragLeave
+     */
+    ItemDragInfo info;
+    info.SetX(8.0);
+    info.SetY(10.0);
+    OffsetT<double> offset(2.0, 4.0);
+    auto onItemDragLeave = [&offset](const ItemDragInfo& info, int32_t targetId) {
+        offset.SetX(info.GetX() * targetId);
+        offset.SetY(info.GetY() * targetId);
+    };
+
+    /**
+     * @tc.steps: step3. Calling the SetOnItemDragLeave function
+     * @tc.expected: The onItemDragLeaveEvent from {2.0 4.0} to {16.0, 20.0}
+     */
+    model.SetOnItemDragLeave(std::move(onItemDragLeave));
+    auto onItemDragLeaveEvent = eventHub->GetOnItemDragLeave();
+    onItemDragLeaveEvent(info, 2);
+    EXPECT_EQ(offset.GetX(), 16.0);
+    EXPECT_EQ(offset.GetY(), 20.0);
+    CreateDone();
+}
+
+/**
+ * @tc.name: SetOnItemDragMove_OneParameter
+ * @tc.desc: Test ListModelNG SetOnItemDragMove
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, SetOnItemDragMove_OneParameter, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ListModelNG model;
+    model.Create(false);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    auto pattern = listNode->GetPattern<ListPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<ListEventHub> listEventHub = AceType::MakeRefPtr<ListEventHub>();
+    listNode->eventHub_ = listEventHub;
+    auto eventHub = listNode->GetEventHub<ListEventHub>();
+
+    /**
+     * @tc.steps: step2. Set the ItemDragInfo and onItemDragMove
+     */
+    ItemDragInfo info;
+    info.SetX(8.0);
+    info.SetY(10.0);
+    OffsetT<double> offset(2.0, 4.0);
+    auto onItemDragMove = [&offset](const ItemDragInfo& info, int32_t fromIndex, int32_t toIndex) {
+        offset.SetX(info.GetX() * fromIndex);
+        offset.SetY(info.GetY() * toIndex);
+    };
+
+    /**
+     * @tc.steps: step3. Calling the SetOnItemDragMove function
+     * @tc.expected: The onItemDragMoveEvent from {2.0 4.0} to {8.0, 20.0}
+     */
+    model.SetOnItemDragMove(std::move(onItemDragMove));
+    auto onItemDragMoveEvent = eventHub->GetOnItemDragMove();
+    onItemDragMoveEvent(info, 1, 2);
+    EXPECT_EQ(offset.GetX(), 8.0);
+    EXPECT_EQ(offset.GetY(), 20.0);
+    CreateDone();
+}
+
+/**
+ * @tc.name: SetOnItemDrop_OneParameter
+ * @tc.desc: Test ListModelNG SetOnItemDrop
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, SetOnItemDrop_OneParameter, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ListModelNG model;
+    model.Create(false);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    auto pattern = listNode->GetPattern<ListPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<ListEventHub> listEventHub = AceType::MakeRefPtr<ListEventHub>();
+    listNode->eventHub_ = listEventHub;
+    auto eventHub = listNode->GetEventHub<ListEventHub>();
+
+    /**
+     * @tc.steps: step2. Set the ItemDragInfo and onItemDrop
+     */
+    ItemDragInfo info;
+    info.SetX(10.0);
+    info.SetY(20.0);
+    OffsetT<double> offset(2.0, 4.0);
+    auto onItemDrop = [&offset](const ItemDragInfo& info, int32_t fromIndex, int32_t toIndex, bool success) {
+        if (success) {
+            offset.SetX(info.GetX() / fromIndex);
+            offset.SetY(info.GetY() / toIndex);
+        } else {
+            offset.SetX(info.GetX());
+            offset.SetY(info.GetY());
+        }
+    };
+
+    /**
+     * @tc.steps: step3. Calling the SetOnItemDrop function
+     * @tc.expected: The onItemDropEvent from {10.0 20.0} to {5.0, 5.0}
+     */
+    model.SetOnItemDrop(std::move(onItemDrop));
+    auto onItemDropEvent = eventHub->GetOnItemDrop();
+    onItemDropEvent(info, 2, 4, true);
+    EXPECT_EQ(offset.GetX(), 5.0);
+    EXPECT_EQ(offset.GetY(), 5.0);
+    CreateDone();
+}
+
+/**
+ * @tc.name: SetEditMode_TwoParameters
+ * @tc.desc: Test ListModelNG SetEditMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, SetEditMode_TwoParameters, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ListModelNG model;
+    model.Create(false);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    auto pattern = listNode->GetPattern<ListPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    listNode->SetLayoutProperty(listLayoutProperty);
+    auto layoutProperty = listNode->GetLayoutProperty<ListLayoutProperty>();
+
+    /**
+     * @tc.steps: step2. Set the editMode to true
+     * @tc.expected: The value of result is true
+     */
+    model.SetEditMode(listNode, true);
+    auto result = layoutProperty->GetEditMode();
+    EXPECT_TRUE(result.value());
+    CreateDone();
+}
+
+/**
+ * @tc.name: SetMultiSelectable_TwoParameters
+ * @tc.desc: Test ListModelNG SetMultiSelectable
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, SetMultiSelectable_TwoParameters, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ListModelNG model;
+    model.Create(false);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    auto pattern = listNode->GetPattern<ListPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetMultiSelectable(false);
+
+    /**
+     * @tc.steps: step2. Set the selectable to true
+     * @tc.expected: The multiSelectable_ of pattern is true
+     */
+    model.SetMultiSelectable(listNode, true);
+    EXPECT_TRUE(pattern->multiSelectable_);
+    CreateDone();
+}
+
+/**
+ * @tc.name: SetChainAnimation_TwoParameters
+ * @tc.desc: Test ListModelNG SetChainAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, SetChainAnimation_TwoParameters, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ListModelNG model;
+    model.Create(false);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    auto pattern = listNode->GetPattern<ListPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    listNode->SetLayoutProperty(listLayoutProperty);
+    auto layoutProperty = listNode->GetLayoutProperty<ListLayoutProperty>();
+
+    /**
+     * @tc.steps: step2. Set the chainAnimation to true
+     * @tc.expected: The value of result is true
+     */
+    model.SetChainAnimation(listNode, true);
+    auto result = layoutProperty->GetChainAnimation();
+    EXPECT_TRUE(result.value());
+    CreateDone();
 }
 } // namespace OHOS::Ace::NG

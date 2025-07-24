@@ -653,7 +653,7 @@ void JSList::ScrollStopCallback(const JSCallbackInfo& args)
         };
         ListModel::GetInstance()->SetOnScrollStop(std::move(onScrollStop));
     } else {
-        ListModel::GetInstance()->SetOnScrollIndex(nullptr);
+        ListModel::GetInstance()->SetOnScrollStop(nullptr);
     }
     args.ReturnSelf();
 }

@@ -865,7 +865,6 @@ void TimePickerRowPattern::UpdateHourAndMinuteTimeRange(const RefPtr<FrameNode>&
         }
         hourColumnPattern->SetCurrentIndex(newIndex);
         hourColumnPattern->SetEnterIndex(newIndex);
-        hourColumnPattern->HandleAccessibilityTextChange();
     }
     oldHourValue_ = GetOptionsCurrentValue(hourColumn);
 
@@ -886,7 +885,6 @@ void TimePickerRowPattern::UpdateHourAndMinuteTimeRange(const RefPtr<FrameNode>&
         }
         minuteColumnPattern->SetCurrentIndex(newIndex);
         minuteColumnPattern->SetEnterIndex(newIndex);
-        minuteColumnPattern->HandleAccessibilityTextChange();
     }
     oldMinuteValue_ = GetOptionsCurrentValue(minuteColumn);
 }
@@ -1332,7 +1330,6 @@ void TimePickerRowPattern::HandleHourColumnBuilding()
             if (hour == selectedTime_.GetHour()) {
                 hourColumnPattern->SetCurrentIndex(hour);
                 hourColumnPattern->SetEnterIndex(hour);
-                hourColumnPattern->HandleAccessibilityTextChange();
             }
             optionsTotalCount_[hourColumn]++;
         }
@@ -1351,11 +1348,9 @@ void TimePickerRowPattern::HandleHourColumnBuilding()
         if (IsAmHour(selectedTime_.GetHour())) {
             amPmColumnPattern->SetCurrentIndex(0); // AM's index
             amPmColumnPattern->SetEnterIndex(0);
-            amPmColumnPattern->HandleAccessibilityTextChange();
         } else {
             amPmColumnPattern->SetCurrentIndex(1); // PM's index
             amPmColumnPattern->SetEnterIndex(1);
-            amPmColumnPattern->HandleAccessibilityTextChange();
         }
         optionsTotalCount_[amPmColumn] = CHILD_WITHOUT_AMPM_SIZE;
         auto selectedHour = GetAmPmHour(selectedTime_.GetHour());
@@ -1363,7 +1358,6 @@ void TimePickerRowPattern::HandleHourColumnBuilding()
             if (hour == selectedHour) {
                 hourColumnPattern->SetCurrentIndex(hour - 1);
                 hourColumnPattern->SetEnterIndex(hour - 1);
-                hourColumnPattern->HandleAccessibilityTextChange();
             }
             optionsTotalCount_[hourColumn]++;
         }
@@ -1402,7 +1396,6 @@ void TimePickerRowPattern::MinOrSecColumnBuilding(
         if (time == selectedTime) {
             columnPattern->SetCurrentIndex(time);
             columnPattern->SetEnterIndex(time);
-            columnPattern->HandleAccessibilityTextChange();
         }
         optionsTotalCount_[columnFrameNode]++;
     }
@@ -1482,7 +1475,6 @@ void TimePickerRowPattern::HandleHourColumnBuildingRange(const PickerTime& value
             if (hour == value.GetHour()) {
                 hourColumnPattern->SetCurrentIndex(hour - startHour);
                 hourColumnPattern->SetEnterIndex(hour - startHour);
-                hourColumnPattern->HandleAccessibilityTextChange();
             }
             optionsTotalCount_[hourColumn]++;
         }
@@ -1510,11 +1502,9 @@ void TimePickerRowPattern::HandleAmPmColumnBuilding(const PickerTime& value)
     if (IsAmHour(value.GetHour())) {
         amPmColumnPattern->SetCurrentIndex(0); // AM's index
         amPmColumnPattern->SetEnterIndex(0);
-        amPmColumnPattern->HandleAccessibilityTextChange();
     } else {
         amPmColumnPattern->SetCurrentIndex(1); // PM's index
         amPmColumnPattern->SetEnterIndex(1);
-        amPmColumnPattern->HandleAccessibilityTextChange();
     }
     optionsTotalCount_[amPmColumn] = CHILD_WITHOUT_AMPM_SIZE;
     if (startTime_.ToMinutes() == START_DEFAULT_TIME.ToMinutes() &&
@@ -1524,7 +1514,6 @@ void TimePickerRowPattern::HandleAmPmColumnBuilding(const PickerTime& value)
             if (hour == selectedHour) {
                 hourColumnPattern->SetCurrentIndex(hour - 1);
                 hourColumnPattern->SetEnterIndex(hour - 1);
-                hourColumnPattern->HandleAccessibilityTextChange();
             }
             optionsTotalCount_[hourColumn]++;
         }
@@ -1577,7 +1566,6 @@ void TimePickerRowPattern::HandleAmToPmHourColumnBuilding(uint32_t selectedHour,
         if (hour == selectedParseHour) {
             hourColumnPattern->SetCurrentIndex(hour - startHour);
             hourColumnPattern->SetEnterIndex(hour - startHour);
-            hourColumnPattern->HandleAccessibilityTextChange();
         }
         optionsTotalCount_[hourColumn]++;
     }
@@ -1594,7 +1582,6 @@ void TimePickerRowPattern::HandleMinAndSecColumnBuildingRange()
     CHECK_NULL_VOID(secondColumnPattern);
     secondColumnPattern->SetCurrentIndex(selectedTime_.GetSecond());
     secondColumnPattern->SetEnterIndex(selectedTime_.GetSecond());
-    secondColumnPattern->HandleAccessibilityTextChange();
 }
 
 void TimePickerRowPattern::HandleMinColumnChange(const PickerTime& value)
@@ -1618,7 +1605,6 @@ void TimePickerRowPattern::HandleMinColumnChange(const PickerTime& value)
         if (minute == value.GetMinute()) {
             minuteColumnPattern->SetCurrentIndex(minute - startMinue);
             minuteColumnPattern->SetEnterIndex(minute - startMinue);
-            minuteColumnPattern->HandleAccessibilityTextChange();
         }
         optionsTotalCount_[minuteColumn]++;
     }

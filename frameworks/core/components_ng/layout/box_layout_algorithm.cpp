@@ -130,7 +130,9 @@ void BoxLayoutAlgorithm::PerformMeasureSelfWithChildList(
                     auto margin = layoutProperty->CreateMargin();
                     CalcSingleSideMarginFrame(margin, singleSideFrame, maxWidth, maxHeight);
                 }
-                auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
+                auto childSize = layoutProperty->GetLayoutPolicyProperty()->IsMatch()
+                                     ? SizeF()
+                                     : child->GetGeometryNode()->GetMarginFrameSize();
                 if (maxWidth < childSize.Width()) {
                     maxWidth = childSize.Width();
                 }

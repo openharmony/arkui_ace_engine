@@ -468,4 +468,86 @@ HWTEST_F(TextFieldPatternTestSeven, GetIMEClientInfo001, TestSize.Level1)
     IMEClient iMEClientInfo = pattern_->GetIMEClientInfo();
     EXPECT_EQ(iMEClientInfo.nodeId, host->GetId());
 }
+
+/**
+ * @tc.name: SetAccessibilityErrorText001
+ * @tc.desc: Test function SetAccessibilityErrorText.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestSeven, SetAccessibilityErrorText001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetShowCounter(true);
+        model.SetMaxLength(10);
+        model.SetShowError(u"error", true);
+    });
+    GetFocus();
+
+    ASSERT_NE(pattern_, nullptr);
+    pattern_->SetAccessibilityErrorText();
+    ASSERT_NE(accessibilityProperty_, nullptr);
+    EXPECT_EQ(accessibilityProperty_->GetErrorText(), "error");
+}
+
+/**
+ * @tc.name: SetAccessibilityErrorText002
+ * @tc.desc: Test function SetAccessibilityErrorText.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestSeven, SetAccessibilityErrorText002, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetShowCounter(true);
+        model.SetMaxLength(10);
+        model.SetShowError(u"error", false);
+    });
+    GetFocus();
+
+    ASSERT_NE(pattern_, nullptr);
+    pattern_->SetAccessibilityErrorText();
+    ASSERT_NE(accessibilityProperty_, nullptr);
+    EXPECT_EQ(accessibilityProperty_->GetErrorText(), "");
+}
+
+/**
+ * @tc.name: SetAccessibilityErrorText003
+ * @tc.desc: Test function SetAccessibilityErrorText.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestSeven, SetAccessibilityErrorText003, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetShowCounter(true);
+        model.SetMaxLength(10);
+        model.SetShowError(u"error", true);
+        model.SetInputStyle(InputStyle::INLINE);
+    });
+    GetFocus();
+
+    ASSERT_NE(pattern_, nullptr);
+    pattern_->SetAccessibilityErrorText();
+    ASSERT_NE(accessibilityProperty_, nullptr);
+    EXPECT_EQ(accessibilityProperty_->GetErrorText(), "");
+}
+
+/**
+ * @tc.name: SetAccessibilityErrorText004
+ * @tc.desc: Test function SetAccessibilityErrorText.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestSeven, SetAccessibilityErrorText004, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetShowCounter(true);
+        model.SetMaxLength(10);
+        model.SetShowError(u"error", true);
+    });
+    GetFocus();
+    ASSERT_NE(eventHub_, nullptr);
+    eventHub_->SetEnabled(false);
+    ASSERT_NE(pattern_, nullptr);
+    pattern_->SetAccessibilityErrorText();
+    ASSERT_NE(accessibilityProperty_, nullptr);
+    EXPECT_EQ(accessibilityProperty_->GetErrorText(), "");
+}
 }

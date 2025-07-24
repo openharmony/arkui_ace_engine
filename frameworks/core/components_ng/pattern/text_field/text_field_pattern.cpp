@@ -7032,6 +7032,25 @@ RefPtr<TextFieldTheme> TextFieldPattern::GetTheme() const
     return theme;
 }
 
+void TextFieldPattern::InitTheme()
+{
+    auto tmpHost = GetHost();
+    CHECK_NULL_VOID(tmpHost);
+    auto context = tmpHost->GetContext();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<TextFieldTheme>(tmpHost->GetThemeScopeId());
+    textFieldTheme_ = theme;
+    // for normal app add version protection, enable keyboard as default start from API 10 or higher
+    if (context->GetMinPlatformVersion() > KEYBOARD_DEFAULT_API) {
+        if (theme) {
+            independentControlKeyboard_ = theme->GetIndependentControlKeyboard();
+            needToRequestKeyboardOnFocus_ = !independentControlKeyboard_;
+        } else {
+            needToRequestKeyboardOnFocus_ = true;
+        }
+    }
+}
+
 std::string TextFieldPattern::GetTextColor() const
 {
     auto theme = GetTheme();
@@ -7968,15 +7987,10 @@ void TextFieldPattern::FromJson(const std::unique_ptr<JsonValue>& json)
 
 void TextFieldPattern::SetAccessibilityAction()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto accessibilityProperty = host->GetAccessibilityProperty<TextFieldAccessibilityProperty>();
-    CHECK_NULL_VOID(accessibilityProperty);
-    accessibilityProperty->SetAccessibilityGroup(true);
-    accessibilityProperty->SetErrorText(UtfUtils::Str16DebugToStr8(GetErrorTextString()));
     SetAccessibilityActionOverlayAndSelection();
     SetAccessibilityActionGetAndSetCaretPosition();
     SetAccessibilityMoveTextAction();
+    SetAccessibilityErrorText();
 }
 
 void TextFieldPattern::SetAccessibilityActionOverlayAndSelection()
@@ -8089,6 +8103,19 @@ void TextFieldPattern::SetAccessibilityMoveTextAction()
         auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
         pattern->SetCaretPosition(caretPosition);
     });
+}
+
+void TextFieldPattern::SetAccessibilityErrorText()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<TextFieldAccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    if (!IsDisabled() && IsShowError()) {
+        accessibilityProperty->SetErrorText(UtfUtils::Str16DebugToStr8(GetErrorTextString()));
+    } else {
+        accessibilityProperty->SetErrorText("");
+    }
 }
 
 void TextFieldPattern::StopEditing()
@@ -8505,18 +8532,6 @@ void TextFieldPattern::OnAttachToFrameNode()
         frameNode->OnAccessibilityEvent(AccessibilityEventType::TEXT_SELECTION_UPDATE);
     };
     selectController_->SetOnAccessibility(std::move(onTextSelectorChange));
-
-    auto theme = pipeline->GetTheme<TextFieldTheme>(frameNode->GetThemeScopeId());
-    textFieldTheme_ = theme;
-    // for normal app add version protection, enable keyboard as default start from API 10 or higher
-    if (pipeline->GetMinPlatformVersion() > KEYBOARD_DEFAULT_API) {
-        if (theme) {
-            independentControlKeyboard_ = theme->GetIndependentControlKeyboard();
-            needToRequestKeyboardOnFocus_ = !independentControlKeyboard_;
-        } else {
-            needToRequestKeyboardOnFocus_ = true;
-        }
-    }
 }
 
 bool TextFieldPattern::NeedPaintSelect()
@@ -10797,6 +10812,8 @@ void TextFieldPattern::AddInsertCommand(const std::u16string& insertValue, Input
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_SCOPED_TRACE("TextInput[%d]AddInsertCommand freeze:[%d] previewText:[%d]", host->GetId(),
+        host->IsFreeze(), GetIsPreviewText());
     if (reason != InputReason::PASTE) {
         if (!HasFocus()) {
             int32_t frameId = host->GetId();

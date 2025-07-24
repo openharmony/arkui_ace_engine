@@ -80,7 +80,8 @@ public:
             auto deleteStartPos = childrenSize_.begin() + start + cursor;
             auto deleteEndPos = deleteStartPos;
             int32_t needDeleteSpan = deleteCount - newChildrenSizeSize;
-            while (deleteEndPos != childrenSize_.end() && needDeleteSpan--) {
+            while (deleteEndPos != childrenSize_.end() && needDeleteSpan > 0) {
+                needDeleteSpan--;
                 deleteEndPos++;
             }
             childrenSize_.erase(deleteStartPos, deleteEndPos);

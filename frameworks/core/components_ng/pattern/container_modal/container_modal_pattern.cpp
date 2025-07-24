@@ -53,7 +53,7 @@ void ContainerModalPattern::ShowTitle(bool isShow, bool hasDeco, bool needUpdate
         return;
     }
 
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<ContainerModalTheme>();
     auto stackNode = GetStackNode();
@@ -269,7 +269,7 @@ void ContainerModalPattern::AddPanEvent(const RefPtr<FrameNode>& controlButtonsN
     panDirection.type = PanDirection::ALL;
 
     if (!panEvent_) {
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto windowManager = pipeline->GetWindowManager();
         CHECK_NULL_VOID(windowManager);
@@ -318,7 +318,7 @@ void ContainerModalPattern::OnWindowForceUnfocused() {}
 
 void ContainerModalPattern::WindowFocus(bool isFocus)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<ContainerModalTheme>();
     isFocus_ = isFocus;
@@ -371,7 +371,7 @@ void ContainerModalPattern::ChangeControlButtons(bool isFocus)
     auto maximizeButton =
         AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, MAX_RECOVER_BUTTON_INDEX));
     CHECK_NULL_VOID(maximizeButton);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     auto windowManager = pipeline->GetWindowManager();
     MaximizeMode mode = windowManager->GetCurrentWindowMaximizeMode();
     InternalResource::ResourceId maxId;
@@ -408,7 +408,7 @@ void ContainerModalPattern::ChangeFloatingTitle(bool isFocus)
 void ContainerModalPattern::ChangeTitleButtonIcon(
     const RefPtr<FrameNode>& buttonNode, InternalResource::ResourceId icon, bool isFocus, bool isCloseBtn)
 {
-    auto theme = PipelineContext::GetCurrentContext()->GetTheme<ContainerModalTheme>();
+    auto theme = PipelineContext::GetCurrentContextSafelyWithCheck()->GetTheme<ContainerModalTheme>();
     auto renderContext = buttonNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto colorType = isFocus ? ControlBtnColorType::NORMAL : ControlBtnColorType::UNFOCUS;

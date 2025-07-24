@@ -30,6 +30,7 @@
 #include "base/utils/noncopyable.h"
 #include "core/common/window.h"
 #include "core/pipeline/pipeline_context.h"
+#include "interfaces/inner_api/ace/constants.h"
 
 namespace OHOS::Ace {
 class ACE_EXPORT FormRenderWindow : public Window {
@@ -110,6 +111,7 @@ public:
 private:
     WeakPtr<TaskExecutor> taskExecutor_ = nullptr;
     int32_t id_ = 0;
+    UIContentType uiContentType_ = UIContentType::UNDEFINED;
 #ifdef ENABLE_ROSEN_BACKEND
     void InitOnVsyncCallback();
     static std::recursive_mutex globalMutex_;

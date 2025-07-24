@@ -40,6 +40,11 @@ public:
 
     AccessibilityValue GetAccessibilityValue() const override;
 
+    std::string GetAccessibilityLevel() const override
+    {
+        return Level::YES_STR;
+    }
+
 protected:
     virtual RefPtr<FrameNode> GetSwiperNode() const;
 
