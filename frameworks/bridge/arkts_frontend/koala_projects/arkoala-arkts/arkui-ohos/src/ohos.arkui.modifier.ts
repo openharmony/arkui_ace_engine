@@ -39,6 +39,18 @@ export { ColumnSplitModifier } from './ColumnSplitModifier';
 
 export { ButtonModifier } from './ButtonModifier';
 
+export { LineModifier } from './LineModifier';
+
+export { PathModifier } from './PathModifier';
+
+export { PolygonModifier } from './PolygonModifier';
+
+export { PolylineModifier } from './PolylineModifier';
+
+export { RectModifier } from './RectModifier';
+
+export { ShapeModifier } from './ShapeModifier';
+
 // export { TextModifier } from './handwritten/modifiers/ArkTextModifier'
 
 export { SymbolGlyphModifier } from "./SymbolGlyphModifier"
