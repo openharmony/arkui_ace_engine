@@ -182,12 +182,12 @@ void ParseCommonAndCustomTitle(const JSRef<JSObject>& jsObj)
             return;
         }
     }
-    if (SystemProperties::ConfigChangePerform() && heightResObj) {
-        NavDestinationModel::GetInstance()->SetTitleHeight(heightResObj);
-        return;
-    }
     if (!isValid || titleHeight.Value() < 0) {
         NavDestinationModel::GetInstance()->SetTitleHeight(Dimension(), true);
+        return;
+    }
+    if (SystemProperties::ConfigChangePerform() && heightResObj) {
+        NavDestinationModel::GetInstance()->SetTitleHeight(titleHeight, heightResObj);
         return;
     }
     NavDestinationModel::GetInstance()->SetTitleHeight(titleHeight);
