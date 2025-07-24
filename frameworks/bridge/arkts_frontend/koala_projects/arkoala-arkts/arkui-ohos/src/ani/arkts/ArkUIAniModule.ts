@@ -68,43 +68,43 @@ export class ArkUIAniModule {
     native static _SetOverlay_ComponentContent(node: KPointer, buildNodePtr: KPointer, options?: OverlayOptions): void
 
     // for web
-    native static _TransferScreenCaptureHandlerToStatic(ptr: KPointer, value: Object | undefined | null): boolean
-    native static _TransferJsGeolocationToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
-    native static _TransferJsResultToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
-    native static _TransferEventResultToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
-    native static _TransferFileSelectorResultToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
-    native static _TransferFileSelectorParamToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
-    native static _TransferWebContextMenuResultToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
-    native static _TransferWebContextMenuParamToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
-    native static _TransferHttpAuthHandlerToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
-    native static _TransferWebResourceReponseToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
-    native static _TransferWebResourceRequestToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
-    native static _TransferConsoleMessageToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
-    native static _TransferDataResubmissionHandlerToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
-    native static _TransferClientAuthenticationHandlerToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
-    native static _TransferSslErrorHandlerToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
-    native static _TransferPermissionRequestToStatic(ptr: KPointer, value: Object | undefined | null): boolean
-    native static _TransferControllerHandlerToStatic(ptr: KPointer, value: Object | undefined | null): boolean
-    native static _TransferWebKeyboardControllerToStatic(ptr: KPointer, value: Object | undefined | null): boolean
+    native static _TransferScreenCaptureHandlerToStatic(ptr: KPointer, value: ESValue): boolean
+    native static _TransferJsGeolocationToStatic(ptr: KPointer, value: ESValue) : boolean
+    native static _TransferJsResultToStatic(ptr: KPointer, value: ESValue) : boolean
+    native static _TransferEventResultToStatic(ptr: KPointer, value: ESValue) : boolean
+    native static _TransferFileSelectorResultToStatic(ptr: KPointer, value: ESValue) : boolean
+    native static _TransferFileSelectorParamToStatic(ptr: KPointer, value: ESValue) : boolean
+    native static _TransferWebContextMenuResultToStatic(ptr: KPointer, value: ESValue) : boolean
+    native static _TransferWebContextMenuParamToStatic(ptr: KPointer, value: ESValue) : boolean
+    native static _TransferHttpAuthHandlerToStatic(ptr: KPointer, value: ESValue) : boolean
+    native static _TransferWebResourceReponseToStatic(ptr: KPointer, value: ESValue) : boolean
+    native static _TransferWebResourceRequestToStatic(ptr: KPointer, value: ESValue) : boolean
+    native static _TransferConsoleMessageToStatic(ptr: KPointer, value: ESValue) : boolean
+    native static _TransferDataResubmissionHandlerToStatic(ptr: KPointer, value: ESValue) : boolean
+    native static _TransferClientAuthenticationHandlerToStatic(ptr: KPointer, value: ESValue) : boolean
+    native static _TransferSslErrorHandlerToStatic(ptr: KPointer, value: ESValue) : boolean
+    native static _TransferPermissionRequestToStatic(ptr: KPointer, value: ESValue): boolean
+    native static _TransferControllerHandlerToStatic(ptr: KPointer, value: ESValue): boolean
+    native static _TransferWebKeyboardControllerToStatic(ptr: KPointer, value: ESValue): boolean
 
-    native static _TransferScreenCaptureHandlerToDynamic(ptr: KPointer): Object | undefined | null
-    native static _TransferJsGeolocationToDynamic(ptr: KPointer) : Object | undefined | null
-    native static _TransferJsResultToDynamic(ptr: KPointer) : Object | undefined | null
-    native static _TransferEventResultToDynamic(ptr: KPointer) : Object | undefined | null
-    native static _TransferFileSelectorResultToDynamic(ptr: KPointer) : Object | undefined | null
-    native static _TransferFileSelectorParamToDynamic(ptr: KPointer) : Object | undefined | null
-    native static _TransferWebContextMenuResultToDynamic(ptr: KPointer) : Object | undefined | null
-    native static _TransferWebContextMenuParamToDynamic(ptr: KPointer) : Object | undefined | null
-    native static _TransferHttpAuthHandlerToDynamic(ptr: KPointer) : Object | undefined | null
-    native static _TransferWebResourceReponseToDynamic(ptr: KPointer) : Object | undefined | null
-    native static _TransferWebResourceRequestToDynamic(ptr: KPointer) : Object | undefined | null
-    native static _TransferConsoleMessageToDynamic(ptr: KPointer) : Object | undefined | null
-    native static _TransferDataResubmissionHandlerToDynamic(ptr: KPointer) : Object | undefined | null
-    native static _TransferClientAuthenticationHandlerToDynamic(ptr: KPointer) : Object | undefined | null
-    native static _TransferSslErrorHandlerToDynamic(ptr: KPointer) : Object | undefined | null
-    native static _TransferPermissionRequestToDynamic(ptr: KPointer) : Object | undefined | null
-    native static _TransferControllerHandlerToDynamic(ptr: KPointer) : Object | undefined | null
-    native static _TransferWebKeyboardControllerToDynamic(ptr: KPointer) : Object | undefined | null
+    native static _TransferScreenCaptureHandlerToDynamic(ptr: KPointer): Any
+    native static _TransferJsGeolocationToDynamic(ptr: KPointer) : Any
+    native static _TransferJsResultToDynamic(ptr: KPointer) : Any
+    native static _TransferEventResultToDynamic(ptr: KPointer) : Any
+    native static _TransferFileSelectorResultToDynamic(ptr: KPointer) : Any
+    native static _TransferFileSelectorParamToDynamic(ptr: KPointer) : Any
+    native static _TransferWebContextMenuResultToDynamic(ptr: KPointer) : Any
+    native static _TransferWebContextMenuParamToDynamic(ptr: KPointer) : Any
+    native static _TransferHttpAuthHandlerToDynamic(ptr: KPointer) : Any
+    native static _TransferWebResourceReponseToDynamic(ptr: KPointer) : Any
+    native static _TransferWebResourceRequestToDynamic(ptr: KPointer) : Any
+    native static _TransferConsoleMessageToDynamic(ptr: KPointer) : Any
+    native static _TransferDataResubmissionHandlerToDynamic(ptr: KPointer) : Any
+    native static _TransferClientAuthenticationHandlerToDynamic(ptr: KPointer) : Any
+    native static _TransferSslErrorHandlerToDynamic(ptr: KPointer) : Any
+    native static _TransferPermissionRequestToDynamic(ptr: KPointer) : Any
+    native static _TransferControllerHandlerToDynamic(ptr: KPointer) : Any
+    native static _TransferWebKeyboardControllerToDynamic(ptr: KPointer) : Any
 
     // for Drag
     native static _DragEvent_Set_Data(ptr: KLong, data : unifiedDataChannel.UnifiedData) : void
