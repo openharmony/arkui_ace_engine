@@ -351,7 +351,7 @@ void OnRenderExited(const CallbackHelper<Callback_OnRenderExitedEvent_Void>& ark
     Ark_OnRenderExitedEvent parameter;
     parameter.renderExitReason = Converter::ArkValue<Ark_RenderExitReason>(
         static_cast<Converter::RenderExitReason>(eventInfo->GetExitedReason()));
-    arkCallback.Invoke(parameter);
+    arkCallback.InvokeSync(parameter);
 }
 
 bool OnShowFileSelector(const CallbackHelper<Callback_OnShowFileSelectorEvent_Boolean>& arkCallback,
@@ -683,7 +683,7 @@ void OnWindowNew(const CallbackHelper<Callback_OnWindowNewEvent_Void>& arkCallba
     auto peer = new ControllerHandlerPeer();
     peer->handler = eventInfo->GetWebWindowNewHandler();
     parameter.handler = peer;
-    arkCallback.Invoke(parameter);
+    arkCallback.InvokeSync(parameter);
 }
 
 void OnWindowExit(const CallbackHelper<Callback_Void>& arkCallback,
@@ -693,7 +693,7 @@ void OnWindowExit(const CallbackHelper<Callback_Void>& arkCallback,
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
-    arkCallback.Invoke();
+    arkCallback.InvokeSync();
 }
 
 bool OnInterceptKey(const CallbackHelper<Callback_KeyEvent_Boolean>& arkCallback,
@@ -1094,7 +1094,7 @@ void OnNativeEmbedDataInfo(const CallbackHelper<Callback_NativeEmbedDataInfo_Voi
     parameter.info = Converter::ArkValue<Opt_NativeEmbedInfo>(arkInfo);
     parameter.status = Converter::ArkValue<Opt_NativeEmbedStatus>(eventInfo->GetStatus());
     parameter.surfaceId = Converter::ArkValue<Opt_String>(eventInfo->GetSurfaceId());
-    arkCallback.Invoke(parameter);
+    arkCallback.InvokeSync(parameter);
 }
 
 void OnNativeEmbedVisibilityChange(const CallbackHelper<OnNativeEmbedVisibilityChangeCallback>& arkCallback,
@@ -1106,7 +1106,7 @@ void OnNativeEmbedVisibilityChange(const CallbackHelper<OnNativeEmbedVisibilityC
     Ark_NativeEmbedVisibilityInfo parameter;
     parameter.embedId = Converter::ArkValue<Ark_String>(eventInfo->GetEmbedId());
     parameter.visibility = Converter::ArkValue<Ark_Boolean>(eventInfo->GetVisibility());
-    arkCallback.Invoke(parameter);
+    arkCallback.InvokeSync(parameter);
 }
 
 void OnNativeEmbedTouchInfo(const CallbackHelper<Callback_NativeEmbedTouchInfo_Void>& arkCallback,
@@ -1185,7 +1185,7 @@ void OnViewportFitChanged(const CallbackHelper<OnViewportFitChangedCallback>& ar
     CHECK_NULL_VOID(eventInfo);
     Ark_ViewportFit parameter = Converter::ArkValue<Ark_ViewportFit>(
         static_cast<ViewportFit>(eventInfo->GetViewportFit()));
-    arkCallback.Invoke(parameter);
+    arkCallback.InvokeSync(parameter);
 }
 
 WebKeyboardOption OnWebKeyboard(const CallbackHelper<WebKeyboardCallback>& arkCallback,
