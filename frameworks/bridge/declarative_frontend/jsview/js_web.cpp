@@ -2951,6 +2951,9 @@ void JSWeb::Create(const JSCallbackInfo& info)
                 ->Call(controller, 0, {})
                 ->ToNumber<int32_t>();
         }
+
+        // Don't compare JSWeb::webDebuggingAccess_ and webDebuggingAccess, call SetWebDebuggingAccess directly.
+        // To ensure JSWeb::webDebuggingAccess_ always equals to WebPattern's class member.
         if (webDebuggingPort > 0) {
             WebModel::GetInstance()->SetWebDebuggingAccessEnabledAndPort(
                 webDebuggingAccess, webDebuggingPort);
