@@ -26,7 +26,7 @@ import {
 } from '../../decorator';
 import { NullableObject } from '../../base/types';
 import { InterfaceProxyHandler } from './observeInterfaceProxy';
-import { ISubscribedWatches } from '../../decorator';
+import { ISubscribedWatches, IWatchSubscriberRegister } from '../../decorator';
 import { DecoratedV1VariableBase } from '../../decoratorImpl/decoratorBase';
 import { StateManager, GlobalStateManager } from '@koalaui/runtime';
 import { UIContextUtil } from '../../../handwritten/UIContextUtil';
@@ -68,6 +68,9 @@ export class StateMgmtTool {
     }
     static isISubscribedWatches(value: NullableObject): boolean {
         return value instanceof ISubscribedWatches;
+    }
+    static isIWatchSubscriberRegister<T>(value: T): boolean {
+        return value instanceof IWatchSubscriberRegister;
     }
     static isInterfaceProxyHandler(value: NullableObject): boolean {
         return value instanceof InterfaceProxyHandler;

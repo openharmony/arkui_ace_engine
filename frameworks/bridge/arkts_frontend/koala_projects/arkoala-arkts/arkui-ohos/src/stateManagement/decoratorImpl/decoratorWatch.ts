@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { WatchFuncType, WatchIdType, ISubscribedWatches } from '../decorator';
+import { WatchFuncType, WatchIdType, ISubscribedWatches, IWatchSubscriberRegister } from '../decorator';
 import { StateMgmtConsole } from '../tools/stateMgmtDFX';
 
 // WatchFunc: Representaton of a @Watch function isnide V1 decorator class
@@ -67,10 +67,10 @@ export class WatchFunc {
     // register to given object
     // when object changes it will call Execute
     // for each subscriber
-    registerMeTo(obj: ISubscribedWatches): void {
+    registerMeTo(obj: IWatchSubscriberRegister): void {
         obj.addWatchSubscriber(this.id_);
     }
-    unregisterMeFrom(obj: ISubscribedWatches): void {
+    unregisterMeFrom(obj: IWatchSubscriberRegister): void {
         obj.removeWatchSubscriber(this.id_);
     }
     execute(propertyName: string): void {

@@ -26,7 +26,7 @@ export interface IDecoratedVariable {
 }
 
 export interface IDecoratedV1Variable<T> extends IDecoratedVariable {
-    registerWatchToSource(me: IDecoratedV1Variable<T>): void;
+    registerWatchToSource(me: IDecoratedV1Variable<T>): WatchIdType;
 }
 
 export interface IDecoratedV2Variable extends IDecoratedVariable {}

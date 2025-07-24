@@ -85,9 +85,9 @@ export class MutableStateMeta extends MutableStateMetaBase implements IMutableSt
             }
         });
         if (this.shouldFireChange()) {
-        	this.__metaDependency!.value += 1;
+            this.__metaDependency!.value += 1;
             ArkUIAniModule._CustomNode_RequestFrame();
-		}
+        }
     }
 
     clearBindingRefs(listener: WeakRef<ITrackedDecoratorRef>): void {

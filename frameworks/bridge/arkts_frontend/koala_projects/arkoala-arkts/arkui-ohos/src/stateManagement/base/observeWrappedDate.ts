@@ -127,7 +127,7 @@ export class WrappedDate extends Date implements IObservedObject, ObserveWrapped
     }
 
     public override toLocaleDateString(locales?: Intl.LocalesArgument, options?: Intl.DateTimeFormatOptions): string {
-         this.conditionalAddRef();
+        this.conditionalAddRef();
         return this.store_.toLocaleDateString(locales, options);
     }
 

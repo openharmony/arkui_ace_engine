@@ -260,7 +260,7 @@ export class InteropStorageBase extends StorageBase {
         }
         const state = interopValue.value as StorageProperty<T>;
         const reference = state.mkRef(key, ttype);
-        state.registerWatch<T>(reference);
+        state.registerWatchToSource(reference);
         return reference;
     }
     /**
@@ -375,7 +375,7 @@ export class InteropStorageBase extends StorageBase {
             }
             const state = interopValue.value as StorageProperty<T>;
             const reference = state.mkRef(key, ttype);
-            state.registerWatch<T>(reference);
+            state.registerWatchToSource(reference);
             return reference;
         }
         const link = super.ref<T>(key, ttype);
@@ -461,7 +461,7 @@ export class InteropStorageBase extends StorageBase {
         }
         const state = interopValue.value as StorageProperty<T>;
         const link = state.makeStorageLink(owner, key, varName, watchFunc);
-        state.registerWatch<T>(link);
+        state.registerWatchToSource(link);
         return link;
     }
 
