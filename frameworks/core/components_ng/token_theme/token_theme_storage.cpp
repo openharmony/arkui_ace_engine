@@ -136,6 +136,9 @@ void TokenThemeStorage::ResetThemeColor(int32_t themeId, RefPtr<TokenTheme>& the
 
 void TokenThemeStorage::CacheResetColor()
 {
+    if (themeCache_.size() == 0) {
+        return;
+    }
     auto colorMode = CheckLocalAndSystemColorMode();
     auto defaultTheme = GetDefaultTheme();
     if (!defaultTheme) {

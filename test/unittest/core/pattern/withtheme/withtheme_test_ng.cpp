@@ -538,4 +538,30 @@ HWTEST_F(WithThemeTestNg, WithThemeTest014, TestSize.Level1)
     EXPECT_EQ(colors->GetColorWithResourceObject(-1), Color());
     EXPECT_EQ(colors->GetColorWithResourceObject(100), Color());
 }
+
+/**
+ * @tc.name: WithThemeTestNg015
+ * @tc.desc: reset cache color test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WithThemeTestNg, WithThemeTest015, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: reset cahced theme with no cache.
+     * @tc.expected: do not CreateSystemTokenTheme.
+     */
+    TokenThemeStorage::GetInstance()->CacheClear();
+    TokenThemeStorage::GetInstance()->CacheResetColor();
+    EXPECT_EQ(TokenThemeStorage::GetInstance()->themeCache_.size(), 0);
+
+    /**
+     * @tc.steps2: add theme cache.
+     */
+    auto theme = AceType::MakeRefPtr<TokenTheme>(TOKEN_THEME_ID);
+    theme->SetColors(g_testProperty.tokenColors_);
+    theme->SetDarkColors(g_testProperty.tokenColors_);
+    theme->SetColorMode(THEME_COLOR_MODE);
+    TokenThemeStorage::GetInstance()->CacheSet(theme);
+    EXPECT_EQ(TokenThemeStorage::GetInstance()->themeCache_.size(), 1);
+}
 } //namespace OHOS::Ace::NG
