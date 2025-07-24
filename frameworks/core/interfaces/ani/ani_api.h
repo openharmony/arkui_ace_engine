@@ -381,6 +381,15 @@ struct ArkUIAniCanvasModifier {
     void (*drawPixelMap2)(ArkUICanvasRenderer peer, void* nativePixelMap, ani_double sx, ani_double sy, ani_double sw,
         ani_double sh, ani_double dx, ani_double dy, ani_double dw, ani_double dh);
     ArkUIImageBitmap (*imageBitmapConstruct)(const std::string& str, void* pixelMapPtr, ArkUI_Int32 unit);
+    ani_double (*getCanvasDensity)(ArkUICanvasRenderer peer);
+    ani_double (*getSystemDensity)();
+    void (*getImageData)(
+        ArkUICanvasRenderer peer, uint8_t** data, ani_double sx, ani_double sy, ani_double sw, ani_double sh);
+    void (*putImageData0)(ArkUICanvasRenderer peer, uint8_t* data, ani_size length, ani_double dx, ani_double dy,
+        ani_int width, ani_int height);
+    void (*putImageData1)(ArkUICanvasRenderer peer, uint8_t* data, ani_size length, ani_double dx, ani_double dy,
+        ani_int width, ani_int height, ani_double dirtyX, ani_double dirtyY, ani_double dirtyWidth,
+        ani_double dirtyHeight);
 };
 
 struct ArkUIAniModifiers {

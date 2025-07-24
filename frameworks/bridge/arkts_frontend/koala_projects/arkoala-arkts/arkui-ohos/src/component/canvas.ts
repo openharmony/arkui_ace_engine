@@ -254,72 +254,6 @@ export class CanvasPatternInternal implements MaterializedBase,CanvasPattern {
         return obj
     }
 }
-export class ImageDataInternal {
-    public static fromPtr(ptr: KPointer): ImageData {
-        const obj : ImageData = new ImageData(undefined, undefined, undefined)
-        obj.peer = new Finalizable(ptr, ImageData.getFinalizer())
-        return obj
-    }
-}
-export class ImageData implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
-    get data(): NativeBuffer {
-        throw new Error("Not implemented")
-    }
-    get height(): number {
-        return this.getHeight()
-    }
-    get width(): number {
-        return this.getWidth()
-    }
-    static ctor_imagedata(width: number, height: number, data?: NativeBuffer): KPointer {
-        const thisSerializer : Serializer = Serializer.hold()
-        let data_type : int32 = RuntimeType.UNDEFINED
-        data_type = runtimeType(data)
-        thisSerializer.writeInt8(data_type as int32)
-        if ((RuntimeType.UNDEFINED) != (data_type)) {
-            const data_value  = data!
-            thisSerializer.writeBuffer(data_value)
-        }
-        const retval  = ArkUIGeneratedNativeModule._ImageData_ctor(width, height, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-        return retval
-    }
-    constructor(width?: number, height?: number, data?: NativeBuffer) {
-        if (((width) !== (undefined)) || ((height) !== (undefined)) || ((data) !== (undefined)))
-        {
-            const ctorPtr : KPointer = ImageData.ctor_imagedata((width)!, (height)!, data)
-            this.peer = new Finalizable(ctorPtr, ImageData.getFinalizer())
-        }
-    }
-    static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._ImageData_getFinalizer()
-    }
-    private getData(): NativeBuffer {
-        return this.getData_serialize()
-    }
-    private getHeight(): number {
-        return this.getHeight_serialize()
-    }
-    private getWidth(): number {
-        return this.getWidth_serialize()
-    }
-    private getData_serialize(): NativeBuffer {
-        const retval  = ArkUIGeneratedNativeModule._ImageData_getData(this.peer!.ptr)
-        return new Deserializer(retval, retval.length as int32).readBuffer()
-    }
-    private getHeight_serialize(): number {
-        const retval  = ArkUIGeneratedNativeModule._ImageData_getHeight(this.peer!.ptr)
-        return retval
-    }
-    private getWidth_serialize(): number {
-        const retval  = ArkUIGeneratedNativeModule._ImageData_getWidth(this.peer!.ptr)
-        return retval
-    }
-}
 export class RenderingContextSettingsInternal {
     public static fromPtr(ptr: KPointer): RenderingContextSettings {
         const obj : RenderingContextSettings = new RenderingContextSettings(undefined)
@@ -1005,41 +939,22 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         return this.createConicGradient_serialize(startAngle_casted, x_casted, y_casted)
     }
     public createImageData(sw: number, sh: number): ImageData {
-        const sw_casted = sw as (number)
-        const sh_casted = sh as (number)
-        return this.createImageData0_serialize(sw_casted, sh_casted)
+        return hookCreateImageData(this, sw, sh)
     }
     public createImageData(imagedata: ImageData): ImageData {
-        const imagedata_casted = imagedata as (ImageData)
-        return this.createImageData1_serialize(imagedata_casted)
+        return hookCreateImageData(this, imagedata)
     }
     public getImageData(sx: number, sy: number, sw: number, sh: number): ImageData {
-        const sx_casted = sx as (number)
-        const sy_casted = sy as (number)
-        const sw_casted = sw as (number)
-        const sh_casted = sh as (number)
-        return this.getImageData_serialize(sx_casted, sy_casted, sw_casted, sh_casted)
+        return hookGetImageData(this, sx, sy, sw, sh)
     }
     public getPixelMap(sx: number, sy: number, sw: number, sh: number): PixelMap {
         return hookGetPixelMap(this, sx, sy, sw, sh)
     }
     public putImageData(imagedata: ImageData, dx: number | string, dy: number | string): void {
-        const imagedata_casted = imagedata as (ImageData)
-        const dx_casted = dx as (number | string)
-        const dy_casted = dy as (number | string)
-        this.putImageData0_serialize(imagedata_casted, dx_casted, dy_casted)
-        return
+        hookPutImageData(this, imagedata, dx, dy)
     }
     public putImageData(imagedata: ImageData, dx: number | string, dy: number | string, dirtyX: number | string, dirtyY: number | string, dirtyWidth: number | string, dirtyHeight: number | string): void {
-        const imagedata_casted = imagedata as (ImageData)
-        const dx_casted = dx as (number | string)
-        const dy_casted = dy as (number | string)
-        const dirtyX_casted = dirtyX as (number | string)
-        const dirtyY_casted = dirtyY as (number | string)
-        const dirtyWidth_casted = dirtyWidth as (number | string)
-        const dirtyHeight_casted = dirtyHeight as (number | string)
-        this.putImageData1_serialize(imagedata_casted, dx_casted, dy_casted, dirtyX_casted, dirtyY_casted, dirtyWidth_casted, dirtyHeight_casted)
-        return
+        hookPutImageData(this, imagedata, dx, dy, dirtyX, dirtyY, dirtyWidth, dirtyHeight)
     }
     public getLineDash(): Array<number> {
         return this.getLineDash_serialize()
@@ -1421,21 +1336,6 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
     private createConicGradient_serialize(startAngle: number, x: number, y: number): CanvasGradient {
         const retval  = ArkUIGeneratedNativeModule._CanvasRenderer_createConicGradient(this.peer!.ptr, startAngle, x, y)
         const obj : CanvasGradient = CanvasGradientInternal.fromPtr(retval)
-        return obj
-    }
-    private createImageData0_serialize(sw: number, sh: number): ImageData {
-        const retval  = ArkUIGeneratedNativeModule._CanvasRenderer_createImageData0(this.peer!.ptr, sw, sh)
-        const obj : ImageData = ImageDataInternal.fromPtr(retval)
-        return obj
-    }
-    private createImageData1_serialize(imagedata: ImageData): ImageData {
-        const retval  = ArkUIGeneratedNativeModule._CanvasRenderer_createImageData1(this.peer!.ptr, toPeerPtr(imagedata))
-        const obj : ImageData = ImageDataInternal.fromPtr(retval)
-        return obj
-    }
-    private getImageData_serialize(sx: number, sy: number, sw: number, sh: number): ImageData {
-        const retval  = ArkUIGeneratedNativeModule._CanvasRenderer_getImageData(this.peer!.ptr, sx, sy, sw, sh)
-        const obj : ImageData = ImageDataInternal.fromPtr(retval)
         return obj
     }
     private getPixelMap_serialize(sx: number, sy: number, sw: number, sh: number): PixelMap {
