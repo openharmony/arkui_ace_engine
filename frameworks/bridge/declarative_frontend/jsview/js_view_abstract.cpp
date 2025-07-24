@@ -181,7 +181,8 @@ const char* BOTTOM_RIGHT_PROPERTY = "bottomRight";
 const char* DEBUG_LINE_INFO_LINE = "$line";
 const char* DEBUG_LINE_INFO_PACKAGE_NAME = "$packageName";
 
-enum class MenuItemType { COPY, PASTE, CUT, SELECT_ALL, UNKNOWN, CAMERA_INPUT, AI_WRITER, TRANSLATE, SHARE, SEARCH };
+enum class MenuItemType { COPY, PASTE, CUT, SELECT_ALL, UNKNOWN, CAMERA_INPUT,
+    AI_WRITER, TRANSLATE, SHARE, SEARCH, ASK_CELIA };
 enum class BackgroundType { CUSTOM_BUILDER, COLOR };
 
 const int32_t NUM_0 = 0;
@@ -1825,6 +1826,7 @@ MenuItemType StringToMenuItemType(std::string_view id)
         { "OH_DEFAULT_TRANSLATE", MenuItemType::TRANSLATE },
         { "OH_DEFAULT_SHARE", MenuItemType::SHARE },
         { "OH_DEFAULT_SEARCH", MenuItemType::SEARCH },
+        { "OH_DEFAULT_ASK_CELIA", MenuItemType::ASK_CELIA },
     };
 
     auto item = keyMenuItemMap.find(id);
@@ -1869,6 +1871,9 @@ void UpdateInfoById(NG::MenuOptionsParam& menuOptionsParam, std::string_view id)
             break;
         case MenuItemType::SEARCH:
             menuOptionsParam.symbolId = theme->GetSearchSymbolId();
+            break;
+        case MenuItemType::ASK_CELIA:
+            menuOptionsParam.symbolId = theme->GetAskCeliaSymbolId();
             break;
         default:
             menuOptionsParam.labelInfo = menuOptionsParam.labelInfo.value_or("");

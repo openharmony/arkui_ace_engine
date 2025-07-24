@@ -8872,6 +8872,9 @@ void RichEditorPattern::UpdateAIMenuOptions()
     SetIsAskCeliaEnabled(isAskCeliaEnabled);
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "UpdateAIMenuOptions isShowAIMenuOption=%{public}d "
         "isAskCeliaEnabled=%{public}d", isShowAIMenuOption_, isAskCeliaEnabled_);
+    if (!IsSupportAskCelia()) {
+        SetIsAskCeliaEnabled(false);
+    }
     CHECK_NULL_VOID(dataDetectorAdapter_);
     if (isAskCeliaEnabled_ && !NeedShowAIDetect() &&
         dataDetectorAdapter_->textDetectResult_.menuOptionAndAction.empty()) {
