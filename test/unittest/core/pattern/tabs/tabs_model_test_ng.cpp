@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "frameworks/core/common/resource/resource_parse_utils.h"
 #include "test/mock/base/mock_system_properties.h"
+#include "test/mock/core/common/mock_resource_adapter_v2.h"
 
 namespace OHOS::Ace::NG {
 
@@ -407,5 +408,93 @@ HWTEST_F(TabsModelTestNg, HandleBackgroundBlurStyleInactiveColorTest001, TestSiz
 
     EXPECT_TRUE(currentOption.has_value());
     CreateDone();
+}
+
+/**
+ * @tc.name: HandleBackgroundEffectInactiveColorTest002
+ * @tc.desc: Verify TabsModelNG::HandleBackgroundEffectInactiveColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsModelTestNg, HandleBackgroundEffectInactiveColorTest002, TestSize.Level1)
+{
+    ResetMockResourceData();
+
+    const int32_t resId = 0;
+    const int32_t resType = static_cast<int32_t>(ResourceType::COLOR);
+    const Color resData = Color::RED;
+    AddMockResourceData(0, resData);
+
+    TabsModelNG model = CreateTabs();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+
+    auto tabsNode = AceType::DynamicCast<TabsNode>(AceType::Claim<FrameNode>(frameNode));
+    ASSERT_NE(tabsNode, nullptr);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    ASSERT_NE(tabBarNode, nullptr);
+    auto target = tabBarNode->GetRenderContext();
+    ASSERT_NE(target, nullptr);
+
+    TabsModelNG::HandleBackgroundEffectInactiveColor(frameNode, nullptr);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    pattern_->resourceMgr_->ReloadResources();
+    ASSERT_TRUE(target->GetBackgroundEffect().has_value());
+    EXPECT_TRUE(target->GetBackgroundEffect()->isWindowFocused);
+
+    std::vector<ResourceObjectParams> params;
+    auto resObj = AceType::MakeRefPtr<ResourceObject>(resId, resType, params, "", "", Container::CurrentIdSafely());
+    TabsModelNG::HandleBackgroundEffectInactiveColor(frameNode, resObj);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    pattern_->resourceMgr_->ReloadResources();
+    ASSERT_TRUE(target->GetBackgroundEffect().has_value());
+    EXPECT_EQ(target->GetBackgroundEffect()->inactiveColor, resData);
+    CreateDone();
+    ResetMockResourceData();
+}
+
+/**
+ * @tc.name: HandleBackgroundBlurStyleInactiveColorTest002
+ * @tc.desc: Verify TabsModelNG::HandleBackgroundBlurStyleInactiveColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsModelTestNg, HandleBackgroundBlurStyleInactiveColorTest002, TestSize.Level1)
+{
+    ResetMockResourceData();
+
+    const int32_t resId = 0;
+    const int32_t resType = static_cast<int32_t>(ResourceType::COLOR);
+    const Color resData = Color::RED;
+    AddMockResourceData(0, resData);
+
+    TabsModelNG model = CreateTabs();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+
+    auto tabsNode = AceType::DynamicCast<TabsNode>(AceType::Claim<FrameNode>(frameNode));
+    ASSERT_NE(tabsNode, nullptr);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    ASSERT_NE(tabBarNode, nullptr);
+    auto target = tabBarNode->GetRenderContext();
+    ASSERT_NE(target, nullptr);
+
+    target->ResetBackBlurStyle();
+    TabsModelNG::HandleBackgroundBlurStyleInactiveColor(frameNode, nullptr);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    pattern_->resourceMgr_->ReloadResources();
+    ASSERT_TRUE(target->GetBackBlurStyle().has_value());
+    EXPECT_TRUE(target->GetBackBlurStyle()->isWindowFocused);
+
+    std::vector<ResourceObjectParams> params;
+    auto resObj = AceType::MakeRefPtr<ResourceObject>(resId, resType, params, "", "", Container::CurrentIdSafely());
+    target->ResetBackBlurStyle();
+    TabsModelNG::HandleBackgroundBlurStyleInactiveColor(frameNode, resObj);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    pattern_->resourceMgr_->ReloadResources();
+    ASSERT_TRUE(target->GetBackBlurStyle().has_value());
+    EXPECT_EQ(target->GetBackBlurStyle()->inactiveColor, resData);
+    CreateDone();
+    ResetMockResourceData();
 }
 } // namespace OHOS::Ace::NG

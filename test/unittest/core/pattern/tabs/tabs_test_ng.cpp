@@ -15,7 +15,9 @@
 
 #include "tabs_test_ng.h"
 
+#include "test/mock/base/mock_system_properties.h"
 #include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/common/mock_resource_adapter_v2.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_render_context.h"
@@ -72,6 +74,8 @@ void TabsTestNg::SetUpTestSuite()
 void TabsTestNg::TearDownTestSuite()
 {
     TestNG::TearDownTestSuite();
+    ResetMockResourceData();
+    g_isConfigChangePerform = false;
 }
 
 void TabsTestNg::SetUp() {}
@@ -99,6 +103,8 @@ void TabsTestNg::TearDown()
     dividerRenderProperty_ = nullptr;
     ClearOldNodes(); // Each testCase will create new list at begin
     AceApplicationInfo::GetInstance().isRightToLeft_ = false;
+    ResetMockResourceData();
+    g_isConfigChangePerform = false;
 }
 
 void TabsTestNg::GetTabs()
@@ -936,6 +942,47 @@ HWTEST_F(TabsTestNg, ReportComponentChangeEvent001, TestSize.Level1)
 
     EXPECT_NE(pattern_, nullptr);
     pattern_->ReportComponentChangeEvent(currentIndex);
+}
+
+/**
+ * @tc.name: OnColorModeChangeTest001
+ * @tc.desc: Test Tabs OnColorModeChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, OnColorModeChangeTest001, TestSize.Level1)
+{
+    g_isConfigChangePerform = true;
+
+    /**
+     * @tc.steps: step1. create tabs and set parameters.
+     */
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(layoutProperty_, nullptr);
+    ASSERT_NE(dividerRenderProperty_, nullptr);
+
+    /**
+     * @tc.steps: step2. reset data.
+     */
+    int32_t colorMode = static_cast<int32_t>(ColorMode::DARK);
+    layoutProperty_->ResetDividerColorSetByUser();
+    dividerRenderProperty_->ResetDividerColor();
+    pattern_->OnColorModeChange(colorMode);
+    EXPECT_TRUE(dividerRenderProperty_->HasDividerColor());
+
+    layoutProperty_->UpdateDividerColorSetByUser(false);
+    dividerRenderProperty_->ResetDividerColor();
+    pattern_->OnColorModeChange(colorMode);
+    EXPECT_TRUE(dividerRenderProperty_->HasDividerColor());
+
+    layoutProperty_->UpdateDividerColorSetByUser(true);
+    dividerRenderProperty_->ResetDividerColor();
+    pattern_->OnColorModeChange(colorMode);
+    EXPECT_FALSE(dividerRenderProperty_->HasDividerColor());
+
+    g_isConfigChangePerform = false;
 }
 
 /**
