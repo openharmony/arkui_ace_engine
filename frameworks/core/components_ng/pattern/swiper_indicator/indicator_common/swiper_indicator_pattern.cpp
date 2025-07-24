@@ -531,16 +531,17 @@ void SwiperIndicatorPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestu
 
 void SwiperIndicatorPattern::HandleTouchEvent(const TouchEventInfo& info)
 {
-    if (!isPressed_ || info.GetTouches().empty()) {
+    if (info.GetTouches().empty()) {
         return;
     }
     auto touchType = info.GetTouches().front().GetTouchType();
     if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
-        HandleTouchUp();
         HandleDragEnd(0);
-        isPressed_ = false;
+        HandleTouchUp();
     }
-    HandleLongDragUpdate(info.GetTouches().front());
+    if (isPressed_) {
+        HandleLongDragUpdate(info.GetTouches().front());
+    }
 }
 
 void SwiperIndicatorPattern::HandleTouchDown()
@@ -736,6 +737,9 @@ void SwiperIndicatorPattern::HandleDragStart(const GestureEvent& info)
 
 void SwiperIndicatorPattern::HandleDragEnd(double dragVelocity)
 {
+    if (!isPressed_) {
+        return;
+    }
     auto swiperNode = GetSwiperNode();
     CHECK_NULL_VOID(swiperNode);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
