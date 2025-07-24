@@ -140,5 +140,6 @@ using RSTextRect = Testing::TestingTypographyProperties::TextRect;
 using RSColor4f = Testing::TestingColor4f;
 using RSCMSTransferFuncType = Testing::TestingCMSTransferFuncType;
 using RSCMSMatrixType = Testing::TestingCMSMatrixType;
+using RSClamp = Testing::TestingClamp;
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_DRAWING_MOCK_H
