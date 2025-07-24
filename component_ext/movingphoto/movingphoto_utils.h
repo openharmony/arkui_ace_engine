@@ -66,6 +66,22 @@ private:
     std::shared_ptr<void> fd_{(void*)(intptr_t)-1, [](void*) {}};
 };
 
+namespace MovingPhotoutils {
+    inline void SecurityAndPrivatyLog(const std::string& src)
+    {
+        if (src.empty()) {
+            TAG_LOGE(AceLogTag::ACE_MOVING_PHOTO, "SecurityAndPrivatyLog src is empty.");
+            return;
+        }
+        size_t posEnd = src.find_last_of("/");
+        if (posEnd == std::string::npos) {
+            TAG_LOGE(AceLogTag::ACE_MOVING_PHOTO, "SecurityAndPrivatyLog src is empty.");
+        }
+        std::string imageUriStr = src.substr(0, posEnd + 1) + "******";
+        TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "SecurityAndPrivatyLog .%{public}s.", imageUriStr.c_str());
+    }
+}
+
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_COMPONENT_EXT_MOVINGPHOTO__UTILS_H

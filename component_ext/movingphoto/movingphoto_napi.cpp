@@ -95,6 +95,7 @@ napi_value JsCreate(napi_env env, napi_callback_info info)
     napi_value imageUri;
     napi_call_function(env, jsData, getUri, 0, nullptr, &imageUri);
     std::string imageUriStr = ExtNapiUtils::GetStringFromValueUtf8(env, imageUri);
+    MovingPhotoutils::SecurityAndPrivatyLog(imageUriStr);
     NG::MovingPhotoModelNG::GetInstance()->SetImageSrc(imageUriStr);
 
     return ExtNapiUtils::CreateNull(env);
@@ -459,6 +460,19 @@ napi_value EnableAutoPlay(napi_env env, napi_callback_info info)
     return ExtNapiUtils::CreateNull(env);
 }
 
+napi_value NotifyTransition(napi_env env, napi_callback_info info)
+{
+    napi_value thisVar = nullptr;
+    NAPI_CALL(env, napi_get_cb_info(env, info, nullptr, nullptr, &thisVar, NULL));
+    NG::MovingPhotoController* controller = nullptr;
+    napi_unwrap(env, thisVar, (void**)&controller);
+    if (controller == nullptr) {
+        return ExtNapiUtils::CreateNull(env);
+    }
+    controller->NotifyTransition();
+    return ExtNapiUtils::CreateNull(env);
+}
+
 
 napi_value MovingPhotoControllerConstructor(napi_env env, napi_callback_info info)
 {
@@ -492,6 +506,7 @@ napi_value InitController(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("enableTransition", EnableTransition),
         DECLARE_NAPI_FUNCTION("setPlaybackPeriod", SetPlaybackPeriod),
         DECLARE_NAPI_FUNCTION("enableAutoPlay", EnableAutoPlay),
+        DECLARE_NAPI_FUNCTION("notifyTransition", NotifyTransition),
     };
     NAPI_CALL(env, napi_define_class(env, "MovingPhotoViewController", NAPI_AUTO_LENGTH,
         MovingPhotoControllerConstructor, nullptr, sizeof(properties) / sizeof(*properties), properties,
