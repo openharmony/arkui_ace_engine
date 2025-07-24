@@ -366,8 +366,6 @@ arkui_files = [
   "arkui-preprocessed/arkui/handwritten/modifiers/ArkDividerNode.ets",
   "arkui-preprocessed/arkui/handwritten/modifiers/ArkFlexNode.ets",
   "arkui-preprocessed/arkui/handwritten/modifiers/ArkGridColNode.ets",
-  "arkui-preprocessed/arkui/handwritten/modifiers/ArkGridItemModifier.ets",
-  "arkui-preprocessed/arkui/handwritten/modifiers/ArkGridItemNode.ets",
   "arkui-preprocessed/arkui/handwritten/modifiers/ArkGridRowNode.ets",
   "arkui-preprocessed/arkui/handwritten/modifiers/ArkImageModifier.ets",
   "arkui-preprocessed/arkui/handwritten/modifiers/ArkImageNode.ets",
