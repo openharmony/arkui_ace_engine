@@ -101,7 +101,7 @@ import { DrawingCanvas, DrawingCanvasInternal, RectType } from "./../arkui-drawi
 import { BreakpointsReference, GridRowDirection, Callback_String_Void, BreakPoints, GridRowColumnOption, GridRowSizeOption, GutterOption, GridRowOptions } from "./../gridRow"
 import { CalendarAlign, CalendarPickerAttribute, Callback_Date_Void, CalendarOptions, CalendarDialogOptions } from "./../calendarPicker"
 import { CalendarController, CalendarControllerInternal, Literal_Number_day_month_year, Callback_CalendarRequestedData_Void, CalendarRequestedData, Callback_CalendarSelectedDate_Void, CalendarSelectedDate, CalendarDay, MonthData, CurrentDayStyle, NonCurrentDayStyle, TodayStyle, WeekStyle, WorkStateStyle } from "./../calendar"
-import { CanvasGradient, CanvasGradientInternal, CanvasPath, CanvasPathInternal, CanvasPattern, CanvasPatternInternal, OffscreenCanvas, OffscreenCanvasInternal, ImageBitmap, ImageBitmapInternal, RenderingContextSettings, RenderingContextSettingsInternal, OffscreenCanvasRenderingContext2D, OffscreenCanvasRenderingContext2DInternal, Path2D, Path2DInternal, TextMetrics, DrawingRenderingContext, DrawingRenderingContextInternal, ImageData, ImageDataInternal, CanvasRenderer, CanvasRendererInternal, ImageSmoothingQuality, CanvasLineCap, CanvasLineJoin, CanvasDirection, CanvasTextAlign, CanvasTextBaseline, CanvasFillRule, CanvasRenderingContext2D, CanvasRenderingContext2DInternal } from "./../canvas"
+import { CanvasGradient, CanvasGradientInternal, CanvasPath, CanvasPathInternal, CanvasPattern, CanvasPatternInternal, OffscreenCanvas, OffscreenCanvasInternal, ImageBitmap, ImageBitmapInternal, RenderingContextSettings, RenderingContextSettingsInternal, OffscreenCanvasRenderingContext2D, OffscreenCanvasRenderingContext2DInternal, Path2D, Path2DInternal, TextMetrics, DrawingRenderingContext, DrawingRenderingContextInternal, CanvasRenderer, CanvasRendererInternal, ImageSmoothingQuality, CanvasLineCap, CanvasLineJoin, CanvasDirection, CanvasTextAlign, CanvasTextBaseline, CanvasFillRule, CanvasRenderingContext2D, CanvasRenderingContext2DInternal } from "./../canvas"
 import { Matrix2D, Matrix2DInternal } from "./../matrix2d"
 import { ColorMode, LayoutDirection } from "./../stateManagement"
 import { Component3DAttribute, ModelType, SceneOptions } from "./../component3d"
@@ -8808,11 +8808,6 @@ export class Deserializer extends DeserializerBase {
         let valueDeserializer : Deserializer = this
         let ptr : KPointer = valueDeserializer.readPointer()
         return ImageBitmapInternal.fromPtr(ptr)
-    }
-    readImageData(): ImageData {
-        let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return ImageDataInternal.fromPtr(ptr)
     }
     readImageError(): ImageError {
         let valueDeserializer : Deserializer = this

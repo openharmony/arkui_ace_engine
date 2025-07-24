@@ -21,11 +21,13 @@
 #endif
 #include "base/geometry/ng/size_t.h"
 #include "core/components/common/properties/paint_state.h"
+#include "core/components_ng/pattern/canvas/canvas_renderer_type.h"
 #include "core/interfaces/native/implementation/canvas_renderer_peer_impl.h"
 #include "core/interfaces/native/implementation/drawing_rendering_context_peer_impl.h"
 #include "core/interfaces/native/implementation/image_bitmap_peer_impl.h"
 #include "core/interfaces/native/implementation/image_data_peer.h"
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
 namespace CanvasAniModifier {
@@ -145,6 +147,67 @@ ArkUIImageBitmap ImageBitmapConstruct(const std::string& str, void* pixelMapPtr,
     return reinterpret_cast<ArkUIImageBitmap>(Referenced::RawPtr(peer));
 }
 
+ani_double GetCanvasDensity(ArkUICanvasRenderer peer)
+{
+    CHECK_NULL_RETURN(peer, 1.0);
+    auto peerImpl = reinterpret_cast<GeneratedModifier::CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, 1.0);
+    return peerImpl->GetDensity();
+}
+
+ani_double GetSystemDensity()
+{
+    return PipelineBase::GetCurrentDensity();
+}
+
+void GetImageData(ArkUICanvasRenderer peer, uint8_t** data, ani_double sx, ani_double sy, ani_double sw, ani_double sh)
+{
+    CHECK_NULL_VOID(peer);
+    auto peerImpl = reinterpret_cast<GeneratedModifier::CanvasRendererPeerImpl*>(peer);
+    ImageSize imageSize = {
+        .left = static_cast<double>(sx),
+        .top = static_cast<double>(sy),
+        .width = static_cast<double>(sw),
+        .height = static_cast<double>(sh)
+    };
+    std::vector<uint8_t> vbuffer(0);
+    uint32_t width = 0;
+    uint32_t height = 0;
+    peerImpl->GetImageData(vbuffer, imageSize, width, height);
+    *data = reinterpret_cast<uint8_t*>(vbuffer.data());
+}
+
+void PutImageData0(ArkUICanvasRenderer peer, uint8_t* data, ani_size length, ani_double dx, ani_double dy,
+    ani_int width, ani_int height)
+{
+    CHECK_NULL_VOID(peer);
+    auto peerImpl = reinterpret_cast<GeneratedModifier::CanvasRendererPeerImpl*>(peer);
+    GeneratedModifier::CanvasRendererPeerImpl::PutImageDataParam params = {
+        .x = std::make_optional<Dimension>(static_cast<float>(dx)),
+        .y = std::make_optional<Dimension>(static_cast<float>(dy)),
+        .size = GeneratedModifier::CanvasRendererPeerImpl::SizeParam::TWO_ARGS,
+    };
+    peerImpl->PutImageData(
+        data, static_cast<size_t>(length), static_cast<int32_t>(width), static_cast<int32_t>(height), params);
+}
+
+void PutImageData1(ArkUICanvasRenderer peer, uint8_t* data, ani_size length, ani_double dx, ani_double dy,
+    ani_int width, ani_int height, ani_double dirtyX, ani_double dirtyY, ani_double dirtyWidth, ani_double dirtyHeight)
+{
+    CHECK_NULL_VOID(peer);
+    auto peerImpl = reinterpret_cast<GeneratedModifier::CanvasRendererPeerImpl*>(peer);
+    GeneratedModifier::CanvasRendererPeerImpl::PutImageDataParam params = {
+        .x = std::make_optional<Dimension>(static_cast<float>(dx)),
+        .y = std::make_optional<Dimension>(static_cast<float>(dy)),
+        .dirtyX = std::make_optional<Dimension>(static_cast<float>(dirtyX)),
+        .dirtyY = std::make_optional<Dimension>(static_cast<float>(dirtyY)),
+        .dirtyWidth = std::make_optional<Dimension>(static_cast<float>(dirtyWidth)),
+        .dirtyHeight = std::make_optional<Dimension>(static_cast<float>(dirtyHeight)),
+        .size = GeneratedModifier::CanvasRendererPeerImpl::SizeParam::SIX_ARGS,
+    };
+    peerImpl->PutImageData(
+        data, static_cast<size_t>(length), static_cast<int32_t>(width), static_cast<int32_t>(height), params);
+}
 } // namespace CanvasAniModifier
 
 const ArkUIAniCanvasModifier* GetCanvasAniModifier()
@@ -155,6 +218,11 @@ const ArkUIAniCanvasModifier* GetCanvasAniModifier()
         .drawPixelMap1 = CanvasAniModifier::DrawPixelMap1,
         .drawPixelMap2 = CanvasAniModifier::DrawPixelMap2,
         .imageBitmapConstruct = CanvasAniModifier::ImageBitmapConstruct,
+        .getCanvasDensity = CanvasAniModifier::GetCanvasDensity,
+        .getSystemDensity = CanvasAniModifier::GetSystemDensity,
+        .getImageData = CanvasAniModifier::GetImageData,
+        .putImageData0 = CanvasAniModifier::PutImageData0,
+        .putImageData1 = CanvasAniModifier::PutImageData1,
     };
     return &impl;
 }

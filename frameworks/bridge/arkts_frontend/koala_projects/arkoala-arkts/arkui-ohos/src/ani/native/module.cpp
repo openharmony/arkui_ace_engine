@@ -760,7 +760,32 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_ImageBitmap_Construct1",
             "L@ohos/multimedia/image/image/PixelMap;I:J",
             reinterpret_cast<void*>(OHOS::Ace::Ani::CanvasModule::ImageBitmapConstruct1)
-        }
+        },
+        ani_native_function {
+            "_CanvasRenderer_GetCanvasDensity",
+            "J:D",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CanvasModule::GetCanvasDensity)
+        },
+        ani_native_function {
+            "_GetSystemDensity",
+            ":D",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CanvasModule::GetSystemDensity)
+        },
+        ani_native_function {
+            "_CanvasRenderer_GetImageData",
+            "JDDDD:Lescompat/Uint8ClampedArray;",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CanvasModule::GetImageData)
+        },
+        ani_native_function {
+            "_CanvasRenderer_PutImageData0",
+            "JLescompat/Uint8ClampedArray;DDII:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CanvasModule::PutImageData0)
+        },
+        ani_native_function {
+            "_CanvasRenderer_PutImageData1",
+            "JLescompat/Uint8ClampedArray;DDIIDDDD:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CanvasModule::PutImageData1)
+        },
     };
 
     auto bindRst = env->Class_BindNativeMethods(cls, methods.data(), methods.size());

@@ -230,4 +230,10 @@ export class ArkUIAniModule {
     native static _CanvasRenderer_DrawPixelMap2(peerPtr: KPointer, pixelmap: image.PixelMap, sx: number, sy: number, sw: number, sh: number, dx: number, dy: number, dw: number, dh: number): void
     native static _ImageBitmap_Construct0(src: string, unit: KInt): KPointer
     native static _ImageBitmap_Construct1(src: image.PixelMap, unit: KInt): KPointer
+    native static _CanvasRenderer_GetCanvasDensity(peerPtr: KPointer): number
+    native static _GetSystemDensity(): number
+    native static _CanvasRenderer_GetImageData(peerPtr: KPointer, sx: number, sy: number, sw: number, sh: number): Uint8ClampedArray
+    native static _CanvasRenderer_PutImageData0(peerPtr: KPointer, array: Uint8ClampedArray, dx: number, dy: number, width: KInt, height: KInt): void
+    native static _CanvasRenderer_PutImageData1(peerPtr: KPointer, array: Uint8ClampedArray, dx: number, dy: number, width: KInt, height: KInt,
+        dirtyX: number, dirtyY: number, dirtyWidth: number, dirtyHeight: number): void
 }

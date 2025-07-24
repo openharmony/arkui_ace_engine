@@ -124,4 +124,104 @@ ani_long CanvasModule::ImageBitmapConstruct1(
         canvasModifier->imageBitmapConstruct("", reinterpret_cast<void*>(&mediaPixelMap), unit));
 }
 
+ani_double CanvasModule::GetCanvasDensity(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long peerPtr)
+{
+    auto* peer = reinterpret_cast<ArkUICanvasRenderer>(peerPtr);
+    CHECK_NULL_RETURN(peer, 1.0);
+    const auto* modifier = GetNodeAniModifier();
+    CHECK_NULL_RETURN(modifier, 1.0);
+    auto* canvasModifier = modifier->getCanvasAniModifier();
+    CHECK_NULL_RETURN(canvasModifier, 1.0);
+    return canvasModifier->getCanvasDensity(peer);
+}
+
+ani_double CanvasModule::GetSystemDensity(ani_env* env, [[maybe_unused]] ani_object aniClass)
+{
+    const auto* modifier = GetNodeAniModifier();
+    CHECK_NULL_RETURN(modifier, 1.0);
+    auto* canvasModifier = modifier->getCanvasAniModifier();
+    CHECK_NULL_RETURN(canvasModifier, 1.0);
+    return canvasModifier->getSystemDensity();
+}
+
+ani_object CanvasModule::GetImageData(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long peerPtr,
+    ani_double sx, ani_double sy, ani_double sw, ani_double sh)
+{
+    ani_ref aniRef;
+    env->GetUndefined(&aniRef);
+    ani_object undefined = static_cast<ani_object>(aniRef);
+
+    auto* peer = reinterpret_cast<ArkUICanvasRenderer>(peerPtr);
+    CHECK_NULL_RETURN(peer, undefined);
+    const auto* modifier = GetNodeAniModifier();
+    CHECK_NULL_RETURN(modifier, undefined);
+    auto* canvasModifier = modifier->getCanvasAniModifier();
+    CHECK_NULL_RETURN(canvasModifier, undefined);
+    uint8_t* imageData;
+    canvasModifier->getImageData(peer, &imageData, sx, sy, sw, sh);
+
+    ani_arraybuffer arrayBuffer;
+    ani_size length = 10;
+    if (!env->CreateArrayBuffer(length, reinterpret_cast<void**>(&imageData), &arrayBuffer)) {
+        return undefined;
+    }
+
+    static const char* className = "Lescompat/Uint8ClampedArray;";
+    ani_class cls;
+    if (ANI_OK != env->FindClass(className, &cls)) {
+        return undefined;
+    }
+    ani_method ctor;
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "J:Lescompat/ArrayBuffer", &ctor)) {
+        return undefined;
+    }
+    ani_object aniValue;
+    if (ANI_OK != env->Object_New(cls, ctor, &aniValue, arrayBuffer)) {
+        return undefined;
+    }
+    return aniValue;
+}
+
+void CanvasModule::PutImageData0(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long peerPtr, ani_object array,
+    ani_double dx, ani_double dy, ani_int width, ani_int height)
+{
+    auto* peer = reinterpret_cast<ArkUICanvasRenderer>(peerPtr);
+    CHECK_NULL_VOID(peer);
+    ani_ref buffer;
+    if ((env->Object_GetFieldByName_Ref(array, "buffer", &buffer)) != ANI_OK) {
+        return;
+    }
+    ani_arraybuffer arrayBuffer = static_cast<ani_arraybuffer>(buffer);
+    uint8_t* data = nullptr;
+    ani_size length = 0;
+    env->ArrayBuffer_GetInfo(arrayBuffer, reinterpret_cast<void**>(&data), &length);
+    CHECK_NULL_VOID(data);
+    const auto* modifier = GetNodeAniModifier();
+    CHECK_NULL_VOID(modifier);
+    auto* canvasModifier = modifier->getCanvasAniModifier();
+    CHECK_NULL_VOID(canvasModifier);
+    canvasModifier->putImageData0(peer, data, length, dx, dy, width, height);
+}
+
+void CanvasModule::PutImageData1(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long peerPtr, ani_object array,
+    ani_double dx, ani_double dy, ani_int width, ani_int height, ani_double dirtyX, ani_double dirtyY,
+    ani_double dirtyWidth, ani_double dirtyHeight)
+{
+    auto* peer = reinterpret_cast<ArkUICanvasRenderer>(peerPtr);
+    CHECK_NULL_VOID(peer);
+    ani_ref buffer;
+    if ((env->Object_GetFieldByName_Ref(array, "buffer", &buffer)) != ANI_OK) {
+        return;
+    }
+    ani_arraybuffer arrayBuffer = static_cast<ani_arraybuffer>(buffer);
+    uint8_t* data = nullptr;
+    ani_size length = 0;
+    env->ArrayBuffer_GetInfo(arrayBuffer, reinterpret_cast<void**>(&data), &length);
+    CHECK_NULL_VOID(data);
+    const auto* modifier = GetNodeAniModifier();
+    CHECK_NULL_VOID(modifier);
+    auto* canvasModifier = modifier->getCanvasAniModifier();
+    CHECK_NULL_VOID(canvasModifier);
+    canvasModifier->putImageData1(peer, data, length, dx, dy, width, height, dirtyX, dirtyY, dirtyWidth, dirtyHeight);
+}
 } // namespace OHOS::Ace::Ani
