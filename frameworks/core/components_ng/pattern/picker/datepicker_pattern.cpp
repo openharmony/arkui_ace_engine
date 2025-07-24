@@ -387,8 +387,10 @@ void DatePickerPattern::OnModifyDone()
         ColumnPatternInitHapticController();
         isHapticChanged_ = false;
     }
-    if (isFiredDateChange_ && !isForceUpdate_ && (lunar_ == datePickerRowLayoutProperty->GetLunar().value_or(false)) &&
-        !isDateOrderChange_ && (isLoop_ == datePickerRowLayoutProperty->GetCanLoopValue(true))) {
+    isForceUpdate_ = isForceUpdate_ ||
+        (lunar_ != datePickerRowLayoutProperty->GetLunar().value_or(false)) ||
+        (isLoop_ != datePickerRowLayoutProperty->GetCanLoopValue(true));
+    if (isFiredDateChange_ && !isForceUpdate_ && !isDateOrderChange_) {
         isFiredDateChange_ = false;
         return;
     }
@@ -2084,46 +2086,44 @@ LunarDate DatePickerPattern::GetCurrentLunarDateByMonthDaysColumn(uint32_t lunar
     auto iter = children.begin();
     auto monthDays = (*iter);
     CHECK_NULL_RETURN(monthDays, lunarResult);
-    iter++;
-    auto year = *iter;
-    CHECK_NULL_RETURN(year, lunarResult);
     auto stackMonthDays = DynamicCast<FrameNode>(monthDays);
     auto monthDaysNode = DynamicCast<FrameNode>(stackMonthDays->GetLastChild()->GetLastChild());
-    auto stackYear = DynamicCast<FrameNode>(year);
-    auto blendYear = DynamicCast<FrameNode>(stackYear->GetLastChild());
-    CHECK_NULL_RETURN(blendYear, lunarResult);
-    auto yearDaysNode = DynamicCast<FrameNode>(blendYear->GetLastChild());
     CHECK_NULL_RETURN(monthDaysNode, lunarResult);
-    CHECK_NULL_RETURN(yearDaysNode, lunarResult);
 
     auto monthDaysDatePickerColumnPattern = monthDaysNode->GetPattern<DatePickerColumnPattern>();
-    auto yearDatePickerColumnPattern = yearDaysNode->GetPattern<DatePickerColumnPattern>();
     CHECK_NULL_RETURN(monthDaysDatePickerColumnPattern, lunarResult);
-    CHECK_NULL_RETURN(yearDatePickerColumnPattern, lunarResult);
-
 
     uint32_t lunarLeapMonth = 0;
     bool hasLeapMonth = GetLunarLeapMonth(lunarYear, lunarLeapMonth);
-    auto monthDaysIndex = monthDaysDatePickerColumnPattern->GetCurrentIndex();
-    uint32_t month = 1;
-    for (; month <= 12; ++month) { // month start from 1 to 12
-        auto flag = hasLeapMonth && lunarLeapMonth == month;
-        uint32_t daysInMonth = GetLunarMaxDay(lunarYear, month, flag && lunarResult.isLeapMonth);
-        if (monthDaysIndex < daysInMonth) {
-            break;
-        } else {
-            monthDaysIndex -= daysInMonth;
+    uint32_t remainingDays = monthDaysDatePickerColumnPattern->GetCurrentIndex();
+
+    // common function for processing a month
+    auto processMonth = [&](uint32_t month, bool isLeap) -> bool {
+        uint32_t daysInMonth = GetLunarMaxDay(lunarYear, month, isLeap);
+        if (remainingDays < daysInMonth) {
+            lunarResult.month = month;
+            lunarResult.isLeapMonth = isLeap;
+            lunarResult.day = remainingDays + 1;
+            return true; // target month is found
         }
-        if (flag && !lunarResult.isLeapMonth) {
-            --month;
-            lunarResult.isLeapMonth = true;
+        remainingDays -= daysInMonth;
+        return false; // continue to process next month
+    };
+
+    lunarResult.year = lunarYear;
+    for (uint32_t month = MIN_MONTH; month <= MAX_MONTH; ++month) {
+        // process regular month
+        if (processMonth(month, false)) {
+            break;
+        }
+
+        // process leap month if exists
+        if (hasLeapMonth && lunarLeapMonth == month) {
+            if (processMonth(month, true)) {
+                break;
+            }
         }
     }
-    lunarResult.month = month;
-    lunarResult.isLeapMonth = (lunarResult.month == lunarLeapMonth && hasLeapMonth);
-    lunarResult.day = monthDaysIndex + 1; // day start form 1, index start from 0
-    lunarResult.year = startDateLunar_.year + yearDatePickerColumnPattern->GetCurrentIndex();
-
     return lunarResult;
 }
 
@@ -3191,6 +3191,11 @@ void DatePickerPattern::UpdateSelectedTextStyle(const PickerTextStyle& textStyle
     auto defaultTextStyle = pickerTheme->GetOptionStyle(true, false);
     auto pickerProperty = GetLayoutProperty<DataPickerRowLayoutProperty>();
     CHECK_NULL_VOID(pickerProperty);
+
+    if (pickerProperty->GetSelectedColor().has_value()) {
+        defaultTextStyle.SetTextColor(pickerProperty->GetSelectedColor().value());
+    }
+
     UpdateTextStyleCommon(
         textStyle,
         defaultTextStyle,

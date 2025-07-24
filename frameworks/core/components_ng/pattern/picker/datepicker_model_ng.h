@@ -54,7 +54,6 @@ public:
     static void SetSelectedDate(FrameNode* frameNode, const PickerDate& value);
     static void SetMode(FrameNode* frameNode, const DatePickerMode& value);
     static void SetOnDateChange(FrameNode* frameNode, DateChangeEvent&& onChange);
-    static void SetChangeEvent(FrameNode* frameNode, DateChangeEvent&& onChange);
     static void SetOnChange(FrameNode* frameNode, DateChangeEvent&& onChange);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     void SetChangeEvent(DateChangeEvent&& onChange) override;

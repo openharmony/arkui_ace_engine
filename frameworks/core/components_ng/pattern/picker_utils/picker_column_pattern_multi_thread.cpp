@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/picker/datepicker_column_pattern.h"
+#include "core/components_ng/pattern/picker_utils/picker_column_pattern.h"
 
 namespace OHOS::Ace::NG {
-void DatePickerColumnPattern::OnAttachToMainTreeMultiThread()
+void PickerColumnPattern::OnAttachToMainTreeMultiThread()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -39,8 +39,9 @@ void DatePickerColumnPattern::OnAttachToMainTreeMultiThread()
     RegisterWindowStateChangedCallback();
 }
 
-void DatePickerColumnPattern::OnDetachFromMainTreeMultiThread()
+void PickerColumnPattern::OnDetachFromMainTreeMultiThread()
 {
+    isTossPlaying_ = false;
     if (hapticController_) {
         hapticController_->Stop();
     }
