@@ -614,6 +614,34 @@ void ViewAbstractModelStatic::BindSheet(FrameNode* frameNode, bool isShow,
         std::move(sheetSpringBack), targetNode);
 }
 
+void ViewAbstractModelStatic::SetBackgroundEffect(FrameNode* frameNode,
+    const std::optional<EffectOption>& effectOption, const std::optional<SysOptions>& sysOptions)
+{
+    FREE_NODE_CHECK(frameNode, SetBackgroundEffect, frameNode, effectOption, sysOptions);
+    ViewAbstract::SetBackgroundEffect(frameNode, effectOption.value_or(EffectOption()),
+        sysOptions.value_or(DEFAULT_SYS_OPTIONS));
+}
+
+void ViewAbstractModelStatic::SetBackgroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& bgBlurStyle)
+{
+    FREE_NODE_CHECK(frameNode, SetBackgroundBlurStyle, frameNode, bgBlurStyle);
+    ViewAbstract::SetBackgroundBlurStyle(frameNode, bgBlurStyle);
+}
+
+void ViewAbstractModelStatic::SetTranslate(FrameNode* frameNode, const NG::TranslateOptions& value)
+{
+    FREE_NODE_CHECK(frameNode, SetTranslate, frameNode, value);
+    ViewAbstract::SetTranslate(frameNode, value);
+}
+
+void ViewAbstractModelStatic::SetGeometryTransition(FrameNode* frameNode, const std::string& id,
+    bool followWithoutTransition, bool doRegisterSharedTransition)
+{
+    FREE_NODE_CHECK(frameNode, SetGeometryTransition,
+        frameNode, id, followWithoutTransition, doRegisterSharedTransition);
+    ViewAbstract::SetGeometryTransition(frameNode, id, followWithoutTransition, doRegisterSharedTransition);
+}
+
 void ViewAbstractModelStatic::DismissSheetStatic()
 {
     auto sheetId = SheetManager::GetInstance().GetDismissSheet();
