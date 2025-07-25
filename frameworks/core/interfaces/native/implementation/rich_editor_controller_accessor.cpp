@@ -147,7 +147,7 @@ LeadingMargin Convert(const Ark_LeadingMarginPlaceholder& src)
     LeadingMargin leadingMargin = {
         .size = LeadingMarginSize(convSize.first, convSize.second),
 #if defined(PIXEL_MAP_SUPPORTED)
-        .pixmap = Converter::Convert<RefPtr<PixelMap>>(src.pixelMap),
+        .pixmap = Converter::Convert<RefPtr<PixelMap>>(src.pixelMap)
 #else
         .pixmap = nullptr
 #endif
@@ -160,7 +160,7 @@ LeadingMargin Convert(const Ark_Length& src)
 {
     auto width = Converter::Convert<Dimension>(src);
     LeadingMargin leadingMargin = {
-        .size = NG::LeadingMarginSize(width, Dimension(0.0, width.Unit()))
+        .size = NG::LeadingMarginSize(width, Dimension(0.0, width.Unit())),
         .pixmap = nullptr
     };
     return leadingMargin;
