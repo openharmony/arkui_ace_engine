@@ -2478,6 +2478,7 @@ void SwiperPattern::StopSpringAnimationImmediately()
         auto host = swiper->GetHost();
         CHECK_NULL_VOID(host);
         host->UpdateAnimatablePropertyFloat(SPRING_PROPERTY_NAME, swiper->currentIndexOffset_);
+        swiper->FireScrollStateEvent(ScrollState::IDLE);
     });
     OnSpringAnimationFinish();
 }
