@@ -151,6 +151,48 @@ Color ParseTextColor(const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, in
     return textColor;
 }
 
+void ParseSelectedBackgroundStyleRadius(const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUI_Bool* isHasValue,
+    ArkUIPickerBackgroundStyleStruct& backgroundStyleStruct, RefPtr<ResourceObject>* radiusResObjs)
+{
+    ArkUI_Float32 value[VALUE_MAX_SIZE] = {
+        DEFAULT_TEXT_PICKER_SELECTED_BACKGROUND_BORDER_RADIUS, DEFAULT_TEXT_PICKER_SELECTED_BACKGROUND_BORDER_RADIUS,
+        DEFAULT_TEXT_PICKER_SELECTED_BACKGROUND_BORDER_RADIUS, DEFAULT_TEXT_PICKER_SELECTED_BACKGROUND_BORDER_RADIUS};
+    ArkUI_Int32 unit[VALUE_MAX_SIZE] = {UNIT_VP, UNIT_VP, UNIT_VP, UNIT_VP};
+    auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
+    CalcDimension calcDimension;
+    RefPtr<ResourceObject> tmpResObj;
+    for (int i = 0; i < VALUE_MAX_SIZE; i++) {
+        if (ArkTSUtils::ParseJsLengthMetrics(vm, runtimeCallInfo->GetCallArgRef(i + NUM_2), calcDimension, tmpResObj) &&
+            !calcDimension.IsNegative()) {
+            isHasValue[i + COLOR_ARG_INDEX] = true;
+            value[i] = calcDimension.Value();
+            unit[i] = static_cast<int>(calcDimension.Unit());
+            radiusResObjs[i] = tmpResObj;
+        }
+        if (ArkTSUtils::ParseJsDimensionVp(vm, runtimeCallInfo->GetCallArgRef(i + NUM_2), calcDimension, tmpResObj) &&
+            !calcDimension.IsNegative()) {
+            isHasValue[i + COLOR_ARG_INDEX] = true;
+            value[i] = calcDimension.Value();
+            unit[i] = static_cast<int>(calcDimension.Unit());
+            radiusResObjs[i] = tmpResObj;
+        }
+    }
+    if (isRightToLeft && (value[TOPLEFT] != value[BOTTOMLEFT] || value[TOPRIGHT] != value[BOTTOMRIGHT]) &&
+        (unit[TOPLEFT] != unit[BOTTOMLEFT] || unit[TOPRIGHT] != unit[BOTTOMRIGHT])) {
+        std::swap(value[TOPLEFT], value[BOTTOMLEFT]);
+        std::swap(value[TOPRIGHT], value[BOTTOMRIGHT]);
+        std::swap(unit[TOPLEFT], unit[BOTTOMLEFT]);
+        std::swap(unit[TOPRIGHT], unit[BOTTOMRIGHT]);
+        std::swap(isHasValue[GETTOPLEFT], isHasValue[GETTOPRIGHT]);
+        std::swap(isHasValue[GETBOTTOMLEFT], isHasValue[GETBOTTOMRIGHT]);
+        std::swap(radiusResObjs[TOPLEFT], radiusResObjs[BOTTOMLEFT]);
+        std::swap(radiusResObjs[TOPRIGHT], radiusResObjs[BOTTOMRIGHT]);
+    }
+    backgroundStyleStruct.values = value;
+    backgroundStyleStruct.units = unit;
+    backgroundStyleStruct.length = VALUE_MAX_SIZE;
+}
+
 } // namespace
 
 ArkUINativeModuleValue TextPickerBridge::SetBackgroundColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -741,52 +783,36 @@ ArkUINativeModuleValue TextPickerBridge::SetTextPickerSelectedBackgroundStyle(Ar
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0); // framenode
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0); // frameNode
     Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(1); // background color
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     CHECK_NULL_RETURN(nativeNode, panda::NativePointerRef::New(vm, nullptr));
-    ArkUI_Bool getValue[GETVALUE_MAX_SIZE] = {false, false, false, false, false};
-    ArkUI_Uint32 colorValue = DEFAULT_TEXT_PICKER_SELECTED_BACKGROUND_COLOR;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+
+    ArkUI_Bool isHasValue[GETVALUE_MAX_SIZE] = {false, false, false, false, false};
+    ArkUIPickerBackgroundStyleStruct backgroundStyleStruct;
+    backgroundStyleStruct.colorValue = DEFAULT_TEXT_PICKER_SELECTED_BACKGROUND_COLOR;
     Color color;
-    if (ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color)) {
-        colorValue = color.GetValue();
-        getValue[GETCOLOR] = true;
+    RefPtr<ResourceObject> colorResObj;
+    if (ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, colorResObj, nodeInfo)) {
+        isHasValue[GETCOLOR] = true;
+        backgroundStyleStruct.isColorSetByUser = true;
+        backgroundStyleStruct.colorValue = color.GetValue();
     }
-    ArkUI_Float32 value[VALUE_MAX_SIZE] = {DEFAULT_TEXT_PICKER_SELECTED_BACKGROUND_BORDER_RADIUS,
-        DEFAULT_TEXT_PICKER_SELECTED_BACKGROUND_BORDER_RADIUS, DEFAULT_TEXT_PICKER_SELECTED_BACKGROUND_BORDER_RADIUS,
-        DEFAULT_TEXT_PICKER_SELECTED_BACKGROUND_BORDER_RADIUS};
-    ArkUI_Int32 unit[VALUE_MAX_SIZE] = {UNIT_VP, UNIT_VP, UNIT_VP, UNIT_VP};
-    auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
-    CalcDimension calcDimension;
-    for (int i = NUM_0; i < VALUE_MAX_SIZE; i++) {
-        if (ArkTSUtils::ParseJsLengthMetrics(vm, runtimeCallInfo->GetCallArgRef(i + NUM_2), calcDimension) &&
-            !calcDimension.IsNegative()) {
-            getValue[i + NUM_1] = true;
-            value[i] = calcDimension.Value();
-            unit[i] = static_cast<int>(calcDimension.Unit());
-        }
-        if (ArkTSUtils::ParseJsDimensionVp(vm, runtimeCallInfo->GetCallArgRef(i + NUM_2), calcDimension) &&
-            !calcDimension.IsNegative()) {
-            getValue[i + NUM_1] = true;
-            value[i] = calcDimension.Value();
-            unit[i] = static_cast<int>(calcDimension.Unit());
-        }
-    }
-    if (isRightToLeft && (value[TOPLEFT] != value[BOTTOMLEFT] || value[TOPRIGHT] != value[BOTTOMRIGHT]) &&
-        (unit[TOPLEFT] != unit[BOTTOMLEFT] || unit[TOPRIGHT] != unit[BOTTOMRIGHT])) {
-        std::swap(value[TOPLEFT], value[BOTTOMLEFT]);
-        std::swap(value[TOPRIGHT], value[BOTTOMRIGHT]);
-        std::swap(unit[TOPLEFT], unit[BOTTOMLEFT]);
-        std::swap(unit[TOPRIGHT], unit[BOTTOMRIGHT]);
-        std::swap(getValue[GETTOPLEFT], getValue[GETTOPRIGHT]);
-        std::swap(getValue[GETBOTTOMLEFT], getValue[GETBOTTOMRIGHT]);
-    }
+    backgroundStyleStruct.colorRawPtr = AceType::RawPtr(colorResObj);
+
+    RefPtr<ResourceObject> radiusResObjs[VALUE_MAX_SIZE] = {nullptr, nullptr, nullptr, nullptr};
+    ParseSelectedBackgroundStyleRadius(vm, runtimeCallInfo, isHasValue, backgroundStyleStruct, radiusResObjs);
+    backgroundStyleStruct.topLeftRawPtr = AceType::RawPtr(radiusResObjs[TOPLEFT]);
+    backgroundStyleStruct.topRightRawPtr = AceType::RawPtr(radiusResObjs[TOPRIGHT]);
+    backgroundStyleStruct.bottomLeftRawPtr = AceType::RawPtr(radiusResObjs[BOTTOMLEFT]);
+    backgroundStyleStruct.bottomRightRawPtr = AceType::RawPtr(radiusResObjs[BOTTOMRIGHT]);
+
     auto modifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(modifiers, panda::NativePointerRef::New(vm, nullptr));
     auto textPickerModifier = modifiers->getTextPickerModifier();
     CHECK_NULL_RETURN(textPickerModifier, panda::NativePointerRef::New(vm, nullptr));
-    textPickerModifier->setTextPickerSelectedBackgroundStyle(nativeNode, getValue, colorValue, value, unit,
-        VALUE_MAX_SIZE);
+    textPickerModifier->setTextPickerSelectedBackgroundStyleWithResObj(nativeNode, isHasValue, &backgroundStyleStruct);
     return panda::JSValueRef::Undefined(vm);
 }
 

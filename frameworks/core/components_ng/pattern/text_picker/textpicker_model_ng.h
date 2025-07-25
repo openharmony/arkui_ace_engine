@@ -179,6 +179,8 @@ private:
     static void ParseSelectedTextStyleResObj(const PickerTextStyle& textStyleOpt);
     static void ParseNormalTextStyleResObj(const PickerTextStyle& textStyleOpt);
     static void ParseDefaultTextStyleResObj(const PickerTextStyle& textStyleOpt);
+    static void ParseBackgroundStyleColorResObj(FrameNode* frameNode, const NG::PickerBackgroundStyle& value);
+    static void ParseBackgroundStyleRadiusResObj(FrameNode* frameNode, const NG::PickerBackgroundStyle& value);
 
     uint32_t maxCount_ = 0;
     std::vector<uint32_t> kinds_;
