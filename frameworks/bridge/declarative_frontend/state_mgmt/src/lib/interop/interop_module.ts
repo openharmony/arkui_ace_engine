@@ -19,7 +19,7 @@ class InteropExtractorModule {
             !('addWatchSubscriber' in newValue) && (typeof InteropExtractorModule.makeObserved !== undefined && typeof InteropExtractorModule.makeObserved === 'function')) {
             newValue = InteropExtractorModule.makeObserved(newValue) as T;
         }
-        if ('addWatchSubscriber' in newValue && typeof newValue.addWatchSubscriber === 'function') {
+        if ('addWatchSubscriber' in newValue && typeof (newValue as any).addWatchSubscriber === 'function') {
             const callback = () => {
                 owningProperty.onTrackedObjectPropertyCompatModeHasChangedPU(null, '');
             };
