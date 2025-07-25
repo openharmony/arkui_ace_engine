@@ -415,7 +415,7 @@ struct ArkUIAniCanvasModifier {
     ani_double (*getCanvasDensity)(ArkUICanvasRenderer peer);
     ani_double (*getSystemDensity)();
     void (*getImageData)(
-        ArkUICanvasRenderer peer, uint8_t** data, ani_double sx, ani_double sy, ani_double sw, ani_double sh);
+        ArkUICanvasRenderer peer, uint8_t* buffer, ani_double sx, ani_double sy, ani_double sw, ani_double sh);
     void (*putImageData0)(ArkUICanvasRenderer peer, uint8_t* data, ani_size length, ani_double dx, ani_double dy,
         ani_int width, ani_int height);
     void (*putImageData1)(ArkUICanvasRenderer peer, uint8_t* data, ani_size length, ani_double dx, ani_double dy,

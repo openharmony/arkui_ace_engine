@@ -92,10 +92,10 @@ public:
     void CreateImageData(
         std::vector<uint8_t>& vbuffer, const Ace::ImageData& imageData, uint32_t& width, uint32_t& height);
     void GetImageData(std::vector<uint8_t>& vbuffer, Ace::ImageSize& imageSize, uint32_t& width, uint32_t& height);
+    void GetImageData(const ImageSize& imageSize, uint8_t* buffer);
     RefPtr<Ace::PixelMap> GetPixelMap(const double x, const double y, const double width, const double height);
     void PutImageData(Ace::ImageData& src, const PutImageDataParam& params);
-    void PutImageData(
-        uint8_t* buffer, size_t bufferLength, int32_t imgWidth, int32_t imgHeight, const PutImageDataParam& params);
+    void PutImageData(const Ace::ImageData& imageData);
     std::vector<double> GetLineDash();
     void SetLineDash(const std::vector<double>& segments);
     void ClearRect(const double x, const double y, const double width, const double height);

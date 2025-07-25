@@ -25,6 +25,9 @@
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
 
 namespace OHOS::Ace::Ani {
+namespace {
+constexpr double DIFF = 1e-10;
+}
 void CanvasModule::SetPixelMap(
     ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long peerPtr, ani_object pixelMapObj)
 {
@@ -147,37 +150,39 @@ ani_double CanvasModule::GetSystemDensity(ani_env* env, [[maybe_unused]] ani_obj
 ani_object CanvasModule::GetImageData(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long peerPtr,
     ani_double sx, ani_double sy, ani_double sw, ani_double sh)
 {
-    ani_ref aniRef;
-    env->GetUndefined(&aniRef);
-    ani_object undefined = static_cast<ani_object>(aniRef);
-
     auto* peer = reinterpret_cast<ArkUICanvasRenderer>(peerPtr);
-    CHECK_NULL_RETURN(peer, undefined);
+    CHECK_NULL_RETURN(peer, nullptr);
     const auto* modifier = GetNodeAniModifier();
-    CHECK_NULL_RETURN(modifier, undefined);
+    CHECK_NULL_RETURN(modifier, nullptr);
     auto* canvasModifier = modifier->getCanvasAniModifier();
-    CHECK_NULL_RETURN(canvasModifier, undefined);
-    uint8_t* imageData;
-    canvasModifier->getImageData(peer, &imageData, sx, sy, sw, sh);
-
-    ani_arraybuffer arrayBuffer;
-    ani_size length = 10;
-    if (!env->CreateArrayBuffer(length, reinterpret_cast<void**>(&imageData), &arrayBuffer)) {
-        return undefined;
+    CHECK_NULL_RETURN(canvasModifier, nullptr);
+    auto density = canvasModifier->getCanvasDensity(peer);
+    auto width = sw * density + DIFF;
+    auto height = sh * density + DIFF;
+    uint32_t finalWidth = static_cast<uint32_t>(std::abs(width));
+    uint32_t finalHeight = static_cast<uint32_t>(std::abs(height));
+    if (finalHeight > 0 && finalWidth > (UINT32_MAX / finalHeight)) {
+        return nullptr;
     }
-
+    size_t length = finalWidth * finalHeight * 4; // 4: size of pixel
+    uint8_t* imageData = nullptr;
+    ani_arraybuffer arrayBuffer;
+    if (ANI_OK != env->CreateArrayBuffer(length, reinterpret_cast<void**>(&imageData), &arrayBuffer)) {
+        return nullptr;
+    }
+    canvasModifier->getImageData(peer, imageData, sx * density, sy * density, sw * density, sh * density);
     static const char* className = "Lescompat/Uint8ClampedArray;";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
-        return undefined;
+        return nullptr;
     }
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "J:Lescompat/ArrayBuffer", &ctor)) {
-        return undefined;
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "Lstd/core/Object;:V", &ctor)) {
+        return nullptr;
     }
     ani_object aniValue;
     if (ANI_OK != env->Object_New(cls, ctor, &aniValue, arrayBuffer)) {
-        return undefined;
+        return nullptr;
     }
     return aniValue;
 }

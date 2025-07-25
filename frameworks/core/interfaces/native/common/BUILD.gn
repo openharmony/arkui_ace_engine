@@ -59,9 +59,6 @@ template("ace_core_interfaces_native") {
       external_deps += [
         "ability_runtime:app_context",
         "webview:libnweb",
-        "image_framework:image_ani",
-        "image_framework:image_native",
-        "runtime_core:ani",
       ]
     }
     if (include_generated_sources) {

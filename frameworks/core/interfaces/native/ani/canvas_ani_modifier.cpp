@@ -20,6 +20,7 @@
 #include "base/image/pixel_map.h"
 #endif
 #include "base/geometry/ng/size_t.h"
+#include "core/components/common/properties/color.h"
 #include "core/components/common/properties/paint_state.h"
 #include "core/components_ng/pattern/canvas/canvas_renderer_type.h"
 #include "core/interfaces/native/implementation/canvas_renderer_peer_impl.h"
@@ -160,53 +161,79 @@ ani_double GetSystemDensity()
     return PipelineBase::GetCurrentDensity();
 }
 
-void GetImageData(ArkUICanvasRenderer peer, uint8_t** data, ani_double sx, ani_double sy, ani_double sw, ani_double sh)
+void GetImageData(ArkUICanvasRenderer peer, uint8_t* buffer, ani_double sx, ani_double sy, ani_double sw, ani_double sh)
 {
     CHECK_NULL_VOID(peer);
     auto peerImpl = reinterpret_cast<GeneratedModifier::CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
     ImageSize imageSize = {
         .left = static_cast<double>(sx),
         .top = static_cast<double>(sy),
         .width = static_cast<double>(sw),
         .height = static_cast<double>(sh)
     };
-    std::vector<uint8_t> vbuffer(0);
-    uint32_t width = 0;
-    uint32_t height = 0;
-    peerImpl->GetImageData(vbuffer, imageSize, width, height);
-    *data = reinterpret_cast<uint8_t*>(vbuffer.data());
+    peerImpl->GetImageData(imageSize, buffer);
 }
 
-void PutImageData0(ArkUICanvasRenderer peer, uint8_t* data, ani_size length, ani_double dx, ani_double dy,
+void CopyFromBuffer(Ace::ImageData& imageData, uint8_t* buffer, size_t bufferLength, int32_t imgWidth)
+{
+    for (int32_t i = std::max(imageData.dirtyY, 0); i < imageData.dirtyY + imageData.dirtyHeight; ++i) {
+        for (int32_t j = std::max(imageData.dirtyX, 0); j < imageData.dirtyX + imageData.dirtyWidth; ++j) {
+            uint32_t idx = static_cast<uint32_t>(4 * (j + imgWidth * i));
+            if (bufferLength > static_cast<size_t>(idx + 3)) { // idx + 3: The 4th byte format: alpha
+                uint8_t alpha = buffer[idx + 3];               // idx + 3: The 4th byte format: alpha
+                uint8_t red = buffer[idx];                     // idx: the 1st byte format: red
+                uint8_t green = buffer[idx + 1];               // idx + 1: The 2nd byte format: green
+                uint8_t blue = buffer[idx + 2];                // idx + 2: The 3rd byte format: blue
+                imageData.data.emplace_back(Color::FromARGB(alpha, red, green, blue).GetValue());
+            }
+        }
+    }
+}
+
+void PutImageData0(ArkUICanvasRenderer peer, uint8_t* buffer, ani_size bufferLength, ani_double dx, ani_double dy,
     ani_int width, ani_int height)
 {
     CHECK_NULL_VOID(peer);
     auto peerImpl = reinterpret_cast<GeneratedModifier::CanvasRendererPeerImpl*>(peer);
-    GeneratedModifier::CanvasRendererPeerImpl::PutImageDataParam params = {
-        .x = std::make_optional<Dimension>(static_cast<float>(dx)),
-        .y = std::make_optional<Dimension>(static_cast<float>(dy)),
-        .size = GeneratedModifier::CanvasRendererPeerImpl::SizeParam::TWO_ARGS,
+    CHECK_NULL_VOID(peerImpl);
+    auto density = peerImpl->GetDensity();
+    Ace::ImageData imageData = {
+        .x = static_cast<int32_t>(dx * density),
+        .y = static_cast<int32_t>(dy * density),
+        .dirtyWidth = static_cast<int32_t>(width),
+        .dirtyHeight = static_cast<int32_t>(height),
+        .data = std::vector<uint32_t>(),
     };
-    peerImpl->PutImageData(
-        data, static_cast<size_t>(length), static_cast<int32_t>(width), static_cast<int32_t>(height), params);
+    CopyFromBuffer(imageData, buffer, static_cast<size_t>(bufferLength), static_cast<int32_t>(width));
+    peerImpl->PutImageData(imageData);
 }
 
-void PutImageData1(ArkUICanvasRenderer peer, uint8_t* data, ani_size length, ani_double dx, ani_double dy,
+void PutImageData1(ArkUICanvasRenderer peer, uint8_t* buffer, ani_size bufferLength, ani_double dx, ani_double dy,
     ani_int width, ani_int height, ani_double dirtyX, ani_double dirtyY, ani_double dirtyWidth, ani_double dirtyHeight)
 {
     CHECK_NULL_VOID(peer);
     auto peerImpl = reinterpret_cast<GeneratedModifier::CanvasRendererPeerImpl*>(peer);
-    GeneratedModifier::CanvasRendererPeerImpl::PutImageDataParam params = {
-        .x = std::make_optional<Dimension>(static_cast<float>(dx)),
-        .y = std::make_optional<Dimension>(static_cast<float>(dy)),
-        .dirtyX = std::make_optional<Dimension>(static_cast<float>(dirtyX)),
-        .dirtyY = std::make_optional<Dimension>(static_cast<float>(dirtyY)),
-        .dirtyWidth = std::make_optional<Dimension>(static_cast<float>(dirtyWidth)),
-        .dirtyHeight = std::make_optional<Dimension>(static_cast<float>(dirtyHeight)),
-        .size = GeneratedModifier::CanvasRendererPeerImpl::SizeParam::SIX_ARGS,
+    CHECK_NULL_VOID(peerImpl);
+    auto density = peerImpl->GetDensity();
+    Ace::ImageData imageData = {
+        .x = static_cast<int32_t>(dx * density),
+        .y = static_cast<int32_t>(dy * density),
+        .dirtyX = static_cast<int32_t>(dirtyX * density),
+        .dirtyY = static_cast<int32_t>(dirtyY * density),
+        .dirtyWidth = static_cast<int32_t>(dirtyWidth * density),
+        .dirtyHeight = static_cast<int32_t>(dirtyHeight * density),
+        .data = std::vector<uint32_t>(),
     };
-    peerImpl->PutImageData(
-        data, static_cast<size_t>(length), static_cast<int32_t>(width), static_cast<int32_t>(height), params);
+    auto imgWidth = static_cast<int32_t>(width);
+    auto imgHeight = static_cast<int32_t>(height);
+    imageData.dirtyWidth = imageData.dirtyX < 0 ? std::min(imageData.dirtyX + imageData.dirtyWidth, imgWidth)
+                                                : std::min(imgWidth - imageData.dirtyX, imageData.dirtyWidth);
+    imageData.dirtyHeight = imageData.dirtyY < 0 ? std::min(imageData.dirtyY + imageData.dirtyHeight, imgHeight)
+                                                 : std::min(imgHeight - imageData.dirtyY, imageData.dirtyHeight);
+
+    CopyFromBuffer(imageData, buffer, static_cast<size_t>(bufferLength), imgWidth);
+    peerImpl->PutImageData(imageData);
 }
 } // namespace CanvasAniModifier
 
