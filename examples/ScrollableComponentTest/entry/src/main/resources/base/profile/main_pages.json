@@ -46,6 +46,7 @@
     "pages/List/DragAndDropSorting/ListItemGroup",
     "pages/List/FadingEdge/FadingEdge",
     "pages/List/ListNestedGrid/ListGridDemo",
+    "pages/List/ListOnWillStopDragging/OnWillStopDragging",
     "pages/List/LoopScrolling/LoopScrolling",
     "pages/List/Sideslip/Sideslip",
     "pages/List/MouseDragSlide",
