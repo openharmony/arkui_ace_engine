@@ -52,11 +52,24 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_DestroyClonedEvent002, TestSize
  */
 HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_DestroyClonedEvent003, TestSize.Level0)
 {
-    ArkUI_UIInputEvent* event =
-        new ArkUI_UIInputEvent { ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, C_TOUCH_EVENT_ID, nullptr, true };
+    // Test all unsupported event types
+    std::vector<std::pair<ArkUI_UIInputEvent_Type, ArkUIEventTypeId>> unsupportedEventTypes = {
+        { ARKUI_UIINPUTEVENT_TYPE_AXIS, AXIS_EVENT_ID },            // AXIS_EVENT_ID = 0
+        { ARKUI_UIINPUTEVENT_TYPE_MOUSE, C_MOUSE_EVENT_ID },        // C_MOUSE_EVENT_ID = 3
+        { ARKUI_UIINPUTEVENT_TYPE_AXIS, C_AXIS_EVENT_ID },          // C_AXIS_EVENT_ID = 4
+        { ARKUI_UIINPUTEVENT_TYPE_KEY, C_KEY_EVENT_ID },            // C_KEY_EVENT_ID = 5
+        { ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, C_FOCUS_AXIS_EVENT_ID }, // C_FOCUS_AXIS_EVENT_ID = 6
+        { ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, C_CLICK_EVENT_ID },      // C_CLICK_EVENT_ID = 7
+        { ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, C_HOVER_EVENT_ID },      // C_HOVER_EVENT_ID = 8
+    };
 
-    auto result = OH_ArkUI_PointerEvent_DestroyClonedEvent(event);
-    EXPECT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    for (const auto& [inputType, eventTypeId] : unsupportedEventTypes) {
+        ArkUI_UIInputEvent* event = new ArkUI_UIInputEvent { inputType, eventTypeId, nullptr, true };
+
+        auto result = OH_ArkUI_PointerEvent_DestroyClonedEvent(event);
+        EXPECT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR) << "Failed for event type: " << static_cast<int>(eventTypeId);
+        delete event; // Clean up the allocated memory
+    }
 }
 
 /**

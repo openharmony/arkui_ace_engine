@@ -40,14 +40,31 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_AxisEvent_GetScrollStep001, TestSize.Level0)
 
 /**
  * @tc.name: OH_ArkUI_AxisEvent_GetScrollStep002
- * @tc.desc: Test OH_ArkUI_AxisEvent_GetScrollStep with unsupported event type
+ * @tc.desc: Test OH_ArkUI_AxisEvent_GetScrollStep with all unsupported event types
  * @tc.type: FUNC
  */
 HWTEST_F(UIInputEventTest, OH_ArkUI_AxisEvent_GetScrollStep002, TestSize.Level0)
 {
-    ArkUI_UIInputEvent event = { ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, C_TOUCH_EVENT_ID, nullptr };
-    auto result = OH_ArkUI_AxisEvent_GetScrollStep(&event);
-    EXPECT_EQ(result, DEFAULT_SCROLL_STEP);
+    constexpr int32_t DEFAULT_SCROLL_STEP = 0;
+
+    std::vector<std::pair<ArkUI_UIInputEvent_Type, ArkUIEventTypeId>> unsupportedEventTypes = {
+        { ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, TOUCH_EVENT_ID },        // 1
+        { ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, C_TOUCH_EVENT_ID },      // 2
+        { ARKUI_UIINPUTEVENT_TYPE_MOUSE, C_MOUSE_EVENT_ID },        // 3
+        { ARKUI_UIINPUTEVENT_TYPE_KEY, C_KEY_EVENT_ID },            // 5
+        { ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, C_FOCUS_AXIS_EVENT_ID }, // 6
+        { ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, C_CLICK_EVENT_ID },      // 7
+        { ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, C_HOVER_EVENT_ID },      // 8
+    };
+
+    // Test each unsupported event type
+    for (const auto& [inputType, eventTypeId] : unsupportedEventTypes) {
+        ArkUITouchEvent inputEvent;
+        ArkUI_UIInputEvent event = { inputType, eventTypeId, &inputEvent, false };
+        auto result = OH_ArkUI_AxisEvent_GetScrollStep(&event);
+        EXPECT_EQ(result, DEFAULT_SCROLL_STEP)
+            << "Unexpected scroll step value for event type: " << static_cast<int>(eventTypeId);
+    }
 }
 
 /**
