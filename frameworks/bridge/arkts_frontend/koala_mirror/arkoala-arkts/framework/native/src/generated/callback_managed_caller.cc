@@ -4840,26 +4840,6 @@ void callManagedCustomNodeBuilderSync(Ark_VMContext vmContext, Ark_Int32 resourc
     argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.callSync));
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(_buffer), _buffer);
 }
-void callManagedCustomStyles(Ark_Int32 resourceId, Ark_String instance)
-{
-    CallbackBuffer _buffer = {{}, {}};
-    const Ark_CallbackResource _callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
-    _buffer.resourceHolder.holdCallbackResource(&_callbackResourceSelf);
-    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(_buffer.buffer), sizeof(_buffer.buffer), &(_buffer.resourceHolder));
-    argsSerializer.writeInt32(Kind_CustomStyles);
-    argsSerializer.writeInt32(resourceId);
-    argsSerializer.writeString(instance);
-    enqueueCallback(&_buffer);
-}
-void callManagedCustomStylesSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_String instance)
-{
-    uint8_t _buffer[4096];
-    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&_buffer, sizeof(_buffer), nullptr);
-    argsSerializer.writeInt32(Kind_CustomStyles);
-    argsSerializer.writeInt32(resourceId);
-    argsSerializer.writeString(instance);
-    KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(_buffer), _buffer);
-}
 void callManagedDataPanelModifierBuilder(Ark_Int32 resourceId, Ark_NativePointer parentNode, Ark_DataPanelConfiguration config, Callback_Pointer_Void continuation)
 {
     CallbackBuffer _buffer = {{}, {}};
@@ -7931,7 +7911,6 @@ Ark_NativePointer getManagedCallbackCaller(CallbackKind kind)
         case Kind_ContentWillScrollCallback: return reinterpret_cast<Ark_NativePointer>(callManagedContentWillScrollCallback);
         case Kind_Context_getGroupDir_Callback: return reinterpret_cast<Ark_NativePointer>(callManagedContext_getGroupDir_Callback);
         case Kind_CustomNodeBuilder: return reinterpret_cast<Ark_NativePointer>(callManagedCustomNodeBuilder);
-        case Kind_CustomStyles: return reinterpret_cast<Ark_NativePointer>(callManagedCustomStyles);
         case Kind_DataPanelModifierBuilder: return reinterpret_cast<Ark_NativePointer>(callManagedDataPanelModifierBuilder);
         case Kind_EditableTextOnChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedEditableTextOnChangeCallback);
         case Kind_ErrorCallback: return reinterpret_cast<Ark_NativePointer>(callManagedErrorCallback);
@@ -8236,7 +8215,6 @@ Ark_NativePointer getManagedCallbackCallerSync(CallbackKind kind)
         case Kind_ContentWillScrollCallback: return reinterpret_cast<Ark_NativePointer>(callManagedContentWillScrollCallbackSync);
         case Kind_Context_getGroupDir_Callback: return reinterpret_cast<Ark_NativePointer>(callManagedContext_getGroupDir_CallbackSync);
         case Kind_CustomNodeBuilder: return reinterpret_cast<Ark_NativePointer>(callManagedCustomNodeBuilderSync);
-        case Kind_CustomStyles: return reinterpret_cast<Ark_NativePointer>(callManagedCustomStylesSync);
         case Kind_DataPanelModifierBuilder: return reinterpret_cast<Ark_NativePointer>(callManagedDataPanelModifierBuilderSync);
         case Kind_EditableTextOnChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedEditableTextOnChangeCallbackSync);
         case Kind_ErrorCallback: return reinterpret_cast<Ark_NativePointer>(callManagedErrorCallbackSync);

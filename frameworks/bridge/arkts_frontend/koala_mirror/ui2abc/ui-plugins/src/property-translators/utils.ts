@@ -55,7 +55,7 @@ export function isDecoratorAnnotation(anno: arkts.AnnotationUsage, decoratorName
     return !!anno.expr && arkts.isIdentifier(anno.expr) && anno.expr.name === decoratorName;
 }
 
-export function hasDecorator(property: arkts.ClassProperty | arkts.ClassDefinition | arkts.ClassDeclaration | arkts.MethodDefinition | arkts.FunctionDeclaration, decoratorName: DecoratorNames): boolean {
+export function hasDecorator(property: arkts.ClassProperty | arkts.ClassDefinition | arkts.ClassDeclaration | arkts.MethodDefinition | arkts.FunctionDeclaration | arkts.ETSParameterExpression, decoratorName: DecoratorNames): boolean {
     if (arkts.isMethodDefinition(property)) {
         return property.function!.annotations.some((anno) => isDecoratorAnnotation(anno, decoratorName));
     }
@@ -63,6 +63,12 @@ export function hasDecorator(property: arkts.ClassProperty | arkts.ClassDefiniti
         return property.decorators.some((anno) => arkts.isIdentifier(anno.expr) && anno.expr.name === decoratorName)
     }
     return property.annotations.some((anno) => isDecoratorAnnotation(anno, decoratorName));
+}
+
+export function replaceDecorator(node: arkts.ETSParameterExpression, oldName: DecoratorNames, newName: string) {
+    if (node.annotations.find(annotation => annotation.baseName?.name == oldName) == undefined) return node
+    let newAnnotations = node.annotations?.map(anno => isDecoratorAnnotation(anno, oldName) ? annotation(newName) : anno)
+    return arkts.factory.updateETSParameterExpression(node, node.ident, node.isOptional, node.initializer, newAnnotations)
 }
 
 export function hasBuilderDecorator(property: arkts.ClassProperty | arkts.ClassDefinition | arkts.ClassDeclaration | arkts.MethodDefinition | arkts.FunctionDeclaration): boolean {

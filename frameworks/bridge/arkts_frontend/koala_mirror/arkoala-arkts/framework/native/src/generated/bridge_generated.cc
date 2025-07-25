@@ -4421,20 +4421,6 @@ void impl_CommonMethod_setGeometryTransition0(Ark_NativePointer thisPtr, KSerial
         GetNodeModifiers()->getCommonMethodModifier()->setGeometryTransition0(self, static_cast<Opt_String*>(&value_value));
 }
 KOALA_INTEROP_DIRECT_V3(CommonMethod_setGeometryTransition0, Ark_NativePointer, KSerializerBuffer, int32_t)
-void impl_CommonMethod_setStateStyles(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
-        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
-        DeserializerBase thisDeserializer(thisArray, thisLength);
-        const auto value_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_StateStyles value_value_buf = {};
-        value_value_buf.tag = value_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-        if ((value_value_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
-        {
-            value_value_buf.value = StateStyles_serializer::read(thisDeserializer);
-        }
-        Opt_StateStyles value_value = value_value_buf;;
-        GetNodeModifiers()->getCommonMethodModifier()->setStateStyles(self, static_cast<Opt_StateStyles*>(&value_value));
-}
-KOALA_INTEROP_DIRECT_V3(CommonMethod_setStateStyles, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_CommonMethod_setRestoreId(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
@@ -27401,53 +27387,6 @@ Ark_NativePointer impl_BaseContext_getFinalizer() {
         return GetAccessors()->getBaseContextAccessor()->getFinalizer();
 }
 KOALA_INTEROP_DIRECT_0(BaseContext_getFinalizer, Ark_NativePointer)
-Ark_NativePointer impl_BaseCustomDialog_construct(KSerializerBuffer thisArray, int32_t thisLength) {
-        DeserializerBase thisDeserializer(thisArray, thisLength);
-        const auto useSharedStorage_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Boolean useSharedStorage_value_buf = {};
-        useSharedStorage_value_buf.tag = useSharedStorage_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-        if ((useSharedStorage_value_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
-        {
-            useSharedStorage_value_buf.value = thisDeserializer.readBoolean();
-        }
-        Opt_Boolean useSharedStorage_value = useSharedStorage_value_buf;;
-        const auto storage_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_CustomObject storage_value_buf = {};
-        storage_value_buf.tag = storage_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-        if ((storage_value_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
-        {
-            storage_value_buf.value = static_cast<Ark_CustomObject>(thisDeserializer.readCustomObject("object"));
-        }
-        Opt_CustomObject storage_value = storage_value_buf;;
-        return GetAccessors()->getBaseCustomDialogAccessor()->construct(static_cast<Opt_Boolean*>(&useSharedStorage_value), static_cast<Opt_CustomObject*>(&storage_value));
-}
-KOALA_INTEROP_DIRECT_2(BaseCustomDialog_construct, Ark_NativePointer, KSerializerBuffer, int32_t)
-Ark_NativePointer impl_BaseCustomDialog_getFinalizer() {
-        return GetAccessors()->getBaseCustomDialogAccessor()->getFinalizer();
-}
-KOALA_INTEROP_DIRECT_0(BaseCustomDialog_getFinalizer, Ark_NativePointer)
-void impl_BaseCustomDialog_$_instantiate(KSerializerBuffer thisArray, int32_t thisLength) {
-        DeserializerBase thisDeserializer(thisArray, thisLength);
-        Callback_T factory_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Callback_T_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_T)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Callback_T_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_T))))};;
-        const auto initializers_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_CustomObject initializers_value_buf = {};
-        initializers_value_buf.tag = initializers_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-        if ((initializers_value_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
-        {
-            initializers_value_buf.value = static_cast<Ark_CustomObject>(thisDeserializer.readCustomObject("T_Options"));
-        }
-        Opt_CustomObject initializers_value = initializers_value_buf;;
-        const auto content_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Callback_Void content_value_buf = {};
-        content_value_buf.tag = content_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-        if ((content_value_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
-        {
-            content_value_buf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Void))))};
-        }
-        Opt_Callback_Void content_value = content_value_buf;;
-        GetAccessors()->getBaseCustomDialogAccessor()->$_instantiate(static_cast<Callback_T*>(&factory_value), static_cast<Opt_CustomObject*>(&initializers_value), static_cast<Opt_Callback_Void*>(&content_value));
-}
-KOALA_INTEROP_DIRECT_V2(BaseCustomDialog_$_instantiate, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_BaseEvent_construct() {
         return GetAccessors()->getBaseEventAccessor()->construct();
 }
@@ -29706,13 +29645,13 @@ void impl_ContentModifierHelper_contentModifierButton(Ark_NativePointer node, KS
         GetAccessors()->getContentModifierHelperAccessor()->contentModifierButton(node, static_cast<Ark_Object*>(&contentModifier_value), static_cast<ButtonModifierBuilder*>(&builder_value));
 }
 KOALA_INTEROP_DIRECT_V3(ContentModifierHelper_contentModifierButton, Ark_NativePointer, KSerializerBuffer, int32_t)
-void impl_ContentModifierHelper_contentModifierCheckbox(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
+void impl_ContentModifierHelper_contentModifierCheckBox(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         Ark_Object contentModifier_value = static_cast<Ark_ContentModifier>(thisDeserializer.readObject());;
         CheckBoxModifierBuilder builder_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Ark_CheckBoxConfiguration config, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_CheckBoxModifierBuilder)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Ark_CheckBoxConfiguration config, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_CheckBoxModifierBuilder))))};;
-        GetAccessors()->getContentModifierHelperAccessor()->contentModifierCheckbox(node, static_cast<Ark_Object*>(&contentModifier_value), static_cast<CheckBoxModifierBuilder*>(&builder_value));
+        GetAccessors()->getContentModifierHelperAccessor()->contentModifierCheckBox(node, static_cast<Ark_Object*>(&contentModifier_value), static_cast<CheckBoxModifierBuilder*>(&builder_value));
 }
-KOALA_INTEROP_DIRECT_V3(ContentModifierHelper_contentModifierCheckbox, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_DIRECT_V3(ContentModifierHelper_contentModifierCheckBox, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_ContentModifierHelper_contentModifierDataPanel(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         Ark_Object contentModifier_value = static_cast<Ark_ContentModifier>(thisDeserializer.readObject());;
@@ -41123,46 +41062,38 @@ Ark_NativePointer impl_TransitionEffect_combine(Ark_NativePointer thisPtr, Ark_N
         return GetAccessors()->getTransitionEffectAccessor()->combine(self, static_cast<Ark_TransitionEffect>(transitionEffect));
 }
 KOALA_INTEROP_DIRECT_2(TransitionEffect_combine, Ark_NativePointer, Ark_NativePointer, Ark_NativePointer)
-Ark_NativePointer impl_TransitionEffect_getIDENTITY(Ark_NativePointer thisPtr) {
-        Ark_TransitionEffect self = reinterpret_cast<Ark_TransitionEffect>(thisPtr);
-        return GetAccessors()->getTransitionEffectAccessor()->getIDENTITY(self);
+Ark_NativePointer impl_TransitionEffect_getIDENTITY() {
+        return GetAccessors()->getTransitionEffectAccessor()->getIDENTITY();
 }
-KOALA_INTEROP_DIRECT_1(TransitionEffect_getIDENTITY, Ark_NativePointer, Ark_NativePointer)
-void impl_TransitionEffect_setIDENTITY(Ark_NativePointer thisPtr, Ark_NativePointer IDENTITY) {
-        Ark_TransitionEffect self = reinterpret_cast<Ark_TransitionEffect>(thisPtr);
-        GetAccessors()->getTransitionEffectAccessor()->setIDENTITY(self, static_cast<Ark_TransitionEffect>(IDENTITY));
+KOALA_INTEROP_DIRECT_0(TransitionEffect_getIDENTITY, Ark_NativePointer)
+void impl_TransitionEffect_setIDENTITY(Ark_NativePointer IDENTITY) {
+        GetAccessors()->getTransitionEffectAccessor()->setIDENTITY(static_cast<Ark_TransitionEffect>(IDENTITY));
 }
-KOALA_INTEROP_DIRECT_V2(TransitionEffect_setIDENTITY, Ark_NativePointer, Ark_NativePointer)
-Ark_NativePointer impl_TransitionEffect_getOPACITY(Ark_NativePointer thisPtr) {
-        Ark_TransitionEffect self = reinterpret_cast<Ark_TransitionEffect>(thisPtr);
-        return GetAccessors()->getTransitionEffectAccessor()->getOPACITY(self);
+KOALA_INTEROP_DIRECT_V1(TransitionEffect_setIDENTITY, Ark_NativePointer)
+Ark_NativePointer impl_TransitionEffect_getOPACITY() {
+        return GetAccessors()->getTransitionEffectAccessor()->getOPACITY();
 }
-KOALA_INTEROP_DIRECT_1(TransitionEffect_getOPACITY, Ark_NativePointer, Ark_NativePointer)
-void impl_TransitionEffect_setOPACITY(Ark_NativePointer thisPtr, Ark_NativePointer OPACITY) {
-        Ark_TransitionEffect self = reinterpret_cast<Ark_TransitionEffect>(thisPtr);
-        GetAccessors()->getTransitionEffectAccessor()->setOPACITY(self, static_cast<Ark_TransitionEffect>(OPACITY));
+KOALA_INTEROP_DIRECT_0(TransitionEffect_getOPACITY, Ark_NativePointer)
+void impl_TransitionEffect_setOPACITY(Ark_NativePointer OPACITY) {
+        GetAccessors()->getTransitionEffectAccessor()->setOPACITY(static_cast<Ark_TransitionEffect>(OPACITY));
 }
-KOALA_INTEROP_DIRECT_V2(TransitionEffect_setOPACITY, Ark_NativePointer, Ark_NativePointer)
-Ark_NativePointer impl_TransitionEffect_getSLIDE(Ark_NativePointer thisPtr) {
-        Ark_TransitionEffect self = reinterpret_cast<Ark_TransitionEffect>(thisPtr);
-        return GetAccessors()->getTransitionEffectAccessor()->getSLIDE(self);
+KOALA_INTEROP_DIRECT_V1(TransitionEffect_setOPACITY, Ark_NativePointer)
+Ark_NativePointer impl_TransitionEffect_getSLIDE() {
+        return GetAccessors()->getTransitionEffectAccessor()->getSLIDE();
 }
-KOALA_INTEROP_DIRECT_1(TransitionEffect_getSLIDE, Ark_NativePointer, Ark_NativePointer)
-void impl_TransitionEffect_setSLIDE(Ark_NativePointer thisPtr, Ark_NativePointer SLIDE) {
-        Ark_TransitionEffect self = reinterpret_cast<Ark_TransitionEffect>(thisPtr);
-        GetAccessors()->getTransitionEffectAccessor()->setSLIDE(self, static_cast<Ark_TransitionEffect>(SLIDE));
+KOALA_INTEROP_DIRECT_0(TransitionEffect_getSLIDE, Ark_NativePointer)
+void impl_TransitionEffect_setSLIDE(Ark_NativePointer SLIDE) {
+        GetAccessors()->getTransitionEffectAccessor()->setSLIDE(static_cast<Ark_TransitionEffect>(SLIDE));
 }
-KOALA_INTEROP_DIRECT_V2(TransitionEffect_setSLIDE, Ark_NativePointer, Ark_NativePointer)
-Ark_NativePointer impl_TransitionEffect_getSLIDE_SWITCH(Ark_NativePointer thisPtr) {
-        Ark_TransitionEffect self = reinterpret_cast<Ark_TransitionEffect>(thisPtr);
-        return GetAccessors()->getTransitionEffectAccessor()->getSLIDE_SWITCH(self);
+KOALA_INTEROP_DIRECT_V1(TransitionEffect_setSLIDE, Ark_NativePointer)
+Ark_NativePointer impl_TransitionEffect_getSLIDE_SWITCH() {
+        return GetAccessors()->getTransitionEffectAccessor()->getSLIDE_SWITCH();
 }
-KOALA_INTEROP_DIRECT_1(TransitionEffect_getSLIDE_SWITCH, Ark_NativePointer, Ark_NativePointer)
-void impl_TransitionEffect_setSLIDE_SWITCH(Ark_NativePointer thisPtr, Ark_NativePointer SLIDE_SWITCH) {
-        Ark_TransitionEffect self = reinterpret_cast<Ark_TransitionEffect>(thisPtr);
-        GetAccessors()->getTransitionEffectAccessor()->setSLIDE_SWITCH(self, static_cast<Ark_TransitionEffect>(SLIDE_SWITCH));
+KOALA_INTEROP_DIRECT_0(TransitionEffect_getSLIDE_SWITCH, Ark_NativePointer)
+void impl_TransitionEffect_setSLIDE_SWITCH(Ark_NativePointer SLIDE_SWITCH) {
+        GetAccessors()->getTransitionEffectAccessor()->setSLIDE_SWITCH(static_cast<Ark_TransitionEffect>(SLIDE_SWITCH));
 }
-KOALA_INTEROP_DIRECT_V2(TransitionEffect_setSLIDE_SWITCH, Ark_NativePointer, Ark_NativePointer)
+KOALA_INTEROP_DIRECT_V1(TransitionEffect_setSLIDE_SWITCH, Ark_NativePointer)
 Ark_NativePointer impl_UICommonEvent_construct() {
         return GetAccessors()->getUICommonEventAccessor()->construct();
 }
@@ -42440,13 +42371,6 @@ void impl_GlobalScope_animateToImmediately(KSerializerBuffer thisArray, int32_t 
         GetAccessors()->getGlobalScopeAccessor()->animateToImmediately(static_cast<Ark_AnimateParam*>(&value_value), static_cast<Callback_Void*>(&event_value));
 }
 KOALA_INTEROP_DIRECT_V2(GlobalScope_animateToImmediately, KSerializerBuffer, int32_t)
-void impl_GlobalScope_applyStyles(KSerializerBuffer thisArray, int32_t thisLength) {
-        DeserializerBase thisDeserializer(thisArray, thisLength);
-        Ark_CustomObject self_value = static_cast<Ark_CustomObject>(thisDeserializer.readCustomObject("T"));;
-        CustomStyles customStyles_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_String instance)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_CustomStyles)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_String instance)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_CustomStyles))))};;
-        GetAccessors()->getGlobalScopeAccessor()->applyStyles(static_cast<Ark_CustomObject*>(&self_value), static_cast<CustomStyles*>(&customStyles_value));
-}
-KOALA_INTEROP_DIRECT_V2(GlobalScope_applyStyles, KSerializerBuffer, int32_t)
 void impl_GlobalScope_bindCompatibleProvideCallback(Ark_NativePointer component, KSerializerBuffer thisArray, int32_t thisLength) {
         DeserializerBase thisDeserializer(thisArray, thisLength);
         Ark_CustomObject createCompatibleState_value = static_cast<Ark_CustomObject>(thisDeserializer.readCustomObject("object"));;

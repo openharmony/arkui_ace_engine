@@ -542,6 +542,7 @@ export class ComponentTransformer extends arkts.AbstractVisitor {
             }
         }
         */
+        this.imports.add("EntryPoint", getComponentPackage())
         const result = arkts.factory.createClassDeclaration(
             arkts.factory.createClassDefinition(
                 arkts.factory.createIdentifier(`__EntryWrapper${ this.entryCounter ? this.entryCounter : "" }`),
