@@ -30,6 +30,11 @@ constexpr float SPEED_1_00_X = 1.00;
 constexpr float SPEED_1_25_X = 1.25;
 constexpr float SPEED_1_75_X = 1.75;
 constexpr float SPEED_2_00_X = 2.00;
+constexpr float SPEED_0_50_X = 0.50;
+constexpr float SPEED_1_50_X = 1.50;
+constexpr float SPEED_3_00_X = 3.00;
+constexpr float SPEED_0_25_X = 0.25;
+constexpr float SPEED_0_125_X = 0.125;
 constexpr uint32_t MEDIA_RESOURCE_MATCH_SIZE = 2;
 const int32_t RAWFILE_PREFIX_LENGTH = strlen("resource://RAWFILE/");
 const std::regex MEDIA_RES_ID_REGEX(R"(^resource://\w+/([0-9]+)\.\w+$)", std::regex::icase);
@@ -63,8 +68,18 @@ OHOS::Media::PlaybackRateMode ConvertToMediaPlaybackSpeed(float speed)
         mode = OHOS::Media::PlaybackRateMode::SPEED_FORWARD_1_75_X;
     } else if (NearEqual(speed, SPEED_2_00_X)) {
         mode = OHOS::Media::PlaybackRateMode::SPEED_FORWARD_2_00_X;
+    } else if (NearEqual(speed, SPEED_0_50_X)) {
+        mode = OHOS::Media::PlaybackRateMode::SPEED_FORWARD_0_50_X;
+    } else if (NearEqual(speed, SPEED_1_50_X)) {
+        mode = OHOS::Media::PlaybackRateMode::SPEED_FORWARD_1_50_X;
+    } else if (NearEqual(speed, SPEED_3_00_X)) {
+        mode = OHOS::Media::PlaybackRateMode::SPEED_FORWARD_3_00_X;
+    } else if (NearEqual(speed, SPEED_0_25_X)) {
+        mode = OHOS::Media::PlaybackRateMode::SPEED_FORWARD_0_25_X;
+    } else if (NearEqual(speed, SPEED_0_125_X)) {
+        mode = OHOS::Media::PlaybackRateMode::SPEED_FORWARD_0_125_X;
     } else {
-        LOGW("speed is not supported yet.");
+        LOGW("speed [%{public}f] is not supported yet.", speed);
     }
     return mode;
 }

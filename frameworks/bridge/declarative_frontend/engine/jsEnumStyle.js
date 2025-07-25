@@ -1369,6 +1369,11 @@ let PlaybackSpeed;
   PlaybackSpeed.Speed_Forward_1_25_X = '1.25';
   PlaybackSpeed.Speed_Forward_1_75_X = '1.75';
   PlaybackSpeed.Speed_Forward_2_00_X = '2.00';
+  PlaybackSpeed.Speed_Forward_0_50_X = '0.50';
+  PlaybackSpeed.Speed_Forward_1_50_X = '1.50';
+  PlaybackSpeed.Speed_Forward_3_00_X = '3.00';
+  PlaybackSpeed.Speed_Forward_0_25_X = '0.25';
+  PlaybackSpeed.Speed_Forward_0_125_X = '0.125';
 })(PlaybackSpeed || (PlaybackSpeed = {}));
 
 let MixedMode;
