@@ -275,6 +275,7 @@ void MovingPhotoPattern::OnRebuildFrame()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     int32_t childCount = host->GetTotalChildCount();
+    CHECK_NULL_VOID(childCount >= 1);
     auto movingPhotoNode = AceType::DynamicCast<MovingPhotoNode>(host);
     CHECK_NULL_VOID(movingPhotoNode);
     auto column = AceType::DynamicCast<FrameNode>(movingPhotoNode->GetColumn(childCount - 1));
@@ -938,6 +939,7 @@ bool MovingPhotoPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     int32_t childCount = host->GetTotalChildCount();
+    CHECK_NULL_RETURN(childCount >= 1, false);
     host->MarkNeedSyncRenderTree();
     auto movingPhoto = AceType::DynamicCast<MovingPhotoNode>(host);
     CHECK_NULL_RETURN(movingPhoto, false);
@@ -1551,6 +1553,7 @@ void MovingPhotoPattern::StartAnimation()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     int32_t childCount = host->GetTotalChildCount();
+    CHECK_NULL_VOID(childCount >= 1);
     auto movingPhoto = AceType::DynamicCast<MovingPhotoNode>(host);
     CHECK_NULL_VOID(movingPhoto);
     auto image = AceType::DynamicCast<FrameNode>(movingPhoto->GetImage());
@@ -1807,6 +1810,7 @@ void MovingPhotoPattern::RefreshMovingPhotoSceneManager()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     int32_t childCount = host->GetTotalChildCount();
+    CHECK_NULL_VOID(childCount >= 1);
     if (historyAutoAndRepeatLevel_ == PlaybackMode::REPEAT) {
         autoAndRepeatLevel_ = PlaybackMode::NONE;
         historyAutoAndRepeatLevel_ = PlaybackMode::NONE;
@@ -1916,7 +1920,7 @@ RefPtr<FrameNode> MovingPhotoPattern::GetTempNode()
     auto firstImage = AceType::DynamicCast<FrameNode>(movingPhoto->GetImage());
     CHECK_NULL_RETURN(firstImage, nullptr);
     auto imageIndex = movingPhoto->GetChildIndex(firstImage);
-    CHECK_NULL_RETURN(imageIndex <= host->GetTotalChildCount() - 1, nullptr);
+    CHECK_NULL_RETURN(imageIndex <= movingPhoto->GetTotalChildCount() - 1, nullptr);
     auto image = AceType::DynamicCast<FrameNode>(movingPhoto->GetChildAtIndex(imageIndex + 1));
     return image;
 }
@@ -1935,6 +1939,7 @@ void MovingPhotoPattern::StopAnimation()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     int32_t childCount = host->GetTotalChildCount();
+    CHECK_NULL_VOID(childCount >= 1);
     auto movingPhoto = AceType::DynamicCast<MovingPhotoNode>(host);
     CHECK_NULL_VOID(movingPhoto);
     auto image = AceType::DynamicCast<FrameNode>(movingPhoto->GetImage());

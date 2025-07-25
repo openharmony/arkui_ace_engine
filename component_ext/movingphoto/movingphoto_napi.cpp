@@ -506,7 +506,7 @@ napi_value InitController(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("enableTransition", EnableTransition),
         DECLARE_NAPI_FUNCTION("setPlaybackPeriod", SetPlaybackPeriod),
         DECLARE_NAPI_FUNCTION("enableAutoPlay", EnableAutoPlay),
-        DECLARE_NAPI_FUNCTION("notifyTransition", NotifyTransition),
+        DECLARE_NAPI_FUNCTION("notifyMovingPhotoTransition", NotifyTransition),
     };
     NAPI_CALL(env, napi_define_class(env, "MovingPhotoViewController", NAPI_AUTO_LENGTH,
         MovingPhotoControllerConstructor, nullptr, sizeof(properties) / sizeof(*properties), properties,

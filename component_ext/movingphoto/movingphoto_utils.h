@@ -75,7 +75,8 @@ namespace MovingPhotoutils {
         }
         size_t posEnd = src.find_last_of("/");
         if (posEnd == std::string::npos) {
-            TAG_LOGE(AceLogTag::ACE_MOVING_PHOTO, "SecurityAndPrivatyLog src is empty.");
+            TAG_LOGE(AceLogTag::ACE_MOVING_PHOTO, "SecurityAndPrivatyLog src not find /.");
+            return;
         }
         std::string imageUriStr = src.substr(0, posEnd + 1) + "******";
         TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "SecurityAndPrivatyLog .%{public}s.", imageUriStr.c_str());
