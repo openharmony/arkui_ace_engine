@@ -28,10 +28,6 @@ public:
 
     std::optional<SizeF> MeasureContent(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
-
-    void MeasureLayoutPolicySize(
-        const LayoutConstraintF& contentConstraint, const RefPtr<LayoutProperty> layoutProperty, OptionalSizeF& size);
-
 private:
     ACE_DISALLOW_COPY_AND_MOVE(ShapeLayoutAlgorithm);
 };

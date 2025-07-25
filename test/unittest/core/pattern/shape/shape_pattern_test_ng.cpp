@@ -584,45 +584,5 @@ HWTEST_F(ShapePatternTestNg, MeasureContent004, TestSize.Level1)
     size = layoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
     ASSERT_TRUE(size.has_value());
     EXPECT_EQ(size.value(), SizeF(500, 600));
-
-    /**
-     * @tc.steps4: Width is matchParent
-     * @tc.expected: the return value of MeasureContent is (100, 50)
-     */
-    layoutProperty->measureType_ = MeasureType::MATCH_CONTENT;
-    contentConstraint.parentIdealSize = OptionalSizeF(100, 200);
-    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
-    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, false);
-    size = layoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
-    ASSERT_TRUE(size.has_value());
-    EXPECT_EQ(size.value(), SizeF(100, 50));
-
-    /**
-     * @tc.steps5: Height is matchParent
-     * @tc.expected: the return value of MeasureContent is (50, 200)
-     */
-    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
-    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
-    size = layoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
-    ASSERT_TRUE(size.has_value());
-    EXPECT_EQ(size.value(), SizeF(50, 200));
-
-    /**
-     * @tc.steps6: Width and Height is not matchParent
-     * @tc.expected: the return value of MeasureContent is (50, 50)
-     */
-    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, false);
-    size = layoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
-    ASSERT_TRUE(size.has_value());
-    EXPECT_EQ(size.value(), SizeF(50, 50));
-
-    /**
-     * @tc.steps7: layoutPolicy has no value
-     * @tc.expected: the return value of MeasureContent is (50, 50)
-     */
-    layoutProperty->layoutPolicy_ = std::nullopt;
-    size = layoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
-    ASSERT_TRUE(size.has_value());
-    EXPECT_EQ(size.value(), SizeF(50, 50));
 }
 } // namespace OHOS::Ace::NG
