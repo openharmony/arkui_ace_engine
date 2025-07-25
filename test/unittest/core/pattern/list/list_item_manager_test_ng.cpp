@@ -14,6 +14,7 @@
  */
 
 #include "gtest/gtest.h"
+#include "list_test_ng.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
 #include "core/components_ng/pattern/list/list_item_drag_manager.h"
@@ -25,9 +26,7 @@ namespace OHOS::Ace::NG {
 using namespace testing;
 using namespace testing::ext;
 
-class ListItemManagerTestNg : public TestNG {
-public:
-};
+class ListItemManagerTestNg : public ListTestNg {};
 
 /**
  * @tc.name: GetListFrameNode001
@@ -157,4 +156,319 @@ HWTEST_F(ListItemManagerTestNg, ScaleAxisNearItem001, TestSize.Level1)
     EXPECT_FALSE(res.needMove);
 }
 
+/**
+ * @tc.name: InitDragDropEvent_DragEvent
+ * @tc.desc: Test ListItemDragManager InitDragDropEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemManagerTestNg, InitDragDropEvent_DragEvent, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ListItemDragManager
+     */
+    auto listNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 1, AceType::MakeRefPtr<ListPattern>());
+    ASSERT_NE(listNode, nullptr);
+    WeakPtr<FrameNode> weakListNode = AceType::WeakClaim(AceType::RawPtr(listNode));
+    auto host = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 0, AceType::MakeRefPtr<ListPattern>());
+    ASSERT_NE(host, nullptr);
+    host->SetParent(weakListNode);
+    host->renderContext_ = RenderContext::Create();
+    auto pattern = host->GetPattern<ListPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<ListItemEventHub> listItemEventHub = AceType::MakeRefPtr<ListItemEventHub>();
+    WeakPtr<ListItemEventHub> weakListItemEventHub = AceType::WeakClaim(AceType::RawPtr(listItemEventHub));
+    host->eventHub_ = listItemEventHub;
+    auto eventHub = host->GetEventHub<ListItemEventHub>();
+    RefPtr<GestureEventHub> gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(weakListItemEventHub);
+    WeakPtr<GestureEventHub> weakGestureEventHub = AceType::WeakClaim(AceType::RawPtr(gestureEventHub));
+    eventHub->gestureEventHub_ = gestureEventHub;
+    auto lazyForEachNode = LazyForEachNode::CreateLazyForEachNode(2, nullptr);
+    ASSERT_NE(lazyForEachNode, nullptr);
+    auto listItemDragManager = AceType::MakeRefPtr<ListItemDragManager>(host, lazyForEachNode);
+
+    /**
+     * @tc.steps: step2. Set SourceTool of info to FINGER
+     */
+    GestureEvent info;
+    info.SetSourceTool(SourceTool::FINGER);
+
+    /**
+     * @tc.steps: step3. Calling the InitDragDropEvent function
+     * @tc.expected: The DragEvent Actuator is created and has drag event
+     */
+    listItemDragManager->InitDragDropEvent();
+    EXPECT_TRUE(eventHub->gestureEventHub_->GetDragEventActuator()->HasDragEvent());
+    EXPECT_EQ(eventHub->gestureEventHub_->GetDragEventActuator()->GetFingers(), DEFAULT_PAN_FINGER);
+    EXPECT_EQ(eventHub->gestureEventHub_->GetDragEventActuator()->GetDirection().type, PanDirection::ALL);
+    EXPECT_EQ(eventHub->gestureEventHub_->GetDragEventActuator()->GetDistance(), DEFAULT_PAN_DISTANCE.Value());
+    EXPECT_TRUE(eventHub->gestureEventHub_->GetDragEventActuator()->isForDragDrop_);
+}
+
+/**
+ * @tc.name: InitDragDropEvent_actionStartTask
+ * @tc.desc: Test ListItemDragManager InitDragDropEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemManagerTestNg, InitDragDropEvent_actionStartTask, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ListItemDragManager
+     */
+    auto listNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 1, AceType::MakeRefPtr<ListPattern>());
+    ASSERT_NE(listNode, nullptr);
+    WeakPtr<FrameNode> weakListNode = AceType::WeakClaim(AceType::RawPtr(listNode));
+    auto host = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 0, AceType::MakeRefPtr<ListPattern>());
+    ASSERT_NE(host, nullptr);
+    host->SetParent(weakListNode);
+    host->renderContext_ = RenderContext::Create();
+    OffsetF offset(10.0f, 10.0f);
+    host->GetGeometryNode()->SetMarginFrameOffset(offset);
+    auto pattern = listNode->GetPattern<ListPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<ListItemEventHub> listItemEventHub = AceType::MakeRefPtr<ListItemEventHub>();
+    WeakPtr<ListItemEventHub> weakListItemEventHub = AceType::WeakClaim(AceType::RawPtr(listItemEventHub));
+    host->eventHub_ = listItemEventHub;
+    auto eventHub = host->GetEventHub<ListItemEventHub>();
+    RefPtr<GestureEventHub> gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(weakListItemEventHub);
+    WeakPtr<GestureEventHub> weakGestureEventHub = AceType::WeakClaim(AceType::RawPtr(gestureEventHub));
+    eventHub->gestureEventHub_ = gestureEventHub;
+    auto lazyForEachNode = LazyForEachNode::CreateLazyForEachNode(2, nullptr);
+    ASSERT_NE(lazyForEachNode, nullptr);
+    auto listItemDragManager = AceType::MakeRefPtr<ListItemDragManager>(host, lazyForEachNode);
+
+    /**
+     * @tc.steps: step2. Set dragState to IDLE and dragOffset to (20.0f, 20.0f)
+     * and set SourceTool of info to FINGER
+     */
+    listItemDragManager->dragOffset_ = OffsetF(20.0f, 20.0f);
+    listItemDragManager->dragState_ = ListItemDragState::IDLE;
+    GestureEvent info;
+    info.SetSourceTool(SourceTool::FINGER);
+
+    /**
+     * @tc.steps: step3. Calling the InitDragDropEvent and actionStartTask function
+     * @tc.expected: The dragState is set to DRAGGING and dragOffset is set to (10.0f, 10.0f)
+     */
+    listItemDragManager->InitDragDropEvent();
+    auto actionStartTask = eventHub->gestureEventHub_->GetDragEventActuator()->userCallback_->GetActionStartEventFunc();
+    actionStartTask(info);
+    EXPECT_EQ(listItemDragManager->dragOffset_.GetX(), 10.0f);
+    EXPECT_EQ(listItemDragManager->dragOffset_.GetY(), 10.0f);
+    EXPECT_EQ(listItemDragManager->dragState_, ListItemDragState::DRAGGING);
+}
+
+/**
+ * @tc.name: InitDragDropEvent_actionUpdateTask
+ * @tc.desc: Test ListItemDragManager InitDragDropEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemManagerTestNg, InitDragDropEvent_actionUpdateTask, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ListItemDragManager
+     */
+    auto listNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 1, AceType::MakeRefPtr<ListPattern>());
+    ASSERT_NE(listNode, nullptr);
+    WeakPtr<FrameNode> weakListNode = AceType::WeakClaim(AceType::RawPtr(listNode));
+    auto host = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 0, AceType::MakeRefPtr<ListPattern>());
+    ASSERT_NE(host, nullptr);
+    host->SetParent(weakListNode);
+    host->renderContext_ = RenderContext::Create();
+    OffsetF offset(10.0f, 10.0f);
+    host->GetGeometryNode()->SetMarginFrameOffset(offset);
+    auto pattern = listNode->GetPattern<ListPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<ListItemEventHub> listItemEventHub = AceType::MakeRefPtr<ListItemEventHub>();
+    WeakPtr<ListItemEventHub> weakListItemEventHub = AceType::WeakClaim(AceType::RawPtr(listItemEventHub));
+    host->eventHub_ = listItemEventHub;
+    auto eventHub = host->GetEventHub<ListItemEventHub>();
+    RefPtr<GestureEventHub> gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(weakListItemEventHub);
+    WeakPtr<GestureEventHub> weakGestureEventHub = AceType::WeakClaim(AceType::RawPtr(gestureEventHub));
+    eventHub->gestureEventHub_ = gestureEventHub;
+    auto lazyForEachNode = LazyForEachNode::CreateLazyForEachNode(2, nullptr);
+    ASSERT_NE(lazyForEachNode, nullptr);
+    auto listItemDragManager = AceType::MakeRefPtr<ListItemDragManager>(host, lazyForEachNode);
+
+    /**
+     * @tc.steps: step2. Set SourceTool of info to FINGER and offset of info to (20.0f, 40.0f)
+     * Set dragOffset to (20.0f, 20.0f) and realOffset to (0.0f, 0.0f)
+     */
+    listItemDragManager->dragOffset_ = OffsetF(20.0f, 20.0f);
+    listItemDragManager->realOffset_ = OffsetF(0.0f, 0.0f);
+    GestureEvent info;
+    info.SetSourceTool(SourceTool::FINGER);
+    info.SetOffsetX(20.0);
+    info.SetOffsetY(40.0);
+
+    /**
+     * @tc.steps: step3. Calling the InitDragDropEvent and actionUpdateTask function
+     * @tc.expected: The realOffset is set to (20.0f, 60.0f)
+     */
+    listItemDragManager->InitDragDropEvent();
+    auto actionUpdateTask =
+        eventHub->gestureEventHub_->GetDragEventActuator()->userCallback_->GetActionUpdateEventFunc();
+    actionUpdateTask(info);
+    EXPECT_EQ(listItemDragManager->realOffset_.GetX(), 20.0f);
+    EXPECT_EQ(listItemDragManager->realOffset_.GetY(), 60.0f);
+}
+
+/**
+ * @tc.name: InitDragDropEvent_actionEndTask
+ * @tc.desc: Test ListItemDragManager InitDragDropEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemManagerTestNg, InitDragDropEvent_actionEndTask, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ListItemDragManager
+     */
+    auto listNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 1, AceType::MakeRefPtr<ListPattern>());
+    ASSERT_NE(listNode, nullptr);
+    WeakPtr<FrameNode> weakListNode = AceType::WeakClaim(AceType::RawPtr(listNode));
+    auto host = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 0, AceType::MakeRefPtr<ListPattern>());
+    ASSERT_NE(host, nullptr);
+    host->SetParent(weakListNode);
+    host->renderContext_ = RenderContext::Create();
+    auto pattern = listNode->GetPattern<ListPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<ListItemEventHub> listItemEventHub = AceType::MakeRefPtr<ListItemEventHub>();
+    WeakPtr<ListItemEventHub> weakListItemEventHub = AceType::WeakClaim(AceType::RawPtr(listItemEventHub));
+    host->eventHub_ = listItemEventHub;
+    auto eventHub = host->GetEventHub<ListItemEventHub>();
+    RefPtr<GestureEventHub> gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(weakListItemEventHub);
+    WeakPtr<GestureEventHub> weakGestureEventHub = AceType::WeakClaim(AceType::RawPtr(gestureEventHub));
+    eventHub->gestureEventHub_ = gestureEventHub;
+    auto lazyForEachNode = LazyForEachNode::CreateLazyForEachNode(2, nullptr);
+    ASSERT_NE(lazyForEachNode, nullptr);
+    auto listItemDragManager = AceType::MakeRefPtr<ListItemDragManager>(host, lazyForEachNode);
+
+    /**
+     * @tc.steps: step2. Set SourceTool of info to FINGER and draggingIndex_ to 0
+     * Set isNeedDividerAnimation_ to false and scrolling to true
+     * Set dragState to DRAGGING
+     */
+    listItemDragManager->scrolling_ = true;
+    listItemDragManager->dragState_ = ListItemDragState::DRAGGING;
+    pattern->SetDraggingIndex(0);
+    pattern->SetIsNeedDividerAnimation(false);
+    GestureEvent info;
+    info.SetSourceTool(SourceTool::FINGER);
+
+    /**
+     * @tc.steps: step3. Calling the InitDragDropEvent and actionEndTask function
+     * @tc.expected: The scrolling is false and dragState is set to IDLE
+     * and draggingIndex_ is set to -1
+     */
+    listItemDragManager->InitDragDropEvent();
+    auto actionEndTask = eventHub->gestureEventHub_->GetDragEventActuator()->userCallback_->GetActionEndEventFunc();
+    actionEndTask(info);
+    EXPECT_EQ(pattern->draggingIndex_, -1);
+    EXPECT_FALSE(listItemDragManager->scrolling_);
+    EXPECT_EQ(listItemDragManager->dragState_, ListItemDragState::IDLE);
+}
+
+/**
+ * @tc.name: InitDragDropEvent_actionCancelTask
+ * @tc.desc: Test ListItemDragManager InitDragDropEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemManagerTestNg, InitDragDropEvent_actionCancelTask, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ListItemDragManager
+     */
+    auto listNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 1, AceType::MakeRefPtr<ListPattern>());
+    ASSERT_NE(listNode, nullptr);
+    WeakPtr<FrameNode> weakListNode = AceType::WeakClaim(AceType::RawPtr(listNode));
+    auto host = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 0, AceType::MakeRefPtr<ListPattern>());
+    ASSERT_NE(host, nullptr);
+    host->SetParent(weakListNode);
+    host->renderContext_ = RenderContext::Create();
+    auto pattern = listNode->GetPattern<ListPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<ListItemEventHub> listItemEventHub = AceType::MakeRefPtr<ListItemEventHub>();
+    WeakPtr<ListItemEventHub> weakListItemEventHub = AceType::WeakClaim(AceType::RawPtr(listItemEventHub));
+    host->eventHub_ = listItemEventHub;
+    auto eventHub = host->GetEventHub<ListItemEventHub>();
+    RefPtr<GestureEventHub> gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(weakListItemEventHub);
+    WeakPtr<GestureEventHub> weakGestureEventHub = AceType::WeakClaim(AceType::RawPtr(gestureEventHub));
+    eventHub->gestureEventHub_ = gestureEventHub;
+    auto lazyForEachNode = LazyForEachNode::CreateLazyForEachNode(2, nullptr);
+    ASSERT_NE(lazyForEachNode, nullptr);
+    auto listItemDragManager = AceType::MakeRefPtr<ListItemDragManager>(host, lazyForEachNode);
+
+    /**
+     * @tc.steps: step2. Set SourceTool of info to FINGER
+     * Set dragState to DRAGGING and isNeedDividerAnimation_ to false
+     * Set hotZoneScrollCallback_ to a lambda function
+     */
+    listItemDragManager->dragState_ = ListItemDragState::DRAGGING;
+    pattern->SetIsNeedDividerAnimation(false);
+    auto func = []() {};
+    pattern->SetHotZoneScrollCallback(std::move(func));
+    GestureEvent info;
+    info.SetSourceTool(SourceTool::FINGER);
+
+    /**
+     * @tc.steps: step3. Calling the InitDragDropEvent and actionCancelTask function
+     * @tc.expected: The dragState is set to IDLE and the hotZoneScrollCallback_ is set to nullptr
+     */
+    listItemDragManager->InitDragDropEvent();
+    auto actionCancelTask =
+        eventHub->gestureEventHub_->GetDragEventActuator()->userCallback_->GetActionCancelEventFunc();
+    actionCancelTask();
+    EXPECT_EQ(listItemDragManager->dragState_, ListItemDragState::IDLE);
+    EXPECT_EQ(pattern->hotZoneScrollCallback_, nullptr);
+}
+
+/**
+ * @tc.name: InitDragDropEvent_actionLongPress
+ * @tc.desc: Test ListItemDragManager InitDragDropEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemManagerTestNg, InitDragDropEvent_actionLongPress, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ListItemDragManager
+     */
+    auto listNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 1, AceType::MakeRefPtr<ListPattern>());
+    ASSERT_NE(listNode, nullptr);
+    WeakPtr<FrameNode> weakListNode = AceType::WeakClaim(AceType::RawPtr(listNode));
+    auto host = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 0, AceType::MakeRefPtr<ListPattern>());
+    ASSERT_NE(host, nullptr);
+    host->SetParent(weakListNode);
+    host->renderContext_ = RenderContext::Create();
+    auto pattern = listNode->GetPattern<ListPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<ListItemEventHub> listItemEventHub = AceType::MakeRefPtr<ListItemEventHub>();
+    WeakPtr<ListItemEventHub> weakListItemEventHub = AceType::WeakClaim(AceType::RawPtr(listItemEventHub));
+    host->eventHub_ = listItemEventHub;
+    auto eventHub = host->GetEventHub<ListItemEventHub>();
+    RefPtr<GestureEventHub> gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(weakListItemEventHub);
+    WeakPtr<GestureEventHub> weakGestureEventHub = AceType::WeakClaim(AceType::RawPtr(gestureEventHub));
+    eventHub->gestureEventHub_ = gestureEventHub;
+    auto lazyForEachNode = LazyForEachNode::CreateLazyForEachNode(2, nullptr);
+    ASSERT_NE(lazyForEachNode, nullptr);
+    int32_t number = 1;
+    lazyForEachNode->onLongPressEvent_ = [&number](int32_t index) { number += index; };
+    auto listItemDragManager = AceType::MakeRefPtr<ListItemDragManager>(host, lazyForEachNode);
+
+    /**
+     * @tc.steps: step2. Set SourceTool of info to FINGER
+     * and set dragState to IDLE
+     */
+    listItemDragManager->dragState_ = ListItemDragState::IDLE;
+    GestureEvent info;
+    info.SetSourceTool(SourceTool::FINGER);
+
+    /**
+     * @tc.steps: step3. Calling the InitDragDropEvent and longPress function
+     * @tc.expected: The dragState is set to LONG_PRESS and number is set to 0
+     */
+    listItemDragManager->InitDragDropEvent();
+    auto longPress = eventHub->gestureEventHub_->GetDragEventActuator()->userCallback_->GetLongPressEventFunc();
+    longPress(info);
+    EXPECT_EQ(listItemDragManager->dragState_, ListItemDragState::LONG_PRESS);
+    EXPECT_EQ(number, 0);
+}
 } // namespace OHOS::Ace::NG
