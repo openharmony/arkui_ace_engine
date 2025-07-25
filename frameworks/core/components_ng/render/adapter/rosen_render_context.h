@@ -391,6 +391,10 @@ public:
     void CreateBackgroundPixelMap(const RefPtr<FrameNode>& customNode) override;
     void OnIsTransitionBackgroundUpdate(bool isTransitionBackground) override {}
     void OnBuilderBackgroundFlagUpdate(bool isBuilderBackground) override;
+    uint32_t GetCurrentBackgroundTaskId() const override
+    {
+        return backgroundTaskId_;
+    }
 
     void ColorToRSColor(const Color& color, OHOS::Rosen::RSColor& rsColor);
     void OnBackgroundColorUpdate(const Color& value) override;
@@ -884,6 +888,8 @@ protected:
 private:
     void ModifyCustomBackground();
     bool ShouldSkipAffineTransformation(std::shared_ptr<RSNode> rsNode);
+
+    uint32_t backgroundTaskId_ = 0;
 };
 } // namespace OHOS::Ace::NG
 
