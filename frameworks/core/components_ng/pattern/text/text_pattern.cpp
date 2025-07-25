@@ -3846,7 +3846,7 @@ size_t TextPattern::GetSubComponentInfos(std::vector<SubComponentInfo>& subCompo
 
 void TextPattern::GetSubComponentInfosForAISpans(std::vector<SubComponentInfo>& subComponentInfos)
 {
-    CHECK_NULL_VOID(GetDataDetectorAdapter());
+    CHECK_NULL_VOID(dataDetectorAdapter_);
     for (const auto& kv : dataDetectorAdapter_->aiSpanMap_) {
         auto& aiSpan = kv.second;
         AddSubComponentInfoForAISpan(subComponentInfos, aiSpan.content, aiSpan);
@@ -3881,7 +3881,7 @@ void TextPattern::AddSubComponentInfosByDataDetectorForSpan(std::vector<SubCompo
     const RefPtr<SpanItem>& span)
 {
     CHECK_NULL_VOID(span);
-    CHECK_NULL_VOID(GetDataDetectorAdapter());
+    CHECK_NULL_VOID(dataDetectorAdapter_);
     int32_t wSpanContentLength = static_cast<int32_t>(span->content.length());
     int32_t spanStart = span->position - wSpanContentLength;
     if (span->needRemoveNewLine) {
