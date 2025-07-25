@@ -34,10 +34,10 @@ export function convertDimensionStrToNumber(value: string): number {
     let numericValue : number = 0
     let unitPart : string = ''
     if (match.length > 1) {
-        numericValue = parseFloat(match[1]);
+        numericValue = parseFloat(match[1]!);
     }
     if (match.length > 2) {
-        unitPart = match[2];
+        unitPart = match[2]!;
     }
     if (unitPart === 'px' || !unitPart) {
         return numericValue;
