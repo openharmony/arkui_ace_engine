@@ -20,7 +20,7 @@
 #include "load.h"
 
 #include "base/utils/utils.h"
-// #include "pixel_map_taihe_ani.h"
+#include "pixel_map_taihe_ani.h"
 #include "utils/ani_utils.h"
 
 namespace OHOS::Ace::Ani {
@@ -187,18 +187,18 @@ ani_object GetSharedLocalStorage([[maybe_unused]] ani_env* env)
 void SetBackgroundImagePixelMap([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, ani_object node,
     ani_object pixelMap, ani_int repeat)
 {
-    // auto* arkNode = reinterpret_cast<ArkUINodeHandle>(node);
-    // auto pixelMapValue = OHOS::Media::PixelMapTaiheAni::GetNativePixelMap(env, pixelMap);
-    // if (!pixelMapValue) {
-    //     return;
-    // }
-    // auto pixelMapPtr = reinterpret_cast<void*>(&pixelMapValue);
-    // const auto* modifier = GetNodeAniModifier();
-    // if (!modifier || !modifier->getCommonAniModifier() || !env) {
-    //     return;
-    // }
-    // modifier->getCommonAniModifier()->setBackgroundImagePixelMap(
-    //     env, arkNode, reinterpret_cast<ani_ref>(pixelMapPtr), repeat);
+    auto* arkNode = reinterpret_cast<ArkUINodeHandle>(node);
+    auto pixelMapValue = OHOS::Media::PixelMapTaiheAni::GetNativePixelMap(env, pixelMap);
+    if (!pixelMapValue) {
+        return;
+    }
+    auto pixelMapPtr = reinterpret_cast<void*>(&pixelMapValue);
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return;
+    }
+    modifier->getCommonAniModifier()->setBackgroundImagePixelMap(
+        env, arkNode, reinterpret_cast<ani_ref>(pixelMapPtr), repeat);
 }
 
 void SetCustomCallback(ani_env* env, ani_object obj, ani_long ptr,
