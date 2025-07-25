@@ -191,7 +191,7 @@ public:
                     TAG_LOGI(OHOS::Ace::AceLogTag::ACE_MEDIA_QUERY, "!listener->env_->WeakReference_GetReference");
                     return;
                 }
-                ani_object result;
+                ani_object result = {};
                 listener->MediaQueryResult::AniResultSerializer(listener->env_, result);
                 ani_ref resultRef = static_cast<ani_ref>(result);
                 if (resultRef == nullptr) {
@@ -394,7 +394,7 @@ private:
         return TWO_ARGS;
     }
 
-    ani_env *env_;
+    ani_env *env_ = nullptr;
     std::list<ani_ref> cbList_;
     static std::set<std::unique_ptr<MediaQueryListener>>* delayDeleteListenerSets_;
     static std::set<ani_ref>* delayDeleteCallbacks_;
