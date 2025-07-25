@@ -290,6 +290,7 @@ bool ListItemGroupLayoutAlgorithm::CheckNeedMeasure(const RefPtr<LayoutWrapper>&
 void ListItemGroupLayoutAlgorithm::MeasureHeaderFooter(LayoutWrapper* layoutWrapper)
 {
     const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
     auto headerFooterLayoutConstraint = layoutProperty->CreateChildConstraint();
     headerFooterLayoutConstraint.maxSize.SetMainSize(Infinity<float>(), axis_);
     RefPtr<LayoutWrapper> headerWrapper = headerIndex_ >= 0 ?
@@ -397,6 +398,7 @@ float ListItemGroupLayoutAlgorithm::GetChildMaxCrossSize(LayoutWrapper* layoutWr
 float ListItemGroupLayoutAlgorithm::UpdateReferencePos(
     RefPtr<LayoutProperty> layoutProperty, bool forwardLayout, float referencePos)
 {
+    CHECK_NULL_RETURN(layoutProperty, referencePos);
     const auto& padding = layoutProperty->CreatePaddingAndBorder();
     const auto& margin = layoutProperty->CreateMargin();
     auto offsetBeforeContent = axis_ == Axis::HORIZONTAL ? padding.left.value_or(0) : padding.top.value_or(0);
