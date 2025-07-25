@@ -60,7 +60,6 @@ bool ParseAniDimensionVp(ani_env* env, ani_object obj, CalcDimension& result)
 ani_object SetConstraintNG(ani_env* env, ani_object constraint_obj, double minWidth, double minHeight, double maxWidth, double maxHeight)
 {
     ani_class cls;
-    ani_object constraint_obj;
     static const char *className = "Larkui/ani/arkts/ArkUIAniCustomNodeModule/ConstraintSizeOptionsInner;";
     if (ANI_OK != env->FindClass(className, &cls)) {
         return nullptr;
