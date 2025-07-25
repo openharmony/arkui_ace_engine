@@ -48,14 +48,12 @@ void ScrollablePaintMethod::UpdateFadingGradient(const RefPtr<RenderContext>& re
         isFadingTop_ = isFadingBottom_;
         isFadingBottom_ = tempFadingValue;
     }
-    if (isFadingTop_) {
-        gradient.AddColor(CreatePercentGradientColor(startPercent_, Color::TRANSPARENT));
-        gradient.AddColor(CreatePercentGradientColor(startPercent_ + percentFading_, Color::WHITE));
-    }
-    if (isFadingBottom_) {
-        gradient.AddColor(CreatePercentGradientColor(endPercent_ - percentFading_, Color::WHITE));
-        gradient.AddColor(CreatePercentGradientColor(endPercent_, Color::TRANSPARENT));
-    }
+    float startRange = isFadingTop_ ? percentFading_ : 0.0f;
+    float endRange = isFadingBottom_ ? percentFading_ : 0.0f;
+    gradient.AddColor(CreatePercentGradientColor(startPercent_, Color::TRANSPARENT));
+    gradient.AddColor(CreatePercentGradientColor(startPercent_ + startRange, Color::WHITE));
+    gradient.AddColor(CreatePercentGradientColor(endPercent_ - endRange, Color::WHITE));
+    gradient.AddColor(CreatePercentGradientColor(endPercent_, Color::TRANSPARENT));
     if (vertical_) {
         gradient.GetLinearGradient()->angle = isReverse_
                                                   ? CalcDimension(LINEAR_GRADIENT_DIRECTION_ANGLE, DimensionUnit::PX)
@@ -65,13 +63,8 @@ void ScrollablePaintMethod::UpdateFadingGradient(const RefPtr<RenderContext>& re
 
     overlayRenderContext_->UpdateZIndex(INT32_MAX);
     overlayRenderContext_->UpdateLinearGradient(gradient);
-    if (!isFadingTop_ && !isFadingBottom_) {
-        overlayRenderContext_->UpdateBackBlendMode(BlendMode::SRC_OVER);
-        renderContext->UpdateBackBlendMode(BlendMode::NONE);
-    } else {
-        overlayRenderContext_->UpdateBackBlendMode(BlendMode::DST_IN);
-        renderContext->UpdateBackBlendMode(BlendMode::SRC_OVER);
-    }
+    overlayRenderContext_->UpdateBackBlendMode(BlendMode::DST_IN);
+    renderContext->UpdateBackBlendMode(BlendMode::SRC_OVER);
     overlayRenderContext_->UpdateBackBlendApplyType(BlendApplyType::OFFSCREEN);
 }
 
