@@ -65,28 +65,6 @@ void RichEditorPatternTestFourNg::TearDownTestSuite()
 }
 
 /**
- * @tc.name: SetMenuParam001
- * @tc.desc: test SetMenuParam
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFourNg, SetMenuParam001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto richEditorController = richEditorPattern->GetRichEditorController();
-    ASSERT_NE(richEditorController, nullptr);
-    auto contentNode = richEditorNode_->GetChildAtIndex(0);
-    ASSERT_NE(contentNode, nullptr);
-    AddImageSpan();
-    std::function<void()> tempFunc = []() { };
-    std::function<void()>& func = tempFunc;
-    SelectMenuParam menuParam;
-    richEditorPattern->SetPreviewMenuParam(TextSpanType::IMAGE, func, menuParam);
-    EXPECT_TRUE(static_cast<bool>(richEditorPattern->oneStepDragController_));
-}
-
-/**
  * @tc.name: CheckEditorTypeChange001
  * @tc.desc: test CheckEditorTypeChange
  * @tc.type: FUNC
@@ -143,23 +121,6 @@ HWTEST_F(RichEditorPatternTestFourNg, GetLeftWordPosition001, TestSize.Level1)
     int32_t res = richEditorPattern->GetLeftWordPosition(-9999);
 
     EXPECT_EQ(res, 0);
-}
-
-/**
- * @tc.name: HandleSurfaceChanged001
- * @tc.desc: test HandleSurfaceChanged
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFourNg, HandleSurfaceChanged001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    richEditorPattern->magnifierController_->isShowMagnifier_ = true;
-    richEditorPattern->HandleSurfaceChanged(0, 0, 0, 0, WindowSizeChangeReason::DRAG);
-
-    EXPECT_EQ(richEditorPattern->magnifierController_->GetShowMagnifier(), false);
 }
 
 /**

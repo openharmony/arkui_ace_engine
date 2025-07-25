@@ -1860,4 +1860,95 @@ HWTEST_F(RichEditorSelectionTestNg, GetRectsForRange001, TestSize.Level1)
     EXPECT_TRUE(result.empty());
 }
 
+/**
+ * @tc.name: HandleKbVerticalSelection001
+ * @tc.desc: test HandleKbVerticalSelection
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSelectionTestNg, HandleKbVerticalSelection001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->textSelector_.baseOffset = 1;
+    richEditorPattern->textSelector_.destinationOffset = 0;
+    richEditorPattern->caretPosition_ = 1;
+    EXPECT_EQ(richEditorPattern->HandleKbVerticalSelection(true), 0);
+    richEditorPattern->caretPosition_ = 0;
+    EXPECT_EQ(richEditorPattern->HandleKbVerticalSelection(true), 0);
+}
+
+/**
+ * @tc.name: HandleKbVerticalSelection002
+ * @tc.desc: test HandleKbVerticalSelection
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSelectionTestNg, HandleKbVerticalSelection002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->textSelector_.baseOffset = 2;
+    richEditorPattern->textSelector_.destinationOffset = 0;
+    richEditorPattern->caretPosition_ = 1;
+    EXPECT_EQ(richEditorPattern->HandleKbVerticalSelection(true), 0);
+}
+
+/**
+ * @tc.name: HandleKbVerticalSelection003
+ * @tc.desc: test HandleKbVerticalSelection
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSelectionTestNg, HandleKbVerticalSelection003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    TextSpanOptions options;
+    options.value = TEST_INSERT_VALUE;
+    richEditorPattern->AddTextSpan(options);
+
+    richEditorPattern->textSelector_.baseOffset = 1;
+    richEditorPattern->textSelector_.destinationOffset = 0;
+    richEditorPattern->caretPosition_ = 0;
+
+    EXPECT_EQ(richEditorPattern->HandleKbVerticalSelection(false), 1);
+}
+
+/**
+ * @tc.name: HandleKbVerticalSelection004
+ * @tc.desc: test HandleKbVerticalSelection
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSelectionTestNg, HandleKbVerticalSelection004, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorPattern->textSelector_.baseOffset = 1;
+    richEditorPattern->textSelector_.destinationOffset = 1;
+    richEditorPattern->caretPosition_ = 0;
+
+    EXPECT_EQ(richEditorPattern->HandleKbVerticalSelection(false), 0);
+}
+
+/**
+ * @tc.name: HandleKbVerticalSelection005
+ * @tc.desc: test HandleKbVerticalSelection
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSelectionTestNg, HandleKbVerticalSelection005, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorPattern->textSelector_.baseOffset = 1;
+    richEditorPattern->textSelector_.destinationOffset = 0;
+    richEditorPattern->caretPosition_ = 1;
+
+    EXPECT_EQ(richEditorPattern->HandleKbVerticalSelection(false), 0);
+}
+
 } // namespace OHOS::Ace::NG

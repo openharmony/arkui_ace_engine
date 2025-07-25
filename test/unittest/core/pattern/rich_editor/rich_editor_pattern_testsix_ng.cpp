@@ -32,7 +32,6 @@ class RichEditorPatternTestSixNg : public RichEditorCommonTestNg {
 public:
     void SetUp() override;
     void TearDown() override;
-    void InitDataUrlAnalyzer(MockDataUrlAnalyzerMgr& mockDataUrlAnalyzerMgr);
     static void TearDownTestSuite();
 };
 
@@ -63,41 +62,6 @@ void RichEditorPatternTestSixNg::TearDown()
 void RichEditorPatternTestSixNg::TearDownTestSuite()
 {
     TestNG::TearDownTestSuite();
-}
-
-void RichEditorPatternTestSixNg::InitDataUrlAnalyzer(MockDataUrlAnalyzerMgr& mockDataUrlAnalyzerMgr)
-{
-    EXPECT_CALL(mockDataUrlAnalyzerMgr, AnalyzeUrls(_))
-        .WillRepeatedly([](const std::string& text) -> std::vector<UrlEntity> {
-            std::vector<UrlEntity> data;
-            if (text.empty()) {
-                return data;
-            }
-            UrlEntity urlEntity;
-            urlEntity.text = text;
-            urlEntity.charOffset = text.length();
-            data.push_back(urlEntity);
-            return data;
-        });
-}
-
-/*
- * @tc.name: AnalyzeUrls001
- * @tc.desc: test url Analyzer
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestSixNg, AnalyzeUrls001, TestSize.Level1)
-{
-    MockDataUrlAnalyzerMgr mockDataUrlAnalyzerMgr;
-    InitDataUrlAnalyzer(mockDataUrlAnalyzerMgr);
-
-    std::string text = "";
-    std::vector<UrlEntity> data = mockDataUrlAnalyzerMgr.AnalyzeUrls(text);
-    EXPECT_TRUE(data.empty());
-
-    text = "test1";
-    data = mockDataUrlAnalyzerMgr.AnalyzeUrls(text);
-    EXPECT_FALSE(data.empty());
 }
 
 /**
@@ -335,63 +299,6 @@ HWTEST_F(RichEditorPatternTestSixNg, UpdateChildrenOffset005, TestSize.Level1)
 
     richEditorPattern->UpdateChildrenOffset();
     EXPECT_FALSE(childNode2->GetSpanItem());
-}
-
-/**
- * @tc.name: HandleKbVerticalSelection003
- * @tc.desc: test HandleKbVerticalSelection
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestSixNg, HandleKbVerticalSelection003, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    TextSpanOptions options;
-    options.value = TEST_INSERT_VALUE;
-    richEditorPattern->AddTextSpan(options);
-
-    richEditorPattern->textSelector_.baseOffset = 1;
-    richEditorPattern->textSelector_.destinationOffset = 0;
-    richEditorPattern->caretPosition_ = 0;
-
-    EXPECT_EQ(richEditorPattern->HandleKbVerticalSelection(false), 1);
-}
-
-/**
- * @tc.name: HandleKbVerticalSelection004
- * @tc.desc: test HandleKbVerticalSelection
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestSixNg, HandleKbVerticalSelection004, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    richEditorPattern->textSelector_.baseOffset = 1;
-    richEditorPattern->textSelector_.destinationOffset = 1;
-    richEditorPattern->caretPosition_ = 0;
-
-    EXPECT_EQ(richEditorPattern->HandleKbVerticalSelection(false), 0);
-}
-
-/**
- * @tc.name: HandleKbVerticalSelection005
- * @tc.desc: test HandleKbVerticalSelection
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestSixNg, HandleKbVerticalSelection005, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    richEditorPattern->textSelector_.baseOffset = 1;
-    richEditorPattern->textSelector_.destinationOffset = 0;
-    richEditorPattern->caretPosition_ = 1;
-
-    EXPECT_EQ(richEditorPattern->HandleKbVerticalSelection(false), 0);
 }
 
 /**

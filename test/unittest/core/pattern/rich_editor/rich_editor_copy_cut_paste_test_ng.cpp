@@ -564,4 +564,26 @@ HWTEST_F(RichEditorCopyCutPasteTestNg, HandleOnCut004, TestSize.Level1)
     EXPECT_EQ(isEventCalled, true);
 }
 
+/**
+ * @tc.name: SetSubSpans001
+ * @tc.desc: test SetSubSpans
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorCopyCutPasteTestNg, SetSubSpans001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<SpanItem>();
+    RefPtr<SpanItem> spanItem1 = AceType::MakeRefPtr<SpanItem>();
+    spanItem->spanItemType = SpanItemType::SYMBOL;
+    spanItem1->spanItemType = SpanItemType::NORMAL;
+    spanItem1->position = 0;
+    richEditorPattern->spans_.push_back(spanItem);
+    richEditorPattern->spans_.push_back(spanItem1);
+    RefPtr<SpanString> spanString = AceType::MakeRefPtr<SpanString>(INIT_VALUE_1);
+    richEditorPattern->SetSubSpans(spanString, 1, 1, spanString->spans_);
+    EXPECT_EQ(spanString->spans_.size(), 0);
+}
+
 }
