@@ -30,7 +30,7 @@ namespace OHOS::Ace::Framework {
 class AniGraphicsModule final {
 public:
     static void SetDrawCallback(ani_env* env, ani_long ptr, ani_fn_object fnObj);
-    static void SetDrawModifier(ani_env* env, ani_long ptr, ani_int flag, ani_object fnObj);
+    static void SetDrawModifier(ani_env* env, ani_long ptr, uint32_t flag, ani_object fnObj);
     static void Invalidate(ani_env* env, ani_long ptr);
     static void SetCustomCallback(ani_env* env, ani_long ptr, ani_fn_object fnObjMeasure, ani_fn_object fnObjLayout);
     static void OnMeasureInnerMeasure(ani_env* env, ani_long ptr);

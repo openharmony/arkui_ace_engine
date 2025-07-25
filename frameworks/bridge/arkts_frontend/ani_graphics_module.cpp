@@ -35,9 +35,9 @@
 namespace OHOS::Ace::Framework {
 namespace {
 namespace {
-const int32_t FLAG_DRAW_FRONT = 1;
-const int32_t FLAG_DRAW_CONTENT = 1 << 1;
-const int32_t FLAG_DRAW_BEHIND = 1 << 2;
+const uint32_t FLAG_DRAW_FRONT = 1;
+const uint32_t FLAG_DRAW_CONTENT = 1 << 1;
+const uint32_t FLAG_DRAW_BEHIND = 1 << 2;
 } // namespace
 ani_object CreateSizeObject(ani_env* env, const NG::DrawingContext& context)
 {
@@ -170,7 +170,7 @@ void AniGraphicsModule::Invalidate(ani_env* env, ani_long ptr)
     }
 }
 
-void AniGraphicsModule::SetDrawModifier(ani_env* env, ani_long ptr, ani_int flag, ani_object drawModifierObj)
+void AniGraphicsModule::SetDrawModifier(ani_env* env, ani_long ptr, uint32_t flag, ani_object drawModifierObj)
 {
     if (drawModifierObj == nullptr) {
         // drawModifierObj should not be nullptr;
