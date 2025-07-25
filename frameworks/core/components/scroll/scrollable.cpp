@@ -171,7 +171,7 @@ void Scrollable::Initialize(const WeakPtr<PipelineBase>& context)
         panRecognizerNG_->SetOnActionCancel(actionCancel);
     } else {
         panRecognizer_ = AceType::MakeRefPtr<PanRecognizer>(
-            context, DEFAULT_PAN_FINGER, panDirection, 5); /* 5: DEFAULT_PAN_DISTANCE:5px */
+            context, DEFAULT_PAN_FINGER, panDirection, 5); /* 5: pan recognizer distance: 5px */
         panRecognizer_->SetOnActionStart(actionStart);
         panRecognizer_->SetOnActionUpdate(actionUpdate);
         panRecognizer_->SetOnActionEnd(actionEnd);

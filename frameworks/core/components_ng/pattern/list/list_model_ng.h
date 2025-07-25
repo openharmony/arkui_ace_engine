@@ -172,7 +172,8 @@ public:
     static int32_t GetInitialIndex(FrameNode* frameNode);
     static V2::ItemDivider GetDivider(FrameNode* frameNode);
     static void SetScroller(FrameNode* frameNode, RefPtr<ScrollControllerBase> scroller, RefPtr<ScrollProxy> proxy);
-    static void SetOnScrollVisibleContentChange(FrameNode* frameNode, OnScrollVisibleContentChangeEvent&& onScrollVisibleContentChange);
+    static void SetOnScrollVisibleContentChange(
+        FrameNode* frameNode, OnScrollVisibleContentChangeEvent&& onScrollVisibleContentChange);
     static void SetOnItemMove(FrameNode* frameNode, OnItemMoveEvent&& onItemMove);
     static void SetOnItemDragStart(FrameNode* frameNode, OnItemDragStartFunc&& onItemDragStart);
     static void SetOnItemDragEnter(FrameNode* frameNode, OnItemDragEnterFunc&& onItemDragEnter);
