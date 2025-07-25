@@ -576,7 +576,6 @@ WebPattern::WebPattern()
     renderMode_ = RenderMode::ASYNC_RENDER;
     cursorType_ = OHOS::NWeb::CursorType::CT_NONE;
     viewDataCommon_ = std::make_shared<ViewDataCommon>();
-    RegisterSurfaceDensityCallback();
     InitRotationEventCallback();
 }
 
@@ -588,7 +587,6 @@ WebPattern::WebPattern(const std::string& webSrc, const RefPtr<WebController>& w
     InitMagnifier();
     cursorType_ = OHOS::NWeb::CursorType::CT_NONE;
     viewDataCommon_ = std::make_shared<ViewDataCommon>();
-    RegisterSurfaceDensityCallback();
     InitRotationEventCallback();
 }
 
@@ -600,7 +598,6 @@ WebPattern::WebPattern(const std::string& webSrc, const SetWebIdCallback& setWeb
     InitMagnifier();
     cursorType_ = OHOS::NWeb::CursorType::CT_NONE;
     viewDataCommon_ = std::make_shared<ViewDataCommon>();
-    RegisterSurfaceDensityCallback();
     InitRotationEventCallback();
 }
 
@@ -645,10 +642,6 @@ WebPattern::~WebPattern()
             pipCallbackMap_.erase(it);
         }
         pipController_.clear();
-    }
-    auto pipeline = PipelineBase::GetCurrentContextSafely();
-    if (pipeline) {
-        pipeline->UnregisterDensityChangedCallback(densityCallbackId_);
     }
     UninitRotationEventCallback();
 }
@@ -3567,6 +3560,7 @@ void WebPattern::OnAttachContext(PipelineContext *context)
     RegistVirtualKeyBoardListener(pipelineContext);
     InitConfigChangeCallback(pipelineContext);
     InitializeAccessibility();
+    InitSurfaceDensityCallback(pipelineContext);
 }
 
 void WebPattern::OnDetachContext(PipelineContext *contextPtr)
@@ -3578,6 +3572,7 @@ void WebPattern::OnDetachContext(PipelineContext *contextPtr)
     auto host = GetHost();
     int32_t nodeId = host->GetId();
     UninitializeAccessibility();
+    UnInitSurfaceDensityCallback(context);
     context->RemoveWindowStateChangedCallback(nodeId);
     context->RemoveWindowSizeChangeCallback(nodeId);
     context->RemoveOnAreaChangeNode(nodeId);
@@ -8010,19 +8005,6 @@ void WebPattern::EndTranslate()
         }, TaskExecutor::TaskType::UI, "ArkUIWebEndTranslate");
 }
 
-void WebPattern::RegisterSurfaceDensityCallback()
-{
-    auto pipeline = PipelineBase::GetCurrentContextSafely();
-    if (pipeline) {
-        density_ = pipeline->GetDensity();
-        densityCallbackId_ = pipeline->RegisterDensityChangedCallback([weak = WeakClaim(this)](double density) {
-            auto webPattern = weak.Upgrade();
-            CHECK_NULL_VOID(webPattern);
-            webPattern->SetSurfaceDensity(density);
-        });
-    }
-}
-
 void WebPattern::InitRotationEventCallback()
 {
     if (rotationEndCallbackId_ != 0) {
@@ -8529,5 +8511,28 @@ void WebPattern::SetTouchHandleExistState(bool touchHandleExist)
 bool WebPattern::IsShowHandle()
 {
     return webSelectOverlay_ && webSelectOverlay_->IsShowHandle();
+}
+
+void WebPattern::InitSurfaceDensityCallback(const RefPtr<PipelineContext> &context)
+{
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::InitSurfaceDensityCallback");
+    CHECK_NULL_VOID(context);
+    density_ = context->GetDensity();
+    if (delegate_) {
+        delegate_->SetSurfaceDensity(density_);
+    }
+    densityCallbackId_ = context->RegisterDensityChangedCallback([weak = WeakClaim(this)](double density) {
+        auto webPattern = weak.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        webPattern->SetSurfaceDensity(density);
+    });
+}
+
+void WebPattern::UnInitSurfaceDensityCallback(const RefPtr<PipelineContext> &context)
+{
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::UnInitSurfaceDensityCallback");
+    CHECK_NULL_VOID(context);
+    context->UnregisterDensityChangedCallback(densityCallbackId_);
+    densityCallbackId_ = 0;
 }
 } // namespace OHOS::Ace::NG
