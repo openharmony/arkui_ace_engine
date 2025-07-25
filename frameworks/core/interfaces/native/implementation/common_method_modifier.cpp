@@ -5585,6 +5585,18 @@ void BindMenu1Impl(Ark_NativePointer node,
 {
     BindMenuBase(node, isShow, content, options);
 }
+void ParseContextMenuParam(MenuParam& menuParam, const std::optional<Ark_ContextMenuOptions>& menuOption,
+    const ResponseType type, Ark_NativePointer node)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    g_bindContextMenuParams(menuParam, menuOption, node, frameNode);
+    if (type != ResponseType::LONG_PRESS) {
+        menuParam.previewMode = MenuPreviewMode::NONE;
+        menuParam.isShowHoverImage = false;
+        menuParam.menuBindType = MenuBindingType::RIGHT_CLICK;
+    }
+}
 void BindContextMenuBase(Ark_NativePointer node,
     const Opt_CustomNodeBuilder* content,
     const Opt_ResponseType *responseType,
@@ -5613,23 +5625,21 @@ void BindContextMenuBase(Ark_NativePointer node,
     };
     menuParam.previewMode = MenuPreviewMode::NONE;
     auto menuOption = Converter::GetOptPtr(options);
-    g_bindContextMenuParams(menuParam, menuOption, node, frameNode);
-    if (type != ResponseType::LONG_PRESS) {
-        menuParam.previewMode = MenuPreviewMode::NONE;
-        menuParam.isShowHoverImage = false;
-        menuParam.menuBindType = MenuBindingType::RIGHT_CLICK;
-    }
     Converter::VisitUnion(menuOption->preview,
-        [&menuParam, menuOption, contentBuilder](const Ark_MenuPreviewMode& value) {
+        [&menuParam, menuOption, type, node, contentBuilder](const Ark_MenuPreviewMode& value) {
             auto mode = Converter::OptConvert<MenuPreviewMode>(value);
             if (mode && mode.value() == MenuPreviewMode::IMAGE) {
                 menuParam.previewMode = MenuPreviewMode::IMAGE;
             }
+            ParseContextMenuParam(menuParam, menuOption, type, node);
             std::function<void()> previewBuildFunc = nullptr;
             contentBuilder(menuParam, std::move(previewBuildFunc));
         },
-        [&menuParam, menuOption, node, frameNode, &contentBuilder](const CustomNodeBuilder& value) {
+        [&menuParam, menuOption, type, node, &contentBuilder](const CustomNodeBuilder& value) {
+            auto frameNode = reinterpret_cast<FrameNode *>(node);
+            CHECK_NULL_VOID(frameNode);
             menuParam.previewMode = MenuPreviewMode::CUSTOM;
+            ParseContextMenuParam(menuParam, menuOption, type, node);
             CallbackHelper(value).BuildAsync([frameNode, menuParam, contentBuilder](const RefPtr<UINode>& uiNode) {
                 auto previewBuildFunc = [frameNode, uiNode]() {
                     PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
