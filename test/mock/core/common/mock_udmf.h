@@ -35,8 +35,7 @@ public:
     MOCK_METHOD(RefPtr<UnifiedData>, CreateUnifiedData, (), (override));
     MOCK_METHOD(int32_t, SetData, (const RefPtr<UnifiedData>& unifiedData, std::string& key), (override));
     MOCK_METHOD(int32_t, GetData, (const RefPtr<UnifiedData>& unifiedData, const std::string& key), (override));
-    MOCK_METHOD(int32_t, GetSummary, (std::string & key, (std::map<std::string, int64_t> & summaryMap),
-        (std::map<std::string, int64_t> & detailedSummaryMap)), (override));
+    MOCK_METHOD(int32_t, GetSummary, (std::string & key, DragSummaryInfo& dragSummaryInfo), (override));
     MOCK_METHOD(bool, GetRemoteStatus, (std::string& key), (override));
     MOCK_METHOD(void, AddFormRecord,
         (const RefPtr<UnifiedData>& unifiedData, int32_t formId, const RequestFormInfo& cardInfo), (override));
@@ -77,7 +76,8 @@ public:
     MOCK_METHOD(
         bool, GetFileUriEntry, (const RefPtr<UnifiedData>& unifiedData, std::vector<std::string>& uri), (override));
     MOCK_METHOD(std::vector<uint8_t>, GetSpanStringEntry, (const RefPtr<UnifiedData>& unifiedData), (override));
-    MOCK_METHOD(bool, IsBelongsTo, (const std::string& summary, const std::string& allowDropType), (override));
+    MOCK_METHOD(bool, IsAppropriateType,
+        (DragSummaryInfo& dragSummaryInfo, (const std::set<std::string>& allowTypes)), (override));
     MOCK_METHOD(RefPtr<DataLoadParams>, TransformDataLoadParams, (napi_env env, napi_value napiValue), (override));
     MOCK_METHOD(RefPtr<DataLoadParams>, TransformDataLoadParamsForNative, (void* rawData), (override));
     MOCK_METHOD(int32_t, SetDelayInfo, (RefPtr<DataLoadParams> dataLoadParams, std::string& key), (override));

@@ -789,7 +789,7 @@ bool JudgeCoordinateCanDrag(Msdp::DeviceStatus::ShadowInfo& shadowInfo)
 }
 
 int32_t SetUnifiedData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, std::string& udKey,
-    std::map<std::string, int64_t>& summary, std::map<std::string, int64_t>& detailedSummary)
+    DragSummaryInfo& dragSummaryInfo)
 {
     int32_t dataSize = 1;
     int32_t ret = 1;
@@ -810,7 +810,7 @@ int32_t SetUnifiedData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, std::st
         dataSize = static_cast<int32_t>(asyncCtx->unifiedData->GetSize());
     }
     if (ret == 0) {
-        ret = UdmfClient::GetInstance()->GetSummary(udKey, summary, detailedSummary);
+        ret = UdmfClient::GetInstance()->GetSummary(udKey, dragSummaryInfo);
         if (ret != 0) {
             TAG_LOGI(AceLogTag::ACE_DRAG, "get summary failed, return value is %{public}d", ret);
         }
@@ -848,9 +848,8 @@ bool EnvelopedDragData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
         return false;
     }
     std::string udKey;
-    std::map<std::string, int64_t> summary;
-    std::map<std::string, int64_t> detailedSummary;
-    int32_t dataSize = SetUnifiedData(asyncCtx, udKey, summary, detailedSummary);
+    DragSummaryInfo dragSummaryInfo;
+    int32_t dataSize = SetUnifiedData(asyncCtx, udKey, dragSummaryInfo);
     int32_t recordSize = (dataSize != 0 ? dataSize : static_cast<int32_t>(shadowInfos.size()));
     auto badgeNumber = asyncCtx->dragPreviewOption.GetCustomerBadgeNumber();
     if (badgeNumber.has_value()) {
@@ -865,7 +864,9 @@ bool EnvelopedDragData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
     dragData = { shadowInfos, {}, udKey, asyncCtx->extraParams, arkExtraInfoJson->ToString(),
         asyncCtx->dragPointerEvent.sourceType, recordSize, asyncCtx->dragPointerEvent.pointerId,
         asyncCtx->dragPointerEvent.displayX, asyncCtx->dragPointerEvent.displayY,
-        asyncCtx->dragPointerEvent.displayId, windowId, true, false, summary, false, detailedSummary };
+        asyncCtx->dragPointerEvent.displayId, windowId, true, false, dragSummaryInfo.summary, false,
+        dragSummaryInfo.detailedSummary, dragSummaryInfo.summaryFormat, dragSummaryInfo.version,
+        dragSummaryInfo.totalSize };
     return true;
 }
 
@@ -1166,9 +1167,8 @@ bool PrepareDragData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
     CHECK_NULL_RETURN(asyncCtx->pixelMap, false);
     int32_t dataSize = 1;
     std::string udKey;
-    std::map<std::string, int64_t> summary;
-    std::map<std::string, int64_t> detailedSummary;
-    dataSize = SetUnifiedData(asyncCtx, udKey, summary, detailedSummary);
+    DragSummaryInfo dragSummaryInfo;
+    dataSize = SetUnifiedData(asyncCtx, udKey, dragSummaryInfo);
     auto badgeNumber = asyncCtx->dragPreviewOption.GetCustomerBadgeNumber();
     if (badgeNumber.has_value()) {
         dataSize = badgeNumber.value();
@@ -1191,7 +1191,8 @@ bool PrepareDragData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
         arkExtraInfoJson->ToString(), asyncCtx->dragPointerEvent.sourceType, dataSize,
         asyncCtx->dragPointerEvent.pointerId, asyncCtx->dragPointerEvent.displayX,
         asyncCtx->dragPointerEvent.displayY, asyncCtx->dragPointerEvent.displayId,
-        windowId, true, false, summary, false, detailedSummary };
+        windowId, true, false, dragSummaryInfo.summary, false, dragSummaryInfo.detailedSummary,
+        dragSummaryInfo.summaryFormat, dragSummaryInfo.version, dragSummaryInfo.totalSize };
     return true;
 }
 

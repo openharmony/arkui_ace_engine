@@ -25,7 +25,6 @@
 #include "core/common/container_scope.h"
 #include "core/common/interaction/interaction_data.h"
 #include "core/common/interaction/interaction_interface.h"
-#include "core/common/udmf/udmf_client.h"
 #include "core/components/common/layout/grid_column_info.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components_ng/base/frame_node.h"
@@ -1283,15 +1282,8 @@ bool DragDropManager::IsDropAllowed(const RefPtr<FrameNode>& dragFrameNode)
         return true;
     }
     DragDropBehaviorReporter::GetInstance().UpdateAllowDropType(dragFrameNodeAllowDrop);
-    for (const auto& it : summaryMap_) {
-        // if one matched found, allow drop
-        for (const auto& element : dragFrameNodeAllowDrop) {
-            if (element == it.first || UdmfClient::GetInstance()->IsBelongsTo(it.first, element)) {
-                return true;
-            }
-        }
-    }
-    return false;
+    dragSummaryInfo_.summary = summaryMap_;
+    return UdmfClient::GetInstance()->IsAppropriateType(dragSummaryInfo_, dragFrameNodeAllowDrop);
 }
 
 void DragDropManager::RequestDragSummaryInfoAndPrivilege()
@@ -1619,17 +1611,17 @@ void DragDropManager::ExecuteCustomDropAnimation(const RefPtr<OHOS::Ace::DragEve
 
 void DragDropManager::RequireSummary()
 {
-    std::map<std::string, int64_t> summary;
-    int32_t ret = InteractionInterface::GetInstance()->GetDragSummary(summary);
+    DragSummaryInfo dragSummaryInfo;
+    int32_t ret =
+        InteractionInterface::GetInstance()->GetDragSummary(dragSummaryInfo.summary, dragSummaryInfo.detailedSummary,
+            dragSummaryInfo.summaryFormat, dragSummaryInfo.version, dragSummaryInfo.totalSize);
     if (ret != 0) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "RequireSummary: Interaction GetSummary failed: %{public}d", ret);
     } else {
-        std::string summarys;
-        for (const auto& [udkey, recordSize] : summary) {
-            std::string str = udkey + "-" + std::to_string(recordSize) + ";";
-            summarys += str;
-        }
-        TAG_LOGI(AceLogTag::ACE_DRAG, "require summary: %{public}s", summarys.c_str());
+        std::string summarys = DragDropFuncWrapper::GetSummaryString(dragSummaryInfo.summary);
+        std::string detailedSummarys = DragDropFuncWrapper::GetSummaryString(dragSummaryInfo.detailedSummary);
+        TAG_LOGI(AceLogTag::ACE_DRAG, "require summary: %{public}s, detailedSummary:%{public}s", summarys.c_str(),
+            detailedSummarys.c_str());
         DragDropBehaviorReporter::GetInstance().UpdateSummaryType(summarys);
     }
     std::string extraInfo;
@@ -1639,7 +1631,8 @@ void DragDropManager::RequireSummary()
     }
     previewRect_ = Rect(-1, -1, -1, -1);
     extraInfo_ = extraInfo;
-    summaryMap_ = summary;
+    summaryMap_ = dragSummaryInfo.summary;
+    dragSummaryInfo_ = dragSummaryInfo;
 }
 
 void DragDropManager::ResetRecordSize(uint32_t recordSize)

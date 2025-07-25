@@ -59,6 +59,9 @@ struct DragDataCore {
     std::map<std::string, int64_t> summarys;
     bool isDragDelay = false;
     std::map<std::string, int64_t> detailedSummarys;
+    std::map<std::string, std::vector<int32_t>> summaryFormat;
+    int32_t version { 0 };
+    int64_t totalSize { -1 };
 };
 
 struct DragBundleInfo {
