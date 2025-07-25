@@ -2362,13 +2362,13 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     if (vmType_ == VMType::ARK_NATIVE) {
         frontendType = FrontendType::ARK_TS;
     }
-    // if (appInfo->codeLanguage == AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_HYBRID) {
-    //     if (vmType_ == VMType::ARK_NATIVE) {
-    //         frontendType = FrontendType::STATIC_HYBRID_DYNAMIC;
-    //     } else {
-    //         frontendType = FrontendType::DYNAMIC_HYBRID_STATIC;
-    //     }
-    // }
+    if (appInfo->arkTSMode == AbilityRuntime::CODE_LANGUAGE_ARKTS_HYBRID) {
+        if (vmType_ == VMType::ARK_NATIVE) {
+            frontendType = FrontendType::STATIC_HYBRID_DYNAMIC;
+        } else {
+            frontendType = FrontendType::DYNAMIC_HYBRID_STATIC;
+        }
+    }
     auto container = CreateContainer(info, frontendType, useNewPipe);
     CHECK_NULL_RETURN(container, UIContentErrorCode::NULL_POINTER);
     container->SetUIContentType(uIContentType_);
