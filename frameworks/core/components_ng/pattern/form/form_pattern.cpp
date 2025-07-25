@@ -1245,9 +1245,7 @@ RefPtr<FrameNode> FormPattern::CreateForbiddenTextNode(std::string resourceName,
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, nullptr);
     if (isRowStyle) {
-        PaddingProperty padding;
-        padding.right = CalcLength(FORBIDDEN_STYLE_PADDING, DimensionUnit::VP);
-        textLayoutProperty->UpdatePadding(padding);
+        textLayoutProperty->UpdateLayoutWeight(1);
     }
     textLayoutProperty->UpdateContent(content);
     textLayoutProperty->UpdateFontWeight(FontWeight::MEDIUM);
