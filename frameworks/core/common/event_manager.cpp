@@ -899,7 +899,7 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event, bool sendOnTouch)
 
 void EventManager::UpdateInfoWhenFinishDispatch(const TouchEvent& point, bool sendOnTouch)
 {
-    if (point.type == TouchType::UP || point.type == TouchType::CANCEL) {
+    if ((point.type == TouchType::UP || point.type == TouchType::CANCEL) && !point.isFalsified) {
         LogTouchTestRecognizerStates(point.id);
         FrameTraceAdapter* ft = FrameTraceAdapter::GetInstance();
         if (ft != nullptr) {
