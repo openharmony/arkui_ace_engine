@@ -48,13 +48,9 @@ constexpr int NUM_8 = 8;
 }
 static thread_local std::vector<int32_t> restoreInstanceIds_;
 
-ani_ref* GetHostContext()
+ani_ref* GetHostContext(ArkUI_Int32 key)
 {
-    auto contextValue = OHOS::Ace::Framework::AniContextModule::GetAniContext();
-    if (contextValue) {
-        return contextValue.get();
-    }
-    return nullptr;
+    return OHOS::Ace::Framework::AniContextModule::GetAniContext(key);
 }
 
 void SyncInstanceId(ArkUI_Int32 instanceId)

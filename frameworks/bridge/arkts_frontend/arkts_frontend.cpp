@@ -533,8 +533,7 @@ bool ArktsFrontend::HandleMessage(void *frameNode, int32_t type, const std::stri
 
 void ArktsFrontend::SetAniContext(int32_t instanceId, ani_ref* context)
 {
-    std::shared_ptr<ani_ref> shared_ptr(context);
-    Framework::AniContextModule::AddAniContext(instanceId, shared_ptr);
+    Framework::AniContextModule::AddAniContext(instanceId, context);
 }
 
 void* ArktsFrontend::preloadArkTSRuntime = nullptr;
