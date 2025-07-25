@@ -1224,4 +1224,39 @@ HWTEST_F(ListControllerTestNg, GetInfo003, TestSize.Level1)
      */
     EXPECT_TRUE(IsEqual(pattern_->GetItemRect(0), Rect(0, -200.0f, WIDTH, 700.0f)));
 }
+
+/**
+ * @tc.name: CheckIsAtEndWhenScrollStop001
+ * @tc.desc: Test isAtEnd when scroll stop
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListControllerTestNg, CheckIsAtEndWhenScrollStop001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create 10 listItem with normal height and 1 listItem with zero height.
+     */
+    ListModelNG model = CreateList();
+    bool isAtEnd = false;
+    auto scrollStop = [&isAtEnd, weak = AceType::WeakClaim(AceType::RawPtr(pattern_))]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        isAtEnd = pattern->positionController_->IsAtEnd();
+    };
+    model.SetOnScrollStop(scrollStop);
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateItemWithSize(1, SizeT<Dimension>(FILL_LENGTH, Dimension(0.f)));
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Fling to bottom, check isAtEnd when scroll stop.
+     * @tc.expected: isAtEnd is true.
+     */
+    MockAnimationManager::GetInstance().SetTicks(TICK);
+    const float finalPosition = 600.0f;
+    const float flingVelocity = finalPosition * FRICTION * FRICTION_SCALE;
+    Fling(flingVelocity);
+    EXPECT_TRUE(TickPosition(-finalPosition / TICK));
+    EXPECT_TRUE(TickPosition(-finalPosition));
+    EXPECT_TRUE(isAtEnd);
+}
 } // namespace OHOS::Ace::NG

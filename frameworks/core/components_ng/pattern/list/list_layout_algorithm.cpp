@@ -1273,14 +1273,14 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t st
             endMainPos = layoutEndMainPos_.value_or(endMainPos_);
             forwardFeature_ = false;
         }
-    } while (LessNotEqual(currentEndPos + chainOffset, endMainPos + endFixPos) || forwardFeature_);
+    } while (LessOrEqual(currentEndPos + chainOffset, endMainPos + endFixPos) || forwardFeature_);
     currentEndPos += chainOffset;
 
     while (itemPosition_.size() > 1 && !targetIndex_) {
         auto pos = itemPosition_.rbegin();
         float chainDelta = GetChainOffset(pos->first);
-        if (GreatNotEqual(pos->second.endPos + chainDelta, endMainPos) &&
-            GreatOrEqual(pos->second.startPos + chainDelta, endMainPos)) {
+        if (GreatNotEqual(pos->second.endPos + chainDelta, endMainPos + endFixPos) &&
+            GreatOrEqual(pos->second.startPos + chainDelta, endMainPos + endFixPos)) {
             recycledItemPosition_.emplace(pos->first, pos->second);
             itemPosition_.erase(pos->first);
         } else {
@@ -2258,6 +2258,7 @@ CachedIndexInfo ListLayoutAlgorithm::GetLayoutGroupCachedCount(LayoutWrapper* la
         wrapper->SetActive(true);
         wrapper->Layout();
         group->SyncItemsToCachedItemPosition();
+        recycledItemPosition_.erase(index);
     }
     bool forward = forwardCache > -1;
     bool backward = backwardCache > -1;
