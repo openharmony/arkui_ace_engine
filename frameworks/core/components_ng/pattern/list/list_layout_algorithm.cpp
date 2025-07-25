@@ -185,7 +185,6 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             posMap_->ClearPosMap();
         }
     }
-
     // In the secondary layout scenario, the previous contentMainSize_ is used as the next prevContentMainSize_.
     prevContentMainSize_ = contentMainSize_;
     
