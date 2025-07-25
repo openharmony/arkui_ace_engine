@@ -57,6 +57,21 @@ bool ParseAniDimensionVp(ani_env* env, ani_object obj, CalcDimension& result)
     // 'vp' -> the value varies with pixel density of device.
     return ParseAniDimension(env, obj, result, DimensionUnit::VP);
 }
+void SetConstraintNG(ani_env* env, ani_object constraint_obj, ani_object minWidth, ani_object minHeight, ani_object maxWidth, ani_object maxHeight)
+{
+    if (ANI_OK != env->Object_SetPropertyByName_Ref(constraint_obj, "maxWidth", maxWidth)) {
+        return;
+    }
+    if (ANI_OK != env->Object_SetPropertyByName_Ref(constraint_obj, "maxHeight", maxHeight)) {
+        return;
+    }
+    if (ANI_OK != env->Object_SetPropertyByName_Ref(constraint_obj, "minWidth", minWidth)) {
+        return;
+    }
+    if (ANI_OK != env->Object_SetPropertyByName_Ref(constraint_obj, "minHeight", minHeight)) {
+        return;
+    }
+}
 
 ani_object GenConstraintNG(ani_env* env, const NG::LayoutConstraintF& parentConstraint)
 {
@@ -68,7 +83,7 @@ ani_object GenConstraintNG(ani_env* env, const NG::LayoutConstraintF& parentCons
     if (ANI_OK != env->FindClass(className, &cls)) {
         return nullptr;
     }
-
+    
     ani_method ctor;
     if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
         return nullptr;
@@ -84,20 +99,7 @@ ani_object GenConstraintNG(ani_env* env, const NG::LayoutConstraintF& parentCons
     if (ANI_OK != env->Object_New(cls, ctor, &constraint_obj, minWidth, minHeight, maxWidth, maxHeight)) {
         return nullptr;
     }
-    if (ANI_OK != env->Object_SetPropertyByName_Ref(constraint_obj, "maxWidth", maxWidth)) {
-        return nullptr;
-    }
-    if (ANI_OK != env->Object_SetPropertyByName_Ref(constraint_obj, "maxHeight", maxHeight)) {
-        return nullptr;
-    }
-    if (ANI_OK != env->Object_SetPropertyByName_Ref(constraint_obj, "minWidth", minWidth)) {
-        return nullptr;
-    }
-    if (ANI_OK != env->Object_SetPropertyByName_Ref(constraint_obj, "minHeight", minHeight)) {
-        return nullptr;
-    }
-
-
+    SetConstraintNG(env, constraint_obj, minWidth, minHeight, maxWidth, maxHeight);
     auto pipeline = PipelineBase::GetCurrentContext();
     if (!pipeline) {
         return constraint_obj;
@@ -110,19 +112,7 @@ ani_object GenConstraintNG(ani_env* env, const NG::LayoutConstraintF& parentCons
         TAG_LOGW(AceLogTag::ACE_LAYOUT, "GenConstraintNG failed.");
         return nullptr;
     }
-    if (ANI_OK != env->Object_SetPropertyByName_Ref(constraint_obj, "maxWidth", maxWidth)) {
-        return nullptr;
-    }
-    if (ANI_OK != env->Object_SetPropertyByName_Ref(constraint_obj, "maxHeight", maxHeight)) {
-        return nullptr;
-    }
-    if (ANI_OK != env->Object_SetPropertyByName_Ref(constraint_obj, "minWidth", minWidth)) {
-        return nullptr;
-    }
-    if (ANI_OK != env->Object_SetPropertyByName_Ref(constraint_obj, "minHeight", minHeight)) {
-        return nullptr;
-    }
-
+    SetConstraintNG(env, constraint_obj, minWidth, minHeight, maxWidth, maxHeight);
     return constraint_obj;
 }
 
@@ -153,18 +143,7 @@ ani_object GenPlaceChildrenConstraintNG(ani_env* env, const NG::SizeF& size, Ref
         if (ANI_OK != env->Object_New(cls, ctor, &constraint_obj, minWidth, minHeight, maxWidth, maxHeight)) {
             return nullptr;
         }
-        if (ANI_OK != env->Object_SetPropertyByName_Ref(constraint_obj, "maxWidth", maxWidth)) {
-            return nullptr;
-        }
-        if (ANI_OK != env->Object_SetPropertyByName_Ref(constraint_obj, "maxHeight", maxHeight)) {
-            return nullptr;
-        }
-        if (ANI_OK != env->Object_SetPropertyByName_Ref(constraint_obj, "minWidth", minWidth)) {
-            return nullptr;
-        }
-        if (ANI_OK != env->Object_SetPropertyByName_Ref(constraint_obj, "minHeight", minHeight)) {
-            return nullptr;
-        }
+        SetConstraintNG(env, constraint_obj, minWidth, minHeight, maxWidth, maxHeight);
         return constraint_obj;
     }
     auto minSize = layoutProperty->GetLayoutConstraint().value().minSize;
@@ -196,18 +175,7 @@ ani_object GenPlaceChildrenConstraintNG(ani_env* env, const NG::SizeF& size, Ref
         TAG_LOGW(AceLogTag::ACE_LAYOUT, "GenPlaceChildrenConstraintNG failed.");
         return nullptr;
     }
-    if (ANI_OK != env->Object_SetPropertyByName_Ref(constraint_obj, "maxWidth", maxWidth)) {
-        return nullptr;
-    }
-    if (ANI_OK != env->Object_SetPropertyByName_Ref(constraint_obj, "maxHeight", maxHeight)) {
-        return nullptr;
-    }
-    if (ANI_OK != env->Object_SetPropertyByName_Ref(constraint_obj, "minWidth", minWidth)) {
-        return nullptr;
-    }
-    if (ANI_OK != env->Object_SetPropertyByName_Ref(constraint_obj, "minHeight", minHeight)) {
-        return nullptr;
-    }
+    SetConstraintNG(env, constraint_obj, minWidth, minHeight, maxWidth, maxHeight);
     return constraint_obj;
 }
 
