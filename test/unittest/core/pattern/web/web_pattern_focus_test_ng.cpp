@@ -265,7 +265,7 @@ public:
 
     void StopAnimate() override {}
 
-    float GetTotalOffset() const override
+    double GetTotalOffset() const override
     {
         return 0.0f;
     }

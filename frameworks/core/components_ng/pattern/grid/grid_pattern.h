@@ -174,7 +174,7 @@ public:
 
     bool UpdateStartIndex(int32_t index, ScrollAlign align);
 
-    float GetTotalOffset() const override
+    double GetTotalOffset() const override
     {
         return EstimateHeight();
     }

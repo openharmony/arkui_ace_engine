@@ -390,7 +390,7 @@ public:
     void PlaySpringAnimation(
         float position, float velocity, float mass, float stiffness, float damping, bool useTotalOffset = true);
     void PlayCurveAnimation(float position, float duration, const RefPtr<Curve>& curve, bool canOverScroll);
-    virtual float GetTotalOffset() const
+    virtual double GetTotalOffset() const
     {
         return 0.0f;
     }

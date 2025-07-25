@@ -106,7 +106,7 @@ public:
 
     int32_t GetChildrenCount() const;
 
-    float GetTotalOffset() const override
+    double GetTotalOffset() const override
     {
         return -layoutInfo_->Offset();
     }
