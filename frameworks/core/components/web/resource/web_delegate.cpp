@@ -8454,6 +8454,13 @@ void WebDelegate::KeyboardReDispatch(const std::shared_ptr<OHOS::NWeb::NWebKeyEv
     webPattern->KeyboardReDispatch(event, isUsed);
 }
 
+void WebDelegate::OnTakeFocus(const std::shared_ptr<OHOS::NWeb::NWebKeyEvent>& event)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->OnTakeFocus(event);
+}
+
 void WebDelegate::OnCursorUpdate(double x, double y, double width, double height)
 {
     auto webPattern = webPattern_.Upgrade();

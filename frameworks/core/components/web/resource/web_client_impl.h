@@ -287,6 +287,8 @@ public:
 
     void KeyboardReDispatch(std::shared_ptr<OHOS::NWeb::NWebKeyEvent> event, bool isUsed) override;
 
+    void OnTakeFocus(std::shared_ptr<OHOS::NWeb::NWebKeyEvent> event) override;
+
     void OnCursorUpdate(double x, double y, double width, double height) override;
 
     void StartVibraFeedback(const std::string& vibratorType) override;
