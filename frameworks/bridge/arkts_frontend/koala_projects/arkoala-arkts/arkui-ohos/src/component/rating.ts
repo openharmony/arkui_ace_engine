@@ -28,6 +28,7 @@ import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { RatingOpsHandWritten, hookRatingContentModifier } from "./../handwritten"
+import { ResourceStr } from "./units"
 
 export class ArkRatingPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -184,9 +185,9 @@ export interface RatingOptions {
     indicator?: boolean;
 }
 export interface StarStyleOptions {
-    backgroundUri: string;
-    foregroundUri: string;
-    secondaryUri?: string;
+    backgroundUri: ResourceStr;
+    foregroundUri: ResourceStr;
+    secondaryUri?: ResourceStr;
 }
 export type RatingInterface = (options?: RatingOptions) => RatingAttribute;
 export interface RatingConfiguration extends CommonConfiguration<RatingConfiguration> {
