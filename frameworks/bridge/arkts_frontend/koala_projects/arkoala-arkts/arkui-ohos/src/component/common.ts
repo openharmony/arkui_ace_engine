@@ -4651,15 +4651,14 @@ export class ArkCommonMethodPeer extends PeerNode {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
-            if (RuntimeType.OBJECT == value_value_type) {
-                thisSerializer.writeInt8(0 as int32)
-                const value_value_0  = value_value as ShadowOptions
-                thisSerializer.writeShadowOptions(value_value_0)
-            }
-            else if (TypeChecker.isShadowStyle(value_value)) {
+            if (TypeChecker.isShadowStyle(value_value)) {
                 thisSerializer.writeInt8(1 as int32)
                 const value_value_1  = value_value as ShadowStyle
                 thisSerializer.writeInt32(TypeChecker.ShadowStyle_ToNumeric(value_value_1))
+            } else if (RuntimeType.OBJECT == value_value_type) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as ShadowOptions
+                thisSerializer.writeShadowOptions(value_value_0)
             }
         }
         ArkUIGeneratedNativeModule._CommonMethod_shadow0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
@@ -11049,7 +11048,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
             const style_type = runtimeType(style)
             const options_type = runtimeType(options)
             const sysOptions_type = runtimeType(sysOptions)
-            if (((RuntimeType.NUMBER == style_type) || (RuntimeType.UNDEFINED == style_type))) {
+            if (((RuntimeType.NUMBER == style_type) || (RuntimeType.UNDEFINED == style_type) || (RuntimeType.OBJECT == options_type) || (RuntimeType.UNDEFINED == options_type))) {
                 const value_casted = style as (BlurStyle | undefined)
                 const options_casted = options as (BackgroundBlurStyleOptions | undefined)
                 this.getPeer()?.backgroundBlurStyle0Attribute(value_casted, options_casted)
