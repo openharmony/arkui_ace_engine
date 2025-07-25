@@ -37,7 +37,7 @@ constexpr int32_t DEFAULT_TEXT_ZOOM_RATIO = 100;
 constexpr float DEFAULT_INITIAL_SCALE = 100.0f;
 constexpr bool DEFAULT_GEOLOCATION_ACCESS_ENABLED = false;
 constexpr bool DEFAULT_DATABASE_ACCESS_ENABLED = false;
-constexpr bool DEFAULT_OVERVIEWMODE_ACCESS_ENABLED = true;
+constexpr bool DEFAULT_OVERVIEW_MODE_ACCESS = false;
 constexpr bool DEFAULT_FORCEDARK_ACCESS_ENABLED = false;
 constexpr bool DEFAULT_PINCH_SMOOTH_ENABLED = false;
 constexpr bool DEFAULT_META_VIEWPORT_ENABLED = true;
@@ -480,7 +480,7 @@ void ResetOverviewModeAccess(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    WebModelNG::SetOverviewModeAccessEnabled(frameNode, DEFAULT_OVERVIEWMODE_ACCESS_ENABLED);
+    WebModelNG::SetOverviewModeAccessEnabled(frameNode, DEFAULT_OVERVIEW_MODE_ACCESS);
 }
 
 void SetForceDarkAccess(ArkUINodeHandle node, ArkUI_Bool value)
