@@ -1,0 +1,18 @@
+{
+  "rootElement": {
+    "id": 1299,
+    "kind": "ComponentRoot",
+    "children": [
+      {
+        "id": 1300,
+        "kind": "XComponent",
+        "children": [],
+        "options": {
+          "id": "xcomponent",
+          "type": "surface",
+          "libraryname": "libraryname"
+        }
+      }
+    ]
+  }
+}

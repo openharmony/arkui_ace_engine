@@ -1,0 +1,17 @@
+{
+  "extends": "@koalaui/arkui-common/config/tsconfig.base.json",
+  "include": [
+    "../spec/**/*.ets"
+  ],
+  "compilerOptions": {
+    "baseUrl": "../spec",
+    "outDir": "../../build/js/arkoala/spec",
+    "plugins": [
+      {
+        "transform": "@koalaui/ets-plugin/build/lib/src/ArkExpander.js",
+        "arkui": "@koalaui/arkoala-arkui",
+        "destination": "../../build/ts/arkoala/spec",
+      }
+    ]
+  }
+}

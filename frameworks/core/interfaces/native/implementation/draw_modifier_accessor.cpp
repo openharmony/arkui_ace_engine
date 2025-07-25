@@ -80,7 +80,4 @@ const GENERATED_ArkUIDrawModifierAccessor* GetDrawModifierAccessor()
     return &DrawModifierAccessorImpl;
 }
 
-struct DrawModifierPeer {
-    virtual ~DrawModifierPeer() = default;
-};
 }

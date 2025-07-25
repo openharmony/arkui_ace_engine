@@ -38,8 +38,8 @@ void AssignCast(std::optional<BarrierDirection>& dst, const Ark_LocalizedBarrier
     switch (src) {
         case ARK_LOCALIZED_BARRIER_DIRECTION_START: dst = BarrierDirection::START; break;
         case ARK_LOCALIZED_BARRIER_DIRECTION_END: dst = BarrierDirection::END; break;
-        // case ARK_BARRIER_DIRECTION_TOP: dst = BarrierDirection::TOP; break;
-        // case ARK_BARRIER_DIRECTION_BOTTOM: dst = BarrierDirection::BOTTOM; break;
+        case ARK_LOCALIZED_BARRIER_DIRECTION_TOP: dst = BarrierDirection::TOP; break;
+        case ARK_LOCALIZED_BARRIER_DIRECTION_BOTTOM: dst = BarrierDirection::BOTTOM; break;
         default: LOGE("Unexpected enum value in Ark_BarrierDirection: %{public}d", src);
     }
 }
@@ -112,31 +112,40 @@ void SetRelativeContainerOptionsImpl(Ark_NativePointer node)
 } // RelativeContainerInterfaceModifier
 namespace RelativeContainerAttributeModifier {
 void GuideLineImpl(Ark_NativePointer node,
-                   const Array_GuideLineStyle* value)
+                   const Opt_Array_GuideLineStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto infoVec = Converter::Convert<std::vector<GuidelineInfo>>(*value);
-    RelativeContainerModelNG::SetGuideline(frameNode, infoVec);
+    auto convValue = Converter::OptConvert<std::vector<GuidelineInfo>>(*value);
+    if (!convValue) {
+        // TODO: Reset value
+        return;
+    }
+    RelativeContainerModelNG::SetGuideline(frameNode, *convValue);
 }
 void Barrier0Impl(Ark_NativePointer node,
-                  const Array_BarrierStyle* value)
+                  const Opt_Array_BarrierStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto infoVec = Converter::Convert<std::vector<BarrierInfo>>(*value);
-    RelativeContainerModelNG::SetBarrier(frameNode, infoVec);
+    auto convValue = Converter::OptConvert<std::vector<BarrierInfo>>(*value);
+    if (!convValue) {
+        // TODO: Reset value
+        return;
+    }
+    RelativeContainerModelNG::SetBarrier(frameNode, *convValue);
 }
 void Barrier1Impl(Ark_NativePointer node,
-                  const Array_LocalizedBarrierStyle* value)
+                  const Opt_Array_LocalizedBarrierStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto infoVec = Converter::Convert<std::vector<BarrierInfo>>(*value);
-    RelativeContainerModelNG::SetBarrier(frameNode, infoVec);
+    auto convValue = Converter::OptConvert<std::vector<BarrierInfo>>(*value);
+    if (!convValue) {
+        // TODO: Reset value
+        return;
+    }
+    RelativeContainerModelNG::SetBarrier(frameNode, *convValue);
 }
 } // RelativeContainerAttributeModifier
 const GENERATED_ArkUIRelativeContainerModifier* GetRelativeContainerModifier()

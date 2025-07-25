@@ -1,0 +1,143 @@
+{
+  "rootElement": {
+    "id": 1028,
+    "kind": "ComponentRoot",
+    "children": [
+      {
+        "id": 1029,
+        "kind": "Column",
+        "children": [
+          {
+            "id": 1030,
+            "kind": "Progress",
+            "children": [],
+            "value": "33",
+            "total": "100",
+            "progressType": "ProgressType.Linear"
+          },
+          {
+            "id": 1031,
+            "kind": "Progress",
+            "children": [],
+            "value": "33",
+            "total": "100",
+            "progressType": "ProgressType.Ring"
+          },
+          {
+            "id": 1032,
+            "kind": "Progress",
+            "children": [],
+            "value": "33",
+            "total": "100",
+            "progressType": "ProgressType.Eclipse"
+          },
+          {
+            "id": 1033,
+            "kind": "Progress",
+            "children": [],
+            "value": "33",
+            "total": "100",
+            "progressType": "ProgressType.ScaleRing"
+          },
+          {
+            "id": 1034,
+            "kind": "Progress",
+            "children": [],
+            "value": "33",
+            "total": "100",
+            "progressType": "ProgressType.Capsule"
+          },
+          {
+            "id": 1035,
+            "kind": "Progress",
+            "children": [],
+            "color": "#0000ff",
+            "backgroundColor": "#808080",
+            "value": "33",
+            "total": "999",
+            "progressType": "ProgressType.Linear",
+            "styleOptions": {
+              "strokeWidth": "4vp",
+              "strokeRadius": "16px",
+              "enableScanEffect": "false",
+              "enableSmoothEffect": "false"
+            }
+          },
+          {
+            "id": 1036,
+            "kind": "Progress",
+            "children": [],
+            "color": "#0000ff",
+            "backgroundColor": "#808080",
+            "value": "33",
+            "total": "999",
+            "progressType": "ProgressType.Ring",
+            "styleOptions": {
+              "strokeWidth": "4vp",
+              "shadow": "true",
+              "status": "PROGRESSING",
+              "enableScanEffect": "true",
+              "enableSmoothEffect": "true"
+            }
+          },
+          {
+            "id": 1037,
+            "kind": "Progress",
+            "children": [],
+            "color": "#0000ff",
+            "backgroundColor": "#808080",
+            "value": "33",
+            "total": "999",
+            "progressType": "ProgressType.Eclipse",
+            "styleOptions": {
+              "enableSmoothEffect": "true"
+            }
+          },
+          {
+            "id": 1038,
+            "kind": "Progress",
+            "children": [],
+            "color": "#0000ff",
+            "backgroundColor": "#808080",
+            "value": "33",
+            "total": "999",
+            "progressType": "ProgressType.ScaleRing",
+            "styleOptions": {
+              "strokeWidth": "4vp",
+              "scaleCount": "100",
+              "scaleWidth": "2vp",
+              "enableSmoothEffect": "true"
+            }
+          },
+          {
+            "id": 1039,
+            "kind": "Progress",
+            "children": [],
+            "color": "#0000ff",
+            "backgroundColor": "#808080",
+            "value": "33",
+            "total": "999",
+            "progressType": "ProgressType.Capsule",
+            "styleOptions": {
+              "borderColor": "#ff0000",
+              "borderWidth": "6vp",
+              "content": "Capsule Progress Content",
+              "font": {
+                "size": "10fp",
+                "weight": "Lighter",
+                "family": "Calibri",
+                "style": "Italic"
+              },
+              "fontColor": "#030303",
+              "enableScanEffect": "true",
+              "showDefaultPercentage": "true",
+              "enableSmoothEffect": "true"
+            }
+          }
+        ],
+        "width": "100%",
+        "height": "100%"
+      }
+    ]
+  }
+}

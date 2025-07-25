@@ -18,11 +18,11 @@
 
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
-import { unsafeCast, int32, float32, int64 } from "@koalaui/common"
-import { Serializer } from "./../generated/peers/Serializer"
-import { CallbackKind } from "./../generated/peers/CallbackKind"
-import { Deserializer } from "./../generated/peers/Deserializer"
-import { CallbackTransformer } from "./../generated/peers/CallbackTransformer"
+import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
+import { Serializer } from "./peers/Serializer"
+import { CallbackKind } from "./peers/CallbackKind"
+import { Deserializer } from "./peers/Deserializer"
+import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 export class ImageAnalyzerControllerInternal {
     public static fromPtr(ptr: KPointer): ImageAnalyzerController {
@@ -52,11 +52,11 @@ export class ImageAnalyzerController implements MaterializedBase {
     }
     private getImageAnalyzerSupportTypes_serialize(): Array<ImageAnalyzerType> {
         const retval  = ArkUIGeneratedNativeModule._ImageAnalyzerController_getImageAnalyzerSupportTypes(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const buffer_length : int32 = retvalDeserializer.readInt32()
         let buffer : Array<ImageAnalyzerType> = new Array<ImageAnalyzerType>(buffer_length)
         for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
-            buffer[buffer_i] = (retvalDeserializer.readInt32() as ImageAnalyzerType)
+            buffer[buffer_i] = TypeChecker.ImageAnalyzerType_FromNumeric(retvalDeserializer.readInt32())
         }
         const returnResult : Array<ImageAnalyzerType> = buffer
         return returnResult

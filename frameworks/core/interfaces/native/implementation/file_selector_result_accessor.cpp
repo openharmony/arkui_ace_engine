@@ -22,8 +22,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace FileSelectorResultAccessor {
 void DestroyPeerImpl(Ark_FileSelectorResult peer)
 {
-    CHECK_NULL_VOID(peer);
-    peer->handler = nullptr;
     delete peer;
 }
 Ark_FileSelectorResult CtorImpl()
@@ -54,7 +52,4 @@ const GENERATED_ArkUIFileSelectorResultAccessor* GetFileSelectorResultAccessor()
     return &FileSelectorResultAccessorImpl;
 }
 
-struct FileSelectorResultPeer {
-    virtual ~FileSelectorResultPeer() = default;
-};
 }

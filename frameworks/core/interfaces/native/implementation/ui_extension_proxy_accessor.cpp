@@ -31,20 +31,20 @@ void DestroyPeerImpl(Ark_UIExtensionProxy peer)
 }
 Ark_UIExtensionProxy CtorImpl()
 {
-    return nullptr;
+    return new UIExtensionProxyPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void SendImpl(Ark_UIExtensionProxy peer,
-              const Map_String_CustomObject* data)
+              const Map_String_Object* data)
 {
     LOGE("UIExtensionProxyAccessor::SendImpl - is not supported");
 }
-Map_String_CustomObject SendSyncImpl(Ark_VMContext vmContext,
-                                     Ark_UIExtensionProxy peer,
-                                     const Map_String_CustomObject* data)
+Map_String_Object SendSyncImpl(Ark_VMContext vmContext,
+                               Ark_UIExtensionProxy peer,
+                               const Map_String_Object* data)
 {
     LOGE("UIExtensionProxyAccessor::SendSyncImpl - is not supported");
     return {};
@@ -152,7 +152,4 @@ const GENERATED_ArkUIUIExtensionProxyAccessor* GetUIExtensionProxyAccessor()
     return &UIExtensionProxyAccessorImpl;
 }
 
-struct UIExtensionProxyPeer {
-    virtual ~UIExtensionProxyPeer() = default;
-};
 }

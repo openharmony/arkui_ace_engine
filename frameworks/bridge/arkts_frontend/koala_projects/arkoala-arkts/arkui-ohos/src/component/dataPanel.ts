@@ -17,30 +17,21 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
-import { unsafeCast, int32, float32, int64 } from "@koalaui/common"
-import { Serializer } from "./../generated/peers/Serializer"
-import { CallbackKind } from "./../generated/peers/CallbackKind"
-import { Deserializer } from "./../generated/peers/Deserializer"
-import { CallbackTransformer } from "./../generated/peers/CallbackTransformer"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
+import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
+import { Serializer } from "./peers/Serializer"
+import { CallbackKind } from "./peers/CallbackKind"
+import { Deserializer } from "./peers/Deserializer"
+import { CallbackTransformer } from "./peers/CallbackTransformer"
+import { ComponentBase } from "./../ComponentBase"
+import { PeerNode } from "./../PeerNode"
+import { ArkCommonMethodPeer, CommonMethod, MultiShadowOptions, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { ResourceColor, Length } from "./units"
+import { ContentModifier, CommonConfiguration } from "./arkui-wrapper-builder"
+import { Color } from "./enums"
+import { Resource } from "global/resource"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { ResourceColor, Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions } from "./units"
-import { MultiShadowOptions, CommonConfiguration, ContentModifier, CommonMethod, DrawModifier, Rectangle, Callback_Array_TouchTestInfo_TouchResult, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, Callback_ClickEvent_Void, ClickEvent, Callback_Boolean_HoverEvent_Void, HoverEvent, AccessibilityCallback, Callback_MouseEvent_Void, MouseEvent, Callback_TouchEvent_Void, TouchEvent, Callback_KeyEvent_Void, KeyEvent, Callback_KeyEvent_Boolean, AnimateParam, TransitionOptions, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, Callback_Area_Area_Void, Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs, Literal_Number_offset_span, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, DragEvent, CustomBuilder, DragItemInfo, Callback_DragEvent_String_Void, UniformDataType, Callback_PreDragStatus_Void, PreDragStatus, Type_CommonMethod_linearGradient_value, Tuple_ResourceColor_Number, Type_CommonMethod_sweepGradient_value, Tuple_Length_Length, Type_CommonMethod_radialGradient_value, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, GestureModifier, BackgroundBrightnessOptions, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, Callback_TouchEvent_HitTestMode, SizeChangeCallback, SafeAreaType, SafeAreaEdge, Literal_Alignment_align, BlurStyle, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, ComponentContent, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback } from "./common"
-import { Resource } from "global/resource";
-import { HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Color, Visibility, ItemAlign, Direction, GradientDirection, ObscuredReasons, RenderFit, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey } from "./enums"
-import { LengthMetrics } from "../Graphics"
-import { ResizableOptions } from "./image"
-import { Callback_Void } from "./abilityComponent"
-import { FocusBoxStyle, FocusPriority } from "./focus"
-import { CircleShape } from "./../generated/ArkCircleShapeMaterialized"
-import { EllipseShape } from "./../generated/ArkEllipseShapeMaterialized"
-import { PathShape } from "./../generated/ArkPathShapeMaterialized"
-import { RectShape } from "./../generated/ArkRectShapeMaterialized"
-import { AttributeModifier } from "./../component/common" 
-import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureType, GestureMask } from "./gesture"
-import { PixelMap } from "./../generated/ArkPixelMapMaterialized"
-import { ArkDataPanelComponent } from "./../generated/ArkDataPanel"
-import { ArkDataPanelPeer } from "./../generated/peers/ArkDataPanelPeer"
+
 export class LinearGradientInternal {
     public static fromPtr(ptr: KPointer): LinearGradient {
         const obj : LinearGradient = new LinearGradient(undefined)
@@ -75,6 +66,153 @@ export class LinearGradient implements MaterializedBase {
         return ArkUIGeneratedNativeModule._LinearGradient_getFinalizer()
     }
 }
+export class ArkDataPanelPeer extends ArkCommonMethodPeer {
+    protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+        super(peerPtr, id, name, flags)
+    }
+    public static create(component: ComponentBase | undefined, flags: int32 = 0): ArkDataPanelPeer {
+        const peerId  = PeerNode.nextId()
+        const _peerPtr  = ArkUIGeneratedNativeModule._DataPanel_construct(peerId, flags)
+        const _peer  = new ArkDataPanelPeer(_peerPtr, peerId, "DataPanel", flags)
+        component?.setPeer(_peer)
+        return _peer
+    }
+    setDataPanelOptionsAttribute(options: DataPanelOptions): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        thisSerializer.writeDataPanelOptions(options)
+        ArkUIGeneratedNativeModule._DataPanelInterface_setDataPanelOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    closeEffectAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._DataPanelAttribute_closeEffect(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    valueColorsAttribute(value: Array<ResourceColor | LinearGradient> | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeInt32(value_value.length as int32)
+            for (let i = 0; i < value_value.length; i++) {
+                const value_value_element : ResourceColor | LinearGradient = value_value[i]
+                let value_value_element_type : int32 = RuntimeType.UNDEFINED
+                value_value_element_type = runtimeType(value_value_element)
+                if ((TypeChecker.isColor(value_value_element)) || (RuntimeType.NUMBER == value_value_element_type) || (RuntimeType.STRING == value_value_element_type) || (RuntimeType.OBJECT == value_value_element_type)) {
+                    thisSerializer.writeInt8(0 as int32)
+                    const value_value_element_0  = value_value_element as ResourceColor
+                    let value_value_element_0_type : int32 = RuntimeType.UNDEFINED
+                    value_value_element_0_type = runtimeType(value_value_element_0)
+                    if (TypeChecker.isColor(value_value_element_0)) {
+                        thisSerializer.writeInt8(0 as int32)
+                        const value_value_element_0_0  = value_value_element_0 as Color
+                        thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_value_element_0_0))
+                    }
+                    else if (RuntimeType.NUMBER == value_value_element_0_type) {
+                        thisSerializer.writeInt8(1 as int32)
+                        const value_value_element_0_1  = value_value_element_0 as number
+                        thisSerializer.writeNumber(value_value_element_0_1)
+                    }
+                    else if (RuntimeType.STRING == value_value_element_0_type) {
+                        thisSerializer.writeInt8(2 as int32)
+                        const value_value_element_0_2  = value_value_element_0 as string
+                        thisSerializer.writeString(value_value_element_0_2)
+                    }
+                    else if (RuntimeType.OBJECT == value_value_element_0_type) {
+                        thisSerializer.writeInt8(3 as int32)
+                        const value_value_element_0_3  = value_value_element_0 as Resource
+                        thisSerializer.writeResource(value_value_element_0_3)
+                    }
+                }
+                else if (TypeChecker.isLinearGradient(value_value_element)) {
+                    thisSerializer.writeInt8(1 as int32)
+                    const value_value_element_1  = value_value_element as LinearGradient
+                    thisSerializer.writeLinearGradient(value_value_element_1)
+                }
+            }
+        }
+        ArkUIGeneratedNativeModule._DataPanelAttribute_valueColors(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    trackBackgroundColorAttribute(value: ResourceColor | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (TypeChecker.isColor(value_value)) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as Color
+                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_value_0))
+            }
+            else if (RuntimeType.NUMBER == value_value_type) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as number
+                thisSerializer.writeNumber(value_value_1)
+            }
+            else if (RuntimeType.STRING == value_value_type) {
+                thisSerializer.writeInt8(2 as int32)
+                const value_value_2  = value_value as string
+                thisSerializer.writeString(value_value_2)
+            }
+            else if (RuntimeType.OBJECT == value_value_type) {
+                thisSerializer.writeInt8(3 as int32)
+                const value_value_3  = value_value as Resource
+                thisSerializer.writeResource(value_value_3)
+            }
+        }
+        ArkUIGeneratedNativeModule._DataPanelAttribute_trackBackgroundColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    strokeWidthAttribute(value: Length | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeLength(value_value)
+        }
+        ArkUIGeneratedNativeModule._DataPanelAttribute_strokeWidth(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    trackShadowAttribute(value: DataPanelShadowOptions | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeDataPanelShadowOptions(value_value)
+        }
+        ArkUIGeneratedNativeModule._DataPanelAttribute_trackShadow(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    contentModifierAttribute(value: ContentModifier | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteObject(value_value)
+        }
+        ArkUIGeneratedNativeModule._DataPanelAttribute_contentModifier(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+}
 export enum DataPanelType {
     LINE = 0,
     Line = 0,
@@ -93,35 +231,119 @@ export interface DataPanelOptions {
     max?: number;
     type?: DataPanelType;
 }
-export interface DataPanelConfiguration extends CommonConfiguration<DataPanelConfiguration> {
+export type DataPanelInterface = (options: DataPanelOptions) => DataPanelAttribute;
+export interface DataPanelConfiguration extends CommonConfiguration {
     values: Array<number>;
     maxValue: number;
 }
-/** @memo:stable */
 export interface DataPanelAttribute extends CommonMethod {
-    /** @memo */
-    setDataPanelOptions(options: DataPanelOptions): this
-    /** @memo */
-    closeEffect(value: boolean): this
-    /** @memo */
-    valueColors(value: Array<ResourceColor | LinearGradient>): this
-    /** @memo */
-    trackBackgroundColor(value: ResourceColor): this
-    /** @memo */
-    strokeWidth(value: Length): this
-    /** @memo */
-    trackShadow(value: DataPanelShadowOptions): this
-    /** @memo */
-    contentModifier(value: ContentModifier<object>): this
+    closeEffect(value: boolean | undefined): this
+    valueColors(value: Array<ResourceColor | LinearGradient> | undefined): this
+    trackBackgroundColor(value: ResourceColor | undefined): this
+    strokeWidth(value: Length | undefined): this
+    trackShadow(value: DataPanelShadowOptions | undefined): this
+    contentModifier(value: ContentModifier | undefined): this
+}
+export class ArkDataPanelStyle extends ArkCommonMethodStyle implements DataPanelAttribute {
+    closeEffect_value?: boolean | undefined
+    valueColors_value?: Array<ResourceColor | LinearGradient> | undefined
+    trackBackgroundColor_value?: ResourceColor | undefined
+    strokeWidth_value?: Length | undefined
+    trackShadow_value?: DataPanelShadowOptions | undefined
+    contentModifier_value?: ContentModifier | undefined
+    public closeEffect(value: boolean | undefined): this {
+        return this
+    }
+    public valueColors(value: Array<ResourceColor | LinearGradient> | undefined): this {
+        return this
+    }
+    public trackBackgroundColor(value: ResourceColor | undefined): this {
+        return this
+    }
+    public strokeWidth(value: Length | undefined): this {
+        return this
+    }
+    public trackShadow(value: DataPanelShadowOptions | undefined): this {
+        return this
+    }
+    public contentModifier(value: ContentModifier | undefined): this {
+        return this
+        }
+}
+export class ArkDataPanelComponent extends ArkCommonMethodComponent implements DataPanelAttribute {
+    getPeer(): ArkDataPanelPeer {
+        return (this.peer as ArkDataPanelPeer)
+    }
+    public setDataPanelOptions(options: DataPanelOptions): this {
+        if (this.checkPriority("setDataPanelOptions")) {
+            const options_casted = options as (DataPanelOptions)
+            this.getPeer()?.setDataPanelOptionsAttribute(options_casted)
+            return this
+        }
+        return this
+    }
+    public closeEffect(value: boolean | undefined): this {
+        if (this.checkPriority("closeEffect")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.closeEffectAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public valueColors(value: Array<ResourceColor | LinearGradient> | undefined): this {
+        if (this.checkPriority("valueColors")) {
+            const value_casted = value as (Array<ResourceColor | LinearGradient> | undefined)
+            this.getPeer()?.valueColorsAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public trackBackgroundColor(value: ResourceColor | undefined): this {
+        if (this.checkPriority("trackBackgroundColor")) {
+            const value_casted = value as (ResourceColor | undefined)
+            this.getPeer()?.trackBackgroundColorAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public strokeWidth(value: Length | undefined): this {
+        if (this.checkPriority("strokeWidth")) {
+            const value_casted = value as (Length | undefined)
+            this.getPeer()?.strokeWidthAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public trackShadow(value: DataPanelShadowOptions | undefined): this {
+        if (this.checkPriority("trackShadow")) {
+            const value_casted = value as (DataPanelShadowOptions | undefined)
+            this.getPeer()?.trackShadowAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public contentModifier(value: ContentModifier | undefined): this {
+        if (this.checkPriority("contentModifier")) {
+            const value_casted = value as (ContentModifier | undefined)
+            this.getPeer()?.contentModifierAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    
+    public applyAttributesFinish(): void {
+        // we call this function outside of class, so need to make it public
+        super.applyAttributesFinish()
+    }
 }
 /** @memo */
 export function DataPanel(
-  /** @memo */
-  style: ((attributes: DataPanelAttribute) => void) | undefined,
-  options: DataPanelOptions, 
-  /** @memo */
-  content_?: () => void,
-) {
+    /** @memo */
+    style: ((attributes: DataPanelAttribute) => void) | undefined,
+    options: DataPanelOptions,
+    /** @memo */
+    content_?: (() => void) | undefined,
+): void {
     const receiver = remember(() => {
         return new ArkDataPanelComponent()
     })

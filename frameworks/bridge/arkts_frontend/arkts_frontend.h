@@ -26,6 +26,9 @@
 #include "base/utils/noncopyable.h"
 #include "core/common/frontend.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "frameworks/bridge/common/accessibility/accessibility_node_manager.h"
+#include "frameworks/bridge/declarative_frontend/ng/page_router_manager.h"
+#include "frameworks/bridge/declarative_frontend/ng/page_router_manager_factory.h"
 
 typedef struct __EtsEnv ets_env; // only include ets_napi.h in .cpp files
 typedef struct __ani_env ani_env;
@@ -209,7 +212,7 @@ public:
 
     RefPtr<AccessibilityManager> GetAccessibilityManager() const override
     {
-        return nullptr;
+        return accessibilityManager_;
     }
     WindowConfig& GetWindowConfig() override
     {
@@ -269,9 +272,7 @@ public:
     }
 
     ani_object CallGetUIContextFunc();
-#ifdef ACE_STATIC
     void SetAniContext(int32_t instanceId, ani_ref* context);
-#endif
     bool IsDrawChildrenCallbackFuncExist(const std::string& componentId) override { return false; }
     void OnDrawChildrenCompleted(const std::string& componentId) override {}
 
@@ -279,6 +280,7 @@ public:
     static void PreloadAceModule(void* aniEnv);
     static void* preloadArkTSRuntime;
 private:
+    RefPtr<NG::PageRouterManager> pageRouterManager_ = nullptr;
     RefPtr<TaskExecutor> taskExecutor_;
     RefPtr<NG::PipelineContext> pipeline_;
     ani_vm* vm_ = nullptr;
@@ -291,6 +293,8 @@ private:
     
     std::map<std::string, RefPtr<InspectorEvent>> layoutCallbacks_;
     std::map<std::string, RefPtr<InspectorEvent>> drawCallbacks_;
+    RefPtr<Framework::AccessibilityNodeManager> accessibilityManager_
+        = Framework::AccessibilityNodeManager::Create();
 };
 
 } // namespace OHOS::Ace

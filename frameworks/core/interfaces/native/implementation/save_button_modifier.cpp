@@ -93,13 +93,19 @@ void SetSaveButtonOptions1Impl(Ark_NativePointer node,
 } // SaveButtonInterfaceModifier
 namespace SaveButtonAttributeModifier {
 void OnClickImpl(Ark_NativePointer node,
-                 const Callback_ClickEvent_SaveButtonOnClickResult_Void* value)
+                 const Opt_SaveButtonCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto onEvent = [arkCallback = CallbackHelper(*value)](GestureEvent& info) {
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // TODO: Reset value
+        return;
+    }
+    auto onEvent = [arkCallback = CallbackHelper(value->value)](GestureEvent& info) {
         auto res = SecurityComponentHandleResult::CLICK_GRANT_FAILED;
+        std::string message;
+        int32_t code = 0;
 #ifdef SECURITY_COMPONENT_ENABLE
         auto secEventValue = info.GetSecCompHandleEvent();
         if (secEventValue != nullptr) {
@@ -108,11 +114,21 @@ void OnClickImpl(Ark_NativePointer node,
             if (res == SecurityComponentHandleResult::DROP_CLICK) {
                 return;
             }
+            code = secEventValue->GetInt("code", code);
+            message = secEventValue->GetString("message", message);
         }
 #endif
         const auto event = Converter::ArkClickEventSync(info);
         Ark_SaveButtonOnClickResult arkResult = Converter::ArkValue<Ark_SaveButtonOnClickResult>(res);
-        arkCallback.InvokeSync(event.ArkValue(), arkResult);
+        auto error = Opt_BusinessError{
+            .value = Ark_BusinessError{
+                .name = Converter::ArkValue<Ark_String>("", Converter::FC),
+                .message = Converter::ArkValue<Ark_String>(message, Converter::FC),
+                .stack = Converter::ArkValue<Opt_String>("", Converter::FC),
+                .code = Converter::ArkValue<Ark_Number>(code)
+            }
+        };
+        arkCallback.InvokeSync(event.ArkValue(), arkResult, error);
     };
 
     ViewAbstract::SetOnClick(frameNode, std::move(onEvent));

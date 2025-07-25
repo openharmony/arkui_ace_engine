@@ -1,0 +1,14 @@
+/*
+ * Scripts to include into the koala-cli package
+ */
+{
+    "scripts": [
+        "ohos-app/**/*",
+        "ohos-sdk/**/*",
+        "ohos-tests/**/*",
+        "tools/**/*",
+        "utils.mjs",
+        "ohconf.mjs",
+        "oh-sdk-utils.mjs"
+    ]
+}

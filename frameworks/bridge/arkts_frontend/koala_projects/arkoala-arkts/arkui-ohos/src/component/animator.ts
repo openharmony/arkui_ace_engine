@@ -17,31 +17,18 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
-import { unsafeCast, int32, float32, int64 } from "@koalaui/common"
-import { Serializer } from "./../generated/peers/Serializer"
-import { CallbackKind } from "./../generated/peers/CallbackKind"
-import { Deserializer } from "./../generated/peers/Deserializer"
-import { CallbackTransformer } from "./../generated/peers/CallbackTransformer"
-import { NodeAttach, remember } from "@koalaui/runtime"
-import { CommonMethod, DrawModifier, Rectangle, Callback_Array_TouchTestInfo_TouchResult, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, Callback_ClickEvent_Void, ClickEvent, Callback_Boolean_HoverEvent_Void, HoverEvent, AccessibilityCallback, Callback_MouseEvent_Void, MouseEvent, Callback_TouchEvent_Void, TouchEvent, Callback_KeyEvent_Void, KeyEvent, Callback_KeyEvent_Boolean, AnimateParam, TransitionOptions, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, Callback_Area_Area_Void, Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs, Literal_Number_offset_span, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, DragEvent, CustomBuilder, DragItemInfo, Callback_DragEvent_String_Void, UniformDataType, Callback_PreDragStatus_Void, PreDragStatus, Type_CommonMethod_linearGradient_value, Tuple_ResourceColor_Number, Type_CommonMethod_sweepGradient_value, Tuple_Length_Length, Type_CommonMethod_radialGradient_value, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, GestureModifier, BackgroundBrightnessOptions, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, Callback_TouchEvent_HitTestMode, SizeChangeCallback, SafeAreaType, SafeAreaEdge, Literal_Alignment_align, BlurStyle, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, ComponentContent, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback } from "./common"
-import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions } from "./units"
-import { HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Color, Visibility, ItemAlign, Direction, GradientDirection, ObscuredReasons, RenderFit, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, AnimationStatus, Curve, FillMode, PlayMode } from "./enums"
-import { LengthMetrics } from "../Graphics"
-import { ResizableOptions } from "./image"
-import { Resource } from "global/resource";
-import { Callback_Void } from "./abilityComponent"
-import { FocusBoxStyle, FocusPriority } from "./focus"
-import { CircleShape } from "./../generated/ArkCircleShapeMaterialized"
-import { EllipseShape } from "./../generated/ArkEllipseShapeMaterialized"
-import { PathShape } from "./../generated/ArkPathShapeMaterialized"
-import { RectShape } from "./../generated/ArkRectShapeMaterialized"
-import { AttributeModifier } from "./../component/common" 
-import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureType, GestureMask } from "./gesture"
-import { PixelMap } from "./../generated/ArkPixelMapMaterialized"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
+import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
+import { Serializer } from "./peers/Serializer"
+import { CallbackKind } from "./peers/CallbackKind"
+import { Deserializer } from "./peers/Deserializer"
+import { CallbackTransformer } from "./peers/CallbackTransformer"
+import { ComponentBase } from "./../ComponentBase"
+import { PeerNode } from "./../PeerNode"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { AnimationStatus, Curve, FillMode, PlayMode } from "./enums"
 import { Callback_Number_Void } from "./alphabetIndexer"
-import { ArkAnimatorComponent } from "./../generated/ArkAnimator"
-import { ArkAnimatorPeer } from "./../generated/peers/ArkAnimatorPeer"
+import { NodeAttach, remember } from "@koalaui/runtime"
 export class SpringPropInternal {
     public static fromPtr(ptr: KPointer): SpringProp {
         const obj : SpringProp = new SpringProp(undefined, undefined, undefined)
@@ -150,47 +137,401 @@ export class ScrollMotion implements MaterializedBase {
         return ArkUIGeneratedNativeModule._ScrollMotion_getFinalizer()
     }
 }
-/** @memo:stable */
+export class ArkAnimatorPeer extends ArkCommonMethodPeer {
+    protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+        super(peerPtr, id, name, flags)
+    }
+    public static create(component: ComponentBase | undefined, flags: int32 = 0): ArkAnimatorPeer {
+        const peerId  = PeerNode.nextId()
+        const _peerPtr  = ArkUIGeneratedNativeModule._Animator_construct(peerId, flags)
+        const _peer  = new ArkAnimatorPeer(_peerPtr, peerId, "Animator", flags)
+        component?.setPeer(_peer)
+        return _peer
+    }
+    setAnimatorOptionsAttribute(value: string): void {
+        ArkUIGeneratedNativeModule._AnimatorInterface_setAnimatorOptions(this.peer.ptr, value)
+    }
+    stateAttribute(value: AnimationStatus | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = (value as AnimationStatus)
+            thisSerializer.writeInt32(TypeChecker.AnimationStatus_ToNumeric(value_value))
+        }
+        ArkUIGeneratedNativeModule._AnimatorAttribute_state(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    durationAttribute(value: number | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeNumber(value_value)
+        }
+        ArkUIGeneratedNativeModule._AnimatorAttribute_duration(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    curveAttribute(value: Curve | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = (value as Curve)
+            thisSerializer.writeInt32(TypeChecker.Curve_ToNumeric(value_value))
+        }
+        ArkUIGeneratedNativeModule._AnimatorAttribute_curve(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    delayAttribute(value: number | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeNumber(value_value)
+        }
+        ArkUIGeneratedNativeModule._AnimatorAttribute_delay(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    fillModeAttribute(value: FillMode | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = (value as FillMode)
+            thisSerializer.writeInt32(TypeChecker.FillMode_ToNumeric(value_value))
+        }
+        ArkUIGeneratedNativeModule._AnimatorAttribute_fillMode(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    iterationsAttribute(value: number | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeNumber(value_value)
+        }
+        ArkUIGeneratedNativeModule._AnimatorAttribute_iterations(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    playModeAttribute(value: PlayMode | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = (value as PlayMode)
+            thisSerializer.writeInt32(TypeChecker.PlayMode_ToNumeric(value_value))
+        }
+        ArkUIGeneratedNativeModule._AnimatorAttribute_playMode(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    motionAttribute(value: SpringMotion | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeSpringMotion(value_value)
+        }
+        ArkUIGeneratedNativeModule._AnimatorAttribute_motion(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onStartAttribute(value: (() => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._AnimatorAttribute_onStart(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onPauseAttribute(value: (() => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._AnimatorAttribute_onPause(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onRepeatAttribute(value: (() => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._AnimatorAttribute_onRepeat(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onCancelAttribute(value: (() => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._AnimatorAttribute_onCancel(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onFinishAttribute(value: (() => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._AnimatorAttribute_onFinish(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onFrameAttribute(value: ((index: number) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._AnimatorAttribute_onFrame(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+}
+export type AnimatorInterface = (value: string) => AnimatorAttribute;
 export interface AnimatorAttribute extends CommonMethod {
-    /** @memo */
-    setAnimatorOptions(value: string): this
-    /** @memo */
-    state(value: AnimationStatus): this
-    /** @memo */
-    duration(value: number): this
-    /** @memo */
-    curve(value: Curve): this
-    /** @memo */
-    delay(value: number): this
-    /** @memo */
-    fillMode(value: FillMode): this
-    /** @memo */
-    iterations(value: number): this
-    /** @memo */
-    playMode(value: PlayMode): this
-    /** @memo */
-    motion(value: SpringMotion): this
-    /** @memo */
-    onStart(value: (() => void)): this
-    /** @memo */
-    onPause(value: (() => void)): this
-    /** @memo */
-    onRepeat(value: (() => void)): this
-    /** @memo */
-    onCancel(value: (() => void)): this
-    /** @memo */
-    onFinish(value: (() => void)): this
-    /** @memo */
-    onFrame(value: ((index: number) => void)): this
+    state(value: AnimationStatus | undefined): this
+    duration(value: number | undefined): this
+    curve(value: Curve | undefined): this
+    delay(value: number | undefined): this
+    fillMode(value: FillMode | undefined): this
+    iterations(value: number | undefined): this
+    playMode(value: PlayMode | undefined): this
+    motion(value: SpringMotion | undefined): this
+    onStart(value: (() => void) | undefined): this
+    onPause(value: (() => void) | undefined): this
+    onRepeat(value: (() => void) | undefined): this
+    onCancel(value: (() => void) | undefined): this
+    onFinish(value: (() => void) | undefined): this
+    onFrame(value: ((index: number) => void) | undefined): this
+}
+export class ArkAnimatorStyle extends ArkCommonMethodStyle implements AnimatorAttribute {
+    state_value?: AnimationStatus | undefined
+    duration_value?: number | undefined
+    curve_value?: Curve | undefined
+    delay_value?: number | undefined
+    fillMode_value?: FillMode | undefined
+    iterations_value?: number | undefined
+    playMode_value?: PlayMode | undefined
+    motion_value?: SpringMotion | undefined
+    onStart_value?: (() => void) | undefined
+    onPause_value?: (() => void) | undefined
+    onRepeat_value?: (() => void) | undefined
+    onCancel_value?: (() => void) | undefined
+    onFinish_value?: (() => void) | undefined
+    onFrame_value?: ((index: number) => void) | undefined
+    public state(value: AnimationStatus | undefined): this {
+        return this
+    }
+    public duration(value: number | undefined): this {
+        return this
+    }
+    public curve(value: Curve | undefined): this {
+        return this
+    }
+    public delay(value: number | undefined): this {
+        return this
+    }
+    public fillMode(value: FillMode | undefined): this {
+        return this
+    }
+    public iterations(value: number | undefined): this {
+        return this
+    }
+    public playMode(value: PlayMode | undefined): this {
+        return this
+    }
+    public motion(value: SpringMotion | undefined): this {
+        return this
+    }
+    public onStart(value: (() => void) | undefined): this {
+        return this
+    }
+    public onPause(value: (() => void) | undefined): this {
+        return this
+    }
+    public onRepeat(value: (() => void) | undefined): this {
+        return this
+    }
+    public onCancel(value: (() => void) | undefined): this {
+        return this
+    }
+    public onFinish(value: (() => void) | undefined): this {
+        return this
+    }
+    public onFrame(value: ((index: number) => void) | undefined): this {
+        return this
+    }
+}
+export class ArkAnimatorComponent extends ArkCommonMethodComponent implements AnimatorAttribute {
+    getPeer(): ArkAnimatorPeer {
+        return (this.peer as ArkAnimatorPeer)
+    }
+    public setAnimatorOptions(value: string): this {
+        if (this.checkPriority("setAnimatorOptions")) {
+            const value_casted = value as (string)
+            this.getPeer()?.setAnimatorOptionsAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public state(value: AnimationStatus | undefined): this {
+        if (this.checkPriority("state")) {
+            const value_casted = value as (AnimationStatus | undefined)
+            this.getPeer()?.stateAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public duration(value: number | undefined): this {
+        if (this.checkPriority("duration")) {
+            const value_casted = value as (number | undefined)
+            this.getPeer()?.durationAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public curve(value: Curve | undefined): this {
+        if (this.checkPriority("curve")) {
+            const value_casted = value as (Curve | undefined)
+            this.getPeer()?.curveAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public delay(value: number | undefined): this {
+        if (this.checkPriority("delay")) {
+            const value_casted = value as (number | undefined)
+            this.getPeer()?.delayAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public fillMode(value: FillMode | undefined): this {
+        if (this.checkPriority("fillMode")) {
+            const value_casted = value as (FillMode | undefined)
+            this.getPeer()?.fillModeAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public iterations(value: number | undefined): this {
+        if (this.checkPriority("iterations")) {
+            const value_casted = value as (number | undefined)
+            this.getPeer()?.iterationsAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public playMode(value: PlayMode | undefined): this {
+        if (this.checkPriority("playMode")) {
+            const value_casted = value as (PlayMode | undefined)
+            this.getPeer()?.playModeAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public motion(value: SpringMotion | undefined): this {
+        if (this.checkPriority("motion")) {
+            const value_casted = value as (SpringMotion | undefined)
+            this.getPeer()?.motionAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onStart(value: (() => void) | undefined): this {
+        if (this.checkPriority("onStart")) {
+            const value_casted = value as ((() => void) | undefined)
+            this.getPeer()?.onStartAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onPause(value: (() => void) | undefined): this {
+        if (this.checkPriority("onPause")) {
+            const value_casted = value as ((() => void) | undefined)
+            this.getPeer()?.onPauseAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onRepeat(value: (() => void) | undefined): this {
+        if (this.checkPriority("onRepeat")) {
+            const value_casted = value as ((() => void) | undefined)
+            this.getPeer()?.onRepeatAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onCancel(value: (() => void) | undefined): this {
+        if (this.checkPriority("onCancel")) {
+            const value_casted = value as ((() => void) | undefined)
+            this.getPeer()?.onCancelAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onFinish(value: (() => void) | undefined): this {
+        if (this.checkPriority("onFinish")) {
+            const value_casted = value as ((() => void) | undefined)
+            this.getPeer()?.onFinishAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onFrame(value: ((index: number) => void) | undefined): this {
+        if (this.checkPriority("onFrame")) {
+            const value_casted = value as (((index: number) => void) | undefined)
+            this.getPeer()?.onFrameAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public applyAttributesFinish(): void {
+        // we call this function outside of class, so need to make it public
+        super.applyAttributesFinish()
+    }
 }
 /** @memo */
 export function Animator(
-  /** @memo */
-  style: ((attributes: AnimatorAttribute) => void) | undefined,
-  value: string, 
-  /** @memo */
-  content_?: () => void,
-) {
+    /** @memo */
+    style: ((attributes: AnimatorAttribute) => void) | undefined,
+    value: string,
+    /** @memo */
+    content_?: (() => void) | undefined,
+): void {
     const receiver = remember(() => {
         return new ArkAnimatorComponent()
     })

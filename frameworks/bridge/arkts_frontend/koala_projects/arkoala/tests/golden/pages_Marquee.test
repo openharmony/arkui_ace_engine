@@ -1,0 +1,42 @@
+{
+  "rootElement": {
+    "id": 1092,
+    "kind": "ComponentRoot",
+    "children": [
+      {
+        "id": 1093,
+        "kind": "Marquee",
+        "children": [],
+        "fontColor": "#FFFFFF",
+        "fontSize": "18fp",
+        "allowScale": "false",
+        "fontWeight": "Normal",
+        "fontFamily": "testString",
+        "options": {
+          "value": "Running Marquee starts rolling",
+          "start": "false",
+          "step": 50,
+          "loop": null,
+          "fromStart": "true"
+        }
+      },
+      {
+        "id": 1094,
+        "kind": "Marquee",
+        "children": [],
+        "fontColor": "#FF00AA",
+        "fontSize": "20fp",
+        "allowScale": "true",
+        "fontWeight": "Bolder",
+        "fontFamily": "testString",
+        "options": {
+          "value": "Running Marquee starts rolling",
+          "start": "false",
+          "step": 50,
+          "loop": 100,
+          "fromStart": "true"
+        }
+      }
+    ]
+  }
+}

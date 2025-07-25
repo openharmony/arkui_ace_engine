@@ -393,6 +393,7 @@ export abstract class ClassElement extends Node<arkts.AstNode> implements ts.Cla
 export type MemberName = Identifier | PrivateIdentifier;
 
 // TODO: support
+// export type PropertyName = Identifier | StringLiteral | NumericLiteral | ts.ComputedPropertyName | PrivateIdentifier;
 export type PropertyName = Identifier | StringLiteral | NumericLiteral | PrivateIdentifier;
 
 // TODO: support
@@ -445,7 +446,6 @@ export class MethodSignature extends Node<arkts.AstNode> implements ts.MethodSig
     _typeElementBrand: any
 }
 
-// export class MethodDeclaration extends Node implements ts.MethodDeclaration, FunctionLikeDeclarationBase, ClassElement {
 export class MethodDeclaration extends Node<arkts.MethodDefinition> implements ts.MethodDeclaration, ClassElement {
     constructor(node: arkts.MethodDefinition) {
         super(node)
@@ -833,23 +833,6 @@ export class HeritageClause extends Node<arkts.SuperExpression> implements ts.He
 // so for temporary solution we're just gonna ignore this type of nodes
 // and replace it with Expression underneath
 export type ParenthesizedExpression = Expression
-// export class ParenthesizedExpression extends Node<undefined> implements ts.ParenthesizedExpression {
-//     constructor(expression: Expression) {
-//         super(undefined)
-//         this.expression = expression
-//     }
-
-//     readonly expression: Expression
-//     readonly kind: ts.SyntaxKind.ParenthesizedExpression = ts.SyntaxKind.ParenthesizedExpression
-
-//     // brands
-//     _primaryExpressionBrand: any
-//     _memberExpressionBrand: any
-//     _leftHandSideExpressionBrand: any
-//     _updateExpressionBrand: any
-//     _unaryExpressionBrand: any
-//     _expressionBrand: any
-// }
 
 // TODO:
 export class ImportDeclaration extends Node<arkts.UnsupportedNode> implements ts.ImportDeclaration {

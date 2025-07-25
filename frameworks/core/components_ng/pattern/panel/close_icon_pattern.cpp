@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/panel/close_icon_pattern.h"
 
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components/close_icon/close_icon_theme.h"
 
 namespace OHOS::Ace::NG {
 void CloseIconPattern::OnModifyDone()
@@ -40,9 +41,13 @@ void CloseIconPattern::InitCloseIcon()
     auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
     buttonNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
     CHECK_NULL_VOID(buttonLayoutProperty);
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto closeIconTheme = pipeline->GetTheme<CloseIconTheme>();
+    CHECK_NULL_VOID(closeIconTheme);
     buttonLayoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(closeIconLayoutProperty->GetCloseIconWidthValue()),
-            CalcLength(closeIconLayoutProperty->GetCloseIconHeightValue())));
+        CalcSize(CalcLength(closeIconLayoutProperty->GetCloseIconWidthValue(closeIconTheme->GetCloseIconWidth())),
+            CalcLength(closeIconLayoutProperty->GetCloseIconHeightValue(closeIconTheme->GetCloseIconHeight()))));
     buttonNode->MarkModifyDone();
     auto pattern = buttonNode->GetPattern<ButtonPattern>();
     CHECK_NULL_VOID(pattern);
@@ -52,8 +57,8 @@ void CloseIconPattern::InitCloseIcon()
     auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
     imageLayoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(closeIconLayoutProperty->GetCloseIconWidthValue()),
-            CalcLength(closeIconLayoutProperty->GetCloseIconHeightValue())));
+        CalcSize(CalcLength(closeIconLayoutProperty->GetCloseIconWidthValue(closeIconTheme->GetCloseIconWidth())),
+            CalcLength(closeIconLayoutProperty->GetCloseIconHeightValue(closeIconTheme->GetCloseIconHeight()))));
     imageLayoutProperty->UpdateImageFit(ImageFit::FILL);
     ImageSourceInfo imageSourceInfo;
     imageSourceInfo.SetResourceId(InternalResource::ResourceId::IC_BOTTOMSHEET_CLOSE_SVG);
@@ -64,7 +69,7 @@ void CloseIconPattern::InitCloseIcon()
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     BorderRadiusProperty radius;
-    radius.SetRadius(closeIconLayoutProperty->GetCloseIconRadiusValue());
+    radius.SetRadius(closeIconLayoutProperty->GetCloseIconRadiusValue(closeIconTheme->GetCloseIconRadius()));
     renderContext->UpdateBorderRadius(radius);
     host->AddChild(buttonNode);
     buttonNode->AddChild(imageNode);

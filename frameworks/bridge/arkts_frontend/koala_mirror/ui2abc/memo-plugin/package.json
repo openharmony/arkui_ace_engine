@@ -1,0 +1,34 @@
+{
+    "name": "@koalaui/memo-plugin",
+    "exports": {
+        "./*": "./lib/*.js",
+        ".": "./lib/MemoTransformer.js"
+    },
+    "files": [
+        "./lib/**/*"
+    ],
+    "scripts": {
+        "clean": "rimraf build",
+        "compile": "rollup -c",
+
+        "runtime:clean": "npm run all:clean --prefix ../../incremental",
+        "runtime:prepare": "npm run build:incremental:inc:ui2abc --prefix ../../incremental/runtime && npm run build:incremental:inc:ui2abc:recheck --prefix ../../incremental/runtime",
+        "compile:libarkts": "npm run compile --prefix ../libarkts",
+        "demo:clean": "npm run clean --prefix demo",
+        "demo:run": "npm run compile:libarkts && npm run compile && npm run compile --prefix demo && npm run run --prefix demo",
+        "test": "npm run compile:libarkts && npm run compile && npm run test --prefix test",
+        "demo:disasm": "npm run disasm --prefix demo",
+
+        "compile:deps:harness": "cd ../../incremental/harness && npm run build:harness",
+        "compile:deps": "npm run compile:libarkts && npm run compile && npm run compile:deps:harness && npm run runtime:prepare",
+
+        "compile:annotate": "npm run compile --prefix ../annotate",
+        "executable": "npm run test:arkts:memo-plugin --prefix ../tests-memo",
+        "diagnostics": "mocha --config mocharc.diagnostics.json",
+        "test:diagnostics": "npm run compile && npm run diagnostics",
+        "test:all": "npm run test && npm run diagnostics && npm run executable"
+    },
+    "devDependencies": {
+        "@koalaui/harness": "1.5.15+devel"
+    }
+}

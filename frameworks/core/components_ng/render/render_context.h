@@ -94,6 +94,10 @@ using TransitionFinishCallback = std::function<void(bool)>;
 
 inline constexpr int32_t ZINDEX_DEFAULT_VALUE = 0;
 
+namespace {
+    NG::Vector5F DEFAULT_ROTATE_VEC = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+}
+
 // RenderContext is used for render node to paint.
 class ACE_FORCE_EXPORT RenderContext : public virtual AceType {
     DECLARE_ACE_TYPE(NG::RenderContext, AceType)
@@ -468,6 +472,7 @@ public:
     virtual void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) {}
 
     void ObscuredToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+    void TransitionToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 
     void SetSharedTransitionOptions(const std::shared_ptr<SharedTransitionOption>& option);
     const std::shared_ptr<SharedTransitionOption>& GetSharedTransitionOption() const;

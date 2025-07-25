@@ -17,27 +17,181 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { int32, int64, float32 } from "@koalaui/common"
-import { KInt, KPointer, KBoolean, KStringPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
+import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
+import { Serializer } from "./peers/Serializer"
+import { ComponentBase } from "./../ComponentBase"
+import { PeerNode } from "./../PeerNode"
+import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { ResourceStr, Dimension, PX, VP, FP, LPX, Percentage } from "./units"
+import { Resource } from "global/resource"
+import { CallbackKind } from "./peers/CallbackKind"
+import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { ResourceStr, Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, AccessibilityOptions } from "./units"
-import { CommonMethod, DrawModifier, Rectangle, Callback_Array_TouchTestInfo_TouchResult, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, Callback_ClickEvent_Void, ClickEvent, Callback_Boolean_HoverEvent_Void, HoverEvent, AccessibilityCallback, Callback_MouseEvent_Void, MouseEvent, Callback_TouchEvent_Void, TouchEvent, Callback_KeyEvent_Void, KeyEvent, Callback_KeyEvent_Boolean, AnimateParam, TransitionOptions, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, Callback_Area_Area_Void, Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs, Literal_Number_offset_span, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, DragEvent, CustomBuilder, DragItemInfo, Callback_DragEvent_String_Void, UniformDataType, Callback_PreDragStatus_Void, PreDragStatus, Type_CommonMethod_linearGradient_value, Tuple_ResourceColor_Number, Type_CommonMethod_sweepGradient_value, Tuple_Length_Length, Type_CommonMethod_radialGradient_value, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, GestureModifier, BackgroundBrightnessOptions, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, Callback_TouchEvent_HitTestMode, SizeChangeCallback, SafeAreaType, SafeAreaEdge, Literal_Alignment_align, BlurStyle, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, ComponentContent, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback } from "./common"
-import { HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Color, Visibility, ItemAlign, Direction, GradientDirection, ObscuredReasons, RenderFit, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey } from "./enums"
-import { LengthMetrics } from "../Graphics"
-import { ResizableOptions } from "./image"
-import { Resource } from "global/resource";
-import { Callback_Void } from "./abilityComponent"
-import { FocusBoxStyle, FocusPriority } from "./focus"
-import { CircleShape } from "./../generated/ArkCircleShapeMaterialized"
-import { EllipseShape } from "./../generated/ArkEllipseShapeMaterialized"
-import { PathShape } from "./../generated/ArkPathShapeMaterialized"
-import { RectShape } from "./../generated/ArkRectShapeMaterialized"
-import { AttributeModifier } from "./../component/common" 
-import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureType, GestureMask } from "./gesture"
-import { PixelMap } from "./../generated/ArkPixelMapMaterialized"
-import { ArkComponent3DComponent } from "./../generated/ArkComponent3d"
-import { ArkComponent3DPeer } from "./../generated/peers/ArkComponent3dPeer"
-export interface Scene {
-    _SceneStub: string;
+import { Scene } from "./arkui-custom"
+
+export class ArkComponent3DPeer extends ArkCommonMethodPeer {
+    protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+        super(peerPtr, id, name, flags)
+    }
+    public static create(component: ComponentBase | undefined, flags: int32 = 0): ArkComponent3DPeer {
+        const peerId  = PeerNode.nextId()
+        const _peerPtr  = ArkUIGeneratedNativeModule._Component3D_construct(peerId, flags)
+        const _peer  = new ArkComponent3DPeer(_peerPtr, peerId, "Component3D", flags)
+        component?.setPeer(_peer)
+        return _peer
+    }
+    setComponent3DOptionsAttribute(sceneOptions?: SceneOptions): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let sceneOptions_type : int32 = RuntimeType.UNDEFINED
+        sceneOptions_type = runtimeType(sceneOptions)
+        thisSerializer.writeInt8(sceneOptions_type as int32)
+        if ((RuntimeType.UNDEFINED) != (sceneOptions_type)) {
+            const sceneOptions_value  = sceneOptions!
+            thisSerializer.writeSceneOptions(sceneOptions_value)
+        }
+        ArkUIGeneratedNativeModule._Component3DInterface_setComponent3DOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    environmentAttribute(value: ResourceStr | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (RuntimeType.STRING == value_value_type) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as string
+                thisSerializer.writeString(value_value_0)
+            }
+            else if (RuntimeType.OBJECT == value_value_type) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as Resource
+                thisSerializer.writeResource(value_value_1)
+            }
+        }
+        ArkUIGeneratedNativeModule._Component3DAttribute_environment(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    shaderAttribute(value: ResourceStr | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (RuntimeType.STRING == value_value_type) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as string
+                thisSerializer.writeString(value_value_0)
+            }
+            else if (RuntimeType.OBJECT == value_value_type) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as Resource
+                thisSerializer.writeResource(value_value_1)
+            }
+        }
+        ArkUIGeneratedNativeModule._Component3DAttribute_shader(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    shaderImageTextureAttribute(value: ResourceStr | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (RuntimeType.STRING == value_value_type) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as string
+                thisSerializer.writeString(value_value_0)
+            }
+            else if (RuntimeType.OBJECT == value_value_type) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as Resource
+                thisSerializer.writeResource(value_value_1)
+            }
+        }
+        ArkUIGeneratedNativeModule._Component3DAttribute_shaderImageTexture(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    shaderInputBufferAttribute(value: Array<number> | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeInt32(value_value.length as int32)
+            for (let i = 0; i < value_value.length; i++) {
+                const value_value_element : number = value_value[i]
+                thisSerializer.writeNumber(value_value_element)
+            }
+        }
+        ArkUIGeneratedNativeModule._Component3DAttribute_shaderInputBuffer(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    renderWidthAttribute(value: Dimension | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeLength(value_value)
+        }
+        ArkUIGeneratedNativeModule._Component3DAttribute_renderWidth(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    renderHeightAttribute(value: Dimension | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeLength(value_value)
+        }
+        ArkUIGeneratedNativeModule._Component3DAttribute_renderHeight(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    customRenderAttribute(uri: ResourceStr | undefined, selfRenderUpdate: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let uri_type : int32 = RuntimeType.UNDEFINED
+        uri_type = runtimeType(uri)
+        thisSerializer.writeInt8(uri_type as int32)
+        if ((RuntimeType.UNDEFINED) != (uri_type)) {
+            const uri_value  = uri!
+            let uri_value_type : int32 = RuntimeType.UNDEFINED
+            uri_value_type = runtimeType(uri_value)
+            if (RuntimeType.STRING == uri_value_type) {
+                thisSerializer.writeInt8(0 as int32)
+                const uri_value_0  = uri_value as string
+                thisSerializer.writeString(uri_value_0)
+            }
+            else if (RuntimeType.OBJECT == uri_value_type) {
+                thisSerializer.writeInt8(1 as int32)
+                const uri_value_1  = uri_value as Resource
+                thisSerializer.writeResource(uri_value_1)
+            }
+        }
+        let selfRenderUpdate_type : int32 = RuntimeType.UNDEFINED
+        selfRenderUpdate_type = runtimeType(selfRenderUpdate)
+        thisSerializer.writeInt8(selfRenderUpdate_type as int32)
+        if ((RuntimeType.UNDEFINED) != (selfRenderUpdate_type)) {
+            const selfRenderUpdate_value  = selfRenderUpdate!
+            thisSerializer.writeBoolean(selfRenderUpdate_value)
+        }
+        ArkUIGeneratedNativeModule._Component3DAttribute_customRender(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export enum ModelType {
     TEXTURE = 0,
@@ -47,33 +201,128 @@ export interface SceneOptions {
     scene?: ResourceStr | Scene;
     modelType?: ModelType;
 }
-/** @memo:stable */
+export type Component3DInterface = (sceneOptions?: SceneOptions) => Component3DAttribute;
 export interface Component3DAttribute extends CommonMethod {
-    /** @memo */
-    setComponent3DOptions(sceneOptions?: SceneOptions): this
-    /** @memo */
-    environment(value: ResourceStr): this
-    /** @memo */
-    shader(value: ResourceStr): this
-    /** @memo */
-    shaderImageTexture(value: ResourceStr): this
-    /** @memo */
-    shaderInputBuffer(value: Array<number>): this
-    /** @memo */
-    renderWidth(value: Dimension): this
-    /** @memo */
-    renderHeight(value: Dimension): this
-    /** @memo */
-    customRender(uri: ResourceStr, selfRenderUpdate: boolean): this
+    environment(value: ResourceStr | undefined): this
+    shader(value: ResourceStr | undefined): this
+    shaderImageTexture(value: ResourceStr | undefined): this
+    shaderInputBuffer(value: Array<number> | undefined): this
+    renderWidth(value: Dimension | undefined): this
+    renderHeight(value: Dimension | undefined): this
+    customRender(uri: ResourceStr | undefined, selfRenderUpdate: boolean | undefined): this
+}
+export class ArkComponent3DStyle extends ArkCommonMethodStyle implements Component3DAttribute {
+    environment_value?: ResourceStr | undefined
+    shader_value?: ResourceStr | undefined
+    shaderImageTexture_value?: ResourceStr | undefined
+    shaderInputBuffer_value?: Array<number> | undefined
+    renderWidth_value?: Dimension | undefined
+    renderHeight_value?: Dimension | undefined
+    public environment(value: ResourceStr | undefined): this {
+        return this
+    }
+    public shader(value: ResourceStr | undefined): this {
+        return this
+    }
+    public shaderImageTexture(value: ResourceStr | undefined): this {
+        return this
+    }
+    public shaderInputBuffer(value: Array<number> | undefined): this {
+        return this
+    }
+    public renderWidth(value: Dimension | undefined): this {
+        return this
+    }
+    public renderHeight(value: Dimension | undefined): this {
+        return this
+    }
+    public customRender(uri: ResourceStr | undefined, selfRenderUpdate: boolean | undefined): this {
+        return this
+        }
+}
+export class ArkComponent3DComponent extends ArkCommonMethodComponent implements Component3DAttribute {
+    getPeer(): ArkComponent3DPeer {
+        return (this.peer as ArkComponent3DPeer)
+    }
+    public setComponent3DOptions(sceneOptions?: SceneOptions): this {
+        if (this.checkPriority("setComponent3DOptions")) {
+            const sceneOptions_casted = sceneOptions as (SceneOptions | undefined)
+            this.getPeer()?.setComponent3DOptionsAttribute(sceneOptions_casted)
+            return this
+        }
+        return this
+    }
+    public environment(value: ResourceStr | undefined): this {
+        if (this.checkPriority("environment")) {
+            const value_casted = value as (ResourceStr | undefined)
+            this.getPeer()?.environmentAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public shader(value: ResourceStr | undefined): this {
+        if (this.checkPriority("shader")) {
+            const value_casted = value as (ResourceStr | undefined)
+            this.getPeer()?.shaderAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public shaderImageTexture(value: ResourceStr | undefined): this {
+        if (this.checkPriority("shaderImageTexture")) {
+            const value_casted = value as (ResourceStr | undefined)
+            this.getPeer()?.shaderImageTextureAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public shaderInputBuffer(value: Array<number> | undefined): this {
+        if (this.checkPriority("shaderInputBuffer")) {
+            const value_casted = value as (Array<number> | undefined)
+            this.getPeer()?.shaderInputBufferAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public renderWidth(value: Dimension | undefined): this {
+        if (this.checkPriority("renderWidth")) {
+            const value_casted = value as (Dimension | undefined)
+            this.getPeer()?.renderWidthAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public renderHeight(value: Dimension | undefined): this {
+        if (this.checkPriority("renderHeight")) {
+            const value_casted = value as (Dimension | undefined)
+            this.getPeer()?.renderHeightAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public customRender(uri: ResourceStr | undefined, selfRenderUpdate: boolean | undefined): this {
+        if (this.checkPriority("customRender")) {
+            const uri_casted = uri as (ResourceStr | undefined)
+            const selfRenderUpdate_casted = selfRenderUpdate as (boolean | undefined)
+            this.getPeer()?.customRenderAttribute(uri_casted, selfRenderUpdate_casted)
+            return this
+        }
+        return this
+    }
+    
+    public applyAttributesFinish(): void {
+        // we call this function outside of class, so need to make it public
+        super.applyAttributesFinish()
+    }
 }
 /** @memo */
 export function Component3D(
-  /** @memo */
-  style: ((attributes: Component3DAttribute) => void) | undefined,
-  sceneOptions?: SceneOptions | undefined, 
-  /** @memo */
-  content_?: () => void,
-) {
+    /** @memo */
+    style: ((attributes: Component3DAttribute) => void) | undefined,
+    sceneOptions?: SceneOptions,
+    /** @memo */
+    content_?: (() => void) | undefined,
+): void {
     const receiver = remember(() => {
         return new ArkComponent3DComponent()
     })

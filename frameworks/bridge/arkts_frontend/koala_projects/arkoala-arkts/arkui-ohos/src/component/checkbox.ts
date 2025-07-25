@@ -17,66 +17,506 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { int32, int64, float32 } from "@koalaui/common"
-import { KInt, KPointer, KBoolean, KStringPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
+import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
+import { Serializer } from "./peers/Serializer"
+import { ComponentBase } from "./../ComponentBase"
+import { PeerNode } from "./../PeerNode"
+import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
+import { ArkCommonMethodPeer, CommonMethod, CustomBuilder, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { ResourceColor, MarkStyle } from "./units"
+import { CheckBoxShape, Color } from "./enums"
+import { ContentModifier, CommonConfiguration } from "./arkui-wrapper-builder"
+import { Resource } from "global/resource"
+import { CallbackKind } from "./peers/CallbackKind"
+import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { CustomBuilder, CommonConfiguration, ContentModifier, CommonMethod, DrawModifier, Rectangle, Callback_Array_TouchTestInfo_TouchResult, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, Callback_ClickEvent_Void, ClickEvent, Callback_Boolean_HoverEvent_Void, HoverEvent, AccessibilityCallback, Callback_MouseEvent_Void, MouseEvent, Callback_TouchEvent_Void, TouchEvent, Callback_KeyEvent_Void, KeyEvent, Callback_KeyEvent_Boolean, AnimateParam, TransitionOptions, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, Callback_Area_Area_Void, Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs, Literal_Number_offset_span, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, DragEvent, DragItemInfo, Callback_DragEvent_String_Void, UniformDataType, Callback_PreDragStatus_Void, PreDragStatus, Type_CommonMethod_linearGradient_value, Tuple_ResourceColor_Number, Type_CommonMethod_sweepGradient_value, Tuple_Length_Length, Type_CommonMethod_radialGradient_value, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, GestureModifier, BackgroundBrightnessOptions, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, Callback_TouchEvent_HitTestMode, SizeChangeCallback, SafeAreaType, SafeAreaEdge, Literal_Alignment_align, BlurStyle, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, ComponentContent, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback } from "./common"
-import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, MarkStyle } from "./units"
-import { HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Color, Visibility, ItemAlign, Direction, GradientDirection, ObscuredReasons, RenderFit, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, CheckBoxShape } from "./enums"
-import { LengthMetrics } from "../Graphics"
-import { ResizableOptions } from "./image"
-import { Resource } from "global/resource";
-import { Callback_Void } from "./abilityComponent"
-import { FocusBoxStyle, FocusPriority } from "./focus"
-import { CircleShape } from "./../generated/ArkCircleShapeMaterialized"
-import { EllipseShape } from "./../generated/ArkEllipseShapeMaterialized"
-import { PathShape } from "./../generated/ArkPathShapeMaterialized"
-import { RectShape } from "./../generated/ArkRectShapeMaterialized"
-import { AttributeModifier } from "./../component/common" 
-import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureType, GestureMask } from "./gesture"
-import { PixelMap } from "./../generated/ArkPixelMapMaterialized"
-import { ArkCheckboxComponent } from "./../generated/ArkCheckbox"
-import { ArkCheckboxPeer } from "./../generated/peers/ArkCheckboxPeer"
+import { Callback_Boolean_Void } from "./navigation"
+
+export class ArkCheckboxPeer extends ArkCommonMethodPeer {
+    protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+        super(peerPtr, id, name, flags)
+    }
+    public static create(component: ComponentBase | undefined, flags: int32 = 0): ArkCheckboxPeer {
+        const peerId  = PeerNode.nextId()
+        const _peerPtr  = ArkUIGeneratedNativeModule._Checkbox_construct(peerId, flags)
+        const _peer  = new ArkCheckboxPeer(_peerPtr, peerId, "Checkbox", flags)
+        component?.setPeer(_peer)
+        return _peer
+    }
+    setCheckboxOptionsAttribute(options?: CheckboxOptions): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let options_type : int32 = RuntimeType.UNDEFINED
+        options_type = runtimeType(options)
+        thisSerializer.writeInt8(options_type as int32)
+        if ((RuntimeType.UNDEFINED) != (options_type)) {
+            const options_value  = options!
+            thisSerializer.writeCheckboxOptions(options_value)
+        }
+        ArkUIGeneratedNativeModule._CheckboxInterface_setCheckboxOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    select0Attribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._CheckboxAttribute_select0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    select1Attribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._CheckboxAttribute_select1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    selectedColor0Attribute(value: ResourceColor | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (TypeChecker.isColor(value_value)) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as Color
+                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_value_0))
+            }
+            else if (RuntimeType.NUMBER == value_value_type) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as number
+                thisSerializer.writeNumber(value_value_1)
+            }
+            else if (RuntimeType.STRING == value_value_type) {
+                thisSerializer.writeInt8(2 as int32)
+                const value_value_2  = value_value as string
+                thisSerializer.writeString(value_value_2)
+            }
+            else if (RuntimeType.OBJECT == value_value_type) {
+                thisSerializer.writeInt8(3 as int32)
+                const value_value_3  = value_value as Resource
+                thisSerializer.writeResource(value_value_3)
+            }
+        }
+        ArkUIGeneratedNativeModule._CheckboxAttribute_selectedColor0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    selectedColor1Attribute(value: ResourceColor | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (TypeChecker.isColor(value_value)) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as Color
+                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_value_0))
+            }
+            else if (RuntimeType.NUMBER == value_value_type) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as number
+                thisSerializer.writeNumber(value_value_1)
+            }
+            else if (RuntimeType.STRING == value_value_type) {
+                thisSerializer.writeInt8(2 as int32)
+                const value_value_2  = value_value as string
+                thisSerializer.writeString(value_value_2)
+            }
+            else if (RuntimeType.OBJECT == value_value_type) {
+                thisSerializer.writeInt8(3 as int32)
+                const value_value_3  = value_value as Resource
+                thisSerializer.writeResource(value_value_3)
+            }
+        }
+        ArkUIGeneratedNativeModule._CheckboxAttribute_selectedColor1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    shape0Attribute(value: CheckBoxShape | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = (value as CheckBoxShape)
+            thisSerializer.writeInt32(TypeChecker.CheckBoxShape_ToNumeric(value_value))
+        }
+        ArkUIGeneratedNativeModule._CheckboxAttribute_shape0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    shape1Attribute(value: CheckBoxShape | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = (value as CheckBoxShape)
+            thisSerializer.writeInt32(TypeChecker.CheckBoxShape_ToNumeric(value_value))
+        }
+        ArkUIGeneratedNativeModule._CheckboxAttribute_shape1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    unselectedColor0Attribute(value: ResourceColor | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (TypeChecker.isColor(value_value)) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as Color
+                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_value_0))
+            }
+            else if (RuntimeType.NUMBER == value_value_type) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as number
+                thisSerializer.writeNumber(value_value_1)
+            }
+            else if (RuntimeType.STRING == value_value_type) {
+                thisSerializer.writeInt8(2 as int32)
+                const value_value_2  = value_value as string
+                thisSerializer.writeString(value_value_2)
+            }
+            else if (RuntimeType.OBJECT == value_value_type) {
+                thisSerializer.writeInt8(3 as int32)
+                const value_value_3  = value_value as Resource
+                thisSerializer.writeResource(value_value_3)
+            }
+        }
+        ArkUIGeneratedNativeModule._CheckboxAttribute_unselectedColor0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    unselectedColor1Attribute(value: ResourceColor | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (TypeChecker.isColor(value_value)) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as Color
+                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_value_0))
+            }
+            else if (RuntimeType.NUMBER == value_value_type) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as number
+                thisSerializer.writeNumber(value_value_1)
+            }
+            else if (RuntimeType.STRING == value_value_type) {
+                thisSerializer.writeInt8(2 as int32)
+                const value_value_2  = value_value as string
+                thisSerializer.writeString(value_value_2)
+            }
+            else if (RuntimeType.OBJECT == value_value_type) {
+                thisSerializer.writeInt8(3 as int32)
+                const value_value_3  = value_value as Resource
+                thisSerializer.writeResource(value_value_3)
+            }
+        }
+        ArkUIGeneratedNativeModule._CheckboxAttribute_unselectedColor1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    mark0Attribute(value: MarkStyle | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeMarkStyle(value_value)
+        }
+        ArkUIGeneratedNativeModule._CheckboxAttribute_mark0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    mark1Attribute(value: MarkStyle | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeMarkStyle(value_value)
+        }
+        ArkUIGeneratedNativeModule._CheckboxAttribute_mark1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onChange0Attribute(value: OnCheckboxChangeCallback | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._CheckboxAttribute_onChange0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onChange1Attribute(value: OnCheckboxChangeCallback | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._CheckboxAttribute_onChange1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    contentModifier0Attribute(value: ContentModifier | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteObject(value_value)
+        }
+        ArkUIGeneratedNativeModule._CheckboxAttribute_contentModifier0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    contentModifier1Attribute(value: ContentModifier | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteObject(value_value)
+        }
+        ArkUIGeneratedNativeModule._CheckboxAttribute_contentModifier1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    _onChangeEvent_selectAttribute(callback: ((select: boolean | undefined) => void)): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        thisSerializer.holdAndWriteCallback(callback)
+        ArkUIGeneratedNativeModule._CheckboxAttribute__onChangeEvent_select(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+}
 export interface CheckboxOptions {
     name?: string;
     group?: string;
     indicatorBuilder?: CustomBuilder;
 }
-export type Callback_Boolean_Void = (parameter: boolean) => void;
-export interface CheckBoxConfiguration extends CommonConfiguration<CheckBoxConfiguration> {
+export interface CheckBoxConfiguration extends CommonConfiguration {
     name: string;
     selected: boolean;
-    triggerChange: ((parameter: boolean) => void);
+    triggerChange: ((isVisible: boolean) => void);
 }
+export type CheckboxInterface = (options?: CheckboxOptions) => CheckboxAttribute;
 export type OnCheckboxChangeCallback = (value: boolean) => void;
-/** @memo:stable */
+export type Callback_Opt_Boolean_Void = (select: boolean | undefined) => void;
 export interface CheckboxAttribute extends CommonMethod {
-    /** @memo */
-    setCheckboxOptions(options?: CheckboxOptions): this
-    /** @memo */
-    select(value: boolean): this
-    /** @memo */
-    selectedColor(value: ResourceColor): this
-    /** @memo */
-    shape(value: CheckBoxShape): this
-    /** @memo */
-    unselectedColor(value: ResourceColor): this
-    /** @memo */
-    mark(value: MarkStyle): this
-    /** @memo */
-    onChange(value: OnCheckboxChangeCallback): this
-    /** @memo */
-    contentModifier(value: ContentModifier<object>): this
-    /** @memo */
-    _onChangeEvent_select(callback: ((parameter: boolean) => void)): void
+    select(value: boolean | undefined): this
+    selectedColor(value: ResourceColor | undefined): this
+    shape(value: CheckBoxShape | undefined): this
+    unselectedColor(value: ResourceColor | undefined): this
+    mark(value: MarkStyle | undefined): this
+    onChange(value: OnCheckboxChangeCallback | undefined): this
+    contentModifier(value: ContentModifier | undefined): this
+    _onChangeEvent_select(callback: ((select: boolean | undefined) => void)): void
+}
+export class ArkCheckboxStyle extends ArkCommonMethodStyle implements CheckboxAttribute {
+    select_value?: boolean | undefined
+    selectedColor_value?: ResourceColor | undefined
+    shape_value?: CheckBoxShape | undefined
+    unselectedColor_value?: ResourceColor | undefined
+    mark_value?: MarkStyle | undefined
+    onChange_value?: OnCheckboxChangeCallback | undefined
+    contentModifier_value?: ContentModifier | undefined
+    public select(value: boolean | undefined): this {
+        return this
+    }
+    public selectedColor(value: ResourceColor | undefined): this {
+        return this
+    }
+    public shape(value: CheckBoxShape | undefined): this {
+        return this
+    }
+    public unselectedColor(value: ResourceColor | undefined): this {
+        return this
+    }
+    public mark(value: MarkStyle | undefined): this {
+        return this
+    }
+    public onChange(value: OnCheckboxChangeCallback | undefined): this {
+        return this
+    }
+    public contentModifier(value: ContentModifier | undefined): this {
+        return this
+    }
+    public _onChangeEvent_select(callback: ((select: boolean | undefined) => void)): void {
+        throw new Error("Unimplmented")
+    }
+}
+export class ArkCheckboxComponent extends ArkCommonMethodComponent implements CheckboxAttribute {
+    getPeer(): ArkCheckboxPeer {
+        return (this.peer as ArkCheckboxPeer)
+    }
+    public setCheckboxOptions(options?: CheckboxOptions): this {
+        if (this.checkPriority("setCheckboxOptions")) {
+            const options_casted = options as (CheckboxOptions | undefined)
+            this.getPeer()?.setCheckboxOptionsAttribute(options_casted)
+            return this
+        }
+        return this
+    }
+    public select(value: boolean | undefined): this {
+        if (this.checkPriority("select")) {
+            const value_type = runtimeType(value)
+            if ((RuntimeType.BOOLEAN == value_type) || (RuntimeType.UNDEFINED == value_type)) {
+                const value_casted = value as (boolean | undefined)
+                this.getPeer()?.select0Attribute(value_casted)
+                return this
+            }
+            if ((RuntimeType.BOOLEAN == value_type) || (RuntimeType.UNDEFINED == value_type)) {
+                const value_casted = value as (boolean | undefined)
+                this.getPeer()?.select1Attribute(value_casted)
+                return this
+            }
+            throw new Error("Can not select appropriate overload")
+        }
+        return this
+    }
+    public selectedColor(value: ResourceColor | undefined): this {
+        if (this.checkPriority("selectedColor")) {
+            const value_type = runtimeType(value)
+            if ((RuntimeType.NUMBER == value_type) || (RuntimeType.NUMBER == value_type) || (RuntimeType.STRING == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
+                const value_casted = value as (ResourceColor | undefined)
+                this.getPeer()?.selectedColor0Attribute(value_casted)
+                return this
+            }
+            if ((RuntimeType.NUMBER == value_type) || (RuntimeType.NUMBER == value_type) || (RuntimeType.STRING == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
+                const value_casted = value as (ResourceColor | undefined)
+                this.getPeer()?.selectedColor1Attribute(value_casted)
+                return this
+            }
+            throw new Error("Can not select appropriate overload")
+        }
+        return this
+    }
+    public shape(value: CheckBoxShape | undefined): this {
+        if (this.checkPriority("shape")) {
+            const value_type = runtimeType(value)
+            if ((RuntimeType.NUMBER == value_type) || (RuntimeType.UNDEFINED == value_type)) {
+                const value_casted = value as (CheckBoxShape | undefined)
+                this.getPeer()?.shape0Attribute(value_casted)
+                return this
+            }
+            throw new Error("Can not select appropriate overload")
+        }
+        return this
+    }
+    public unselectedColor(value: ResourceColor | undefined): this {
+        if (this.checkPriority("unselectedColor")) {
+            const value_type = runtimeType(value)
+            if ((RuntimeType.NUMBER == value_type) || (RuntimeType.NUMBER == value_type) || (RuntimeType.STRING == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
+                const value_casted = value as (ResourceColor | undefined)
+                this.getPeer()?.unselectedColor0Attribute(value_casted)
+                return this
+            }
+            if ((RuntimeType.NUMBER == value_type) || (RuntimeType.NUMBER == value_type) || (RuntimeType.STRING == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
+                const value_casted = value as (ResourceColor | undefined)
+                this.getPeer()?.unselectedColor1Attribute(value_casted)
+                return this
+            }
+            throw new Error("Can not select appropriate overload")
+        }
+        return this
+    }
+    public mark(value: MarkStyle | undefined): this {
+        if (this.checkPriority("mark")) {
+            const value_type = runtimeType(value)
+            if ((RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
+                const value_casted = value as (MarkStyle | undefined)
+                this.getPeer()?.mark0Attribute(value_casted)
+                return this
+            }
+            if ((RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
+                const value_casted = value as (MarkStyle | undefined)
+                this.getPeer()?.mark1Attribute(value_casted)
+                return this
+            }
+            throw new Error("Can not select appropriate overload")
+        }
+        return this
+    }
+    public onChange(value: OnCheckboxChangeCallback | undefined): this {
+        if (this.checkPriority("onChange")) {
+            const value_type = runtimeType(value)
+            if ((RuntimeType.FUNCTION == value_type) || (RuntimeType.UNDEFINED == value_type)) {
+                const value_casted = value as (OnCheckboxChangeCallback | undefined)
+                this.getPeer()?.onChange0Attribute(value_casted)
+                return this
+            }
+            if ((RuntimeType.FUNCTION == value_type) || (RuntimeType.UNDEFINED == value_type)) {
+                const value_casted = value as (OnCheckboxChangeCallback | undefined)
+                this.getPeer()?.onChange1Attribute(value_casted)
+                return this
+            }
+            throw new Error("Can not select appropriate overload")
+        }
+        return this
+    }
+    public contentModifier(value: ContentModifier | undefined): this {
+        if (this.checkPriority("contentModifier")) {
+            const value_type = runtimeType(value)
+            if ((RuntimeType.BIGINT == value_type) || (RuntimeType.BOOLEAN == value_type) || (RuntimeType.FUNCTION == value_type) || (RuntimeType.MATERIALIZED == value_type) || (RuntimeType.NUMBER == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.STRING == value_type) || (RuntimeType.SYMBOL == value_type) || (RuntimeType.UNDEFINED == value_type)) {
+                const value_casted = value as (ContentModifier | undefined)
+                this.getPeer()?.contentModifier0Attribute(value_casted)
+                return this
+            }
+            if ((RuntimeType.BIGINT == value_type) || (RuntimeType.BOOLEAN == value_type) || (RuntimeType.FUNCTION == value_type) || (RuntimeType.MATERIALIZED == value_type) || (RuntimeType.NUMBER == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.STRING == value_type) || (RuntimeType.SYMBOL == value_type) || (RuntimeType.UNDEFINED == value_type)) {
+                const value_casted = value as (ContentModifier | undefined)
+                this.getPeer()?.contentModifier1Attribute(value_casted)
+                return this
+            }
+            throw new Error("Can not select appropriate overload")
+        }
+        return this
+    }
+    public _onChangeEvent_select(callback: ((select: boolean | undefined) => void)): void {
+        if (this.checkPriority("_onChangeEvent_select")) {
+            const callback_casted = callback as (((select: boolean | undefined) => void))
+            this.getPeer()?._onChangeEvent_selectAttribute(callback_casted)
+            return
+        }
+        return
+    }
+    public applyAttributesFinish(): void {
+        // we call this function outside of class, so need to make it public
+        super.applyAttributesFinish()
+    }
 }
 /** @memo */
 export function Checkbox(
-  /** @memo */
-  style: ((attributes: CheckboxAttribute) => void) | undefined,
-  options?: CheckboxOptions | undefined, 
-  /** @memo */
-  content_?: () => void,
-) {
+    /** @memo */
+    style: ((attributes: CheckboxAttribute) => void) | undefined,
+    options?: CheckboxOptions,
+    /** @memo */
+    content_?: (() => void) | undefined,
+): void {
     const receiver = remember(() => {
         return new ArkCheckboxComponent()
     })

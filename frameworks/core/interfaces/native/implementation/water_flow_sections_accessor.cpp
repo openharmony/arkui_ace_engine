@@ -55,6 +55,15 @@ std::vector<WaterFlowSections::Section> Convert(const Array_SectionOptions& src)
     }
     return dst;
 }
+void AssignArkValue(Ark_SectionOptions& dst, const WaterFlowSections::Section& src)
+{
+    dst.itemsCount = Converter::ArkValue<Ark_Number>(src.itemsCount);
+    dst.crossCount = Converter::ArkValue<Opt_Number>(src.crossCount);
+    LOGE("CallbackKeeper does not support callback with parameters, dst.onGetItemMainSizeByIndex isn't converted");
+    dst.columnsGap = Converter::ArkValue<Opt_Length>(src.columnsGap);
+    dst.rowsGap = Converter::ArkValue<Opt_Length>(src.rowsGap);
+    dst.margin = Converter::ArkUnion<Opt_Union_Margin_Dimension, Ark_Padding>(src.margin);
+}
 }
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -116,11 +125,12 @@ Ark_Boolean UpdateImpl(Ark_WaterFlowSections peer,
 }
 Array_SectionOptions ValuesImpl(Ark_WaterFlowSections peer)
 {
-    LOGE("ARKOALA WaterFlowSectionAccessor.ValuesImpl -> Incorrect return value, "
-         "should be Array<SectionOptions>");
     CHECK_NULL_RETURN(peer, {});
     CHECK_NULL_RETURN(peer->GetController(), {});
-    return {};
+    auto info = peer->GetController()->GetSectionInfo();
+    LOGE("WaterFlowSectionAccessor.ValuesImpl -> converter is not fully implemented");
+    auto options = Converter::ArkValue<Array_SectionOptions>(info, Converter::FC);
+    return options;
 }
 Ark_Number LengthImpl(Ark_WaterFlowSections peer)
 {

@@ -124,32 +124,14 @@ export function createNodeFactory() {
         updateSuper,
         createParenthesizedExpression,
         updateParenthesizedExpression,
-        // createImportDeclaration,
         createImportSpecifier,
     }
 
-    // @api
-    // function createSourceFile(
-    //     statements: readonly Statement[],
-    //     endOfFileToken: EndOfFileToken,
-    //     flags: NodeFlags,
-    // ): SourceFile;
     function createSourceFile(source: string, state: Es2pandaContextState = Es2pandaContextState.ES2PANDA_STATE_PARSED): SourceFile {
         const node = arkts.EtsScript.createFromSource(source, state)
         return new SourceFile(node)
     }
 
-    // TODO: fix (now doesn't create a new node)
-    // @api
-    // updateSourceFile(
-    //     node: SourceFile,
-    //     statements: readonly Statement[],
-    //     isDeclarationFile?: boolean,
-    //     referencedFiles?: readonly FileReference[],
-    //     typeReferences?: readonly FileReference[],
-    //     hasNoDefaultLib?: boolean,
-    //     libReferences?: readonly FileReference[]
-    // ): SourceFile;
     function updateSourceFile(
         node: SourceFile,
         statements: readonly Statement[]
@@ -162,10 +144,6 @@ export function createNodeFactory() {
         )
     }
 
-    // @api
-    // createIdentifier(
-    //     text: string
-    // ): Identifier;
     function createIdentifier(
         text: string,
         typeAnnotation?: TypeNode | undefined
@@ -178,11 +156,6 @@ export function createNodeFactory() {
         )
     }
 
-    // @api
-    // createStringLiteral(
-    //     text: string,
-    //     isSingleQuote?: boolean
-    // ): StringLiteral;
     function createStringLiteral(
         str: string
     ): StringLiteral {
@@ -193,11 +166,6 @@ export function createNodeFactory() {
         )
     }
 
-    // @api
-    // createNumericLiteral(
-    //     value: string | number,
-    //     numericLiteralFlags: TokenFlags = TokenFlags.None
-    // ): NumericLiteral {
     function createNumericLiteral(
         value: number
     ): NumericLiteral {
@@ -208,11 +176,6 @@ export function createNodeFactory() {
         )
     }
 
-    // @api
-    // createVariableDeclarationList(
-    //     declarations: readonly VariableDeclaration[],
-    //     flags = NodeFlags.None
-    // ): VariableDeclarationList
     function createVariableDeclarationList(
         declarations: readonly VariableDeclaration[],
         flags: NodeFlags = NodeFlags.None
@@ -226,11 +189,6 @@ export function createNodeFactory() {
         )
     }
 
-    // @api
-    // updateVariableDeclarationList(
-    //     node: VariableDeclarationList,
-    //     declarations: readonly VariableDeclaration[]
-    // ): VariableDeclarationList
     function updateVariableDeclarationList(
         node: VariableDeclarationList,
         declarations: readonly VariableDeclaration[]
@@ -245,11 +203,6 @@ export function createNodeFactory() {
         )
     }
 
-    // @api
-    // createVariableStatement(
-    //     modifiers: readonly ModifierLike[] | undefined,
-    //     declarationList: VariableDeclarationList | readonly VariableDeclaration[]
-    // ): VariableStatement
     function createVariableStatement(
         modifiers: readonly Modifier[] | undefined,
         declarationList: VariableDeclarationList | readonly VariableDeclaration[]
@@ -264,12 +217,6 @@ export function createNodeFactory() {
         )
     }
 
-    // @api
-    // updateVariableStatement(
-    //     node: VariableStatement,
-    //     modifiers: readonly ModifierLike[] | undefined,
-    //     declarationList: VariableDeclarationList
-    // ): VariableStatement
     function updateVariableStatement(
         node: VariableStatement,
         modifiers: readonly Modifier[] | undefined,
@@ -285,13 +232,6 @@ export function createNodeFactory() {
         )
     }
 
-    // @api
-    // createVariableDeclaration(
-    //     name: string | BindingName,
-    //     exclamationToken: ExclamationToken | undefined,
-    //     type: TypeNode | undefined,
-    //     initializer: Expression | undefined
-    // ): VariableDeclaration
     function createVariableDeclaration(
         name: string | Identifier,
         exclamationToken: undefined,
@@ -308,14 +248,6 @@ export function createNodeFactory() {
         )
     }
 
-    // @api
-    // function updateVariableDeclaration(
-    //     node: VariableDeclaration,
-    //     name: BindingName,
-    //     exclamationToken: ExclamationToken | undefined,
-    //     type: TypeNode | undefined,
-    //     initializer: Expression | undefined
-    // ): VariableDeclaration
     function updateVariableDeclaration(
         node: VariableDeclaration,
         name: Identifier,
@@ -334,16 +266,6 @@ export function createNodeFactory() {
         )
     }
 
-    // @api
-    // createFunctionDeclaration(
-    //     modifiers: readonly ModifierLike[] | undefined,
-    //     asteriskToken: AsteriskToken | undefined,
-    //     name: string | Identifier | undefined,
-    //     typeParameters: readonly TypeParameterDeclaration[] | undefined,
-    //     parameters: readonly ParameterDeclaration[],
-    //     type: TypeNode | undefined,
-    //     body: Block | undefined
-    // ): FunctionDeclaration;
     function createFunctionDeclaration(
         modifiers: readonly Modifier[] | undefined,
         asteriskToken: undefined,
@@ -372,17 +294,6 @@ export function createNodeFactory() {
         )
     }
 
-    // @api
-    // updateFunctionDeclaration(
-    //     node: FunctionDeclaration,
-    //     modifiers: readonly ModifierLike[] | undefined,
-    //     asteriskToken: AsteriskToken | undefined,
-    //     name: Identifier | undefined,
-    //     typeParameters: readonly TypeParameterDeclaration[] | undefined,
-    //     parameters: readonly ParameterDeclaration[],
-    //     type: TypeNode | undefined,
-    //     body: Block | undefined
-    // ): FunctionDeclaration;
     function updateFunctionDeclaration(
         node: FunctionDeclaration,
         modifiers: readonly Modifier[] | undefined,
@@ -414,15 +325,6 @@ export function createNodeFactory() {
         )
     }
 
-    // @api
-    // createParameterDeclaration(
-    //     modifiers: readonly ModifierLike[] | undefined,
-    //     dotDotDotToken: DotDotDotToken | undefined,
-    //     name: string | BindingName,
-    //     questionToken?: QuestionToken,
-    //     type?: TypeNode,
-    //     initializer?: Expression
-    // ): ParameterDeclaration;
     function createParameterDeclaration(
         modifiers: readonly Modifier[] | undefined,
         dotDotDotToken: undefined,
@@ -442,16 +344,6 @@ export function createNodeFactory() {
         )
     }
 
-    // @api
-    // function updateParameterDeclaration(
-    //     node: ParameterDeclaration,
-    //     modifiers: readonly ModifierLike[] | undefined,
-    //     dotDotDotToken: DotDotDotToken | undefined,
-    //     name: string | BindingName,
-    //     questionToken: QuestionToken | undefined,
-    //     type: TypeNode | undefined,
-    //     initializer: Expression | undefined,
-    // ): ParameterDeclaration
     function updateParameterDeclaration(
         node: ParameterDeclaration,
         modifiers: readonly Modifier[] | undefined,
@@ -473,13 +365,6 @@ export function createNodeFactory() {
         )
     }
 
-    // @api
-    // createTypeParameterDeclaration(
-    //     modifiers: readonly Modifier[] | undefined,
-    //     name: string | Identifier,
-    //     constraint?: TypeNode,
-    //     defaultType?: TypeNode
-    // ): TypeParameterDeclaration;
     function createTypeParameterDeclaration(
         modifiers: readonly Modifier[] | undefined,
         name: string | Identifier,
@@ -496,14 +381,6 @@ export function createNodeFactory() {
         )
     }
 
-    // @api
-    // function updateTypeParameterDeclaration(
-    //     node: TypeParameterDeclaration,
-    //     modifiers: readonly Modifier[] | undefined,
-    //     name: Identifier,
-    //     constraint: TypeNode | undefined,
-    //     defaultType: TypeNode | undefined
-    // ): TypeParameterDeclaration
     function updateTypeParameterDeclaration(
         node: TypeParameterDeclaration,
         modifiers: readonly Modifier[] | undefined,
@@ -522,10 +399,6 @@ export function createNodeFactory() {
         )
     }
 
-    // @api
-    // createUnionTypeNode(
-    //     types: readonly TypeNode[]
-    // ): UnionTypeNode
     function createUnionTypeNode(
         types: readonly TypeNode[]
     ): UnionTypeNode {
@@ -536,11 +409,6 @@ export function createNodeFactory() {
         )
     }
 
-    // @api
-    // function updateUnionTypeNode(
-    //     node: UnionTypeNode,
-    //     types: NodeArray<TypeNode>
-    // ): UnionTypeNode
     function updateUnionTypeNode(
         node: UnionTypeNode,
         types: readonly TypeNode[]
@@ -554,11 +422,6 @@ export function createNodeFactory() {
 
     }
 
-    // @api
-    // createTypeReferenceNode(
-    //     typeName: string | EntityName,
-    //     typeArguments?: readonly TypeNode[]
-    // ): TypeReferenceNode;
     function createTypeReferenceNode(
         typeName: Identifier,
         typeArguments?: undefined
@@ -570,12 +433,6 @@ export function createNodeFactory() {
         )
     }
 
-    // @api
-    // function updateTypeReferenceNode(
-    //     node: TypeReferenceNode,
-    //     typeName: EntityName,
-    //     typeArguments: NodeArray<TypeNode> | undefined
-    // ): TypeReferenceNode
     function updateTypeReferenceNode(
         node: TypeReferenceNode,
         typeName: Identifier,
@@ -589,10 +446,6 @@ export function createNodeFactory() {
         )
     }
 
-    // @api
-    // createKeywordTypeNode<TKind extends KeywordTypeSyntaxKind>(
-    //     kind: TKind
-    // ): KeywordTypeNode<TKind>;
     function createKeywordTypeNode(
         TKind: ts.KeywordTypeSyntaxKind
     ): KeywordTypeNode {
@@ -627,11 +480,6 @@ export function createNodeFactory() {
         return keywords.get(TKind) ?? throwError('unsupported keyword')
     }
 
-    // @api
-    // createBlock(
-    //     statements: readonly Statement[],
-    //     multiLine?: boolean
-    // ): Block;
     function createBlock(
         statements: readonly Statement[],
         multiline?: boolean
@@ -643,11 +491,6 @@ export function createNodeFactory() {
         )
     }
 
-    // @api
-    // updateBlock(
-    //     node: Block,
-    //     statements: readonly Statement[]
-    // ): Block;
     function updateBlock(
         node: Block,
         statements: readonly Statement[]
@@ -660,10 +503,6 @@ export function createNodeFactory() {
         )
     }
 
-    // @api
-    // createExpressionStatement(
-    //     expression: Expression
-    // ): ExpressionStatement;
     function createExpressionStatement(
         expression: Expression
     ): ExpressionStatement {
@@ -674,11 +513,6 @@ export function createNodeFactory() {
         )
     }
 
-    // @api
-    // updateExpressionStatement(
-    //     node: ExpressionStatement,
-    //     expression: Expression
-    // ): ExpressionStatement;
     function updateExpressionStatement(
         node: ExpressionStatement,
         expression: Expression
@@ -691,10 +525,6 @@ export function createNodeFactory() {
         )
     }
 
-    // @api
-    // createReturnStatement(
-    //     expression?: Expression
-    // ): ReturnStatement;
     function createReturnStatement(
         expression: Expression
     ): ReturnStatement {
@@ -705,11 +535,6 @@ export function createNodeFactory() {
         )
     }
 
-    // @api
-    // function updateReturnStatement(
-    //     node: ReturnStatement,
-    //     expression: Expression | undefined
-    // ): ReturnStatement
     function updateReturnStatement(
         node: ReturnStatement,
         expression: Expression
@@ -722,11 +547,6 @@ export function createNodeFactory() {
         )
     }
 
-    // @api
-    // createPropertyAccessExpression(
-    //     expression: Expression,
-    //     name: string | MemberName
-    // ): PropertyAccessExpression;
     function createPropertyAccessExpression(
         expression: Expression,
         name: string | Identifier
@@ -742,12 +562,6 @@ export function createNodeFactory() {
         )
     }
 
-    // @api
-    // updatePropertyAccessExpression(
-    //     node: PropertyAccessExpression,
-    //     expression: Expression,
-    //     name: MemberName
-    // ): PropertyAccessExpression;
     function updatePropertyAccessExpression(
         node: PropertyAccessExpression,
         expression: Expression,
@@ -765,12 +579,6 @@ export function createNodeFactory() {
         )
     }
 
-    // @api
-    // createCallExpression(
-    //     expression: Expression,
-    //     typeArguments: readonly TypeNode[] | undefined,
-    //     argumentsArray: readonly Expression[] | undefined
-    // ): CallExpression;
     function createCallExpression(
         expression: Expression,
         typeArguments: readonly TypeNode[] | undefined,
@@ -786,13 +594,6 @@ export function createNodeFactory() {
         )
     }
 
-    // @api
-    // updateCallExpression(
-    //     node: CallExpression,
-    //     expression: Expression,
-    //     typeArguments: readonly TypeNode[] | undefined,
-    //     argumentsArray: readonly Expression[]
-    // ): CallExpression;
     function updateCallExpression(
         node: CallExpression,
         expression: Expression,
@@ -841,22 +642,12 @@ export function createNodeFactory() {
     }
 
     // TODO: rewrite maybe
-    // @api
-    // createToken(
-    //     token: SyntaxKind._
-    // ): _;
     function createToken<TKind extends ts.TokenSyntaxKind>(
         token: TKind
     ) {
         return new Token(token)
     }
 
-    // @api
-    // createBinaryExpression(
-    //     left: Expression,
-    //     operator: BinaryOperator | BinaryOperatorToken,
-    //     right: Expression
-    // ): BinaryExpression;
     function createBinaryExpression(
         left: Expression,
         operator: BinaryOperatorToken,
@@ -871,13 +662,6 @@ export function createNodeFactory() {
         )
     }
 
-    // @api
-    // function updateBinaryExpression(
-    //     node: BinaryExpression,
-    //     left: Expression,
-    //     operator: BinaryOperatorToken,
-    //     right: Expression
-    // ): BinaryExpression
     function updateBinaryExpression(
         node: BinaryExpression,
         left: Expression,
@@ -894,15 +678,6 @@ export function createNodeFactory() {
         )
     }
 
-    // @api
-    // createArrowFunction(
-    //     modifiers: readonly Modifier[] | undefined,
-    //     typeParameters: readonly TypeParameterDeclaration[] | undefined,
-    //     parameters: readonly ParameterDeclaration[],
-    //     type: TypeNode | undefined,
-    //     equalsGreaterThanToken: EqualsGreaterThanToken | undefined,
-    //     body: ConciseBody
-    // ): ArrowFunction;
     function createArrowFunction(
         modifiers: readonly Modifier[] | undefined,
         typeParameters: readonly TypeParameterDeclaration[] | undefined,
@@ -929,16 +704,6 @@ export function createNodeFactory() {
         )
     }
 
-    // @api
-    // function updateArrowFunction(
-    //     node: ArrowFunction,
-    //     modifiers: readonly Modifier[] | undefined,
-    //     typeParameters: readonly TypeParameterDeclaration[] | undefined,
-    //     parameters: readonly ParameterDeclaration[],
-    //     type: TypeNode | undefined,
-    //     equalsGreaterThanToken: EqualsGreaterThanToken,
-    //     body: ConciseBody,
-    // ): ArrowFunction
     function updateArrowFunction(
         node: ArrowFunction,
         modifiers: readonly Modifier[] | undefined,
@@ -968,14 +733,6 @@ export function createNodeFactory() {
         )
     }
 
-    // @api
-    // function createClassDeclaration(
-    //     modifiers: readonly ModifierLike[] | undefined,
-    //     name: string | Identifier | undefined,
-    //     typeParameters: readonly TypeParameterDeclaration[] | undefined,
-    //     heritageClauses: readonly HeritageClause[] | undefined,
-    //     members: readonly ClassElement[],
-    // ): ClassDeclaration
     function createClassDeclaration(
         modifiers: readonly Modifier[] | undefined,
         name: string | Identifier | undefined,
@@ -999,15 +756,6 @@ export function createNodeFactory() {
         )
     }
 
-    // @api
-    // updateClassDeclaration(
-    //     node: ClassDeclaration,
-    //     modifiers: readonly ModifierLike[] | undefined,
-    //     name: Identifier | undefined,
-    //     typeParameters: readonly TypeParameterDeclaration[] | undefined,
-    //     heritageClauses: readonly HeritageClause[] | undefined,
-    //     members: readonly ClassElement[]
-    // ): ClassDeclaration;
     function updateClassDeclaration(
         node: ClassDeclaration,
         modifiers: readonly Modifier[] | undefined,
@@ -1033,12 +781,6 @@ export function createNodeFactory() {
         )
     }
 
-    // @api
-    // tsc: createFunctionTypeNode(
-    //     typeParameters: readonly TypeParameterDeclaration[] | undefined,
-    //     parameters: readonly ParameterDeclaration[],
-    //     type: TypeNode
-    // ): FunctionTypeNode;
     function createFunctionTypeNode(
         typeParameters: readonly TypeParameterDeclaration[] | undefined,
         parameters: readonly ParameterDeclaration[],
@@ -1056,13 +798,6 @@ export function createNodeFactory() {
         )
     }
 
-    // @api
-    // function updateFunctionTypeNode(
-    //     node: FunctionTypeNode,
-    //     typeParameters: NodeArray<TypeParameterDeclaration> | undefined,
-    //     parameters: NodeArray<ParameterDeclaration>,
-    //     type: TypeNode,
-    // ): FunctionTypeNode
     function updateFunctionTypeNode(
         node: FunctionTypeNode,
         typeParameters: readonly TypeParameterDeclaration[] | undefined,
@@ -1083,17 +818,6 @@ export function createNodeFactory() {
     }
 
     // TODO: fix modifiers
-    // @api
-    // createMethodDeclaration(
-    //     modifiers: readonly ModifierLike[] | undefined,
-    //     asteriskToken: AsteriskToken | undefined,
-    //     name: string | PropertyName,
-    //     questionToken: QuestionToken | undefined,
-    //     typeParameters: readonly TypeParameterDeclaration[] | undefined,
-    //     parameters: readonly ParameterDeclaration[],
-    //     type: TypeNode | undefined,
-    //     body: Block | undefined
-    // ): MethodDeclaration;
     function createMethodDeclaration(
         modifiers: readonly Modifier[] | undefined,
         asteriskToken: undefined,
@@ -1129,18 +853,6 @@ export function createNodeFactory() {
         )
     }
 
-    // @api
-    // tsc: updateMethodDeclaration(
-    //     node: MethodDeclaration,
-    //     modifiers: readonly ModifierLike[] | undefined,
-    //     asteriskToken: AsteriskToken | undefined,
-    //     name: PropertyName,
-    //     questionToken: QuestionToken | undefined,
-    //     typeParameters: readonly TypeParameterDeclaration[] | undefined,
-    //     parameters: readonly ParameterDeclaration[],
-    //     type: TypeNode | undefined,
-    //     body: Block | undefined
-    // ): MethodDeclaration;
     function updateMethodDeclaration(
         node: MethodDeclaration,
         modifiers: readonly Modifier[] | undefined,
@@ -1180,12 +892,6 @@ export function createNodeFactory() {
         )
     }
 
-    // @api
-    // createConstructorDeclaration(
-    //     modifiers: readonly ModifierLike[] | undefined,
-    //     parameters: readonly ParameterDeclaration[],
-    //     body: Block | undefined
-    // ): ConstructorDeclaration;
     function createConstructorDeclaration(
         modifiers: readonly Modifier[] | undefined,
         parameters: readonly ParameterDeclaration[],
@@ -1219,13 +925,6 @@ export function createNodeFactory() {
         )
     }
 
-    // @api
-    // function updateConstructorDeclaration(
-    //     node: ConstructorDeclaration,
-    //     modifiers: readonly ModifierLike[] | undefined,
-    //     parameters: readonly ParameterDeclaration[],
-    //     body: Block | undefined,
-    // ): ConstructorDeclaration
     function updateConstructorDeclaration(
         node: ConstructorDeclaration,
         modifiers: readonly Modifier[] | undefined,
@@ -1265,9 +964,6 @@ export function createNodeFactory() {
 
     }
 
-    // @api
-    // tsc: createSuper(
-    // ): SuperExpression;
     function createSuper(
     ): SuperExpression {
         return new SuperExpression(
@@ -1275,10 +971,6 @@ export function createNodeFactory() {
         )
     }
 
-    // @api
-    // tsc: updateSuper(
-    //     node: SuperExpression
-    // ): SuperExpression;
     function updateSuper(
         node: SuperExpression
     ): SuperExpression {
@@ -1289,66 +981,17 @@ export function createNodeFactory() {
         )
     }
 
-    // @api
-    // tsc: createParenthesizedExpression(
-    //     expression: Expression
-    // ): ParenthesizedExpression;
     function createParenthesizedExpression(
         expression: Expression
     ): ParenthesizedExpression {
         return expression
-        // TODO:
-        // return new ParenthesizedExpression(
-        //     expression
-        // )
     }
-
-    // @api
-    // tsc: updateParenthesizedExpression(
-    //     node: ParenthesizedExpression,
-    //     expression: Expression
-    // ): ParenthesizedExpression;
     function updateParenthesizedExpression(
         node: ParenthesizedExpression,
         expression: Expression
     ): ParenthesizedExpression {
         return expression
-        // TODO:
-        // return new ParenthesizedExpression(
-        //     expression
-        // )
     }
-
-    // // @api
-    // // createImportDeclaration(
-    // //     decorators: readonly Decorator[] | undefined,
-    // //     modifiers: readonly Modifier[] | undefined,
-    // //     importClause: ImportClause | undefined,
-    // //     moduleSpecifier: Expression,
-    // //     assertClause?: AssertClause
-    // // ): ImportDeclaration;
-    // function createImportDeclaration(
-    //     decorators: undefined,
-    //     modifiers: readonly Modifier[] | undefined,
-    //     importClause: ImportClause | undefined,
-    //     moduleSpecifier: StringLiteral,
-    //     assertClause?: undefined
-    // ): ImportDeclaration {
-    //     return new ImportDeclaration(
-    //         arkts.EtsImportDeclaration.create(
-    //             undefined,
-    //             arkts.ImportSource.create(moduleSpecifier.node),
-
-    //         )
-    //     )
-    // }
-
-    // @api
-    // createImportSpecifier(
-    //     isTypeOnly: boolean,
-    //     propertyName: Identifier | undefined,
-    //     name: Identifier
-    // ): ImportSpecifier;
     function createImportSpecifier(
         isTypeOnly: boolean,
         propertyName: Identifier | undefined,

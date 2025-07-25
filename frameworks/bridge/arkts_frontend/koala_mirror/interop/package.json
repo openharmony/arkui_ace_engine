@@ -1,0 +1,111 @@
+{
+    "name": "@koalaui/interop",
+    "version": "1.7.3+devel",
+    "description": "",
+    "workspaces": [
+        "../incremental/build-common",
+        "../incremental/compat",
+        "../incremental/common"
+    ],
+    "files": [
+        "build/lib/src/**/*.js",
+        "build/lib/src/**/*.d.ts",
+        "src/**/*",
+        "index.ts",
+        "oh-package.json5"
+    ],
+    "main": "./build/lib/src/interop/index.js",
+    "exports": {
+        ".": "./build/lib/src/interop/index.js",
+        "./*.js": "./build/lib/src/interop/*.js",
+        "./*": "./build/lib/src/interop/*.js"
+    },
+    "imports": {
+        "#common/wrappers": {
+            "browser": "./build/lib/src/wasm/wrappers/index.js",
+            "node": "./build/lib/src/napi/wrappers/index.js"
+        },
+        "#common/wrappers/*": {
+            "browser": "./build/lib/src/wasm/wrappers/*.js",
+            "node": "./build/lib/src/napi/wrappers/*.js",
+            "default": "./build/lib/src/napi/wrappers/*.js"
+        }
+    },
+    "types": "index.d.ts",
+    "typesVersions": {
+        "*": {
+            "*": [
+                "./build/lib/src/interop/*"
+            ]
+        }
+    },
+    "scripts": {
+        "clean": "rimraf dist build types",
+        "compile": "ets-tsc -b .",
+        "build:interop": "npm run build:interop:inc",
+        "build:interop:gn": "npm run build:interop:inc",
+        "build:interop:inc": "fast-arktsc --config ./arktsconfig.json --compiler ../incremental/tools/panda/arkts/arktsc --link-name ./build/interop.abc && ninja ${NINJA_OPTIONS} -f build/abc/build.ninja",
+        "clean:interop": "npm run clean",
+        "lint": "eslint src test components",
+        "test:wasm:coverage": "NODE_OPTIONS='--conditions browser --no-experimental-fetch' nyc mocha",
+        "test:wasm": "NODE_OPTIONS='--conditions browser --no-experimental-fetch' mocha",
+        "test:node:coverage": "nyc mocha",
+        "test:node": "mocha",
+        "test:coverage": "npm run test:node:coverage",
+        "test": "npm run test:node",
+        "watch": "ets-tsc -b . --watch",
+        "prepare:compiler": "test $(node -e \"console.log(process.platform)\") != \"linux\" && npm run --prefix ../arkoala-arkts/ohos-sdk download || npm run install:toolchain --prefix ../arkoala-arkts/tools/compiler",
+        "prepare:arm64": "npm run prepare:compiler && npm run install:sysroot:arm64 --prefix ../arkoala-arkts/tools/compiler",
+        "prepare:arm32": "npm run prepare:compiler && npm run install:sysroot:arm32 --prefix ../arkoala-arkts/tools/compiler",
+        "configure:native-node-host": "meson setup -D vm_kind=node build-node-host",
+        "compile:native-node-host": "npm run configure:native-node-host && meson compile -C build-node-host && meson install -C build-node-host",
+        "configure:native-hzvm-host": "meson setup -D vm_kind=hzvm build-hzvm-host",
+        "compile:native-hzvm-host": "npm run configure:native-hzvm-host && meson compile -C build-hzvm-host && meson install -C build-hzvm-host",
+        "configure:native-panda-host": "meson setup -D vm_kind=panda build-panda-host",
+        "compile:native-panda-host": "npm run configure:native-panda-host && meson compile -C build-panda-host && meson install -C build-panda-host",
+        "configure:native-panda-linux-x64": "node ./scripts/configure.mjs panda-linux-x64",
+        "compile:native-panda-linux-x64": "npm run configure:native-panda-linux-x64 && meson compile -C build-panda-linux-x64 && meson install -C build-panda-linux-x64",
+        "configure:native-panda-linux-arm64": "node ./scripts/configure.mjs panda-linux-arm64",
+        "compile:native-panda-linux-arm64": "npm run configure:native-panda-linux-arm64 && meson compile -C build-panda-linux-arm64 && meson install -C build-panda-linux-arm64",
+        "configure:native-panda-windows-x64": "node ./scripts/configure.mjs panda-windows-x64",
+        "compile:native-panda-windows-x64": "npm run configure:native-panda-windows-x64 && meson compile -C build-panda-windows-x64 && meson install -C build-panda-windows-x64",
+        "configure:native-panda-macos-x64": "node ./scripts/configure.mjs panda-macos-x64",
+        "compile:native-panda-macos-x64": "npm run configure:native-panda-macos-x64 && meson compile -C build-panda-macos-x64 && meson install -C build-panda-macos-x64",
+        "configure:native-panda-macos-arm64": "node ./scripts/configure.mjs panda-macos-arm64",
+        "compile:native-panda-macos-arm64": "npm run configure:native-panda-macos-arm64 && meson compile -C build-panda-macos-arm64 && meson install -C build-panda-macos-arm64",
+        "configure:native-jvm-host": "meson setup -D vm_kind=jvm build-jvm-host -D vmloader=true -D jdk_dir=$JAVA_HOME",
+        "compile:native-jvm-host": "npm run configure:native-jvm-host && meson compile -C build-jvm-host && meson install -C build-jvm-host",
+        "configure:native-hzvm-ohos-arm64": "npm run prepare:arm64 && node ./scripts/configure.mjs hzvm-ohos-arm64",
+        "compile:native-hzvm-ohos-arm64": "npm run configure:native-hzvm-ohos-arm64 && meson compile -C build-hzvm-ohos-arm64 && meson install -C build-hzvm-ohos-arm64",
+        "configure:native-hzvm-ohos-arm32": "npm run prepare:arm32 && node ./scripts/configure.mjs hzvm-ohos-arm32",
+        "compile:native-hzvm-ohos-arm32": "npm run configure:native-hzvm-ohos-arm32 && meson compile -C build-hzvm-ohos-arm32 && meson install -C build-hzvm-ohos-arm32",
+        "configure:native-hzvm-ohos": "npm run configure:native-hzvm-ohos-arm64",
+        "compile:native-hzvm-ohos": "npm run compile:native-hzvm-ohos-arm64",
+        "configure:native-panda-ohos-arm64": "npm run prepare:arm64 && node ./scripts/configure.mjs panda-ohos-arm64",
+        "compile:native-panda-ohos-arm64": "npm run configure:native-panda-ohos-arm64 && meson compile -C build-panda-ohos-arm64 && meson install -C build-panda-ohos-arm64",
+        "configure:native-panda-ohos-arm32": "npm run prepare:arm32 && node ./scripts/configure.mjs panda-ohos-arm32",
+        "compile:native-panda-ohos-arm32": "npm run configure:native-panda-ohos-arm32 && meson compile -C build-panda-ohos-arm32 && meson install -C build-panda-ohos-arm32",
+        "configure:native-panda-with-node-host": "npm run configure:native-panda-host && meson setup -D vm_kind=node -D vmloader=true build-node-host-vmloader",
+        "compile:native-panda-with-node-host": "npm run configure:native-panda-with-node-host && npm run compile:native-panda-host && npm run compile:native-panda-host && meson compile -C build-node-host-vmloader && meson install -C build-node-host-vmloader",
+        "configure:native-panda-with-hzvm-ohos-arm64": "npm run configure:native-panda-ohos-arm64 && node ./scripts/configure.mjs hzvm-ohos-arm64-vmloader",
+        "compile:native-panda-with-hzvm-ohos-arm64": "npm run configure:native-panda-with-hzvm-ohos-arm64 && npm run compile:native-panda-ohos-arm64 && meson compile -C build-hzvm-ohos-arm64-vmloader && meson install -C build-hzvm-ohos-arm64-vmloader",
+        "configure:native-panda-with-hzvm-ohos-arm32": "npm run configure:native-panda-ohos-arm32 && node ./scripts/configure.mjs hzvm-ohos-arm32-vmloader",
+        "compile:native-panda-with-hzvm-ohos-arm32": "npm run configure:native-panda-with-hzvm-ohos-arm32 && npm run compile:native-panda-ohos-arm32 && meson compile -C build-hzvm-ohos-arm32-vmloader && meson install -C build-hzvm-ohos-arm32-vmloader"
+    },
+    "keywords": [],
+    "dependencies": {
+        "@types/node": "^18.0.0",
+        "@koalaui/common": "1.7.3+devel"
+    },
+    "devDependencies": {
+        "@ohos/hypium": "1.0.6",
+        "@types/node": "^18.0.0",
+        "@typescript-eslint/eslint-plugin": "^5.20.0",
+        "@typescript-eslint/parser": "^5.20.0",
+        "eslint": "^8.13.0",
+        "eslint-plugin-unused-imports": "^2.0.0",
+        "source-map-support": "^0.5.21",
+        "@koalaui/ets-tsc": "4.9.5-r5",
+        "@koalaui/fast-arktsc": "1.5.15"
+    }
+}

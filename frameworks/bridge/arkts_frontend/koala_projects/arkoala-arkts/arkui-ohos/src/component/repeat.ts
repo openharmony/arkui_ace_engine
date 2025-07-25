@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,14 +14,45 @@
  */
 
 
-// WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
+// HANDWRITTEN, DO NOT REGENERATE
 
-import { int32, int64, float32 } from "@koalaui/common"
-import { KInt, KPointer, KBoolean, KStringPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
-import { NodeAttach, remember } from "@koalaui/runtime"
+import { __context, __id } from '@koalaui/runtime';
+import { RepeatImpl } from '../handwritten/RepeatImpl';
+
+export interface RepeatItem<T> {
+    readonly item: T;
+    readonly index: number;
+}
+
+export type RepeatArray<T> = Array<T> | ReadonlyArray<T> | Readonly<Array<T>>;
+export type RepeatItemBuilder<T> =
+    /** @memo */
+    (repeatItem: RepeatItem<T>) => void;
+export type TemplateTypedFunc<T> = (item: T, index: number) => string;
+
 export interface VirtualScrollOptions {
     totalCount?: number;
+    reusable?: boolean;
+    onTotalCount?: () => number;
 }
+
 export interface TemplateOptions {
     cachedCount?: number;
+}
+
+export interface RepeatAttribute<T> {
+    each(itemGenerator: RepeatItemBuilder<T>): RepeatAttribute<T>;
+    key(keyGenerator: (item: T, index: number) => string): RepeatAttribute<T>;
+    virtualScroll(options?: VirtualScrollOptions): RepeatAttribute<T>;
+    template(type: string, itemBuilder: RepeatItemBuilder<T>, templateOptions?: TemplateOptions): RepeatAttribute<T>;
+    templateId(typedFunc: TemplateTypedFunc<T>): RepeatAttribute<T>;
+}
+
+/** @memo */
+export function Repeat<T>(
+    /** @memo */
+    style: ((attributes: RepeatAttribute<T>) => void) | undefined,
+    arr: RepeatArray<T>
+): void {
+    RepeatImpl<T>(style, arr);
 }

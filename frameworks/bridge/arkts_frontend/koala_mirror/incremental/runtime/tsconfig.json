@@ -1,0 +1,20 @@
+{
+    "extends": "@koalaui/build-common/tsconfig.json",
+    "compilerOptions": {
+        "outDir": "build/lib",
+        "rootDir": ".",
+        "module": "CommonJS",
+        "plugins": [
+            {
+                "transform": "@koalaui/compiler-plugin/build/lib/src/koala-transformer.js",
+                "contextImport": "../../src/internals",
+                "trace": false
+            }
+        ]
+    },
+    "include": [ "src/**/*.ts" ],
+    "references": [
+        { "path": "../compiler-plugin" },
+        { "path": "../common" }
+    ]
+}

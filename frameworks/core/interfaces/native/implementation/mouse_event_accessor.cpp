@@ -44,6 +44,7 @@ namespace OHOS::Ace::NG::Converter {
             case ARK_MOUSE_ACTION_MOVE: dst = MouseAction::MOVE; break;
             case ARK_MOUSE_ACTION_PRESS: dst = MouseAction::PRESS; break;
             case ARK_MOUSE_ACTION_RELEASE: dst = MouseAction::RELEASE; break;
+            case ARK_MOUSE_ACTION_CANCEL: dst = MouseAction::CANCEL; break;
             default: LOGE("Unexpected enum value in Ark_MouseAction: %{public}d", src);
         }
     }
@@ -53,11 +54,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace MouseEventAccessor {
 void DestroyPeerImpl(Ark_MouseEvent peer)
 {
-    delete peer;
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_MouseEvent CtorImpl()
 {
-    return new MouseEventPeer();
+    return PeerUtils::CreatePeer<MouseEventPeer>();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -311,7 +312,65 @@ void SetStopPropagationImpl(Ark_MouseEvent peer,
     CHECK_NULL_VOID(peer);
     auto info = peer->GetEventInfo();
     CHECK_NULL_VOID(info);
-    LOGE("Arkoala method MouseEventAccessor.SetStopPropagation doesn't have sence. Not implemented...");
+    LOGE("Arkoala method MouseEventAccessor.SetStopPropagation doesn't have sense. Not implemented...");
+}
+Opt_Number GetRawDeltaXImpl(Ark_MouseEvent peer)
+{
+    const auto errValue = Converter::ArkValue<Opt_Number>();
+    CHECK_NULL_RETURN(peer, errValue);
+    auto info = peer->GetEventInfo();
+    CHECK_NULL_RETURN(info, errValue);
+    return Converter::ArkValue<Opt_Number>(info->GetRawDeltaX());
+}
+void SetRawDeltaXImpl(Ark_MouseEvent peer,
+                      const Ark_Number* rawDeltaX)
+{
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(rawDeltaX);
+    auto info = peer->GetEventInfo();
+    CHECK_NULL_VOID(info);
+    info->SetRawDeltaX(Converter::Convert<float>(*rawDeltaX));
+}
+Opt_Number GetRawDeltaYImpl(Ark_MouseEvent peer)
+{
+    const auto errValue = Converter::ArkValue<Opt_Number>();
+    CHECK_NULL_RETURN(peer, errValue);
+    auto info = peer->GetEventInfo();
+    CHECK_NULL_RETURN(info, errValue);
+    return Converter::ArkValue<Opt_Number>(info->GetRawDeltaY());
+}
+void SetRawDeltaYImpl(Ark_MouseEvent peer,
+                      const Ark_Number* rawDeltaY)
+{
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(rawDeltaY);
+    auto info = peer->GetEventInfo();
+    CHECK_NULL_VOID(info);
+    info->SetRawDeltaY(Converter::Convert<float>(*rawDeltaY));
+}
+Opt_Array_MouseButton GetPressedButtonsImpl(Ark_MouseEvent peer)
+{
+    auto invalid = Converter::ArkValue<Opt_Array_MouseButton>();
+    CHECK_NULL_RETURN(peer, invalid);
+    auto info = peer->GetEventInfo();
+    CHECK_NULL_RETURN(info, invalid);
+    return Converter::ArkValue<Opt_Array_MouseButton>(info->GetPressedButtons(), Converter::FC);
+}
+void SetPressedButtonsImpl(Ark_MouseEvent peer,
+                           const Array_MouseButton* pressedButtons)
+{
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(pressedButtons);
+    auto info = peer->GetEventInfo();
+    CHECK_NULL_VOID(info);
+    std::vector<MouseButton> buttons;
+    for (int i = 0; i < pressedButtons->length; ++i) {
+        auto mouseButton = Converter::OptConvert<MouseButton>(pressedButtons->array[i]);
+        if (mouseButton) {
+            buttons.push_back(mouseButton.value());
+        }
+    }
+    info->SetPressedButtons(buttons);
 }
 } // MouseEventAccessor
 const GENERATED_ArkUIMouseEventAccessor* GetMouseEventAccessor()
@@ -342,6 +401,12 @@ const GENERATED_ArkUIMouseEventAccessor* GetMouseEventAccessor()
         MouseEventAccessor::SetYImpl,
         MouseEventAccessor::GetStopPropagationImpl,
         MouseEventAccessor::SetStopPropagationImpl,
+        MouseEventAccessor::GetRawDeltaXImpl,
+        MouseEventAccessor::SetRawDeltaXImpl,
+        MouseEventAccessor::GetRawDeltaYImpl,
+        MouseEventAccessor::SetRawDeltaYImpl,
+        MouseEventAccessor::GetPressedButtonsImpl,
+        MouseEventAccessor::SetPressedButtonsImpl,
     };
     return &MouseEventAccessorImpl;
 }

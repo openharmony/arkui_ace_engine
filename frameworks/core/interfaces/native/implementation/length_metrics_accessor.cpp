@@ -32,6 +32,7 @@ inline Ark_LengthMetrics CreatePeer(const Ark_Number* value, DimensionUnit unit)
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LengthMetricsAccessor {
+using namespace Converter;
 void DestroyPeerImpl(Ark_LengthMetrics peer)
 {
     LengthMetricsPeer::Destroy(peer);

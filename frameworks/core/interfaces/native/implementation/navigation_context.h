@@ -18,6 +18,7 @@
 #include "base/error/error_code.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_stack.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/interfaces/native/utility/callback_helper.h"
@@ -28,25 +29,20 @@ class ExternalDataKeeper : public virtual Referenced {
 public:
     ExternalDataKeeper() = default;
     ~ExternalDataKeeper() override = default;
-    explicit ExternalDataKeeper(const Ark_CustomObject& data): data_(data) {}
-    Ark_CustomObject data_;
+    explicit ExternalDataKeeper(const Ark_Object& data): data_(data) {}
+    Ark_Object data_;
     ACE_DISALLOW_COPY_AND_MOVE(ExternalDataKeeper);
 };
 using ExternalData = RefPtr<ExternalDataKeeper>;
 using OnPopCallback = CallbackHelper<Callback_PopInfo_Void>;
-using NavDestBuildCallback = CallbackHelper<Callback_String_Unknown_Void>;
-
-enum class LaunchMode {
-    STANDARD = 0,
-    MOVE_TO_TOP_SINGLETON = 1,
-    POP_TO_SINGLETON = 2,
-    NEW_INSTANCE = 3,
-};
+using NavDestBuildCallback = CallbackHelper<Callback_String_Opt_Object_Void>;
 
 struct Interception {
-    CallbackHelper<InterceptionModeCallback> modeChange;
-    CallbackHelper<InterceptionShowCallback> willShow;
-    CallbackHelper<InterceptionShowCallback> didShow;
+    std::function<void(NG::NavigationMode)> modeChange;
+    std::function<void(const RefPtr<NG::NavDestinationContext>&,
+        const RefPtr<NG::NavDestinationContext>&, NG::NavigationOperation, bool)> willShow;
+    std::function<void(const RefPtr<NG::NavDestinationContext>&,
+        const RefPtr<NG::NavDestinationContext>&, NG::NavigationOperation, bool)> didShow;
 };
 using InterceptionType = struct Interception *;
 
@@ -90,17 +86,12 @@ struct PopInfo {
 
 using PushDestinationResultType = int32_t;
 
-struct Options {
-    std::optional<LaunchMode> launchMode;
-    std::optional<bool> animated;
-};
-
 class NavigationStack;
 
 constexpr bool DEFAULT_ANIMATED = true;
 constexpr LaunchMode DEFAULT_LAUNCH_MODE = LaunchMode::STANDARD;
 
-// this dublicates the functionality of JS NavPathStack class
+// this duplicates the functionality of JS NavPathStack class
 // (frameworks/bridge/declarative_frontend/engine/jsEnumStyle.js)
 class PathStack : public virtual Referenced {
 public:
@@ -116,29 +107,28 @@ public:
     int GetJsIndexFromNativeIndex(int index);
     void InitNavPathIndex(const std::vector<std::string>& pathName);
     std::vector<int> GetAllPathIndex();
-    std::pair<int, std::optional<std::string>> FindInPopArray(const std::string& name);
+    std::pair<int, std::optional<std::string>> FindInPopArray(const PathInfo& info);
     void SetParent(const RefPtr<NavigationStack>& parent);
     RefPtr<NavigationStack> GetParent();
     void PushName(const std::string& name, const ParamType& param);
     void PushPathByName(const std::string& name,
         const ParamType& param, const OnPopCallback& onPop, std::optional<bool> animated);
-    std::pair<LaunchMode, bool> ParseNavigationOptions(const std::optional<Options>& param);
+    std::pair<LaunchMode, bool> ParseNavigationOptions(const std::optional<NavigationOptions>& param);
     bool PushWithLaunchModeAndAnimated(PathInfo info, LaunchMode launchMode, bool animated);
-    void PushPath(PathInfo info, const std::optional<Options>& optionParam);
+    void PushPath(PathInfo info, const std::optional<NavigationOptions>& optionParam);
     PushDestinationResultType PushDestinationByName(const std::string& name,
         const ParamType& param, const OnPopCallback& onPop, std::optional<bool> animated);
     PushDestinationResultType PushDestination(PathInfo info,
-        const std::optional<Options>& optionParam);
-    void ReplacePath(PathInfo info, const std::optional<Options>& optionParam);
+        const std::optional<NavigationOptions>& optionParam);
+    void ReplacePath(PathInfo info, const std::optional<NavigationOptions>& optionParam);
     void ReplacePathByName(std::string name, const ParamType&  param, const std::optional<bool>& animated);
     void SetIsReplace(enum IsReplace value);
     void SetAnimated(bool value);
-    PathInfo Pop(const PopResultType& result, const std::optional<bool>& animated);
+    PathInfo Pop(bool isAnimated);
     void PopTo(const std::string& name, const std::optional<bool>& animated);
-    int PopToName(const std::string& name, const PopResultType& result, const std::optional<bool>& animated);
-    void PopToIndex(size_t index, const PopResultType& result, const std::optional<bool>& animated);
-    void PopToInternal(std::vector<PathInfo>::iterator it,
-        const PopResultType& result, const std::optional<bool>& animated);
+    int PopToName(const std::string& name, const std::optional<bool>& animated);
+    void PopToIndex(size_t index, const std::optional<bool>& animated);
+    void PopToInternal(std::vector<PathInfo>::iterator it, const std::optional<bool>& animated);
     int MoveToTop(const std::string& name, const std::optional<bool>& animated);
     void MoveIndexToTop(size_t index, const std::optional<bool>& animated);
     void MoveToTopInternal(std::vector<PathInfo>::iterator it, const std::optional<bool>& animated);
@@ -150,10 +140,20 @@ public:
     void RemoveInvalidPage(size_t index);
     std::vector<std::string> GetAllPathName();
     std::vector<ParamType> GetParamByName(const std::string& name);
-    std::vector<uint32_t> GetIndexByName(const std::string& name);
-    size_t GetSize() const;
+    std::vector<size_t> GetIndexByName(const std::string& name);
+    size_t Size() const;
     void DisableAnimation(bool disableAnimation);
     void SetInterception(InterceptionType interception);
+    InterceptionType GetInterception()
+    {
+        return interception_;
+    }
+    PathInfo* GetPathInfo(size_t index);
+    std::vector<std::string> GetIdByName(const std::string& name);
+    void SetOnPopCallback(std::function<void(const std::string)> popCallback)
+    {
+        onPopCallback_ = popCallback;
+    }
 protected:
     std::vector<PathInfo> pathArray_;
     enum IsReplace isReplace_ = NO_ANIM_NO_REPLACE;
@@ -163,10 +163,10 @@ protected:
     std::vector<PathInfo> popArray_ = {};
     InterceptionType interception_ = nullptr;
     std::function<void()> onStateChangedCallback_;
+    std::function<void(const std::string)> onPopCallback_;
     void SetOnStateChangedCallback(std::function<void()> callback); // the extra NavigationStack invokes this
     void InvokeOnStateChanged();
     std::vector<PathInfo>::iterator FindNameInternal(const std::string& name);
-    PathInfo* GetPathInfo(size_t index);
     const PathInfo* GetPathInfo(size_t index) const;
 };
 
@@ -253,6 +253,7 @@ private:
     {
         PathStack::SetIsReplace(static_cast<PathStack::IsReplace>(value));
     }
+    int32_t GetSize() const override;
     std::string GetNameByIndex(int32_t index) const;
     ParamType GetParamByIndex(int32_t index) const;
     OnPopCallback GetOnPopByIndex(int32_t index) const;
@@ -269,9 +270,9 @@ private:
 } // namespace OHOS::Ace::NG::GeneratedModifier::NavigationContext
 
 namespace OHOS::Ace::NG::Converter {
-void AssignArkValue(Ark_CustomObject& dst, const GeneratedModifier::NavigationContext::ExternalData& src);
+void AssignArkValue(Ark_Object& dst, const GeneratedModifier::NavigationContext::ExternalData& src);
 void AssignArkValue(Ark_NavPathInfo& dst, const GeneratedModifier::NavigationContext::PathInfo& src);
-template<> GeneratedModifier::NavigationContext::ExternalData Convert(const Ark_CustomObject& src);
+template<> GeneratedModifier::NavigationContext::ExternalData Convert(const Ark_Object& src);
 template<> GeneratedModifier::NavigationContext::PathInfo Convert(const Ark_NavPathInfo& src);
 } // namespace OHOS::Ace::NG::Converter
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_NAVIGATION_CONTEXT_H
