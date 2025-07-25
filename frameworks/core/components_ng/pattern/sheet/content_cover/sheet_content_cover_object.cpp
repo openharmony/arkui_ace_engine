@@ -100,6 +100,17 @@ void SheetContentCoverObject::ClipSheetNode()
     renderContext->UpdateBackShadow(Shadow());
 }
 
+void SheetContentCoverObject::BeforeCreateLayoutWrapper()
+{
+    auto sheetPattern = GetPattern();
+    CHECK_NULL_VOID(sheetPattern);
+    auto dragBarNode = sheetPattern->GetDragBarNode();
+    CHECK_NULL_VOID(dragBarNode);
+    auto dragBarLayoutProperty = dragBarNode->GetLayoutProperty();
+    CHECK_NULL_VOID(dragBarLayoutProperty);
+    dragBarLayoutProperty->UpdateVisibility(VisibleType::GONE);
+}
+
 void SheetContentCoverObject::SetFinishEventForAnimationOption(
     AnimationOption& option, bool isTransitionIn, bool isFirstTransition)
 {
