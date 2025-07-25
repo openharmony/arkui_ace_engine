@@ -217,6 +217,21 @@ public:
 
     void OnDetachFromMainTree() override;
     Color GetDragBackgroundColor();
+
+    bool IsAnimating()
+    {
+        return overlayModifier_ && overlayModifier_->IsAnimating();
+    }
+
+    void UpdateAnimatingParagraph()
+    {
+        animatingParagraph_ = paragraph_.Upgrade();
+    }
+
+    void ResetAnimatingParagraph()
+    {
+        animatingParagraph_.Reset();
+    }
 protected:
     static TextDragData CalculateTextDragData(RefPtr<TextDragBase>& pattern, RefPtr<FrameNode>& dragNode);
     virtual void AdjustMaxWidth(float& width, const RectF& contentRect, const std::vector<RectF>& boxes);
@@ -249,6 +264,7 @@ private:
     float lastLineHeight_ = 0.0f;
     OffsetF contentOffset_;
     WeakPtr<Paragraph> paragraph_;
+    RefPtr<Paragraph> animatingParagraph_;
     std::shared_ptr<RSPath> clipPath_;
     std::shared_ptr<RSPath> backGroundPath_;
     std::shared_ptr<RSPath> selBackGroundPath_;
