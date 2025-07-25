@@ -53,6 +53,10 @@ void JSDumpRegister::AddListener(const JSCallbackInfo& info)
     }
 
     auto container = Container::Current();
+    if (!container) {
+        LOGE("JSDumpRegister::AddListener container is null!");
+        return;
+    }
     auto pipelineBase = container->GetPipelineContext();
     auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(pipelineBase);
     if (!pipelineContext) {
