@@ -44,6 +44,7 @@ void MovingPhotoLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             continue;
         }
         int32_t childCount = host->GetTotalChildCount();
+        CHECK_NULL_VOID(childCount >= 1);
         auto childLayoutWrapper = host->GetChildByIndex(childCount - 1);
         for (auto&& videoChild : childLayoutWrapper->GetAllChildrenWithBuild()) {
             if (videoChild->GetHostTag() == V2::COLUMN_ETS_TAG) {
@@ -82,6 +83,7 @@ void MovingPhotoLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             layoutConstraintForColumn.UpdateMinSizeWithCheck(contentSize);
             child->Measure(layoutConstraintForColumn);
             int32_t childCount = host->GetTotalChildCount();
+            CHECK_NULL_VOID(childCount >= 1);
             auto childLayoutWrapper = host->GetChildByIndex(childCount - 1);
             ChildMeasure(childLayoutWrapper, contentSize, layoutConstraint);
             if (childLayoutWrapper) {
@@ -137,6 +139,7 @@ void MovingPhotoLayoutAlgorithm::MeasureInXmageMode(LayoutWrapper* layoutWrapper
             layoutConstraintForColumn.UpdateMinSizeWithCheck(columnSize);
             child->Measure(layoutConstraintForColumn);
             int32_t childCount = host->GetTotalChildCount();
+            CHECK_NULL_VOID(childCount >= 1);
             auto childLayoutWrapper = host->GetChildByIndex(childCount - 1);
             ChildMeasureInXmage(childLayoutWrapper, contentSize, imageSize, xmageOffsetRatio, layoutConstraint);
             if (childLayoutWrapper) {
