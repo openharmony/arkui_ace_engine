@@ -1094,7 +1094,7 @@ void OnNativeEmbedDataInfo(const CallbackHelper<Callback_NativeEmbedDataInfo_Voi
     parameter.info = Converter::ArkValue<Opt_NativeEmbedInfo>(arkInfo);
     parameter.status = Converter::ArkValue<Opt_NativeEmbedStatus>(eventInfo->GetStatus());
     parameter.surfaceId = Converter::ArkValue<Opt_String>(eventInfo->GetSurfaceId());
-    arkCallback.Invoke(parameter);
+    arkCallback.InvokeSync(parameter);
 }
 
 void OnNativeEmbedVisibilityChange(const CallbackHelper<OnNativeEmbedVisibilityChangeCallback>& arkCallback,
@@ -1106,7 +1106,7 @@ void OnNativeEmbedVisibilityChange(const CallbackHelper<OnNativeEmbedVisibilityC
     Ark_NativeEmbedVisibilityInfo parameter;
     parameter.embedId = Converter::ArkValue<Ark_String>(eventInfo->GetEmbedId());
     parameter.visibility = Converter::ArkValue<Ark_Boolean>(eventInfo->GetVisibility());
-    arkCallback.Invoke(parameter);
+    arkCallback.InvokeSync(parameter);
 }
 
 void OnNativeEmbedTouchInfo(const CallbackHelper<Callback_NativeEmbedTouchInfo_Void>& arkCallback,
@@ -1185,7 +1185,7 @@ void OnViewportFitChanged(const CallbackHelper<OnViewportFitChangedCallback>& ar
     CHECK_NULL_VOID(eventInfo);
     Ark_ViewportFit parameter = Converter::ArkValue<Ark_ViewportFit>(
         static_cast<ViewportFit>(eventInfo->GetViewportFit()));
-    arkCallback.Invoke(parameter);
+    arkCallback.InvokeSync(parameter);
 }
 
 WebKeyboardOption OnWebKeyboard(const CallbackHelper<WebKeyboardCallback>& arkCallback,
