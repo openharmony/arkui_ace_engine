@@ -3380,7 +3380,6 @@ HWTEST_F(TextTestFiveNg, TextMultiThread01, TestSize.Level1)
     textPattern->OnDetachFromFrameNodeMultiThread(AceType::RawPtr(textFrameNode));
     textPattern->OnDetachFromMainTreeMultiThread();
     textPattern->OnAttachToMainTreeMultiThread();
-    textPattern->OnModifyDoneMultiThread();
 
     textPattern->SetTextDetectEnableMultiThread(true);
     EXPECT_EQ(textPattern->setTextDetectEnableMultiThread_, true);
