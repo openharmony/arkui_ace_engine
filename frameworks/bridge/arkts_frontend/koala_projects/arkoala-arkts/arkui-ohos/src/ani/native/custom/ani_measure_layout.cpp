@@ -99,7 +99,7 @@ ani_object GenConstraintNG(ani_env* env, const NG::LayoutConstraintF& parentCons
 {
     auto minSize = parentConstraint.minSize;
     auto maxSize = parentConstraint.maxSize;
-    ani_object constraint_obj;
+    ani_object constraint_obj = nullptr;
 
     double minWidth = 0.0f;
     double minHeight = 0.0f;
@@ -122,7 +122,7 @@ ani_object GenConstraintNG(ani_env* env, const NG::LayoutConstraintF& parentCons
 
 ani_object GenPlaceChildrenConstraintNG(ani_env* env, const NG::SizeF& size, RefPtr<NG::LayoutProperty> layoutProperty)
 {
-    ani_object constraint_obj;
+    ani_object constraint_obj = nullptr;
     double minWidth = 0.0f;
     double minHeight = 0.0f;
     double maxWidth = 0.0f;
