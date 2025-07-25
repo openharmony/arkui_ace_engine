@@ -2345,12 +2345,16 @@ export class Serializer extends SerializerBase {
         const value_selected  = value.selected
         let value_selected_type : int32 = RuntimeType.UNDEFINED
         value_selected_type = runtimeType(value_selected)
-        valueSerializer.writeInt8(value_selected_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_selected_type)) {
             if (!TypeChecker.isBindableDate(value_selected)) {
+                valueSerializer.writeInt8(value_selected_type as int32)
                 const value_selected_value  = value_selected! as Date
                 valueSerializer.writeInt64((value_selected_value.getTime() as int64))
+            } else {
+                valueSerializer.writeInt8(4)
             }
+        } else {
+            valueSerializer.writeInt8(value_selected_type as int32)
         }
         const value_mode  = value.mode
         let value_mode_type : int32 = RuntimeType.UNDEFINED

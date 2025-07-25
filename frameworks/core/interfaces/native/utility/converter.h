@@ -765,6 +765,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<ParticleType>& dst, const Ark_ParticleType& src);
     template<> void AssignCast(std::optional<UpdaterType>& dst, const Ark_ParticleUpdater& src);
     template<> void AssignCast(std::optional<ParticleDisturbanceShapeType>& dst, const Ark_DisturbanceFieldShape& src);
+    template<> void AssignCast(std::optional<DatePickerMode>& dst, const Ark_DatePickerMode& src);
     template<> void AssignCast(std::optional<PickerDate>& dst, const Ark_Date& src);
     template<> void AssignCast(std::optional<Placement>& dst, const Ark_Placement& src);
     template<> void AssignCast(std::optional<RectHeightStyle>& dst, const Ark_RectHeightStyle& src);
