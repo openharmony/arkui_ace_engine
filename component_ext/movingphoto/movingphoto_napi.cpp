@@ -95,7 +95,6 @@ napi_value JsCreate(napi_env env, napi_callback_info info)
     napi_value imageUri;
     napi_call_function(env, jsData, getUri, 0, nullptr, &imageUri);
     std::string imageUriStr = ExtNapiUtils::GetStringFromValueUtf8(env, imageUri);
-    MovingPhotoutils::SecurityAndPrivatyLog(imageUriStr);
     NG::MovingPhotoModelNG::GetInstance()->SetImageSrc(imageUriStr);
 
     return ExtNapiUtils::CreateNull(env);

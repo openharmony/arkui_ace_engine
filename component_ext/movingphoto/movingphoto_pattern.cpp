@@ -465,7 +465,6 @@ void MovingPhotoPattern::UpdateImageNode()
         imageLayoutProperty->UpdateImageFit(imageFit);
         image->MarkModifyDone();
     }
-    MovingPhotoutils::SecurityAndPrivatyLog(imageSourceInfo.GetSrc());
     RegisterImageEvent(image);
 }
 
@@ -509,7 +508,6 @@ void MovingPhotoPattern::UpdateTempImageNode(const ImageSourceInfo& imageSourceI
         imageLayoutProperty->UpdateImageFit(imageFit);
         image->MarkModifyDone();
     }
-    MovingPhotoutils::SecurityAndPrivatyLog(imageSourceInfo.GetSrc());
     RegisterImageEvent(image);
 }
 
@@ -938,11 +936,11 @@ bool MovingPhotoPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
 
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    int32_t childCount = host->GetTotalChildCount();
-    CHECK_NULL_RETURN(childCount >= 1, false);
     host->MarkNeedSyncRenderTree();
     auto movingPhoto = AceType::DynamicCast<MovingPhotoNode>(host);
     CHECK_NULL_RETURN(movingPhoto, false);
+    int32_t childCount = movingPhoto->GetTotalChildCount();
+    CHECK_NULL_RETURN(childCount >= 1, false);
     auto video = AceType::DynamicCast<FrameNode>(movingPhoto->GetVideo(childCount - 1));
     CHECK_NULL_RETURN(video, false);
     video->GetRenderContext()->SetClipToBounds(true);
@@ -1552,10 +1550,10 @@ void MovingPhotoPattern::StartAnimation()
     TAG_LOGD(AceLogTag::ACE_MOVING_PHOTO, "movingphoto StartAnimation start");
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    int32_t childCount = host->GetTotalChildCount();
-    CHECK_NULL_VOID(childCount >= 1);
     auto movingPhoto = AceType::DynamicCast<MovingPhotoNode>(host);
     CHECK_NULL_VOID(movingPhoto);
+    int32_t childCount = movingPhoto->GetTotalChildCount();
+    CHECK_NULL_VOID(childCount >= 1);
     auto image = AceType::DynamicCast<FrameNode>(movingPhoto->GetImage());
     CHECK_NULL_VOID(image);
     auto imageRsContext = image->GetRenderContext();
@@ -1809,8 +1807,6 @@ void MovingPhotoPattern::RefreshMovingPhotoSceneManager()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    int32_t childCount = host->GetTotalChildCount();
-    CHECK_NULL_VOID(childCount >= 1);
     if (historyAutoAndRepeatLevel_ == PlaybackMode::REPEAT) {
         autoAndRepeatLevel_ = PlaybackMode::NONE;
         historyAutoAndRepeatLevel_ = PlaybackMode::NONE;
@@ -1818,6 +1814,8 @@ void MovingPhotoPattern::RefreshMovingPhotoSceneManager()
         Pause();
         auto movingPhoto = AceType::DynamicCast<MovingPhotoNode>(host);
         CHECK_NULL_VOID(movingPhoto);
+        int32_t childCount = movingPhoto->GetTotalChildCount();
+        CHECK_NULL_VOID(childCount >= 1);
         auto video = AceType::DynamicCast<FrameNode>(movingPhoto->GetVideo(childCount - 1));
         CHECK_NULL_VOID(video);
         video->GetRenderContext()->SetClipToBounds(true);
@@ -1920,7 +1918,7 @@ RefPtr<FrameNode> MovingPhotoPattern::GetTempNode()
     auto firstImage = AceType::DynamicCast<FrameNode>(movingPhoto->GetImage());
     CHECK_NULL_RETURN(firstImage, nullptr);
     auto imageIndex = movingPhoto->GetChildIndex(firstImage);
-    CHECK_NULL_RETURN(imageIndex <= movingPhoto->GetTotalChildCount() - 1, nullptr);
+    CHECK_NULL_RETURN(imageIndex < movingPhoto->GetTotalChildCount() - 1, nullptr);
     auto image = AceType::DynamicCast<FrameNode>(movingPhoto->GetChildAtIndex(imageIndex + 1));
     return image;
 }
@@ -1938,8 +1936,6 @@ void MovingPhotoPattern::StopAnimation()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    int32_t childCount = host->GetTotalChildCount();
-    CHECK_NULL_VOID(childCount >= 1);
     auto movingPhoto = AceType::DynamicCast<MovingPhotoNode>(host);
     CHECK_NULL_VOID(movingPhoto);
     auto image = AceType::DynamicCast<FrameNode>(movingPhoto->GetImage());
@@ -1948,6 +1944,8 @@ void MovingPhotoPattern::StopAnimation()
     CHECK_NULL_VOID(imageLayoutProperty);
     auto imageRsContext = image->GetRenderContext();
     CHECK_NULL_VOID(imageRsContext);
+    int32_t childCount = movingPhoto->GetTotalChildCount();
+    CHECK_NULL_VOID(childCount >= 1);
     auto video = AceType::DynamicCast<FrameNode>(movingPhoto->GetVideo(childCount - 1));
     CHECK_NULL_VOID(video);
     auto videoRsContext = video->GetRenderContext();
