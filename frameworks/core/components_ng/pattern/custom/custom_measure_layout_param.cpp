@@ -59,7 +59,9 @@ RefPtr<LayoutWrapper> MeasureLayoutParam::GetOrCreateChildByIndex(int32_t index)
 
 LayoutConstraintF MeasureLayoutParam::CreateChildConstraint() const
 {
-    return layoutWrapper_->GetLayoutProperty()->CreateChildConstraint();
+    const auto& layoutProperty = layoutWrapper_->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, LayoutConstraintF());
+    return layoutProperty->CreateChildConstraint();
 }
 
 void MeasureLayoutParam::Update(LayoutWrapper* layoutWrapper)

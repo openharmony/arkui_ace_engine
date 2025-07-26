@@ -56,8 +56,10 @@ void FolderStackLayoutAlgorithm::LayoutHoverStack(LayoutWrapper* layoutWrapper,
 {
     auto folderStackGeometryNode = layoutWrapper->GetGeometryNode();
     auto size = folderStackGeometryNode->GetFrameSize();
-    const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
-    auto layoutDirection = layoutWrapper->GetLayoutProperty()->GetLayoutDirection();
+    const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    const auto& padding = layoutProperty->CreatePaddingAndBorder();
+    auto layoutDirection = layoutProperty->GetLayoutDirection();
     if (layoutDirection == TextDirection::AUTO) {
         layoutDirection = AceApplicationInfo::GetInstance().IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR;
     }
@@ -92,7 +94,9 @@ void FolderStackLayoutAlgorithm::LayoutControlPartsStack(LayoutWrapper* layoutWr
     const RefPtr<FolderStackGroupNode>& hostNode, const RefPtr<FolderStackLayoutProperty>& folderStackLayoutProperty)
 {
     auto folderStackGeometryNode = layoutWrapper->GetGeometryNode();
-    auto layoutDirection = layoutWrapper->GetLayoutProperty()->GetLayoutDirection();
+    const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto layoutDirection = layoutProperty->GetLayoutDirection();
     if (layoutDirection == TextDirection::AUTO) {
         layoutDirection = AceApplicationInfo::GetInstance().IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR;
     }
