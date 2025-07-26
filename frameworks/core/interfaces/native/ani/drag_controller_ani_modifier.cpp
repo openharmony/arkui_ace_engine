@@ -68,7 +68,7 @@ struct DragControllerAsyncCtx {
     ani_resolver deferred = nullptr;
     ArkUINodeHandle customBuilderNode = nullptr;
     std::vector<ArkUINodeHandle> customBuilderNodeList;
-    RefPtr<OHOS::Ace::UnifiedData> unifiedData;
+    RefPtr<OHOS::Ace::UnifiedData> unifiedData = nullptr;
     std::string extraParams;
     int32_t instanceId = -1;
     int32_t errCode = -1;
@@ -733,7 +733,7 @@ void OnComplete(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
     asyncCtx->windowScale = windowScale;
     auto displayInfo = container->GetDisplayInfo();
     CHECK_NULL_VOID(displayInfo);
-    asyncCtx->dragPointerEvent.displayId = displayInfo->GetDisplayId();
+    asyncCtx->dragPointerEvent.displayId = static_cast<int32_t>(displayInfo->GetDisplayId());
     taskExecutor->PostTask(
         [asyncCtx]() {
             LOGI("AceDrag, try to start msdp drag.");
@@ -851,13 +851,15 @@ std::shared_ptr<DragControllerAsyncCtx> ConvertDragControllerAsync(const ArkUIDr
     dragAsyncContext->asyncCallback = asyncCtx.asyncCallback;
     dragAsyncContext->deferred = asyncCtx.deferred;
     dragAsyncContext->dragPointerEvent.pointerId = asyncCtx.dragPointerEvent.pointerId;
-    UpdatePreviewOptionDefaultAttr(dragAsyncContext, asyncCtx);
     dragAsyncContext->dragAction = asyncCtx.dragAction;
     dragAsyncContext->callBackJsFunction = asyncCtx.callBackJsFunction;
     UpdatePreviewOptionDefaultAttr(dragAsyncContext, asyncCtx);
-    auto unifiedDataPtr = reinterpret_cast<void*>(asyncCtx.unifiedData);
-    RefPtr<UnifiedData> udData = UdmfClient::GetInstance()->TransformUnifiedDataFromANI(unifiedDataPtr);
-    dragAsyncContext->unifiedData = udData;
+    if (asyncCtx.unifiedData) {
+        auto unifiedDataPtr = std::static_pointer_cast<UDMF::UnifiedData>(asyncCtx.unifiedData.GetSharedPtr());
+        auto udData = AceType::MakeRefPtr<UnifiedDataImpl>();
+        udData->SetUnifiedData(unifiedDataPtr);
+        dragAsyncContext->unifiedData = udData;
+    }
 #if defined(PIXEL_MAP_SUPPORTED)
     if (asyncCtx.pixelMap) {
         dragAsyncContext->pixelMap = std::static_pointer_cast<Media::PixelMap>(asyncCtx.pixelMap.GetSharedPtr());

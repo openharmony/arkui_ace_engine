@@ -185,7 +185,7 @@ private:
                 } else if (LessOrEqual(static_cast<size_t>(duration), 0)) {
                     duration = 0;
                 }
-                animationInfo.duration = static_cast<size_t>(duration);
+                animationInfo.duration = static_cast<int32_t>(duration);
             }
         }
         TAG_LOGI(AceLogTag::ACE_DRAG, "animation duration is %{public}d", animationInfo.duration);
