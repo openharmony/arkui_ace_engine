@@ -1285,7 +1285,7 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest027, TestSize.Level1)
 
     /**
      * @tc.steps: step2. DetachFirstImageFromFrameNode
-     * @tc.expected: step2. delete first imageNode
+     * @tc.expected: step2. NotifyTransition add temp node
      */
     pattern->NotifyTransition();
     int32_t childCount = frameNode->GetTotalChildCount();

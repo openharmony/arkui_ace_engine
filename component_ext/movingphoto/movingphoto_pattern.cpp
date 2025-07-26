@@ -1838,8 +1838,11 @@ void MovingPhotoPattern::NotifyTransition()
     notifyTransitionFlag_ = true;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto layoutProperty = GetLayoutProperty<MovingPhotoLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
+    auto movingPhoto = AceType::DynamicCast<MovingPhotoNode>(host);
+    CHECK_NULL_VOID(movingPhoto);
+    auto image = AceType::DynamicCast<FrameNode>(movingPhoto->GetImage());
+    CHECK_NULL_VOID(image);
+    AddTempNode(image, host);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto dataProvider = AceType::DynamicCast<DataProviderManagerStandard>(pipeline->GetDataProviderManager());
