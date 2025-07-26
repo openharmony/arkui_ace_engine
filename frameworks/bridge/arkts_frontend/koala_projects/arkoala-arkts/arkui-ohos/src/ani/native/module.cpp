@@ -765,7 +765,107 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_Common_px2lpx",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::Px2lpx)
-       },
+        },
+        ani_native_function {
+            "_TransferKeyEventPointer",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferKeyEventPointer)
+        },
+        ani_native_function {
+            "_CreateKeyEventAccessorWithPointer",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CreateKeyEventAccessorWithPointer)
+        },
+        ani_native_function {
+            "_CreateEventTargetInfoAccessor",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CreateEventTargetInfoAccessor)
+        },
+        ani_native_function {
+            "_EventTargetInfoAccessorWithId",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::EventTargetInfoAccessorWithId)
+        },
+        ani_native_function {
+            "_CreateScrollableTargetInfoAccessor",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CreateScrollableTargetInfoAccessor)
+        },
+        ani_native_function {
+            "_ScrollableTargetInfoAccessorWithId",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ScrollableTargetInfoAccessorWithId)
+        },
+        ani_native_function {
+            "_ScrollableTargetInfoAccessorWithPointer",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ScrollableTargetInfoAccessorWithPointer)
+        },
+        ani_native_function {
+            "_TransferScrollableTargetInfoPointer",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferScrollableTargetInfoPointer)
+        },
+        ani_native_function {
+            "_createDragEventAccessorWithPointer",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CreateDragEventAccessorWithPointer)
+        },
+        ani_native_function {
+            "_getDragEventPointer",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::GetDragEventPointer)
+        },
+        ani_native_function {
+            "_createTouchEventAccessorWithPointer",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CreateTouchEventAccessorWithPointer)
+        },
+        ani_native_function {
+            "_createMouseEventAccessorWithPointer",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CreateMouseEventAccessorWithPointer)
+        },
+        ani_native_function {
+            "_createAxisEventAccessorWithPointer",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CreateAxisEventAccessorWithPointer)
+        },
+        ani_native_function {
+            "_createClickEventAccessorWithPointer",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CreateClickEventAccessorWithPointer)
+        },
+        ani_native_function {
+            "_createHoverEventAccessorWithPointer",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CreateHoverEventAccessorWithPointer)
+        },
+        ani_native_function {
+            "_getTouchEventPointer",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::GetTouchEventPointer)
+        },
+        ani_native_function {
+            "_getMouseEventPointer",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::GetMouseEventPointer)
+        },
+        ani_native_function {
+            "_getAxisEventPointer",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::GetAxisEventPointer)
+        },
+        ani_native_function {
+            "_getClickEventPointer",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::GetClickEventPointer)
+        },
+        ani_native_function {
+            "_getHoverEventPointer",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::GetHoverEventPointer)
+        },
        ani_native_function {
             "_CanvasRenderer_SetPixelMap",
             "JL@ohos/multimedia/image/image/PixelMap;:V",

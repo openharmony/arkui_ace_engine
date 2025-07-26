@@ -12178,7 +12178,7 @@ export class HoverEventInternal extends BaseEventInternal implements Materialize
         return obj
     }
 }
-export interface MouseEvent {
+export interface MouseEvent extends BaseEvent {
     button: MouseButton
     action: MouseAction
     displayX: number

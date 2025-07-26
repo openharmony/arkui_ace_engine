@@ -285,6 +285,26 @@ struct ArkUIAniCommonModifier {
     ani_double (*px2fp)(ani_double value, ani_int instanceId);
     ani_double (*lpx2px)(ani_double value, ani_int instanceId);
     ani_double (*px2lpx)(ani_double value, ani_int instanceId);
+    void* (*transferKeyEventPointer)(ani_long nativePtr);
+    void* (*createKeyEventAccessorWithPointer)(ani_long nativePtr);
+    void* (*createEventTargetInfoAccessor)();
+    void (*eventTargetInfoAccessorWithId)(ani_env* env, ani_long input, ani_string id);
+    void* (*createScrollableTargetInfoAccessor)();
+    void (*scrollableTargetInfoAccessorWithId)(ani_env* env, ani_long input, ani_string id);
+    void (*scrollableTargetInfoAccessorWithPointer)(ani_long input, ani_long nativePtr);
+    void* (*transferScrollableTargetInfoPointer)(ani_long nativePtr);
+    ani_long (*transferDragEventPointer)(ani_long ptr);
+    ani_long (*getDragEventPointer)(ani_long ptr);
+    void* (*transferTouchEventPointer)(ani_long nativePtr);
+    void* (*transferMouseEventPointer)(ani_long nativePtr);
+    void* (*transferAxisEventPointer)(ani_long nativePtr);
+    void* (*transferClickEventPointer)(ani_long nativePtr);
+    void* (*transferHoverEventPointer)(ani_long nativePtr);
+    void* (*getTouchEventPointer)(ani_long peer);
+    void* (*getMouseEventPointer)(ani_long peer);
+    void* (*getAxisEventPointer)(ani_long peer);
+    void* (*getClickEventPointer)(ani_long peer);
+    void* (*getHoverEventPointer)(ani_long peer);
 };
 struct ArkUIAniCustomNodeModifier {
     ani_long (*constructCustomNode)(ani_int, std::function<void()>&& onPageShow, std::function<void()>&& onPageHide,

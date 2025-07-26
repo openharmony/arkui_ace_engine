@@ -67,6 +67,15 @@ export class ArkUIAniModule {
     native static _LazyForEachNode_Construct(id: KInt): KPointer
     native static _SetOverlay_ComponentContent(node: KPointer, buildNodePtr: KPointer, options?: OverlayOptions): void
 
+    native static _TransferKeyEventPointer(input: KPointer): KPointer
+    native static _CreateKeyEventAccessorWithPointer(input: KPointer): KPointer
+    native static _CreateEventTargetInfoAccessor(): KPointer
+    native static _EventTargetInfoAccessorWithId(input: KPointer, id: string): void
+    native static _CreateScrollableTargetInfoAccessor(): KPointer
+    native static _ScrollableTargetInfoAccessorWithId(input: KPointer, id: string): void
+    native static _ScrollableTargetInfoAccessorWithPointer(input: KPointer, pointer: KPointer): void
+    native static _TransferScrollableTargetInfoPointer(input: KPointer): KPointer
+
     // for web
     native static _TransferScreenCaptureHandlerToStatic(ptr: KPointer, value: ESValue): boolean
     native static _TransferJsGeolocationToStatic(ptr: KPointer, value: ESValue) : boolean
@@ -117,6 +126,9 @@ export class ArkUIAniModule {
     native static _Drag_Set_AllowDrop_Null(ptr: KLong) : void
     native static _Drag_Set_AllowDrop(ptr: KPointer, thisArray: Array<string>, thisLength: KInt): void
     native static _Drag_Set_DragPreview(ptr: KPointer, dragInfo: HookDragInfo): void
+
+    native static _createDragEventAccessorWithPointer(input: KPointer) : KPointer
+    native static _getDragEventPointer(input: KPointer): KPointer
 
     // for componentSnapshot
     native static _ComponentSnapshot_createFromBuilderWithCallback(ptr: KPointer, destroyCallback: () => void,
@@ -230,6 +242,17 @@ export class ArkUIAniModule {
     native static _Common_lpx2px(value:number, instanceId: KInt): number
     native static _Common_px2lpx(value:number, instanceId: KInt): number
 
+    // for transfer
+    native static _createTouchEventAccessorWithPointer(input: KPointer): KPointer
+    native static _createMouseEventAccessorWithPointer(input: KPointer): KPointer
+    native static _createAxisEventAccessorWithPointer(input: KPointer): KPointer
+    native static _createClickEventAccessorWithPointer(input: KPointer): KPointer
+    native static _createHoverEventAccessorWithPointer(input: KPointer): KPointer
+    native static _getTouchEventPointer(peer: KPointer): KPointer
+    native static _getMouseEventPointer(peer: KPointer): KPointer
+    native static _getAxisEventPointer(peer: KPointer): KPointer
+    native static _getClickEventPointer(peer: KPointer): KPointer
+    native static _getHoverEventPointer(peer: KPointer): KPointer
     // for Canvas
     native static _CanvasRenderer_SetPixelMap(peerPtr: KPointer, pixelmap: image.PixelMap): void
     native static _CanvasRenderer_GetPixelMap(peerPtr: KPointer, sx: number, sy: number, sw: number, sh: number): image.PixelMap

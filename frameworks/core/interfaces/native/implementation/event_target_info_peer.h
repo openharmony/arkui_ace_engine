@@ -23,7 +23,12 @@ struct EventTargetInfoPeer : public OHOS::Ace::AceType {
 public:
     EventTargetInfoPeer() = default;
     virtual ~EventTargetInfoPeer() = default;
-
+    static EventTargetInfoPeer* Create()
+    {
+        auto peer = AceType::MakeRefPtr<EventTargetInfoPeer>();
+        peer->IncRefCount();
+        return AceType::RawPtr(peer);
+    }
     std::string id;
     bool isScrollableComponent_ = true;
 };

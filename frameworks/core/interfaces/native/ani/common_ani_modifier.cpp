@@ -23,6 +23,13 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
+#include "core/event/touch_event.h"
+#include "core/interfaces/native/implementation/axis_event_peer.h"
+#include "core/interfaces/native/implementation/click_event_peer.h"
+#include "core/interfaces/native/implementation/event_target_info_peer.h"
+#include "core/interfaces/native/implementation/hover_event_peer.h"
+#include "core/interfaces/native/implementation/mouse_event_peer.h"
+#include "core/interfaces/native/implementation/touch_event_peer.h"
 #include "core/interfaces/native/implementation/frame_node_peer_impl.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -30,6 +37,9 @@
 #include "bridge/arkts_frontend/arkts_frontend.h"
 #include "bridge/arkts_frontend/ani_context_module.h"
 #include "core/components/container_modal/container_modal_constants.h"
+#include "core/interfaces/native/implementation/key_event_peer.h"
+#include "core/interfaces/native/implementation/scrollable_target_info_peer.h"
+#include "core/interfaces/native/implementation/drag_event_peer.h"
 #include "frameworks/base/subwindow/subwindow_manager.h"
 
 #include <memory>
@@ -134,7 +144,7 @@ ani_ref GetSharedLocalStorage()
 
 void SetBackgroundImagePixelMap(ani_env* env, ArkUINodeHandle node, ani_ref pixelMapPtr, ArkUI_Int32 repeat)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto pixelMapValue = reinterpret_cast<void*>(pixelMapPtr);
     CHECK_NULL_VOID(pixelMapValue);
@@ -277,6 +287,7 @@ void SetOverlayComponent(ani_long node, ani_long builderPtr, AniOverlayOptions o
     Alignment align = ParseAlignment(options.alignment);
     ViewAbstract::SetOverlayBuilder(frameNode, overlayNode, align, x, y);
 }
+
 ani_double Vp2px(ani_double value, ani_int instanceId)
 {
     if (NearZero(value)) {
@@ -409,6 +420,163 @@ ani_double Px2lpx(ani_double value, ani_int instanceId)
     return value / windowConfig.designWidthScale;
 }
 
+void* TransferKeyEventPointer(ani_long nativePtr)
+{
+    CHECK_NULL_RETURN(nativePtr, nullptr);
+    auto accessor = reinterpret_cast<Ark_KeyEvent>(nativePtr);
+    CHECK_NULL_RETURN(accessor, nullptr);
+    auto nativePointer = reinterpret_cast<void*>(accessor->GetEventInfo());
+    return reinterpret_cast<void*>(nativePointer);
+}
+
+void* CreateKeyEventAccessorWithPointer(ani_long nativePtr)
+{
+    CHECK_NULL_RETURN(nativePtr, nullptr);
+    auto peer = KeyEventPeer::Create(reinterpret_cast<void*>(nativePtr));
+    return reinterpret_cast<void*>(peer);
+}
+
+void* CreateEventTargetInfoAccessor()
+{
+    auto peer = EventTargetInfoPeer::Create();
+    return reinterpret_cast<void*>(peer);
+}
+
+void EventTargetInfoAccessorWithId(ani_env* env, ani_long input, ani_string id)
+{
+    CHECK_NULL_VOID(input);
+    auto accessor = reinterpret_cast<Ark_EventTargetInfo>(input);
+    CHECK_NULL_VOID(accessor);
+    auto idValue = AniUtils::ANIStringToStdString(env, id);
+    accessor->id = idValue;
+}
+
+void* CreateScrollableTargetInfoAccessor()
+{
+    auto peer = ScrollableTargetInfoPeer::Create();
+    return reinterpret_cast<void*>(peer);
+}
+
+void ScrollableTargetInfoAccessorWithId(ani_env* env, ani_long input, ani_string id)
+{
+    CHECK_NULL_VOID(input);
+    auto accessor = reinterpret_cast<Ark_EventTargetInfo>(input);
+    CHECK_NULL_VOID(accessor);
+    auto idValue = AniUtils::ANIStringToStdString(env, id);
+    accessor->id = idValue;
+}
+
+void ScrollableTargetInfoAccessorWithPointer(ani_long input, ani_long nativePtr)
+{
+    CHECK_NULL_VOID(input);
+    auto accessor = reinterpret_cast<Ark_ScrollableTargetInfo>(input);
+    CHECK_NULL_VOID(accessor);
+    auto pattern = reinterpret_cast<OHOS::Ace::NG::Pattern*>(nativePtr);
+    CHECK_NULL_VOID(pattern);
+    accessor->SetPattern(AceType::WeakClaim(pattern));
+}
+
+void* TransferScrollableTargetInfoPointer(ani_long nativePtr)
+{
+    CHECK_NULL_RETURN(nativePtr, nullptr);
+    auto accessor = reinterpret_cast<Ark_ScrollableTargetInfo>(nativePtr);
+    CHECK_NULL_RETURN(accessor, nullptr);
+    auto pattern = accessor->GetPattern();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    auto nativePointer = reinterpret_cast<void*>(AceType::RawPtr(pattern));
+    return reinterpret_cast<void*>(nativePointer);
+}
+
+ani_long TransferDragEventPointer(ani_long ptr)
+{
+    CHECK_NULL_RETURN(ptr, 0);
+    auto weak = OHOS::Ace::AceType::WeakClaim(reinterpret_cast<OHOS::Ace::DragEvent*>(ptr));
+    auto dragEvent = weak.Upgrade();
+    CHECK_NULL_RETURN(dragEvent, 0);
+    auto peer = DragEventPeer::Create(dragEvent);
+    return reinterpret_cast<ani_long>(peer);
+}
+
+ani_long GetDragEventPointer(ani_long ptr)
+{
+    CHECK_NULL_RETURN(ptr, 0);
+    auto peer = reinterpret_cast<DragEventPeer*>(ptr);
+    CHECK_NULL_RETURN(peer, 0);
+    auto dragInfo = peer->dragInfo;
+    CHECK_NULL_RETURN(dragInfo, 0);
+    return reinterpret_cast<ani_long>(AceType::RawPtr(dragInfo));
+}
+
+void* TransferTouchEventPointer(ani_long nativePtr)
+{
+    CHECK_NULL_RETURN(nativePtr, nullptr);
+    auto peer = TouchEventPeer::Create(reinterpret_cast<void*>(nativePtr));
+    return reinterpret_cast<void*>(peer);
+}
+
+void* TransferMouseEventPointer(ani_long nativePtr)
+{
+    CHECK_NULL_RETURN(nativePtr, nullptr);
+    auto peer = MouseEventPeer::Create(reinterpret_cast<void*>(nativePtr));
+    return reinterpret_cast<void*>(peer);
+}
+
+void* TransferAxisEventPointer(ani_long nativePtr)
+{
+    CHECK_NULL_RETURN(nativePtr, nullptr);
+    auto peer = AxisEventPeer::Create(reinterpret_cast<void*>(nativePtr));
+    return reinterpret_cast<void*>(peer);
+}
+
+void* TransferClickEventPointer(ani_long nativePtr)
+{
+    CHECK_NULL_RETURN(nativePtr, nullptr);
+    auto peer = ClickEventPeer::Create(reinterpret_cast<void*>(nativePtr));
+    return reinterpret_cast<void*>(peer);
+}
+
+void* TransferHoverEventPointer(ani_long nativePtr)
+{
+    CHECK_NULL_RETURN(nativePtr, nullptr);
+    auto peer = HoverEventPeer::Create(reinterpret_cast<void*>(nativePtr));
+    return reinterpret_cast<void*>(peer);
+}
+
+void* GetTouchEventPointer(ani_long nativePtr)
+{
+    CHECK_NULL_RETURN(nativePtr, nullptr);
+    auto peer = reinterpret_cast<Ark_TouchEvent>(nativePtr);
+    return reinterpret_cast<void*>(peer->GetEventInfo());
+}
+
+void* GetMouseEventPointer(ani_long nativePtr)
+{
+    CHECK_NULL_RETURN(nativePtr, nullptr);
+    auto peer = reinterpret_cast<Ark_MouseEvent>(nativePtr);
+    return reinterpret_cast<void*>(peer->GetEventInfo());
+}
+
+void* GetAxisEventPointer(ani_long nativePtr)
+{
+    CHECK_NULL_RETURN(nativePtr, nullptr);
+    auto peer = reinterpret_cast<Ark_AxisEvent>(nativePtr);
+    return reinterpret_cast<void*>(peer->GetEventInfo());
+}
+
+void* GetClickEventPointer(ani_long nativePtr)
+{
+    CHECK_NULL_RETURN(nativePtr, nullptr);
+    auto peer = reinterpret_cast<Ark_ClickEvent>(nativePtr);
+    return reinterpret_cast<void*>(peer->GetEventInfo());
+}
+
+void* GetHoverEventPointer(ani_long nativePtr)
+{
+    CHECK_NULL_RETURN(nativePtr, nullptr);
+    auto peer = reinterpret_cast<Ark_HoverEvent>(nativePtr);
+    return reinterpret_cast<void*>(peer->GetEventInfo());
+}
+
 const ArkUIAniCommonModifier* GetCommonAniModifier()
 {
     static const ArkUIAniCommonModifier impl = {
@@ -436,7 +604,27 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .fp2px = OHOS::Ace::NG::Fp2px,
         .px2fp = OHOS::Ace::NG::Px2fp,
         .lpx2px = OHOS::Ace::NG::Lpx2px,
-        .px2lpx = OHOS::Ace::NG::Px2lpx
+        .px2lpx = OHOS::Ace::NG::Px2lpx,
+        .transferKeyEventPointer = OHOS::Ace::NG::TransferKeyEventPointer,
+        .createKeyEventAccessorWithPointer = OHOS::Ace::NG::CreateKeyEventAccessorWithPointer,
+        .createEventTargetInfoAccessor = OHOS::Ace::NG::CreateEventTargetInfoAccessor,
+        .eventTargetInfoAccessorWithId = OHOS::Ace::NG::EventTargetInfoAccessorWithId,
+        .createScrollableTargetInfoAccessor = OHOS::Ace::NG::CreateScrollableTargetInfoAccessor,
+        .scrollableTargetInfoAccessorWithId = OHOS::Ace::NG::ScrollableTargetInfoAccessorWithId,
+        .scrollableTargetInfoAccessorWithPointer = OHOS::Ace::NG::ScrollableTargetInfoAccessorWithPointer,
+        .transferScrollableTargetInfoPointer = OHOS::Ace::NG::TransferScrollableTargetInfoPointer,
+        .transferDragEventPointer = OHOS::Ace::NG::TransferDragEventPointer,
+        .getDragEventPointer = OHOS::Ace::NG::GetDragEventPointer,
+        .transferTouchEventPointer = OHOS::Ace::NG::TransferTouchEventPointer,
+        .transferMouseEventPointer = OHOS::Ace::NG::TransferMouseEventPointer,
+        .transferAxisEventPointer = OHOS::Ace::NG::TransferAxisEventPointer,
+        .transferClickEventPointer = OHOS::Ace::NG::TransferClickEventPointer,
+        .transferHoverEventPointer = OHOS::Ace::NG::TransferHoverEventPointer,
+        .getTouchEventPointer = OHOS::Ace::NG::GetTouchEventPointer,
+        .getMouseEventPointer = OHOS::Ace::NG::GetMouseEventPointer,
+        .getAxisEventPointer = OHOS::Ace::NG::GetAxisEventPointer,
+        .getClickEventPointer = OHOS::Ace::NG::GetClickEventPointer,
+        .getHoverEventPointer = OHOS::Ace::NG::GetHoverEventPointer,
     };
     return &impl;
 }

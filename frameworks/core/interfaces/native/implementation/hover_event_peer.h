@@ -20,6 +20,13 @@
 
 struct HoverEventPeer
     : public OHOS::Ace::NG::GeneratedModifier::SomeEventPeer<OHOS::Ace::HoverInfo> {
+    static HoverEventPeer* Create(void* ptr)
+    {
+        auto* peer = OHOS::Ace::NG::PeerUtils::CreatePeer<HoverEventPeer>();
+        CHECK_NULL_RETURN(peer, nullptr);
+        peer->SetEventInfo(reinterpret_cast<OHOS::Ace::HoverInfo*>(ptr));
+        return peer;
+    }
 protected:
     HoverEventPeer() = default;
     ~HoverEventPeer() override = default;
