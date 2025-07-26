@@ -26831,6 +26831,7 @@ typedef struct GENERATED_ArkUIRouterExtenderAccessor {
     Ark_NativePointer (*runPage)(const Ark_String* url);
     void (*clear)();
 } GENERATED_ArkUIRouterExtenderAccessor;
+
 /**
  * An API to control an implementation. When making changes modifying binary
  * layout, i.e. adding new events - increase ARKUI_API_VERSION above for binary
@@ -26956,6 +26957,7 @@ typedef struct GENERATED_ArkUINodeModifiers {
     const GENERATED_ArkUIUIExtensionComponentModifier* (*getUIExtensionComponentModifier)();
     const GENERATED_ArkUILinearIndicatorModifier* (*getLinearIndicatorModifier)();
     const GENERATED_ArkUIStateModifier* (*getUIStateModifier)();
+
 } GENERATED_ArkUINodeModifiers;
 
 typedef struct GENERATED_ArkUIAccessors {

@@ -861,6 +861,7 @@ public:
     bool PrepareAIMenuOptions(std::unordered_map<TextDataDetectType, AISpan>& aiMenuOptions);
     bool IsAiSelected();
     virtual RefPtr<FrameNode> CreateAIEntityMenu();
+    bool CheckAIPreviewMenuEnable();
     void InitAiSelection(const Offset& globalOffset);
     bool CanAIEntityDrag() override;
     RefPtr<PreviewMenuController> GetOrCreatePreviewMenuController();
@@ -1094,7 +1095,7 @@ private:
     void InitTouchEvent();
     void HandleTouchEvent(const TouchEventInfo& info);
     void ActSetSelection(int32_t start, int32_t end);
-    bool IsShowHandle();
+    virtual bool IsShowHandle();
     void InitUrlMouseEvent();
     void InitUrlTouchEvent();
     void HandleUrlMouseEvent(const MouseInfo& info);

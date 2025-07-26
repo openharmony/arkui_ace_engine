@@ -148,7 +148,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DividerColorSetByUser, bool, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CacheRange, CacheRange, PROPERTY_UPDATE_MEASURE_SELF);
 
-    int defCachedCount_ = 1;
+    int32_t defCachedCount_ = 1;
 protected:
     void UpdateLayoutProperty(const ListLayoutProperty* layoutProperty);
 };

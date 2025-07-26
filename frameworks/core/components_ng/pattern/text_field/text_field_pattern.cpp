@@ -593,22 +593,13 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     CHECK_NULL_RETURN(textFieldLayoutAlgorithm, false);
     auto paragraph = textFieldLayoutAlgorithm->GetParagraph();
     float paragraphWidth = 0.0f;
+    bool skipUpdateParagraph = false;
     if (paragraph) {
+        skipUpdateParagraph = ShouldSkipUpdateParagraph();
         paragraph_ = paragraph;
         paragraphWidth = std::max(paragraph->GetLongestLine(), 0.0f);
     }
-    if (!IsDragging()) {
-        do {
-            if (!dragNode_) {
-                break;
-            }
-            auto dragNodePattern = AceType::DynamicCast<TextDragPattern>(dragNode_->GetPattern());
-            if (!dragNodePattern) {
-                break;
-            }
-            dragNodePattern->UpdateParagraph(paragraph_);
-        } while (false);
-    }
+    UpdateParagraphForDragNode(skipUpdateParagraph);
     auto textRect = textFieldLayoutAlgorithm->GetTextRect();
     auto isSameSizeMouseMenu = NearEqual(paragraphWidth, paragraphWidth_) &&
                                     NearEqual(textRect.GetSize(), textRect_.GetSize()) && IsUsingMouse();
@@ -11950,5 +11941,30 @@ Offset TextFieldPattern::GetCaretClickLocalOffset(const Offset& offset)
         localOffset.SetY(contentRect_.Bottom() - PreferredLineHeight() / 2.0f);
     }
     return localOffset;
+}
+
+bool TextFieldPattern::ShouldSkipUpdateParagraph()
+{
+    if (IsDragging() || !dragNode_ || !IsNormalInlineState()) {
+        return false;
+    }
+    auto dragNodePattern = AceType::DynamicCast<TextDragPattern>(dragNode_->GetPattern());
+    CHECK_NULL_RETURN(dragNodePattern, false);
+    if (!dragNodePattern->IsAnimating()) {
+        return false;
+    }
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Destroy the paragraph after the drag floating animation ends.");
+    dragNodePattern->UpdateAnimatingParagraph();
+    return true;
+}
+
+void TextFieldPattern::UpdateParagraphForDragNode(bool skipUpdate)
+{
+    if (IsDragging() || !dragNode_ || skipUpdate) {
+        return;
+    }
+    auto dragNodePattern = AceType::DynamicCast<TextDragPattern>(dragNode_->GetPattern());
+    CHECK_NULL_VOID(dragNodePattern);
+    dragNodePattern->UpdateParagraph(paragraph_);
 }
 } // namespace OHOS::Ace::NG

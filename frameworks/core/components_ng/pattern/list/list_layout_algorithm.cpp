@@ -185,7 +185,6 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             posMap_->ClearPosMap();
         }
     }
-
     // In the secondary layout scenario, the previous contentMainSize_ is used as the next prevContentMainSize_.
     prevContentMainSize_ = contentMainSize_;
     
@@ -2283,8 +2282,11 @@ CachedIndexInfo ListLayoutAlgorithm::GetLayoutGroupCachedCount(LayoutWrapper* la
 float ListLayoutAlgorithm::GetLayoutCrossAxisSize(LayoutWrapper* layoutWrapper)
 {
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
-    auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
-    MinusPaddingToSize(padding, size);
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    if (layoutProperty) {
+        auto padding = layoutProperty->CreatePaddingAndBorder();
+        MinusPaddingToSize(padding, size);
+    }
     return GetCrossAxisSize(size, axis_);
 }
 

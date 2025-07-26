@@ -508,18 +508,11 @@ HWTEST_F(RichEditorAITestOneNg, InitAiselection, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    auto richEditorController = richEditorPattern->GetRichEditorController();
-    ASSERT_NE(richEditorController, nullptr);
     std::map<int32_t, AISpan> aiSpanMap;
-    AISpan aiSpan0;
-    aiSpan0.content = ADDRESS;
-    aiSpan0.start = 0;
-    aiSpan0.end = 3;
+    AISpan aiSpan0 = { .content = ADDRESS, .start = 0, .end = 3 };
     aiSpanMap[0] = aiSpan0;
-    TextSpanOptions options;
-    options.value = ADDRESS_U16;
-    richEditorController->AddTextSpan(options);
-    ParagraphManager::ParagraphInfo paragraphInfo;
+    TextSpanOptions options = { .value = ADDRESS_U16 };
+    richEditorPattern->AddTextSpan(options);
     auto mockParagraph = MockParagraph::GetOrCreateMockParagraph();
     ASSERT_NE(mockParagraph, nullptr);
     EXPECT_CALL(*mockParagraph, GetRectsForRange(_, _, _))
@@ -528,9 +521,15 @@ HWTEST_F(RichEditorAITestOneNg, InitAiselection, TestSize.Level1)
         }));
     PositionWithAffinity positionWithAffinity(1, TextAffinity::UPSTREAM);
     EXPECT_CALL(*mockParagraph, GetGlyphPositionAtCoordinate(_)).WillRepeatedly(Return(positionWithAffinity));
-    paragraphInfo.paragraph = mockParagraph;
-    paragraphInfo.start = 0;
-    paragraphInfo.end = 10;
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    pipeline->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<RichEditorTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
+
+    ParagraphManager::ParagraphInfo paragraphInfo = { .paragraph = mockParagraph, .start = 0, .end = 10 };
     richEditorPattern->paragraphs_.paragraphs_.emplace_back(paragraphInfo);
     Offset offset = { 10, 10 };
     richEditorPattern->dataDetectorAdapter_->aiSpanMap_ = aiSpanMap;
@@ -558,18 +557,11 @@ HWTEST_F(RichEditorAITestOneNg, InitAiSelection002, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto pattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(pattern, nullptr);
-    auto controller = pattern->GetRichEditorController();
-    ASSERT_NE(controller, nullptr);
     std::map<int32_t, AISpan> aiSpanMap;
-    AISpan aiSpan0;
-    aiSpan0.content = ADDRESS;
-    aiSpan0.start = 0;
-    aiSpan0.end = 3;
+    AISpan aiSpan0 = { .content = ADDRESS, .start = 0, .end = 3 };
     aiSpanMap[0] = aiSpan0;
-    TextSpanOptions options;
-    options.value = ADDRESS_U16;
-    controller->AddTextSpan(options);
-    ParagraphManager::ParagraphInfo paragraphInfo;
+    TextSpanOptions options = { .value = ADDRESS_U16 };
+    pattern->AddTextSpan(options);
     RefPtr<MockParagraph> mockParagraph = AceType::MakeRefPtr<MockParagraph>();
     EXPECT_CALL(*mockParagraph, GetRectsForRange(_, _, _))
         .WillRepeatedly(Invoke([](int32_t start, int32_t end, std::vector<RectF>& selectedRects) {
@@ -577,14 +569,19 @@ HWTEST_F(RichEditorAITestOneNg, InitAiSelection002, TestSize.Level1)
         }));
     PositionWithAffinity positionWithAffinity(1, TextAffinity::DOWNSTREAM);
     EXPECT_CALL(*mockParagraph, GetGlyphPositionAtCoordinate(_)).WillRepeatedly(Return(positionWithAffinity));
-    paragraphInfo.paragraph = mockParagraph;
-    paragraphInfo.start = 0;
-    paragraphInfo.end = 10;
+    ParagraphManager::ParagraphInfo paragraphInfo = { .paragraph = mockParagraph, .start = 0, .end = 10 };
     pattern->paragraphs_.paragraphs_.emplace_back(paragraphInfo);
     Offset offset = { 10, 10 };
     pattern->dataDetectorAdapter_->aiSpanMap_ = aiSpanMap;
     pattern->dataDetectorAdapter_->enablePreviewMenu_ = true;
     pattern->textDetectEnable_ = true;
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    pipeline->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<RichEditorTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
 
     pattern->showSelect_ = false;
     pattern->InitAiSelection(offset, false);

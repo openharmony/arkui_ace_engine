@@ -1149,7 +1149,8 @@ void ListModelNG::SetScroller(FrameNode* frameNode, RefPtr<ScrollControllerBase>
     pattern->SetScrollBarProxy(AceType::DynamicCast<ScrollBarProxy>(proxy));
 }
 
-void ListModelNG::SetOnScrollVisibleContentChange(FrameNode* frameNode, OnScrollVisibleContentChangeEvent&& onScrollVisibleContentChange)
+void ListModelNG::SetOnScrollVisibleContentChange(
+    FrameNode* frameNode, OnScrollVisibleContentChangeEvent&& onScrollVisibleContentChange)
 {
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetOrCreateEventHub<ListEventHub>();

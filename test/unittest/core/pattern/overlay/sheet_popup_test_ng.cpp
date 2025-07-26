@@ -229,7 +229,6 @@ HWTEST_F(SheetPopupTestNg, GetPopupStyleSheetOffset001, TestSize.Level1)
     overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
         nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
-
     /**
      * @tc.steps: step3: measure and layout sheet page
      * @tc.expected: finalPlacement == Bottom and showArrow == true
@@ -239,6 +238,7 @@ HWTEST_F(SheetPopupTestNg, GetPopupStyleSheetOffset001, TestSize.Level1)
     auto sheetPattern = sheetPageNode->GetPattern<SheetPresentationPattern>();
     ASSERT_NE(sheetPattern, nullptr);
     sheetPattern->sheetThemeType_ = "popup";
+    sheetPattern->sheetType_ = SheetType::SHEET_POPUP;
     auto sheetWrapperNode = AceType::DynamicCast<FrameNode>(sheetPageNode->GetParent());
     ASSERT_NE(sheetWrapperNode, nullptr);
     RefPtr<SheetPresentationLayoutAlgorithm> sheetPageLayoutAlgorithm;
@@ -319,7 +319,6 @@ HWTEST_F(SheetPopupTestNg, GetPopupStyleSheetOffset002, TestSize.Level1)
     overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
         nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
-
     /**
      * @tc.steps: step3: measure and layout sheet page
      * @tc.expected: finalPlacement == Bottom and showArrow == false
@@ -329,6 +328,7 @@ HWTEST_F(SheetPopupTestNg, GetPopupStyleSheetOffset002, TestSize.Level1)
     auto sheetPattern = sheetPageNode->GetPattern<SheetPresentationPattern>();
     ASSERT_NE(sheetPattern, nullptr);
     sheetPattern->sheetThemeType_ = "popup";
+    sheetPattern->sheetType_ = SheetType::SHEET_POPUP;
     auto sheetWrapperNode = AceType::DynamicCast<FrameNode>(sheetPageNode->GetParent());
     ASSERT_NE(sheetWrapperNode, nullptr);
     RefPtr<SheetPresentationLayoutAlgorithm> sheetPageLayoutAlgorithm;
@@ -411,7 +411,6 @@ HWTEST_F(SheetPopupTestNg, GetPopupStyleSheetOffset003, TestSize.Level1)
     overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
         nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
-
     /**
      * @tc.steps: step3: measure and layout sheet page
      * @tc.expected: finalPlacement == Bottom and showArrow == false
@@ -421,6 +420,7 @@ HWTEST_F(SheetPopupTestNg, GetPopupStyleSheetOffset003, TestSize.Level1)
     auto sheetPattern = sheetPageNode->GetPattern<SheetPresentationPattern>();
     ASSERT_NE(sheetPattern, nullptr);
     sheetPattern->sheetThemeType_ = "popup";
+    sheetPattern->sheetType_ = SheetType::SHEET_POPUP;
     auto sheetWrapperNode = AceType::DynamicCast<FrameNode>(sheetPageNode->GetParent());
     ASSERT_NE(sheetWrapperNode, nullptr);
     RefPtr<SheetPresentationLayoutAlgorithm> sheetPageLayoutAlgorithm;
@@ -504,7 +504,6 @@ HWTEST_F(SheetPopupTestNg, GetPopupStyleSheetOffset004, TestSize.Level1)
     overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
         nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
-
     /**
      * @tc.steps: step3: measure and layout sheet page
      * @tc.expected: finalPlacement == Bottom and showArrow == false
@@ -514,6 +513,7 @@ HWTEST_F(SheetPopupTestNg, GetPopupStyleSheetOffset004, TestSize.Level1)
     auto sheetPattern = sheetPageNode->GetPattern<SheetPresentationPattern>();
     ASSERT_NE(sheetPattern, nullptr);
     sheetPattern->sheetThemeType_ = "popup";
+    sheetPattern->sheetType_ = SheetType::SHEET_POPUP;
     auto sheetWrapperNode = AceType::DynamicCast<FrameNode>(sheetPageNode->GetParent());
     ASSERT_NE(sheetWrapperNode, nullptr);
     RefPtr<SheetPresentationLayoutAlgorithm> sheetPageLayoutAlgorithm;
@@ -996,7 +996,6 @@ HWTEST_F(SheetPopupTestNg, SheetPopupAvoidKeyboard001, TestSize.Level1)
     overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
         nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
-
     /**
      * @tc.steps: step3: measure and layout sheet page
      * @tc.expected: finalPlacement == Top and showArrow == true
@@ -1007,6 +1006,7 @@ HWTEST_F(SheetPopupTestNg, SheetPopupAvoidKeyboard001, TestSize.Level1)
     auto sheetPattern = sheetPageNode->GetPattern<SheetPresentationPattern>();
     ASSERT_NE(sheetPattern, nullptr);
     sheetPattern->sheetThemeType_ = "popup";
+    sheetPattern->sheetType_ = SheetType::SHEET_POPUP;
     auto sheetWrapperNode = AceType::DynamicCast<FrameNode>(sheetPageNode->GetParent());
     ASSERT_NE(sheetWrapperNode, nullptr);
     RefPtr<SheetPresentationLayoutAlgorithm> sheetPageLayoutAlgorithm;
@@ -1099,7 +1099,6 @@ HWTEST_F(SheetPopupTestNg, SheetPopupAvoidKeyboard002, TestSize.Level1)
     overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
         nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
-
     /**
      * @tc.steps: step3: measure and layout sheet page
      * @tc.expected: finalPlacement == Top and showArrow == false
@@ -1110,6 +1109,7 @@ HWTEST_F(SheetPopupTestNg, SheetPopupAvoidKeyboard002, TestSize.Level1)
     auto sheetPattern = sheetPageNode->GetPattern<SheetPresentationPattern>();
     ASSERT_NE(sheetPattern, nullptr);
     sheetPattern->sheetThemeType_ = "popup";
+    sheetPattern->sheetType_ = SheetType::SHEET_POPUP;
     auto sheetWrapperNode = AceType::DynamicCast<FrameNode>(sheetPageNode->GetParent());
     ASSERT_NE(sheetWrapperNode, nullptr);
     RefPtr<SheetPresentationLayoutAlgorithm> sheetPageLayoutAlgorithm;

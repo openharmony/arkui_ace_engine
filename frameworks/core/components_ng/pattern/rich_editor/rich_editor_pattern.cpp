@@ -3476,6 +3476,8 @@ bool RichEditorPattern::HandleUserGestureEvent(
             }
             info = info.SetScreenLocation(
                 Offset(textOffset.GetX() - paragraphOffset.GetX(), textOffset.GetY() - paragraphOffset.GetY()));
+            info = info.SetGlobalDisplayLocation(
+                Offset(textOffset.GetX() - paragraphOffset.GetX(), textOffset.GetY() - paragraphOffset.GetY()));
             return gestureFunc(item, info);
         }
     }
@@ -8892,12 +8894,6 @@ Offset RichEditorPattern::ConvertGlobalToTextOffset(const Offset& globalOffset)
         localOffset = ConvertGlobalToLocalOffset(globalOffset);
     }
     return ConvertTouchOffsetToTextOffset(localOffset);
-}
-
-bool RichEditorPattern::CheckAIPreviewMenuEnable()
-{
-    return dataDetectorAdapter_ && dataDetectorAdapter_->enablePreviewMenu_ && NeedShowAIDetect() &&
-           copyOption_ != CopyOptions::None;
 }
 
 void RichEditorPattern::InitAiSelection(const Offset& globalOffset, bool isBetweenSelection)

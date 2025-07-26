@@ -1673,24 +1673,7 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
         }
     }
 
-    // if node has background, do update
-    if (renderContext_->HasBuilderBackgroundFlag()) {
-        bool isBuilderBackground = renderContext_->GetBuilderBackgroundFlag().value();
-        if (isBuilderBackground && builderFunc_) {
-            auto builderNode = builderFunc_();
-            auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
-                ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
-            if (builderNode) {
-                builderNode->MountToParent(columnNode);
-            }
-            SetBackgroundLayoutConstraint(columnNode);
-            renderContext_->CreateBackgroundPixelMap(columnNode);
-            builderFunc_ = nullptr;
-            backgroundNode_ = columnNode;
-        } else if (!isBuilderBackground) {
-            renderContext_->UpdateCustomBackground();
-        }
-    }
+    UpdateBackground();
 
     // update focus state
     auto focusHub = GetFocusHub();
@@ -5201,24 +5184,7 @@ void FrameNode::SyncGeometryNode(bool needSyncRsNode, const DirtySwapConfig& con
         TriggerOnSizeChangeCallback();
     }
 
-    // if node has background, do update
-    if (renderContext_->HasBuilderBackgroundFlag()) {
-        bool isBuilderBackground = renderContext_->GetBuilderBackgroundFlag().value();
-        if (isBuilderBackground && builderFunc_) {
-            auto builderNode = builderFunc_();
-            auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
-                ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
-            if (builderNode) {
-                builderNode->MountToParent(columnNode);
-            }
-            SetBackgroundLayoutConstraint(columnNode);
-            renderContext_->CreateBackgroundPixelMap(columnNode);
-            builderFunc_ = nullptr;
-            backgroundNode_ = columnNode;
-        } else if (!isBuilderBackground) {
-            renderContext_->UpdateCustomBackground();
-        }
-    }
+    UpdateBackground();
 
     // update focus state
     UpdateFocusState();
@@ -7242,5 +7208,27 @@ uint32_t FrameNode::CallAIFunction(const std::string& functionName, const std::s
                 AI_CALL_FUNCNAME_INVALID;
     }
     return AI_CALLER_INVALID;
+}
+
+void FrameNode::UpdateBackground()
+{
+    // if node has background, do update.
+    if (renderContext_->HasBuilderBackgroundFlag()) {
+        bool isBuilderBackground = renderContext_->GetBuilderBackgroundFlag().value();
+        if (isBuilderBackground && builderFunc_) {
+            auto builderNode = builderFunc_();
+            auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+                ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+            if (builderNode) {
+                builderNode->MountToParent(columnNode);
+            }
+            SetBackgroundLayoutConstraint(columnNode);
+            renderContext_->CreateBackgroundPixelMap(columnNode);
+            builderFunc_ = nullptr;
+            backgroundNode_ = columnNode;
+        } else if (!isBuilderBackground) {
+            renderContext_->UpdateCustomBackground();
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

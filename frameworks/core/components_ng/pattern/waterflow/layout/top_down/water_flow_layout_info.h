@@ -202,8 +202,6 @@ public:
     // 0.0f until itemEnd_ is true
     float maxHeight_ = 0.0f;
 
-    bool knowTotalHeight_ = false; // set to true when content end is reached. no longer need to estimate totalHeight
-
     // first index for onScrollIndex
     int32_t firstIndex_ = 0;
 

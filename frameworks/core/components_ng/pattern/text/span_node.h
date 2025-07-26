@@ -881,19 +881,6 @@ private:
     RefPtr<UINode> customNode_;
 };
 
-class PlaceholderSpanPattern : public Pattern {
-    DECLARE_ACE_TYPE(PlaceholderSpanPattern, Pattern);
-
-public:
-    PlaceholderSpanPattern() = default;
-    ~PlaceholderSpanPattern() override = default;
-
-    bool IsAtomicNode() const override
-    {
-        return false;
-    }
-};
-
 class ACE_EXPORT PlaceholderSpanNode : public FrameNode {
     DECLARE_ACE_TYPE(PlaceholderSpanNode, FrameNode);
 
@@ -958,6 +945,31 @@ private:
     RefPtr<PlaceholderSpanItem> placeholderSpanItem_ = MakeRefPtr<PlaceholderSpanItem>();
 
     ACE_DISALLOW_COPY_AND_MOVE(PlaceholderSpanNode);
+};
+
+class PlaceholderSpanPattern : public Pattern {
+    DECLARE_ACE_TYPE(PlaceholderSpanPattern, Pattern);
+
+public:
+    PlaceholderSpanPattern() = default;
+    ~PlaceholderSpanPattern() override = default;
+
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override
+    {
+        Pattern::OnDirtyLayoutWrapperSwap(dirty, config);
+        CHECK_NULL_RETURN(config.frameSizeChange, true);
+        auto spanNode = DynamicCast<PlaceholderSpanNode>(GetHost());
+        CHECK_NULL_RETURN(spanNode, true);
+        const auto& spanItem = spanNode->GetSpanItem();
+        CHECK_NULL_RETURN(spanItem, true);
+        spanItem->MarkDirty();
+        return true;
+    }
+
+    bool IsAtomicNode() const override
+    {
+        return false;
+    }
 };
 
 struct CustomSpanItem : public PlaceholderSpanItem {

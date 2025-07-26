@@ -2031,6 +2031,8 @@ private:
     void OnAccessibilityEventTextChange(const std::string& changeType, const std::string& changeString);
     void FireOnWillAttachIME();
     Offset GetCaretClickLocalOffset(const Offset& offset);
+    bool ShouldSkipUpdateParagraph();
+    void UpdateParagraphForDragNode(bool skipUpdate);
 
     RectF frameRect_;
     RectF textRect_;

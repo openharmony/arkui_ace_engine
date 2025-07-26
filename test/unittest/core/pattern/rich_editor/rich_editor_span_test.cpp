@@ -1481,4 +1481,32 @@ HWTEST_F(RichEditorSpanTest, AddTextSpan001, TestSize.Level1)
     EXPECT_EQ(res, 0);
 }
 
+/**
+ * @tc.name: AddTextSpan001
+ * @tc.desc: test AddTextSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSpanTest, PlaceholderSpanNodeTest001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto placeholderSpanNode = PlaceholderSpanNode::GetOrCreateSpanNode(V2::PLACEHOLDER_SPAN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<PlaceholderSpanPattern>(); });
+    ASSERT_NE(placeholderSpanNode, nullptr);
+    auto placeholderSpanItem = placeholderSpanNode->GetSpanItem();
+    ASSERT_NE(placeholderSpanItem, nullptr);
+    auto placeholderSpanPattern = placeholderSpanNode->GetPattern<PlaceholderSpanPattern>();
+    ASSERT_NE(placeholderSpanPattern, nullptr);
+
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        richEditorNode_, AceType::MakeRefPtr<GeometryNode>(), richEditorNode_->GetLayoutProperty());
+    DirtySwapConfig config = { .frameSizeChange = true };
+
+    placeholderSpanItem->needReLayout = false;
+    placeholderSpanPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    EXPECT_EQ(placeholderSpanItem->needReLayout, true);
+}
+
 } // namespace OHOS::Ace::NG

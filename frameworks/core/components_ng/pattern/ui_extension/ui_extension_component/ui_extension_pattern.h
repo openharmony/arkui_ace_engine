@@ -282,6 +282,10 @@ public:
     {
         isModalRequestFocus_ = requestFocus;
     }
+    bool IsWindowSceneVisible() const
+    {
+        return windowSceneVisible_;
+    }
 
 protected:
     virtual void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
@@ -450,6 +454,7 @@ private:
     bool needReNotifyForeground_ = false;
     bool needReDispatchDisplayArea_ = false;
     bool curVisible_ = false;
+    bool windowSceneVisible_ = false;
     SessionType sessionType_ = SessionType::UI_EXTENSION_ABILITY;
     UIExtensionUsage usage_ = UIExtensionUsage::EMBEDDED;
 

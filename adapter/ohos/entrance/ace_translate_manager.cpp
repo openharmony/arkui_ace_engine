@@ -185,6 +185,13 @@ void UiTranslateManagerImpl::TravelFindPixelMap(RefPtr<NG::UINode> currentNode)
     }
 }
 
+void UiTranslateManagerImpl::PostToUI(const std::function<void()>& task)
+{
+    if (taskExecutor_) {
+        taskExecutor_->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIHandleUiTranslateManager");
+    }
+}
+
 void UiTranslateManagerImpl::FindTopNavDestination(RefPtr<NG::UINode> currentNode, RefPtr<NG::FrameNode>& result)
 {
     for (const auto& item : currentNode->GetChildren()) {

@@ -18,6 +18,8 @@
 #include "list_test_ng.h"
 #include "ui/base/geometry/ng/offset_t.h"
 
+#include "core/components_v2/list/list_properties.h"
+
 namespace OHOS::Ace::NG {
 constexpr char SCROLLBAR_COLOR_BLUE[] = "#FF0000FF";
 
@@ -657,6 +659,331 @@ HWTEST_F(ListModelTestNg, SetChainAnimation_TwoParameters, TestSize.Level1)
     model.SetChainAnimation(listNode, true);
     auto result = layoutProperty->GetChainAnimation();
     EXPECT_TRUE(result.value());
+    CreateDone();
+}
+
+/**
+ * @tc.name: SetSticky_TwoParameters
+ * @tc.desc: Test ListModelNG SetSticky
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, SetSticky_TwoParameters, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ListModelNG model;
+    model.Create(false);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    auto pattern = listNode->GetPattern<ListPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    listNode->SetLayoutProperty(listLayoutProperty);
+    auto layoutProperty = listNode->GetLayoutProperty<ListLayoutProperty>();
+
+    /**
+     * @tc.steps: step2. Set the StickyStyle to 3
+     * @tc.expected: The sticky is set BOTH
+     */
+    model.SetSticky(listNode, 3);
+    auto result = model.GetSticky(listNode);
+    EXPECT_EQ(static_cast<V2::StickyStyle>(result), V2::StickyStyle::BOTH);
+    CreateDone();
+}
+
+/**
+ * @tc.name: SetEdgeEffect_FourParameters
+ * @tc.desc: Test ListModelNG SetEdgeEffect
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, SetEdgeEffect_FourParameters, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ListModelNG model;
+    model.Create(false);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    auto pattern = listNode->GetPattern<ListPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    listNode->SetLayoutProperty(listLayoutProperty);
+    auto layoutProperty = listNode->GetLayoutProperty<ListLayoutProperty>();
+
+    /**
+     * @tc.steps: step2. Set the edgeEffectAlwaysEnabled_ to false
+     * Set the effectEdge_ to ALL
+     */
+    pattern->edgeEffectAlwaysEnabled_ = false;
+    pattern->effectEdge_ = EffectEdge::ALL;
+
+    /**
+     * @tc.steps: step3. Set the SetEdgeEffect to 1
+     * @tc.expected: The edgeEffectAlwaysEnabled_ be true and the effectEdge_ be START
+     * and the sticky is set FADE
+     */
+    model.SetEdgeEffect(listNode, 1, true, EffectEdge::START);
+    auto result = model.GetEdgeEffect(listNode);
+    EXPECT_TRUE(pattern->edgeEffectAlwaysEnabled_);
+    EXPECT_EQ(pattern->effectEdge_, EffectEdge::START);
+    EXPECT_EQ(static_cast<EdgeEffect>(result), EdgeEffect::FADE);
+    CreateDone();
+}
+
+/**
+ * @tc.name: GetListDirection
+ * @tc.desc: Test ListModelNG GetListDirection
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, GetListDirection, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ListModelNG model;
+    model.Create(false);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    auto pattern = listNode->GetPattern<ListPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    listNode->SetLayoutProperty(listLayoutProperty);
+    auto layoutProperty = listNode->GetLayoutProperty<ListLayoutProperty>();
+
+    /**
+     * @tc.steps: step2. Set the Axis to HORIZONTAL
+     * @tc.expected: The result is static_cast<Axis>(Axis::HORIZONTAL)
+     */
+    model.SetListDirection(listNode, static_cast<int32_t>(Axis::HORIZONTAL));
+    auto result = model.GetListDirection(listNode);
+    EXPECT_EQ(result, 1);
+    CreateDone();
+}
+
+/**
+ * @tc.name: GetListFriction
+ * @tc.desc: Test ListModelNG GetListFriction
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, GetListFriction, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ListModelNG model;
+    model.Create(false);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    auto pattern = listNode->GetPattern<ListPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    listNode->SetLayoutProperty(listLayoutProperty);
+    auto layoutProperty = listNode->GetLayoutProperty<ListLayoutProperty>();
+
+    /**
+     * @tc.steps: step2. Set the friction of pattern to 6.0
+     */
+    pattern->SetFriction(6.0);
+
+    /**
+     * @tc.steps: step3. Set the friction to 2.0
+     * @tc.expected: The result is 2.0
+     */
+    model.SetListFriction(listNode, 2.0);
+    auto result = model.GetListFriction(listNode);
+    EXPECT_EQ(result, 2.0);
+    CreateDone();
+}
+
+/**
+ * @tc.name: SetAndGet_ListNestedScroll
+ * @tc.desc: Test ListModelNG::SetListNestedScroll and ListModelNG::GetListNestedScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, SetAndGet_ListNestedScroll, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ListModelNG model;
+    model.Create(false);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    auto pattern = listNode->GetPattern<ListPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    listNode->SetLayoutProperty(listLayoutProperty);
+    auto layoutProperty = listNode->GetLayoutProperty<ListLayoutProperty>();
+
+    /**
+     * @tc.steps: step2. Set the nestedOpt
+     */
+    NestedScrollOptions nestedOpt;
+    nestedOpt.backward = NestedScrollMode::PARENT_FIRST;
+    nestedOpt.forward = NestedScrollMode::SELF_FIRST;
+
+    /**
+     * @tc.steps: step3. Calling the SetListNestedScroll function
+     * @tc.expected: Calling the GetListNestedScroll function returns the set value
+     */
+    model.SetListNestedScroll(listNode, nestedOpt);
+    auto result = model.GetListNestedScroll(listNode);
+    EXPECT_EQ(result.backward, NestedScrollMode::PARENT_FIRST);
+    EXPECT_EQ(result.forward, NestedScrollMode::SELF_FIRST);
+    CreateDone();
+}
+
+/**
+ * @tc.name: GetListScrollBar
+ * @tc.desc: Test ListModelNG GetListScrollBar
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, GetListScrollBar, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ListModelNG model;
+    model.Create(false);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    auto pattern = listNode->GetPattern<ListPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<ScrollablePaintProperty> scrollablePaintProperty = AceType::MakeRefPtr<ScrollablePaintProperty>();
+    listNode->paintProperty_ = scrollablePaintProperty;
+    auto paintProperty = listNode->GetPaintProperty<ScrollablePaintProperty>();
+
+    /**
+     * @tc.steps: step2. Set the barState to 2
+     * @tc.expected: Calling the GetListScrollBar function returns static_cast<int32_t>(DisplayMode::ON)
+     */
+    model.SetListScrollBar(listNode, 2);
+    auto result = model.GetListScrollBar(listNode);
+    EXPECT_EQ(result, static_cast<int32_t>(DisplayMode::ON));
+    CreateDone();
+}
+
+/**
+ * @tc.name: SetListScrollBar_barStateLessZero
+ * @tc.desc: Test ListModelNG SetListScrollBar
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, SetListScrollBar_barStateLessZero, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ListModelNG model;
+    model.Create(false);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    auto pattern = listNode->GetPattern<ListPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<ScrollablePaintProperty> scrollablePaintProperty = AceType::MakeRefPtr<ScrollablePaintProperty>();
+    listNode->paintProperty_ = scrollablePaintProperty;
+    auto paintProperty = listNode->GetPaintProperty<ScrollablePaintProperty>();
+
+    /**
+     * @tc.steps: step2. Set the barState to -1
+     * @tc.expected: Calling the GetListScrollBar function returns static_cast<int32_t>(DisplayMode::OFF)
+     */
+    model.SetListScrollBar(listNode, -1);
+    auto result = model.GetListScrollBar(listNode);
+    EXPECT_EQ(result, static_cast<int32_t>(DisplayMode::OFF));
+    CreateDone();
+}
+
+/**
+ * @tc.name: SetListScrollBarWidth
+ * @tc.desc: Test ListModelNG SetListScrollBarWidth
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, SetListScrollBarWidth, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ListModelNG model;
+    model.Create(false);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    auto pattern = listNode->GetPattern<ListPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<ScrollablePaintProperty> scrollablePaintProperty = AceType::MakeRefPtr<ScrollablePaintProperty>();
+    listNode->paintProperty_ = scrollablePaintProperty;
+    auto paintProperty = listNode->GetPaintProperty<ScrollablePaintProperty>();
+
+    /**
+     * @tc.steps: step2. Calling the SetListScrollBarWidth function
+     * @tc.expected: The scrollBarWidth is set successfully
+     */
+    model.SetListScrollBarWidth(listNode, "2.0vp");
+    EXPECT_EQ(paintProperty->GetScrollBarWidth(), 2.0_vp);
+    CreateDone();
+}
+
+/**
+ * @tc.name: SetAndGet_ListItemAlign
+ * @tc.desc: Test ListModelNG::SetListItemAlign and ListModelNG::GetListItemAlign
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, SetAndGet_ListItemAlign, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ListModelNG model;
+    model.Create(false);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    auto pattern = listNode->GetPattern<ListPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    listNode->SetLayoutProperty(listLayoutProperty);
+
+    /**
+     * @tc.steps: step2. Calling the SetListItemAlign and GetListItemAlign function
+     * @tc.expected: The ListItemAlign is updated
+     */
+    model.SetListItemAlign(listNode, V2::ListItemAlign::CENTER);
+    auto result = model.GetListItemAlign(listNode);
+    EXPECT_EQ(result, 1);
+    CreateDone();
+}
+
+/**
+ * @tc.name: GetListSpace
+ * @tc.desc: Test ListModelNG GetListSpace
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, GetListSpace, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ListModelNG model;
+    model.Create(false);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    auto pattern = listNode->GetPattern<ListPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    listNode->SetLayoutProperty(listLayoutProperty);
+
+    /**
+     * @tc.steps: step2. Set the space to 10.0vp
+     */
+    Dimension space = 10.0_vp;
+    model.SetListSpace(listNode, space);
+
+    /**
+     * @tc.steps: step3. Calling the GetListSpace function
+     * @tc.expected: The ListSpace is updated
+     */
+    auto result = model.GetListSpace(listNode);
+    EXPECT_EQ(result, 10.0);
     CreateDone();
 }
 } // namespace OHOS::Ace::NG

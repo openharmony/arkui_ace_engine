@@ -741,6 +741,40 @@ HWTEST_F(TextTestNg, SpanStringGetSubSpanList002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: DumpSimplifyInfo001
+ * @tc.desc: test DumpSimplifyInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, DumpSimplifyInfo001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init textLayoutProp.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("host", 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto textLayoutProp = pattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. make !textvalue.empty() true
+     */
+    textLayoutProp->UpdateContent(CREATE_VALUE_W);
+
+    auto json = JsonUtil::CreateSharedPtrJson();
+    pattern->DumpSimplifyInfo(json);
+
+    /**
+     * @tc.steps: step3. verify result
+     * @expect json is not ""
+     */
+    EXPECT_TRUE(json->Contains("content"));
+    std::string  result = json->ToString();
+    EXPECT_EQ(result, "{\"content\":\"Hello World\"}");
+}
+
+/**
  * @tc.name: SpanStringGetSpan001
  * @tc.desc: test GetSpan
  * @tc.type: FUNC

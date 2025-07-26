@@ -367,6 +367,12 @@ public:
     void ChangeIndex(int32_t index, bool useAnimation);
     void ChangeIndex(int32_t index, SwiperAnimationMode mode);
 
+#if defined(ACE_STATIC)
+    void ChangeIndexMultiThread(int32_t index, bool useAnimation);
+    void ChangeIndexMultiThread(int32_t index, SwiperAnimationMode mode);
+    void SetCachedCountMultiThread(int32_t cachedCount);
+#endif
+
     void OnVisibleChange(bool isVisible) override;
 
     int32_t GetStartIndex() const
@@ -489,13 +495,7 @@ public:
     {
         isIndicatorLongPress_ = isIndicatorLongPress;
     }
-    void SetCachedCount(int32_t cachedCount)
-    {
-        if (cachedCount_.has_value() && cachedCount_.value() != cachedCount) {
-            SetLazyLoadFeature(true);
-        }
-        cachedCount_ = cachedCount;
-    }
+    void SetCachedCount(int32_t cachedCount);
 
     void SetFinishCallbackType(FinishCallbackType finishCallbackType)
     {
@@ -534,7 +534,7 @@ public:
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
     bool IsAutoFill() const;
-    void SwipeToWithoutAnimation(int32_t index);
+    void SwipeToWithoutAnimation(int32_t index, bool byUser = false);
     void StopAutoPlay();
     void StartAutoPlay();
     void StopTranslateAnimation();
@@ -955,6 +955,14 @@ private:
     void OnDetachFromFrameNode(FrameNode* node) override;
     void OnAttachToMainTree() override;
     void OnDetachFromMainTree() override;
+
+#if defined(ACE_STATIC)
+    void OnAttachToFrameNodeMultiThread();
+    void OnDetachFromFrameNodeMultiThread(FrameNode* node);
+    void OnAttachToMainTreeMultiThread();
+    void OnDetachFromMainTreeMultiThread();
+#endif
+
     void InitSurfaceChangedCallback();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void HandleTargetIndex(const RefPtr<LayoutWrapper>& dirty, const RefPtr<SwiperLayoutAlgorithm>& algo);

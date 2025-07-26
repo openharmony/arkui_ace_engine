@@ -28,6 +28,7 @@ constexpr float GRID_WIDTH = 480.0f;
 constexpr float GRID_HEIGHT = 800.0f;
 constexpr float ITEM_WIDTH = 120.0f;
 constexpr float ITEM_HEIGHT = 200.0f;
+constexpr float PIXELMAP_DRAG_SCALE_MULTIPLE = 1.05f;
 constexpr int32_t DEFAULT_BADGE_NUM = 2;
 } // namespace
 
@@ -240,6 +241,27 @@ HWTEST_F(DragAnimationHelperTestNg, PlayGatherAnimation001, TestSize.Level1)
     auto borderRadius = renderContext->GetBorderRadius();
     ASSERT_TRUE(borderRadius.has_value());
     EXPECT_FALSE(borderRadius.value().multiValued);
+}
+
+/**
+ * @tc.name: GetLiftingNodeScale001
+ * @tc.desc: test GetLiftingNodeScale func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAnimationHelperTestNg, GetLiftingNodeScale001, TestSize.Level1)
+{
+    auto scale = DragAnimationHelper::GetLiftingNodeScale(nullptr);
+    EXPECT_EQ(scale, PIXELMAP_DRAG_SCALE_MULTIPLE);
+    auto imageNodeId = GetElmtId();
+    auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, imageNodeId,
+        []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(imageNode, nullptr);
+    auto renderContext = imageNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    const float customScale = 2.0f;
+    renderContext->UpdateTransformScale({ customScale, customScale });
+    scale = DragAnimationHelper::GetLiftingNodeScale(renderContext);
+    EXPECT_EQ(scale, customScale);
 }
 
 /**

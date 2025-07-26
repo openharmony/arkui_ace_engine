@@ -1048,18 +1048,18 @@ HWTEST_F(DragEventTestNgIssue, DragEventTestNGIssue017, TestSize.Level1)
 
     result = DragDropGlobalController::GetInstance().RequestDragEndCallback(-1, DragRet::DRAG_SUCCESS, callback);
     EXPECT_EQ(result, false);
-    EXPECT_EQ(DragDropGlobalController::GetInstance().requestId_, -1);
-    EXPECT_EQ(DragDropGlobalController::GetInstance().dragResult_, DragRet::DRAG_FAIL);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().requestId_, requestId);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().dragResult_, DragRet::DRAG_SUCCESS);
 
     result = DragDropGlobalController::GetInstance().RequestDragEndCallback(-1, DragRet::DRAG_SUCCESS, nullptr);
     EXPECT_EQ(result, false);
-    EXPECT_EQ(DragDropGlobalController::GetInstance().requestId_, -1);
-    EXPECT_EQ(DragDropGlobalController::GetInstance().dragResult_, DragRet::DRAG_FAIL);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().requestId_, requestId);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().dragResult_, DragRet::DRAG_SUCCESS);
 
     result = DragDropGlobalController::GetInstance().RequestDragEndCallback(requestId, DragRet::DRAG_SUCCESS, nullptr);
     EXPECT_EQ(result, false);
-    EXPECT_EQ(DragDropGlobalController::GetInstance().requestId_, -1);
-    EXPECT_EQ(DragDropGlobalController::GetInstance().dragResult_, DragRet::DRAG_FAIL);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().requestId_, requestId);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().dragResult_, DragRet::DRAG_SUCCESS);
 }
 
 /**
@@ -1102,9 +1102,9 @@ HWTEST_F(DragEventTestNgIssue, DragEventTestNGIssue018, TestSize.Level1)
     EXPECT_EQ(DragDropGlobalController::GetInstance().dragResult_, DragRet::DRAG_FAIL);
 
     DragDropGlobalController::GetInstance().isOnOnDropPhase_ = false;
-    DragDropGlobalController::GetInstance().NotifyDragEndPendingDone(requestId);
+    ret = DragDropGlobalController::GetInstance().NotifyDragEndPendingDone(requestId);
     EXPECT_EQ(ret, -1);
-    DragDropGlobalController::GetInstance().NotifyDragEndPendingDone(wrongRequestId);
+    ret = DragDropGlobalController::GetInstance().NotifyDragEndPendingDone(wrongRequestId);
     EXPECT_EQ(ret, -1);
 }
 

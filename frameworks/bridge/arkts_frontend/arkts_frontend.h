@@ -126,12 +126,9 @@ public:
 
     void UpdateState(Frontend::State state) override {}
 
-    bool OnBackPressed() override
-    {
-        return false;
-    }
-    void OnShow() override {}
-    void OnHide() override {}
+    bool OnBackPressed() override;
+    void OnShow() override;
+    void OnHide() override;
     void OnConfigurationUpdated(const std::string& data) override {}
     void OnSaveAbilityState(std::string& data) override {}
     void OnRestoreAbilityState(const std::string& data) override {}
@@ -272,13 +269,24 @@ public:
     }
 
     ani_object CallGetUIContextFunc();
+
     void SetAniContext(int32_t instanceId, ani_ref* context);
-    bool IsDrawChildrenCallbackFuncExist(const std::string& componentId) override { return false; }
+
+    RefPtr<NG::PageRouterManager> GetPageRouterManager()
+    {
+        return pageRouterManager_;
+    }
+
+    bool IsDrawChildrenCallbackFuncExist(const std::string& componentId) override
+    {
+        return false;
+    }
     void OnDrawChildrenCompleted(const std::string& componentId) override {}
 
     void* GetEnv() override;
     static void PreloadAceModule(void* aniEnv);
     static void* preloadArkTSRuntime;
+
 private:
     RefPtr<NG::PageRouterManager> pageRouterManager_ = nullptr;
     RefPtr<TaskExecutor> taskExecutor_;

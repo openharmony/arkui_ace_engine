@@ -144,6 +144,10 @@ HWTEST_F(RenderNodeTestNg, RenderNodeLayoutAlgorithm001, TestSize.Level1)
     geometryNode->SetFrameSize(frameSize);
     renderNodeLayoutAlgorithm->Layout(AceType::RawPtr(layoutWrapper));
     EXPECT_EQ(geometryNode->GetContentOffset(), OffsetF(0, 0));
+    SizeF frameSize2(300, 300);
+    geometryNode->SetFrameSize(frameSize2);
+    renderNodeLayoutAlgorithm->Layout(AceType::RawPtr(layoutWrapper));
+    EXPECT_EQ(geometryNode->GetContentOffset(), OffsetF(0, 0));
 }
 
 /**

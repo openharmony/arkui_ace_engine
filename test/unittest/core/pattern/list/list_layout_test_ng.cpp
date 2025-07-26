@@ -3157,6 +3157,68 @@ HWTEST_F(ListLayoutTestNg, FadingEdge003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: FadingEdge004
+ * @tc.desc: Test FadingEdge property
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, FadingEdge004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set FadingEdge
+     * @tc.expected: Would create a overlayNode attach to list
+     */
+    const Dimension fadingEdgeLength = Dimension(10.0f);
+    ListModelNG model = CreateList();
+    ScrollableModelNG::SetFadingEdge(true, fadingEdgeLength);
+    CreateListItems(10);
+    CreateDone();
+    EXPECT_TRUE(frameNode_->GetOverlayNode());
+
+    /**
+     * @tc.steps: step2. The list at top
+     * @tc.expected: Fading bottom and both top and bottom have gradient
+     */
+    auto paintMethod = UpdateContentModifier();
+    EXPECT_FALSE(paintMethod->isFadingTop_);
+    EXPECT_TRUE(paintMethod->isFadingBottom_);
+    auto renderContext = paintMethod->overlayRenderContext_;
+    EXPECT_TRUE(renderContext);
+    auto& gradientProp = renderContext->GetOrCreateGradient();
+    EXPECT_TRUE(gradientProp);
+    NG::Gradient gradient;
+    if (gradientProp->HasLastGradientType() || gradientProp->HasLinearGradient()) {
+        gradient = gradientProp->GetLinearGradientValue();
+    }
+    EXPECT_EQ(gradient.GetColors().size(), 4); // 4: both top and bottom have gradient
+
+    /**
+     * @tc.steps: step3. The list at middle
+     * @tc.expected: Fading both and both top and bottom have gradient
+     */
+    ScrollTo(100.0f);
+    paintMethod = UpdateContentModifier();
+    EXPECT_TRUE(paintMethod->isFadingTop_);
+    EXPECT_TRUE(paintMethod->isFadingBottom_);
+    if (gradientProp->HasLastGradientType() || gradientProp->HasLinearGradient()) {
+        gradient = gradientProp->GetLinearGradientValue();
+    }
+    EXPECT_EQ(gradient.GetColors().size(), 4); // 4: both top and bottom have gradient
+
+    /**
+     * @tc.steps: step4. The list at bottom
+     * @tc.expected: Fading top and both top and bottom have gradient
+     */
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    paintMethod = UpdateContentModifier();
+    EXPECT_TRUE(paintMethod->isFadingTop_);
+    EXPECT_FALSE(paintMethod->isFadingBottom_);
+    if (gradientProp->HasLastGradientType() || gradientProp->HasLinearGradient()) {
+        gradient = gradientProp->GetLinearGradientValue();
+    }
+    EXPECT_EQ(gradient.GetColors().size(), 4); // 4: both top and bottom have gradient
+}
+
+/**
  * @tc.name: InitialIndex001
  * @tc.desc: Test the initialIndex and scrollToIndex priority.
  * @tc.type: FUNC

@@ -1869,6 +1869,7 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage067, TestSi
     dragEvent->SetResult(DragRet::DRAG_SUCCESS);
     dragEvent->SetIsDragEndPending(true);
     dragEvent->SetRequestIdentify(1);
+    DragDropGlobalController::GetInstance().requestId_ = 1;
     dragDropManager->OnDragDrop(dragEvent, frameNode, pointerEvent);
     EXPECT_EQ(dragEvent->GetResult(), DragRet::DRAG_FAIL);
 }

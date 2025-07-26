@@ -45,6 +45,7 @@ public:
     MOCK_METHOD1(SetTransparentLayer, void(bool));
     MOCK_METHOD1(SetClipToBounds, void(bool));
     MOCK_METHOD1(RemoveOverlayModifier, void(const RefPtr<OverlayModifier>&));
+    MOCK_METHOD0(UpdateCustomBackground, void());
 
     void SetVisible(bool visible) override
     {

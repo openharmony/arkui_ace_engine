@@ -18,6 +18,7 @@
 
 #pragma once
 
+#include <variant>
 #include "base/log/log_wrapper.h"
 #include "core/interfaces/native/utility/base_keeper.h"
 #include "core/interfaces/native/utility/callback_helper.h"

@@ -6311,6 +6311,118 @@ HWTEST_F(SelectOverlayTestNg, AddCreateMenuExtensionMenuParams005, TestSize.Leve
     EXPECT_NE(params[0].symbol, nullptr);
 }
 
+/*
+ * @tc.name: AddCreateMenuExtensionMenuParams006
+ * @tc.desc: Test AddCreateMenuExtensionMenuParams with symbol callback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, AddCreateMenuExtensionMenuParams006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create SelectOverlayNode and prepare menu items.
+     */
+    SelectOverlayInfo selectInfo;
+    selectInfo.menuCallback.onCut = []() {};
+
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+
+    std::vector<MenuOptionsParam> menuOptionItems;
+    MenuOptionsParam menuItem1;
+    menuItem1.content = "Custom Menu Item";
+    menuItem1.id = "other";
+    menuItem1.symbolId = 10;
+    menuOptionItems.emplace_back(menuItem1);
+
+    std::vector<OptionParam> params;
+    int32_t startIndex = 0;
+
+    /**
+     * @tc.steps: step2. Mock ThemeManager and IconTheme.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+
+    auto iconTheme = AceType::MakeRefPtr<IconTheme>();
+    ASSERT_NE(iconTheme, nullptr);
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(textOverlayTheme)).WillRepeatedly(Return(iconTheme));
+
+    /**
+     * @tc.steps: step3. Call AddCreateMenuExtensionMenuParams.
+     * @tc.expected: The function correctly adds the menu item with symbol callback.
+     */
+    selectOverlayNode->AddCreateMenuExtensionMenuParams(menuOptionItems, infoPtr, startIndex, params);
+
+    /**
+     * @tc.expected: The params vector contains one item.
+     */
+    EXPECT_EQ(params.size(), 1);
+
+    /**
+     * @tc.expected: The symbol callback is correctly set.
+     */
+    EXPECT_NE(params[0].symbol, nullptr);
+}
+
+/**
+ * @tc.name: AddCreateMenuExtensionMenuParams007
+ * @tc.desc: Test AddCreateMenuExtensionMenuParams with symbol callback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayTestNg, AddCreateMenuExtensionMenuParams007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create SelectOverlayNode and prepare menu items.
+     */
+    SelectOverlayInfo selectInfo;
+    selectInfo.menuCallback.onCut = []() {};
+
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
+
+    std::vector<MenuOptionsParam> menuOptionItems;
+    MenuOptionsParam menuItem1;
+    menuItem1.content = "Custom Menu Item";
+    menuItem1.id = "other";
+    menuItem1.symbolId = 0;
+    menuOptionItems.emplace_back(menuItem1);
+
+    std::vector<OptionParam> params;
+    int32_t startIndex = 0;
+
+    /**
+     * @tc.steps: step2. Mock ThemeManager and IconTheme.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+
+    auto iconTheme = AceType::MakeRefPtr<IconTheme>();
+    ASSERT_NE(iconTheme, nullptr);
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillOnce(Return(textOverlayTheme)).WillRepeatedly(Return(iconTheme));
+
+    /**
+     * @tc.steps: step3. Call AddCreateMenuExtensionMenuParams.
+     * @tc.expected: The function correctly adds the menu item with symbol callback.
+     */
+    selectOverlayNode->AddCreateMenuExtensionMenuParams(menuOptionItems, infoPtr, startIndex, params);
+
+    /**
+     * @tc.expected: The params vector contains one item.
+     */
+    EXPECT_EQ(params.size(), 1);
+
+    /**
+     * @tc.expected: The symbol callback is correctly set.
+     */
+    EXPECT_EQ(params[0].symbol, nullptr);
+}
+
 /**
  * @tc.name: SelectOverlayLayoutAlgorithm.AdjustToInfo
  * @tc.desc: test AdjustToInfo

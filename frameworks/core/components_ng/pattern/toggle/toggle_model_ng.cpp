@@ -754,8 +754,8 @@ void ToggleModelNG::SetCheckboxDefaultColor(FrameNode* frameNode, const ToggleCo
 {
     // Set the default color for checkbox based on the type, For checkbox, only these two color types need to be
     // handled: SELECTED_COLOR, BACKGROUND_COLOR
+    CHECK_NULL_VOID(frameNode);
     if (type == ToggleColorType::SELECTED_COLOR) {
-        CHECK_NULL_VOID(frameNode);
         auto pipeline = frameNode->GetContext();
         CHECK_NULL_VOID(pipeline);
         auto theme = pipeline->GetTheme<CheckboxTheme>();
@@ -764,7 +764,7 @@ void ToggleModelNG::SetCheckboxDefaultColor(FrameNode* frameNode, const ToggleCo
         ACE_UPDATE_NODE_PAINT_PROPERTY(SwitchPaintProperty, SelectedColor, color, frameNode);
     } else if (type == ToggleColorType::BACKGROUND_COLOR) {
         Color color = Color::TRANSPARENT;
-        ToggleButtonModelNG::SetBackgroundColor(color, false);
+        ToggleButtonModelNG::SetBackgroundColor(frameNode, color, false);
     }
 }
 
@@ -802,8 +802,8 @@ void ToggleModelNG::SetButtonDefaultColor(FrameNode* frameNode, const ToggleColo
 {
     // Set the default color for button based on the type,For button, only these two color types need to be
     // handled: SELECTED_COLOR, BACKGROUND_COLOR
+    CHECK_NULL_VOID(frameNode);
     if (type == ToggleColorType::SELECTED_COLOR) {
-        CHECK_NULL_VOID(frameNode);
         auto pipeline = frameNode->GetContext();
         CHECK_NULL_VOID(pipeline);
         auto theme = pipeline->GetTheme<ToggleTheme>();
@@ -812,7 +812,7 @@ void ToggleModelNG::SetButtonDefaultColor(FrameNode* frameNode, const ToggleColo
         ACE_UPDATE_NODE_PAINT_PROPERTY(SwitchPaintProperty, SelectedColor, color, frameNode);
     } else if (type == ToggleColorType::BACKGROUND_COLOR) {
         Color color = Color::TRANSPARENT;
-        ToggleButtonModelNG::SetBackgroundColor(color, false);
+        ToggleButtonModelNG::SetBackgroundColor(frameNode, color, false);
     }
 }
 
