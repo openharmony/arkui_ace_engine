@@ -839,7 +839,11 @@ void JSSpanString::MarshallingExtSpan(const JSCallbackInfo& info, std::vector<ui
         // marshalling only support two params: spanString and callback function
         return;
     }
-    auto* spanString = JSRef<JSObject>::Cast(info[0])->Unwrap<JSSpanString>();
+    auto jsVal = info[0];
+    if (!jsVal->IsObject()) {
+        return;
+    }
+    auto* spanString = JSRef<JSObject>::Cast(jsVal)->Unwrap<JSSpanString>();
     CHECK_NULL_VOID(spanString);
     auto spanStringController = spanString->GetController();
     CHECK_NULL_VOID(spanStringController);
