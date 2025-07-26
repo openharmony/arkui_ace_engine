@@ -1,5 +1,15 @@
 # Code owners for ArkUI ace_engine
 
+[Default]
+adapter/ @arkui-default
+advanced_ui_component/ @arkui-default
+component_ext/ @arkui-default
+examples/ @arkui-default
+figures/ @arkui-default
+frameworks/ @arkui-default
+interfaces/ @arkui-default
+test/ @arkui-default
+
 [Config Files]
 .clang-format @arkui_architecture
 ace_config.gni @arkui_architecture
