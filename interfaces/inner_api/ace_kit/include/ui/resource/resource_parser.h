@@ -20,13 +20,13 @@
 #include <string>
 
 #include "ui/properties/color.h"
-#include "ui/base/geometry/dimension.h"
+#include "ui/base/geometry/calc_dimension.h"
 #include "ui/resource/resource_info.h"
 
 namespace OHOS::Ace::Kit {
 class ACE_FORCE_EXPORT ResourceParser {
 public:
-    static bool GetDimension(const ResourceInfo& resourceInfo, Ace::Dimension& dimension);
+    static bool GetDimension(const ResourceInfo& resourceInfo, Ace::CalcDimension& dimension);
     static bool GetColor(const ResourceInfo& resourceInfo, Ace::Color& color);
     static bool GetString(const ResourceInfo& resourceInfo, std::string& str);
     static bool GetMediaPath(const ResourceInfo& resourceInfo, std::string& mediaPath);
