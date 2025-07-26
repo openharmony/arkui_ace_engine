@@ -1104,6 +1104,7 @@ void SheetPresentationPattern::SheetTransitionForOverlay(bool isTransitionIn, bo
         option,
         sheetObject_->GetAnimationPropertyCallForOverlay(isTransitionIn), // Moving effect end point
         option.GetOnFinishEvent());
+    SetBottomStyleHotAreaInSubwindow();
 }
 
 void SheetPresentationPattern::SheetInteractiveDismiss(BindSheetDismissReason dismissReason, float dragVelocity)
