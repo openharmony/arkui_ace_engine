@@ -203,7 +203,7 @@ export class ArkWebTransfer {
 
     public static transferConsoleMessageToStatic(value: Any): Object {
         registerAllNativeModuleLibraryName()
-        let result: ConsoleMessage = new ConsoleMessage()
+        let result: ConsoleMessage = new ConsoleMessage("transferMessage", "transferId", 0, MessageLevel.DEBUG)
         if (!ArkUIAniModule._TransferConsoleMessageToStatic(result.peer!.ptr, ESValue.wrap(value))) {
             throw new Error('transfer failed')
         }

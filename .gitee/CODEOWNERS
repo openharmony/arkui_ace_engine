@@ -3137,7 +3137,7 @@ frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/han
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/RepeatImpl.ts @arkuistatemgmt
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ReusablePool.ts @arkuistatemgmt
 frameworks/bridge/arkts_frontend/koala_projects/incremental/ @arkuistatemgmt
-
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/component/web.ts @arkwebinarkuireview
 
 [Test source]
 test/mock/core/event/ @arkuievent
