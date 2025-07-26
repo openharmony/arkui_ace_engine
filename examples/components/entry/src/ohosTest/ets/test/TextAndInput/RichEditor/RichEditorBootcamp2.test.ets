@@ -29,7 +29,7 @@ import {
 import { richEditorBeforeAll } from './RichEditor.test';
 
 /*获取AbilityDelegator实例,管理Ability的生命周期和事件*/
-const delegator: abilityDelegatorRegistry.AbilityDelegator = abilityDelegatorRegistry.getAbilityDelegator()
+const delegator: abilityDelegatorRegistry.AbilityDelegator = abilityDelegatorRegistry.getAbilityDelegator();
 
 /*初始化与UI元素交互的驱动对象*/
 const driver = Driver.create();
