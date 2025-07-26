@@ -1131,4 +1131,73 @@ HWTEST_F(AppBarTestNg, BuildAppbar001, TestSize.Level1)
     AppBarView::BuildAppbar(pipeline);
     EXPECT_EQ(atom, appBar->atomicService_.Upgrade());
 }
+
+/**
+ * @tc.name: RectChangeListener001
+ * @tc.desc: Test RectChangeListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppBarTestNg, RectChangeListener001, TestSize.Level1)
+{
+    auto stage = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(stage, nullptr);
+    auto appBar = AceType::MakeRefPtr<AppBarView>();
+    ASSERT_NE(appBar, nullptr);
+    auto atom = appBar->Create(stage);
+    ASSERT_NE(atom, nullptr);
+    auto pattern = atom->GetPattern<AtomicServicePattern>();
+    ASSERT_NE(pattern, nullptr);
+    bool isExecute = false;
+    auto callback = [&isExecute](const RectF& rect) mutable { isExecute = true; };
+    pattern->AddRectChangeListener(callback);
+    pattern->NotifyRectChange(RectF(0.0f, 0.0f, 100.0f, 100.0f));
+    EXPECT_EQ(isExecute, true);
+}
+
+/**
+ * @tc.name: RectChangeListener002
+ * @tc.desc: Test RectChangeListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppBarTestNg, RectChangeListener002, TestSize.Level1)
+{
+    auto stage = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(stage, nullptr);
+    auto appBar = AceType::MakeRefPtr<AppBarView>();
+    ASSERT_NE(appBar, nullptr);
+    auto atom = appBar->Create(stage);
+    ASSERT_NE(atom, nullptr);
+    auto pattern = atom->GetPattern<AtomicServicePattern>();
+    ASSERT_NE(pattern, nullptr);
+    bool isExecute = false;
+    auto callback = [&isExecute](const RectF& rect) mutable { isExecute = true; };
+    auto listenerId =  pattern->AddRectChangeListener(callback);
+    auto size = static_cast<size_t>(pattern->rectChangeListeners_.size());
+    EXPECT_EQ(size, 1);
+    pattern->RemoveRectChangeListener(listenerId);
+    auto sizeRectChange = static_cast<size_t>(pattern->rectChangeListeners_.size());
+    EXPECT_EQ(sizeRectChange, 0);
+}
+
+/**
+ * @tc.name: RectChangeListener003
+ * @tc.desc: Test RectChangeListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppBarTestNg, RectChangeListener003, TestSize.Level1)
+{
+    auto stage = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(stage, nullptr);
+    auto appBar = AceType::MakeRefPtr<AppBarView>();
+    ASSERT_NE(appBar, nullptr);
+    auto atom = appBar->Create(stage);
+    ASSERT_NE(atom, nullptr);
+    auto pattern = atom->GetPattern<AtomicServicePattern>();
+    ASSERT_NE(pattern, nullptr);
+    bool isExecute = false;
+    auto callback = [&isExecute](const RectF& rect) mutable { isExecute = true; };
+    pattern->AddRectChangeListener(callback);
+    pattern->CallRectChange();
+    EXPECT_EQ(pattern->appBarRect_, std::nullopt);
+}
 } // namespace OHOS::Ace::NG
