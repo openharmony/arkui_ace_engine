@@ -477,6 +477,7 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
             offset *= friction;
         }
         auto userOffset = FireOnWillScroll(-offset);
+        userOffset = FireObserverOnWillScroll(userOffset);
         info_.currentOffset_ -= userOffset;
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 
@@ -493,6 +494,7 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
             offset *= friction;
         }
         auto userOffset = FireOnWillScroll(-offset);
+        userOffset = FireObserverOnWillScroll(userOffset);
         info_.currentOffset_ -= userOffset;
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 
@@ -509,6 +511,7 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
 void GridPattern::UpdateOffsetHelper(float offset)
 {
     auto userOffset = FireOnWillScroll(-offset);
+    userOffset = FireObserverOnWillScroll(userOffset);
     info_.currentOffset_ -= userOffset;
     auto host = GetHost();
     if (host) {

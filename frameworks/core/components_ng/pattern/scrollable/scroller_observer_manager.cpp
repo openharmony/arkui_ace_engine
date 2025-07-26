@@ -100,4 +100,14 @@ void ScrollerObserverManager::HandleOnWillScrollEventEx(
         }
     }
 }
+
+void ScrollerObserverManager::HandleTwoDimensionOnWillScrollEvent(ScrollFrameResult& xResult,
+    ScrollFrameResult& yResult, ScrollState state, ScrollSource source)
+{
+    for (const auto& pair : observers_) {
+        if (pair.second.twoDimensionOnWillScrollEvent) {
+            pair.second.twoDimensionOnWillScrollEvent(xResult, yResult, state, source);
+        }
+    }
+}
 } // namespace OHOS::Ace::NG

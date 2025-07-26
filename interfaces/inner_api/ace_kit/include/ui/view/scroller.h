@@ -33,6 +33,8 @@ public:
     using OnDidScrollEvent = std::function<void(Dimension, ScrollSource, bool, bool)>;
     using OnScrollerAreaChangeEvent = std::function<void(Dimension, ScrollSource, bool, bool)>;
     using OnWillScrollEventEx = std::function<void(ScrollFrameResult&, ScrollState, ScrollSource)>;
+    using TwoDimensionOnWillScrollEvent = std::function<void(ScrollFrameResult&,
+        ScrollFrameResult&, ScrollState, ScrollSource)>;
     struct Observer {
         OnReachEvent onReachStartEvent;
         OnReachEvent onReachEndEvent;
@@ -41,6 +43,7 @@ public:
         OnDidScrollEvent onDidScrollEvent;
         OnScrollerAreaChangeEvent onScrollerAreaChangeEvent;
         OnWillScrollEventEx onWillScrollEventEx;
+        TwoDimensionOnWillScrollEvent twoDimensionOnWillScrollEvent;
     };
     Scroller() = default;
     virtual ~Scroller() = default;
