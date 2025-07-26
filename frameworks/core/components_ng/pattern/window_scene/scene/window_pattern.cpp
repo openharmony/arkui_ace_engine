@@ -242,7 +242,7 @@ void WindowPattern::OnAttachToFrameNode()
     AddChild(host, appWindow_, appWindowName_, 0);
     auto surfaceNode = session_->GetSurfaceNode();
     CHECK_NULL_VOID(surfaceNode);
-    if (IsAddSnapshotWindow(surfaceNode)) {
+    if (IsAddSnapshotWindow(surfaceNode, host)) {
         return;
     }
     if (!surfaceNode->IsBufferAvailable()) {
