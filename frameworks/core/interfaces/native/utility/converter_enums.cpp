@@ -2385,4 +2385,15 @@ void AssignCast(std::optional<ParticleDisturbanceShapeType>& dst, const Ark_Dist
         }
     }
 }
+
+template<>
+void AssignCast(std::optional<DatePickerMode>& dst, const Ark_DatePickerMode& src)
+{
+    switch (src) {
+        case ARK_DATE_PICKER_MODE_DATE: dst = DatePickerMode::DATE; break;
+        case ARK_DATE_PICKER_MODE_YEAR_AND_MONTH: dst = DatePickerMode::YEAR_AND_MONTH; break;
+        case ARK_DATE_PICKER_MODE_MONTH_AND_DAY: dst = DatePickerMode::MONTH_AND_DAY; break;
+        default: LOGE("Unexpected enum value in Ark_DatePickerMode: %{public}d", src);
+    }
+}
 } // namespace OHOS::Ace::NG::Converter
