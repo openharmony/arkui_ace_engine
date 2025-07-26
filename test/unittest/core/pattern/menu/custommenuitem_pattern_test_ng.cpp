@@ -33,6 +33,7 @@
 #include "core/components/select/select_theme.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item/custom_menu_item_layout_algorithm.h"
@@ -488,6 +489,8 @@ HWTEST_F(CustomMenuItemPatternTestNg, CustomMenuItemLayoutAlgorithm002, TestSize
     auto algorithm = AceType::MakeRefPtr<CustomMenuItemLayoutAlgorithm>();
     ASSERT_TRUE(algorithm);
     algorithm->Measure(AceType::RawPtr(layoutWrapper));
+    BoxLayoutAlgorithm boxLayoutAlgorithm;
+    boxLayoutAlgorithm.Measure(Referenced::RawPtr(childLayoutWrapper));
     EXPECT_FLOAT_EQ(childLayoutWrapper->GetGeometryNode()->GetFrameSize().Width(), 200.f);
     EXPECT_FLOAT_EQ(childLayoutWrapper->GetGeometryNode()->GetFrameSize().Height(), 100.f);
 }
