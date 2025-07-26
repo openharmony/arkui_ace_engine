@@ -26,7 +26,7 @@ export function getSystemDensity(): number {
     return ArkUIAniModule._GetSystemDensity()
 }
 export function convertDimensionStrToNumber(value: string): number {
-    const regex : RegExp = new RegExp('/^(-?\d*\.?\d+)(%|px|vp)?$/', 'i')
+    const regex : RegExp = new RegExp('/^(-?\d*\.?\d+)(px|vp)?$/', 'i')
     const match: RegExpMatchArray | null = value.match(regex)
     if (!match) {
         return 0
@@ -61,9 +61,7 @@ export function hookCreateImageData(peerPtr: CanvasRenderer, sw: number, sh: num
     const length: int32 = width_cast * height_cast * PIXEL_SIZE
     const arrayBuffer: ArrayBuffer = new ArrayBuffer(length)
     const uint8View = new Uint8Array(arrayBuffer)
-    for (let i = 0; i < length; i++) {
-        uint8View[i] = 0xffffffff
-    }
+    uint8View.fill(0xffffffff)
     const data: Uint8ClampedArray = new Uint8ClampedArray(arrayBuffer)
     const resObj: ImageData = new ImageData(width_cast, height_cast, data, LengthMetricsUnit.PX)
     return resObj
@@ -74,9 +72,7 @@ export function hookCreateImageData(peerPtr: CanvasRenderer, imagedata: ImageDat
     const length: int32 = width_cast * height_cast * PIXEL_SIZE
     const arrayBuffer: ArrayBuffer = new ArrayBuffer(length)
     const uint8View = new Uint8Array(arrayBuffer)
-    for (let i = 0; i < length; i++) {
-        uint8View[i] = 0xffffffff
-    }
+    uint8View.fill(0xffffffff)
     const data: Uint8ClampedArray = new Uint8ClampedArray(arrayBuffer)
     const resObj: ImageData = new ImageData(width_cast, height_cast, data, LengthMetricsUnit.PX)
     return resObj
@@ -189,6 +185,9 @@ export function hookDrawImage(peerPtr: CanvasRenderer, image: ImageBitmap | Pixe
 }
 export function hookGetContext(peerPtr: OffscreenCanvas, contextType: string, options?: RenderingContextSettings): OffscreenCanvasRenderingContext2D {
     return peerPtr.getContext2d(options)
+}
+export function hookGetCanvas(peerPtr: DrawingRenderingContext): drawing.Canvas{
+    return ArkUIAniModule._DrawingRenderingContext_GetCanvas(peerPtr.peer!.ptr)
 }
 export class ImageBitmapInternal {
     public static fromPtr(ptr: KPointer): ImageBitmap {

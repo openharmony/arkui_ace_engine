@@ -36,6 +36,7 @@ import { VoidCallback } from "./units"
 import { ImageAIOptions, ImageAnalyzerConfig } from "./imageCommon"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { FrameNode, FrameNodeInternal } from "../FrameNode"
+import { drawing } from "@ohos/graphics/drawing"
 
 export class CanvasGradientInternal {
     public static fromPtr(ptr: KPointer): CanvasGradient {
@@ -428,7 +429,7 @@ export class DrawingRenderingContext implements MaterializedBase {
     get size(): Size {
         throw new Error("Not implemented")
     }
-    get canvas(): DrawingCanvas {
+    get canvas(): drawing.Canvas {
         return this.getCanvas()
     }
     static ctor_drawingrenderingcontext(unit?: LengthMetricsUnit): KPointer {
@@ -458,8 +459,8 @@ export class DrawingRenderingContext implements MaterializedBase {
     private getSize(): Size {
         return this.getSize_serialize()
     }
-    private getCanvas(): DrawingCanvas {
-        return this.getCanvas_serialize()
+    private getCanvas(): drawing.Canvas {
+        return hookGetCanvas(this)
     }
     private invalidate_serialize(): void {
         ArkUIGeneratedNativeModule._DrawingRenderingContext_invalidate(this.peer!.ptr)
