@@ -69,6 +69,21 @@ export class InteropStorageBase extends StorageBase {
     protected clearDynamicValue_: () => boolean = () => {
         throw new Error('not implement');
     };
+    protected checkClearDynamicValue_: () => boolean = () => {
+        throw new Error('not implement');
+    };
+    protected getStaticSize(): number {
+        return super.size();
+    }
+    protected removeStaticValue(key: string): boolean {
+        return super.delete(key);
+    }
+    protected staticClear(): boolean {
+        return super.clear();
+    }
+    protected checkStaticClear(): boolean {
+        return super.checkClear();
+    }
 
     public constructor() {
         super();
@@ -89,20 +104,25 @@ export class InteropStorageBase extends StorageBase {
         const removeKeyFunc = (key: string): void => {
             this.interopStorage_.delete(key);
         };
-        const clearKeyFunc = (): void => {
+        const clearKeyFunc = (): boolean => {
+            if(!this.staticClear()){
+                return false;
+            }
             this.interopStorage_.clear();
-            // need to clear ArkTS1.2 too
-            super.clear();
+            return true;
         };
+        const checkClearKeyFunc = (): boolean => {
+            return this.checkStaticClear();
+        }
         // used by ArkTS1.1 to interop with static storage map.
         const getValue = (key: string): Any => {
             return this.getStoragePropertyForDynamic(key);
         };
-        const removeValue = (key: string): void => {
-            super.delete(key);
+        const removeValue = (key: string): boolean => {
+            return this.removeStaticValue(key);
         };
         const getSize = (): number => {
-            return super.size();
+            return this.getStaticSize();
         };
         const getKeys = (): Set<String> => {
             const keys: Set<String> = this.keySet;
@@ -118,6 +138,9 @@ export class InteropStorageBase extends StorageBase {
         const setClearValueFunc = (event: () => boolean): void => {
             this.clearDynamicValue_ = event;
         };
+        const setCheckClearValueFunc = (event: () => boolean): void => {
+            this.checkClearDynamicValue_ = event;
+        }
         let proxyStorage = bindFunc.invoke(
             ESValue.wrap(getValue),
             ESValue.wrap(removeValue),
@@ -126,9 +149,11 @@ export class InteropStorageBase extends StorageBase {
             ESValue.wrap(addKeyFunc),
             ESValue.wrap(removeKeyFunc),
             ESValue.wrap(clearKeyFunc),
+            ESValue.wrap(checkClearKeyFunc),
             ESValue.wrap(setGetValueFunc),
             ESValue.wrap(setRemoveValueFunc),
-            ESValue.wrap(setClearValueFunc)
+            ESValue.wrap(setClearValueFunc),
+            ESValue.wrap(setCheckClearValueFunc)
         );
         this.setProxy(proxyStorage);
     }
@@ -426,9 +451,13 @@ export class InteropStorageBase extends StorageBase {
      * @since 20
      */
     clear(): boolean {
-        let result1 = super.clear();
-        let result2 = this.clearDynamicValue_();
-        return result1 && result2;
+        if(!(this.checkStaticClear() && this.checkClearDynamicValue_())) {
+            return false;
+        }
+        this.staticClear();
+        this.interopStorage_.clear();
+        this.clearDynamicValue_();
+        return true;
     }
 
     /**
@@ -505,40 +534,48 @@ export class InteropAppStorageBase extends InteropStorageBase {
             return;
         }
         // these function will call by ArkTS1.1 to speed up dynamic key search for ArkTS1.2.
-        const addKeyFunc = (key: string) => {
+        const addKeyFunc = (key: string): void => {
             this.interopStorage_.set(key, new InteropStorageValue());
         };
-        const removeKeyFunc = (key: string) => {
+        const removeKeyFunc = (key: string): void => {
             this.interopStorage_.delete(key);
         };
-        const clearKeyFunc = () => {
+        const clearKeyFunc = (): boolean => {
+            if(!this.staticClear()){
+                return false;
+            }
             this.interopStorage_.clear();
-            // need to clear ArkTS1.2 too
-            super.clear();
+            return true;
         };
+        const checkClearKeyFunc = (): boolean => {
+            return this.checkStaticClear();
+        }
         // used by ArkTS1.1 to interop with static storage map.
-        const getValue = (key: string) => {
+        const getValue = (key: string): Any => {
             return this.getStoragePropertyForDynamic(key);
         };
-        const removeValue = (key: string) => {
-            super.delete(key);
+        const removeValue = (key: string): boolean => {
+            return this.removeStaticValue(key);
         };
-        const getSize = () => {
-            return super.size();
+        const getSize = (): number => {
+            return this.getStaticSize();
         };
-        const getKeys = () => {
+        const getKeys = (): Set<String> => {
             const keys: Set<String> = this.keySet;
             return keys;
         };
         // used by ArkTS1.2 to interop with dynamic storage map.
-        const setGetValueFunc = (event: (value: string) => ESValue) => {
+        const setGetValueFunc = (event: (value: string) => ESValue): void => {
             this.getDynamicValue_ = event;
         };
-        const setRemoveValueFunc = (event: (value: string) => boolean) => {
+        const setRemoveValueFunc = (event: (value: string) => boolean): void => {
             this.removeDynamicValue_ = event;
         };
-        const setClearValueFunc = (event: () => boolean) => {
+        const setClearValueFunc = (event: () => boolean): void => {
             this.clearDynamicValue_ = event;
+        };
+        const setCheckClearValueFunc = (event: () => boolean): void => {
+            this.checkClearDynamicValue_ = event;
         };
         bindFunc.invoke(
             ESValue.wrap(getValue),
@@ -548,9 +585,11 @@ export class InteropAppStorageBase extends InteropStorageBase {
             ESValue.wrap(addKeyFunc),
             ESValue.wrap(removeKeyFunc),
             ESValue.wrap(clearKeyFunc),
+            ESValue.wrap(checkClearKeyFunc),
             ESValue.wrap(setGetValueFunc),
             ESValue.wrap(setRemoveValueFunc),
-            ESValue.wrap(setClearValueFunc)
+            ESValue.wrap(setClearValueFunc),
+            ESValue.wrap(setCheckClearValueFunc)
         );
     }
 }
