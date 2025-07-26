@@ -19,6 +19,7 @@
 #include "arkcompiler/runtime_core/static_core/plugins/ets/runtime/napi/ets_napi.h"
 #include "interfaces/inner_api/ace/constants.h"
 
+#include "base/subwindow/subwindow_manager.h"
 #include "bridge/arkts_frontend/arkts_ani_utils.h"
 #include "bridge/arkts_frontend/ani_context_module.h"
 #include "bridge/arkts_frontend/entry/arkts_entry_loader.h"
@@ -332,7 +333,7 @@ void* ArktsFrontend::GetShared(int32_t id)
 {
     int32_t currentInstance = id;
     if (currentInstance >= MIN_SUBCONTAINER_ID && currentInstance < MIN_PLUGIN_SUBCONTAINER_ID) {
-        // currentInstance = SubwindowManager::GetInstance()->GetParentContainerId(currentInstance);
+        currentInstance = SubwindowManager::GetInstance()->GetParentContainerId(currentInstance);
     }
     auto it = storageMap_.find(currentInstance);
     if (it == storageMap_.end()) {

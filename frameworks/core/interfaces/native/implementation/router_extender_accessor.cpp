@@ -46,11 +46,8 @@ Ark_NativePointer PushImpl(const Ark_String* url)
     if (!pageRouterManager) {
         return nullptr;
     }
-// #if defined(ACE_STATIC)
     auto pageNode = pageRouterManager->PushExtender(routerPageInfo);
     return pageNode.GetRawPtr();
-// #endif
-    return nullptr;
 }
 
 Ark_NativePointer ReplaceImpl(const Ark_String* url, const Opt_Callback_Void* finishCallback)
@@ -79,11 +76,8 @@ Ark_NativePointer ReplaceImpl(const Ark_String* url, const Opt_Callback_Void* fi
             finish.Invoke();
         };
     }
-// #if defined(ACE_STATIC)
     auto pageNode = pageRouterManager->ReplaceExtender(routerPageInfo, std::move(callback));
     return pageNode.GetRawPtr();
-// #endif
-    return nullptr;
 }
 
 void MoveCommonUnderPageNode(Ark_NativePointer commonNode, Ark_NativePointer pageNode)
@@ -142,11 +136,8 @@ Ark_NativePointer RunPageImpl(const Ark_String* url)
     if (!pageRouterManager) {
         return nullptr;
     }
-// #if defined(ACE_STATIC)
     auto pageNode = pageRouterManager->RunPageExtender(routerPageInfo);
     return pageNode.GetRawPtr();
-// #endif
-    return nullptr;
 }
 
 void ClearImpl()
