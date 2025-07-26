@@ -50,6 +50,7 @@ struct IndexPage {
     new TextList(16, '点击放大item', 'pages/List/DragAndDropSorting/ListItemGroup'),
     new TextList(17, 'OnWillStopDragging', 'pages/List/ListOnWillStopDragging/OnWillStopDragging'),
     new TextList(18, 'Table', 'pages/List/Table/TableDemo'),
+    new TextList(19, 'Graduator', 'pages/List/Graduator/Graduator'),
   ]
   @State fontSize: Resource | undefined = undefined
   build() {
