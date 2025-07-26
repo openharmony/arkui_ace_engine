@@ -18,21 +18,23 @@ import { AttributeUpdaterFlag, CommonMethodModifier } from './CommonMethodModifi
 import { ShapePoint } from 'arkui/component/line';
 import { ArkPolygonPeer, PolygonAttribute } from 'arkui/component/polygon';
 import { CommonShapeMethodModifier } from './CommonShapeMethodModifier';
+import { PeerNode } from './PeerNode';
 
 export class PolygonModifier extends CommonShapeMethodModifier implements PolygonAttribute, AttributeModifier<PolygonAttribute> {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
-    applyNormalAttribute(instance: CommonShapeMethod): void { }
-    applyPressedAttribute(instance: CommonShapeMethod): void { }
-    applyFocusedAttribute(instance: CommonShapeMethod): void { }
-    applyDisabledAttribute(instance: CommonShapeMethod): void { }
-    applySelectedAttribute(instance: CommonShapeMethod): void { }
+    applyNormalAttribute(instance: PolygonAttribute): void { }
+    applyPressedAttribute(instance: PolygonAttribute): void { }
+    applyFocusedAttribute(instance: PolygonAttribute): void { }
+    applyDisabledAttribute(instance: PolygonAttribute): void { }
+    applySelectedAttribute(instance: PolygonAttribute): void { }
     _points_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _points_0_0value?: Array<ShapePoint> | undefined
-    applyModifierPatch(peer: ArkPolygonPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(peerNode: PeerNode): void {
+        super.applyModifierPatch(peerNode)
+        const peer = peerNode as ArkPolygonPeer
         if (this._points_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._points_0_flag) {
@@ -52,8 +54,12 @@ export class PolygonModifier extends CommonShapeMethodModifier implements Polygo
             }
         }
     }
-    mergeModifier(modifier: PolygonModifier): void {
-        super.mergeModifier(modifier)
+    mergeModifier(value: CommonMethodModifier): void {
+        super.mergeModifier(value)
+        if (!(value instanceof PolygonModifier)) {
+            return;
+        }
+        const modifier = value as PolygonModifier
         if (modifier._points_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._points_0_flag) {

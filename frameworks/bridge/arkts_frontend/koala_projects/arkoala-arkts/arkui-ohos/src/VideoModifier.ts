@@ -72,8 +72,9 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
     _surfaceBackgroundColor_0_0value?: ColorMetrics | undefined
     _enableShortcutKey_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _enableShortcutKey_0_0value?: boolean | undefined
-    applyModifierPatch(peer: ArkVideoPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(peerNode: PeerNode): void {
+        super.applyModifierPatch(peerNode)
+        const peer = peerNode as ArkVideoPeer
         if (this._muted_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._muted_0_flag) {
@@ -417,8 +418,12 @@ export class VideoModifier extends CommonMethodModifier implements VideoAttribut
             }
         }
     }
-    mergeModifier(modifier: VideoModifier): void {
-        super.mergeModifier(modifier)
+    mergeModifier(value: CommonMethodModifier): void {
+        super.mergeModifier(value)
+        if (!(value instanceof VideoModifier)) {
+            return;
+        }
+        const modifier = value as VideoModifier
         if (modifier._muted_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._muted_0_flag) {

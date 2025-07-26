@@ -18,21 +18,23 @@ import { AttributeUpdaterFlag, CommonMethodModifier } from './CommonMethodModifi
 import { ShapePoint } from 'arkui/component/line';
 import { ArkPolylinePeer, PolylineAttribute } from 'arkui/component/polyline';
 import { CommonShapeMethodModifier } from './CommonShapeMethodModifier';
+import { PeerNode } from './PeerNode';
 
 export class PolylineModifier extends CommonShapeMethodModifier implements PolylineAttribute, AttributeModifier<PolylineAttribute> {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
-    applyNormalAttribute(instance: CommonShapeMethod): void { }
-    applyPressedAttribute(instance: CommonShapeMethod): void { }
-    applyFocusedAttribute(instance: CommonShapeMethod): void { }
-    applyDisabledAttribute(instance: CommonShapeMethod): void { }
-    applySelectedAttribute(instance: CommonShapeMethod): void { }
+    applyNormalAttribute(instance: PolylineAttribute): void { }
+    applyPressedAttribute(instance: PolylineAttribute): void { }
+    applyFocusedAttribute(instance: PolylineAttribute): void { }
+    applyDisabledAttribute(instance: PolylineAttribute): void { }
+    applySelectedAttribute(instance: PolylineAttribute): void { }
     _points_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _points_0_0value?: Array<ShapePoint> | undefined
-    applyModifierPatch(peer: ArkPolylinePeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(peerNode: PeerNode): void {
+        super.applyModifierPatch(peerNode)
+        const peer = peerNode as ArkPolylinePeer
         if (this._points_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._points_0_flag) {
@@ -52,8 +54,12 @@ export class PolylineModifier extends CommonShapeMethodModifier implements Polyl
             }
         }
     }
-    mergeModifier(modifier: PolylineModifier): void {
-        super.mergeModifier(modifier)
+    mergeModifier(value: CommonMethodModifier): void {
+        super.mergeModifier(value)
+        if (!(value instanceof PolylineModifier)) {
+            return;
+        }
+        const modifier = value as PolylineModifier
         if (modifier._points_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._points_0_flag) {

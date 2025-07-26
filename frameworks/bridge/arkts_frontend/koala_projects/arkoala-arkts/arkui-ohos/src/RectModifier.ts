@@ -18,25 +18,27 @@ import { AttributeUpdaterFlag, CommonMethodModifier } from './CommonMethodModifi
 import { RectAttribute, ArkRectPeer, RadiusItem } from 'arkui/component/rect';
 import { Length } from 'arkui/component/units';
 import { CommonShapeMethodModifier } from './CommonShapeMethodModifier';
+import { PeerNode } from './PeerNode';
 
 export class RectModifier extends CommonShapeMethodModifier implements RectAttribute, AttributeModifier<RectAttribute> {
     _instanceId: number = -1;
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
-    applyNormalAttribute(instance: CommonShapeMethod): void { }
-    applyPressedAttribute(instance: CommonShapeMethod): void { }
-    applyFocusedAttribute(instance: CommonShapeMethod): void { }
-    applyDisabledAttribute(instance: CommonShapeMethod): void { }
-    applySelectedAttribute(instance: CommonShapeMethod): void { }
+    applyNormalAttribute(instance: RectAttribute): void { }
+    applyPressedAttribute(instance: RectAttribute): void { }
+    applyFocusedAttribute(instance: RectAttribute): void { }
+    applyDisabledAttribute(instance: RectAttribute): void { }
+    applySelectedAttribute(instance: RectAttribute): void { }
     _radiusWidth_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _radiusWidth_0_0value?: number | string | undefined
     _radiusHeight_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _radiusHeight_0_0value?: number | string | undefined
     _radius_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _radius_0_0value?: Length | Array<RadiusItem> | undefined
-    applyModifierPatch(peer: ArkRectPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(peerNode: PeerNode): void {
+        super.applyModifierPatch(peerNode)
+        const peer = peerNode as ArkRectPeer
         if (this._radiusWidth_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._radiusWidth_0_flag) {
@@ -92,8 +94,12 @@ export class RectModifier extends CommonShapeMethodModifier implements RectAttri
             }
         }
     }
-    mergeModifier(modifier: RectModifier): void {
-        super.mergeModifier(modifier)
+    mergeModifier(value: CommonMethodModifier): void {
+        super.mergeModifier(value)
+        if (!(value instanceof RectModifier)) {
+            return;
+        }
+        const modifier = value as RectModifier
         if (modifier._radiusWidth_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._radiusWidth_0_flag) {

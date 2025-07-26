@@ -44,6 +44,16 @@ function hookPolygonAttributeModifier(component: ArkPolygonComponent, modifier: 
         }
     }
     let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+        if (params.length < 1) {
+            return;
+        }
+        let options_casted: PolygonOptions | undefined = undefined
+        const param1_type = runtimeType(params[0])
+        if (RuntimeType.OBJECT == param1_type) {
+            options_casted = params[0] as PolygonOptions
+        }
+        let peer: ArkPolygonPeer = component.getPeer() as Object as ArkPolygonPeer;
+        peer?.setPolygonOptionsAttribute(options_casted)
     };
     let updaterReceiver = (): ArkPolygonComponent => {
         let componentNew: ArkPolygonComponent = new ArkPolygonComponent();

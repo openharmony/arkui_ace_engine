@@ -32,8 +32,10 @@ function convertPlaybackSpeed(value: PlaybackSpeed): number {
     return PlayBackSpeedTable[index]
 }
 
-function hookSetVideoOptions(component: ArkVideoComponent, value: VideoOptions): void {
-    const peer = component.getPeer();
+function hookSetVideoOptionsWithPeer(peer: ArkVideoPeer, value: VideoOptions): void {
+    if (peer === undefined) {
+        return;
+    }
     let value_currentProgressRate_type : int32 = RuntimeType.UNDEFINED
     const value_currentProgressRate  = value.currentProgressRate
     value_currentProgressRate_type = runtimeType(value_currentProgressRate)
@@ -57,7 +59,12 @@ function hookSetVideoOptions(component: ArkVideoComponent, value: VideoOptions):
             return;
         }
     }
-    peer?.setVideoOptionsAttribute(value);
+    peer.setVideoOptionsAttribute(value);
+}
+
+function hookSetVideoOptions(component: ArkVideoComponent, value: VideoOptions): void {
+    const peer = component.getPeer();
+    hookSetVideoOptionsWithPeer(peer, value);
 }
 
 export function hookVideoAttributeModifier(component: ArkVideoComponent, modifier: AttributeModifier<VideoAttribute> | AttributeModifier<CommonMethod> | undefined): void {
@@ -83,6 +90,15 @@ export function hookVideoAttributeModifier(component: ArkVideoComponent, modifie
         }
     }
     let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+        if (params.length < 1) {
+            return;
+        }
+        let peer: ArkVideoPeer = component.getPeer() as Object as ArkVideoPeer;
+        const param1_type = runtimeType(params[0])
+        if ((RuntimeType.UNDEFINED) !== param1_type) {
+            const options_casted = params[0] as VideoOptions;
+            hookSetVideoOptionsWithPeer(peer, options_casted);
+        }
     };
     let updaterReceiver = (): ArkVideoComponent => {
         let componentNew: ArkVideoComponent = new ArkVideoComponent();
