@@ -57,8 +57,9 @@ bool ParseAniDimensionVp(ani_env* env, ani_object obj, CalcDimension& result)
     // 'vp' -> the value varies with pixel density of device.
     return ParseAniDimension(env, obj, result, DimensionUnit::VP);
 }
-ani_object SetConstraintNG(ani_env* env, ani_object constraint_obj, double minWidth, double minHeight, double maxWidth, double maxHeight)
+ani_object SetConstraintNG(ani_env* env, double minWidth, double minHeight, double maxWidth, double maxHeight)
 {
+    ani_object constraint_obj;
     ani_class cls;
     static const char *className = "Larkui/ani/arkts/ArkUIAniCustomNodeModule/ConstraintSizeOptionsInner;";
     if (ANI_OK != env->FindClass(className, &cls)) {
@@ -106,7 +107,7 @@ ani_object GenConstraintNG(ani_env* env, const NG::LayoutConstraintF& parentCons
     double maxWidth = 0.0f;
     double maxHeight = 0.0f;
 
-    constraint_obj = SetConstraintNG(env, constraint_obj, minWidth, minHeight, maxWidth, maxHeight);
+    constraint_obj = SetConstraintNG(env, minWidth, minHeight, maxWidth, maxHeight);
     auto pipeline = PipelineBase::GetCurrentContext();
     if (!pipeline) {
         return constraint_obj;
@@ -116,7 +117,7 @@ ani_object GenConstraintNG(ani_env* env, const NG::LayoutConstraintF& parentCons
     maxWidth = maxSize.Width() / pipeline->GetDipScale();
     maxHeight = maxSize.Height() / pipeline->GetDipScale();
 
-    constraint_obj = SetConstraintNG(env, constraint_obj, minWidth, minHeight, maxWidth, maxHeight);
+    constraint_obj = SetConstraintNG(env, minWidth, minHeight, maxWidth, maxHeight);
     return constraint_obj;
 }
 
@@ -130,7 +131,7 @@ ani_object GenPlaceChildrenConstraintNG(ani_env* env, const NG::SizeF& size, Ref
 
     auto pipeline = PipelineBase::GetCurrentContext();
     if (!layoutProperty || !pipeline) {
-        constraint_obj = SetConstraintNG(env, constraint_obj, minWidth, minHeight, maxWidth, maxHeight);
+        constraint_obj = SetConstraintNG(env, minWidth, minHeight, maxWidth, maxHeight);
         return constraint_obj;
     }
     auto minSize = layoutProperty->GetLayoutConstraint().value().minSize;
@@ -158,7 +159,7 @@ ani_object GenPlaceChildrenConstraintNG(ani_env* env, const NG::SizeF& size, Ref
         leftBorder - rightBorder;
     maxHeight =size.Height() / pipeline->GetDipScale() - topPadding - bottomPadding -
         topBorder - bottomBorder;
-    constraint_obj = SetConstraintNG(env, constraint_obj, minWidth, minHeight, maxWidth, maxHeight);
+    constraint_obj = SetConstraintNG(env, minWidth, minHeight, maxWidth, maxHeight);
     return constraint_obj;
 }
 
