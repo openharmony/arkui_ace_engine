@@ -633,7 +633,7 @@ void JSMeasureLayoutParamNG::Update(ani_env* env,  NG::LayoutWrapper* layoutWrap
 ani_object ANIGetMargin(ani_env* env,  ani_object object)
 {
     auto ptr = static_cast<NG::MeasureLayoutChild*>(Unwrap(env, object));
-
+    CHECK_NULL_RETURN(ptr, nullptr);
     auto child = ptr->GetOrCreateChild();
     if (!(child && child->GetLayoutProperty())) {
         return GenEdgesGlobalized(env, {}, TextDirection::LTR);
@@ -645,6 +645,7 @@ ani_object ANIGetMargin(ani_env* env,  ani_object object)
 ani_object ANIGetPadding(ani_env* env, [[maybe_unused]] ani_object object)
 {
     auto ptr = static_cast<NG::MeasureLayoutChild*>(Unwrap(env, object));
+    CHECK_NULL_RETURN(ptr, nullptr);
     auto child = ptr->GetOrCreateChild();
     if (!(child && child->GetLayoutProperty())) {
         return GenEdgesGlobalized(env, {}, TextDirection::LTR);
@@ -656,6 +657,7 @@ ani_object ANIGetPadding(ani_env* env, [[maybe_unused]] ani_object object)
 ani_object ANIGetBorderWidth(ani_env* env, [[maybe_unused]] ani_object object)
 {
     auto ptr = static_cast<NG::MeasureLayoutChild*>(Unwrap(env, object));
+    CHECK_NULL_RETURN(ptr, nullptr);
     auto child = ptr->GetOrCreateChild();
     if (!(child && child->GetLayoutProperty())) {
         return GenBorderWidthGlobalized(env, {}, TextDirection::LTR);
@@ -668,6 +670,7 @@ ani_object ANIGetBorderWidth(ani_env* env, [[maybe_unused]] ani_object object)
 ani_object ANIMeasure(ani_env* env, ani_object aniClass, ani_object sizeObj)
 {
     auto ptr = static_cast<NG::MeasureLayoutChild*>(Unwrap(env, aniClass));
+    CHECK_NULL_RETURN(ptr, nullptr);
     auto child = ptr->GetOrCreateChild();
     if (!child) {
         return AniUtils::GetUndefined(env);
@@ -765,6 +768,7 @@ ani_object ANIMeasure(ani_env* env, ani_object aniClass, ani_object sizeObj)
 ani_object ANIPlaceChildren(ani_env* env, ani_object aniClass, ani_object positionObj)
 {
     auto ptr = static_cast<NG::MeasureLayoutChild*>(Unwrap(env, aniClass));
+    CHECK_NULL_RETURN(ptr, nullptr);
     auto child = ptr->GetChild();
     if (!child) {
         return AniUtils::GetUndefined(env);
