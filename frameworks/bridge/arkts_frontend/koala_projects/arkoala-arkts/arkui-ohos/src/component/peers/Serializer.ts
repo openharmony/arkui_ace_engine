@@ -6774,16 +6774,16 @@ export class Serializer extends SerializerBase {
     writeStarStyleOptions(value: StarStyleOptions): void {
         let valueSerializer : Serializer = this
         const value_backgroundUri  = value.backgroundUri
-        valueSerializer.writeString(value_backgroundUri)
+        valueSerializer.writeString(value_backgroundUri as string)
         const value_foregroundUri  = value.foregroundUri
-        valueSerializer.writeString(value_foregroundUri)
+        valueSerializer.writeString(value_foregroundUri as string)
         const value_secondaryUri  = value.secondaryUri
         let value_secondaryUri_type : int32 = RuntimeType.UNDEFINED
         value_secondaryUri_type = runtimeType(value_secondaryUri)
         valueSerializer.writeInt8(value_secondaryUri_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_secondaryUri_type)) {
             const value_secondaryUri_value  = value_secondaryUri!
-            valueSerializer.writeString(value_secondaryUri_value)
+            valueSerializer.writeString(value_secondaryUri_value as string)
         }
     }
     writeStateStyles(value: StateStyles): void {
