@@ -1327,6 +1327,13 @@ void AssignCast(std::optional<DateTimeType>& dst, const Ark_DateTimeOptions& src
             type.minuteType = ZeroPrefixType::HIDE;
         }
     }
+    auto secondStr = OptConvert<std::string>(src.second);
+    if (secondStr) {
+        type.secondType = ZeroPrefixType::SHOW;
+        if (secondStr == TIMEPICKER_OPTIONS_NUMERIC_VAL) {
+            type.secondType = ZeroPrefixType::HIDE;
+        }
+    }
     dst = type;
 }
 
