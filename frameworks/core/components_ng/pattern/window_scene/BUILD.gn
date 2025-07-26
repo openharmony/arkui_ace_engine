@@ -31,6 +31,7 @@ build_component_ng("window_scene") {
     "helper/window_scene_helper.cpp",
     "root/root_scene_model.cpp",
     "scene/input_scene.cpp",
+    "scene/layout_manager_dfx.cpp",
     "scene/panel_scene.cpp",
     "scene/system_window_scene.cpp",
     "scene/transform_scene.cpp",
