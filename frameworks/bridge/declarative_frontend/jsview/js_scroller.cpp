@@ -156,7 +156,7 @@ void JSScroller::ScrollTo(const JSCallbackInfo& args)
             .duration = static_cast<float>(animationValue->IsBoolean() ? DEFAULT_DURATION : duration),
             .curve = curve,
             .smooth = (animationValue->IsBoolean() && smooth) || animationValue->IsObject(),
-            .canOverScroll = canOverScroll })) {
+            .canOverScroll = canStayOverScroll })) {
         return;
     }
     auto position = direction == Axis::VERTICAL ? yOffset : xOffset;

@@ -944,7 +944,7 @@ TEST_F(FreeScrollTest, Scroller001)
 
 /**
  * @tc.name: Scroller002
- * @tc.desc: Test scroller interface
+ * @tc.desc: Test scroller ScrollToEdge and ScrollTo
  * @tc.type: FUNC
  */
 TEST_F(FreeScrollTest, Scroller002)
