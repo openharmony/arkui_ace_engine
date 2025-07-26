@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-#include <cstdint>
-
+#include "gtest/gtest.h"
 #include "list_test_ng.h"
 #include "ui/base/geometry/ng/offset_t.h"
 
+#include "core/components_ng/pattern/list/list_position_controller.h"
 #include "core/components_v2/list/list_properties.h"
 
 namespace OHOS::Ace::NG {
@@ -984,6 +984,361 @@ HWTEST_F(ListModelTestNg, GetListSpace, TestSize.Level1)
      */
     auto result = model.GetListSpace(listNode);
     EXPECT_EQ(result, 10.0);
+    CreateDone();
+}
+
+/**
+ * @tc.name: GetEdgeEffect
+ * @tc.desc: Test ListModelNG GetEdgeEffect
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, GetEdgeEffect, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ListModelNG model;
+    model.Create(false);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    auto pattern = listNode->GetPattern<ListPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    listNode->SetLayoutProperty(listLayoutProperty);
+    model.SetEdgeEffect(listNode, static_cast<int32_t>(EdgeEffect::FADE), true, EffectEdge::START);
+
+    /**
+     * @tc.steps: step3. Calling the GetEdgeEffect function
+     * @tc.expected: The result be 1
+     */
+    auto result = model.GetEdgeEffect(listNode);
+    EXPECT_EQ(result, 1);
+    CreateDone();
+}
+
+/**
+ * @tc.name: Set_GetListStackFromEnd
+ * @tc.desc: Test ListModelNG::SetListStackFromEnd and ListModelNG::GetListStackFromEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, Set_GetListStackFromEnd, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ListModelNG model;
+    model.Create(false);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    auto pattern = listNode->GetPattern<ListPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    listNode->SetLayoutProperty(listLayoutProperty);
+
+    /**
+     * @tc.steps: step2. Calling the SetListStackFromEnd function
+     * @tc.expected: Calling the GetListStackFromEnd function returns true
+     */
+    model.SetListStackFromEnd(listNode, true);
+
+    /**
+     * @tc.steps: step3. Calling the GetListStackFromEnd function
+     * @tc.expected: The result returns true
+     */
+    auto result = model.GetListStackFromEnd(listNode);
+    EXPECT_TRUE(result);
+    CreateDone();
+}
+
+/**
+ * @tc.name: GetEdgeEffectAlways
+ * @tc.desc: Test ListModelNG GetEdgeEffectAlways
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, GetEdgeEffectAlways, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ListModelNG model;
+    model.Create(false);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    auto pattern = listNode->GetPattern<ListPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    listNode->SetLayoutProperty(listLayoutProperty);
+
+    /**
+     * @tc.steps: step2. Set the EdgeEffectAlways to true
+     * @tc.expected: Calling the GetEdgeEffectAlways function returns true
+     */
+    pattern->SetEdgeEffect(EdgeEffect::FADE, true, EffectEdge::ALL);
+
+    /**
+     * @tc.steps: step3. Calling the GetEdgeEffectAlways function
+     * @tc.expected: The result returns 1
+     */
+    auto result = model.GetEdgeEffectAlways(listNode);
+    EXPECT_EQ(result, 1);
+    CreateDone();
+}
+
+/**
+ * @tc.name: SetChainAnimationOptions_TwoParameters
+ * @tc.desc: Test ListModelNG SetChainAnimationOptions
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, SetChainAnimationOptions_TwoParameters, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ListModelNG model;
+    model.Create(false);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    auto pattern = listNode->GetPattern<ListPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    listNode->SetLayoutProperty(listLayoutProperty);
+
+    /**
+     * @tc.steps: step2. Set the minSpace of chainAnimationOptions_ to 2.0_vp
+     * and set the minSpace of chainAnimationOptions_ to 4.0_vp
+     */
+    ChainAnimationOptions options;
+    options.minSpace = 2.0_vp;
+    options.maxSpace = 4.0_vp;
+
+    /**
+     * @tc.steps: step3. Calling the SetChainAnimationOptions function
+     * @tc.expected: The minSpace of chainAnimationOptions_ returns 2.0vp
+     */
+    model.SetChainAnimationOptions(listNode, options);
+    EXPECT_EQ(pattern->chainAnimationOptions_.value().minSpace, 2.0_vp);
+    CreateDone();
+}
+
+/**
+ * @tc.name: GetDisplayMode
+ * @tc.desc: Test ListModelNG GetDisplayMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, GetDisplayMode, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ListModelNG model;
+    model.Create(false);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    auto pattern = listNode->GetPattern<ListPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    listNode->SetLayoutProperty(listLayoutProperty);
+
+    /**
+     * @tc.steps: step2. Calling the GetDisplayMode function
+     * @tc.expected: The result returns OFF
+     */
+    auto result = model.GetDisplayMode();
+    EXPECT_EQ(result, DisplayMode::OFF);
+    CreateDone();
+}
+
+/**
+ * @tc.name: SetOnScroll_TwoParameters
+ * @tc.desc: Test ListModelNG SetOnScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, SetOnScroll_TwoParameters, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ListModelNG model;
+    model.Create(false);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    auto pattern = listNode->GetPattern<ListPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<ListEventHub> listEventHub = AceType::MakeRefPtr<ListEventHub>();
+    listNode->eventHub_ = listEventHub;
+    auto eventHub = listNode->GetEventHub<ListEventHub>();
+
+    /**
+     * @tc.steps: step2. Set the OnScrollEvent
+     * and set isScroll to false
+     */
+    bool isScroll = false;
+    OnScrollEvent scrollHandler = [&isScroll](Dimension offset, ScrollState state) { isScroll = true; };
+
+    /**
+     * @tc.steps: step3. Calling the SetOnScroll function
+     * @tc.expected: The isScroll from false to true
+     */
+    model.SetOnScroll(listNode, std::move(scrollHandler));
+    auto onScroll = eventHub->GetOnDidScroll();
+    onScroll(10.0_vp, ScrollState::SCROLL);
+    EXPECT_TRUE(isScroll);
+    CreateDone();
+}
+
+/**
+ * @tc.name: SetOnScrollFrameBegin_TwoParameters
+ * @tc.desc: Test ListModelNG SetOnScrollFrameBegin
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, SetOnScrollFrameBegin_TwoParameters, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ListModelNG model;
+    model.Create(false);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    auto pattern = listNode->GetPattern<ListPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<ListEventHub> listEventHub = AceType::MakeRefPtr<ListEventHub>();
+    listNode->eventHub_ = listEventHub;
+    auto eventHub = listNode->GetEventHub<ListEventHub>();
+
+    /**
+     * @tc.steps: step2. Set the OnScrollEvent
+     * and set isScroll to false
+     */
+    auto scrollHandler = [](Dimension delta, ScrollState state) -> ScrollFrameResult {
+        Dimension newOffset;
+
+        switch (state) {
+            case ScrollState::IDLE:
+                newOffset.SetValue(0.0);
+                break;
+
+            case ScrollState::SCROLL:
+                newOffset.SetValue(delta.Value());
+                break;
+
+            case ScrollState::FLING:
+                newOffset.SetValue(delta.Value() * 0.8);
+                break;
+        }
+
+        return { newOffset };
+    };
+
+    /**
+     * @tc.steps: step3. Calling the SetOnScroll function
+     * @tc.expected: The isScroll from false to true
+     */
+    model.SetOnScrollFrameBegin(listNode, std::move(scrollHandler));
+    auto onScrollFrameBeginEvent = eventHub->GetOnScrollFrameBegin();
+    auto onScrollFrameBegin = onScrollFrameBeginEvent(Dimension(10.0), ScrollState::FLING);
+    EXPECT_EQ(onScrollFrameBegin.offset.Value(), 8.0);
+    CreateDone();
+}
+
+/**
+ * @tc.name: SetListChildrenMainSize
+ * @tc.desc: Test ListModelNG SetListChildrenMainSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, SetListChildrenMainSize, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ListModelNG model;
+    model.Create(false);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    auto pattern = listNode->GetPattern<ListPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<PipelineContext> context = AceType::MakeRefPtr<PipelineContext>();
+    context->SetPixelRoundMode(PixelRoundMode::PIXEL_ROUND_AFTER_MEASURE);
+    listNode->context_ = AceType::RawPtr(context);
+    std::vector<float> mainSize = { 2.0f, 4.0f };
+    pattern->childrenSize_ = AceType::MakeRefPtr<ListChildrenMainSize>(mainSize, 2.0f);
+    pattern->childrenSize_->isRoundingMode_ = false;
+
+    /**
+     * @tc.steps: step2. Calling the SetListChildrenMainSize function
+     * @tc.expected: The isRoundingMode_ be true
+     */
+    model.SetListChildrenMainSize(listNode, 2.0f, mainSize);
+    listNode->context_ = nullptr;
+    EXPECT_TRUE(pattern->childrenSize_->isRoundingMode_);
+    CreateDone();
+}
+
+/**
+ * @tc.name: GetInitialIndex
+ * @tc.desc: Test ListModelNG GetInitialIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, GetInitialIndex, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ListModelNG model;
+    model.Create(false);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    auto pattern = listNode->GetPattern<ListPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    listNode->SetLayoutProperty(listLayoutProperty);
+
+    /**
+     * @tc.steps: step2. Set the InitialIndex to 2
+     * @tc.expected: Calling the GetInitialIndex function returns 2
+     */
+    model.SetInitialIndex(listNode, 2);
+
+    /**
+     * @tc.steps: step3. Calling the GetInitialIndex function
+     * @tc.expected: The result return 2
+     */
+    auto result = model.GetInitialIndex(listNode);
+    EXPECT_EQ(result, 2);
+    CreateDone();
+}
+
+/**
+ * @tc.name: GetDivider
+ * @tc.desc: Test ListModelNG GetDivider
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModelTestNg, GetDivider, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    ListModelNG model;
+    model.Create(false);
+    auto listNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(listNode, nullptr);
+    auto pattern = listNode->GetPattern<ListPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    listNode->SetLayoutProperty(listLayoutProperty);
+
+    /**
+     * @tc.steps: step2. Set the divider
+     */
+    V2::ItemDivider divider = { 6.0_vp, 2.0_vp, 8.0_vp, Color::RED };
+    model.SetDivider(divider);
+
+    /**
+     * @tc.steps: step3. Calling the GetDivider function
+     * @tc.expected: The diver is set successfully, and the obtained diver is the same as the setting
+     */
+    auto result = model.GetDivider(listNode);
+    EXPECT_EQ(result, divider);
     CreateDone();
 }
 } // namespace OHOS::Ace::NG
