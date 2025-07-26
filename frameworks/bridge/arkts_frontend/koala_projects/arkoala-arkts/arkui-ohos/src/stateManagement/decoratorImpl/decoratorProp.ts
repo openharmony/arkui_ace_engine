@@ -91,9 +91,6 @@ export class PropDecoratedVariable<T> extends DecoratedV1VariableBase<T> impleme
             if (isDynamicObject(newValue)) {
                 newValue = getObservedObject(newValue, this);
             }
-            if (this.setProxyValue) {
-                this.setProxyValue!(newValue);
-            }
             // @Watch
             // if new value is object, register so that property changes trigger
             // Watch function exec
@@ -102,6 +99,9 @@ export class PropDecoratedVariable<T> extends DecoratedV1VariableBase<T> impleme
             this.registerWatchForObservedObjectChanges(newValue);
 
             if (this.__localValue.set(UIUtils.makeObserved(newValue) as T)) {
+                if (this.setProxyValue) {
+                    this.setProxyValue!(newValue);
+                }
                 this.execWatchFuncs();
             }
         }
