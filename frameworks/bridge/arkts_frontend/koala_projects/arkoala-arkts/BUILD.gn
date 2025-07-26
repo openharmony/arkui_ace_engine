@@ -48,8 +48,8 @@ generate_static_abc("components_compile_abc") {
   files = arkui_files
   paths_keys = arkui_path_keys
   paths_values = arkui_path_values
-  #ui_enable = "True"
-  #only_memo = "True"
+  ui_enable = "True"
+  only_memo = "True"
   dependencies = [ ":arkoala_process" ]
   dst_file = target_out_dir + "/components_compile_abc"
   out_puts = [ target_out_dir + "/components_compile_abc/modules_static.abc" ]
