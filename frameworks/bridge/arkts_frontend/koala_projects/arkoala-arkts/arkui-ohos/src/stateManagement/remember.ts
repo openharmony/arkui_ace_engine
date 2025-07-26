@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-import { remember } from "@koalaui/runtime";
+import { memoize } from "@koalaui/runtime";
 
 /** @memo */
 export function rememberVar<T>(factory: () => T): T {
-    return remember(factory);
+    return memoize(factory);
 }
