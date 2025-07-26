@@ -1995,7 +1995,6 @@ HWTEST_F(FormPatternTest, FormPatternTest_054, TestSize.Level1)
     auto res = pattern->CreateColumnNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE);
     EXPECT_EQ(res, nullptr);
     pattern->frameNode_ = formNode;
-
     res = pattern->CreateColumnNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE);
     EXPECT_NE(res, nullptr);
     EXPECT_EQ(res->GetTag(), "Column");
