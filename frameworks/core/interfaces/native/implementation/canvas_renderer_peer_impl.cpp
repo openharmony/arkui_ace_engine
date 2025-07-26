@@ -12,7 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+ 
+#include <math.h>
 #include "canvas_renderer_peer_impl.h"
 
 #include "arkoala_api_generated.h"

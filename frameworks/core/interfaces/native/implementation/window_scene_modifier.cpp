@@ -18,7 +18,7 @@
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/window_scene/scene/window_scene_model.h"
 #else
-#include "test/unittest/capi/stubs/mock_window_scene_model.h"
+#include "core/components_ng/pattern/window_scene/scene/window_scene_model.h"
 #endif
 
 #include "core/interfaces/native/utility/converter.h"

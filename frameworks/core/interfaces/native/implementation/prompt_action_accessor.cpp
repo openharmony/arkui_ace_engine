@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "base/subwindow/subwindow_manager.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components/toast/toast_theme.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
