@@ -1087,7 +1087,6 @@ void UIObserverListener::AddTargetObject(napi_value objValueEvent, const BaseEve
     napi_value napiY = nullptr;
     napi_create_double(env_, localOffset.GetY().ConvertToVp(), &napiY);
     napi_set_named_property(env_, napiOffset, "y", napiY);
-    napi_set_named_property(env_, napiTargetObject, "position", napiOffset);
 
     napi_value napiGlobalOffset = nullptr;
     napi_create_object(env_, &napiGlobalOffset);
@@ -1099,10 +1098,11 @@ void UIObserverListener::AddTargetObject(napi_value objValueEvent, const BaseEve
     napi_create_double(env_, localOffset.GetY().ConvertToVp() + origin.GetY().ConvertToVp(),
         &napiGlobalY);
     napi_set_named_property(env_, napiGlobalOffset, "y", napiGlobalY);
-    napi_set_named_property(env_, napiTargetObject, "globalPosition", napiGlobalOffset);
 
     napi_value napiArea = nullptr;
     napi_create_object(env_, &napiArea);
+    napi_set_named_property(env_, napiArea, "position", napiOffset);
+    napi_set_named_property(env_, napiArea, "globalPosition", napiGlobalOffset);
     napi_value napiWidth = nullptr;
     napi_create_double(env_, baseEventInfo.GetTarget().area.GetWidth().ConvertToVp(), &napiWidth);
     napi_set_named_property(env_, napiArea, "width", napiWidth);
