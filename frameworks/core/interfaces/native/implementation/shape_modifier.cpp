@@ -23,7 +23,6 @@
 #include "core/interfaces/native/utility/validators.h"
 #include "core/interfaces/native/generated/interface/ui_node_api.h"
 #if defined(PIXEL_MAP_SUPPORTED)
-#include "pixel_map_ani.h"
 #include "pixel_map.h"
 #include "base/image/pixel_map.h"
 #endif
@@ -71,15 +70,7 @@ void SetShapeOptions0Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     ViewAbstract::SetFocusable(frameNode, true);
-    RefPtr<PixelMap> pixelMap;
-#if !defined(PREVIEW) && defined(PIXEL_MAP_SUPPORTED)
-    Media::PixelMapAni* pixelMapAni = reinterpret_cast<Media::PixelMapAni*>(value);
-    CHECK_NULL_VOID(pixelMapAni);
-    auto nativePixelMap = pixelMapAni->nativePixelMap_;
-    CHECK_NULL_VOID(nativePixelMap);
-    pixelMap = PixelMap::CreatePixelMap(&nativePixelMap);
-#endif
-    ShapeModelStatic::InitBox(frameNode, pixelMap);
+    ShapeModelStatic::InitBox(frameNode, nullptr);
 }
 void SetShapeOptions1Impl(Ark_NativePointer node)
 {

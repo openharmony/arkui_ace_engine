@@ -86,7 +86,7 @@ export function hookGetImageData(peerPtr: CanvasRenderer, sx: number, sy: number
     const density = getCanvasDensity(peerPtr)
     const width_value: number = sw * density + DIFF
     const height_value: number = sh * density + DIFF
-    if ((width_value > INT32_MAX) || (height_value > INT32_MAX) ||
+    if ((!data) || (width_value > INT32_MAX) || (height_value > INT32_MAX) ||
         ((width_value > 0) && (height_value > (INT32_MAX / width_value / PIXEL_SIZE)))) {
         const resObj = new ImageData(0, 0)
         return resObj

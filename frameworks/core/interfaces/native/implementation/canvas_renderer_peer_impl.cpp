@@ -401,6 +401,11 @@ void CanvasRendererPeerImpl::GetImageData(
     width = finalWidth;
     height = finalHeight;
 }
+void CanvasRendererPeerImpl::GetImageData(const Ace::ImageSize& imageSize, uint8_t* buffer)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    renderingContext2DModel_->GetImageDataModel(imageSize, buffer);
+}
 RefPtr<Ace::PixelMap> CanvasRendererPeerImpl::GetPixelMap(
     const double x, const double y, const double width, const double height)
 {
@@ -454,31 +459,9 @@ void CanvasRendererPeerImpl::PutImageData(Ace::ImageData& src, const PutImageDat
     }
     renderingContext2DModel_->PutImageData(imageData);
 }
-void CanvasRendererPeerImpl::PutImageData(
-    uint8_t* buffer, size_t bufferLength, int32_t imgWidth, int32_t imgHeight, const PutImageDataParam& params)
+void CanvasRendererPeerImpl::PutImageData(const Ace::ImageData& imageData)
 {
     CHECK_NULL_VOID(renderingContext2DModel_);
-    // Parse other parameters
-    Ace::ImageData imageData = { .dirtyWidth = imgWidth, .dirtyHeight = imgHeight };
-    ParseImageData(imageData, params);
-    imageData.dirtyWidth = imageData.dirtyX < 0 ? std::min(imageData.dirtyX + imageData.dirtyWidth, imgWidth)
-                                                : std::min(imgWidth - imageData.dirtyX, imageData.dirtyWidth);
-    imageData.dirtyHeight = imageData.dirtyY < 0 ? std::min(imageData.dirtyY + imageData.dirtyHeight, imgHeight)
-                                                 : std::min(imgHeight - imageData.dirtyY, imageData.dirtyHeight);
-    // copy the data from the image data.
-    imageData.data = std::vector<uint32_t>();
-    for (int32_t i = std::max(imageData.dirtyY, 0); i < imageData.dirtyY + imageData.dirtyHeight; ++i) {
-        for (int32_t j = std::max(imageData.dirtyX, 0); j < imageData.dirtyX + imageData.dirtyWidth; ++j) {
-            uint32_t idx = static_cast<uint32_t>(4 * (j + imgWidth * i));
-            if (bufferLength > static_cast<size_t>(idx + ALPHA_INDEX)) {
-                uint8_t alpha = buffer[idx + 3]; // idx + 3: The 4th byte format: alpha
-                uint8_t red = buffer[idx];       // idx: the 1st byte format: red
-                uint8_t green = buffer[idx + 1]; // idx + 1: The 2nd byte format: green
-                uint8_t blue = buffer[idx + 2];  // idx + 2: The 3rd byte format: blue
-                imageData.data.emplace_back(Color::FromARGB(alpha, red, green, blue).GetValue());
-            }
-        }
-    }
     renderingContext2DModel_->PutImageData(imageData);
 }
 std::vector<double> CanvasRendererPeerImpl::GetLineDash()
