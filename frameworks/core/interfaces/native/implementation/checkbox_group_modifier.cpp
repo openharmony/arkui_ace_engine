@@ -134,7 +134,7 @@ void OnChange0Impl(Ark_NativePointer node,
         };
         arkCallback.Invoke(result);
     };
-    CheckBoxGroupModelStatic::SetChangeEvent(frameNode, std::move(onEvent));
+    CheckBoxGroupModelStatic::SetOnChange(frameNode, std::move(onEvent));
 }
 void OnChange1Impl(Ark_NativePointer node,
                    const Opt_OnCheckboxGroupChangeCallback* value)
