@@ -2351,7 +2351,7 @@ export class Serializer extends SerializerBase {
                 const value_selected_value  = value_selected! as Date
                 valueSerializer.writeInt64((value_selected_value.getTime() as int64))
             } else {
-                valueSerializer.writeInt8(4)
+                valueSerializer.writeInt8(RuntimeType.FUNCTION)
             }
         } else {
             valueSerializer.writeInt8(value_selected_type as int32)
@@ -7462,7 +7462,7 @@ export class Serializer extends SerializerBase {
                 const value_selected_value  = value_selected! as Date
                 valueSerializer.writeInt64((value_selected_value.getTime() as int64))
             } else {
-                valueSerializer.writeInt8(4)
+                valueSerializer.writeInt8(RuntimeType.FUNCTION)
             }
         } else {
             valueSerializer.writeInt8(value_selected_type as int32)
