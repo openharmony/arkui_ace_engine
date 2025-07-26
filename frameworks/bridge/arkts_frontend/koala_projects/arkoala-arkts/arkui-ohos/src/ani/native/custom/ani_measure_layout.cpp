@@ -113,10 +113,8 @@ ani_object GenConstraintNG(ani_env* env, const NG::LayoutConstraintF& parentCons
         return constraint_obj;
     }
     if (NearZero(pipeline->GetDipScale())) {
-        minWidth = minSize.Width();
-        minHeight = minSize.Height();
-        maxWidth = maxSize.Width();
-        maxHeight = maxSize.Height();
+        TAG_LOGW(AceLogTag::ACE_LAYOUT, "GetDipScale failed.");
+        return nullptr;
     } else {
         minWidth = minSize.Width() / pipeline->GetDipScale();
         minHeight = minSize.Height() / pipeline->GetDipScale();
@@ -157,12 +155,8 @@ ani_object GenPlaceChildrenConstraintNG(ani_env* env, const NG::SizeF& size, Ref
     auto leftBorder = borderWidth ? borderWidth->leftDimen->ConvertToVp() : 0.0f;
     auto rightBorder = borderWidth ? borderWidth->rightDimen->ConvertToVp() : 0.0f;
     if (NearZero(pipeline->GetDipScale())) {
-        minWidth = minSize.Width();
-        minHeight = minSize.Height();
-        maxWidth = size.Width() - leftPadding - rightPadding -
-            leftBorder - rightBorder;
-        maxHeight =size.Height() - topPadding - bottomPadding -
-            topBorder - bottomBorder;
+        TAG_LOGW(AceLogTag::ACE_LAYOUT, "GetDipScale failed.");
+        return nullptr;
     } else {
         minWidth = minSize.Width() / pipeline->GetDipScale();
         minHeight = minSize.Height() / pipeline->GetDipScale();
