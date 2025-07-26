@@ -958,6 +958,29 @@ HWTEST_F(RichEditorStyledStringTestNg, FromStyledString002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: FromStyledString003
+ * @tc.desc: test FromStyledString
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyledStringTestNg, FromStyledString003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    Selection selection;
+    RefPtr<SpanString> spanString;
+    spanString = AceType::MakeRefPtr<SpanString>(INIT_VALUE_1);
+    ASSERT_NE(spanString, nullptr);
+    spanString->spans_.front() = nullptr;
+    spanString->spans_.emplace_back();
+
+    selection = richEditorPattern->FromStyledString(spanString).GetSelection();
+    EXPECT_EQ(selection.selection[0], 0);
+    EXPECT_EQ(selection.selection[1], 0);
+}
+
+/**
  * @tc.name: ToStyledString001
  * @tc.desc: Test spans to styledString.
  * @tc.type: FUNC
@@ -1459,4 +1482,73 @@ HWTEST_F(RichEditorStyledStringTestNg, CreatePasteCallback001, TestSize.Level1)
     pasteCallback(arrs, text, isMulitiTypeRecord);
     EXPECT_EQ(2, richEditorPattern->spans_.size());
 }
+
+/**
+ * @tc.name: ProcessStyledString001
+ * @tc.desc: test ProcessStyledString
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyledStringTestNg, ProcessStyledString001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorPattern->spans_.push_front(AceType::MakeRefPtr<SpanItem>());
+
+    richEditorPattern->textDetectEnable_ = true;
+    richEditorPattern->dataDetectorAdapter_->aiDetectInitialized_ = true;
+    richEditorPattern->ProcessStyledString();
+
+    richEditorPattern->dataDetectorAdapter_->aiDetectInitialized_ = false;
+    richEditorPattern->ProcessStyledString();
+
+    ASSERT_EQ(richEditorPattern->spans_.empty(), true);
+}
+
+/**
+ * @tc.name: ProcessStyledString002
+ * @tc.desc: test ProcessStyledString
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyledStringTestNg, ProcessStyledString002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    AddSpan(INIT_VALUE_1);
+    richEditorPattern->textDetectEnable_ = true;
+    bool ret = false;
+    ret = richEditorPattern->CanStartAITask();
+    EXPECT_TRUE(ret);
+
+    richEditorPattern->textForDisplay_ = INIT_VALUE_1;
+    richEditorPattern->dataDetectorAdapter_->aiDetectInitialized_ = true;
+    richEditorPattern->ProcessStyledString();
+
+    EXPECT_FALSE(richEditorPattern->spans_.empty());
+}
+
+/**
+ * @tc.name: ProcessStyledString003
+ * @tc.desc: test ProcessStyledString
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyledStringTestNg, ProcessStyledString003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    AddSpan(INIT_VALUE_1);
+    richEditorPattern->textDetectEnable_ = true;
+    bool ret = false;
+    ret = richEditorPattern->CanStartAITask();
+    EXPECT_TRUE(ret);
+
+    richEditorPattern->dataDetectorAdapter_->aiDetectInitialized_ = false;
+    richEditorPattern->ProcessStyledString();
+
+    EXPECT_FALSE(richEditorPattern->spans_.empty());
+}
+
 } // namespace OHOS::Ace::NG

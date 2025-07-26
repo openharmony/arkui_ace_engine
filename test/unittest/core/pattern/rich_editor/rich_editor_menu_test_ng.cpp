@@ -1312,4 +1312,46 @@ HWTEST_F(RichEditorMenuTestNg, HandleExtendAction002, TestSize.Level1)
     EXPECT_TRUE(richEditorPattern->selectMenuInfo_.showCopyAll);
 }
 
+/**
+ * @tc.name: CheckEditorTypeChange001
+ * @tc.desc: test CheckEditorTypeChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorMenuTestNg, CheckEditorTypeChange001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorPattern->CheckEditorTypeChange();
+
+    SelectOverlayInfo selectOverlayInfo;
+    selectOverlayInfo.singleLineHeight = 143;
+    auto root = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto selectOverlayManager = AceType::MakeRefPtr<SelectOverlayManager>(root);
+    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo, nullptr, false);
+    richEditorPattern->selectOverlayProxy_ = proxy;
+    richEditorPattern->UpdateSelectOverlayOrCreate(selectOverlayInfo, true);
+    richEditorPattern->CheckEditorTypeChange();
+
+    richEditorPattern->selectOverlayProxy_->GetSelectOverlayMangerInfo().menuInfo.editorType =
+        static_cast<int32_t>(TextSpanType::TEXT);
+    richEditorPattern->CheckEditorTypeChange();
+
+    richEditorPattern->selectOverlayProxy_->GetSelectOverlayMangerInfo().menuInfo.editorType =
+        static_cast<int32_t>(TextSpanType::NONE);
+    richEditorPattern->selectedType_ = TextSpanType::TEXT;
+    richEditorPattern->CheckEditorTypeChange();
+
+    richEditorPattern->selectOverlayProxy_->GetSelectOverlayMangerInfo().menuInfo.editorType =
+        static_cast<int32_t>(TextSpanType::TEXT);
+    richEditorPattern->selectedType_ = TextSpanType::TEXT;
+    richEditorPattern->CheckEditorTypeChange();
+
+    richEditorPattern->selectOverlayProxy_->selectOverlayId_ = 1;
+    richEditorPattern->CheckEditorTypeChange();
+
+    EXPECT_TRUE(richEditorPattern->selectOverlayProxy_);
+}
+
 }
