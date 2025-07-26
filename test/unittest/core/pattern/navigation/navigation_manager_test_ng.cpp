@@ -673,7 +673,7 @@ HWTEST_F(NavigationManagerTestNg, ParseNavigationIntentInfo001, TestSize.Level1)
     auto navigationManager = GetNavigationManager();
     ASSERT_NE(navigationManager, nullptr);
     /**
-     * @tc.steps: step2. build serialized intent info.
+     * @tc.steps: step2. build serialized navigationIntent info.
      */
     const std::string navigationInspectorId = "navigation";
     const std::string navDestinationName = "name";
@@ -703,7 +703,7 @@ HWTEST_F(NavigationManagerTestNg, ParseNavigationIntentInfo002, TestSize.Level1)
     auto navigationManager = GetNavigationManager();
     ASSERT_NE(navigationManager, nullptr);
     /**
-     * @tc.steps: step2. build an empty serialized intent info.
+     * @tc.steps: step2. build an empty serialized navigationIntent info.
      */
     const auto intentJson = JsonUtil::Create(true);
     const std::string serializedIntentInfo = intentJson->ToString();
@@ -1367,13 +1367,19 @@ HWTEST_F(NavigationManagerTestNg, SetNavigationIntentInfo002, TestSize.Level1)
  * @tc.name: FireNavigationIntentActively001
  * @tc.desc: Branch: if (navigationMap_.find(pageId) == navigationMap_.end()) = true
  *           Condition: navigationMap_.find(pageId) == navigationMap_.end() = true
+ *           Expected: call FireNavigationIntentActively fail, return false
  * @tc.type: FUNC
  */
 HWTEST_F(NavigationManagerTestNg, FireNavigationIntentActively001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. create navigation and mock info.
+     */
     NavigationManagerTestNg::SetUpTestSuite();
     auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    ASSERT_NE(navigationGroupNode, nullptr);
+    navigationGroupNode->curId_ = "navigation";
     auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
     auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
     ASSERT_NE(navigationPattern, nullptr);
@@ -1381,7 +1387,9 @@ HWTEST_F(NavigationManagerTestNg, FireNavigationIntentActively001, TestSize.Leve
     auto pipelineContext = navigationGroupNode->GetContext();
     ASSERT_NE(pipelineContext, nullptr);
     auto navigationManager = pipelineContext->GetNavigationManager();
-
+    /**
+     * @tc.steps: step2. modify navigationIntent info and do verify.
+     */
     int32_t pageId = 1;
     bool needTransition = false;
     ASSERT_EQ(navigationManager->FireNavigationIntentActively(pageId, needTransition), false);
@@ -1392,13 +1400,19 @@ HWTEST_F(NavigationManagerTestNg, FireNavigationIntentActively001, TestSize.Leve
  * @tc.name: FireNavigationIntentActively002
  * @tc.desc: Branch: if (!navigationIntentInfo_.has_value()) = true
  *           Condition: navigationIntentInfo_.has_value() = false
+ *           Expected: call FireNavigationIntentActively fail, return false
  * @tc.type: FUNC
  */
 HWTEST_F(NavigationManagerTestNg, FireNavigationIntentActively002, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. create navigation and mock info.
+     */
     NavigationManagerTestNg::SetUpTestSuite();
     auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    ASSERT_NE(navigationGroupNode, nullptr);
+    navigationGroupNode->curId_ = "navigation";
     auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
     auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
     ASSERT_NE(navigationPattern, nullptr);
@@ -1406,7 +1420,9 @@ HWTEST_F(NavigationManagerTestNg, FireNavigationIntentActively002, TestSize.Leve
     auto pipelineContext = navigationGroupNode->GetContext();
     ASSERT_NE(pipelineContext, nullptr);
     auto navigationManager = pipelineContext->GetNavigationManager();
-
+    /**
+     * @tc.steps: step2. modify navigationIntent info and do verify.
+     */
     int32_t pageId = 1;
     bool needTransition = false;
     navigationManager->AddNavigation(pageId, navigationGroupNode);
@@ -1416,16 +1432,20 @@ HWTEST_F(NavigationManagerTestNg, FireNavigationIntentActively002, TestSize.Leve
 
 /**
  * @tc.name: FireNavigationIntentActively003
- * @tc.desc: Branch: if (navigationInfo.navigationId == navigationIntentInfo_.value().navigationInspectorId) = true
- *           Branch: if (!navigationNode) = true
- *           Condition: navigationNode = true
+ * @tc.desc: Branch: if (navigation->curId_ == navigationIntentInfo_.value().navigationInspectorId) = true
+ *           Expected: call FireNavigationIntentActively success, return true
  * @tc.type: FUNC
  */
 HWTEST_F(NavigationManagerTestNg, FireNavigationIntentActively003, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. create navigation and mock info.
+     */
     NavigationManagerTestNg::SetUpTestSuite();
     auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    ASSERT_NE(navigationGroupNode, nullptr);
+    navigationGroupNode->curId_ = "navigation";
     auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
     auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
     ASSERT_NE(navigationPattern, nullptr);
@@ -1433,27 +1453,35 @@ HWTEST_F(NavigationManagerTestNg, FireNavigationIntentActively003, TestSize.Leve
     auto pipelineContext = navigationGroupNode->GetContext();
     ASSERT_NE(pipelineContext, nullptr);
     auto navigationManager = pipelineContext->GetNavigationManager();
-
+    /**
+     * @tc.steps: step2. modify navigationIntent info and do verify.
+     */
     int32_t pageId = 1;
     bool needTransition = false;
     navigationManager->navigationIntentInfo_ = std::make_optional<NavigationIntentInfo>();
-    navigationManager->navigationIntentInfo_->navigationInspectorId = "";
+    navigationManager->navigationIntentInfo_->navigationInspectorId = "navigation";
     navigationManager->AddNavigation(pageId, navigationGroupNode);
-    ASSERT_EQ(navigationManager->FireNavigationIntentActively(pageId, needTransition), false);
+    ASSERT_EQ(navigationManager->FireNavigationIntentActively(pageId, needTransition), true);
     NavigationManagerTestNg::TearDownTestSuite();
 }
 
 /**
  * @tc.name: FireNavigationIntentActively004
- * @tc.desc: Branch: if (navigationInfo.navigationId == navigationIntentInfo_.value().navigationInspectorId) = false
- *           Condition: navigationInfo.navigationId == navigationIntentInfo_.value().navigationInspectorId = false
+ * @tc.desc: Branch: if navigation->curId_ != navigationIntentInfo_.value().navigationInspectorId
+ *           Condition: navigation->curId_ != navigationIntentInfo_.value().navigationInspectorId
+ *           Expected: call FireNavigationIntentActively fail, return false
  * @tc.type: FUNC
  */
 HWTEST_F(NavigationManagerTestNg, FireNavigationIntentActively004, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. create navigation and mock info.
+     */
     NavigationManagerTestNg::SetUpTestSuite();
     auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    ASSERT_NE(navigationGroupNode, nullptr);
+    navigationGroupNode->curId_ = "__invalid__";
     auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
     auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
     ASSERT_NE(navigationPattern, nullptr);
@@ -1461,7 +1489,9 @@ HWTEST_F(NavigationManagerTestNg, FireNavigationIntentActively004, TestSize.Leve
     auto pipelineContext = navigationGroupNode->GetContext();
     ASSERT_NE(pipelineContext, nullptr);
     auto navigationManager = pipelineContext->GetNavigationManager();
-
+    /**
+     * @tc.steps: step2. modify navigationIntent info and do verify.
+     */
     int32_t pageId = 1;
     bool needTransition = false;
     navigationManager->navigationIntentInfo_ = std::make_optional<NavigationIntentInfo>();
