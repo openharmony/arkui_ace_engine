@@ -59,6 +59,8 @@
     "pages/List/SlideHorizontallyOneSide",
     "pages/List/FoldExpand",
     "pages/List/MultiSelectSliding",
+    "pages/List/scrollToControlParent",
+    "pages/List/simulateSwiper",
     "pages/alphabetIndexer/AlphabetIndexerMainPage",
     "pages/alphabetIndexer/AutoCollapse",
     "pages/alphabetIndexer/PopupPosition",
