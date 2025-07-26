@@ -1467,5 +1467,134 @@ HWTEST_F(RichEditorEditTestNg, BeforeChangeText002, TestSize.Level1)
     EXPECT_TRUE(ret);
 }
 
+/**
+ * @tc.name: UpdateChildrenOffset001
+ * @tc.desc: test UpdateChildrenOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestNg, UpdateChildrenOffset001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init and call function.
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateNodePaintMethod();
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
+    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
+    auto host = richEditorPattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    /**
+     * @tc.steps: step2. change parameter and call function.
+     */
+    AddSpan(INIT_VALUE_1);
+    OHOS::Ace::RefPtr<OHOS::Ace::NG::SpanItem> spanItem1 = AceType::MakeRefPtr<ImageSpanItem>();
+    richEditorPattern->spans_.emplace_back(spanItem1);
+    OHOS::Ace::RefPtr<OHOS::Ace::NG::SpanItem> spanItem2 = AceType::MakeRefPtr<PlaceholderSpanItem>();
+    richEditorPattern->spans_.emplace_back(spanItem2);
+    TestParagraphRect paragraphRect = { .start = 0, .end = 6, .rects = { { -400.0, -400.0, 200.0, 200.0 } } };
+    TestParagraphItem paragraphItem = { .start = 0, .end = 6, .testParagraphRects = { paragraphRect } };
+    AddParagraph(paragraphItem);
+    richEditorPattern->textSelector_.baseOffset = 0;
+    richEditorPattern->textSelector_.destinationOffset = 6;
+    richEditorPattern->contentRect_ = { -500.0, -500.0, 500.0, 500.0 };
+    richEditorPattern->isSpanStringMode_ = true;
+    std::list<RefPtr<UINode>>& childrens = host->ModifyChildren();
+    auto childNode2 = FrameNode::CreateFrameNode("childNode", 2, AceType::MakeRefPtr<ImagePattern>());
+    auto childNode3 = FrameNode::CreateFrameNode("childNode", 3, AceType::MakeRefPtr<PlaceholderSpanPattern>());
+    auto childNode4 = FrameNode::CreateFrameNode("childNode", 4, AceType::MakeRefPtr<ImagePattern>());
+    auto childNode5 = FrameNode::CreateFrameNode("childNode", 5, AceType::MakeRefPtr<PlaceholderSpanPattern>());
+    auto childNode6 = FrameNode::CreateFrameNode("childNode", 5, AceType::MakeRefPtr<Pattern>());
+    childrens.emplace_back(childNode2);
+    childrens.emplace_back(childNode3);
+    childrens.emplace_back(childNode4);
+    childrens.emplace_back(childNode5);
+    richEditorPattern->UpdateChildrenOffset();
+    EXPECT_NE(richEditorPattern->spans_.size(), 0);
+}
+
+/**
+ * @tc.name: UpdateChildrenOffset003
+ * @tc.desc: test UpdateChildrenOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestNg, UpdateChildrenOffset003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->spans_.emplace_back();
+    richEditorPattern->UpdateChildrenOffset();
+    EXPECT_FALSE(richEditorPattern->spans_.empty());
+}
+
+/**
+ * @tc.name: UpdateChildrenOffset004
+ * @tc.desc: test UpdateChildrenOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestNg, UpdateChildrenOffset004, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorPattern->CreateNodePaintMethod();
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
+    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
+    auto host = richEditorPattern->GetHost();
+    ASSERT_NE(host, nullptr);
+
+    AddSpan(INIT_VALUE_1);
+    OHOS::Ace::RefPtr<OHOS::Ace::NG::SpanItem> spanItem1 = AceType::MakeRefPtr<ImageSpanItem>();
+    richEditorPattern->spans_.emplace_back(spanItem1);
+    OHOS::Ace::RefPtr<OHOS::Ace::NG::SpanItem> spanItem2 = AceType::MakeRefPtr<PlaceholderSpanItem>();
+    richEditorPattern->spans_.emplace_back(spanItem2);
+    richEditorPattern->isSpanStringMode_ = true;
+
+    std::list<RefPtr<UINode>>& childrens = host->ModifyChildren();
+    auto childNode2 = AceType::MakeRefPtr<ImageSpanNode>(V2::IMAGE_ETS_TAG, 2);
+    childrens.emplace_back(childNode2);
+
+    richEditorPattern->UpdateChildrenOffset();
+    EXPECT_TRUE(childNode2->GetSpanItem());
+}
+
+/**
+ * @tc.name: UpdateChildrenOffset005
+ * @tc.desc: test UpdateChildrenOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestNg, UpdateChildrenOffset005, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorPattern->CreateNodePaintMethod();
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
+    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
+    auto host = richEditorPattern->GetHost();
+    ASSERT_NE(host, nullptr);
+
+    AddSpan(INIT_VALUE_1);
+    OHOS::Ace::RefPtr<OHOS::Ace::NG::SpanItem> spanItem1 = AceType::MakeRefPtr<ImageSpanItem>();
+    richEditorPattern->spans_.emplace_back(spanItem1);
+    OHOS::Ace::RefPtr<OHOS::Ace::NG::SpanItem> spanItem2 = AceType::MakeRefPtr<PlaceholderSpanItem>();
+    richEditorPattern->spans_.emplace_back(spanItem2);
+    TestParagraphRect paragraphRect = { .start = 0, .end = 6, .rects = { { -400.0, -400.0, 200.0, 200.0 } } };
+    TestParagraphItem paragraphItem = { .start = 0, .end = 6, .testParagraphRects = { paragraphRect } };
+    AddParagraph(paragraphItem);
+    richEditorPattern->isSpanStringMode_ = true;
+
+    std::list<RefPtr<UINode>>& childrens = host->ModifyChildren();
+    auto childNode2 = AceType::MakeRefPtr<ImageSpanNode>(V2::IMAGE_ETS_TAG, 2);
+    childNode2->imageSpanItem_ = nullptr;
+    childrens.emplace_back(childNode2);
+
+    richEditorPattern->UpdateChildrenOffset();
+    EXPECT_FALSE(childNode2->GetSpanItem());
+}
 
 } // namespace OHOS::Ace::NG

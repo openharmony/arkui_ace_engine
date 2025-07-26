@@ -685,4 +685,49 @@ HWTEST_F(RichEditorClickTestNg, HandleUserClickEvent003, TestSize.Level1)
     EXPECT_FALSE(ret);
 }
 
+/**
+ * @tc.name: IsClickBoundary001
+ * @tc.desc: test IsClickBoundary
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorClickTestNg, IsClickBoundary001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init and call function.
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateNodePaintMethod();
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
+    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
+    /**
+     * @tc.steps: step2. change parameter and call function.
+     */
+    auto length = richEditorPattern->GetTextContentLength();
+    auto caretPosition = length + 1;
+    auto ret = richEditorPattern->IsClickBoundary(caretPosition);
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: RichEditorScopeTest
+ * @tc.desc: test RichEditorScope
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorClickTestNg, RichEditorScopeTest, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto& requestFocusBySingleClick = richEditorPattern->requestFocusBySingleClick_;
+
+    requestFocusBySingleClick = false;
+    {
+        RICH_EDITOR_SCOPE(requestFocusBySingleClick);
+        EXPECT_EQ(requestFocusBySingleClick, true);
+    }
+    EXPECT_EQ(requestFocusBySingleClick, false);
+}
+
 } // namespace OHOS::Ace::NG

@@ -1396,4 +1396,39 @@ HWTEST_F(RichEditorSelectOverlayTestNg, DumpInfo002, TestSize.Level1)
     EXPECT_NE(richEditorPattern->selectOverlay_->HasRenderTransform(), true);
 }
 
+/**
+ * @tc.name: OnHandleMove001
+ * @tc.desc: test OnHandleMove
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSelectOverlayTestNg, OnHandleMove003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    EXPECT_EQ(richEditorPattern->OnBackPressed(), false);
+    RectF rect(0, 0, 5, 5);
+    richEditorPattern->CreateHandles();
+    richEditorPattern->textSelector_.Update(0, 5);
+    richEditorPattern->selectOverlay_->OnHandleMove(rect, true);
+}
+
+/**
+ * @tc.name: UpdateSelectorOnHandleMove001
+ * @tc.desc: test UpdateSelectorOnHandleMove
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSelectOverlayTestNg, UpdateSelectorOnHandleMove001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    EXPECT_EQ(richEditorPattern->OnBackPressed(), false);
+    auto offsetF = OffsetF(5.0f, 30.0f);
+    RectF rect(0, 0, 5, 5);
+    richEditorPattern->CreateHandles();
+    richEditorPattern->textSelector_.Update(0, 5);
+    richEditorPattern->selectOverlay_->UpdateSelectorOnHandleMove(offsetF, true);
+}
+
 } // namespace OHOS::Ace::NG
