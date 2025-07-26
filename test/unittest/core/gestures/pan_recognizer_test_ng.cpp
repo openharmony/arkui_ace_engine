@@ -2474,7 +2474,7 @@ HWTEST_F(PanRecognizerTestNg, OnResetStatus001, TestSize.Level1)
 HWTEST_F(PanRecognizerTestNg, HandlePanExtAccept001, TestSize.Level1)
 {
     /**
-      * @tc.steps: step1. create PanRecognizer
+      * @tc.steps: step1. create PanRecognizer.
       */
     RefPtr<PanGestureOption> panGestureOption = AceType::MakeRefPtr<PanGestureOption>();
     PanRecognizer panRecognizer = PanRecognizer(panGestureOption);
