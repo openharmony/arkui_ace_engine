@@ -20,8 +20,8 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
-#include "rich_editor_controller_peer_impl.h"
 #include "pixel_map_peer.h"
+#include "rich_editor_controller_peer_impl.h"
 #include "styled_string_peer.h"
 
 namespace OHOS::Ace::NG::Converter {
