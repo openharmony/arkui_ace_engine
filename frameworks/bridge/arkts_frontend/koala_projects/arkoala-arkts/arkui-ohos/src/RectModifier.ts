@@ -15,7 +15,8 @@
 
 import { AttributeModifier, CommonMethod, CommonShapeMethod, ArkCommonShapeMethodPeer } from 'arkui/component/common';
 import { AttributeUpdaterFlag, CommonMethodModifier } from './CommonMethodModifier';
-import { RectAttribute, ArkRectPeer } from 'arkui/component/rect';
+import { RectAttribute, ArkRectPeer, RadiusItem } from 'arkui/component/rect';
+import { Length } from 'arkui/component/units';
 import { CommonShapeMethodModifier } from './CommonShapeMethodModifier';
 
 export class RectModifier extends CommonShapeMethodModifier implements RectAttribute, AttributeModifier<RectAttribute> {
@@ -33,7 +34,7 @@ export class RectModifier extends CommonShapeMethodModifier implements RectAttri
     _radiusHeight_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _radiusHeight_0_0value?: number | string | undefined
     _radius_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _radius_0_0value?: number | string | Array<number | string> | undefined
+    _radius_0_0value?: Length | Array<RadiusItem> | undefined
     applyModifierPatch(peer: ArkRectPeer): void {
         super.applyModifierPatch(peer)
         if (this._radiusWidth_0_flag != AttributeUpdaterFlag.INITIAL)
@@ -76,7 +77,7 @@ export class RectModifier extends CommonShapeMethodModifier implements RectAttri
         {
             switch (this._radius_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.radiusAttribute((this._radius_0_0value as number | string | Array<number | string> | undefined));
+                    peer.radiusAttribute((this._radius_0_0value as Length | Array<RadiusItem> | undefined));
                     this._radius_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -157,7 +158,7 @@ export class RectModifier extends CommonShapeMethodModifier implements RectAttri
         }
         return this
     }
-    radius(value: number | string | Array<number | string> | undefined): this {
+    radius(value: Length | Array<RadiusItem> | undefined): this {
         if (((this._radius_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._radius_0_0value) !== (value)))
         {
             this._radius_0_flag = AttributeUpdaterFlag.UPDATE

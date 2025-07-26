@@ -16535,55 +16535,41 @@ void impl_RectAttribute_radiusHeight(Ark_NativePointer thisPtr, KSerializerBuffe
 KOALA_INTEROP_DIRECT_V3(RectAttribute_radiusHeight, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_RectAttribute_radius(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
-        Deserializer thisDeserializer(thisArray, thisLength);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
         const auto value_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Union_Number_String_Array_Union_Number_String value_value_buf = {};
+        Opt_Union_Length_Array_RadiusItem value_value_buf = {};
         value_value_buf.tag = value_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-        if ((INTEROP_RUNTIME_UNDEFINED) != (value_value_buf_runtimeType))
+        if ((value_value_buf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED))
         {
             const Ark_Int8 value_value_buf__selector = thisDeserializer.readInt8();
-            Ark_Union_Number_String_Array_Union_Number_String value_value_buf_ = {};
+            Ark_Union_Length_Array_RadiusItem value_value_buf_ = {};
             value_value_buf_.selector = value_value_buf__selector;
             if (value_value_buf__selector == 0) {
                 value_value_buf_.selector = 0;
-                value_value_buf_.value0 = static_cast<Ark_Number>(thisDeserializer.readNumber());
+                value_value_buf_.value0 = thisDeserializer.readLength();
             }
             else if (value_value_buf__selector == 1) {
                 value_value_buf_.selector = 1;
-                value_value_buf_.value1 = static_cast<Ark_String>(thisDeserializer.readString());
-            }
-            else if (value_value_buf__selector == 2) {
-                value_value_buf_.selector = 2;
                 const Ark_Int32 value_value_buf__u_length = thisDeserializer.readInt32();
-                Array_Union_Number_String value_value_buf__u = {};
+                Array_RadiusItem value_value_buf__u = {};
                 thisDeserializer.resizeArray<std::decay<decltype(value_value_buf__u)>::type,
         std::decay<decltype(*value_value_buf__u.array)>::type>(&value_value_buf__u, value_value_buf__u_length);
                 for (int value_value_buf__u_i = 0; value_value_buf__u_i < value_value_buf__u_length; value_value_buf__u_i++) {
-                    const Ark_Int8 value_value_buf__u_buf_selector = thisDeserializer.readInt8();
-                    Ark_Union_Number_String value_value_buf__u_buf = {};
-                    value_value_buf__u_buf.selector = value_value_buf__u_buf_selector;
-                    if (value_value_buf__u_buf_selector == 0) {
-                        value_value_buf__u_buf.selector = 0;
-                        value_value_buf__u_buf.value0 = static_cast<Ark_Number>(thisDeserializer.readNumber());
-                    }
-                    else if (value_value_buf__u_buf_selector == 1) {
-                        value_value_buf__u_buf.selector = 1;
-                        value_value_buf__u_buf.value1 = static_cast<Ark_String>(thisDeserializer.readString());
-                    }
-                    else {
-                        INTEROP_FATAL("One of the branches for value_value_buf__u_buf has to be chosen through deserialisation.");
-                    }
-                    value_value_buf__u.array[value_value_buf__u_i] = static_cast<Ark_Union_Number_String>(value_value_buf__u_buf);
+                    Ark_RadiusItem value_value_buf__u_buf = {};
+                    value_value_buf__u_buf.value0 = thisDeserializer.readLength();
+                    value_value_buf__u_buf.value1 = thisDeserializer.readLength();
+                    value_value_buf__u.array[value_value_buf__u_i] = value_value_buf__u_buf;
+
                 }
-                value_value_buf_.value2 = value_value_buf__u;
+                value_value_buf_.value1 = value_value_buf__u;
             }
             else {
                 INTEROP_FATAL("One of the branches for value_value_buf_ has to be chosen through deserialisation.");
             }
-            value_value_buf.value = static_cast<Ark_Union_Number_String_Array_Union_Number_String>(value_value_buf_);
+            value_value_buf.value = static_cast<Ark_Union_Length_Array_RadiusItem>(value_value_buf_);
         }
-        Opt_Union_Number_String_Array_Union_Number_String value_value = value_value_buf;;
-        GetNodeModifiers()->getRectModifier()->setRadius(self, (const Opt_Union_Number_String_Array_Union_Number_String*)&value_value);
+        Opt_Union_Length_Array_RadiusItem value_value = value_value_buf;;
+        GetNodeModifiers()->getRectModifier()->setRadius(self, static_cast<Opt_Union_Length_Array_RadiusItem*>(&value_value));
 }
 KOALA_INTEROP_DIRECT_V3(RectAttribute_radius, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_Refresh_construct(Ark_Int32 id, Ark_Int32 flags) {
