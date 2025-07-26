@@ -2564,7 +2564,7 @@ float ScrollablePattern::GetDVSyncOffset()
         return 0;
     }
     uint64_t currentVsync = context->GetVsyncTime();
-    uint64_t currentTime = GetSysTimestamp();
+    uint64_t currentTime = static_cast<uint64_t>(GetSysTimestamp());
     bool needUpdateCommandTime = false;
     if (currentVsync >= offsets_.back().first && currentVsync - currentTime > DVSYNC_DELAY_TIME_BASE) {
         currentTime += DVSYNC_OFFSET_TIME;
