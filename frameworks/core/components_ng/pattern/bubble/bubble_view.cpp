@@ -376,13 +376,6 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(const std::string& targetTag, int
             textPattern->SetStyledString(spanString, false);
         }
     }
-    if (spanString) {
-        auto messageNode = bubblePattern->GetMessageNode();
-        if (messageNode) {
-            auto textPattern = messageNode->GetPattern<TextPattern>();
-            textPattern->SetStyledString(spanString, false);
-        }
-    }
     child->MountToParent(popupNode);
     return popupNode;
 }
@@ -408,9 +401,13 @@ RefPtr<FrameNode> BubbleView::CreateCustomBubbleNode(
     if (param->HasEnableHoverMode()) {
         layoutProps->UpdateEnableHoverMode(param->EnableHoverMode());
     } else {
+        layoutProps->ResetEnableHoverMode();
     }
     
     if (param->GetArrowHeight().has_value()) {
+        layoutProps->UpdateArrowHeight(param->GetArrowHeight().value());
+    }
+    if (param->GetArrowWidth().has_value()) {
         layoutProps->UpdateArrowWidth(param->GetArrowWidth().value());
     }
     if (param->GetRadius().has_value()) {

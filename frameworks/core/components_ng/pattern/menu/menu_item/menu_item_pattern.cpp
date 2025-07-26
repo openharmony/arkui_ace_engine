@@ -2668,11 +2668,7 @@ void MenuItemPattern::SetBgColor(const Color& color)
 {
     auto renderContext = GetHost()->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    // if (color) {
-    //     renderContext->UpdateBackgroundColor(color.value());
-    // } else {
-    //     renderContext->ResetBackgroundColor();
-    // }
+    renderContext->UpdateBackgroundColor(color);
     bgColor_ = color;
 }
 
@@ -2688,14 +2684,7 @@ void MenuItemPattern::SetFontColor(const Color& color, bool isNeedRecord)
     }
     auto context = text_->GetRenderContext();
     CHECK_NULL_VOID(context);
-    // if (color) {
-    //     auto value = color.value();
-    //     props->UpdateTextColor(value);
-    //     context->UpdateForegroundColor(value);
-    // } else {
-    //     props->ResetTextColor();
-    //     context->ResetForegroundColor();
-    // }
+    context->UpdateForegroundColor(color);
     context->UpdateForegroundColorFlag(false);
     context->ResetForegroundColorStrategy();
 }
