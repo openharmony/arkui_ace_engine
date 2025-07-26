@@ -15,6 +15,8 @@
 
 #include "DeserializerBase.h"
 
+#include "securec.h"
+
 #include <algorithm>
 #include <vector>
 
@@ -35,7 +37,7 @@ struct MyDeserializer : CustomDeserializer {
         InteropCustomObject result;
         strcpy(result.kind, "NativeError");
         result.id = 0;
-        strcat(result.kind, kind.c_str());
+        strncat_s(result.kind, sizeof(result.kind), kind.c_str());
         return result;
     }
 
@@ -53,7 +55,7 @@ struct DateDeserializer final : CustomDeserializer {
     virtual InteropCustomObject deserialize(DeserializerBase* deserializer, const std::string& kind) {
         InteropCustomObject result = {};
         result.string = deserializer->readString();
-        strncpy(result.kind, kind.c_str(), sizeof(result.kind) - 1);
+        strncpy_s(result.kind, sizeof(result.kind), kind.c_str(), sizeof(result.kind) - 1);
         return result;
     }
 };

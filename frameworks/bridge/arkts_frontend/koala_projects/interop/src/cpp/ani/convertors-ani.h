@@ -140,7 +140,7 @@ struct InteropTypeConverter<KInteropBuffer> {
       CHECK_ANI_FATAL(env->FixedArray_GetRegion_Byte(value, 0, length, (ani_byte*)data));
       KInteropBuffer result = { 0 };
       result.data = data;
-      result.length = length;
+      result.length = static_cast<KLong>(length);
       return result;
     }
     static inline InteropType convertTo(ani_env* env, KInteropBuffer value) {
@@ -193,7 +193,9 @@ struct InteropTypeConverter<KStringPtr> {
         result.resize(lengthUtf8);
         ani_size count = 0;
         CHECK_ANI_FATAL(env->String_GetUTF8SubString(value, 0, lengthUtf8, result.data(), lengthUtf8 + 1, &count));
-        result.data()[lengthUtf8] = 0;
+        if (result.data()) {
+          result.data()[lengthUtf8] = 0;
+        }
         return result;
     }
     static InteropType convertTo(ani_env* env, const KStringPtr& value) {
