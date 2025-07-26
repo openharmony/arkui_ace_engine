@@ -112,11 +112,17 @@ ani_object GenConstraintNG(ani_env* env, const NG::LayoutConstraintF& parentCons
     if (!pipeline) {
         return constraint_obj;
     }
-    minWidth = minSize.Width() / pipeline->GetDipScale();
-    minHeight = minSize.Height() / pipeline->GetDipScale();
-    maxWidth = maxSize.Width() / pipeline->GetDipScale();
-    maxHeight = maxSize.Height() / pipeline->GetDipScale();
-
+    if (NearZero(pipeline->GetDipScale())) {
+        minWidth = minSize.Width();
+        minHeight = minSize.Height();
+        maxWidth = maxSize.Width();
+        maxHeight = maxSize.Height();
+    } else {
+        minWidth = minSize.Width() / pipeline->GetDipScale();
+        minHeight = minSize.Height() / pipeline->GetDipScale();
+        maxWidth = maxSize.Width() / pipeline->GetDipScale();
+        maxHeight = maxSize.Height() / pipeline->GetDipScale();
+    }
     constraint_obj = SetConstraintNG(env, minWidth, minHeight, maxWidth, maxHeight);
     return constraint_obj;
 }
@@ -136,8 +142,6 @@ ani_object GenPlaceChildrenConstraintNG(ani_env* env, const NG::SizeF& size, Ref
     }
     auto minSize = layoutProperty->GetLayoutConstraint().value().minSize;
 
-    minWidth = minSize.Width() / pipeline->GetDipScale();
-    minHeight = minSize.Height() / pipeline->GetDipScale();
 
     auto parentNode = AceType::DynamicCast<NG::FrameNode>(layoutProperty->GetHost()->GetParent());
     if (parentNode && parentNode->GetTag() == V2::COMMON_VIEW_ETS_TAG) {
@@ -154,11 +158,21 @@ ani_object GenPlaceChildrenConstraintNG(ani_env* env, const NG::SizeF& size, Ref
     auto bottomBorder = borderWidth ? borderWidth->bottomDimen->ConvertToVp() : 0.0f;
     auto leftBorder = borderWidth ? borderWidth->leftDimen->ConvertToVp() : 0.0f;
     auto rightBorder = borderWidth ? borderWidth->rightDimen->ConvertToVp() : 0.0f;
-
-    maxWidth = size.Width() / pipeline->GetDipScale() - leftPadding - rightPadding -
-        leftBorder - rightBorder;
-    maxHeight =size.Height() / pipeline->GetDipScale() - topPadding - bottomPadding -
-        topBorder - bottomBorder;
+    if (NearZero(pipeline->GetDipScale())) {
+        minWidth = minSize.Width();
+        minHeight = minSize.Height();
+        maxWidth = size.Width() - leftPadding - rightPadding -
+            leftBorder - rightBorder;
+        maxHeight =size.Height() - topPadding - bottomPadding -
+            topBorder - bottomBorder;
+    } else {
+        minWidth = minSize.Width() / pipeline->GetDipScale();
+        minHeight = minSize.Height() / pipeline->GetDipScale();
+        maxWidth = size.Width() / pipeline->GetDipScale() - leftPadding - rightPadding -
+            leftBorder - rightBorder;
+        maxHeight =size.Height() / pipeline->GetDipScale() - topPadding - bottomPadding -
+            topBorder - bottomBorder;
+    }
     constraint_obj = SetConstraintNG(env, minWidth, minHeight, maxWidth, maxHeight);
     return constraint_obj;
 }
