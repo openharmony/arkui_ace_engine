@@ -439,9 +439,7 @@ static ani_object StepsCurve([[maybe_unused]] ani_env* env, ani_double count, an
     interpolatingCurve->curve = OHOS::Ace::Framework::CreateCurve(curveString);
 
     ani_object curve_object;
-    if (ANI_OK != env->Object_New(cls, ctor, &curve_object, reinterpret_cast<ani_object>(interpolatingCurve))) {
-        return nullptr;
-    }
+    env->Object_New(cls, ctor, &curve_object, reinterpret_cast<ani_object>(interpolatingCurve));
     return curve_object;
 }
 

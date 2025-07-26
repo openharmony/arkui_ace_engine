@@ -487,10 +487,7 @@ static ani_object MatrixTransferStatic(ani_env *env, ani_object obj, ani_object 
     auto matrix = ConvertToMatrixArray(env, static_cast<ani_object>(input));
     auto matrix4Object = new Matrix4_Obj(matrix);
     ani_object matrix4ObjectCur;
-    if (ANI_OK != env->Object_New(cls, ctor, &matrix4ObjectCur, reinterpret_cast<ani_long>(matrix4Object))) {
-        ani_object nullobj = nullptr;
-        return nullobj;
-    }
+    env->Object_New(cls, ctor, &matrix4ObjectCur, reinterpret_cast<ani_long>(matrix4Object));
     return matrix4ObjectCur;
 }
 

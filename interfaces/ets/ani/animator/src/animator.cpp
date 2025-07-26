@@ -688,10 +688,7 @@ static ani_object AnimatorTransferStatic(ani_env *aniEnv, ani_object, ani_object
     animatorResult->SetMotion(motion);
     animatorResult->SetAnimatorOption(option);
     animatorResult->SetAnimator(animator);
-    if (ANI_OK != aniEnv->Object_New(cls, ctor, &animatorObj, reinterpret_cast<ani_long>(animatorResult))) {
-        TAG_LOGI(AceLogTag::ACE_ANIMATION, "[ANI] create animatorResult fail");
-        return animatorObj;
-    }
+    aniEnv->Object_New(cls, ctor, &animatorObj, reinterpret_cast<ani_long>(animatorResult));
     return animatorObj;
 }
 
@@ -906,11 +903,8 @@ void ANICreateSimpleAnimatorOptionsWithParam(ani_env* env, [[maybe_unused]] ani_
     JsSimpleAnimatorOption* simpleAnimatorOption = new JsSimpleAnimatorOption();
     simpleAnimatorOption->SetBegin(static_cast<double>(start));
     simpleAnimatorOption->SetEnd(static_cast<double>(end));
-    if (ANI_OK !=
-        env->Object_SetPropertyByName_Long(object, "SimpleAnimatorOptionsResult",
-            reinterpret_cast<ani_long>(simpleAnimatorOption))) {
-        return;
-    }
+    env->Object_SetPropertyByName_Long(
+        object, "SimpleAnimatorOptionsResult", reinterpret_cast<ani_long>(simpleAnimatorOption));
 }
 
 ani_object ANISetSimpleAnimatorDuration(ani_env* env, [[maybe_unused]] ani_object object,
