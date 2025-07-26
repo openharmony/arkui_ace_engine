@@ -411,10 +411,20 @@ class LocalStorage extends NativeLocalStorage {
         stateMgmtProfiler.end();
         return false;
       }
-      p.aboutToBeDeleted();
-      this.storage_.delete(propName);
-      stateMgmtProfiler.end();
-      return true;
+      if (InteropConfigureStateMgmt.instance.needsInterop()) {
+        if (!this.storage_.delete(propName)) {
+          return false;
+        }
+        p.aboutToBeDeleted();
+        stateMgmtProfiler.end();
+        return true;
+      }
+      else {
+        p.aboutToBeDeleted();
+        this.storage_.delete(propName);
+        stateMgmtProfiler.end();
+        return true;
+      }
     } else {
       stateMgmtConsole.debug(`${this.constructor.name}: Attempt to delete unknown property ${propName}.`);
       stateMgmtProfiler.end();
@@ -440,6 +450,15 @@ class LocalStorage extends NativeLocalStorage {
           has ${p.numberOfSubscrbers()} subscribers. Subscribers need to unsubscribe before prop deletion.
           Any @Component instance with a @StorageLink/Prop or @LocalStorageLink/Prop is a subscriber.`);
         stateMgmtProfiler.end();
+        return false;
+      }
+    }
+    if (InteropConfigureStateMgmt.instance.needsInterop()) {
+      if (
+        'checkClearKeyFunc_' in this.storage_ &&
+        typeof this.storage_.checkClearKeyFunc_ === 'function' &&
+        !this.storage_.checkClearKeyFunc_()
+      ) {
         return false;
       }
     }
