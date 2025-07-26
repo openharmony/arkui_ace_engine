@@ -15,15 +15,15 @@
 #include "bridge/arkts_frontend/arkts_frontend.h"
 
 #include <ani.h>
+
 #include "arkcompiler/runtime_core/static_core/plugins/ets/runtime/napi/ets_napi.h"
 #include "interfaces/inner_api/ace/constants.h"
-#include "ui/base/utils/utils.h"
 
 #include "bridge/arkts_frontend/arkts_ani_utils.h"
 #include "bridge/arkts_frontend/ani_context_module.h"
 #include "bridge/arkts_frontend/entry/arkts_entry_loader.h"
+#include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "frameworks/base/subwindow/subwindow_manager.h"
 
 namespace OHOS::Ace {
 UIContentErrorCode ArktsFrontend::RunPage(
@@ -295,11 +295,44 @@ void ArktsFrontend::AttachPipelineContext(const RefPtr<PipelineBase>& context)
     }
 }
 
+bool ArktsFrontend::OnBackPressed()
+{
+    CHECK_NULL_RETURN(pageRouterManager_, false);
+    auto pageNode = pageRouterManager_->GetCurrentPageNode();
+    CHECK_NULL_RETURN(pageNode, false);
+    auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+    CHECK_NULL_RETURN(pagePattern, false);
+    if (pagePattern->OnBackPressed()) {
+        return true;
+    }
+    return pageRouterManager_->Pop();
+}
+
+void ArktsFrontend::OnShow()
+{
+    CHECK_NULL_VOID(pageRouterManager_);
+    auto pageNode = pageRouterManager_->GetCurrentPageNode();
+    CHECK_NULL_VOID(pageNode);
+    auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+    CHECK_NULL_VOID(pagePattern);
+    pagePattern->OnShow();
+}
+
+void ArktsFrontend::OnHide()
+{
+    CHECK_NULL_VOID(pageRouterManager_);
+    auto pageNode = pageRouterManager_->GetCurrentPageNode();
+    CHECK_NULL_VOID(pageNode);
+    auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+    CHECK_NULL_VOID(pagePattern);
+    pagePattern->OnHide();
+}
+
 void* ArktsFrontend::GetShared(int32_t id)
 {
     int32_t currentInstance = id;
     if (currentInstance >= MIN_SUBCONTAINER_ID && currentInstance < MIN_PLUGIN_SUBCONTAINER_ID) {
-        currentInstance = SubwindowManager::GetInstance()->GetParentContainerId(currentInstance);
+        // currentInstance = SubwindowManager::GetInstance()->GetParentContainerId(currentInstance);
     }
     auto it = storageMap_.find(currentInstance);
     if (it == storageMap_.end()) {
@@ -365,5 +398,4 @@ void ArktsFrontend::SetAniContext(int32_t instanceId, ani_ref* context)
     std::shared_ptr<ani_ref> shared_ptr(context);
     Framework::AniContextModule::AddAniContext(instanceId, shared_ptr);
 }
-
 } // namespace OHOS::Ace
