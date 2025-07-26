@@ -277,6 +277,7 @@ arkui_files = [
   "arkui-preprocessed/arkui/component/symbolSpan.ets",
   "arkui-preprocessed/arkui/component/symbolglyph.ets",
   "arkui-preprocessed/arkui/component/tabContent.ets",
+  "arkui-preprocessed/arkui/component/tabsExtender.ets",
   "arkui-preprocessed/arkui/component/tabs.ets",
   "arkui-preprocessed/arkui/component/tabsops.ets",
   "arkui-preprocessed/arkui/component/test-api.ets",

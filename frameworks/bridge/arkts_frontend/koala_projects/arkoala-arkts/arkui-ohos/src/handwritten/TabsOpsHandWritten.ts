@@ -15,6 +15,8 @@
 
 import { KPointer, InteropNativeModule } from "@koalaui/interop"
 import { TabsOps, BarMode, ScrollableBarModeOptions, BlurStyle, BackgroundBlurStyleOptions, Bindable } from "../component"
+import { TabsExtender, ArkTabsComponent } from "../component"
+import { ArkUIGeneratedNativeModule } from "#components"
 
 export class TabsOpsHandWritten {
     static hookTabsAttributeBarModeImpl(node: KPointer, value: BarMode | undefined, options: ScrollableBarModeOptions | undefined) {
@@ -30,4 +32,8 @@ export class TabsOpsHandWritten {
             value.onChange(v)
         })
     }
+}
+
+export function hookTabsApplyAttributesFinish(node: ArkTabsComponent) : void {
+    TabsExtender.ApplyAttributesFinish(node.getPeer().peer.ptr)
 }

@@ -23066,6 +23066,10 @@ typedef struct GENERATED_ArkUITabsModifier {
                                     const Callback_Number_Void* callback);
 } GENERATED_ArkUITabsModifier;
 
+typedef struct GENERATED_ArkUITabsExtenderAccessor {
+    void (*ApplyAttributesFinish)(Ark_NativePointer node);
+} GENERATED_ArkUITabsExtenderAccessor;
+
 typedef struct GENERATED_ArkUITabContentModifier {
     Ark_NativePointer (*construct)(Ark_Int32 id,
                                    Ark_Int32 flags);
@@ -28373,6 +28377,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIBuilderNodeOpsAccessor* (*getBuilderNodeOpsAccessor)();
     const GENERATED_ArkUIPulseSymbolEffectAccessor* (*getPulseSymbolEffectAccessor)();
     const GENERATED_ArkUITabsControllerAccessor* (*getTabsControllerAccessor)();
+    const GENERATED_ArkUITabsExtenderAccessor* (*getTabsExtenderAccessor)();
     const GENERATED_ArkUITabContentTransitionProxyAccessor* (*getTabContentTransitionProxyAccessor)();
     const GENERATED_ArkUITextControllerAccessor* (*getTextControllerAccessor)();
     const GENERATED_ArkUITextAreaControllerAccessor* (*getTextAreaControllerAccessor)();

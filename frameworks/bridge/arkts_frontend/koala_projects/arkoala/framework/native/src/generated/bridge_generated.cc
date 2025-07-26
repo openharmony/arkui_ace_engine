@@ -35394,6 +35394,10 @@ Ark_NativePointer impl_TabsOps_registerBarBackgroundBlurStyle(Ark_NativePointer 
         return GetAccessors()->getTabsOpsAccessor()->registerBarBackgroundBlurStyle(node, (const Opt_BlurStyle*)&style_value, (const Opt_BackgroundBlurStyleOptions*)&options_value);
 }
 KOALA_INTEROP_DIRECT_3(TabsOps_registerBarBackgroundBlurStyle, Ark_NativePointer, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_TabsExtender_ApplyAttributesFinish(Ark_NativePointer node) {
+        GetAccessors()->getTabsExtenderAccessor()->ApplyAttributesFinish(node);
+}
+KOALA_INTEROP_DIRECT_V1(TabsExtender_ApplyAttributesFinish, Ark_NativePointer)
 void impl_IUIContext_freezeUINode0(const KStringPtr& id, Ark_Boolean isFrozen) {
         GetAccessors()->getIUIContextAccessor()->freezeUINode0((const Ark_String*) (&id), isFrozen);
 }
