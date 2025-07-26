@@ -25,23 +25,23 @@ const re = new RegExp("^\\[\\S+?]");
 export class ArkResource implements Resource {
     bundleName: string = "";
     moduleName: string = "";
-    params?: Array<Object | undefined> | undefined;
+    params?: Array<string | int | long | double | Resource> | undefined;
     type?: int32 | undefined;
     _id: long = -1;
 
-    castParams(params: Object[]): Array<Object | undefined> {
-        let result: Array<Object | undefined> = new Array<Object | undefined>();
+    castParams(params: Array<string | int | long | double | Resource>): Array<string | int | long | double | Resource> {
+        let result: Array<string | int | long | double | Resource> = new Array<string | int | long | double | Resource>();
         for (let param of params) {
             result.push(param);
         }
         return result;
     }
 
-    constructor(resourceName: string | null, bundleName: string, moduleName: string, ...params: Object[]) {
+    constructor(resourceName: string | null, bundleName: string, moduleName: string, ...params: Array<string | int | long | double | Resource>) {
         this.bundleName = bundleName;
         this.moduleName = moduleName;
         if (resourceName !== null) {
-            let param1 = new Array<Object | undefined>();
+            let param1 = new Array<string | int | long | double | Resource>();
             param1.push(resourceName);
             this.params = param1.concat(this.castParams(params));
         } else {
@@ -55,7 +55,7 @@ export class ArkResource implements Resource {
             InteropNativeModule._NativeLog("UI-Plugin do not send resourceName when id is -1");
         }
     }
-    constructor(id: long, type: int32, bundleName: string, moduleName: string, ...params: Object[]) {
+    constructor(id: long, type: int32, bundleName: string, moduleName: string, ...params: Array<string | int | long | double | Resource>) {
         this._id = id;
         this.type = type;
         this.params = this.castParams(params);
@@ -129,19 +129,19 @@ export class ArkResource implements Resource {
         return ResourceType.STRING;
     }
 }
-export function _r(bundleName: string, moduleName: string, name: string, ...params: Object[]): Resource {
+export function _r(bundleName: string, moduleName: string, name: string, ...params: Array<string | int | long | double | Resource>): Resource {
     return new ArkResource(name, bundleName, moduleName, ...params)
 }
 export function _rawfile(bundleName: string, moduleName: string, name: string): Resource {
     return new ArkResource(0, 30000, bundleName, moduleName, name);
 }
-export function _r(id: number, type: number, bundleName: string, moduleName: string, ...params: Object[]): Resource {
+export function _r(id: number, type: number, bundleName: string, moduleName: string, ...params: Array<string | int | long | double | Resource>): Resource {
     if (id === -1) {
         return new ArkResource(null, bundleName, moduleName, ...params);
     }
     return new ArkResource(id as long, type as int32, bundleName, moduleName, ...params);
 }
-export function _rawfile(id: number, type: number, bundleName: string, moduleName: string, ...params: Object[]): Resource {
+export function _rawfile(id: number, type: number, bundleName: string, moduleName: string, ...params: Array<string | int | long | double | Resource>): Resource {
     const name: string = params[0] as string;
     return _rawfile(bundleName, moduleName, name);
 }
