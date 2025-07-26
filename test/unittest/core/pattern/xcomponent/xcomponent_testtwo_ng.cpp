@@ -2047,6 +2047,7 @@ HWTEST_F(XComponentTestTwoNg, InitNativeNodeCallbacksTest, TestSize.Level1)
      * @tc.expected: All pointer is non-null.
      */
     g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    g_testProperty.libraryName = XCOMPONENT_LIBRARY_NAME;
     auto frameNode = CreateXComponentNode(g_testProperty);
     ASSERT_TRUE(frameNode);
     auto pattern = frameNode->GetPattern<XComponentPattern>();
@@ -2057,6 +2058,7 @@ HWTEST_F(XComponentTestTwoNg, InitNativeNodeCallbacksTest, TestSize.Level1)
      * @tc.expected: attachNativeNodeCallback_ is not null and detachNativeNodeCallback_ is not null.
      */
     pattern->InitNativeNodeCallbacks();
+    ASSERT_TRUE(pattern->nativeXComponentImpl_);
     EXPECT_TRUE(pattern->nativeXComponentImpl_->attachNativeNodeCallback_);
     EXPECT_TRUE(pattern->nativeXComponentImpl_->detachNativeNodeCallback_);
 }
