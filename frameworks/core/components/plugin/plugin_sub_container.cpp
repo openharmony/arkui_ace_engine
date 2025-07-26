@@ -67,7 +67,7 @@ void PluginSubContainer::Initialize(const std::string& codeLanguage)
     if (!container) {
         return;
     }
-    if (codeLanguage == OHOS::AppExecFwk::Constants::CODE_LANGUAGE_1_2) {
+    if (codeLanguage == OHOS::AppExecFwk::Constants::ARKTS_MODE_STATIC) {
         if (outSidePipelineContext->GetFrontendType() != FrontendType::ARK_TS) {
             TAG_LOGE(AceLogTag::ACE_PLUGIN_COMPONENT,
                 "codeLanguage %{public}s is not supported in frontend type %{public}d.",

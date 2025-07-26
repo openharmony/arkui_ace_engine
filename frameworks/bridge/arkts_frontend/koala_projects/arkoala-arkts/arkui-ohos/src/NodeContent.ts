@@ -30,6 +30,8 @@ export class NodeContentInternal {
 export class NodeContent implements MaterializedBase, Content {
     peer?: Finalizable | undefined = undefined
     nodeArray_: Array<FrameNode>;
+    // "nativePtr_" is used in "ace_engine/interfaces/native/node/native_node_ani.cpp"
+    private nativePtr_: KPointer | undefined;
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
@@ -40,6 +42,7 @@ export class NodeContent implements MaterializedBase, Content {
     constructor() {
         const ctorPtr: KPointer = NodeContent.ctor_nodecontent()
         this.peer = new Finalizable(ctorPtr, NodeContent.getFinalizer())
+        this.nativePtr_ = this.peer?.ptr;
         this.nodeArray_ = new Array<FrameNode>();
     }
     static getFinalizer(): KPointer {

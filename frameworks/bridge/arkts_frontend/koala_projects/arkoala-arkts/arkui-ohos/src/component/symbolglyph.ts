@@ -22,15 +22,16 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, AttributeModifier, StateStyles } from "./common"
 import { Resource } from "global.resource"
 import { ResourceColor } from "./units"
 import { FontWeight, Color } from "./enums"
-import { CallbackKind } from "./peers/CallbackKind"
-import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 
 import { Deserializer } from "./peers/Deserializer"
+import { SymbolGlyphModifier } from "../SymbolGlyphModifier"
+import { hookSymbolGlyphAttributeModifier } from "../handwritten"
+
 export enum EffectDirection {
     DOWN = 0,
     UP = 1
@@ -204,6 +205,7 @@ export class ReplaceSymbolEffect extends SymbolEffect implements MaterializedBas
     }
 }
 export class ArkSymbolGlyphPeer extends ArkCommonMethodPeer {
+    _attributeSet?: SymbolGlyphModifier;
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -444,14 +446,15 @@ export enum EffectFillStyle {
     ITERATIVE = 1
 }
 export interface SymbolGlyphAttribute extends CommonMethod {
-    fontSize(value: number | string | Resource | undefined): this
-    fontColor(value: Array<ResourceColor> | undefined): this
-    fontWeight(value: number | FontWeight | string | undefined): this
-    effectStrategy(value: SymbolEffectStrategy | undefined): this
-    renderingStrategy(value: SymbolRenderingStrategy | undefined): this
-    minFontScale(value: number | Resource | undefined): this
-    maxFontScale(value: number | Resource | undefined): this
-    symbolEffect(symbolEffect: SymbolEffect | undefined, isActive?: boolean | number): this
+    fontSize(value: number | string | Resource | undefined): this { return this; }
+    fontColor(value: Array<ResourceColor> | undefined): this { return this; }
+    fontWeight(value: number | FontWeight | string | undefined): this { return this; }
+    effectStrategy(value: SymbolEffectStrategy | undefined): this { return this; }
+    renderingStrategy(value: SymbolRenderingStrategy | undefined): this { return this; }
+    minFontScale(value: number | Resource | undefined): this { return this; }
+    maxFontScale(value: number | Resource | undefined): this { return this; }
+    symbolEffect(symbolEffect: SymbolEffect | undefined, isActive?: boolean | number): this { return this; }
+    attributeModifier(value: AttributeModifier<SymbolGlyphAttribute> | AttributeModifier<CommonMethod>| undefined): this { return this; }
 }
 export class ArkSymbolGlyphStyle extends ArkCommonMethodStyle implements SymbolGlyphAttribute {
     fontSize_value?: number | string | Resource | undefined
@@ -572,6 +575,11 @@ export class ArkSymbolGlyphComponent extends ArkCommonMethodComponent implements
             }
             throw new Error("Can not select appropriate overload")
         }
+        return this
+    }
+
+    public attributeModifier(modifier: AttributeModifier<SymbolGlyphAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        hookSymbolGlyphAttributeModifier(this, modifier);
         return this
     }
     

@@ -34,17 +34,25 @@ void DestroyPeerImpl(Ark_OffscreenCanvasRenderingContext2D peer)
         peerImpl->DecRefCount();
     }
 }
-Ark_OffscreenCanvasRenderingContext2D CtorImpl(const Ark_Number* width,
-                                               const Ark_Number* height,
-                                               const Opt_RenderingContextSettings* settings)
+Ark_OffscreenCanvasRenderingContext2D ConstructImpl(const Ark_Number* width,
+                                                    const Ark_Number* height,
+                                                    const Opt_RenderingContextSettings* settings,
+                                                    const Opt_LengthMetricsUnit* unit)
 {
     auto peerImpl = Referenced::MakeRefPtr<OffscreenCanvasRenderingContext2DPeerImpl>();
     peerImpl->IncRefCount();
+    auto offscreenContext = reinterpret_cast<OffscreenCanvasRenderingContext2DPeer*>(Referenced::RawPtr(peerImpl));
+    CHECK_NULL_RETURN(width, offscreenContext);
+    CHECK_NULL_RETURN(height, offscreenContext);
     auto fWidth = static_cast<double>(Converter::Convert<float>(*width));
     auto fHeight = static_cast<double>(Converter::Convert<float>(*height));
     auto optSettings = Converter::OptConvert<Ark_RenderingContextSettings>(*settings);
+    auto optUnit = Converter::OptConvertPtr<Ace::CanvasUnit>(unit);
+    if (unit->tag != INTEROP_TAG_UNDEFINED) {
+        peerImpl->SetUnit(optUnit.value());
+    }
     peerImpl->SetOptions(fWidth, fHeight, optSettings);
-    return reinterpret_cast<OffscreenCanvasRenderingContext2DPeer*>(Referenced::RawPtr(peerImpl));
+    return offscreenContext;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -78,7 +86,7 @@ const GENERATED_ArkUIOffscreenCanvasRenderingContext2DAccessor* GetOffscreenCanv
 {
     static const GENERATED_ArkUIOffscreenCanvasRenderingContext2DAccessor OffscreenCanvasRenderingContext2DAccessorImpl {
         OffscreenCanvasRenderingContext2DAccessor::DestroyPeerImpl,
-        OffscreenCanvasRenderingContext2DAccessor::CtorImpl,
+        OffscreenCanvasRenderingContext2DAccessor::ConstructImpl,
         OffscreenCanvasRenderingContext2DAccessor::GetFinalizerImpl,
         OffscreenCanvasRenderingContext2DAccessor::ToDataURLImpl,
         OffscreenCanvasRenderingContext2DAccessor::TransferToImageBitmapImpl,

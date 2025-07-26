@@ -39,15 +39,15 @@ void SetDrawableDescriptor(ArkUINodeHandle node, void* drawableDescriptor, int t
 void SetResizableLattice(ArkUINodeHandle node, void* aniLattice)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
-    auto lattice = DrawingLattice::CreateDrawingLatticeFromAni(aniLattice);
+    auto lattice = DrawingLattice::CreateDrawingLatticeFromNative(aniLattice);
     ImageModelStatic::SetResizableLattice(frameNode, lattice);
 }
 
 void SetDrawingColorFilter(ArkUINodeHandle node, void* aniColorFilter)
 {
-    // auto frameNode = reinterpret_cast<FrameNode*>(node);
-    // auto colorFilter = DrawingColorFilter::CreateDrawingColorFilterFromAni(aniColorFilter);
-    // ImageModelStatic::SetDrawingColorFilter(frameNode, colorFilter);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto colorFilter = DrawingColorFilter::CreateDrawingColorFilterFromNative(aniColorFilter);
+    ImageModelStatic::SetDrawingColorFilter(frameNode, colorFilter);
 }
 
 const ArkUIAniImageModifier* GetImageAniModifier()

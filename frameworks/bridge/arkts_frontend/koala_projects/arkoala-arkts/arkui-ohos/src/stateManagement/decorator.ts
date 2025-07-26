@@ -17,6 +17,8 @@ import { ObserveSingleton } from './base/observeSingleton';
 import { int32 } from '@koalaui/common';
 import { __StateMgmtFactoryImpl } from './base/stateMgmtFactory';
 import { ExtendableComponent } from '../component/extendableComponent';
+import { IBindingSource, ITrackedDecoratorRef } from './base/mutableStateMeta';
+import { IComputedDecoratorRef } from './decoratorImpl/decoratorComputed';
 
 export interface IDecoratedVariable {
     readonly varName: string;
@@ -24,8 +26,10 @@ export interface IDecoratedVariable {
 }
 
 export interface IDecoratedV1Variable<T> extends IDecoratedVariable {
-    registerWatchToSource(me: IDecoratedV1Variable<T>): void;
+    registerWatchToSource(me: IDecoratedV1Variable<T>): WatchIdType;
 }
+
+export interface IDecoratedV2Variable extends IDecoratedVariable {}
 
 export interface IDecoratedImmutableVariable<T> {
     get(): T;
@@ -41,6 +45,19 @@ export interface IDecoratedUpdatableVariable<T> {
 }
 
 export interface IStateDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV1Variable<T> {}
+
+export interface ILocalDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV2Variable {}
+
+export interface IParamDecoratedVariable<T>
+    extends IDecoratedImmutableVariable<T>,
+        IDecoratedUpdatableVariable<T>,
+        IDecoratedV2Variable {}
+
+export interface IParamOnceDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV2Variable {}
+
+export interface IProviderDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV2Variable {}
+
+export interface IConsumerDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV2Variable {}
 
 export interface IPropDecoratedVariable<T>
     extends IDecoratedMutableVariable<T>,
@@ -75,9 +92,7 @@ export interface ILocalStoragePropRefDecoratedVariable<T>
     extends IDecoratedMutableVariable<T>,
         IDecoratedV1Variable<T> {}
 
-export type LinkSourceType<T> = IStateDecoratedVariable<T> | ILinkDecoratedVariable<T> | IObjectLinkDecoratedVariable<T> |
-    IPropDecoratedVariable<T> | IPropRefDecoratedVariable<T> | IStorageLinkDecoratedVariable<T> | ILocalStorageLinkDecoratedVariable<T> |
-    IStoragePropRefDecoratedVariable<T> | ILocalStoragePropRefDecoratedVariable<T> | IProvideDecoratedVariable<T> | IConsumeDecoratedVariable<T>;
+export type LinkSourceType<T> = IDecoratedV1Variable<T>;
 
 export interface IMutableStateMeta {
     addRef(): void;
@@ -108,6 +123,21 @@ export const STATE_MGMT_FACTORY: IStateMgmtFactory = new __StateMgmtFactoryImpl(
 export interface IStateMgmtFactory {
     makeMutableStateMeta(): IMutableStateMeta;
     makeSubscribedWatches(): ISubscribedWatches;
+    makeLocal<T>(owningView: ExtendableComponent, varName: string, initValue: T): ILocalDecoratedVariable<T>;
+    makeParam<T>(owningView: ExtendableComponent, varName: string, initValue: T): IParamDecoratedVariable<T>;
+    makeParamOnce<T>(owningView: ExtendableComponent, varName: string, initValue: T): IParamOnceDecoratedVariable<T>;
+    makeProvider<T>(
+        owningView: ExtendableComponent,
+        varName: string,
+        provideAlias: string,
+        initValue: T
+    ): IProviderDecoratedVariable<T>;
+    makeConsumer<T>(
+        owningView: ExtendableComponent,
+        varName: string,
+        provideAlias: string,
+        initValue: T
+    ): IConsumerDecoratedVariable<T>;
     makeState<T>(
         owningView: ExtendableComponent,
         varName: string,
@@ -184,6 +214,8 @@ export interface IStateMgmtFactory {
         ttype: Type,
         watchFunc?: WatchFuncType
     ): ILocalStoragePropRefDecoratedVariable<T>;
+    makeComputed<T>(computeFunction: ComputeCallback<T>, varName: string): IComputedDecoratedVariable<T>;
+    makeMonitor(pathLabmda: IMonitorPathInfo[], monitorFunction: MonitorCallback): IMonitorDecoratedVariable;
 }
 
 export type WatchFuncType = (propertyName: string) => void;
@@ -198,3 +230,27 @@ export interface IWatchSubscriberRegister {
 export interface ISubscribedWatches extends IWatchSubscriberRegister {
     executeOnSubscribingWatches(propertyName: string): void;
 }
+
+export interface IComputedDecoratedVariable<T> extends IComputedDecoratorRef, IDecoratedImmutableVariable<T> {}
+
+export interface IMonitor {
+    readonly dirty: Array<string>;
+    value<T>(path?: string): IMonitorValue<T> | undefined;
+}
+
+export interface IMonitorDecoratedVariable {}
+
+export interface IMonitorPathInfo {
+    path: string;
+    valueCallback: MonitorValueCallback;
+}
+
+export interface IMonitorValue<T> {
+    before: T;
+    now: T;
+    readonly path: string;
+}
+
+export type MonitorValueCallback = () => Any;
+export type MonitorCallback = (m: IMonitor) => void;
+export type ComputeCallback<T> = () => T;

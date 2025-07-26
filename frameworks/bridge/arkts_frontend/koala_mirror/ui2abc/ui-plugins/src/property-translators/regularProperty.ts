@@ -33,7 +33,7 @@ export class regularPropertyTranslator extends PropertyTranslator implements Ini
     translateMember(): arkts.AstNode[] {
         const originalName: string = expectName(this.property.key);
         const newName: string = backingField(originalName);
-        this.cacheTranslatedInitializer(newName, originalName); // TODO: need to release cache after some point...
+        this.cacheTranslatedInitializer(newName, originalName); // Improve: need to release cache after some point...
         return this.translateWithoutInitializer(newName, originalName);
     }
 

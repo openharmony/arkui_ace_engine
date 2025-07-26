@@ -37,11 +37,11 @@ import { LengthMetrics } from "../../Graphics"
 import {  PixelMap, UniformDataType } from "#external"
 import { ResizableOptions } from "../../component/image"
 import { Filter, VisualEffect, BrightnessBlender } from "#external"
-import { CircleShape, EllipseShape, PathShape, RectShape } from "../../component/arkui-external"
+import { CircleShape, EllipseShape, PathShape, RectShape } from "@ohos/arkui/shape"
 import { FocusBoxStyle, FocusPriority } from "../../component/focus"
 import { TransformationMatrix } from "../../component/arkui-common"
 import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureType, GestureMask } from "../../component/gesture"
-import { ComponentContent } from "../../component/arkui-custom"
+import { ComponentContent } from 'arkui/ComponentContent'
 import { BlendMode } from "../../component/common"
 import { InteropNativeModule } from '@koalaui/interop';
 
@@ -683,7 +683,7 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
     }
     backgroundColor(value: ResourceColor | undefined): this {
         if (value != null) {
-            this.getPeer().backgroundColor1Attribute(value as ResourceColor);
+            this.getPeer().backgroundColor0Attribute(value as ResourceColor);
         }
         return this;
     }

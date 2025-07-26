@@ -16,7 +16,7 @@
 import * as arkts from "@koalaui/libarkts"
 import { factory } from "./MemoFactory"
 import { KPointer } from "@koalaui/interop"
-import { isMemoParametersDeclaration, PositionalIdTracker, RuntimeNames } from "./utils"
+import { PositionalIdTracker, RuntimeNames } from "./utils"
 
 export type ParamInfo = {
     ident: arkts.Identifier,
@@ -61,9 +61,7 @@ export class ParameterTransformer extends arkts.AbstractVisitor {
     }
 
     visitor(beforeChildren: arkts.AstNode): arkts.AstNode {
-        // TODO: temporary checking skip nodes by comparison with expected skip nodes
-        // Should be fixed when update procedure implemented properly
-        if (/* beforeChildren === this.skipNode */ isMemoParametersDeclaration(beforeChildren)) {
+        if (beforeChildren === this.skipNode) {
             return beforeChildren
         }
         if (arkts.isVariableDeclaration(beforeChildren) && this.rewriteIdentifiers?.has(beforeChildren.declarators[0].id!.originalPeer)) {
@@ -71,17 +69,17 @@ export class ParameterTransformer extends arkts.AbstractVisitor {
         }
         if (arkts.isCallExpression(beforeChildren)) {
             if (arkts.isIdentifier(beforeChildren.callee)) {
-                const decl = arkts.getPeerDecl(beforeChildren.callee.originalPeer) // TODO: here should be getDeclResolveGensym, but it would result in code not passing filterSource
+                const decl = arkts.getPeerDecl(beforeChildren.callee.originalPeer) // Improve: here should be getDeclResolveGensym, but it would result in code not passing filterSource
                 if (decl && this.rewriteCalls?.has(decl.originalPeer)) {
                     return this.rewriteCalls.get(decl.originalPeer)!(
-                        beforeChildren.arguments.map((it) => this.visitor(it) as arkts.Expression) // TODO: remove as
+                        beforeChildren.arguments.map((it) => this.visitor(it) as arkts.Expression) // Improve: remove as
                     )
                 }
             }
         }
         const node = this.visitEachChild(beforeChildren)
         if (arkts.isIdentifier(node)) {
-            const decl = arkts.getPeerDecl(node.originalPeer) // TODO: here should be getDeclResolveGensym, but it would result in code not passing filterSource
+            const decl = arkts.getPeerDecl(node.originalPeer) // Improve: here should be getDeclResolveGensym, but it would result in code not passing filterSource
             if (decl && this.rewriteIdentifiers?.has(decl.originalPeer)) {
                 return this.rewriteIdentifiers.get(decl.originalPeer)!()
             }

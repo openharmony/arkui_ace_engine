@@ -47,6 +47,7 @@ public:
         AsyncWorkHelper::AsyncExecFunc&& execFunc)
     {
         work_ = AsyncWorkHelper::CreateWork(vmContext, asyncWorker, std::move(execFunc));
+        AsyncWorkHelper::QueueWork(work_);
     }
 
     // Resolve the promise.
@@ -54,7 +55,6 @@ public:
     void Resolve(ArkResult&&... result) const
     {
         callback_.InvokeSync(std::forward<ArkResult>(result)..., Converter::ArkValue<Opt_Array_String>(Ark_Empty()));
-        AsyncWorkHelper::ResolveWork(work_);
     }
 
     // Reject the promise.
@@ -68,7 +68,6 @@ public:
         } else {
             callback_.InvokeSync(Converter::ArkValue<ArkResult>(Ark_Empty()), arkErrors);
         }
-        AsyncWorkHelper::RejectWork(work_);
     }
 
 private:

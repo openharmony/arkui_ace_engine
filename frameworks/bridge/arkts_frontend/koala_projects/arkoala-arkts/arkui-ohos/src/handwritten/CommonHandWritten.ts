@@ -19,6 +19,8 @@ import { Filter, VisualEffect, BrightnessBlender } from "#external"
 import { KPointer, RuntimeType, runtimeType } from "@koalaui/interop"
 import {ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
+import { ArkUIAniModule } from 'arkui.ani';
+import { CustomProperty } from '../component/common';
 
 export function hookCommonMethodGestureImpl(commonMethod: ArkCommonMethodComponent, gesture: GestureType | undefined, mask?: GestureMask): void {
     if (gesture instanceof Gesture) {
@@ -33,10 +35,10 @@ export function hookCommonMethodGestureImpl(commonMethod: ArkCommonMethodCompone
 export function hookCommonMethodPriorityGestureImpl(commonMethod: ArkCommonMethodComponent, gesture: GestureType | undefined, mask?: GestureMask): void {
     if (gesture instanceof Gesture) {
         let singleGesture = gesture as Gesture;
-        singleGesture.setGesture(2, commonMethod.getPeer(), mask);
+        singleGesture.setGesture(1, commonMethod.getPeer(), mask);
     } else {
         let gestureGroup = gesture as GestureGroup;
-        gestureGroup.addGestureGroupToNode(2, commonMethod.getPeer(), mask)
+        gestureGroup.addGestureGroupToNode(1, commonMethod.getPeer(), mask)
     }
 }
 
@@ -111,6 +113,9 @@ export function hookCommonMethodAdvancedBlendModeImpl(commonMethod: ArkCommonMet
     const node_casted = commonMethod.getPeer().peer.ptr as (KPointer)
     const type_casted = type as (BlendApplyType | undefined)
     if (runtimeType(effect) == RuntimeType.OBJECT) {
+        if (!effect.hasOwnProperty('brightnessBlenderNativeObj')) {
+            return;
+        }
         const value_casted = Object.values(effect)[0] as (int64)
         commonMethodOps.AdvancedBlendModeObjectImpl(node_casted, value_casted, type_casted)
     } else {
@@ -124,4 +129,35 @@ export class CommonMethodHandWritten {
     static hookCommonMethodAnimateToImmediatelyImpl(value: AnimateParam, event: (() => void)): void {
         AnimationExtender.AnimateToImmediatelyImpl(value, event);
     }
+}
+
+export class ElementIdToCustomProperties {
+    constructor() { }
+    static instance_: ElementIdToCustomProperties = new ElementIdToCustomProperties();
+    static _elementIdToCustomProperties = new Map<number, Map<string, CustomProperty>>();
+}
+export function hookCustomPropertyImpl(arkComponent: ArkCommonMethodComponent,
+    name: string, value: CustomProperty): void {
+    const nodeId = arkComponent.getPeer().getId();
+    if (!ElementIdToCustomProperties._elementIdToCustomProperties.has(nodeId)) {
+        ElementIdToCustomProperties._elementIdToCustomProperties.set(nodeId, new Map<string, CustomProperty>());
+    }
+    const customProperties = ElementIdToCustomProperties._elementIdToCustomProperties.get(nodeId);
+    if (customProperties) {
+        customProperties.set(name, value);
+    }
+    const removeCallback: () => void = () => {
+        ElementIdToCustomProperties._elementIdToCustomProperties.delete(nodeId);
+    };
+    const getCallback: (name: string) => string | undefined = (name: string) => {
+        if (ElementIdToCustomProperties._elementIdToCustomProperties.has(nodeId)) {
+            const customPropertiesGet = ElementIdToCustomProperties._elementIdToCustomProperties.get(nodeId);
+            if (customPropertiesGet) {
+                const propertyValue = customPropertiesGet.get(name);
+                return propertyValue !== undefined ? JSON.stringify(propertyValue) : undefined;
+            }
+        }
+        return undefined;
+    };
+    ArkUIAniModule._Common_SetCustomPropertyCallBack(arkComponent.getPeer().getPeerPtr(), removeCallback, getCallback);
 }

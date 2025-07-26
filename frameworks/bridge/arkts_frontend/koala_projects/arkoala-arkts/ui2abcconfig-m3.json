@@ -74,6 +74,9 @@
             "@ohos/graphics/drawing": [
                 "@ohos.graphics.drawing.ets"
             ],
+            "@ohos/intl": [
+                "@ohos.intl.ets"
+            ],
             "@ohos/arkui/graphics": [
                 "@ohos.arkui.graphics.ets"
             ],
@@ -94,6 +97,9 @@
             ],
             "@ohos/arkui/componentSnapshot": [
                 "@ohos.arkui.componentSnapshot.ets"
+            ],
+            "@ohos/arkui/shape": [
+                "@ohos.arkui.shape.ets"
             ],
             "@ohos.multimodalInput.intentionCode": [
                 "@ohos.multimodalInput.intentionCode.ets"

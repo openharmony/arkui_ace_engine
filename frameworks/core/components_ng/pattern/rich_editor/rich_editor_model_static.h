@@ -23,6 +23,7 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT RichEditorModelStatic : public OHOS::Ace::RichEditorModel {
 public:
     static RefPtr<NG::FrameNode> CreateFrameNode(int32_t nodeId);
+    static void InitRichEditorModel(RefPtr<FrameNode> frameNode);
     static RefPtr<RichEditorBaseControllerBase> GetRichEditorController(FrameNode* frameNode);
     static RefPtr<RichEditorBaseControllerBase> GetRichEditorStyledStringController(FrameNode* frameNode);
     static bool IsStyledStringMode(FrameNode* frameNode);

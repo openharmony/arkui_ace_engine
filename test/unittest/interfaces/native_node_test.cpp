@@ -7435,4 +7435,178 @@ HWTEST_F(NativeNodeTest, NativeNodeTest147, TestSize.Level1)
     ret = OH_ArkUI_NodeUtils_GetLayoutPositionInGlobalDisplay(nullptr, &offset);
     EXPECT_EQ(ret, ERROR_CODE_PARAM_INVALID);
 }
+
+/**
+ * @tc.name: NativeThreadSafeNodeTest001
+ * @tc.desc: Test IsValidArkUINode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeThreadSafeNodeTest001, TestSize.Level1)
+{
+    EXPECT_EQ(NodeModel::IsValidArkUINode(nullptr), false);
+
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto notThreadSafeNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    EXPECT_EQ(NodeModel::IsValidArkUINode(notThreadSafeNode), true);
+    nodeAPI->disposeNode(notThreadSafeNode);
+
+    auto nodeAPI2 = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_MULTI_THREAD_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto threadSafeNode = nodeAPI2->createNode(ARKUI_NODE_STACK);
+    EXPECT_EQ(NodeModel::IsValidArkUINode(threadSafeNode), true);
+    nodeAPI2->disposeNode(threadSafeNode);
+}
+
+/**
+ * @tc.name: NativeThreadSafeNodeTest002
+ * @tc.desc: Test GetNativeNodeEventType
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeThreadSafeNodeTest002, TestSize.Level1)
+{
+    ArkUINodeEvent event;
+    event.extraParam = reinterpret_cast<ArkUI_Int64>(nullptr);
+    EXPECT_EQ(NodeModel::GetNativeNodeEventType(&event), -1);
+
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto notThreadSafeNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ArkUINodeEvent event1;
+    event1.extraParam = reinterpret_cast<ArkUI_Int64>(notThreadSafeNode);
+    EXPECT_EQ(NodeModel::GetNativeNodeEventType(&event1), -1);
+    nodeAPI->disposeNode(notThreadSafeNode);
+
+    auto nodeAPI2 = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_MULTI_THREAD_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto threadSafeNode = nodeAPI2->createNode(ARKUI_NODE_STACK);
+    ArkUINodeEvent event2;
+    event2.extraParam = reinterpret_cast<ArkUI_Int64>(threadSafeNode);
+    EXPECT_EQ(NodeModel::GetNativeNodeEventType(&event2), -1);
+    nodeAPI2->disposeNode(threadSafeNode);
+}
+
+/**
+ * @tc.name: NativeThreadSafeNodeTest003
+ * @tc.desc: Test clearChildren
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeThreadSafeNodeTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create not thread safe native node
+     */
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));\
+    ASSERT_NE(nodeAPI, nullptr);
+    auto notThreadSafeNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    auto notThreadSafeChildNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(notThreadSafeNode, nullptr);
+    ASSERT_NE(notThreadSafeChildNode, nullptr);
+    /**
+     * @tc.steps: step2. add not thread safe child
+     */
+    nodeAPI->addChild(notThreadSafeNode, notThreadSafeChildNode);
+    EXPECT_EQ(nodeAPI->getTotalChildCount(notThreadSafeNode), 1);
+    /**
+     * @tc.steps: step3. not thread safe native node remove all children
+     */
+    nodeAPI->removeAllChildren(notThreadSafeNode);
+    ASSERT_NE(notThreadSafeChildNode->uiNodeHandle, nullptr);
+    auto* childNode = reinterpret_cast<NG::UINode*>(notThreadSafeChildNode->uiNodeHandle);
+    ASSERT_NE(childNode, nullptr);
+    EXPECT_EQ(childNode->isRemoving_, true);
+    EXPECT_EQ(nodeAPI->getTotalChildCount(notThreadSafeNode), 0);
+    nodeAPI->disposeNode(notThreadSafeNode);
+    nodeAPI->disposeNode(notThreadSafeChildNode);
+
+    /**
+     * @tc.steps: step4. create thread safe native node
+     */
+    auto nodeAPI2 = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_MULTI_THREAD_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI2, nullptr);
+    auto threadSafeNode = nodeAPI2->createNode(ARKUI_NODE_STACK);
+    auto threadSafeChildNode = nodeAPI2->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(threadSafeNode, nullptr);
+    ASSERT_NE(threadSafeChildNode, nullptr);
+    /**
+     * @tc.steps: step5. add thread safe child
+     */
+    nodeAPI2->addChild(threadSafeNode, threadSafeChildNode);
+    EXPECT_EQ(nodeAPI2->getTotalChildCount(threadSafeNode), 1);
+    /**
+     * @tc.steps: step6. thread safe native node remove all children
+     */
+    nodeAPI2->removeAllChildren(threadSafeNode);
+    ASSERT_NE(threadSafeChildNode->uiNodeHandle, nullptr);
+    auto* freeChildUINode = reinterpret_cast<NG::UINode*>(threadSafeChildNode->uiNodeHandle);
+    ASSERT_NE(freeChildUINode, nullptr);
+    EXPECT_EQ(freeChildUINode->isRemoving_, false);
+    EXPECT_EQ(nodeAPI2->getTotalChildCount(threadSafeNode), 0);
+    nodeAPI2->disposeNode(threadSafeNode);
+    nodeAPI2->disposeNode(threadSafeChildNode);
+}
+
+/**
+ * @tc.name: NativeThreadSafeNodeTest004
+ * @tc.desc: Test removeChild
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeThreadSafeNodeTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create not thread safe native node
+     */
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));\
+    ASSERT_NE(nodeAPI, nullptr);
+    auto notThreadSafeNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    auto notThreadSafeChildNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(notThreadSafeNode, nullptr);
+    ASSERT_NE(notThreadSafeChildNode, nullptr);
+    /**
+     * @tc.steps: step2. add not thread safe child
+     */
+    nodeAPI->addChild(notThreadSafeNode, notThreadSafeChildNode);
+    EXPECT_EQ(nodeAPI->getTotalChildCount(notThreadSafeNode), 1);
+    /**
+     * @tc.steps: step3. remove not thread safe child
+     */
+    nodeAPI->removeChild(notThreadSafeNode, notThreadSafeChildNode);
+    ASSERT_NE(notThreadSafeChildNode->uiNodeHandle, nullptr);
+    auto* childNode = reinterpret_cast<NG::UINode*>(notThreadSafeChildNode->uiNodeHandle);
+    ASSERT_NE(childNode, nullptr);
+    EXPECT_EQ(childNode->isRemoving_, true);
+    EXPECT_EQ(nodeAPI->getTotalChildCount(notThreadSafeNode), 0);
+    nodeAPI->disposeNode(notThreadSafeNode);
+    nodeAPI->disposeNode(notThreadSafeChildNode);
+
+    /**
+     * @tc.steps: step4. create thread safe native node
+     */
+    auto nodeAPI2 = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_MULTI_THREAD_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI2, nullptr);
+    auto threadSafeNode = nodeAPI2->createNode(ARKUI_NODE_STACK);
+    auto threadSafeChildNode = nodeAPI2->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(threadSafeNode, nullptr);
+    ASSERT_NE(threadSafeChildNode, nullptr);
+    /**
+     * @tc.steps: step5. add thread safe child
+     */
+    nodeAPI->addChild(threadSafeNode, threadSafeChildNode);
+    EXPECT_EQ(nodeAPI2->getTotalChildCount(threadSafeNode), 1);
+    /**
+     * @tc.steps: step6. remove thread safe child
+     */
+    nodeAPI2->removeChild(threadSafeNode, threadSafeChildNode);
+    ASSERT_NE(threadSafeChildNode->uiNodeHandle, nullptr);
+    auto* freeChildUINode = reinterpret_cast<NG::UINode*>(threadSafeChildNode->uiNodeHandle);
+    ASSERT_NE(freeChildUINode, nullptr);
+    EXPECT_EQ(freeChildUINode->isRemoving_, false);
+    EXPECT_EQ(nodeAPI2->getTotalChildCount(threadSafeNode), 0);
+    nodeAPI2->disposeNode(threadSafeNode);
+    nodeAPI2->disposeNode(threadSafeChildNode);
+}
 } // namespace OHOS::Ace

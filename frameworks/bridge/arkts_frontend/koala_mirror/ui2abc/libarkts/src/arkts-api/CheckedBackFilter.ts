@@ -57,7 +57,7 @@ export class CheckedBackFilter extends ContextAwareVisitor {
         return node.arguments[1]
     }
     transformEnum(node: ClassDefinition): AstNode {
-        return TSEnumDeclaration.createTSEnumDeclaration(
+        return TSEnumDeclaration.create1TSEnumDeclaration(
             node.ident,
             node.body.map(it => {
                 const member: ClassElement = it as ClassElement
@@ -90,7 +90,7 @@ export class CheckedBackFilter extends ContextAwareVisitor {
         )
     }
     transformScopedEnum(node:TSEnumDeclaration): TSEnumDeclaration {
-        return TSEnumDeclaration.createTSEnumDeclaration(
+        return TSEnumDeclaration.create1TSEnumDeclaration(
             node.key,
             node.members,
             node.isConst,

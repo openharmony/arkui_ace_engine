@@ -430,7 +430,7 @@ std::string PluginPattern::GetPackageCodeLanguage(const RequestPluginInfo& info)
     if (!ret) {
         return codeLanguage;
     }
-    return bundleInfo.applicationInfo.codeLanguage;
+    return bundleInfo.applicationInfo.arkTSMode;
 }
 
 std::string PluginPattern::GetPackagePath(const WeakPtr<PluginPattern>& weak, RequestPluginInfo& info) const

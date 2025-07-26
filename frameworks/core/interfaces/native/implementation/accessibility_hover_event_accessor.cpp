@@ -61,7 +61,6 @@ Ark_Number GetXImpl(Ark_AccessibilityHoverEvent peer)
     auto info = peer->GetEventInfo();
     CHECK_NULL_RETURN(info, DefaultValueArkNumber);
     const auto& localLocation = info->GetLocalLocation();
-    LOGE("Arkoala method AccessibilityHoverEventAccessor.GetXImpl return int32_t value");
     const auto value = PipelineBase::Px2VpWithCurrentDensity(localLocation.GetX());
     return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(value));
 }
@@ -85,7 +84,6 @@ Ark_Number GetYImpl(Ark_AccessibilityHoverEvent peer)
     auto info = peer->GetEventInfo();
     CHECK_NULL_RETURN(info, DefaultValueArkNumber);
     const auto& localLocation = info->GetLocalLocation();
-    LOGE("Arkoala method AccessibilityHoverEventAccessor.GetYImpl return int32_t value");
     const auto value = PipelineBase::Px2VpWithCurrentDensity(localLocation.GetY());
     return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(value));
 }

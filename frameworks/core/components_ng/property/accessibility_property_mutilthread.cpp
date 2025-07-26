@@ -22,34 +22,50 @@
 namespace OHOS::Ace::NG {
 void AccessibilityProperty::SetAccessibilityGroupMultiThread()
 {
-    NotifyComponentChangeEventMultiThread(AccessibilityEventType::ELEMENT_INFO_CHANGE);
+    // no need send event when node is free
 }
 
 void AccessibilityProperty::SetAccessibilityTextWithEventMultiThread()
 {
-    NotifyComponentChangeEventMultiThread(AccessibilityEventType::TEXT_CHANGE);
+    // no need send event when node is free
 }
 
 void AccessibilityProperty::SetAccessibilityDescriptionWithEventMultiThread()
 {
-    NotifyComponentChangeEventMultiThread(AccessibilityEventType::TEXT_CHANGE);
+    // no need send event when node is free
 }
 
 void AccessibilityProperty::SetAccessibilityLevelMultiThread(const std::string& backupLevel)
 {
-    if (backupLevel != accessibilityLevel_.value_or("")) {
-        NotifyComponentChangeEventMultiThread(AccessibilityEventType::ELEMENT_INFO_CHANGE);
-    }
+    // no need send event when node is free
 }
 
 void AccessibilityProperty::NotifyComponentChangeEventMultiThread(AccessibilityEventType eventType)
 {
     auto frameNode = host_.Upgrade();
     CHECK_NULL_VOID(frameNode);
-    frameNode->PostAfterAttachMainTreeTask([weak = WeakClaim(this), eventType]() {
+    frameNode->PostAfterAttachMainTreeTask([weak = WeakPtr(frameNode)]() {
+        if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            auto pipeline = frameNode->GetContext();
+            CHECK_NULL_VOID(pipeline);
+            pipeline->AddAccessibilityCallbackEvent(AccessibilityCallbackEventId::ON_SEND_ELEMENT_INFO_CHANGE,
+                                                    frameNode->GetAccessibilityId());
+        }
+    });
+}
+
+void AccessibilityProperty::SetAccessibilityNextFocusInspectorKeyMultiThread(
+    const std::string& accessibilityNextFocusInspectorKey)
+{
+    auto frameNode = host_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->PostAfterAttachMainTreeTask([weak = WeakClaim(this), accessibilityNextFocusInspectorKey]() {
         auto host = weak.Upgrade();
         CHECK_NULL_VOID(host);
-        host->NotifyComponentChangeEvent(eventType);
+        // no need send event when node is free
+        host->UpdateAccessibilityNextFocusIdMap(accessibilityNextFocusInspectorKey);
     });
 }
 } // namespace OHOS::Ace::NG

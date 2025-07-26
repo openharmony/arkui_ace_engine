@@ -594,6 +594,7 @@ ohos_unittest("native_node_napi_test") {
     "$ace_root/interfaces/native/node/event_converter.cpp",
     "$ace_root/interfaces/native/node/gesture_impl.cpp",
     "$ace_root/interfaces/native/node/native_impl.cpp",
+    "$ace_root/interfaces/native/node/native_node_ani.cpp",
     "$ace_root/interfaces/native/node/native_node_extented.cpp",
     "$ace_root/interfaces/native/node/native_node_napi.cpp",
     "$ace_root/interfaces/native/node/node_extened.cpp",
@@ -604,6 +605,7 @@ ohos_unittest("native_node_napi_test") {
     "$ace_root/interfaces/native/node/node_utils.cpp",
     "$ace_root/interfaces/native/node/progress_option.cpp",
     "$ace_root/interfaces/native/node/style_modifier.cpp",
+    "native_node_ani_test.cpp",
     "native_node_napi_test.cpp",
     "native_node_test.cpp",
   ]
@@ -650,6 +652,7 @@ ohos_unittest("native_node_napi_test") {
     "image_framework:image",
     "image_framework:image_native",
     "napi:ace_napi",
+    "runtime_core:ani",
     "resource_management:global_resmgr",
   ]
 }

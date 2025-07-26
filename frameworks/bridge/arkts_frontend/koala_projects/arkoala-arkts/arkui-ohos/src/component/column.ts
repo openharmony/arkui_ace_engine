@@ -29,10 +29,12 @@ import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Resource } from "global.resource"
 import { ArkColumnNode } from '../handwritten/modifiers/ArkColumnNode';
-import { ArkColumnAttributeSet, ColumnModifier } from '../ColumnModifier';
+import { ColumnModifier } from '../ColumnModifier'
+import { hookColumnAttributeModifier } from '../handwritten'
 
 export class ArkColumnPeer extends ArkCommonMethodPeer {
-    protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    _attributeSet?:ColumnModifier;
+    constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component: ComponentBase | undefined, flags: int32 = 0): ArkColumnPeer {
@@ -134,10 +136,11 @@ export interface ColumnOptionsV2 {
     stub: string;
 }
 export interface ColumnAttribute extends CommonMethod {
-    alignItems(value: HorizontalAlign | undefined): this
-    justifyContent(value: FlexAlign | undefined): this
-    pointLight(value: PointLightStyle | undefined): this
-    reverse(value: boolean | undefined): this
+    alignItems(value: HorizontalAlign | undefined): this {return this;}
+    justifyContent(value: FlexAlign | undefined): this {return this;}
+    pointLight(value: PointLightStyle | undefined): this {return this;}
+    reverse(value: boolean | undefined): this {return this;}
+    attributeModifier(value: AttributeModifier<ColumnAttribute> | AttributeModifier<CommonMethod>| undefined): this { return this;}
 }
 export class ArkColumnStyle extends ArkCommonMethodStyle implements ColumnAttribute {
     alignItems_value?: HorizontalAlign | undefined
@@ -158,30 +161,6 @@ export class ArkColumnStyle extends ArkCommonMethodStyle implements ColumnAttrib
     }
 }
 export class ArkColumnComponent extends ArkCommonMethodComponent implements ColumnAttribute {
-    protected _modifierHost: ArkColumnNode | undefined;
-    setModifierHost(value: ArkColumnNode): void {
-        this._modifierHost = value;
-    }
-    getModifierHost(): ArkColumnNode {
-        if (this._modifierHost === undefined || this._modifierHost === null) {
-            this._modifierHost = new ArkColumnNode();
-            this._modifierHost!.setPeer(this.getPeer());
-        }
-        return this._modifierHost!;
-    }
-    getAttributeSet(): ArkColumnAttributeSet  {
-        return this.getPeer()._attributeSet as ArkColumnAttributeSet;
-    }
- 
-    initAttributeSet<T>(modifier: AttributeModifier<T>): void {
-        let isCommonModifier: boolean = modifier instanceof ColumnModifier;
-        if (isCommonModifier) {
-            let commonModifier = modifier as object as ColumnModifier;
-            this.getPeer()._attributeSet = commonModifier.attributeSet;
-        } else if (this.getPeer()._attributeSet == null) {
-            this.getPeer()._attributeSet = new ArkColumnAttributeSet();
-        }
-    }
     getPeer(): ArkColumnPeer {
         return (this.peer as ArkColumnPeer)
     }
@@ -235,6 +214,11 @@ export class ArkColumnComponent extends ArkCommonMethodComponent implements Colu
         return this
     }
     
+    public attributeModifier(modifier: AttributeModifier<ColumnAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        hookColumnAttributeModifier(this, modifier)
+        return this
+    }
+
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()

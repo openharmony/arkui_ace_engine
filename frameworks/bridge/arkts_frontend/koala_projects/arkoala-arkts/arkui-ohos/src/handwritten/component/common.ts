@@ -1,9 +1,16 @@
-import { GestureOps } from "./arkui-custom"
+import { GestureOps, OverlayOps } from "./arkui-custom"
 import { GestureGroupHandler } from "./gesture"
 import { ArkUIAniModule } from "arkui.ani"
 import { int32 } from "@koalaui/common"
 import { AnimateParam } from "../component"
 import { CommonMethodHandWritten } from "./../handwritten"
+import { KPointer } from "@koalaui/interop"
+import { ComponentContent } from 'arkui/ComponentContent'
+import { ArkCommonMethodComponent, CustomBuilder, OverlayOptions } from 'arkui/component'
+import { runtimeType, RuntimeType, toPeerPtr} from "@koalaui/interop"
+import { FrameNode } from "arkui/FrameNode"
+import { WrappedBuilder } from './builder'
+
 export function applyStyles<T extends CommonMethod>(this: T, customStyles: CustomStyles): T {
     customStyles(this);
     return this;
@@ -179,4 +186,37 @@ export class ChildrenMainSize {
     public clearChanges(): void {
         this.changeArray.splice(0);
     }
+}
+
+export function hookOverlayImpl(node: ArkCommonMethodComponent, value: string | CustomBuilder | ComponentContent | undefined, options?: OverlayOptions) : void {
+    let value_type : int32 = RuntimeType.UNDEFINED
+    value_type = runtimeType(value)
+    if ((RuntimeType.UNDEFINED) !== (value_type)) {
+        if (value instanceof ComponentContent) {
+            const value_component = value as ComponentContent
+            let frameNode = value_component.getFrameNode()
+            if (frameNode === undefined || frameNode === null) {
+                ArkUIAniModule._SetOverlay_ComponentContent(node.getPeer().getPeerPtr(), 0, options)
+                return
+            }
+            let nodePtr = toPeerPtr(frameNode as FrameNode) as KPointer
+            ArkUIAniModule._SetOverlay_ComponentContent(node.getPeer().getPeerPtr(), nodePtr, options)
+            return
+        }
+    }
+    const value_const = value as (string | CustomBuilder| undefined)
+    OverlayOps.setOverlayAttribute(node.getPeer().getPeerPtr(), value_const, options)
+}
+
+export type CustomBuilderT<T> =
+/** @memo */
+(t: T) => void;
+
+export interface ContentModifier<T> {
+    applyContent(): WrappedBuilder<CustomBuilderT<T>>;
+}
+
+export interface CommonConfiguration<T> {
+    enabled: boolean;
+    contentModifier: ContentModifier<T>;
 }

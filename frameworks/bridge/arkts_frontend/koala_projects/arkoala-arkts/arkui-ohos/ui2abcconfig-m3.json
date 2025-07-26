@@ -64,11 +64,17 @@
             "@ohos/arkui/observer": [
                 "./@ohos.arkui.observer.ts"
             ],
+            "@ohos/arkui/shape": [ 
+                "./@ohos.arkui.shape.ts"
+            ],
             "@ohos/graphics/common2D": [
                 "./@ohos.graphics.common2D.ts"
             ],
             "@ohos/graphics/drawing": [
                 "./@ohos.graphics.drawing.ts"
+            ],
+            "@ohos/intl": [
+                "./@ohos.intl.ts"
             ],
             "@ohos/arkui/graphics": [
                 "./@ohos.arkui.graphics.ts"
@@ -113,10 +119,12 @@
         "./@ohos.arkui.componentSnapshot.ts",
         "./@ohos.arkui.inspector.ts",
         "./global/**/*.ts",
+        "./@ohos.arkui.shape.ts",
         "./@ohos.router.ts",
         "./@ohos.arkui.observer.ts",
         "./@ohos.graphics.common2D.ts",
         "./@ohos.graphics.drawing.ts",
+        "./@ohos.intl.ts",
         "./@ohos.arkui.graphics.ts",
         "./@ohos.overlayManager.ts",
         "./@ohos.promptAction.ts"

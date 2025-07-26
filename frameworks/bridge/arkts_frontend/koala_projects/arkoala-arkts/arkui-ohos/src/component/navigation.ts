@@ -30,7 +30,8 @@ import { ArkCommonMethodPeer, CommonMethod, CustomBuilder, LayoutSafeAreaType, L
 import { Length, Dimension, ResourceStr, PX, VP, FP, LPX, Percentage, ResourceColor } from "./units"
 import { PixelMap } from "#external"
 import { Resource } from "global.resource"
-import { SymbolGlyphModifier, TextModifier } from "./arkui-external"
+import { TextModifier } from "./arkui-external"
+import { SymbolGlyphModifier } from "../SymbolGlyphModifier"
 import { SystemBarStyle } from "./arkui-custom"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { TitleHeight } from "./enums"
@@ -163,6 +164,9 @@ export class NavPathStack implements MaterializedBase {
     }
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._NavPathStack_getFinalizer()
+    }
+    static getParamWithNavDestinationId(navDestinationId: string): Object | null | undefined {
+        return PathStackUtils.getParamByNavDestinationId(navDestinationId);
     }
     public pushPath(info: NavPathInfo, animated?: boolean | undefined): void {
         PathStackUtils.pushPath(this, info, animated)

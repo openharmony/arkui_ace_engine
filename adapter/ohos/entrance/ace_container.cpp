@@ -4850,39 +4850,4 @@ UIContentErrorCode AceContainer::RunIntentPage()
     CHECK_NULL_RETURN(front, UIContentErrorCode::NULL_POINTER);
     return front->RunIntentPage();
 }
-
-bool AceContainer::IsPcOrPadFreeMultiWindowMode() const
-{
-    CHECK_NULL_RETURN(uiWindow_, false);
-    return uiWindow_->IsPcOrPadFreeMultiWindowMode();
-}
-
-bool AceContainer::SetSystemBarEnabled(SystemBarType type, bool enable, bool animation)
-{
-    CHECK_NULL_RETURN(uiWindow_, false);
-    Rosen::WindowType winType;
-    switch (type) {
-        case SystemBarType::STATUS:
-            winType = Rosen::WindowType::WINDOW_TYPE_STATUS_BAR;
-            break;
-        case SystemBarType::NAVIGATION_INDICATOR:
-            winType = Rosen::WindowType::WINDOW_TYPE_NAVIGATION_INDICATOR;
-            break;
-        default:
-            return false;
-    }
-    auto property = uiWindow_->GetSystemBarPropertyByType(winType);
-    property.enable_ = enable;
-    property.enableAnimation_ = animation;
-    property.settingFlag_ = static_cast<Rosen::SystemBarSettingFlag>(
-        static_cast<int32_t>(property.settingFlag_) |
-        static_cast<int32_t>(Rosen::SystemBarSettingFlag::ENABLE_SETTING));
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Set SystemBar: type:%{public}d, enable:%{public}d, animation:%{public}d",
-        static_cast<int32_t>(type), enable, animation);
-    if (Rosen::WMError::WM_OK != uiWindow_->SetSpecificBarProperty(winType, property)) {
-        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "Failed to set systemBar property");
-        return false;
-    }
-    return true;
-}
 } // namespace OHOS::Ace::Platform

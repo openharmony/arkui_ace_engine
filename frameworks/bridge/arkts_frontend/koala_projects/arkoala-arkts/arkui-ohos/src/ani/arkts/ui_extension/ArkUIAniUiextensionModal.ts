@@ -47,8 +47,8 @@ export class ArkUIAniUiextensionModal {
         ArkUIAniUiextensionLoadLibraryHelp.LoadLibrary();
     }
 
-    native static _Uiextension_Set_Option(nodePointer: KLong, option: ArkUIAniUIExtensionOptions): void
-    native static _Uiextension_Set_Want(nodePointer: KLong, want: Want): void
+    native static _Uiextension_Set_Option(nodePointer: KLong, option: ArkUIAniUIExtensionOptions): void;
+    native static _Uiextension_Set_Want(nodePointer: KLong, want: Want): void;
     native static _Uiextension_Set_OnResultCallback(nodePointer: KLong, value: ResultCallback) : void;
     native static _Uiextension_Set_OnErrorCallback(nodePointer: KLong, value: ErrorCallback) : void;
     native static _Uiextension_Set_OnReciveCallback(nodePointer: KLong, value: ReciveCallback) : void;

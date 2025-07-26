@@ -27,16 +27,18 @@ export class PropertyDescriptor {
 }
 
 export class StructDescriptor {
-    constructor(public name: string, public properties: PropertyDescriptor[]) { }
+    constructor(public name: string, public annotations: string[], public properties: PropertyDescriptor[]) { }
     static fromJSON(parsed: any): StructDescriptor[] {
-        return parsed.structs.map((struct: any) => new StructDescriptor(struct.name,
+        return parsed.structs.map((struct: any) => new StructDescriptor(struct.name, struct.annotations,
             struct.properties.map((property: any) =>
                 new PropertyDescriptor(property.name, property.decorators)
             )
         ))
     }
     toJSON(): string {
-        return `{ "name": "${this.name}", "properties": [${this.properties.map(it => it.toJSON()).join(", ")}] }`
+        return `{ "name": "${this.name}", `
+            + `"annotations": [${this.annotations.map(it => `"${it}"`).join(",")}], `
+            + `"properties": [${this.properties.map(it => it.toJSON()).join(", ")}] }`
     }
 
     decoratorsFor(name: string): string[] | undefined {
@@ -45,6 +47,10 @@ export class StructDescriptor {
 
     hasDecorator(property: string, decorator: string): boolean {
         return this.decoratorsFor(property)?.includes(decorator) ?? false
+    }
+
+    hasAnnotation(annotation: string): boolean {
+        return this.annotations?.includes(annotation) ?? false
     }
 }
 export class StructsResolver {
@@ -61,6 +67,7 @@ export class StructsResolver {
             if (name.startsWith("escompat")) continue
             if (name.startsWith("@ohos.arkui")) continue
             if (name.startsWith("@koalaui")) continue
+            if (name.startsWith("arkui.stateManagement")) continue
 
             let program = source.programs[0]
             let table = this.getOrCreateTable(program.sourceFilePath, this.restart)
@@ -165,6 +172,7 @@ export class StructTable {
     static toDescriptor(declaration: arkts.ETSStructDeclaration): StructDescriptor {
         return new StructDescriptor(
             declaration.definition?.ident?.name!,
+            StructTable.extractAnnotations(declaration),
             declaration.definition!.body
                 .filter(arkts.isClassProperty)
                 .map((classProperty: arkts.ClassProperty) =>
@@ -181,6 +189,12 @@ export class StructTable {
             .filter(it => arkts.isIdentifier(it.expr))
             .map(it => (it.expr as arkts.Identifier).name!)
         return decorators.concat(annotations)
+    }
+    static extractAnnotations(declaration: arkts.ETSStructDeclaration): string[] {
+        let annotations = declaration?.definition?.annotations
+            .filter(it => arkts.isIdentifier(it.expr))
+            .map(it => (it.expr as arkts.Identifier).name!) ?? []
+        return annotations
     }
     update() {
         if (!this.restart) return

@@ -18,21 +18,34 @@
 #include "base/memory/ace_type.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
+#include "core/common/multi_thread_build_manager.h"
 #include "core/common/thread_checker.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
+#include "core/interfaces/native/implementation/frame_node_peer_impl.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "bridge/arkts_frontend/ani_graphics_module.h"
 #include "bridge/arkts_frontend/arkts_frontend.h"
 #include "bridge/arkts_frontend/ani_context_module.h"
+#include "core/components/container_modal/container_modal_constants.h"
 
 #include <memory>
 #include <vector>
 
 namespace OHOS::Ace::NG {
-
+namespace {
+constexpr int NUM_0 = 0;
+constexpr int NUM_1 = 1;
+constexpr int NUM_2 = 2;
+constexpr int NUM_3 = 3;
+constexpr int NUM_4 = 4;
+constexpr int NUM_5 = 5;
+constexpr int NUM_6 = 6;
+constexpr int NUM_7 = 7;
+constexpr int NUM_8 = 8;
+}
 static thread_local std::vector<int32_t> restoreInstanceIds_;
 
 ani_ref* GetHostContext()
@@ -171,6 +184,226 @@ void OnLayoutInnerLayout(ani_env* env, ani_long ptr)
     Framework::AniGraphicsModule::OnLayoutInnerLayout(env, ptr);
 }
 
+void SetParallelScoped(ani_boolean parallel)
+{
+    MultiThreadBuildManager::SetIsThreadSafeNodeScope(parallel);
+    MultiThreadBuildManager::SetIsParallelizeUI(parallel);
+}
+
+static void SetCustomPropertyCallBack(
+    ani_env* env, ArkUINodeHandle node, std::function<void()>&& func,
+    std::function<std::string(const std::string&)>&& getFunc)
+{
+    auto id = Container::CurrentIdSafelyWithCheck();
+    ContainerScope scope(id);
+    auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+    if (pipeline && !pipeline->CheckThreadSafe()) {
+        LOGF_ABORT("SetCustomPropertyCallBack doesn't run on UI thread");
+    }
+    auto frameNode = reinterpret_cast<NG::FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetCustomPropertyCallback(std::move(func), std::move(getFunc));
+}
+
+static std::optional<std::string> GetCustomProperty(ani_env* env, ArkUINodeHandle node, const std::string& key)
+{
+    auto id = Container::CurrentIdSafelyWithCheck();
+    ContainerScope scope(id);
+    auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+    if (pipeline && !pipeline->CheckThreadSafe()) {
+        LOGF_ABORT("GetCustomProperty doesn't run on UI thread");
+    }
+    auto frameNode = reinterpret_cast<NG::FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, std::nullopt);
+
+    std::string capiCustomProperty;
+    if (frameNode->GetCapiCustomProperty(key, capiCustomProperty)) {
+        return capiCustomProperty;
+    } else {
+        return std::nullopt;
+    }
+}
+
+Alignment ParseAlignment(int32_t align)
+{
+    Alignment alignment = Alignment::CENTER;
+    switch (align) {
+        case NUM_0:
+            alignment = Alignment::TOP_LEFT;
+            break;
+        case NUM_1:
+            alignment = Alignment::TOP_CENTER;
+            break;
+        case NUM_2:
+            alignment = Alignment::TOP_RIGHT;
+            break;
+        case NUM_3:
+            alignment = Alignment::CENTER_LEFT;
+            break;
+        case NUM_4:
+            alignment = Alignment::CENTER;
+            break;
+        case NUM_5:
+            alignment = Alignment::CENTER_RIGHT;
+            break;
+        case NUM_6:
+            alignment = Alignment::BOTTOM_LEFT;
+            break;
+        case NUM_7:
+            alignment = Alignment::BOTTOM_CENTER;
+            break;
+        case NUM_8:
+            alignment = Alignment::BOTTOM_RIGHT;
+            break;
+        default:
+            break;
+    }
+    return alignment;
+}
+
+void SetOverlayComponent(ani_long node, ani_long builderPtr, AniOverlayOptions options)
+{
+    CHECK_NULL_VOID(node);
+    FrameNode* frameNode = reinterpret_cast<FrameNode*>(node);
+    FrameNodePeer* overlayNodePeer = builderPtr ? reinterpret_cast<FrameNodePeer*>(builderPtr) : nullptr;
+    RefPtr<NG::FrameNode> overlayNode = FrameNodePeer::GetFrameNodeByPeer(overlayNodePeer);
+    CalcDimension x(options.x, DimensionUnit::VP);
+    CalcDimension y(options.y, DimensionUnit::VP);
+    Alignment align = ParseAlignment(options.alignment);
+    ViewAbstract::SetOverlayBuilder(frameNode, overlayNode, align, x, y);
+}
+ani_double Vp2px(ani_double value, ani_int instanceId)
+{
+    if (NearZero(value)) {
+        return 0;
+    }
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(context, 0);
+    ContainerScope cope(instanceId);
+    double density = PipelineBase::GetCurrentDensity();
+    return value * density;
+}
+
+ani_double Px2vp(ani_double value, ani_int instanceId)
+{
+    if (NearZero(value)) {
+        return 0;
+    }
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(context, 0);
+    ContainerScope cope(instanceId);
+    double density = PipelineBase::GetCurrentDensity();
+    if (NearZero(density)) {
+        return 0;
+    }
+    return value / density;
+}
+
+ani_double Fp2px(ani_double value, ani_int instanceId)
+{
+    if (NearZero(value)) {
+        return 0;
+    }
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(context, 0);
+    ContainerScope cope(instanceId);
+    double density = PipelineBase::GetCurrentDensity();
+    if (NearZero(density)) {
+        return 0;
+    }
+    double fontScale = 1.0;
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, 0);
+    auto pipelineContext = container->GetPipelineContext();
+    if (pipelineContext) {
+        fontScale = pipelineContext->GetFontScale();
+    }
+    return  value * density * fontScale;
+}
+
+ani_double Px2fp(ani_double value, ani_int instanceId)
+{
+    if (NearZero(value)) {
+        return 0;
+    }
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(context, 0);
+    ContainerScope cope(instanceId);
+    double density = PipelineBase::GetCurrentDensity();
+    if (NearZero(density)) {
+        return 0;
+    }
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, 0);
+    auto pipelineContext = container->GetPipelineContext();
+    double fontScale = 1.0;
+    if (pipelineContext) {
+        fontScale = pipelineContext->GetFontScale();
+    }
+    double ratio = density * fontScale;
+    double fpValue = value / ratio;
+    return fpValue;
+}
+
+ani_double Lpx2px(ani_double value, ani_int instanceId)
+{
+    if (NearZero(value)) {
+        return 0;
+    }
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(context, 0);
+    ContainerScope cope(instanceId);
+    double density = PipelineBase::GetCurrentDensity();
+    if (NearZero(density)) {
+        return 0;
+    }
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, 0);
+    auto pipelineContext = container->GetPipelineContext();
+    auto window = container->GetWindow();
+    CHECK_NULL_RETURN(window, 0);
+    auto width = window->GetCurrentWindowRect().Width();
+    auto frontend = container->GetFrontend();
+    CHECK_NULL_RETURN(frontend, 0);
+    auto windowConfig = frontend->GetWindowConfig();
+    if (pipelineContext && pipelineContext->IsContainerModalVisible()) {
+        int32_t multiplier = 2;
+        width -= multiplier * (CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx();
+    }
+    if (!windowConfig.autoDesignWidth) {
+        windowConfig.UpdateDesignWidthScale(width);
+    }
+    return value * windowConfig.designWidthScale;
+}
+
+ani_double Px2lpx(ani_double value, ani_int instanceId)
+{
+    if (NearZero(value)) {
+        return 0;
+    }
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(context, 0);
+    ContainerScope cope(instanceId);
+    CHECK_NULL_RETURN(value, 0);
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, 0);
+    auto pipelineContext = container->GetPipelineContext();
+    auto window = container->GetWindow();
+    CHECK_NULL_RETURN(window, 0);
+    auto width = window->GetCurrentWindowRect().Width();
+    auto frontend = container->GetFrontend();
+    CHECK_NULL_RETURN(frontend, 0);
+    auto windowConfig = frontend->GetWindowConfig();
+    if (pipelineContext && pipelineContext->IsContainerModalVisible()) {
+        int32_t multiplier = 2;
+        width -= multiplier * (CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx();
+    }
+    if (!windowConfig.autoDesignWidth) {
+        windowConfig.UpdateDesignWidthScale(width);
+    }
+    return value / windowConfig.designWidthScale;
+}
+
 const ArkUIAniCommonModifier* GetCommonAniModifier()
 {
     static const ArkUIAniCommonModifier impl = {
@@ -188,7 +421,18 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .checkIsUIThread = OHOS::Ace::NG::CheckIsUIThread,
         .isDebugMode =  OHOS::Ace::NG::IsDebugMode,
         .onMeasureInnerMeasure = OHOS::Ace::NG::OnMeasureInnerMeasure,
-        .onLayoutInnerLayout = OHOS::Ace::NG::OnLayoutInnerLayout };
+        .onLayoutInnerLayout = OHOS::Ace::NG::OnLayoutInnerLayout,
+        .setParallelScoped = OHOS::Ace::NG::SetParallelScoped,
+        .setCustomPropertyCallBack = OHOS::Ace::NG::SetCustomPropertyCallBack,
+        .getCustomProperty = OHOS::Ace::NG::GetCustomProperty,
+        .setOverlayComponent = OHOS::Ace::NG::SetOverlayComponent,
+        .vp2px = OHOS::Ace::NG::Vp2px,
+        .px2vp = OHOS::Ace::NG::Px2vp,
+        .fp2px = OHOS::Ace::NG::Fp2px,
+        .px2fp = OHOS::Ace::NG::Px2fp,
+        .lpx2px = OHOS::Ace::NG::Lpx2px,
+        .px2lpx = OHOS::Ace::NG::Px2lpx
+    };
     return &impl;
 }
 

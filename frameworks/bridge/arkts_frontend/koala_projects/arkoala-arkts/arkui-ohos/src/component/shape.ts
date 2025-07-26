@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, AttributeModifier } from "./common"
 import { ResourceColor, Length } from "./units"
 import { LineCapStyle, LineJoinStyle, Color } from "./enums"
 import { Resource } from "global.resource"
@@ -31,8 +31,10 @@ import { ArkUIAniModule } from "arkui.ani"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ShapeModifier } from "../ShapeModifier"
 
 export class ArkShapePeer extends ArkCommonMethodPeer {
+    _attributeSet?: ShapeModifier
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -337,6 +339,7 @@ export interface ShapeAttribute extends CommonMethod {
     strokeWidth(value: number | string | undefined): this
     antiAlias(value: boolean | undefined): this
     mesh(value: Array<number> | undefined, column: number | undefined, row: number | undefined): this
+    attributeModifier(value: AttributeModifier<ShapeAttribute> | AttributeModifier<CommonMethod> | undefined): this { return this; }
 }
 export class ArkShapeStyle extends ArkCommonMethodStyle implements ShapeAttribute {
     viewPort_value?: ViewportRect | undefined
@@ -514,6 +517,11 @@ export class ArkShapeComponent extends ArkCommonMethodComponent implements Shape
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+
+    public attributeModifier(modifier: AttributeModifier<ShapeAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        hookShapeAttributeModifier(this, modifier);
+        return this
     }
 }
 /** @memo */

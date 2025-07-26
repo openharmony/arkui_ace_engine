@@ -263,8 +263,24 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      *
      * @returns new length
      */
-    public override push(...val: T[]): number {
+    public override pushArray(...val: T[]): number {
         const ret = this.store_.push(...val);
+        this.meta_.fireChange(CONSTANT.OB_LENGTH);
+        this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
+
+        // exec all subscribing @Watch
+        this.executeOnSubscribingWatches('push');
+
+        return ret;
+    }
+
+    /**
+     * Adds the specified elements to the end of an array and returns the new length of the array.
+     *
+     * @returns new length
+     */
+    public override pushOne(val: T): number {
+        const ret = this.store_.push(val);
         this.meta_.fireChange(CONSTANT.OB_LENGTH);
         this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
 
@@ -849,6 +865,13 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
         return this.store_.lastIndexOf(searchElement, fromIndex);
     }
 
+    public override lastIndexOf(searchElement: T): number {
+         if (this.shouldAddRef()) {
+            this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
+        }
+        return this.store_.lastIndexOf(searchElement);
+    }
+
     /**
      * Creates and returns a new string by concatenating all of the elements in an `Array`,
      * separated by a specified separator string.
@@ -923,6 +946,20 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
         return this.store_.toSpliced(start, deleteIdx);
     }
 
+    public override toSpliced(start: number, delete: number, ...items: FixedArray<T>): Array<T> {
+        if (this.shouldAddRef()) {
+            this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
+        }
+        return this.store_.toSpliced(start, delete, ...items);
+    }
+
+    public override toSpliced(start: int, delete: int, ...items: FixedArray<T>): Array<T> {
+        if (this.shouldAddRef()) {
+            this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
+        }
+        return this.store_.toSpliced(start, delete, ...items);
+    }
+
     /**
      * Copying version of the splice() method.
      *
@@ -979,6 +1016,13 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
             this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
         }
         return this.store_.indexOf(val, fromIndex);
+    }
+
+    public override indexOf(val: T) {
+        if (this.shouldAddRef()) {
+            this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
+        }
+        return this.store_.indexOf(val);
     }
 
     /**

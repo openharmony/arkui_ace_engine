@@ -18,14 +18,18 @@ import {
     CustomComponentNames,
     getCustomComponentOptionsName,
     Importer,
-    InternalAnnotations
+    InternalAnnotations,
+    getComponentPackage,
+    getRuntimeAnnotationsPackage,
+    getDecoratorPackage
 } from "./utils";
 import { BuilderParamTransformer, ConsumeTransformer, LinkTransformer, LocalStorageLinkTransformer, LocalStoragePropTransformer, ObjectLinkTransformer, PropertyTransformer, PropTransformer, ProvideTransformer, StateTransformer, StorageLinkTransformer, StoragePropTransformer, PlainPropertyTransformer, fieldOf, isOptionBackedByProperty, isOptionBackedByPropertyName } from "./property-transformers";
 import { annotation, isAnnotation, classMethods } from "./common/arkts-utils";
-import { DecoratorNames, DecoratorParameters, hasDecorator, hasBuilderDecorator } from "./property-translators/utils";
+import { DecoratorNames, DecoratorParameters, hasDecorator, hasBuilderDecorator, hasEntryAnnotation } from "./property-translators/utils";
 import {
     factory
 } from "./ui-factory"
+import { Es2pandaVariableDeclarationKind } from "@koalaui/libarkts"
 
 export interface ApplicationInfo {
     bundleName: string,
@@ -44,6 +48,7 @@ function computeOptionsName(clazz: arkts.ClassDeclaration): string {
 
 export class ComponentTransformer extends arkts.AbstractVisitor {
     private arkuiImport?: string
+    private entryCounter: number = 0
 
     constructor(private imports: Importer, options?: ComponentTransformerOptions) {
         super()
@@ -55,15 +60,15 @@ export class ComponentTransformer extends arkts.AbstractVisitor {
         this.parseEntryParameter(statements)
         this.imports.add(
             CustomComponentNames.COMPONENT_CLASS_NAME,
-            CustomComponentNames.COMPONENT_DEFAULT_IMPORT)
+            getComponentPackage())
         this.imports.add(
             InternalAnnotations.BUILDER_LAMBDA,
-            CustomComponentNames.COMPONENT_DEFAULT_IMPORT)
+            getDecoratorPackage())
         this.imports.add(
             "CommonMethod",
-            CustomComponentNames.COMPONENT_DEFAULT_IMPORT)
-        this.imports.add(InternalAnnotations.MEMO, "@koalaui/runtime/annotations")
-        this.imports.add(InternalAnnotations.MEMO_STABLE, "@koalaui/runtime/annotations")
+            getComponentPackage())
+        this.imports.add(InternalAnnotations.MEMO, getRuntimeAnnotationsPackage())
+        this.imports.add(InternalAnnotations.MEMO_STABLE, getRuntimeAnnotationsPackage())
         this.propertyTransformers.forEach(it => it.collectImports(this.imports))
         statements.forEach(statement => {
             if (arkts.isETSStructDeclaration(statement)) {
@@ -76,7 +81,13 @@ export class ComponentTransformer extends arkts.AbstractVisitor {
     }
 
     private rewriteModule(node: arkts.ETSModule): arkts.ETSModule {
-        return arkts.updateETSModuleByStatements(node, this.transformStatements(node.statements))
+        return arkts.factory.updateETSModule(
+            node,
+            this.transformStatements(node.statements),
+            node.ident,
+            node.getNamespaceFlag(),
+            node.program,
+        )
     }
 
     private optionsName(clazz: arkts.ClassDefinition): arkts.Identifier {
@@ -164,18 +175,41 @@ export class ComponentTransformer extends arkts.AbstractVisitor {
         this.addDisposeStruct(clazz, result)
         this.addEntryParameter(clazz, result)
         this.addCustomLayoutParameter(clazz, result)
+        this.addReusableMethods(clazz, result)
         this.addInstantiate(clazz, result)
         return result
     }
 
     private addInitializeStruct(clazz: arkts.ClassDeclaration, classBody: arkts.ClassElement[]) {
         const statements: arkts.Statement[] = []
+        // TODO: this is to workaround panda bug #27680
+        // It should be OptionsT, but the compiler has lost the bridge
+        statements.push(
+            arkts.factory.createVariableDeclaration(
+                    Es2pandaVariableDeclarationKind.VARIABLE_DECLARATION_KIND_CONST,
+                    [
+                         arkts.factory.createVariableDeclarator(
+                            arkts.Es2pandaVariableDeclaratorFlag.VARIABLE_DECLARATOR_FLAG_CONST,
+                            arkts.factory.createIdentifier(CustomComponentNames.COMPONENT_INITIALIZERS_NAME),
+                                arkts.factory.createTSAsExpression(
+                                    arkts.factory.createIdentifier(CustomComponentNames.COMPONENT_INITIALIZERS_NAME_0),
+                                        arkts.factory.createETSUnionType([
+                                            factory.createTypeReferenceFromString(this.optionsName(clazz.definition!).name),
+                                            arkts.factory.createETSUndefinedType()
+                                         ]),
+                                    false
+                                )
+                        )
+                    ]
+                )
+            )
+
         forEachProperty(clazz, property => {
             this.getPropertyTransformer(property).applyInitializeStruct(this.pageLocalStorage, property, statements)
         })
-        if (statements.length > 0) {
+        if (statements.length > 1) {
             classBody.push(createVoidMethod(CustomComponentNames.COMPONENT_INITIALIZE_STRUCT, [
-                factory.createInitializersOptionsParameter(computeOptionsName(clazz)),
+                factory.createInitializersOptionsParameter(computeOptionsName(clazz), true),
                 factory.createContentParameter(),
             ], statements))
         }
@@ -206,6 +240,82 @@ export class ComponentTransformer extends arkts.AbstractVisitor {
         }
     }
 
+    private addReusableMethods(clazz: arkts.ClassDeclaration, classBody: arkts.ClassElement[]) {
+        if (!clazz.definition?.annotations.some(it => isAnnotation(it, DecoratorNames.REUSABLE))) {
+            return
+        }
+
+        const resultName = "result"
+        const props: arkts.Expression[] = []
+        forEachProperty(clazz, property => {
+            this.getPropertyTransformer(property).applyReuseRecord(property, props)
+        })
+
+        if (props.length > 0) {
+            const resultDeclaration = arkts.factory.createVariableDeclaration(
+                arkts.Es2pandaVariableDeclarationKind.VARIABLE_DECLARATION_KIND_LET,
+                [
+                    arkts.factory.createVariableDeclarator(
+                        arkts.Es2pandaVariableDeclaratorFlag.VARIABLE_DECLARATOR_FLAG_LET,
+                        arkts.factory.createIdentifier(resultName, createRecordTypeReference()),
+                        arkts.factory.createObjectExpression(
+                            arkts.Es2pandaAstNodeType.AST_NODE_TYPE_OBJECT_EXPRESSION,
+                            [],
+                            false
+                        )
+                    )
+                ]
+            )
+            const initBlock = arkts.factory.createIfStatement(
+                arkts.factory.createBinaryExpression(
+                    arkts.factory.createIdentifier(CustomComponentNames.COMPONENT_INITIALIZERS_NAME),
+                    arkts.factory.createUndefinedLiteral(),
+                    arkts.Es2pandaTokenType.TOKEN_TYPE_PUNCTUATOR_NOT_EQUAL
+                ),
+                arkts.factory.createBlockStatement([
+                    arkts.factory.createExpressionStatement(
+                        arkts.factory.createAssignmentExpression(
+                            arkts.factory.createIdentifier(resultName),
+                            arkts.factory.createObjectExpression(
+                                arkts.Es2pandaAstNodeType.AST_NODE_TYPE_OBJECT_EXPRESSION,
+                                props,
+                                false
+                            ),
+                            arkts.Es2pandaTokenType.TOKEN_TYPE_PUNCTUATOR_SUBSTITUTION
+                        )
+                    )
+                ])
+            )
+
+            const methodName = CustomComponentNames.COMPONENT_TO_RECORD
+            const method = arkts.factory.createMethodDefinition(
+                arkts.Es2pandaMethodDefinitionKind.METHOD_DEFINITION_KIND_METHOD,
+                arkts.factory.createIdentifier(methodName),
+                arkts.factory.createFunctionExpression(
+                    arkts.factory.createIdentifier(methodName),
+                    arkts.factory.createScriptFunction(
+                        arkts.factory.createBlockStatement([
+                            resultDeclaration,
+                            initBlock,
+                            arkts.factory.createReturnStatement(arkts.factory.createIdentifier(resultName))
+                        ]),
+                        undefined,
+                        [factory.createInitializersOptionsParameter(computeOptionsName(clazz), false)],
+                        createRecordTypeReference(),
+                        false,
+                        arkts.Es2pandaScriptFunctionFlags.SCRIPT_FUNCTION_FLAGS_METHOD,
+                        arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_PROTECTED,
+                        arkts.factory.createIdentifier(methodName),
+                        []
+                    )
+                ),
+                arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_PROTECTED,
+                false
+            )
+            classBody.push(method)
+        }
+    }
+
     private createFactoryParameter(typeName: string, paramName: string): arkts.ETSParameterExpression {
         return arkts.factory.createETSParameterExpression(
             arkts.factory.createIdentifier(paramName,
@@ -217,6 +327,16 @@ export class ComponentTransformer extends arkts.AbstractVisitor {
                     )
                 )
             ), false)
+    }
+
+    private createStringParameter(paramName: string): arkts.ETSParameterExpression {
+        return arkts.factory.createETSParameterExpression(
+            arkts.factory.createIdentifier(paramName,
+                arkts.factory.createETSUnionType([
+                    factory.createTypeReferenceFromString("string"),
+                    arkts.factory.createETSUndefinedType()
+                ])
+            ), true)
     }
 
     private addInstantiate(clazz: arkts.ClassDeclaration, classBody: arkts.ClassElement[]) {
@@ -244,8 +364,9 @@ export class ComponentTransformer extends arkts.AbstractVisitor {
                     undefined,
                     [
                         this.createFactoryParameter(clazzName, "factory"),
-                        factory.createInitializersOptionsParameter(classOptionsName, true),
-                        factory.createContentParameter(true)
+                        factory.createInitializersOptionsParameter(classOptionsName, false, true),
+                        factory.createContentParameter(true),
+                        this.createStringParameter("reuseKey")
                     ],
                     arkts.factory.createETSTypeReference(
                         arkts.factory.createETSTypeReferencePart(
@@ -260,7 +381,7 @@ export class ComponentTransformer extends arkts.AbstractVisitor {
                         [
                             arkts.factory.createClassProperty(
                                 arkts.factory.createIdentifier("value"),
-                                arkts.factory.createStringLiteral("StructBase.instantiateImpl"),
+                                arkts.factory.createStringLiteral(CustomComponentNames.COMPONENT_BUILDER_LAMBDA),
                                 undefined,
                                 arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_NONE,
                                 false
@@ -275,8 +396,29 @@ export class ComponentTransformer extends arkts.AbstractVisitor {
         classBody.push(instantiate)
     }
 
-    private rewriteBuildBody(clazz: arkts.ClassDeclaration, oldBody: arkts.BlockStatement): arkts.BlockStatement {
+    private rewriteBuildBody(clazz: arkts.ClassDeclaration, oldBody: arkts.BlockStatement, optionsName: string): arkts.BlockStatement {
         let result: arkts.Statement[] = []
+        // Improve: this is to workaround panda bug #27680
+        // It should be OptionsT, but the compiler has lost the bridge
+        result.push(
+            arkts.factory.createVariableDeclaration(
+                    Es2pandaVariableDeclarationKind.VARIABLE_DECLARATION_KIND_CONST,
+                    [
+                         arkts.factory.createVariableDeclarator(
+                            arkts.Es2pandaVariableDeclaratorFlag.VARIABLE_DECLARATOR_FLAG_CONST,
+                            arkts.factory.createIdentifier(CustomComponentNames.COMPONENT_INITIALIZERS_NAME),
+                                arkts.factory.createTSAsExpression(
+                                    arkts.factory.createIdentifier(CustomComponentNames.COMPONENT_INITIALIZERS_NAME_0),
+                                        arkts.factory.createETSUnionType([
+                                            factory.createTypeReferenceFromString(optionsName),
+                                            arkts.factory.createETSUndefinedType()
+                                         ]),
+                                    false
+                                )
+                        )
+                    ]
+                )
+            )
         forEachProperty(clazz, property => {
             this.getPropertyTransformer(property).applyBuild(property, result)
         })
@@ -288,24 +430,23 @@ export class ComponentTransformer extends arkts.AbstractVisitor {
 
     private rewriteBuild(clazz: arkts.ClassDeclaration, method: arkts.MethodDefinition): arkts.MethodDefinition {
         let isDeclaration = arkts.hasModifierFlag(method, arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_DECLARE)
-        const newName: arkts.Identifier = arkts.factory.createIdentifier(CustomComponentNames.COMPONENT_BUILD)
         const className = clazz.definition?.ident?.name!
         const classTypeName = clazz.definition?.typeParams?.params?.[0]?.name?.name ?? className
         const classOptionsName = computeOptionsName(clazz)
         const scriptFunction = method.function as arkts.ScriptFunction
         const newFunction = arkts.factory.createScriptFunction(
-            this.rewriteBuildBody(clazz, scriptFunction.body! as arkts.BlockStatement),
+            this.rewriteBuildBody(clazz, scriptFunction.body! as arkts.BlockStatement, classOptionsName),
             scriptFunction.typeParams,
             [
                 factory.createStyleParameter(classTypeName),
                 factory.createContentParameter(),
-                factory.createInitializersOptionsParameter(classOptionsName)
+                factory.createInitializersOptionsParameter(classOptionsName, true)
             ],
             arkts.factory.createETSPrimitiveType(arkts.Es2pandaPrimitiveType.PRIMITIVE_TYPE_VOID),
             false,
             scriptFunction.flags,
             scriptFunction.modifierFlags,
-            newName,
+            arkts.factory.createIdentifier(CustomComponentNames.COMPONENT_BUILD),
             [annotation(InternalAnnotations.MEMO)]
         )
         const modifiers: arkts.Es2pandaModifierFlags = isDeclaration
@@ -313,8 +454,8 @@ export class ComponentTransformer extends arkts.AbstractVisitor {
             : arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_PUBLIC;
         return arkts.factory.createMethodDefinition(
             arkts.Es2pandaMethodDefinitionKind.METHOD_DEFINITION_KIND_METHOD,
-            newName,
-            arkts.factory.createFunctionExpression(newName, newFunction),
+            arkts.factory.createIdentifier(CustomComponentNames.COMPONENT_BUILD),
+            arkts.factory.createFunctionExpression(arkts.factory.createIdentifier(CustomComponentNames.COMPONENT_BUILD), newFunction),
             modifiers,
             false
         )
@@ -393,9 +534,71 @@ export class ComponentTransformer extends arkts.AbstractVisitor {
         throw new Error(`Cannot find transformer for property ${property.id?.name}`)
     }
 
+    private createEntryWrapper(className: string): arkts.ClassDeclaration {
+        /*
+        class __EntryWrapper extends EntryPoint {
+            @memo public entry(): void {
+                `${className}`()
+            }
+        }
+        */
+        const result = arkts.factory.createClassDeclaration(
+            arkts.factory.createClassDefinition(
+                arkts.factory.createIdentifier(`__EntryWrapper${ this.entryCounter ? this.entryCounter : "" }`),
+                undefined,
+                undefined,
+                [],
+                undefined,
+                arkts.factory.createIdentifier("EntryPoint", undefined),
+                [
+                    arkts.factory.createMethodDefinition(
+                        arkts.Es2pandaMethodDefinitionKind.METHOD_DEFINITION_KIND_METHOD,
+                        arkts.factory.createIdentifier("entry"),
+                        arkts.factory.createFunctionExpression(
+                            arkts.factory.createIdentifier("entry"),
+                            arkts.factory.createScriptFunction(
+                                arkts.factory.createBlockStatement(
+                                    [
+                                        arkts.factory.createExpressionStatement(
+                                            arkts.factory.createCallExpression(
+                                                arkts.factory.createIdentifier(className),
+                                                [],
+                                                undefined,
+                                            )
+                                        )
+                                    ],
+                                ),
+                                undefined,
+                                [],
+                                arkts.factory.createETSPrimitiveType(
+                                    arkts.Es2pandaPrimitiveType.PRIMITIVE_TYPE_VOID,
+                                ),
+                                false,
+                                arkts.Es2pandaScriptFunctionFlags.SCRIPT_FUNCTION_FLAGS_METHOD,
+                                arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_PUBLIC,
+                                arkts.factory.createIdentifier("entry"),
+                                [annotation(InternalAnnotations.MEMO)],
+                            ),
+                        ),
+                        arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_PUBLIC,
+                        false,
+                    )
+                ],
+                arkts.Es2pandaClassDefinitionModifiers.CLASS_DEFINITION_MODIFIERS_CLASS_DECL,
+                arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_FINAL,
+            ),
+            arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_EXPORT,
+        )
+        this.entryCounter++
+        return result
+    }
+
     private rewriteStruct(node: arkts.ETSStructDeclaration, result: arkts.Statement[]) {
         result.push(this.rewriteStructToClass(node))
         result.push(this.rewriteStructToOptions(node))
+        if (node.definition && hasEntryAnnotation(node.definition)) {
+            result.push(this.createEntryWrapper(node.definition.ident!.name))
+        }
     }
 
     visitor(node: arkts.AstNode): arkts.AstNode {
@@ -458,5 +661,18 @@ function createTrueMethod(methodName: string): arkts.MethodDefinition {
         ),
         arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_PROTECTED,
         false
+    )
+}
+
+function createRecordTypeReference(): arkts.TypeNode {
+    return arkts.factory.createETSTypeReference(
+        arkts.factory.createETSTypeReferencePart(
+            arkts.factory.createIdentifier("Record", undefined),
+            arkts.factory.createTSTypeParameterInstantiation([
+                factory.createTypeReferenceFromString("string"),
+                factory.createTypeReferenceFromString("Object"),
+            ]),
+            undefined
+        )
     )
 }

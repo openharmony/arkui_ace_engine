@@ -88,7 +88,7 @@ int32_t PostUITaskAndWait(ArkUI_Int32 contextId, void* taskData, void(*task)(voi
 const ArkUIMultiThreadManagerAPI* GetMultiThreadManagerAPI()
 {
     static const ArkUIMultiThreadManagerAPI multiThreadImpl = {
-        .setIsFreeNodeScope = SetIsThreadSafeNodeScope,
+        .setIsThreadSafeNodeScope = SetIsThreadSafeNodeScope,
         .checkNodeOnValidThread = CheckNodeOnValidThread,
         .checkOnUIThread = CheckOnUIThread,
         .postAsyncUITask = PostAsyncUITask,

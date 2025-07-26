@@ -26,7 +26,7 @@ import {
 } from '../../decorator';
 import { NullableObject } from '../../base/types';
 import { InterfaceProxyHandler } from './observeInterfaceProxy';
-import { ISubscribedWatches } from '../../decorator';
+import { ISubscribedWatches, IWatchSubscriberRegister } from '../../decorator';
 import { DecoratedV1VariableBase } from '../../decoratorImpl/decoratorBase';
 import { StateManager, GlobalStateManager } from '@koalaui/runtime';
 import { UIContextUtil } from '../../../handwritten/UIContextUtil';
@@ -69,11 +69,17 @@ export class StateMgmtTool {
     static isISubscribedWatches(value: NullableObject): boolean {
         return value instanceof ISubscribedWatches;
     }
+    static isIWatchSubscriberRegister<T>(value: T): boolean {
+        return value instanceof IWatchSubscriberRegister;
+    }
     static isInterfaceProxyHandler(value: NullableObject): boolean {
         return value instanceof InterfaceProxyHandler;
     }
     static tryGetHandler(value: Object): NullableObject {
-        return proxy.Proxy.tryGetHandler(value) as NullableObject;
+        const objType = Type.of(value);
+        return objType instanceof ClassType && (objType as ClassType).getName().endsWith('@Proxy')
+            ? (proxy.Proxy.tryGetHandler(value) as NullableObject) // a very slow call so need to judge proxy first
+            : undefined;
     }
     static createProxy<T extends Object>(value: T): T {
         return proxy.Proxy.create(value, new InterfaceProxyHandler<T>()) as T;

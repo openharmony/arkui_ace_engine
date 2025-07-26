@@ -17,9 +17,9 @@
 
 #include <ani.h>
 
-// #if !defined(PREVIEW)
-// #include "canvas_ani/ani_canvas.h"
-// #endif
+#if !defined(PREVIEW)
+#include "canvas_ani/ani_canvas.h"
+#endif
 
 #include "bridge/arkts_frontend/arkts_ani_utils.h"
 #include "core/components_ng/base/extension_handler.h"
@@ -118,11 +118,11 @@ ani_object AniGraphicsModule::CreateDrawingContext(ani_env* env, const NG::Drawi
 
     // canvas Object
 #if !defined(PREVIEW)
-    // ani_object aniCanvas = OHOS::Rosen::Drawing::AniCanvas::CreateAniCanvas(env, &context.canvas);
-    // if (!aniCanvas) {
-    //     LOGE("Create AniCanvas failed !");
-    // }
-    // env->Object_SetPropertyByName_Ref(result, "canvas_", (ani_ref)aniCanvas);
+    ani_object aniCanvas = OHOS::Rosen::Drawing::AniCanvas::CreateAniCanvas(env, &context.canvas);
+    if (!aniCanvas) {
+        LOGE("Create AniCanvas failed !");
+    }
+    env->Object_SetPropertyByName_Ref(result, "canvas_", (ani_ref)aniCanvas);
 #endif
 
     return result;

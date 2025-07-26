@@ -264,15 +264,31 @@ void WebModelStatic::SetEnabledHapticFeedback(FrameNode* frameNode, bool isEnabl
 
 void WebModelStatic::SetOptimizeParserBudgetEnabled(FrameNode *frameNode, const std::optional<bool>& enable)
 {
-    (void)frameNode;
-    (void)enable;
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    if (enable) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebModelStatic::SetOptimizeParserBudgetEnabled: %{public}d",
+            enable.value());
+        webPatternStatic->UpdateOptimizeParserBudgetEnabled(enable.value());
+    } else {
+        webPatternStatic->ResetOptimizeParserBudgetEnabled();
+    }
 }
 
 void WebModelStatic::SetEnableFollowSystemFontWeight(FrameNode *frameNode,
     const std::optional<bool>& enableFollowSystemFontWeight)
 {
-    (void)frameNode;
-    (void)enableFollowSystemFontWeight;
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    if (enableFollowSystemFontWeight) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebModelStatic::SetEnableFollowSystemFontWeight: %{public}d",
+            enableFollowSystemFontWeight.value());
+        webPatternStatic->UpdateEnableFollowSystemFontWeight(enableFollowSystemFontWeight.value());
+    } else {
+        webPatternStatic->ResetEnableFollowSystemFontWeight();
+    }
 }
 
 void WebModelStatic::SetWebMediaAVSessionEnabled(FrameNode *frameNode, const std::optional<bool>& enable)
@@ -434,6 +450,7 @@ void WebModelStatic::SetTextZoomRatio(FrameNode* frameNode, int32_t textZoomRati
     CHECK_NULL_VOID(frameNode);
     auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
     CHECK_NULL_VOID(webPatternStatic);
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebModelStatic::SetTextZoomRatio：%{public}d", textZoomRatioNum);
     webPatternStatic->UpdateTextZoomRatio(textZoomRatioNum);
 }
 

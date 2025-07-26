@@ -14,7 +14,7 @@
  */
 
 import { Assert, suite, test } from "@koalaui/harness"
-import { MarkableQueue, markableQueue } from "@koalaui/common"
+import { MarkableQueue, markableQueue } from "../../src/common/MarkableQueue"
 
 const collector = new Array<string>()
 

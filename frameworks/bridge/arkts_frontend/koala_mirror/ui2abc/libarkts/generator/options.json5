@@ -255,4 +255,28 @@
             ]
         }
     ],
+    fragments: [
+        {
+            interface: "MethodDefinition",
+            methods: [
+                {
+                    name: "setChildrenParentPtr",
+                    definition: "extension_MethodDefinitionSetChildrenParentPtr",
+                },
+                {
+                    name: "onUpdate",
+                    definition: "extension_MethodDefinitionOnUpdate",
+                },
+            ]
+        },
+        {
+            interface: "ETSModule",
+            methods: [
+                {
+                    name: "getNamespaceFlag",
+                    definition: "extension_ETSModuleGetNamespaceFlag",
+                }
+            ]
+        }
+    ],
 }

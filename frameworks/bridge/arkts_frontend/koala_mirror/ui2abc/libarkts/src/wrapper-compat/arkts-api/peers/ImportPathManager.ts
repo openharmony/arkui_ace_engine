@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { ArktsObject } from "./ArktsObject"
+import { ArktsObject } from "../../../arkts-api/peers/ArktsObject"
 import { global } from "../static/global"
 import { KNativePointer } from "@koalaui/interop"
 
@@ -29,6 +29,6 @@ export class ImportPathManager extends ArktsObject {
     }
 
     resolvePath(currentModulePath: string, importPath: string): string {
-        return ''; // TODO: no longer support this.
+        return ''; // Improve: no longer support this.
     }
 }

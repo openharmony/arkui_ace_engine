@@ -1,0 +1,22 @@
+{
+  "name": "@ohos/arkui",
+  "version": "1.5.15-dev",
+  "description": "",
+  "main": "build/ts/src/index.js",
+  "types": "build/ts/src/index.d.ts",
+  "scripts": {
+    "interface-sdk:download": "node scripts/download-interface-sdk.mjs",
+    "clean": "rimraf build build-m3 build-m3-sdk build-m3-impl",
+    "clean:arkui-no-common": "npm run clean",
+    "build:arkui-no-common": "npm run build:m3:recheck",
+    "copy:abc": "mkdir -p ../build/bootPandaFiles/ && cp ./build-m3-impl/arkui-m3.abc ../build/bootPandaFiles/arkui.abc",
+    "build:m3:restart": "node ../../ui2abc/fast-arktsc --config ./ui2abcconfig-m3.json --compiler ../../incremental/tools/panda/arkts/ui2abc --link-name ./build-m3-impl/arkui-m3.abc --restart-stages && ninja ${NINJA_OPTIONS} -f build-m3-impl/build.ninja -k 1200 && npm run copy:abc",
+    "build:m3:recheck": "node ../../ui2abc/fast-arktsc --simultaneous --config ./ui2abcconfig-recheck.json --compiler ../../incremental/tools/panda/arkts/ui2abc --link-name ./build-m3-impl/arkui-m3.abc && ninja ${NINJA_OPTIONS} -f build-m3-recheck/build.ninja -k 1200 && npm run copy:abc",
+    "build:m3": "npm run build:m3:recheck",
+    "build:sdk-m3": "echo NOOP",
+    "build:sdk-m3:restart": "node ../../ui2abc/fast-arktsc --config ./ui2abcconfig-sdk-m3.json --compiler ../../incremental/tools/panda/arkts/ui2abc --link-name ./build-m3-sdk/arkui-sdk.abc --restart-stages && ninja ${NINJA_OPTIONS} -f build-m3-sdk/build.ninja -k 1200",
+    "build:sdk-m3:recheck": "node ../../ui2abc/fast-arktsc --simultaneous --config ./ui2abcconfig-sdk-m3-recheck.json --compiler ../../incremental/tools/panda/arkts/ui2abc --link-name ./build-m3-sdk/recheck/arkui-sdk.abc && ninja ${NINJA_OPTIONS} -f build-m3-sdk/recheck/build.ninja -k 1200",
+    "build:m3:cached": "node ../../tools/build-cache-cli.mjs build ./cache-ui2abcconfig-m3.json",
+    "build:sdk-m3:cached": "node ../../tools/build-cache-cli.mjs build ./cache-ui2abcconfig-sdk-m3.json"
+  }
+}

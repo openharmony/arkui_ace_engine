@@ -19,7 +19,7 @@
 #include "core/interfaces/ani/ani_api.h"
 
 namespace OHOS::Ace::NG {
-const ArkUIAniWebModifier* GetWebAniModifier() { return nullptr; }
+const ArkUIAniWebModifier* GetWebAniModifier();
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_ANI_WEB_ANI_MODIFIER

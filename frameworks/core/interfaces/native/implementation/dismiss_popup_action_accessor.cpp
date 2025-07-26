@@ -14,17 +14,24 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/implementation/dismiss_popup_action_peer.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DismissPopupActionAccessor {
 void DestroyPeerImpl(Ark_DismissPopupAction peer)
 {
+    CHECK_NULL_VOID(peer);
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_DismissPopupAction ConstructImpl()
 {
-    return {};
+    auto peer = PeerUtils::CreatePeer<DismissPopupActionPeer>();
+    peer->reason = BindSheetDismissReason::CLOSE_BUTTON;
+    return peer;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -32,14 +39,21 @@ Ark_NativePointer GetFinalizerImpl()
 }
 void DismissImpl(Ark_DismissPopupAction peer)
 {
+    ViewAbstract::DismissPopup();
 }
 Ark_DismissReason GetReasonImpl(Ark_DismissPopupAction peer)
 {
-    return {};
+    auto defaultVal = Converter::ArkValue<Ark_DismissReason>(BindSheetDismissReason::CLOSE_BUTTON);
+    if (peer) {
+        defaultVal = Converter::ArkValue<Ark_DismissReason>(peer->reason);
+    }
+    return defaultVal;
 }
 void SetReasonImpl(Ark_DismissPopupAction peer,
-                   Ark_DismissReason reason)
+                Ark_DismissReason reason)
 {
+    CHECK_NULL_VOID(peer);
+    peer->reason = Converter::Convert<BindSheetDismissReason>(reason);
 }
 } // DismissPopupActionAccessor
 const GENERATED_ArkUIDismissPopupActionAccessor* GetDismissPopupActionAccessor()
@@ -54,8 +68,5 @@ const GENERATED_ArkUIDismissPopupActionAccessor* GetDismissPopupActionAccessor()
     };
     return &DismissPopupActionAccessorImpl;
 }
-
-struct DismissPopupActionPeer {
-    virtual ~DismissPopupActionPeer() = default;
-};
 }
+ 

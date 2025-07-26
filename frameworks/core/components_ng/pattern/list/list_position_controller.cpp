@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/list/list_position_controller.h"
 
+#include "base/utils/multi_thread.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -50,6 +51,9 @@ void ListPositionController::JumpToItemInGroup(int32_t index, int32_t indexInGro
     CHECK_NULL_VOID(pattern);
     auto listPattern = AceType::DynamicCast<ListPattern>(pattern);
     CHECK_NULL_VOID(listPattern);
+    auto host = listPattern->GetHost();
+    // call JumpToItemInGroupMultiThread by multi thread;
+    FREE_NODE_CHECK(host, JumpToItemInGroup, index, indexInGroup, smooth, align, source);
     if (align == ScrollAlign::NONE) {
         align = ScrollAlign::START;
     }

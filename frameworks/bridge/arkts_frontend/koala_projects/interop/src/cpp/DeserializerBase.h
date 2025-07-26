@@ -20,9 +20,7 @@
 #include <cstring>
 #include <string>
 #include <vector>
-#if (!defined(__linux__))
 #include <charconv>
-#endif
 
 #include "interop-types.h"
 #include "interop-logging.h"
@@ -544,28 +542,12 @@ public:
 
   InteropString readString()
   {
-    InteropString result {};
+    InteropString result;
     InteropInt32 length = readInt32();
     check(length);
-
     // We refer to string data in-place.
-    constexpr int terminatorLen = 1;
-    constexpr int minUtfSize = 6;
-    constexpr uint16_t UTF16_BOM = 0xFEFF;
-    uint16_t* currentData = reinterpret_cast<uint16_t*>(data + position);
-    if (length >= minUtfSize && currentData[0] == UTF16_BOM) {
-      // Handle utf16 strings
-      constexpr int bomLen = 1;
-      constexpr int bytesOccupiedEveryChar = 2;
-      result.chars = (const char *)(data + position);
-      result.length = length / bytesOccupiedEveryChar - bomLen - terminatorLen;
-      currentData[bomLen + result.length] = u'\0';
-    } else {
-      // Handle utf8 strings (only contains latin)
-      result.chars = (const char *)(data + position);
-      result.length = length - terminatorLen;
-      data[position + result.length] = '\0';
-    }
+    result.chars = (const char *)(data + position);
+    result.length = length - 1;
     this->position += length;
     return result;
   }
@@ -622,7 +604,7 @@ inline void WriteToString(std::string *result, InteropUInt32 value)
 template <>
 inline void WriteToString(std::string *result, InteropFloat32 value)
 {
-#if ((defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && (__MAC_OS_X_VERSION_MAX_ALLOWED < 130300L)) || defined(__linux__))
+#if (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && (__MAC_OS_X_VERSION_MAX_ALLOWED < 130300L))
   // to_chars() is not available on older macOS.
   char buf[20];
   snprintf(buf, sizeof buf, "%f", value);

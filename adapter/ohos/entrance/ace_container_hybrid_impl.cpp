@@ -63,6 +63,9 @@ void AceContainer::InitializeStaticHybridDynamic(std::shared_ptr<OHOS::AppExecFw
 {
     // 1.2 initialization
     frontend_ = MakeRefPtr<ArktsFrontend>(sharedRuntime_);
+    // open statemanagement interop
+    DynamicCast<ArktsFrontend>(frontend_)->OpenStateMgmtInterop();
+
     // 1.1 initialization
 #ifdef NG_BUILD
     subFrontend_ = AceType::MakeRefPtr<DeclarativeFrontendNG>();

@@ -8,12 +8,12 @@ function main(): void {}
 
 
 class Test {
-  @memo() public args_with_default_values(__memo_context: __memo_context_type, __memo_id: __memo_id_type, gensym%%_1?: int, gensym%%_2?: (()=> int), gensym%%_3?: int, arg4?: int): void {
-    let arg1: int = (((gensym%%_1) !== (undefined)) ? gensym%%_1 : (10 as int));
-    let arg2: (()=> int) = (((gensym%%_2) !== (undefined)) ? gensym%%_2 : ((() => {
+  @memo() public args_with_default_values(__memo_context: __memo_context_type, __memo_id: __memo_id_type, gensym_XXX?: int, gensym_XXX?: (()=> int), gensym_XXX?: int, arg4?: int): void {
+    let arg1: int = (((gensym_XXX) !== (undefined)) ? gensym_XXX : (10 as int));
+    let arg2: (()=> int) = (((gensym_XXX) !== (undefined)) ? gensym_XXX : ((() => {
       return 20;
     }) as (()=> int)));
-    let arg3: int = (((gensym%%_3) !== (undefined)) ? gensym%%_3 : (arg1 as int));
+    let arg3: int = (((gensym_XXX) !== (undefined)) ? gensym_XXX : (arg1 as int));
     const __memo_scope = __memo_context.scope<void>(((__memo_id) + (__hash("id_args_with_default_values_@test/HQ/param-calls.ets"))), 5);
     const __memo_parameter_this = __memo_scope.param(0, this), __memo_parameter_arg1 = __memo_scope.param(1, arg1), __memo_parameter_arg2 = __memo_scope.param(2, arg2), __memo_parameter_arg3 = __memo_scope.param(3, arg3), __memo_parameter_arg4 = __memo_scope.param(4, arg4);
     if (__memo_scope.unchanged) {

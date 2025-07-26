@@ -93,7 +93,7 @@ export class LengthMetrics implements MaterializedBase {
         const ctorPtr: KPointer = LengthMetrics.ctor_lengthmetrics()
         this.peer = new Finalizable(ctorPtr, LengthMetrics.getFinalizer())
         this.value = value;
-        if (!unit || unit < LengthUnit.PX || unit > LengthUnit.LPX) {
+        if (unit === undefined || unit === null || unit < LengthUnit.PX || unit > LengthUnit.LPX) {
             this.unit = LengthUnit.VP;
             this.value = !unit ? value : 0;
         } else {
@@ -561,10 +561,11 @@ export class DrawContext {
         return this.canvas_
     }
 }
-export interface Vector2T {
-    x: number;
-    y: number;
+export interface Vector2T<T> {
+    x: T;
+    y: T;
 }
+export type PositionT<T> = Vector2T<T>;
 export interface Vector3 {
     x: number;
     y: number;

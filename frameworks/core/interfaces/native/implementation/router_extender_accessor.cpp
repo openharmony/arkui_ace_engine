@@ -18,6 +18,7 @@
 #include "core/common/frontend.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/pattern/stage/page_node.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -26,28 +27,69 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RouterExtenderAccessor {
-Ark_NativePointer PushImpl(const Ark_String* url)
+namespace {
+void RegisterPageCallback(const RefPtr<FrameNode>& frameNode, const RefPtr<UINode>& jsViewNode)
 {
-    CHECK_NULL_RETURN(url, nullptr);
-    std::string pushUrl = Converter::Convert<std::string>(*url);
-    if (pushUrl.empty()) {
-        return nullptr;
-    }
-    auto container = Container::Current();
-    CHECK_NULL_RETURN(container, nullptr);
-    auto delegate = container->GetFrontend();
-    CHECK_NULL_RETURN(delegate, nullptr);
-    auto pageNode = delegate->PushExtender(pushUrl, "");
-    return pageNode;
-}
+    auto curPageNode = AceType::DynamicCast<PageNode>(frameNode);
+    CHECK_NULL_VOID(curPageNode);
+    auto pagePattern = curPageNode->GetPattern<NG::PagePattern>();
+    CHECK_NULL_VOID(pagePattern);
+    auto customNode = AceType::DynamicCast<CustomNode>(jsViewNode);
+    CHECK_NULL_VOID(customNode);
+    pagePattern->SetOnPageShow([weak = WeakPtr<CustomNode>(customNode)]() {
+        auto view = weak.Upgrade();
+        if (view) {
+            view->FireOnPageShow();
+        }
+    });
+    pagePattern->SetOnPageHide([weak = WeakPtr<CustomNode>(customNode)]() {
+        auto view = weak.Upgrade();
+        if (view) {
+            view->FireOnPageHide();
+        }
+    });
+    pagePattern->SetOnBackPressed([weak = WeakPtr<CustomNode>(customNode)]() {
+        auto view = weak.Upgrade();
+        if (view) {
+            return view->FireOnBackPressed();
+        }
+        return false;
+    });
 
-Ark_NativePointer ReplaceImpl(const Ark_String* url, const Opt_Callback_Void* finishCallback)
+    pagePattern->SetPageTransitionFunc(
+        [weak = WeakPtr<CustomNode>(customNode), pageId = curPageNode->GetId(),
+            weakPage = WeakPtr<FrameNode>(curPageNode)]() {
+            auto custom = weak.Upgrade();
+            auto page = weakPage.Upgrade();
+            if (custom && page) {
+                auto pattern = page->GetPattern<PagePattern>();
+                CHECK_NULL_VOID(pattern);
+                NG::ScopedViewStackProcessor scopedViewStackProcessor;
+                NG::ViewStackProcessor::GetInstance()->SetPageNode(page);
+                // clear pageTransition effects and execute js to get latest pageTransition effects.
+                pattern->ClearPageTransitionEffect();
+                custom->FirePageTransition();
+                NG::ViewStackProcessor::GetInstance()->SetPageNode(nullptr);
+            }
+        });
+
+    pagePattern->MarkRenderDone();
+}
+}
+Ark_NativePointer PushImpl(const Ark_String* url, const Opt_Boolean* recover, Ark_NativePointer jsView,
+    const Opt_Callback_Void* finishCallback)
 {
     CHECK_NULL_RETURN(url, nullptr);
+    CHECK_NULL_RETURN(recover, nullptr);
+    CHECK_NULL_RETURN(jsView, nullptr);
     CHECK_NULL_RETURN(finishCallback, nullptr);
     std::string pushUrl = Converter::Convert<std::string>(*url);
     if (pushUrl.empty()) {
         return nullptr;
+    }
+    bool recoverValue = true;
+    if (recover->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        recoverValue = Converter::Convert<bool>(recover->value);
     }
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, nullptr);
@@ -59,7 +101,59 @@ Ark_NativePointer ReplaceImpl(const Ark_String* url, const Opt_Callback_Void* fi
             finish.Invoke();
         };
     }
-    auto pageNode = delegate->ReplaceExtender(pushUrl, "", std::move(callback));
+    auto pageNode = delegate->PushExtender(pushUrl, "", recoverValue, std::move(callback));
+    CHECK_NULL_RETURN(pageNode, nullptr);
+    auto jsViewNode = reinterpret_cast<UINode*>(jsView);
+    CHECK_NULL_RETURN(jsViewNode, nullptr);
+    auto frameNode = AceType::Claim(reinterpret_cast<FrameNode*>(pageNode));
+    jsViewNode->MountToParent(frameNode);
+    frameNode->MarkDirtyNode();
+
+    RegisterPageCallback(frameNode, AceType::Claim(jsViewNode));
+    return pageNode;
+}
+
+Ark_NativePointer ReplaceImpl(const Ark_String* url, const Opt_Boolean* recover, Ark_NativePointer jsView,
+    const Opt_Callback_Void* enterFinishCallback, const Opt_Callback_Void* exitFinishCallback)
+{
+    CHECK_NULL_RETURN(url, nullptr);
+    CHECK_NULL_RETURN(recover, nullptr);
+    CHECK_NULL_RETURN(jsView, nullptr);
+    CHECK_NULL_RETURN(enterFinishCallback, nullptr);
+    CHECK_NULL_RETURN(exitFinishCallback, nullptr);
+    std::string pushUrl = Converter::Convert<std::string>(*url);
+    if (pushUrl.empty()) {
+        return nullptr;
+    }
+    bool recoverValue = true;
+    if (recover->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        recoverValue = Converter::Convert<bool>(recover->value);
+    }
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, nullptr);
+    auto delegate = container->GetFrontend();
+    CHECK_NULL_RETURN(delegate, nullptr);
+    std::function<void()> callback;
+    if (enterFinishCallback->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        callback = [finish = CallbackHelper(enterFinishCallback->value)]() {
+            finish.Invoke();
+        };
+    }
+    std::function<void()> replace;
+    if (exitFinishCallback->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        replace = [replaceBack = CallbackHelper(exitFinishCallback->value)]() {
+            replaceBack.Invoke();
+        };
+    }
+    auto pageNode = delegate->ReplaceExtender(pushUrl, "", recoverValue, std::move(callback), std::move(replace));
+    CHECK_NULL_RETURN(pageNode, nullptr);
+    auto jsViewNode = reinterpret_cast<UINode*>(jsView);
+    CHECK_NULL_RETURN(jsViewNode, nullptr);
+    auto frameNode = AceType::Claim(reinterpret_cast<FrameNode*>(pageNode));
+    jsViewNode->MountToParent(frameNode);
+    frameNode->MarkDirtyNode();
+
+    RegisterPageCallback(frameNode, AceType::Claim(jsViewNode));
     return pageNode;
 }
 
@@ -93,18 +187,55 @@ void BackImpl()
     delegate->BackExtender("", "");
 }
 
-Ark_NativePointer RunPageImpl(const Ark_String* url)
+void BackWithOptionsImpl(const Ark_String* url, const Opt_Object* params)
+{
+    CHECK_NULL_VOID(url);
+    CHECK_NULL_VOID(params);
+    std::string pushUrl = Converter::Convert<std::string>(*url);
+    std::string param;
+    if (params->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+    }
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto delegate = container->GetFrontend();
+    CHECK_NULL_VOID(delegate);
+    delegate->BackExtender(pushUrl, param);
+}
+
+Ark_NativePointer RunPageImpl(const Ark_String* url, const Opt_Boolean* recover, Ark_NativePointer jsView,
+    const Opt_Callback_Void* finishCallback)
 {
     CHECK_NULL_RETURN(url, nullptr);
+    CHECK_NULL_RETURN(recover, nullptr);
+    CHECK_NULL_RETURN(jsView, nullptr);
+    CHECK_NULL_RETURN(finishCallback, nullptr);
     std::string pushUrl = Converter::Convert<std::string>(*url);
     if (pushUrl.empty()) {
         return nullptr;
+    }
+    bool recoverValue = true;
+    if (recover->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        recoverValue = Converter::Convert<bool>(recover->value);
     }
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, nullptr);
     auto delegate = container->GetFrontend();
     CHECK_NULL_RETURN(delegate, nullptr);
-    auto pageNode = delegate->RunPageExtender(pushUrl, "");
+    std::function<void()> callback;
+    if (finishCallback->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        callback = [finish = CallbackHelper(finishCallback->value)]() {
+            finish.Invoke();
+        };
+    }
+    auto pageNode = delegate->RunPageExtender(pushUrl, "", recoverValue, std::move(callback));
+    CHECK_NULL_RETURN(pageNode, nullptr);
+    auto jsViewNode = reinterpret_cast<UINode*>(jsView);
+    CHECK_NULL_RETURN(jsViewNode, nullptr);
+    auto frameNode = AceType::Claim(reinterpret_cast<FrameNode*>(pageNode));
+    jsViewNode->MountToParent(frameNode);
+    jsViewNode->MarkDirtyNode();
+
+    RegisterPageCallback(frameNode, AceType::Claim(jsViewNode));
     return pageNode;
 }
 
@@ -116,6 +247,26 @@ void ClearImpl()
     CHECK_NULL_VOID(delegate);
     delegate->ClearExtender();
 }
+
+void ShowAlertBeforeBackPageImpl(const Ark_String* url)
+{
+    CHECK_NULL_VOID(url);
+    std::string message = Converter::Convert<std::string>(*url);
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto delegate = container->GetFrontend();
+    CHECK_NULL_VOID(delegate);
+    delegate->ShowAlertBeforeBackPageExtender(message);
+}
+
+void HideAlertBeforeBackPageImpl()
+{
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto delegate = container->GetFrontend();
+    CHECK_NULL_VOID(delegate);
+    delegate->HideAlertBeforeBackPageExtender();
+}
 }
 
 const GENERATED_ArkUIRouterExtenderAccessor* GetRouterExtenderAccessor()
@@ -125,8 +276,11 @@ const GENERATED_ArkUIRouterExtenderAccessor* GetRouterExtenderAccessor()
         RouterExtenderAccessor::ReplaceImpl,
         RouterExtenderAccessor::MoveCommonUnderPageNode,
         RouterExtenderAccessor::BackImpl,
+        RouterExtenderAccessor::BackWithOptionsImpl,
         RouterExtenderAccessor::RunPageImpl,
-        RouterExtenderAccessor::ClearImpl
+        RouterExtenderAccessor::ClearImpl,
+        RouterExtenderAccessor::ShowAlertBeforeBackPageImpl,
+        RouterExtenderAccessor::HideAlertBeforeBackPageImpl,
     };
     return &RouterExtenderAccessorImpl;
 }

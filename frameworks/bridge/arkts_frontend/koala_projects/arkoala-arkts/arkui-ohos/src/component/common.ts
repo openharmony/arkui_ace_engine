@@ -25,10 +25,13 @@ import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { DrawContext } from "./../Graphics"
 import { LengthMetrics } from "../Graphics"
-import { ComponentContent, Context, ContextInternal, StateStylesOps } from "./arkui-custom"
+import { Context, ContextInternal, StateStylesOps } from "./arkui-custom"
+import { ComponentContent } from 'arkui/ComponentContent'
 import { UIContext } from "@ohos/arkui/UIContext"
 import { IntentionCode } from '@ohos.multimodalInput.intentionCode'
-import { CircleShape, EllipseShape, PathShape, RectShape, SymbolGlyphModifier, ImageModifier } from "./arkui-external"
+import { ImageModifier } from "./arkui-external"
+import { SymbolGlyphModifier } from "../SymbolGlyphModifier"
+import { CircleShape, EllipseShape, PathShape, RectShape } from "@ohos/arkui/shape"
 import { KeyType, KeySource, Color, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, LineCapStyle, LineJoinStyle, BarState, CrownSensitivity, EdgeEffect, TextDecorationType, TextDecorationStyle, Curve, PlayMode, SharedTransitionEffectType, GradientDirection, HorizontalAlign, VerticalAlign, TransitionType, FontWeight, FontStyle, TouchType, InteractionHand, CrownAction, Placement, ArrowPointPosition, ClickEffectLevel, NestedScrollMode, PixelRoundCalcPolicy, IlluminatedType, MouseButton, MouseAction, AccessibilityHoverType, AxisAction, AxisModel, ScrollSource } from "./enums"
 import { ResourceColor, ConstraintSizeOptions, DirectionalEdgesT, SizeOptions, Length, ChainWeightOptions, Padding, LocalizedPadding, Position, BorderOptions, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, PX, VP, FP, LPX, Percentage, Bias, Font, EdgeStyles, Edges } from "./units"
 import { Resource } from "global.resource"
@@ -38,7 +41,6 @@ import { PeerNode } from "./../PeerNode"
 import { ResizableOptions } from "./image"
 import { Filter, VisualEffect, BrightnessBlender } from "#external"
 import { FocusBoxStyle, FocusPriority } from "./focus"
-import { TransformationMatrix } from "./arkui-common"
 import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureRecognizer, GestureType, GestureMask, TapGestureInterface, LongPressGestureInterface, PanGestureInterface, PinchGestureInterface, SwipeGestureInterface, RotationGestureInterface, GestureGroupInterface, GestureHandler, GesturePriority, Gesture, GestureGroup, GestureGroupHandler } from "./gesture"
 import { StyledString } from "./styledString"
 import { Callback_Number_Number_Void } from "./grid"
@@ -47,6 +49,7 @@ import { Tuple_Number_Number } from "./arkui-synthetics"
 import { ButtonType, ButtonStyleMode, ButtonRole } from "./button"
 import { Callback_Number_Void } from "./alphabetIndexer"
 import { AnimationRange_Number } from "./type-replacements"
+import { Matrix4Transit } from "#external"
 import { ScrollState } from "./list"
 import { _animateTo, _animationStart, _animationStop } from "./../handwritten/ArkAnimation"
 import { GlobalScope } from "./GlobalScope"
@@ -61,10 +64,14 @@ import { rememberMutableState } from '@koalaui/runtime'
 import { hookDragPreview, hookAllowDropAttribute, hookRegisterOnDragStartImpl, hookOnDrop, hookDragEventStartDataLoading } from "../handwritten/ArkDragDrop"
 import { ArkUIAniModule } from "arkui.ani"
 import { PointerStyle, UnifiedData, Summary, PixelMap, UniformDataType, DataSyncOptions } from "#external"
-import { hookCommonMethodGestureImpl, hookCommonMethodGestureModifierImpl, hookCommonMethodParallelGestureImpl, hookCommonMethodPriorityGestureImpl, hookCommonMethodVisualEffectImpl, hookCommonMethodBackgroundFilterImpl, hookCommonMethodForegroundFilterImpl, hookCommonMethodCompositingFilterImpl, hookCommonMethodAdvancedBlendModeImpl } from "../handwritten/CommonHandWritten"
-export interface ICurve {
-    interpolate(fraction: number): number
-}
+import { hookCommonMethodGestureImpl, hookCommonMethodGestureModifierImpl, hookCommonMethodParallelGestureImpl,
+    hookCommonMethodPriorityGestureImpl, hookCommonMethodVisualEffectImpl, hookCommonMethodBackgroundFilterImpl,
+    hookCommonMethodForegroundFilterImpl, hookCommonMethodCompositingFilterImpl, hookCommonMethodAdvancedBlendModeImpl,
+    hookCustomPropertyImpl
+} from "../handwritten/CommonHandWritten"
+import { CommonMethodModifier } from "../CommonMethodModifier"
+import { ICurve as ICurve_} from "#external"
+export type ICurve = ICurve_
 export class ICurveInternal implements MaterializedBase,ICurve {
     peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
@@ -1855,8 +1862,9 @@ export class GestureModifierInternal implements MaterializedBase,GestureModifier
         return obj
     }
 }
+export type CustomProperty = Object | undefined | Record<string, CustomProperty>;
 export class ArkCommonMethodPeer extends PeerNode {
-    _attributeSet?: ArkCommonAttributeSet;
+    _attributeSet?: CommonMethodModifier;
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -2252,6 +2260,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_margin(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    
     backgroundColor0Attribute(value: ResourceColor | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
@@ -3901,14 +3910,15 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_rotate1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    transform0Attribute(value: TransformationMatrix | undefined): void {
+    transform0Attribute(value: object | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8(value_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_type)) {
-            const value_value  = value!
-            thisSerializer.writeTransformationMatrix(value_value)
+            const value_curve_value  = value!
+            const value_curve_value_2  = value_curve_value as Matrix4Transit
+            thisSerializer.writeInt64(Object.values(value_curve_value_2)[0] as int64)
         }
         ArkUIGeneratedNativeModule._CommonMethod_transform0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -4641,15 +4651,14 @@ export class ArkCommonMethodPeer extends PeerNode {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
-            if (RuntimeType.OBJECT == value_value_type) {
-                thisSerializer.writeInt8(0 as int32)
-                const value_value_0  = value_value as ShadowOptions
-                thisSerializer.writeShadowOptions(value_value_0)
-            }
-            else if (TypeChecker.isShadowStyle(value_value)) {
+            if (TypeChecker.isShadowStyle(value_value)) {
                 thisSerializer.writeInt8(1 as int32)
                 const value_value_1  = value_value as ShadowStyle
                 thisSerializer.writeInt32(TypeChecker.ShadowStyle_ToNumeric(value_value_1))
+            } else if (RuntimeType.OBJECT == value_value_type) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as ShadowOptions
+                thisSerializer.writeShadowOptions(value_value_0)
             }
         }
         ArkUIGeneratedNativeModule._CommonMethod_shadow0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
@@ -5447,25 +5456,6 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_accessibilityFocusDrawLevel(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    customPropertyAttribute(name: string | undefined, value: Object | undefined): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        let name_type : int32 = RuntimeType.UNDEFINED
-        name_type = runtimeType(name)
-        thisSerializer.writeInt8(name_type as int32)
-        if ((RuntimeType.UNDEFINED) != (name_type)) {
-            const name_value  = name!
-            thisSerializer.writeString(name_value)
-        }
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8(value_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteObject(value_value)
-        }
-        ArkUIGeneratedNativeModule._CommonMethod_customProperty(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
     expandSafeAreaAttribute(types?: Array<SafeAreaType>, edges?: Array<SafeAreaEdge>): void {
         const thisSerializer : Serializer = Serializer.hold()
         let types_type : int32 = RuntimeType.UNDEFINED
@@ -5941,41 +5931,6 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeDragInteractionOptions(options_value)
         }
         ArkUIGeneratedNativeModule._CommonMethod_dragPreviewOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    overlayAttribute(value: string | CustomBuilder | ComponentContent | undefined, options?: OverlayOptions): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8(value_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (RuntimeType.STRING == value_value_type) {
-                thisSerializer.writeInt8(0 as int32)
-                const value_value_0  = value_value as string
-                thisSerializer.writeString(value_value_0)
-            }
-            else if (RuntimeType.FUNCTION == value_value_type) {
-                thisSerializer.writeInt8(1 as int32)
-                const value_value_1  = value_value as CustomBuilder
-                thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(value_value_1))
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
-                thisSerializer.writeInt8(2 as int32)
-                const value_value_2  = value_value as ComponentContent
-                thisSerializer.writeComponentContent(value_value_2)
-            }
-        }
-        let options_type : int32 = RuntimeType.UNDEFINED
-        options_type = runtimeType(options)
-        thisSerializer.writeInt8(options_type as int32)
-        if ((RuntimeType.UNDEFINED) != (options_type)) {
-            const options_value  = options!
-            thisSerializer.writeOverlayOptions(options_value)
-        }
-        ArkUIGeneratedNativeModule._CommonMethod_overlay(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     blendMode0Attribute(value: BlendMode | undefined, type?: BlendApplyType): void {
@@ -6924,7 +6879,7 @@ export class ArkScrollableCommonMethodPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._ScrollableCommonMethod_edgeEffect(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    fadingEdgeAttribute(enabled: boolean | undefined, options?: FadingEdgeOptions): void {
+    fadingEdgeAttribute(enabled: boolean | undefined, options?: FadingEdgeOptions | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let enabled_type : int32 = RuntimeType.UNDEFINED
         enabled_type = runtimeType(enabled)
@@ -7600,11 +7555,23 @@ export type Callback_SheetDismiss_Void = (sheetDismiss: SheetDismiss) => void;
 export type Callback_DismissSheetAction_Void = (parameter: DismissSheetAction) => void;
 export type Callback_SpringBackAction_Void = (parameter: SpringBackAction) => void;
 export type Callback_SheetType_Void = (parameter: SheetType) => void;
+export type SingleLengthDetent = [
+    SheetSize | Length
+]
+export type DoubleLengthDetents = [
+    SheetSize | Length,
+    SheetSize | Length | undefined
+]
+export type TripleLengthDetents = [
+    SheetSize | Length,
+    SheetSize | Length | undefined,
+    SheetSize | Length | undefined
+]
 export interface SheetOptions extends BindOptions {
     height?: SheetSize | Length;
     dragBar?: boolean;
     maskColor?: ResourceColor;
-    detents?: [ SheetSize | Length, SheetSize | Length | undefined, SheetSize | Length | undefined ];
+    detents?: SingleLengthDetent | DoubleLengthDetents | TripleLengthDetents;
     blurStyle?: BlurStyle;
     showClose?: boolean | Resource;
     preferType?: SheetType;
@@ -8027,200 +7994,199 @@ export interface BackgroundOptions {
     align?: Alignment;
 }
 export interface CommonMethod {
-    width(value: Length | undefined | Length | LayoutPolicy | undefined): this
-    height(value: Length | undefined | Length | LayoutPolicy | undefined): this
-    drawModifier(value: DrawModifier | undefined): this
-    responseRegion(value: Array<Rectangle> | Rectangle | undefined): this
-    mouseResponseRegion(value: Array<Rectangle> | Rectangle | undefined): this
-    size(value: SizeOptions | undefined): this
-    constraintSize(value: ConstraintSizeOptions | undefined): this
-    touchable(value: boolean | undefined): this
-    hitTestBehavior(value: HitTestMode | undefined): this
-    onChildTouchTest(value: ((value: Array<TouchTestInfo>) => TouchResult) | undefined): this
-    layoutWeight(value: number | string | undefined): this
-    chainWeight(value: ChainWeightOptions | undefined): this
-    padding(value: Padding | Length | LocalizedPadding | undefined): this
-    safeAreaPadding(value: Padding | LengthMetrics | LocalizedPadding | undefined): this
-    margin(value: Padding | Length | LocalizedPadding | undefined): this
-    backgroundColor(value: ResourceColor | undefined): this
-    pixelRound(value: PixelRoundPolicy | undefined): this
-    backgroundImageSize(value: SizeOptions | ImageSize | undefined): this
-    backgroundImagePosition(value: Position | Alignment | undefined): this
-    backgroundEffect(options: BackgroundEffectOptions | undefined, sysOptions?: SystemAdaptiveOptions): this
-    backgroundImageResizable(value: ResizableOptions | undefined): this
-    foregroundEffect(value: ForegroundEffectOptions | undefined): this
-    visualEffect(value: VisualEffect | undefined): this
-    backgroundFilter(value: Filter | undefined): this
-    foregroundFilter(value: Filter | undefined): this
-    compositingFilter(value: Filter | undefined): this
-    opacity(value: number | Resource | undefined): this
-    border(value: BorderOptions | undefined): this
-    borderStyle(value: BorderStyle | EdgeStyles | undefined): this
-    borderWidth(value: Length | EdgeWidths | LocalizedEdgeWidths | undefined): this
-    borderColor(value: ResourceColor | EdgeColors | LocalizedEdgeColors | undefined): this
-    borderRadius(value: Length | BorderRadiuses | LocalizedBorderRadiuses | undefined): this
-    borderImage(value: BorderImageOption | undefined): this
-    outline(value: OutlineOptions | undefined): this
-    outlineStyle(value: OutlineStyle | EdgeOutlineStyles | undefined): this
-    outlineWidth(value: Dimension | EdgeOutlineWidths | undefined): this
-    outlineColor(value: ResourceColor | EdgeColors | LocalizedEdgeColors | undefined): this
-    outlineRadius(value: Dimension | OutlineRadiuses | undefined): this
-    foregroundColor(value: ResourceColor | ColoringStrategy | undefined): this
-    onClick(event: ((event: ClickEvent) => void) | undefined): this
-    onHover(value: ((isHover: boolean,event: HoverEvent) => void) | undefined): this
-    onHoverMove(value: ((parameter: HoverEvent) => void) | undefined): this
-    onAccessibilityHover(value: AccessibilityCallback | undefined): this
-    hoverEffect(value: HoverEffect | undefined): this
-    onMouse(value: ((event: MouseEvent) => void) | undefined): this
-    onTouch(value: ((event: TouchEvent) => void) | undefined): this
-    onKeyEvent(value: ((event: KeyEvent) => boolean) | undefined): this
-    onDigitalCrown(value: ((parameter: CrownEvent) => void) | undefined): this
-    onKeyPreIme(value: ((parameter: KeyEvent) => boolean) | undefined): this
-    onKeyEventDispatch(value: ((parameter: KeyEvent) => boolean) | undefined): this
-    onFocusAxisEvent(value: ((parameter: FocusAxisEvent) => void) | undefined): this
-    onAxisEvent(value: ((parameter: AxisEvent) => void) | undefined): this
-    focusable(value: boolean | undefined): this
-    nextFocus(value: FocusMovement | undefined): this
-    tabStop(value: boolean | undefined): this
-    onFocus(value: (() => void) | undefined): this
-    onBlur(value: (() => void) | undefined): this
-    tabIndex(value: number | undefined): this
-    defaultFocus(value: boolean | undefined): this
-    groupDefaultFocus(value: boolean | undefined): this
-    focusOnTouch(value: boolean | undefined): this
-    focusBox(value: FocusBoxStyle | undefined): this
+    width(value: Length | undefined | Length | LayoutPolicy | undefined): this {return this;}
+    height(value: Length | undefined | Length | LayoutPolicy | undefined):this {return this;}
+    drawModifier(value: DrawModifier | undefined): this {return this;}
+    responseRegion(value: Array<Rectangle> | Rectangle | undefined): this {return this;}
+    mouseResponseRegion(value: Array<Rectangle> | Rectangle | undefined): this {return this;}
+    size(value: SizeOptions | undefined): this {return this;}
+    constraintSize(value: ConstraintSizeOptions | undefined): this {return this;}
+    touchable(value: boolean | undefined): this {return this;}
+    hitTestBehavior(value: HitTestMode | undefined): this {return this;}
+    onChildTouchTest(value: ((value: Array<TouchTestInfo>) => TouchResult) | undefined): this {return this;}
+    layoutWeight(value: number | string | undefined): this {return this;}
+    chainWeight(value: ChainWeightOptions | undefined): this {return this;}
+    padding(value: Padding | Length | LocalizedPadding | undefined): this {return this;}
+    safeAreaPadding(value: Padding | LengthMetrics | LocalizedPadding | undefined): this {return this;}
+    margin(value: Padding | Length | LocalizedPadding | undefined): this {return this;}
+    backgroundColor(value: ResourceColor | undefined): this {return this;}
+    pixelRound(value: PixelRoundPolicy | undefined): this {return this;}
+    backgroundImageSize(value: SizeOptions | ImageSize | undefined): this {return this;}
+    backgroundImagePosition(value: Position | Alignment | undefined): this {return this;}
+    backgroundEffect(options: BackgroundEffectOptions | undefined, sysOptions?: SystemAdaptiveOptions): this {return this;}
+    backgroundImageResizable(value: ResizableOptions | undefined): this {return this;}
+    foregroundEffect(value: ForegroundEffectOptions | undefined): this {return this;}
+    visualEffect(value: VisualEffect | undefined): this {return this;}
+    backgroundFilter(value: Filter | undefined): this {return this;}
+    foregroundFilter(value: Filter | undefined): this {return this;}
+    compositingFilter(value: Filter | undefined): this {return this;}
+    opacity(value: number | Resource | undefined): this {return this;}
+    border(value: BorderOptions | undefined): this {return this;}
+    borderStyle(value: BorderStyle | EdgeStyles | undefined): this {return this;}
+    borderWidth(value: Length | EdgeWidths | LocalizedEdgeWidths | undefined): this {return this;}
+    borderColor(value: ResourceColor | EdgeColors | LocalizedEdgeColors | undefined): this {return this;}
+    borderRadius(value: Length | BorderRadiuses | LocalizedBorderRadiuses | undefined): this {return this;}
+    borderImage(value: BorderImageOption | undefined): this {return this;}
+    outline(value: OutlineOptions | undefined): this {return this;}
+    outlineStyle(value: OutlineStyle | EdgeOutlineStyles | undefined): this {return this;}
+    outlineWidth(value: Dimension | EdgeOutlineWidths | undefined): this {return this;}
+    outlineColor(value: ResourceColor | EdgeColors | LocalizedEdgeColors | undefined): this {return this;}
+    outlineRadius(value: Dimension | OutlineRadiuses | undefined): this {return this;}
+    foregroundColor(value: ResourceColor | ColoringStrategy | undefined): this {return this;}
+    onClick(event: ((event: ClickEvent) => void) | undefined): this {return this;}
+    onHover(value: ((isHover: boolean,event: HoverEvent) => void) | undefined): this {return this;}
+    onHoverMove(value: ((parameter: HoverEvent) => void) | undefined): this {return this;}
+    onAccessibilityHover(value: AccessibilityCallback | undefined): this {return this;}
+    hoverEffect(value: HoverEffect | undefined): this {return this;}
+    onMouse(value: ((event: MouseEvent) => void) | undefined): this {return this;}
+    onTouch(value: ((event: TouchEvent) => void) | undefined): this {return this;}
+    onKeyEvent(value: ((event: KeyEvent) => boolean) | undefined): this {return this;}
+    onDigitalCrown(value: ((parameter: CrownEvent) => void) | undefined): this {return this;}
+    onKeyPreIme(value: ((parameter: KeyEvent) => boolean) | undefined): this {return this;}
+    onKeyEventDispatch(value: ((parameter: KeyEvent) => boolean) | undefined): this {return this;}
+    onFocusAxisEvent(value: ((parameter: FocusAxisEvent) => void) | undefined): this {return this;}
+    onAxisEvent(value: ((parameter: AxisEvent) => void) | undefined): this {return this;}
+    focusable(value: boolean | undefined): this {return this;}
+    nextFocus(value: FocusMovement | undefined): this {return this;}
+    tabStop(value: boolean | undefined): this {return this;}
+    onFocus(value: (() => void) | undefined): this {return this;}
+    onBlur(value: (() => void) | undefined): this {return this;}
+    tabIndex(value: number | undefined): this {return this;}
+    defaultFocus(value: boolean | undefined): this {return this;}
+    groupDefaultFocus(value: boolean | undefined): this {return this;}
+    focusOnTouch(value: boolean | undefined): this {return this;}
+    focusBox(value: FocusBoxStyle | undefined): this {return this;}
     // when use buildSystem memo-plugin will insert animation declaration
-    animationStart(value: AnimateParam | undefined): this
-    animationStop(value: AnimateParam | undefined):this
+    animationStart(value: AnimateParam | undefined): this {return this;}
+    animationStop(value: AnimateParam | undefined):this {return this;}
     __createOrSetAnimatableProperty<T>(functionName: string, value: number | AnimatableArithmetic<T>,
-        callback: (value: number | AnimatableArithmetic<T>) => void): void
-    transition(effect: TransitionOptions | TransitionEffect | undefined | TransitionEffect | undefined, onFinish?: TransitionFinishCallback): this
-    motionBlur(value: MotionBlurOptions | undefined): this
-    brightness(value: number | undefined): this
-    contrast(value: number | undefined): this
-    grayscale(value: number | undefined): this
-    colorBlend(value: Color | string | Resource | undefined): this
-    saturate(value: number | undefined): this
-    sepia(value: number | undefined): this
-    invert(value: number | InvertOptions | undefined): this
-    hueRotate(value: number | string | undefined): this
-    useShadowBatching(value: boolean | undefined): this
-    useEffect(useEffect: boolean | undefined, effectType?: EffectType | undefined | EffectType): this
-    renderGroup(value: boolean | undefined): this
-    freeze(value: boolean | undefined): this
-    translate(value: TranslateOptions | undefined): this
-    scale(value: ScaleOptions | undefined): this
-    gridSpan(value: number | undefined): this
-    gridOffset(value: number | undefined): this
-    rotate(value: RotateOptions | undefined): this
-    transform(value: TransformationMatrix | undefined | Object | undefined): this
-    onAppear(value: (() => void) | undefined): this
-    onDisAppear(value: (() => void) | undefined): this
-    onAttach(value: (() => void) | undefined): this
-    onDetach(value: (() => void) | undefined): this
-    onAreaChange(value: ((oldValue: Area,newValue: Area) => void) | undefined): this
-    visibility(value: Visibility | undefined): this
-    flexGrow(value: number | undefined): this
-    flexShrink(value: number | undefined): this
-    flexBasis(value: number | string | undefined): this
-    alignSelf(value: ItemAlign | undefined): this
-    displayPriority(value: number | undefined): this
-    zIndex(value: number | undefined): this
-    direction(value: Direction | undefined): this
-    align(value: Alignment | undefined): this
-    position(value: Position | Edges | LocalizedEdges | undefined): this
-    markAnchor(value: Position | LocalizedPosition | undefined): this
-    offset(value: Position | Edges | LocalizedEdges | undefined): this
-    enabled(value: boolean | undefined): this
-    useSizeType(value: Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs | undefined): this
-    alignRules(value: AlignRuleOption | undefined | LocalizedAlignRuleOptions | undefined): this
-    aspectRatio(value: number | undefined): this
-    clickEffect(value: ClickEffect | undefined): this
-    onDragStart(value: ((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) | undefined): this
-    onDragEnter(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this
-    onDragMove(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this
-    onDragLeave(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this
-    onDrop(eventCallback: ((event: DragEvent,extraParams?: string) => void) | undefined | OnDragEventCallback | undefined, dropOptions?: DropOptions): this
-    onDragEnd(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this
-    allowDrop(value: Array<UniformDataType> | null | undefined): this
-    draggable(value: boolean | undefined): this
-    dragPreview(preview: CustomBuilder | DragItemInfo | string | undefined, config?: PreviewConfiguration): this
-    onPreDrag(value: ((parameter: PreDragStatus) => void) | undefined): this
-    linearGradient(value: LinearGradientOptions | undefined): this
-    sweepGradient(value: SweepGradientOptions | undefined): this
-    radialGradient(value: RadialGradientOptions | undefined): this
-    motionPath(value: MotionPathOptions | undefined): this
-    shadow(value: ShadowOptions | ShadowStyle | undefined): this
-    clip(value: boolean | undefined): this
-    clipShape(value: CircleShape | EllipseShape | PathShape | RectShape | undefined): this
-    mask(value: ProgressMask | undefined): this
-    maskShape(value: CircleShape | EllipseShape | PathShape | RectShape | undefined): this
-    key(value: string | undefined): this
-    id(value: string | undefined): this
-    geometryTransition(id: string | undefined, options?: GeometryTransitionOptions): this
-    stateStyles(value: StateStyles | undefined): this
-    restoreId(value: number | undefined): this
-    sphericalEffect(value: number | undefined): this
-    lightUpEffect(value: number | undefined): this
-    pixelStretchEffect(value: PixelStretchEffectOptions | undefined): this
-    accessibilityGroup(isGroup: boolean | undefined, accessibilityOptions?: AccessibilityOptions): this
-    accessibilityText(value: string | undefined | Resource | undefined): this
-    accessibilityNextFocusId(value: string | undefined): this
-    accessibilityDefaultFocus(value: boolean | undefined): this
-    accessibilityUseSamePage(value: AccessibilitySamePageMode | undefined): this
-    accessibilityScrollTriggerable(value: boolean | undefined): this
-    accessibilityRole(value: AccessibilityRoleType | undefined): this
-    onAccessibilityFocus(value: AccessibilityFocusCallback | undefined): this
-    accessibilityTextHint(value: string | undefined): this
-    accessibilityDescription(value: string | undefined | Resource | undefined): this
-    accessibilityLevel(value: string | undefined): this
-    accessibilityVirtualNode(value: CustomBuilder | undefined): this
-    accessibilityChecked(value: boolean | undefined): this
-    accessibilitySelected(value: boolean | undefined): this
-    obscured(value: Array<ObscuredReasons> | undefined): this
-    reuseId(value: string | undefined): this
-    reuse(value: ReuseOptions | undefined): this
-    renderFit(value: RenderFit | undefined): this
-    gestureModifier(value: GestureModifier | undefined): this
-    backgroundBrightness(value: BackgroundBrightnessOptions | undefined): this
-    onGestureJudgeBegin(value: ((gestureInfo: GestureInfo,event: BaseGestureEvent) => GestureJudgeResult) | undefined): this
-    onGestureRecognizerJudgeBegin(callback_: GestureRecognizerJudgeBeginCallback | undefined, exposeInnerGesture?: boolean): this
-    shouldBuiltInRecognizerParallelWith(value: ShouldBuiltInRecognizerParallelWithCallback | undefined): this
-    monopolizeEvents(value: boolean | undefined): this
-    onTouchIntercept(value: ((parameter: TouchEvent) => HitTestMode) | undefined): this
-    onSizeChange(value: SizeChangeCallback | undefined): this
-    accessibilityFocusDrawLevel(value: FocusDrawLevel | undefined): this
-    customProperty(name: string | undefined, value: Object | undefined): this
-    expandSafeArea(types?: Array<SafeAreaType> | undefined, edges?: Array<SafeAreaEdge> | undefined): this
-    background(builder: CustomBuilder | undefined, options?: BackgroundOptions): this
-    backgroundImage(src: ResourceStr | PixelMap | undefined, repeat?: ImageRepeat | undefined): this
-    backgroundBlurStyle(style: BlurStyle | undefined, options?: BackgroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): this
-    foregroundBlurStyle(style: BlurStyle | undefined, options?: ForegroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): this
-    focusScopeId(id: string | undefined, isGroup?: boolean, arrowStepOut?: boolean): this
-    focusScopePriority(scopeId: string | undefined, priority?: FocusPriority): this
-    gesture(gesture: GestureType | undefined, mask?: GestureMask): this
-    priorityGesture(gesture: GestureType | undefined, mask?: GestureMask): this
-    parallelGesture(gesture: GestureType | undefined, mask?: GestureMask): this
-    blur(blurRadius: number | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this
-    linearGradientBlur(value: number | undefined, options: LinearGradientBlurOptions | undefined): this
-    systemBarEffect(): this
-    backdropBlur(radius: number | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this
-    sharedTransition(id: string | undefined, options?: sharedTransitionOptions): this
-    chainMode(direction: Axis | undefined, style: ChainStyle | undefined): this
-    dragPreviewOptions(value: DragPreviewOptions | undefined, options?: DragInteractionOptions): this
-    overlay(value: string | CustomBuilder | ComponentContent | undefined, options?: OverlayOptions): this
-    blendMode(value: BlendMode | undefined, type?: BlendApplyType): this
-    advancedBlendMode(effect: BlendMode | BrightnessBlender | undefined, type?: BlendApplyType): this
-    bindTips(message: TipsMessageType | undefined, options?: TipsOptions): this
-    bindPopup(show: boolean | undefined, popup: PopupOptions | CustomPopupOptions | undefined): this
-    bindMenu(content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions | undefined): this
-    bindContextMenu(content: CustomBuilder | undefined, responseType: ResponseType | undefined, options?: ContextMenuOptions | undefined): this
-    bindContentCover(isShow: boolean | undefined | Bindable<boolean>, builder: CustomBuilder | undefined, type?: ContentCoverOptions): this
-    bindSheet(isShow: boolean | undefined | Bindable<boolean>, builder: CustomBuilder | undefined, options?: SheetOptions): this
-    onVisibleAreaChange(ratios: Array<number> | undefined, event: VisibleAreaChangeCallback | undefined): this
-    onVisibleAreaApproximateChange(options: VisibleAreaEventOptions | undefined, event: VisibleAreaChangeCallback | undefined): this
-    keyboardShortcut(value: string | FunctionKey | undefined, keys: Array<ModifierKey> | undefined, action?: (() => void)): this
-    attributeModifier<T>(value: AttributeModifier<T>): this
+        callback: (value: number | AnimatableArithmetic<T>) => void): void {}
+    transition(effect: TransitionEffect | undefined, onFinish?: TransitionFinishCallback): this {return this;}
+    motionBlur(value: MotionBlurOptions | undefined): this {return this;}
+    brightness(value: number | undefined): this {return this;}
+    contrast(value: number | undefined): this {return this;}
+    grayscale(value: number | undefined): this {return this;}
+    colorBlend(value: Color | string | Resource | undefined): this {return this;}
+    saturate(value: number | undefined): this {return this;}
+    sepia(value: number | undefined): this {return this;}
+    invert(value: number | InvertOptions | undefined): this {return this;}
+    hueRotate(value: number | string | undefined): this {return this;}
+    useShadowBatching(value: boolean | undefined): this {return this;}
+    useEffect(useEffect: boolean | undefined, effectType?: EffectType | undefined | EffectType): this {return this;}
+    renderGroup(value: boolean | undefined): this {return this;}
+    freeze(value: boolean | undefined): this {return this;}
+    translate(value: TranslateOptions | undefined): this {return this;}
+    scale(value: ScaleOptions | undefined): this {return this;}
+    gridSpan(value: number | undefined): this {return this;}
+    gridOffset(value: number | undefined): this {return this;}
+    rotate(value: RotateOptions | undefined): this {return this;}
+    transform(value: object | undefined): this {return this;}
+    onAppear(value: (() => void) | undefined): this {return this;}
+    onDisAppear(value: (() => void) | undefined): this {return this;}
+    onAttach(value: (() => void) | undefined): this {return this;}
+    onDetach(value: (() => void) | undefined): this {return this;}
+    onAreaChange(value: ((oldValue: Area,newValue: Area) => void) | undefined): this {return this;}
+    visibility(value: Visibility | undefined): this {return this;}
+    flexGrow(value: number | undefined): this {return this;}
+    flexShrink(value: number | undefined): this {return this;}
+    flexBasis(value: number | string | undefined): this {return this;}
+    alignSelf(value: ItemAlign | undefined): this {return this;}
+    displayPriority(value: number | undefined): this {return this;}
+    zIndex(value: number | undefined): this {return this;}
+    direction(value: Direction | undefined): this {return this;}
+    align(value: Alignment | undefined): this {return this;}
+    position(value: Position | Edges | LocalizedEdges | undefined): this {return this;}
+    markAnchor(value: Position | LocalizedPosition | undefined): this {return this;}
+    offset(value: Position | Edges | LocalizedEdges | undefined): this {return this;}
+    enabled(value: boolean | undefined): this {return this;}
+    useSizeType(value: Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs | undefined): this {return this;}
+    alignRules(value: AlignRuleOption | undefined | LocalizedAlignRuleOptions | undefined): this {return this;}
+    aspectRatio(value: number | undefined): this {return this;}
+    clickEffect(value: ClickEffect | undefined): this {return this;}
+    onDragStart(value: ((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) | undefined): this {return this;}
+    onDragEnter(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this {return this;}
+    onDragMove(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this {return this;}
+    onDragLeave(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this {return this;}
+    onDrop(eventCallback: ((event: DragEvent,extraParams?: string) => void) | undefined | OnDragEventCallback | undefined, dropOptions?: DropOptions): this {return this;}
+    onDragEnd(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this {return this;}
+    allowDrop(value: Array<UniformDataType> | null | undefined): this {return this;}
+    draggable(value: boolean | undefined): this {return this;}
+    dragPreview(preview: CustomBuilder | DragItemInfo | string | undefined, config?: PreviewConfiguration): this {return this;}
+    onPreDrag(value: ((parameter: PreDragStatus) => void) | undefined): this {return this;}
+    linearGradient(value: LinearGradientOptions | undefined): this {return this;}
+    sweepGradient(value: SweepGradientOptions | undefined): this {return this;}
+    radialGradient(value: RadialGradientOptions | undefined): this {return this;}
+    motionPath(value: MotionPathOptions | undefined): this {return this;}
+    shadow(value: ShadowOptions | ShadowStyle | undefined): this {return this;}
+    clip(value: boolean | undefined): this {return this;}
+    clipShape(value: CircleShape | EllipseShape | PathShape | RectShape | undefined): this {return this;}
+    mask(value: ProgressMask | undefined): this {return this;}
+    maskShape(value: CircleShape | EllipseShape | PathShape | RectShape | undefined): this {return this;}
+    key(value: string | undefined): this {return this;}
+    id(value: string | undefined): this {return this;}
+    geometryTransition(id: string | undefined, options?: GeometryTransitionOptions): this {return this;}
+    stateStyles(value: StateStyles | undefined): this {return this;}
+    restoreId(value: number | undefined): this {return this;}
+    sphericalEffect(value: number | undefined): this {return this;}
+    lightUpEffect(value: number | undefined): this {return this;}
+    pixelStretchEffect(value: PixelStretchEffectOptions | undefined): this {return this;}
+    accessibilityGroup(isGroup: boolean | undefined, accessibilityOptions?: AccessibilityOptions): this {return this;}
+    accessibilityText(value: string | undefined | Resource | undefined): this {return this;}
+    accessibilityNextFocusId(value: string | undefined): this {return this;}
+    accessibilityDefaultFocus(value: boolean | undefined): this {return this;}
+    accessibilityUseSamePage(value: AccessibilitySamePageMode | undefined): this {return this;}
+    accessibilityScrollTriggerable(value: boolean | undefined): this {return this;}
+    accessibilityRole(value: AccessibilityRoleType | undefined): this {return this;}
+    onAccessibilityFocus(value: AccessibilityFocusCallback | undefined): this {return this;}
+    accessibilityTextHint(value: string | undefined): this {return this;}
+    accessibilityDescription(value: string | undefined | Resource | undefined): this {return this;}
+    accessibilityLevel(value: string | undefined): this {return this;}
+    accessibilityVirtualNode(value: CustomBuilder | undefined): this {return this;}
+    accessibilityChecked(value: boolean | undefined): this {return this;}
+    accessibilitySelected(value: boolean | undefined): this {return this;}
+    obscured(value: Array<ObscuredReasons> | undefined): this {return this;}
+    reuseId(value: string | undefined): this {return this;}
+    reuse(value: ReuseOptions | undefined): this {return this;}
+    renderFit(value: RenderFit | undefined): this {return this;}
+    gestureModifier(value: GestureModifier | undefined): this {return this;}
+    backgroundBrightness(value: BackgroundBrightnessOptions | undefined): this {return this;}
+    onGestureJudgeBegin(value: ((gestureInfo: GestureInfo,event: BaseGestureEvent) => GestureJudgeResult) | undefined): this {return this;}
+    onGestureRecognizerJudgeBegin(callback_: GestureRecognizerJudgeBeginCallback | undefined, exposeInnerGesture?: boolean): this {return this;}
+    shouldBuiltInRecognizerParallelWith(value: ShouldBuiltInRecognizerParallelWithCallback | undefined): this {return this;}
+    monopolizeEvents(value: boolean | undefined): this {return this;}
+    onTouchIntercept(value: ((parameter: TouchEvent) => HitTestMode) | undefined): this {return this;}
+    onSizeChange(value: SizeChangeCallback | undefined): this {return this;}
+    accessibilityFocusDrawLevel(value: FocusDrawLevel | undefined): this {return this;}
+    customProperty(name: string, value: CustomProperty): this {return this;}
+    expandSafeArea(types?: Array<SafeAreaType> | undefined, edges?: Array<SafeAreaEdge> | undefined): this {return this;}
+    background(builder: CustomBuilder | undefined, options?: BackgroundOptions): this {return this;}
+    backgroundImage(src: ResourceStr | PixelMap | undefined, repeat?: ImageRepeat | undefined): this {return this;}
+    backgroundBlurStyle(style: BlurStyle | undefined, options?: BackgroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): this {return this;}
+    foregroundBlurStyle(style: BlurStyle | undefined, options?: ForegroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): this {return this;}
+    focusScopeId(id: string | undefined, isGroup?: boolean, arrowStepOut?: boolean): this {return this;}
+    focusScopePriority(scopeId: string | undefined, priority?: FocusPriority): this {return this;}
+    gesture(gesture: GestureType | undefined, mask?: GestureMask): this {return this;}
+    priorityGesture(gesture: GestureType | undefined, mask?: GestureMask): this {return this;}
+    parallelGesture(gesture: GestureType | undefined, mask?: GestureMask): this {return this;}
+    blur(blurRadius: number | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {return this;}
+    linearGradientBlur(value: number | undefined, options: LinearGradientBlurOptions | undefined): this {return this;}
+    systemBarEffect(): this {return this;}
+    backdropBlur(radius: number | undefined, options?: BlurOptions, sysOptions?: SystemAdaptiveOptions): this {return this;}
+    sharedTransition(id: string | undefined, options?: sharedTransitionOptions): this {return this;}
+    chainMode(direction: Axis | undefined, style: ChainStyle | undefined): this {return this;}
+    dragPreviewOptions(value: DragPreviewOptions | undefined, options?: DragInteractionOptions): this {return this;}
+    overlay(value: string | CustomBuilder | ComponentContent | undefined, options?: OverlayOptions): this {return this;}
+    blendMode(value: BlendMode | undefined, type?: BlendApplyType): this {return this;}
+    advancedBlendMode(effect: BlendMode | BrightnessBlender | undefined, type?: BlendApplyType): this {return this;}
+    bindTips(message: TipsMessageType | undefined, options?: TipsOptions): this {return this;}
+    bindPopup(show: boolean | undefined, popup: PopupOptions | CustomPopupOptions | undefined): this {return this;}
+    bindMenu(content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions | undefined): this {return this;}
+    bindContextMenu(content: CustomBuilder | undefined, responseType: ResponseType | undefined, options?: ContextMenuOptions | undefined): this {return this;}
+    bindContentCover(isShow: boolean | undefined | Bindable<boolean>, builder: CustomBuilder | undefined, type?: ContentCoverOptions): this {return this;}
+    bindSheet(isShow: boolean | undefined | Bindable<boolean>, builder: CustomBuilder | undefined, options?: SheetOptions): this {return this;}
+    onVisibleAreaChange(ratios: Array<number> | undefined, event: VisibleAreaChangeCallback | undefined): this {return this;}
+    onVisibleAreaApproximateChange(options: VisibleAreaEventOptions | undefined, event: VisibleAreaChangeCallback | undefined): this {return this;}
+    keyboardShortcut(value: string | FunctionKey | undefined, keys: Array<ModifierKey> | undefined, action?: (() => void)): this {return this;}
 }
 export class ArkCommonMethodStyle implements CommonMethod {
     width_value?: Length | undefined
@@ -8305,7 +8271,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     gridSpan_value?: number | undefined
     gridOffset_value?: number | undefined
     rotate_value?: RotateOptions | undefined
-    transform_value?: TransformationMatrix | undefined
+    transform_value?: Matrix4Transit | undefined
     onAppear_value?: (() => void) | undefined
     onDisAppear_value?: (() => void) | undefined
     onAttach_value?: (() => void) | undefined
@@ -8579,7 +8545,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     public animation(value: AnimateParam | undefined): this {
         return this
     }
-    public transition(effect: TransitionOptions | TransitionEffect | undefined | TransitionEffect | undefined, onFinish?: TransitionFinishCallback): this {
+    public transition(effect: TransitionEffect | undefined, onFinish?: TransitionFinishCallback): this {
         return this
     }
     public motionBlur(value: MotionBlurOptions | undefined): this {
@@ -8636,7 +8602,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     public rotate(value: RotateOptions | undefined): this {
         return this
     }
-    public transform(value: TransformationMatrix | undefined | Object | undefined): this {
+    public transform(value: object | undefined ): this {
         return this
     }
     public onAppear(value: (() => void) | undefined): this {
@@ -8867,7 +8833,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     public accessibilityFocusDrawLevel(value: FocusDrawLevel | undefined): this {
         return this
     }
-    public customProperty(name: string | undefined, value: Object | undefined): this {
+    public customProperty(name: string, value: CustomProperty): this {
         return this
     }
     public expandSafeArea(types?: Array<SafeAreaType> | undefined, edges?: Array<SafeAreaEdge> | undefined): this {
@@ -8955,9 +8921,6 @@ export class ArkCommonMethodStyle implements CommonMethod {
         return this
     }
     public keyboardShortcut(value: string | FunctionKey | undefined, keys: Array<ModifierKey> | undefined, action?: (() => void)): this {
-        return this
-    }
-    public attributeModifier<T>(value: AttributeModifier<T>): this {
         return this
     }
 }
@@ -9144,7 +9107,7 @@ export interface ScrollableCommonMethod extends CommonMethod {
     digitalCrownSensitivity(value: CrownSensitivity | undefined): this
     backToTop(value: boolean | undefined): this
     edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions | undefined): this
-    fadingEdge(enabled: boolean | undefined, options?: FadingEdgeOptions): this
+    fadingEdge(enabled: boolean | undefined, options?: FadingEdgeOptions | undefined): this
 }
 export class ArkScrollableCommonMethodStyle extends ArkCommonMethodStyle implements ScrollableCommonMethod {
     public scrollBar(value: BarState | undefined): this {
@@ -9195,7 +9158,7 @@ export class ArkScrollableCommonMethodStyle extends ArkCommonMethodStyle impleme
     public edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions | undefined): this {
         return this
     }
-    public fadingEdge(enabled: boolean | undefined, options?: FadingEdgeOptions): this {
+    public fadingEdge(enabled: boolean | undefined, options?: FadingEdgeOptions | undefined): this {
         return this
     }
 }
@@ -9295,19 +9258,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
             this._modifierHost!.setPeer(this.getPeer())
         }
         return this._modifierHost!
-    }
-    getAttributeSet(): ArkCommonAttributeSet  {
-        return this.getPeer()._attributeSet as ArkCommonAttributeSet;
-    }
-
-    initAttributeSet<T>(modifier: AttributeModifier<T>): void {
-        let isCommonModifier: boolean = modifier instanceof CommonModifier;
-        if (isCommonModifier) {
-            let commonModifier = modifier as object as CommonModifier;
-            this.getPeer()._attributeSet = commonModifier.attributeSet;
-        } else if (this.getPeer()._attributeSet == null) {
-            this.getPeer()._attributeSet = new ArkCommonAttributeSet();
-        }
     }
     getPeer(): ArkCommonMethodPeer {
         return (this.peer as ArkCommonMethodPeer)
@@ -9949,7 +9899,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
             throw new Error('__createOrSetAnimatableProperty format error')
         }
     }
-    public transition(effect: TransitionOptions | TransitionEffect | undefined | TransitionEffect | undefined, onFinish?: TransitionFinishCallback): this {
+    public transition(effect: TransitionEffect | undefined, onFinish?: TransitionFinishCallback): this {
         if (this.checkPriority("transition")) {
             const effect_type = runtimeType(effect)
             const onFinish_type = runtimeType(onFinish)
@@ -10264,11 +10214,11 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public transform(value: TransformationMatrix | undefined | Object | undefined): this {
+    public transform(value: object | undefined): this {
         if (this.checkPriority("transform")) {
             const value_type = runtimeType(value)
             if ((RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (TransformationMatrix | undefined)
+                const value_casted = value as (object | undefined)
                 this.getPeer()?.transform0Attribute(value_casted)
                 return this
             }
@@ -10653,11 +10603,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
                 this.getPeer()?.clipShape0Attribute(value_casted)
                 return this
             }
-            if ((RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (CircleShape | EllipseShape | PathShape | RectShape | undefined)
-                this.getPeer()?.clipShape1Attribute(value_casted)
-                return this
-            }
             throw new Error("Can not select appropriate overload")
         }
         return this
@@ -10690,11 +10635,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
             if ((RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
                 const value_casted = value as (CircleShape | EllipseShape | PathShape | RectShape | undefined)
                 this.getPeer()?.maskShape0Attribute(value_casted)
-                return this
-            }
-            if ((RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (CircleShape | EllipseShape | PathShape | RectShape | undefined)
-                this.getPeer()?.maskShape1Attribute(value_casted)
                 return this
             }
             throw new Error("Can not select appropriate overload")
@@ -10738,9 +10678,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public stateStyles(value: StateStyles | undefined): this {
         if (this.checkPriority("stateStyles")) {
-            const value_casted = value as (StateStyles | undefined)
-            hookStateStyleImpl(this.getPeer(), value_casted)
-            return this
+            hookStateStyleImpl(this, value)
         }
         return this
     }
@@ -11075,14 +11013,11 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public customProperty(name: string | undefined, value: Object | undefined): this {
+    public customProperty(name: string, value: CustomProperty): this {
         if (this.checkPriority("customProperty")) {
-            const name_casted = name as (string | undefined)
-            const value_casted = value as (Object | undefined)
-            this.getPeer()?.customPropertyAttribute(name_casted, value_casted)
-            return this
+            hookCustomPropertyImpl(this, name, value);
         }
-        return this
+        return this;
     }
     public expandSafeArea(types?: Array<SafeAreaType> | undefined, edges?: Array<SafeAreaEdge> | undefined): this {
         if (this.checkPriority("expandSafeArea")) {
@@ -11104,9 +11039,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public backgroundImage(src: ResourceStr | PixelMap | undefined, repeat?: ImageRepeat | undefined): this {
         if (this.checkPriority("backgroundImage")) {
-            const src_casted = src as (ResourceStr | PixelMap | undefined)
-            const repeat_casted = repeat as (ImageRepeat | undefined)
-            hookBackgroundImageImpl(this.getPeer(), src_casted, repeat_casted)
+            hookBackgroundImageImpl(this, src, repeat)
         }
         return this
     }
@@ -11115,7 +11048,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
             const style_type = runtimeType(style)
             const options_type = runtimeType(options)
             const sysOptions_type = runtimeType(sysOptions)
-            if (((RuntimeType.NUMBER == style_type) || (RuntimeType.UNDEFINED == style_type))) {
+            if (((RuntimeType.NUMBER == style_type) || (RuntimeType.UNDEFINED == style_type) || (RuntimeType.OBJECT == options_type) || (RuntimeType.UNDEFINED == options_type))) {
                 const value_casted = style as (BlurStyle | undefined)
                 const options_casted = options as (BackgroundBlurStyleOptions | undefined)
                 this.getPeer()?.backgroundBlurStyle0Attribute(value_casted, options_casted)
@@ -11297,10 +11230,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public overlay(value: string | CustomBuilder | ComponentContent | undefined, options?: OverlayOptions): this {
         if (this.checkPriority("overlay")) {
-            const value_casted = value as (string | CustomBuilder | ComponentContent | undefined)
-            const options_casted = options as (OverlayOptions)
-            this.getPeer()?.overlayAttribute(value_casted, options_casted)
-            return this
+            hookOverlayImpl(this, value, options)
         }
         return this
     }
@@ -11428,47 +11358,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public attributeModifier<T>(modifier: AttributeModifier<T>): this {
-
-        let peerNode = this.getPeer()
-        this.initAttributeSet(modifier);
-        let isAttributeUpdater: boolean = (modifier instanceof AttributeUpdater);
-        if (isAttributeUpdater) {
-            let attributeUpdater = modifier as object as AttributeUpdater<T, (...params: Object[]) => T>
-            if (!attributeUpdater.peerNode_) {
-                attributeUpdater.initializeModifier(peerNode._attributeSet as T);
-            } else if (this.getPeer() !== attributeUpdater.peerNode_) {
-                attributeUpdater.onComponentChanged(peerNode._attributeSet as T);
-            }
-            attributeUpdater.peerNode_ = this.getPeer();
-            attributeUpdater.attribute = this.getModifierHost() as T
-            attributeUpdater.updateConstructorParams = (...params: Object[]) => {
-                let attribute = this.getModifierHost()! as T;
-                this.getModifierHost()!.constructParam(...params);
-                return attribute;
-            };
-        }
-        this.applyModifierByState(isAttributeUpdater, modifier);
-        return this;
-    }
-    public applyModifierByState<T>(isAttributeUpdater: boolean, modifier: AttributeModifier<T>): void {
-        // let currentState = rememberMutableState<int32>(0);
-        // let peerNode = this.getPeer()
-        // let isInit =  rememberMutableState<boolean>(true);
-        // remember(() => {
-        //     StateStylesOps.onStateStyleChange(peerNode.getPeerPtr(), (state: int32) => {
-        //         currentState.value = state;
-        //         isInit.value = false;
-        //     })
-        // })
-        // if (isAttributeUpdater) {
-        //     applyUIAttributesUpdate(modifier!, peerNode, currentState.value, isInit.value);
-        // } else {
-        //     applyUIAttributes(modifier!, peerNode, currentState.value);
-        // }
-        // this.getAttributeSet().applyModifierPatch(peerNode);
-    }
-
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
@@ -11704,10 +11593,10 @@ export class ArkScrollableCommonMethodComponent extends ArkCommonMethodComponent
         }
         return this
     }
-    public fadingEdge(enabled: boolean | undefined, options?: FadingEdgeOptions): this {
+    public fadingEdge(enabled: boolean | undefined, options?: FadingEdgeOptions | undefined): this {
         if (this.checkPriority("fadingEdge")) {
             const enabled_casted = enabled as (boolean | undefined)
-            const options_casted = options as (FadingEdgeOptions)
+            const options_casted = options as (FadingEdgeOptions | undefined)
             this.getPeer()?.fadingEdgeAttribute(enabled_casted, options_casted)
             return this
         }
@@ -13458,11 +13347,11 @@ export namespace focusControl {
 }
 
 export interface AttributeModifier<T> {
-    applyNormalAttribute(instance: T) : void;
-    applyPressedAttribute(instance: T) : void;
-    applyFocusedAttribute(instance: T) : void;
-    applyDisabledAttribute(instance: T) : void;
-    applySelectedAttribute(instance: T) : void;
+    applyNormalAttribute(instance: T): void {}
+    applyPressedAttribute(instance: T) : void {}
+    applyFocusedAttribute(instance: T) : void {}
+    applyDisabledAttribute(instance: T) : void {}
+    applySelectedAttribute(instance: T) : void {}
 }
 
 export interface Type_CommonMethod_linearGradient_value {

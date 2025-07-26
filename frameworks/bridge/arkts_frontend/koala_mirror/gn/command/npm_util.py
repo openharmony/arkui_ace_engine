@@ -31,7 +31,7 @@ parser.add_argument("--target-out-path", help="out directory of built target")
 parser.add_argument("--built-file-path", help="result of building")
 parser.add_argument("--install", action="store_true", help="request npm install")
 parser.add_argument("--install-path", help="path to install in")
-parser.add_argument("--npm-args", nargs='+', help="npm command args")
+parser.add_argument("--run-tasks", nargs='+', help="npm run tasks")
 
 args = parser.parse_args()
 
@@ -70,6 +70,8 @@ def run(args, dir = None):
             f.write("\n")
             f.write("error message: "+ e.stderr + "\n")
             f.close()
+        print(f"Error: npm failed, errors logged to {koala_log}")
+        raise
 
 def install(dir = None):
     run(["install", "--registry", NPM_REPO, "--verbose"], dir or project_path)
@@ -78,14 +80,14 @@ def copy_target():
     if not os.path.exists(args.built_file_path):
         print(f"Error: Built file not found at {args.built_file_path}")
         sys.exit(1)
-    out_dir = os.path.join(args.target_out_path, os.path.basename(args.built_file_path))
-    shutil.copy(args.built_file_path, out_dir)
+    shutil.copy(args.built_file_path, args.target_out_path)
 
 def main():
     if args.install:
         install(args.install_path)
-    if args.npm_args:
-        run(args.npm_args)
+    if args.run_tasks:
+        for task in args.run_tasks:
+            run(["run", task])
     if args.target_out_path and args.built_file_path:
         copy_target()
 

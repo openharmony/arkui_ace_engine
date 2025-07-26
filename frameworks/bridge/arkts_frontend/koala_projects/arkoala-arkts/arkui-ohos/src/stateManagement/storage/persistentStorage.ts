@@ -117,7 +117,15 @@ class AniStorage implements IAniStorage {
 class PersistentStorage {
     private static instance_: PersistentStorage | undefined = undefined;
     private map_: TypedMap = new TypedMap();
-    private simpleTypeSet: Set<Type> = new Set<Type>([Type.from<number>(), Type.from<string>(), Type.from<boolean>()]);
+    private simpleTypeSet: Set<Type> = new Set<Type>([
+        Type.from<int>(),
+        Type.from<long>(),
+        Type.from<float>(),
+        Type.from<double>(),
+        Type.from<number>(),
+        Type.from<string>(),
+        Type.from<boolean>(),
+    ]);
     private readonly storage_: IAniStorage = new AniStorage();
 
     private static getOrCreate(): PersistentStorage {
@@ -152,10 +160,10 @@ class PersistentStorage {
         toJson?: ToJSONType<T>,
         fromJson?: FromJSONType<T>
     ): boolean {
-        return PersistentStorage.getOrCreate().persistProp1(key, ttype, defaultValue, toJson, fromJson);
+        return PersistentStorage.getOrCreate().persistPropInternal(key, ttype, defaultValue, toJson, fromJson);
     }
 
-    private persistProp1<T>(
+    private persistPropInternal<T>(
         key: string,
         ttype: Type,
         defaultValue: T,
@@ -176,7 +184,7 @@ class PersistentStorage {
             }
 
             // case 1: property exists in storage already and start to persist it
-            if (AppStorage.keySets().has(key)) {
+            if (AppStorage.has(key)) {
                 const success = PersistentStorage.getOrCreate().__startToPersistStorageProperty<T>(key, ttype, toJson);
                 if (!success) {
                     StateMgmtConsole.log(`Failed to start persistence for existing key ${key}`);
@@ -222,10 +230,10 @@ class PersistentStorage {
      * @since 20
      */
     public static deleteProp(key: string): void {
-        PersistentStorage.getOrCreate().deleteProp1(key);
+        PersistentStorage.getOrCreate().deletePropInternal(key);
     }
 
-    private deleteProp1(key: string): void {
+    private deletePropInternal(key: string): void {
         // Remove from AniStorage
         PersistentStorage.getOrCreate().storage_.delete(key);
         // Remove from TypedMap and need to unregister from AppStorage
@@ -246,10 +254,10 @@ class PersistentStorage {
      * @since 20
      */
     public static keys(): Array<string> {
-        return PersistentStorage.getOrCreate().keys1();
+        return PersistentStorage.getOrCreate().keysInternal();
     }
 
-    private keys1(): Array<string> {
+    private keysInternal(): Array<string> {
         return PersistentStorage.getOrCreate().map_.keys();
     }
 
@@ -339,6 +347,9 @@ class PersistentStorage {
                     const jsonString = JSON.stringify(newValue);
                     PersistentStorage.getOrCreate().storage_.set(key, jsonString);
                 } else {
+                    if (!toJson) {
+                        StateMgmtConsole.log(`Object Types for key ${key} requires toJson functions to be defined`);
+                    }
                     const jsonElement = toJson!(newValue);
                     // convert JsonElement to jsonString
                     const jsonString = JSON.stringifyJsonElement(jsonElement);

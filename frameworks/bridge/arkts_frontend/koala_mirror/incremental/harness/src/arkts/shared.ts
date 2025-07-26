@@ -30,7 +30,20 @@ export enum TestKind {
     SKIP, // skip something from testing
 }
 
-export function doTest(kind: TestKind, name: string, content?: () => void, suite: boolean = false) {
+export type TestFilter = (id: string, suite: boolean) => boolean
+
+let globalFilter: TestFilter | undefined = undefined
+
+/**
+ * Sets a filter function to run only desirable suites and tests.
+ * @param filter Function to filter suites and test
+ */
+export function setTestFilter(filter?: TestFilter) {
+    globalFilter = filter
+}
+
+export function doTest(kind: TestKind, id: string, name: string, content?: () => void, suite: boolean = false) {
+    if (globalFilter && globalFilter?.(id, suite)) return
     const time = Date.now()
     const test = new Test(kind, name, suite)
     console.log(`start processing ${name}`)
@@ -43,10 +56,28 @@ export function doTest(kind: TestKind, name: string, content?: () => void, suite
         stack.push(test)
         if (kind != TestKind.SKIP) content?.()
     } catch (error) {
-        test.error = error instanceof Error
+        const stack = error instanceof Error
             ? errorAsString(error)
             : JSON.stringify(error)
-        console.log(test.error)
+        test.error = stack // mark test as failed with error's stacktrace
+        const array = stack.replaceAll("Error:", "Assert:").split("\n")
+        const length = array.length
+        if (length > 0) {
+            console.log(array[0])
+            if (length > 0) {
+                let index = 1
+                if (array[index].indexOf("<ctor> (etsstdlib.ets:") > 0) {
+                    index++ // workaround for ArkTS stacktrace
+                }
+                while (index < length && array[index].indexOf("/assert.ts:") > 0) {
+                    index++
+                }
+                while (index < length && array[index].indexOf("/shared.ts:") < 0) {
+                    console.log(array[index])
+                    index++
+                }
+            }
+        }
     } finally {
         stack.pop()
         console.log(`${Date.now() - time}ms to process ${name}`)

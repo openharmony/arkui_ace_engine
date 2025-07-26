@@ -38,3 +38,13 @@ export function dumpProgramInfo(program: Program) {
     console.log(`\tSourceFileFolder:      ${program.sourceFileFolder}`)
     console.log(`\tSourceFilePath:        ${program.sourceFilePath}`)
 }
+
+export function dumpProgramSrcFormatted(program: Program, withLines: boolean = true) {
+    const lines = program.ast.dumpSrc()
+    console.log(`// file: ${program.absoluteName}`)
+    if (withLines) {
+        console.log(lines.split('\n').map((it, index) => `${`${index + 1}`.padStart(4)} |${it}`).join('\n'))
+    } else {
+        console.log(lines)
+    }
+}

@@ -34,13 +34,13 @@ public:
         return (*asyncWorker.createWork)(vmContext, handler, &Execute, &Destroy);
     }
 
-    static void ResolveWork(const Ark_AsyncWork& work)
+    static void QueueWork(const Ark_AsyncWork& work)
     {
         CHECK_NULL_VOID(work.queue);
         (*work.queue)(work.workId);
     }
 
-    static void RejectWork(const Ark_AsyncWork& work)
+    static void CancelWork(const Ark_AsyncWork& work)
     {
         CHECK_NULL_VOID(work.cancel);
         (*work.cancel)(work.workId);
@@ -58,7 +58,8 @@ private:
     }
     static void Destroy(Handler handler)
     {
-        if (std::find(storage_.begin(), storage_.end(), handler) != storage_.end()) {
+        if (auto it = std::find(storage_.begin(), storage_.end(), handler); it != storage_.end()) {
+            storage_.erase(it);
             delete static_cast<AsyncExecFunc*>(handler);
         }
     }

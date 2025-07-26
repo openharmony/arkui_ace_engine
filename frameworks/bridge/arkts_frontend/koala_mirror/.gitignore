@@ -17,6 +17,7 @@ interface_sdk-js
 **/command-line-tools
 **/libs
 **/lib
+!incremental/tools/ets-tsc/lib
 **/*.abc
 cachegrind.out.*
 perf.data*
@@ -29,6 +30,7 @@ incremetal-cj/runtime/ck
 .rollup.cache
 tsconfig.tsbuildinfo
 *.meta.json
+.cache
 out
 sdk
 koala_build.log

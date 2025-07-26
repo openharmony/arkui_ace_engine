@@ -38,10 +38,17 @@ def copy_files(config, src_base, dist_base, out_root):
         source = os.path.join(src_base, source)
         destination = os.path.join(dist_base, destination)
 
-        # Check if the source path exists
+        # Check if the source path exists, otherwise try fallback
         if not os.path.exists(source):
-            print(f"Source path does not exist: {source}")
-            continue
+            print(f"Source path does not exist (will try to fallback): {source}")
+            if mapping['source_fallback']:
+                source_fallback = replace_out_root(mapping['source_fallback'], out_root)
+                source = os.path.join(src_base, source_fallback)
+                if not os.path.exists(source):
+                    print(f"Fallback source path does not exist: {source}")
+                    continue
+            else:
+                continue
 
         # Create the destination directory if it doesn't exist
         dest_dir = os.path.dirname(destination) if os.path.isfile(source) else destination

@@ -15,12 +15,14 @@
 
 import { IObserve, OBSERVE } from '../decorator';
 import { IObservedObject, RenderIdType } from '../decorator';
-import { IBindingSource } from './mutableStateMeta';
+import { IBindingSource, ITrackedDecoratorRef } from './mutableStateMeta';
 import { TypeChecker } from '#components';
 import { StateMgmtTool } from '#stateMgmtTool';
 import { NullableObject } from './types';
 import { StateManagerImpl } from '@koalaui/runtime';
 import { StateMgmtConsole } from '../tools/stateMgmtDFX';
+import { MonitorFunctionDecorator, MonitorValueInternal } from '../decoratorImpl/decoratorMonitor';
+import { ComputedDecoratedVariable, IComputedDecoratorRef } from '../decoratorImpl/decoratorComputed';
 
 export class ObserveSingleton implements IObserve {
     public static readonly instance: ObserveSingleton = new ObserveSingleton();
@@ -28,8 +30,17 @@ export class ObserveSingleton implements IObserve {
     public static readonly RenderingComponent: number = 0;
     public static readonly RenderingComponentV1: number = 1;
     public static readonly RenderingComponentV2: number = 2;
+    public static readonly RenderingMonitor: number = 3;
+    public static readonly RenderingComputed: number = 4;
 
     public _renderingComponent: number = ObserveSingleton.RenderingComponent;
+    public renderingComponentRef?: ITrackedDecoratorRef;
+    private monitorPathRefsChanged_ = new Set<WeakRef<ITrackedDecoratorRef>>();
+    private computedPropRefsChanged_ = new Set<WeakRef<ITrackedDecoratorRef>>();
+    private finalizationRegistry = new FinalizationRegistry<WeakRef<ITrackedDecoratorRef>>(
+        this.finalizeComputedAndMonitorPath
+    );
+    private reverseBindingRefsToSet_ = new Map<WeakRef<ITrackedDecoratorRef>, Set<WeakRef<IBindingSource>>>();
 
     get renderingComponent(): number {
         return this._renderingComponent;
@@ -47,8 +58,6 @@ export class ObserveSingleton implements IObserve {
         this._renderingId = value;
     }
     public _renderingId: RenderIdType | undefined = ObserveSingleton.InvalidRenderId;
-
-    private id2BindingSource = new Map<RenderIdType, Set<IBindingSource>>();
 
     constructor() {}
 
@@ -95,11 +104,70 @@ export class ObserveSingleton implements IObserve {
         );
     }
 
-    public clearBindingById(id: RenderIdType): void {
-        const bindingSources: Set<IBindingSource> | undefined = this.id2BindingSource.get(id);
-        bindingSources?.forEach((binding) => {
-            binding.clearBinding(id);
+    public addDirtyRef(trackedRef: ITrackedDecoratorRef): void {
+        if (trackedRef.id >= MonitorFunctionDecorator.MIN_MONITOR_ID) {
+            this.monitorPathRefsChanged_.add(trackedRef.weakThis);
+        } else if (trackedRef.id >= ComputedDecoratedVariable.MIN_COMPUTED_ID) {
+            this.computedPropRefsChanged_.add(trackedRef.weakThis);
+        }
+    }
+
+    public addToTrackedRegistry(ref: ITrackedDecoratorRef, reverseSet: Set<WeakRef<IBindingSource>>): void {
+        this.reverseBindingRefsToSet_.set(ref.weakThis, reverseSet);
+        this.finalizationRegistry.register(ref, ref.weakThis);
+    }
+
+    public finalizeComputedAndMonitorPath(ref: WeakRef<ITrackedDecoratorRef>): void {
+        const bindingSources = this.reverseBindingRefsToSet_.get(ref);
+        if (bindingSources) {
+            bindingSources.forEach((binding: WeakRef<IBindingSource>) => {
+                binding.deref()?.clearBindingRefs(ref);
+            });
+            this.reverseBindingRefsToSet_.delete(ref);
+        }
+    }
+
+    public updateDirty(): void {
+        do {
+            while (this.computedPropRefsChanged_.size > 0) {
+                const computedProps = this.computedPropRefsChanged_;
+                this.computedPropRefsChanged_ = new Set<WeakRef<ITrackedDecoratorRef>>();
+                this.updateDirtyComputedProps(computedProps);
+            }
+            if (this.monitorPathRefsChanged_.size > 0) {
+                const monitors = this.monitorPathRefsChanged_;
+                this.monitorPathRefsChanged_ = new Set<WeakRef<ITrackedDecoratorRef>>();
+                let monitorsToRun: Set<MonitorFunctionDecorator> = this.notifyDirtyMonitorPaths(monitors);
+                if (monitorsToRun && monitorsToRun.size > 0) {
+                    monitorsToRun.forEach((monitor: MonitorFunctionDecorator) => {
+                        monitor.runMonitorFunction();
+                    });
+                }
+            }
+        } while (this.monitorPathRefsChanged_.size + this.computedPropRefsChanged_.size > 0);
+    }
+
+    private updateDirtyComputedProps(computedProps: Set<WeakRef<ITrackedDecoratorRef>>): void {
+        computedProps.forEach((computedPropWeak: WeakRef<ITrackedDecoratorRef>) => {
+            let computedPropRef = computedPropWeak.deref();
+            computedPropRef?.clearReverseBindings();
+            if (computedPropRef) {
+                (computedPropRef as IComputedDecoratorRef).fireChange();
+            }
         });
-        this.id2BindingSource.delete(id);
+    }
+
+    private notifyDirtyMonitorPaths(monitorPaths: Set<WeakRef<ITrackedDecoratorRef>>): Set<MonitorFunctionDecorator> {
+        let monitors: Set<MonitorFunctionDecorator> = new Set<MonitorFunctionDecorator>();
+        monitorPaths.forEach((monitorPathRef: WeakRef<ITrackedDecoratorRef>) => {
+            let monitorPath = monitorPathRef.deref();
+            if (monitorPath) {
+                let monitor: MonitorFunctionDecorator = (monitorPath as MonitorValueInternal).monitor;
+                if (monitor.notifyChangesForPath(monitorPath)) {
+                    monitors.add(monitor);
+                }
+            }
+        });
+        return monitors;
     }
 }

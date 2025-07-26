@@ -9470,7 +9470,7 @@ void TextFieldPattern::SetPreviewTextOperation(PreviewTextInfo info)
         static_cast<int32_t>(layoutProperty->GetMaxLengthValue(Infinity<uint32_t>()))) {
         isPreviewTextOverCount_ = true;
     }
-    // hasInsertValue = contentController_->ReplaceSelectedValue(start, end, info.text);
+    contentController_->ReplaceSelectedValue(start, end, info.text);
     int32_t caretMoveLength = abs(static_cast<int32_t>(contentController_->GetTextUtf16Value().length()) -
         originLength);
 

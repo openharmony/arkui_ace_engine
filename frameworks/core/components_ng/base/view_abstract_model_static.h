@@ -157,7 +157,27 @@ public:
         return ViewAbstract::ClosePopup(customNode);
     }
 
+    static int32_t OpenMenu(NG::MenuParam param, const RefPtr<NG::UINode>& customNode, const int32_t& targetId)
+    {
+        return ViewAbstract::OpenMenu(param, customNode, targetId);
+    }
+
+    static int32_t GetMenuParam(NG::MenuParam& menuParam, const RefPtr<NG::UINode>& customNode);
+
+    static int32_t UpdateMenu(const NG::MenuParam& menuParam, const RefPtr<NG::UINode>& customNode)
+    {
+        return ViewAbstract::UpdateMenu(menuParam, customNode);
+    }
+
+    static int32_t CloseMenu(const RefPtr<UINode>& customNode)
+    {
+        return ViewAbstract::CloseMenu(customNode);
+    }
+
     static void SetAccessibilityVirtualNode(FrameNode* frameNode, std::function<RefPtr<NG::UINode>()>&& buildFunc);
+    static void SetAccessibilityDefaultFocus(FrameNode* frameNode, bool isFocus);
+    static void SetAccessibilityUseSamePage(FrameNode* frameNode, const std::string& pageMode);
+
     static void DisableOnAccessibilityHover(FrameNode* frameNode);
     static void SetOnAccessibilityHover(FrameNode* frameNode, OnAccessibilityHoverFunc &&onAccessibilityHoverEventFunc);
     static void BindMenu(FrameNode* frameNode,
@@ -194,11 +214,14 @@ public:
     }
 
     static void SetBackgroundEffect(FrameNode* frameNode,
-        const std::optional<EffectOption>& effectOption, const std::optional<SysOptions>& sysOptions)
-    {
-        ViewAbstract::SetBackgroundEffect(frameNode, effectOption.value_or(EffectOption()),
-            sysOptions.value_or(DEFAULT_SYS_OPTIONS));
-    }
+        const std::optional<EffectOption>& effectOption, const std::optional<SysOptions>& sysOptions);
+
+    static void SetBackgroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& bgBlurStyle);
+
+    static void SetTranslate(FrameNode* frameNode, const NG::TranslateOptions& value);
+
+    static void SetGeometryTransition(FrameNode* frameNode, const std::string& id,
+        bool followWithoutTransition, bool doRegisterSharedTransition);
 
     static void SetFrontBlur(FrameNode* frameNode, const std::optional<float>& radius,
         const std::optional<BlurOption>& blurOption, const std::optional<SysOptions>& sysOptions)
@@ -304,6 +327,10 @@ public:
     static void SetDragPreview(FrameNode* frameNode, const std::optional<DragDropInfo>& DragDropInfo);
     static void SetBackgroundImage(FrameNode* frameNode, const std::optional<ImageSourceInfo>& src);
     static void SetBackgroundImageRepeat(FrameNode* frameNode, const std::optional<ImageRepeat>& imageRepeat);
+    static constexpr SysOptions DEFAULT_SYS_OPTIONS = {
+        .disableSystemAdaptation = false
+    };
+
 private:
     static bool CheckMenuIsShow(const MenuParam& menuParam, int32_t targetId, const RefPtr<FrameNode>& targetNode);
     static void RegisterContextMenuKeyEvent(
@@ -312,11 +339,17 @@ private:
         std::function<void()>&& buildFunc, const MenuParam& menuParam, std::function<void()>&& previewBuildFunc);
     static void BindContextMenuSingle(FrameNode* targetNode,
         std::function<void()>&& buildFunc, const MenuParam& menuParam, std::function<void()>&& previewBuildFunc);
-
-    static constexpr SysOptions DEFAULT_SYS_OPTIONS = {
-        .disableSystemAdaptation = false
-    };
 };
+
+
+// multi thread function start
+void SetBackgroundBlurStyleMultiThread(FrameNode* frameNode, const BlurStyleOption& bgBlurStyle);
+void SetBackgroundEffectMultiThread(FrameNode* frameNode,
+    const std::optional<EffectOption>& effectOption, const std::optional<SysOptions>& sysOptions);
+void SetTranslateMultiThread(FrameNode* frameNode, const NG::TranslateOptions& value);
+void SetGeometryTransitionMultiThread(FrameNode* frameNode, const std::string& id,
+    bool followWithoutTransition, bool doRegisterSharedTransition);
+// multi thread function end
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_VIEW_ABSTRACT_MODEL_STATIC_H

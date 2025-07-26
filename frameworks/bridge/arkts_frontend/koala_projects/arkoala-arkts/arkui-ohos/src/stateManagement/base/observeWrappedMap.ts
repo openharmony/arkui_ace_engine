@@ -118,7 +118,7 @@ export class WrappedMap<K, V> extends Map<K, V> implements IObservedObject, Obse
      * Returns number of Entries with unique keys in the Map
      * @returns number of Entries with unique keys in the Map
      */
-    public override get size(): number {
+    public override get size(): int {
         if (this.shouldAddRef()) {
             this.meta_.addRef(CONSTANT.OB_LENGTH);
         }

@@ -147,7 +147,6 @@ template("ace_osal_ohos_source_set") {
         "ability_base:view_data",
         "ability_base:want",
         "ability_runtime:abilitykit_native",
-        #"graphic_2d:drawing_ani",
         "graphic_2d:libframe_analyzer",
         "image_framework:image",
         "input:libmmi-client",

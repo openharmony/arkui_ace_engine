@@ -198,7 +198,9 @@ struct InteropTypeConverter<KStringPtr> {
     }
     static InteropType convertTo(ani_env* env, const KStringPtr& value) {
       ani_string result = nullptr;
-      CHECK_ANI_FATAL(env->String_NewUTF8(value.c_str(), value.length() - 1 /* drop zero terminator */, &result));
+      int length = value.length();
+      CHECK_ANI_FATAL(
+          env->String_NewUTF8(value.c_str(), length > 0 ? length - 1 /* drop zero terminator */ : 0, &result));
       return result;
     }
     static void release(ani_env* env, InteropType value, const KStringPtr& converted) {}

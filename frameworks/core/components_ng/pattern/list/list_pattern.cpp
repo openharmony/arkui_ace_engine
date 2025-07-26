@@ -1051,12 +1051,6 @@ OverScrollOffset ListPattern::GetOutBoundaryOffset(float delta, bool useChainDel
     return offset;
 }
 
-void ListPattern::UpdateOffsetHelper(float lastDelta)
-{
-    auto userOffset = FireOnWillScroll(currentDelta_ - lastDelta);
-    currentDelta_ = lastDelta + userOffset;
-}
-
 bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
 {
     // check edgeEffect is not springEffect

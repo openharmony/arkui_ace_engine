@@ -89,30 +89,6 @@ export class ArkColumnSplitStyle extends ArkCommonMethodStyle implements ColumnS
         }
 }
 export class ArkColumnSplitComponent extends ArkCommonMethodComponent implements ColumnSplitAttribute {
-    protected _modifierHost: ArkColumnSplitNode | undefined;
-    setModifierHost(value: ArkColumnSplitNode): void {
-        this._modifierHost = value;
-    }
-    getModifierHost(): ArkColumnSplitNode {
-        if (this._modifierHost === undefined || this._modifierHost === null) {
-            this._modifierHost = new ArkColumnSplitNode();
-            this._modifierHost!.setPeer(this.getPeer());
-        }
-        return this._modifierHost!;
-    }
-    getAttributeSet(): ArkColumnSplitAttributeSet  {
-        return this.getPeer()._attributeSet as ArkColumnSplitAttributeSet;
-    }
- 
-    initAttributeSet<T>(modifier: AttributeModifier<T>): void {
-        let isCommonModifier: boolean = modifier instanceof ColumnSplitModifier;
-        if (isCommonModifier) {
-            let commonModifier = modifier as object as ColumnSplitModifier;
-            this.getPeer()._attributeSet = commonModifier.attributeSet;
-        } else if (this.getPeer()._attributeSet == null) {
-            this.getPeer()._attributeSet = new ArkColumnSplitAttributeSet();
-        }
-    }
     getPeer(): ArkColumnSplitPeer {
         return (this.peer as ArkColumnSplitPeer)
     }

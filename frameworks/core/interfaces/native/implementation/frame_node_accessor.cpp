@@ -205,7 +205,9 @@ Ark_FrameNode GetChildImpl(Ark_FrameNode peer,
     CHECK_NULL_RETURN(peerNode, nullptr);
     CHECK_NULL_RETURN(index, nullptr);
     auto indexInt = Converter::Convert<int32_t>(*index);
-    CHECK_NULL_RETURN(indexInt > -1, nullptr);
+    if (indexInt < 0) {
+        return nullptr;
+    }
     auto expandModeInt = Converter::Convert<int32_t>(*expandMode);
     auto child = GetChildNode(peerNode, indexInt, expandModeInt);
     CHECK_NULL_RETURN(child, nullptr);
@@ -282,7 +284,6 @@ void DisposeImpl(Ark_FrameNode peer)
     CHECK_NULL_VOID(peerNode);
     auto currentUINodeRef = AceType::DynamicCast<UINode>(peerNode);
     CHECK_NULL_VOID(currentUINodeRef);
-    LOGW("FrameNodeAccessor::DisposeImpl - behavior can be wrong. No specification to this API.");
     auto parent = GetParentNode(peerNode);
     CHECK_NULL_VOID(parent);
     parent->RemoveChild(currentUINodeRef);
@@ -591,7 +592,17 @@ static GENERATED_Ark_NodeType ParseNodeType(std::string& type)
 {
     static const std::unordered_map<std::string, GENERATED_Ark_NodeType> typeMap = {
         { "List", GENERATED_ARKUI_LIST },
+        { "Column", GENERATED_ARKUI_COLUMN },
+        { "Row", GENERATED_ARKUI_ROW },
+        { "Stack", GENERATED_ARKUI_STACK },
+        { "Flex", GENERATED_ARKUI_FLEX },
+        { "RelativeContainer", GENERATED_ARKUI_RELATIVE_CONTAINER },
+        { "GridRow", GENERATED_ARKUI_GRID_ROW },
+        { "GridCol", GENERATED_ARKUI_GRID_COL },
+        { "Divider", GENERATED_ARKUI_DIVIDER },
+        { "Blank", GENERATED_ARKUI_BLANK },
         { "Search", GENERATED_ARKUI_SEARCH },
+        { "Swiper", GENERATED_ARKUI_SWIPER },
         { "TextArea", GENERATED_ARKUI_TEXT_AREA },
         { "TextInput", GENERATED_ARKUI_TEXT_INPUT },
         { "Text", GENERATED_ARKUI_TEXT },

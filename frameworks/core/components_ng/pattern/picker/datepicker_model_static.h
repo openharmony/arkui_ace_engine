@@ -23,6 +23,7 @@ class ACE_EXPORT DatePickerModelStatic {
 public:
     static void SetOnChange(FrameNode* frameNode, DateChangeEvent&& onChange);
     static void SetChangeEvent(FrameNode* frameNode, DateChangeEvent&& onChange);
+    static void SetSelectedDate(FrameNode* frameNode, const int64_t& value);
 };
 
 } // namespace OHOS::Ace::NG

@@ -35,24 +35,6 @@ inline void AssignCast(std::optional<KeyboardAvoidMode>& dst, const Ark_Keyboard
         default: LOGE("Unexpected enum value in Ark_KeyboardAvoidMode: %{public}d", src);
     }
 }
-template<>
-inline void AssignCast(std::optional<LevelMode>& dst, const Ark_LevelMode& src)
-{
-    switch (src) {
-        case ARK_LEVEL_MODE_OVERLAY: dst = LevelMode::OVERLAY; break;
-        case ARK_LEVEL_MODE_EMBEDDED: dst = LevelMode::EMBEDDED; break;
-        default: LOGE("Unexpected enum value in Ark_LevelMode: %{public}d", src);
-    }
-}
-template<>
-inline void AssignCast(std::optional<ImmersiveMode>& dst, const Ark_ImmersiveMode& src)
-{
-    switch (src) {
-        case ARK_IMMERSIVE_MODE_DEFAULT: dst = ImmersiveMode::DEFAULT; break;
-        case ARK_IMMERSIVE_MODE_EXTEND: dst = ImmersiveMode::EXTEND; break;
-        default: LOGE("Unexpected enum value in Ark_ImmersiveMode: %{public}d", src);
-    }
-}
 } // namespace OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {

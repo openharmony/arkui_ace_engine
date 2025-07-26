@@ -16,6 +16,7 @@
 import * as arkts from "../../../../../src/arkts-api"
 
 class AddOptionalChain extends arkts.AbstractVisitor {
+    visitor(beforeChildren: arkts.BlockStatement): arkts.BlockStatement
     visitor(beforeChildren: arkts.AstNode): arkts.AstNode {
         const node = this.visitEachChild(beforeChildren)
         if (arkts.isVariableDeclarator(node) && arkts.isIdentifier(node.id) && node.id.name == "zzz") {
@@ -42,5 +43,5 @@ class AddOptionalChain extends arkts.AbstractVisitor {
 
 export function addOptionalChain(program: arkts.Program) {
     const inserted = new AddOptionalChain().visitor(program.ast)
-    return new arkts.ChainExpressionFilter().visitor(inserted)
+    return program.setAst(new arkts.ChainExpressionFilter().visitor(inserted))
 }

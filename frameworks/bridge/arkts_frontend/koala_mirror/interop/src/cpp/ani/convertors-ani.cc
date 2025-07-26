@@ -146,10 +146,10 @@ void AniExports::setClasspath(const char* module, const char *classpath) {
 
 static std::map<std::string, std::string> g_defaultClasspaths = {
     {"InteropNativeModule", "L@koalaui/interop/InteropNativeModule/InteropNativeModule;"},
-    // todo leave just InteropNativeModule, define others via KOALA_ETS_INTEROP_MODULE_CLASSPATH
-    {"TestNativeModule", "L@ohos/arkui/generated/arkts/TestNativeModule/TestNativeModule;"},
-    {"ArkUINativeModule", "L@ohos/arkui/generated/arkts/ArkUINativeModule/ArkUINativeModule;"},
-    {"ArkUIGeneratedNativeModule", "L@ohos/arkui/generated/arkts/ArkUIGeneratedNativeModule/ArkUIGeneratedNativeModule;"},
+    // Improve: leave just InteropNativeModule, define others via KOALA_ETS_INTEROP_MODULE_CLASSPATH
+    {"TestNativeModule", "Larkui/generated/arkts/TestNativeModule/TestNativeModule;"},
+    {"ArkUINativeModule", "Larkui/generated/arkts/ArkUINativeModule/ArkUINativeModule;"},
+    {"ArkUIGeneratedNativeModule", "Larkui/generated/arkts/ArkUIGeneratedNativeModule/ArkUIGeneratedNativeModule;"},
 };
 
 const std::string& AniExports::getClasspath(const std::string& module) {
@@ -169,17 +169,23 @@ static struct {
     ani_static_method method = nullptr;
 } g_koalaANICallbackDispatcher;
 
+static thread_local ani_env* currentContext = nullptr;
+
 bool setKoalaANICallbackDispatcher(
     ani_env* aniEnv,
     ani_class clazz,
     const char* dispatcherMethodName,
     const char* dispatcherMethodSig
 ) {
+    currentContext = aniEnv;
     g_koalaANICallbackDispatcher.clazz = clazz;
     CHECK_ANI_FATAL(aniEnv->Class_FindStaticMethod(
         clazz, dispatcherMethodName, dispatcherMethodSig,
         &g_koalaANICallbackDispatcher.method
     ));
+    if (!clazz || !g_koalaANICallbackDispatcher.method) {
+        INTEROP_FATAL("Dispatcher not found");
+    }
     if (g_koalaANICallbackDispatcher.method == nullptr) {
         return false;
     }
@@ -187,6 +193,18 @@ bool setKoalaANICallbackDispatcher(
 }
 
 void getKoalaANICallbackDispatcher(ani_class* clazz, ani_static_method* method) {
+    if (!g_koalaANICallbackDispatcher.clazz || !g_koalaANICallbackDispatcher.clazz) {
+        INTEROP_FATAL("Dispatcher not defined");
+    }
     *clazz = g_koalaANICallbackDispatcher.clazz;
     *method = g_koalaANICallbackDispatcher.method;
+}
+
+ani_env* getKoalaANIContext(void* hint)
+{
+    if (currentContext) {
+        return currentContext;
+    } else {
+        return reinterpret_cast<ani_env*>(hint);
+    }
 }

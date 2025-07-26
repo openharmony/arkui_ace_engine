@@ -106,4 +106,26 @@ void RosenRenderContext::SetFrontBlurFilterMultiThread()
     };
     node->PostAfterAttachMainTreeTask(task);
 }
+
+void RosenRenderContext::AnimateHoverEffectScaleMultiThread(bool isHovered)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->PostAfterAttachMainTreeTask([weak = WeakClaim(this), isHovered]() {
+        auto renderContext = weak.Upgrade();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->AnimateHoverEffectScale(isHovered);
+    });
+}
+
+void RosenRenderContext::AnimateHoverEffectBoardMultiThread(bool isHovered)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->PostAfterAttachMainTreeTask([weak = WeakClaim(this), isHovered]() {
+        auto renderContext = weak.Upgrade();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->AnimateHoverEffectBoard(isHovered);
+    });
+}
 }

@@ -454,6 +454,33 @@ void CanvasRendererPeerImpl::PutImageData(Ace::ImageData& src, const PutImageDat
     }
     renderingContext2DModel_->PutImageData(imageData);
 }
+void CanvasRendererPeerImpl::PutImageData(
+    uint8_t* buffer, size_t bufferLength, int32_t imgWidth, int32_t imgHeight, const PutImageDataParam& params)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    // Parse other parameters
+    Ace::ImageData imageData = { .dirtyWidth = imgWidth, .dirtyHeight = imgHeight };
+    ParseImageData(imageData, params);
+    imageData.dirtyWidth = imageData.dirtyX < 0 ? std::min(imageData.dirtyX + imageData.dirtyWidth, imgWidth)
+                                                : std::min(imgWidth - imageData.dirtyX, imageData.dirtyWidth);
+    imageData.dirtyHeight = imageData.dirtyY < 0 ? std::min(imageData.dirtyY + imageData.dirtyHeight, imgHeight)
+                                                 : std::min(imgHeight - imageData.dirtyY, imageData.dirtyHeight);
+    // copy the data from the image data.
+    imageData.data = std::vector<uint32_t>();
+    for (int32_t i = std::max(imageData.dirtyY, 0); i < imageData.dirtyY + imageData.dirtyHeight; ++i) {
+        for (int32_t j = std::max(imageData.dirtyX, 0); j < imageData.dirtyX + imageData.dirtyWidth; ++j) {
+            uint32_t idx = static_cast<uint32_t>(4 * (j + imgWidth * i));
+            if (bufferLength > static_cast<size_t>(idx + ALPHA_INDEX)) {
+                uint8_t alpha = buffer[idx + 3]; // idx + 3: The 4th byte format: alpha
+                uint8_t red = buffer[idx];       // idx: the 1st byte format: red
+                uint8_t green = buffer[idx + 1]; // idx + 1: The 2nd byte format: green
+                uint8_t blue = buffer[idx + 2];  // idx + 2: The 3rd byte format: blue
+                imageData.data.emplace_back(Color::FromARGB(alpha, red, green, blue).GetValue());
+            }
+        }
+    }
+    renderingContext2DModel_->PutImageData(imageData);
+}
 std::vector<double> CanvasRendererPeerImpl::GetLineDash()
 {
     std::vector<double> segments;
@@ -550,6 +577,19 @@ void CanvasRendererPeerImpl::MeasureText(Ace::TextMetrics& textMetrics, const st
     double density = GetDensity();
     if (Positive(density)) {
         textMetrics = renderingContext2DModel_->GetMeasureTextMetrics(paintState_, text);
+        textMetrics.width /= density;
+        textMetrics.height /= density;
+        textMetrics.actualBoundingBoxLeft /= density;
+        textMetrics.actualBoundingBoxRight /= density;
+        textMetrics.actualBoundingBoxAscent /= density;
+        textMetrics.actualBoundingBoxDescent /= density;
+        textMetrics.hangingBaseline /= density;
+        textMetrics.alphabeticBaseline /= density;
+        textMetrics.ideographicBaseline /= density;
+        textMetrics.emHeightAscent /= density;
+        textMetrics.emHeightDescent /= density;
+        textMetrics.fontBoundingBoxAscent /= density;
+        textMetrics.fontBoundingBoxDescent /= density;
     }
 }
 void CanvasRendererPeerImpl::StrokeText(
@@ -1115,5 +1155,107 @@ bool CanvasRendererPeerImpl::IsValidLetterSpacing(const std::string& letterSpaci
 {
     std::regex pattern(R"(^[+-]?(\d+(\.\d+)?|\.\d+)((vp|px)$)?$)", std::regex::icase);
     return std::regex_match(letterSpacing, pattern);
+}
+void CanvasRendererPeerImpl::Path2DArc(const ArcParam& params)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    double x = 0.0;
+    double y = 0.0;
+    double radius = 0.0;
+    double startAngle = 0.0;
+    double endAngle = 0.0;
+    if (GetDoubleArg(x, params.x) && GetDoubleArg(y, params.y) && GetDoubleArg(radius, params.radius) &&
+        GetDoubleArg(startAngle, params.startAngle) && GetDoubleArg(endAngle, params.endAngle)) {
+        bool anticlockwise = params.anticlockwise.value_or(false);
+        double density = GetDensity();
+        renderingContext2DModel_->Arc({x * density, y * density, radius * density,
+            startAngle, endAngle, anticlockwise});
+    }
+}
+void CanvasRendererPeerImpl::Path2DArcTo(const ArcToParam& params)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    double x1 = 0.0;
+    double y1 = 0.0;
+    double x2 = 0.0;
+    double y2 = 0.0;
+    double radius = 0.0;
+    if (GetDoubleArg(x1, params.x1) && GetDoubleArg(y1, params.y1) && GetDoubleArg(x2, params.x2) &&
+        GetDoubleArg(y2, params.y2) && GetDoubleArg(radius, params.radius)) {
+        double density = GetDensity();
+        renderingContext2DModel_->ArcTo({x1 * density, y1 * density, x2 * density, y2 * density, radius * density});
+    }
+}
+void CanvasRendererPeerImpl::Path2DBezierCurveTo(const BezierCurveToParam& params)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    double cp1x = 0.0;
+    double cp1y = 0.0;
+    double cp2x = 0.0;
+    double cp2y = 0.0;
+    double x = 0.0;
+    double y = 0.0;
+    if (GetDoubleArg(cp1x, params.cp1x) && GetDoubleArg(cp1y, params.cp1y) && GetDoubleArg(cp2x, params.cp2x) &&
+        GetDoubleArg(cp2y, params.cp2y) && GetDoubleArg(x, params.x) && GetDoubleArg(y, params.y)) {
+        double density = GetDensity();
+        renderingContext2DModel_->BezierCurveTo({
+            cp1x * density, cp1y * density, cp2x * density, cp2y * density, x * density, y * density});
+    }
+}
+void CanvasRendererPeerImpl::Path2DClosePath()
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    renderingContext2DModel_->ClosePath();
+}
+void CanvasRendererPeerImpl::Path2DEllipse(const EllipseParam& params)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    double x = 0.0;
+    double y =  0.0;
+    double radiusX =  0.0;
+    double radiusY =  0.0;
+    double rotation =  0.0;
+    double startAngle =  0.0;
+    double endAngle =  0.0;
+    if (GetDoubleArg(x, params.x) && GetDoubleArg(y, params.y) && GetDoubleArg(radiusX, params.radiusX) &&
+        GetDoubleArg(radiusY, params.radiusY) && GetDoubleArg(rotation, params.rotation) &&
+        GetDoubleArg(startAngle, params.startAngle) && GetDoubleArg(endAngle, params.endAngle)) {
+        bool anticlockwise = params.anticlockwise.value_or(false);
+        double density = GetDensity();
+        renderingContext2DModel_->Ellipse({x * density, y * density, radiusX * density, radiusY * density,
+            rotation, startAngle, endAngle, anticlockwise});
+    }
+}
+void CanvasRendererPeerImpl::Path2DLineTo(double x, double y)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    if (IfJudgeSpecialValue(x) && IfJudgeSpecialValue(y)) {
+        double density = GetDensity();
+        renderingContext2DModel_->LineTo(x * density, y * density);
+    }
+}
+void CanvasRendererPeerImpl::Path2DMoveTo(double x, double y)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    if (IfJudgeSpecialValue(x) && IfJudgeSpecialValue(y)) {
+        double density = GetDensity();
+        renderingContext2DModel_->MoveTo(x * density, y * density);
+    }
+}
+void CanvasRendererPeerImpl::Path2DQuadraticCurveTo(double cpx, double cpy, double x, double y)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    if (IfJudgeSpecialValue(cpx) && IfJudgeSpecialValue(cpy) && IfJudgeSpecialValue(x) && IfJudgeSpecialValue(y)) {
+        double density = GetDensity();
+        renderingContext2DModel_->QuadraticCurveTo({cpx * density, cpy * density, x * density, y * density});
+    }
+}
+void CanvasRendererPeerImpl::Path2DRect(double x, double y, double width, double height)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    if (IfJudgeSpecialValue(x) && IfJudgeSpecialValue(y) && IfJudgeSpecialValue(width) && IfJudgeSpecialValue(height)) {
+        double density = GetDensity();
+        renderingContext2DModel_->AddRect({x * density, y * density, width * density, height * density});
+    }
 }
 } // namespace OHOS::Ace::NG::GeneratedModifier

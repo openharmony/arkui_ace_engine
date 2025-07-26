@@ -17,7 +17,6 @@ import { functionOverValue } from "@koalaui/common"
 import { __context, __id } from "../internals"
 import { scheduleCallback } from "../states/GlobalStateManager"
 import { ArrayState, ControlledScope, MutableState } from "../states/State"
-import { __memo_context_type, __memo_id_type } from "../internals"
 
 /**
  * It calculates the value of the given lambda and caches its result.
@@ -50,7 +49,7 @@ export function memoize<Value>(compute: () => Value): Value {
  */
 /** @memo:intrinsic */
 export function memoLifecycle(onAttach: () => void, onDetach: () => void): void {
-    const scope = __context().scope<undefined>(__id(), 0, undefined, undefined, (_: undefined) => onDetach(), true) // do not recalculate if used states were updated
+    const scope = __context().scopeEx<undefined>(__id(), 0, undefined, undefined, (_: undefined) => onDetach(), true) // do not recalculate if used states were updated
     if (scope.unchanged) {
         scope.cached
     } else {
@@ -68,7 +67,7 @@ export function memoLifecycle(onAttach: () => void, onDetach: () => void): void 
  */
 /** @memo:intrinsic */
 export function once(callback: () => void): void {
-    const scope = __context().scope<undefined>(__id(), 0, undefined, undefined, undefined, true) // do not recalculate if used states were updated
+    const scope = __context().scopeEx<undefined>(__id(), 0, undefined, undefined, undefined, true) // do not recalculate if used states were updated
     if (scope.unchanged) {
         scope.cached
     } else {
@@ -88,7 +87,7 @@ export function once(callback: () => void): void {
  */
 /** @memo:intrinsic */
 export function remember<Value>(compute: () => Value): Value {
-    const scope = __context().scope<Value>(__id(), 0, undefined, undefined, undefined, true) // do not recalculate if used states were updated
+    const scope = __context().scopeEx<Value>(__id(), 0, undefined, undefined, undefined, true) // do not recalculate if used states were updated
     return scope.unchanged ? scope.cached : scope.recache(compute())
 }
 
@@ -103,7 +102,7 @@ export function remember<Value>(compute: () => Value): Value {
  */
 /** @memo:intrinsic */
 export function rememberDisposable<Value>(compute: () => Value, cleanup: (value: Value | undefined) => void): Value {
-    const scope = __context().scope<Value>(__id(), 0, undefined, undefined, cleanup, true) // do not recalculate if used states were updated
+    const scope = __context().scopeEx<Value>(__id(), 0, undefined, undefined, cleanup, true) // do not recalculate if used states were updated
     return scope.unchanged ? scope.cached : scope.recache(compute())
 }
 
@@ -119,7 +118,7 @@ export function rememberDisposable<Value>(compute: () => Value, cleanup: (value:
  */
 /** @memo:intrinsic */
 export function rememberMutableState<Value>(initial: (() => Value) | Value): MutableState<Value> {
-    const scope = __context().scope<MutableState<Value>>(__id(), 0, undefined, undefined, undefined, true) // do not recalculate if used states were updated
+    const scope = __context().scopeEx<MutableState<Value>>(__id(), 0, undefined, undefined, undefined, true) // do not recalculate if used states were updated
     return scope.unchanged ? scope.cached : scope.recache(__context()
         .mutableState<Value>(
             functionOverValue<Value>(initial) ?
@@ -136,7 +135,7 @@ export function rememberMutableState<Value>(initial: (() => Value) | Value): Mut
  */
 /** @memo:intrinsic */
 export function rememberArrayState<Value>(initial?: () => ReadonlyArray<Value>): ArrayState<Value> {
-    const scope = __context().scope<ArrayState<Value>>(__id(), 0, undefined, undefined, undefined, true) // do not recalculate if used states were updated
+    const scope = __context().scopeEx<ArrayState<Value>>(__id(), 0, undefined, undefined, undefined, true) // do not recalculate if used states were updated
     return scope.unchanged ? scope.cached : scope.recache(__context().arrayState<Value>(initial?.()))
 }
 

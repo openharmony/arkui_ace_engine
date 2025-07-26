@@ -162,8 +162,6 @@ public:
 
     void SetForceSplitEnable(bool isForceSplit, const std::string& homePage, bool isRouter = true) override {};
 
-    napi_value GetUINapiContext() override;
-
     void EnableContainerModalGesture(bool isEnable) override {};
 
     bool GetContainerFloatingTitleVisible() override

@@ -15,9 +15,11 @@
 
 #include "image_module.h"
 
+#include "color_filter_ani/ani_color_filter.h"
+#include "lattice_ani/ani_lattice.h"
 #include "load.h"
 #include "log/log.h"
-// #include "pixel_map_taihe_ani.h"
+#include "pixel_map_taihe_ani.h"
 
 namespace OHOS::Ace::Ani {
 void ImageResizableOptions(ani_env* env, [[maybe_unused]] ani_object obj, ani_long node, ani_object latticeAni)
@@ -34,18 +36,28 @@ void ImageResizableOptions(ani_env* env, [[maybe_unused]] ani_object obj, ani_lo
         HILOGE("image reziable options is null");
         return;
     }
-    modifier->getImageAniModifier()->setResizableLattice(arkNode, lattice);
+    auto* aniLattice = reinterpret_cast<OHOS::Rosen::Drawing::AniLattice*>(lattice);
+    if (aniLattice == nullptr) {
+        HILOGE("image reziable aniLattice is null");
+        return;
+    }
+    auto resizableLattic = aniLattice->GetLattice();
+    if (resizableLattic == nullptr) {
+        HILOGE("image reziable resizableLattic is null");
+        return;
+    }
+    modifier->getImageAniModifier()->setResizableLattice(arkNode, &resizableLattic);
 }
 
 void ImageConstructPixelMap(ani_env* env, [[maybe_unused]] ani_object obj, ani_long node, ani_object pixelMapAni)
 {
-    // auto* arkNode = reinterpret_cast<ArkUINodeHandle>(node);
-    // const auto* modifier = GetNodeAniModifier();
-    // if (!modifier || !arkNode) {
-    //     return;
-    // }
-    // auto pixelMap = OHOS::Media::PixelMapTaiheAni::GetNativePixelMap(env, pixelMapAni);
-    // modifier->getImageAniModifier()->setPixelMap(arkNode, &pixelMap);
+    auto* arkNode = reinterpret_cast<ArkUINodeHandle>(node);
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !arkNode) {
+        return;
+    }
+    auto pixelMap = OHOS::Media::PixelMapTaiheAni::GetNativePixelMap(env, pixelMapAni);
+    modifier->getImageAniModifier()->setPixelMap(arkNode, &pixelMap);
 }
 
 void ImageConstructDrawableDescriptor(
@@ -80,6 +92,16 @@ void ImageDrawingColorFilter(ani_env* env, [[maybe_unused]] ani_object obj, ani_
         HILOGE("image colorFilter options is null");
         return;
     }
-    modifier->getImageAniModifier()->setDrawingColorFilter(arkNode, colorFilter);
+    auto* aniColorFilter = reinterpret_cast<OHOS::Rosen::Drawing::AniColorFilter*>(colorFilter);
+    if (aniColorFilter == nullptr) {
+        HILOGE("image aniColorFilter options is null");
+        return;
+    }
+    auto drawingColorFilter = aniColorFilter->GetColorFilter();
+    if (drawingColorFilter == nullptr) {
+        HILOGE("image drawingColorFilter options is null");
+        return;
+    }
+    modifier->getImageAniModifier()->setDrawingColorFilter(arkNode, &drawingColorFilter);
 }
 } // namespace OHOS::Ace::Ani

@@ -28,9 +28,13 @@ template<typename TCallbackType>
 class AutoCallbackKeeper {
 public:
     AutoCallbackKeeper(std::function<void()>&& handler);
+    AutoCallbackKeeper(std::function<void(bool)>&& handler);
+    AutoCallbackKeeper(std::function<void(Ark_Number)>&& handler);
+    AutoCallbackKeeper(std::function<void(Ark_Number, Ark_Number)>&& handler);
+    AutoCallbackKeeper(std::function<void(Ark_Number, Ark_SliderChangeMode)>&& handler);
     ~AutoCallbackKeeper();
 
-    TCallbackType ArkValue() const &;
+    TCallbackType ArkValue() const&;
 
 private:
     TCallbackType arkCallback_;
@@ -39,10 +43,12 @@ private:
 namespace {
 using ReverseResultHandler = std::variant<
     std::function<void()>,
-    std::function<void(const void *)>,
-    std::function<void(Ark_Boolean)>,
+    std::function<void(bool)>,
     std::function<void(Ark_Number)>,
-    std::function<void(Ark_Number, Ark_Number)>
+    std::function<void(Ark_Number, Ark_Number)>,
+    std::function<void(Ark_Number, Ark_SliderChangeMode)>,
+    std::function<void(const void *)>,
+    std::function<void(Ark_Boolean)>
 >;
 }
 
@@ -50,6 +56,10 @@ class CallbackKeeper : public BaseKeeper<ReverseResultHandler> {
 public:
     using AnyResultHandlerType = std::function<void(const void *)>;
     using ReverseHandler = std::function<void()>;
+    using BooleanHandlerType = std::function<void(bool)>;
+    using NumberHandlerType = std::function<void(Ark_Number)>;
+    using ButtonTriggerClickHandlerType = std::function<void(Ark_Number, Ark_Number)>;
+    using SliderTriggerChangeHandlerType = std::function<void(Ark_Number, Ark_SliderChangeMode)>;
 
     template <typename ArkResultType, typename ContinuationType, typename CallbackHelper, typename... Params>
     static void InvokeWithResultHandler(
@@ -98,6 +108,30 @@ public:
     }
 
     template <typename CallbackType>
+    static CallbackType DefineBooleanCallback(BooleanHandlerType handler, bool autoHold = true)
+    {
+        return RegisterReverseCallback<CallbackType, BooleanHandlerType>(handler, autoHold);
+    }
+
+    template<typename CallbackType>
+    static CallbackType DefineButtonTriggerClickCallback(ButtonTriggerClickHandlerType handler, bool autoHold = true)
+    {
+        return RegisterReverseCallback<CallbackType, ButtonTriggerClickHandlerType>(handler, autoHold);
+    }
+
+    template<typename CallbackType>
+    static CallbackType DefineNumberCallback(NumberHandlerType handler, bool autoHold = true)
+    {
+        return RegisterReverseCallback<CallbackType, NumberHandlerType>(handler, autoHold);
+    }
+
+    template<typename CallbackType>
+    static CallbackType DefineSliderTriggerChangeCallback(SliderTriggerChangeHandlerType handler, bool autoHold = true)
+    {
+        return RegisterReverseCallback<CallbackType, SliderTriggerChangeHandlerType>(handler, autoHold);
+    }
+
+    template <typename CallbackType>
     static void ReleaseReverseCallback(CallbackType callback)
     {
         Release(callback.resource.resourceId);
@@ -109,6 +143,29 @@ public:
         return AutoCallbackKeeper<CallbackType>(std::move(handler));
     }
 
+    template <typename CallbackType = Callback_Boolean_Void>
+    static AutoCallbackKeeper<CallbackType> Claim(BooleanHandlerType &&handler)
+    {
+        return AutoCallbackKeeper<CallbackType>(std::move(handler));
+    }
+
+    template<typename CallbackType = ButtonTriggerClickCallback>
+    static AutoCallbackKeeper<CallbackType> Claim(ButtonTriggerClickHandlerType&& handler)
+    {
+        return AutoCallbackKeeper<CallbackType>(std::move(handler));
+    }
+
+    template<typename CallbackType = Callback_Number_Void>
+    static AutoCallbackKeeper<CallbackType> Claim(NumberHandlerType&& handler)
+    {
+        return AutoCallbackKeeper<CallbackType>(std::move(handler));
+    }
+
+    template<typename CallbackType = SliderTriggerChangeCallback>
+    static AutoCallbackKeeper<CallbackType> Claim(SliderTriggerChangeHandlerType&& handler)
+    {
+        return AutoCallbackKeeper<CallbackType>(std::move(handler));
+    }
 private:
     template <typename FinalHandlerType, typename... Params>
     static void ReceiveResult(const Ark_Int32 resourceId, Params... args)
@@ -140,6 +197,22 @@ private:
 template<typename TCallbackType>
 inline AutoCallbackKeeper<TCallbackType>::AutoCallbackKeeper(std::function<void()>&& handler)
     : arkCallback_(CallbackKeeper::DefineReverseCallback<TCallbackType>(std::move(handler))) {}
+
+template<typename TCallbackType>
+inline AutoCallbackKeeper<TCallbackType>::AutoCallbackKeeper(std::function<void(bool)>&& handler)
+    : arkCallback_(CallbackKeeper::DefineBooleanCallback<TCallbackType>(std::move(handler))) {}
+
+template<typename TCallbackType>
+inline AutoCallbackKeeper<TCallbackType>::AutoCallbackKeeper(std::function<void(Ark_Number, Ark_Number)>&& handler)
+    : arkCallback_(CallbackKeeper::DefineButtonTriggerClickCallback<TCallbackType>(std::move(handler))) {}
+
+template<typename TCallbackType>
+inline AutoCallbackKeeper<TCallbackType>::AutoCallbackKeeper(std::function<void(Ark_Number)>&& handler)
+    : arkCallback_(CallbackKeeper::DefineNumberCallback<TCallbackType>(std::move(handler))) {}
+
+template<typename TCallbackType>
+inline AutoCallbackKeeper<TCallbackType>::AutoCallbackKeeper(std::function<void(Ark_Number, Ark_SliderChangeMode)>&& handler)
+    : arkCallback_(CallbackKeeper::DefineSliderTriggerChangeCallback<TCallbackType>(std::move(handler))) {}
 
 template<typename TCallbackType>
 inline AutoCallbackKeeper<TCallbackType>::~AutoCallbackKeeper()

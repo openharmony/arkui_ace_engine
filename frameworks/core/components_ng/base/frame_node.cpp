@@ -46,7 +46,6 @@
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
-#include "core/common/multi_thread_build_manager.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
@@ -458,6 +457,10 @@ FrameNode::FrameNode(
     layoutProperty_->SetHost(WeakClaim(this));
     layoutSeperately_ = true;
     paintProperty_->SetHost(WeakClaim(this));
+
+    if (IsThreadSafeNode()) {
+        MultiThreadBuildManager::CheckTag(tag);
+    }
 }
 
 FrameNode::~FrameNode()
@@ -2493,7 +2496,7 @@ void FrameNode::RebuildRenderContextTree()
     needSyncRenderTree_ = false;
 }
 
-void FrameNode::MarkModifyDoneUnsafely()
+void FrameNode::MarkModifyDone()
 {
     // This function has a mirror function (XxxMultiThread) and needs to be modified synchronously.
     FREE_NODE_CHECK(this, MarkModifyDone);
@@ -2540,19 +2543,6 @@ void FrameNode::MarkModifyDoneUnsafely()
 #endif
 }
 
-void FrameNode::MarkModifyDone()
-{
-    if (!IsFreeState()) {
-        MarkModifyDoneUnsafely();
-    } else {
-        PostAfterAttachMainTreeTask([weak = WeakClaim(this)]() {
-            auto host = weak.Upgrade();
-            CHECK_NULL_VOID(host);
-            host->MarkModifyDoneUnsafely();
-        });
-    }
-}
-
 [[deprecated("using AfterMountToParent")]] void FrameNode::OnMountToParentDone()
 {
     // This function has a mirror function (XxxMultiThread) and needs to be modified synchronously.
@@ -2572,7 +2562,7 @@ void FrameNode::FlushUpdateAndMarkDirty()
     MarkDirtyNode();
 }
 
-void FrameNode::MarkDirtyNodeUnsafely(PropertyChangeFlag extraFlag)
+void FrameNode::MarkDirtyNode(PropertyChangeFlag extraFlag)
 {
     // This function has a mirror function (XxxMultiThread) and needs to be modified synchronously.
     FREE_NODE_CHECK(this, MarkDirtyNode, extraFlag);
@@ -2593,19 +2583,6 @@ void FrameNode::MarkDirtyNodeUnsafely(PropertyChangeFlag extraFlag)
         return;
     }
     MarkDirtyNode(IsMeasureBoundary(), IsRenderBoundary(), extraFlag);
-}
-
-void FrameNode::MarkDirtyNode(PropertyChangeFlag extraFlag)
-{
-    if (!IsFreeState()) {
-        MarkDirtyNodeUnsafely(extraFlag);
-    } else {
-        PostAfterAttachMainTreeTask([weak = WeakClaim(this), extraFlag]() {
-            auto host = weak.Upgrade();
-            CHECK_NULL_VOID(host);
-            host->MarkDirtyNodeUnsafely(extraFlag);
-        });
-    }
 }
 
 void FrameNode::ProcessFreezeNode()
@@ -5104,11 +5081,6 @@ void FrameNode::SyncGeometryNode(bool needSyncRsNode, const DirtySwapConfig& con
 
 RefPtr<LayoutWrapper> FrameNode::GetOrCreateChildByIndex(uint32_t index, bool addToRenderTree, bool isCache)
 {
-    if (arkoalaLazyAdapter_) {
-        auto node = arkoalaLazyAdapter_->GetOrCreateChild(index);
-        AddChild(node);
-        return node;
-    }
     auto child = frameProxy_->GetFrameNodeByIndex(index, true, isCache, addToRenderTree);
     if (child) {
         child->SetSkipSyncGeometryNode(SkipSyncGeometryNode());
@@ -5121,9 +5093,6 @@ RefPtr<LayoutWrapper> FrameNode::GetOrCreateChildByIndex(uint32_t index, bool ad
 
 RefPtr<LayoutWrapper> FrameNode::GetChildByIndex(uint32_t index, bool isCache)
 {
-    if (arkoalaLazyAdapter_) {
-        return arkoalaLazyAdapter_->GetChild(index);
-    }
     return frameProxy_->GetFrameNodeByIndex(index, false, isCache, false);
 }
 
@@ -5173,54 +5142,8 @@ void FrameNode::RemoveAllChildInRenderTree()
 
 void FrameNode::SetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCached)
 {
-    if (arkoalaLazyAdapter_) {
-        int32_t startIndex = showCached ? std::max(0, start - cacheStart) : start;
-        int32_t endIndex = showCached ? std::min(GetTotalChildCount() - 1, end + cacheEnd) : end;
-        std::vector<RefPtr<UINode>> toRemove;
-        for (const auto& child : GetChildren()) {
-            const int32_t index = static_cast<int32_t>(arkoalaLazyAdapter_->GetIndexOfChild(DynamicCast<FrameNode>(child)));
-            if (index >= startIndex && index <= endIndex) {
-                child->SetActive(true);
-            } else {
-                toRemove.push_back(child);
-            }
-        }
-        for (auto&& node : toRemove) {
-            RemoveChild(node);
-        }
-        arkoalaLazyAdapter_->SetActiveRange(startIndex - cacheStart, endIndex + cacheEnd);
-        return;
-    }
     frameProxy_->SetActiveChildRange(start, end, cacheStart, cacheEnd, showCached);
 }
-
-/* ============================== Arkoala LazyForEach adapter section START ==============================*/
-void FrameNode::ArkoalaSynchronize(
-    LazyComposeAdapter::CreateItemCb creator, LazyComposeAdapter::UpdateRangeCb updater, int32_t totalCount)
-{
-    if (!arkoalaLazyAdapter_) {
-        arkoalaLazyAdapter_ = std::make_unique<LazyComposeAdapter>();
-    }
-    arkoalaLazyAdapter_->SetCallbacks(std::move(creator), std::move(updater));
-    arkoalaLazyAdapter_->SetTotalCount(totalCount);
-}
-
-void FrameNode::ArkoalaRemoveItemsOnChange(int32_t changeIndex)
-{
-    CHECK_NULL_VOID(arkoalaLazyAdapter_);
-    std::vector<RefPtr<UINode>> toRemove;
-    for (const auto& child : GetChildren()) {
-        const int32_t index = static_cast<int32_t>(arkoalaLazyAdapter_->GetIndexOfChild(DynamicCast<FrameNode>(child)));
-        if (index >= changeIndex) {
-            toRemove.push_back(child);
-        }
-    }
-    for (auto&& node : toRemove) {
-        RemoveChild(node);
-    }
-    arkoalaLazyAdapter_->OnDataChange(changeIndex);
-}
-/* ============================== Arkoala LazyForEach adapter section END ================================*/
 
 void FrameNode::SetActiveChildRange(
     const std::optional<ActiveChildSets>& activeChildSets, const std::optional<ActiveChildRange>& activeChildRange)

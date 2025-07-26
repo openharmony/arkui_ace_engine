@@ -3800,5 +3800,33 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg255, TestSize.Level1)
     context_->OnDragEvent({ DEFAULT_INT1, DEFAULT_INT1 }, DragEventAction::DRAG_EVENT_OUT);
     EXPECT_EQ(manager->currentId_, DEFAULT_INT1);
 }
+
+/**
+ * @tc.name: FlushPendingDeleteCustomNode
+ * @tc.desc: Test FlushPendingDeleteCustomNode of pipeline_context
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, FlushPendingDeleteCustomNode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    /**
+     * @tc.steps: make context_->pendingDeleteCustomNode_ is empty.
+     */
+    while (!context_->pendingDeleteCustomNode_.empty()) {
+        context_->pendingDeleteCustomNode_.pop();
+    }
+
+    RefPtr<CustomNode> node1 = CustomNode::CreateCustomNode(11, "test1");
+    node1->SetOnCleanupFunc([](){});
+    context_->pendingDeleteCustomNode_.push(node1);
+
+    context_->FlushPendingDeleteCustomNode();
+    auto size = context_->pendingDeleteCustomNode_.size();
+    EXPECT_EQ(size, 0);
+}
 } // namespace NG
 } // namespace OHOS::Ace

@@ -563,8 +563,7 @@ HWTEST_F(GridOptionLayoutTestNg, GridLayout005, TestSize.Level1)
      */
     GridItemRect retItemRect;
     auto pattern = frameNode_->GetPattern<GridPattern>();
-    GridLayoutInfo info {};
-    auto algorithm = AceType::MakeRefPtr<GridLayoutAlgorithm>(info, 2, 5);
+    auto algorithm = AceType::MakeRefPtr<GridLayoutAlgorithm>(GridLayoutInfo {}, 2, 5);
     auto childLayoutProperty = GetChildLayoutProperty<GridItemLayoutProperty>(frameNode_, 0);
     ASSERT_NE(layoutProperty_, nullptr);
     ASSERT_NE(childLayoutProperty, nullptr);
@@ -733,8 +732,7 @@ HWTEST_F(GridOptionLayoutTestNg, GridLayout006, TestSize.Level1)
      */
     GridItemRect retItemRect;
     auto pattern = frameNode_->GetPattern<GridPattern>();
-    GridLayoutInfo info {};
-    auto algorithm = AceType::MakeRefPtr<GridLayoutAlgorithm>(info, 2, 5);
+    auto algorithm = AceType::MakeRefPtr<GridLayoutAlgorithm>(GridLayoutInfo {}, 2, 5);
     auto childLayoutProperty = GetChildLayoutProperty<GridItemLayoutProperty>(frameNode_, 0);
     ASSERT_NE(layoutProperty_, nullptr);
     ASSERT_NE(childLayoutProperty, nullptr);

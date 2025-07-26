@@ -325,13 +325,13 @@ void TabBar0Impl(Ark_NativePointer node,
         TabContentModelStatic::SetTabBarStyle(frameNode, TabBarStyle::NOSTYLE);
         TabContentModelStatic::SetTabBar(frameNode, label, icon, std::move(builder));
     } else if (auto arkText = std::get_if<CustomNodeBuilder>(&options.value()); arkText) {
-        CallbackHelper(*arkText).BuildAsync([frameNode](const RefPtr<UINode>& uiNode) {
-            auto builder = [frameNode, uiNode]() {
-                ViewStackProcessor::GetInstance()->Push(uiNode);
-            };
-            TabContentModelStatic::SetTabBarStyle(frameNode, TabBarStyle::NOSTYLE);
-            TabContentModelStatic::SetTabBar(frameNode, std::nullopt, std::nullopt, std::move(builder));
-            }, node);
+        CallbackHelper(*arkText).BuildAsync(
+            [frameNode](const RefPtr<UINode>& uiNode) {
+                auto builder = [frameNode, uiNode]() { ViewStackProcessor::GetInstance()->Push(uiNode); };
+                TabContentModelStatic::SetTabBarStyle(frameNode, TabBarStyle::NOSTYLE);
+                TabContentModelStatic::SetTabBar(frameNode, std::nullopt, std::nullopt, std::move(builder));
+            },
+            node);
     } else if (auto iconLabel = std::get_if<Ark_TabBarOptions>(&options.value()); iconLabel) {
         if (auto tabBarOptions = Converter::OptConvert<TabBarOptions>(*iconLabel); tabBarOptions) {
             label = tabBarOptions->text;
@@ -365,16 +365,13 @@ void TabBar2Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    Converter::VisitUnion(*value,
+    Converter::VisitUnion(
+        *value,
         [](const Ark_ComponentContent& arkContent) {
             LOGE("TabContentAttributeModifier.TabBar2Impl type Ark_ComponentContent is not supported yet.");
         },
-        [frameNode](const Ark_SubTabBarStyle& style) {
-            g_setSubTabBarStyle(frameNode, style);
-        },
-        [frameNode](const Ark_BottomTabBarStyle& style) {
-            g_setBottomTabBarStyle(frameNode, style);
-        },
+        [frameNode](const Ark_SubTabBarStyle& style) { g_setSubTabBarStyle(frameNode, style); },
+        [frameNode](const Ark_BottomTabBarStyle& style) { g_setBottomTabBarStyle(frameNode, style); },
         [frameNode](const Ark_String& arkContent) {
             auto text = Converter::OptConvert<std::string>(arkContent);
             TabContentModelStatic::SetTabBarStyle(frameNode, TabBarStyle::NOSTYLE);
@@ -385,13 +382,12 @@ void TabBar2Impl(Ark_NativePointer node,
             TabContentModelStatic::SetTabBarStyle(frameNode, TabBarStyle::NOSTYLE);
             TabContentModelStatic::SetTabBar(frameNode, text, std::nullopt, nullptr);
         },
-        [frameNode](const CustomNodeBuilder& arkBuilder) {
-            auto builder = [callback = CallbackHelper(arkBuilder), frameNode]() {
-                auto builderNode = callback.BuildSync(frameNode);
-                NG::ViewStackProcessor::GetInstance()->Push(builderNode);
-            };
-            TabContentModelStatic::SetTabBarStyle(frameNode, TabBarStyle::NOSTYLE);
-            TabContentModelStatic::SetTabBar(frameNode, std::nullopt, std::nullopt, std::move(builder));
+        [frameNode, node](const CustomNodeBuilder& arkBuilder) {
+            CallbackHelper(arkBuilder).BuildAsync([frameNode](const RefPtr<UINode>& uiNode) {
+                auto builder = [frameNode, uiNode]() { ViewStackProcessor::GetInstance()->Push(uiNode); };
+                TabContentModelStatic::SetTabBarStyle(frameNode, TabBarStyle::NOSTYLE);
+                TabContentModelStatic::SetTabBar(frameNode, std::nullopt, std::nullopt, std::move(builder));
+            }, node);
         },
         [frameNode](const Ark_TabBarOptions& arkTabBarOptions) {
             std::optional<std::string> label;
@@ -403,8 +399,7 @@ void TabBar2Impl(Ark_NativePointer node,
             TabContentModelStatic::SetTabBarStyle(frameNode, TabBarStyle::NOSTYLE);
             TabContentModelStatic::SetTabBar(frameNode, label, icon, nullptr);
         },
-        []() {}
-    );
+        []() {});
 }
 void OnWillShowImpl(Ark_NativePointer node,
                     const Opt_VoidCallback* value)

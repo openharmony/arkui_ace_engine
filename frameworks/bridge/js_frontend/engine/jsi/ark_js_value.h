@@ -46,6 +46,7 @@ public:
     }
 
     int32_t ToInt32(shared_ptr<JsRuntime> runtime) override;
+    int64_t ToInt64(const shared_ptr<JsRuntime>& runtime) override;
     double ToDouble(shared_ptr<JsRuntime> runtime) override;
     std::string ToString(shared_ptr<JsRuntime> runtime) override;
     bool ToBoolean(shared_ptr<JsRuntime> runtime) override;

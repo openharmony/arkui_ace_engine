@@ -21,14 +21,14 @@ group("unittest") {
   testonly = true
   deps = []
   if (!is_asan) {
-    # deps += [
-    #   "adapter:adapter_unittest",
-    #   "base:base_unittest",
-    #   "bridge:bridge_unittest",
-    #   "core:core_unittest",
-    #   "frameworks:frameworks_unittest",
-    #   "interfaces:interfaces_unittest",
-    # ]
+    deps += [
+      "adapter:adapter_unittest",
+      "base:base_unittest",
+      "bridge:bridge_unittest",
+      "core:core_unittest",
+      "frameworks:frameworks_unittest",
+      "interfaces:interfaces_unittest",
+    ]
     # if (!ohos_indep_compiler_enable) {
     #   deps += [ ":linux_unittest" ]
     # }
@@ -284,7 +284,6 @@ ohos_source_set("ace_components_base") {
     "$ace_root/frameworks/core/components_ng/base/geometry_node.cpp",
     "$ace_root/frameworks/core/components_ng/base/inspector.cpp",
     "$ace_root/frameworks/core/components_ng/base/inspector_filter.cpp",
-    "$ace_root/frameworks/core/components_ng/base/lazy_compose_adapter.cpp",
     "$ace_root/frameworks/core/components_ng/base/interop/view_stack_processor_interop.cpp",
     "$ace_root/frameworks/core/components_ng/base/modifier.cpp",
     "$ace_root/frameworks/core/components_ng/base/navigation_register.cpp",
@@ -1038,7 +1037,6 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/grid/grid_utils.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/grid/irregular/grid_irregular_filler.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/grid/irregular/grid_irregular_layout_algorithm.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/grid/irregular/grid_large_delta_converter.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/grid/irregular/grid_layout_range_solver.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/grid/irregular/grid_layout_utils.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/grid_col/grid_col_layout_algorithm.cpp",
@@ -1121,6 +1119,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/list/list_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/list/list_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/list/list_position_controller.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/list/list_position_controller_multi_thread.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/list/list_position_map.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/loading_progress/loading_progress_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/loading_progress/loading_progress_model_ng.cpp",
@@ -1247,11 +1246,11 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/picker/datepicker_column_accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/picker/datepicker_column_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/picker/datepicker_column_pattern.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/picker/datepicker_column_pattern_multi_thread.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/picker/datepicker_dialog_view.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/picker/datepicker_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/picker/datepicker_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/picker/datepicker_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/picker_utils/picker_column_pattern_multi_thread.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/picker_utils/picker_column_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/picker_utils/toss_animation_controller.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/progress/progress_accessibility_property.cpp",
@@ -1560,7 +1559,6 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/time_picker/timepicker_column_accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/time_picker/timepicker_column_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/time_picker/timepicker_column_pattern.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/time_picker/timepicker_column_pattern_multi_thread.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/time_picker/timepicker_dialog_view.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/time_picker/timepicker_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/time_picker/timepicker_paint_method.cpp",
@@ -1588,7 +1586,6 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/video/video_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/video/video_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/view_context/view_context_model_ng.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_large_delta_converter.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_info_sw.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_sw.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_algorithm.cpp",
