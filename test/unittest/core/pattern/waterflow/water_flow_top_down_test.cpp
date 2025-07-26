@@ -1418,6 +1418,28 @@ HWTEST_F(WaterFlowTopDownScrollerTestNg, ScrollEdge002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SyncLoad001
+ * @tc.desc: test load items frame by frame
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTopDownScrollerTestNg, SyncLoad001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(800.f));
+    model.SetSyncLoad(false);
+    CreateItemsInLazyForEach(50, [](int32_t) { return 100.0f; });
+    CreateDone();
+
+    // @tc.steps: limit the number of frame-by-frame loads.
+    MockPipelineContext::GetCurrent()->SetResponseTime(2);
+    // @tc.steps: scrollby large offset to trigger jump in waterflow
+    ScrollBy(0, 800 * 3);
+    // @tc.expected: fill current page in one frame
+    EXPECT_GE(pattern_->layoutInfo_->endIndex_ - pattern_->layoutInfo_->startIndex_, 2);
+}
+
+/**
  * @tc.name: ModeTransition001
  * @tc.desc: measure in original mode first, then change to segment mode.
  * @tc.type: FUNC
