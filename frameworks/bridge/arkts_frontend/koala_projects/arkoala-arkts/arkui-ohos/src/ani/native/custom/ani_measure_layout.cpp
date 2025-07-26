@@ -141,8 +141,6 @@ ani_object GenPlaceChildrenConstraintNG(ani_env* env, const NG::SizeF& size, Ref
         return constraint_obj;
     }
     auto minSize = layoutProperty->GetLayoutConstraint().value().minSize;
-
-
     auto parentNode = AceType::DynamicCast<NG::FrameNode>(layoutProperty->GetHost()->GetParent());
     if (parentNode && parentNode->GetTag() == V2::COMMON_VIEW_ETS_TAG) {
         layoutProperty = parentNode->GetLayoutProperty();
