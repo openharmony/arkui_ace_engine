@@ -48,6 +48,9 @@ void HandleExtraDragMoveReporting(const RefPtr<FrameNode>& frameNode, const std:
     auto touchDownPoint = actuator->GetTouchDownPoint();
     auto pointerEvent = DragPointerEvent(touchDownPoint.x, touchDownPoint.y,
         touchDownPoint.screenX, touchDownPoint.screenY, touchDownPoint.globalDisplayX, touchDownPoint.globalDisplayY);
+    pointerEvent.displayId = touchDownPoint.targetDisplayId;
+    pointerEvent.sourceTool = touchDownPoint.sourceTool;
+    pointerEvent.UpdatePressedKeyCodes(touchDownPoint.pressedKeyCodes_);
     dragDropManager->OnDragMove(pointerEvent, extraInfo);
 }
 
@@ -66,6 +69,8 @@ void DragDropProxy::OnDragStart(
     auto pointerEvent = DragPointerEvent(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY(),
         info.GetScreenLocation().GetX(), info.GetScreenLocation().GetY(), info.GetGlobalDisplayLocation().GetX(),
         info.GetGlobalDisplayLocation().GetY());
+    pointerEvent.displayId = info.GetTargetDisplayId();
+    pointerEvent.sourceTool = info.GetSourceTool();
     pointerEvent.UpdatePressedKeyCodes(info.GetPressedKeyCodes());
     manager->RequireBundleInfo();
     manager->OnDragStart(point, frameNode);
