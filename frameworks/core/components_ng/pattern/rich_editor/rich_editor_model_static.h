@@ -40,6 +40,7 @@ public:
         const std::optional<bool>& supportAvoidance);
     static void BindSelectionMenu(FrameNode* frameNode, TextSpanType& editorType, TextResponseType& type,
         std::function<void()>& buildFunc, SelectMenuParam& menuParam);
+    static void SetMaxLength(FrameNode* frameNode, std::optional<int32_t> value);
     void SetDraggable(bool draggable);
 };
 } // namespace OHOS::Ace::NG
