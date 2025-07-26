@@ -3051,6 +3051,39 @@ HWTEST_F(ListLayoutTestNg, ListAddDelChildTest003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ListAddDelChildTest004
+ * @tc.desc: Test list delete item with List size change and layout backward.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListAddDelChildTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List
+     */
+    ListModelNG model = CreateList();
+    CreateListItems(2); /* 2: item count */
+    CreateItemWithSize(1, SizeT<Dimension>(FILL_LENGTH, Dimension(300)));
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. update offset.
+     * @tc.expected: offset is 80.
+     */
+    UpdateCurrentOffset(-80.f);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 80.f);
+
+    /**
+     * @tc.steps: step3. Remove child and List size change and scroll backward.
+     * @tc.expected: offset is 0.
+     */
+    layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(CalcLength(WIDTH), CalcLength(50.f)));
+    frameNode_->RemoveChildAtIndex(0);
+    frameNode_->RemoveChildAtIndex(0);
+    UpdateCurrentOffset(80.f);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0);
+}
+
+/**
  * @tc.name: FadingEdge001
  * @tc.desc: Test FadingEdge property
  * @tc.type: FUNC

@@ -918,7 +918,7 @@ void ListLayoutAlgorithm::GetStartIndexInfo(int32_t& index, float& pos, bool& is
 void ListLayoutAlgorithm::GetEndIndexInfo(int32_t& index, float& pos, bool& isGroup)
 {
     auto it = itemPosition_.rbegin();
-    if (!overScrollFeature_) {
+    if (!overScrollFeature_ && NearEqual(contentMainSize_, prevContentMainSize_)) {
         auto nextIt = it;
         ++nextIt;
         while (nextIt != itemPosition_.rend() &&
