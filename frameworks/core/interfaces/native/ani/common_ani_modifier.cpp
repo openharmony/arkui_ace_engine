@@ -30,6 +30,7 @@
 #include "bridge/arkts_frontend/arkts_frontend.h"
 #include "bridge/arkts_frontend/ani_context_module.h"
 #include "core/components/container_modal/container_modal_constants.h"
+#include "frameworks/base/subwindow/subwindow_manager.h"
 
 #include <memory>
 #include <vector>
@@ -87,7 +88,11 @@ ArkUI_Int32 GetFocusedInstanceId()
 {
     auto container = Container::GetFoucsed();
     CHECK_NULL_RETURN(container, -1);
-    return container->GetInstanceId();
+    auto currentInstance = container->GetInstanceId();
+    if (currentInstance >= MIN_SUBCONTAINER_ID && currentInstance < MIN_PLUGIN_SUBCONTAINER_ID) {
+        currentInstance = SubwindowManager::GetInstance()->GetParentContainerId(currentInstance);
+    }
+    return currentInstance;
 }
 
 ani_long BuilderProxyNodeConstruct(ArkUI_Int32 id)
