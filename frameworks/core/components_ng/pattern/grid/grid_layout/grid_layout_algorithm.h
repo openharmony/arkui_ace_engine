@@ -31,7 +31,7 @@ class ACE_EXPORT GridLayoutAlgorithm : public GridLayoutBaseAlgorithm {
     DECLARE_ACE_TYPE(GridLayoutAlgorithm, GridLayoutBaseAlgorithm);
 
 public:
-    GridLayoutAlgorithm(GridLayoutInfo& gridLayoutInfo, int32_t crossCount, int32_t mainCount)
+    GridLayoutAlgorithm(GridLayoutInfo gridLayoutInfo, int32_t crossCount, int32_t mainCount)
         : GridLayoutBaseAlgorithm(gridLayoutInfo), crossCount_(crossCount), mainCount_(mainCount) {};
     ~GridLayoutAlgorithm() override = default;
 

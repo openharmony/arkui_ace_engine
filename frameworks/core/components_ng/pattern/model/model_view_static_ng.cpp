@@ -110,8 +110,8 @@ void ModelViewNG::AddCustomRender(FrameNode* frameNode,
         ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelCustomRender, customRender);
     }
 }
-void ModelViewNG::AddShaderInputBuffer(FrameNode* frameNode, const std::shared_ptr<Render3D::ShaderInputBuffer>& buffer)
-{
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ModelPaintProperty, ModelShaderInputBuffer, buffer, frameNode);
-}
+// void ModelViewNG::AddShaderInputBuffer(FrameNode* frameNode, const std::shared_ptr<Render3D::ShaderInputBuffer>& buffer)
+// {
+//     ACE_UPDATE_NODE_PAINT_PROPERTY(ModelPaintProperty, ModelShaderInputBuffer, buffer, frameNode);
+// }
 }

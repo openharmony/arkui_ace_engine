@@ -621,6 +621,43 @@ void GridIrregularLayoutAlgorithm::PrepareLineHeight(float mainSize, int32_t& ju
     }
 }
 
+namespace {
+void AddLineHeight(float& height, int32_t curLine, int32_t startLine, const std::map<int32_t, float>& lineHeights)
+{
+    auto iter = lineHeights.find(curLine);
+    if (iter != lineHeights.end()) {
+        height += iter->second;
+    } else {
+        // estimation
+        height += height / std::abs(curLine - startLine);
+    }
+}
+} // namespace
+
+int32_t GridIrregularLayoutAlgorithm::SkipLinesForward()
+{
+    int32_t line = info_.startMainLineIndex_;
+    float height = 0.0f;
+    while (LessNotEqual(height, -info_.currentOffset_)) {
+        AddLineHeight(height, line++, info_.startMainLineIndex_, info_.lineHeightMap_);
+    }
+    GridIrregularFiller filler(&info_, wrapper_);
+    return filler.FillMatrixByLine(info_.startMainLineIndex_, line);
+}
+
+int32_t GridIrregularLayoutAlgorithm::SkipLinesBackward() const
+{
+    const auto& info = info_;
+    float height = info.GetHeightInRange(info.startMainLineIndex_, info.endMainLineIndex_ + 1, 0.0f);
+
+    float target = info.currentOffset_ + height;
+    int32_t line = info.startMainLineIndex_;
+    while (LessNotEqual(height, target) && line > 0) {
+        AddLineHeight(height, --line, info.endMainLineIndex_, info.lineHeightMap_);
+    }
+    return std::max(0, info.FindEndIdx(line).itemIdx);
+}
+
 void GridIrregularLayoutAlgorithm::MeasureToTarget()
 {
     GridIrregularFiller filler(&info_, wrapper_);
