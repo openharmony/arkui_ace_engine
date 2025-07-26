@@ -37,6 +37,15 @@
 namespace OHOS::Ace::NG {
 class InspectorFilter;
 
+struct ListItemAdapter {
+    int32_t totalCount = 0;
+    std::pair<int32_t, int32_t> range = { 0, 0 };
+    std::function<void(int32_t start, int32_t end)> requestItemFunc;
+    // which directional item request.
+    std::pair<bool, bool> requestFeature = { false, false };
+    std::function<RefPtr<FrameNode>(int32_t index)> getItemFunc;
+};
+
 struct ListItemGroupPara {
     int32_t lanes = -1;
     int32_t itemEndIndex = -1;
@@ -188,6 +197,11 @@ public:
     float GetContentStartOffset() const override
     {
         return contentStartOffset_;
+    }
+
+    float GetStartPos() const
+    {
+        return startMainPos_ - currentDelta_;
     }
 
     RefPtr<ScrollControllerBase> GetPositionController() const
@@ -387,6 +401,19 @@ public:
     {
         return static_cast<bool>(childrenSize_);
     }
+
+    const std::shared_ptr<ListItemAdapter>& GetListItemAdapter()
+    {
+        if (adapter_) {
+            return adapter_;
+        }
+        adapter_ = std::make_shared<ListItemAdapter>();
+        return adapter_;
+    }
+
+    void CheckListItemRange(const std::pair<int32_t, int32_t>& range);
+    void CheckScrollItemRange();
+
     void UpdateChildPosInfo(int32_t index, float delta, float sizeChange);
 
     SizeF GetChildrenExpandedSize() override;
@@ -505,7 +532,7 @@ protected:
     float endMainPos_ = 0.0f;
     float spaceWidth_ = 0.0f;
     float contentMainSize_ = 0.0f;
-    float contentStartOffset_ = 0.0f;
+    float contentStartOffset_ = 0.0f; // inner padding of list content
     float contentEndOffset_ = 0.0f;
 
     float currentDelta_ = 0.0f;
@@ -533,6 +560,7 @@ protected:
     bool isStackFromEnd_ = true;
     FocusWrapMode focusWrapMode_ = FocusWrapMode::DEFAULT;
 private:
+    void UpdateOffsetHelper(float lastDelta);
     void CheckAndUpdateAnimateTo(float relativeOffset, float prevOffset);
     void OnScrollEndCallback() override;
     void FireOnReachStart(const OnReachEvent& onReachStart, const OnReachEvent& onJSFrameNodeReachStart) override;
@@ -676,6 +704,8 @@ private:
     bool needReEstimateOffset_ = false;
     std::optional<ListPredictLayoutParam> predictLayoutParam_;
     std::optional<ListPredictLayoutParamV2> predictLayoutParamV2_;
+
+    std::shared_ptr<ListItemAdapter> adapter_;
 
     bool isNeedToUpdateListDirection_ = false;
     bool startIndexChanged_ = false;

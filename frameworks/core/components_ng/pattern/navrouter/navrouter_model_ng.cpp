@@ -60,6 +60,7 @@ void NavRouterModelNG::SetNavRouteMode(FrameNode* frameNode, int32_t mode)
 
 void NavRouterModelNG::SetOnStateChange(FrameNode* frameNode, std::function<void(bool isActivated)>&& onStateChange)
 {
+    CHECK_NULL_VOID(frameNode);
     auto navRouterEventHub = AceType::DynamicCast<NavRouterEventHub>(frameNode->GetEventHub<EventHub>());
     CHECK_NULL_VOID(navRouterEventHub);
     navRouterEventHub->SetOnStateChange(std::move(onStateChange));

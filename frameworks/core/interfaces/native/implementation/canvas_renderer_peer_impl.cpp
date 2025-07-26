@@ -12,7 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+ 
+#include <math.h>
 #include "canvas_renderer_peer_impl.h"
 
 #include "arkoala_api_generated.h"
@@ -109,6 +110,10 @@ CanvasRendererPeerImpl::CanvasRendererPeerImpl()
     instanceId_ = Container::CurrentIdSafely();
     density_ = PipelineBase::GetCurrentDensity();
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        paintState_ = PaintState();
+        paintState_.SetTextAlign(TextAlign::START);
+        paintState_.SetOffTextDirection(TextDirection::INHERIT);
+        paintState_.SetFontSize(DEFAULT_FONT_SIZE);
     }
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
         isJudgeSpecialValue_ = true;
@@ -358,8 +363,8 @@ void CanvasRendererPeerImpl::CreateImageData(
 void CanvasRendererPeerImpl::CreateImageData(
     std::vector<uint8_t>& vbuffer, const Ace::ImageData& imageData, uint32_t& width, uint32_t& height)
 {
-    uint32_t finalWidth = static_cast<uint32_t>(std::abs(imageData.dirtyWidth));
-    uint32_t finalHeight = static_cast<uint32_t>(std::abs(imageData.dirtyHeight));
+    uint32_t finalWidth = std::abs(imageData.dirtyWidth);
+    uint32_t finalHeight = std::abs(imageData.dirtyHeight);
     vbuffer.resize(finalWidth * finalHeight * PIXEL_SIZE);
     uint32_t* buffer = (uint32_t*)vbuffer.data();
     if (!buffer || (finalHeight > 0 && finalWidth > (UINT32_MAX / finalHeight))) {
@@ -435,7 +440,7 @@ void CanvasRendererPeerImpl::PutImageData(Ace::ImageData& src, const PutImageDat
     // copy the data from the image data.
     std::vector<uint32_t> vbuffer = src.data;
     auto* buffer = (uint8_t*)vbuffer.data();
-    int32_t bufferLength = static_cast<int32_t>(vbuffer.size() * sizeof(uint32_t));
+    int32_t bufferLength = vbuffer.size() * sizeof(uint32_t);
     imageData.data = std::vector<uint32_t>();
     for (int32_t i = std::max(imageData.dirtyY, 0); i < imageData.dirtyY + imageData.dirtyHeight; ++i) {
         for (int32_t j = std::max(imageData.dirtyX, 0); j < imageData.dirtyX + imageData.dirtyWidth; ++j) {
@@ -732,7 +737,7 @@ void CanvasRendererPeerImpl::SetFillStyle(const std::string& colorStr)
 void CanvasRendererPeerImpl::SetFillStyle(const uint32_t colorNum)
 {
     CHECK_NULL_VOID(renderingContext2DModel_);
-    renderingContext2DModel_->SetFillColor(Color(colorNum), false);
+    renderingContext2DModel_->SetFillColor(Color(ColorAlphaAdapt(colorNum)), false);
 }
 void CanvasRendererPeerImpl::SetFillStyle(const std::shared_ptr<Ace::Gradient>& gradient)
 {
@@ -943,12 +948,37 @@ void CanvasRendererPeerImpl::SetTextBaseline(const std::string& baselineStr)
     paintState_.SetTextBaseline(baseline);
     renderingContext2DModel_->SetTextBaseline(baseline);
 }
+void CanvasRendererPeerImpl::SetLetterSpacing(const std::string& letterSpacingStr)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    if (!letterSpacingStr.empty() && IsValidLetterSpacing(letterSpacingStr)) {
+        if (letterSpacingStr.find("vp") != std::string::npos || letterSpacingStr.find("px") != std::string::npos) {
+            renderingContext2DModel_->SetLetterSpacing(GetDimensionValue(letterSpacingStr));
+            return;
+        }
+        renderingContext2DModel_->SetLetterSpacing(
+            Dimension(StringUtils::StringToDouble(letterSpacingStr) * GetDensity()));
+    }
+}
+void CanvasRendererPeerImpl::SetLetterSpacing(const Ace::Dimension& letterSpacing)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    auto letterSpacingCal = CalcDimension(letterSpacing.Value(), letterSpacing.Unit());
+    if (letterSpacingCal.Unit() != DimensionUnit::PX && letterSpacingCal.Unit() != DimensionUnit::VP) {
+        letterSpacingCal.Reset();
+    }
+    renderingContext2DModel_->SetLetterSpacing(letterSpacingCal);
+}
 // inheritance
 void CanvasRendererPeerImpl::ResetPaintState()
 {
+    paintState_ = PaintState();
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
-    } else {
-        paintState_ = PaintState();
+        // The default value of TextAlign is TextAlign::START and Direction is TextDirection::INHERIT.
+        // The default value of the font size in canvas is 14px.
+        paintState_.SetTextAlign(TextAlign::START);
+        paintState_.SetOffTextDirection(TextDirection::INHERIT);
+        paintState_.SetFontSize(DEFAULT_FONT_SIZE);
     }
     std::vector<PaintState>().swap(savePaintState_);
     isInitializeShadow_ = false;
@@ -1082,5 +1112,10 @@ void CanvasRendererPeerImpl::ParseImageData(Ace::ImageData& imageData, const Put
     if (params.dirtyHeight) {
         imageData.dirtyHeight = static_cast<int32_t>(GetDimensionValue(*params.dirtyHeight).Value());
     }
+}
+bool CanvasRendererPeerImpl::IsValidLetterSpacing(const std::string& letterSpacing)
+{
+    std::regex pattern(R"(^[+-]?(\d+(\.\d+)?|\.\d+)((vp|px)$)?$)", std::regex::icase);
+    return std::regex_match(letterSpacing, pattern);
 }
 } // namespace OHOS::Ace::NG::GeneratedModifier

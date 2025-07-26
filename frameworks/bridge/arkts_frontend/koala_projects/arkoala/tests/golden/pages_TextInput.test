@@ -1,0 +1,290 @@
+{
+  "rootElement": {
+    "nodeId": 1208,
+    "kind": "ComponentRoot",
+    "children": [
+      {
+        "nodeId": 1209,
+        "kind": "TextInput",
+        "children": [],
+        "setTextInputOptions_value": {},
+        "placeholderFont_value": {
+          "size": 30,
+          "weight": 0,
+          "family": "testFamily",
+          "style": 0
+        },
+        "fontColor_value": "#ff0000ff",
+        "placeholderColor_value": "#ff0000ff",
+        "caretColor_value": "#ff0000ff",
+        "textAlign_value": 0,
+        "enterKeyType_value": 0,
+        "showPasswordIcon_value": 0,
+        "caretStyle_value": {},
+        "selectedBackgroundColor_value": "#ff0000ff",
+        "caretPosition_value": 0
+      },
+      {
+        "nodeId": 1210,
+        "kind": "TextInput",
+        "children": [],
+        "setTextInputOptions_value": {
+          "placeholder": "Placeholder"
+        },
+        "placeholderFont_value": {
+          "size": "20vp",
+          "weight": 1,
+          "family": "testFamily",
+          "style": 1
+        },
+        "fontColor_value": 333,
+        "placeholderColor_value": 333,
+        "caretColor_value": 333,
+        "textAlign_value": 1,
+        "enterKeyType_value": 1,
+        "showPasswordIcon_value": 1,
+        "caretStyle_value": {
+          "width": 10,
+          "color": "#ff0000ff"
+        },
+        "selectedBackgroundColor_value": 333,
+        "caretPosition_value": 1234,
+        "showError_value": "error"
+      },
+      {
+        "nodeId": 1211,
+        "kind": "TextInput",
+        "children": [],
+        "setTextInputOptions_value": {
+          "text": "TextInput"
+        },
+        "placeholderFont_value": {
+          "size": "40px",
+          "weight": 2,
+          "family": "testFamily",
+          "style": 0
+        },
+        "fontColor_value": "#404040",
+        "placeholderColor_value": "#404040",
+        "caretColor_value": "#404040",
+        "textAlign_value": 2,
+        "enterKeyType_value": 2,
+        "caretStyle_value": {
+          "width": "11px",
+          "color": "#ffff0000"
+        },
+        "selectedBackgroundColor_value": "#404040",
+        "showError_value": "error"
+      },
+      {
+        "nodeId": 1212,
+        "kind": "TextInput",
+        "children": [],
+        "setTextInputOptions_value": {
+          "placeholder": "Placeholder",
+          "text": "TextInput"
+        },
+        "placeholderFont_value": {
+          "size": "25lpx",
+          "weight": 3,
+          "family": "testFamily",
+          "style": 1
+        },
+        "enterKeyType_value": 3,
+        "caretStyle_value": {
+          "width": "12lpx",
+          "color": 333
+        }
+      },
+      {
+        "nodeId": 1213,
+        "kind": "TextInput",
+        "children": [],
+        "placeholderFont_value": {
+          "size": "5%",
+          "weight": 4,
+          "family": "testFamily",
+          "style": 0
+        },
+        "enterKeyType_value": 4,
+        "caretStyle_value": {
+          "width": "13vp",
+          "color": "#404040"
+        }
+      },
+      {
+        "nodeId": 1214,
+        "kind": "TextInput",
+        "children": [],
+        "placeholderFont_value": {
+          "size": 24,
+          "weight": 5,
+          "family": "testFamily",
+          "style": 1
+        },
+        "caretStyle_value": {
+          "width": "14fp"
+        }
+      },
+      {
+        "nodeId": 1215,
+        "kind": "TextInput",
+        "children": [],
+        "placeholderFont_value": {
+          "size": "5%",
+          "weight": "Medium",
+          "family": "testFamily",
+          "style": 0
+        },
+        "caretStyle_value": {
+          "width": "15%"
+        }
+      },
+      {
+        "nodeId": 1216,
+        "kind": "TextInput",
+        "children": [],
+        "placeholderFont_value": {
+          "size": 24,
+          "weight": 100,
+          "family": "testFamily",
+          "style": 1
+        },
+        "showUnderline_value": 0
+      },
+      {
+        "nodeId": 1217,
+        "kind": "TextInput",
+        "children": [],
+        "placeholderFont_value": {
+          "size": "5%",
+          "weight": "Lighter",
+          "family": "testFamily",
+          "style": 0
+        },
+        "showUnderline_value": 1
+      },
+      {
+        "nodeId": 1218,
+        "kind": "TextInput",
+        "children": [],
+        "placeholderFont_value": {
+          "size": 24,
+          "weight": 900,
+          "family": "testFamily",
+          "style": 1
+        },
+        "cancelButton_value": {
+          "style": 0,
+          "icon": {}
+        }
+      },
+      {
+        "nodeId": 1219,
+        "kind": "TextInput",
+        "children": [],
+        "placeholderFont_value": {},
+        "cancelButton_value": {
+          "style": 1,
+          "icon": {
+            "size": 10,
+            "color": "#ff0000ff",
+            "src": "source"
+          }
+        }
+      },
+      {
+        "nodeId": 1220,
+        "kind": "TextInput",
+        "children": [],
+        "maxLines_value": 5,
+        "fontSize_value": 30,
+        "fontFamily_value": "Arial",
+        "fontStyle_value": 0,
+        "fontWeight_value": 0,
+        "cancelButton_value": {
+          "style": 2,
+          "icon": {
+            "size": "11px",
+            "color": "#ffff0000"
+          }
+        }
+      },
+      {
+        "nodeId": 1221,
+        "kind": "TextInput",
+        "children": [],
+        "fontSize_value": "20vp",
+        "fontStyle_value": 1,
+        "fontWeight_value": "Bolder",
+        "copyOption_value": 0,
+        "passwordIcon_value": {},
+        "cancelButton_value": {
+          "icon": {
+            "size": "12lpx",
+            "color": 333
+          }
+        }
+      },
+      {
+        "nodeId": 1222,
+        "kind": "TextInput",
+        "children": [],
+        "fontSize_value": "40px",
+        "fontWeight_value": 400,
+        "barState_value": 2,
+        "copyOption_value": 1,
+        "passwordIcon_value": {
+          "onIconSrc": "showIcon"
+        },
+        "cancelButton_value": {
+          "icon": {
+            "size": "13vp",
+            "color": "#404040"
+          }
+        }
+      },
+      {
+        "nodeId": 1223,
+        "kind": "TextInput",
+        "children": [],
+        "fontSize_value": "25lpx",
+        "maxLength_value": 20,
+        "fontWeight_value": 900,
+        "barState_value": 1,
+        "copyOption_value": 2,
+        "selectionMenuHidden_value": 1,
+        "enableKeyboardOnFocus_value": 0,
+        "passwordIcon_value": {
+          "offIconSrc": "hideIcon"
+        },
+        "cancelButton_value": {
+          "icon": {
+            "size": "14fp"
+          }
+        }
+      },
+      {
+        "nodeId": 1224,
+        "kind": "TextInput",
+        "children": [],
+        "fontSize_value": "5%",
+        "maxLength_value": 200,
+        "fontWeight_value": 10,
+        "barState_value": 0,
+        "copyOption_value": 3,
+        "selectionMenuHidden_value": 0,
+        "enableKeyboardOnFocus_value": 1,
+        "passwordIcon_value": {
+          "onIconSrc": "showIcon",
+          "offIconSrc": "hideIcon"
+        },
+        "cancelButton_value": {
+          "icon": {
+            "size": "15%"
+          }
+        }
+      }
+    ]
+  }
+}

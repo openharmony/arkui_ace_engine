@@ -1,0 +1,52 @@
+{
+  "rootElement": {
+    "nodeId": 1019,
+    "kind": "ComponentRoot",
+    "children": [
+      {
+        "nodeId": 1020,
+        "kind": "Span",
+        "children": [],
+        "setSpanOptions_value": "Span Check 1\n",
+        "font_value": {
+          "size": 30,
+          "weight": 0,
+          "family": "testString",
+          "style": 0
+        },
+        "decoration_value": {
+          "type": 2,
+          "color": "#ff0000ff"
+        }
+      },
+      {
+        "nodeId": 1021,
+        "kind": "Span",
+        "children": [],
+        "setSpanOptions_value": "Span Check 2\n",
+        "fontColor_value": "#ffffffff",
+        "fontSize_value": 17,
+        "fontStyle_value": 0,
+        "fontWeight_value": 20,
+        "fontFamily_value": "testString",
+        "decoration_value": {
+          "type": 1,
+          "color": "#ffff0000"
+        },
+        "letterSpacing_value": 17,
+        "textCase_value": 0,
+        "lineHeight_value": 37
+      },
+      {
+        "nodeId": 1022,
+        "kind": "Span",
+        "children": [],
+        "setSpanOptions_value": "Span Check 3\n",
+        "fontColor_value": -1,
+        "fontSize_value": "17vp",
+        "fontWeight_value": 5,
+        "fontStyle_value": 1
+      }
+    ]
+  }
+}

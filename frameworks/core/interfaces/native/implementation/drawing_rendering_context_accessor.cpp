@@ -67,7 +67,11 @@ Ark_Size GetSizeImpl(Ark_DrawingRenderingContext peer)
     CHECK_NULL_RETURN(peer, {});
     auto peerImpl = reinterpret_cast<DrawingRenderingContextPeerImpl*>(peer);
     CHECK_NULL_RETURN(peerImpl, {});
+#ifdef WRONG_GEN
     return Converter::ArkValue<Ark_Size>(peerImpl->GetSize());
+#else
+    return {};
+#endif
 }
 Ark_DrawingCanvas GetCanvasImpl(Ark_DrawingRenderingContext peer)
 {
@@ -96,7 +100,4 @@ const GENERATED_ArkUIDrawingRenderingContextAccessor* GetDrawingRenderingContext
     return &DrawingRenderingContextAccessorImpl;
 }
 
-struct DrawingRenderingContextPeer {
-    virtual ~DrawingRenderingContextPeer() = default;
-};
 }

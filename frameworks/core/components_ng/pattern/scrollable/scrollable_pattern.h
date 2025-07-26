@@ -913,6 +913,7 @@ public:
         return scrollBar_;
     }
 protected:
+    void OnAttachToFrameNode() override;
     void SuggestOpIncGroup(bool flag);
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void UpdateScrollBarRegion(float offset, float estimatedHeight, Size viewPort, Offset viewOffset);
@@ -1037,7 +1038,6 @@ private:
     void InitOption(AnimationOption &option, float duration, const RefPtr<Curve>& curve);
     float GetScrollDelta(float offset, bool& stopAnimation);
 
-    void OnAttachToFrameNode() override;
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void RegisterWindowStateChangedCallback();
     void OnTouchTestDone(const std::shared_ptr<BaseGestureEvent>& baseGestureEvent,

@@ -15,11 +15,11 @@
 
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ArkCustomComponentImpl } from "./ArkCustomComponent"
-import { ArkCommonMethodComponent } from "./generated"
+import { ArkCommonMethodComponent } from "./component"
 import { ArkPageTransitionEnter, ArkPageTransitionExit } from "./handwritten/ArkPageTransition";
-import { PageTransitionOptions } from "./component/pageTransition";
+import { PageTransitionOptions } from "./component";
 import { ArkComponentRoot } from "./ArkComponentRoot"
-import { ArkColumnPeer } from "./generated/peers/ArkColumnPeer";
+import { ArkColumnPeer } from "./component";
 
 /** base class for user's structs */
 export abstract class ArkStructBase<T, T_Options> extends ArkCustomComponentImpl {
@@ -66,8 +66,11 @@ export abstract class ArkStructBase<T, T_Options> extends ArkCustomComponentImpl
         initializers?: T_Options
     ): void {
         ArkComponentRoot(this, () => {
-            this.__updateStruct(initializers)
-            this.__build(attributes, content, initializers)
+            this.__updateStruct(initializers);
+            this.__build(attributes, content, initializers);
+            remember(() => {
+                this.onDidBuild();
+            });
         })
     }
 
@@ -81,12 +84,6 @@ export abstract class ArkStructBase<T, T_Options> extends ArkCustomComponentImpl
     ): void
 
     /** @memo */
-    pageTransition(): void {
-        ArkPageTransitionEnter(undefined, undefined, { duration: 100 } as PageTransitionOptions)
-        ArkPageTransitionExit(undefined, undefined, { duration: 100 } as PageTransitionOptions)
-    }
-
-    /** @memo */
     static _instantiateReusable<T extends ArkStructBase<T, T_Options>, T_Options>(
         reuseId: string,
         /** @memo */
@@ -97,7 +94,7 @@ export abstract class ArkStructBase<T, T_Options> extends ArkCustomComponentImpl
         arg2?: T_Options,
     ): void {
         /* need to wrap both states and build() of @Component */
-        NodeAttach(() => ArkColumnPeer.create(), (node: ArkColumnPeer) => { // replace with Frontend Node later
+        NodeAttach(() => ArkColumnPeer.create(undefined), (node: ArkColumnPeer) => { // replace with Frontend Node later
             const component = remember(() => {
                 const instance = factory()
                 instance.__initializeStruct(arg1, arg2);

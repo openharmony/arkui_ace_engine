@@ -368,6 +368,7 @@ if get_option('vmloader') == true
     loader_sources = [
         './src/generated/library.cc',
         './src/vsync.cc',
+        './src/generated/bridge_custom.cc',
         interop_src / 'common-interop.cc',
         interop_src / 'interop-logging.cc',
     ]

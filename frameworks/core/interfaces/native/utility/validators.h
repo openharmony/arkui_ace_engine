@@ -18,11 +18,12 @@
 
 #include <optional>
 
-#include "base/geometry/dimension.h"
 #include "base/geometry/calc_dimension.h"
-#include "core/components_v2/grid_layout/grid_container_util_class.h"
-#include "core/components_ng/property/calc_length.h"
+#include "base/geometry/dimension.h"
+#include "core/components/common/properties/animation_option.h"
 #include "core/components/picker/picker_data.h"
+#include "core/components_ng/property/calc_length.h"
+#include "core/components_v2/grid_layout/grid_container_util_class.h"
 
 namespace OHOS::Ace::NG {
 namespace Validator {
@@ -55,6 +56,7 @@ void ValidateIntensity(std::optional<float>& opt);
 void ValidateNonNegative(std::optional<CalcLength>& opt);
 void ValidateNonPercent(std::optional<CalcLength>& opt);
 void ValidatePickerDate(PickerDate& date);
+void ValidateAnimationOption(AnimationOption& opt, bool isForm);
 } // namespace OHOS::Ace::NG::Validator
 } // namespace OHOS::Ace::NG
 

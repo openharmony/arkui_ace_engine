@@ -19,7 +19,9 @@
 #include <memory>
 #include <optional>
 
+#include "base/geometry/ng/rect_t.h"
 #include "core/animation/page_transition_common.h"
+#include "core/components/common/properties/color.h"
 #include "core/components_ng/property/transition_property.h"
 
 namespace OHOS::Ace::NG {

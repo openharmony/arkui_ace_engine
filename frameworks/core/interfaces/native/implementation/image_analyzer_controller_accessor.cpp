@@ -84,7 +84,4 @@ const GENERATED_ArkUIImageAnalyzerControllerAccessor* GetImageAnalyzerController
     return &ImageAnalyzerControllerAccessorImpl;
 }
 
-struct ImageAnalyzerControllerPeer {
-    virtual ~ImageAnalyzerControllerPeer() = default;
-};
 }

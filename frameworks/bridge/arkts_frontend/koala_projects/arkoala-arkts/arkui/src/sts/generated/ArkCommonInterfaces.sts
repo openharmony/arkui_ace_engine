@@ -1,0 +1,134 @@
+/*
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+// WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
+
+@memo
+@BuildLambda("CommonMethod")
+export function CommonMethod(
+    
+    @memo
+    content?: () => void,
+): ArkCommonMethodComponent {
+    throw new Error("This function should only be called through a BuilderLambda redirect")
+}
+
+@memo
+export function CommonMethodImpl(
+    @memo
+    style: ((attributes: ArkCommonMethodComponent) => void) | undefined,
+    
+    @memo
+    content?: () => void,
+): void {
+    const receiver = remember(() => {
+        return new ArkCommonMethodComponent()
+    })
+    NodeAttach<ArkCommonMethodPeer>((): ArkCommonMethodPeer => ArkCommonMethodPeer.create(receiver), (_: ArkCommonMethodPeer) => {
+        
+        style?.(receiver)
+        content?.()
+        receiver.applyAttributesFinish()
+    })
+}
+
+@memo
+@BuildLambda("CommonShapeMethod")
+export function CommonShapeMethod(
+    
+    @memo
+    content?: () => void,
+): ArkCommonShapeMethodComponent {
+    throw new Error("This function should only be called through a BuilderLambda redirect")
+}
+
+@memo
+export function CommonShapeMethodImpl(
+    @memo
+    style: ((attributes: ArkCommonShapeMethodComponent) => void) | undefined,
+    
+    @memo
+    content?: () => void,
+): void {
+    const receiver = remember(() => {
+        return new ArkCommonShapeMethodComponent()
+    })
+    NodeAttach<ArkCommonShapeMethodPeer>((): ArkCommonShapeMethodPeer => ArkCommonShapeMethodPeer.create(receiver), (_: ArkCommonShapeMethodPeer) => {
+        
+        style?.(receiver)
+        content?.()
+        receiver.applyAttributesFinish()
+    })
+}
+
+@memo
+@BuildLambda("Common")
+export function Common(
+    
+    @memo
+    content?: () => void,
+): ArkCommonComponent {
+    throw new Error("This function should only be called through a BuilderLambda redirect")
+}
+
+@memo
+export function CommonImpl(
+    @memo
+    style: ((attributes: ArkCommonComponent) => void) | undefined,
+    
+    @memo
+    content?: () => void,
+): void {
+    const receiver = remember(() => {
+        return new ArkCommonComponent()
+    })
+    NodeAttach<ArkCommonPeer>((): ArkCommonPeer => ArkCommonPeer.create(receiver), (_: ArkCommonPeer) => {
+        receiver.setCommonOptions()
+        style?.(receiver)
+        content?.()
+        receiver.applyAttributesFinish()
+    })
+}
+
+@memo
+@BuildLambda("ScrollableCommonMethod")
+export function ScrollableCommonMethod(
+    
+    @memo
+    content?: () => void,
+): ArkScrollableCommonMethodComponent {
+    throw new Error("This function should only be called through a BuilderLambda redirect")
+}
+
+@memo
+export function ScrollableCommonMethodImpl(
+    @memo
+    style: ((attributes: ArkScrollableCommonMethodComponent) => void) | undefined,
+    
+    @memo
+    content?: () => void,
+): void {
+    const receiver = remember(() => {
+        return new ArkScrollableCommonMethodComponent()
+    })
+    NodeAttach<ArkScrollableCommonMethodPeer>((): ArkScrollableCommonMethodPeer => ArkScrollableCommonMethodPeer.create(receiver), (_: ArkScrollableCommonMethodPeer) => {
+        
+        style?.(receiver)
+        content?.()
+        receiver.applyAttributesFinish()
+    })
+}
+

@@ -14,23 +14,29 @@
  */
 
 import { ArrayState, Equivalent, MutableState, StateManager, ValueTracker, createStateManager } from "./State"
+import { int32 } from "@koalaui/common"
 
 /**
  * This class provides an access to the global state manager of the application.
  * @internal
  */
 export class GlobalStateManager {
+    // @ts-ignore
+    private static localManagerMap = new ConcurrentHashMap<int32, StateManager>()
     private static current: StateManager | undefined = undefined
 
     /**
-     * The current instance of a global state manager.
+     * The current instance of a coroutine local state manager.
      * Note that it will be recreated after reset.
      */
     static get instance(): StateManager {
-        let current = GlobalStateManager.current
+        let current = GlobalStateManager.GetLocalManager()
         if (current === undefined) {
-            current = createStateManager()
-            GlobalStateManager.current = current
+            if (GlobalStateManager.current === undefined) {
+                GlobalStateManager.current = createStateManager()
+                GlobalStateManager.SetLocalManager(GlobalStateManager.current)
+            }
+            return GlobalStateManager.current!
         }
         return current
     }
@@ -40,7 +46,30 @@ export class GlobalStateManager {
      * @internal
      */
     static reset() {
-        GlobalStateManager.current?.reset()
+        GlobalStateManager.GetLocalManager()?.reset()
+    }
+
+    /**
+     * Get state manager by coroutine id.
+     * @internal
+     */
+    static GetLocalManager(): StateManager | undefined {
+        // @ts-ignore
+        return GlobalStateManager.localManagerMap.get(CoroutineExtras.getWorkerId())
+    }
+
+    /**
+     * Store state manager by coroutine id.
+     * @internal
+     */
+    static SetLocalManager(manager: StateManager | undefined): void {
+        if (manager === undefined) {
+            // @ts-ignore
+            GlobalStateManager.localManagerMap.delete(CoroutineExtras.getWorkerId())
+            return
+        }
+        // @ts-ignore
+        GlobalStateManager.localManagerMap.set(CoroutineExtras.getWorkerId(), manager)
     }
 }
 

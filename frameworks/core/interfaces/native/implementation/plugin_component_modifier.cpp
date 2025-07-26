@@ -36,7 +36,7 @@ namespace Converter {
     {
         PluginComponentOptions opt;
         opt.requestPluginInfo = OptConvert<RequestPluginInfo>(options.template_);
-        LOGE("PluginComponentModifier::Convert cannot convert data. data is Ark_CustomObject!");
+        opt.data = Convert<std::string>(options.data);
         return opt;
     }
     template<>
@@ -82,26 +82,34 @@ void SetPluginComponentOptionsImpl(Ark_NativePointer node,
 } // PluginComponentInterfaceModifier
 namespace PluginComponentAttributeModifier {
 void OnCompleteImpl(Ark_NativePointer node,
-                    const VoidCallback* value)
+                    const Opt_VoidCallback* value)
 {
 #ifdef PLUGIN_COMPONENT_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto onComplete = [arkCallback = CallbackHelper(*value)](const std::string& param) -> void {
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // TODO: Reset value
+        return;
+    }
+    auto onComplete = [arkCallback = CallbackHelper(*optValue)](const std::string& param) -> void {
         arkCallback.Invoke();
     };
     PluginModelStatic::SetOnComplete(frameNode, std::move(onComplete));
 #endif
 }
 void OnErrorImpl(Ark_NativePointer node,
-                 const PluginErrorCallback* value)
+                 const Opt_PluginErrorCallback* value)
 {
 #ifdef PLUGIN_COMPONENT_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto onError = [arkCallback = CallbackHelper(*value)](const std::string& param) -> void {
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // TODO: Reset value
+        return;
+    }
+    auto onError = [arkCallback = CallbackHelper(*optValue)](const std::string& param) -> void {
         auto json = JsonUtil::ParseJsonString(param);
         Ark_PluginErrorData errorData;
         errorData.errcode = Converter::ArkValue<Ark_Number>(StringUtils::StringToInt(json->GetString("errcode")));

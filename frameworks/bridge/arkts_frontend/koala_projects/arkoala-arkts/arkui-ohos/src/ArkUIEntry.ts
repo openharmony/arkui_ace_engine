@@ -18,17 +18,20 @@ import { int32, int64 } from "@koalaui/common"
 import { pointer, nullptr, KPointer, InteropNativeModule, registerNativeModuleLibraryName, KSerializerBuffer } from "@koalaui/interop"
 import { PeerNode } from "./PeerNode"
 import { ArkUINativeModule } from "#components"
-import { EventEmulator } from "./generated/ArkEventEmulatorMaterialized"
+import { EventEmulator } from "./component"
 import { UserView, UserViewBuilder, EntryPoint } from "./UserView"
-import { ClickEvent, ClickEventInternal } from "./component/common"
-import { checkEvents, setCustomEventsChecker } from "./generated/Events"
-import { checkArkoalaCallbacks } from "./generated/peers/CallbacksChecker"
-import { setUIDetachedRootCreator } from "./generated/peers/CallbackTransformer"
+import { ClickEvent, ClickEventInternal } from "./component"
+import { checkEvents, setCustomEventsChecker } from "./component/Events"
+import { checkArkoalaCallbacks } from "./component/peers/CallbacksChecker"
+import { setUIDetachedRootCreator } from "./component/peers/CallbackTransformer"
 import { enterForeignContext, leaveForeignContext } from "./handwritten"
 import { wrapSystemCallback, KUint8ArrayPtr } from "@koalaui/interop"
-import { deserializeAndCallCallback } from "./generated/peers/CallbackDeserializeCall"
-import { Deserializer } from "./generated/peers/Deserializer"
+import { deserializeAndCallCallback } from "./component/peers/CallbackDeserializeCall"
+import { Deserializer } from "./component/peers/Deserializer"
 import { StateUpdateLoop } from "./stateManagement"
+import { Routed } from "./handwritten/Router"
+import { updateLazyItems } from "./handwritten/LazyForEachImpl"
+import router from "@ohos/router"
 
 setCustomEventsChecker(checkArkoalaCallbacks)
 
@@ -143,41 +146,47 @@ function registerSyncCallbackProcessor() {
 
 export class Application {
     private manager: StateManager | undefined = undefined
-    private rootState: ComputableState<PeerNode> | undefined = undefined
     private timer: MutableState<int64> | undefined = undefined
     private currentCrash: Object | undefined = undefined
     private enableDumpTree = false
     private exitApp: boolean = false
     private userView?: UserView
     private entryPoint?: EntryPoint
+    private moduleName: string
+    private initUrl: string
+    private initParam: string
 
     private withLog = false
     private useNativeLog = true
 
-    constructor(useNativeLog: boolean, userView?: UserView, entryPoint?: EntryPoint) {
+    constructor(useNativeLog: boolean, moduleName: string, initUrl: string, initParam: string, userView?: UserView, entryPoint?: EntryPoint) {
         this.useNativeLog = useNativeLog
+        this.moduleName = moduleName
+        this.initUrl = initUrl
+        this.initParam = initParam
         this.userView = userView
         this.entryPoint = entryPoint
     }
 
     static createMemoRootState(manager: StateManager,
         /** @memo */
-        builder: UserViewBuilder
-    ): ComputableState<PeerNode> {
+        builder: UserViewBuilder,
+        moduleName: string,
+        initUrl: string
+    ): void {
         const peer = PeerNode.generateRootPeer()
-        return manager.updatableNode<PeerNode>(peer, (context: StateContext) => {
-            const frozen = manager.frozen
-            manager.frozen = true
-            memoEntry<void>(context, 0, builder)
-            manager.frozen = frozen
-        })
+        Routed(builder, moduleName, peer, initUrl)
+        let routerOption: router.RouterOptions = {url: initUrl}
+        router.runPage(routerOption, builder)
     }
 
     private computeRoot(): PeerNode {
         // let handle = ArkUINativeModule._SystemAPI_StartFrame()
         let result: PeerNode
+        let rootArray: Array<ComputableState<PeerNode>>
         try {
-            result = this.rootState!.value
+            rootArray = router.getStateRoot()
+            result = rootArray[rootArray.length - 1].value
         } finally {
             // ArkUINativeModule._SystemAPI_EndFrame(handle)
         }
@@ -199,8 +208,10 @@ export class Application {
             } else {
                 throw new Error("Invalid EntryPoint")
             }
-            this.rootState = Application.createMemoRootState(this.manager!, builder)
+            Application.createMemoRootState(this.manager!, builder, this.moduleName, this.initUrl)
+            InteropNativeModule._NativeLog(`ArkTS Application.start before computeRoot`)
             root = this.computeRoot()
+            InteropNativeModule._NativeLog(`ArkTS Application.start after computeRoot`)
         } catch (e) {
             if (e instanceof Error) {
                 InteropNativeModule._NativeLog(`ArkTS Application.start error name: ${e.name} message: ${e.message}`);
@@ -232,16 +243,19 @@ export class Application {
 
     private updateState() {
         // NativeModule._NativeLog("ARKTS: updateState")
-        this.updateStates(this.manager!, this.rootState!)
+        let rootArray = router.getStateRoot();
+        let rootState = rootArray[rootArray.length - 1]
+        this.updateStates(this.manager!, rootState!)
         while (StateUpdateLoop.len) {
             StateUpdateLoop.consume();
-            this.updateStates(this.manager!, this.rootState!)
+            this.updateStates(this.manager!, rootState!)
         }
         // Here we request to draw a frame and call custom components callbacks.
-        let root = this.rootState!.value
-        ArkUINativeModule._MeasureLayoutAndDraw(root.peer.ptr)
-        // Call callbacks and sync
-        callScheduledCallbacks()
+        rootArray.forEach((element, index) => {
+            let root = element.value
+            ArkUINativeModule._MeasureLayoutAndDraw(root.peer.ptr)
+            callScheduledCallbacks()
+        });
     }
 
     updateStates(manager: StateManager, root: ComputableState<PeerNode>) {
@@ -298,7 +312,12 @@ export class Application {
             try {
                 this.timer!.value = Date.now() as int64
                 this.loopIteration(arg0, arg1)
-                if (this.enableDumpTree) dumpTree(this.rootState!.value)
+                if (this.enableDumpTree) {
+                    let rootArray = router.getStateRoot();
+                    if (rootArray.length > 0) {
+                        dumpTree(rootArray[0]!.value)
+                    }
+                }
             } catch (error) {
                 if (error instanceof Error) {
                     InteropNativeModule._NativeLog(`ArkTS Application.enter error name: ${error.name} message: ${error.message}`);
@@ -366,7 +385,7 @@ export class Application {
         return "0"
     }
 
-    static createApplication(appUrl: string, params: string, useNativeLog: boolean, userView?: UserView, entryPoint?: EntryPoint): Application {
+    static createApplication(appUrl: string, params: string, useNativeLog: boolean, moduleName: string, userView?: UserView, entryPoint?: EntryPoint): Application {
         if (!userView && !entryPoint) {
             throw new Error(`Invalid EntryPoint`)
         }
@@ -375,7 +394,7 @@ export class Application {
         registerNativeModuleLibraryName("ArkUIGeneratedNativeModule", "ArkoalaNative_ark.z")
         registerNativeModuleLibraryName("TestNativeModule", "ArkoalaNative_ark.z")
         registerSyncCallbackProcessor()
-        return new Application(useNativeLog, userView, entryPoint)
+        return new Application(useNativeLog, moduleName, appUrl, params, userView, entryPoint)
     }
 }
 
@@ -385,4 +404,3 @@ function makeClickEvent(x: number, y: number): ClickEvent {
     result.y = y
     return result
 }
-

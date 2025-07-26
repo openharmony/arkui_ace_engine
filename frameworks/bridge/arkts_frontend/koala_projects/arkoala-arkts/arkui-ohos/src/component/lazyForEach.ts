@@ -15,6 +15,7 @@
 
 
 // HANDWRITTEN, DO NOT REGENERATE
+import { __memo_context_type , __memo_id_type  } from "arkui.stateManagement.runtime";
 
 import { __context, __id } from "@koalaui/runtime"
 import { DynamicNode } from "./common"
@@ -114,10 +115,9 @@ export interface IDataSource<T> {
 /** @memo */
 export function LazyForEach<T>(
     /** @memo */
-    style: ((attributes: DynamicNode) => void) | undefined,
+    style: ((attributes: DynamicNode<T>) => void) | undefined,
     dataSource: IDataSource<T>,
-    /** @memo */
-    itemGenerator: (item: T, index: number) => void,
+    itemGenerator: (__memo_context: __memo_context_type, __memo_id: __memo_id_type,item: T, index: number) => void,
     keyGenerator?: (item: T, index: number) => string,
 ) {
     LazyForEachImpl(dataSource, itemGenerator, keyGenerator)

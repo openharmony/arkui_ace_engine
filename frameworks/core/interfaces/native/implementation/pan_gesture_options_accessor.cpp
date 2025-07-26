@@ -24,33 +24,19 @@ struct PanGestureOptionsInfo {
     std::optional<int32_t> fingers;
     std::optional<PanDirection> direction;
     std::optional<float> distance;
+    std::optional<bool> isFingerCountLimited;
 };
 
 namespace Converter {
 template<>
-void AssignCast(std::optional<PanDirection>& dst, const Ark_PanDirection& src)
-{
-    dst = PanDirection();
-    switch (src) {
-        case ARK_PAN_DIRECTION_NONE: dst->type = PanDirection::NONE; break;
-        case ARK_PAN_DIRECTION_HORIZONTAL: dst->type = PanDirection::HORIZONTAL; break;
-        case ARK_PAN_DIRECTION_LEFT: dst->type = PanDirection::LEFT; break;
-        case ARK_PAN_DIRECTION_RIGHT: dst->type = PanDirection::RIGHT; break;
-        case ARK_PAN_DIRECTION_VERTICAL: dst->type = PanDirection::VERTICAL; break;
-        case ARK_PAN_DIRECTION_UP: dst->type = PanDirection::UP; break;
-        case ARK_PAN_DIRECTION_DOWN: dst->type = PanDirection::DOWN; break;
-        case ARK_PAN_DIRECTION_ALL: dst->type = PanDirection::ALL; break;
-        default: LOGE("Unexpected enum value in Ark_PanDirection: %{public}d", src);
-    }
-}
-template<>
 void AssignCast(std::optional<PanGestureOptionsInfo>& dst,
-                const Ark_Literal_Number_distance_fingers_PanDirection_direction& src)
+                const Ark_PanGestureHandlerOptions& src)
 {
     PanGestureOptionsInfo result;
     result.fingers = Converter::OptConvert<int32_t>(src.fingers);
     result.direction = Converter::OptConvert<PanDirection>(src.direction);
     result.distance = Converter::OptConvert<float>(src.distance);
+    result.isFingerCountLimited = Converter::OptConvert<bool>(src.isFingerCountLimited);
     dst = result;
 }
 }
@@ -58,30 +44,43 @@ void AssignCast(std::optional<PanGestureOptionsInfo>& dst,
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PanGestureOptionsAccessor {
+namespace {
+    constexpr int32_t DEFAULT_PAN_FINGERS = 1;
+    constexpr int32_t DEFAULT_MAX_PAN_FINGERS = 10;
+    Dimension DEFAULT_PAN_DISTANCE = 5.0_vp;
+    constexpr auto DEFAULT_PAN_DIRECTION = PanDirection{};
+}
 void DestroyPeerImpl(Ark_PanGestureOptions peer)
 {
-    CHECK_NULL_VOID(peer);
-    peer->handler = nullptr;
     delete peer;
 }
-Ark_PanGestureOptions CtorImpl(const Opt_Literal_Number_distance_fingers_PanDirection_direction* value)
+Ark_PanGestureOptions CtorImpl(const Opt_PanGestureHandlerOptions* value)
 {
     auto peer = new PanGestureOptionsPeer();
     peer->handler = Referenced::MakeRefPtr<PanGestureOption>();
     CHECK_NULL_RETURN(value, peer);
-
+    auto fingers = DEFAULT_PAN_FINGERS;
+    auto distance = DEFAULT_PAN_DISTANCE.ConvertToPx();
+    auto direction = DEFAULT_PAN_DIRECTION;
+    auto isFingerCountLimited = false;
     auto info = Converter::OptConvert<PanGestureOptionsInfo>(*value);
     if (info) {
-        if (info.value().direction) {
-            peer->handler->SetDirection(info.value().direction.value());
-        }
+        direction = info.value().direction.value_or(DEFAULT_PAN_DIRECTION);
         if (info.value().distance) {
-            peer->handler->SetDistance(info.value().distance.value());
+            Dimension dimension = LessNotEqual(info.value().distance.value(), 0.0) ?
+                DEFAULT_PAN_DISTANCE : Dimension(info.value().distance.value(), DimensionUnit::VP);
+            distance = dimension.ConvertToPx();
         }
-        if (info.value().fingers) {
-            peer->handler->SetFingers(info.value().fingers.value());
-        }
+        fingers = info.value().fingers.value_or(DEFAULT_PAN_FINGERS);
+        fingers = fingers <= DEFAULT_PAN_FINGERS ? DEFAULT_PAN_FINGERS : fingers;
+        fingers = fingers > DEFAULT_MAX_PAN_FINGERS ? DEFAULT_PAN_FINGERS : fingers;
+        isFingerCountLimited = info.value().isFingerCountLimited.value_or(false);
     }
+
+    peer->handler->SetDirection(direction);
+    peer->handler->SetDistance(distance);
+    peer->handler->SetFingers(fingers);
+    peer->handler->SetIsLimitFingerCount(isFingerCountLimited);
     return peer;
 }
 Ark_NativePointer GetFinalizerImpl()
@@ -94,9 +93,7 @@ void SetDirectionImpl(Ark_PanGestureOptions peer,
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(peer->handler);
     auto convDirection = Converter::OptConvert<PanDirection>(value);
-    if (convDirection.has_value()) {
-        peer->handler->SetDirection(convDirection.value());
-    }
+    peer->handler->SetDirection(convDirection.value_or(DEFAULT_PAN_DIRECTION));
 }
 void SetDistanceImpl(Ark_PanGestureOptions peer,
                      const Ark_Number* value)
@@ -104,10 +101,14 @@ void SetDistanceImpl(Ark_PanGestureOptions peer,
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(peer->handler);
     CHECK_NULL_VOID(value);
+    auto distance = DEFAULT_PAN_DISTANCE.ConvertToPx();
     auto convDistance = Converter::OptConvert<float>(*value);
     if (convDistance.has_value()) {
-        peer->handler->SetDistance(convDistance.value());
+        Dimension dimension = LessNotEqual(convDistance.value(), 0.0) ?
+            DEFAULT_PAN_DISTANCE : Dimension(convDistance.value(), DimensionUnit::VP);
+        distance = dimension.ConvertToPx();
     }
+    peer->handler->SetDistance(distance);
 }
 void SetFingersImpl(Ark_PanGestureOptions peer,
                     const Ark_Number* value)
@@ -116,16 +117,28 @@ void SetFingersImpl(Ark_PanGestureOptions peer,
     CHECK_NULL_VOID(peer->handler);
     CHECK_NULL_VOID(value);
     auto convFingers = Converter::OptConvert<int32_t>(*value);
-    if (convFingers.has_value()) {
-        peer->handler->SetFingers(convFingers.value());
-    }
+    auto fingers = convFingers.value_or(DEFAULT_PAN_FINGERS);
+    fingers = fingers <= DEFAULT_PAN_FINGERS ? DEFAULT_PAN_FINGERS : fingers;
+    fingers = fingers > DEFAULT_MAX_PAN_FINGERS ? DEFAULT_PAN_FINGERS : fingers;
+    peer->handler->SetFingers(fingers);
 }
 Ark_PanDirection GetDirectionImpl(Ark_PanGestureOptions peer)
 {
-    CHECK_NULL_RETURN(peer, {});
-    CHECK_NULL_RETURN(peer->handler, {});
-    auto panDirection = peer->handler->GetDirection();
-    return Converter::ArkValue<Ark_PanDirection>(panDirection);
+    CHECK_NULL_RETURN(peer, Converter::INVALID_ENUM_VAL<Ark_PanDirection>);
+    CHECK_NULL_RETURN(peer->handler,  Converter::INVALID_ENUM_VAL<Ark_PanDirection>);
+    auto direction = peer->handler->GetDirection();
+    return Converter::ArkValue<Ark_PanDirection>(direction, Converter::FC);
+}
+Ark_Number GetDistanceImpl(Ark_PanGestureOptions peer)
+{
+    const auto errValue = Converter::ArkValue<Ark_Number>(0);
+    CHECK_NULL_RETURN(peer, errValue);
+    CHECK_NULL_RETURN(peer->handler, errValue);
+    auto distance = peer->handler->GetDistance();
+    auto context = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_RETURN(context, errValue);
+    auto distance_new = context->ConvertPxToVp(Dimension(distance, DimensionUnit::PX));
+    return Converter::ArkValue<Ark_Number>(distance_new);
 }
 } // PanGestureOptionsAccessor
 const GENERATED_ArkUIPanGestureOptionsAccessor* GetPanGestureOptionsAccessor()
@@ -138,11 +151,9 @@ const GENERATED_ArkUIPanGestureOptionsAccessor* GetPanGestureOptionsAccessor()
         PanGestureOptionsAccessor::SetDistanceImpl,
         PanGestureOptionsAccessor::SetFingersImpl,
         PanGestureOptionsAccessor::GetDirectionImpl,
+        PanGestureOptionsAccessor::GetDistanceImpl,
     };
     return &PanGestureOptionsAccessorImpl;
 }
 
-struct PanGestureOptionsPeer {
-    virtual ~PanGestureOptionsPeer() = default;
-};
 }

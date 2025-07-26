@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/accessor_utils.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/implementation/drag_event_peer.h"
@@ -127,22 +128,26 @@ void SetDataImpl(Ark_DragEvent peer,
 Ark_UnifiedData GetDataImpl(Ark_VMContext vmContext,
                             Ark_DragEvent peer)
 {
-    CHECK_NULL_RETURN(peer, nullptr);
-    CHECK_NULL_RETURN(peer->dragInfo, nullptr);
-    auto data = peer->dragInfo->GetData();
-    CHECK_NULL_RETURN(data, nullptr);
     const auto unifiedPeer = GeneratedModifier::GetUnifiedDataAccessor()->ctor();
+    CHECK_NULL_RETURN(peer, unifiedPeer);
+    CHECK_NULL_RETURN(peer->dragInfo, unifiedPeer);
+    auto data = peer->dragInfo->GetData();
+    CHECK_NULL_RETURN(data, unifiedPeer);
     unifiedPeer->unifiedData = data;
     return unifiedPeer;
 }
 Ark_Summary GetSummaryImpl(Ark_DragEvent peer)
 {
-    CHECK_NULL_RETURN(peer, {});
+    Ark_Summary arkValue = { .summary = {}, .totalSize = 0 };
+    CHECK_NULL_RETURN(peer, arkValue);
     auto info = peer->dragInfo;
-    CHECK_NULL_RETURN(info, {});
+    CHECK_NULL_RETURN(info, arkValue);
     auto summary = info->GetSummary();
-    LOGE("DragEventAccessor::GetSummaryImpl wrong return data");
-    return {};
+    arkValue.summary = Converter::ArkValue<Map_String_Int64>(summary, Converter::FC);
+    for (const auto &item: summary) {
+        arkValue.totalSize += ArkValue<Ark_Int64>(item.second);
+    }
+    return arkValue;
 }
 void SetResultImpl(Ark_DragEvent peer,
                    Ark_DragResult dragResult)
@@ -207,6 +212,24 @@ Ark_Boolean GetModifierKeyStateImpl(Ark_VMContext vmContext,
     auto keysStr = Converter::Convert<std::vector<std::string>>(*keys);
     return Converter::ArkValue<Ark_Boolean>(AccessorUtils::CheckKeysPressed(keysStr, eventKeys));
 }
+void ExecuteDropAnimationImpl(Ark_DragEvent peer,
+                              const Callback_Void* customDropAnimation)
+{
+    CHECK_NULL_VOID(customDropAnimation);
+    CHECK_NULL_VOID(peer);
+    auto info = peer->dragInfo;
+    CHECK_NULL_VOID(info);
+    auto customDropAnimationCallback = [callback = CallbackHelper(*customDropAnimation)]() {
+        callback.InvokeSync();
+    };
+    info->SetDropAnimation(std::move(customDropAnimationCallback));
+}
+Ark_String StartDataLoadingImpl(Ark_VMContext vmContext,
+                                Ark_DragEvent peer,
+                                const Ark_DataSyncOptions* options)
+{
+    return {};
+}
 Ark_DragBehavior GetDragBehaviorImpl(Ark_DragEvent peer)
 {
     auto defaultReturn = ArkValue<Ark_DragBehavior>(DragBehavior::MOVE);
@@ -264,6 +287,8 @@ const GENERATED_ArkUIDragEventAccessor* GetDragEventAccessor()
         DragEventAccessor::GetVelocityYImpl,
         DragEventAccessor::GetVelocityImpl,
         DragEventAccessor::GetModifierKeyStateImpl,
+        DragEventAccessor::ExecuteDropAnimationImpl,
+        DragEventAccessor::StartDataLoadingImpl,
         DragEventAccessor::GetDragBehaviorImpl,
         DragEventAccessor::SetDragBehaviorImpl,
         DragEventAccessor::GetUseCustomDropAnimationImpl,

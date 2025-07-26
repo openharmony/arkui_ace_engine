@@ -1,0 +1,14 @@
+{
+    "ui": "tdd",
+    "spec": "./test/test.arkts.spec.ts",
+    "extension": [
+        "ts"
+    ],
+    "exclude": "./test/specification/**/*",
+    "require": [
+        "../../incremental/test-utils/scripts/register"
+    ],
+    "reporterOptions": [
+        "maxDiffSize=0"
+    ]
+}

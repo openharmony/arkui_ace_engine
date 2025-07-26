@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
+#include "arkoala_api_generated.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/dialog/alert_dialog_model_ng.h"
+#include "core/components_ng/pattern/dialog/dialog_pattern.h"
+#include "core/interfaces/native/implementation/dialog_common.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "core/interfaces/native/utility/callback_helper.h"
-#include "core/interfaces/native/implementation/dialog_common.h"
-#include "core/components_ng/pattern/dialog/dialog_pattern.h"
-#include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG {
 struct DialogPropsForUpdate {
@@ -50,7 +50,7 @@ struct DialogPropsForUpdate {
     Opt_TransitionEffect transition;
     Opt_Length width;
 };
-}
+} // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace::NG::Converter {
 void AssignArkValue(Ark_DismissReason& dst, const DialogDismissReason& src)

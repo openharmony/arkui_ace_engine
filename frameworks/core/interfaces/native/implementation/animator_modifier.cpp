@@ -37,97 +37,88 @@ void SetAnimatorOptionsImpl(Ark_NativePointer node,
 } // AnimatorInterfaceModifier
 namespace AnimatorAttributeModifier {
 void StateImpl(Ark_NativePointer node,
-               Ark_AnimationStatus value)
+               const Opt_AnimationStatus* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
 }
 void DurationImpl(Ark_NativePointer node,
-                  const Ark_Number* value)
+                  const Opt_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
 }
 void CurveImpl(Ark_NativePointer node,
-               Ark_Curve value)
+               const Opt_Curve* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
 }
 void DelayImpl(Ark_NativePointer node,
-               const Ark_Number* value)
+               const Opt_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
 }
 void FillModeImpl(Ark_NativePointer node,
-                  Ark_FillMode value)
+                  const Opt_FillMode* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
 }
 void IterationsImpl(Ark_NativePointer node,
-                    const Ark_Number* value)
+                    const Opt_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
 }
 void PlayModeImpl(Ark_NativePointer node,
-                  Ark_PlayMode value)
+                  const Opt_PlayMode* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
 }
 void MotionImpl(Ark_NativePointer node,
-                Ark_SpringMotion value)
+                const Opt_SpringMotion* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
 }
 void OnStartImpl(Ark_NativePointer node,
-                 const Callback_Void* value)
+                 const Opt_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
 }
 void OnPauseImpl(Ark_NativePointer node,
-                 const Callback_Void* value)
+                 const Opt_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
 }
 void OnRepeatImpl(Ark_NativePointer node,
-                  const Callback_Void* value)
+                  const Opt_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
 }
 void OnCancelImpl(Ark_NativePointer node,
-                  const Callback_Void* value)
+                  const Opt_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
 }
 void OnFinishImpl(Ark_NativePointer node,
-                  const Callback_Void* value)
+                  const Opt_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
 }
 void OnFrameImpl(Ark_NativePointer node,
-                 const Callback_Number_Void* value)
+                 const Opt_Callback_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
 }
 } // AnimatorAttributeModifier
 const GENERATED_ArkUIAnimatorModifier* GetAnimatorModifier()

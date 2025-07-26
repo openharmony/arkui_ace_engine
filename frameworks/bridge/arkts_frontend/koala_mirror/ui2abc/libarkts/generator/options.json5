@@ -1,0 +1,239 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+{
+    "irHack": [
+        "AnnotationUsage",
+        "ETSFunctionType",
+        "ETSUnionType",
+        "ETSNullType",
+        "ETSUndefinedType",
+    ],
+    "ignore": {
+        "full": [
+            "es2panda_Impl",
+            "es2panda_Config",
+            "es2panda_ExternalSource",
+        ],
+        "partial": [
+            {
+                interface: "MethodDefinition",
+                methods: [
+                    "GetOverloadInfo",  // return type is wrong
+                ]
+            },
+            {
+                interface: "AnnotationDeclaration",
+                methods: [
+                    "PropertiesPtrConst" // interfaces create-to-param matching
+                ]
+            },
+            {
+                interface: "NumberLiteral",
+                methods: [
+                    "SetInt",
+                    "SetLong",
+                    "SetDouble",
+                    "SetFloat"
+                ]
+            },
+            {
+                interface: "AnnotationUsage",
+                methods: [
+                    "PropertiesPtrConst" // interfaces create-to-param matching
+                ]
+            },
+            {
+                interface: "TSInterfaceBody",
+                methods: [
+                    "BodyPtr" // interfaces create-to-param matching
+                ]
+            },
+            {
+                interface: "Signature",
+                methods: [
+                    "ProtectionFlagConst" // u8
+                ]
+            },
+            {
+                interface: "ETSReExportDeclaration",
+                methods: [
+                    "Create", // sequence<String>
+                    "Update", // sequence<String>
+                    "GetUserPathsConst" // sequence<String>
+                ]
+            },
+            {
+                interface: "CharLiteral",
+                methods: [
+                    "Create1", // KShort,
+                    "Update1", // KShort
+                    "CharConst", // KShort
+                ]
+            },
+            {
+                interface: "ForUpdateStatement",
+                methods: [
+                    "Update" // forbidden naming
+                ]
+            },
+            {
+                interface: "CallExpression",
+                methods: [
+                    "Update" // differs from handwritten
+                ]
+            },
+            {
+                interface: "TryStatement",
+                methods: [
+                    "AddFinalizerInsertion" // idl missing const
+                ]
+            },
+            {
+                interface: "MemberExpression",
+                methods: [
+                    "SetExtensionAccessorType" // ETSFunction type ambiguity
+                ]
+            },
+        ]
+    },
+    nonNullable: [
+        {
+            name: "ScriptFunction",
+            methods: [
+                {
+                    name: "SetIdent",
+                    types: ["id"]
+                }
+            ]
+        },
+        {
+            name: "ArrowFunctionExpression",
+            methods: [
+                {
+                    name: "FunctionConst",
+                    types: ["returnType"]
+                }
+            ]
+        },
+        {
+            name : "FunctionDeclaration",
+            methods: [
+                {
+                    name: "FunctionConst",
+                    types: ["returnType"]
+                }
+            ]
+        },
+        {
+            name: "CallExpression",
+            methods: [
+                {
+                    name: "CalleeConst",
+                    types: ["returnType"]
+                }
+            ]
+        },
+        {
+            name : "ExpressionStatement",
+            methods: [
+                {
+                    name: "GetExpressionConst",
+                    types: ["returnType"]
+                }
+            ]
+        },
+        {
+            name: "IfStatement",
+            methods: [
+                {
+                    name: "TestConst",
+                    types: ["returnType"]
+                },
+                {
+                    name: "ConsequentConst",
+                    types: ["returnType"]
+                }
+            ]
+        },
+        {
+            name: "MemberExpression",
+            methods: [
+                {
+                    name: "ObjectConst",
+                    types: ["returnType"]
+                },
+                {
+                    name: "PropertyConst",
+                    types: ["returnType"]
+                }
+            ]
+        },
+        {
+            name: "ETSParameterExpression",
+            methods: [
+                {
+                    name: "IdentConst",
+                    types: ["returnType"]
+                }
+            ]
+        },
+        {
+            name: "VariableDeclarator",
+            methods: [
+                {
+                    name: "IdConst",
+                    types: ["returnType"]
+                }
+            ]
+        },
+        {
+            name: "ClassElement",
+            methods: [
+                {
+                    name: "IdConst",
+                    types: ["returnType"]
+                }
+            ]
+        },
+        {
+            name: "MethodDefinition",
+            methods: [
+                {
+                    name: "FunctionConst",
+                    types: ["returnType"]
+                },
+            ]
+        },
+        {
+            name: "ETSFunctionType",
+            methods: [
+                {
+                    name: "ReturnTypeConst",
+                    types: ["returnType"]
+                }
+            ]
+        },
+        {
+            name: "TSTypeAliasDeclaration",
+            methods: [
+                {
+                    name: "TypeAnnotationConst",
+                    types: ["returnType"]
+                }
+            ]
+        },
+    ],
+}

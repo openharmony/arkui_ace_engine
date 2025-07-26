@@ -34,13 +34,30 @@ interface StorageLinkPropRegistration {
 export class LocalStorage {
     private storage_: Map<string, StateDecoratedVariable<NullableObject>>;
     private nextLinkPropId: StorageLinkPropIdType = 1;
-    private linkPropRegistrations_: Map<string, Set<StorageLinkPropIdType>> =
-        new Map<string, Set<StorageLinkPropIdType>>();
+    // map propName -> Link/Prop ID
+    private linkFinalisationRegistrations_: Map<string, Set<StorageLinkPropIdType>> = new Map<string, Set<StorageLinkPropIdType>>();
+    // how FinalizationRegistry is used: when creating a link or prop:
+    // finalizationRegistry_.register(prop/link object, { propName: propName, id: id })
+    private finalizationRegistry_: FinalizationRegistry<StorageLinkPropRegistration>
+        = new FinalizationRegistry<StorageLinkPropRegistration>(this.__clearLinkInternalByRegistration);
+
+    // framework internal function, not STK
+    public __clearLinkInternalByRegistration(linkPropRegistration: StorageLinkPropRegistration): void {
+        const reg: Set<StorageLinkPropIdType> | undefined
+            = this.linkFinalisationRegistrations_.get(linkPropRegistration.propName)
+        if (reg === undefined) {
+            return;
+        }
+        reg!.delete(linkPropRegistration.id);
+        if (reg!.size === 0) {
+            this.linkFinalisationRegistrations_.delete(linkPropRegistration.propName);
+        }
+    }
 
     constructor() {
         this.storage_ = new Map<string, StateDecoratedVariable<NullableObject>>();
     }
-    
+
     private getInfo(): string {
         return '@LocalStorage';
     }
@@ -138,14 +155,15 @@ export class LocalStorage {
     private linkInternal<T>(propName: string, p: StateDecoratedVariable<T>): LinkDecoratedVariable<T> {
         const link: LinkDecoratedVariable<T> = p.mkLink(propName);
         const id = this.nextLinkPropId++;
-        let reg = this.linkPropRegistrations_.get(propName);
+        let reg = this.linkFinalisationRegistrations_.get(propName);
         if (reg === undefined) {
             reg = new Set<StorageLinkPropIdType>();
-            this.linkPropRegistrations_.set(propName, reg);
+            this.linkFinalisationRegistrations_.set(propName, reg);
         }
         reg!.add(id);
-        // why no used here
         const regEntry: StorageLinkPropRegistration = { propName: propName, id: id };
+        // when the link is gc'ed, unregister it from linkFinalisationRegistrations_:
+        this.finalizationRegistry_.register(link, regEntry);
         return link;
     }
 
@@ -183,12 +201,15 @@ export class LocalStorage {
         const prop = result.prop;
         
         const id = this.nextLinkPropId++;
-        let reg = this.linkPropRegistrations_.get(propName)
+        let reg = this.linkFinalisationRegistrations_.get(propName)
         if (reg === undefined) {
             reg = new Set<StorageLinkPropIdType>();
-            this.linkPropRegistrations_.set(propName, reg);
+            this.linkFinalisationRegistrations_.set(propName, reg);
         }
-        reg.add(id);
+        reg!.add(id);
+        const regEntry: StorageLinkPropRegistration = { propName: propName, id: id };
+        // when the link is gc'ed, unregister it from linkFinalisationRegistrations_:
+        this.finalizationRegistry_.register(prop, regEntry);
         return prop;
     }
 
@@ -198,28 +219,28 @@ export class LocalStorage {
             return false;
         }
 
-        const registrations = this.linkPropRegistrations_.get(propName);
+        const registrations = this.linkFinalisationRegistrations_.get(propName);
         if (registrations && registrations.size > 0) {
             return false;
         }
 
         // can delete
-        this.linkPropRegistrations_.delete(propName);
+        this.linkFinalisationRegistrations_.delete(propName);
         this.storage_.delete(propName);
         return true;
     }
 
     protected clear(): boolean {
-        if (this.linkPropRegistrations_.size > 0) {
+        if (this.linkFinalisationRegistrations_.size > 0) {
             for (let propName of this.keys()) {
-                if ((this.linkPropRegistrations_.get(propName) !== undefined)
-                    && (this.linkPropRegistrations_.get(propName)!.size > 0)) {
+                if ((this.linkFinalisationRegistrations_.get(propName) !== undefined)
+                    && (this.linkFinalisationRegistrations_.get(propName)!.size > 0)) {
                     return false;
                 }
             }
         }
         this.storage_.clear();
-        this.linkPropRegistrations_.clear();
+        this.linkFinalisationRegistrations_.clear();
         return true;
     }    
 }

@@ -1,0 +1,50 @@
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/config/components/ets_frontend/ets2abc_config.gni")
+import("//build/ohos.gni")
+import("//foundation/arkui/ace_engine/ace_config.gni")
+
+interop_root = ""
+
+node_version = "v16.20.2"
+host_arch = "${host_os}-${host_cpu}"
+
+action("interop.abc") {
+    script = "gn/command/npm.py"
+    outputs = [
+        "$target_out_dir/interop.abc"
+    ]
+    args = [
+        "--project-path", rebase_path("."),
+        "--node-path", rebase_path("//prebuilts/build-tools/common/nodejs/node-${node_version}-${host_arch}/bin"),
+        "--arklink-path", rebase_path("${static_linker_build_path}"),
+        "--es2panda-path", rebase_path("${ets2abc_build_path}"),
+        "--stdlib-path", rebase_path("//arkcompiler/runtime_core/static_core/plugins/ets/stdlib"),
+        "--npm-args", "run", "build:interop:gn"
+    ]
+
+    deps = [
+      "${ohos_ets_api_deps}",
+      "${ohos_ets_arkts_deps}",
+    ]
+
+    external_deps = ets2abc_build_deps
+    external_deps += static_linker_build_deps
+}
+
+group("interop") {
+    deps = [
+      "$interop_root:interop.abc"
+    ]
+}

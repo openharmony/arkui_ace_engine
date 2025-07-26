@@ -103,7 +103,7 @@ private:
 
     const GridLayoutInfo* info_;
     const LayoutWrapper* wrapper_;
-    const GridLayoutOptions* opts_;
+    const GridLayoutOptions* opts_ = nullptr;
 
     ACE_DISALLOW_COPY_AND_MOVE(GridLayoutRangeSolver);
 };

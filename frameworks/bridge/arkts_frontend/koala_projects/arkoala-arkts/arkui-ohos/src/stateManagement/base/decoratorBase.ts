@@ -75,7 +75,6 @@ export abstract class DecoratedVariableBase<T> {
 
     // FIXME compiler bug: why public is needed that derived class can use
     public validateValue(newValue: T): boolean {
-        // return ((typeof newValue === 'object') && !(newValue instanceof IObservedObject));
         return true;
     }
 }
@@ -137,23 +136,11 @@ export abstract class DecoratedV1VariableBase<T> extends DecoratedVariableBase<T
 
     /* compiler BUG: change to protcted */
     public registerWatchForObservedObjectChanges(value: T): void {
-        if (value && typeof value === 'object'
-            && TypeChecker.isIWatchTrigger(value)) {
-            this._watchFuncs.forEach((watchFunc) => {
-                watchFunc.registerMeTo(value as Object as IWatchTrigger);
-            });
-        }
     }
 
 
     /* compiler BUG: change to protcted */
     public unregisterWatchFromObservedObjectChanges(value: T): void {
-        if (value && typeof value === 'object'
-            && TypeChecker.isIWatchTrigger(value)) {
-            this._watchFuncs.forEach((watchFunc) => {
-                watchFunc.unregisterMeFrom(value as Object as IWatchTrigger);
-            });
-        }
     }
 
     /* compiler BUG: change to protcted */

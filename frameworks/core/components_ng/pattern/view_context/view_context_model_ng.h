@@ -41,6 +41,8 @@ public:
 
 private:
     static thread_local std::set<FrameNode*> pendingAnimationNodes_;
+    static void closeAnimationInternal(const AnimationOption& option, bool needFlush);
+    static void openAnimationInternal(const AnimationOption& option);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FORM_FORM_MODEL_NG_H

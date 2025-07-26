@@ -1,0 +1,25 @@
+From 698eaee2980c79599cd451d22b925df11b277642 Mon Sep 17 00:00:00 2001
+From: Dmitrii <naumov.dmitrii@huawei.com>
+Date: Wed, 13 Dec 2023 13:59:23 +0300
+Subject: [PATCH 2/5] recycle-function-array-prop-link-prop-value
+
+---
+ .../render_decorator/@recycle/recycle_function_array.ts         | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/compiler/test/utForPartialUpdate/render_decorator/@recycle/recycle_function_array.ts b/compiler/test/utForPartialUpdate/render_decorator/@recycle/recycle_function_array.ts
+index c1250213..a69e3208 100644
+--- a/compiler/test/utForPartialUpdate/render_decorator/@recycle/recycle_function_array.ts
++++ b/compiler/test/utForPartialUpdate/render_decorator/@recycle/recycle_function_array.ts
+@@ -19,7 +19,7 @@ struct HomeComponent {
+   @State value: number = 1
+   build() {
+     Column() {
+-      child({propvalue: this.value, linkvalue: this.value})
++      child()
+     }
+   }
+ }
+-- 
+2.25.1
+

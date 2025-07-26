@@ -1,0 +1,29 @@
+{
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "outDir": "build/unmemoized",
+        "plugins": [],
+        "paths": {
+            "@koalaui/runtime": ["../../incremental/runtime/unmemoized/src"],
+            "@koalaui/arkui-common": ["../arkui-common/unmemoized/src"],
+            "@koalaui/arkoala": ["../framework/unmemoized/src"],
+            "@koalaui/arkoala-arkui": ["../arkui/unmemoized/src"],
+
+        }
+    },
+    "include": [
+        "unmemoized"
+    ],
+    "exclude": [
+        "./src/**/*",
+        "./generated/**/*"
+    ],
+    "references": [
+        { "path": "../../incremental/compiler-plugin" },
+        { "path": "../../incremental/runtime/tsconfig-run-unmemoized.json" },
+        { "path": "../arkui-common/tsconfig-run-unmemoized.json" },
+        { "path": "../framework/tsconfig-run-unmemoized.json" },
+        { "path": "../arkui/tsconfig-run-unmemoized.json" },
+    ]
+
+}

@@ -1,0 +1,39 @@
+{
+  "rootElement": {
+    "nodeId": 1284,
+    "kind": "ComponentRoot",
+    "children": [
+      {
+        "nodeId": 1285,
+        "kind": "Shape",
+        "children": [],
+        "viewPort_value": {
+          "x": "11px",
+          "y": "22fp",
+          "width": "33vp",
+          "height": "55lpx"
+        },
+        "mesh_value": [
+          null,
+          null
+        ],
+        "mesh_column": 7,
+        "mesh_row": 3,
+        "stroke_value": "0xabcdef",
+        "fill_value": "0xfedcba",
+        "strokeDashOffset_value": "10fp",
+        "strokeDashArray_value": [
+          null,
+          null
+        ],
+        "strokeLineCap_value": 2,
+        "strokeLineJoin_value": 2,
+        "strokeMiterLimit_value": 7,
+        "strokeOpacity_value": 0.20000000298023224,
+        "fillOpacity_value": 0.800000011920929,
+        "strokeWidth_value": "5px",
+        "antiAlias_value": 1
+      }
+    ]
+  }
+}

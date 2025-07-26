@@ -108,13 +108,13 @@ void AssignArkValue(Ark_RichEditorTextStyle& dst, const UpdateSpanStyle& src, Co
     dst.letterSpacing = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>(str);
     str = Converter::ArkValue<Ark_String>(src.updateLineHeight.value_or(CalcDimension()).ToString(), ctx);
     dst.lineHeight = Converter::ArkUnion<Opt_Union_Number_String_Resource, Ark_String>(str);
-    dst.fontFeature = Converter::ArkValue<Opt_String>(src.updateFontFeature);
+    dst.fontFeature = Converter::ArkValue<Opt_String>(src.updateFontFeature, ctx);
 }
 
 void AssignArkValue(Ark_PreviewText& dst, const PreviewTextInfo& src, Converter::ConvContext *ctx)
 {
     dst.offset = ArkValue<Ark_Number>(src.offset.value_or(0.0f));
-    // dst.value = ArkValue<Ark_String>(src.value.value_or(std::string()), ctx);
+    dst.value = ArkValue<Ark_String>(src.value.value_or(std::u16string()), ctx);
 }
 }
 
@@ -212,6 +212,10 @@ Ark_PreviewText GetPreviewTextImpl(Ark_RichEditorBaseController peer)
     auto result = peer->GetPreviewText();
     return Converter::ArkValue<Ark_PreviewText>(result, Converter::FC);
 }
+Opt_RectResult GetCaretRectImpl(Ark_RichEditorBaseController peer)
+{
+    return {};
+}
 } // RichEditorBaseControllerAccessor
 const GENERATED_ArkUIRichEditorBaseControllerAccessor* GetRichEditorBaseControllerAccessor()
 {
@@ -229,11 +233,9 @@ const GENERATED_ArkUIRichEditorBaseControllerAccessor* GetRichEditorBaseControll
         RichEditorBaseControllerAccessor::StopEditingImpl,
         RichEditorBaseControllerAccessor::GetLayoutManagerImpl,
         RichEditorBaseControllerAccessor::GetPreviewTextImpl,
+        RichEditorBaseControllerAccessor::GetCaretRectImpl,
     };
     return &RichEditorBaseControllerAccessorImpl;
 }
 
-struct RichEditorBaseControllerPeer {
-    virtual ~RichEditorBaseControllerPeer() = default;
-};
 }

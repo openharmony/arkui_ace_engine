@@ -245,7 +245,4 @@ const GENERATED_ArkUIWebControllerAccessor* GetWebControllerAccessor()
     return &WebControllerAccessorImpl;
 }
 
-struct WebControllerPeer {
-    virtual ~WebControllerPeer() = default;
-};
 }

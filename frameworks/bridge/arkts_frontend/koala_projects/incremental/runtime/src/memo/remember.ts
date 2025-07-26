@@ -30,7 +30,7 @@ import { ArrayState, ControlledScope, MutableState } from "../states/State"
  * @experimental
  */
 /** @memo:intrinsic */
-export function memo<Value>(compute: () => Value): Value {
+export function memoize<Value>(compute: () => Value): Value {
     const scope = __context().scope<Value>(__id())
     return scope.unchanged ? scope.cached : scope.recache(compute())
 }
@@ -83,7 +83,7 @@ export function once(callback: () => void): void {
  *
  * @param compute - a function to compute cacheable result
  * @returns the last calculated value
- * @see memo
+ * @see memoize
  */
 /** @memo:intrinsic */
 export function remember<Value>(compute: () => Value): Value {

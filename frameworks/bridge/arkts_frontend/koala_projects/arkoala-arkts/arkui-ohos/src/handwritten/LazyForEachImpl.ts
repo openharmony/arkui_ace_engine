@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+import { __memo_context_type , __memo_id_type  } from "arkui.stateManagement.runtime";
 import { __id, ComputableState, contextNode, GlobalStateManager, Disposable, memoEntry2, remember, rememberDisposable, rememberMutableState, StateContext, scheduleCallback } from "@koalaui/runtime";
 import { InteropNativeModule, nullptr, pointer } from "@koalaui/interop";
 import { PeerNode } from "../PeerNode";
@@ -20,9 +20,9 @@ import { InternalListener } from "../DataChangeListener";
 import { setNeedCreate } from "../ArkComponentRoot";
 import { int32 } from "@koalaui/common";
 import { IDataSource } from "../component/lazyForEach";
+import { LazyForEachOps } from "../component";
 import { LazyItemNode } from "./LazyItemNode";
 import { CustomComponent } from "../component/customComponent";
-import { LazyForEachOps } from "../generated/ArkLazyForEachOpsMaterialized"
 
 let globalLazyItems: Set<ComputableState<LazyItemNode>> = new Set<ComputableState<LazyItemNode>>()
 export function updateLazyItems() {
@@ -33,8 +33,7 @@ export function updateLazyItems() {
 
 /** @memo:intrinsic */
 export function LazyForEachImpl<T>(dataSource: IDataSource<T>,
-    /** @memo */
-    itemGenerator: (item: T, index: number) => void,
+    itemGenerator: (__memo_context: __memo_context_type, __memo_id: __memo_id_type,item: T, index: number) => void,
     keyGenerator?: (item: T, index: number) => string,
 ) {
     const parent = contextNode<PeerNode>()
@@ -72,15 +71,19 @@ export function LazyForEachImpl<T>(dataSource: IDataSource<T>,
 class LazyItemCompositionContext {
     private prevFrozen: boolean
     private prevNeedCreate: boolean
+    private prevCurrent?: Object
 
     constructor(parentComponent?: Object) {
         const manager = GlobalStateManager.instance
         this.prevFrozen = manager.frozen
         manager.frozen = true
         this.prevNeedCreate = setNeedCreate(true) // ensure synchronous creation of all inner CustomComponent
+        this.prevCurrent = CustomComponent.current
+        CustomComponent.current = parentComponent // setup CustomComponent context to link with @Provide variables
     }
 
     exit(): void {
+        CustomComponent.current = this.prevCurrent
         setNeedCreate(this.prevNeedCreate)
         GlobalStateManager.instance.frozen = this.prevFrozen
     }
@@ -116,8 +119,7 @@ class LazyItemPool implements Disposable {
     getOrCreate<T>(
         index: int32,
         data: T,
-        /** @memo */
-        itemGenerator: (item: T, index: number) => void,
+        itemGenerator: (__memo_context: __memo_context_type, __memo_id: __memo_id_type,item: T, index: number) => void,
     ): pointer {
         if (this._activeItems.has(index)) {
             const node = this._activeItems.get(index)!

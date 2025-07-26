@@ -20,6 +20,7 @@ build_component_ng("qrcode_pattern_ng") {
   sources = [
     "qrcode_layout_algorithm.cpp",
     "qrcode_model_ng.cpp",
+    "qrcode_model_static.cpp",
     "qrcode_modifier.cpp",
     "qrcode_paint_method.cpp",
     "qrcode_pattern.cpp",
@@ -36,6 +37,7 @@ build_component_plugin("qrcode_source") {
   sources = [
     "qrcode_layout_algorithm.cpp",
     "qrcode_model_ng.cpp",
+    "qrcode_model_static.cpp",
     "qrcode_modifier.cpp",
     "qrcode_napi.cpp",
     "qrcode_paint_method.cpp",
