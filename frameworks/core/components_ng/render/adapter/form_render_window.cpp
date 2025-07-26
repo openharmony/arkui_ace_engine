@@ -112,6 +112,16 @@ void FormRenderWindow::RequestFrame()
 #endif
 }
 
+void FormRenderWindow::RecordFrameTime(uint64_t timeStamp, const std::string& name)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    if (uiContentType_ == UIContentType::DYNAMIC_COMPONENT) {
+        CHECK_NULL_VOID(rsUIDirector_);
+        rsUIDirector_->SetTimeStamp(timeStamp, name);
+    }
+#endif
+}
+
 void FormRenderWindow::Destroy()
 {
     TAG_LOGI(AceLogTag::ACE_FORM, "RenderWindow destroyed");

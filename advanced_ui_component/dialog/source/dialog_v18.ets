@@ -143,6 +143,10 @@ const CONTENT_FONT_WEIGHT = lazyInit<FontWeight>(() => {
   let fontWeight: FontWeight = FontWeight[getString(125834682) || 'Medium'];
   return fontWeight;
 });
+// 'sys.string.dialog_content_font_size'
+const CONTENT_FONT_SIZE = lazyInit<number>(() => {
+  return getLengthMetricsByResource($r('sys.float.dialog_content_font_size'), BODY_L);
+});
 const SCROLL_BAR_OFFSET = 20;
 const SELECT_DIALOG_SCROLL_BAR_OFFSET = 4;
 
@@ -231,7 +235,7 @@ export struct TipsDialog {
           })
           .margin({ start: LengthMetrics.vp(0), end: LengthMetrics.vp(TIP_CHECKBOX_END_MARGIN()) })
         Text(this.checkTips)
-          .fontSize(`${BODY_L}fp`)
+          .fontSize(`${CONTENT_FONT_SIZE()}fp`)
           .fontWeight(FontWeight.Regular)
           .fontColor(this.fontColorWithTheme)
           .maxLines(CONTENT_MAX_LINES)
@@ -341,7 +345,7 @@ export struct TipsDialog {
   }
 
   getContentFontSize(): Length {
-    return BODY_L + 'fp';
+    return CONTENT_FONT_SIZE() + 'fp';
   }
 
   private initButtons(): void {
@@ -739,7 +743,7 @@ export struct ConfirmDialog {
             .focusBox({
               strokeWidth: LengthMetrics.px(0)
             })
-            .fontSize(`${BODY_L}fp`)
+            .fontSize(`${CONTENT_FONT_SIZE()}fp`)
             .fontWeight(CONTENT_FONT_WEIGHT())
             .fontColor(this.fontColorWithTheme)
             .textAlign(this.textAlign)
@@ -909,7 +913,7 @@ export struct AlertDialog {
           .focusBox({
             strokeWidth: LengthMetrics.px(0)
           })
-          .fontSize(`${BODY_L}fp`)
+          .fontSize(`${CONTENT_FONT_SIZE()}fp`)
           .fontWeight(this.getFontWeight())
           .fontColor(this.fontColorWithTheme)
           .margin({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) })
@@ -1920,7 +1924,7 @@ export struct LoadingDialog {
     Column() {
       Row() {
         Text(this.content)
-          .fontSize(`${BODY_L}fp`)
+          .fontSize(`${CONTENT_FONT_SIZE()}fp`)
           .fontWeight(FontWeight.Regular)
           .fontColor(this.fontColorWithTheme)
           .layoutWeight(LOADING_TEXT_LAYOUT_WEIGHT)

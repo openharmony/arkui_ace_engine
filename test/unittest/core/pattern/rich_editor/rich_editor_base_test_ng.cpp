@@ -794,4 +794,72 @@ void RichEditorBaseTestNg::TestMagnifier(const RefPtr<RichEditorPattern>& richEd
     EXPECT_FALSE(richEditorPattern->isCursorAlwaysDisplayed_);
 }
 
+/**
+ * @tc.name: UpdateMagnifierStateAfterLayout001
+ * @tc.desc: test UpdateMagnifierStateAfterLayout
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, UpdateMagnifierStateAfterLayout001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    WeakPtr<TextBase> textBase;
+    richEditorPattern->selectOverlay_ = AceType::MakeRefPtr<RichEditorSelectOverlay>(textBase);
+    richEditorPattern->magnifierController_.Reset();
+    richEditorPattern->UpdateMagnifierStateAfterLayout(true);
+    EXPECT_FALSE(richEditorPattern->caretVisible_);
+}
+
+/**
+ * @tc.name: UpdateMagnifierStateAfterLayout002
+ * @tc.desc: test UpdateMagnifierStateAfterLayout
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, UpdateMagnifierStateAfterLayout002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    WeakPtr<TextBase> textBase;
+    richEditorPattern->selectOverlay_ = AceType::MakeRefPtr<RichEditorSelectOverlay>(textBase);
+    WeakPtr<Pattern> pattern;
+    richEditorPattern->magnifierController_ = AceType::MakeRefPtr<MagnifierController>(pattern);
+    richEditorPattern->magnifierController_->magnifierNodeExist_ = true;
+    richEditorPattern->UpdateMagnifierStateAfterLayout(true);
+    EXPECT_FALSE(richEditorPattern->caretVisible_);
+}
+
+/**
+ * @tc.name: HandleSurfaceChanged001
+ * @tc.desc: test HandleSurfaceChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, HandleSurfaceChanged001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->magnifierController_.Reset();
+    richEditorPattern->HandleSurfaceChanged(1, 1, 2, 2, WindowSizeChangeReason::DRAG);
+    EXPECT_FALSE(richEditorPattern->originIsMenuShow_);
+}
+
+/**
+ * @tc.name: HandleSurfaceChanged002
+ * @tc.desc: test HandleSurfaceChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, HandleSurfaceChanged002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorPattern->magnifierController_->isShowMagnifier_ = true;
+    richEditorPattern->HandleSurfaceChanged(0, 0, 0, 0, WindowSizeChangeReason::DRAG);
+
+    EXPECT_EQ(richEditorPattern->magnifierController_->GetShowMagnifier(), false);
+}
+
 } // namespace OHOS::Ace::NG

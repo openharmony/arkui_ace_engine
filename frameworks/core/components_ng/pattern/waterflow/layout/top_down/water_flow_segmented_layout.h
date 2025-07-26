@@ -80,6 +80,11 @@ public:
 
     bool PreloadItem(LayoutWrapper* host, int32_t itemIdx, int64_t deadline) override;
 
+    bool MeasureInNextFrame() const override
+    {
+        return info_->measureInNextFrame_;
+    }
+
 private:
     /**
      * @brief Initialize member variables from LayoutProperty.

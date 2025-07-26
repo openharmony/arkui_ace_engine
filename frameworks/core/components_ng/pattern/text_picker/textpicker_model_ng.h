@@ -190,6 +190,8 @@ private:
     static void ValidateData(
         NG::TextCascadePickerOptions& options, const std::vector<std::string>& values, uint32_t index,
         std::vector<std::string>& selectedValues, std::vector<uint32_t>& valuesIndex);
+    static void ParseBackgroundStyleColorResObj(FrameNode* frameNode, const NG::PickerBackgroundStyle& value);
+    static void ParseBackgroundStyleRadiusResObj(FrameNode* frameNode, const NG::PickerBackgroundStyle& value);
 
     uint32_t maxCount_ = 0;
     std::vector<uint32_t> kinds_;

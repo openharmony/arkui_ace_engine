@@ -4709,21 +4709,21 @@ void PipelineContext::FlushReload(const ConfigurationChange& configurationChange
     };
     if (!onShow_) {
         changeTask();
-        return;
+    } else {
+        AnimationOption option;
+        const int32_t duration = 400;
+        option.SetDuration(duration);
+        option.SetCurve(Curves::FRICTION);
+        RecycleManager::Notify(configurationChange);
+        AnimationUtils::Animate(
+            option,
+            changeTask,
+            [weak = WeakClaim(this)]() {
+                auto pipeline = weak.Upgrade();
+                CHECK_NULL_VOID(pipeline);
+                pipeline->OnFlushReloadFinish();
+            });
     }
-    AnimationOption option;
-    const int32_t duration = 400;
-    option.SetDuration(duration);
-    option.SetCurve(Curves::FRICTION);
-    RecycleManager::Notify(configurationChange);
-    AnimationUtils::Animate(
-        option,
-        changeTask,
-        [weak = WeakClaim(this)]() {
-            auto pipeline = weak.Upgrade();
-            CHECK_NULL_VOID(pipeline);
-            pipeline->OnFlushReloadFinish();
-        });
     auto stage = stageManager_->GetStageNode();
     CHECK_NULL_VOID(stage);
     auto renderContext = stage->GetRenderContext();

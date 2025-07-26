@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { describe, beforeAll, beforeEach, afterEach, afterAll, it, expect } from '@ohos/hypium'
+import { describe, beforeAll, beforeEach, afterEach, afterAll, it, expect } from '@ohos/hypium';
 import { abilityDelegatorRegistry, Component, Driver, ON } from '@kit.TestKit';
 
 import {
@@ -31,7 +31,7 @@ import { RelativeContainerStart } from './RelativeContainer.test';
 
 
 /*获取AbilityDelegator实例,管理Ability的生命周期和事件*/
-const delegator: abilityDelegatorRegistry.AbilityDelegator = abilityDelegatorRegistry.getAbilityDelegator()
+const delegator: abilityDelegatorRegistry.AbilityDelegator = abilityDelegatorRegistry.getAbilityDelegator();
 
 /*初始化与UI元素交互的驱动对象*/
 const driver = Driver.create();

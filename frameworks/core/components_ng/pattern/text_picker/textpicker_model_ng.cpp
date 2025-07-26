@@ -1727,6 +1727,10 @@ bool TextPickerModelNG::GetEnableHapticFeedback(FrameNode* frameNode)
 
 void TextPickerModelNG::SetSelectedBackgroundStyle(const NG::PickerBackgroundStyle& value)
 {
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    ParseBackgroundStyleColorResObj(frameNode, value);
+    ParseBackgroundStyleRadiusResObj(frameNode, value);
     if (value.color.has_value()) {
         ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedBackgroundColor,
             value.color.value());
@@ -1740,6 +1744,8 @@ void TextPickerModelNG::SetSelectedBackgroundStyle(const NG::PickerBackgroundSty
 void TextPickerModelNG::SetSelectedBackgroundStyle(FrameNode* frameNode, const NG::PickerBackgroundStyle& value)
 {
     CHECK_NULL_VOID(frameNode);
+    ParseBackgroundStyleColorResObj(frameNode, value);
+    ParseBackgroundStyleRadiusResObj(frameNode, value);
     if (value.color.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedBackgroundColor,
             value.color.value(), frameNode);
@@ -1895,7 +1901,8 @@ void TextPickerModelNG::ParseResTextStyle(const PickerTextStyle& textStyleOpt, c
     auto pickerPattern = frameNode->GetPattern<TextPickerPattern>();
     CHECK_NULL_VOID(pickerPattern);
 
-    if (!textStyleOpt.textColorResObj && !textStyleOpt.fontSizeResObj && !textStyleOpt.fontFamilyResObj) {
+    if (!textStyleOpt.textColorResObj && !textStyleOpt.fontSizeResObj && !textStyleOpt.fontFamilyResObj &&
+        !textStyleOpt.minFontSizeResObj && !textStyleOpt.maxFontSizeResObj) {
         pickerPattern->RemoveResObj(textStyleType);
         return;
     }
@@ -1919,6 +1926,18 @@ void TextPickerModelNG::ParseResTextStyle(const PickerTextStyle& textStyleOpt, c
         if (textStyleOpt.fontFamilyResObj &&
             ResourceParseUtils::ParseResFontFamilies(textStyleOpt.fontFamilyResObj, families)) {
             textStyle.fontFamily = families;
+        }
+
+        CalcDimension minFontSize;
+        if (textStyleOpt.minFontSizeResObj &&
+            ResourceParseUtils::ParseResDimensionFp(textStyleOpt.minFontSizeResObj, minFontSize)) {
+            textStyle.minFontSize = minFontSize;
+        }
+
+        CalcDimension maxFontSize;
+        if (textStyleOpt.maxFontSizeResObj &&
+            ResourceParseUtils::ParseResDimensionFp(textStyleOpt.maxFontSizeResObj, maxFontSize)) {
+            textStyle.maxFontSize = maxFontSize;
         }
 
         updateTextStyleFunc(textStyle);
@@ -1984,49 +2003,11 @@ void TextPickerModelNG::ParseDefaultTextStyleResObj(const PickerTextStyle& textS
     auto pickerPattern = frameNode->GetPattern<TextPickerPattern>();
     CHECK_NULL_VOID(pickerPattern);
 
-    if (!textStyleOpt.textColorResObj && !textStyleOpt.fontSizeResObj && !textStyleOpt.fontFamilyResObj &&
-        !textStyleOpt.minFontSizeResObj && !textStyleOpt.maxFontSizeResObj) {
-        pickerPattern->RemoveResObj("TextPickerDefaultTextStyle");
-        return;
-    }
-
-    auto&& updateFunc = [textStyleOpt, frameNode](const RefPtr<ResourceObject> resObj) {
-        PickerTextStyle textStyle;
-        auto pickerPattern = frameNode->GetPattern<TextPickerPattern>();
-        CHECK_NULL_VOID(pickerPattern);
-        Color color;
-        if (textStyleOpt.textColorResObj &&
-            ResourceParseUtils::ParseResColor(textStyleOpt.textColorResObj, color)) {
-            textStyle.textColor = color;
-        }
-
-        CalcDimension fontSize;
-        if (textStyleOpt.fontSizeResObj &&
-            ResourceParseUtils::ParseResDimensionFp(textStyleOpt.fontSizeResObj, fontSize)) {
-            textStyle.fontSize = fontSize;
-        }
-
-        std::vector<std::string> families;
-        if (textStyleOpt.fontFamilyResObj &&
-            ResourceParseUtils::ParseResFontFamilies(textStyleOpt.fontFamilyResObj, families)) {
-            textStyle.fontFamily = families;
-        }
-
-        CalcDimension minFontSize;
-        if (textStyleOpt.minFontSizeResObj &&
-            ResourceParseUtils::ParseResDimensionFp(textStyleOpt.minFontSizeResObj, minFontSize)) {
-            textStyle.minFontSize = minFontSize;
-        }
-
-        CalcDimension maxFontSize;
-        if (textStyleOpt.maxFontSizeResObj &&
-            ResourceParseUtils::ParseResDimensionFp(textStyleOpt.maxFontSizeResObj, maxFontSize)) {
-            textStyle.maxFontSize = maxFontSize;
-        }
-        pickerPattern->UpdateDefaultTextStyle(textStyle);
-    };
-    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
-    pickerPattern->AddResObj("TextPickerDefaultTextStyle", resObj, std::move(updateFunc));
+    ParseResTextStyle(
+        textStyleOpt,
+        "TextPickerDefaultTextStyle",
+        [pickerPattern](const PickerTextStyle& textStyle) { pickerPattern->UpdateDefaultTextStyle(textStyle); }
+    );
 }
 
 void TextPickerModelNG::ParseSingleRangeResourceObj(const RefPtr<ResourceObject>& resultResObj,
@@ -2210,6 +2191,75 @@ void TextPickerModelNG::TextPickerRemoveResObj(FrameNode* frameNode, const std::
     auto pickerPattern = frameNode->GetPattern<TextPickerPattern>();
     CHECK_NULL_VOID(pickerPattern);
     pickerPattern->RemoveResObj(key);
+}
+
+void TextPickerModelNG::ParseBackgroundStyleColorResObj(FrameNode* frameNode, const NG::PickerBackgroundStyle& value)
+{
+    if (!SystemProperties::ConfigChangePerform() || !frameNode) {
+        return;
+    }
+
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(textPickerPattern);
+    textPickerPattern->RemoveResObj("TextPicker.BackgroundStyle.color");
+
+    auto&& updateColorFunc = [value, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto node = weak.Upgrade();
+        CHECK_NULL_VOID(node);
+
+        NG::PickerBackgroundStyle& backgroundValue = const_cast<NG::PickerBackgroundStyle&>(value);
+        Color color = backgroundValue.color.value();
+        if (value.colorResObj && ResourceParseUtils::ParseResColor(backgroundValue.colorResObj, color)) {
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedBackgroundColor, color, node);
+        } else if (!value.textColorSetByUser) {
+            auto context = node->GetContext();
+            CHECK_NULL_VOID(context);
+            auto theme = context->GetTheme<PickerTheme>();
+            if (theme) {
+                color = theme->GetSelectedBackgroundColor();
+                ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedBackgroundColor, color, node);
+            }
+        }
+    };
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
+    textPickerPattern->AddResObj("TextPicker.BackgroundStyle.color", resObj, std::move(updateColorFunc));
+}
+
+void TextPickerModelNG::ParseBackgroundStyleRadiusResObj(FrameNode* frameNode, const NG::PickerBackgroundStyle& value)
+{
+    if (!SystemProperties::ConfigChangePerform() || !frameNode) {
+        return;
+    }
+
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(textPickerPattern);
+    textPickerPattern->RemoveResObj("TextPicker.BackgroundStyle.borderRadius");
+
+    if (!value.borderRadiusResObj && !value.borderRadius->HasResources()) {
+        return;
+    }
+
+    auto&& updateRadiusFunc = [value, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto node = weak.Upgrade();
+        CHECK_NULL_VOID(node);
+
+        NG::PickerBackgroundStyle& backgroundValue = const_cast<NG::PickerBackgroundStyle&>(value);
+        if (backgroundValue.borderRadius->HasResources()) {
+            backgroundValue.borderRadius->ReloadResources();
+            NG::BorderRadiusProperty& borderRadiusValue = backgroundValue.borderRadius.value();
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, SelectedBorderRadius, borderRadiusValue, node);
+        } else if (backgroundValue.borderRadiusResObj) {
+            CalcDimension calcDimension;
+            ResourceParseUtils::ParseResDimensionVpNG(backgroundValue.borderRadiusResObj, calcDimension);
+            if (GreatOrEqual(calcDimension.Value(), 0.0f)) {
+                NG::BorderRadiusProperty borderRadiusValue = NG::BorderRadiusProperty(calcDimension);
+                ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+                    TextPickerLayoutProperty, SelectedBorderRadius, borderRadiusValue, node);
+            }
+        }
+    };
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
+    textPickerPattern->AddResObj("TextPicker.BackgroundStyle.borderRadius", resObj, std::move(updateRadiusFunc));
 }
 
 } // namespace OHOS::Ace::NG

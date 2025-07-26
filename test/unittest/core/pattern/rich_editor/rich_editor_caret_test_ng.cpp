@@ -850,4 +850,27 @@ HWTEST_F(RichEditorCaretTestNg, CalcMoveUpPos001, TestSize.Level0)
     EXPECT_EQ(caretPosition, richEditorPattern->paragraphs_.GetIndex(textOffset));
 }
 
+/**
+ * @tc.name: TriggerAvoidOnCaretChange
+ * @tc.desc: test rich_editor_pattern.cpp TriggerAvoidOnCaretChange function
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorCaretTestNg, TriggerAvoidOnCaretChange, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto pattern_ = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern_, nullptr);
+    auto focusHub = pattern_->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->currentFocus_ = true;
+    pattern_->HandleFocusEvent();
+    auto host = pattern_->GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    context->safeAreaManager_->keyboardAvoidMode_ = KeyBoardAvoidMode::OFFSET_WITH_CARET;
+    pattern_->TriggerAvoidOnCaretChange();
+    EXPECT_EQ(pattern_->GetLastCaretPos(), std::nullopt);
+}
+
 }

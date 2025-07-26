@@ -472,4 +472,38 @@ HWTEST_F(RichEditorKeyboardTestNg, GetCrossOverHeight003, TestSize.Level1)
     EXPECT_EQ(richEditorPattern->GetCrossOverHeight(), 5.0f);
 }
 
+/**
+ * @tc.name: HandlePointWithTransform001
+ * @tc.desc: test HandlePointWithTransform
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorKeyboardTestNg, HandlePointWithTransform001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorNode_->tag_ = V2::WINDOW_SCENE_ETS_TAG;
+    OffsetF point(0, 0);
+    richEditorPattern->HandlePointWithTransform(point);
+    EXPECT_EQ(point.GetX(), 0);
+    EXPECT_EQ(point.GetY(), 0);
+}
+
+/**
+ * @tc.name: HandlePointWithTransform002
+ * @tc.desc: test HandlePointWithTransform
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorKeyboardTestNg, HandlePointWithTransform002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorNode_->tag_ = V2::SCREEN_ETS_TAG;
+    OffsetF point(0, 0);
+    richEditorPattern->HandlePointWithTransform(point);
+    EXPECT_EQ(point.GetX(), 0);
+    EXPECT_EQ(point.GetY(), 0);
+}
+
 }
