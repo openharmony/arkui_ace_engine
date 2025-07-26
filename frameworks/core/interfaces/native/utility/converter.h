@@ -622,6 +622,7 @@ namespace Converter {
     template<> TextDecorationOptions Convert(const Ark_TextDecorationOptions& src);
     template<> TextDetectConfig Convert(const Ark_TextDataDetectorConfig& src);
     template<> TextRange Convert(const Ark_TextRange& src);
+    template<> TouchLocationInfo Convert(const Ark_TouchObject& src);
     template<> TranslateOptions Convert(const Ark_TranslateOptions& src);
     template<> bool Convert(const Ark_EdgeEffectOptions& src);
     template<> float Convert(const Ark_Float32& src);
@@ -749,6 +750,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<NavigationType>& dst, const Ark_WebNavigationType& src);
     template<> void AssignCast(std::optional<SourceType>& dst, const Ark_SourceType& src);
     template<> void AssignCast(std::optional<SourceTool>& dst, const Ark_SourceTool& src);
+    template<> void AssignCast(std::optional<TouchType>& dst, const Ark_TouchType& src);
     template<> void AssignCast(std::optional<HapticFeedbackMode>& dst, const Ark_HapticFeedbackMode& src);
     template<> void AssignCast(std::optional<DividerMode>& dst, const Ark_DividerMode& src);
     template<> void AssignCast(std::optional<NestedScrollMode>& dst, const Ark_NestedScrollMode& src);

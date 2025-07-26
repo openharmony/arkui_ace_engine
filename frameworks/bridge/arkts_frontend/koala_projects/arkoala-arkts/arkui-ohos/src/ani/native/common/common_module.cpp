@@ -473,4 +473,175 @@ ani_double Px2lpx(ani_env* env, ani_object obj, ani_double value, ani_int instan
     }
     return modifier->getCommonAniModifier()->px2lpx(value, instanceId);
 }
+void* TransferKeyEventPointer(ani_env* env, ani_object obj, ani_long pointer)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return nullptr;
+    }
+    return modifier->getCommonAniModifier()->transferKeyEventPointer(pointer);
+}
+void* CreateKeyEventAccessorWithPointer(ani_env* env, [[maybe_unused]] ani_object obj, ani_long pointer)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return nullptr;
+    }
+    return modifier->getCommonAniModifier()->createKeyEventAccessorWithPointer(pointer);
+}
+void* CreateEventTargetInfoAccessor(ani_env* env, [[maybe_unused]] ani_object obj)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return nullptr;
+    }
+    return modifier->getCommonAniModifier()->createEventTargetInfoAccessor();
+}
+void EventTargetInfoAccessorWithId(ani_env* env, [[maybe_unused]] ani_object obj, ani_long input, ani_string id)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return;
+    }
+    return modifier->getCommonAniModifier()->eventTargetInfoAccessorWithId(env, input, id);
+}
+void* CreateScrollableTargetInfoAccessor(ani_env* env, [[maybe_unused]] ani_object obj)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return nullptr;
+    }
+    return modifier->getCommonAniModifier()->createScrollableTargetInfoAccessor();
+}
+void ScrollableTargetInfoAccessorWithId(ani_env* env, [[maybe_unused]] ani_object obj, ani_long input, ani_string id)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return;
+    }
+    return modifier->getCommonAniModifier()->scrollableTargetInfoAccessorWithId(env, input, id);
+}
+void ScrollableTargetInfoAccessorWithPointer(
+    ani_env* env, [[maybe_unused]] ani_object obj, ani_long input, ani_long pointer)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return;
+    }
+    return modifier->getCommonAniModifier()->scrollableTargetInfoAccessorWithPointer(input, pointer);
+}
+void* TransferScrollableTargetInfoPointer(ani_env* env, ani_object obj, ani_long pointer)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return nullptr;
+    }
+    return modifier->getCommonAniModifier()->transferScrollableTargetInfoPointer(pointer);
+}
+ani_long CreateDragEventAccessorWithPointer(ani_env* env, ani_object obj, ani_long pointer)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return 0;
+    }
+    return modifier->getCommonAniModifier()->transferDragEventPointer(pointer);
+}
+
+ani_long GetDragEventPointer(ani_env* env, ani_object obj, ani_long pointer)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return 0;
+    }
+    return modifier->getCommonAniModifier()->getDragEventPointer(pointer);
+}
+void* CreateTouchEventAccessorWithPointer(ani_env* env, [[maybe_unused]] ani_object obj, ani_long pointer)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return nullptr;
+    }
+    return modifier->getCommonAniModifier()->transferTouchEventPointer(pointer);
+}
+
+void* CreateMouseEventAccessorWithPointer(ani_env* env, [[maybe_unused]] ani_object obj, ani_long pointer)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return nullptr;
+    }
+    return modifier->getCommonAniModifier()->transferMouseEventPointer(pointer);
+}
+
+void* CreateAxisEventAccessorWithPointer(ani_env* env, [[maybe_unused]] ani_object obj, ani_long pointer)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return nullptr;
+    }
+    return modifier->getCommonAniModifier()->transferAxisEventPointer(pointer);
+}
+
+void* CreateClickEventAccessorWithPointer(ani_env* env, [[maybe_unused]] ani_object obj, ani_long pointer)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return nullptr;
+    }
+    return modifier->getCommonAniModifier()->transferClickEventPointer(pointer);
+}
+
+void* CreateHoverEventAccessorWithPointer(ani_env* env, [[maybe_unused]] ani_object obj, ani_long pointer)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return nullptr;
+    }
+    return modifier->getCommonAniModifier()->transferHoverEventPointer(pointer);
+}
+
+void* GetTouchEventPointer(ani_env* env, [[maybe_unused]] ani_object obj, ani_long touchEventPeer)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return nullptr;
+    }
+    return modifier->getCommonAniModifier()->getTouchEventPointer(touchEventPeer);
+}
+
+void* GetMouseEventPointer(ani_env* env, [[maybe_unused]] ani_object obj, ani_long mouseEventPeer)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return nullptr;
+    }
+    return modifier->getCommonAniModifier()->getMouseEventPointer(mouseEventPeer);
+}
+
+void* GetAxisEventPointer(ani_env* env, [[maybe_unused]] ani_object obj, ani_long axisEventPeer)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return nullptr;
+    }
+    return modifier->getCommonAniModifier()->getAxisEventPointer(axisEventPeer);
+}
+
+void* GetClickEventPointer(ani_env* env, [[maybe_unused]] ani_object obj, ani_long clickEventPeer)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return nullptr;
+    }
+    return modifier->getCommonAniModifier()->getMouseEventPointer(clickEventPeer);
+}
+
+void* GetHoverEventPointer(ani_env* env, [[maybe_unused]] ani_object obj, ani_long hoverEventPeer)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return nullptr;
+    }
+    return modifier->getCommonAniModifier()->getMouseEventPointer(hoverEventPeer);
+}
 } // namespace OHOS::Ace::Ani

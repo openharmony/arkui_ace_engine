@@ -20,6 +20,13 @@
 
 struct ClickEventPeer
     : public OHOS::Ace::NG::GeneratedModifier::SomeEventPeer<OHOS::Ace::GestureEvent> {
+    static ClickEventPeer* Create(void* ptr)
+    {
+        auto* peer = OHOS::Ace::NG::PeerUtils::CreatePeer<ClickEventPeer>();
+        CHECK_NULL_RETURN(peer, nullptr);
+        peer->SetEventInfo(reinterpret_cast<OHOS::Ace::GestureEvent*>(ptr));
+        return peer;
+    }
 protected:
     ClickEventPeer() = default;
     ~ClickEventPeer() override = default;

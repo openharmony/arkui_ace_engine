@@ -3,6 +3,9 @@ import { Callback } from "./common"
 import { GestureOps } from "./arkui-custom"
 import { PeerNode } from "../PeerNode"
 import { GlobalStateManager, MutableState } from '@koalaui/runtime'
+import { KeyEventInternal, TouchTestInfo } from "arkui/component/common"
+import { TypeChecker } from "#components"
+import { ArkUIAniModule } from "arkui.ani"
 
 export class GestureHandler {
     gestureTag: string | undefined;
@@ -889,5 +892,82 @@ export class PanGestureOptions implements MaterializedBase {
     private getDistance_serialize(): number {
         const retval  = ArkUIGeneratedNativeModule._PanGestureOptions_getDistance(this.peer!.ptr)
         return retval
+    }
+}
+
+export class ScrollableTargetInfoTransfer {
+    static transferStatic(input: Any): Object {
+        if (typeof (input) !== 'object') {
+            return new Object();
+        }
+        if(input === null) {
+            return new Object();
+        }
+        let objectInternal : ScrollableTargetInfo = new ScrollableTargetInfo();
+        let peer: KPointer = ArkUIAniModule._CreateScrollableTargetInfoAccessor()
+        let esValue: ESValue = ESValue.wrap(input);
+        let id = esValue.invokeMethod("getId");
+        if (id.isString()) {
+            ArkUIAniModule._ScrollableTargetInfoAccessorWithId(peer, id.toString())
+        }
+        const global = ESValue.getGlobal();
+        const wrapFunc = global.getProperty('getScrollableTargetInfoPointer');
+        if (wrapFunc.isNull() || wrapFunc.isUndefined()) {
+            return new Object();
+        }
+        let pointer = wrapFunc.invoke(esValue);
+        if (pointer.isNumber()) {
+            ArkUIAniModule._ScrollableTargetInfoAccessorWithPointer(peer, pointer.toNumber() as long)
+        }
+        objectInternal.peer!.ptr = peer;
+        return objectInternal;
+    }
+    static transferDynamic(input: Object): Any { 
+        if (input == null) {
+           return new Object();
+        }
+        let objectInternal: EventTargetInfo = input as EventTargetInfo;
+        const nativePointer: KPointer = ArkUIAniModule._TransferScrollableTargetInfoPointer(objectInternal.peer!.ptr as long);
+        const global = ESValue.getGlobal();
+        const wrapFunc = global.getProperty('wrapScrollableTargetInfoPointer');
+        if (wrapFunc.isNull() || wrapFunc.isUndefined()) {
+            return new Object();
+        }
+        let retValue = wrapFunc.invoke(objectInternal.getId(), nativePointer);
+        return retValue;
+    }
+}
+
+export class EventTargetInfoTransfer {
+    static transferStatic(input: Any): Object {
+        if (typeof (input) !== 'object') {
+            return new Object();
+        }
+        if(input === null) {
+            return new Object();
+        }
+        let objectInternal : EventTargetInfo = new EventTargetInfo();
+        let esValue: ESValue = ESValue.wrap(input);
+        let peer: KPointer = ArkUIAniModule._CreateEventTargetInfoAccessor()
+        let id = esValue.invokeMethod("getId");
+        if (id.isString()) {
+            ArkUIAniModule._EventTargetInfoAccessorWithId(peer, id.toString())
+        }
+        objectInternal.peer!.ptr = peer;
+        return objectInternal;
+    }
+    static transferDynamic(input: Object): Any { 
+        if (input == null) {
+           return new Object();
+        }
+        
+        let objectInternal: EventTargetInfo = input as EventTargetInfo;
+        const global = ESValue.getGlobal();
+        const wrapFunc = global.getProperty('WrapEventTargetInfoPointer');
+        if (wrapFunc.isNull() || wrapFunc.isUndefined()) {
+            return new Object();
+        }
+        let retValue = wrapFunc.invoke(objectInternal.getId());
+        return retValue;
     }
 }

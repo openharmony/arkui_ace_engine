@@ -3001,6 +3001,35 @@ OHOS::Ace::TextMetrics Convert(const Ark_TextMetrics& src)
 }
 
 template<>
+TouchLocationInfo Convert(const Ark_TouchObject& src)
+{
+    TouchLocationInfo dst(src.id.i32);
+    double windowX = Converter::Convert<double>(src.windowX);
+    double windowY = Converter::Convert<double>(src.windowY);
+    double x = Converter::Convert<double>(src.x);
+    double y = Converter::Convert<double>(src.y);
+    double displayX = Converter::Convert<double>(src.displayX);
+    double displayY = Converter::Convert<double>(src.displayY);
+
+    dst.SetGlobalLocation(Offset(PipelineBase::Vp2PxWithCurrentDensity(windowX),
+        PipelineBase::Vp2PxWithCurrentDensity(windowY)));
+    dst.SetLocalLocation(Offset(PipelineBase::Vp2PxWithCurrentDensity(x),
+        PipelineBase::Vp2PxWithCurrentDensity(y)));
+    dst.SetScreenLocation(Offset(PipelineBase::Vp2PxWithCurrentDensity(displayX),
+        PipelineBase::Vp2PxWithCurrentDensity(displayY)));
+    auto pressedTimeOpt = Converter::OptConvert<int32_t>(src.pressedTime);
+    std::chrono::nanoseconds nanoseconds(static_cast<int64_t>(pressedTimeOpt.value_or(0)));
+    TimeStamp time(nanoseconds);
+    dst.SetPressedTime(time);
+    dst.SetForce(Converter::OptConvert<float>(src.pressure).value_or(0.0f));
+    dst.SetWidth(Converter::OptConvert<int32_t>(src.width).value_or(0));
+    dst.SetHeight(Converter::OptConvert<int32_t>(src.height).value_or(0));
+    dst.SetOperatingHand(static_cast<int32_t>(src.hand.value));
+    dst.SetTouchType(Converter::Convert<std::optional<TouchType>>(src.type).value_or(TouchType::UNKNOWN));
+    return dst;
+}
+
+template<>
 std::set<SourceTool> Convert(const Array_SourceTool& src)
 {
     std::set<SourceTool> dst = {};

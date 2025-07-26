@@ -438,6 +438,16 @@ public:
     {
         return changedTouches_;
     }
+    
+    // use for ArkTs1.2 interop
+    void SetTouches(const std::list<TouchLocationInfo>& touches)
+    {
+        touches_ = touches;
+    }
+    void SetChangedTouches(const std::list<TouchLocationInfo>& changedTouches)
+    {
+        changedTouches_ = changedTouches;
+    }
     const std::list<TouchLocationInfo>& GetHistory() const;
     void AddHistoryPointerEvent(const std::shared_ptr<MMI::PointerEvent>& info);
     const std::list<std::shared_ptr<MMI::PointerEvent>>& GetHistoryPointerEvent() const;
