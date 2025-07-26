@@ -112,4 +112,12 @@ void CheckBoxGroupModelStatic::SetChangeEvent(FrameNode* frameNode, GroupChangeE
     CHECK_NULL_VOID(eventHub);
     eventHub->SetChangeEvent(std::move(changeEvent));
 }
+
+void CheckBoxGroupModelStatic::SetOnChange(FrameNode* frameNode, GroupChangeEvent&& onChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<CheckBoxGroupEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnChange(std::move(onChange));
+}
 } // namespace OHOS::Ace::NG
