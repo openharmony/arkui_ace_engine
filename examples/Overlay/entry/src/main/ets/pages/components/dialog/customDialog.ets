@@ -26,6 +26,8 @@ const testList: TestListOption[] = [
   { title: '自定义弹窗_基本功能_0', url: 'pages/components/dialog/page/CustomDialogTestLevel0_0' },
   { title: '自定义弹窗_基本功能_1', url: 'pages/components/dialog/page/CustomDialogTestLevel0_1' },
   { title: '自定义弹窗_基本功能_生命周期', url: 'pages/components/dialog/page/CustomDialogTestLevel0_2' },
+  { title: '自定义弹窗_基本功能_3', url: 'pages/components/dialog/page/CustomDialogTestLevel0_3' },
+  { title: '自定义弹窗_基本功能_4', url: 'pages/components/dialog/page/CustomDialogTestLevel0_4' },
 ]
 
 @Entry
