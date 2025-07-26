@@ -11324,8 +11324,8 @@ typedef struct Opt_OnFullScreenEnterCallback {
 } Opt_OnFullScreenEnterCallback;
 typedef struct OnHoverCallback {
     Ark_CallbackResource resource;
-    void (*call)(const Ark_Int32 resourceId);
-    void (*callSync)(Ark_VMContext context, const Ark_Int32 resourceId);
+    void (*call)(const Ark_Int32 resourceId, const Ark_Boolean status, const Ark_HoverEvent event);
+    void (*callSync)(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_Boolean status, const Ark_HoverEvent event);
 } OnHoverCallback;
 typedef struct Opt_OnHoverCallback {
     Ark_Tag tag;
