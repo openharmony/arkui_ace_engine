@@ -14,7 +14,14 @@
  */
 
 #include "test/unittest/core/pattern/rich_editor/rich_editor_common_test_ng.h"
+#include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/common/mock_data_url_analyzer_mgr.h"
+#include "test/mock/base/mock_task_executor.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -35,8 +42,25 @@ public:
     RefPtr<SpanItem> GetSpanItemAtIndex(int32_t index);
     void ResetContentChangeCallbackState();
     void InitContentChangeCallback();
+    void InitDataUrlAnalyzer(MockDataUrlAnalyzerMgr& mockDataUrlAnalyzerMgr);
     static void TearDownTestSuite();
 };
+
+void RichEditorUrlStyleTest::InitDataUrlAnalyzer(MockDataUrlAnalyzerMgr& mockDataUrlAnalyzerMgr)
+{
+    EXPECT_CALL(mockDataUrlAnalyzerMgr, AnalyzeUrls(_))
+        .WillRepeatedly([](const std::string& text) -> std::vector<UrlEntity> {
+            std::vector<UrlEntity> data;
+            if (text.empty()) {
+                return data;
+            }
+            UrlEntity urlEntity;
+            urlEntity.text = text;
+            urlEntity.charOffset = text.length();
+            data.push_back(urlEntity);
+            return data;
+        });
+}
 
 void RichEditorUrlStyleTest::SetUp()
 {
@@ -638,6 +662,149 @@ HWTEST_F(RichEditorUrlStyleTest, RichEditorUrlStyleOnSelectTest001, TestSize.Lev
     EXPECT_EQ(spanResults[0].urlAddress, u"");
     EXPECT_EQ(spanResults[1].urlAddress, URL_ADDRESS_1);
     EXPECT_EQ(spanResults[2].urlAddress, URL_ADDRESS_2);
+}
+
+/**
+ * @tc.name: GetUrlSpanColor001
+ * @tc.desc: Test get color in urlSpan theme.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorUrlStyleTest, GetUrlSpanColor001, TestSize.Level1)
+{
+    // 0: Get richEditor Node and richEditor Pattern
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    // 1: Get richEditorTheme
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
+
+    // 2: Backup old richEditorTheme and set new richEditorTheme
+    auto oldThemeManager = PipelineBase::GetCurrentContext()->themeManager_;
+    PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
+
+    // 3: Test whether richEditor pattern->GetUrlHoverColor() and theme-GetUrlHoverColor() are the same color
+    RichEditorTheme richEditorTheme;
+    EXPECT_EQ(richEditorPattern->GetUrlHoverColor(), richEditorTheme.GetUrlHoverColor());
+
+    // 4: Test whether richEditor pattern->GetUrlPressColor() and theme-GetUrlPressColor() are the same color
+    EXPECT_EQ(richEditorPattern->GetUrlPressColor(), richEditorTheme.GetUrlPressColor());
+
+    // 5: Restore old richEditorTheme
+    PipelineBase::GetCurrentContext()->themeManager_ = oldThemeManager;
+}
+
+/**
+ * @tc.name: GetUrlSpanShowShadow001
+ * @tc.desc: Test set urlSpan showShadow
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorUrlStyleTest, GetUrlSpanShowShadow001, TestSize.Level1)
+{
+    // 0: Get richEditor Node and richEditor Pattern
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    // 1: Mock location
+    Offset localLocation = Offset(54.0, 20.0);
+    Offset globalLocation = Offset(54.0, 20.0);
+
+    // 2: Mock contentRect position and width and height
+    richEditorPattern->contentRect_.x_ = 25.0f;
+    richEditorPattern->contentRect_.y_ = 13.0f;
+    richEditorPattern->contentRect_.width_ = 526.0f;
+    richEditorPattern->contentRect_.height_ = 56.0f;
+
+    // 3: Create urlSpan with hyperlink address
+    std::string address = "https://www.example.com";
+    auto urlSpan = AceType::MakeRefPtr<UrlSpan>(address);
+
+    // 4: Create spanItem and set to spans list
+    auto spanItem = AceType::MakeRefPtr<NG::SpanItem>();
+    urlSpan->ApplyToSpanItem(spanItem, SpanOperation::ADD);
+    spanItem->position = 2;
+    std::list<RefPtr<NG::SpanItem>> spans;
+    spans.push_back(spanItem);
+
+    // 5: Create ParagraphManager and set to richEditorPattern
+    auto pManager = AceType::MakeRefPtr<ParagraphManager>();
+    ASSERT_NE(pManager, nullptr);
+    richEditorPattern->pManager_ = pManager;
+
+    // 6: Create MutableSpanString and set to richEditorPattern
+    auto spanString = AceType::MakeRefPtr<MutableSpanString>(u"click here");
+    spanString->AddSpan(AceType::MakeRefPtr<UrlSpan>(address, 0, 10));
+    richEditorPattern->SetStyledString(spanString);
+
+    // 7: Create TextOverlayModifier and set to richEditorPattern
+    richEditorPattern->overlayMod_ = AceType::MakeRefPtr<TextOverlayModifier>();
+
+    // 8: Create Paragraph and set to richEditorPattern
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    richEditorPattern->paragraphs_.AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
+
+    // 9: spans list set to richEditorPattern
+    richEditorPattern->spans_ = spans;
+
+    // 10: call HandleUrlSpanShowShadow method
+    bool show = richEditorPattern->HandleUrlSpanShowShadow(localLocation, globalLocation, Color(Color::BLUE));
+
+    EXPECT_FALSE(show);
+}
+
+/*
+ * @tc.name: AnalyzeUrls001
+ * @tc.desc: test url Analyzer
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorUrlStyleTest, AnalyzeUrls001, TestSize.Level1)
+{
+    MockDataUrlAnalyzerMgr mockDataUrlAnalyzerMgr;
+    InitDataUrlAnalyzer(mockDataUrlAnalyzerMgr);
+
+    std::string text = "";
+    std::vector<UrlEntity> data = mockDataUrlAnalyzerMgr.AnalyzeUrls(text);
+    EXPECT_TRUE(data.empty());
+
+    text = "test1";
+    data = mockDataUrlAnalyzerMgr.AnalyzeUrls(text);
+    EXPECT_FALSE(data.empty());
+}
+
+/**
+ * @tc.name: GetUrlSpanString001
+ * @tc.desc: Test basic function of UrlSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorUrlStyleTest, GetUrlSpanString001, TestSize.Level1)
+{
+    // 0: Create MutableSpanString
+    auto spanString = AceType::MakeRefPtr<MutableSpanString>(u"0123456789");
+
+    // 1: Create UrlSpan and add to spanString
+    std::string address = "https://www.example.com";
+    spanString->AddSpan(AceType::MakeRefPtr<UrlSpan>(address, 8, 10));
+
+    // 2: Test subSpanString and spanString is equal
+    auto subSpanString  = spanString->GetSubSpanString(0, 10);
+    EXPECT_TRUE(subSpanString->IsEqualToSpanString(spanString));
+
+    // 3: Test get urlspan first position size
+    auto firstSpans = spanString->GetSpans(8, 1);
+    EXPECT_EQ(firstSpans.size(), 1);
+
+    // 4: Test get urlSpan start and end position, and url address
+    auto urlSpan = AceType::DynamicCast<UrlSpan>(firstSpans[0]);
+    ASSERT_NE(urlSpan, nullptr);
+    EXPECT_EQ(urlSpan->GetStartIndex(), 8);
+    EXPECT_EQ(urlSpan->GetEndIndex(), 9);
+    EXPECT_EQ(urlSpan->GetUrlSpanAddress(), address);
 }
 
 }
