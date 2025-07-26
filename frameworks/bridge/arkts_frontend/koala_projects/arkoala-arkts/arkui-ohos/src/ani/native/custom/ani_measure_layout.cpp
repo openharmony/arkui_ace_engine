@@ -65,7 +65,7 @@ ani_object SetConstraintNG(ani_env* env, double minWidth, double minHeight, doub
     if (ANI_OK != env->FindClass(className, &cls)) {
         return nullptr;
     }
-    
+
     ani_method ctor;
     if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
         return nullptr;
