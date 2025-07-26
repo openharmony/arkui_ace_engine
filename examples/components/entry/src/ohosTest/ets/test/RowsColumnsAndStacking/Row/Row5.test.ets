@@ -106,7 +106,7 @@ export default function Row5Test() {
     // linearGradient.number2
     it('ArkUI_Row_Comp_0350', 0, async (done: Function) => {
       await titleSearch('基础属性', 'linearGradient.number2', '通用属性3')
-      //取不到值需要，设置颜色获取
+      //当无法直接获取值时，需要通过设置颜色来间接获取
       await sliderDrag({
         slideStar: Slide.start,
         toggleClick: {

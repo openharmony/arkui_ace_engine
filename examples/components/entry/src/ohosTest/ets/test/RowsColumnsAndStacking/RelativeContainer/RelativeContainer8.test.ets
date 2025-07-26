@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { describe, beforeAll, beforeEach, afterEach, afterAll, it, expect } from '@ohos/hypium'
+import { describe, beforeAll, beforeEach, afterEach, afterAll, it, expect } from '@ohos/hypium';
 import { abilityDelegatorRegistry, Component, Driver, ON } from '@kit.TestKit';
 
 import {
@@ -31,7 +31,7 @@ import { On, Point } from '@ohos.UiTest';
 import { RelativeContainerStart } from './RelativeContainer.test';
 
 /*获取AbilityDelegator实例,管理Ability的生命周期和事件*/
-const delegator: abilityDelegatorRegistry.AbilityDelegator = abilityDelegatorRegistry.getAbilityDelegator()
+const delegator: abilityDelegatorRegistry.AbilityDelegator = abilityDelegatorRegistry.getAbilityDelegator();
 
 /*初始化与UI元素交互的驱动对象*/
 const driver = Driver.create();
@@ -58,9 +58,9 @@ export default function RelativeContainer8Test() {
       // Presets a clear action, which is performed after all test cases of the test suite end.
       // This API supports only one parameter: clear action function.
     })
-    /*
-        * 测试组件responseRegion.value.width支持设置100%且获取属性正确
-        */
+    /**
+     * 测试组件responseRegion.value.width支持设置100%且获取属性正确
+     */
     it('ArkUI_RelativeContainer_Comp_0639', 0, async (done: Function) => {
       //需要前置条件responseRegion.value.x、responseRegion.value.y、responseRegion.value.width、responseRegion.value.height四个toggle打开，获取不到参数值
       await titleSearch('基础属性', 'responseRegion.value.width', '通用属性6')
@@ -74,9 +74,9 @@ export default function RelativeContainer8Test() {
       done();
     })
     //responseRegion.value.height
-    /*
-    * 测试组件responseRegion.value.height支持设置0%且获取属性正确
-    */
+    /**
+     * 测试组件responseRegion.value.height支持设置0%且获取属性正确
+     */
     it('ArkUI_RelativeContainer_Comp_0640', 0, async (done: Function) => {
       //需要前置条件responseRegion.value.x、responseRegion.value.y、responseRegion.value.width、responseRegion.value.height四个toggle打开，获取不到参数值
       await titleSearch('基础属性', 'responseRegion.value.height', '通用属性6')
@@ -88,9 +88,9 @@ export default function RelativeContainer8Test() {
       })
       done();
     })
-    /*
-    * 测试组件responseRegion.value.height支持设置30%且获取属性正确
-    */
+    /**
+     * 测试组件responseRegion.value.height支持设置30%且获取属性正确
+     */
     it('ArkUI_RelativeContainer_Comp_0641', 0, async (done: Function) => {
       //需要前置条件responseRegion.value.x、responseRegion.value.y、responseRegion.value.width、responseRegion.value.height四个toggle打开，获取不到参数值
       await titleSearch('基础属性', 'responseRegion.value.height', '通用属性6')
@@ -102,7 +102,7 @@ export default function RelativeContainer8Test() {
       })
       done();
     })
-    /*
+    /**
      * 测试组件responseRegion.value.height支持设置60%且获取属性正确
      */
     it('ArkUI_RelativeContainer_Comp_0642', 0, async (done: Function) => {
@@ -116,7 +116,7 @@ export default function RelativeContainer8Test() {
       })
       done();
     })
-    /*
+    /**
      * 测试组件responseRegion.value.height支持设置90%且获取属性正确
      */
     it('ArkUI_RelativeContainer_Comp_0643', 0, async (done: Function) => {
@@ -130,7 +130,7 @@ export default function RelativeContainer8Test() {
       })
       done();
     })
-    /*
+    /**
      * 测试组件responseRegion.value.height支持设置100%且获取属性正确
      */
     it('ArkUI_RelativeContainer_Comp_0644', 0, async (done: Function) => {
@@ -146,9 +146,9 @@ export default function RelativeContainer8Test() {
       done();
     })
     //hitTestBehavior
-    /*
+    /**
      * 测试组件hitTestBehavior支持设置Default且获取属性正确
-     * */
+     */
     it('ArkUI_RelativeContainer_Comp_0645', 0, async (done: Function) => {
       await titleSearch('基础属性', 'hitTestBehavior', '通用属性6')
       await radioClick({
@@ -165,9 +165,9 @@ export default function RelativeContainer8Test() {
       })
       done();
     })
-    /*
+    /**
      * 测试组件hitTestBehavior支持设置Block且获取属性正确
-     * */
+     */
     it('ArkUI_RelativeContainer_Comp_0646', 0, async (done: Function) => {
       await titleSearch('基础属性', 'hitTestBehavior', '通用属性6')
       await radioClick({
@@ -184,9 +184,9 @@ export default function RelativeContainer8Test() {
       })
       done();
     })
-    /*
+    /**
      * 测试组件hitTestBehavior支持设置Transparent且获取属性正确
-     * */
+     */
     it('ArkUI_RelativeContainer_Comp_0647', 0, async (done: Function) => {
       await titleSearch('基础属性', 'hitTestBehavior', '通用属性6')
       await radioClick({
@@ -203,9 +203,9 @@ export default function RelativeContainer8Test() {
       })
       done();
     })
-    /*
+    /**
      * 测试组件hitTestBehavior支持设置None且获取属性正确
-     * */
+     */
     it('ArkUI_RelativeContainer_Comp_0648', 0, async (done: Function) => {
       await titleSearch('基础属性', 'hitTestBehavior', '通用属性6')
       await radioClick({
@@ -224,9 +224,9 @@ export default function RelativeContainer8Test() {
       done();
     })
     // obscured
-    /*
+    /**
      * 测试组件obscured支持设置null且获取属性正确
-     * */
+     */
     it('ArkUI_RelativeContainer_Comp_0761', 0, async (done: Function) => {
       //获取不到属性值无法进行断言
       await titleSearch('基础属性', 'obscured', '通用属性7')
@@ -235,9 +235,9 @@ export default function RelativeContainer8Test() {
       })
       done();
     })
-    /*
+    /**
      * 测试组件obscured支持设置PLACEHOLDER且获取属性正确
-     * */
+     */
     it('ArkUI_RelativeContainer_Comp_0762', 0, async (done: Function) => {
       //获取不到属性值无法进行断言
       await titleSearch('基础属性', 'obscured', '通用属性7')
@@ -250,9 +250,9 @@ export default function RelativeContainer8Test() {
       done();
     })
     //renderFit
-    /*
+    /**
      * 测试组件renderFit支持设置CENTER且获取属性正确
-     * */
+     */
     it('ArkUI_RelativeContainer_Comp_0763', 0, async (done: Function) => {
       //无法获取属性值进行断言
       await titleSearch('基础属性', 'renderFit', '通用属性7')
@@ -267,9 +267,9 @@ export default function RelativeContainer8Test() {
       })
       done();
     })
-    /*
+    /**
      * 测试组件renderFit支持设置TOP且获取属性正确
-     * */
+     */
     it('ArkUI_RelativeContainer_Comp_0764', 0, async (done: Function) => {
       //无法获取属性值进行断言
       await titleSearch('基础属性', 'renderFit', '通用属性7')
@@ -284,9 +284,9 @@ export default function RelativeContainer8Test() {
       })
       done();
     })
-    /*
+    /**
      * 测试组件renderFit支持设置BOTTOM且获取属性正确
-     * */
+     */
     it('ArkUI_RelativeContainer_Comp_0765', 0, async (done: Function) => {
       //无法获取属性值进行断言
       await titleSearch('基础属性', 'renderFit', '通用属性7')
@@ -301,9 +301,9 @@ export default function RelativeContainer8Test() {
       })
       done();
     })
-    /*
+    /**
      * 测试组件renderFit支持设置LEFT且获取属性正确
-     * */
+     */
     it('ArkUI_RelativeContainer_Comp_0766', 0, async (done: Function) => {
       await titleSearch('基础属性', 'renderFit', '通用属性7')
       await radioClick({
@@ -317,9 +317,9 @@ export default function RelativeContainer8Test() {
       })
       done();
     })
-    /*
+    /**
      * 测试组件renderFit支持设置RIGHT且获取属性正确
-     * */
+     */
     it('ArkUI_RelativeContainer_Comp_0767', 0, async (done: Function) => {
       await titleSearch('基础属性', 'renderFit', '通用属性7')
       await radioClick({
@@ -333,9 +333,9 @@ export default function RelativeContainer8Test() {
       })
       done();
     })
-    /*
+    /**
      * 测试组件renderFit支持设置TOP_LEFT且获取属性正确
-     * */
+     */
     it('ArkUI_RelativeContainer_Comp_0768', 0, async (done: Function) => {
       await titleSearch('基础属性', 'renderFit', '通用属性7')
       await radioClick({
@@ -349,9 +349,9 @@ export default function RelativeContainer8Test() {
       })
       done();
     })
-    /*
+    /**
      * 测试组件renderFit支持设置TOP_RIGHT且获取属性正确
-     * */
+     */
     it('ArkUI_RelativeContainer_Comp_0769', 0, async (done: Function) => {
       await titleSearch('基础属性', 'renderFit', '通用属性7')
       await radioClick({
