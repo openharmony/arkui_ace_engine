@@ -5562,12 +5562,11 @@ void BindMenuBase(Ark_NativePointer node,
             ViewAbstractModelStatic::BindMenu(frameNode, std::move(optionsParam), nullptr, menuParam);
         },
         [frameNode, node, menuParam](const CustomNodeBuilder& value) {
-            CallbackHelper(value).BuildAsync([frameNode, node, menuParam](const RefPtr<UINode>& uiNode) {
-                auto builder = [uiNode]() {
-                    ViewStackProcessor::GetInstance()->Push(uiNode);
-                };
-                ViewAbstractModelStatic::BindMenu(frameNode, {}, std::move(builder), menuParam);
-                }, node);
+            auto builder = [callback = CallbackHelper(value), node]() {
+                auto uiNode = callback.BuildSync(node);
+                ViewStackProcessor::GetInstance()->Push(uiNode);
+            };
+            ViewAbstractModelStatic::BindMenu(frameNode, {}, std::move(builder), menuParam);
         },
         []() {});
 }
