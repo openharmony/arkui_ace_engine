@@ -12,11 +12,58 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "core/common/container.h"
 #include "core/event/statusbar/statusbar_event_proxy.h"
 
 namespace OHOS::Ace {
+class MockStatusBarEventProxy : public StatusBarEventProxy {
+public:
+    MockStatusBarEventProxy();
+    ~MockStatusBarEventProxy() override;
+
+    void Register(const WeakPtr<StatusBarClickListener>& listener) override;
+    void UnRegister(const WeakPtr<StatusBarClickListener>& listener) override;
+    void OnStatusBarClick() override {}
+    std::set<std::pair<WeakPtr<StatusBarClickListener>, int32_t>> GetStatusBarClickListener() override;
+
+private:
+    std::set<std::pair<WeakPtr<StatusBarClickListener>, int32_t>> listeners_;
+};
+
+MockStatusBarEventProxy::MockStatusBarEventProxy() = default;
+MockStatusBarEventProxy::~MockStatusBarEventProxy() = default;
+
+std::unique_ptr<StatusBarEventProxy> StatusBarEventProxy::instance_;
+std::mutex StatusBarEventProxy::mutex_;
 StatusBarEventProxy* StatusBarEventProxy::GetInstance()
 {
-    return nullptr;
+    if (!instance_) {
+        std::scoped_lock lock(mutex_);
+        if (!instance_) {
+            instance_ = std::make_unique<MockStatusBarEventProxy>();
+        }
+    }
+    return instance_.get();
+}
+std::set<std::pair<WeakPtr<StatusBarClickListener>, int32_t>> MockStatusBarEventProxy::GetStatusBarClickListener()
+{
+    return listeners_;
+}
+void MockStatusBarEventProxy::Register(const WeakPtr<StatusBarClickListener>& listener)
+{
+    listeners_.insert({ listener, Container::CurrentId() });
+}
+
+void MockStatusBarEventProxy::UnRegister(const WeakPtr<StatusBarClickListener>& listener)
+{
+    if (listeners_.empty()) {
+        return;
+    }
+    for (auto it = listeners_.begin(); it != listeners_.end(); ++it) {
+        if (it->first == listener) {
+            listeners_.erase(it);
+            break;
+        }
+    }
 }
 } // namespace OHOS::Ace

@@ -43,7 +43,7 @@ HWTEST_F(EventManagerTestNg, ExecuteTouchTestDoneCallbackTest001, TestSize.Level
     ResponseLinkResult responseLinkRecognizers;
     auto panHorizontal1 = AceType::MakeRefPtr<PanRecognizer>(
         DEFAULT_PAN_FINGER, PanDirection { PanDirection::HORIZONTAL }, DEFAULT_PAN_DISTANCE.ConvertToPx());
-
+    ASSERT_NE(panHorizontal1, nullptr);
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG, 0, nullptr);
     ASSERT_NE(frameNode, nullptr);
     auto eventHub = frameNode->GetOrCreateGestureEventHub();
@@ -1241,5 +1241,68 @@ HWTEST_F(EventManagerTestNg, HandleMouseHoverAnimation001, TestSize.Level1)
     event.action = MouseAction::WINDOW_LEAVE;
     eventManager->DispatchMouseHoverAnimationNG(event, false);
     EXPECT_EQ(eventManager->currHoverNode_.Upgrade(), nullptr);
+}
+
+/**
+ * @tc.name: UpdateInfoWhenFinishDispatch001
+ * @tc.desc: Test UpdateInfoWhenFinishDispatch function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, UpdateInfoWhenFinishDispatch001, TestSize.Level1)
+{
+    /**
+     * @tc.step1: Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    /**
+     * @tc.step2: Set refereeNG_ and touchTestResults_.
+     * @tc.expected: refereeNG_ and touchTestResults_ not null.
+     */
+    auto resultId = ElementRegister::GetInstance()->MakeUniqueId();
+    TouchTestResult touchTestResults;
+    auto panRecognizer = AceType::MakeRefPtr<PanRecognizer>(
+        DEFAULT_PAN_FINGER, PanDirection { PanDirection::NONE }, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    panRecognizer->OnPending();
+    touchTestResults.push_back(panRecognizer);
+    eventManager->touchTestResults_.emplace(resultId, touchTestResults);
+    RefPtr<GestureScope> scope = AceType::MakeRefPtr<GestureScope>(resultId);
+    ASSERT_NE(scope, nullptr);
+    ASSERT_NE(eventManager->refereeNG_, nullptr);
+    scope->AddMember(panRecognizer);
+    eventManager->refereeNG_->gestureScopes_.insert(std::make_pair(resultId, scope));
+    TouchEvent event;
+    event.id = resultId;
+    event.type = TouchType::UP;
+    event.sourceTool = SourceTool::FINGER;
+    event.isFalsified = true;
+
+    /**
+     * @tc.step3: Set refereeNG_ and touchTestResults_.
+     * @tc.expected: refereeNG_ and touchTestResults_ not null.
+     */
+    eventManager->UpdateInfoWhenFinishDispatch(event, true);
+    EXPECT_FALSE(eventManager->touchTestResults_.empty());
+
+    event.type = TouchType::DOWN;
+    eventManager->UpdateInfoWhenFinishDispatch(event, true);
+    EXPECT_FALSE(eventManager->touchTestResults_.empty());
+
+    event.type = TouchType::CANCEL;
+    eventManager->UpdateInfoWhenFinishDispatch(event, true);
+    EXPECT_FALSE(eventManager->touchTestResults_.empty());
+
+    event.type = TouchType::UP;
+    event.isFalsified = false;
+    eventManager->UpdateInfoWhenFinishDispatch(event, true);
+    EXPECT_EQ(eventManager->lastSourceTool_, SourceTool::FINGER);
+
+    event.type = TouchType::CANCEL;
+    event.isFalsified = false;
+    eventManager->lastSourceTool_ = SourceTool::UNKNOWN;
+    eventManager->UpdateInfoWhenFinishDispatch(event, true);
+    EXPECT_EQ(eventManager->lastSourceTool_, SourceTool::FINGER);
 }
 } // namespace OHOS::Ace::NG

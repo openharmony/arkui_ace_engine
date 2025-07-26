@@ -103,10 +103,16 @@ const std::vector<Color>& TokenColors::GetColors()
 
 Color TokenColors::GetColorWithResourceObject(int32_t colorIndex) const
 {
-    if ((colorMode_ == ColorMode::COLOR_MODE_UNDEFINED) && (resObjs_.size() == TokenColors::TOTAL_NUMBER) &&
-        resObjs_[colorIndex]) {
+    if (colorIndex < 0 || colorIndex >= TokenColors::TOTAL_NUMBER) {
+        return Color();
+    }
+    if ((resObjs_.size() == TokenColors::TOTAL_NUMBER) && resObjs_[colorIndex]) {
         Color color;
-        ResourceParseUtils::ParseResColor(resObjs_[colorIndex], color);
+        if (colorMode_ == ColorMode::COLOR_MODE_UNDEFINED) {
+            ResourceParseUtils::ParseResColor(resObjs_[colorIndex], color);
+        } else {
+            ResourceParseUtils::ParseResColorWithColorMode(resObjs_[colorIndex], color, colorMode_);
+        }
         return color;
     }
     return colors_[colorIndex];

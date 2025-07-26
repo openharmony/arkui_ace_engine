@@ -136,8 +136,8 @@ static void UpdateLayoutPolicy(const JSCallbackInfo& args, bool isWidth)
         if (layoutPolicy->IsString()) {
             policy = JSContainerBase::ParseLayoutPolicy(layoutPolicy->ToString());
         }
-        ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(policy, false);
     }
+    ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(policy, false);
 }
 
 void JSCounter::JSHeight(const JSCallbackInfo& args)

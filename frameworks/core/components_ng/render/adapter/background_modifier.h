@@ -19,22 +19,13 @@
 #include <functional>
 #include <memory>
 
-#if defined(MODIFIER_NG)
 #include "render_service_client/core/modifier_ng/custom/rs_background_style_modifier.h"
-#else
-#include "render_service_client/core/modifier/rs_extended_modifier.h"
-#endif
 
 #include "core/components_ng/render/adapter/rosen_modifier_adapter.h"
 
 namespace OHOS::Ace::NG {
-#if defined(MODIFIER_NG)
 using RSBackgroundStyleModifier = Rosen::ModifierNG::RSBackgroundStyleModifier;
 using RSDrawingContext = Rosen::ModifierNG::RSDrawingContext;
-#else
-using RSBackgroundStyleModifier = Rosen::RSBackgroundStyleModifier;
-using RSDrawingContext = Rosen::RSDrawingContext;
-#endif
 
 class BackgroundModifier : public RSBackgroundStyleModifier {
 public:

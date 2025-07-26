@@ -472,7 +472,7 @@ int32_t ReadDragDropFrameworkStatus()
 
 int32_t ReadTouchAccelarateMode()
 {
-    return system::GetIntParameter("debug.ace.touch.accelarate", 2);
+    return system::GetIntParameter("debug.ace.touch.accelarate", 0);
 }
 
 bool IsAscending(const std::vector<double>& nums)

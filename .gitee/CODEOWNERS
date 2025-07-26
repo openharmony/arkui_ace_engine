@@ -257,6 +257,7 @@ examples/ImageAnimator/ @arkui_image
 examples/Picker/ @arkui_image
 examples/PickDialog/ @arkui_image
 examples/ScrollableComponentTest/ @arkuiscroll
+examples/UIExtension @arkuiabilitygroup
 
 [Frameworks Base]
 frameworks/base/background_task_helper/background_task_helper.h @arkuiframework
@@ -2763,6 +2764,7 @@ frameworks/core/components_ng/render/shape_painter.cpp @arkuilayout
 frameworks/core/components_ng/render/shape_painter.h @arkuilayout
 frameworks/core/components_ng/render/snapshot_param.h @arkuievent
 frameworks/core/components_ng/token_theme/ @arkuiframework
+frameworks/core/drawable/ @arkui_image
 frameworks/core/pipeline_ng/ @arkui_architecture
 
 [Native Node Interfaces]
@@ -3266,6 +3268,7 @@ test/unittest/core/pattern/video/ @arkuilayout
 test/unittest/core/pattern/view_context/ @arkuiframework
 test/unittest/core/pattern/waterflow/ @arkuiscroll
 test/unittest/core/pattern/web/ @arkwebinarkuireview
+test/unittest/core/pattern/withtheme/ @arkuiframework
 test/unittest/core/pattern/xcomponent/ @arkuilayout
 test/unittest/core/pattern/test_ng.cpp @arkuiscroll
 test/unittest/core/pattern/test_ng.h @arkuiscroll
@@ -3274,6 +3277,7 @@ test/unittest/core/render/ @arkuiframework
 test/unittest/core/rosen/ @arkuiframework
 test/unittest/core/svg/ @arkui_image
 test/unittest/core/syntax/ @arkuistatemgmt
+test/unittest/core/base/frame_node_test_ng_coverage.cpp @arkui_architecture
 test/unittest/interfaces/ @arkuiframework
 test/unittest/interfaces/ui_input_event_test.cpp @arkuievent
 test/unittest/interfaces/ace_ui_input_event/ @arkuievent

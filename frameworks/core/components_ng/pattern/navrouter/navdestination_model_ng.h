@@ -51,7 +51,7 @@ public:
     void SetSubtitle(const std::string& subtitle) override;
     void SetCustomTitle(const RefPtr<AceType>& customNode) override;
     void SetTitleHeight(const Dimension& titleHeight, bool isValid = true) override;
-    void SetTitleHeight(const RefPtr<ResourceObject>& resObj, bool isValid = true) override;
+    void SetTitleHeight(const Dimension& height, const RefPtr<ResourceObject>& resObj) override;
     void UpdateTitleHeight(
         const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& resObj) override;
     void SetOnShown(std::function<void()>&& onShow) override;
@@ -149,7 +149,8 @@ public:
         const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& mainResObj) override;
     void UpdateSubTitle(
         const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& subResObj) override;
-    static CalcDimension ParseTitleHeight(const RefPtr<ResourceObject>& resObj);
+    static CalcDimension ParseTitleHeight(
+        const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& resObj);
     static void ResetResObj(FrameNode* frameNode, NavDestinationPatternType type, const std::string& key);
     static void SetBeforeCreateLayoutWrapperCallBack(
         FrameNode* frameNode, std::function<void()>&& beforeCreateLayoutWrapper);

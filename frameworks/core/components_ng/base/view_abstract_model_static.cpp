@@ -66,11 +66,11 @@ void StartVibratorStatic(const MenuParam& menuParam, bool isMenu, const std::str
 NG::OffsetF UpdateMenuPostionStatic(const NG::OffsetF& menuPosition, const MenuParam& menuParam,
     const RefPtr<FrameNode>& targetNode)
 {
-    if (menuParam.isAnchorPosition) {
+    if (menuParam.anchorPosition.has_value()) {
         NG::OffsetF targetNodePosition = targetNode->GetPositionToWindowWithTransform();
-        return { menuParam.anchorPosition.GetX() + menuParam.positionOffset.GetX() +
+        return { menuParam.anchorPosition->GetX() + menuParam.positionOffset.GetX() +
                  targetNodePosition.GetX(),
-                 menuParam.anchorPosition.GetY() + menuParam.positionOffset.GetY() +
+                 menuParam.anchorPosition->GetY() + menuParam.positionOffset.GetY() +
                  targetNodePosition.GetY() };
     }
     return menuPosition;

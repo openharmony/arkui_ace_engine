@@ -1217,7 +1217,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg164, TestSize.Level1)
 {
     /**
      * @tc.steps1: Call the function FlushFrameCallback.
-     * @tc.expected: Test the member frameCallbackFuncs_ is not empty.
+     * @tc.expected: Test the member frameCallbackFuncs_ is empty.
      */
     ASSERT_NE(context_, nullptr);
     uint64_t nanoTimestamp = 1;
@@ -1225,8 +1225,16 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg164, TestSize.Level1)
         return;
     };
     context_->frameCallbackFuncs_.push_back(callback);
-    context_->FlushFrameCallback(nanoTimestamp);
+    context_->FlushFrameCallback(nanoTimestamp, 0);
     EXPECT_TRUE(context_->frameCallbackFuncs_.empty());
+    /**
+     * @tc.steps2: Call the function FlushFrameCallback with UINT64_MAX as framecount .
+     * @tc.expected: frameCallbackFuncs_ size is 1.
+     */
+    context_->frameCallbackFuncs_.push_back(callback);
+    context_->FlushFrameCallback(nanoTimestamp, UINT64_MAX);
+    EXPECT_EQ(context_->frameCallbackFuncs_.size(), 1);
+    context_->frameCallbackFuncs_.clear();
 }
 
 /**
@@ -1242,13 +1250,21 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg165, TestSize.Level1)
      */
     ASSERT_NE(context_, nullptr);
     uint64_t nanoTimestamp = 1;
-    uint32_t frameCount = 1;
+    uint64_t frameCount = 1;
     FrameCallbackFuncFromCAPI frameCallback = [](uint64_t nanoTimestamp, uint32_t frameCount) {
         return;
     };
     context_->frameCallbackFuncsFromCAPI_.push_back(frameCallback);
     context_->FlushFrameCallbackFromCAPI(nanoTimestamp, frameCount);
     EXPECT_TRUE(context_->frameCallbackFuncsFromCAPI_.empty());
+    /**
+     * @tc.steps2: Call the function FlushFrameCallbackFromCAPI with UINT64_MAX as framecount .
+     * @tc.expected: frameCallbackFuncsFromCAPI_ size is 1.
+     */
+    context_->frameCallbackFuncsFromCAPI_.push_back(frameCallback);
+    context_->FlushFrameCallbackFromCAPI(nanoTimestamp, UINT64_MAX);
+    EXPECT_EQ(context_->frameCallbackFuncsFromCAPI_.size(), 1);
+    context_->frameCallbackFuncsFromCAPI_.clear();
 }
 
 /**
@@ -2542,6 +2558,32 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg406, TestSize.Level1)
     context_->windowModal_ = WindowModal::DIALOG_MODAL;
     context_->ContainerModalUnFocus();
     EXPECT_TRUE(context_->windowModal_ != WindowModal::CONTAINER_MODAL);
+}
+
+/**
+ * @tc.name: FlushMouseEventForHover001
+ * @tc.desc: Test FlushMouseEventForHover.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, FlushMouseEventForHover001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Construction input parameter, call FlushMouseEventForHover.
+     * @tc.expected: The value of button is correct.
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->isTransFlag_ = true;
+    MouseEvent mouseEvent;
+    mouseEvent.sourceType = SourceType::MOUSE;
+    mouseEvent.action = MouseAction::MOVE;
+    context_->lastMouseEvent_ = std::make_unique<MouseEvent>(mouseEvent);
+    context_->lastSourceType_ = SourceType::MOUSE;
+    context_->lastMouseEvent_->button = MouseButton::NONE_BUTTON;
+    context_->FlushMouseEventForHover();
+    EXPECT_EQ(context_->lastMouseEvent_->button, MouseButton::NONE_BUTTON);
+    context_->lastMouseEvent_->button = MouseButton::LEFT_BUTTON;
+    context_->FlushMouseEventForHover();
+    EXPECT_EQ(context_->lastMouseEvent_->button, MouseButton::LEFT_BUTTON);
 }
 } // namespace NG
 } // namespace OHOS::Ace

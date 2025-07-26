@@ -183,7 +183,7 @@ bool SheetWrapperPaintMethod::IsDrawBorder(PaintWrapper* paintWrapper)
     CHECK_NULL_RETURN(sheetNode, false);
     auto sheetPattern = DynamicCast<SheetPresentationPattern>(sheetNode->GetPattern());
     CHECK_NULL_RETURN(sheetPattern, false);
-    auto sheetType = sheetPattern->GetSheetType();
+    auto sheetType = sheetPattern->GetSheetTypeNoProcess();
     auto pipeline = sheetNode->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto sheetTheme = pipeline->GetTheme<SheetTheme>();

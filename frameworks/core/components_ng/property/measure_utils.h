@@ -64,6 +64,14 @@ PaddingPropertyF ConvertToPaddingPropertyF(const std::unique_ptr<PaddingProperty
 PaddingPropertyF ConvertToPaddingPropertyF(const PaddingProperty& padding, const ScaleProperty& scaleProperty,
     float percentReference = -1.0f, bool roundPixel = true, bool nonNegative = false);
 
+PaddingPropertyF ConvertWithResidueToPaddingPropertyF(const std::unique_ptr<PaddingProperty>& padding,
+    const ScaleProperty& scaleProperty, const PaddingPropertyF& fract, float percentReference = -1.0f,
+    bool nonNegative = false);
+
+PaddingPropertyF ConvertWithResidueToPaddingPropertyF(const PaddingProperty& padding,
+    const ScaleProperty& scaleProperty, const PaddingPropertyF& fract, float percentReference = -1.0f,
+    bool nonNegative = false);
+
 MarginPropertyF ConvertToMarginPropertyF(const std::unique_ptr<MarginProperty>& margin,
     const ScaleProperty& scaleProperty, float percentReference = -1.0f, bool roundPixel = true);
 

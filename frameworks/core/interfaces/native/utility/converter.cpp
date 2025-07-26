@@ -1381,7 +1381,7 @@ RefPtr<Curve> Convert(const Ark_String& src)
 template<>
 RefPtr<Curve> Convert(const Ark_Curve& src)
 {
-    return Framework::CreateCurve("src", false);
+    return Framework::CreateCurve(src, false);
 }
 
 template<>

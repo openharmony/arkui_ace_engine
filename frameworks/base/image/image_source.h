@@ -21,6 +21,13 @@
 #include "core/components/common/layout/constants.h"
 
 namespace OHOS::Ace {
+
+#if defined(ACE_STATIC)
+struct DecodeOptions {
+    PixelFormat desiredFormat = PixelFormat::RGBA_8888;
+};
+#endif
+
 struct PixelMapConfig {
     AIImageQuality imageQuality = AIImageQuality::NONE;
     bool isHdrDecoderNeed = false;
@@ -58,6 +65,17 @@ public:
         const Size& size, uint32_t& errorCode, const PixelMapConfig& pixelMapConfig = {}) = 0;
     virtual RefPtr<PixelMap> CreatePixelMap(
         uint32_t index, const Size& size, uint32_t& errorCode, const PixelMapConfig& pixelMapConfig = {}) = 0;
+#if defined(ACE_STATIC)
+    /**
+     * @description: only for 1.2
+     * @param options decode options
+     * @return refptr pixelmap
+     */
+    virtual RefPtr<PixelMap> CreatePixelMap(const DecodeOptions& options)
+    {
+        return nullptr;
+    }
+#endif
     virtual RefPtr<PixelMap> CreatePixelMap() = 0;
     virtual Size GetImageSize() = 0;
     virtual uint32_t GetFrameCount() = 0;

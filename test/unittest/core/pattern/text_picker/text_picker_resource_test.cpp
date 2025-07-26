@@ -39,6 +39,8 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr uint32_t SELECTED_INDEX_1 = 1;
 constexpr double TEST_FONT_SIZE = 10.0;
+constexpr double TEST_MIN_FONT_SIZE = 9.0;
+constexpr double TEST_MAX_FONT_SIZE = 20.0;
 } // namespace
 
 class TextPickerResourceTest : public testing::Test {
@@ -53,6 +55,7 @@ public:
     RefPtr<DialogTheme> dialogTheme_;
     RefPtr<PickerTheme> pickerThem_;
     RefPtr<ButtonTheme> buttonTheme_;
+    RefPtr<TextTheme> textTheme_;
 };
 
 class TestNode : public UINode {
@@ -92,6 +95,7 @@ void TextPickerResourceTest::SetUp()
     dialogTheme_ = AceType::MakeRefPtr<DialogTheme>();
     pickerThem_ = MockThemeDefault::GetPickerTheme();
     buttonTheme_ = AceType::MakeRefPtr<ButtonTheme>();
+    textTheme_ = AceType::MakeRefPtr<TextTheme>();
 
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
@@ -119,6 +123,8 @@ RefPtr<Theme> TextPickerResourceTest::GetThemeByType(ThemeType type)
         return pickerThem_;
     } else if (type == ButtonTheme::TypeId()) {
         return buttonTheme_;
+    } else if (type == TextTheme::TypeId()) {
+        return textTheme_;
     } else {
         return nullptr;
     }
@@ -494,6 +500,267 @@ HWTEST_F(TextPickerResourceTest, UpdateSelectedTextStyle001, TestSize.Level1)
 
     EXPECT_EQ(pickerProperty->GetSelectedColor().value(), Color::GREEN);
     EXPECT_EQ(pickerProperty->GetSelectedFontSize().value(), Dimension(TEST_FONT_SIZE + 1));
+}
+
+/**
+ * @tc.name: SetDefaultTextStyle001
+ * @tc.desc: Test SetDefaultTextStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerResourceTest, SetDefaultTextStyle001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPicker.
+     */
+    auto pipeline = MockPipelineContext::GetCurrent();
+    auto theme = pipeline->GetTheme<PickerTheme>();
+
+    SystemProperties::SetDeviceType(DeviceType::PHONE);
+    SystemProperties::SetDeviceOrientation(static_cast<int32_t>(DeviceOrientation::LANDSCAPE));
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    std::vector<NG::RangeContent> oldRange = { { "", "Text1" }, { "", "Text2" }, { "", "Text3" } };
+    TextPickerModelNG::GetInstance()->SetRange(oldRange);
+    TextPickerModelNG::GetInstance()->SetSelected(SELECTED_INDEX_1);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->SetIsSystemColorChange(true);
+
+    /**
+     * @tc.steps: step2. Call SetDefaultTextStyle function.
+     */
+    PickerTextStyle textStyle;
+    textStyle.textColor = Color::RED;
+    textStyle.fontSize = Dimension(TEST_FONT_SIZE);
+    auto textTheme = pipeline->GetTheme<TextTheme>();
+    TextPickerModelNG::GetInstance()->SetDefaultTextStyle(textTheme, textStyle);
+
+    auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    EXPECT_EQ(pickerProperty->GetDefaultColor().value(), Color::RED);
+    EXPECT_EQ(pickerProperty->GetDefaultFontSize().value(), Dimension(TEST_FONT_SIZE));
+
+    textStyle.textColor = Color::GREEN;
+    textStyle.fontSize = Dimension(TEST_FONT_SIZE + 1);
+    textStyle.minFontSize = Dimension(TEST_MIN_FONT_SIZE);
+    textStyle.maxFontSize = Dimension(TEST_MAX_FONT_SIZE);
+    auto pickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+    pickerPattern->UpdateDefaultTextStyle(textStyle);
+
+    EXPECT_EQ(pickerProperty->GetDefaultColor().value(), Color::GREEN);
+    EXPECT_EQ(pickerProperty->GetDefaultFontSize().value(), Dimension(TEST_FONT_SIZE + 1));
+    EXPECT_EQ(pickerProperty->GetDefaultMinFontSize().value(), Dimension(TEST_MIN_FONT_SIZE));
+    EXPECT_EQ(pickerProperty->GetDefaultMaxFontSize().value(), Dimension(TEST_MAX_FONT_SIZE));
+}
+
+/**
+ * @tc.name: SelectedBackgroundStyle001
+ * @tc.desc: Test GetCanLoopFromLayoutProperty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerResourceTest, SelectedBackgroundStyle001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPicker.
+     */
+    auto pipeline = MockPipelineContext::GetCurrent();
+    auto theme = pipeline->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+
+    SystemProperties::SetDeviceType(DeviceType::PHONE);
+    SystemProperties::SetDeviceOrientation(static_cast<int32_t>(DeviceOrientation::LANDSCAPE));
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    std::vector<NG::RangeContent> oldRange = { { "", "Text1" }, { "", "Text2" }, { "", "Text3" } };
+    TextPickerModelNG::GetInstance()->SetRange(oldRange);
+    TextPickerModelNG::GetInstance()->SetSelected(SELECTED_INDEX_1);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Set g_isConfigChangePerform to true.
+     */
+    g_isConfigChangePerform = true;
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->resourceMgr_ = AceType::MakeRefPtr<PatternResourceManager>();
+    ASSERT_NE(pattern->resourceMgr_, nullptr);
+
+    NG::PickerBackgroundStyle pickerBgStyle;
+    pickerBgStyle.color = Color::RED;
+    pickerBgStyle.borderRadius = NG::BorderRadiusProperty(8.0_vp);
+    TextPickerModelNG::SetSelectedBackgroundStyle(frameNode, pickerBgStyle);
+
+    NG::PickerBackgroundStyle result1;
+    NG::PickerBackgroundStyle result2;
+    auto layoutProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    result1.color = layoutProperty->GetSelectedBackgroundColorValue();
+    result1.borderRadius = layoutProperty->GetSelectedBorderRadiusValue();
+    result2.color = TextPickerModelNG::GetSelectedBackgroundStyle(frameNode).color;
+    result2.borderRadius = TextPickerModelNG::GetSelectedBackgroundStyle(frameNode).borderRadius;
+    EXPECT_EQ(pickerBgStyle.color, result1.color);
+    EXPECT_EQ(pickerBgStyle.borderRadius, result1.borderRadius);
+    EXPECT_EQ(pickerBgStyle.color, result2.color);
+    EXPECT_EQ(pickerBgStyle.borderRadius, result2.borderRadius);
+
+    /**
+     * @tc.steps: step3. Call ParseBackgroundStyleColorResObj and ParseBackgroundStyleRadiusResObj
+     * to register the resourceObject callback function.
+     * @tc.expected: Dut to color is set by user, the value will not be changed.
+     */
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+
+    pickerBgStyle.textColorSetByUser = true;
+    pickerBgStyle.colorResObj = AceType::MakeRefPtr<ResourceObject>();
+    pickerBgStyle.borderRadiusResObj = AceType::MakeRefPtr<ResourceObject>();
+    TextPickerModelNG::ParseBackgroundStyleColorResObj(frameNode, pickerBgStyle);
+    TextPickerModelNG::ParseBackgroundStyleRadiusResObj(frameNode, pickerBgStyle);
+    pattern->resourceMgr_->ReloadResources();
+    result1.color = layoutProperty->GetSelectedBackgroundColorValue();
+    result2.color = TextPickerModelNG::GetSelectedBackgroundStyle(frameNode).color;
+    EXPECT_EQ(pickerBgStyle.color, result1.color);
+    EXPECT_EQ(pickerBgStyle.color, result2.color);
+}
+
+/**
+ * @tc.name: SelectedBackgroundStyle002
+ * @tc.desc: Test GetCanLoopFromLayoutProperty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerResourceTest, SelectedBackgroundStyle002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPicker.
+     */
+    auto pipeline = MockPipelineContext::GetCurrent();
+    auto theme = pipeline->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+
+    SystemProperties::SetDeviceType(DeviceType::PHONE);
+    SystemProperties::SetDeviceOrientation(static_cast<int32_t>(DeviceOrientation::LANDSCAPE));
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    std::vector<NG::RangeContent> oldRange = { { "", "Text1" }, { "", "Text2" }, { "", "Text3" } };
+    TextPickerModelNG::GetInstance()->SetRange(oldRange);
+    TextPickerModelNG::GetInstance()->SetSelected(SELECTED_INDEX_1);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Set g_isConfigChangePerform to true.
+     */
+    g_isConfigChangePerform = true;
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->resourceMgr_ = AceType::MakeRefPtr<PatternResourceManager>();
+    ASSERT_NE(pattern->resourceMgr_, nullptr);
+
+    NG::PickerBackgroundStyle pickerBgStyle;
+    pickerBgStyle.color = Color::RED;
+    pickerBgStyle.borderRadius = NG::BorderRadiusProperty(8.0_vp);
+    TextPickerModelNG::GetInstance()->SetSelectedBackgroundStyle(pickerBgStyle);
+
+    NG::PickerBackgroundStyle result1;
+    NG::PickerBackgroundStyle result2;
+    auto layoutProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    result1.color = layoutProperty->GetSelectedBackgroundColorValue();
+    result1.borderRadius = layoutProperty->GetSelectedBorderRadiusValue();
+    result2.color = TextPickerModelNG::GetSelectedBackgroundStyle(frameNode).color;
+    result2.borderRadius = TextPickerModelNG::GetSelectedBackgroundStyle(frameNode).borderRadius;
+    EXPECT_EQ(pickerBgStyle.color, result1.color);
+    EXPECT_EQ(pickerBgStyle.borderRadius, result1.borderRadius);
+    EXPECT_EQ(pickerBgStyle.color, result2.color);
+    EXPECT_EQ(pickerBgStyle.borderRadius, result2.borderRadius);
+
+    /**
+     * @tc.steps: step3. Call ParseBackgroundStyleColorResObj and ParseBackgroundStyleRadiusResObj
+     * to register the resourceObject callback function.
+     * @tc.expected: Dut to color is set by user, the value will not be changed.
+     */
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+    pickerBgStyle.textColorSetByUser = true;
+    pickerBgStyle.colorResObj = AceType::MakeRefPtr<ResourceObject>();
+    pickerBgStyle.borderRadiusResObj = AceType::MakeRefPtr<ResourceObject>();
+    TextPickerModelNG::ParseBackgroundStyleColorResObj(frameNode, pickerBgStyle);
+    TextPickerModelNG::ParseBackgroundStyleRadiusResObj(frameNode, pickerBgStyle);
+    pattern->resourceMgr_->ReloadResources();
+    result1.color = layoutProperty->GetSelectedBackgroundColorValue();
+    result2.color = TextPickerModelNG::GetSelectedBackgroundStyle(frameNode).color;
+    EXPECT_EQ(pickerBgStyle.color, result1.color);
+    EXPECT_EQ(pickerBgStyle.color, result2.color);
+}
+
+/**
+ * @tc.name: SelectedBackgroundStyle003
+ * @tc.desc: Test GetCanLoopFromLayoutProperty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerResourceTest, SelectedBackgroundStyle003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPicker.
+     */
+    auto pipeline = MockPipelineContext::GetCurrent();
+    auto theme = pipeline->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+
+    SystemProperties::SetDeviceType(DeviceType::PHONE);
+    SystemProperties::SetDeviceOrientation(static_cast<int32_t>(DeviceOrientation::LANDSCAPE));
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    std::vector<NG::RangeContent> oldRange = { { "", "Text1" }, { "", "Text2" }, { "", "Text3" } };
+    TextPickerModelNG::GetInstance()->SetRange(oldRange);
+    TextPickerModelNG::GetInstance()->SetSelected(SELECTED_INDEX_1);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Set g_isConfigChangePerform to true.
+     */
+    g_isConfigChangePerform = true;
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->resourceMgr_ = AceType::MakeRefPtr<PatternResourceManager>();
+    ASSERT_NE(pattern->resourceMgr_, nullptr);
+
+    NG::PickerBackgroundStyle pickerBgStyle;
+    pickerBgStyle.color = Color::RED;
+    pickerBgStyle.borderRadius = NG::BorderRadiusProperty(8.0_vp);
+    TextPickerModelNG::GetInstance()->SetSelectedBackgroundStyle(pickerBgStyle);
+
+    NG::PickerBackgroundStyle result1;
+    NG::PickerBackgroundStyle result2;
+    auto layoutProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    result1.color = layoutProperty->GetSelectedBackgroundColorValue();
+    result1.borderRadius = layoutProperty->GetSelectedBorderRadiusValue();
+    result2.color = TextPickerModelNG::GetSelectedBackgroundStyle(frameNode).color;
+    result2.borderRadius = TextPickerModelNG::GetSelectedBackgroundStyle(frameNode).borderRadius;
+    EXPECT_EQ(pickerBgStyle.color, result1.color);
+    EXPECT_EQ(pickerBgStyle.borderRadius, result1.borderRadius);
+    EXPECT_EQ(pickerBgStyle.color, result2.color);
+    EXPECT_EQ(pickerBgStyle.borderRadius, result2.borderRadius);
+
+    /**
+     * @tc.steps: step3. Call ParseBackgroundStyleColorResObj and ParseBackgroundStyleRadiusResObj
+     * to register the resourceObject callback function.
+     * @tc.expected: Dut to color is not set by user, the value will not be changed.
+     */
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+    pickerBgStyle.textColorSetByUser = false;
+    pickerBgStyle.colorResObj = AceType::MakeRefPtr<ResourceObject>();
+    pickerBgStyle.borderRadiusResObj = AceType::MakeRefPtr<ResourceObject>();
+    TextPickerModelNG::ParseBackgroundStyleColorResObj(frameNode, pickerBgStyle);
+    TextPickerModelNG::ParseBackgroundStyleRadiusResObj(frameNode, pickerBgStyle);
+    pattern->resourceMgr_->ReloadResources();
+    Color newColor = theme->GetSelectedBackgroundColor();
+    result1.color = layoutProperty->GetSelectedBackgroundColorValue();
+    result2.color = TextPickerModelNG::GetSelectedBackgroundStyle(frameNode).color;
+    EXPECT_EQ(newColor, result1.color);
+    EXPECT_EQ(newColor, result2.color);
+    EXPECT_NE(newColor, pickerBgStyle.color);
 }
 
 } // namespace OHOS::Ace::NG

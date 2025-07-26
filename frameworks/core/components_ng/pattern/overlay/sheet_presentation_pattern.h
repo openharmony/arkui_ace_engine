@@ -92,7 +92,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        auto sheetType = GetSheetType();
+        auto sheetType = sheetType_;
         if (sheetType == SheetType::SHEET_SIDE) {
             return MakeRefPtr<SheetPresentationSideLayoutAlgorithm>();
         }
@@ -348,8 +348,6 @@ public:
     void ModifyFireSheetTransition(float dragVelocity = 0.0f);
 
     void SheetInteractiveDismiss(BindSheetDismissReason dismissReason, float dragVelocity = 0.0f);
-
-    void SetSheetAnimationOption(AnimationOption& option) const;
 
     void SetSheetBorderWidth(bool isPartialUpdate = false);
 
@@ -931,7 +929,7 @@ public:
     // If has dispute about version isolation, suggest use the following. And it does not support SHEET_BOTTOM_OFFSET
     bool IsSheetBottom() const
     {
-        auto sheetType = GetSheetType();
+        auto sheetType = sheetType_;
         return !(sheetType == SheetType::SHEET_CENTER || sheetType == SheetType::SHEET_POPUP ||
                  sheetType == SheetType::SHEET_BOTTOM_OFFSET);
     }

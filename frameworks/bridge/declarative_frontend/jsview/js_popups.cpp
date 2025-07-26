@@ -1499,17 +1499,16 @@ void JSViewPopups::ParseMenuParam(
         JSRef<JSVal> yVal = anchorPositionObj->GetProperty(static_cast<int32_t>(ArkUIIndex::Y));
         CalcDimension dx;
         CalcDimension dy;
-        if (JSViewAbstract::ParseJsDimensionVp(xVal, dx)) {
-            menuParam.anchorPosition.SetX(dx.ConvertToPx());
+        if (JSViewAbstract::ParseJsDimensionVp(xVal, dx) && JSViewAbstract::ParseJsDimensionVp(yVal, dy)) {
+            menuParam.anchorPosition = { dx.ConvertToPx(), dy.ConvertToPx() };
         }
-        if (JSViewAbstract::ParseJsDimensionVp(yVal, dy)) {
-            menuParam.anchorPosition.SetY(dy.ConvertToPx());
-        }
-        menuParam.isAnchorPosition = true;
-        if (LessNotEqual(menuParam.anchorPosition.GetX(), 0.0f) &&
-            LessNotEqual(menuParam.anchorPosition.GetY(), 0.0f)) {
-            menuParam.isAnchorPosition = false;
-            menuParam.placement = Placement::BOTTOM_LEFT;
+
+        if (menuParam.anchorPosition.has_value()) {
+            if (LessNotEqual(menuParam.anchorPosition->GetX(), 0.0f) &&
+                LessNotEqual(menuParam.anchorPosition->GetY(), 0.0f)) {
+                menuParam.placement = Placement::BOTTOM_LEFT;
+                menuParam.anchorPosition.reset();
+            }
         }
     }
 }

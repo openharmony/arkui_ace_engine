@@ -165,6 +165,7 @@ void JSMenu::SetWidth(const JSCallbackInfo& info)
         JSRef<JSObject> object = JSRef<JSObject>::Cast(jsValue);
         JSRef<JSVal> layoutPolicy = object->GetProperty("id_");
         if (layoutPolicy->IsString()) {
+            ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
             auto policy = ParseLayoutPolicy(layoutPolicy->ToString());
             ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(policy, true);
             return;

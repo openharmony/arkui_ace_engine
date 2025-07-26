@@ -20,6 +20,15 @@
 #include "base/utils/utils.h"
 
 namespace OHOS::Ace {
+
+#if defined(ACE_STATIC)
+// only for 1.2
+RefPtr<PixelMap> PixelMap::Create(const InitializationOptions& opts)
+{
+    return nullptr;
+}
+#endif
+
 RefPtr<PixelMap> PixelMap::CreatePixelMap(void* rawPtr)
 {
     return nullptr;

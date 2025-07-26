@@ -1233,6 +1233,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg024, TestSize.Level1)
     ResetEventFlag(DISPATCH_TOUCH_EVENT_TOUCH_EVENT_FLAG);
     context_->FlushTouchEvents();
     EXPECT_FALSE(GetEventFlag(DISPATCH_TOUCH_EVENT_TOUCH_EVENT_FLAG));
+    EXPECT_FALSE(context_->touchAccelarate_);
 }
 
 /**
@@ -2219,9 +2220,11 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg111, TestSize.Level1)
 {
     MouseEvent mouseEvent;
     context_->lastMouseEvent_ = std::make_unique<MouseEvent>(mouseEvent);
+    mouseEvent.targetDisplayId = 10;
     mouseEvent.mockFlushEvent = false;
     context_->UpdateLastMoveEvent(mouseEvent);
     EXPECT_EQ(context_->lastMouseEvent_->isMockWindowTransFlag, false);
+    EXPECT_EQ(context_->lastMouseEvent_->targetDisplayId, 10);
 }
 
 /**
@@ -2562,6 +2565,23 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg127, TestSize.Level1)
     context_->UpdateDVSyncTime(100, abilityName, 8333333);
 
     EXPECT_FALSE(context_->commandTimeUpdate_);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg128
+ * @tc.desc: Test SetIsTransFlag.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg128, TestSize.Level1)
+{
+    context_->SetIsTransFlag(true);
+    context_->SetIsTransFlag(false);
+    context_->SetIsTransFlag(true);
+    EXPECT_TRUE(context_->isTransFlag_);
+    context_->SetIsTransFlag(false);
+    context_->SetIsTransFlag(true);
+    context_->SetIsTransFlag(false);
+    EXPECT_FALSE(context_->isTransFlag_);
 }
 } // namespace NG
 } // namespace OHOS::Ace

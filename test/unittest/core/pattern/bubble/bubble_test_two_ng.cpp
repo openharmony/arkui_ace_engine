@@ -46,6 +46,7 @@
 #include "core/components_ng/pattern/bubble/bubble_view.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 using namespace testing;
@@ -55,7 +56,6 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr float POSITION_FIVE = 5.0f;
 constexpr float RESULT_FIVE = 5.0f;
-constexpr float ARROW_HEIGHT = 8.0f;
 constexpr float RESULT_TEN = 10.0f;
 constexpr float BORDER_RADIUS_TEN = 10.0f;
 constexpr float MARGIN_START = 10.0f;
@@ -542,7 +542,7 @@ HWTEST_F(BubbleTestTwoNg, CoverParent001, TestSize.Level1)
     algorithm.targetSize_ = SizeF(SIZE_TWENTY, SIZE_TWENTY);
     position = algorithm.CoverParent(childSize, Placement::BOTTOM);
     EXPECT_FLOAT_EQ(position.GetX(), RESULT_TEN);
-    EXPECT_FLOAT_EQ(position.GetY(), RESULT_TEN + ARROW_HEIGHT);
+    EXPECT_FLOAT_EQ(position.GetY(), RESULT_TEN);
 
     algorithm.isHalfFoldHover_ = true;
     algorithm.avoidKeyboard_ = false;
@@ -1257,14 +1257,14 @@ HWTEST_F(BubbleTestTwoNg, GetBottomRect001, TestSize.Level1)
     BubbleTestTwoNg::InitGetRectSetting(algorithm);
 
     algorithm.isHalfFoldHover_ = false;
-    Rect rect = algorithm.GetBottomRect();
+    Rect rect = algorithm.GetBottomRect(Dimension(0.0f));
     EXPECT_FLOAT_EQ(rect.Width(), CHILDSIZE_ONE_HUNDRED_EIGHTY);
     EXPECT_FLOAT_EQ(rect.Height(), RESULT_FORTY);
     EXPECT_FLOAT_EQ(rect.Left(), RESULT_TEN);
     EXPECT_FLOAT_EQ(rect.Top(), RESULT_ONE_HUNDRED_FIFTY);
 
     algorithm.isHalfFoldHover_ = true;
-    rect = algorithm.GetBottomRect();
+    rect = algorithm.GetBottomRect(Dimension(0.0f));
     EXPECT_FLOAT_EQ(rect.Width(), CHILDSIZE_ONE_HUNDRED_EIGHTY);
     EXPECT_FLOAT_EQ(rect.Height(), RESULT_FIFTY);
     EXPECT_FLOAT_EQ(rect.Left(), RESULT_TEN);
@@ -1282,14 +1282,14 @@ HWTEST_F(BubbleTestTwoNg, GetTopRect001, TestSize.Level1)
     BubbleTestTwoNg::InitGetRectSetting(algorithm);
 
     algorithm.isHalfFoldHover_ = false;
-    Rect rect = algorithm.GetTopRect();
+    Rect rect = algorithm.GetTopRect(Dimension(0.0f));
     EXPECT_FLOAT_EQ(rect.Width(), CHILDSIZE_ONE_HUNDRED_EIGHTY);
     EXPECT_FLOAT_EQ(rect.Height(), RESULT_FORTY);
     EXPECT_FLOAT_EQ(rect.Left(), RESULT_TEN);
     EXPECT_FLOAT_EQ(rect.Top(), RESULT_TEN);
 
     algorithm.isHalfFoldHover_ = true;
-    rect = algorithm.GetTopRect();
+    rect = algorithm.GetTopRect(Dimension(0.0f));
     EXPECT_FLOAT_EQ(rect.Width(), CHILDSIZE_ONE_HUNDRED_EIGHTY);
     EXPECT_FLOAT_EQ(rect.Height(), RESULT_FIFTY);
     EXPECT_FLOAT_EQ(rect.Left(), RESULT_TEN);
@@ -1307,14 +1307,14 @@ HWTEST_F(BubbleTestTwoNg, GetRightRect001, TestSize.Level1)
     BubbleTestTwoNg::InitGetRectSetting(algorithm);
 
     algorithm.isHalfFoldHover_ = false;
-    Rect rect = algorithm.GetRightRect();
+    Rect rect = algorithm.GetRightRect(Dimension(0.0f));
     EXPECT_FLOAT_EQ(rect.Width(), RESULT_FORTY);
     EXPECT_FLOAT_EQ(rect.Height(), CHILDSIZE_ONE_HUNDRED_EIGHTY);
     EXPECT_FLOAT_EQ(rect.Left(), RESULT_ONE_HUNDRED_FIFTY);
     EXPECT_FLOAT_EQ(rect.Top(), RESULT_TEN);
 
     algorithm.isHalfFoldHover_ = true;
-    rect = algorithm.GetRightRect();
+    rect = algorithm.GetRightRect(Dimension(0.0f));
     EXPECT_FLOAT_EQ(rect.Width(), RESULT_FORTY);
     EXPECT_FLOAT_EQ(rect.Height(), SIZE_TWO_HUNDRED);
     EXPECT_FLOAT_EQ(rect.Left(), RESULT_ONE_HUNDRED_FIFTY);
@@ -1332,14 +1332,14 @@ HWTEST_F(BubbleTestTwoNg, GetLeftRect001, TestSize.Level1)
     BubbleTestTwoNg::InitGetRectSetting(algorithm);
 
     algorithm.isHalfFoldHover_ = false;
-    Rect rect = algorithm.GetLeftRect();
+    Rect rect = algorithm.GetLeftRect(Dimension(0.0f));
     EXPECT_FLOAT_EQ(rect.Width(), RESULT_FORTY);
     EXPECT_FLOAT_EQ(rect.Height(), CHILDSIZE_ONE_HUNDRED_EIGHTY);
     EXPECT_FLOAT_EQ(rect.Left(), RESULT_TEN);
     EXPECT_FLOAT_EQ(rect.Top(), RESULT_TEN);
 
     algorithm.isHalfFoldHover_ = true;
-    rect = algorithm.GetLeftRect();
+    rect = algorithm.GetLeftRect(Dimension(0.0f));
     EXPECT_FLOAT_EQ(rect.Width(), RESULT_FORTY);
     EXPECT_FLOAT_EQ(rect.Height(), SIZE_TWO_HUNDRED);
     EXPECT_FLOAT_EQ(rect.Left(), RESULT_TEN);
@@ -1843,5 +1843,223 @@ HWTEST_F(BubbleTestTwoNg, UpdateContentPositionRange001, TestSize.Level1)
     layoutAlgorithm->placement_ = Placement::RIGHT;
     layoutAlgorithm->UpdateContentPositionRange(xMin, xMax, yMin, yMax);
     EXPECT_EQ(xMin, 200.0 + BUBBLE_ARROW_HEIGHT.ConvertToPx());
+}
+
+/**
+ * @tc.name: BubblePatternUpdateArrowWidthTest001
+ * @tc.desc: Test BubblePattern::UpdateArrowWidth
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestTwoNg, BubblePatternUpdateArrowWidthTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create bubble frame node.
+     * @tc.expected: step1. Frame node is created successfully.
+     */
+    TestProperty testProperty;
+    RefPtr<FrameNode> frameNode = CreateBubbleNode(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Get BubblePattern from frame node.
+     * @tc.expected: step2. BubblePattern is not null.
+     */
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+
+    /**
+     * @tc.steps: step3. Update arrow width to 1.0f.
+     * @tc.expected: step3. Arrow width is updated correctly.
+     */
+    CalcDimension dimension = { 1.0f };
+    bubblePattern->UpdateArrowWidth(dimension);
+
+    /**
+     * @tc.steps: step4. Verify arrow width value in layout property.
+     * @tc.expected: step4. Arrow width value is 1.0f.
+     */
+    auto bubbleLayout = frameNode->GetLayoutPropertyPtr<BubbleLayoutProperty>();
+    ASSERT_NE(bubbleLayout, nullptr);
+
+    CalcDimension defaultValue = { 0.0f };
+    auto arrowWidthValue = bubbleLayout->GetArrowWidthValue(Dimension(defaultValue));
+    EXPECT_EQ(arrowWidthValue, Dimension(1.0f));
+}
+
+/**
+ * @tc.name: BubblePatternUpdateArrowHeightTest001
+ * @tc.desc: Test BubblePattern::UpdateArrowHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestTwoNg, BubblePatternUpdateArrowHeightTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create bubble frame node.
+     * @tc.expected: step1. Frame node is created successfully.
+     */
+    TestProperty testProperty;
+    RefPtr<FrameNode> frameNode = CreateBubbleNode(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Get BubblePattern from frame node.
+     * @tc.expected: step2. BubblePattern is not null.
+     */
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+
+    /**
+     * @tc.steps: step3. Update arrow height to 1.0f.
+     * @tc.expected: step3. Arrow height is updated correctly.
+     */
+    CalcDimension dimension = { 1.0f };
+    bubblePattern->UpdateArrowHeight(dimension);
+
+    /**
+     * @tc.steps: step4. Verify arrow height value in layout property.
+     * @tc.expected: step4. Arrow height value is 1.0f.
+     */
+    auto bubbleLayout = frameNode->GetLayoutPropertyPtr<BubbleLayoutProperty>();
+    ASSERT_NE(bubbleLayout, nullptr);
+
+    CalcDimension defaultValue = { 0.0f };
+    auto arrowHeightValue = bubbleLayout->GetArrowHeightValue(Dimension(defaultValue));
+    EXPECT_EQ(arrowHeightValue, Dimension(1.0f));
+}
+
+/**
+ * @tc.name: BubblePatternUpdateWidthTest001
+ * @tc.desc: Test BubblePattern::UpdateWidth
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestTwoNg, BubblePatternUpdateWidthTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create bubble frame node.
+     * @tc.expected: step1. Frame node is created successfully.
+     */
+    TestProperty testProperty;
+    RefPtr<FrameNode> frameNode = CreateBubbleNode(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Get BubblePattern from frame node.
+     * @tc.expected: step2. BubblePattern is not null.
+     */
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+
+    /**
+     * @tc.steps: step3. Add a child node to bubble.
+     * @tc.expected: step3. Child node is created and added successfully.
+     */
+    auto child = FrameNode::CreateFrameNode("child", 11, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(child, nullptr);
+    frameNode->AddChild(child);
+
+    /**
+     * @tc.steps: step4. Update bubble width to 1.0f.
+     * @tc.expected: step4. Bubble width is updated correctly.
+     */
+    CalcDimension dimension = { 1.0f };
+    bubblePattern->UpdateWidth(dimension);
+
+    /**
+     * @tc.steps: step5. Verify width value in measure property.
+     * @tc.expected: step5. Width value is 1.0f (due to measure property setup).
+     */
+    auto layoutProperty = child->GetLayoutProperty();
+    auto&& layoutConstraint = layoutProperty->GetCalcLayoutConstraint();
+    auto width = layoutConstraint->selfIdealSize->Width();
+    EXPECT_DOUBLE_EQ(width->GetDimension().ConvertToPx(), 1.0f);
+}
+
+/**
+ * @tc.name: BubblePatternUpdateRadiusTest001
+ * @tc.desc: Test BubblePattern::UpdateRadius
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestTwoNg, BubblePatternUpdateRadiusTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create bubble frame node.
+     * @tc.expected: step1. Frame node is created successfully.
+     */
+    TestProperty testProperty;
+    RefPtr<FrameNode> frameNode = CreateBubbleNode(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Get BubblePattern from frame node.
+     * @tc.expected: step2. BubblePattern is not null.
+     */
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+
+    /**
+     * @tc.steps: step3. Update bubble radius to 1.0f.
+     * @tc.expected: step3. Bubble radius is updated correctly.
+     */
+    CalcDimension dimension = { 1.0f };
+    bubblePattern->UpdateRadius(dimension);
+
+    /**
+     * @tc.steps: step4. Verify radius value in layout property.
+     * @tc.expected: step4. Radius value is 1.0f.
+     */
+    auto bubbleLayout = frameNode->GetLayoutPropertyPtr<BubbleLayoutProperty>();
+    ASSERT_NE(bubbleLayout, nullptr);
+
+    CalcDimension defaultValue = { 0.0f };
+    auto radiusValue = bubbleLayout->GetRadiusValue(Dimension(defaultValue));
+    EXPECT_EQ(radiusValue, Dimension(1.0f));
+}
+
+/**
+ * @tc.name: BubblePatternUpdateBubbleTextTest001
+ * @tc.desc: Test BubblePattern::UpdateBubbleText
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestTwoNg, BubblePatternUpdateBubbleTextTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create bubble frame node.
+     * @tc.expected: step1. Frame node is created successfully.
+     */
+    TestProperty testProperty;
+    RefPtr<FrameNode> frameNode = CreateBubbleNode(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Get BubblePattern from frame node.
+     * @tc.expected: step2. BubblePattern is not null.
+     */
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+
+    /**
+     * @tc.steps: step3. Create and set message node.
+     * @tc.expected: step3. Message node is created and set successfully.
+     */
+    auto messageNode = FrameNode::CreateFrameNode("messageNode", 11, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(messageNode, nullptr);
+
+    bubblePattern->SetMessageNode(messageNode);
+
+    /**
+     * @tc.steps: step4. Update bubble text color to BLACK.
+     * @tc.expected: step4. Text color is updated correctly.
+     */
+    bubblePattern->UpdateBubbleText(Color::BLACK);
+
+    /**
+     * @tc.steps: step5. Verify text color in message node layout property.
+     * @tc.expected: step5. Text color is BLACK.
+     */
+    auto textProperLayout = messageNode->GetLayoutPropertyPtr<TextLayoutProperty>();
+    ASSERT_NE(textProperLayout, nullptr);
+
+    auto textColorValue = textProperLayout->GetTextColorValue(Color::RED);
+    EXPECT_EQ(textColorValue, Color::BLACK);
 }
 } // namespace OHOS::Ace::NG

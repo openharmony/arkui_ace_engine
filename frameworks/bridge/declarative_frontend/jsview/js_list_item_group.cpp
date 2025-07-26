@@ -225,13 +225,13 @@ void JSListItemGroup::SetDivider(const JSCallbackInfo& args)
         } else {
             setByUser = true;
         }
-        NG::ListItemGroupModelNG::GetInstance()->SetDividerColorByUser(setByUser);
 
         ConvertFromJSValue(obj->GetProperty("startMargin"), divider.startMargin, resObjStartMargin);
 
         ConvertFromJSValue(obj->GetProperty("endMargin"), divider.endMargin, resObjEndMargin);
 
         if (SystemProperties::ConfigChangePerform()) {
+            NG::ListItemGroupModelNG::GetInstance()->SetDividerColorByUser(setByUser);
             NG::ListItemGroupModelNG::GetInstance()->ParseResObjDividerStrokeWidth(resObjStrokeWidth);
             NG::ListItemGroupModelNG::GetInstance()->ParseResObjDividerColor(resObjColor);
             NG::ListItemGroupModelNG::GetInstance()->ParseResObjDividerStartMargin(resObjStartMargin);

@@ -75,6 +75,17 @@ ohos_unittest("ui_input_event_test") {
     "oh_arkui_uiinputevent_gety_test.cpp",
     "oh_arkui_uiinputevent_getybyindex_test.cpp",
     "oh_arkui_uiinputevent_gewindowxbyindex_test.cpp",
+    "oh_arkui_uiinputevent_getmodifierkeystates_test.cpp",
+    "oh_arkui_uiinputevent_gettargetdisplayid_test.cpp",
+    "oh_arkui_axisevent_setpropagation_test.cpp",
+    "oh_arkui_axisevent_getscrollstep_test.cpp",
+    "oh_arkui_pointerevent_destroyclonedevent_test.cpp",
+    "oh_arkui_pointerevent_setclonedeventlocalposition_test.cpp",
+    "oh_arkui_pointerevent_setclonedeventlocalpositionbyindex_test.cpp",
+    "oh_arkui_pointerevent_setclonedeventactiontype_test.cpp",
+    "oh_arkui_pointerevent_setclonedeventchangedfingerid_test.cpp",
+    "oh_arkui_pointerevent_setclonedeventfingeridbyindex_test.cpp",
+    "oh_arkui_pointerevent_postclonedevent_test.cpp",
   ]
 
   configs = [

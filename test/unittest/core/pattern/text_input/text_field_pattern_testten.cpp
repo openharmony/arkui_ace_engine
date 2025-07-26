@@ -929,6 +929,7 @@ HWTEST_F(TextFieldPatternTestten, GetCancelImageText001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(textFieldPattern, nullptr);
+    textFieldPattern->InitTheme();
     auto result = textFieldPattern->GetCancelImageText();
     EXPECT_EQ(result, "");
 }
@@ -2580,5 +2581,52 @@ HWTEST_F(TextFieldPatternTestten, IsStopEditWhenCloseKeyboard001, TestSize.Level
     ASSERT_NE(textFieldPattern, nullptr);
     auto result = textFieldPattern->IsStopEditWhenCloseKeyboard();
     EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: OnDirtyLayoutWrapperSwap002
+ * @tc.desc: Test OnDirtyLayoutWrapperSwap
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestten, OnDirtyLayoutWrapperSwap002, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextFieldPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+    auto dirty = AceType::MakeRefPtr<LayoutWrapperNode>(
+        frameNode, AceType::MakeRefPtr<GeometryNode>(), AceType::MakeRefPtr<LayoutProperty>());
+    ASSERT_NE(dirty, nullptr);
+    auto layoutAlgorithm = AceType::MakeRefPtr<TextAreaLayoutAlgorithm>();
+    dirty->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+    auto paragraph1 = AceType::MakeRefPtr<MockParagraph>();
+    layoutAlgorithm->paragraph_ = paragraph1;
+    auto textDragNode0 = FrameNode::GetOrCreateFrameNode("DragNode", ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextDragPattern>(); });
+    ASSERT_NE(dirty, nullptr);
+    textFieldPattern->dragNode_ = textDragNode0;
+    auto dragPattern = textDragNode0->GetPattern<TextDragPattern>();
+    ASSERT_NE(dragPattern, nullptr);
+
+    DirtySwapConfig config;
+    config.skipMeasure = false;
+    dirty->skipMeasureContent_ = false;
+    textFieldPattern->OnDirtyLayoutWrapperSwap(dirty, config);
+    auto dragParagraph = dragPattern->GetParagraph().Upgrade();
+    ASSERT_NE(dragParagraph, nullptr);
+    EXPECT_EQ(paragraph1, dragParagraph);
+
+    auto paintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    paintProperty->UpdateInputStyle(InputStyle::INLINE);
+    auto paragraph2 = AceType::MakeRefPtr<MockParagraph>();
+    layoutAlgorithm->paragraph_ = paragraph2;
+    dragPattern->CreateNodePaintMethod();
+    ASSERT_NE(dragPattern->overlayModifier_, nullptr);
+    dragPattern->overlayModifier_->SetAnimateFlag(true);
+    textFieldPattern->OnDirtyLayoutWrapperSwap(dirty, config);
+    ASSERT_NE(dragPattern->animatingParagraph_, nullptr);
+    dragParagraph = dragPattern->GetParagraph().Upgrade();
+    EXPECT_EQ(paragraph1, dragParagraph);
 }
 } // namespace OHOS::Ace::NG

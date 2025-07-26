@@ -2820,6 +2820,9 @@ bool WebPattern::WebOnKeyEvent(const KeyEvent& keyEvent)
     TAG_LOGD(AceLogTag::ACE_WEB,
         "WebPattern::WebOnKeyEvent keyEvent:%{public}s", keyEvent.ToString().c_str());
     webKeyEvent_.push_back(keyEvent);
+    if (keyEvent.code == KeyCode::KEY_TAB && keyEvent.action == KeyAction::DOWN) {
+        tabKeyEvent_ = keyEvent;
+    }
     std::vector<int32_t> pressedCodes;
     for (auto pCode : keyEvent.pressedCodes) {
         pressedCodes.push_back(static_cast<int32_t>(pCode));
@@ -2873,6 +2876,30 @@ void WebPattern::KeyboardReDispatch(
     }
     TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::KeyboardReDispatch erase key");
     webKeyEvent_.erase((++keyEvent).base());
+}
+
+void WebPattern::OnTakeFocus(const std::shared_ptr<OHOS::NWeb::NWebKeyEvent>& event)
+{
+    CHECK_NULL_VOID(event);
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto taskExecutor = pipelineContext->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    if (static_cast<int32_t>(tabKeyEvent_.code) != event->GetKeyCode() ||
+        static_cast<int32_t>(tabKeyEvent_.action) != event->GetAction()) {
+        return;
+    }
+    taskExecutor->PostTask([context = AceType::WeakClaim(pipelineContext),
+        event = tabKeyEvent_] () {
+        auto pipelineContext = context.Upgrade();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->ReDispatch(const_cast<KeyEvent&>(event));
+        },
+        TaskExecutor::TaskType::UI, "ArkUIWebKeyboardReDispatch");
 }
 
 void WebPattern::WebRequestFocus()
@@ -6898,7 +6925,6 @@ void WebPattern::UpdateFocusedAccessibilityId(int64_t accessibilityId)
             renderContext->ResetAccessibilityFocusRect();
             renderContext->UpdateAccessibilityFocus(false);
         } else {
-            renderContext->UpdateAccessibilityFocus(false);
             renderContext->UpdateAccessibilityFocusRect(rect);
             renderContext->UpdateAccessibilityFocus(true);
         }
@@ -7815,8 +7841,8 @@ void WebPattern::DumpGpuInfo()
     std::ostringstream oss;
     oss << std::fixed << std::setprecision(DECIMAL_POINTS) << totalSize; // 转换成保留两位小数的字符串
     std::string formattedSize = oss.str();                               // 获取格式化后的字符串
-    DumpLog::GetInstance().Print("------------GpuMemoryInfo-----------");
-    DumpLog::GetInstance().Print("Total Gpu Memory size: " + formattedSize + "(MB)");
+    DumpLog::GetInstance().AddDesc("------------GpuMemoryInfo-----------");
+    DumpLog::GetInstance().AddDesc("Total Gpu Memory size: " + formattedSize + "(MB)");
 }
 
 void WebPattern::DumpSurfaceInfo()
@@ -8058,6 +8084,11 @@ void WebPattern::AdjustRotationRenderFit(WindowSizeChangeReason type)
     if (type != WindowSizeChangeReason::ROTATION) {
         return;
     }
+    if (!isAttachedToMainTree_ || !isVisible_) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::AdjustRotationRenderFit not support");
+        return;
+    }
+
     if (delegate_) {
         delegate_->MaximizeResize();
     }
@@ -8065,7 +8096,7 @@ void WebPattern::AdjustRotationRenderFit(WindowSizeChangeReason type)
     bool isNwebEx = delegate_->IsNWebEx();
     TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::AdjustRotationRenderFit, isNwebEx: %{public}d", isNwebEx);
     if (isNwebEx && SystemProperties::GetDeviceType() == DeviceType::TWO_IN_ONE &&
-        isVisible_ && renderMode_ == RenderMode::ASYNC_RENDER) {
+        renderMode_ == RenderMode::ASYNC_RENDER) {
         isRotating_ = true;
         TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::AdjustRotationRenderFit, webId: %{public}d", GetWebId());
         if (renderContextForSurface_) {
@@ -8520,5 +8551,10 @@ void WebPattern::SetTouchHandleExistState(bool touchHandleExist)
     if (delegate_) {
         delegate_->SetTouchHandleExistState(touchHandleExist);
     }
+}
+
+bool WebPattern::IsShowHandle()
+{
+    return webSelectOverlay_ && webSelectOverlay_->IsShowHandle();
 }
 } // namespace OHOS::Ace::NG

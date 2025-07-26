@@ -29,6 +29,8 @@ constexpr int32_t CALL_ARG_1 = 1;
 constexpr int32_t CALL_ARG_2 = 2;
 constexpr int32_t CALL_ARG_3 = 3;
 constexpr int32_t CALL_ARG_4 = 4;
+constexpr int32_t CALL_ARG_5 = 5;
+constexpr int32_t CALL_ARG_6 = 6;
 constexpr char END_CHAR = '\0';
 
 ArkUINativeModuleValue WebBridge::SetJavaScriptAccess(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -1860,48 +1862,65 @@ void FreeScriptItemCharPtr(ArkUI_ScriptItemArray* values, ArkUI_Int32 size)
     }
 }
 
-ArkUINativeModuleValue WebBridge::SetJavaScriptOnDocumentStart(ArkUIRuntimeCallInfo* runtimeCallInfo)
+ArkUINativeModuleValue SetJavaScriptCommon(ArkUIRuntimeCallInfo* runtimeCallInfo,
+    std::function<void(ArkUINodeHandle, ArkUI_ScriptItemArray*, int32_t)> setter,
+    std::function<void(ArkUINodeHandle)> resetter)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
     Local<JSValueRef> scriptsArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
     Local<JSValueRef> scriptRulesArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_2);
+
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (!scriptsArg->IsArray(vm) || !scriptRulesArg->IsArray(vm)) {
-        GetArkUINodeModifiers()->getWebModifier()->resetJavaScriptOnDocumentStart(nativeNode);
+        resetter(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    std::vector<ArkUI_ScriptItemArray> scriptInfos;
+
     auto scriptsArr = panda::Local<panda::ArrayRef>(scriptsArg);
     auto scriptRulesArr = panda::Local<panda::ArrayRef>(scriptRulesArg);
     int32_t size = static_cast<int32_t>(scriptsArr->Length(vm));
-    std::vector<ArkUI_CharPtr> scriptRules;
+    std::vector<ArkUI_ScriptItemArray> scriptInfos;
+    std::vector<std::vector<ArkUI_CharPtr>> allScriptRules;
+
     for (int32_t i = 0; i < size; i++) {
-        ArkUI_ScriptItemArray info;
+        ArkUI_ScriptItemArray info { nullptr, nullptr, 0 };
         Local<JSValueRef> scriptVal = panda::ArrayRef::GetValueAt(vm, scriptsArr, i);
-        Local<JSValueRef> scriptRulesVal = panda::ArrayRef::GetValueAt(vm, scriptRulesArr, i);
         if (scriptVal->IsString(vm)) {
             std::string str = scriptVal->ToString(vm)->ToString(vm);
             info.script = ParseStringToCharPtr(str);
         }
+
+        Local<JSValueRef> scriptRulesVal = panda::ArrayRef::GetValueAt(vm, scriptRulesArr, i);
         if (scriptRulesVal->IsArray(vm)) {
             auto array = panda::Local<panda::ArrayRef>(scriptRulesVal);
             uint32_t scriptRuleSize = array->Length(vm);
-            ParseReferencedId(vm, static_cast<int32_t>(scriptRuleSize), array, scriptRules);
-            info.scriptRules = scriptRules.data();
-            info.scriptRulesSize = static_cast<int32_t>(scriptRules.size());
-            scriptRules.clear();
-        } else {
-            info.scriptRulesSize = 0;
+            std::vector<ArkUI_CharPtr> itemRules;
+            ParseReferencedId(vm, static_cast<int32_t>(scriptRuleSize), array, itemRules);
+            allScriptRules.push_back(std::move(itemRules));
+            auto& lastRules = allScriptRules.back();
+            info.scriptRules = lastRules.data();
+            info.scriptRulesSize = static_cast<int32_t>(lastRules.size());
         }
         scriptInfos.push_back(info);
     }
-    ArkUI_ScriptItemArray* values = scriptInfos.data();
-    GetArkUINodeModifiers()->getWebModifier()->setJavaScriptOnDocumentStart(nativeNode, values, size);
-    FreeScriptItemCharPtr(values, size);
+
+    setter(nativeNode, scriptInfos.data(), size);
+    FreeScriptItemCharPtr(scriptInfos.data(), size);
     return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue WebBridge::SetJavaScriptOnDocumentStart(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    auto setter = [](ArkUINodeHandle node, ArkUI_ScriptItemArray* values, int32_t size) {
+        GetArkUINodeModifiers()->getWebModifier()->setJavaScriptOnDocumentStart(node, values, size);
+    };
+    auto resetter = [](ArkUINodeHandle node) {
+        GetArkUINodeModifiers()->getWebModifier()->resetJavaScriptOnDocumentStart(node);
+    };
+    return SetJavaScriptCommon(runtimeCallInfo, setter, resetter);
 }
 
 ArkUINativeModuleValue WebBridge::ResetJavaScriptOnDocumentStart(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -1917,46 +1936,13 @@ ArkUINativeModuleValue WebBridge::ResetJavaScriptOnDocumentStart(ArkUIRuntimeCal
 
 ArkUINativeModuleValue WebBridge::SetJavaScriptOnDocumentEnd(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
-    Local<JSValueRef> scriptsArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
-    Local<JSValueRef> scriptRulesArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_2);
-    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
-    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    if (!scriptsArg->IsArray(vm) || !scriptRulesArg->IsArray(vm)) {
-        GetArkUINodeModifiers()->getWebModifier()->resetJavaScriptOnDocumentEnd(nativeNode);
-        return panda::JSValueRef::Undefined(vm);
-    }
-    std::vector<ArkUI_ScriptItemArray> scriptInfos;
-    auto scriptsArr = panda::Local<panda::ArrayRef>(scriptsArg);
-    auto scriptRulesArr = panda::Local<panda::ArrayRef>(scriptRulesArg);
-    int32_t size = static_cast<int32_t>(scriptsArr->Length(vm));
-    std::vector<ArkUI_CharPtr> scriptRules;
-    for (int32_t i = 0; i < size; i++) {
-        ArkUI_ScriptItemArray info;
-        Local<JSValueRef> scriptVal = panda::ArrayRef::GetValueAt(vm, scriptsArr, i);
-        Local<JSValueRef> scriptRulesVal = panda::ArrayRef::GetValueAt(vm, scriptRulesArr, i);
-        if (scriptVal->IsString(vm)) {
-            std::string str = scriptVal->ToString(vm)->ToString(vm);
-            info.script = ParseStringToCharPtr(str);
-        }
-        if (scriptRulesVal->IsArray(vm)) {
-            auto array = panda::Local<panda::ArrayRef>(scriptRulesVal);
-            uint32_t scriptRuleSize = array->Length(vm);
-            ParseReferencedId(vm, static_cast<int32_t>(scriptRuleSize), array, scriptRules);
-            info.scriptRules = scriptRules.data();
-            info.scriptRulesSize = static_cast<int32_t>(scriptRules.size());
-            scriptRules.clear();
-        } else {
-            info.scriptRulesSize = 0;
-        }
-        scriptInfos.push_back(info);
-    }
-    ArkUI_ScriptItemArray* values = scriptInfos.data();
-    GetArkUINodeModifiers()->getWebModifier()->setJavaScriptOnDocumentEnd(nativeNode, values, size);
-    FreeScriptItemCharPtr(values, size);
-    return panda::JSValueRef::Undefined(vm);
+    auto setter = [](ArkUINodeHandle node, ArkUI_ScriptItemArray* values, int32_t size) {
+        GetArkUINodeModifiers()->getWebModifier()->setJavaScriptOnDocumentEnd(node, values, size);
+    };
+    auto resetter = [](ArkUINodeHandle node) {
+        GetArkUINodeModifiers()->getWebModifier()->resetJavaScriptOnDocumentEnd(node);
+    };
+    return SetJavaScriptCommon(runtimeCallInfo, setter, resetter);
 }
 
 ArkUINativeModuleValue WebBridge::ResetJavaScriptOnDocumentEnd(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -3804,7 +3790,7 @@ void ProcessBuffer(EcmaVM* vm, panda::Local<panda::ObjectRef> jsObj, RefPtr<WebR
         return;
 
     panda::Local<panda::ArrayBufferRef> arrayBuffer = value->ToObject(vm);
-    size_t size = arrayBuffer->ByteLength(vm);
+    auto size = arrayBuffer->ByteLength(vm);
     if (size > 0) {
         auto copyPtr = std::make_unique<char[]>(size);
         CHECK_NULL_VOID(copyPtr);
@@ -4007,6 +3993,86 @@ ArkUINativeModuleValue WebBridge::ResetOnBeforeUnload(ArkUIRuntimeCallInfo* runt
     }
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getWebModifier()->resetOnBeforeUnload(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue WebBridge::SetJavaScriptProxy(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    Local<JSValueRef> objectArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
+    Local<JSValueRef> nameArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_2);
+    Local<JSValueRef> methodListArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_3);
+    Local<JSValueRef> controllerArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_4);
+    Local<JSValueRef> asyncMethodListArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_5);
+    Local<JSValueRef> permissionArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_6);
+    if (!nodeArg->IsNativePointer(vm)) {
+        return panda::NativePointerRef::New(vm, nullptr);
+    }
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    if (frameNode == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "SetJavaScriptProxy: frameNode is null");
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto runtime = Framework::JsiDeclarativeEngineInstance::GetCurrentRuntime();
+    if (!runtime) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "SetJavaScriptProxy: JsiRuntime not found");
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    std::function<void()> callback = [runtime, frameNodeWeak = AceType::WeakClaim(frameNode),
+                                         persistentObject = panda::CopyableGlobal(vm, objectArg),
+                                         persistentName = panda::CopyableGlobal(vm, nameArg),
+                                         persistentMethodList = panda::CopyableGlobal(vm, methodListArg),
+                                         persistentController = panda::CopyableGlobal(vm, controllerArg),
+                                         persistentAsyncMethodList = panda::CopyableGlobal(vm, asyncMethodListArg),
+                                         persistentPermission = panda::CopyableGlobal(vm, permissionArg)]() mutable {
+        const EcmaVM* vm = runtime->GetEcmaVm();
+        if (!vm) {
+            TAG_LOGE(AceLogTag::ACE_WEB, "JavaScriptProxy: vm is null");
+            return;
+        }
+        panda::LocalScope scope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(frameNodeWeak.Upgrade());
+        Local<JSValueRef> localController = persistentController.ToLocal();
+        Local<JSValueRef> localObject = persistentObject.ToLocal();
+        Local<JSValueRef> localName = persistentName.ToLocal();
+        Local<JSValueRef> localMethodList = persistentMethodList.ToLocal();
+        Local<JSValueRef> localAsyncMethodList = persistentAsyncMethodList.ToLocal();
+        Local<JSValueRef> localPermission = persistentPermission.ToLocal();
+        if (!localController->IsObject(vm)) {
+            TAG_LOGE(AceLogTag::ACE_WEB, "JavaScriptProxy: controller is not an object");
+            return;
+        }
+        Local<panda::ObjectRef> controllerObj = localController->ToObject(vm);
+        Local<panda::StringRef> jsProxyKey = panda::StringRef::NewFromUtf8(vm, "jsProxy");
+        Local<panda::JSValueRef> jsProxyFuncVal = controllerObj->Get(vm, jsProxyKey);
+        if (!jsProxyFuncVal->IsFunction(vm)) {
+            TAG_LOGE(AceLogTag::ACE_WEB, "JavaScriptProxy: jsProxy is not a function");
+            return;
+        }
+        Local<panda::FunctionRef> jsProxyFunc = jsProxyFuncVal->ToObject(vm);
+        auto func = panda::CopyableGlobal(vm, Local<panda::FunctionRef>(jsProxyFunc));
+        Local<JSValueRef> argv[] = { localObject, localName, localMethodList, localAsyncMethodList, localPermission };
+        func->Call(vm, controllerObj, argv, CALL_ARG_5);
+    };
+    GetArkUINodeModifiers()->getWebModifier()->setJavaScriptProxy(nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue WebBridge::ResetJavaScriptProxy(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    if (!nodeArg->IsNativePointer(vm)) {
+        return panda::NativePointerRef::New(vm, nullptr);
+    }
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getWebModifier()->resetJavaScriptProxy(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

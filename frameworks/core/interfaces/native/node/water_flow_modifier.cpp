@@ -520,7 +520,9 @@ ArkUI_WaterFlowSectionOption GetWaterFlowSectionOptions(ArkUINodeHandle node)
     ArkUI_WaterFlowSectionOption option;
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, option);
-    auto newSection = WaterFlowModelNG::GetOrCreateWaterFlowSections(frameNode)->GetSectionInfo();
+    auto sections = WaterFlowModelNG::GetOrCreateWaterFlowSections(frameNode);
+    CHECK_NULL_RETURN(sections, option);
+    auto newSection = sections->GetSectionInfo();
     auto sectionsCount = newSection.size();
     option.sections.resize(sectionsCount);
     for (size_t i = 0; i < sectionsCount; ++i) {

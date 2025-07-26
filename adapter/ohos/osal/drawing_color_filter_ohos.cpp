@@ -15,10 +15,25 @@
 
 #include "drawing_color_filter_ohos.h"
 
+#if defined(ACE_STATIC)
+#include "color_filter_ani/ani_color_filter.h"
+#endif
 #include "color_filter_napi/js_color_filter.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 
 namespace OHOS::Ace {
+
+#if defined(ACE_STATIC)
+RefPtr<DrawingColorFilter> DrawingColorFilter::CreateDrawingColorFilterFromAni(void* aniAddr)
+{
+    CHECK_NULL_RETURN(aniAddr, nullptr);
+    auto* aniColorFilter = reinterpret_cast<OHOS::Rosen::Drawing::AniColorFilter*>(aniAddr);
+    CHECK_NULL_RETURN(aniColorFilter, nullptr);
+    auto colorFilter = aniColorFilter->GetColorFilter();
+    return AceType::MakeRefPtr<DrawingColorFilterOhos>(colorFilter);
+}
+#endif
+
 RefPtr<DrawingColorFilter> DrawingColorFilter::CreateDrawingColorFilter(void* sptrAddr)
 {
     CHECK_NULL_RETURN(sptrAddr, nullptr);

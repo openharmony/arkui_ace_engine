@@ -24,8 +24,7 @@
 #include "base/utils/noncopyable.h"
 
 namespace OHOS::Ace {
-
-using AceVsyncCallback = std::function<void(uint64_t, uint32_t)>;
+using AceVsyncCallback = std::function<void(uint64_t, uint64_t)>;
 class AceView;
 class RenderNode;
 

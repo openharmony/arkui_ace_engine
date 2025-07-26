@@ -68,7 +68,10 @@ void SearchTextFieldPattern::InitDragEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->SetDraggable(true);
+    auto parentFrameNode = AceType::DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_VOID(parentFrameNode);
+    auto draggable = parentFrameNode->IsDraggable() || !parentFrameNode->IsCustomerSet();
+    host->SetDraggable(draggable);
     TextFieldPattern::InitDragEvent();
 }
 

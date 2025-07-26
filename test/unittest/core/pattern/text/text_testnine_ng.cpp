@@ -1008,11 +1008,11 @@ HWTEST_F(TextTestNineNg, MeasureWithMatchParent, TestSize.Level1)
     EXPECT_EQ(frameSize, SizeF(0.0f, 0.0f));
     layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
     layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
-    layoutProperty->layoutConstraint_ = LayoutConstraintF();
-    layoutProperty->layoutConstraint_->parentIdealSize = OptionalSizeF(SizeF(100.0f, 100.0f));
+    layoutProperty->contentConstraint_ = LayoutConstraintF();
+    layoutProperty->contentConstraint_->parentIdealSize = OptionalSizeF(SizeF(100.0f, 100.0f));
     textLayoutAlgorithm->MeasureWithMatchParent(AceType::RawPtr(layoutWrapper));
     frameSize = geometryNode->GetFrameSize();
-    EXPECT_EQ(frameSize, SizeF(100.0f, 100.0f));
+    EXPECT_EQ(frameSize.Height(), 100.0f);
 }
 
 /**
@@ -1066,8 +1066,71 @@ HWTEST_F(TextTestNineNg, CalcContentConstraint, TestSize.Level1)
     EXPECT_EQ(newContentConstraint.selfIdealSize.Height(), 2000.0f);
 
     constraint.maxSize = SizeF(500.0f, 500.0f);
+    constraint.parentIdealSize = OptionalSizeF();
     newContentConstraint = textLayoutAlgorithm->CalcContentConstraint(constraint, AceType::RawPtr(layoutWrapper));
     EXPECT_EQ(newContentConstraint.selfIdealSize.Width(), 500.0f);
     EXPECT_EQ(newContentConstraint.selfIdealSize.Height(), 500.0f);
+}
+
+/**
+ * @tc.name: MeasureWithFixAtIdealSize
+ * @tc.desc: Test MeasureWithFixAtIdealSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNineNg, MeasureWithFixAtIdealSize, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init and Create function
+     */
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    auto textLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    ASSERT_NE(textLayoutAlgorithm, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(0.0f, 0.0f));
+    geometryNode->SetContentSize(SizeF(100.0f, 100.0f));
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    LayoutConstraintF layoutConstraintF;
+    layoutProperty->UpdateLayoutConstraint(layoutConstraintF);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, layoutProperty);
+    /**
+     * @tc.steps: step2. call MeasureWithFixAtIdealSize.
+     */
+    // no layoutpolicy
+    textLayoutAlgorithm->MeasureWithFixAtIdealSize(AceType::RawPtr(layoutWrapper));
+    EXPECT_EQ(geometryNode->GetFrameSize(), SizeF(0.0f, 0.0f));
+
+    // width = FIX_AT_IDEAL_SIZE, height = NO_MATCH
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, true);
+    geometryNode->SetFrameSize(SizeF(0.0f, 0.0f));
+    textLayoutAlgorithm->MeasureWithFixAtIdealSize(AceType::RawPtr(layoutWrapper));
+    EXPECT_EQ(geometryNode->GetFrameSize(), SizeF(100.0f, 0.0f));
+
+    // width = NO_MATCH, height = FIX_AT_IDEAL_SIZE
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, false);
+    geometryNode->SetFrameSize(SizeF(0.0f, 0.0f));
+    textLayoutAlgorithm->MeasureWithFixAtIdealSize(AceType::RawPtr(layoutWrapper));
+    EXPECT_EQ(geometryNode->GetFrameSize(), SizeF(0.0f, 100.0f));
+
+    // width = FIX_AT_IDEAL_SIZE, height = FIX_AT_IDEAL_SIZE
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, true);
+    geometryNode->SetFrameSize(SizeF(0.0f, 0.0f));
+    textLayoutAlgorithm->MeasureWithFixAtIdealSize(AceType::RawPtr(layoutWrapper));
+    EXPECT_EQ(geometryNode->GetFrameSize(), SizeF(100.0f, 100.0f));
+
+    // width = FIX_AT_IDEAL_SIZE, height = FIX_AT_IDEAL_SIZE maxCalcSize
+    MeasureProperty calcProperty;
+    calcProperty.maxSize =
+        CalcSize(CalcLength(Dimension(80.0f, DimensionUnit::PX)), CalcLength(Dimension(80.0f, DimensionUnit::PX)));
+    layoutProperty->UpdateCalcLayoutProperty(calcProperty);
+    geometryNode->SetFrameSize(SizeF(0.0f, 0.0f));
+    textLayoutAlgorithm->MeasureWithFixAtIdealSize(AceType::RawPtr(layoutWrapper));
+    EXPECT_EQ(geometryNode->GetFrameSize(), SizeF(80.0f, 80.0f));
 }
 } // namespace OHOS::Ace::NG

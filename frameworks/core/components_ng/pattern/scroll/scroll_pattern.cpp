@@ -1732,7 +1732,7 @@ void ScrollPattern::TriggerScrollBarDisplay()
 Offset ScrollPattern::GetFreeScrollOffset() const
 {
     if (freeScroll_) {
-        auto res = freeScroll_->GetOffset();
+        auto&& res = freeScroll_->GetLayoutOffset();
         return { Dimension(-res.GetX()).ConvertToVp(), Dimension(-res.GetY()).ConvertToVp() };
     }
     return {};
@@ -1775,7 +1775,7 @@ bool ScrollPattern::FreeScrollPage(bool reverse, bool smooth)
     }
     return true;
 }
-bool ScrollPattern::FreeScrollToEdge(ScrollEdgeType type, bool smooth, const std::optional<float>& velocity)
+bool ScrollPattern::FreeScrollToEdge(ScrollEdgeType type, bool smooth, std::optional<float> velocity)
 {
     CHECK_NULL_RETURN(freeScroll_, false);
     auto pos = freeScroll_->GetOffset();
@@ -1796,6 +1796,10 @@ bool ScrollPattern::FreeScrollToEdge(ScrollEdgeType type, bool smooth, const std
             break;
     }
     if (smooth) {
+        if (velocity) {
+            constexpr float VELOCITY_TO_SPRING_RATIO = 100.0f;
+            *velocity /= VELOCITY_TO_SPRING_RATIO; // Adjust velocity for smooth scrolling
+        }
         freeScroll_->ScrollTo(pos, velocity);
     } else {
         freeScroll_->SetOffset(pos);

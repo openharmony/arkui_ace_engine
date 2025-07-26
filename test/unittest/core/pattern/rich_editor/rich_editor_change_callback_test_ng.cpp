@@ -1220,44 +1220,6 @@ HWTEST_F(RichEditorChangeCallbackTestNg, HandleOnEditChanged005, TestSize.Level1
 }
 
 /**
- * @tc.name: StopEditingTest
- * @tc.desc: test StopEditing
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorChangeCallbackTestNg, StopEditingTest, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. get richEditor controller
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto richEditorController = richEditorPattern->GetRichEditorController();
-    ASSERT_NE(richEditorController, nullptr);
-    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
-    ASSERT_NE(focusHub, nullptr);
-
-    /**
-     * @tc.steps: step2. initalize span properties
-     */
-    TextSpanOptions options2;
-    options2.value = INIT_VALUE_1;
-
-    /**
-     * @tc.steps: step3. test add span
-     */
-    richEditorController->AddTextSpan(options2);
-    focusHub->RequestFocusImmediately();
-    EXPECT_TRUE(focusHub->IsCurrentFocus());
-    richEditorPattern->caretTwinkling_ = true;
-    richEditorController->StopEditing();
-
-    EXPECT_FALSE(richEditorPattern->caretTwinkling_);
-
-    ClearSpan();
-}
-
-/**
  * @tc.name: OnSubmitTest
  * @tc.desc: test OnSubmitTest
  * @tc.type: FUNC
@@ -1736,6 +1698,56 @@ HWTEST_F(RichEditorChangeCallbackTestNg, HandleSurfaceChanged001, TestSize.Level
             cases[i][0], cases[i][1], cases[i][2], cases[i][3], WindowSizeChangeReason::DRAG);
         EXPECT_NE(richEditorPattern, nullptr);
     }
+}
+
+/**
+ * @tc.name: IsStopBackPress001
+ * @tc.desc: test IsStopBackPress
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorChangeCallbackTestNg, IsStopBackPress001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->isStopBackPress_ = false;
+    richEditorPattern->isCustomKeyboardAttached_ = true;
+    auto result = richEditorPattern->OnBackPressed();
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: OnBackPressed001
+ * @tc.desc: test OnBackPressed
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorChangeCallbackTestNg, OnBackPressed001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    EXPECT_EQ(richEditorPattern->OnBackPressed(), false);
+
+    richEditorPattern->textSelector_.Update(0, 1);
+    richEditorPattern->CalculateHandleOffsetAndShowOverlay();
+    richEditorPattern->ShowSelectOverlay(
+        richEditorPattern->textSelector_.firstHandle, richEditorPattern->textSelector_.secondHandle, false);
+    EXPECT_TRUE(richEditorPattern->SelectOverlayIsOn());
+    RectF rect(0, 0, 5, 5);
+    richEditorPattern->CreateHandles();
+    richEditorPattern->textSelector_.Update(0, 5);
+    richEditorPattern->textSelector_.Update(0, 5);
+    richEditorPattern->selectOverlay_->OnHandleMoveDone(rect, true);
+    EXPECT_EQ(richEditorPattern->OnBackPressed(), true);
+
+    auto func = []() {};
+    richEditorPattern->SetCustomKeyboard(func);
+    richEditorPattern->RequestCustomKeyboard();
+    EXPECT_EQ(richEditorPattern->OnBackPressed(), true);
+
+    richEditorPattern->imeShown_ = true;
+    EXPECT_EQ(richEditorPattern->OnBackPressed(), true);
 }
 
 } // namespace OHOS::Ace::NG

@@ -38,6 +38,7 @@ public:
     using EnableTransitionImpl = std::function<void(bool)>;
     using SetPlaybackPeriodFucImpl = std::function<void(int64_t, int64_t)>;
     using EnableAutoPlayImpl = std::function<void(bool)>;
+    using NotifyTransitionImpl = std::function<void()>;
 
     void SetStartPlaybackImpl(StartPlaybackImpl&& startPlaybackImpl)
     {
@@ -147,6 +148,19 @@ public:
         }
     }
 
+    void SetNotifyTransitionImpl(NotifyTransitionImpl&&
+        notifyTransitionImpl)
+    {
+        notifyTransitionImpl_ = std::move(notifyTransitionImpl);
+    }
+
+    void NotifyTransition()
+    {
+        if (notifyTransitionImpl_) {
+            notifyTransitionImpl_();
+        }
+    }
+
 private:
     StartPlaybackImpl startPlaybackImpl_;
     StopPlaybackImpl stopPlaybackImpl_;
@@ -157,6 +171,7 @@ private:
     EnableTransitionImpl enableTransitionImpl_;
     SetPlaybackPeriodFucImpl setPlaybackPeriodFucImpl_;
     EnableAutoPlayImpl enableAutoPlayImpl_;
+    NotifyTransitionImpl notifyTransitionImpl_;
 };
 
 } // namespace OHOS::Ace::NG

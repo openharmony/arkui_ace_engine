@@ -480,7 +480,7 @@ void PipelineContext::DetachNode(RefPtr<UINode>) {}
 
 void PipelineContext::Finish(bool autoFinish) const {}
 
-void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) {}
+void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount) {}
 
 void PipelineContext::FlushPipelineWithoutAnimation() {}
 
@@ -700,7 +700,7 @@ void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
 
 void PipelineContext::AddIgnoreLayoutSafeAreaBundle(IgnoreLayoutSafeAreaBundle&& bundle)
 {
-    if (MockPipelineContext::GetCurrent()->UseFlushUITasks()) 
+    if (MockPipelineContext::GetCurrent()->UseFlushUITasks())
     {
         taskScheduler_->AddIgnoreLayoutSafeAreaBundle(std::move(bundle));
     }
@@ -1173,7 +1173,7 @@ void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea, double positio
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, bool forceChange)
 {}
 
-void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount) {}
+void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint64_t frameCount) {}
 
 bool PipelineBase::ReachResponseDeadline() const
 {

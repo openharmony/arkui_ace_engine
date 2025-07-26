@@ -85,11 +85,13 @@ public:
     {
         if (makeFunc == nullptr) {
             makeFunc_ = std::nullopt;
-            contentModifierNode_ = nullptr;
             OnModifyDone();
             return;
         }
         makeFunc_ = std::move(makeFunc);
+        if (ratingModifier_) {
+            ratingModifier_->SetUseContentModifier(true);
+        }
     }
 
     bool UseContentModifier()

@@ -181,7 +181,8 @@ const char* BOTTOM_RIGHT_PROPERTY = "bottomRight";
 const char* DEBUG_LINE_INFO_LINE = "$line";
 const char* DEBUG_LINE_INFO_PACKAGE_NAME = "$packageName";
 
-enum class MenuItemType { COPY, PASTE, CUT, SELECT_ALL, UNKNOWN, CAMERA_INPUT, AI_WRITER, TRANSLATE, SHARE, SEARCH };
+enum class MenuItemType { COPY, PASTE, CUT, SELECT_ALL, UNKNOWN, CAMERA_INPUT,
+    AI_WRITER, TRANSLATE, SHARE, SEARCH, ASK_CELIA };
 enum class BackgroundType { CUSTOM_BUILDER, COLOR };
 
 const int32_t NUM_0 = 0;
@@ -1825,6 +1826,7 @@ MenuItemType StringToMenuItemType(std::string_view id)
         { "OH_DEFAULT_TRANSLATE", MenuItemType::TRANSLATE },
         { "OH_DEFAULT_SHARE", MenuItemType::SHARE },
         { "OH_DEFAULT_SEARCH", MenuItemType::SEARCH },
+        { "OH_DEFAULT_ASK_CELIA", MenuItemType::ASK_CELIA },
     };
 
     auto item = keyMenuItemMap.find(id);
@@ -1870,9 +1872,12 @@ void UpdateInfoById(NG::MenuOptionsParam& menuOptionsParam, std::string_view id)
         case MenuItemType::SEARCH:
             menuOptionsParam.symbolId = theme->GetSearchSymbolId();
             break;
+        case MenuItemType::ASK_CELIA:
+            menuOptionsParam.symbolId = theme->GetAskCeliaSymbolId();
+            break;
         default:
             menuOptionsParam.labelInfo = menuOptionsParam.labelInfo.value_or("");
-            menuOptionsParam.symbolId = 0;
+            menuOptionsParam.symbolId = menuOptionsParam.symbolId.value_or(0);
             break;
     }
 }
@@ -10668,7 +10673,9 @@ void JSViewAbstract::GetJsAngleWithDefault(
 
 inline void JSViewAbstract::CheckAngle(std::optional<float>& angle)
 {
-    angle = std::clamp(angle.value(), 0.0f, MAX_ANGLE);
+    if (angle.has_value()) {
+        angle = std::clamp(angle.value(), 0.0f, MAX_ANGLE);
+    }
 }
 
 void JSViewAbstract::GetPerspective(
@@ -10950,6 +10957,7 @@ RefPtr<ThemeConstants> JSViewAbstract::GetThemeConstants(const JSRef<JSObject>& 
     auto cardId = CardScope::CurrentId();
     if (cardId != INVALID_CARD_ID) {
         auto container = Container::Current();
+        CHECK_NULL_RETURN(container, nullptr);
         auto weak = container->GetCardPipeline(cardId);
         auto cardPipelineContext = weak.Upgrade();
         CHECK_NULL_RETURN(cardPipelineContext, nullptr);
@@ -13001,9 +13009,7 @@ std::vector<NG::MenuOptionsParam> JSViewAbstract::ParseMenuItems(const JSRef<JSA
         std::string icon;
         ParseJsMedia(jsStartIcon, icon);
         menuOptionsParam.icon = icon;
-        if (!showShortcut) {
-           ParseMenuItemsSymbolId(jsStartIcon, menuOptionsParam);
-        }
+        ParseMenuItemsSymbolId(jsStartIcon, menuOptionsParam);
         menuParams.emplace_back(menuOptionsParam);
     }
     return menuParams;

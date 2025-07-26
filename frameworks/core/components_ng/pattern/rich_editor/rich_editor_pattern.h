@@ -809,7 +809,7 @@ public:
     void SetSelection(int32_t start, int32_t end, const std::optional<SelectionOptions>& options = std::nullopt,
         bool isForward = false) override;
     bool ResetOnInvalidSelection(int32_t start, int32_t end);
-    bool IsShowHandle();
+    bool IsShowHandle() override;
     void UpdateSelectionInfo(int32_t start, int32_t end);
     bool IsEditing();
     std::u16string GetLeftTextOfCursor(int32_t number) override;
@@ -909,7 +909,6 @@ public:
     void CopySelectionMenuParams(SelectOverlayInfo& selectInfo, TextResponseType responseType);
     std::function<void(Offset)> GetThumbnailCallback() override;
     void InitAiSelection(const Offset& globalOffset, bool isBetweenSelection = false);
-    bool CheckAIPreviewMenuEnable();
     void CreateDragNode();
     float GetMaxSelectedWidth();
     void InitDragShadow(const RefPtr<FrameNode>& host, const RefPtr<FrameNode>& dragNode, bool isDragShadowNeeded,
@@ -1906,6 +1905,7 @@ private:
     std::unique_ptr<StyleManager> styleManager_;
     bool requestFocusBySingleClick_ = false;
     std::optional<float> lastCaretPos_ = std::nullopt;
+    int32_t touchedFingerCount_ = 0;
 #if defined(IOS_PLATFORM)
     TextCompose compose_;
     bool unmarkText_;

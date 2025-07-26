@@ -2560,7 +2560,7 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
         aceView_->SetCreateTime(createTime_);
     }
     resRegister_ = aceView_->GetPlatformResRegister();
-    auto uiTranslateManager = std::make_shared<UiTranslateManagerImpl>();
+    auto uiTranslateManager = std::make_shared<UiTranslateManagerImpl>(taskExecutor_);
 #ifndef NG_BUILD
     if (useNewPipeline_) {
         pipelineContext_ = AceType::MakeRefPtr<NG::PipelineContext>(
@@ -3409,6 +3409,7 @@ void AceContainer::ProcessColorModeUpdate(
     configurationChange.colorModeUpdate = true;
     if (SystemProperties::ConfigChangePerform()) {
         // reread all cache color of ark theme when configuration updates
+        ContainerScope scope(instanceId_);
         NG::TokenThemeStorage::GetInstance()->CacheResetColor();
     } else {
         // clear cache of ark theme instances when configuration updates

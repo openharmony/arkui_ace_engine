@@ -185,7 +185,6 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             posMap_->ClearPosMap();
         }
     }
-
     // In the secondary layout scenario, the previous contentMainSize_ is used as the next prevContentMainSize_.
     prevContentMainSize_ = contentMainSize_;
     
@@ -209,6 +208,10 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     // Frame expansion will be determined after Layout.
     size.MinusHeight(expandHeight);
     layoutWrapper->GetGeometryNode()->SetFrameSize(size);
+
+    if (listLayoutProperty->HasCacheRange()) {
+        ScrollableUtils::DisableLazyForEachBuildCache(layoutWrapper->GetHostNode());
+    }
 
     // set list cache info.
     SetCacheCount(layoutWrapper, listLayoutProperty->GetCachedCountWithDefault());
@@ -915,7 +918,7 @@ void ListLayoutAlgorithm::GetStartIndexInfo(int32_t& index, float& pos, bool& is
 void ListLayoutAlgorithm::GetEndIndexInfo(int32_t& index, float& pos, bool& isGroup)
 {
     auto it = itemPosition_.rbegin();
-    if (!overScrollFeature_) {
+    if (!overScrollFeature_ && NearEqual(contentMainSize_, prevContentMainSize_)) {
         auto nextIt = it;
         ++nextIt;
         while (nextIt != itemPosition_.rend() &&
@@ -2279,8 +2282,11 @@ CachedIndexInfo ListLayoutAlgorithm::GetLayoutGroupCachedCount(LayoutWrapper* la
 float ListLayoutAlgorithm::GetLayoutCrossAxisSize(LayoutWrapper* layoutWrapper)
 {
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
-    auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
-    MinusPaddingToSize(padding, size);
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    if (layoutProperty) {
+        auto padding = layoutProperty->CreatePaddingAndBorder();
+        MinusPaddingToSize(padding, size);
+    }
     return GetCrossAxisSize(size, axis_);
 }
 
@@ -2415,6 +2421,25 @@ std::tuple<int32_t, int32_t, int32_t, int32_t> ListLayoutAlgorithm::LayoutCached
     return { startIndex, endIndex, cachedForward, cachedBackward };
 }
 
+void CheckMinCacheRange(LayoutWrapper* layoutWrapper, std::list<PredictLayoutItem>& list,
+    int32_t cacheCount, int32_t start, int32_t end)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto prop = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(prop);
+    int32_t minCacheCount = prop->GetMinCacheCount();
+    if (minCacheCount >= cacheCount) {
+        return;
+    }
+    for (auto it = list.begin(); it != list.end();) {
+        if (it->index < start - minCacheCount || it->index > end + minCacheCount) {
+            it = list.erase(it);
+        } else {
+            ++it;
+        }
+    }
+}
+
 std::list<PredictLayoutItem> ListLayoutAlgorithm::LayoutCachedItemV2(LayoutWrapper* layoutWrapper, int32_t cacheCount,
     bool show)
 {
@@ -2429,6 +2454,8 @@ std::list<PredictLayoutItem> ListLayoutAlgorithm::LayoutCachedItemV2(LayoutWrapp
         startIndex =
             LayoutCachedBackward(layoutWrapper, cacheCount, cachedBackward, startIndex, predictBuildList, show);
     }
+    CheckMinCacheRange(layoutWrapper, predictBuildList, cacheCount,
+        itemPosition_.begin()->first, itemPosition_.rbegin()->first);
     int32_t cacheStart = itemPosition_.begin()->first - startIndex;
     int32_t cacheEnd = endIndex - itemPosition_.rbegin()->first;
     if (isStackFromEnd_) {

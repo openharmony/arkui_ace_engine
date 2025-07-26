@@ -2135,7 +2135,7 @@ class OnAreaChangeModifier extends ModifierWithKey {
     }
   }
 }
-OnSizeChangeModifier.identity = Symbol('onAreaChange');
+OnAreaChangeModifier.identity = Symbol('onAreaChange');
 class OnGestureJudgeBeginModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -30798,7 +30798,8 @@ class ArkWebComponent extends ArkComponent {
     return this;
   }
   javaScriptProxy(javaScriptProxy) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebJavaScriptProxyModifier.identity, WebJavaScriptProxyModifier, javaScriptProxy);
+    return this;
   }
   password(password) {
     throw new Error('Method not implemented.');
@@ -32664,6 +32665,21 @@ class WebOnBeforeUnloadModifier extends ModifierWithKey {
   }
 }
 WebOnBeforeUnloadModifier.identity = Symbol('webOnBeforeUnloadModifier');
+
+class WebJavaScriptProxyModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().web.resetJavaScriptProxy(node);
+    } else {
+      getUINativeModule().web.setJavaScriptProxy(node, this.value.object, this.value.name, this.value.methodList,
+        this.value.controller, this.value?.asyncMethodList, this.value?.permission);
+    }
+  }
+}
+WebJavaScriptProxyModifier.identity = Symbol('webJavaScriptProxyModifier');
 
 // @ts-ignore
 if (globalThis.Web !== undefined) {

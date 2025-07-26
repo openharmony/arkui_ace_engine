@@ -145,7 +145,7 @@ public:
     virtual void SendCommand(const std::string& command) {};
     virtual void SaveSendCommandFunction(SendCommandFunction&& function) {};
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
-    virtual void SendPixelMap(std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>> maps) {};
+    virtual void SendPixelMap(const std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>>& maps) {};
 #endif
     virtual void GetVisibleInspectorTree() {};
 
@@ -179,9 +179,9 @@ protected:
     std::atomic<int32_t> webTaskNums_ = 0;
     std::string baseInfo_;
     std::map<int32_t, std::shared_ptr<UiTranslateManager>> translateManagerMap_;
-    std::shared_ptr<UiTranslateManager> translateManager_ = nullptr;
+    std::shared_mutex translateManagerMutex_;
     std::function<int32_t()> getInstanceIdCallback_;
-    static std::shared_mutex translateManagerMutex_;
+    std::shared_mutex getInstanceIdCallbackMutex_;
     std::function<std::string()> pipelineContextPageNameCallback_;
     SendCommandFunction sendCommandFunction_ = 0;
     std::function<uint32_t(const std::string& funcName, const std::string& params)> pipelineExeAppAIFunctionCallback_;

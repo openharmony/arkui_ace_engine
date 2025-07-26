@@ -472,4 +472,96 @@ HWTEST_F(RichEditorKeyboardTestNg, GetCrossOverHeight003, TestSize.Level1)
     EXPECT_EQ(richEditorPattern->GetCrossOverHeight(), 5.0f);
 }
 
+/**
+ * @tc.name: GetCrossOverHeight004
+ * @tc.desc: test GetCrossOverHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorKeyboardTestNg, GetCrossOverHeight004, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->status_ = Status::DRAGGING;
+    richEditorPattern->CreateHandles();
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    richEditorPattern->contentChange_ = true;
+    richEditorPattern->keyboardAvoidance_ = true;
+    EXPECT_EQ(richEditorPattern->GetCrossOverHeight(), 0.0f);
+    richEditorPattern->contentChange_ = false;
+    richEditorPattern->keyboardAvoidance_ = true;
+    EXPECT_EQ(richEditorPattern->GetCrossOverHeight(), 0.0f);
+    richEditorPattern->contentChange_ = false;
+    richEditorPattern->keyboardAvoidance_ = false;
+    EXPECT_EQ(richEditorPattern->GetCrossOverHeight(), 0.0f);
+    richEditorPattern->contentChange_ = true;
+    richEditorPattern->keyboardAvoidance_ = false;
+    EXPECT_EQ(richEditorPattern->GetCrossOverHeight(), 0.0f);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: GetCrossOverHeight005
+ * @tc.desc: test GetCrossOverHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorKeyboardTestNg, GetCrossOverHeight005, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->status_ = Status::DRAGGING;
+    richEditorPattern->CreateHandles();
+    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
+    richEditorPattern->contentChange_ = true;
+    richEditorPattern->keyboardAvoidance_ = true;
+    EXPECT_EQ(richEditorPattern->GetCrossOverHeight(), 0.0f);
+    richEditorPattern->contentChange_ = false;
+    richEditorPattern->keyboardAvoidance_ = true;
+    EXPECT_EQ(richEditorPattern->GetCrossOverHeight(), 0.0f);
+    richEditorPattern->contentChange_ = false;
+    richEditorPattern->keyboardAvoidance_ = false;
+    EXPECT_EQ(richEditorPattern->GetCrossOverHeight(), 0.0f);
+    richEditorPattern->contentChange_ = true;
+    richEditorPattern->keyboardAvoidance_ = false;
+    EXPECT_EQ(richEditorPattern->GetCrossOverHeight(), 0.0f);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: HandlePointWithTransform001
+ * @tc.desc: test HandlePointWithTransform
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorKeyboardTestNg, HandlePointWithTransform001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorNode_->tag_ = V2::WINDOW_SCENE_ETS_TAG;
+    OffsetF point(0, 0);
+    richEditorPattern->HandlePointWithTransform(point);
+    EXPECT_EQ(point.GetX(), 0);
+    EXPECT_EQ(point.GetY(), 0);
+}
+
+/**
+ * @tc.name: HandlePointWithTransform002
+ * @tc.desc: test HandlePointWithTransform
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorKeyboardTestNg, HandlePointWithTransform002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorNode_->tag_ = V2::SCREEN_ETS_TAG;
+    OffsetF point(0, 0);
+    richEditorPattern->HandlePointWithTransform(point);
+    EXPECT_EQ(point.GetX(), 0);
+    EXPECT_EQ(point.GetY(), 0);
+}
+
 }

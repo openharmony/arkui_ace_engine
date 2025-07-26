@@ -51,6 +51,10 @@ public:
     void Register(const WeakPtr<StatusBarClickListener>& listener) override;
     void UnRegister(const WeakPtr<StatusBarClickListener>& listener) override;
     void OnStatusBarClick() override;
+    std::set<std::pair<WeakPtr<StatusBarClickListener>, int32_t>> GetStatusBarClickListener() override
+    {
+        return listeners_;
+    }
 
 private:
     /**
@@ -61,6 +65,7 @@ private:
     std::set<std::pair<WeakPtr<StatusBarClickListener>, int32_t>> listeners_;
 
     std::shared_ptr<StatusBarEventSubscriber> eventFwkSubscriber_;
+    std::mutex listenersMutex_;
 
     ACE_DISALLOW_COPY_AND_MOVE(StatusBarEventProxyOhos);
 };

@@ -2455,4 +2455,11 @@ void WebModelNG::SetOnPdfLoadEvent(std::function<void(const BaseEventInfo* info)
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnPdfLoadEvent(std::move(uiCallback));
 }
+
+void WebModelNG::SetJavaScriptProxy(FrameNode* frameNode, std::function<void()>&& jsProxyCallback)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->SetJsProxyCallback(std::move(jsProxyCallback));
+}
 } // namespace OHOS::Ace::NG

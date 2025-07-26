@@ -54,6 +54,10 @@ public:
     void OnLayoutFinished(const OffsetF& adjustedOffset, const SizeF& scrollableArea);
 
     OffsetF GetOffset() const;
+    const OffsetF& GetLayoutOffset() const
+    {
+        return actualOffset_;
+    }
 
     /**
      * @brief Start a scroll animation to the final position.
@@ -110,7 +114,7 @@ private:
 
     ScrollPattern& pattern_;
     RefPtr<NodeAnimatablePropertyOffsetF> offset_;
-    OffsetF prevOffset_;
+    OffsetF actualOffset_; // actual displayed offset, adjusted by LayoutAlgorithm
     RefPtr<PanRecognizer> freePanGesture_;
     RefPtr<TouchEventImpl> freeTouch_;
     RefPtr<AxisAnimator> axisAnimator_; // to smooth out mouse wheel scrolls
@@ -121,8 +125,9 @@ public:
         DRAG,
         FLING,
         EXTERNAL_FLING, // used for external animations like scroller animation
-        BOUNCE, // used for bounce animation transitioned from FLING when reaching edge
+        BOUNCE,         // used for bounce animation transitioned from FLING when reaching edge
     };
+
 private:
     State state_ = State::IDLE;
     bool enableScroll_ = true;

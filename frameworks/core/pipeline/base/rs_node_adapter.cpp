@@ -28,25 +28,45 @@ namespace OHOS::Ace {
 
 std::shared_ptr<Rosen::RSNode> RsNodeAdapter::CreateCanvasNode()
 {
-    auto rsUIDirector = GetRSUIDirector();
-    if (rsUIDirector) {
-        auto rsUIContext = rsUIDirector->GetRSUIContext();
-        return Rosen::RSCanvasNode::Create(false, false, rsUIContext);
+    auto rsUIContext = GetRSUIContext();
+    if (rsUIContext) {
+        auto canvasNode = Rosen::RSCanvasNode::Create(false, false, rsUIContext);
+        if (canvasNode) {
+            canvasNode->SetSkipCheckInMultiInstance(true);
+        }
+        return canvasNode;
     }
     return Rosen::RSCanvasNode::Create();
 }
 
 std::shared_ptr<Rosen::RSNode> RsNodeAdapter::CreateRootNode()
 {
-    auto rsUIDirector = GetRSUIDirector();
-    if (rsUIDirector) {
-        auto rsUIContext = rsUIDirector->GetRSUIContext();
-        return Rosen::RSRootNode::Create(false, false, rsUIContext);
+    auto rsUIContext = GetRSUIContext();
+    if (rsUIContext) {
+        auto rootNode = Rosen::RSRootNode::Create(false, false, rsUIContext);
+        if (rootNode) {
+            rootNode->SetSkipCheckInMultiInstance(true);
+        }
+        return rootNode;
     }
     return Rosen::RSRootNode::Create();
 }
 
-std::shared_ptr<Rosen::RSUIDirector> RsNodeAdapter::GetRSUIDirector()
+std::shared_ptr<Rosen::RSNode> RsNodeAdapter::CreateSurfaceNode(
+    const Rosen::RSSurfaceNodeConfig& surfaceNodeConfig)
+{
+    auto rsUIContext = GetRSUIContext();
+    if (rsUIContext) {
+        auto surfaceNode = Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false, rsUIContext);
+        if (surfaceNode) {
+            surfaceNode->SetSkipCheckInMultiInstance(true);
+        }
+        return surfaceNode;
+    }
+    return Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false);
+}
+
+std::shared_ptr<Rosen::RSUIContext> RsNodeAdapter::GetRSUIContext()
 {
     std::shared_ptr<Rosen::RSUIDirector> rsUIDirector;
     auto currentContainer = Container::CurrentSafelyWithCheck();
@@ -61,6 +81,9 @@ std::shared_ptr<Rosen::RSUIDirector> RsNodeAdapter::GetRSUIDirector()
             rsUIDirector = contextNG->GetRSUIDirector();
         }
     }
-    return rsUIDirector;
+    if (rsUIDirector) {
+        return rsUIDirector->GetRSUIContext();
+    }
+    return nullptr;
 }
 }

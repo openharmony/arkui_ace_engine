@@ -51,6 +51,7 @@ public:
     }
 
     virtual void RequestFrame();
+    virtual void ForceFlushVsync(uint64_t nanoTimestamp, uint64_t frameCount) {}
 
     virtual void FlushFrameRate(int32_t rate, int32_t animatorExpectedFrameRate, int32_t rateTyte) {}
 
@@ -102,7 +103,7 @@ public:
         return false;
     }
 
-    virtual void OnVsync(uint64_t nanoTimestamp, uint32_t frameCount);
+    virtual void OnVsync(uint64_t nanoTimestamp, uint64_t frameCount);
 
     virtual void SetVsyncCallback(AceVsyncCallback&& callback);
 
@@ -232,7 +233,7 @@ public:
     virtual void Unlock() {}
 
     virtual void SetUiDvsyncSwitch(bool dvsyncSwitch);
-    
+
     virtual uint32_t GetStatusBarHeight() const
     {
         return 0;

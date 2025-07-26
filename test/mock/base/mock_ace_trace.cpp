@@ -22,6 +22,7 @@ void AceTraceBegin(const char* name) {}
 void AceTraceEnd() {}
 
 void AceTraceBeginCommercial(const char* name) {}
+
 void AceTraceEndCommercial() {}
 
 void AceAsyncTraceBegin(int32_t taskId, const char* name, bool isAnimationTrace) {}

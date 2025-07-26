@@ -741,6 +741,40 @@ HWTEST_F(TextTestNg, SpanStringGetSubSpanList002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: DumpSimplifyInfo001
+ * @tc.desc: test DumpSimplifyInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, DumpSimplifyInfo001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init textLayoutProp.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("host", 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto textLayoutProp = pattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. make !textvalue.empty() true
+     */
+    textLayoutProp->UpdateContent(CREATE_VALUE_W);
+
+    auto json = JsonUtil::CreateSharedPtrJson();
+    pattern->DumpSimplifyInfo(json);
+
+    /**
+     * @tc.steps: step3. verify result
+     * @expect json is not ""
+     */
+    EXPECT_TRUE(json->Contains("content"));
+    std::string  result = json->ToString();
+    EXPECT_EQ(result, "{\"content\":\"Hello World\"}");
+}
+
+/**
  * @tc.name: SpanStringGetSpan001
  * @tc.desc: test GetSpan
  * @tc.type: FUNC
@@ -994,4 +1028,37 @@ HWTEST_F(TextTestNg, UrlSpanApplyToSpanItem001, TestSize.Level1)
     urlSpan.ApplyToSpanItem(spanItem, SpanOperation::REMOVE);
     EXPECT_EQ(spanItem->urlOnRelease, nullptr);
 }
+
+/**
+ * @tc.name: GetSpanItemAttributeUseForHtml
+ * @tc.desc: Test GetSpanItemAttributeUseForHtml.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, GetSpanItemAttributeUseForHtml, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create the TextPattern.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. set GetSpanItemAttributeUseForHtml func param.
+     */
+    std::optional<TextStyle> textStyle = std::optional<TextStyle>(TextStyle());
+    textStyle->SetFontSize(Dimension(NG::TEXT_DEFAULT_FONT_SIZE));
+    textStyle->SetFontWeight(FontWeight::MEDIUM);
+    textStyle->SetLineHeight(Dimension(2.2));
+    NG::FontStyle fontStyle;
+    NG::TextLineStyle textLineStyle;
+    /**
+     * @tc.steps: step3. Excute function for GetSpanItemAttributeUseForHtml.
+     */
+    pattern->GetSpanItemAttributeUseForHtml(fontStyle, textLineStyle, textStyle);
+    EXPECT_EQ(fontStyle.GetFontSize(), Dimension(NG::TEXT_DEFAULT_FONT_SIZE));
+    EXPECT_EQ(fontStyle.GetFontWeight(), FontWeight::MEDIUM);
+    EXPECT_EQ(textLineStyle.GetLineHeight(), Dimension(2.2));
+}
+
 } // namespace OHOS::Ace::NG

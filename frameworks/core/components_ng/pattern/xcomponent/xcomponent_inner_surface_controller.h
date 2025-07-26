@@ -36,6 +36,7 @@ public:
         const std::string& surfaceId, int32_t& renderFitNumber, bool& isRenderFitNewVersionEnabled);
     static void RegisterNode(const std::string& surfaceId, const WeakPtr<FrameNode>& node);
     static void UnregisterNode(const std::string& surfaceId);
+    static int32_t GetSurfaceRotationBySurfaceId(const std::string& surfaceId, bool& isSurfaceLock);
 private:
     static std::unordered_map<std::string, WeakPtr<FrameNode>> nodeMap;
     static std::mutex mutex;

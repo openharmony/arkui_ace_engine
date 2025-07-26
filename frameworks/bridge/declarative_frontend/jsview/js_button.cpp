@@ -693,6 +693,9 @@ void JSButton::JsSize(const JSCallbackInfo& info)
 
 void JSButton::JsRadius(const JSCallbackInfo& info)
 {
+    if (!NG::ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
     JsRadius(info[0]);
 }
 

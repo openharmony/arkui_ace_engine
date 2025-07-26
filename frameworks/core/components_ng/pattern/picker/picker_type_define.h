@@ -81,6 +81,9 @@ struct PickerTextProperties {
 struct PickerBackgroundStyle {
     std::optional<Color> color;
     std::optional<NG::BorderRadiusProperty> borderRadius;
+    bool textColorSetByUser = false;
+    RefPtr<ResourceObject> colorResObj;
+    RefPtr<ResourceObject> borderRadiusResObj;
 };
 
 // textpicker column kind

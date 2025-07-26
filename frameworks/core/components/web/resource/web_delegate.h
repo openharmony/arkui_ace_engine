@@ -1228,6 +1228,8 @@ public:
 
     void KeyboardReDispatch(const std::shared_ptr<OHOS::NWeb::NWebKeyEvent>& event, bool isUsed);
 
+    void OnTakeFocus(const std::shared_ptr<OHOS::NWeb::NWebKeyEvent>& event);
+
     void OnCursorUpdate(double x, double y, double width, double height);
 
     void CloseCustomKeyboard()

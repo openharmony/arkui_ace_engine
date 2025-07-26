@@ -25,7 +25,6 @@
 #include "include/core/SkPictureRecorder.h"
 #include "include/core/SkRefCnt.h"
 #include "render_service_client/core/animation/rs_particle_params.h"
-#if defined(MODIFIER_NG)
 #include "render_service_client/core/modifier_ng/appearance/rs_alpha_modifier.h"
 #include "render_service_client/core/modifier_ng/appearance/rs_behind_window_filter_modifier.h"
 #include "render_service_client/core/modifier_ng/appearance/rs_mask_modifier.h"
@@ -33,9 +32,6 @@
 #include "render_service_client/core/modifier_ng/geometry/rs_frame_clip_modifier.h"
 #include "render_service_client/core/modifier_ng/geometry/rs_transform_modifier.h"
 #include "render_service_client/core/ui/rs_canvas_node.h"
-#else
-#include "core/components_ng/render/adapter/rosen_modifier_property.h"
-#endif
 #include "render_service_client/core/ui/rs_node.h"
 #include "render_service_client/core/ui/rs_texture_export.h"
 #include "render_service_client/core/ui/rs_ui_context.h"
@@ -199,13 +195,8 @@ public:
         rsNode_->SetVisible(visible);
     }
 
-#if defined(MODIFIER_NG)
     template<typename ModifierName, auto Setter, typename T>
     void AddOrUpdateModifier(std::shared_ptr<ModifierName>& modifier, const T& value);
-#else
-    template<typename ModifierName, typename T>
-    void SetAnimatableProperty(std::shared_ptr<ModifierName>& modifier, const T& value);
-#endif
 
     void FlushContentDrawFunction(CanvasDrawFunction&& contentDraw) override;
 
@@ -400,7 +391,6 @@ public:
     void CreateBackgroundPixelMap(const RefPtr<FrameNode>& customNode) override;
     void OnIsTransitionBackgroundUpdate(bool isTransitionBackground) override {}
     void OnBuilderBackgroundFlagUpdate(bool isBuilderBackground) override;
-    void OnBackgroundIgnoresLayoutSafeAreaEdgesUpdate(uint32_t edges) override;
 
     void ColorToRSColor(const Color& color, OHOS::Rosen::RSColor& rsColor);
     void OnBackgroundColorUpdate(const Color& value) override;
@@ -538,6 +528,8 @@ public:
     void RemoveFromTree() override;
 
     void SetNeedUseCmdlistDrawRegion(bool needUseCmdlistDrawRegion) override;
+
+    void UpdateCustomBackground() override;
 
 protected:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
@@ -715,13 +707,8 @@ protected:
     template<typename T, typename D>
     void SetGraphicModifier(std::shared_ptr<T>& modifier, D data);
 
-#if defined(MODIFIER_NG)
     void AddModifier(const std::shared_ptr<Rosen::ModifierNG::RSModifier>& modifier);
     void RemoveModifier(const std::shared_ptr<Rosen::ModifierNG::RSModifier>& modifier);
-#else
-    void AddModifier(const std::shared_ptr<Rosen::RSModifier>& modifier);
-    void RemoveModifier(const std::shared_ptr<Rosen::RSModifier>& modifier);
-#endif
 
     // helper function to update one of the graphic effects
     template<typename T, typename D>
@@ -757,6 +744,8 @@ protected:
     // Use rect to update the drawRegion rect at index.
     void UpdateDrawRegion(uint32_t index, const std::shared_ptr<Rosen::RectF>& rect);
     void NotifyHostTransformUpdated(bool changed = true);
+    void NotifyHostTransformUpdatedMultiThread(bool changed = true);
+    void SetFrontBlurFilterMultiThread();
     void InitAccessibilityFocusModidifer(const RoundRect&, const Color&, float);
     void InitFocusStateModidifer(const RoundRect&, const Color&, float);
     void InitFocusAnimationModidifer(const RoundRect&, const Color&, float);
@@ -825,7 +814,6 @@ protected:
     std::shared_ptr<OverlayTextModifier> overlayTextModifier_ = nullptr;
     std::shared_ptr<GradientStyleModifier> gradientStyleModifier_;
 
-#if defined(MODIFIER_NG)
     std::shared_ptr<Rosen::ModifierNG::RSBoundsClipModifier> clipBoundModifier_;
     std::shared_ptr<Rosen::ModifierNG::RSFrameClipModifier> customClipToFrameModifier_;
     std::shared_ptr<Rosen::ModifierNG::RSMaskModifier> clipMaskModifier_;
@@ -849,32 +837,6 @@ protected:
     // for page orientation feature.
     std::shared_ptr<Rosen::ModifierNG::RSTransformModifier> baseTranslateInXYModifier_;
     std::shared_ptr<Rosen::ModifierNG::RSTransformModifier> baseRotateInZModifier_;
-#else
-    std::shared_ptr<Rosen::RSClipBoundsModifier> clipBoundModifier_;
-    std::shared_ptr<Rosen::RSCustomClipToFrameModifier> customClipToFrameModifier_;
-    std::shared_ptr<Rosen::RSMaskModifier> clipMaskModifier_;
-    std::optional<TransformMatrixModifier> transformModifier_;
-    std::shared_ptr<Rosen::RSProperty<Rosen::Vector2f>> pivotProperty_;
-    std::unique_ptr<SharedTransitionModifier> sharedTransitionModifier_;
-    std::optional<WindowBlurModifier> windowBlurModifier_;
-    // translate, rotation, scale, alpha modifier for developer
-    std::shared_ptr<Rosen::RSTranslateModifier> translateXYUserModifier_;
-    std::shared_ptr<Rosen::RSTranslateZModifier> translateZUserModifier_;
-    std::shared_ptr<Rosen::RSRotationXModifier> rotationXUserModifier_;
-    std::shared_ptr<Rosen::RSRotationYModifier> rotationYUserModifier_;
-    std::shared_ptr<Rosen::RSRotationModifier> rotationZUserModifier_;
-    std::shared_ptr<Rosen::RSCameraDistanceModifier> cameraDistanceUserModifier_;
-    std::shared_ptr<Rosen::RSScaleModifier> scaleXYUserModifier_;
-    std::shared_ptr<Rosen::RSScaleModifier> scrollScaleModifier_;
-    std::shared_ptr<Rosen::RSAlphaModifier> alphaUserModifier_;
-    std::shared_ptr<Rosen::RSAlphaModifier> alphaModifier_;
-    // translate modifiers for interruption
-    std::shared_ptr<Rosen::RSTranslateModifier> translateXYModifier_;
-    // for page orientation feature.
-    std::shared_ptr<Rosen::RSTranslateModifier> baseTranslateInXYModifier_;
-    std::shared_ptr<Rosen::RSRotationModifier> baseRotateInZModifier_;
-#endif
-
     // graphics modifiers
     struct GraphicModifiers {
         std::shared_ptr<GrayScaleModifier> grayScale;
@@ -912,11 +874,7 @@ protected:
     bool reDraggingFlag_ = false;
     PipelineContext* pipeline_;
 
-#if defined(MODIFIER_NG)
     template <typename Modifier, RSPropertyType PropertyType, typename ValueType>
-#else
-    template <typename Modifier, typename ValueType>
-#endif
     friend class PropertyTransitionEffectTemplate;
 
     friend class RosenPivotTransitionEffect;

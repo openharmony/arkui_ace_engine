@@ -19,6 +19,7 @@
 #define private public
 #define protected public
 
+#include "test/mock/base/mock_system_properties.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
@@ -1459,5 +1460,229 @@ HWTEST_F(MenuItemGroupTestNg, AttachBottomDivider002, TestSize.Level1)
     ASSERT_NE(parent, nullptr);
     menuItemGroupPattern.AttachBottomDivider();
     EXPECT_EQ(parent->GetChildIndex(node), 0);
+}
+
+/**
+ * @tc.name: OnColorConfigurationUpdateTest001
+ * @tc.desc: Test OnColorConfigurationUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemGroupTestNg, OnColorConfigurationUpdateTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Create MenuItemGroupView and get frame node
+     * @tc.expected: View and frame node created successfully
+     */
+    MenuItemGroupView menuItemGroupView;
+    menuItemGroupView.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto menuItemGroupPattern = frameNode->GetPattern<MenuItemGroupPattern>();
+    ASSERT_NE(menuItemGroupPattern, nullptr);
+
+    /**
+     * @tc.steps2: Set up theme manager mock
+     * @tc.expected: Theme manager returns select theme
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([=](ThemeType type) -> RefPtr<Theme> {
+        return selectTheme;
+    });
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+
+    /**
+     * @tc.steps3: Create header and footer content
+     * @tc.expected: Header and footer frame nodes created
+     */
+    menuItemGroupPattern->headerContent_ = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(menuItemGroupPattern->headerContent_, nullptr);
+    menuItemGroupPattern->footerContent_ = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(menuItemGroupPattern->footerContent_, nullptr);
+
+    /**
+     * @tc.steps4: Get layout properties and themes
+     * @tc.expected: Layout properties and themes obtained
+     */
+    auto headercontent = menuItemGroupPattern->headerContent_->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(headercontent, nullptr);
+    auto headerpipeline = menuItemGroupPattern->headerContent_->GetContextWithCheck();
+    ASSERT_NE(headerpipeline, nullptr);
+    auto headermenuTheme = headerpipeline->GetTheme<SelectTheme>();
+    ASSERT_NE(headermenuTheme, nullptr);
+
+    auto footercontent = menuItemGroupPattern->footerContent_->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(footercontent, nullptr);
+    auto footerpipeline = menuItemGroupPattern->footerContent_->GetContextWithCheck();
+    ASSERT_NE(footerpipeline, nullptr);
+    auto footermenuTheme = footerpipeline->GetTheme<SelectTheme>();
+    ASSERT_NE(footermenuTheme, nullptr);
+
+    /**
+     * @tc.steps5: Set theme colors
+     * @tc.expected: Theme colors set to red and blue
+     */
+    Color menuFontColor = Color::RED;
+    Color secondaryFontColor = Color::BLUE;
+    headermenuTheme->menuFontColor_ = menuFontColor;
+    footermenuTheme->secondaryFontColor_ = secondaryFontColor;
+
+    /**
+     * @tc.steps6: Test with config change disabled
+     * @tc.expected: Text colors not updated
+     */
+    g_isConfigChangePerform = false;
+    EXPECT_EQ(SystemProperties::ConfigChangePerform(), false);
+    menuItemGroupPattern->OnColorConfigurationUpdate();
+    EXPECT_NE(headercontent->GetTextColor().value_or(Color::BLACK), headermenuTheme->GetMenuFontColor());
+    EXPECT_NE(footercontent->GetTextColor().value_or(Color::BLACK), footermenuTheme->GetSecondaryFontColor());
+
+    /**
+     * @tc.steps7: Test with config change enabled
+     * @tc.expected: Text colors updated to theme values
+     */
+    g_isConfigChangePerform = true;
+    ASSERT_NE(SystemProperties::ConfigChangePerform(), false);
+    menuItemGroupPattern->OnColorConfigurationUpdate();
+    EXPECT_EQ(headercontent->GetTextColor(), menuFontColor);
+    EXPECT_EQ(footercontent->GetTextColor().value(), secondaryFontColor);
+}
+
+/**
+ * @tc.name: MenuItemGroupViewCreateWithStringResourceObj001
+ * @tc.desc: Test CreateWithStringResourceObj with HEADER types.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemGroupTestNg, CreateWithStringResourceObj001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Create MenuItemGroupView and get frame node
+     * @tc.expected: View and frame node created successfully
+     */
+    MenuItemGroupView view;
+    view.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<MenuItemGroupPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps2: Create header content
+     * @tc.expected: Header frame node created
+     */
+    pattern->headerContent_ = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(pattern->headerContent_, nullptr);
+    auto textLayoutProperty = pattern->headerContent_->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps3: Call CreateWithStringResourceObj for header
+     * @tc.expected: Resource object associated with header
+     */
+    auto resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    view.CreateWithStringResourceObj(resObj, MenuItemGroupStringType::HEADER);
+
+    /**
+     * @tc.steps4: Test with empty resource cache
+     * @tc.expected: Header content is empty
+     */
+    std::string str = "";
+    std::string key = "MenuItemGroup" + MenuItemGroupView::StringTypeToString(MenuItemGroupStringType::HEADER);
+    pattern->AddResCache(key, str);
+    auto resMgr = pattern->resourceMgr_;
+    ASSERT_NE(resMgr, nullptr);
+    resMgr->ReloadResources();
+    EXPECT_EQ(textLayoutProperty->GetContentValue(u""), u"");
+
+    /**
+     * @tc.steps5: Test with valid resource cache
+     * @tc.expected: Header content updated to "TEST"
+     */
+    str = "TEST";
+    pattern->AddResCache(key, str);
+    resMgr->ReloadResources();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    EXPECT_EQ(textLayoutProperty->GetContentValue(), UtfUtils::Str8DebugToStr16(str));
+}
+
+/**
+ * @tc.name: MenuItemGroupViewCreateWithStringResourceObj002
+ * @tc.desc: Test CreateWithStringResourceObj with FOOTER types.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemGroupTestNg, CreateWithStringResourceObj002, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Create MenuItemGroupView and get frame node
+     * @tc.expected: View and frame node created successfully
+     */
+    MenuItemGroupView view;
+    view.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<MenuItemGroupPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps2: Create footer content
+     * @tc.expected: Footer frame node created
+     */
+    pattern->footerContent_ = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(pattern->footerContent_, nullptr);
+    auto textLayoutProperty = pattern->footerContent_->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps3: Call CreateWithStringResourceObj for footer
+     * @tc.expected: Resource object associated with footer
+     */
+    auto resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    view.CreateWithStringResourceObj(resObj, MenuItemGroupStringType::FOOTER);
+
+    /**
+     * @tc.steps4: Test with valid resource cache
+     * @tc.expected: Footer content updated to "TEST"
+     */
+    std::string str = "TEST";
+    std::string key = "MenuItemGroup" + MenuItemGroupView::StringTypeToString(MenuItemGroupStringType::FOOTER);
+    pattern->AddResCache(key, str);
+    auto resMgr = pattern->resourceMgr_;
+    ASSERT_NE(resMgr, nullptr);
+    resMgr->ReloadResources();
+    EXPECT_EQ(textLayoutProperty->GetContentValue(), UtfUtils::Str8DebugToStr16(str));
+}
+
+/**
+ * @tc.name: StringTypeToString
+ * @tc.desc: Test StringTypeToString
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemGroupTestNg, StringTypeToString, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Test HEADER string conversion
+     * @tc.expected: Returns "Header"
+     */
+    std::string result1 = MenuItemGroupView::StringTypeToString(MenuItemGroupStringType::HEADER);
+    EXPECT_EQ(result1, "Header");
+
+    /**
+     * @tc.steps2: Test FOOTER string conversion
+     * @tc.expected: Returns "Footer"
+     */
+    std::string result2 = MenuItemGroupView::StringTypeToString(MenuItemGroupStringType::FOOTER);
+    EXPECT_EQ(result2, "Footer");
+
+    /**
+     * @tc.steps3: Test unknown type conversion
+     * @tc.expected: Returns "Unknown" for type 100
+     */
+    MenuItemGroupStringType unknownType = static_cast<MenuItemGroupStringType>(100);
+    std::string result3 = MenuItemGroupView::StringTypeToString(unknownType);
+    EXPECT_EQ(result3, "Unknown");
 }
 } // namespace OHOS::Ace::NG

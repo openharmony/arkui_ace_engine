@@ -1066,11 +1066,11 @@ public:
     void AddFrameCallback(FrameCallbackFunc&& frameCallbackFunc, IdleCallbackFunc&& idleCallbackFunc,
         int64_t delayMillis);
 
-    void FlushFrameCallback(uint64_t nanoTimestamp);
+    void FlushFrameCallback(uint64_t nanoTimestamp, uint64_t frameCount);
     void TriggerIdleCallback(int64_t deadline);
 
     void AddCAPIFrameCallback(FrameCallbackFuncFromCAPI&& frameCallbackFuncFromCAPI);
-    void FlushFrameCallbackFromCAPI(uint64_t nanoTimestamp, uint32_t frameCount);
+    void FlushFrameCallbackFromCAPI(uint64_t nanoTimestamp, uint64_t frameCount);
 
     void RegisterTouchEventListener(const std::shared_ptr<ITouchEventCallback>& listener);
     void UnregisterTouchEventListener(const WeakPtr<NG::Pattern>& pattern);
@@ -1282,7 +1282,7 @@ protected:
     void MaximizeInImplictAnimation(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
 
-    void FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) override;
+    void FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount) override;
     void FlushPipelineWithoutAnimation() override;
     void FlushFocus();
     void FlushFocusWithNode(RefPtr<FrameNode> focusNode, bool isScope);
@@ -1510,7 +1510,7 @@ private:
     WeakPtr<FrameNode> windowSceneNode_;
     uint32_t nextScheduleTaskId_ = 0;
     uint64_t resampleTimeStamp_ = 0;
-    bool touchAccelarate_ = true;
+    bool touchAccelarate_ = false;
     bool isEventsPassThrough_ = false;
     bool backgroundColorModeUpdated_ = false;  // Dark/light color switch flag
     uint64_t animationTimeStamp_ = 0;

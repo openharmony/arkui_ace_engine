@@ -108,30 +108,51 @@ void TokenThemeStorage::CacheClear()
     themeCache_.clear();
 }
 
+void TokenThemeStorage::ResetThemeColor(int32_t themeId, RefPtr<TokenTheme>& theme, RefPtr<TokenTheme>& defaultTheme,
+    ColorMode& colorMode)
+{
+    auto resObjs = theme->GetResObjs();
+    if (resObjs.size() != TokenColors::TOTAL_NUMBER) {
+        return;
+    }
+    auto tokenColors = theme->Colors();
+    auto defaultColors = defaultTheme ? defaultTheme->Colors() : tokenColors;
+    auto userFlags = themeColorSetByUser_[themeId][(colorMode == ColorMode::DARK)];
+    for (int32_t i = 0; i < TokenColors::TOTAL_NUMBER; i++) {
+        if (!resObjs[i]) {
+            if (userFlags.size() == TokenColors::TOTAL_NUMBER && !userFlags[i]) {
+                tokenColors->SetColor(i, defaultColors->GetByIndex(i));
+            }
+            continue;
+        }
+        Color colorValue;
+        auto state = ResourceParseUtils::ParseResColor(resObjs[i], colorValue);
+        if (!state) {
+            continue;
+        }
+        tokenColors->SetColor(i, colorValue);
+    }
+}
+
 void TokenThemeStorage::CacheResetColor()
 {
+    if (themeCache_.size() == 0) {
+        return;
+    }
+    auto colorMode = CheckLocalAndSystemColorMode();
+    auto defaultTheme = GetDefaultTheme();
+    if (!defaultTheme) {
+        defaultTheme = CreateSystemTokenTheme(colorMode);
+        SetDefaultTheme(defaultTheme, colorMode);
+        CacheSet(defaultTheme);
+    }
     std::lock_guard<std::mutex> lock(themeCacheMutex_);
     for (auto& [themeId, theme] : themeCache_) {
         LOGD("Theme reset colors with id %{public}d", themeId);
-        auto tokenColors = theme ? theme->Colors() : nullptr;
-        if (!tokenColors) {
+        if (!theme || (theme->GetColorMode() != ColorMode::COLOR_MODE_UNDEFINED)) {
             continue;
         }
-        auto resObjs = tokenColors->GetResObjs();
-        if (resObjs.size() != TokenColors::TOTAL_NUMBER) {
-            continue;
-        }
-        for (int32_t i = 0; i < TokenColors::TOTAL_NUMBER; i++) {
-            if (!resObjs[i]) {
-                continue;
-            }
-            Color colorValue;
-            auto state = ResourceParseUtils::ParseResColor(resObjs[i], colorValue);
-            if (!state) {
-                continue;
-            }
-            tokenColors->SetColor(i, colorValue);
-        }
+        ResetThemeColor(themeId, theme, defaultTheme, colorMode);
     }
 }
 
@@ -206,11 +227,23 @@ RefPtr<TokenTheme> TokenThemeStorage::CreateSystemTokenTheme(ColorMode colorMode
     return tokenTheme;
 }
 
-void TokenThemeStorage::SetIsThemeColorAvailable(bool isDark, int32_t idx, bool isColorAvailable)
+void TokenThemeStorage::SetIsThemeColorAvailable(bool isDark, int32_t index, bool isColorAvailable)
 {
-    if (idx >= 0 && idx < TokenColors::TOTAL_NUMBER) {
+    if (index >= 0 && index < TokenColors::TOTAL_NUMBER) {
         auto& colorsAvailable = isDark ? darkThemeColorsAvailable_ : lightThemeColorsAvailable_;
-        colorsAvailable[idx] = isColorAvailable;
+        colorsAvailable[index] = isColorAvailable;
     }
+}
+
+void TokenThemeStorage::SetIsThemeColorSetByUser(int32_t themeId, bool isDark, int32_t index, bool isColorSetByUser)
+{
+    if (index < 0 || index >= TokenColors::TOTAL_NUMBER) {
+        return;
+    }
+    auto& themeIdMap = themeColorSetByUser_[themeId];
+    if (themeIdMap.find(isDark) == themeIdMap.end()) {
+        themeIdMap[isDark] = std::vector<bool> (TokenColors::TOTAL_NUMBER, false);
+    }
+    themeIdMap[isDark][index] = isColorSetByUser;
 }
 } // namespace OHOS::Ace::NG

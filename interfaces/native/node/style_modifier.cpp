@@ -8508,7 +8508,7 @@ int32_t SetSwiperDisplayCount(ArkUI_NodeHandle node, const ArkUI_AttributeItem* 
         node->uiNodeHandle, displayCount.c_str(), type.c_str());
 
     ArkUI_Bool swipeByGroup = DEFAULT_FALSE;
-    if (item->size == 2 && InRegion(DEFAULT_FALSE, DEFAULT_TRUE, item->value[1].i32)) {
+    if (item->size == 2 && InRegion(DEFAULT_FALSE, DEFAULT_TRUE, item->value[1].i32) && type != "string") {
         swipeByGroup = item->value[1].i32;
     }
     GetFullImpl()->getNodeModifiers()->getSwiperModifier()->setSwiperSwipeByGroup(node->uiNodeHandle, swipeByGroup);

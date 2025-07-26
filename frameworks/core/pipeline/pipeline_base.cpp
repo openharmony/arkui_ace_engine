@@ -51,7 +51,7 @@ PipelineBase::PipelineBase(std::shared_ptr<Window> window, RefPtr<TaskExecutor> 
     imageCache_ = ImageCache::Create();
     fontManager_ = FontManager::Create();
     auto&& vsyncCallback = [weak = AceType::WeakClaim(this), instanceId](
-                               const uint64_t nanoTimestamp, const uint32_t frameCount) {
+                               uint64_t nanoTimestamp, uint64_t frameCount) {
         ContainerScope scope(instanceId);
         auto context = weak.Upgrade();
         if (context) {
@@ -76,7 +76,7 @@ PipelineBase::PipelineBase(std::shared_ptr<Window> window, RefPtr<TaskExecutor> 
     imageCache_ = ImageCache::Create();
     fontManager_ = FontManager::Create();
     auto&& vsyncCallback = [weak = AceType::WeakClaim(this), instanceId](
-                               const uint64_t nanoTimestamp, const uint32_t frameCount) {
+                               uint64_t nanoTimestamp, uint64_t frameCount) {
         ContainerScope scope(instanceId);
         auto context = weak.Upgrade();
         if (context) {
@@ -737,7 +737,7 @@ bool PipelineBase::CloseImplicitAnimation()
 #endif
 }
 
-void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount)
+void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint64_t frameCount)
 {
     CHECK_RUN_ON(UI);
     ACE_SCOPED_TRACE("OnVsyncEvent now:%" PRIu64 "", nanoTimestamp);

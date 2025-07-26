@@ -2460,6 +2460,54 @@ HWTEST_F(ListLayoutTestNg, ListCacheCount001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ListCacheCount002
+ * @tc.desc: Window size drag not load cached node
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListCacheCount002, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetCachedCount(2);
+    CreateItemsInLazyForEach(10, 100.0f, nullptr); /* 10: item count */
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. SetCacheRange
+     * @tc.expected: 1 ListItem cached.
+     */
+    ListModelNG::SetCacheRange(AceType::RawPtr(frameNode_), 1, 3);
+    auto listPattern = frameNode_->GetPattern<ListPattern>();
+    FlushIdleTask(listPattern);
+    EXPECT_EQ(listPattern->cachedItemPosition_.size(), 1);
+
+    /**
+     * @tc.steps: step2. ResetCacheRange
+     * @tc.expected: 2 ListItem cached.
+     */
+    ListModelNG::ResetCacheRange(AceType::RawPtr(frameNode_));
+    FlushUITasks(frameNode_);
+    FlushIdleTask(listPattern);
+    EXPECT_EQ(listPattern->cachedItemPosition_.size(), 2);
+
+    /**
+     * @tc.steps: step3. SetCachedCount 4
+     * @tc.expected: 4 ListItem cached.
+     */
+    ListModelNG::SetCachedCount(AceType::RawPtr(frameNode_), 4);
+    FlushUITasks(frameNode_);
+    FlushIdleTask(listPattern);
+    EXPECT_EQ(listPattern->cachedItemPosition_.size(), 4);
+
+    /**
+     * @tc.steps: step4. SetCacheRange
+     * @tc.expected: 3 ListItem cached.
+     */
+    ListModelNG::SetCacheRange(AceType::RawPtr(frameNode_), 1, 3);
+    FlushUITasks(frameNode_);
+    FlushIdleTask(listPattern);
+    EXPECT_EQ(listPattern->cachedItemPosition_.size(), 3);
+}
+/**
  * @tc.name: SetHeaderFooterComponent01
  * @tc.desc: Test HeaderComponent/FooterComponent of ListItemGroup
  * @tc.type: FUNC
@@ -3003,6 +3051,39 @@ HWTEST_F(ListLayoutTestNg, ListAddDelChildTest003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ListAddDelChildTest004
+ * @tc.desc: Test list delete item with List size change and layout backward.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListAddDelChildTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List
+     */
+    ListModelNG model = CreateList();
+    CreateListItems(2); /* 2: item count */
+    CreateItemWithSize(1, SizeT<Dimension>(FILL_LENGTH, Dimension(300)));
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. update offset.
+     * @tc.expected: offset is 80.
+     */
+    UpdateCurrentOffset(-80.f);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 80.f);
+
+    /**
+     * @tc.steps: step3. Remove child and List size change and scroll backward.
+     * @tc.expected: offset is 0.
+     */
+    layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(CalcLength(WIDTH), CalcLength(50.f)));
+    frameNode_->RemoveChildAtIndex(0);
+    frameNode_->RemoveChildAtIndex(0);
+    UpdateCurrentOffset(80.f);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0);
+}
+
+/**
  * @tc.name: FadingEdge001
  * @tc.desc: Test FadingEdge property
  * @tc.type: FUNC
@@ -3106,6 +3187,68 @@ HWTEST_F(ListLayoutTestNg, FadingEdge003, TestSize.Level1)
     FlushUITasks(frameNode_);
     geo = frameNode_->GetOverlayNode()->GetGeometryNode();
     EXPECT_EQ(geo->GetFrameSize().Height(), 410.f);
+}
+
+/**
+ * @tc.name: FadingEdge004
+ * @tc.desc: Test FadingEdge property
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, FadingEdge004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set FadingEdge
+     * @tc.expected: Would create a overlayNode attach to list
+     */
+    const Dimension fadingEdgeLength = Dimension(10.0f);
+    ListModelNG model = CreateList();
+    ScrollableModelNG::SetFadingEdge(true, fadingEdgeLength);
+    CreateListItems(10);
+    CreateDone();
+    EXPECT_TRUE(frameNode_->GetOverlayNode());
+
+    /**
+     * @tc.steps: step2. The list at top
+     * @tc.expected: Fading bottom and both top and bottom have gradient
+     */
+    auto paintMethod = UpdateContentModifier();
+    EXPECT_FALSE(paintMethod->isFadingTop_);
+    EXPECT_TRUE(paintMethod->isFadingBottom_);
+    auto renderContext = paintMethod->overlayRenderContext_;
+    EXPECT_TRUE(renderContext);
+    auto& gradientProp = renderContext->GetOrCreateGradient();
+    EXPECT_TRUE(gradientProp);
+    NG::Gradient gradient;
+    if (gradientProp->HasLastGradientType() || gradientProp->HasLinearGradient()) {
+        gradient = gradientProp->GetLinearGradientValue();
+    }
+    EXPECT_EQ(gradient.GetColors().size(), 4); // 4: both top and bottom have gradient
+
+    /**
+     * @tc.steps: step3. The list at middle
+     * @tc.expected: Fading both and both top and bottom have gradient
+     */
+    ScrollTo(100.0f);
+    paintMethod = UpdateContentModifier();
+    EXPECT_TRUE(paintMethod->isFadingTop_);
+    EXPECT_TRUE(paintMethod->isFadingBottom_);
+    if (gradientProp->HasLastGradientType() || gradientProp->HasLinearGradient()) {
+        gradient = gradientProp->GetLinearGradientValue();
+    }
+    EXPECT_EQ(gradient.GetColors().size(), 4); // 4: both top and bottom have gradient
+
+    /**
+     * @tc.steps: step4. The list at bottom
+     * @tc.expected: Fading top and both top and bottom have gradient
+     */
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    paintMethod = UpdateContentModifier();
+    EXPECT_TRUE(paintMethod->isFadingTop_);
+    EXPECT_FALSE(paintMethod->isFadingBottom_);
+    if (gradientProp->HasLastGradientType() || gradientProp->HasLinearGradient()) {
+        gradient = gradientProp->GetLinearGradientValue();
+    }
+    EXPECT_EQ(gradient.GetColors().size(), 4); // 4: both top and bottom have gradient
 }
 
 /**

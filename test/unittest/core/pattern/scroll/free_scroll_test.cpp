@@ -580,8 +580,8 @@ TEST_F(FreeScrollTest, MouseWheel002)
     FlushUITasks(frameNode_);
     EXPECT_EQ(GetChildOffset(frameNode_, 0), OffsetF(-DELTA_X, -DELTA_Y));
 
-    freeScroll.ScrollTo({LARGE_DELTA_X, LARGE_DELTA_Y}, std::nullopt); // start a scroll animation
-    freeScroll.HandleAxisAnimationFrame(-DELTA_X); // should be ignored
+    freeScroll.ScrollTo({ LARGE_DELTA_X, LARGE_DELTA_Y }, std::nullopt); // start a scroll animation
+    freeScroll.HandleAxisAnimationFrame(-DELTA_X);                       // should be ignored
     FlushUITasks(frameNode_);
     EXPECT_EQ(GetChildOffset(frameNode_, 0), OffsetF(-DELTA_X, -DELTA_Y));
     MockAnimationManager::GetInstance().Reset();
@@ -926,13 +926,13 @@ TEST_F(FreeScrollTest, Scroller001)
     const auto& controller = pattern_->freeScroll_;
     ASSERT_TRUE(controller && controller->offset_);
     controller->offset_->Set(OffsetF { X, Y });
-
+    FlushUITasks(frameNode_);
     EXPECT_EQ(scroller->GetCurrentOffset(), Offset(-X, -Y));
 
     scroller->ScrollBy(DELTA_X, DELTA_X, false);
+    FlushUITasks(frameNode_);
     EXPECT_EQ(
         scroller->GetCurrentOffset().ToString(), Offset(CONTENT_W - WIDTH, CONTENT_H - HEIGHT).ToString()); // clamped
-    FlushUITasks();
     EXPECT_EQ(GetChildOffset(frameNode_, 0), OffsetF(-CONTENT_W + WIDTH, -CONTENT_H + HEIGHT));
     EXPECT_EQ(willScrollCalled, 2);
 
@@ -944,7 +944,7 @@ TEST_F(FreeScrollTest, Scroller001)
 
 /**
  * @tc.name: Scroller002
- * @tc.desc: Test scroller interface
+ * @tc.desc: Test scroller ScrollToEdge and ScrollTo
  * @tc.type: FUNC
  */
 TEST_F(FreeScrollTest, Scroller002)
@@ -1053,6 +1053,27 @@ TEST_F(FreeScrollTest, Scroller004)
     FlushUITasks(frameNode_);
     EXPECT_EQ(pattern_->freeScroll_->state_, State::IDLE);
     EXPECT_EQ(GetChildOffset(frameNode_, 0).ToString(), OffsetF(-CONTENT_W, -CONTENT_H).ToString());
+}
+
+/**
+ * @tc.name: Scroller005
+ * @tc.desc: Test scroller getOffset
+ * @tc.type: FUNC
+ */
+TEST_F(FreeScrollTest, Scroller005)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::NONE, true);
+    model.SetAxis(Axis::FREE);
+    CreateFreeContent({ CONTENT_W, CONTENT_H });
+    CreateScrollDone();
+    auto scroller = AceType::MakeRefPtr<ScrollableController>();
+    scroller->SetScrollPattern(pattern_);
+    scroller->FreeScrollTo({ .xOffset = Dimension(-DELTA_X), .yOffset = Dimension(-DELTA_Y), .smooth = true });
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks(frameNode_);
+    EXPECT_EQ(GetChildOffset(frameNode_, 0), OffsetF());
+    EXPECT_EQ(scroller->GetCurrentOffset(), Offset());
 }
 
 namespace {

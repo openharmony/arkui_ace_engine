@@ -39,6 +39,10 @@ public:
     static void SetDynamicRangeMode(FrameNode* frameNode, const std::optional<DynamicRangeMode>& dynamicRangeMode);
     static void SetOrientation(FrameNode* frameNode, const std::optional<ImageRotateOrientation>& orientation);
     static void SetEnhancedImageQuality(FrameNode* frameNode, const std::optional<AIImageQuality>& imageQuality);
+#if defined(ACE_STATIC)
+    static void SetResizableLattice(FrameNode* frameNode, const RefPtr<DrawingLattice>& lattice);
+    static void SetDrawingColorFilter(FrameNode* frameNode, const RefPtr<DrawingColorFilter>& colorFilter);
+#endif
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_STATIC_H

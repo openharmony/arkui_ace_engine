@@ -52,6 +52,13 @@ extern "C" ACE_FORCE_EXPORT XComponentControllerErrorCode OHOS_ACE_GetRenderFitB
     ));
 }
 
+extern "C" ACE_FORCE_EXPORT XComponentControllerErrorCode OHOS_ACE_GetSurfaceRotationBySurfaceId(
+    const std::string& surfaceId, bool& isSurfaceLock)
+{
+    return static_cast<XComponentControllerErrorCode>(
+        XComponentInnerSurfaceController::GetSurfaceRotationBySurfaceId(surfaceId, isSurfaceLock));
+}
+
 XComponentControllerErrorCode XComponentControllerNG::GetGlobalPosition(float& offsetX, float& offsetY)
 {
     auto pattern = pattern_.Upgrade();

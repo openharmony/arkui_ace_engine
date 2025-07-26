@@ -103,68 +103,15 @@ void SheetContentCoverObject::ClipSheetNode()
 void SheetContentCoverObject::SetFinishEventForAnimationOption(
     AnimationOption& option, bool isTransitionIn, bool isFirstTransition)
 {
-    auto sheetPattern = GetPattern();
-    CHECK_NULL_VOID(sheetPattern);
-    auto sheetNode = sheetPattern->GetHost();
-    CHECK_NULL_VOID(sheetNode);
-    if (isTransitionIn) {
-        option.SetOnFinishEvent(
-            [sheetWK = WeakClaim(RawPtr(sheetNode)), isFirst = isFirstTransition] {
-                auto sheetNode = sheetWK.Upgrade();
-                CHECK_NULL_VOID(sheetNode);
-                auto pattern = sheetNode->GetPattern<SheetPresentationPattern>();
-                CHECK_NULL_VOID(pattern);
-                pattern->OnAppear();
-                pattern->AvoidAiBar();
-                pattern->FireOnTypeDidChange();
-                pattern->FireOnWidthDidChange();
-                auto sheetObject = pattern->GetSheetObject();
-                CHECK_NULL_VOID(sheetObject);
-                sheetObject->FireHeightDidChange();
-            });
-    } else {
-        option.SetOnFinishEvent(
-            [sheetWK = WeakClaim(RawPtr(sheetNode))] {
-            auto sheet = sheetWK.Upgrade();
-            CHECK_NULL_VOID(sheet);
-            auto pattern = sheet->GetPattern<SheetPresentationPattern>();
-            CHECK_NULL_VOID(pattern);
-            auto overlayManager = pattern->GetOverlayManager();
-            CHECK_NULL_VOID(overlayManager);
-            pattern->OnDisappear();
-            overlayManager->FireAutoSave(sheet);
-            overlayManager->RemoveSheet(sheet);
-        });
-    }
+    option.SetOnFinishEvent(GetSheetTransitionFinishEvent(isTransitionIn));
 }
 
 AnimationOption SheetContentCoverObject::GetAnimationOptionForOverlay(bool isTransitionIn, bool isFirstTransition)
 {
-    auto sheetPattern = GetPattern();
-    CHECK_NULL_RETURN(sheetPattern, AnimationOption());
-    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
-    CHECK_NULL_RETURN(layoutProperty, AnimationOption());
-    auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
-
     AnimationOption option;
-    auto transition = sheetStyle.modalTransition.value_or(ModalTransition::DEFAULT);
-    switch (transition) {
-        case ModalTransition::ALPHA:
-            option.SetCurve(Curves::FRICTION);
-            option.SetDuration(FULL_MODAL_ALPHA_ANIMATION_DURATION);
-            option.SetFillMode(FillMode::FORWARDS);
-            break;
-        case ModalTransition::NONE:
-            option.SetDuration(0);
-            break;
-        case ModalTransition::DEFAULT:
-        default:
-            const RefPtr<InterpolatingSpring> curve =
-                AceType::MakeRefPtr<InterpolatingSpring>(0.0f, CURVE_MASS, CURVE_STIFFNESS, CURVE_DAMPING);
-            option.SetCurve(curve);
-            option.SetFillMode(FillMode::FORWARDS);
-            break;
-    }
+    SetSheetAnimationOption(option);
+    const RefPtr<InterpolatingSpring> curve = GetSheetTransitionCurve(0.0f);
+    option.SetCurve(curve);
     SetFinishEventForAnimationOption(option, isTransitionIn, isFirstTransition);
     return option;
 }
@@ -249,6 +196,92 @@ std::function<void()> SheetContentCoverObject::GetAnimationPropertyCallForOverla
                 }
             };
     }
+}
+
+void SheetContentCoverObject::SetSheetAnimationOption(AnimationOption& option) const
+{
+    auto sheetPattern = GetPattern();
+    CHECK_NULL_VOID(sheetPattern);
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
+
+    auto transition = sheetStyle.modalTransition.value_or(ModalTransition::DEFAULT);
+    switch (transition) {
+        case ModalTransition::ALPHA:
+            option.SetDuration(FULL_MODAL_ALPHA_ANIMATION_DURATION);
+            option.SetFillMode(FillMode::FORWARDS);
+            break;
+        case ModalTransition::NONE:
+            option.SetDuration(0);
+            break;
+        case ModalTransition::DEFAULT:
+        default:
+            option.SetFillMode(FillMode::FORWARDS);
+            break;
+    }
+}
+
+RefPtr<InterpolatingSpring> SheetContentCoverObject::GetSheetTransitionCurve(float dragVelocity) const
+{
+    auto sheetPattern = GetPattern();
+    CHECK_NULL_RETURN(sheetPattern, AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 0.0f, 0.0f, 0.0f));
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    CHECK_NULL_RETURN(layoutProperty, AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 0.0f, 0.0f, 0.0f));
+    auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
+
+    auto transition = sheetStyle.modalTransition.value_or(ModalTransition::DEFAULT);
+    switch (transition) {
+        case ModalTransition::ALPHA:
+            return AceType::MakeRefPtr<InterpolatingSpring>(0.2f, 0.0f, 0.2f, 1.0f);
+        case ModalTransition::NONE:
+            return AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 0.0f, 0.0f, 0.0f);
+        case ModalTransition::DEFAULT:
+        default:
+            return AceType::MakeRefPtr<InterpolatingSpring>(0.0f, CURVE_MASS, CURVE_STIFFNESS, CURVE_DAMPING);
+    }
+}
+
+std::function<void()> SheetContentCoverObject::GetSheetTransitionFinishEvent(bool isTransitionIn)
+{
+    auto sheetPattern = GetPattern();
+    CHECK_NULL_RETURN(sheetPattern, nullptr);
+    auto sheetNode = sheetPattern->GetHost();
+    CHECK_NULL_RETURN(sheetNode, nullptr);
+    
+    if (isTransitionIn) {
+        return [sheetWK = WeakClaim(RawPtr(sheetNode))] {
+            auto sheetNode = sheetWK.Upgrade();
+            CHECK_NULL_VOID(sheetNode);
+            auto pattern = sheetNode->GetPattern<SheetPresentationPattern>();
+            CHECK_NULL_VOID(pattern);
+            pattern->OnAppear();
+            pattern->AvoidAiBar();
+            pattern->FireOnTypeDidChange();
+            pattern->FireOnWidthDidChange();
+            auto sheetObject = pattern->GetSheetObject();
+            CHECK_NULL_VOID(sheetObject);
+            sheetObject->FireHeightDidChange();
+        };
+    } else {
+        return [sheetWK = WeakClaim(RawPtr(sheetNode))] {
+            auto sheet = sheetWK.Upgrade();
+            CHECK_NULL_VOID(sheet);
+            auto pattern = sheet->GetPattern<SheetPresentationPattern>();
+            CHECK_NULL_VOID(pattern);
+            auto overlayManager = pattern->GetOverlayManager();
+            CHECK_NULL_VOID(overlayManager);
+            pattern->OnDisappear();
+            overlayManager->FireAutoSave(sheet);
+            overlayManager->RemoveSheet(sheet);
+        };
+    }
+}
+
+std::function<void()> SheetContentCoverObject::GetSheetAnimationEvent(bool isTransitionIn, float offset)
+{
+    InitAnimationForOverlay(isTransitionIn, true);
+    return GetAnimationPropertyCallForOverlay(isTransitionIn);
 }
 
 void SheetContentCoverObject::FireHeightDidChange()

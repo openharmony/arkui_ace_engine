@@ -79,6 +79,14 @@ public:
     static XComponentControllerErrorCode GetRenderFitBySurfaceId(
         const std::string& surfaceId, int32_t& renderFitNumber, bool& isRenderFitNewVersionEnabled);
 
+    /**
+     * @brief get surface lock info by surfaceId
+     * @param surfaceId index of the surface
+     * @param isSurfaceLock the locking attribute of the surface
+     */
+    static XComponentControllerErrorCode GetSurfaceRotationBySurfaceId(
+        const std::string& surfaceId, bool& isSurfaceLock);
+
     XComponentController() = default;
     virtual ~XComponentController() = default;
 

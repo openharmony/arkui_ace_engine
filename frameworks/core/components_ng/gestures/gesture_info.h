@@ -264,6 +264,15 @@ public:
         }
     }
 
+#ifdef ARKUI_CAPI_UNITTEST
+    std::optional<GestureTypeName> GetType()
+    {
+        if (gestureInfo_) {
+            return gestureInfo_->GetType();
+        }
+        return std::nullopt;
+    }
+#endif // ARKUI_CAPI_UNITTEST
 protected:
     int32_t fingers_ = 1;
     bool isLimitFingerCount_ = false;

@@ -118,13 +118,13 @@
             "https://gitee.com/zhuweifeng94",
             "https://gitee.com/zzc19990127"
         ],
-        "https://gitee.com/arkui_advanced_ui_component": [
+        "https://gitee.com/arkuiadvanceduicomponent": [
             "https://gitee.com/fengluochenai",
             "https://gitee.com/wangrunsen",
             "https://gitee.com/wxwg_admin",
             "https://gitee.com/guozonghao11"
         ],
-        "arkui-idlize": [
+        "https://gitee.com/arkui-idlize": [
             "https://gitee.com/guozejun"
         ]
     },
@@ -474,19 +474,23 @@
         },
         "https://gitee.com/fengluochenai": {
             "info": "[高级UI组件 luocheng]",
-            "group": "https://gitee.com/arkui_advanced_ui_component"
+            "group": "https://gitee.com/arkuiadvanceduicomponent"
         },
         "https://gitee.com/wangrunsen": {
             "info": "[高级UI组件 wangrunsen]",
-            "group": "https://gitee.com/arkui_advanced_ui_component"
+            "group": "https://gitee.com/arkuiadvanceduicomponent"
         },
         "https://gitee.com/wxwg_admin": {
             "info": "[高级UI组件 xuyinjie]",
-            "group": "https://gitee.com/arkui_advanced_ui_component"
+            "group": "https://gitee.com/arkuiadvanceduicomponent"
         },
         "https://gitee.com/guozonghao11": {
             "info": "[高级UI组件 guozonghao]",
-            "group": "https://gitee.com/arkui_advanced_ui_component"
+            "group": "https://gitee.com/arkuiadvanceduicomponent"
+        },
+        "https://gitee.com/guozejun": {
+            "info": "[idlize guozejun]",
+            "group": "https://gitee.com/arkui-idlize"
         }
     }
 }

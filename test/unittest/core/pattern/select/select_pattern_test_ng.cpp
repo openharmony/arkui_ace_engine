@@ -23,6 +23,7 @@
 #define protected public
 #define private public
 
+#include "test/mock/base/mock_system_properties.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
@@ -2974,5 +2975,207 @@ HWTEST_F(SelectPatternTestNg, SetOptionBgColorByUser001, TestSize.Level1)
     auto itemPaintProperty = selectPattern->options_[0]->GetPaintProperty<MenuItemPaintProperty>();
     ASSERT_NE(itemPaintProperty, nullptr);
     ASSERT_EQ(itemPaintProperty->GetOptionBgColor().has_value(), false);
+}
+
+/**
+ * @tc.name: SetOptionBgColorByUser
+ * @tc.desc: Test SelectPattern SetOptionBgColorByUser.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, SetOptionBgColorByUser, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select model, initialize frame node and set size.
+     * @tc.expected: step1. Select model and frame node are created, size is set correctly.
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    selectPattern->SetSelectSize(SizeF(SELECT_WIDTH, SELECT_HEIGHT));
+    selectPattern->UpdateTargetSize();
+    auto menu = selectPattern->GetMenuNode();
+    ASSERT_NE(menu, nullptr);
+    auto menuLayoutProps = menu->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(menuLayoutProps, nullptr);
+    auto targetSize = menuLayoutProps->GetTargetSizeValue(SizeF());
+    EXPECT_EQ(targetSize, SizeF(SELECT_WIDTH, SELECT_HEIGHT));
+    auto optionCount = selectPattern->options_.size();
+    ASSERT_NE(optionCount, 0);
+    auto option = selectPattern->options_[0];
+    auto optionPaintProperty = option->GetPaintProperty<MenuItemPaintProperty>();
+    ASSERT_NE(optionPaintProperty, nullptr);
+    auto props = select->GetPaintProperty<SelectPaintProperty>();
+    ASSERT_NE(props, nullptr);
+
+    /**
+     * @tc.steps: step2. Test option background color update with user-defined flag.
+     * @tc.expected: step2. Option background color is updated based on user-defined flag.
+     */
+    std::vector<bool> vec { true, false };
+    for (auto flag : vec) {
+        props->UpdateSelectedOptionBgColorSetByUser(flag);
+        selectPattern->optionBgColor_.reset();
+        selectPattern->SetOptionBgColor(Color::GREEN);
+        EXPECT_EQ(optionPaintProperty->GetOptionBgColorValue(), Color::GREEN);
+    }
+}
+
+/**
+ * @tc.name: SetColorByUser
+ * @tc.desc: Test SelectPattern SetColorByUser.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, SetColorByUser, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select model and initialize components.
+     * @tc.expected: step1. Select model and related components are created successfully.
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+
+    auto select = AceType::WeakClaim(ViewStackProcessor::GetInstance()->GetMainFrameNode()).Upgrade();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto pipeline = select->GetContextWithCheck();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    ASSERT_NE(theme, nullptr);
+    auto props = select->GetPaintProperty<SelectPaintProperty>();
+    ASSERT_NE(props, nullptr);
+
+    /**
+     * @tc.steps: step2. Test SetColorByUser with different user-defined flags.
+     * @tc.expected: step2. Color properties are updated based on user-defined flags and theme.
+     */
+    g_isConfigChangePerform = false;
+    selectPattern->SetColorByUser(select, theme);
+    g_isConfigChangePerform = true;
+    props->UpdateFontColorSetByUser(true);
+    props->UpdateOptionFontColorSetByUser(true);
+    props->UpdateSelectedOptionBgColorSetByUser(true);
+    props->UpdateSelectedOptionFontColorSetByUser(true);
+    selectPattern->SetColorByUser(select, theme);
+
+    selectPattern->fontColor_ = Color::RED;
+    props->UpdateFontColorSetByUser(false);
+    selectPattern->SetColorByUser(select, theme);
+    EXPECT_FALSE(selectPattern->fontColor_.has_value());
+
+    props->UpdateSelectedOptionBgColorSetByUser(false);
+    selectPattern->SetColorByUser(select, theme);
+    EXPECT_EQ(theme->GetSelectedColor(), selectPattern->selectedBgColor_);
+
+    props->UpdateSelectedOptionFontColorSetByUser(false);
+    selectPattern->SetColorByUser(select, theme);
+    EXPECT_EQ(theme->GetSelectedColorText(), selectPattern->selectedFont_.FontColor);
+    g_isConfigChangePerform = false;
+}
+
+/**
+ * @tc.name: FontColorByUser001
+ * @tc.desc: Test FontColorByUser func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, FontColorByUser001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select model, initialize frame node, obtain related objects.
+     * @tc.expected: step1. Select model and frame node are created successfully, related objects are obtained.
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    selectModelInstance.Create(params);
+    selectModelInstance.SetFontColorByUser(true);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto props = select->GetPaintProperty<SelectPaintProperty>();
+    ASSERT_NE(props, nullptr);
+    EXPECT_TRUE(props->GetFontColorSetByUserValue(false));
+
+    /**
+     * @tc.steps: step2. call ResetFontColor.
+     * @tc.expected: step2. Font color is reset, FontColorSetByUser flag is updated.
+     */
+    selectModelInstance.ResetFontColor();
+    EXPECT_FALSE(props->GetFontColorSetByUserValue(false));
+
+    auto pipeline = select->GetContextWithCheck();
+    ASSERT_NE(pipeline, nullptr);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>(select->GetThemeScopeId());
+    ASSERT_NE(selectTheme, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+
+    /**
+     * @tc.steps: step3. Test UpdateComponentColor with BACKGROUND_COLOR.
+     * @tc.expected: The color is updated correctly.
+     */
+    selectPattern->SetModifierByUser(selectTheme, props);
+    ASSERT_NE(selectPattern->text_, nullptr);
+    auto textProps = selectPattern->text_->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textProps, nullptr);
+    ASSERT_EQ(textProps->GetTextColor(), selectTheme->GetFontColor());
+    auto context = selectPattern->text_->GetRenderContext();
+    ASSERT_NE(context, nullptr);
+    ASSERT_EQ(context->GetForegroundColor(), selectTheme->GetFontColor());
+}
+
+/**
+ * @tc.name: UpdateComponentColor001
+ * @tc.desc: Test UpdateComponentColor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestNg, UpdateComponentColor001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select model and initialize frame node.
+     * @tc.expected: step1. Select model and frame node are created successfully.
+     */
+    SelectModelNG selectModelNG;
+    std::vector<SelectParam> params = { { OPTION_TEXT_3, INTERNAL_SOURCE } };
+    selectModelNG.Create(params);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pipelineContext = PipelineBase::GetCurrentContextSafely();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Test UpdateComponentColor under different system color change and rerenderable states.
+     * @tc.expected: step2. Component colors are updated correctly when system color changes and node is rerenderable.
+     */
+    std::vector<std::pair<bool, bool>> vec { { true, true }, { true, false }, { false, true }, { false, false } };
+    for (const auto& pair : vec) {
+        pipelineContext->SetIsSystemColorChange(pair.first);
+        frameNode->SetRerenderable(pair.second);
+        pattern->UpdateComponentColor(Color::RED, static_cast<SelectColorType>(7));
+        if (pipelineContext->IsSystmColorChange() && pair.second) {
+            pattern->UpdateComponentColor(Color::RED, SelectColorType::FONT_COLOR);
+            EXPECT_EQ(pattern->fontColor_, Color::RED);
+            pattern->UpdateComponentColor(Color::RED, SelectColorType::BACKGROUND_COLOR);
+            auto ret = renderContext->GetBackgroundColor();
+            EXPECT_EQ(ret, Color::RED);
+            pattern->UpdateComponentColor(Color::RED, SelectColorType::SELECTED_OPTION_BG_COLOR);
+            EXPECT_EQ(pattern->selectedBgColor_, Color::RED);
+            pattern->UpdateComponentColor(Color::RED, SelectColorType::SELECTED_OPTION_FONT_COLOR);
+            EXPECT_EQ(pattern->selectedFont_.FontColor, Color::RED);
+            pattern->UpdateComponentColor(Color::RED, SelectColorType::OPTION_BG_COLOR);
+            EXPECT_EQ(pattern->optionBgColor_, Color::RED);
+            pattern->UpdateComponentColor(Color::RED, SelectColorType::OPTION_FONT_COLOR);
+            EXPECT_EQ(pattern->optionBgColor_, Color::RED);
+            pattern->UpdateComponentColor(Color::RED, SelectColorType::MENU_BACKGROUND_COLOR);
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

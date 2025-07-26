@@ -32,10 +32,14 @@ import { StackStart } from './Stack';
 
 /*获取AbilityDelegator实例,管理Ability的生命周期和事件*/
 const delegator: abilityDelegatorRegistry.AbilityDelegator = abilityDelegatorRegistry.getAbilityDelegator()
-
+// 定义常量，用于描述不同的选项
+const RADIO_OPTION_100_PERCENT = 4; // 100% 的选项
+const RADIO_OPTION_0_PERCENT = 0;   // 0% 的选项
+const RADIO_OPTION_30_PERCENT = 1;  // 30% 的选项
+const RADIO_OPTION_60_PERCENT = 2;  // 60% 的选项
+const RADIO_OPTION_90_PERCENT = 3;  // 90% 的选项
 /*初始化与UI元素交互的驱动对象*/
 const driver = Driver.create();
-
 export default function Stack8Test() {
   describe('Stack8Test', () => {
     // Defines a test suite. Two parameters are supported: test suite name and test suite function.
@@ -62,7 +66,15 @@ export default function Stack8Test() {
         * 测试组件responseRegion.value.width支持设置100%且获取属性正确
         */
     it('ArkUI_Stack_Comp_0639', 0, async (done: Function) => {
-      //需要前置条件responseRegion.value.x、responseRegion.value.y、responseRegion.value.width、responseRegion.value.height四个toggle打开，获取不到参数值
+      // 前置条件：
+      // 1. 页面需处于"通用属性6"分类下的"基础属性"面板，且已显示"responseRegion"相关配置项
+      // 2. 需确保以下4个toggle开关处于"打开"状态（开关显示为激活状态，如蓝色）：
+      //    - responseRegion.value.x（响应区域X轴偏移量配置开关）
+      //    - responseRegion.value.y（响应区域Y轴偏移量配置开关）
+      //    - responseRegion.value.width（响应区域宽度配置开关）
+      //    - responseRegion.value.height（响应区域高度配置开关）
+      // 3. 本用例中"100%"为预设的radio选项值（页面中该radio选项显示文本为"100%"）用于验证组件在最大宽度下的表现。
+      // 现状问题：目前无法通过接口获取上述4个参数的实时值，暂无法验证配置后的值是否生效
       await titleSearch('基础属性', 'responseRegion.value.width', '通用属性6')
       await radioClick({
         radioClickObj: 4,
@@ -137,7 +149,7 @@ export default function Stack8Test() {
       //需要前置条件responseRegion.value.x、responseRegion.value.y、responseRegion.value.width、responseRegion.value.height四个toggle打开，获取不到参数值
       await titleSearch('基础属性', 'responseRegion.value.height', '通用属性6')
       await radioClick({
-        radioClickObj: 4,
+        radioClickObj: RADIO_OPTION_100_PERCENT,
         toggleClick: {
           toggleClickType: ToggleClick.Close,
           toggleClickObj: 'responseRegion.value.height'
@@ -152,7 +164,7 @@ export default function Stack8Test() {
     it('ArkUI_Stack_Comp_0645', 0, async (done: Function) => {
       await titleSearch('基础属性', 'hitTestBehavior', '通用属性6')
       await radioClick({
-        radioClickObj: 0,
+        radioClickObj: RADIO_OPTION_0_PERCENT,
         toggleClick: {
           toggleClickObj: 'hitTestBehavior'
         },
@@ -171,7 +183,7 @@ export default function Stack8Test() {
     it('ArkUI_Stack_Comp_0646', 0, async (done: Function) => {
       await titleSearch('基础属性', 'hitTestBehavior', '通用属性6')
       await radioClick({
-        radioClickObj: 1,
+        radioClickObj: RADIO_OPTION_30_PERCENT,
         toggleClick: {
           toggleClickObj: 'hitTestBehavior'
         },
@@ -190,7 +202,7 @@ export default function Stack8Test() {
     it('ArkUI_Stack_Comp_0647', 0, async (done: Function) => {
       await titleSearch('基础属性', 'hitTestBehavior', '通用属性6')
       await radioClick({
-        radioClickObj: 2,
+        radioClickObj: RADIO_OPTION_60_PERCENT,
         toggleClick: {
           toggleClickObj: 'hitTestBehavior'
         },
@@ -209,7 +221,7 @@ export default function Stack8Test() {
     it('ArkUI_Stack_Comp_0648', 0, async (done: Function) => {
       await titleSearch('基础属性', 'hitTestBehavior', '通用属性6')
       await radioClick({
-        radioClickObj: 3,
+        radioClickObj: RADIO_OPTION_90_PERCENT,
         toggleClick: {
           toggleClickType: ToggleClick.Close,
           toggleClickObj: 'hitTestBehavior'

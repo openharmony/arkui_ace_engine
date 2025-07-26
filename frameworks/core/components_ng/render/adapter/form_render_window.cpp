@@ -46,6 +46,7 @@ FormRenderWindow::FormRenderWindow(RefPtr<TaskExecutor> taskExecutor, int32_t id
 #ifdef ENABLE_ROSEN_BACKEND
     ContainerScope scope(id);
     auto container = Container::Current();
+    uiContentType_ = container->GetUIContentType();
     if (receiver_ == nullptr) {
         auto& rsClient = Rosen::RSInterfaces::GetInstance();
         frameRateLinker_ = Rosen::RSFrameRateLinker::Create();
@@ -102,7 +103,21 @@ void FormRenderWindow::RequestFrame()
 {
 #ifdef ENABLE_ROSEN_BACKEND
     if (receiver_ != nullptr) {
+        if (uiContentType_ == UIContentType::DYNAMIC_COMPONENT) {
+            CHECK_NULL_VOID(!isRequestVsync_);
+            isRequestVsync_ = true;
+        }
         receiver_->RequestNextVSync(frameCallback_);
+    }
+#endif
+}
+
+void FormRenderWindow::RecordFrameTime(uint64_t timeStamp, const std::string& name)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    if (uiContentType_ == UIContentType::DYNAMIC_COMPONENT) {
+        CHECK_NULL_VOID(rsUIDirector_);
+        rsUIDirector_->SetTimeStamp(timeStamp, name);
     }
 #endif
 }

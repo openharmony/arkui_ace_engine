@@ -127,6 +127,11 @@ void CounterDecorator::UpdateTextFieldMargin()
             textFieldLayoutProperty->UpdateMargin(*currentMargin);
         }
     }
+    auto textNode = textNode_.Upgrade();
+    CHECK_NULL_VOID(textNode);
+    auto accessibilityProperty = textNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityLevel("yes");
 }
 
 float CounterDecorator::MeasureTextNodeHeight()
@@ -172,9 +177,15 @@ void CounterDecorator::UpdateCounterContentAndStyle(uint32_t textLength, uint32_
     CHECK_NULL_VOID(context);
     auto textFieldLayoutProperty = decoratedNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
+    auto accessibilityProperty = textNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
     std::string counterText;
     if (isVisible) {
         counterText = std::to_string(textLength) + "/" + std::to_string(maxLength);
+        accessibilityProperty->SetAccessibilityText(
+            GetAccessibilityText(theme->GetCounterContent(), textLength, maxLength));
+    } else {
+        accessibilityProperty->SetAccessibilityText("");
     }
     TextStyle countTextStyle = (textFieldPattern->GetShowCounterStyleValue() && textFieldPattern->HasFocus()) ?
                                 theme->GetOverCountTextStyle() :
@@ -195,6 +206,30 @@ void CounterDecorator::UpdateCounterContentAndStyle(uint32_t textLength, uint32_
     counterNodeLayoutProperty->UpdateTextAlign(GetCounterNodeAlignment());
     counterNodeLayoutProperty->UpdateMaxLines(theme->GetCounterTextMaxline());
     context->UpdateForegroundColor(countTextStyle.GetTextColor());
+}
+
+std::string CounterDecorator::GetAccessibilityText(
+    const std::string& originStr, uint32_t textLength, uint32_t maxLength)
+{
+    std::string result = originStr;
+    std::string textLengthStr = std::to_string(textLength);
+    std::string maxLengthStr = std::to_string(maxLength);
+    std::string toFindStrFirst = "%1$d";
+    std::string toFindStrSecond = "%2$d";
+
+    size_t pos = result.find(toFindStrFirst);
+    if (pos == std::string::npos) {
+        return "";
+    }
+    result.replace(pos, toFindStrFirst.length(), textLengthStr);
+
+    pos = result.find(toFindStrSecond, pos + textLengthStr.length());
+    if (pos == std::string::npos) {
+        return "";
+    }
+    result.replace(pos, toFindStrSecond.length(), maxLengthStr);
+
+    return result;
 }
 
 TextAlign CounterDecorator::GetCounterNodeAlignment()

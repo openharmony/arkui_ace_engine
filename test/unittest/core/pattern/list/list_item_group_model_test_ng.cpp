@@ -20,7 +20,7 @@
 
 namespace OHOS::Ace::NG {
 
-class ListItemGroupModelTestNg : public ListTestNg {};
+class ListItemGroupModelTestNg : public TestNG {};
 
 /**
  * @tc.name: SetHeader_TwoParameters
@@ -49,6 +49,7 @@ HWTEST_F(ListItemGroupModelTestNg, SetHeader_TwoParameters, TestSize.Level1)
      */
     model.SetHeader(listNode, AceType::RawPtr(headerNode));
     EXPECT_TRUE(pattern->isHeaderComponentContentExist_);
+    CreateDone();
 }
 
 /**
@@ -78,6 +79,7 @@ HWTEST_F(ListItemGroupModelTestNg, SetFooter_TwoParameters, TestSize.Level1)
      */
     model.SetFooter(listNode, AceType::RawPtr(footerNode));
     EXPECT_TRUE(pattern->isFooterComponentContentExist_);
+    CreateDone();
 }
 
 /**
@@ -111,6 +113,7 @@ HWTEST_F(ListItemGroupModelTestNg, SetListChildrenMainSize, TestSize.Level1)
     model.SetListChildrenMainSize(listNode, 2.0f, mainSize);
     listNode->context_ = nullptr;
     EXPECT_TRUE(pattern->childrenSize_->isRoundingMode_);
+    CreateDone();
 }
 
 /**
@@ -144,6 +147,7 @@ HWTEST_F(ListItemGroupModelTestNg, ResetListChildrenMainSize, TestSize.Level1)
     model.ResetListChildrenMainSize(listNode);
     listNode->context_ = nullptr;
     EXPECT_EQ(pattern->childrenSize_, nullptr);
+    CreateDone();
 }
 
 /**
@@ -178,6 +182,7 @@ HWTEST_F(ListItemGroupModelTestNg, GetDivider, TestSize.Level1)
      */
     auto result = model.GetDivider(listNode);
     EXPECT_EQ(result, divider);
+    CreateDone();
 }
 
 /**
@@ -212,6 +217,7 @@ HWTEST_F(ListItemGroupModelTestNg, SetSpace_TwoParameters, TestSize.Level1)
     model.SetSpace(listNode, space);
     auto value = listNode->GetLayoutProperty<ListItemGroupLayoutProperty>()->GetSpaceValue();
     EXPECT_EQ(value, 20.0_vp);
+    CreateDone();
 }
 
 /**
@@ -248,6 +254,7 @@ HWTEST_F(ListItemGroupModelTestNg, RemoveHeader_NoParameter, TestSize.Level1)
      */
     model.RemoveHeader();
     EXPECT_FALSE(pattern->isHeaderComponentContentExist_);
+    CreateDone();
 }
 
 /**
@@ -284,6 +291,7 @@ HWTEST_F(ListItemGroupModelTestNg, RemoveFooter_NoParameter, TestSize.Level1)
      */
     model.RemoveFooter();
     EXPECT_FALSE(pattern->isFooterComponentContentExist_);
+    CreateDone();
 }
 
 /**
@@ -318,6 +326,7 @@ HWTEST_F(ListItemGroupModelTestNg, HasHeader, TestSize.Level1)
      */
     auto result = model.HasHeader(listNode);
     EXPECT_TRUE(result);
+    CreateDone();
 }
 
 /**
@@ -352,5 +361,6 @@ HWTEST_F(ListItemGroupModelTestNg, HasFooter, TestSize.Level1)
      */
     auto result = model.HasFooter(listNode);
     EXPECT_TRUE(result);
+    CreateDone();
 }
 } // namespace OHOS::Ace::NG

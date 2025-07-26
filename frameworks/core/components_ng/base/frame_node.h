@@ -603,13 +603,13 @@ public:
         AccessibilityEventType eventType, int32_t startIndex, int32_t endIndex);
 
     void OnAccessibilityEvent(
-        AccessibilityEventType eventType, std::string beforeText, std::string latestContent);
+        AccessibilityEventType eventType, const std::string& beforeText, const std::string& latestContent);
 
     void OnAccessibilityEvent(
         AccessibilityEventType eventType, int64_t stackNodeId, WindowsContentChangeTypes windowsContentChangeType);
 
     void OnAccessibilityEvent(
-        AccessibilityEventType eventType, std::string textAnnouncedForAccessibility);
+        AccessibilityEventType eventType, const std::string& textAnnouncedForAccessibility);
     void MarkNeedRenderOnly();
 
     void OnDetachFromMainTree(bool recursive, PipelineContext* context) override;
@@ -1574,7 +1574,8 @@ private:
     void GetPercentSensitive();
     void UpdatePercentSensitive();
 
-    void AddFrameNodeSnapshot(bool isHit, int32_t parentId, std::vector<RectF> responseRegionList, EventTreeType type);
+    void AddFrameNodeSnapshot(
+        bool isHit, int32_t parentId, const std::vector<RectF>& responseRegionList, EventTreeType type);
 
     int32_t GetNodeExpectedRate();
 
@@ -1633,6 +1634,7 @@ private:
     void MarkDirtyNodeMultiThread(PropertyChangeFlag extraFlag);
     void RebuildRenderContextTreeMultiThread();
     void MarkNeedRenderMultiThread(bool isRenderBoundary);
+    void UpdateBackground();
 
     bool isTrimMemRecycle_ = false;
     // sort in ZIndex.

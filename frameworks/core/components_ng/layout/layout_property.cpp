@@ -107,20 +107,68 @@ TextDirection StringToTextDirection(const std::string& str)
     return TextDirection::LTR;
 }
 
-void ConstrainContentByBorderAndPadding(std::optional<LayoutConstraintF>& contentConstraint,
-    std::optional<LayoutConstraintF>& layoutConstraint, std::unique_ptr<BorderWidthProperty>& borderWidth,
-    std::unique_ptr<PaddingProperty>& padding)
+void AddPaddingFraction(PaddingPropertyF& padding, PaddingPropertyF& noRound, PaddingPropertyF& fraction)
+{
+    if (noRound.top && padding.top) {
+        float fractTop = noRound.top.value() - padding.top.value();
+        fraction.top = fraction.top.value_or(0.0f) + fractTop;
+    }
+    if (noRound.right && padding.right) {
+        float fractRight = noRound.right.value() - padding.right.value();
+        fraction.right = fraction.right.value_or(0.0f) + fractRight;
+    }
+    if (noRound.bottom && padding.bottom) {
+        float fractBottom = noRound.bottom.value() - padding.bottom.value();
+        fraction.bottom = fraction.bottom.value_or(0.0f) + fractBottom;
+    }
+    if (noRound.left && padding.left) {
+        float fractLeft = noRound.left.value() - padding.left.value();
+        fraction.left = fraction.left.value_or(0.0f) + fractLeft;
+    }
+}
+
+void AddBorderWidthFraction(
+    BorderWidthPropertyF& borderWidth, BorderWidthPropertyF& noRound, PaddingPropertyF& fraction)
+{
+    if (noRound.topDimen && borderWidth.topDimen) {
+        float fractTop = noRound.topDimen.value() - borderWidth.topDimen.value();
+        fraction.top = fraction.top.value_or(0.0f) + fractTop;
+    }
+    if (noRound.rightDimen && borderWidth.rightDimen) {
+        float fractRight = noRound.rightDimen.value() - borderWidth.rightDimen.value();
+        fraction.right = fraction.right.value_or(0.0f) + fractRight;
+    }
+    if (noRound.bottomDimen && borderWidth.bottomDimen) {
+        float fractBottom = noRound.bottomDimen.value() - borderWidth.bottomDimen.value();
+        fraction.bottom = fraction.bottom.value_or(0.0f) + fractBottom;
+    }
+    if (noRound.leftDimen && borderWidth.leftDimen) {
+        float fractLeft = noRound.leftDimen.value() - borderWidth.leftDimen.value();
+        fraction.left = fraction.left.value_or(0.0f) + fractLeft;
+    }
+}
+
+void AdjustingConstrainAndRoundOff(std::optional<LayoutConstraintF>& contentConstraint,
+    PaddingPropertyF& roundOffFraction, std::optional<LayoutConstraintF>& layoutConstraint,
+    std::unique_ptr<BorderWidthProperty>& borderWidth, std::unique_ptr<PaddingProperty>& padding)
 {
     if (padding) {
         auto paddingF = ConvertToPaddingPropertyF(
             *padding, contentConstraint->scaleProperty, contentConstraint->percentReference.Width());
         contentConstraint->MinusPaddingToNonNegativeSize(paddingF.left, paddingF.right, paddingF.top, paddingF.bottom);
+        auto paddingNoRound = ConvertToPaddingPropertyF(
+            *padding, contentConstraint->scaleProperty, contentConstraint->percentReference.Width(), false);
+        AddPaddingFraction(paddingF, paddingNoRound, roundOffFraction);
     }
-    CHECK_NULL_VOID(borderWidth);
-    auto borderWidthF = ConvertToBorderWidthPropertyF(
-        *borderWidth, contentConstraint->scaleProperty, layoutConstraint->percentReference.Width());
-    contentConstraint->MinusPaddingToNonNegativeSize(
-        borderWidthF.leftDimen, borderWidthF.rightDimen, borderWidthF.topDimen, borderWidthF.bottomDimen);
+    if (borderWidth) {
+        auto borderWidthF = ConvertToBorderWidthPropertyF(
+            *borderWidth, contentConstraint->scaleProperty, layoutConstraint->percentReference.Width());
+        contentConstraint->MinusPaddingToNonNegativeSize(
+            borderWidthF.leftDimen, borderWidthF.rightDimen, borderWidthF.topDimen, borderWidthF.bottomDimen);
+        auto borderWidthNoRound = ConvertToBorderWidthPropertyF(
+            *borderWidth, contentConstraint->scaleProperty, layoutConstraint->percentReference.Width(), false);
+        AddBorderWidthFraction(borderWidthF, borderWidthNoRound, roundOffFraction);
+    }
 }
 
 void TruncateSafeAreaPadding(const std::optional<float>& range, std::optional<float>& start, std::optional<float>& end)
@@ -863,26 +911,31 @@ void LayoutProperty::ConstraintContentBySafeAreaPadding()
 PaddingPropertyF LayoutProperty::GetOrCreateSafeAreaPadding(bool forceReCreate)
 {
     auto host = GetHost();
-    CHECK_NULL_RETURN(host, CreateSafeAreaPadding());
+    CHECK_NULL_RETURN(host, CreateSafeAreaPadding(true));
     const auto& geometryNode = host->GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, CreateSafeAreaPadding());
+    CHECK_NULL_RETURN(geometryNode, CreateSafeAreaPadding(true));
     auto& resolvedSafeAreaPadding = geometryNode->GetResolvedSingleSafeAreaPadding();
     if (forceReCreate || !resolvedSafeAreaPadding) {
         host->ResetSafeAreaPadding();
-        auto safeAreaPadding = CreateSafeAreaPadding();
+        auto safeAreaPadding = CreateSafeAreaPadding(true);
         geometryNode->SetResolvedSingleSafeAreaPadding(safeAreaPadding);
         return safeAreaPadding;
     }
     return *(resolvedSafeAreaPadding.get());
 }
 
-PaddingPropertyF LayoutProperty::CreateSafeAreaPadding()
+PaddingPropertyF LayoutProperty::CreateSafeAreaPadding(bool adjustingRound)
 {
     if (layoutConstraint_.has_value()) {
         std::optional<LayoutConstraintF> contentWithSafeArea = layoutConstraint_.value();
-        ConstrainContentByBorderAndPadding(contentWithSafeArea, layoutConstraint_, borderWidth_, padding_);
-        PaddingPropertyF truncatedSafeAreaPadding = ConvertToPaddingPropertyF(safeAreaPadding_,
-            ScaleProperty::CreateScaleProperty(), layoutConstraint_->percentReference.Width(), true, true);
+        PaddingPropertyF roundOffFraction;
+        AdjustingConstrainAndRoundOff(contentWithSafeArea, roundOffFraction, layoutConstraint_, borderWidth_, padding_);
+        PaddingPropertyF truncatedSafeAreaPadding =
+            adjustingRound
+                ? ConvertWithResidueToPaddingPropertyF(safeAreaPadding_, ScaleProperty::CreateScaleProperty(),
+                    roundOffFraction, layoutConstraint_->percentReference.Width(), true)
+                : ConvertToPaddingPropertyF(safeAreaPadding_, ScaleProperty::CreateScaleProperty(),
+                    layoutConstraint_->percentReference.Width(), true, true);
         TruncateSafeAreaPadding(
             contentWithSafeArea->selfIdealSize.Height(), truncatedSafeAreaPadding.top, truncatedSafeAreaPadding.bottom);
 
@@ -2113,13 +2166,6 @@ void LayoutProperty::CheckBackgroundLayoutSafeAreaEdges(const TextDirection& dir
         propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT;
         localizedBackgroundIgnoresLayoutSafeAreaEdges_ = edges;
     }
-
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    const auto& target = host->GetRenderContext();
-    CHECK_NULL_VOID(target);
-    target->UpdateBackgroundIgnoresLayoutSafeAreaEdges(
-        localizedBackgroundIgnoresLayoutSafeAreaEdges_.value_or(LAYOUT_SAFE_AREA_EDGE_NONE));
 }
 
 void LayoutProperty::LocalizedPaddingOrMarginChange(

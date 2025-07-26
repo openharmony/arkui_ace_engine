@@ -543,4 +543,26 @@ HWTEST_F(RichEditorTouchTestNg, TestRichEditorUpdateSelectionByTouchMove001, Tes
     ASSERT_NE((host->layoutProperty_->propertyChangeFlag_) & PROPERTY_UPDATE_RENDER, 0);
 }
 
+/**
+ * @tc.name: TestTestTouchedFingerCount
+ * @tc.desc: test TestTouchedFingerCount
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorTouchTestNg, TestTouchedFingerCount, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. declare and init variables and call function.
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto& fingerCount = richEditorPattern->touchedFingerCount_;
+    fingerCount = 0;
+    TouchLocationInfo touchLocationInfo(0);
+    richEditorPattern->HandleTouchDown(touchLocationInfo);
+    EXPECT_NE(fingerCount, 0);
+    richEditorPattern->HandleTouchUp();
+    EXPECT_EQ(fingerCount, 0);
+}
+
 }

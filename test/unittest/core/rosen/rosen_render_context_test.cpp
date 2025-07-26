@@ -1217,7 +1217,6 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest047, TestSize.Level1)
     auto rotationYUserModifier = std::make_shared<Rosen::RSAnimatableProperty<float>>(rotate);
     auto rotationZUserModifier = std::make_shared<Rosen::RSAnimatableProperty<float>>(rotate);
     auto cameraDistanceUserModifier = std::make_shared<Rosen::RSAnimatableProperty<float>>(rotate);
-#if defined(MODIFIER_NG)
     rosenRenderContext->rotationXUserModifier_ = std::make_shared<Rosen::ModifierNG::RSTransformModifier>();
     rosenRenderContext->rotationXUserModifier_->AttachProperty(
         Rosen::ModifierNG::RSPropertyType::ROTATION_X, rotationXUserModifier);
@@ -1235,22 +1234,6 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest047, TestSize.Level1)
     auto rotationYValue = rosenRenderContext->rotationYUserModifier_->GetRotationY();
     auto rotationZValue = rosenRenderContext->rotationZUserModifier_->GetRotation();
     auto cameraDistanceValue = rosenRenderContext->cameraDistanceUserModifier_->GetCameraDistance();
-#else
-    rosenRenderContext->rotationXUserModifier_ = std::make_shared<Rosen::RSRotationXModifier>(rotationXUserModifier);
-    rosenRenderContext->rotationYUserModifier_ = std::make_shared<Rosen::RSRotationYModifier>(rotationYUserModifier);
-    rosenRenderContext->rotationZUserModifier_ = std::make_shared<Rosen::RSRotationModifier>(rotationZUserModifier);
-    rosenRenderContext->cameraDistanceUserModifier_ =
-        std::make_shared<Rosen::RSCameraDistanceModifier>(cameraDistanceUserModifier);
-    rosenRenderContext->OnTransformRotateAngleUpdate({ rotateX, rotateY, rotateZ, perspective });
-    auto rotationXValue = std::static_pointer_cast<Rosen::RSAnimatableProperty<float>>(
-        rosenRenderContext->rotationXUserModifier_->GetProperty())->Get();
-    auto rotationYValue = std::static_pointer_cast<Rosen::RSAnimatableProperty<float>>(
-        rosenRenderContext->rotationYUserModifier_->GetProperty())->Get();
-    auto rotationZValue = std::static_pointer_cast<Rosen::RSAnimatableProperty<float>>(
-        rosenRenderContext->rotationZUserModifier_->GetProperty())->Get();
-    auto cameraDistanceValue = std::static_pointer_cast<Rosen::RSAnimatableProperty<float>>(
-        rosenRenderContext->cameraDistanceUserModifier_->GetProperty()) ->Get();
-#endif
     EXPECT_EQ(rotationXValue, -rotateX);
     EXPECT_EQ(rotationYValue, -rotateY);
     EXPECT_EQ(rotationZValue, rotateZ);
@@ -1937,52 +1920,6 @@ HWTEST_F(RosenRenderContextTest, OnBuilderBackgroundFlagUpdate001, TestSize.Leve
 }
 
 /**
- * @tc.name: OnBackgroundIgnoresLayoutSafeAreaEdgesUpdate001
- * @tc.desc: Test OnBackgroundIgnoresLayoutSafeAreaEdgesUpdate Func.
- * @tc.type: FUNC
- */
-HWTEST_F(RosenRenderContextTest, OnBackgroundIgnoresLayoutSafeAreaEdgesUpdate001, TestSize.Level1)
-{
-    auto frameNode = FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
-    ASSERT_NE(frameNode, nullptr);
-    RefPtr<RosenRenderContext> rosenRenderContext = InitRosenRenderContext(frameNode);
-    ASSERT_NE(rosenRenderContext, nullptr);
-    ASSERT_NE(rosenRenderContext->rsNode_, nullptr);
-    auto transitionModifier = rosenRenderContext->GetOrCreateTransitionModifier();
-    ASSERT_NE(transitionModifier, nullptr);
-    /**
-     * @tc.steps: step1. Call ignoresLayoutSafeAreaEdges to true.
-     * @tc.expected: step1. The transitionModifier->Modify() should be called.
-     */
-    uint32_t ignoresLayoutSafeAreaEdges = NG::LAYOUT_SAFE_AREA_EDGE_ALL;
-    transitionModifier->Modify();
-    bool flag = transitionModifier->flag_->Get();
-    rosenRenderContext->UpdateIsTransitionBackground(true);
-    rosenRenderContext->UpdateBuilderBackgroundFlag(false);
-    rosenRenderContext->OnBackgroundIgnoresLayoutSafeAreaEdgesUpdate(ignoresLayoutSafeAreaEdges);
-    EXPECT_NE(transitionModifier->flag_->Get(), flag);
-
-    /**
-     * @tc.steps: step2. Set ignoresLayoutSafeAreaEdges to false.
-     * @tc.expected: step2. The transitionModifier->Modify() should not be called.
-     */
-    flag = transitionModifier->flag_->Get();
-    rosenRenderContext->UpdateBuilderBackgroundFlag(true);
-    rosenRenderContext->OnBackgroundIgnoresLayoutSafeAreaEdgesUpdate(ignoresLayoutSafeAreaEdges);
-    EXPECT_EQ(flag, transitionModifier->flag_->Get());
-
-    /**
-     * @tc.steps: step3. Set ignoresLayoutSafeAreaEdges while rsNode_ is null.
-     * @tc.expected: step3. The transitionModifier->Modify() should not be called.
-     */
-    rosenRenderContext->rsNode_ = nullptr;
-    rosenRenderContext->UpdateBuilderBackgroundFlag(true);
-    flag = transitionModifier->flag_->Get();
-    rosenRenderContext->OnBackgroundIgnoresLayoutSafeAreaEdgesUpdate(ignoresLayoutSafeAreaEdges);
-    EXPECT_EQ(flag, transitionModifier->flag_->Get());
-}
-
-/**
  * @tc.name: OnBackgroundAlignUpdate001
  * @tc.desc: Test OnBackgroundAlignUpdate Func.
  * @tc.type: FUNC
@@ -2064,6 +2001,38 @@ HWTEST_F(RosenRenderContextTest, OnBackgroundPixelMapUpdate001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateCustomBackground001
+ * @tc.desc: Test UpdateCustomBackground Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, UpdateCustomBackground001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<RosenRenderContext> rosenRenderContext = InitRosenRenderContext(frameNode);
+    ASSERT_NE(rosenRenderContext, nullptr);
+    ASSERT_NE(rosenRenderContext->rsNode_, nullptr);
+
+    /**
+     * @tc.steps: step1. Create transition modifier and get the modifier flag.
+     * @tc.expected: step1. Creation successful.
+     */
+    rosenRenderContext->UpdateIsTransitionBackground(true);
+    auto transitionModifier = rosenRenderContext->GetOrCreateTransitionModifier();
+    ASSERT_NE(transitionModifier, nullptr);
+    transitionModifier->Modify();
+    ASSERT_NE(transitionModifier->flag_, nullptr);
+    bool flag = transitionModifier->flag_->Get();
+
+    /**
+     * @tc.steps: step2. Call UpdateCustomBackground function.
+     * @tc.expected: step2. The modifier flag is changed.
+     */
+    rosenRenderContext->UpdateCustomBackground();
+    EXPECT_NE(transitionModifier->flag_->Get(), flag);
+}
+
+/**
  * @tc.name: OnTransform3DMatrixUpdate001
  * @tc.desc: Test OnTransform3DMatrixUpdate Func.
  * @tc.type: FUNC
@@ -2081,7 +2050,6 @@ HWTEST_F(RosenRenderContextTest, OnTransform3DMatrixUpdate001, TestSize.Level1)
     Matrix4 matrix4(INDEX_1, INDEX_0, INDEX_0, INDEX_0, INDEX_0, INDEX_1, INDEX_0, INDEX_0, INDEX_0, INDEX_0, INDEX_1,
         INDEX_0, INDEX_100, INDEX_0, INDEX_0, INDEX_1);
     rosenRenderContext->OnTransform3DMatrixUpdate(matrix4);
-#if defined(MODIFIER_NG)
     auto perspectiveValue = rosenRenderContext->transformModifier_->GetPersp();
     auto xyTranslateValue = rosenRenderContext->transformModifier_->GetTranslate();
     auto translateZValue = rosenRenderContext->transformModifier_->GetTranslateZ();
@@ -2089,15 +2057,6 @@ HWTEST_F(RosenRenderContextTest, OnTransform3DMatrixUpdate001, TestSize.Level1)
     auto scaleZValue = rosenRenderContext->transformModifier_->GetScaleZ();
     auto skewValue = rosenRenderContext->transformModifier_->GetSkew();
     auto quaternionValue = rosenRenderContext->transformModifier_->GetQuaternion();
-#else
-    auto perspectiveValue = rosenRenderContext->transformModifier_->perspectiveValue.get()->Get();
-    auto xyTranslateValue = rosenRenderContext->transformModifier_->translateXYValue.get()->Get();
-    auto translateZValue = rosenRenderContext->transformModifier_->translateZValue.get()->Get();
-    auto scaleXYValue = rosenRenderContext->transformModifier_->scaleXYValue.get()->Get();
-    auto scaleZValue = rosenRenderContext->transformModifier_->scaleZValue.get()->Get();
-    auto skewValue = rosenRenderContext->transformModifier_->skewValue.get()->Get();
-    auto quaternionValue = rosenRenderContext->transformModifier_->quaternionValue.get()->Get();
-#endif
     EXPECT_NE(perspectiveValue[0], 0);
     EXPECT_EQ(perspectiveValue[1], 0);
     EXPECT_EQ(perspectiveValue[2], 0);

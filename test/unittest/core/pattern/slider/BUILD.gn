@@ -21,6 +21,7 @@ ace_unittest("slider_test_ng") {
     "slider_content_modifier_test_ng.cpp",
     "slider_modifier_test_ng.cpp",
     "slider_pattern_test_ng.cpp",
+    "slider_pattern_two_test_ng.cpp",
     "slider_test_ng.cpp",
   ]
 }

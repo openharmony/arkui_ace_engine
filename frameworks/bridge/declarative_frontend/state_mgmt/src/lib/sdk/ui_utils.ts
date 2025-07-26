@@ -59,7 +59,7 @@ class UIUtilsImpl {
 
     public addMonitor(target: object, path: string | string[], monitorFunc: MonitorCallback, options?: MonitorOptions): void {
       if (!target || typeof target !== 'object' || !(ObserveV2.IsObservedObjectV2(target) ||  target instanceof ViewV2)) {
-        const message = `addMonitor failed because the target is illegal, target must be the @ObservedV2(with at least one @Trace property) or @ComponentV2 instance.`;
+        const message = `addMonitor failed because the target is illegal. The target must be an instance of @ObservedV2 (with at least one @Trace, @Computed, or @Monitor inside) or @ComponentV2.`;
         stateMgmtConsole.applicationError(message);
         throw new BusinessError(ADD_MONITOR_FAIL_TARGET_ILLEGAL, message);
       }
@@ -79,7 +79,7 @@ class UIUtilsImpl {
         
     public clearMonitor(target: object, path: string | string[], monitorFunc: MonitorCallback): void {
       if (!target || typeof target !== 'object' || !(ObserveV2.IsObservedObjectV2(target) ||  target instanceof ViewV2)) {
-        const message = `clearMonitor failed because the target is illegal, target must be the @ObservedV2(with at least one @Trace property) or @ComponentV2 instance.`;
+        const message = `clearMonitor failed because the target is illegal. The target must be an instance of @ObservedV2 (with at least one @Trace, @Computed, or @Monitor inside) or @ComponentV2.`;
         stateMgmtConsole.applicationError(message);
         throw new BusinessError(ADD_MONITOR_FAIL_TARGET_ILLEGAL, message);
       }
