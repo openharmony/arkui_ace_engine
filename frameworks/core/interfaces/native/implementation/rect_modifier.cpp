@@ -153,14 +153,14 @@ void SetRectOptionsImpl(Ark_NativePointer node,
         size_t length = std::min(opt->cornerRadius.size(), static_cast<size_t>(MAX_RADIUS_ITEM_COUNT));
         for (int32_t i = 0; i < length; ++i) {
             const RectRadius radiusItem = opt->cornerRadius[i];
-            const Dimension rx = radiusItem.radiusWidth.value();
-            const Dimension ry = radiusItem.radiusHeight.value();
+            const Dimension rx = radiusItem.radiusWidth.value_or(DEFAULT_RADIUS);
+            const Dimension ry = radiusItem.radiusHeight.value_or(DEFAULT_RADIUS);
             RectModelNG::SetRadiusValue(frameNode, rx, ry, i);
         }
         return;
     }
-    const Dimension rx = opt->radiusWidth.value();
-    const Dimension ry = opt->radiusHeight.value();
+    const Dimension rx = opt->radiusWidth.value_or(DEFAULT_RADIUS);
+    const Dimension ry = opt->radiusHeight.value_or(DEFAULT_RADIUS);
     RectModelNG::SetRadiusWidth(frameNode, rx);
     RectModelNG::SetRadiusHeight(frameNode, ry);
 }
@@ -183,17 +183,36 @@ void RadiusHeightImpl(Ark_NativePointer node,
     RectModelNG::SetRadiusHeight(frameNode, radiusHeight.value_or(DEFAULT_RADIUS));
 }
 void RadiusImpl(Ark_NativePointer node,
-                const Opt_Union_Number_String_Array_Union_Number_String* value)
+                const Opt_Union_Length_Array_RadiusItem* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto radius = Converter::OptConvert<RectRadius>(*value);
-    if (!radius) {
+    CHECK_NULL_VOID(value);
+    if (value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
         RectModelNG::SetRadiusWidth(frameNode, DEFAULT_RADIUS);
         RectModelNG::SetRadiusHeight(frameNode, DEFAULT_RADIUS);
+    } else {
+        Converter::VisitUnion(
+            value->value,
+            [frameNode](const Ark_Length& value) {
+                auto radiusValue = Converter::OptConvertFromArkLength(value, DimensionUnit::VP);
+                RectModelNG::SetRadiusWidth(frameNode, radiusValue.value_or(DEFAULT_RADIUS));
+                RectModelNG::SetRadiusHeight(frameNode, radiusValue.value_or(DEFAULT_RADIUS));
+            },
+            [frameNode](const Array_RadiusItem& value) {
+                CHECK_NULL_VOID(value.array);
+                int32_t length = value.length;
+                length = std::min(length, MAX_RADIUS_ITEM_COUNT);
+                for (int32_t i = 0; i < length; ++i) {
+                    const RectRadius radiusItem = Converter::Convert<RectRadius>(value.array[i]);
+                    const Dimension rx = radiusItem.radiusWidth.value_or(DEFAULT_RADIUS);
+                    const Dimension ry = radiusItem.radiusHeight.value_or(DEFAULT_RADIUS);
+                    RectModelNG::SetRadiusValue(frameNode, rx, ry, i);
+                }
+            },
+            []() {}
+        );
     }
-    RectModelNG::SetRadiusWidth(frameNode, radius->radiusWidth.value_or(DEFAULT_RADIUS));
-    RectModelNG::SetRadiusHeight(frameNode, radius->radiusHeight.value_or(DEFAULT_RADIUS));
 }
 } // RectAttributeModifier
 const GENERATED_ArkUIRectModifier* GetRectModifier()

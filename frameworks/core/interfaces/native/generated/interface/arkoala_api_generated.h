@@ -22321,7 +22321,7 @@ typedef struct GENERATED_ArkUIRectModifier {
     void (*setRadiusHeight)(Ark_NativePointer node,
                             const Opt_Union_Number_String* value);
     void (*setRadius)(Ark_NativePointer node,
-                      const Opt_Union_Number_String_Array_Union_Number_String* value);
+                      const Opt_Union_Length_Array_RadiusItem* value);
 } GENERATED_ArkUIRectModifier;
 
 typedef struct GENERATED_ArkUIRefreshModifier {
