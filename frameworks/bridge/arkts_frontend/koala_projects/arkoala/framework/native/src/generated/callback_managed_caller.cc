@@ -5456,7 +5456,7 @@ void callManagedOnFullScreenEnterCallbackSync(Ark_VMContext vmContext, Ark_Int32
     argsSerializer.writeFullScreenEnterEvent(event);
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(_buffer), _buffer);
 }
-void callManagedOnHoverCallback(Ark_Int32 resourceId)
+void callManagedOnHoverCallback(Ark_Int32 resourceId, Ark_Boolean status, Ark_HoverEvent event)
 {
     CallbackBuffer _buffer = {{}, {}};
     const Ark_CallbackResource _callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
@@ -5464,14 +5464,18 @@ void callManagedOnHoverCallback(Ark_Int32 resourceId)
     Serializer argsSerializer = Serializer((KSerializerBuffer)&(_buffer.buffer), sizeof(_buffer.buffer), &(_buffer.resourceHolder));
     argsSerializer.writeInt32(Kind_OnHoverCallback);
     argsSerializer.writeInt32(resourceId);
+    argsSerializer.writeBoolean(status);
+    argsSerializer.writeHoverEvent(event);
     enqueueCallback(&_buffer);
 }
-void callManagedOnHoverCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId)
+void callManagedOnHoverCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Boolean status, Ark_HoverEvent event)
 {
     uint8_t _buffer[4096];
     Serializer argsSerializer = Serializer((KSerializerBuffer)&_buffer, sizeof(_buffer), nullptr);
     argsSerializer.writeInt32(Kind_OnHoverCallback);
     argsSerializer.writeInt32(resourceId);
+    argsSerializer.writeBoolean(status);
+    argsSerializer.writeHoverEvent(event);
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(_buffer), _buffer);
 }
 void callManagedOnHoverStatusChangeCallback(Ark_Int32 resourceId, Ark_HoverEventParam param)

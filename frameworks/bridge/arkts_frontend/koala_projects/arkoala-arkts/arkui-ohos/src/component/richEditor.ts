@@ -1380,7 +1380,7 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
             const spanType_casted = spanType as (RichEditorSpanType | undefined)
             const content_casted = content as (CustomBuilder | undefined)
             const responseType_casted = responseType as (ResponseType | RichEditorResponseType | undefined)
-            const options_casted = options as (SelectionMenuOptions)
+            const options_casted = options as (SelectionMenuOptions | undefined)
             this.getPeer()?.bindSelectionMenuAttribute(spanType_casted, content_casted, responseType_casted, options_casted)
             return this
         }
@@ -1389,7 +1389,7 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
     public customKeyboard(value: CustomBuilder | undefined, options?: KeyboardOptions): this {
         if (this.checkPriority("customKeyboard")) {
             const value_casted = value as (CustomBuilder | undefined)
-            const options_casted = options as (KeyboardOptions)
+            const options_casted = options as (KeyboardOptions | undefined)
             this.getPeer()?.customKeyboardAttribute(value_casted, options_casted)
             return this
         }
@@ -1398,7 +1398,7 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
     public placeholder(value: ResourceStr | undefined, style?: PlaceholderStyle): this {
         if (this.checkPriority("placeholder")) {
             const value_casted = value as (ResourceStr | undefined)
-            const style_casted = style as (PlaceholderStyle)
+            const style_casted = style as (PlaceholderStyle | undefined)
             this.getPeer()?.placeholderAttribute(value_casted, style_casted)
             return this
         }

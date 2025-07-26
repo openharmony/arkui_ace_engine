@@ -253,19 +253,17 @@ UserGestureOptions Convert(const Ark_RichEditorGesture& src)
     return result;
 }
 
-#ifdef WRONG_GEN
 template<>
 UserMouseOptions Convert(const ::OnHoverCallback& src)
 {
     UserMouseOptions result;
     result.onHover = [callback = CallbackHelper(src)](bool isHover, HoverInfo& info) {
         Ark_Boolean arkIsHover = Converter::ArkValue<Ark_Boolean>(isHover);
-            const auto event = Converter::ArkHoverEventSync(info);
+        const auto event = Converter::ArkHoverEventSync(info);
         callback.InvokeSync(arkIsHover, event.ArkValue());
     };
     return result;
 }
-#endif
 
 template<>
 ImageSpanOptions Convert(const Ark_RichEditorImageSpanOptions& src)
@@ -275,9 +273,7 @@ ImageSpanOptions Convert(const Ark_RichEditorImageSpanOptions& src)
         ret.offset = imageOffset.value() >= 0 ? imageOffset.value() : 0;
     }
     ret.userGestureOption = Converter::OptConvert<UserGestureOptions>(src.gesture).value_or(UserGestureOptions {});
-#ifdef WRONG_GEN
     ret.userMouseOption = Converter::OptConvert<UserMouseOptions>(src.onHover).value_or(UserMouseOptions {});
-#endif
     ret.imageAttribute = Converter::OptConvert<ImageSpanAttribute>(src.imageStyle);
     return ret;
 }

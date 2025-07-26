@@ -1889,7 +1889,9 @@ export function deserializeAndCallOnFullScreenEnterCallback(thisDeserializer: De
 export function deserializeAndCallOnHoverCallback(thisDeserializer: Deserializer): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as OnHoverCallback)
-    _call()
+    let status : boolean = thisDeserializer.readBoolean()
+    let event : HoverEvent = (thisDeserializer.readHoverEvent() as HoverEvent)
+    _call(status, event)
 }
 export function deserializeAndCallOnHoverStatusChangeCallback(thisDeserializer: Deserializer): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
