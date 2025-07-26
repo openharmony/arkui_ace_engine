@@ -150,6 +150,51 @@ PaddingPropertyF ConvertToPaddingPropertyF(const PaddingProperty& padding, const
     return PaddingPropertyF { left, right, top, bottom };
 }
 
+PaddingPropertyF ConvertWithResidueToPaddingPropertyF(const std::unique_ptr<PaddingProperty>& padding,
+    const ScaleProperty& scaleProperty, const PaddingPropertyF& fract, float percentReference, bool nonNegative)
+{
+    if (!padding) {
+        return {};
+    }
+    return ConvertWithResidueToPaddingPropertyF(*padding, scaleProperty, fract, percentReference, nonNegative);
+}
+
+PaddingPropertyF ConvertWithResidueToPaddingPropertyF(const PaddingProperty& padding,
+    const ScaleProperty& scaleProperty, const PaddingPropertyF& fract, float percentReference, bool nonNegative)
+{
+    auto left = ConvertToPx(padding.left, scaleProperty, percentReference);
+    auto right = ConvertToPx(padding.right, scaleProperty, percentReference);
+    auto top = ConvertToPx(padding.top, scaleProperty, percentReference);
+    auto bottom = ConvertToPx(padding.bottom, scaleProperty, percentReference);
+    if (left.has_value()) {
+        left = floor(left.value() + fract.left.value_or(0.0f));
+    }
+    if (right.has_value()) {
+        right = floor(right.value() + fract.right.value_or(0.0f));
+    }
+    if (top.has_value()) {
+        top = floor(top.value() + fract.top.value_or(0.0f));
+    }
+    if (bottom.has_value()) {
+        bottom = floor(bottom.value() + fract.bottom.value_or(0.0f));
+    }
+    if (nonNegative) {
+        if (left.has_value()) {
+            left = std::max(left.value(), 0.0f);
+        }
+        if (right.has_value()) {
+            right = std::max(right.value(), 0.0f);
+        }
+        if (top.has_value()) {
+            top = std::max(top.value(), 0.0f);
+        }
+        if (bottom.has_value()) {
+            bottom = std::max(bottom.value(), 0.0f);
+        }
+    }
+    return PaddingPropertyF { left, right, top, bottom };
+}
+
 MarginPropertyF ConvertToMarginPropertyF(const std::unique_ptr<MarginProperty>& margin,
     const ScaleProperty& scaleProperty, float percentReference, bool roundPixel)
 {
