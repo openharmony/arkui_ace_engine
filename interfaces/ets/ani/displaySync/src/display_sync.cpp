@@ -225,6 +225,7 @@ ani_object ANICreate(ani_env *env, [[maybe_unused]] ani_object object, [[maybe_u
     DisplaySync* displaySync = new DisplaySync(uiDisplaySync);
     if (ANI_OK != env->Object_New(cls, ctor, &displaySync_obj, reinterpret_cast<ani_long>(displaySync))) {
         TAG_LOGE(AceLogTag::ACE_DISPLAY_SYNC, "[ANI] create displaySync fail");
+        delete displaySync;
         return displaySync_obj;
     }
     return displaySync_obj;
