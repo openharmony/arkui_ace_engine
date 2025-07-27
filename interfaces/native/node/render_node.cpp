@@ -33,7 +33,7 @@ int32_t OH_ArkUI_RenderNodeUtils_AddRenderNode(ArkUI_NodeHandle node, ArkUI_Rend
     CHECK_NULL_RETURN(node, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
     CHECK_NULL_RETURN(child, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
     if (node->type != ArkUI_NodeType::ARKUI_NODE_CUSTOM) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+        return OHOS::Ace::ERROR_CODE_NOT_CUSTOM_NODE;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
@@ -46,7 +46,7 @@ int32_t OH_ArkUI_RenderNodeUtils_RemoveRenderNode(ArkUI_NodeHandle node, ArkUI_R
     CHECK_NULL_RETURN(node, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
     CHECK_NULL_RETURN(child, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
     if (node->type != ArkUI_NodeType::ARKUI_NODE_CUSTOM) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+        return OHOS::Ace::ERROR_CODE_NOT_CUSTOM_NODE;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
@@ -58,7 +58,7 @@ int32_t OH_ArkUI_RenderNodeUtils_ClearRenderNodeChildren(ArkUI_NodeHandle node)
 {
     CHECK_NULL_RETURN(node, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
     if (node->type != ArkUI_NodeType::ARKUI_NODE_CUSTOM) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+        return OHOS::Ace::ERROR_CODE_NOT_CUSTOM_NODE;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
@@ -146,6 +146,9 @@ int32_t OH_ArkUI_RenderNodeUtils_ClearChildren(ArkUI_RenderNodeHandle node)
 int32_t OH_ArkUI_RenderNodeUtils_GetChild(ArkUI_RenderNodeHandle node, int32_t index, ArkUI_RenderNodeHandle* child)
 {
     CHECK_NULL_RETURN(node, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    if (index < 0) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
     ArkUIRenderNodeHandle renderNode;
@@ -247,7 +250,7 @@ int32_t OH_ArkUI_RenderNodeUtils_GetChildren(
     auto result = impl->getNodeModifiers()->getNDKRenderNodeModifier()->getChildren(
         node->renderNodeHandle, &renderNode, &nodeId, &nodeCount);
     *count = nodeCount;
-    if (result == OHOS::Ace::ERROR_CODE_NO_ERROR) {
+    if (nodeCount > 0 && result == OHOS::Ace::ERROR_CODE_NO_ERROR) {
         ArkUI_RenderNodeHandle* childrenList = new ArkUI_RenderNodeHandle[nodeCount];
         for (int32_t i = 0; i < nodeCount; i++) {
             childrenList[i] = new ArkUI_RenderNode({ renderNode[i] });
@@ -297,6 +300,9 @@ int32_t OH_ArkUI_RenderNodeUtils_SetOpacity(ArkUI_RenderNodeHandle node, float o
     if (node == nullptr) {
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
+    if (!OHOS::Ace::InRegion(0, 1, opacity)) {
+        return OHOS::Ace::ERROR_CODE_PARAM_OUT_OF_RANGE;
+    }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
     return impl->getNodeModifiers()->getNDKRenderNodeModifier()->setOpacity(node->renderNodeHandle, opacity);
@@ -316,6 +322,9 @@ int32_t OH_ArkUI_RenderNodeUtils_SetSize(ArkUI_RenderNodeHandle node, int32_t wi
 {
     if (node == nullptr) {
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    if (width < 0 || height < 0) {
+        return OHOS::Ace::ERROR_CODE_PARAM_OUT_OF_RANGE;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
@@ -487,6 +496,9 @@ int32_t OH_ArkUI_RenderNodeUtils_SetShadowAlpha(ArkUI_RenderNodeHandle node, flo
     if (node == nullptr) {
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
+    if (!OHOS::Ace::InRegion(0, 1, alpha)) {
+        return OHOS::Ace::ERROR_CODE_PARAM_OUT_OF_RANGE;
+    }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
     return impl->getNodeModifiers()->getNDKRenderNodeModifier()->setShadowAlpha(node->renderNodeHandle, alpha);
@@ -506,6 +518,9 @@ int32_t OH_ArkUI_RenderNodeUtils_SetShadowElevation(ArkUI_RenderNodeHandle node,
 {
     if (node == nullptr) {
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    if (elevation < 0) {
+        return OHOS::Ace::ERROR_CODE_PARAM_OUT_OF_RANGE;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
@@ -537,6 +552,9 @@ int32_t OH_ArkUI_RenderNodeUtils_SetShadowRadius(ArkUI_RenderNodeHandle node, fl
     if (node == nullptr) {
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
+    if (radius < 0) {
+        return OHOS::Ace::ERROR_CODE_PARAM_OUT_OF_RANGE;
+    }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
     return impl->getNodeModifiers()->getNDKRenderNodeModifier()->setShadowRadius(node->renderNodeHandle, radius);
@@ -544,7 +562,7 @@ int32_t OH_ArkUI_RenderNodeUtils_SetShadowRadius(ArkUI_RenderNodeHandle node, fl
 
 int32_t OH_ArkUI_RenderNodeUtils_SetBorderStyle(ArkUI_RenderNodeHandle node, ArkUI_NodeBorderStyleOption* borderStyle)
 {
-    if (node == nullptr) {
+    if (node == nullptr || borderStyle == nullptr) {
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -571,7 +589,7 @@ int32_t OH_ArkUI_RenderNodeUtils_GetBorderStyle(ArkUI_RenderNodeHandle node, Ark
 
 int32_t OH_ArkUI_RenderNodeUtils_SetBorderWidth(ArkUI_RenderNodeHandle node, ArkUI_NodeBorderWidthOption* borderWidth)
 {
-    if (node == nullptr) {
+    if (node == nullptr || borderWidth == nullptr) {
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -595,7 +613,7 @@ int32_t OH_ArkUI_RenderNodeUtils_GetBorderWidth(ArkUI_RenderNodeHandle node, Ark
 
 int32_t OH_ArkUI_RenderNodeUtils_SetBorderColor(ArkUI_RenderNodeHandle node, ArkUI_NodeBorderColor* borderColor)
 {
-    if (node == nullptr) {
+    if (node == nullptr || borderColor == nullptr) {
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -620,7 +638,7 @@ int32_t OH_ArkUI_RenderNodeUtils_GetBorderColor(ArkUI_RenderNodeHandle node, Ark
 
 int32_t OH_ArkUI_RenderNodeUtils_SetBorderRadius(ArkUI_RenderNodeHandle node, ArkUI_NodeBorderRadius* borderRadius)
 {
-    if (node == nullptr) {
+    if (node == nullptr || borderRadius == nullptr) {
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -659,6 +677,9 @@ int32_t OH_ArkUI_RenderNodeUtils_SetBounds(ArkUI_RenderNodeHandle node,
     if (node == nullptr) {
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
+    if (width < 0 || height < 0) {
+        return OHOS::Ace::ERROR_CODE_PARAM_OUT_OF_RANGE;
+    }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
     return impl->getNodeModifiers()->getNDKRenderNodeModifier()->setBounds(node->renderNodeHandle,
@@ -694,6 +715,9 @@ int32_t OH_ArkUI_RenderNodeUtils_SetClipToFrame(ArkUI_RenderNodeHandle node, int
     if (node == nullptr) {
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
+    if (!OHOS::Ace::InRegion(0, 1, clipToFrame)) {
+        return OHOS::Ace::ERROR_CODE_PARAM_OUT_OF_RANGE;
+    }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
     return impl->getNodeModifiers()->getNDKRenderNodeModifier()->setClipToFrame(node->renderNodeHandle, clipToFrame);
@@ -713,6 +737,9 @@ int32_t OH_ArkUI_RenderNodeUtils_SetClipToBounds(ArkUI_RenderNodeHandle node, in
 {
     if (node == nullptr) {
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    if (!OHOS::Ace::InRegion(0, 1, clipToBounds)) {
+        return OHOS::Ace::ERROR_CODE_PARAM_OUT_OF_RANGE;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
@@ -756,6 +783,7 @@ ArkUI_RenderContentModifierHandle OH_ArkUI_RenderNodeUtils_CreateContentModifier
 
 void OH_ArkUI_RenderNodeUtils_DisposeContentModifier(ArkUI_RenderContentModifierHandle modifier)
 {
+    CHECK_NULL_VOID(modifier);
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_VOID(impl);
     g_modifierSet.erase(modifier->RenderModifierHandle);
@@ -767,6 +795,9 @@ void OH_ArkUI_RenderNodeUtils_DisposeContentModifier(ArkUI_RenderContentModifier
 int32_t OH_ArkUI_RenderNodeUtils_AttachFloatProperty(
     ArkUI_RenderContentModifierHandle modifier, ArkUI_FloatPropertyHandle property)
 {
+    if (modifier == nullptr || property == nullptr) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
     return impl->getNodeModifiers()->getNDKRenderNodeModifier()->attachProperty(
@@ -776,6 +807,9 @@ int32_t OH_ArkUI_RenderNodeUtils_AttachFloatProperty(
 int32_t OH_ArkUI_RenderNodeUtils_AttachVector2Property(
     ArkUI_RenderContentModifierHandle modifier, ArkUI_Vector2PropertyHandle property)
 {
+    if (modifier == nullptr || property == nullptr) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
     return impl->getNodeModifiers()->getNDKRenderNodeModifier()->attachProperty(
@@ -785,6 +819,9 @@ int32_t OH_ArkUI_RenderNodeUtils_AttachVector2Property(
 int32_t OH_ArkUI_RenderNodeUtils_AttachColorProperty(
     ArkUI_RenderContentModifierHandle modifier, ArkUI_ColorPropertyHandle property)
 {
+    if (modifier == nullptr || property == nullptr) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
     return impl->getNodeModifiers()->getNDKRenderNodeModifier()->attachProperty(
@@ -794,6 +831,9 @@ int32_t OH_ArkUI_RenderNodeUtils_AttachColorProperty(
 int32_t OH_ArkUI_RenderNodeUtils_AttachFloatAnimatableProperty(
     ArkUI_RenderContentModifierHandle modifier, ArkUI_FloatAnimatablePropertyHandle property)
 {
+    if (modifier == nullptr || property == nullptr) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
     return impl->getNodeModifiers()->getNDKRenderNodeModifier()->attachProperty(
@@ -803,6 +843,9 @@ int32_t OH_ArkUI_RenderNodeUtils_AttachFloatAnimatableProperty(
 int32_t OH_ArkUI_RenderNodeUtils_AttachVector2AnimatableProperty(
     ArkUI_RenderContentModifierHandle modifier, ArkUI_Vector2AnimatablePropertyHandle property)
 {
+    if (modifier == nullptr || property == nullptr) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
     return impl->getNodeModifiers()->getNDKRenderNodeModifier()->attachProperty(
@@ -812,6 +855,9 @@ int32_t OH_ArkUI_RenderNodeUtils_AttachVector2AnimatableProperty(
 int32_t OH_ArkUI_RenderNodeUtils_AttachColorAnimatableProperty(
     ArkUI_RenderContentModifierHandle modifier, ArkUI_ColorAnimatablePropertyHandle property)
 {
+    if (modifier == nullptr || property == nullptr) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
     return impl->getNodeModifiers()->getNDKRenderNodeModifier()->attachProperty(
@@ -833,6 +879,9 @@ ArkUI_FloatPropertyHandle OH_ArkUI_RenderNodeUtils_CreateFloatProperty(float val
 
 int32_t OH_ArkUI_RenderNodeUtils_SetFloatPropertyValue(ArkUI_FloatPropertyHandle property, float value)
 {
+    if (property == nullptr) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
     return impl->getNodeModifiers()->getNDKRenderNodeModifier()->setFloatProperty(property->rsPropertyHandle, value);
@@ -840,6 +889,9 @@ int32_t OH_ArkUI_RenderNodeUtils_SetFloatPropertyValue(ArkUI_FloatPropertyHandle
 
 int32_t OH_ArkUI_RenderNodeUtils_GetFloatPropertyValue(ArkUI_FloatPropertyHandle property, float* value)
 {
+    if (property == nullptr) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
     return impl->getNodeModifiers()->getNDKRenderNodeModifier()->getFloatProperty(property->rsPropertyHandle, value);
@@ -847,6 +899,7 @@ int32_t OH_ArkUI_RenderNodeUtils_GetFloatPropertyValue(ArkUI_FloatPropertyHandle
 
 void OH_ArkUI_RenderNodeUtils_DisposeFloatProperty(ArkUI_FloatPropertyHandle property)
 {
+    CHECK_NULL_VOID(property);
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_VOID(impl);
     g_propertySet.erase(property->rsPropertyHandle);
@@ -870,6 +923,9 @@ ArkUI_Vector2PropertyHandle OH_ArkUI_RenderNodeUtils_CreateVector2Property(float
 
 int32_t OH_ArkUI_RenderNodeUtils_SetVector2PropertyValue(ArkUI_Vector2PropertyHandle property, float x, float y)
 {
+    if (property == nullptr) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
     return impl->getNodeModifiers()->getNDKRenderNodeModifier()->setVector2Property(property->rsPropertyHandle, x, y);
@@ -877,6 +933,9 @@ int32_t OH_ArkUI_RenderNodeUtils_SetVector2PropertyValue(ArkUI_Vector2PropertyHa
 
 int32_t OH_ArkUI_RenderNodeUtils_GetVector2PropertyValue(ArkUI_Vector2PropertyHandle property, float* x, float* y)
 {
+    if (property == nullptr) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
     return impl->getNodeModifiers()->getNDKRenderNodeModifier()->getVector2Property(property->rsPropertyHandle, x, y);
@@ -884,6 +943,7 @@ int32_t OH_ArkUI_RenderNodeUtils_GetVector2PropertyValue(ArkUI_Vector2PropertyHa
 
 void OH_ArkUI_RenderNodeUtils_DisposeVector2Property(ArkUI_Vector2PropertyHandle property)
 {
+    CHECK_NULL_VOID(property);
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_VOID(impl);
     g_propertySet.erase(property->rsPropertyHandle);
@@ -907,6 +967,9 @@ ArkUI_ColorPropertyHandle OH_ArkUI_RenderNodeUtils_CreateColorProperty(uint32_t 
 
 int32_t OH_ArkUI_RenderNodeUtils_SetColorPropertyValue(ArkUI_ColorPropertyHandle property, uint32_t value)
 {
+    if (property == nullptr) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
     return impl->getNodeModifiers()->getNDKRenderNodeModifier()->setColorProperty(property->rsPropertyHandle, value);
@@ -914,6 +977,9 @@ int32_t OH_ArkUI_RenderNodeUtils_SetColorPropertyValue(ArkUI_ColorPropertyHandle
 
 int32_t OH_ArkUI_RenderNodeUtils_GetColorPropertyValue(ArkUI_ColorPropertyHandle property, uint32_t* value)
 {
+    if (property == nullptr) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
     return impl->getNodeModifiers()->getNDKRenderNodeModifier()->getColorProperty(property->rsPropertyHandle, value);
@@ -921,6 +987,7 @@ int32_t OH_ArkUI_RenderNodeUtils_GetColorPropertyValue(ArkUI_ColorPropertyHandle
 
 void OH_ArkUI_RenderNodeUtils_DisposeColorProperty(ArkUI_ColorPropertyHandle property)
 {
+    CHECK_NULL_VOID(property);
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_VOID(impl);
     g_propertySet.erase(property->rsPropertyHandle);
@@ -945,6 +1012,9 @@ ArkUI_FloatAnimatablePropertyHandle OH_ArkUI_RenderNodeUtils_CreateFloatAnimatab
 int32_t OH_ArkUI_RenderNodeUtils_SetFloatAnimatablePropertyValue(
     ArkUI_FloatAnimatablePropertyHandle property, float value)
 {
+    if (property == nullptr) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
     return impl->getNodeModifiers()->getNDKRenderNodeModifier()->setFloatAnimatableProperty(
@@ -954,6 +1024,9 @@ int32_t OH_ArkUI_RenderNodeUtils_SetFloatAnimatablePropertyValue(
 int32_t OH_ArkUI_RenderNodeUtils_GetFloatAnimatablePropertyValue(
     ArkUI_FloatAnimatablePropertyHandle property, float* value)
 {
+    if (property == nullptr) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
     return impl->getNodeModifiers()->getNDKRenderNodeModifier()->getFloatAnimatableProperty(
@@ -962,6 +1035,7 @@ int32_t OH_ArkUI_RenderNodeUtils_GetFloatAnimatablePropertyValue(
 
 void OH_ArkUI_RenderNodeUtils_DisposeFloatAnimatableProperty(ArkUI_FloatAnimatablePropertyHandle property)
 {
+    CHECK_NULL_VOID(property);
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_VOID(impl);
     g_propertySet.erase(property->rsPropertyHandle);
@@ -986,6 +1060,9 @@ ArkUI_Vector2AnimatablePropertyHandle OH_ArkUI_RenderNodeUtils_CreateVector2Anim
 int32_t OH_ArkUI_RenderNodeUtils_SetVector2AnimatablePropertyValue(
     ArkUI_Vector2AnimatablePropertyHandle property, float x, float y)
 {
+    if (property == nullptr) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
     return impl->getNodeModifiers()->getNDKRenderNodeModifier()->setVector2AnimatableProperty(
@@ -995,6 +1072,9 @@ int32_t OH_ArkUI_RenderNodeUtils_SetVector2AnimatablePropertyValue(
 int32_t OH_ArkUI_RenderNodeUtils_GetVector2AnimatablePropertyValue(
     ArkUI_Vector2AnimatablePropertyHandle property, float* x, float* y)
 {
+    if (property == nullptr) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
     return impl->getNodeModifiers()->getNDKRenderNodeModifier()->getVector2AnimatableProperty(
@@ -1003,6 +1083,7 @@ int32_t OH_ArkUI_RenderNodeUtils_GetVector2AnimatablePropertyValue(
 
 void OH_ArkUI_RenderNodeUtils_DisposeVector2AnimatableProperty(ArkUI_Vector2AnimatablePropertyHandle property)
 {
+    CHECK_NULL_VOID(property);
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_VOID(impl);
     g_propertySet.erase(property->rsPropertyHandle);
@@ -1027,6 +1108,9 @@ ArkUI_ColorAnimatablePropertyHandle OH_ArkUI_RenderNodeUtils_CreateColorAnimatab
 int32_t OH_ArkUI_RenderNodeUtils_SetColorAnimatablePropertyValue(
     ArkUI_ColorAnimatablePropertyHandle property, uint32_t value)
 {
+    if (property == nullptr) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
     return impl->getNodeModifiers()->getNDKRenderNodeModifier()->setColorAnimatableProperty(
@@ -1036,6 +1120,9 @@ int32_t OH_ArkUI_RenderNodeUtils_SetColorAnimatablePropertyValue(
 int32_t OH_ArkUI_RenderNodeUtils_GetColorAnimatablePropertyValue(
     ArkUI_ColorAnimatablePropertyHandle property, uint32_t* value)
 {
+    if (property == nullptr) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
     return impl->getNodeModifiers()->getNDKRenderNodeModifier()->getColorAnimatableProperty(
@@ -1044,6 +1131,7 @@ int32_t OH_ArkUI_RenderNodeUtils_GetColorAnimatablePropertyValue(
 
 void OH_ArkUI_RenderNodeUtils_DisposeColorAnimatableProperty(ArkUI_ColorAnimatablePropertyHandle property)
 {
+    CHECK_NULL_VOID(property);
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_VOID(impl);
     g_propertySet.erase(property->rsPropertyHandle);
@@ -1071,12 +1159,14 @@ ArkUI_RectShapeOption* OH_ArkUI_RenderNodeUtils_CreateRectShapeOption()
 
 void OH_ArkUI_RenderNodeUtils_DisposeRectShapeOption(ArkUI_RectShapeOption* option)
 {
+    CHECK_NULL_VOID(option);
     delete option;
 }
 
 void OH_ArkUI_RenderNodeUtils_SetRectShapeOptionEdgeValue(
     ArkUI_RectShapeOption* option, float rect, ArkUI_EdgeDirection direction)
 {
+    CHECK_NULL_VOID(option);
     switch (direction) {
         case ARKUI_EDGE_DIRECTION_ALL:
             option->left = rect;
@@ -1112,11 +1202,13 @@ ArkUI_NodeBorderStyleOption* OH_ArkUI_RenderNodeUtils_CreateNodeBorderStyleOptio
 
 void OH_ArkUI_RenderNodeUtils_DisposeNodeBorderStyleOption(ArkUI_NodeBorderStyleOption* option)
 {
+    CHECK_NULL_VOID(option);
     delete option;
 }
 
 void OH_ArkUI_NodeBorderStyleOption_SetLeftBorderStyle(ArkUI_NodeBorderStyleOption* option, ArkUI_BorderStyle style)
 {
+    CHECK_NULL_VOID(option);
     option->leftStyle = style;
 }
 
@@ -1155,12 +1247,14 @@ ArkUI_NodeBorderWidthOption* OH_ArkUI_RenderNodeUtils_CreateNodeBorderWidthOptio
 
 void OH_ArkUI_RenderNodeUtils_DisposeNodeBorderWidthOption(ArkUI_NodeBorderWidthOption* option)
 {
+    CHECK_NULL_VOID(option);
     delete option;
 }
 
 void OH_ArkUI_RenderNodeUtils_SetNodeBorderWidthOptionEdgeWidth(
     ArkUI_NodeBorderWidthOption* option, float width, ArkUI_EdgeDirection direction)
 {
+    CHECK_NULL_VOID(option);
     switch (direction) {
         case ARKUI_EDGE_DIRECTION_ALL:
             option->leftWidth = width;
@@ -1193,12 +1287,14 @@ ArkUI_NodeBorderColorOption* OH_ArkUI_RenderNodeUtils_CreateNodeBorderColorOptio
 
 void OH_ArkUI_RenderNodeUtils_DisposeNodeBorderColorOption(ArkUI_NodeBorderColorOption* option)
 {
+    CHECK_NULL_VOID(option);
     delete option;
 }
 
 void OH_ArkUI_RenderNodeUtils_SetNodeBorderColorOptionEdgeColor(
     ArkUI_NodeBorderColorOption* option, uint32_t color, ArkUI_EdgeDirection direction)
 {
+    CHECK_NULL_VOID(option);
     switch (direction) {
         case ARKUI_EDGE_DIRECTION_ALL:
             option->leftColor = color;
@@ -1231,30 +1327,32 @@ ArkUI_NodeBorderRadiusOption* OH_ArkUI_RenderNodeUtils_CreateNodeBorderRadiusOpt
 
 void OH_ArkUI_RenderNodeUtils_DisposeNodeBorderRadiusOption(ArkUI_NodeBorderRadiusOption* option)
 {
+    CHECK_NULL_VOID(option);
     delete option;
 }
 
 void OH_ArkUI_RenderNodeUtils_SetNodeBorderRadiusOptionEdgeRadius(
-    ArkUI_NodeBorderRadiusOption* option, uint32_t radius, ArkUI_EdgeDirection direction)
+    ArkUI_NodeBorderRadiusOption* option, uint32_t edgeRadius, ArkUI_EdgeDirection direction)
 {
+    CHECK_NULL_VOID(option);
     switch (direction) {
         case ARKUI_EDGE_DIRECTION_ALL:
-            option->leftRadius = radius;
-            option->rightRadius = radius;
-            option->topRadius = radius;
-            option->bottomRadius = radius;
+            option->leftRadius = edgeRadius;
+            option->rightRadius = edgeRadius;
+            option->topRadius = edgeRadius;
+            option->bottomRadius = edgeRadius;
             break;
         case ARKUI_EDGE_DIRECTION_LEFT:
-            option->leftRadius = radius;
+            option->leftRadius = edgeRadius;
             break;
         case ARKUI_EDGE_DIRECTION_RIGHT:
-            option->rightRadius = radius;
+            option->rightRadius = edgeRadius;
             break;
         case ARKUI_EDGE_DIRECTION_TOP:
-            option->topRadius = radius;
+            option->topRadius = edgeRadius;
             break;
         case ARKUI_EDGE_DIRECTION_BOTTOM:
-            option->bottomRadius = radius;
+            option->bottomRadius = edgeRadius;
             break;
         default:
             return;
@@ -1269,21 +1367,25 @@ ArkUI_CircleShapeOption* OH_ArkUI_RenderNodeUtils_CreateCircleShapeOption()
 
 void OH_ArkUI_RenderNodeUtils_DisposeCircleShapeOption(ArkUI_CircleShapeOption* option)
 {
+    CHECK_NULL_VOID(option);
     delete option;
 }
 
 void OH_ArkUI_RenderNodeUtils_SetCircleShapeOptionCenterX(ArkUI_CircleShapeOption* option, float centerX)
 {
+    CHECK_NULL_VOID(option);
     option->centerX = centerX;
 }
 
 void OH_ArkUI_RenderNodeUtils_SetCircleShapeOptionCenterY(ArkUI_CircleShapeOption* option, float centerY)
 {
+    CHECK_NULL_VOID(option);
     option->centerY = centerY;
 }
 
 void OH_ArkUI_RenderNodeUtils_SetCircleShapeOptionRadius(ArkUI_CircleShapeOption* option, float radius)
 {
+    CHECK_NULL_VOID(option);
     option->radius = radius;
 }
 
@@ -1296,12 +1398,14 @@ ArkUI_RoundRectShapeOption* OH_ArkUI_RenderNodeUtils_CreateRoundRectShapeOption(
 
 void OH_ArkUI_RenderNodeUtils_DisposeRoundRectShapeOption(ArkUI_RoundRectShapeOption* option)
 {
+    CHECK_NULL_VOID(option);
     delete option;
 }
 
 void OH_ArkUI_RenderNodeUtils_SetRoundRectShapeOptionEdgeValue(
     ArkUI_RoundRectShapeOption* option, float value, ArkUI_EdgeDirection direction)
 {
+    CHECK_NULL_VOID(option);
     switch (direction) {
         case ARKUI_EDGE_DIRECTION_ALL:
             option->left = value;
@@ -1329,6 +1433,7 @@ void OH_ArkUI_RenderNodeUtils_SetRoundRectShapeOptionEdgeValue(
 void OH_ArkUI_RenderNodeUtils_SetRoundRectShapeOptionCornerXY(
     ArkUI_RoundRectShapeOption* option, float x, float y, ArkUI_CornerDirection direction)
 {
+    CHECK_NULL_VOID(option);
     switch (direction) {
         case ARKUI_CORNER_DIRECTION_ALL:
             option->topLeftX = x;
@@ -1369,11 +1474,13 @@ ArkUI_CommandPathOption* OH_ArkUI_RenderNodeUtils_CreateCommandPathOption()
 
 void OH_ArkUI_RenderNodeUtils_DisposeCommandPathOption(ArkUI_CommandPathOption* option)
 {
+    CHECK_NULL_VOID(option);
     delete option;
 }
 
 void OH_ArkUI_RenderNodeUtils_SetCommandPathOptionCommands(ArkUI_CommandPathOption* option, char* commands)
 {
+    CHECK_NULL_VOID(option);
     option->commands = commands;
 }
 
@@ -1411,7 +1518,7 @@ int32_t OH_ArkUI_RenderNodeUtils_SetMask(ArkUI_RenderNodeHandle node, ArkUI_Rend
 
 int32_t OH_ArkUI_RenderNodeUtils_SetClip(ArkUI_RenderNodeHandle node, ArkUI_RenderNodeClipOption* option)
 {
-    if (node == nullptr) {
+    if (node == nullptr || option == nullptr) {
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -1506,6 +1613,7 @@ ArkUI_RenderNodeMaskOption* OH_ArkUI_RenderNodeUtils_CreateRenderNodeMaskOptionF
 
 void OH_ArkUI_RenderNodeUtils_DisposeRenderNodeMaskOption(ArkUI_RenderNodeMaskOption* option)
 {
+    CHECK_NULL_VOID(option);
     delete option;
 }
 
@@ -1597,6 +1705,7 @@ ArkUI_RenderNodeClipOption* OH_ArkUI_RenderNodeUtils_CreateRenderNodeClipOptionF
 
 void OH_ArkUI_RenderNodeUtils_DisposeRenderNodeClipOption(ArkUI_RenderNodeClipOption* option)
 {
+    CHECK_NULL_VOID(option);
     delete option;
 }
 
