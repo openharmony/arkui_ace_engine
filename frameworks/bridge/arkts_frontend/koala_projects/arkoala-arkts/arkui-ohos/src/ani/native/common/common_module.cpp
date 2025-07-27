@@ -695,7 +695,7 @@ ani_int GetColorValue(ani_env* env, ani_object aniClass, ani_object src)
     if ((status = env->Object_InstanceOf(src, stringClass, &isString)) != ANI_OK) {
         HILOGW("GetColorValue call instanceof string failed. %{public}d", status);
     }
-    if(isString){
+    if (isString) {
         auto srcString = ANIUtils_ANIStringToStdString(env, static_cast<ani_string>(src));
         return modifier->getCommonAniModifier()->getColorValueByString(srcString);
     }
