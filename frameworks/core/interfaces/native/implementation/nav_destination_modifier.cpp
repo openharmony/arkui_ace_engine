@@ -91,7 +91,7 @@ void OnShownImpl(Ark_NativePointer node,
         return;
     }
     auto onShownEvent = [arkCallback = CallbackHelper(*optValue)]() {
-        arkCallback.Invoke();
+        arkCallback.InvokeSync();
     };
     NavDestinationModelStatic::SetOnShown(frameNode, std::move(onShownEvent));
 }
@@ -105,7 +105,7 @@ void OnHiddenImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    auto onHiddenEvent = [arkCallback = CallbackHelper(*optValue)]() { arkCallback.Invoke(); };
+    auto onHiddenEvent = [arkCallback = CallbackHelper(*optValue)]() { arkCallback.InvokeSync(); };
     NavDestinationModelStatic::SetOnHidden(frameNode, std::move(onHiddenEvent));
 }
 void OnBackPressedImpl(Ark_NativePointer node,
@@ -305,7 +305,7 @@ void OnReadyImpl(Ark_NativePointer node,
     }
     auto onReady = [readyCallback = CallbackHelper(value->value)](RefPtr<NG::NavDestinationContext> context) {
         Ark_NavDestinationContext arkContext = Converter::ArkValue<Ark_NavDestinationContext>(context);
-        readyCallback.Invoke(arkContext);
+        readyCallback.InvokeSync(arkContext);
     };
     NavDestinationModelStatic::SetOnReady(frameNode, std::move(onReady));
 }
@@ -320,7 +320,7 @@ void OnWillAppearImpl(Ark_NativePointer node,
         return;
     }
     auto onWillAppearEvent = [arkCallback = CallbackHelper(*optValue)]() {
-        arkCallback.Invoke();
+        arkCallback.InvokeSync();
     };
     NavDestinationModelStatic::SetOnWillAppear(frameNode, std::move(onWillAppearEvent));
 }
@@ -335,7 +335,7 @@ void OnWillDisappearImpl(Ark_NativePointer node,
         return;
     }
     auto onWillDisappearEvent = [arkCallback = CallbackHelper(*optValue)]() {
-        arkCallback.Invoke();
+        arkCallback.InvokeSync();
     };
     NavDestinationModelStatic::SetOnWillDisAppear(frameNode, std::move(onWillDisappearEvent));
 }
@@ -350,7 +350,7 @@ void OnWillShowImpl(Ark_NativePointer node,
         return;
     }
     auto onWillShowEvent = [arkCallback = CallbackHelper(*optValue)]() {
-        arkCallback.Invoke();
+        arkCallback.InvokeSync();
     };
     NavDestinationModelStatic::SetOnWillShow(frameNode, std::move(onWillShowEvent));
 }
@@ -365,7 +365,7 @@ void OnWillHideImpl(Ark_NativePointer node,
         return;
     }
     auto onWillHideEvent = [arkCallback = CallbackHelper(*optValue)]() {
-        arkCallback.Invoke();
+        arkCallback.InvokeSync();
     };
     NavDestinationModelStatic::SetOnWillHide(frameNode, std::move(onWillHideEvent));
 }
@@ -458,7 +458,7 @@ void OnActiveImpl(Ark_NativePointer node,
     }
     auto onActiveEvent = [arkCallback = CallbackHelper(*optValue)](int32_t activeValue) {
         Ark_NavDestinationActiveReason arkValue = static_cast<Ark_NavDestinationActiveReason>(activeValue);
-        arkCallback.Invoke(arkValue);
+        arkCallback.InvokeSync(arkValue);
     };
     NavDestinationModelStatic::SetOnActive(frameNode, std::move(onActiveEvent));
 }
@@ -475,7 +475,7 @@ void OnInactiveImpl(Ark_NativePointer node,
     }
     auto onInactiveEvent = [arkCallback = CallbackHelper(*optValue)](int32_t inactiveValue) {
         Ark_NavDestinationActiveReason arkValue = static_cast<Ark_NavDestinationActiveReason>(inactiveValue);
-        arkCallback.Invoke(arkValue);
+        arkCallback.InvokeSync(arkValue);
     };
     NavDestinationModelStatic::SetOnInactive(frameNode, std::move(onInactiveEvent));
 }
