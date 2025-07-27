@@ -1337,6 +1337,11 @@ void TextPattern::UpdateAIMenuOptions()
     }
 }
 
+void TextPattern::ProcessOverlay(const OverlayRequest& request)
+{
+    selectOverlay_->ProcessOverlay(request);
+}
+
 void TextPattern::ShowSelectOverlay(const OverlayRequest& request)
 {
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
@@ -1347,7 +1352,7 @@ void TextPattern::ShowSelectOverlay(const OverlayRequest& request)
         return;
     }
     UpdateAIMenuOptions();
-    selectOverlay_->ProcessOverlay(request);
+    ProcessOverlay(request);
 }
 
 void TextPattern::HandleOnSelectAll()

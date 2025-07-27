@@ -611,7 +611,7 @@ public:
     std::u16string GetSelectedText(int32_t start, int32_t end, bool includeStartHalf = false,
         bool includeEndHalf = false, bool getSubstrDirectly = false) const;
     void UpdateSelectionSpanType(int32_t selectStart, int32_t selectEnd);
-    void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
+    virtual void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
     void ResetSelection();
     virtual bool IsSelectAll();
     void HandleOnCopy();
@@ -956,6 +956,7 @@ protected:
         const ShowSelectOverlayFunc& showSelectOverlayFunc);
     bool IsDraggable(const Offset& localOffset);
     virtual void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
+    virtual void ProcessOverlay(const OverlayRequest& request = OverlayRequest());
     void ShowSelectOverlay(const OverlayRequest& = OverlayRequest());
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     virtual void UpdateSelectorOnHandleMove(const OffsetF& localOffset, float handleHeight, bool isFirstHandle);

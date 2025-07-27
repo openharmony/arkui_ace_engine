@@ -8487,12 +8487,18 @@ void RichEditorPattern::CopySelectionMenuParams(SelectOverlayInfo& selectInfo, T
     CopyBindSelectionMenuParams(selectInfo, menuParams);
 }
 
+void RichEditorPattern::ProcessOverlay(const OverlayRequest& request)
+{
+    // this selectOverlay_ and selectOverlay_ in TextPattern are two distinct objects.
+    selectOverlay_->ProcessOverlay(request);
+}
+
 void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle, bool isCopyAll,
     TextResponseType responseType, bool handleReverse)
 {
     CHECK_NULL_VOID(!IsPreviewTextInputting());
     textResponseType_ = responseType;
-    selectOverlay_->ProcessOverlay({.animation = true});
+    ProcessOverlay({ .animation = true });
 }
 
 void RichEditorPattern::SetIsEnableSubWindowMenu()
