@@ -719,14 +719,39 @@ void ListPattern::SetLayoutAlgorithmParams(
         listLayoutAlgorithm->SetOverScrollFeature();
     }
     listLayoutAlgorithm->SetIsSpringEffect(IsScrollableSpringEffect());
-    listLayoutAlgorithm->SetCanOverScrollStart(CanOverScrollStart(GetScrollSource()) && IsAtTop());
-    listLayoutAlgorithm->SetCanOverScrollEnd(CanOverScrollEnd(GetScrollSource()) && IsAtBottom(true));
+    listLayoutAlgorithm->SetCanOverScrollStart(JudgeCanOverScrollStart());
+    listLayoutAlgorithm->SetCanOverScrollEnd(JudgeCanOverScrollEnd());
     if (chainAnimation_ && GetEffectEdge() == EffectEdge::ALL) {
         SetChainAnimationLayoutAlgorithm(listLayoutAlgorithm, listLayoutProperty);
         SetChainAnimationToPosMap();
     }
     listLayoutAlgorithm->SetPrevMeasureBreak(prevMeasureBreak_);
     listLayoutAlgorithm->SetDraggingIndex(draggingIndex_);
+}
+
+bool ListPattern::JudgeCanOverScrollStart()
+{
+    auto source = GetScrollSource();
+    if (!CanOverScrollStart(source)) {
+        return false;
+    }
+    if (IsAtTop()) {
+        return true;
+    }
+    
+    return source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_ANIMATION || source == SCROLL_FROM_ANIMATION_SPRING;
+}
+
+bool ListPattern::JudgeCanOverScrollEnd()
+{
+    auto source = GetScrollSource();
+    if (!CanOverScrollEnd(source)) {
+        return false;
+    }
+    if (IsAtBottom(true)) {
+        return true;
+    }
+    return source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_ANIMATION || source == SCROLL_FROM_ANIMATION_SPRING;
 }
 
 void ListPattern::SetChainAnimationToPosMap()
