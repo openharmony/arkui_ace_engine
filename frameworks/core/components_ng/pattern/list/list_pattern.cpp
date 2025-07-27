@@ -918,7 +918,7 @@ bool ListPattern::IsAtBottom(bool considerRepeat) const
     float endMainPos = endMainPos_;
     float startMainPos = startMainPos_;
     auto contentMainSize = contentMainSize_ - contentEndOffset_ - contentStartOffset_;
-    if (GreatNotEqual(contentMainSize, endMainPos - startMainPos) && !isStackFromEnd_) {
+    if (startIndex_ == 0 && GreatNotEqual(contentMainSize, endMainPos - startMainPos) && !isStackFromEnd_) {
         endMainPos = startMainPos + contentMainSize;
     }
     auto maxListItemIndex = considerRepeat ? GetMaxIndexByRepeat() : maxListItemIndex_;
