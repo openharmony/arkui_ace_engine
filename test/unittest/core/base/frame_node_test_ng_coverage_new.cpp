@@ -1408,6 +1408,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeHitTestMode005, TestSize.Level1)
     EXPECT_EQ(test, HitTestResult::BUBBLING);
     EXPECT_EQ(result.size(), 2);
     EXPECT_TRUE(onChildTouchTestTriggerd);
+    FRAME_NODE_PARENT->renderContext_ = nullptr;
 }
 
 /**
