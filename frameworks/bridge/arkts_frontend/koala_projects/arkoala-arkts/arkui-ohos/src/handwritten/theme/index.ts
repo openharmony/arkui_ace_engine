@@ -310,8 +310,8 @@ export function makeRecordfromObj(obj: Object): Record<string, Any> {
 export interface ArkThemeResource extends Resource {
     bundleName: string;
     moduleName: string;
-    id: number;
+    id: long;
     params?: Array<Object | undefined>;
-    type?: number;
+    type?: int;
     opacityRatio: number;
 }

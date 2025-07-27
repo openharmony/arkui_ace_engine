@@ -16,13 +16,13 @@
 import { Resource } from 'global.resource';
 
 export class ArkResourcesHelper {
-    static COLOR: number = 10001;
-    static FLOAT: number = 10002;
+    static COLOR: int = 10001;
+    static FLOAT: int = 10002;
 
-    static $r(name: string, id?: number): Resource {
+    static $r(name: string, id?: long): Resource {
         let splitted = name.split('.', 2);
         let strType = splitted[1];
-        let type: number = ArkResourcesHelper.COLOR;
+        let type: int = ArkResourcesHelper.COLOR;
         if (strType === 'float') {
             type = ArkResourcesHelper.FLOAT;
         }
