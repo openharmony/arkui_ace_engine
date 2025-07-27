@@ -2048,6 +2048,44 @@ HWTEST_F(ListLayoutTestNg, ChildrenMainSize006, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ListIsAtBottom001
+ * @tc.desc: test func IsAtBottom when List is at bottom and chain animation opened
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListIsAtBottom001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init List then slide List by Scroller to bottom.
+       @tc.expected: List is at bottom and startIndex_ is 1.
+     */
+    ListModelNG model = CreateList();
+    model.SetSpace(Dimension(SPACE));
+    model.SetInitialIndex(0);
+    CreateListItems(TOTAL_ITEM_NUMBER / 2); // 2: half of the total
+    CreateDone();
+    pattern_->ScrollToIndex(LAST_ITEM);
+    FlushUITasks();
+    EXPECT_TRUE(pattern_->IsAtBottom());
+    EXPECT_EQ(pattern_->startIndex_, 1); // 1: current start index.
+
+    /**
+     * @tc.steps: step2. slide List over bottom.
+     * @tc.expected: isAtBottom also return true and startIndex_ maintain 1.
+     */
+    UpdateCurrentOffset(-100.f);
+    EXPECT_TRUE(pattern_->IsAtBottom());
+    EXPECT_EQ(pattern_->startIndex_, 1); // 1: current start index.
+
+    /**
+     * @tc.steps: step3. simulate chain animation and item 1 out of screen for chain delta.
+     * @tc.expected: startIndex_ change to 2 and isAtBottom also return true.
+     */
+    pattern_->itemPosition_.erase(1);
+    pattern_->startMainPos_ = pattern_->itemPosition_[2].startPos - pattern_->spaceWidth_;
+    EXPECT_TRUE(pattern_->IsAtBottom());
+}
+
+/**
  * @tc.name: ListRepeatCacheCount001
  * @tc.desc: List cacheCount
  * @tc.type: FUNC
