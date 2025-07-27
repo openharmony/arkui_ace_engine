@@ -1352,10 +1352,10 @@ public:
         ViewAbstract::SetDragPreview(info);
     }
 
-    void SetOnVisibleChange(
-        std::function<void(bool, double)>&& onVisibleChange, const std::vector<double>& ratios) override
+    void SetOnVisibleChange(std::function<void(bool, double)>&& onVisibleChange, const std::vector<double>& ratios,
+        bool isOutOfBoundsAllowed) override
     {
-        ViewAbstract::SetOnVisibleChange(std::move(onVisibleChange), ratios);
+        ViewAbstract::SetOnVisibleChange(std::move(onVisibleChange), ratios, isOutOfBoundsAllowed);
     }
 
     void SetOnVisibleAreaApproximateChange(const std::function<void(bool, double)>&& onVisibleChange,

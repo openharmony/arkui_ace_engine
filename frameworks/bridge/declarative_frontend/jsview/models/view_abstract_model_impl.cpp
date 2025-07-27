@@ -1252,7 +1252,7 @@ void ViewAbstractModelImpl::SetOnDrop(NG::OnDragDropFunc&& onDrop)
 }
 
 void ViewAbstractModelImpl::SetOnVisibleChange(
-    std::function<void(bool, double)>&& onVisibleChange, const std::vector<double>& ratios)
+    std::function<void(bool, double)>&& onVisibleChange, const std::vector<double>& ratios, bool isOutOfBoundsAllowed)
 {
     auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
     CHECK_NULL_VOID(inspector);
