@@ -98,7 +98,7 @@ export class ArkThemeNativeHelper {
         for (let attr of Object.values(colors)) {
             const value: ResourceColor = attr as ResourceColor;
             if (Colors.checkIsColor(value)) {
-                colorArray.push(Colors.convertColorEnumToValue(value as Color));
+                colorArray.push(value as Color);
                 continue;
             }
             colorArray.push(value);
