@@ -13,10 +13,12 @@
  * limitations under the License.
  */
 
+import { __context, StateManager } from '@koalaui/runtime'
 import { ArkStructBase } from "../ArkStructBase"
 import { ArkCommonMethodComponent } from "./common"
 import { UIContext } from "@ohos/arkui/UIContext"
 import { ProvideDecoratedVariable, ConsumeDecoratedVariable, WatchFuncType } from "../stateManagement";
+import { ContextRecord } from 'arkui/handwritten/UIContextImpl'
 
 class CustomDelegate<T extends CustomComponent<T, T_Options>, T_Options> extends
     ArkStructBase<CustomDelegate<T, T_Options>, T_Options> {
@@ -94,6 +96,7 @@ export abstract class CustomComponent<T extends CustomComponent<T, T_Options>, T
     private parent_: CustomComponent<T, T_Options> | undefined;
     public static current: Object | undefined = undefined;
     private providedVars_: Map<string, ProvideDecoratedVariable<Object>> = new Map<string, ProvideDecoratedVariable<Object>>();
+    private uiContext: UIContext | undefined = undefined;
     constructor() {
         this.parent_ = CustomComponent.current as (CustomComponent<T, T_Options> | undefined);
     }
@@ -135,7 +138,11 @@ export abstract class CustomComponent<T extends CustomComponent<T, T_Options>, T
         content?: () => void,
         reuseKey?: string
     ): void {
-        CustomDelegate._instantiate(undefined, () => new CustomDelegate<S, S_Options>(factory()), content, initializers, reuseKey);
+        const context: StateManager = __context() as StateManager;
+        const data: ContextRecord | undefined = context.contextData ? context.contextData as ContextRecord : undefined
+        let instance: S = factory();
+        instance.uiContext = data?.uiContext;
+        CustomDelegate._instantiate(undefined, () => new CustomDelegate<S, S_Options>(instance), content, initializers, reuseKey);
     }
 
     __initializeStruct(
@@ -156,7 +163,7 @@ export abstract class CustomComponent<T extends CustomComponent<T, T_Options>, T
     onPageShow(): void {}
     onPageHide(): void {}
     onBackPress(): boolean { return false; }
-    getUIContext(): UIContext { return new UIContext(100000); }
+    getUIContext(): UIContext { return this.uiContext!; }
 
     aboutToReuse(param: Record<string, Object>): void {}
     aboutToRecycle(): void {}

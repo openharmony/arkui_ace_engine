@@ -52,6 +52,7 @@ export interface StateManager extends StateContext {
     callCallbacks(): void
     frozen: boolean
     reset(): void
+    contextData: object | undefined
 }
 
 /**
@@ -534,6 +535,7 @@ export class StateManagerImpl implements StateManager {
     external: Dependency | undefined = undefined
     updateNeeded = false
     frozen: boolean = false
+    contextData: object | undefined = undefined;
     private readonly callbacks = markableQueue()
     readonly journal = new Journal()
 

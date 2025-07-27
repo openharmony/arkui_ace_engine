@@ -105,7 +105,7 @@ export class ArkCustomComponentImpl implements ArkCustomComponent {
     pageTransition(): void {
     }
     getUIContext(): UIContext {
-        return new UIContext(100000);
+        throw new Error("Unexpected use of base class ArkCustomComponent method getUIContext")
     }
     getUniqueId(): number {
         throw new Error("Unexpected use of base class method")

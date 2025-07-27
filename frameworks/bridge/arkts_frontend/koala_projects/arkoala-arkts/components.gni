@@ -264,6 +264,8 @@ arkui_files = [
   "arkui-preprocessed/arkui/handwritten/StepperOpsHandWritten.ets",
   "arkui-preprocessed/arkui/handwritten/TabsOpsHandWritten.ets",
   "arkui-preprocessed/arkui/handwritten/TextFieldOpsHandWritten.ets",
+  "arkui-preprocessed/arkui/handwritten/UIContextImpl.ets",
+  "arkui-preprocessed/arkui/handwritten/UIContextUtil.ets",
   "arkui-preprocessed/arkui/handwritten/index.ets",
   "arkui-preprocessed/arkui/handwritten/modifiers/ArkBaseNode.ets",
   "arkui-preprocessed/arkui/handwritten/modifiers/ArkColumnNode.ets",
