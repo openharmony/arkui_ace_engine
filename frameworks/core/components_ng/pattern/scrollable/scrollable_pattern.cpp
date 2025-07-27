@@ -641,12 +641,11 @@ void ScrollablePattern::SetHandleExtScrollCallback(const RefPtr<Scrollable>& scr
 {
     // move HandleScroll and HandleOverScroll to ScrollablePattern by setting callbacks to scrollable
     CHECK_NULL_VOID(scrollable);
-    auto handleScroll = [weak = AceType::WeakClaim(this)]() -> ScrollResult {
+    auto handleScroll = [weak = AceType::WeakClaim(this)]() -> void {
         auto pattern = weak.Upgrade();
         if (pattern) {
-            return pattern->HandleExtScroll(pattern->GetVelocity());
+            pattern->HandleExtScroll(pattern->GetVelocity());
         }
-        return {};
     };
     scrollable->SetHandleExtScrollCallback(std::move(handleScroll));
 }

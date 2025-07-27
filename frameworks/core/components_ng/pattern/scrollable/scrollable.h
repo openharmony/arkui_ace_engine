@@ -413,7 +413,7 @@ public:
     {
         overScrollCallback_ = std::move(func);
     }
-    void SetHandleExtScrollCallback(std::function<ScrollResult(void)>&& func)
+    void SetHandleExtScrollCallback(std::function<void(void)>&& func)
     {
         handleExtScrollCallback_ = std::move(func);
     }
@@ -703,7 +703,7 @@ private:
     // ScrollablePattern::RemainVelocityToChild
     RemainVelocityCallback remainVelocityCallback_;
     // ScrollablePattern::HandleExtScroll
-    std::function<ScrollResult(void)> handleExtScrollCallback_;
+    std::function<void(void)> handleExtScrollCallback_;
 
     EdgeEffect edgeEffect_ = EdgeEffect::NONE;
     bool canOverScroll_ = true;
