@@ -16,6 +16,7 @@
 #include "tabs_test_ng.h"
 #include "test/mock/base/mock_task_executor.h"
 
+#include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 
 namespace OHOS::Ace::NG {
@@ -858,5 +859,198 @@ HWTEST_F(TabBarPatternThreeTestNg, GetTabBarBackgroundColor003, TestSize.Level1)
 
     auto color = tabBarPattern->GetTabBarBackgroundColor();
     EXPECT_EQ(color, Color::GREEN);
+}
+
+/**
+ * @tc.name: CalculateFrontChildrenMainSize001
+ * @tc.desc: test CalculateFrontChildrenMainSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarPatternThreeTestNg, CalculateFrontChildrenMainSize001, TestSize.Level1)
+{
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    CHECK_NULL_VOID(element);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(element);
+    ASSERT_NE(tabsNode, nullptr);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    ASSERT_NE(tabBarNode, nullptr);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+
+    tabBarPattern->scrollMargin_ = 50.0f;
+    int32_t indicator = 2;
+    tabBarPattern->visibleItemPosition_ = { { 0, { .startPos = 0.0f, .endPos = 100.0f } },
+        { 1, { .startPos = 100.0f, .endPos = 250.0f } } };
+    auto frontChildrenMainSize = tabBarPattern->CalculateFrontChildrenMainSize(indicator);
+    EXPECT_FLOAT_EQ(frontChildrenMainSize, 300.0f);
+}
+
+/**
+ * @tc.name: CalculateFrontChildrenMainSize002
+ * @tc.desc: test CalculateFrontChildrenMainSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarPatternThreeTestNg, CalculateFrontChildrenMainSize002, TestSize.Level1)
+{
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    CHECK_NULL_VOID(element);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(element);
+    ASSERT_NE(tabsNode, nullptr);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    ASSERT_NE(tabBarNode, nullptr);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+
+    tabBarPattern->scrollMargin_ = 50.0f;
+    int32_t indicator = 2;
+    auto frontChildrenMainSize = tabBarPattern->CalculateFrontChildrenMainSize(indicator);
+    EXPECT_FLOAT_EQ(frontChildrenMainSize, 50.0f);
+}
+
+/**
+ * @tc.name: SetEdgeEffectCallback001
+ * @tc.desc: test SetEdgeEffectCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarPatternThreeTestNg, SetEdgeEffectCallback001, TestSize.Level1)
+{
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    CHECK_NULL_VOID(element);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(element);
+    ASSERT_NE(tabsNode, nullptr);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    ASSERT_NE(tabBarNode, nullptr);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+
+    auto scrollEffect = AceType::MakeRefPtr<ScrollEdgeEffect>();
+
+    auto count = 0.0;
+    scrollEffect->SetCurrentPositionCallback(([&count]() { return count++; }));
+
+    scrollEffect->SetLeadingCallback(([&count]() { return count++; }));
+
+    scrollEffect->SetTrailingCallback(([&count]() { return count++; }));
+
+    scrollEffect->SetInitLeadingCallback(([&count]() { return count++; }));
+
+    scrollEffect->SetInitTrailingCallback(([&count]() { return count++; }));
+
+    tabBarPattern->SetEdgeEffectCallback(scrollEffect);
+    EXPECT_FLOAT_EQ(count, 5);
+}
+
+/**
+ * @tc.name: SetAccessibilityAction001
+ * @tc.desc: test SetAccessibilityAction
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarPatternThreeTestNg, SetAccessibilityAction001, TestSize.Level1)
+{
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    CHECK_NULL_VOID(element);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(element);
+    ASSERT_NE(tabsNode, nullptr);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    ASSERT_NE(tabBarNode, nullptr);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+
+    auto count = 0;
+    auto accessibilityProperty = tabBarNode->GetAccessibilityProperty<AccessibilityProperty>();
+    accessibilityProperty->SetActionScrollForward(([&count]() { return count++; }));
+
+    accessibilityProperty->SetActionScrollBackward(([&count]() { return count++; }));
+
+    tabBarPattern->SetAccessibilityAction();
+    EXPECT_FLOAT_EQ(count, 2);
+}
+
+/**
+ * @tc.name: InitFocusEvent001
+ * @tc.desc: test InitFocusEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarPatternThreeTestNg, InitFocusEvent001, TestSize.Level1)
+{
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    CHECK_NULL_VOID(element);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(element);
+    ASSERT_NE(tabsNode, nullptr);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    ASSERT_NE(tabBarNode, nullptr);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+
+    auto focusHub = tabBarNode->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    auto count = 0;
+    focusHub->SetOnFocusInternal([&count](FocusReason) { count++; });
+
+    focusHub->SetOnBlurInternal(([&count]() { count++; }));
+
+    focusHub->SetOnGetNextFocusNodeFunc([&count](FocusReason reason, FocusIntension intension) -> RefPtr<FocusHub> {
+        count++;
+        return nullptr;
+    });
+
+    tabBarPattern->InitFocusEvent();
+    EXPECT_FLOAT_EQ(count, 3);
+}
+
+/**
+ * @tc.name: AddIsFocusActiveUpdateEvent001
+ * @tc.desc: test AddIsFocusActiveUpdateEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarPatternThreeTestNg, AddIsFocusActiveUpdateEvent001, TestSize.Level1)
+{
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    CHECK_NULL_VOID(element);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(element);
+    ASSERT_NE(tabsNode, nullptr);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    ASSERT_NE(tabBarNode, nullptr);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+
+    auto count = 0;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto callback = [&count](bool) { count++; };
+    pipeline->AddIsFocusActiveUpdateEvent(tabBarNode, callback);
+
+    tabBarPattern->AddIsFocusActiveUpdateEvent();
+    EXPECT_FLOAT_EQ(count, 1);
+}
+
+/**
+ * @tc.name: InitTabBarProperties001
+ * @tc.desc: test InitTabBarProperties
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarPatternThreeTestNg, InitTabBarProperties001, TestSize.Level1)
+{
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    CHECK_NULL_VOID(element);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(element);
+    ASSERT_NE(tabsNode, nullptr);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    ASSERT_NE(tabBarNode, nullptr);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+
+    auto pipeline = tabBarNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto tabTheme = pipeline->GetTheme<TabTheme>();
+    ASSERT_NE(tabTheme, nullptr);
+
+    tabTheme->subTabBarHoverColor_ = Color::BLACK;
+    tabTheme->tabBarFocusedColor_ = Color::BLUE;
+
+    tabBarPattern->InitTabBarProperties(tabTheme);
+    EXPECT_EQ(tabBarPattern->tabBarItemHoverColor_, Color::BLACK);
+    EXPECT_EQ(tabBarPattern->tabBarItemFocusBgColor_, Color::BLUE);
+    EXPECT_EQ(tabBarPattern->tabBarItemDefaultBgColor_, Color::BLACK);
 }
 } // namespace OHOS::Ace::NG
