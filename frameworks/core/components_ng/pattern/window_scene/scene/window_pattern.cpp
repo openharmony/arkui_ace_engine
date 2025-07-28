@@ -254,7 +254,8 @@ void WindowPattern::OnAttachToFrameNode()
     attachToFrameNodeFlag_ = true;
 }
 
-bool IsAddSnapshotWindow(const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode, const RefPtr<NG::FrameNode>& host)
+bool WindowPattern::IsAddSnapshotWindow(const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode,
+    const RefPtr<NG::FrameNode>& host)
 {
     int32_t imageFit = 0;
     if (Rosen::SceneSessionManager::GetInstance().GetPersistentImageFit(
