@@ -25,6 +25,7 @@
 #include "arkoala_api_generated.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/validators.h"
+#include "length_metrics_peer.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -41,6 +42,7 @@ struct TextPickerOptions {
     std::vector<NG::TextCascadePickerOptions> options;
     std::vector<uint32_t> selecteds;
     std::vector<std::string> values;
+    std::vector<Dimension> columnWidths;
     bool hasValue = false;
     bool hasSelected = false;
     bool isCascade = false;
@@ -207,6 +209,19 @@ namespace OHOS::Ace::NG::Converter {
         return kind;
     }
 
+    inline std::vector<Dimension> ParseColumnWidths(const Opt_Array_LengthMetrics& columnWidths)
+    {
+        std::vector<Dimension> result;
+        if (columnWidths.tag != 0 && columnWidths.value.array && columnWidths.value.length > 0) {
+            result.reserve(static_cast<size_t>(columnWidths.value.length));
+            for (auto i = 0; i < columnWidths.value.length; i++) {
+                Ark_LengthMetrics lengthMetrics = columnWidths.value.array[i];
+                result.emplace_back(lengthMetrics ? lengthMetrics->value : Dimension(0.0f));
+            }
+        }
+        return result;
+    }
+
     template<>
     TextPickerOptions Convert(const Ark_TextPickerOptions& src)
     {
@@ -251,6 +266,9 @@ namespace OHOS::Ace::NG::Converter {
                 dst.isCascade = options.first;
             }
         }
+
+        // parse the columnWidths' data of TextPickerOptions
+        dst.columnWidths = ParseColumnWidths(src.columnWidths);
         return dst;
     }
 }
@@ -367,6 +385,7 @@ void SetTextPickerOptionsImpl(Ark_NativePointer node,
             TextPickerModelStatic::SetRange(frameNode, textPickerOptions.range);
             TextPickerModelStatic::SetValue(frameNode, textPickerOptions.value);
             TextPickerModelStatic::SetSelected(frameNode, textPickerOptions.selected);
+            TextPickerModelStatic::SetColumnWidths(frameNode, textPickerOptions.columnWidths);
         } else if (!textPickerOptions.options.empty()) {
             ValidateMultiTextPickerOptions(textPickerOptions);
             //do not change the order of calls
@@ -378,6 +397,7 @@ void SetTextPickerOptionsImpl(Ark_NativePointer node,
             if (textPickerOptions.isCascade || textPickerOptions.hasSelected) {
                 TextPickerModelStatic::SetSelecteds(frameNode, textPickerOptions.selecteds);
             }
+            TextPickerModelStatic::SetColumnWidths(frameNode, textPickerOptions.columnWidths);
         }
     }
 }
