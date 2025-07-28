@@ -8102,6 +8102,14 @@ export interface CommonMethod {
     enabled(value: boolean | undefined): this {return this;}
     useSizeType(value: Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs | undefined): this {return this;}
     alignRules(value: AlignRuleOption | undefined | LocalizedAlignRuleOptions | undefined): this {return this;}
+    alignRulesWithAlignRuleOptionTypedValue(value: AlignRuleOption | undefined): this {
+        this.alignRules(value);
+        return this;
+    }
+    alignRulesWithLocalizedAlignRuleOptionsTypedValue(value: LocalizedAlignRuleOptions | undefined): this {
+        this.alignRules(value);
+        return this;
+    }
     aspectRatio(value: number | undefined): this {return this;}
     clickEffect(value: ClickEffect | undefined): this {return this;}
     onDragStart(value: ((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) | undefined): this {return this;}
@@ -8665,6 +8673,14 @@ export class ArkCommonMethodStyle implements CommonMethod {
     }
     public alignRules(value: AlignRuleOption | undefined | LocalizedAlignRuleOptions | undefined): this {
         return this
+    }
+    public alignRulesWithAlignRuleOptionTypedValue(value: AlignRuleOption | undefined): this {
+        this.alignRules(value);
+        return this;
+    }
+    public alignRulesWithLocalizedAlignRuleOptionsTypedValue(value: LocalizedAlignRuleOptions | undefined): this {
+        this.alignRules(value);
+        return this;
     }
     public aspectRatio(value: number | undefined): this {
         return this
