@@ -25,7 +25,7 @@ import {
     PropDecoratedVariable,
     LinkDecoratedVariable, 
     ConsumeDecoratedVariable, 
-    WatchFunc,
+    InteropWatchFunc,
     UIUtils,
     IObservedObject,
     OBSERVE,
@@ -242,7 +242,7 @@ export function getObservedObject<T>(value: T, staticState: StateUnion<T>): T {
 
 export function registerCreateWatchFuncCallback(): void {
     const createWatchFuncCallback = (callback: WatchFuncType, value: Object): WatchIdType => {
-        const watchFunc = new WatchFunc(callback);
+        const watchFunc = new InteropWatchFunc(callback);
         const watchFuncId = watchFunc.id();
         (value as IObservedObject).addWatchSubscriber(watchFuncId);
         return watchFuncId;
