@@ -428,6 +428,49 @@ HWTEST_F(RichEditorLayoutTestNg, UpdateFrameSizeWithLayoutPolicy002, TestSize.Le
 }
 
 /**
+ * @tc.name: UpdateFrameSizeWithLayoutPolicy003
+ * @tc.desc: test LayoutPolicy WRAP_CONTENT and FIX_AT_IDEAL_SIZE with calcLayoutConstraint is nullPtr
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorLayoutTestNg, UpdateFrameSizeWithLayoutPolicy003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        richEditorNode_, AceType::MakeRefPtr<GeometryNode>(), richEditorNode_->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto layoutAlgorithm = AceType::DynamicCast<RichEditorLayoutAlgorithm>(richEditorPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = CONTAINER_SIZE;
+    parentLayoutConstraint.percentReference = CONTAINER_SIZE;
+    parentLayoutConstraint.selfIdealSize.SetSize(CONTAINER_SIZE);
+    layoutProperty->UpdateLayoutConstraint(parentLayoutConstraint);
+    LayoutPolicyProperty layoutPolicyProperty;
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::WRAP_CONTENT;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::WRAP_CONTENT;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+    layoutProperty->calcLayoutConstraint_ = nullptr;
+    auto contentSize = SizeF(CONTAINER_WIDTH, CONTAINER_HEIGHT);
+    layoutWrapper->GetGeometryNode()->SetContentSize(contentSize);
+
+    auto frameSize = CONTAINER_SIZE;
+    layoutAlgorithm->UpdateFrameSizeWithLayoutPolicy(AceType::RawPtr(layoutWrapper), frameSize);
+    EXPECT_EQ(frameSize, contentSize);
+
+    frameSize = CONTAINER_SIZE;
+    layoutProperty->layoutPolicy_->widthLayoutPolicy_ = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    layoutProperty->layoutPolicy_->heightLayoutPolicy_ = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    layoutAlgorithm->UpdateFrameSizeWithLayoutPolicy(AceType::RawPtr(layoutWrapper), frameSize);
+    EXPECT_EQ(frameSize, contentSize);
+}
+
+/**
  * @tc.name: UpdateConstraintByLayoutPolicy
  * @tc.desc: test UpdateConstraintByLayoutPolicy
  * @tc.type: FUNC
