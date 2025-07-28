@@ -22,7 +22,7 @@ action("runtime_annotate") {
 
   args = [
     rebase_path("."),
-    rebase_path("annotate-config.json")
+    rebase_path("annotate-config.json"),
   ]
 }
 
@@ -32,19 +32,15 @@ generate_static_abc("runtime_compile_abc") {
   package = "@koalaui/runtime"
   paths_keys = koalaui_runtime_path_keys
   paths_values = koalaui_runtime_path_values
-  #ui_enable = "True"
-  #only_memo = "True"
+  ui_enable = "True"
+  only_memo = "True"
   dependencies = [ ":runtime_annotate" ]
   dst_file = target_out_dir + "/runtime_compile_abc"
   out_puts = [ target_out_dir + "/runtime_compile_abc/modules_static.abc" ]
 }
 
 ohos_copy("runtime_abc") {
-  sources = [
-    target_out_dir + "/runtime_compile_abc/modules_static.abc"
-  ]
-  outputs = [
-    target_out_dir + "/runtime.abc"
-  ]
+  sources = [ target_out_dir + "/runtime_compile_abc/modules_static.abc" ]
+  outputs = [ target_out_dir + "/runtime.abc" ]
   deps = [ ":runtime_compile_abc" ]
 }
