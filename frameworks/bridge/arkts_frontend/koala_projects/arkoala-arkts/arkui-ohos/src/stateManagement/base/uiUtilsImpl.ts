@@ -20,6 +20,7 @@ import { WrappedDate } from './observeWrappedDate';
 import { WrappedSet } from './observeWrappedSet';
 import { WrappedMap } from './observeWrappedMap';
 import { ObserveWrappedBase } from './observeWrappedBase';
+import { Binding, MutableBinding } from '../utils';
 
 export class UIUtilsImpl {
     private static observedMap: WeakMap<Object, Object> = new WeakMap<Object, Object>();
@@ -123,6 +124,13 @@ export class UIUtilsImpl {
             return (source as ObserveWrappedBase).getRaw()! as T;
         }
         return source;
+    }
+
+    public makeBindingReadonly<T>(getter: () => T): Binding<T> {
+        return new Binding<T>(getter);
+    }
+    public makeBindingMutable<T>(getter: () => T, setter: (newValue: T) => void): MutableBinding<T> {
+        return new MutableBinding<T>(getter, setter);
     }
 }
 
