@@ -16,7 +16,6 @@
 
 #include <ani.h>
 
-#include "arkcompiler/runtime_core/static_core/plugins/ets/runtime/napi/ets_napi.h"
 #include "interfaces/inner_api/ace/constants.h"
 
 #include "base/subwindow/subwindow_manager.h"
@@ -396,7 +395,6 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_PreloadAceArkTSModule(void* aniEnv)
 
 void ArktsFrontend::SetAniContext(int32_t instanceId, ani_ref* context)
 {
-    std::shared_ptr<ani_ref> shared_ptr(context);
-    Framework::AniContextModule::AddAniContext(instanceId, shared_ptr);
+    Framework::AniContextModule::AddAniContext(instanceId, context);
 }
 } // namespace OHOS::Ace
