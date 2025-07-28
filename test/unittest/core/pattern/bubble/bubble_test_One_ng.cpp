@@ -76,6 +76,9 @@ constexpr bool BUBBLE_PAINT_PROPERTY_AUTO_CANCEL_FALSE = false;
 constexpr bool BUBBLE_PROPERTY_SHOW = true;
 const OffsetF BUBBLE_POSITION_OFFSET = OffsetF(100.0f, 100.0f);
 constexpr Dimension BUBBLE_CHILD_OFFSET = 8.0_vp;
+constexpr Dimension DEFAULT_RADIUS = 20.0_px;
+constexpr Dimension DEFAULT_ARROW_HEIGHT = 20.0_px;
+constexpr Dimension DEFAULT_ARROW_WIDTH = 20.0_px;
 const SafeAreaInsets::Inset KEYBOARD_INSET = { .start = 500.f, .end = 1000.f };
 
 const std::string CLIP_PATH = "M100 0 L0 100 L50 200 L150 200 L200 100 Z";
@@ -2679,14 +2682,11 @@ HWTEST_F(BubbleTestOneNg, CreateBubbleNode001, TestSize.Level1)
     popupParam->SetMessage(BUBBLE_MESSAGE);
     popupParam->SetTargetOffset(POPUP_PARAM_POSITION_OFFSET);
 
-    Dimension radius = 20.0_px;
-    Dimension arrowHeight = 20.0_px;
-    Dimension arrowWidth = 20.0_px;
     Shadow shadow = ShadowConfig::DefaultShadowL;
-    popupParam->SetRadius(radius);
+    popupParam->SetRadius(DEFAULT_RADIUS);
     popupParam->SetTipsFlag(true);
-    popupParam->SetArrowHeight(arrowHeight);
-    popupParam->SetArrowWidth(arrowWidth);
+    popupParam->SetArrowHeight(DEFAULT_ARROW_HEIGHT);
+    popupParam->SetArrowWidth(DEFAULT_ARROW_WIDTH);
     popupParam->SetShadow(shadow);
     popupParam->SetAnchorType(TipsAnchorType::CURSOR);
 
@@ -2710,9 +2710,9 @@ HWTEST_F(BubbleTestOneNg, CreateBubbleNode001, TestSize.Level1)
      */
     auto property = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
     EXPECT_EQ(property->GetPositionOffset().value(), BUBBLE_POSITION_OFFSET);
-    EXPECT_EQ(property->GetRadius().value(), radius);
-    EXPECT_EQ(property->GetArrowHeight().value(), arrowHeight);
-    EXPECT_EQ(property->GetArrowWidth().value(), arrowWidth);
+    EXPECT_EQ(property->GetRadius().value(), DEFAULT_RADIUS);
+    EXPECT_EQ(property->GetArrowHeight().value(), DEFAULT_ARROW_HEIGHT);
+    EXPECT_EQ(property->GetArrowWidth().value(), DEFAULT_ARROW_WIDTH);
     EXPECT_EQ(property->GetShowAtAnchor().value(), TipsAnchorType::CURSOR);
 }
 

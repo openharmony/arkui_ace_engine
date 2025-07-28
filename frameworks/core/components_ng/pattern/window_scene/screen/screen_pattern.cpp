@@ -235,7 +235,7 @@ bool ScreenPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         rootScene->SetDisplayDensity(density);
         int32_t orientation = static_cast<int32_t>(screenSession_->GetScreenProperty().GetDisplayOrientation());
         rootScene->SetDisplayOrientation(orientation);
-        rootScene->UpdateViewportConfig(rect, Rosen::WindowSizeChangeReason::UNDEFINED);
+        rootScene->UpdateViewportConfig(rect, Rosen::WindowSizeChangeReason::ROOT_SCENE_CHANGE);
     } else if (rsWindow->GetClassType() == "ScreenScene") {
         auto screenScene = static_cast<Rosen::ScreenScene*>(rsWindow.GetRefPtr());
         CHECK_NULL_RETURN(screenScene, false);
