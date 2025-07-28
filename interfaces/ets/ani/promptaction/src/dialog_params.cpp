@@ -27,6 +27,11 @@
 
 constexpr int32_t CALLBACK_PARAM_LENGTH = 2;
 constexpr int32_t PRIMARY_BUTTON_COUNT_MAX = 1;
+std::unordered_map<int32_t, OHOS::Ace::BorderStyle> borderStyleMap = {
+    { 0, OHOS::Ace::BorderStyle::DOTTED },
+    { 1, OHOS::Ace::BorderStyle::DASHED },
+    { 2, OHOS::Ace::BorderStyle::SOLID },
+};
 
 bool GetButtonInfo(ani_env* env, ani_ref resultRef, OHOS::Ace::ButtonInfo& result)
 {
@@ -1145,7 +1150,13 @@ bool GetBorderStyle(ani_env* env, ani_object object, OHOS::Ace::BorderStyle& res
     if (!GetEnumInt(env, object, "Larkui/component/enums/BorderStyle;", resultInt)) {
         return false;
     }
-    result = static_cast<OHOS::Ace::BorderStyle>(resultInt);
+
+    auto iter = borderStyleMap.find(resultInt);
+    if (iter != borderStyleMap.end()) {
+        result = iter->second;
+        return true;
+    }
+    result = OHOS::Ace::BorderStyle::SOLID;
     return true;
 }
 
@@ -1155,7 +1166,13 @@ bool GetBorderStyle(ani_env* env, ani_object object, const char *name, OHOS::Ace
     if (!GetEnumInt(env, object, name, "Larkui/component/enums/BorderStyle;", resultInt)) {
         return false;
     }
-    result = static_cast<OHOS::Ace::BorderStyle>(resultInt);
+
+    auto iter = borderStyleMap.find(resultInt);
+    if (iter != borderStyleMap.end()) {
+        result = iter->second;
+        return true;
+    }
+    result = OHOS::Ace::BorderStyle::SOLID;
     return true;
 }
 
