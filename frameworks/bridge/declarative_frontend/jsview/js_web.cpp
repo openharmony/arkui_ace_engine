@@ -3911,7 +3911,6 @@ void ParseBindSelectionMenuOptionParam(const JSCallbackInfo& info, const JSRef<J
     bool isPreviewMenu = menuType->IsNumber() && menuType->ToNumber<int32_t>() == 1;
     menuParam.hapticFeedbackMode = HapticFeedbackMode::DISABLED;
     if (isPreviewMenu) {
-        RETURN_IF_UNSUPPORTED_ENGINE(OHOS::ArkWeb::ArkWebEngineVersion::M132, "ParseBindSelectionMenuOptionParam");
         menuParam.previewMode = MenuPreviewMode::CUSTOM;
         auto previewMenuOptions = menuOptions->GetProperty("previewMenuOptions");
         if (previewMenuOptions->IsObject()) {
