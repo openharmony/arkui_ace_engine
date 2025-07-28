@@ -441,6 +441,8 @@ public:
 
     void ResetLayoutItem(LayoutWrapper* layoutWrapper);
 
+    void ResetUnLayoutedItems(LayoutWrapper* layoutWrapper, PositionMap& positionMap);
+
     std::pair<int32_t, float> GetSnapStartIndexAndPos();
 
     std::pair<int32_t, float> GetSnapEndIndexAndPos();
@@ -543,6 +545,7 @@ protected:
     int32_t UpdateDefaultCachedCount(const int32_t oldCachedCount, const int32_t itemCount);
     bool IsListLanesEqual(const RefPtr<LayoutWrapper>& wrapper) const;
     void ReportGetChildError(const std::string& funcName, int32_t index) const;
+    void UpdateNoLayoutedItems();
 
     Axis axis_ = Axis::VERTICAL;
     int32_t laneIdx4Divider_ = 0;
@@ -632,6 +635,7 @@ protected:
     PositionMap itemPosition_;
     PositionMap recycledItemPosition_;
     PositionMap cachedItemPosition_;
+    PositionMap noLayoutedItems_;
     int32_t preStartIndex_ = 0;
     float currentOffset_ = 0.0f;
     float adjustOffset_ = 0.0f;
