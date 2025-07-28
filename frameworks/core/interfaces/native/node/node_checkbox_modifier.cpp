@@ -363,9 +363,7 @@ const ArkUICheckboxModifier *GetCheckboxModifier()
     static const ArkUICheckboxModifier modifier = {
         .setSelect = SetSelect,
         .setSelectedColor = SetSelectedColor,
-        .setSelectedColorPtr = SetSelectedColorPtr,
         .setUnSelectedColor = SetUnSelectedColor,
-        .setUnSelectedColorPtr = SetUnSelectedColorPtr,
         .setCheckboxWidth = SetCheckboxWidth,
         .setCheckboxHeight = SetCheckboxHeight,
         .setMark = SetMark,
@@ -395,6 +393,8 @@ const ArkUICheckboxModifier *GetCheckboxModifier()
         .setCheckboxGroup = SetCheckboxGroup,
         .getCheckboxName = GetCheckboxName,
         .getCheckboxGroup = GetCheckboxGroup,
+        .setSelectedColorPtr = SetSelectedColorPtr,
+        .setUnSelectedColorPtr = SetUnSelectedColorPtr,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

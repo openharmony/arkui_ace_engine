@@ -914,8 +914,7 @@ void MenuPattern::UpdateSelectOptionTextByIndex(int32_t index, const std::string
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     const auto& children = GetOptions();
-    auto childCount = children.size();
-    if (index >= childCount) {
+    if (index >= static_cast<int32_t>(children.size())) {
         return;
     }
     auto childIt = children.at(index);
@@ -938,8 +937,7 @@ void MenuPattern::UpdateSelectOptionIconByIndex(int32_t index, const std::string
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     const auto& children = GetOptions();
-    auto childCount = children.size();
-    if (index >= childCount) {
+    if (index >= static_cast<int32_t>(children.size())) {
         return;
     }
     auto childIt = children.at(index);
@@ -1810,7 +1808,7 @@ void MenuPattern::ShowStackMenuAppearAnimation()
     auto mainMenuAccessibilityProps = mainMenu->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(mainMenuAccessibilityProps);
     mainMenuAccessibilityProps->SetAccessibilityLevel(AccessibilityProperty::Level::NO_HIDE_DESCENDANTS);
-    
+
     ShowStackMainMenuAnimation(mainMenu, host, menuWrapper);
     ShowStackSubMenuAnimation(mainMenu, host);
     isSubMenuShow_ = false;
@@ -2055,7 +2053,7 @@ void MenuPattern::ShowStackSubMenuDisappearAnimation(const RefPtr<FrameNode>& me
     });
 
     ShowArrowReverseRotateAnimation();
-    
+
     auto [originOffset, endOffset] = GetMenuOffset(menuNode, subMenuNode, true);
     auto subMenuPos = subMenuNode->GetPaintRectOffset(false, true);
     auto menuPosition = OffsetF(subMenuPos.GetX(), originOffset.GetY());
