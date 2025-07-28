@@ -1311,16 +1311,18 @@ void TextFieldLayoutAlgorithm::CalculateContentMaxSizeWithPolicy(
     auto widthLayoutPolicy = TextBase::GetLayoutCalPolicy(layoutWrapper, true);
     if (widthLayoutPolicy == LayoutCalPolicy::FIX_AT_IDEAL_SIZE) {
         maxIdealSize.SetWidth(std::numeric_limits<double>::infinity());
-    } else if (widthLayoutPolicy == LayoutCalPolicy::MATCH_PARENT) {
-        maxIdealSize.SetWidth(contentConstraint.parentIdealSize.Width().value_or(contentConstraint.maxSize.Width()));
+    } else if (widthLayoutPolicy == LayoutCalPolicy::MATCH_PARENT &&
+               contentConstraint.parentIdealSize.Width().has_value()) {
+        maxIdealSize.SetWidth(contentConstraint.parentIdealSize.Width().value());
         contentConstraint.selfIdealSize.SetWidth(maxIdealSize.Width());
     }
     auto heightLayoutPolicy = TextBase::GetLayoutCalPolicy(layoutWrapper, false);
     if (!contentConstraint.selfIdealSize.Height().has_value() &&
         heightLayoutPolicy == LayoutCalPolicy::FIX_AT_IDEAL_SIZE) {
         maxIdealSize.SetHeight(std::numeric_limits<double>::infinity());
-    } else if (heightLayoutPolicy == LayoutCalPolicy::MATCH_PARENT) {
-        maxIdealSize.SetHeight(contentConstraint.parentIdealSize.Height().value_or(contentConstraint.maxSize.Height()));
+    } else if (heightLayoutPolicy == LayoutCalPolicy::MATCH_PARENT &&
+               contentConstraint.parentIdealSize.Height().has_value()) {
+        maxIdealSize.SetHeight(contentConstraint.parentIdealSize.Height().value());
         contentConstraint.selfIdealSize.SetHeight(maxIdealSize.Height());
     }
 }
