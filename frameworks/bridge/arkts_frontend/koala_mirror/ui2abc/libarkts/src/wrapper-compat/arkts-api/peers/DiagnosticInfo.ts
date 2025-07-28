@@ -17,7 +17,6 @@ import { ArktsObject } from '../../../arkts-api/peers/ArktsObject';
 import { global } from '../static/global';
 import { KNativePointer } from '@koalaui/interop';
 import { DiagnosticKind } from './DiagnosticKind';
-import { SourcePosition } from "./SourcePosition";
 import { passStringArray } from '../utilities/private';
 
 export class DiagnosticInfo extends ArktsObject {
@@ -25,9 +24,9 @@ export class DiagnosticInfo extends ArktsObject {
     super(peer);
   }
 
-  static create(kind: DiagnosticKind, pos: SourcePosition, ...args: string[]): DiagnosticInfo {
+  static create(kind: DiagnosticKind, ...args: string[]): DiagnosticInfo {
     return new DiagnosticInfo(
-      global.es2panda._CreateDiagnosticInfo(global.context, kind.peer, passStringArray(args), args.length, pos.peer)
+      global.es2panda._CreateDiagnosticInfo(global.context, kind.peer, passStringArray(args), args.length)
     );
   }
 

@@ -501,12 +501,10 @@ KNativePointer impl_CreateDiagnosticKind(KNativePointer context, KStringPtr& mes
 }
 KOALA_INTEROP_3(CreateDiagnosticKind, KNativePointer, KNativePointer, KStringPtr, KInt)
 
-KNativePointer impl_CreateDiagnosticInfo(KNativePointer context, KNativePointer kind, KStringArray argsPtr,
-                                         KInt argc, KNativePointer pos)
+KNativePointer impl_CreateDiagnosticInfo(KNativePointer context, KNativePointer kind, KStringArray argsPtr, KInt argc)
 {
     const auto _context = reinterpret_cast<es2panda_Context*>(context);
     const auto _kind = reinterpret_cast<es2panda_DiagnosticKind*>(kind);
-    const auto _pos = reinterpret_cast<es2panda_SourcePosition *>(pos);
     const std::size_t headerLen = 4;
     const char** _args = new const char*[argc];
     std::size_t position = headerLen;
@@ -517,17 +515,15 @@ KNativePointer impl_CreateDiagnosticInfo(KNativePointer context, KNativePointer 
         _args[i] = strdup(std::string(reinterpret_cast<const char*>(argsPtr + position), strLen).c_str());
         position += strLen;
     }
-    return GetImpl()->CreateDiagnosticInfo(_context, _kind, _args, argc, _pos);
+    return GetImpl()->CreateDiagnosticInfo(_context, _kind, _args, argc);
 }
-KOALA_INTEROP_5(CreateDiagnosticInfo, KNativePointer, KNativePointer, KNativePointer,
-                KStringArray, KInt, KNativePointer)
+KOALA_INTEROP_4(CreateDiagnosticInfo, KNativePointer, KNativePointer, KNativePointer, KStringArray, KInt)
 
 KNativePointer impl_CreateSuggestionInfo(KNativePointer context, KNativePointer kind, KStringArray argsPtr,
-                                         KInt argc, KStringPtr& substitutionCode, KNativePointer range)
+                                         KInt argc, KStringPtr& substitutionCode)
 {
     const auto _context = reinterpret_cast<es2panda_Context*>(context);
     const auto _kind = reinterpret_cast<es2panda_DiagnosticKind *>(kind);
-    const auto _range = reinterpret_cast<es2panda_SourceRange *>(range);
     const std::size_t headerLen = 4;
     const char** _args = new const char*[argc];
     std::size_t position = headerLen;
@@ -539,9 +535,9 @@ KNativePointer impl_CreateSuggestionInfo(KNativePointer context, KNativePointer 
         position += strLen;
     }
     const auto _substitutionCode = getStringCopy(substitutionCode);
-    return GetImpl()->CreateSuggestionInfo(_context, _kind, _args, argc, _substitutionCode, _range);
+    return GetImpl()->CreateSuggestionInfo(_context, _kind, _args, argc, _substitutionCode);
 }
-KOALA_INTEROP_6(CreateSuggestionInfo, KNativePointer, KNativePointer, KNativePointer, KStringArray, KInt, KStringPtr, KNativePointer)
+KOALA_INTEROP_5(CreateSuggestionInfo, KNativePointer, KNativePointer, KNativePointer, KStringArray, KInt, KStringPtr)
 
 void impl_LogDiagnostic(KNativePointer context, KNativePointer kind, KStringArray argvPtr,
                         KInt argc, KNativePointer pos)
@@ -564,14 +560,15 @@ void impl_LogDiagnostic(KNativePointer context, KNativePointer kind, KStringArra
 KOALA_INTEROP_V5(LogDiagnostic, KNativePointer, KNativePointer, KStringArray, KInt, KNativePointer)
 
 void impl_LogDiagnosticWithSuggestion(KNativePointer context, KNativePointer diagnosticInfo,
-                                      KNativePointer suggestionInfo)
+                                      KNativePointer suggestionInfo, KNativePointer range)
 {
     const auto _context = reinterpret_cast<es2panda_Context*>(context);
     const auto _diagnosticInfo = reinterpret_cast<es2panda_DiagnosticInfo*>(diagnosticInfo);
     const auto _suggestionInfo = reinterpret_cast<es2panda_SuggestionInfo*>(suggestionInfo);
-    GetImpl()->LogDiagnosticWithSuggestion(_context, _diagnosticInfo, _suggestionInfo);
+    const auto _range = reinterpret_cast<es2panda_SourceRange*>(range);
+    GetImpl()->LogDiagnosticWithSuggestion(_context, _diagnosticInfo, _suggestionInfo, _range);
 }
-KOALA_INTEROP_V3(LogDiagnosticWithSuggestion, KNativePointer, KNativePointer, KNativePointer)
+KOALA_INTEROP_V4(LogDiagnosticWithSuggestion, KNativePointer, KNativePointer, KNativePointer, KNativePointer)
 
 KInt impl_GenerateStaticDeclarationsFromContext(KNativePointer contextPtr, KStringPtr &outputPath)
 {
