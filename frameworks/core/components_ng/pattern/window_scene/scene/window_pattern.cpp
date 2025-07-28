@@ -242,9 +242,7 @@ void WindowPattern::OnAttachToFrameNode()
     AddChild(host, appWindow_, appWindowName_, 0);
     auto surfaceNode = session_->GetSurfaceNode();
     CHECK_NULL_VOID(surfaceNode);
-    if (IsAddSnapshotWindow(surfaceNode, host)) {
-        return;
-    }
+    CHECK_EQUAL_VOID(IsAddSnapshotWindow(surfaceNode, host), true);
     if (!surfaceNode->IsBufferAvailable()) {
         CreateStartingWindow();
         AddChild(host, startingWindow_, startingWindowName_);
@@ -261,13 +259,12 @@ bool WindowPattern::IsAddSnapshotWindow(const std::shared_ptr<Rosen::RSSurfaceNo
     if (Rosen::SceneSessionManager::GetInstance().GetPersistentImageFit(
         session_->GetPersistentId(), imageFit) == false) {
         return false;
-    } else {
-        CreateSnapshotWindow();
-        AddChild(host, snapshotWindow_, snapshotWindowName_);
-        surfaceNode->SetIsNotifyUIBufferAvailable(false);
-        surfaceNode->SetBufferAvailableCallback(callback_);
-        return true;
     }
+    CreateSnapshotWindow();
+    AddChild(host, snapshotWindow_, snapshotWindowName_);
+    surfaceNode->SetIsNotifyUIBufferAvailable(false);
+    surfaceNode->SetBufferAvailableCallback(callback_);
+    return true;
 }
 
 void WindowPattern::CreateBlankWindow(RefPtr<FrameNode>& window)
