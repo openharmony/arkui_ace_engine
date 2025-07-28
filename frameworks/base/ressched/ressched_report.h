@@ -33,6 +33,7 @@ constexpr int32_t LOAD_PAGE_START_EVENT = 0;
 constexpr int32_t LOAD_PAGE_COMPLETE_EVENT = 1;
 constexpr int32_t LOAD_PAGE_NO_REQUEST_FRAME_EVENT = 2;
 constexpr double JUDGE_DISTANCE = 3.125;
+constexpr int64_t INVALID_DATA = -1;
 }
 
 struct ResEventInfo {
@@ -58,7 +59,8 @@ ReportSyncEventFunc ACE_EXPORT LoadReportSyncEventFunc();
 class ACE_EXPORT ResSchedReport final {
 public:
     static ResSchedReport& GetInstance();
-    void ResSchedDataReport(const char* name, const std::unordered_map<std::string, std::string>& param = {});
+    void ResSchedDataReport(const char* name, const std::unordered_map<std::string, std::string>& param = {},
+        int64_t tid = ResDefine::INVALID_DATA);
     void TriggerModuleSerializer();
     void ResSchedDataReport(uint32_t resType, int32_t value = 0,
         const std::unordered_map<std::string, std::string>& payload = {});
@@ -75,6 +77,9 @@ public:
     void HandlePageTransition(const std::string& fromPage, const std::string& toPage, const std::string& mode);
     static std::atomic<int32_t> createPageCount; // not consider multi-instances.
     static bool triggerExecuted; // not consider multi-instances.
+    int64_t GetTid();
+    int64_t GetPid();
+    pthread_t GetPthreadSelf();
 
 private:
     ResSchedReport();
