@@ -281,7 +281,8 @@ void AniWaterFlowModule::ParseWaterFlowSections(ani_env* env, ani_ref sections, 
         return;
     }
 
-    for (int32_t i = 0; i < changeArrayLength; i++) {
+    int32_t changeLength = static_cast<int32_t>(changeArrayLength);
+    for (int32_t i = 0; i < changeLength; i++) {
         ani_ref change;
         if (env->Array_Get_Ref(static_cast<ani_array_ref>(changeArray), i, &change) != ANI_OK) {
             continue;
