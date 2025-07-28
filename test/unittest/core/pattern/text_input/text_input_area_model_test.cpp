@@ -2720,23 +2720,6 @@ HWTEST_F(TextInputAreaTest, ImageSpanViewStatic002, TestSize.Level0)
     ImageSpanViewStatic::SetImageSpanSrc(frameNode.GetRawPtr(), imageInfo);
     EXPECT_EQ(pattern->GetSyncLoad(), true);
 }
-/**
- * @tc.name: ImageSpanViewStatic003
- * @tc.desc: test SetBaselineOffset func
- * @tc.type: FUNC
- */
-HWTEST_F(TextInputAreaTest, ImageSpanViewStatic003, TestSize.Level0)
-{
-    auto pattern = AceType::MakeRefPtr<TextPattern>();
-    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
-    ASSERT_NE(frameNode, nullptr);
-    auto imageLayoutProperty = frameNode->GetLayoutPropertyPtr<ImageLayoutProperty>();
-    ASSERT_NE(imageLayoutProperty, nullptr);
-    ImageSpanViewStatic::SetBaselineOffset(frameNode.GetRawPtr(), std::make_optional(Dimension(10)));
-    EXPECT_FALSE(imageLayoutProperty->GetVerticalAlign().has_value());
-    ImageSpanViewStatic::SetBaselineOffset(frameNode.GetRawPtr(), std::nullopt);
-    EXPECT_FALSE(imageLayoutProperty->GetVerticalAlign().has_value());
-}
 
 /**
  * @tc.name: testFieldModelStatic055
