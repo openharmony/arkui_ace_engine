@@ -1,0 +1,11 @@
+{
+  "scripts": {
+    "download": "node scripts/oh-sdk-cli.mjs download",
+    "download:prebuilt": "node scripts/oh-sdk-cli.mjs download:prebuilt"
+  },
+  "devDependencies": {
+    "commander": "10.0.1",
+    "decompress": "^4.2.1",
+    "tar": "^7.4.1"
+  }
+}

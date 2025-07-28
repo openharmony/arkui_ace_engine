@@ -155,7 +155,8 @@ Note:If the text contains special characters, please escape them according to th
 				<filteritem type="filepath" name="test/component_test/test_cases/components/button_and_selection/entry/src/main/ets/pages/rating/StarOrange.png" desc=" 自研的二进制图片"/>
 				<filteritem type="filepath" name="test/component_test/test_cases/components/button_and_selection/entry/src/main/resources/base/media/foreground.png" desc=" 自研的二进制图片"/>
 				<filteritem type="filepath" name="test/component_test/test_cases/components/button_and_selection/entry/src/main/resources/base/media/background.png" desc=" 自研的二进制图片"/>
-				<filteritem type="filepath" name="adapter/ohos/services/etc/timepicker.ogg" desc=" 自研的音振效果文件"/>
+				<filteritem type="filepath" name="adapter/ohos/services/etc/timepicker.ogg" desc="自研的音振效果文件"/>
+                <filteritem type="filepath" name="frameworks/bridge/arkts_frontend/koala_mirror/ui2abc/libarkts/rollup.lib.mjs" desc="组装所需"/>
             </filefilter>
             <filefilter name="copyrightPolicyFilter" desc="copyright文件头校验策略的过滤条件" >
                 <filteritem type="filepath" name="examples/StrengthenTest/*.json5" desc="json文件无法添加版权"/>

@@ -1156,10 +1156,10 @@ HWTEST_F(NavDestinationModelTestNg, SetTitleHeight101, TestSize.Level1)
     navdestinationModel.SetTitleHeight(Dimension(25.0_vp), false);
     EXPECT_EQ(titleBarLayoutProperty->GetTitleHeight(), std::nullopt);
     RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(BUNDLE_NAME, MODULE_NAME, 0);
-    navdestinationModel.SetTitleHeight(resObj, false);
+    navdestinationModel.SetTitleHeight(Dimension(25.0_vp), resObj);
     std::string titleHeightKey = "navDestination.title.customtitle";
-    CalcDimension height = navdestinationModel.ParseTitleHeight(resObj);
-    EXPECT_EQ(titleBarLayoutProperty->GetTitleHeight(), std::nullopt);
+    CalcDimension height = navdestinationModel.ParseTitleHeight(titleBarNode, resObj);
+    EXPECT_NE(titleBarLayoutProperty->GetTitleHeight(), std::nullopt);
     ViewStackProcessor::GetInstance()->ClearStack();
     NavDestinationModelTestNg::TearDownTestCase();
 }
@@ -1192,9 +1192,9 @@ HWTEST_F(NavDestinationModelTestNg, SetTitleHeight102, TestSize.Level1)
     navdestinationModel.SetTitleHeight(Dimension(25.0_vp), true);
     EXPECT_EQ(titleBarLayoutProperty->GetTitleHeight(), Dimension(25.0_vp));
     RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(BUNDLE_NAME, MODULE_NAME, 0);
-    navdestinationModel.SetTitleHeight(resObj, true);
+    navdestinationModel.SetTitleHeight(Dimension(25.0_vp), resObj);
     std::string titleHeightKey = "navDestination.title.customtitle";
-    CalcDimension height = navdestinationModel.ParseTitleHeight(resObj);
+    CalcDimension height = navdestinationModel.ParseTitleHeight(titleBarNode, resObj);
     EXPECT_EQ(titleBarPattern->GetResCacheMapByKey(titleHeightKey), height.ToString());
     ViewStackProcessor::GetInstance()->ClearStack();
     NavDestinationModelTestNg::TearDownTestCase();
@@ -1807,7 +1807,7 @@ HWTEST_F(NavDestinationModelTestNg, ParseTitleHeight001, TestSize.Level1)
     std::string heighValue;
     std::string key = "navigation.title.customtitle";
     RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(BUNDLE_NAME, MODULE_NAME, 0);
-    navdestinationModel.ParseTitleHeight(resObj);
+    navdestinationModel.ParseTitleHeight(titleBarNode, resObj);
     std::string heighString = titleBarPattern->GetResCacheMapByKey(key);
     EXPECT_EQ(heighString, "");
     ResourceParseUtils::ParseResString(resObj, key);

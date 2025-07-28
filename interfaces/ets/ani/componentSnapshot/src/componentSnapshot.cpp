@@ -18,6 +18,7 @@
 #include <sys/stat.h>
 #ifdef PIXEL_MAP_SUPPORTED
 #include "pixel_map.h"
+#include "pixel_map_ani.h"
 #include "pixel_map_napi.h"
 
 #endif

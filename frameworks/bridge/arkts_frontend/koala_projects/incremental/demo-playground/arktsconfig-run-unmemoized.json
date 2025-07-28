@@ -1,0 +1,17 @@
+{
+      "compilerOptions": {
+          "package": "@koalaui/demo",
+          "outDir": "build",
+          "baseUrl": ".",
+          "paths": {
+              "@koalaui/common": ["../common/src"],
+              "@koalaui/compat": ["../compat/src/arkts"],
+              "@koalaui/runtime": ["../runtime/build/unmemoized/src"]
+          }
+      },
+      "include": ["./build/unmemoized/**/*.ts"],
+      "references": [
+        { "path": "../common" },
+        { "path": "../runtime/arktsconfig-run-unmemoized.json" }
+      ]
+}

@@ -114,15 +114,17 @@ public:
         }
     }
 
-    void GetSpansImpl(const RangeOptions& options)
+    SelectionInfo GetSpansImpl(const RangeOptions& options)
     {
+        SelectionInfo result;
         if (auto controller = handler_.Upgrade(); controller) {
             auto start = options.start.value_or(0);
             auto end = options.end.value_or(0);
             auto richEditorController = AceType::DynamicCast<RichEditorControllerBase>(controller);
-            CHECK_NULL_VOID(richEditorController);
-            richEditorController->GetSpansInfo(start, end);
+            CHECK_NULL_RETURN(richEditorController, result);
+            result = richEditorController->GetSpansInfo(start, end);
         }
+        return result;
     }
 
     SelectionInfo GetSelectionImpl()
@@ -148,13 +150,14 @@ public:
         return ret;
     }
 
-    void FromStyledStringImpl(RefPtr<SpanStringBase> value)
+    SelectionInfo FromStyledStringImpl(RefPtr<SpanStringBase> value)
     {
         if (auto controller = handler_.Upgrade(); controller && value) {
             auto richEditorController = AceType::DynamicCast<RichEditorControllerBase>(controller);
-            CHECK_NULL_VOID(richEditorController);
-            richEditorController->FromStyledString(value);
+            CHECK_NULL_RETURN(richEditorController, {});
+            return richEditorController->FromStyledString(value);
         }
+        return {};
     }
 
     RefPtr<SpanStringBase> ToStyledStringImpl(const RangeOptions& options)

@@ -182,7 +182,8 @@ void XComponentPattern::InitSurface()
     renderSurface_ = RenderSurface::Create();
 #endif
     renderSurface_->SetInstanceId(GetHostInstanceId());
-    renderSurface_->SetBufferUsage(BUFFER_USAGE_XCOMPONENT);
+    std::string xComponentType = GetType() == XComponentType::SURFACE ? "s" : "t";
+    renderSurface_->SetBufferUsage(BUFFER_USAGE_XCOMPONENT + "-" + xComponentType + "-" + GetId());
     if (type_ == XComponentType::SURFACE) {
         InitializeRenderContext();
         if (!SystemProperties::GetExtSurfaceEnabled()) {
@@ -395,6 +396,9 @@ void XComponentPattern::OnAttachToFrameNode()
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().EnableSelfRender();
     }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    nodeId_ = std::to_string(host->GetId());
 }
 
 void XComponentPattern::OnModifyDone()
@@ -502,11 +506,11 @@ void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
             OnSurfaceDestroyed();
             auto eventHub = frameNode->GetOrCreateEventHub<XComponentEventHub>();
             CHECK_NULL_VOID(eventHub);
-            eventHub->FireDestroyEvent(GetId(frameNode));
+            eventHub->FireDestroyEvent(GetId());
             if (id_.has_value()) {
                 eventHub->FireDetachEvent(id_.value());
             }
-            eventHub->FireControllerDestroyedEvent(surfaceId_, GetId(frameNode));
+            eventHub->FireControllerDestroyedEvent(surfaceId_, GetId());
 #ifdef RENDER_EXTRACT_SUPPORTED
             if (renderContextForSurface_) {
                 renderContextForSurface_->RemoveSurfaceChangedCallBack();

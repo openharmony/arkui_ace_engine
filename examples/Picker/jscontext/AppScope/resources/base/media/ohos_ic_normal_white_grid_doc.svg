@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="281px" height="320px" viewBox="0 0 281 320" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>ic_normal_white_grid_doc</title>
+    <g id="页面-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <rect id="矩形备份-6" fill="#FFFFFF" x="270" y="76" width="4" height="6"></rect>
+        <path d="M16.4285714,0 L196.654842,0 L196.654842,0 L196.511188,65.6742883 C196.489098,75.7731853 204.657964,83.9778663 214.756861,83.9999563 C214.770194,83.9999854 214.783526,84 214.796859,84 L280.428571,84 L280.428571,84 L280.428571,304 C280.428571,312.836556 273.265127,320 264.428571,320 L16.4285714,320 C7.59201543,320 0.428571429,312.836556 0.428571429,304 L0.428571429,16 C0.428571429,7.163444 7.59201543,1.623249e-15 16.4285714,0 Z" id="矩形备份-23" fill="#61A4FF"></path>
+        <path d="M196.428571,0 L280.428571,84 L214.714286,84 C204.615365,84 196.428571,75.8132069 196.428571,65.7142857 L196.428571,0 L196.428571,0 Z" id="矩形备份-24" fill="#A2C9FF"></path>
+        <polyline id="路径-4" stroke="#FFFFFF" stroke-width="16" stroke-linecap="round" stroke-linejoin="round" points="90.4285714 160 112.462193 248 140.771974 160 168.986402 248 190.428571 160"></polyline>
+    </g>
+</svg>

@@ -175,7 +175,7 @@ bool SecurityComponentHandler::GetBorderRect(const RefPtr<FrameNode>& parentNode
     auto borderWidth = renderContext->GetBorderWidth();
     CHECK_NULL_RETURN(borderWidth, false);
     auto parentRect = renderContext->GetPaintRectWithTransform();
-    parentRect.SetOffset(parentNode->GetPositionToScreenWithTransform());
+    parentRect.SetOffset(parentNode->GetPositionToWindowWithTransform());
     auto borderColor = renderContext->GetBorderColor();
     auto leftIsTransparent = borderColor && borderColor->leftColor.has_value() &&
         (borderColor->leftColor.value() == Color::TRANSPARENT);
@@ -408,20 +408,6 @@ bool SecurityComponentHandler::CheckLinearGradientBlur(const RefPtr<FrameNode>& 
     }
 }
 
-bool SecurityComponentHandler::CheckGrayScale(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext,
-    std::string& message)
-{
-    if (renderContext->GetFrontGrayScale().has_value() &&
-        GreatNotEqual(renderContext->GetFrontGrayScale().value().ConvertToVp(), 0.0f)) {
-        SC_LOG_ERROR("SecurityComponentCheckFail: Parent %{public}s grayscale is set, security component is invalid",
-            node->GetTag().c_str());
-        message = ", attribute grayscale of parent component " + node->GetTag() + "(id = " +
-            std::to_string(node->GetId()) + ") is set";
-        return true;
-    }
-    return false;
-}
-
 bool SecurityComponentHandler::CheckSaturate(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext,
     std::string& message)
 {
@@ -604,7 +590,7 @@ bool SecurityComponentHandler::CheckRenderEffect(RefPtr<FrameNode>& node, std::s
 
     if (CheckOpacity(node, renderContext, message) || CheckBrightness(node, renderContext, message) ||
         CheckVisibility(node, layoutProperty, message) || CheckBlur(node, renderContext, message) ||
-        CheckGrayScale(node, renderContext, message) || CheckSaturate(node, renderContext, message) ||
+        CheckSaturate(node, renderContext, message) ||
         CheckContrast(node, renderContext, message) || CheckInvert(node, renderContext, message) ||
         CheckSepia(node, renderContext, message) || CheckHueRotate(node, renderContext, message) ||
         CheckColorBlend(node, renderContext, message) || CheckClipMask(node, renderContext, message) ||
@@ -674,7 +660,7 @@ bool SecurityComponentHandler::CheckParentNodesEffect(RefPtr<FrameNode>& node,
     RefPtr<RenderContext> renderContext = node->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
     auto frameRect = renderContext->GetPaintRectWithTransform();
-    frameRect.SetOffset(node->GetPositionToScreenWithTransform());
+    frameRect.SetOffset(node->GetPositionToWindowWithTransform());
     auto visibleRect = frameRect;
     auto parent = node->GetParent();
     std::string scId = std::to_string(node->GetId());
@@ -721,7 +707,7 @@ void SecurityComponentHandler::GetVisibleRect(RefPtr<FrameNode>& node, RectF& vi
     auto renderContext = node->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     RectF parentRect = renderContext->GetPaintRectWithTransform();
-    parentRect.SetOffset(node->GetPositionToScreenWithTransform());
+    parentRect.SetOffset(node->GetPositionToWindowWithTransform());
     visibleRect = visibleRect.Constrain(parentRect);
 }
 
@@ -1369,7 +1355,7 @@ int32_t SecurityComponentHandler::ReportSecurityComponentClickEvent(int32_t& scI
 #ifdef SECURITY_COMPONENT_ENABLE
     secEvent.point.touchX = event.GetDisplayX();
     secEvent.point.touchY = event.GetDisplayY();
-    auto pointerEvent = event.GetPointerEvent();
+    auto pointerEvent = event.GetClickPointerEvent();
     uint8_t defaultData = 0;
     std::vector<uint8_t> dataBuffer;
     if (pointerEvent == nullptr) {

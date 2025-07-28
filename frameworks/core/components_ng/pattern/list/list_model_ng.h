@@ -96,6 +96,8 @@ public:
     static void SetShowCached(FrameNode* frameNode, bool show);
     static int32_t GetCachedCount(FrameNode* frameNode);
     static bool GetShowCached(FrameNode* frameNode);
+    static void SetCacheRange(FrameNode* frameNode, int32_t min, int32_t max);
+    static void ResetCacheRange(FrameNode* frameNode);
     static int32_t GetScrollEnabled(FrameNode* frameNode);
     static void SetScrollEnabled(FrameNode* frameNode, bool enableScrollInteraction);
     static int32_t GetSticky(FrameNode* frameNode);
@@ -170,7 +172,8 @@ public:
     static int32_t GetInitialIndex(FrameNode* frameNode);
     static V2::ItemDivider GetDivider(FrameNode* frameNode);
     static void SetScroller(FrameNode* frameNode, RefPtr<ScrollControllerBase> scroller, RefPtr<ScrollProxy> proxy);
-    static void SetOnScrollVisibleContentChange(FrameNode* frameNode, OnScrollVisibleContentChangeEvent&& onScrollVisibleContentChange);
+    static void SetOnScrollVisibleContentChange(
+        FrameNode* frameNode, OnScrollVisibleContentChangeEvent&& onScrollVisibleContentChange);
     static void SetOnItemMove(FrameNode* frameNode, OnItemMoveEvent&& onItemMove);
     static void SetOnItemDragStart(FrameNode* frameNode, OnItemDragStartFunc&& onItemDragStart);
     static void SetOnItemDragEnter(FrameNode* frameNode, OnItemDragEnterFunc&& onItemDragEnter);

@@ -1,0 +1,16 @@
+{
+    "extends": "@koalaui/arkui-common/config/tsconfig.base.json",
+    "exclude": ["node_modules", "js_output", "dependencies", "pages/Progress.test.ets", "pages/Marquee.test.ets"],
+    "include": ["./**/*.ets"],
+    "compilerOptions": {
+        "types": [],
+        "outDir": "../../../build/js_output/arkui-test",
+        "plugins": [
+            {
+                "transform": "@koalaui/ets-plugin/build/lib/src/ArkExpander.js",
+                "destination":  "../../generated/ets-test",
+                "arkui": "@koalaui/arkoala-arkui"
+            }
+        ]
+    }
+}

@@ -22,11 +22,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PanGestureEventAccessor {
 void DestroyPeerImpl(Ark_PanGestureEvent peer)
 {
-    delete peer;
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_PanGestureEvent CtorImpl()
 {
-    return new PanGestureEventPeer();
+    return PeerUtils::CreatePeer<PanGestureEventPeer>();
 }
 Ark_NativePointer GetFinalizerImpl()
 {

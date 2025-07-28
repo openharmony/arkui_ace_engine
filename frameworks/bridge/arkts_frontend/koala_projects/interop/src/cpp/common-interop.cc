@@ -138,7 +138,7 @@ KOALA_INTEROP_1(StringLength, KInt, KNativePointer)
 
 void impl_StringData(KNativePointer ptr, KByte* bytes, KUInt size) {
     string* s = reinterpret_cast<string*>(ptr);
-    if (s && bytes) memcpy(bytes, s->c_str(), size);
+    if (s) memcpy(bytes, s->c_str(), size);
 }
 KOALA_INTEROP_V3(StringData, KNativePointer, KByte*, KUInt)
 
@@ -207,7 +207,7 @@ std::vector<KStringPtr> makeStringVector(KStringArray strArray) {
     for (KUInt i = 0; i < arraySize; ++i) {
         int len = unpackUInt(strArray + offset);
         res[i].assign((const char*)(strArray + offset + sizeof(KUInt)), len);
-        offset += static_cast<size_t>(len + sizeof(KUInt));
+        offset += len + sizeof(KUInt);
     }
     return res;
 }

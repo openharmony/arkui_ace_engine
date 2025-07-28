@@ -427,6 +427,24 @@ bool ResourceParseUtils::ParseResColor(const RefPtr<ResourceObject>& resObj, Col
     return false;
 }
 
+bool ResourceParseUtils::ParseResColorWithColorMode(const RefPtr<ResourceObject>& resObj, Color& result,
+    const ColorMode& colorMode)
+{
+    CHECK_NULL_RETURN(resObj, false);
+
+    if (resObj->GetInstanceId() == UNKNOWN_INSTANCE_ID) {
+        resObj->SetInstanceId(Container::CurrentIdSafely());
+    }
+    auto resourceWrapper = GetOrCreateResourceWrapper(resObj);
+    CHECK_NULL_RETURN(resourceWrapper, false);
+    auto resourceAdapter = resourceWrapper->GetResourceAdapter();
+    auto colorModeValue = resourceAdapter ? resourceAdapter->GetResourceColorMode() : Container::CurrentColorMode();
+    ResourceManager::GetInstance().UpdateColorMode(colorMode);
+    bool state = ParseResColor(resObj, result);
+    ResourceManager::GetInstance().UpdateColorMode(colorModeValue);
+    return state;
+}
+
 bool ResourceParseUtils::ParseResString(const RefPtr<ResourceObject>& resObj, std::u16string& result)
 {
     CHECK_NULL_RETURN(resObj, false);

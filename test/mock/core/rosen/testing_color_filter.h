@@ -18,6 +18,7 @@
 
 #include <memory>
 
+#include "test/mock/core/rosen/testing_color_space.h"
 #include "testing_color_matrix.h"
 
 namespace OHOS::Ace::Testing {
@@ -27,6 +28,12 @@ public:
     virtual ~TestingColorFilter() = default;
 
     static std::shared_ptr<TestingColorFilter> CreateMatrixColorFilter(TestingColorMatrix& /* cm */)
+    {
+        return std::make_shared<TestingColorFilter>();
+    }
+
+    static std::shared_ptr<TestingColorFilter> CreateMatrixColorFilter(
+        TestingColorMatrix& /* cm */, TestingClamp /* clamp */)
     {
         return std::make_shared<TestingColorFilter>();
     }

@@ -22,11 +22,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SubmitEventAccessor {
 void DestroyPeerImpl(Ark_SubmitEvent peer)
 {
-    delete peer;
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_SubmitEvent CtorImpl()
 {
-    return new SubmitEventPeer();
+    return PeerUtils::CreatePeer<SubmitEventPeer>();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -40,9 +40,10 @@ void KeepEditableStateImpl(Ark_SubmitEvent peer)
 }
 Ark_String GetTextImpl(Ark_SubmitEvent peer)
 {
-    std::string result = "";
+    std::u16string result = u"";
     CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_String>(result, Converter::FC));
     CHECK_NULL_RETURN(peer->GetEventInfo(), Converter::ArkValue<Ark_String>(result, Converter::FC));
+    result = peer->GetEventInfo()->GetText();
     return Converter::ArkValue<Ark_String>(result, Converter::FC);
 }
 void SetTextImpl(Ark_SubmitEvent peer,
@@ -50,7 +51,8 @@ void SetTextImpl(Ark_SubmitEvent peer,
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(peer->GetEventInfo());
-    auto string = Converter::Convert<std::string>(*text);
+    auto string = Converter::Convert<std::u16string>(*text);
+    peer->GetEventInfo()->SetText(string);
 }
 } // SubmitEventAccessor
 const GENERATED_ArkUISubmitEventAccessor* GetSubmitEventAccessor()

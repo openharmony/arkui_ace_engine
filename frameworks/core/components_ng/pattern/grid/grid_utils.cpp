@@ -44,25 +44,25 @@ std::string GridUtils::ParseArgs(const std::string& args)
 }
 
 namespace {
-inline float GetRowGap(const RefPtr<GridLayoutProperty>& props, float frameHeight)
+inline float GetRowGap(const GridLayoutProperty& props, float frameHeight)
 {
-    auto scale = props->GetLayoutConstraint()->scaleProperty;
-    return ConvertToPx(props->GetRowsGap().value_or(0.0_vp), scale, frameHeight).value_or(0);
+    auto scale = props.GetLayoutConstraint()->scaleProperty;
+    return ConvertToPx(props.GetRowsGap().value_or(0.0_vp), scale, frameHeight).value_or(0);
 }
 
-inline float GetColumnGap(const RefPtr<GridLayoutProperty>& props, float frameWidth)
+inline float GetColumnGap(const GridLayoutProperty& props, float frameWidth)
 {
-    auto scale = props->GetLayoutConstraint()->scaleProperty;
-    return ConvertToPx(props->GetColumnsGap().value_or(0.0_vp), scale, frameWidth).value_or(0);
+    auto scale = props.GetLayoutConstraint()->scaleProperty;
+    return ConvertToPx(props.GetColumnsGap().value_or(0.0_vp), scale, frameWidth).value_or(0);
 }
 } // namespace
 
-float GridUtils::GetMainGap(const RefPtr<GridLayoutProperty>& props, const SizeF& frameSize, Axis axis)
+float GridUtils::GetMainGap(const GridLayoutProperty& props, const SizeF& frameSize, Axis axis)
 {
     return axis == Axis::HORIZONTAL ? GetColumnGap(props, frameSize.Width()) : GetRowGap(props, frameSize.Height());
 }
 
-float GridUtils::GetCrossGap(const RefPtr<GridLayoutProperty>& props, const SizeF& frameSize, Axis axis)
+float GridUtils::GetCrossGap(const GridLayoutProperty& props, const SizeF& frameSize, Axis axis)
 {
     return axis == Axis::HORIZONTAL ? GetRowGap(props, frameSize.Height()) : GetColumnGap(props, frameSize.Width());
 }

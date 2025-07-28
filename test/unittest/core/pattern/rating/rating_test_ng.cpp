@@ -201,7 +201,7 @@ HWTEST_F(RatingTestNg, RatingRenderPropertyTest004, TestSize.Level1)
 
     // Test ratingScore and stepSize default value.
     EXPECT_EQ(ratingRenderProperty->GetRatingScore().value_or(0.0), DEFAULT_RATING_SCORE);
-    EXPECT_EQ(ratingRenderProperty->GetStepSize().value_or(0.5), DEFAULT_STEP_SIZE);
+    EXPECT_EQ(ratingRenderProperty->GetStepSize().value_or(DEFAULT_STEP_SIZE), DEFAULT_STEP_SIZE);
 }
 
 /**

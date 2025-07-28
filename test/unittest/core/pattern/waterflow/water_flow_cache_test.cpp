@@ -349,4 +349,48 @@ HWTEST_F(WaterFlowTestNg, LazyForEachJump002, TestSize.Level1)
     EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 7);
     EXPECT_EQ(frameNode_->GetTotalChildCount(), 96);
 }
+
+/**
+ * @tc.name: LargeDataPerformance001
+ * @tc.desc: Test WaterFlow performance with large dataset and memory management
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, LargeDataPerformance001, TestSize.Level1)
+{
+    auto model = CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.0f));
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetCachedCount(5);
+
+    // Create large number of items (1000) to test virtualization
+    CreateItemsInLazyForEach(1000, [](uint32_t idx) {
+        return 50.0f + (idx % 5) * 20.0f; // Different heights
+    });
+    CreateDone();
+
+    // Verify that only visible items are created initially
+    EXPECT_LE(pattern_->layoutInfo_->endIndex_, 20);
+    int32_t initialChildCount = frameNode_->GetTotalChildCount();
+
+    // Quick scroll to middle position
+    pattern_->ScrollToIndex(500, false, ScrollAlign::START);
+    FlushUITasks();
+
+    // Verify memory management: total child count should remain within reasonable range
+    EXPECT_LE(frameNode_->GetTotalChildCount(), initialChildCount + 50);
+    EXPECT_GE(pattern_->layoutInfo_->startIndex_, 480);
+    EXPECT_LE(pattern_->layoutInfo_->endIndex_, 520);
+
+    // Quick scroll to the end
+    UpdateCurrentOffset(-50000.0f);
+    FlushUITasks();
+
+    // Verify state when reaching the end
+    EXPECT_GE(pattern_->layoutInfo_->startIndex_, 980);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 999);
+
+    // Verify cached items count control
+    EXPECT_LE(pattern_->preloadItems_.size(), 5);
+}
 } // namespace OHOS::Ace::NG

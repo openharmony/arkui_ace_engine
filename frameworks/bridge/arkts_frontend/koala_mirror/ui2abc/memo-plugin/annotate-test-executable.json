@@ -1,0 +1,5 @@
+{
+    "inputDir": "./test/executable",
+    "outputDir": "./test/ets",
+    "include": ["./test/executable/**/*.ts"]
+}

@@ -37,6 +37,7 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/overlay/sheet_manager.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_layout_algorithm.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_style.h"
@@ -1137,7 +1138,6 @@ HWTEST_F(SheetShowInSubwindowTestNg, SideSheetLayoutAlgorithm5, TestSize.Level1)
      * @tc.steps: step1. create sheet node.
      */
     SheetStyle style;
-    style.sheetType = SheetType::SHEET_SIDE;
     style.sheetTitle = "mainTitle";
     auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
@@ -1158,6 +1158,7 @@ HWTEST_F(SheetShowInSubwindowTestNg, SideSheetLayoutAlgorithm5, TestSize.Level1)
      */
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->sheetType_ = SheetType::SHEET_SIDE;
     auto sideLayoutAlgorithm =
         AceType::DynamicCast<SheetPresentationSideLayoutAlgorithm>(sheetPattern->CreateLayoutAlgorithm());
     ASSERT_NE(sideLayoutAlgorithm, nullptr);
@@ -1205,7 +1206,6 @@ HWTEST_F(SheetShowInSubwindowTestNg, SideSheetLayoutAlgorithm6, TestSize.Level1)
      * @tc.steps: step1. create sheet node.
      */
     SheetStyle style;
-    style.sheetType = SheetType::SHEET_SIDE;
     style.sheetTitle = "mainTitle";
     auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
@@ -1230,6 +1230,7 @@ HWTEST_F(SheetShowInSubwindowTestNg, SideSheetLayoutAlgorithm6, TestSize.Level1)
      */
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->sheetType_ = SheetType::SHEET_SIDE;
     auto sideLayoutAlgorithm =
         AceType::DynamicCast<SheetPresentationSideLayoutAlgorithm>(sheetPattern->CreateLayoutAlgorithm());
     ASSERT_NE(sideLayoutAlgorithm, nullptr);
@@ -1827,5 +1828,38 @@ HWTEST_F(SheetShowInSubwindowTestNg, ComputePopupStyleOffset003, TestSize.Level1
     auto maxHeight =
         sheetPageLayoutAlgorithm->ComputeMaxHeight(parentConstraintHeight, parentConstraintWidth, layoutWrapper);
     EXPECT_FLOAT_EQ(maxHeight, 90.0f);
+}
+
+/**
+ * @tc.name: TestSheetBreakpoint001
+ * @tc.desc: Test preferType
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetShowInSubwindowTestNg, TestBreakpoint001, TestSize.Level1)
+{
+    auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
+    SheetShowInSubwindowTestNg::SetSheetTheme(sheetTheme);
+    SheetStyle sheetStyle;
+    auto state = WidthMDHeightSMState();
+    auto type1 = state.HandleType(sheetStyle);
+    EXPECT_EQ(type1, SheetType::SHEET_BOTTOMLANDSPACE);
+    sheetTheme->sheetBottom_ = "center";
+    auto type2 = state.HandleType(sheetStyle);
+    EXPECT_EQ(type2, SheetType::SHEET_CENTER);
+    sheetTheme->sheetBottom_ = "popup";
+    auto type3 = state.HandleType(sheetStyle);
+    EXPECT_EQ(type3, SheetType::SHEET_CENTER);
+    sheetStyle.sheetType = SheetType::SHEET_POPUP;
+    auto type4 = state.HandleType(sheetStyle);
+    EXPECT_EQ(type4, SheetType::SHEET_POPUP);
+    sheetStyle.sheetType = SheetType::SHEET_CONTENT_COVER;
+    auto type5 = state.HandleType(sheetStyle);
+    EXPECT_EQ(type5, SheetType::SHEET_CONTENT_COVER);
+    sheetStyle.sheetType = SheetType::SHEET_BOTTOM;
+    auto type6 = state.HandleType(sheetStyle);
+    EXPECT_EQ(type6, SheetType::SHEET_BOTTOM);
+    sheetStyle.sheetType = SheetType::SHEET_SIDE;
+    auto type7 = state.HandleType(sheetStyle);
+    EXPECT_EQ(type7, SheetType::SHEET_SIDE);
 }
 } // namespace OHOS::Ace::NG

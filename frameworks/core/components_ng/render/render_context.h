@@ -94,6 +94,10 @@ using TransitionFinishCallback = std::function<void(bool)>;
 
 inline constexpr int32_t ZINDEX_DEFAULT_VALUE = 0;
 
+namespace {
+    NG::Vector5F DEFAULT_ROTATE_VEC = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+}
+
 // RenderContext is used for render node to paint.
 class ACE_FORCE_EXPORT RenderContext : public virtual AceType {
     DECLARE_ACE_TYPE(NG::RenderContext, AceType)
@@ -468,6 +472,7 @@ public:
     virtual void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) {}
 
     void ObscuredToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+    void TransitionToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 
     void SetSharedTransitionOptions(const std::shared_ptr<SharedTransitionOption>& option);
     const std::shared_ptr<SharedTransitionOption>& GetSharedTransitionOption() const;
@@ -624,7 +629,6 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(CustomBackground, CustomBackgroundColor, Color);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(CustomBackground, IsTransitionBackground, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(CustomBackground, BuilderBackgroundFlag, bool);
-    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(CustomBackground, BackgroundIgnoresLayoutSafeAreaEdges, uint32_t);
 
     // Graphics
     ACE_DEFINE_PROPERTY_GROUP(Graphics, GraphicsProperty);
@@ -835,6 +839,8 @@ public:
 
     virtual void SetNeedUseCmdlistDrawRegion(bool needUseCmdlistDrawRegion) {}
 
+    virtual void UpdateCustomBackground() {}
+
 protected:
     RenderContext() = default;
     std::shared_ptr<SharedTransitionOption> sharedTransitionOption_;
@@ -861,7 +867,6 @@ protected:
     virtual void OnCustomBackgroundColorUpdate(const Color& color) {}
     virtual void OnIsTransitionBackgroundUpdate(bool isTransitionBackground) {}
     virtual void OnBuilderBackgroundFlagUpdate(bool isBuilderBackground) {}
-    virtual void OnBackgroundIgnoresLayoutSafeAreaEdgesUpdate(uint32_t edges) {}
 
     virtual void OnBorderImageUpdate(const RefPtr<BorderImage>& borderImage) {}
     virtual void OnBorderImageSourceUpdate(const ImageSourceInfo& borderImageSourceInfo) {}

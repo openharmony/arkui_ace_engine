@@ -313,6 +313,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternInitSurfaceChangedCallback001, TestSize.Leve
      * @tc.expected: Related function is called.
      */
     auto pipeline = frameNode_->GetContextRefPtr();
+    ASSERT_NE(pipeline, nullptr);
     pattern_->surfaceChangedCallbackId_.emplace(1);
     pattern_->InitSurfaceChangedCallback();
     pipeline->callbackId_ = 0;
@@ -1630,6 +1631,7 @@ HWTEST_F(SwiperTestNg, OnModifyDone_StopAndResetSpringAnimation, TestSize.Level1
     swiperPattern->isBindIndicator_ = true;
     swiperPattern->currentDelta_ = 2.0f;
     swiperPattern->OnModifyDone();
+    EXPECT_EQ(frameNode->layoutProperty_->GetPropertyChangeFlag(), PROPERTY_UPDATE_MEASURE_SELF);
     EXPECT_EQ(swiperPattern->currentDelta_, 0.0f);
 }
 

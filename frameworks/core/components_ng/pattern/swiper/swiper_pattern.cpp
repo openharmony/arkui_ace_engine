@@ -30,6 +30,7 @@
 #include "base/perfmonitor/perf_constants.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/ressched/ressched_report.h"
+#include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
 #include "core/animation/curve.h"
 #include "core/animation/curves.h"
@@ -121,6 +122,9 @@ SwiperPattern::SwiperPattern()
 void SwiperPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
+#if defined(ACE_STATIC)
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode);
+#endif
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -136,6 +140,9 @@ void SwiperPattern::OnAttachToFrameNode()
 
 void SwiperPattern::OnDetachFromFrameNode(FrameNode* node)
 {
+#if defined(ACE_STATIC)
+    THREAD_SAFE_NODE_CHECK(node, OnDetachFromFrameNode, node);
+#endif
     CHECK_NULL_VOID(node);
     auto pipeline = node->GetContext();
     CHECK_NULL_VOID(pipeline);
@@ -147,6 +154,10 @@ void SwiperPattern::OnDetachFromFrameNode(FrameNode* node)
 
 void SwiperPattern::OnAttachToMainTree()
 {
+#if defined(ACE_STATIC)
+    auto host = GetHost();
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
+#endif
     if (!isInit_) {
         SetOnHiddenChangeForParent();
     }
@@ -154,6 +165,10 @@ void SwiperPattern::OnAttachToMainTree()
 
 void SwiperPattern::OnDetachFromMainTree()
 {
+#if defined(ACE_STATIC)
+    auto host = GetHost();
+    THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree);
+#endif
     RemoveOnHiddenChange();
 }
 
@@ -242,7 +257,9 @@ void SwiperPattern::StopAndResetSpringAnimation()
         itemPosition_.clear();
         isVoluntarilyClear_ = true;
         jumpIndex_ = currentIndex_;
+        MarkDirtyNodeSelf();
     }
+    UpdateItemRenderGroup(false);
 }
 
 void SwiperPattern::CheckLoopChange()
@@ -594,11 +611,17 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
     }
     auto index = CheckIndexRange(userSetCurrentIndex);
     if (index != userSetCurrentIndex) {
+        // The current index property is an outlier and has been corrected.
+        // It is necessary to determine whether the changindex interface has a set value.
+        if (userSetCurrentIndex >= TotalCount()) {
+            index = jumpIndexByUser_.value_or(index);
+        }
         UpdateCurrentIndex(index);
     } else if (oldIndex != userSetCurrentIndex) {
         currentIndex_ = userSetCurrentIndex;
         propertyAnimationIndex_ = GetLoopIndex(propertyAnimationIndex_);
     }
+    jumpIndexByUser_.reset();
 
     if (IsSwipeByGroup() && needAdjustIndex_) {
         AdjustCurrentIndexOnSwipePage(CurrentIndex());
@@ -615,10 +638,6 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
         SetIndicatorJumpIndex(jumpIndex_);
     }
     isVoluntarilyClear_ = false;
-    if (jumpIndexByUser_.has_value()) {
-        jumpIndex_ = jumpIndexByUser_;
-    }
-    jumpIndexByUser_.reset();
     if (jumpIndex_) {
         if ((jumpIndex_.value() < 0 || jumpIndex_.value() >= TotalCount()) && !IsLoop()) {
             jumpIndex_ = 0;
@@ -1892,7 +1911,7 @@ void SwiperPattern::OnSwiperCustomAnimationFinish(
     taskExecutor->PostDelayedTask(task, TaskExecutor::TaskType::UI, timeout, "ArkUISwiperDelayedCustomAnimation");
 }
 
-void SwiperPattern::SwipeToWithoutAnimation(int32_t index)
+void SwiperPattern::SwipeToWithoutAnimation(int32_t index, bool byUser)
 {
     if (currentIndex_ != index) {
         FireWillShowEvent(index);
@@ -1911,7 +1930,9 @@ void SwiperPattern::SwipeToWithoutAnimation(int32_t index)
     StopSpringAnimationImmediately();
     StopIndicatorAnimation(true);
     jumpIndex_ = index;
-    jumpIndexByUser_ = index;
+    if (byUser) {
+        jumpIndexByUser_ = index;
+    }
     AceAsyncTraceBeginCommercial(0, hasTabsAncestor_ ? APP_TABS_NO_ANIMATION_SWITCH : APP_SWIPER_NO_ANIMATION_SWITCH);
     uiCastJumpIndex_ = index;
     MarkDirtyNodeSelf();
@@ -2199,6 +2220,10 @@ bool SwiperPattern::IsInFastAnimation() const
 
 void SwiperPattern::ChangeIndex(int32_t index, SwiperAnimationMode mode)
 {
+#if defined(ACE_STATIC)
+    auto host = GetHost();
+    FREE_NODE_CHECK(host, ChangeIndex, index, mode);
+#endif
     int32_t targetIndex = 0;
     if (!ComputeTargetIndex(index, targetIndex)) {
         return;
@@ -2213,7 +2238,7 @@ void SwiperPattern::ChangeIndex(int32_t index, SwiperAnimationMode mode)
             SetIndicatorChangeIndexStatus(false);
         }
 
-        SwipeToWithoutAnimation(CheckIndexRange(CheckTargetIndex(index)));
+        SwipeToWithoutAnimation(CheckIndexRange(CheckTargetIndex(index)), true);
     } else if (mode == SwiperAnimationMode::DEFAULT_ANIMATION) {
         if (GetMaxDisplayCount() > 0) {
             SetIndicatorChangeIndexStatus(true);
@@ -2244,8 +2269,24 @@ bool SwiperPattern::ComputeTargetIndex(int32_t index, int32_t& targetIndex) cons
     return true;
 }
 
+void SwiperPattern::SetCachedCount(int32_t cachedCount)
+{
+#if defined(ACE_STATIC)
+    auto host = GetHost();
+    FREE_NODE_CHECK(host, SetCachedCount, cachedCount);
+#endif
+    if (cachedCount_.has_value() && cachedCount_.value() != cachedCount) {
+        SetLazyLoadFeature(true);
+    }
+    cachedCount_ = cachedCount;
+}
+
 void SwiperPattern::ChangeIndex(int32_t index, bool useAnimation)
 {
+#if defined(ACE_STATIC)
+    auto host = GetHost();
+    FREE_NODE_CHECK(host, ChangeIndex, index, useAnimation);
+#endif
     int32_t targetIndex = 0;
     if (!ComputeTargetIndex(index, targetIndex)) {
         return;
@@ -2266,7 +2307,7 @@ void SwiperPattern::ChangeIndex(int32_t index, bool useAnimation)
             SetIndicatorChangeIndexStatus(false);
         }
 
-        SwipeToWithoutAnimation(CheckIndexRange(CheckTargetIndex(index)));
+        SwipeToWithoutAnimation(CheckIndexRange(CheckTargetIndex(index)), true);
     }
 }
 
@@ -2478,6 +2519,7 @@ void SwiperPattern::StopSpringAnimationImmediately()
         auto host = swiper->GetHost();
         CHECK_NULL_VOID(host);
         host->UpdateAnimatablePropertyFloat(SPRING_PROPERTY_NAME, swiper->currentIndexOffset_);
+        swiper->FireScrollStateEvent(ScrollState::IDLE);
     });
     OnSpringAnimationFinish();
 }
@@ -4906,7 +4948,7 @@ std::shared_ptr<SwiperParameters> SwiperPattern::GetSwiperParameters() const
 {
     if (swiperParameters_ == nullptr) {
         swiperParameters_ = std::make_shared<SwiperParameters>();
-        auto pipelineContext = PipelineBase::GetCurrentContext();
+        auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_RETURN(pipelineContext, swiperParameters_);
         auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
         CHECK_NULL_RETURN(swiperIndicatorTheme, swiperParameters_);
@@ -4947,7 +4989,7 @@ std::shared_ptr<SwiperDigitalParameters> SwiperPattern::GetSwiperDigitalParamete
 {
     if (swiperDigitalParameters_ == nullptr) {
         swiperDigitalParameters_ = std::make_shared<SwiperDigitalParameters>();
-        auto pipelineContext = PipelineBase::GetCurrentContext();
+        auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_RETURN(pipelineContext, swiperDigitalParameters_);
         auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
         swiperDigitalParameters_->fontColor = swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor();
@@ -5116,7 +5158,7 @@ void SwiperPattern::UpdatePaintProperty(const RefPtr<FrameNode>& indicatorNode)
     CHECK_NULL_VOID(indicatorNode);
     auto paintProperty = indicatorNode->GetPaintProperty<DotIndicatorPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
     CHECK_NULL_VOID(swiperIndicatorTheme);
@@ -5668,18 +5710,22 @@ void SwiperPattern::SaveArrowProperty(const RefPtr<FrameNode>& arrowNode)
     CHECK_NULL_VOID(props);
     const auto arrowProps = arrowNode->GetLayoutProperty<SwiperArrowLayoutProperty>();
     CHECK_NULL_VOID(arrowProps);
+    auto pipelineContext = PipelineBase::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    CHECK_NULL_VOID(theme);
     arrowProps->UpdateDirection(props->GetDirection().value_or(Axis::HORIZONTAL));
     arrowProps->UpdateIndex(props->GetIndex().value_or(0));
     arrowProps->UpdateLoop(props->GetLoop().value_or(true));
     arrowProps->UpdateEnabled(paintProps->GetEnabled().value_or(true));
-    arrowProps->UpdateDisplayArrow(props->GetDisplayArrowValue());
-    arrowProps->UpdateHoverShow(props->GetHoverShowValue());
-    arrowProps->UpdateIsShowBackground(props->GetIsShowBackgroundValue());
-    arrowProps->UpdateBackgroundSize(props->GetBackgroundSizeValue());
-    arrowProps->UpdateBackgroundColor(props->GetBackgroundColorValue());
-    arrowProps->UpdateArrowSize(props->GetArrowSizeValue());
-    arrowProps->UpdateArrowColor(props->GetArrowColorValue());
-    arrowProps->UpdateIsSidebarMiddle(props->GetIsSidebarMiddleValue());
+    arrowProps->UpdateDisplayArrow(props->GetDisplayArrowValue(false));
+    arrowProps->UpdateHoverShow(props->GetHoverShowValue(false));
+    arrowProps->UpdateIsShowBackground(props->GetIsShowBackgroundValue(theme->GetIsShowArrowBackground()));
+    arrowProps->UpdateBackgroundSize(props->GetBackgroundSizeValue(theme->GetSmallArrowBackgroundSize()));
+    arrowProps->UpdateBackgroundColor(props->GetBackgroundColorValue(theme->GetSmallArrowBackgroundColor()));
+    arrowProps->UpdateArrowSize(props->GetArrowSizeValue(theme->GetSmallArrowSize()));
+    arrowProps->UpdateArrowColor(props->GetArrowColorValue(theme->GetSmallArrowColor()));
+    arrowProps->UpdateIsSidebarMiddle(props->GetIsSidebarMiddleValue(theme->GetIsSidebarMiddle()));
 }
 
 void SwiperPattern::SetAccessibilityAction()
@@ -7257,6 +7303,7 @@ void SwiperPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
     json->PutExtAttr("currentIndex", currentIndex_, filter);
     json->PutExtAttr("currentOffset", currentOffset_, filter);
     json->PutExtAttr("uiCastJumpIndex", uiCastJumpIndex_.value_or(-1), filter);
+    json->PutExtAttr("indicatorInteractive", isIndicatorInteractive_ ? "true" : "false", filter);
 
     if (indicatorIsBoolean_) {
         return;
@@ -7264,6 +7311,7 @@ void SwiperPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
 
     auto indicatorType = GetIndicatorType();
     const char* indicator = "indicator";
+    json->Delete(indicator);
     if (indicatorType == SwiperIndicatorType::DOT) {
         json->PutExtAttr(indicator, SwiperHelper::GetDotIndicatorStyle(GetSwiperParameters()).c_str(), filter);
     } else if (indicatorType == SwiperIndicatorType::ARC_DOT) {

@@ -48,6 +48,7 @@
 #include "frameworks/core/gestures/press_recognizer.h"
 #include "frameworks/core/components_ng/pattern/node_container/node_container_pattern.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_accessibility_child_tree_callback.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_inner_surface_controller.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1988,5 +1989,77 @@ HWTEST_F(XComponentTestTwoNg, SetHasGotNativeXComponentTest, TestSize.Level1)
      */
     pattern->SetHasGotNativeXComponent(true);
     EXPECT_TRUE(pattern->hasGotNativeXComponent_);
+}
+
+/**
+ * @tc.name: GetSurfaceRotationBySurfaceIdTest
+ * @tc.desc: Test innerAPI GetSurfaceRotationBySurfaceId Func
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestTwoNg, GetSurfaceRotationBySurfaceIdTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+
+    /**
+     * @tc.steps2: Call XComponentInnerSurfaceController::GetSurfaceRotationBySurfaceId Func when isSurfaceLock_ = true
+     * and isSurfaceLock = false with invalid surfaceId.
+     * @tc.expected: code equals 1 and isSurfaceLock = false.
+     */
+    pattern->isSurfaceLock_ = true;
+    bool isSurfaceLock = false;
+    std::string surfaceId = "123";
+    int32_t code = XComponentInnerSurfaceController::GetSurfaceRotationBySurfaceId(surfaceId, isSurfaceLock);
+    EXPECT_EQ(code, 1);
+    EXPECT_FALSE(isSurfaceLock);
+
+    /**
+     * @tc.steps3: Call XComponentInnerSurfaceController::GetSurfaceRotationBySurfaceId Func when isSurfaceLock_ = true
+     * and isSurfaceLock = false with valid surfaceId.
+     * @tc.expected: code equals 0 and isSurfaceLock = true.
+     */
+    pattern->isSurfaceLock_ = true;
+    isSurfaceLock = false;
+    surfaceId = "123";
+    pattern->initialSurfaceId_ = "123";
+    pattern->RegisterNode();
+    code = XComponentInnerSurfaceController::GetSurfaceRotationBySurfaceId(surfaceId, isSurfaceLock);
+    EXPECT_EQ(code, 0);
+    EXPECT_TRUE(isSurfaceLock);
+}
+
+/**
+ * @tc.name: InitNativeNodeCallbacksTest
+ * @tc.desc: Test InitNativeNodeCallbacks Func
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestTwoNg, InitNativeNodeCallbacksTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    g_testProperty.libraryName = XCOMPONENT_LIBRARY_NAME;
+    auto frameNode = CreateXComponentNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+
+    /**
+     * @tc.steps2: Call InitNativeNodeCallbacks Func
+     * @tc.expected: attachNativeNodeCallback_ is not null and detachNativeNodeCallback_ is not null.
+     */
+    pattern->InitNativeNodeCallbacks();
+    ASSERT_TRUE(pattern->nativeXComponentImpl_);
+    EXPECT_TRUE(pattern->nativeXComponentImpl_->attachNativeNodeCallback_);
+    EXPECT_TRUE(pattern->nativeXComponentImpl_->detachNativeNodeCallback_);
 }
 } // namespace OHOS::Ace::NG

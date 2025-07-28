@@ -57,28 +57,35 @@ namespace PolylineInterfaceModifier {
 void SetPolylineOptionsImpl(Ark_NativePointer node,
                             const Opt_PolylineOptions* options)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(options);
-    auto opt = Converter::OptConvert<PolylineOptions>(*options);
-    CHECK_NULL_VOID(opt);
-    Validator::ValidateNonNegative(opt->width);
+    // auto frameNode = reinterpret_cast<FrameNode *>(node);
+    // CHECK_NULL_VOID(frameNode);
+    // CHECK_NULL_VOID(options);
+    // auto opt = Converter::OptConvert<PolylineOptions>(*options);
+    // CHECK_NULL_VOID(opt);
+    // Validator::ValidateNonNegative(opt->width);
     // ShapeAbstractModelNG::SetWidth(frameNode, opt->width);
-    Validator::ValidateNonNegative(opt->height);
+    // Validator::ValidateNonNegative(opt->height);
     // ShapeAbstractModelNG::SetHeight(frameNode, opt->height);
 }
 } // PolylineInterfaceModifier
 namespace PolylineAttributeModifier {
 void PointsImpl(Ark_NativePointer node,
-                const Array_Point* value)
+                const Opt_Array_ShapePoint* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    std::optional<ShapePoints> points = Converter::Convert<std::vector<ShapePoint>>(*value);
-    if (points->size() < POINTS_NUMBER_MIN) {
-        points.reset();
-    }
+    // auto frameNode = reinterpret_cast<FrameNode *>(node);
+    // CHECK_NULL_VOID(frameNode);
+    // CHECK_NULL_VOID(value);
+    // std::optional<ShapePoints> points;
+    // if (value->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+    //     std::vector<ShapePoint> shapePointArray;
+    //     for (int32_t i = 0; i < value->value.length; ++i) {
+    //         shapePointArray.emplace_back(Converter::Convert<ShapePoint>(value->value.array[i]));
+    //     }
+    //     points = std::make_optional<ShapePoints>(shapePointArray);
+    // }
+    // if (points && points->size() < POINTS_NUMBER_MIN) {
+    //     points.reset();
+    // }
     // PolygonModelNG::SetPoints(frameNode, points);
 }
 } // PolylineAttributeModifier

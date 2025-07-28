@@ -55,6 +55,10 @@ public:
     {
         return firstIndex_;
     }
+    float GetPendingDelta() const override
+    {
+        return 0.0f; // not implemented
+    }
     int32_t GetCrossIndex(int32_t itemIndex) const override;
 
     void UpdateStartIndex() override;
@@ -197,8 +201,6 @@ public:
     float currentOffset_ = 0.0f;
     // 0.0f until itemEnd_ is true
     float maxHeight_ = 0.0f;
-
-    bool knowTotalHeight_ = false; // set to true when content end is reached. no longer need to estimate totalHeight
 
     // first index for onScrollIndex
     int32_t firstIndex_ = 0;

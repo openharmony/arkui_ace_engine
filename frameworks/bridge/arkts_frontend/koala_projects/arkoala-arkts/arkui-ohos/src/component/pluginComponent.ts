@@ -17,25 +17,59 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { int32, int64, float32 } from "@koalaui/common"
-import { KInt, KPointer, KBoolean, KStringPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
+import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
+import { Serializer } from "./peers/Serializer"
+import { ComponentBase } from "./../ComponentBase"
+import { PeerNode } from "./../PeerNode"
+import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { VoidCallback } from "./units"
+import { CallbackKind } from "./peers/CallbackKind"
+import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { CommonMethod, DrawModifier, Rectangle, Callback_Array_TouchTestInfo_TouchResult, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, Callback_ClickEvent_Void, ClickEvent, Callback_Boolean_HoverEvent_Void, HoverEvent, AccessibilityCallback, Callback_MouseEvent_Void, MouseEvent, Callback_TouchEvent_Void, TouchEvent, Callback_KeyEvent_Void, KeyEvent, Callback_KeyEvent_Boolean, AnimateParam, TransitionOptions, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, Callback_Area_Area_Void, Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs, Literal_Number_offset_span, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, DragEvent, CustomBuilder, DragItemInfo, Callback_DragEvent_String_Void, UniformDataType, Callback_PreDragStatus_Void, PreDragStatus, Type_CommonMethod_linearGradient_value, Tuple_ResourceColor_Number, Type_CommonMethod_sweepGradient_value, Tuple_Length_Length, Type_CommonMethod_radialGradient_value, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, GestureModifier, BackgroundBrightnessOptions, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, Callback_TouchEvent_HitTestMode, SizeChangeCallback, SafeAreaType, SafeAreaEdge, Literal_Alignment_align, BlurStyle, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, ComponentContent, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback } from "./common"
-import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, VoidCallback } from "./units"
-import { HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Color, Visibility, ItemAlign, Direction, GradientDirection, ObscuredReasons, RenderFit, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey } from "./enums"
-import { LengthMetrics } from "../Graphics"
-import { ResizableOptions } from "./image"
-import { Resource } from "global/resource";
-import { Callback_Void } from "./abilityComponent"
-import { FocusBoxStyle, FocusPriority } from "./focus"
-import { CircleShape } from "./../generated/ArkCircleShapeMaterialized"
-import { EllipseShape } from "./../generated/ArkEllipseShapeMaterialized"
-import { PathShape } from "./../generated/ArkPathShapeMaterialized"
-import { RectShape } from "./../generated/ArkRectShapeMaterialized"
-import { AttributeModifier } from "./../component/common" 
-import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureType, GestureMask } from "./gesture"
-import { PixelMap } from "./../generated/ArkPixelMapMaterialized"
-import { ArkPluginComponentComponent } from "./../generated/ArkPluginComponent"
-import { ArkPluginComponentPeer } from "./../generated/peers/ArkPluginComponentPeer"
+
+export class ArkPluginComponentPeer extends ArkCommonMethodPeer {
+    protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+        super(peerPtr, id, name, flags)
+    }
+    public static create(component: ComponentBase | undefined, flags: int32 = 0): ArkPluginComponentPeer {
+        const peerId  = PeerNode.nextId()
+        const _peerPtr  = ArkUIGeneratedNativeModule._PluginComponent_construct(peerId, flags)
+        const _peer  = new ArkPluginComponentPeer(_peerPtr, peerId, "PluginComponent", flags)
+        component?.setPeer(_peer)
+        return _peer
+    }
+    setPluginComponentOptionsAttribute(options: PluginComponentOptions): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        thisSerializer.writePluginComponentOptions(options)
+        ArkUIGeneratedNativeModule._PluginComponentInterface_setPluginComponentOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onCompleteAttribute(value: VoidCallback | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._PluginComponentAttribute_onComplete(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onErrorAttribute(value: PluginErrorCallback | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._PluginComponentAttribute_onError(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+}
 export interface PluginComponentTemplate {
     source: string;
     bundleName: string;
@@ -49,23 +83,63 @@ export interface PluginErrorData {
     msg: string;
 }
 export type PluginErrorCallback = (info: PluginErrorData) => void;
-/** @memo:stable */
+export type PluginComponentInterface = (options: PluginComponentOptions) => PluginComponentAttribute;
 export interface PluginComponentAttribute extends CommonMethod {
-    /** @memo */
-    setPluginComponentOptions(options: PluginComponentOptions): this
-    /** @memo */
-    onComplete(value: VoidCallback): this
-    /** @memo */
-    onError(value: PluginErrorCallback): this
+    onComplete(value: VoidCallback | undefined): this
+    onError(value: PluginErrorCallback | undefined): this
+}
+export class ArkPluginComponentStyle extends ArkCommonMethodStyle implements PluginComponentAttribute {
+    onComplete_value?: VoidCallback | undefined
+    onError_value?: PluginErrorCallback | undefined
+    public onComplete(value: VoidCallback | undefined): this {
+        return this
+    }
+    public onError(value: PluginErrorCallback | undefined): this {
+        return this
+        }
+}
+export class ArkPluginComponentComponent extends ArkCommonMethodComponent implements PluginComponentAttribute {
+    getPeer(): ArkPluginComponentPeer {
+        return (this.peer as ArkPluginComponentPeer)
+    }
+    public setPluginComponentOptions(options: PluginComponentOptions): this {
+        if (this.checkPriority("setPluginComponentOptions")) {
+            const options_casted = options as (PluginComponentOptions)
+            this.getPeer()?.setPluginComponentOptionsAttribute(options_casted)
+            return this
+        }
+        return this
+    }
+    public onComplete(value: VoidCallback | undefined): this {
+        if (this.checkPriority("onComplete")) {
+            const value_casted = value as (VoidCallback | undefined)
+            this.getPeer()?.onCompleteAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onError(value: PluginErrorCallback | undefined): this {
+        if (this.checkPriority("onError")) {
+            const value_casted = value as (PluginErrorCallback | undefined)
+            this.getPeer()?.onErrorAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    
+    public applyAttributesFinish(): void {
+        // we call this function outside of class, so need to make it public
+        super.applyAttributesFinish()
+    }
 }
 /** @memo */
 export function PluginComponent(
-  /** @memo */
-  style: ((attributes: PluginComponentAttribute) => void) | undefined,
-  options: PluginComponentOptions, 
-  /** @memo */
-  content_?: () => void,
-) {
+    /** @memo */
+    style: ((attributes: PluginComponentAttribute) => void) | undefined,
+    options: PluginComponentOptions,
+    /** @memo */
+    content_?: (() => void) | undefined,
+): void {
     const receiver = remember(() => {
         return new ArkPluginComponentComponent()
     })

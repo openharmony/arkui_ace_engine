@@ -1640,6 +1640,30 @@ HWTEST_F(WaterFlowSegmentTest, Jump004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SyncLoad001
+ * @tc.desc: test load items frame by frame
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentTest, SyncLoad001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(800.f));
+    model.SetSyncLoad(false);
+    CreateItemsInLazyForEach(37, [](int32_t) { return 100.0f; });
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_14);
+    CreateDone();
+    auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
+    // @tc.steps: limit the number of frame-by-frame loads.
+    MockPipelineContext::GetCurrent()->SetResponseTime(2);
+    // @tc.steps: scrollby large offset to trigger jump in waterflow
+    ScrollBy(0, 800 * 3);
+    // @tc.expected: fill current page in one frame
+    EXPECT_GE(info->endIndex_ - info->startIndex_, 2);
+}
+
+/**
  * @tc.name: EstimateTotalHeight001
  * @tc.desc: Test EstimateTotalHeight.
  * @tc.type: FUNC

@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/video/video_layout_algorithm.h"
 
 #include "core/components/video/video_theme.h"
+#include "core/components_ng/layout/drawing_layout_utils.h"
 #include "core/components_ng/pattern/video/video_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -23,7 +24,7 @@ namespace {
 const Dimension LIFT_HEIGHT = 28.0_vp;
 float CalControlBarHeight(bool needLift = false)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, 0.0f);
     auto videoTheme = pipelineContext->GetTheme<VideoTheme>();
     CHECK_NULL_RETURN(videoTheme, 0.0f);
@@ -64,9 +65,10 @@ void VideoLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
 void VideoLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
-    auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
-    auto contentSize = layoutWrapper->GetGeometryNode()->GetContentSize();
     auto layoutProperty = DynamicCast<VideoLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    auto layoutConstraint = layoutProperty->CreateChildConstraint();
+    auto contentSize = layoutWrapper->GetGeometryNode()->GetContentSize();
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(host);
     auto pattern = DynamicCast<VideoPattern>(host->GetPattern());
@@ -118,31 +120,6 @@ std::optional<SizeF> VideoLayoutAlgorithm::MeasureContent(
                                                                 : contentConstraint.maxSize;
     MeasureLayoutPolicySize(contentConstraint, layoutWrapper, layoutSize);
     return layoutSize;
-}
-
-void VideoLayoutAlgorithm::MeasureLayoutPolicySize(
-    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, SizeF& size)
-{
-    const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
-    CHECK_NULL_VOID(layoutProperty);
-    auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
-    CHECK_NULL_VOID(layoutPolicy.has_value());
-
-    if (layoutPolicy->IsWidthMatch() && contentConstraint.parentIdealSize.Width().has_value()) {
-        // if width is matchParent
-        size.SetWidth(contentConstraint.parentIdealSize.Width().value());
-    } else if (layoutPolicy->IsWidthAdaptive()) {
-        // if width is wrapContent or fixAtIdealSize set width 0.0
-        size.SetWidth(0.0);
-    }
-
-    if (layoutPolicy->IsHeightMatch() && contentConstraint.parentIdealSize.Height().has_value()) {
-        // if height is matchParent
-        size.SetHeight(contentConstraint.parentIdealSize.Height().value());
-    } else if (layoutPolicy->IsHeightAdaptive()) {
-        // if height is wrapContent or fixAtIdealSize set height 0.0
-        size.SetHeight(0.0);
-    }
 }
 
 } // namespace OHOS::Ace::NG

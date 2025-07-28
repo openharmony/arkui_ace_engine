@@ -39,6 +39,9 @@ public:
     void GetFocus(const RefPtr<RichEditorPattern>& pattern);
     void OnDrawVerify(const SelectSpanType& type, const std::u16string& text, SymbolSpanOptions options, Offset offset,
         bool selected = false);
+private:
+    int32_t CheckMaxLines(int32_t maxLines);
+    float CheckMaxLinesHeight(float maxLinesHeight);
 };
 
 void RichEditorBaseTestOneNg::FlushLayoutTask(const RefPtr<FrameNode>& frameNode)
@@ -63,6 +66,13 @@ void RichEditorBaseTestOneNg::GetFocus(const RefPtr<RichEditorPattern>& pattern)
     focushHub->currentFocus_ = true;
     pattern->HandleFocusEvent();
     FlushLayoutTask(richEditorNode_);
+}
+
+int32_t RichEditorBaseTestOneNg::CheckMaxLines(int32_t maxLines)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    richEditorPattern->SetMaxLines(maxLines);
+    return richEditorPattern->GetMaxLines();
 }
 
 
@@ -140,7 +150,7 @@ void RichEditorBaseTestOneNg::OnDrawVerify(
     /**
      * @tc.steps: step7. When handle move done
      */
-    richEditorPattern->selectOverlay_->ProcessOverlay();
+    richEditorPattern->ProcessOverlay();
     RectF handleRect;
     richEditorPattern->selectOverlay_->OnHandleMoveDone(handleRect, true);
 
@@ -415,6 +425,118 @@ HWTEST_F(RichEditorBaseTestOneNg, RichEditorEventHub005, TestSize.Level1)
     while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
         ViewStackProcessor::GetInstance()->elementsStack_.pop();
     }
+}
+
+/**
+ * @tc.name: SetMaxLength001
+ * @tc.desc: test SetMaxLength
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestOneNg, SetMaxLength001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    int32_t maxLength = 1;
+    richEditorPattern->SetMaxLength(maxLength);
+    EXPECT_EQ(richEditorPattern->GetMaxLength(), 1);
+}
+
+/**
+ * @tc.name: SetMaxLength002
+ * @tc.desc: test SetMaxLength
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestOneNg, SetMaxLength002, TestSize.Level1)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    EXPECT_EQ(richEditorPattern->GetMaxLength(), INT_MAX);
+}
+
+/**
+ * @tc.name: SetMaxLines001
+ * @tc.desc: test SetMaxLines
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestOneNg, SetMaxLines001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    EXPECT_EQ(CheckMaxLines(1), 1);
+}
+
+/**
+ * @tc.name: SetMaxLines002
+ * @tc.desc: test SetMaxLines
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestOneNg, SetMaxLines002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    EXPECT_EQ(CheckMaxLines(0), 0);
+}
+
+/**
+ * @tc.name: SetMaxLines003
+ * @tc.desc: test SetMaxLines
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestOneNg, SetMaxLines003, TestSize.Level1)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    EXPECT_EQ(richEditorPattern->GetMaxLines(), INT_MAX);
+}
+
+float RichEditorBaseTestOneNg::CheckMaxLinesHeight(float maxLinesHeight)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    richEditorPattern->SetMaxLinesHeight(maxLinesHeight);
+    return richEditorPattern->GetMaxLinesHeight();
+}
+
+/**
+ * @tc.name: SetMaxLinesHeight001
+ * @tc.desc: test SetMaxLinesHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestOneNg, SetMaxLinesHeight001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    EXPECT_EQ(CheckMaxLinesHeight(0.0f), 0.0f);
+}
+
+/**
+ * @tc.name: SetMaxLinesHeight002
+ * @tc.desc: test SetMaxLinesHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestOneNg, SetMaxLinesHeight002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    EXPECT_EQ(CheckMaxLinesHeight(10.0f), 10.0f);
+}
+
+/**
+ * @tc.name: SetMaxLinesHeight003
+ * @tc.desc: test SetMaxLinesHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestOneNg, SetMaxLinesHeight003, TestSize.Level1)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    EXPECT_EQ(richEditorPattern->GetMaxLinesHeight(), FLT_MAX);
+}
+
+/**
+ * @tc.name: GetRichEditorController001
+ * @tc.desc: test GetRichEditorController
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestOneNg, GetRichEditorController001, TestSize.Level1)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    auto controller = richEditorModel.GetRichEditorController();
+    ASSERT_NE(controller, nullptr);
 }
 
 } // namespace OHOS::Ace::NG

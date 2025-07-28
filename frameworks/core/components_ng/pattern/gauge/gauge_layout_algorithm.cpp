@@ -56,17 +56,17 @@ void GaugeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         BoxLayoutAlgorithm::PerformMeasureSelfWithChildList(layoutWrapper, list);
         return;
     }
-    BoxLayoutAlgorithm::Measure(layoutWrapper);
     auto layoutProperty = AceType::DynamicCast<LayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
     if (layoutPolicy.has_value() && (layoutPolicy->IsWrap() || layoutPolicy->IsFix())) {
-        auto geometryNode = layoutWrapper->GetGeometryNode();
-        CHECK_NULL_VOID(geometryNode);
-        auto frameSize = SizeF(ZERO_MEASURE_CONTENT_SIZE, ZERO_MEASURE_CONTENT_SIZE);
-        geometryNode->SetFrameSize(frameSize);
-        return;
+        auto layoutConstraint = layoutProperty->GetLayoutConstraint();
+        if (layoutConstraint) {
+            layoutConstraint->maxSize.SetWidth(ZERO_MEASURE_CONTENT_SIZE);
+            layoutConstraint->maxSize.SetHeight(ZERO_MEASURE_CONTENT_SIZE);
+        }
     }
+    BoxLayoutAlgorithm::Measure(layoutWrapper);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         MeasureLimitValueTextWidth(layoutWrapper);
         auto geometryNode = layoutWrapper->GetGeometryNode();
@@ -116,7 +116,7 @@ std::optional<SizeF> GaugeLayoutAlgorithm::MeasureContent(
         auto height = contentConstraint.selfIdealSize.Height().value();
         return SizeF(height, height);
     }
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, std::nullopt);
     auto gaugeTheme = pipeline->GetTheme<ProgressTheme>();
     CHECK_NULL_RETURN(gaugeTheme, std::nullopt);
@@ -161,7 +161,7 @@ void GaugeLayoutAlgorithm::MeasureLimitValueTextWidth(LayoutWrapper* layoutWrapp
     auto startAngle = layoutProperty->GetStartAngleValue(DEFAULT_START_DEGREE);
     auto endAngle = layoutProperty->GetEndAngleValue(DEFAULT_END_DEGREE);
 
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<GaugeTheme>();
     CHECK_NULL_VOID(theme);

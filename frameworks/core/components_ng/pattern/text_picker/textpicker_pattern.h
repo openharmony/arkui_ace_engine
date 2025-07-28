@@ -203,7 +203,7 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_RETURN(pipeline, FocusPattern());
         auto pickerTheme = pipeline->GetTheme<PickerTheme>();
         CHECK_NULL_RETURN(pickerTheme, FocusPattern());
@@ -513,6 +513,16 @@ public:
         curOpacity_ = opacity;
     }
 
+    static std::string GetSelectedObjectStr(const std::string value,
+        const uint32_t index, int32_t status = 0)
+    {
+        return std::string("{\"value\":") + "\"" + value + "\"" + ",\"index\":" + std::to_string(index) +
+               ",\"status\":" + std::to_string(status) + "}";
+    }
+
+    static std::string GetSelectedObjectMulti(const std::vector<std::string>& values,
+        const std::vector<uint32_t>& indexs, int32_t status);
+
     void SetDisableTextStyleAnimation(bool isDisableTextStyleAnimation);
 
     bool GetDisableTextStyleAnimation() const
@@ -610,8 +620,6 @@ private:
         uint32_t value, uint32_t curColumn, uint32_t replaceColumn);
     void OnColumnsBuildingUnCascade();
     void OnColumnsBuildingCascade();
-    std::string GetSelectedObjectMulti(const std::vector<std::string>& values,
-        const std::vector<uint32_t>& indexs, int32_t status) const;
     void SupplementOption(const std::vector<NG::TextCascadePickerOptions>& reOptions,
         std::vector<NG::RangeContent>& rangeContents, uint32_t patterIndex);
     void ProcessCascadeOptionsValues(const std::vector<std::string>& rangeResultValue, uint32_t index);
@@ -634,7 +642,9 @@ private:
         const TextStyle& defaultTextStyle,
         std::function<void(const Color&)> updateTextColorFunc,
         std::function<void(const Dimension&)> updateFontSizeFunc,
-        std::function<void(const std::vector<std::string>&)> updateFontFamilyFunc);
+        std::function<void(const std::vector<std::string>&)> updateFontFamilyFunc,
+        std::function<void(const Dimension&)> updateMinFontSizeFunc,
+        std::function<void(const Dimension&)> updateMaxFontSizeFunc);
 
     void ParseRangeResult(NG::TextCascadePickerOptions& option);
     void GetRealSelectedIndex(const std::vector<NG::TextCascadePickerOptions>& rangeOptions,

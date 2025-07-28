@@ -55,7 +55,7 @@ HWTEST_F(ResourceParserTest, ResourceParserTestTest001, TestSize.Level1)
     Kit::ResourceInfo info;
     info.bundleName = "";
     info.moduleName = "";
-    Ace::Dimension dimension;
+    Ace::CalcDimension dimension;
     auto result = ResourceParser::GetDimension(info, dimension);
     EXPECT_TRUE(result);
 }
@@ -70,7 +70,7 @@ HWTEST_F(ResourceParserTest, ResourceParserTestTest002, TestSize.Level1)
     Kit::ResourceInfo info;
     info.resId = UNKNOWN_RESOURCE_ID;
     info.params.push_back("param");
-    Ace::Dimension dimension;
+    Ace::CalcDimension dimension;
     auto result = ResourceParser::GetDimension(info, dimension);
     EXPECT_FALSE(result);
 }
@@ -84,7 +84,7 @@ HWTEST_F(ResourceParserTest, ResourceParserTestTest003, TestSize.Level1)
 {
     Kit::ResourceInfo info;
     info.resId = 123;
-    Ace::Dimension dimension;
+    Ace::CalcDimension dimension;
     auto result = ResourceParser::GetDimension(info, dimension);
     EXPECT_FALSE(result);
 }
@@ -504,5 +504,62 @@ HWTEST_F(ResourceParserTest, ResourceParserTestTest027, TestSize.Level1)
     bool result = ResourceParser::GetPluralString(info, 2, str);
 
     EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ResourceParserTestTest028
+ * @tc.desc: Test GetDimension when resId is unknown, check GetDimension rst by different type
+ * @tc.type: Func
+ */
+HWTEST_F(ResourceParserTest, ResourceParserTestTest028, TestSize.Level1)
+{
+    Kit::ResourceInfo info;
+    info.bundleName = "";
+    info.moduleName = "";
+    info.resId = UNKNOWN_RESOURCE_ID;
+    Ace::CalcDimension dimension;
+
+    // param is empty, check return false
+    auto result = ResourceParser::GetDimension(info, dimension);
+    EXPECT_FALSE(result);
+
+    info.params.push_back("param");
+    info.type = static_cast<int32_t>(ResourceType::STRING);
+    result = ResourceParser::GetDimension(info, dimension);
+    EXPECT_FALSE(result);
+
+    info.type = static_cast<int32_t>(ResourceType::INTEGER);
+    result = ResourceParser::GetDimension(info, dimension);
+    EXPECT_TRUE(result);
+
+    info.type = static_cast<int32_t>(ResourceType::FLOAT);
+    result = ResourceParser::GetDimension(info, dimension);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: ResourceParserTestTest029
+ * @tc.desc: Test GetDimension when resId is known, check GetDimension rst by different type
+ * @tc.type: Func
+ */
+HWTEST_F(ResourceParserTest, ResourceParserTestTest029, TestSize.Level1)
+{
+    Kit::ResourceInfo info;
+    info.bundleName = "";
+    info.moduleName = "";
+    info.resId = 123;
+    Ace::CalcDimension dimension;
+
+    info.type = static_cast<int32_t>(ResourceType::STRING);
+    auto result = ResourceParser::GetDimension(info, dimension);
+    EXPECT_FALSE(result);
+
+    info.type = static_cast<int32_t>(ResourceType::INTEGER);
+    result = ResourceParser::GetDimension(info, dimension);
+    EXPECT_TRUE(result);
+
+    info.type = static_cast<int32_t>(ResourceType::FLOAT);
+    result = ResourceParser::GetDimension(info, dimension);
+    EXPECT_TRUE(result);
 }
 } // namespace OHOS::Ace

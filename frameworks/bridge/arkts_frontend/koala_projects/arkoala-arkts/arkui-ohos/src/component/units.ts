@@ -18,16 +18,16 @@
 
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
-import { unsafeCast, int32, float32, int64 } from "@koalaui/common"
-import { Serializer } from "./../generated/peers/Serializer"
-import { CallbackKind } from "./../generated/peers/CallbackKind"
-import { Deserializer } from "./../generated/peers/Deserializer"
-import { CallbackTransformer } from "./../generated/peers/CallbackTransformer"
+import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
+import { Serializer } from "./peers/Serializer"
+import { CallbackKind } from "./peers/CallbackKind"
+import { Deserializer } from "./peers/Deserializer"
+import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { Resource } from "global/resource";
-import { LengthMetrics } from "../Graphics"
-import { BorderStyle, Color, FontWeight, FontStyle } from "./enums"
+import { Resource } from "global/resource"
+import { LengthMetrics, ColorMetrics } from "../Graphics"
 import { OutlineStyle } from "./common"
+import { Color, FontWeight, FontStyle, BorderStyle, DividerMode } from "./enums"
 export class ColorFilterInternal {
     public static fromPtr(ptr: KPointer): ColorFilter {
         const obj : ColorFilter = new ColorFilter(undefined)
@@ -134,12 +134,6 @@ export interface LocalizedEdgeColors {
     start?: ResourceColor;
 }
 export type LocalizedMargin = LocalizedPadding;
-export interface EdgeStyles {
-    top?: BorderStyle;
-    right?: BorderStyle;
-    bottom?: BorderStyle;
-    left?: BorderStyle;
-}
 export interface EdgeOutlineStyles {
     top?: OutlineStyle;
     right?: OutlineStyle;
@@ -202,6 +196,12 @@ export interface SizeOptions {
     width?: Length;
     height?: Length;
 }
+export interface EdgeStyles {
+    top?: BorderStyle;
+    right?: BorderStyle;
+    bottom?: BorderStyle;
+    left?: BorderStyle;
+}
 export interface BorderOptions {
     width?: EdgeWidths | Length | LocalizedEdgeWidths;
     color?: EdgeColors | ResourceColor | LocalizedEdgeColors;
@@ -236,6 +236,7 @@ export interface DividerStyleOptions {
     color?: ResourceColor;
     startMargin?: LengthMetrics;
     endMargin?: LengthMetrics;
+    mode?: DividerMode;
 }
 export interface ChainWeightOptions {
     horizontal?: number;

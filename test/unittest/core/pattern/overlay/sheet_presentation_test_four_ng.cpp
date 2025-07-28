@@ -36,6 +36,7 @@
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/text_field/text_field_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1426,6 +1427,778 @@ HWTEST_F(SheetPresentationTestFourNg, DirtyLayoutProcess002, TestSize.Level1)
     sheetPattern->centerHeight_ = 100.0f;
     object->DirtyLayoutProcess(layoutAlgorithmWrapper);
     EXPECT_EQ(sheetPattern->centerHeight_, 100.0f);
+    SheetPresentationTestFourNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: UpdateSidePosition001
+ * @tc.desc: UpdateSidePosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestFourNg, UpdateSidePosition001, TestSize.Level1)
+{
+    SheetPresentationTestFourNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto context = sheetNode->GetRenderContext();
+    CHECK_NULL_VOID(context);
+
+    auto object = AceType::DynamicCast<SheetSideObject>(sheetPattern->GetSheetObject());
+    CHECK_NULL_VOID(object);
+    sheetPattern->isOnAppearing_ = false;
+    sheetPattern->isOnDisappearing_ = false;
+    sheetPattern->isDrag_ = false;
+
+    AceApplicationInfo::GetInstance().isRightToLeft_ = false;
+    object->sheetMaxWidth_ = 100.0f;
+    object->sheetWidth_ = 50.0f;
+    object->UpdateSidePosition();
+    const auto& transform = context->GetTransform();
+    auto translation = transform->GetTransformTranslate();
+    EXPECT_EQ(translation->x.Value(), 50.0f);
+    EXPECT_EQ(translation->y.Value(), 0.0f);
+    EXPECT_EQ(translation->z.Value(), 0.0f);
+    SheetPresentationTestFourNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: UpdateSidePosition002
+ * @tc.desc: UpdateSidePosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestFourNg, UpdateSidePosition002, TestSize.Level1)
+{
+    SheetPresentationTestFourNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto context = sheetNode->GetRenderContext();
+    CHECK_NULL_VOID(context);
+
+    auto object = AceType::DynamicCast<SheetSideObject>(sheetPattern->GetSheetObject());
+    CHECK_NULL_VOID(object);
+    sheetPattern->isOnAppearing_ = false;
+    sheetPattern->isOnDisappearing_ = false;
+    sheetPattern->isDrag_ = false;
+
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    object->sheetMaxWidth_ = 100.0f;
+    object->sheetWidth_ = 50.0f;
+    object->UpdateSidePosition();
+    const auto& transform = context->GetTransform();
+    auto translation = transform->GetTransformTranslate();
+    EXPECT_EQ(translation->x.Value(), 0.0f);
+    EXPECT_EQ(translation->y.Value(), 0.0f);
+    EXPECT_EQ(translation->z.Value(), 0.0f);
+    SheetPresentationTestFourNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: GetSheetTransitionCurve001
+ * @tc.desc: GetSheetTransitionCurve
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestFourNg, GetSheetTransitionCurve001, TestSize.Level1)
+{
+    SheetPresentationTestFourNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+
+    auto object = AceType::DynamicCast<SheetSideObject>(sheetPattern->GetSheetObject());
+    CHECK_NULL_VOID(object);
+    float dragVelocity = 100.0f;
+    auto curve = object->GetSheetTransitionCurve(dragVelocity);
+
+    EXPECT_FLOAT_EQ(curve->GetMass(), CURVE_MASS);
+    EXPECT_FLOAT_EQ(curve->GetStiffness(), CURVE_STIFFNESS);
+    EXPECT_FLOAT_EQ(curve->GetDamping(), CURVE_DAMPING);
+    SheetPresentationTestFourNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: GetSheetTransitionFinishEvent001
+ * @tc.desc: GetSheetTransitionFinishEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestFourNg, GetSheetTransitionFinishEvent001, TestSize.Level1)
+{
+    SheetPresentationTestFourNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+
+    auto object = AceType::DynamicCast<SheetSideObject>(sheetPattern->GetSheetObject());
+    CHECK_NULL_VOID(object);
+    bool isTransitionIn = false;
+    auto event = object->GetSheetTransitionFinishEvent(isTransitionIn);
+    EXPECT_NE(event, nullptr);
+    EXPECT_FALSE(sheetPattern->isAnimationProcess_);
+    SheetPresentationTestFourNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: GetSheetTransitionFinishEvent002
+ * @tc.desc: GetSheetTransitionFinishEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestFourNg, GetSheetTransitionFinishEvent002, TestSize.Level1)
+{
+    SheetPresentationTestFourNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+
+    auto object = AceType::DynamicCast<SheetSideObject>(sheetPattern->GetSheetObject());
+    CHECK_NULL_VOID(object);
+
+    bool isTransitionIn = true;
+    sheetPattern->isAnimationBreak_ = false;
+    auto event = object->GetSheetTransitionFinishEvent(isTransitionIn);
+    EXPECT_NE(event, nullptr);
+    EXPECT_FALSE(sheetPattern->isAnimationProcess_);
+    EXPECT_EQ(sheetPattern->GetSheetObject()->currentOffset_, 0.0f);
+    SheetPresentationTestFourNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: GetSheetTransitionFinishEvent003
+ * @tc.desc: GetSheetTransitionFinishEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestFourNg, GetSheetTransitionFinishEvent003, TestSize.Level1)
+{
+    SheetPresentationTestFourNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+
+    auto object = AceType::DynamicCast<SheetSideObject>(sheetPattern->GetSheetObject());
+    CHECK_NULL_VOID(object);
+    bool isTransitionIn = true;
+    sheetPattern->isAnimationBreak_ = true;
+    auto event = object->GetSheetTransitionFinishEvent(isTransitionIn);
+    EXPECT_NE(event, nullptr);
+    EXPECT_FALSE(sheetPattern->isAnimationBreak_);
+    SheetPresentationTestFourNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: GetSheetAnimationEvent001
+ * @tc.desc: GetSheetAnimationEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestFourNg, GetSheetAnimationEvent001, TestSize.Level1)
+{
+    SheetPresentationTestFourNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto context = sheetNode->GetRenderContext();
+    CHECK_NULL_VOID(context);
+
+    auto object = AceType::DynamicCast<SheetSideObject>(sheetPattern->GetSheetObject());
+    CHECK_NULL_VOID(object);
+    bool isTransitionIn = true;
+    float offset = 100.0f;
+    object->sheetMaxWidth_ = 100.0f;
+    object->sheetWidth_ = 50.0f;
+    const auto& transform = context->GetTransform();
+    auto translation = transform->GetTransformTranslate();
+    AceApplicationInfo::GetInstance().isRightToLeft_ = false;
+    auto event = object->GetSheetAnimationEvent(isTransitionIn, offset);
+    EXPECT_NE(event, nullptr);
+    EXPECT_EQ(translation->x.Value(), 50.0f);
+    EXPECT_EQ(translation->y.Value(), 0.0f);
+    EXPECT_EQ(translation->z.Value(), 0.0f);
+    SheetPresentationTestFourNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: GetSheetAnimationEvent002
+ * @tc.desc: GetSheetAnimationEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestFourNg, GetSheetAnimationEvent002, TestSize.Level1)
+{
+    SheetPresentationTestFourNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto context = sheetNode->GetRenderContext();
+    CHECK_NULL_VOID(context);
+
+    auto object = AceType::DynamicCast<SheetSideObject>(sheetPattern->GetSheetObject());
+    CHECK_NULL_VOID(object);
+    bool isTransitionIn = false;
+    float offset = 100.0f;
+    object->sheetMaxWidth_ = 100.0f;
+    const auto& transform = context->GetTransform();
+    auto translation = transform->GetTransformTranslate();
+    AceApplicationInfo::GetInstance().isRightToLeft_ = false;
+    auto event = object->GetSheetAnimationEvent(isTransitionIn, offset);
+    EXPECT_NE(event, nullptr);
+    EXPECT_EQ(translation->x.Value(), 100.0f);
+    EXPECT_EQ(translation->y.Value(), 0.0f);
+    EXPECT_EQ(translation->z.Value(), 0.0f);
+    SheetPresentationTestFourNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: SetFinishEventForAnimationOption001
+ * @tc.desc: SetFinishEventForAnimationOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestFourNg, SetFinishEventForAnimationOption001, TestSize.Level1)
+{
+    SheetPresentationTestFourNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+
+    auto object = AceType::DynamicCast<SheetSideObject>(sheetPattern->GetSheetObject());
+    CHECK_NULL_VOID(object);
+    AnimationOption option;
+    bool isTransitionIn = true;
+    bool isFirstTransition = true;
+    object->SetFinishEventForAnimationOption(option, isTransitionIn, isFirstTransition);
+    EXPECT_NE(option.onFinishEvent_, nullptr);
+    SheetPresentationTestFourNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: HandleDragUpdateForLTR001
+ * @tc.desc: HandleDragUpdateForLTR
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestFourNg, HandleDragUpdateForLTR001, TestSize.Level1)
+{
+    SheetPresentationTestFourNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+
+    auto object = AceType::DynamicCast<SheetSideObject>(sheetPattern->GetSheetObject());
+    CHECK_NULL_VOID(object);
+
+    GestureEvent event;
+    event.mainDelta_ = 10.0;
+    auto sheetObject = sheetPattern->GetSheetObject();
+    ASSERT_NE(sheetObject, nullptr);
+    sheetObject->currentOffset_ = -20.0f;
+    sheetObject->sheetWidth_ = 10.0f;
+    object->HandleDragUpdateForLTR(event);
+
+    EXPECT_EQ(sheetPattern->onWidthDidChange_, nullptr);
+    SheetPresentationTestFourNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: HandleDragUpdateForLTR002
+ * @tc.desc: HandleDragUpdateForLTR
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestFourNg, HandleDragUpdateForLTR002, TestSize.Level1)
+{
+    SheetPresentationTestFourNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+
+    auto object = AceType::DynamicCast<SheetSideObject>(sheetPattern->GetSheetObject());
+    CHECK_NULL_VOID(object);
+
+    GestureEvent event;
+    event.mainDelta_ = 10.0;
+    auto sheetObject = sheetPattern->GetSheetObject();
+    ASSERT_NE(sheetObject, nullptr);
+    sheetObject->currentOffset_ = 10.0f;
+    sheetObject->sheetWidth_ = 10.0f;
+    object->HandleDragUpdateForLTR(event);
+
+    EXPECT_NE(sheetPattern->onWidthDidChange_, nullptr);
+    SheetPresentationTestFourNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: HandleDragUpdateForRTL001
+ * @tc.desc: HandleDragUpdateForRTL
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestFourNg, HandleDragUpdateForRTL001, TestSize.Level1)
+{
+    SheetPresentationTestFourNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+
+    auto object = AceType::DynamicCast<SheetSideObject>(sheetPattern->GetSheetObject());
+    CHECK_NULL_VOID(object);
+
+    GestureEvent event;
+    event.mainDelta_ = 10.0;
+    auto sheetObject = sheetPattern->GetSheetObject();
+    ASSERT_NE(sheetObject, nullptr);
+    sheetObject->currentOffset_ = 10.0f;
+    sheetObject->sheetWidth_ = 10.0f;
+    object->HandleDragUpdateForRTL(event);
+
+    EXPECT_EQ(sheetPattern->onWidthDidChange_, nullptr);
+    SheetPresentationTestFourNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: HandleDragUpdateForRTL002
+ * @tc.desc: HandleDragUpdateForRTL
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestFourNg, HandleDragUpdateForRTL002, TestSize.Level1)
+{
+    SheetPresentationTestFourNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+
+    auto object = AceType::DynamicCast<SheetSideObject>(sheetPattern->GetSheetObject());
+    CHECK_NULL_VOID(object);
+
+    GestureEvent event;
+    event.mainDelta_ = 10.0;
+    auto sheetObject = sheetPattern->GetSheetObject();
+    ASSERT_NE(sheetObject, nullptr);
+    sheetObject->currentOffset_ = -20.0f;
+    sheetObject->sheetWidth_ = 10.0f;
+    object->HandleDragUpdateForRTL(event);
+
+    EXPECT_NE(sheetPattern->onWidthDidChange_, nullptr);
+    SheetPresentationTestFourNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: HandleDragEndForLTR001
+ * @tc.desc: HandleDragEndForLTR
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestFourNg, HandleDragEndForLTR001, TestSize.Level1)
+{
+    SheetPresentationTestFourNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+
+    auto object = AceType::DynamicCast<SheetSideObject>(sheetPattern->GetSheetObject());
+    CHECK_NULL_VOID(object);
+
+    float dragVelocity = 500.0f;
+    auto sheetObject = sheetPattern->GetSheetObject();
+    ASSERT_NE(sheetObject, nullptr);
+    sheetObject->currentOffset_ = 10.0f;
+    sheetObject->sheetWidth_ = 10.0f;
+    object->HandleDragEndForLTR(dragVelocity);
+    EXPECT_TRUE(sheetPattern->isDirectionUp_);
+    EXPECT_NE(sheetPattern->onWidthDidChange_, nullptr);
+    SheetPresentationTestFourNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: HandleDragEndForLTR002
+ * @tc.desc: HandleDragEndForLTR
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestFourNg, HandleDragEndForLTR002, TestSize.Level1)
+{
+    SheetPresentationTestFourNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+
+    auto object = AceType::DynamicCast<SheetSideObject>(sheetPattern->GetSheetObject());
+    CHECK_NULL_VOID(object);
+
+    float dragVelocity = 500.0f;
+    auto sheetObject = sheetPattern->GetSheetObject();
+    ASSERT_NE(sheetObject, nullptr);
+    sheetObject->currentOffset_ = 1.0f;
+    sheetObject->sheetWidth_ = 10.0f;
+    AnimationOption option;
+    object->HandleDragEndForLTR(dragVelocity);
+    EXPECT_EQ(option.fillMode_, FillMode::FORWARDS);
+    SheetPresentationTestFourNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: HandleDragEndForLTR003
+ * @tc.desc: HandleDragEndForLTR
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestFourNg, HandleDragEndForLTR003, TestSize.Level1)
+{
+    SheetPresentationTestFourNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+
+    auto object = AceType::DynamicCast<SheetSideObject>(sheetPattern->GetSheetObject());
+    CHECK_NULL_VOID(object);
+
+    float dragVelocity = -1500.0f;
+    auto sheetObject = sheetPattern->GetSheetObject();
+    ASSERT_NE(sheetObject, nullptr);
+    sheetObject->currentOffset_ = 1.0f;
+    sheetObject->sheetWidth_ = 10.0f;
+    AnimationOption option;
+    object->HandleDragEndForLTR(dragVelocity);
+    EXPECT_EQ(option.fillMode_, FillMode::FORWARDS);
+    SheetPresentationTestFourNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: HandleDragEndForLTR004
+ * @tc.desc: HandleDragEndForLTR
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestFourNg, HandleDragEndForLTR004, TestSize.Level1)
+{
+    SheetPresentationTestFourNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+
+    auto object = AceType::DynamicCast<SheetSideObject>(sheetPattern->GetSheetObject());
+    CHECK_NULL_VOID(object);
+
+    float dragVelocity = 1500.0f;
+    auto sheetObject = sheetPattern->GetSheetObject();
+    ASSERT_NE(sheetObject, nullptr);
+    sheetObject->currentOffset_ = 10.0f;
+    sheetObject->sheetWidth_ = 10.0f;
+    AnimationOption option;
+    object->HandleDragEndForLTR(dragVelocity);
+    EXPECT_TRUE(sheetPattern->isDirectionUp_);
+    EXPECT_NE(sheetPattern->onWidthDidChange_, nullptr);
+    SheetPresentationTestFourNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: HandleDragEndForRTL001
+ * @tc.desc: HandleDragEndForRTL
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestFourNg, HandleDragEndForRTL001, TestSize.Level1)
+{
+    SheetPresentationTestFourNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+
+    auto object = AceType::DynamicCast<SheetSideObject>(sheetPattern->GetSheetObject());
+    CHECK_NULL_VOID(object);
+
+    float dragVelocity = 500.0f;
+    auto sheetObject = sheetPattern->GetSheetObject();
+    ASSERT_NE(sheetObject, nullptr);
+    sheetObject->currentOffset_ = 10.0f;
+    sheetObject->sheetWidth_ = 10.0f;
+    AnimationOption option;
+    object->HandleDragEndForRTL(dragVelocity);
+    EXPECT_TRUE(sheetPattern->isDirectionUp_);
+    EXPECT_NE(sheetPattern->onWidthDidChange_, nullptr);
+    SheetPresentationTestFourNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: HandleDragEndForRTL002
+ * @tc.desc: HandleDragEndForRTL
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestFourNg, HandleDragEndForRTL002, TestSize.Level1)
+{
+    SheetPresentationTestFourNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+
+    auto object = AceType::DynamicCast<SheetSideObject>(sheetPattern->GetSheetObject());
+    CHECK_NULL_VOID(object);
+
+    float dragVelocity = 500.0f;
+    auto sheetObject = sheetPattern->GetSheetObject();
+    ASSERT_NE(sheetObject, nullptr);
+    sheetObject->currentOffset_ = 1.0f;
+    sheetObject->sheetWidth_ = 10.0f;
+    AnimationOption option;
+    object->HandleDragEndForRTL(dragVelocity);
+    EXPECT_EQ(option.fillMode_, FillMode::FORWARDS);
+    SheetPresentationTestFourNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: HandleDragEndForRTL003
+ * @tc.desc: HandleDragEndForRTL
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestFourNg, HandleDragEndForRTL003, TestSize.Level1)
+{
+    SheetPresentationTestFourNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+
+    auto object = AceType::DynamicCast<SheetSideObject>(sheetPattern->GetSheetObject());
+    CHECK_NULL_VOID(object);
+
+    float dragVelocity = -1500.0f;
+    auto sheetObject = sheetPattern->GetSheetObject();
+    ASSERT_NE(sheetObject, nullptr);
+    sheetObject->currentOffset_ = 10.0f;
+    sheetObject->sheetWidth_ = 10.0f;
+    AnimationOption option;
+    object->HandleDragEndForRTL(dragVelocity);
+    EXPECT_TRUE(sheetPattern->isDirectionUp_);
+    EXPECT_NE(sheetPattern->onWidthDidChange_, nullptr);
+    SheetPresentationTestFourNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: HandleDragEndForRTL004
+ * @tc.desc: HandleDragEndForRTL
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestFourNg, HandleDragEndForRTL004, TestSize.Level1)
+{
+    SheetPresentationTestFourNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+
+    auto object = AceType::DynamicCast<SheetSideObject>(sheetPattern->GetSheetObject());
+    CHECK_NULL_VOID(object);
+
+    float dragVelocity = 1500.0f;
+    auto sheetObject = sheetPattern->GetSheetObject();
+    ASSERT_NE(sheetObject, nullptr);
+    sheetObject->currentOffset_ = 10.0f;
+    sheetObject->sheetWidth_ = 10.0f;
+    AnimationOption option;
+    object->HandleDragEndForRTL(dragVelocity);
+    EXPECT_EQ(option.fillMode_, FillMode::FORWARDS);
+    SheetPresentationTestFourNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: GetUpOffsetCaretNeed001
+ * @tc.desc: GetUpOffsetCaretNeed
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestFourNg, GetUpOffsetCaretNeed001, TestSize.Level1)
+{
+    SheetPresentationTestFourNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto manager = pipeline->GetSafeAreaManager();
+    ASSERT_NE(manager, nullptr);
+    manager->keyboardAvoidMode_ = KeyBoardAvoidMode::OFFSET;
+    manager->keyboardInset_.start = 0;
+    manager->keyboardInset_.end = 0;
+    auto object = AceType::DynamicCast<SheetSideObject>(sheetPattern->GetSheetObject());
+    CHECK_NULL_VOID(object);
+    auto height = object->GetUpOffsetCaretNeed();
+    EXPECT_EQ(height, 0.0f);
+    SheetPresentationTestFourNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: GetUpOffsetCaretNeed002
+ * @tc.desc: GetUpOffsetCaretNeed
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestFourNg, GetUpOffsetCaretNeed002, TestSize.Level1)
+{
+    SheetPresentationTestFourNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto manager = pipeline->GetSafeAreaManager();
+    ASSERT_NE(manager, nullptr);
+    manager->keyboardAvoidMode_ = KeyBoardAvoidMode::OFFSET_WITH_CARET;
+    manager->keyboardInset_.start = 0;
+    manager->keyboardInset_.end = 10;
+    manager->systemSafeArea_.bottom_.start = 0;
+    manager->systemSafeArea_.bottom_.end = 10;
+    auto object = AceType::DynamicCast<SheetSideObject>(sheetPattern->GetSheetObject());
+    CHECK_NULL_VOID(object);
+    auto height = object->GetUpOffsetCaretNeed();
+    EXPECT_EQ(height, 20);
+    SheetPresentationTestFourNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: GetUpOffsetCaretNeed003
+ * @tc.desc: GetUpOffsetCaretNeed
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestFourNg, GetUpOffsetCaretNeed003, TestSize.Level1)
+{
+    SheetPresentationTestFourNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto manager = pipeline->GetSafeAreaManager();
+    ASSERT_NE(manager, nullptr);
+    manager->keyboardAvoidMode_ = KeyBoardAvoidMode::OFFSET;
+    manager->keyboardInset_.start = 0;
+    manager->keyboardInset_.end = 10;
+    auto object = AceType::DynamicCast<SheetSideObject>(sheetPattern->GetSheetObject());
+    CHECK_NULL_VOID(object);
+    auto textFieldManager = AceType::DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
+    auto height = object->GetUpOffsetCaretNeed();
+    EXPECT_EQ(height, 0.0f);
+    SheetPresentationTestFourNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: GetUpOffsetCaretNeed003
+ * @tc.desc: GetUpOffsetCaretNeed
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestFourNg, GetUpOffsetCaretNeed004, TestSize.Level1)
+{
+    SheetPresentationTestFourNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto manager = pipeline->GetSafeAreaManager();
+    ASSERT_NE(manager, nullptr);
+    manager->keyboardAvoidMode_ = KeyBoardAvoidMode::OFFSET_WITH_CARET;
+    manager->keyboardInset_.start = 0;
+    manager->keyboardInset_.end = 10;
+    manager->systemSafeArea_.bottom_.start = 0;
+    manager->systemSafeArea_.bottom_.end = 10;
+    auto object = AceType::DynamicCast<SheetSideObject>(sheetPattern->GetSheetObject());
+    CHECK_NULL_VOID(object);
+    auto textFieldManager = AceType::DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
+    textFieldManager->optionalPosition_ = Offset { 10.0f, 20.0f };
+    auto height = object->GetUpOffsetCaretNeed();
+    EXPECT_EQ(height, 20);
+    SheetPresentationTestFourNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: GetUpOffsetCaretNeed003
+ * @tc.desc: GetUpOffsetCaretNeed
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestFourNg, GetUpOffsetCaretNeed005, TestSize.Level1)
+{
+    SheetPresentationTestFourNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto manager = pipeline->GetSafeAreaManager();
+    ASSERT_NE(manager, nullptr);
+    manager->keyboardAvoidMode_ = KeyBoardAvoidMode::OFFSET_WITH_CARET;
+    manager->keyboardInset_.start = 0;
+    manager->keyboardInset_.end = 10;
+    manager->systemSafeArea_.bottom_.start = 0;
+    manager->systemSafeArea_.bottom_.end = 10;
+    auto object = AceType::DynamicCast<SheetSideObject>(sheetPattern->GetSheetObject());
+    CHECK_NULL_VOID(object);
+    auto textFieldManager = AceType::DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
+    textFieldManager->optionalPosition_ = Offset { 10.0f, 20.0f };
+    pipeline->rootHeight_ = 100;
+    textFieldManager->height_ = 10;
+    auto height = object->GetUpOffsetCaretNeed();
+    EXPECT_EQ(height, 0.0f);
     SheetPresentationTestFourNg::TearDownTestCase();
 }
 } // namespace OHOS::Ace::NG

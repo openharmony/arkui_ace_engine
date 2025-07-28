@@ -1292,7 +1292,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerOnSizeChangeCallback03, TestSize.Level
 
 /**
  * @tc.name: FrameNodIsFrameDisappear01
- * @tc.desc: Test the function IsFrameDisappear
+ * @tc.desc: Test the function IsFrameDisappear.
  * @tc.type: FUNC
  */
 HWTEST_F(FrameNodeTestNg, FrameNodeIsFrameDisappear01, TestSize.Level1)
@@ -1512,7 +1512,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeIsFrameDisappear05, TestSize.Level1)
      * @tc.expected: expect res is false
      */
     parentLayoutProperty->propVisibility_ = VisibleType::INVISIBLE;
-    EXPECT_FALSE(frameNode2->IsFrameDisappear(TIMESTAMP_2, 2));
+    EXPECT_FALSE(frameNode2->IsFrameDisappear(TIMESTAMP_2, 3));
 
     /**
      * @tc.steps: step5. call the function IsFrameDisappear and no use TIMESTAMP_1 cache.

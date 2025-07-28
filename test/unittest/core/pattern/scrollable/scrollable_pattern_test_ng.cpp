@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/arc_list/arc_list_pattern.h"
 #include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar.h"
+#include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -1055,6 +1056,37 @@ HWTEST_F(ScrollablePatternTestNg, GetPaintPropertyDumpInfo_Parameter003, TestSiz
     json->Put("innerScrollBarState", "default");
     scrollablePattern->GetPaintPropertyDumpInfo(json);
     EXPECT_EQ(json->GetString("innerScrollBarState"), "default");
+}
+
+/**
+ * @tc.name: GetEventDumpInfo001
+ * @tc.desc: Test ScrollablePattern GetEventDumpInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollablePatternTestNg, GetEventDumpInfo001, TestSize.Level1)
+{
+    RefPtr<ScrollablePattern> scrollablePattern = AceType::MakeRefPtr<ListPattern>();
+    auto json = JsonUtil::Create(true);
+    scrollablePattern->GetEventDumpInfo(json);
+    EXPECT_EQ(json->GetString("hasOnScrollStart"), "false");
+}
+
+/**
+ * @tc.name: GetEventDumpInfo002
+ * @tc.desc: Test ScrollablePattern GetEventDumpInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollablePatternTestNg, GetEventDumpInfo002, TestSize.Level1)
+{
+    RefPtr<ScrollablePattern> scrollablePattern = AceType::MakeRefPtr<ListPattern>();
+    auto scrollStart = []() {};
+   
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollablePattern);
+    ASSERT_NE(frameNode, nullptr);
+    ScrollableModelNG::SetOnScrollStart(AceType::RawPtr(frameNode), std::move(scrollStart));
+    auto json = JsonUtil::Create(true);
+    scrollablePattern->GetPaintPropertyDumpInfo(json);
+    EXPECT_EQ(json->GetString("hasOnScrollStart"), "true");
 }
 
 /**

@@ -2048,6 +2048,44 @@ HWTEST_F(ListLayoutTestNg, ChildrenMainSize006, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ListIsAtBottom001
+ * @tc.desc: test func IsAtBottom when List is at bottom and chain animation opened
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListIsAtBottom001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init List then slide List by Scroller to bottom.
+       @tc.expected: List is at bottom and startIndex_ is 1.
+     */
+    ListModelNG model = CreateList();
+    model.SetSpace(Dimension(SPACE));
+    model.SetInitialIndex(0);
+    CreateListItems(TOTAL_ITEM_NUMBER / 2); // 2: half of the total
+    CreateDone();
+    pattern_->ScrollToIndex(LAST_ITEM);
+    FlushUITasks();
+    EXPECT_TRUE(pattern_->IsAtBottom());
+    EXPECT_EQ(pattern_->startIndex_, 1); // 1: current start index.
+
+    /**
+     * @tc.steps: step2. slide List over bottom.
+     * @tc.expected: isAtBottom also return true and startIndex_ maintain 1.
+     */
+    UpdateCurrentOffset(-100.f);
+    EXPECT_TRUE(pattern_->IsAtBottom());
+    EXPECT_EQ(pattern_->startIndex_, 1); // 1: current start index.
+
+    /**
+     * @tc.steps: step3. simulate chain animation and item 1 out of screen for chain delta.
+     * @tc.expected: startIndex_ change to 2 and isAtBottom also return true.
+     */
+    pattern_->itemPosition_.erase(1);
+    pattern_->startMainPos_ = pattern_->itemPosition_[2].startPos - pattern_->spaceWidth_;
+    EXPECT_TRUE(pattern_->IsAtBottom());
+}
+
+/**
  * @tc.name: ListRepeatCacheCount001
  * @tc.desc: List cacheCount
  * @tc.type: FUNC
@@ -2459,6 +2497,54 @@ HWTEST_F(ListLayoutTestNg, ListCacheCount001, TestSize.Level1)
     EXPECT_EQ(GetChildY(frameNode_, 7), 450.0f);
 }
 
+/**
+ * @tc.name: ListCacheCount002
+ * @tc.desc: Window size drag not load cached node
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListCacheCount002, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetCachedCount(2);
+    CreateItemsInLazyForEach(10, 100.0f, nullptr); /* 10: item count */
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. SetCacheRange
+     * @tc.expected: 1 ListItem cached.
+     */
+    ListModelNG::SetCacheRange(AceType::RawPtr(frameNode_), 1, 3);
+    auto listPattern = frameNode_->GetPattern<ListPattern>();
+    FlushIdleTask(listPattern);
+    EXPECT_EQ(listPattern->cachedItemPosition_.size(), 1);
+
+    /**
+     * @tc.steps: step2. ResetCacheRange
+     * @tc.expected: 2 ListItem cached.
+     */
+    ListModelNG::ResetCacheRange(AceType::RawPtr(frameNode_));
+    FlushUITasks(frameNode_);
+    FlushIdleTask(listPattern);
+    EXPECT_EQ(listPattern->cachedItemPosition_.size(), 2);
+
+    /**
+     * @tc.steps: step3. SetCachedCount 4
+     * @tc.expected: 4 ListItem cached.
+     */
+    ListModelNG::SetCachedCount(AceType::RawPtr(frameNode_), 4);
+    FlushUITasks(frameNode_);
+    FlushIdleTask(listPattern);
+    EXPECT_EQ(listPattern->cachedItemPosition_.size(), 4);
+
+    /**
+     * @tc.steps: step4. SetCacheRange
+     * @tc.expected: 3 ListItem cached.
+     */
+    ListModelNG::SetCacheRange(AceType::RawPtr(frameNode_), 1, 3);
+    FlushUITasks(frameNode_);
+    FlushIdleTask(listPattern);
+    EXPECT_EQ(listPattern->cachedItemPosition_.size(), 3);
+}
 /**
  * @tc.name: SetHeaderFooterComponent01
  * @tc.desc: Test HeaderComponent/FooterComponent of ListItemGroup
@@ -3003,6 +3089,39 @@ HWTEST_F(ListLayoutTestNg, ListAddDelChildTest003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ListAddDelChildTest004
+ * @tc.desc: Test list delete item with List size change and layout backward.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListAddDelChildTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List
+     */
+    ListModelNG model = CreateList();
+    CreateListItems(2); /* 2: item count */
+    CreateItemWithSize(1, SizeT<Dimension>(FILL_LENGTH, Dimension(300)));
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. update offset.
+     * @tc.expected: offset is 80.
+     */
+    UpdateCurrentOffset(-80.f);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 80.f);
+
+    /**
+     * @tc.steps: step3. Remove child and List size change and scroll backward.
+     * @tc.expected: offset is 0.
+     */
+    layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(CalcLength(WIDTH), CalcLength(50.f)));
+    frameNode_->RemoveChildAtIndex(0);
+    frameNode_->RemoveChildAtIndex(0);
+    UpdateCurrentOffset(80.f);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0);
+}
+
+/**
  * @tc.name: FadingEdge001
  * @tc.desc: Test FadingEdge property
  * @tc.type: FUNC
@@ -3106,6 +3225,68 @@ HWTEST_F(ListLayoutTestNg, FadingEdge003, TestSize.Level1)
     FlushUITasks(frameNode_);
     geo = frameNode_->GetOverlayNode()->GetGeometryNode();
     EXPECT_EQ(geo->GetFrameSize().Height(), 410.f);
+}
+
+/**
+ * @tc.name: FadingEdge004
+ * @tc.desc: Test FadingEdge property
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, FadingEdge004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set FadingEdge
+     * @tc.expected: Would create a overlayNode attach to list
+     */
+    const Dimension fadingEdgeLength = Dimension(10.0f);
+    ListModelNG model = CreateList();
+    ScrollableModelNG::SetFadingEdge(true, fadingEdgeLength);
+    CreateListItems(10);
+    CreateDone();
+    EXPECT_TRUE(frameNode_->GetOverlayNode());
+
+    /**
+     * @tc.steps: step2. The list at top
+     * @tc.expected: Fading bottom and both top and bottom have gradient
+     */
+    auto paintMethod = UpdateContentModifier();
+    EXPECT_FALSE(paintMethod->isFadingTop_);
+    EXPECT_TRUE(paintMethod->isFadingBottom_);
+    auto renderContext = paintMethod->overlayRenderContext_;
+    EXPECT_TRUE(renderContext);
+    auto& gradientProp = renderContext->GetOrCreateGradient();
+    EXPECT_TRUE(gradientProp);
+    NG::Gradient gradient;
+    if (gradientProp->HasLastGradientType() || gradientProp->HasLinearGradient()) {
+        gradient = gradientProp->GetLinearGradientValue();
+    }
+    EXPECT_EQ(gradient.GetColors().size(), 4); // 4: both top and bottom have gradient
+
+    /**
+     * @tc.steps: step3. The list at middle
+     * @tc.expected: Fading both and both top and bottom have gradient
+     */
+    ScrollTo(100.0f);
+    paintMethod = UpdateContentModifier();
+    EXPECT_TRUE(paintMethod->isFadingTop_);
+    EXPECT_TRUE(paintMethod->isFadingBottom_);
+    if (gradientProp->HasLastGradientType() || gradientProp->HasLinearGradient()) {
+        gradient = gradientProp->GetLinearGradientValue();
+    }
+    EXPECT_EQ(gradient.GetColors().size(), 4); // 4: both top and bottom have gradient
+
+    /**
+     * @tc.steps: step4. The list at bottom
+     * @tc.expected: Fading top and both top and bottom have gradient
+     */
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    paintMethod = UpdateContentModifier();
+    EXPECT_TRUE(paintMethod->isFadingTop_);
+    EXPECT_FALSE(paintMethod->isFadingBottom_);
+    if (gradientProp->HasLastGradientType() || gradientProp->HasLinearGradient()) {
+        gradient = gradientProp->GetLinearGradientValue();
+    }
+    EXPECT_EQ(gradient.GetColors().size(), 4); // 4: both top and bottom have gradient
 }
 
 /**

@@ -4774,7 +4774,7 @@ ArkUINativeModuleValue CommonBridge::SetAccessibilityRoleType(ArkUIRuntimeCallIn
     if (secondArg->IsInt()) {
         auto index = secondArg->Int32Value(vm);
         AccessibilityRoleType roleType = static_cast<AccessibilityRoleType>(index);
-        std::string role = JSAccessibilityAbstract::GetRoleByType(roleType);
+        std::string role = AccessibilityUtils::GetRoleByType(roleType);
         if (!role.empty()) {
             GetArkUINodeModifiers()->getCommonModifier()->setAccessibilityCustomRole(nativeNode, role.c_str());
         } else {
@@ -7606,6 +7606,9 @@ void CommonBridge::SetCommonAttributes(
         panda::NumberRef::New(vm, static_cast<int32_t>(info->GetDeviceId())));
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "targetDisplayId"),
         panda::NumberRef::New(vm, static_cast<int32_t>(info->GetTargetDisplayId())));
+    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "axisVertical"), panda::NumberRef::New(vm, info->GetVerticalAxis()));
+    obj->Set(
+        vm, panda::StringRef::NewFromUtf8(vm, "axisHorizontal"), panda::NumberRef::New(vm, info->GetHorizontalAxis()));
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getModifierKeyState"),
         panda::FunctionRef::New(vm, ArkTSUtils::JsGetModifierKeyState));
 }
@@ -9198,7 +9201,8 @@ ArkUINativeModuleValue CommonBridge::ResetOnBlur(ArkUIRuntimeCallInfo* runtimeCa
 Local<panda::ObjectRef> CommonBridge::CreateHoverInfo(EcmaVM* vm, const HoverInfo& hoverInfo)
 {
     const char* keys[] = { "stopPropagation", "getModifierKeyState", "timestamp", "source", "target", "deviceId",
-        "targetDisplayId", "displayX", "displayY", "windowX", "windowY", "x", "y", "globalDisplayX", "globalDisplayY" };
+        "targetDisplayId", "displayX", "displayY", "windowX", "windowY", "x", "y", "globalDisplayX", "globalDisplayY",
+        "sourceTool" };
     double density = PipelineBase::GetCurrentDensity();
     const Offset& globalOffset = hoverInfo.GetGlobalLocation();
     const Offset& localOffset = hoverInfo.GetLocalLocation();
@@ -9217,7 +9221,8 @@ Local<panda::ObjectRef> CommonBridge::CreateHoverInfo(EcmaVM* vm, const HoverInf
         panda::NumberRef::New(vm, density != 0 ? localOffset.GetX() / density : 0),
         panda::NumberRef::New(vm, density != 0 ? localOffset.GetY() / density : 0),
         panda::NumberRef::New(vm, density != 0 ? globalDisplayOffset.GetX() / density : 0),
-        panda::NumberRef::New(vm, density != 0 ? globalDisplayOffset.GetY() / density : 0) };
+        panda::NumberRef::New(vm, density != 0 ? globalDisplayOffset.GetY() / density : 0),
+        panda::NumberRef::New(vm, static_cast<int32_t>(hoverInfo.GetSourceTool())) };
     return panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
 }
 

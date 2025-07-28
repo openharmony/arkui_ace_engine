@@ -100,7 +100,6 @@ constexpr int32_t Y_INDEX = 1;
 constexpr int32_t Z_INDEX = 2;
 constexpr int32_t ARRAY_SIZE = 3;
 constexpr float HALF = 0.5f;
-constexpr float DEFAULT_BIAS = 0.5f;
 constexpr float DEFAULT_SATURATE = 1.0f;
 constexpr float DEFAULT_BRIGHTNESS = 1.0f;
 constexpr int32_t OUTLINE_LEFT_WIDTH_INDEX = 0;
@@ -956,9 +955,9 @@ void SetBgImgPosition(const DimensionUnit& typeX, const DimensionUnit& typeY, Ar
 }
 
 LayoutSafeAreaEdge ParseIgnoresLayoutSafeAreaEdges(
-    const ArkUI_Int32* ignoreEdges, ArkUI_Int32 size, LayoutSafeAreaEdge defaultVal)
+    const ArkUI_Int32* ignoreEdges, ArkUI_Uint32 size, LayoutSafeAreaEdge defaultVal)
 {
-    if (ignoreEdges == nullptr || size <= 0) {
+    if (ignoreEdges == nullptr || size == 0) {
         return NG::LAYOUT_SAFE_AREA_EDGE_NONE;
     }
     static std::vector<uint32_t> layoutEdgeEnum {
@@ -971,7 +970,7 @@ LayoutSafeAreaEdge ParseIgnoresLayoutSafeAreaEdges(
         NG::LAYOUT_SAFE_AREA_EDGE_ALL
     };
     NG::LayoutSafeAreaEdge edges = NG::LAYOUT_SAFE_AREA_EDGE_NONE;
-    for (int32_t i = 0; i < size; ++i) {
+    for (uint32_t i = 0; i < size; ++i) {
         if (ignoreEdges[i] < 0 || ignoreEdges[i] > LAYOUT_SAFE_AREA_EDGE_LIMIT) {
             return defaultVal;
         }

@@ -191,6 +191,10 @@ std::pair<std::string, RefPtr<NG::UINode>> WaterFlowMockLazy::OnGetChildByIndex(
     ViewAbstract::SetHeight(CalcLength(getHeight_(index)));
     auto node = ViewStackProcessor::GetInstance()->Finish();
     node->nodeId_ = index;
+    auto frameNode = AceType::DynamicCast<FrameNode>(node);
+    frameNode->measureCallback_ = [](RefPtr<Kit::FrameNode>& node) {
+        NG::MockPipelineContext::GetCurrent()->DecResponseTime();
+    };
     return { std::to_string(index), node };
 }
 

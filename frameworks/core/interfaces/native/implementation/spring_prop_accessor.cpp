@@ -43,7 +43,4 @@ const GENERATED_ArkUISpringPropAccessor* GetSpringPropAccessor()
     return &SpringPropAccessorImpl;
 }
 
-struct SpringPropPeer {
-    virtual ~SpringPropPeer() = default;
-};
 }

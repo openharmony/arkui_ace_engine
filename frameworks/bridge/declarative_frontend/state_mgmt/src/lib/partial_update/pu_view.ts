@@ -512,7 +512,7 @@ abstract class ViewPU extends PUV2ViewBase
   }
 
   // collect elements need to update synchronously and its owning view
-  public collectElementsNeedToUpdateSynchronously(varName: PropertyInfo, dependentElmtIds: Set<number>): void {
+  public collectElementsNeedToUpdateSynchronously(varName: PropertyInfo, dependentElmtIds: Set<number>, isAllowedWatchCallback: boolean): void {
     stateMgmtConsole.debug(`collectElementsNeedToUpdateSynchronously ${this.debugInfo__()} change ${varName} dependent elements ${dependentElmtIds}`);
     if (dependentElmtIds.size && !this.isFirstRender()) {
       for (const elmtId of dependentElmtIds) {
@@ -523,6 +523,10 @@ abstract class ViewPU extends PUV2ViewBase
         }
       }
       SyncedViewRegistry.addSyncedUpdateDirtyNodes(this);
+    }
+    if (!isAllowedWatchCallback) {
+      stateMgmtConsole.debug(`${this.debugInfo__()} state var ${varName} does not call @Watch function`);
+      return;
     }
     const cb = this.watchedProps.get(varName);
     if (cb && typeof cb === 'function') {

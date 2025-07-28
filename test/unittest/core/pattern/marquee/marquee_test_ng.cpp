@@ -1251,6 +1251,7 @@ HWTEST_F(MarqueeTestNg, MarqueeTest017, TestSize.Level1)
     pattern->OnModifyDone();
     EXPECT_NE(pattern->animation_, nullptr);
     EXPECT_TRUE(marqueePaintProperty->GetPlayerStatusValue());
+    EXPECT_TRUE(pattern->playStatus_);
 
     /**
      * @tc.steps: step6. Create themeManager with marqueeLayoutProperty values and call OnModifyDone.
@@ -2048,12 +2049,20 @@ HWTEST_F(MarqueeTestNg, HandleWidthConstraint, TestSize.Level1)
     marqueeLayoutAlgorithm->HandleWidthConstraint(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, 100.0f, calcContext);
     ASSERT_NE(calcContext.optionalSize.Width(), std::nullopt);
     EXPECT_EQ(calcContext.optionalSize.Width().value(), 100.0f);
-    EXPECT_EQ(calcContext.layoutConstraint.maxSize.Width(), 500.0f);
+    EXPECT_EQ(calcContext.layoutConstraint.maxSize.Width(), 200.0f);
 
+    calcContext.optionalSize.Reset();
     calcContext.layoutConstraint.parentIdealSize.SetWidth(1000.0f);
     marqueeLayoutAlgorithm->HandleWidthConstraint(LayoutCalPolicy::MATCH_PARENT, 100.0f, calcContext);
     ASSERT_NE(calcContext.optionalSize.Width(), std::nullopt);
     EXPECT_EQ(calcContext.optionalSize.Width().value(), 1000.0f);
+
+    calcContext.optionalSize.Reset();
+    calcContext.layoutConstraint.parentIdealSize.Reset();
+    calcContext.layoutConstraint.maxSize.SetWidth(1080);
+    marqueeLayoutAlgorithm->HandleWidthConstraint(LayoutCalPolicy::MATCH_PARENT, 100.0f, calcContext);
+    ASSERT_NE(calcContext.optionalSize.Width(), std::nullopt);
+    EXPECT_EQ(calcContext.optionalSize.Width().value(), 1080.0f);
 }
 
 /**
@@ -2133,11 +2142,19 @@ HWTEST_F(MarqueeTestNg, HandleHeightConstraint, TestSize.Level1)
     marqueeLayoutAlgorithm->HandleHeightConstraint(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, 100.0f, calcContext);
     ASSERT_NE(calcContext.optionalSize.Height(), std::nullopt);
     EXPECT_EQ(calcContext.optionalSize.Height().value(), 100.0f);
-    EXPECT_EQ(calcContext.layoutConstraint.maxSize.Height(), 500.0f);
+    EXPECT_EQ(calcContext.layoutConstraint.maxSize.Height(), 200.0f);
 
+    calcContext.optionalSize.Reset();
     calcContext.layoutConstraint.parentIdealSize.SetHeight(1000.0f);
     marqueeLayoutAlgorithm->HandleHeightConstraint(LayoutCalPolicy::MATCH_PARENT, 100.0f, calcContext);
     ASSERT_NE(calcContext.optionalSize.Height(), std::nullopt);
     EXPECT_EQ(calcContext.optionalSize.Height().value(), 1000.0f);
+
+    calcContext.optionalSize.Reset();
+    calcContext.layoutConstraint.parentIdealSize.Reset();
+    calcContext.layoutConstraint.maxSize.SetHeight(1080);
+    marqueeLayoutAlgorithm->HandleHeightConstraint(LayoutCalPolicy::MATCH_PARENT, 100.0f, calcContext);
+    ASSERT_NE(calcContext.optionalSize.Height(), std::nullopt);
+    EXPECT_EQ(calcContext.optionalSize.Height().value(), 1080.0f);
 }
 } // namespace OHOS::Ace::NG

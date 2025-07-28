@@ -13,15 +13,10 @@
  * limitations under the License.
  */
 
-#include <cstdint>
 #include <sstream>
 #include <vector>
 
 // SORTED_SECTION
-#include "arkoala-macros.h"
-#include "arkoala_api_generated.h"
-#include "extension_companion_node.h"
-
 #include "base/error/error_code.h"
 #include "core/common/card_scope.h"
 #include "core/components_ng/base/group_node.h"
@@ -29,6 +24,10 @@
 #include "core/components_ng/pattern/list/list_model_ng.h"
 #include "core/components_ng/syntax/lazy_for_each_builder.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
+
+#include "arkoala_api_generated.h"
+#include "arkoala-macros.h"
+#include "extension_companion_node.h"
 
 namespace OHOS::Ace::NG {
 namespace GeneratedApiImpl {
@@ -84,9 +83,13 @@ Ark_Float32 GetDesignWidthScale(int deviceId)
     return windowConfig.GetDesignWidthScale(SystemProperties::GetDeviceWidth());
 }
 
-void SetCustomCallback(Ark_VMContext context, Ark_NodeHandle nodePtr, Ark_Int32 callback) {}
+void SetCustomCallback(Ark_VMContext context, Ark_NodeHandle nodePtr, Ark_Int32 callback)
+{
+}
 
-void SetCustomNodeDestroyCallback(void (*destroy)(Ark_NodeHandle nodeId)) {}
+void SetCustomNodeDestroyCallback(void (*destroy)(Ark_NodeHandle nodeId))
+{
+}
 
 Ark_NodeHandle GetNodeByViewStack()
 {
@@ -120,6 +123,11 @@ Ark_Int32 AddChild(Ark_NodeHandle parentNode, Ark_NodeHandle childNode)
     CHECK_NULL_RETURN(childNode, result);
     auto* parent = reinterpret_cast<UINode*>(parentNode);
     auto* child = reinterpret_cast<UINode*>(childNode);
+    if (auto* groupNode = AceType::DynamicCast<GroupNode>(parent); groupNode) {
+        groupNode->AddChildToGroup(AceType::Claim(child));
+        parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        return result;
+    }
     parent->AddChild(AceType::Claim(child));
     auto* frameNode = AceType::DynamicCast<FrameNode>(child);
     if (frameNode) {
@@ -135,6 +143,11 @@ Ark_Int32 InsertChildAt(Ark_NodeHandle parentNode, Ark_NodeHandle childNode, int
     CHECK_NULL_RETURN(childNode, result);
     auto* parent = reinterpret_cast<UINode*>(parentNode);
     auto* child = reinterpret_cast<UINode*>(childNode);
+    if (auto* groupNode = AceType::DynamicCast<GroupNode>(parent); groupNode) {
+        groupNode->AddChildToGroup(AceType::Claim(child));
+        parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        return result;
+    }
     parent->AddChild(AceType::Claim(child), position);
     auto* frameNode = AceType::DynamicCast<FrameNode>(child);
     if (frameNode) {
@@ -165,12 +178,11 @@ Ark_Int32 InsertChildAfter(Ark_NodeHandle parentNode, Ark_NodeHandle childNode, 
         parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return result;
     }
-    if (siblingNode == nullptr ||
-        siblingNode == reinterpret_cast<Ark_NodeHandle>(0x01) /*lazyForEach markItem case.*/) {
-        parent->AddChild(AceType::Claim(child));
-    } else {
-        auto* sibling = reinterpret_cast<UINode*>(siblingNode);
+    auto* sibling = reinterpret_cast<UINode*>(siblingNode);
+    if (sibling) {
         parent->AddChildAfter(AceType::Claim(child), AceType::Claim(sibling));
+    } else {
+        parent->AddChild(AceType::Claim(child));
     }
     auto* frameNode = AceType::DynamicCast<FrameNode>(child);
     if (frameNode) {
@@ -204,11 +216,11 @@ Ark_Int32 InsertChildBefore(Ark_NodeHandle parentNode, Ark_NodeHandle childNode,
         parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return result;
     }
-    if (siblingNode == nullptr) {
-        parent->AddChild(AceType::Claim(child));
-    } else {
-        auto* sibling = reinterpret_cast<UINode*>(siblingNode);
+    auto* sibling = reinterpret_cast<UINode*>(siblingNode);
+    if (sibling) {
         parent->AddChildBefore(AceType::Claim(child), AceType::Claim(sibling));
+    } else {
+        parent->AddChild(AceType::Claim(child));
     }
     auto* frameNode = AceType::DynamicCast<FrameNode>(child);
     if (frameNode) {
@@ -255,7 +267,9 @@ Ark_PipelineContext GetPipelineContext(Ark_NodeHandle node)
 
 void SetVsyncCallback(Ark_PipelineContext pipelineContext, Ark_VsyncCallback callback)
 {
-    auto vsync = [pipelineContext, callback]() { callback(pipelineContext); };
+    auto vsync = [pipelineContext, callback]() {
+        callback(pipelineContext);
+    };
     reinterpret_cast<PipelineContext*>(pipelineContext)->SetVsyncListener(vsync);
 }
 
@@ -466,21 +480,21 @@ void GetLayoutConstraint(Ark_NodeHandle node, Ark_Int32* value)
 
 void SetChildTotalCount(Ark_NodeHandle node, int totalCount)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    if (frameNode->GetTag() == OHOS::Ace::V2::LIST_ETS_TAG) {
-        // ListModelNG::SetListItemTotalCount(frameNode, totalCount);
-        return;
-    }
-    if (frameNode->GetTag() == OHOS::Ace::V2::GRID_ETS_TAG) {
-        // GridModelNG::SetGridItemTotalCount(frameNode, totalCount);
-        return;
-    }
+    // auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    // CHECK_NULL_VOID(frameNode);
+    // if (frameNode->GetTag() == OHOS::Ace::V2::LIST_ETS_TAG) {
+    //     ListModelNG::SetListItemTotalCount(frameNode, totalCount);
+    //     return;
+    // }
+    // if (frameNode->GetTag() == OHOS::Ace::V2::GRID_ETS_TAG) {
+    //     GridModelNG::SetGridItemTotalCount(frameNode, totalCount);
+    //     return;
+    // }
 }
 
 int IndexerChecker(Ark_VMContext vmContext, Ark_NodeHandle nodePtr)
 {
-    TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NOT IMPLEMENTED! Arkoala IndexerChecker");
+    TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NOT IMPLEMENTED! Arkoala IndexerChecker for %{public}p", nodePtr);
     return 1;
 }
 
@@ -533,32 +547,34 @@ inline T* fromBits(GENERATED_Ark_EventCallbackArg* args)
 
 void SetLazyItemIndexer(Ark_VMContext vmContext, Ark_NodeHandle nodePtr, int indexerId)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(nodePtr);
-    CHECK_NULL_VOID(frameNode);
-    auto getNodeByIndex = [vmContext, indexerId](int32_t index) -> OHOS::Ace::RefPtr<FrameNode> {
-        GENERATED_Ark_EventCallbackArg args[] = { { index }, { 0 }, { 0 } };
-        int found = GetCallbackMethod()->CallInt(vmContext, indexerId, 3, &args[0]);
-        if (found == 0) {
-            return nullptr;
-        }
-        return OHOS::Ace::AceType::Claim(fromBits<FrameNode>(&args[1]));
-    };
-    if (frameNode->GetTag() == OHOS::Ace::V2::LIST_ETS_TAG) {
-        // ListModelNG::SetListItemGetFunc(frameNode, std::move(getNodeByIndex));
-        return;
-    }
-    if (frameNode->GetTag() == OHOS::Ace::V2::GRID_ETS_TAG) {
-        // GridModelNG::SetGridItemGetFunc(frameNode, std::move(getNodeByIndex));
-        return;
-    }
+    // auto* frameNode = reinterpret_cast<FrameNode*>(nodePtr);
+    // CHECK_NULL_VOID(frameNode);
+    // auto getNodeByIndex = [vmContext, indexerId](int32_t index) -> OHOS::Ace::RefPtr<FrameNode> {
+    //     GENERATED_Ark_EventCallbackArg args[] = { { index }, { 0 }, { 0 } };
+    //     int found = GetCallbackMethod()->CallInt(vmContext, indexerId, 3, &args[0]);
+    //     if (found == 0) {
+    //         return nullptr;
+    //     }
+    //     return OHOS::Ace::AceType::Claim(fromBits<FrameNode>(&args[1]));
+    // };
+    // if (frameNode->GetTag() == OHOS::Ace::V2::LIST_ETS_TAG) {
+    //     ListModelNG::SetListItemGetFunc(frameNode, std::move(getNodeByIndex));
+    //     return;
+    // }
+    // if (frameNode->GetTag() == OHOS::Ace::V2::GRID_ETS_TAG) {
+    //     GridModelNG::SetGridItemGetFunc(frameNode, std::move(getNodeByIndex));
+    //     return;
+    // }
 }
 
-void EmitOnClick(Ark_NativePointer node, Ark_ClickEvent event) {}
+void EmitOnClick(Ark_NativePointer node, Ark_ClickEvent event)
+{
+}
 } // namespace GeneratedApiImpl
 } // namespace OHOS::Ace::NG
 
 extern "C" {
-IDLIZE_API_EXPORT const GENERATED_ArkUIAnyAPI* GENERATED_GetArkAnyAPI(GENERATED_Ark_APIVariantKind kind, int version);
+IDLIZE_API_EXPORT const OH_AnyAPI* GENERATED_GetArkAnyAPI(GENERATED_Ark_APIVariantKind kind, int version);
 
 __attribute__((constructor)) static void ProvideEntryPoint(void)
 {

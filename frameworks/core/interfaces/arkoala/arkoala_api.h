@@ -1043,6 +1043,19 @@ struct ArkUIPickerEdgeAlignStruct {
     void* dyRawPtr;
 };
 
+struct ArkUIPickerBackgroundStyleStruct {
+    ArkUI_Uint32 colorValue;
+    ArkUI_Float32* values;
+    ArkUI_Int32* units;
+    ArkUI_Int32 length;
+    ArkUI_Bool isColorSetByUser;
+    void* colorRawPtr;
+    void* topLeftRawPtr;
+    void* topRightRawPtr;
+    void* bottomLeftRawPtr;
+    void* bottomRightRawPtr;
+};
+
 struct ArkUISliderShowStepOptions {
     uint32_t step;
     const char* text;
@@ -2150,9 +2163,9 @@ struct ArkUITabBarBackgroundEffect {
 };
 
 struct ArkUIDrawingContext {
-    ArkUICanvasHandle canvas;
     ArkUI_Float32 width;
     ArkUI_Float32 height;
+    ArkUICanvasHandle canvas;
 };
 
 struct ArkUIDirtySwapConfig {
@@ -2210,14 +2223,14 @@ struct ArkUIPaddingRes {
 };
 
 struct ArkUIBackgroundContent {
-    ArkUI_Int32 color;
+    ArkUI_Uint32 color;
     void* bgColorRawPtr;
 };
 
 struct ArkUIBackgroundOptions {
     ArkUI_Int32 align;
     ArkUI_Int32* ignoresLayoutSafeAreaEdges;
-    ArkUI_Int32 ignoresLayoutSafeAreaEdgesSize;
+    ArkUI_Uint32 ignoresLayoutSafeAreaEdgesSize;
 };
 
 struct ArkUIRectShape {
@@ -3287,6 +3300,8 @@ struct ArkUIListModifier {
     void (*resetCachedCount)(ArkUINodeHandle node);
     void (*setCachedIsShown)(ArkUINodeHandle node, ArkUI_Int32 cachedCount);
     void (*resetCachedIsShown)(ArkUINodeHandle node);
+    void (*setCacheRange)(ArkUINodeHandle node, ArkUI_Int32 min, ArkUI_Int32 max);
+    void (*resetCacheRange)(ArkUINodeHandle node);
     ArkUI_Int32 (*getListFocusWrapMode)(ArkUINodeHandle node);
     void (*setListFocusWrapMode)(ArkUINodeHandle node, ArkUI_Int32 focusWrapMode);
     void (*resetListFocusWrapMode)(ArkUINodeHandle node);
@@ -6014,6 +6029,8 @@ struct ArkUITextPickerModifier {
         ArkUINodeHandle node, ArkUITextCascadePickerRangeContentArray arry, ArkUI_Int32 rangeType);
     void (*setTextPickerSelectedBackgroundStyle)(ArkUINodeHandle node, ArkUI_Bool* getValue, ArkUI_Uint32 color,
         ArkUI_Float32* value, ArkUI_Int32* unit, ArkUI_Int32 size);
+    void (*setTextPickerSelectedBackgroundStyleWithResObj)(ArkUINodeHandle node, ArkUI_Bool* isHasValue,
+        const struct ArkUIPickerBackgroundStyleStruct* backgroundStyleStruct);
     void (*getTextPickerSelectedBackgroundStyle)(ArkUINodeHandle node, ArkUINumberValue* result, ArkUI_Int32 size);
     void (*resetTextPickerSelectedBackgroundStyle)(ArkUINodeHandle node);
 };
@@ -7069,7 +7086,7 @@ struct ArkUINDKRenderNodeModifier {
     ArkUI_Int32 (*clearChildren)(ArkUIRenderNodeHandle node);
     ArkUI_Int32 (*getChild)(ArkUIRenderNodeHandle node, ArkUI_Int32 index, ArkUIRenderNodeHandle* child,
         ArkUI_Int32* childId);
-    ArkUI_Int32 (*getChildren)(ArkUIRenderNodeHandle node, ArkUIRenderNodeHandle** child, ArkUI_Int32** childId,
+    ArkUI_Int32 (*getChildren)(ArkUIRenderNodeHandle node, ArkUIRenderNodeHandle** child, ArkUI_Uint32** childId,
         ArkUI_Int32* count);
     ArkUI_Int32 (*getFirstChild)(ArkUIRenderNodeHandle node, ArkUIRenderNodeHandle* child, ArkUI_Int32* childId);
     ArkUI_Int32 (*getNextSibling)(ArkUIRenderNodeHandle node, ArkUIRenderNodeHandle* slibing, ArkUI_Int32* childId);

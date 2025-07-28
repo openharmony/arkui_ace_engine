@@ -14,7 +14,7 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/menu/menu_model_ng.h"
+#include "core/components_ng/pattern/menu/menu_model_static.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -70,7 +70,10 @@ namespace MenuModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    return nullptr;
+    auto frameNode = MenuModelStatic::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 } // MenuModifier
 namespace MenuInterfaceModifier {
@@ -81,50 +84,51 @@ void SetMenuOptionsImpl(Ark_NativePointer node)
 } // MenuInterfaceModifier
 namespace MenuAttributeModifier {
 void FontSizeImpl(Ark_NativePointer node,
-                  const Ark_Length* value)
+                  const Opt_Length* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    MenuModelNG::SetFontSize(frameNode, Converter::Convert<Dimension>(*value));
+    MenuModelStatic::SetFontSize(frameNode, Converter::OptConvert<Dimension>(*value));
 }
 void FontImpl(Ark_NativePointer node,
-              const Ark_Font* value)
+              const Opt_Font* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
     auto fontOpt = Converter::OptConvert<Font>(*value);
     if (fontOpt.has_value()) {
-        MenuModelNG::SetFontFamily(frameNode, fontOpt.value().fontFamilies);
+        // TODO: Reset value
+        MenuModelStatic::SetFontSize(frameNode, fontOpt.value().fontSize);
+        MenuModelStatic::SetFontWeight(frameNode, fontOpt.value().fontWeight);
+        MenuModelStatic::SetFontStyle(frameNode, fontOpt.value().fontStyle);
+        MenuModelStatic::SetFontFamily(frameNode, fontOpt.value().fontFamilies);
     }
 }
 void FontColorImpl(Ark_NativePointer node,
-                   const Ark_ResourceColor* value)
+                   const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    MenuModelNG::SetFontColor(frameNode, Converter::OptConvert<Color>(*value));
+    MenuModelStatic::SetFontColor(frameNode, Converter::OptConvert<Color>(*value));
 }
 void RadiusImpl(Ark_NativePointer node,
-                const Ark_Union_Dimension_BorderRadiuses* value)
+                const Opt_Union_Dimension_BorderRadiuses* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-
     auto radiusesOpt = Converter::OptConvert<BorderRadiusesType>(*value);
     if (radiusesOpt) {
+        // TODO: Reset value
         if (auto radiusPtr = std::get_if<std::optional<Dimension>>(&(*radiusesOpt)); radiusPtr) {
             Validator::ValidateNonNegative(*radiusPtr);
+            MenuModelStatic::SetBorderRadius(frameNode, *radiusPtr);
         }
         if (auto radiusPtr = std::get_if<BorderRadiusProperty>(&(*radiusesOpt)); radiusPtr) {
             Validator::ValidateNonNegative(radiusPtr->radiusTopLeft);
             Validator::ValidateNonNegative(radiusPtr->radiusTopRight);
             Validator::ValidateNonNegative(radiusPtr->radiusBottomLeft);
             Validator::ValidateNonNegative(radiusPtr->radiusBottomRight);
-            MenuModelNG::SetBorderRadius(frameNode,
+            MenuModelStatic::SetBorderRadius(frameNode,
                 radiusPtr->radiusTopLeft, radiusPtr->radiusTopRight,
                 radiusPtr->radiusBottomLeft, radiusPtr->radiusBottomRight);
         }
@@ -137,6 +141,7 @@ void MenuItemDividerImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto divider = Converter::OptConvert<V2::ItemDivider>(*value);
+    MenuModelStatic::SetItemDivider(frameNode, divider, std::nullopt);
 }
 void MenuItemGroupDividerImpl(Ark_NativePointer node,
                               const Opt_DividerStyleOptions* value)
@@ -145,12 +150,14 @@ void MenuItemGroupDividerImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto divider = Converter::OptConvert<V2::ItemDivider>(*value);
+    MenuModelStatic::SetItemGroupDivider(frameNode, divider, std::nullopt);
 }
 void SubMenuExpandingModeImpl(Ark_NativePointer node,
-                              Ark_SubMenuExpandingMode value)
+                              const Opt_SubMenuExpandingMode* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    MenuModelStatic::SetExpandingMode(frameNode, Converter::OptConvert<SubMenuExpandingMode>(*value));
 }
 } // MenuAttributeModifier
 const GENERATED_ArkUIMenuModifier* GetMenuModifier()

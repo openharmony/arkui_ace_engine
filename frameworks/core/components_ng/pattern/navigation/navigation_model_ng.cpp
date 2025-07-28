@@ -671,9 +671,8 @@ void NavigationModelNG::SetTitleHeight(const Dimension& height, bool isValid)
     navBarLayoutProperty->UpdateTitleMode(static_cast<NG::NavigationTitleMode>(NavigationTitleMode::MINI));
 }
 
-void NavigationModelNG::SetTitleHeight(const RefPtr<ResourceObject>& resObj)
+void NavigationModelNG::SetTitleHeight(const Dimension& height, const RefPtr<ResourceObject>& resObj)
 {
-    CalcDimension height = ParseTitleHeight(resObj);
     SetTitleHeight(height);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -689,7 +688,7 @@ void NavigationModelNG::SetTitleHeight(const RefPtr<ResourceObject>& resObj)
         CHECK_NULL_VOID(titleBarNode);
         auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
         CHECK_NULL_VOID(titleBarLayoutProperty);
-        CalcDimension height = ParseTitleHeight(resObj);
+        CalcDimension height = ParseTitleHeight(titleBarNode, resObj);
         titleBarLayoutProperty->UpdateTitleHeight(height);
         SetHideBackButton(true);
         titleBarNode->MarkModifyDone();
@@ -700,15 +699,9 @@ void NavigationModelNG::SetTitleHeight(const RefPtr<ResourceObject>& resObj)
     titleBarPattern->AddResObj("navigation.title.customtitle", resObj, std::move(updateFunc));
 }
 
-CalcDimension NavigationModelNG::ParseTitleHeight(const RefPtr<ResourceObject>& resObj)
+CalcDimension NavigationModelNG::ParseTitleHeight(
+    const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& resObj)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_RETURN(frameNode, Dimension());
-    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
-    CHECK_NULL_RETURN(navigationGroupNode, Dimension());
-    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
-    CHECK_NULL_RETURN(navBarNode, Dimension());
-    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
     CHECK_NULL_RETURN(titleBarNode, Dimension());
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
     CHECK_NULL_RETURN(titleBarPattern, Dimension());
@@ -865,7 +858,7 @@ bool NavigationModelNG::CreateBackButtonNode(RefPtr<FrameNode>& backButtonNode)
     focusHub->SetFocusDependence(FocusDependence::SELF);
     auto gestureEventHub = backButtonNode->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(gestureEventHub, false);
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     auto clickCallback = [weakContext = WeakPtr<PipelineContext>(context)](GestureEvent& /* info */) {
         auto context = weakContext.Upgrade();
         CHECK_NULL_VOID(context);
@@ -2101,7 +2094,6 @@ void NavigationModelNG::SetMaxNavBarWidth(FrameNode* frameNode, const RefPtr<Res
 
 void NavigationModelNG::SetNavBarWidth(FrameNode* frameNode, const Dimension& value)
 {
-    CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, NavBarWidth, value, frameNode);
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
     CHECK_NULL_VOID(navigationGroupNode);

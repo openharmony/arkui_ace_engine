@@ -27,8 +27,8 @@ class ACE_EXPORT GridScrollLayoutAlgorithm : public GridLayoutBaseAlgorithm {
     DECLARE_ACE_TYPE(GridScrollLayoutAlgorithm, GridLayoutBaseAlgorithm);
 
 public:
-    GridScrollLayoutAlgorithm(GridLayoutInfo gridLayoutInfo, uint32_t crossCount, uint32_t mainCount)
-        : GridLayoutBaseAlgorithm(std::move(gridLayoutInfo)), crossCount_(crossCount), mainCount_(mainCount) {};
+    GridScrollLayoutAlgorithm(GridLayoutInfo& gridLayoutInfo, uint32_t crossCount, uint32_t mainCount)
+        : GridLayoutBaseAlgorithm(gridLayoutInfo), crossCount_(crossCount), mainCount_(mainCount) {};
     ~GridScrollLayoutAlgorithm() override = default;
 
     void Measure(LayoutWrapper* layoutWrapper) override;
@@ -78,6 +78,21 @@ public:
         }
     }
 
+    void SetItemAdapterFeature(const std::pair<bool, bool>& requestFeature)
+    {
+        requestFeature_ = requestFeature;
+    }
+
+    void SetLazyFeature(bool isLazy)
+    {
+        isLazyFeature_ = isLazy;
+    }
+
+    const std::pair<int32_t, int32_t>& GetItemAdapterRange() const
+    {
+        return range_;
+    }
+
 protected:
     void SkipForwardLines(float mainSize, LayoutWrapper* layoutWrapper);
     void SkipBackwardLines(float mainSize, LayoutWrapper* layoutWrapper);
@@ -85,11 +100,19 @@ protected:
     virtual void SkipIrregularLines(LayoutWrapper* layoutWrapper, bool forward);
 
 private:
+    enum class RequestFeature {
+        FIRST = 0,
+        SECOND
+    };
+
+    bool CheckPredictItems(
+        RequestFeature requestFeature, LayoutWrapper* layoutWrapper, float mainSize, float mainLength);
     void FillGridViewportAndMeasureChildren(float mainSize, float crossSize, LayoutWrapper* layoutWrapper);
     void ReloadToStartIndex(float mainSize, float crossSize, LayoutWrapper* layoutWrapper);
     void ReloadFromUpdateIdxToStartIndex(
         float mainSize, float crossSize, int32_t updateLineIndex, LayoutWrapper* layoutWrapper);
     float MeasureRecordedItems(float mainSize, float crossSize, LayoutWrapper* layoutWrapper);
+    void AdjustEndIndex(LayoutWrapper* layoutWrapper);
     bool UseCurrentLines(float mainSize, float crossSize, LayoutWrapper* layoutWrapper, float& mainLength);
     virtual void SkipLargeOffset(float mainSize, LayoutWrapper* layoutWrapper);
 
@@ -253,13 +276,16 @@ private:
      * @param line index of line to measure
      * updates @param mainLength by adding this line's measured height
      * updates @param endIdx with max item index in this line
+     * updates @param isScrollableSpringMotionRunning spring effect is runnning
      * @return false if line isn't recorded.
      */
-    bool MeasureExistingLine(int32_t line, float& mainLength, int32_t& endIdx);
+    bool MeasureExistingLine(
+        int32_t line, float& mainLength, int32_t& endIdx, bool isScrollableSpringMotionRunning = false);
 
-    LayoutWrapper* wrapper_;
+    LayoutWrapper* wrapper_ = nullptr;
     SizeF frameSize_;
     int32_t currentMainLineIndex_ = 0;        // it equals to row index in vertical grid
+    int32_t prevStartMainLineIndex_ = -1;     // startMainLineIndex before upward lazy items request
     int32_t moveToEndLineIndex_ = -1;         // place index in the last line when scroll to index after matrix
     Axis axis_ = Axis::VERTICAL;
 
@@ -278,6 +304,10 @@ private:
     int32_t scrollSource_ = SCROLL_FROM_NONE;
     OffsetF childFrameOffset_;
     GridReloadReason reason_;
+
+    std::pair<int32_t, int32_t> range_ = { -1, -1 };
+    std::pair<bool, bool> requestFeature_ = { false, false };
+    bool isLazyFeature_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(GridScrollLayoutAlgorithm);
 };

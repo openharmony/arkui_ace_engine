@@ -520,6 +520,15 @@ RefPtr<FrameNode> FrameNode::CreateFrameNodeWithTree(
     return newChild;
 }
 
+// int32_t FrameNode::GetTotalChildCount() const
+// {
+//     auto overrideCount = pattern_->GetTotalChildCount();
+//     if (overrideCount < 0) {
+//         return UINode::TotalChildCount();
+//     }
+//     return overrideCount;
+// }
+
 RefPtr<FrameNode> FrameNode::GetOrCreateFrameNode(
     const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
 {
@@ -1335,6 +1344,8 @@ void FrameNode::OnAttachToMainTree(bool recursive)
     }
     renderContext_->OnNodeAppear(recursive);
     pattern_->OnAttachToMainTree();
+    ClearCachedGlobalOffset();
+    ClearCachedIsFrameDisappear();
 
     if (isActive_ && SystemProperties::GetDeveloperModeOn()) {
         PaintDebugBoundary(SystemProperties::GetDebugBoundaryEnabled());
@@ -1383,6 +1394,7 @@ void FrameNode::NotifyColorModeChange(uint32_t colorMode)
     FireColorNDKCallback();
 
     if (GetLocalColorMode() != ColorMode::COLOR_MODE_UNDEFINED) {
+        UINode::NotifyColorModeChange(colorMode);
         return;
     }
 
@@ -1661,19 +1673,7 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
         }
     }
 
-    // update background
-    if (builderFunc_) {
-        auto builderNode = builderFunc_();
-        auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-            AceType::MakeRefPtr<LinearLayoutPattern>(true));
-        if (builderNode) {
-            builderNode->MountToParent(columnNode);
-        }
-        SetBackgroundLayoutConstraint(columnNode);
-        renderContext_->CreateBackgroundPixelMap(columnNode);
-        builderFunc_ = nullptr;
-        backgroundNode_ = columnNode;
-    }
+    UpdateBackground();
 
     // update focus state
     auto focusHub = GetFocusHub();
@@ -1773,6 +1773,9 @@ void FrameNode::TriggerOnAreaChangeCallback(uint64_t nanoTimestamp, int32_t area
         }
         eventHub_->HandleOnAreaChange(
             lastFrameRect_, lastParentOffsetToWindow_, currFrameRect, currParentOffsetToWindow);
+    } else {
+        //if in this branch, next time cache is not trusted
+        ClearCachedGlobalOffset();
     }
     pattern_->OnAreaChangedInner();
 }
@@ -1908,7 +1911,8 @@ bool FrameNode::IsFrameDisappear(uint64_t timestamp, int32_t isVisibleChangeMinD
     }
     bool isFrameDisappear = !isOnShow || !isOnMainTree || !isSelfVisible;
     if (isFrameDisappear) {
-        cachedIsFrameDisappear_ = { timestamp, true };
+        //if in this branch, next time cache is not trusted
+        ClearCachedIsFrameDisappear();
         return true;
     }
     auto result = IsFrameAncestorDisappear(timestamp, isVisibleChangeMinDepth);
@@ -1925,10 +1929,13 @@ bool FrameNode::IsFrameAncestorDisappear(uint64_t timestamp, int32_t isVisibleCh
     bool result = !curIsVisible || !curFrameIsActive;
     RefPtr<FrameNode> parentUi = GetAncestorNodeOfFrame(false);
     if (!parentUi || result) {
-        cachedIsFrameDisappear_ = { timestamp, result };
+        //if in this branch, next time cache is not trusted
+        ClearCachedIsFrameDisappear();
         return result;
     }
 
+    // if this node have not calculate once, then it will calculate to root
+    isVisibleChangeMinDepth = cachedIsFrameDisappear_.first > 0 ? isVisibleChangeMinDepth : -1;
     // MinDepth < 0, it do not work
     // MinDepth >= 0, and this node have calculate once
     // MinDepth = 0, no change from last frame, use cache directly
@@ -1942,8 +1949,6 @@ bool FrameNode::IsFrameAncestorDisappear(uint64_t timestamp, int32_t isVisibleCh
         return result;
     }
 
-    // if this node have not calculate once, then it will calculate to root
-    isVisibleChangeMinDepth = parentIsFrameDisappear.first > 0 ? isVisibleChangeMinDepth : -1;
     result = result || parentUi->IsFrameAncestorDisappear(timestamp, isVisibleChangeMinDepth);
 
     cachedIsFrameDisappear_ = { timestamp, result };
@@ -1960,6 +1965,7 @@ void FrameNode::TriggerVisibleAreaChangeCallback(
     auto hasInnerCallback = eventHub_->HasVisibleAreaCallback(false);
     auto hasUserCallback = eventHub_->HasVisibleAreaCallback(true);
     if (!hasInnerCallback && !hasUserCallback) {
+        ClearCachedIsFrameDisappear();
         return;
     }
     auto& visibleAreaUserRatios = eventHub_->GetVisibleAreaRatios(true);
@@ -1968,9 +1974,8 @@ void FrameNode::TriggerVisibleAreaChangeCallback(
     auto& visibleAreaInnerCallback = eventHub_->GetVisibleAreaCallback(false);
     if (forceDisappear || IsFrameDisappear(timestamp, isVisibleChangeMinDepth)) {
         if (IsDebugInspectorId()) {
-            TAG_LOGD(AceLogTag::ACE_UIEVENT,
-                "OnVisibleAreaChange Node(%{public}s/%{public}d) lastRatio(User:%{public}s/Inner:%{public}s) "
-                "forceDisappear:%{public}d frameDisappear:%{public}d ",
+            TAG_LOGD(AceLogTag::ACE_UIEVENT, "OnVisibleAreaChange Node(%{public}s/%{public}d) "
+                "lastRatio(User:%{public}s/Inner:%{public}s) forceDisappear:%{public}d frameDisappear:%{public}d ",
                 tag_.c_str(), nodeId_, std::to_string(lastVisibleRatio_).c_str(),
                 std::to_string(lastInnerVisibleRatio_).c_str(), forceDisappear, IsFrameDisappear(timestamp));
         }
@@ -2549,7 +2554,7 @@ void FrameNode::MarkModifyDone()
     renderContext_->OnModifyDone();
 #if (defined(__aarch64__) || defined(__x86_64__))
     if (Recorder::IsCacheAvaliable()) {
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         pipeline->AddAfterRenderTask([weak = WeakPtr(pattern_)]() {
             auto pattern = weak.Upgrade();
@@ -4162,7 +4167,7 @@ void FrameNode::OnAccessibilityEvent(
 }
 
 void FrameNode::OnAccessibilityEvent(
-    AccessibilityEventType eventType, std::string beforeText, std::string latestContent)
+    AccessibilityEventType eventType, const std::string& beforeText, const std::string& latestContent)
 {
     if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
         AccessibilityEvent event;
@@ -4192,7 +4197,7 @@ void FrameNode::OnAccessibilityEvent(
 }
 
 void FrameNode::OnAccessibilityEvent(
-    AccessibilityEventType eventType, std::string textAnnouncedForAccessibility)
+    AccessibilityEventType eventType, const std::string& textAnnouncedForAccessibility)
 {
     if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
         if (eventType != AccessibilityEventType::ANNOUNCE_FOR_ACCESSIBILITY) {
@@ -5179,19 +5184,7 @@ void FrameNode::SyncGeometryNode(bool needSyncRsNode, const DirtySwapConfig& con
         TriggerOnSizeChangeCallback();
     }
 
-    // update background
-    if (builderFunc_) {
-        auto builderNode = builderFunc_();
-        auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-            AceType::MakeRefPtr<LinearLayoutPattern>(true));
-        if (builderNode) {
-            builderNode->MountToParent(columnNode);
-        }
-        SetBackgroundLayoutConstraint(columnNode);
-        renderContext_->CreateBackgroundPixelMap(columnNode);
-        builderFunc_ = nullptr;
-        backgroundNode_ = columnNode;
-    }
+    UpdateBackground();
 
     // update focus state
     UpdateFocusState();
@@ -5381,7 +5374,7 @@ bool FrameNode::ReachResponseDeadline() const
 OffsetF FrameNode::GetOffsetInScreen()
 {
     auto frameOffset = GetPaintRectOffset(false, true);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, OffsetF(0.0f, 0.0f));
     auto window = pipelineContext->GetWindow();
     CHECK_NULL_RETURN(window, OffsetF(0.0f, 0.0f));
@@ -5634,7 +5627,7 @@ void FrameNode::RecordExposureInner()
 }
 
 void FrameNode::AddFrameNodeSnapshot(
-    bool isHit, int32_t parentId, std::vector<RectF> responseRegionList, EventTreeType type)
+    bool isHit, int32_t parentId, const std::vector<RectF>& responseRegionList, EventTreeType type)
 {
     auto context = GetContext();
     CHECK_NULL_VOID(context);
@@ -5822,6 +5815,8 @@ OffsetF FrameNode::CalculateOffsetRelativeToWindow(uint64_t nanoTimestamp, bool 
         }
     }
 
+    // if this node have not calculate once, then it will calculate to root
+    areaChangeMinDepth = cachedGlobalOffset_.first > 0 ? areaChangeMinDepth : -1;
     auto parent = GetAncestorNodeOfFrame(true);
     if (parent) {
         auto parentTimestampOffset = parent->GetCachedGlobalOffset();
@@ -5835,8 +5830,6 @@ OffsetF FrameNode::CalculateOffsetRelativeToWindow(uint64_t nanoTimestamp, bool 
             currOffset = currOffset + parentTimestampOffset.second;
             SetCachedGlobalOffset({ nanoTimestamp, currOffset });
         } else {
-            // if this node have not calculate once, then it will calculate to root
-            areaChangeMinDepth = parentTimestampOffset.first > 0 ? areaChangeMinDepth : -1;
             currOffset = currOffset + parent->CalculateOffsetRelativeToWindow(
                 nanoTimestamp, logFlag, areaChangeMinDepth);
             SetCachedGlobalOffset({ nanoTimestamp, currOffset });
@@ -6036,7 +6029,7 @@ void FrameNode::AttachContext(PipelineContext* context, bool recursive)
 {
     if (SystemProperties::GetMultiInstanceEnabled()) {
         auto renderContext = GetRenderContext();
-        if (renderContext) {
+        if (!isDeleteRsNode_ && renderContext) {
             renderContext->SetRSUIContext(context);
         }
     }
@@ -6619,10 +6612,11 @@ void FrameNode::ProcessFrameNodeChangeFlag()
     auto changeFlag = FRAME_NODE_CHANGE_INFO_NONE;
     auto parent = Claim(this);
     while (parent) {
-        if (parent->GetChangeInfoFlag() != FRAME_NODE_CHANGE_INFO_NONE) {
-            changeFlag = changeFlag | parent->GetChangeInfoFlag();
-        }
+        changeFlag = changeFlag | parent->GetChangeInfoFlag();
         parent = parent->GetAncestorNodeOfFrame(true);
+        if (changeFlag == FRAME_NODE_CHANGE_ALL) {
+            break;
+        }
     }
     if (changeFlag == FRAME_NODE_CHANGE_INFO_NONE) {
         return;
@@ -7214,5 +7208,27 @@ uint32_t FrameNode::CallAIFunction(const std::string& functionName, const std::s
                 AI_CALL_FUNCNAME_INVALID;
     }
     return AI_CALLER_INVALID;
+}
+
+void FrameNode::UpdateBackground()
+{
+    // if node has background, do update.
+    if (renderContext_->HasBuilderBackgroundFlag()) {
+        bool isBuilderBackground = renderContext_->GetBuilderBackgroundFlag().value();
+        if (isBuilderBackground && builderFunc_) {
+            auto builderNode = builderFunc_();
+            auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+                ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+            if (builderNode) {
+                builderNode->MountToParent(columnNode);
+            }
+            SetBackgroundLayoutConstraint(columnNode);
+            renderContext_->CreateBackgroundPixelMap(columnNode);
+            builderFunc_ = nullptr;
+            backgroundNode_ = columnNode;
+        } else if (!isBuilderBackground) {
+            renderContext_->UpdateCustomBackground();
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

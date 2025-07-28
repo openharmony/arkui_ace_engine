@@ -239,6 +239,16 @@ const CONTENT_FONT_WEIGHT = lazyInit(() => {
     let fontWeight = FontWeight[getString(125834682) || 'Medium'];
     return fontWeight;
 });
+// 'sys.string.dialog_content_font_size'
+const CONTENT_FONT_SIZE = lazyInit(() => {
+    return getLengthMetricsByResource({
+        'id': -1,
+        'type': 10002,
+        params: ['sys.float.dialog_content_font_size'],
+        'bundleName': '__harDefaultBundleName__',
+        'moduleName': '__harDefaultModuleName__'
+    }, BODY_L);
+});
 const SCROLL_BAR_OFFSET = 20;
 const SELECT_DIALOG_SCROLL_BAR_OFFSET = 4;
 export class TipsDialog extends ViewPU {
@@ -646,7 +656,7 @@ export class TipsDialog extends ViewPU {
                     Checkbox.pop();
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Text.create(this.checkTips);
-                        Text.fontSize(`${BODY_L}fp`);
+                        Text.fontSize(`${CONTENT_FONT_SIZE()}fp`);
                         Text.fontWeight(FontWeight.Regular);
                         Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
                         Text.maxLines(CONTENT_MAX_LINES);
@@ -783,7 +793,7 @@ export class TipsDialog extends ViewPU {
         this.initMargin();
     }
     getContentFontSize() {
-        return BODY_L + 'fp';
+        return CONTENT_FONT_SIZE() + 'fp';
     }
     initButtons() {
         if (!this.primaryButton && !this.secondaryButton) {
@@ -1740,7 +1750,7 @@ export class ConfirmDialog extends ViewPU {
             Text.focusBox({
                 strokeWidth: LengthMetrics.px(0)
             });
-            Text.fontSize(`${BODY_L}fp`);
+            Text.fontSize(`${CONTENT_FONT_SIZE()}fp`);
             Text.fontWeight(CONTENT_FONT_WEIGHT());
             Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
             Text.textAlign(this.textAlign);
@@ -2183,7 +2193,7 @@ export class AlertDialog extends ViewPU {
             Text.focusBox({
                 strokeWidth: LengthMetrics.px(0)
             });
-            Text.fontSize(`${BODY_L}fp`);
+            Text.fontSize(`${CONTENT_FONT_SIZE()}fp`);
             Text.fontWeight(this.getFontWeight());
             Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
             Text.margin({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) });
@@ -4071,7 +4081,7 @@ export class LoadingDialog extends ViewPU {
         }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Text.create(this.content);
-            Text.fontSize(`${BODY_L}fp`);
+            Text.fontSize(`${CONTENT_FONT_SIZE()}fp`);
             Text.fontWeight(FontWeight.Regular);
             Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
             Text.layoutWeight(LOADING_TEXT_LAYOUT_WEIGHT);

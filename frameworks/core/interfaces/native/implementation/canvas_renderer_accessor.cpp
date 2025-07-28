@@ -782,6 +782,29 @@ void ResetImpl(Ark_CanvasRenderer peer)
     CHECK_NULL_VOID(peerImpl);
     peerImpl->Reset();
 }
+Ark_Union_LengthMetrics_String GetLetterSpacingImpl(Ark_CanvasRenderer peer)
+{
+    return {};
+}
+void SetLetterSpacingImpl(Ark_CanvasRenderer peer,
+                          const Ark_Union_LengthMetrics_String* letterSpacing)
+{
+    CHECK_NULL_VOID(peer);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    CHECK_NULL_VOID(letterSpacing);
+    Converter::VisitUnion(
+        *letterSpacing,
+        [peerImpl](const Ark_String& str) {
+            auto spacing = Converter::Convert<std::string>(str);
+            peerImpl->SetLetterSpacing(spacing);
+        },
+        [peerImpl](const Ark_LengthMetrics& metrics) {
+            Dimension spacing = Converter::OptConvert<Dimension>(metrics).value_or(Dimension());
+            peerImpl->SetLetterSpacing(spacing);
+        },
+        []() {});
+}
 Ark_Number GetGlobalAlphaImpl(Ark_CanvasRenderer peer)
 {
     LOGE("ARKOALA CanvasRendererAccessor::GetGlobalAlphaImpl there is no implementation in controller "
@@ -1190,6 +1213,8 @@ const GENERATED_ArkUICanvasRendererAccessor* GetCanvasRendererAccessor()
         CanvasRendererAccessor::SaveLayerImpl,
         CanvasRendererAccessor::RestoreLayerImpl,
         CanvasRendererAccessor::ResetImpl,
+        CanvasRendererAccessor::GetLetterSpacingImpl,
+        CanvasRendererAccessor::SetLetterSpacingImpl,
         CanvasRendererAccessor::GetGlobalAlphaImpl,
         CanvasRendererAccessor::SetGlobalAlphaImpl,
         CanvasRendererAccessor::GetGlobalCompositeOperationImpl,

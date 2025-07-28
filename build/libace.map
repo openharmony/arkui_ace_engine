@@ -39,6 +39,7 @@
       GetArkUIAnyFullNodeAPI;
       GetCJUIFullNodeAPI;
       GetArkUIFullNodeAPI;
+      GetArkUIAniModifiers;
 
       OHOS::Ace::AceApplicationInfo::*;
       OHOS::Ace::AceScopedTrace::*;
@@ -101,6 +102,8 @@
       "OHOS::Ace::AnimatableColor::AnimatableColor()";
       "OHOS::Ace::AnimatableColor::~AnimatableColor()";
       "OHOS::Ace::NG::LayoutProperty::~LayoutProperty()";
+      OHOS::Ace::NG::Modifier::*;
+      OHOS::Ace::NG::ModifierAdapter::*;
 
       OHOS::Ace::ColumnModel::*;
       OHOS::Ace::FlexModel::*;
@@ -238,7 +241,7 @@
       OHOS::Ace::RenderStack::*;
       OHOS::Ace::RenderElement::*;
       OHOS::Ace::FocusNode::*;
-      OHOS::Ace::FocusHub::*;
+      OHOS::Ace::NG::FocusHub::*;
       OHOS::Ace::Gradient::*;
       OHOS::Ace::CanvasPath2D::*;
       OHOS::Ace::NG::Matrix2D::*;
@@ -352,6 +355,7 @@
       vtable?for?OHOS::Ace::ComponentGroupElement;
       vtable?for?OHOS::Ace::NG::PagePattern;
       vtable?for?OHOS::Ace::StackElement;
+      vtable?for?OHOS::Ace::CanvasPath2D;
       vtable?for?OHOS::Ace::ComposedComponent;
       vtable?for?OHOS::Ace::BoxComponent;
       vtable?for?OHOS::Ace::PageTransitionComponent;
@@ -386,6 +390,7 @@
       VTT?for?OHOS::Ace::StackElement;
       VTT?for?OHOS::Ace::ComponentGroupElement;
       VTT?for?OHOS::Ace::NG::PagePattern;
+      VTT?for?OHOS::Ace::CanvasPath2D;
       VTT?for?OHOS::Ace::ComposedComponent;
       VTT?for?OHOS::Ace::BoxComponent;
       VTT?for?OHOS::Ace::PageTransitionComponent;
@@ -477,6 +482,7 @@
       OHOS::Ace::Kit::CustomNode::*;
       OHOS::Ace::Kit::Text::*;
       OHOS::Ace::Kit::Tabs::*;
+      OHOS::Ace::Kit::FrameNode::*;
       OHOS::Ace::NG::NavigationStack::*;
       OHOS::Ace::NG::CustomNode::*;
       OHOS::Ace::NG::NavigationGroupNode::*;
@@ -572,6 +578,7 @@
       OHOS::Ace::PipelineBase::GetImageCache*;
       "OHOS::Ace::ACE_PI";
       "OHOS::Ace::ACE_E";
+      OHOS::Ace::PipelineBase::GetImageCache*;
     };
   local:
     *;

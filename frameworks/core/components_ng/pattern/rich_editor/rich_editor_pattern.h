@@ -809,12 +809,13 @@ public:
     void SetSelection(int32_t start, int32_t end, const std::optional<SelectionOptions>& options = std::nullopt,
         bool isForward = false) override;
     bool ResetOnInvalidSelection(int32_t start, int32_t end);
-    bool IsShowHandle();
+    bool IsShowHandle() override;
     void UpdateSelectionInfo(int32_t start, int32_t end);
     bool IsEditing();
     std::u16string GetLeftTextOfCursor(int32_t number) override;
     std::u16string GetRightTextOfCursor(int32_t number) override;
     int32_t GetTextIndexAtCursor() override;
+    void ProcessOverlay(const OverlayRequest& request = OverlayRequest()) override;
     void ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle, bool isCopyAll = false,
         TextResponseType responseType = TextResponseType::LONG_PRESS, bool handlReverse = false);
     void CheckEditorTypeChange();
@@ -902,14 +903,13 @@ public:
     void OnDragNodeFloating() override;
     void CloseSelectOverlay() override;
     void CloseHandleAndSelect() override;
-    void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
+    void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false) override;
     void CalculateDefaultHandleHeight(float& height) override;
     bool IsSingleHandle();
     bool IsHandlesShow() override;
     void CopySelectionMenuParams(SelectOverlayInfo& selectInfo, TextResponseType responseType);
     std::function<void(Offset)> GetThumbnailCallback() override;
     void InitAiSelection(const Offset& globalOffset, bool isBetweenSelection = false);
-    bool CheckAIPreviewMenuEnable();
     void CreateDragNode();
     float GetMaxSelectedWidth();
     void InitDragShadow(const RefPtr<FrameNode>& host, const RefPtr<FrameNode>& dragNode, bool isDragShadowNeeded,
@@ -1082,19 +1082,19 @@ public:
 
     void OnVirtualKeyboardAreaChanged() override;
 
-    void SetCaretColor(const Color& caretColor)
+    void SetCaretColor(const std::optional<Color>& caretColor)
     {
-        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "setCaretColor=%{public}s", caretColor.ToString().c_str());
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "setCaretColor=%{public}s", caretColor->ToString().c_str());
         caretColor_ = caretColor;
         IF_TRUE(SelectOverlayIsOn(), selectOverlay_->UpdateHandleColor());
     }
 
     Color GetCaretColor() const;
 
-    void SetSelectedBackgroundColor(const Color& selectedBackgroundColor)
+    void SetSelectedBackgroundColor(const std::optional<Color>& selectedBackgroundColor)
     {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetSelectedBackgroundColor=%{public}s",
-            selectedBackgroundColor.ToString().c_str());
+            selectedBackgroundColor->ToString().c_str());
         selectedBackgroundColor_ = selectedBackgroundColor;
     }
 
@@ -1906,6 +1906,7 @@ private:
     std::unique_ptr<StyleManager> styleManager_;
     bool requestFocusBySingleClick_ = false;
     std::optional<float> lastCaretPos_ = std::nullopt;
+    int32_t touchedFingerCount_ = 0;
 #if defined(IOS_PLATFORM)
     TextCompose compose_;
     bool unmarkText_;

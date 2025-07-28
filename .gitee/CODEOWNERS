@@ -257,6 +257,7 @@ examples/ImageAnimator/ @arkui_image
 examples/Picker/ @arkui_image
 examples/PickDialog/ @arkui_image
 examples/ScrollableComponentTest/ @arkuiscroll
+examples/UIExtension @arkuiabilitygroup
 
 [Frameworks Base]
 frameworks/base/background_task_helper/background_task_helper.h @arkuiframework
@@ -2416,6 +2417,7 @@ frameworks/core/components_ng/export_texture_info/export_texture_info.h @arkuila
 frameworks/core/components_ng/gestures/ @arkuievent
 frameworks/core/components_ng/image_provider/ @arkui_image
 frameworks/core/components_ng/layout/ @arkuilayout
+frameworks/core/components_ng/layout/section/ @arkuiscroll
 frameworks/core/components_ng/manager/avoid_info/ @arkui_superman
 frameworks/core/components_ng/manager/BUILD.gn @arkui_architecture
 frameworks/core/components_ng/manager/display_sync/ @arkuiframework
@@ -3267,6 +3269,7 @@ test/unittest/core/pattern/video/ @arkuilayout
 test/unittest/core/pattern/view_context/ @arkuiframework
 test/unittest/core/pattern/waterflow/ @arkuiscroll
 test/unittest/core/pattern/web/ @arkwebinarkuireview
+test/unittest/core/pattern/withtheme/ @arkuiframework
 test/unittest/core/pattern/xcomponent/ @arkuilayout
 test/unittest/core/pattern/test_ng.cpp @arkuiscroll
 test/unittest/core/pattern/test_ng.h @arkuiscroll
@@ -3275,8 +3278,13 @@ test/unittest/core/render/ @arkuiframework
 test/unittest/core/rosen/ @arkuiframework
 test/unittest/core/svg/ @arkui_image
 test/unittest/core/syntax/ @arkuistatemgmt
+test/unittest/core/base/frame_node_test_ng_coverage.cpp @arkui_architecture
 test/unittest/interfaces/ @arkuiframework
 test/unittest/interfaces/ui_input_event_test.cpp @arkuievent
 test/unittest/interfaces/ace_ui_input_event/ @arkuievent
 test/unittest/interfaces/ace_gesture/ @arkuievent
 test/unittest/interfaces/form_render/ @form_framework
+
+[Generated source]
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/ @guozejun
+frameworks/core/interfaces/native/generated/ @guozejun

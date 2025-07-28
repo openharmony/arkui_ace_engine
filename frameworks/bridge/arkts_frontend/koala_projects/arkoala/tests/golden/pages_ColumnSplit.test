@@ -1,0 +1,18 @@
+{
+  "rootElement": {
+    "nodeId": 1308,
+    "kind": "ComponentRoot",
+    "children": [
+      {
+        "nodeId": 1309,
+        "kind": "ColumnSplit",
+        "children": [],
+        "resizeable_value": 1,
+        "divider_value": {
+          "startMargin": "5px",
+          "endMargin": 7
+        }
+      }
+    ]
+  }
+}

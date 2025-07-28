@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,13 +15,11 @@
 
 #include "node_render_node_modifier.h"
 
-#ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_base/include/render/rs_mask.h"
 #include "render_service_client/core/modifier_ng/rs_modifier_ng.h"
 #include "render_service_client/core/ui/rs_canvas_node.h"
 
 #include "core/components_ng/render/adapter/rosen_render_context.h"
-#endif
 
 #include "base/memory/ace_type.h"
 #include "core/components_ng/base/view_abstract.h"
@@ -125,11 +123,7 @@ ArkUI_Int32 ClearRenderNodeChildren(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
     CHECK_NULL_RETURN(frameNode->GetRenderContext(), ERROR_CODE_PARAM_INVALID);
-#ifdef ENABLE_ROSEN_BACKEND
     auto rsContext = AceType::DynamicCast<RosenRenderContext>(frameNode->GetRenderContext());
-#else
-    auto rsContext = nullptr;
-#endif
     CHECK_NULL_RETURN(rsContext, ERROR_CODE_PARAM_INVALID);
     auto rsNode = rsContext->GetRSNode();
     rsNode->ClearChildren();
@@ -138,20 +132,14 @@ ArkUI_Int32 ClearRenderNodeChildren(ArkUINodeHandle node)
 
 ArkUIRenderNodeHandle CreateNode(int32_t* nodeId)
 {
-#ifdef ENABLE_ROSEN_BACKEND
     std::shared_ptr<RSNode> renderNode;
-    renderNode = Rosen::RSCanvasNode::Create();
-    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
-    if (pipelineContext) {
-        auto rsUIDirector = pipelineContext->GetRSUIDirector();
-        if (rsUIDirector && SystemProperties::GetMultiInstanceEnabled()) {
-            auto rsContext = rsUIDirector->GetRSUIContext();
-            renderNode = Rosen::RSCanvasNode::Create(false, false, rsContext);
-        }
+    auto pipelineContext = NG::PipelineContext::GetCurrentContextSafely();
+    if (SystemProperties::GetMultiInstanceEnabled() && pipelineContext && pipelineContext->GetRSUIDirector()) {
+        auto rsContext = pipelineContext->GetRSUIDirector()->GetRSUIContext();
+        renderNode = Rosen::RSCanvasNode::Create(false, false, rsContext);
+    } else {
+        renderNode = Rosen::RSCanvasNode::Create();
     }
-#else
-    auto renderNode = nullptr;
-#endif
     CHECK_NULL_RETURN(renderNode, nullptr);
     RenderNodeStruct* nodeStruct = new RenderNodeStruct { .rsNode = renderNode, .nodeId = renderNode->GetId() };
     *nodeId = renderNode->GetId();
@@ -179,7 +167,7 @@ int32_t GetChildIndex(std::shared_ptr<RSNode> parent, std::shared_ptr<RSNode> ch
 {
     CHECK_NULL_RETURN(parent, -1);
     CHECK_NULL_RETURN(child, -1);
-    for (int i = 0; i < parent->GetChildren().size(); i++) {
+    for (size_t i = 0; i < parent->GetChildren().size(); i++) {
         if (parent->GetChildByIndex(i) == child) {
             return i;
         }
@@ -240,7 +228,7 @@ ArkUI_Int32 GetChild(ArkUIRenderNodeHandle node, int32_t index, ArkUIRenderNodeH
     return ERROR_CODE_NO_ERROR;
 }
 
-ArkUI_Int32 GetChildren(ArkUIRenderNodeHandle node, ArkUIRenderNodeHandle** child, int32_t** childId, int32_t* count)
+ArkUI_Int32 GetChildren(ArkUIRenderNodeHandle node, ArkUIRenderNodeHandle** child, uint32_t** childId, int32_t* count)
 {
     auto rsNodePtr = GetRsNodeFromStruct(node);
     CHECK_NULL_RETURN(rsNodePtr, ERROR_CODE_PARAM_INVALID);
@@ -250,7 +238,7 @@ ArkUI_Int32 GetChildren(ArkUIRenderNodeHandle node, ArkUIRenderNodeHandle** chil
         return ERROR_CODE_PARAM_INVALID;
     }
     ArkUIRenderNodeHandle* childList = new ArkUIRenderNodeHandle[childCount];
-    int32_t* childIdList = new int32_t[childCount];
+    uint32_t* childIdList = new uint32_t[childCount];
     while (childCount > 0) {
         auto renderNode = rsNodePtr->GetChildByIndex(index);
         if (renderNode) {
@@ -1121,7 +1109,7 @@ ArkUI_Int32 SetColorAnimatableProperty(ArkUIPropertyHandle property, uint32_t co
 {
     auto* propertyStruct = reinterpret_cast<RenderPropertyStruct*>(property);
     CHECK_NULL_RETURN(propertyStruct, ERROR_CODE_PARAM_INVALID);
-    if (propertyStruct->propertyType != ArkUIPropertyType::PROPERTY_COLOR) {
+    if (propertyStruct->propertyType != ArkUIPropertyType::ANIMATABLE_PROPERTY_COLOR) {
         return ERROR_CODE_PARAM_INVALID;
     }
     propertyStruct->colorAnimatableProperty->Set(Rosen::RSColor(color));

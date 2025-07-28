@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
+#include "layout/sliding_window/water_flow_large_delta_converter.h"
 
 #include "base/log/dump_log.h"
 #include "base/utils/utils.h"
@@ -358,6 +359,7 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     layoutInfo_->duringPositionCalc_ = false;
     layoutInfo_->targetIndex_.reset();
     layoutInfo_->extraOffset_.reset();
+    layoutInfo_->jumpForRecompose_ = WaterFlowLayoutInfoBase::EMPTY_JUMP_INDEX;
     UpdateScrollBarOffset();
     CheckScrollable();
 
@@ -904,8 +906,8 @@ void WaterFlowPattern::GetEventDumpInfo()
     onScrollIndex ? DumpLog::GetInstance().AddDesc("hasOnScrollIndex: true")
                   : DumpLog::GetInstance().AddDesc("hasOnScrollIndex: false");
     auto onJSFrameNodeScrollIndex = hub->GetJSFrameNodeOnWaterFlowScrollIndex();
-    onJSFrameNodeScrollIndex ? DumpLog::GetInstance().AddDesc("hasFrameNodeOnScrollIndex: true")
-                             : DumpLog::GetInstance().AddDesc("hasFrameNodeOnScrollIndex: false");
+    onJSFrameNodeScrollIndex ? DumpLog::GetInstance().AddDesc("nodeOnScrollIndex: true")
+                             : DumpLog::GetInstance().AddDesc("nodeOnScrollIndex: false");
 }
 
 void WaterFlowPattern::GetEventDumpInfo(std::unique_ptr<JsonValue>& json)
@@ -918,7 +920,7 @@ void WaterFlowPattern::GetEventDumpInfo(std::unique_ptr<JsonValue>& json)
     auto onScrollIndex = hub->GetOnScrollIndex();
     json->Put("hasOnScrollIndex", onScrollIndex ? "true" : "false");
     auto onJSFrameNodeScrollIndex = hub->GetJSFrameNodeOnWaterFlowScrollIndex();
-    json->Put("hasFrameNodeOnScrollIndex", onJSFrameNodeScrollIndex ? "true" : "false");
+    json->Put("nodeOnScrollIndex", onJSFrameNodeScrollIndex ? "true" : "false");
 }
 
 void WaterFlowPattern::DumpInfoAddSections()

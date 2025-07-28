@@ -27,6 +27,14 @@
 namespace OHOS::Ace::NG {
 class InspectorFilter;
 
+struct GridItemAdapter {
+    int32_t totalCount = 0;
+    std::pair<int32_t, int32_t> range = { 0, 0 };
+    std::function<void(int32_t start, int32_t end)> requestItemFunc;
+    // which directional item request.
+    std::pair<bool, bool> requestFeature = { false, false };
+    std::function<RefPtr<FrameNode>(int32_t index)> getItemFunc;
+};
 
 class ACE_EXPORT GridPattern : public ScrollablePattern {
     DECLARE_ACE_TYPE(GridPattern, ScrollablePattern);
@@ -266,6 +274,15 @@ public:
 
     SizeF GetChildrenExpandedSize() override;
 
+    const std::shared_ptr<GridItemAdapter>& GetGridItemAdapter()
+    {
+        if (adapter_) {
+            return adapter_;
+        }
+        adapter_ = std::make_shared<GridItemAdapter>();
+        return adapter_;
+    }
+
     void HandleOnItemFocus(int32_t index);
 
 private:
@@ -285,6 +302,8 @@ private:
 
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
+
+    void UpdateOffsetHelper(float offset);
 
     void ClearMultiSelect() override;
     bool IsItemSelected(float offsetX, float offsetY) override;
@@ -314,11 +333,14 @@ private:
 
     std::string GetIrregularIndexesString() const;
 
+    void CheckGridItemRange(const std::pair<int32_t, int32_t> &range);
+
     bool supportAnimation_ = false;
     bool isConfigScrollable_ = false;
     bool scrollable_ = true;
     bool preSpring_ = false; // true if during SyncLayoutBeforeSpring task.
     bool isSmoothScrolling_ = false;
+    bool reachedEnd_ = false;
     bool irregular_ = false; // true if LayoutOptions require running IrregularLayout
 
     RefPtr<GridContentModifier> gridContentModifier_;
@@ -335,9 +357,11 @@ private:
     ScrollAlign scrollAlign_ = ScrollAlign::AUTO;
     std::optional<int32_t> targetIndex_;
     std::pair<std::optional<float>, std::optional<float>> scrollbarInfo_;
+    std::pair<int32_t, int32_t> prevRange_; // to track changes of item range during Layout
     std::unique_ptr<GridLayoutInfo> infoCopy_; // legacy impl to save independent data for animation.
     GridLayoutInfo info_;
     std::list<GridPreloadItem> preloadItemList_; // list of GridItems to build preemptively in IdleTask
+    std::shared_ptr<GridItemAdapter> adapter_;
 
     ACE_DISALLOW_COPY_AND_MOVE(GridPattern);
 };

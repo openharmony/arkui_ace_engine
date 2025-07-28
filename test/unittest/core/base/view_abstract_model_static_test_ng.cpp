@@ -119,6 +119,8 @@ HWTEST_F(ViewAbstractModelStaticTestNg, ViewAbstractModelStaticTestNg003, TestSi
     targetNodes->pattern_ = nullptr;
     viewAbstractModelStatic.BindDragWithContextMenuParams(targetNodes, menuParam);
     EXPECT_EQ(targetNodes->GetOrCreateGestureEventHub(), nullptr);
+    targetNodes->eventHub_ = AceType::MakeRefPtr<EventHub>();
+    targetNodes->pattern_  = AceType::MakeRefPtr<Pattern>();
 
     /**
      * @tc.steps: contextMenuRegisterType is CUSTOM_TYPE.
@@ -231,6 +233,8 @@ HWTEST_F(ViewAbstractModelStaticTestNg, ViewAbstractModelStaticTestNg006, TestSi
     targetNodes->pattern_ = nullptr;
     viewAbstractModelStatic.BindDragWithContextMenuParamsStatic(targetNodes, menuParam);
     EXPECT_EQ(targetNodes->GetOrCreateGestureEventHub(), nullptr);
+    targetNodes->eventHub_ = AceType::MakeRefPtr<EventHub>();
+    targetNodes->pattern_  = AceType::MakeRefPtr<Pattern>();
 
     /**
      * @tc.steps: contextMenuRegisterType is CUSTOM_TYPE.

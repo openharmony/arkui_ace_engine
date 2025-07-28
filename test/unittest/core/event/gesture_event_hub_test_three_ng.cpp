@@ -1560,4 +1560,51 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubProcessTouchHitTest001, TestSize.
         EXPECT_EQ(panRecognizer->GetDistance(), testCase.expectDistance.ConvertToPx());
     }
 }
+
+/**
+ * @tc.name: ProcessTouchTestHitSequence001
+ * @tc.desc: Test ProcessTouchTestHit
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, ProcessTouchTestHitSequence001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create recognizer and add to innerTargets.
+     */
+    OffsetF coordinateOffset;
+    TouchRestrict touchRestrict;
+    TouchTestResult innerTargets;
+    TouchTestResult finalResult;
+    ResponseLinkResult responseLinkResult;
+    PointF localPoint;
+    PanDirection panDirection;
+    panDirection.type = PanDirection::ALL;
+    auto panRecognizer = AceType::MakeRefPtr<PanRecognizer>(1, panDirection, 0.0);
+    panRecognizer->SetPriority(GesturePriority::Low);
+    innerTargets.emplace_back(panRecognizer);
+
+    auto otherFrameNode = FrameNode::CreateFrameNode(
+        "scroll", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    auto scrollGestureEventHub = otherFrameNode->GetOrCreateGestureEventHub();
+    auto scrollableActuator =
+        AceType::MakeRefPtr<ScrollableActuator>(AceType::WeakClaim(AceType::RawPtr(scrollGestureEventHub)));
+
+    auto scrollableEvent = AceType::MakeRefPtr<ScrollableEvent>(Axis::VERTICAL);
+    auto scrollable = AceType::MakeRefPtr<Scrollable>();
+    auto panRecognizerNG = AceType::MakeRefPtr<PanRecognizer>(1, panDirection, 0.0);
+    scrollable->panRecognizerNG_ = panRecognizerNG;
+    scrollableEvent->SetScrollable(scrollable);
+    scrollableActuator->AddScrollableEvent(scrollableEvent);
+    EXPECT_EQ(scrollableActuator->scrollableEvents_.size(), 1);
+    scrollGestureEventHub->scrollableActuator_ = scrollableActuator;
+
+    /**
+     * @tc.steps: step2. call ProcessTouchTestHit , recognizer is not instance of recognizer group
+     * @tc.expected: result is false
+     */
+    auto result = scrollGestureEventHub->ProcessTouchTestHit(
+        coordinateOffset, touchRestrict, innerTargets, finalResult, 2, localPoint, nullptr, responseLinkResult);
+    EXPECT_FALSE(result);
+    EXPECT_FALSE(panRecognizer->IsSystemGesture());
+}
 } // namespace OHOS::Ace::NG

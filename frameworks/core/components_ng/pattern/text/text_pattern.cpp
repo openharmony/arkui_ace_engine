@@ -292,11 +292,18 @@ bool TextPattern::CanAIEntityDrag()
     return NeedShowAIDetect();
 }
 
+bool TextPattern::CheckAIPreviewMenuEnable()
+{
+    return dataDetectorAdapter_ && dataDetectorAdapter_->enablePreviewMenu_
+        && copyOption_ != CopyOptions::None
+        && NeedShowAIDetect()
+        && IsShowHandle();
+}
+
 void TextPattern::InitAiSelection(const Offset& globalOffset)
 {
     ResetAISelected(AIResetSelectionReason::INIT_SELECTION);
-    CHECK_NULL_VOID(GetDataDetectorAdapter() && dataDetectorAdapter_->enablePreviewMenu_ && NeedShowAIDetect() &&
-                    pManager_ && selectOverlay_ && IsShowHandle());
+    CHECK_NULL_VOID(pManager_ && selectOverlay_ && CheckAIPreviewMenuEnable());
     int32_t extend = 0;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1330,6 +1337,11 @@ void TextPattern::UpdateAIMenuOptions()
     }
 }
 
+void TextPattern::ProcessOverlay(const OverlayRequest& request)
+{
+    selectOverlay_->ProcessOverlay(request);
+}
+
 void TextPattern::ShowSelectOverlay(const OverlayRequest& request)
 {
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
@@ -1340,7 +1352,7 @@ void TextPattern::ShowSelectOverlay(const OverlayRequest& request)
         return;
     }
     UpdateAIMenuOptions();
-    selectOverlay_->ProcessOverlay(request);
+    ProcessOverlay(request);
 }
 
 void TextPattern::HandleOnSelectAll()
@@ -3749,7 +3761,7 @@ void TextPattern::OnModifyDone()
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto nowTime = static_cast<unsigned long long>(GetSystemTimestamp());
-    ACE_SCOPED_TRACE("OnModifyDone[Text][id:%d][time:%llu]", host->GetId(), nowTime);
+    ACE_TEXT_SCOPED_TRACE("OnModifyDone[Text][id:%d][time:%llu]", host->GetId(), nowTime);
     auto pipeline = host->GetContext();
     if (!(pipeline && pipeline->GetMinPlatformVersion() > API_PROTEXTION_GREATER_NINE)) {
         bool shouldClipToContent =
@@ -3839,7 +3851,7 @@ size_t TextPattern::GetSubComponentInfos(std::vector<SubComponentInfo>& subCompo
 
 void TextPattern::GetSubComponentInfosForAISpans(std::vector<SubComponentInfo>& subComponentInfos)
 {
-    CHECK_NULL_VOID(GetDataDetectorAdapter());
+    CHECK_NULL_VOID(dataDetectorAdapter_);
     for (const auto& kv : dataDetectorAdapter_->aiSpanMap_) {
         auto& aiSpan = kv.second;
         AddSubComponentInfoForAISpan(subComponentInfos, aiSpan.content, aiSpan);
@@ -3874,7 +3886,7 @@ void TextPattern::AddSubComponentInfosByDataDetectorForSpan(std::vector<SubCompo
     const RefPtr<SpanItem>& span)
 {
     CHECK_NULL_VOID(span);
-    CHECK_NULL_VOID(GetDataDetectorAdapter());
+    CHECK_NULL_VOID(dataDetectorAdapter_);
     int32_t wSpanContentLength = static_cast<int32_t>(span->content.length());
     int32_t spanStart = span->position - wSpanContentLength;
     if (span->needRemoveNewLine) {
@@ -4811,24 +4823,28 @@ void TextPattern::DumpSimplifyInfo(std::shared_ptr<JsonValue>& json)
 {
     auto textLayoutProp = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProp);
-    auto textValue = UtfUtils::Str16DebugToStr8(textLayoutProp->GetContent().value_or(u" "));
-    if (!IsSetObscured() && textValue[0] != '\0') {
+    if (IsSetObscured()) {
+        json->Put("content", "");
+        return;
+    }
+    auto textValue = UtfUtils::Str16DebugToStr8(textLayoutProp->GetContent().value_or(u""));
+    if (!textValue.empty()) {
         json->Put("content", textValue.c_str());
-        return;
-    }
-
-    CHECK_NULL_VOID(pManager_);
-    auto paragraphs = pManager_->GetParagraphs();
-    if (paragraphs.empty()) {
-        return;
-    }
-
-    for (auto&& info : paragraphs) {
-        auto paragraph = info.paragraph;
-        if (paragraph) {
-            auto text = StringUtils::Str16ToStr8(paragraph->GetParagraphText());
-            json->Put("content", text.c_str());
+    } else {
+        CHECK_NULL_VOID(pManager_);
+        auto paragraphs = pManager_->GetParagraphs();
+        if (paragraphs.empty()) {
+            return;
         }
+
+        std::string text;
+        for (auto&& info : paragraphs) {
+            auto paragraph = info.paragraph;
+            if (paragraph) {
+                text += StringUtils::Str16ToStr8(paragraph->GetParagraphText());
+            }
+        }
+        json->Put("content", text.c_str());
     }
 }
 

@@ -2242,7 +2242,11 @@ UpdateSpanStyle RichEditorPattern::GetUpdateSpanStyle()
 
 void RichEditorPattern::MarkAISpanStyleChanged()
 {
-    std::for_each(spans_.begin(), spans_.end(), [](const auto& span) { span->aiSpanResultCount = 0; });
+    std::for_each(spans_.begin(), spans_.end(), [](const auto& span) {
+        if (span->aiSpanResultCount != 0) {
+            span->needReLayout = true;
+        }
+    });
     TextPattern::MarkAISpanStyleChanged();
 }
 
@@ -3472,6 +3476,8 @@ bool RichEditorPattern::HandleUserGestureEvent(
             }
             info = info.SetScreenLocation(
                 Offset(textOffset.GetX() - paragraphOffset.GetX(), textOffset.GetY() - paragraphOffset.GetY()));
+            info = info.SetGlobalDisplayLocation(
+                Offset(textOffset.GetX() - paragraphOffset.GetX(), textOffset.GetY() - paragraphOffset.GetY()));
             return gestureFunc(item, info);
         }
     }
@@ -3968,6 +3974,10 @@ TextAlign RichEditorPattern::GetTextAlignByDirection()
 
 void RichEditorPattern::HandleLongPress(GestureEvent& info)
 {
+    if (touchedFingerCount_ == 0) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "no finger touched, skip long press event");
+        return;
+    }
     CHECK_NULL_VOID(!selectOverlay_->GetIsHandleMoving());
     auto focusHub = GetFocusHub();
     CHECK_NULL_VOID(focusHub);
@@ -7785,8 +7795,8 @@ void RichEditorPattern::HandleUrlSpanForegroundClear()
 void RichEditorPattern::HandleTouchDown(const TouchLocationInfo& info)
 {
     auto sourceTool = info.GetSourceTool();
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Touch down longPressState=[%{public}d, %{public}d], source=%{public}d",
-        previewLongPress_, editingLongPress_, sourceTool);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Touch down longPressState=[%{public}d, %{public}d], source=%{public}d,"
+        "fingers=%{public}d", previewLongPress_, editingLongPress_, sourceTool, ++touchedFingerCount_);
     globalOffsetOnMoveStart_ = GetPaintRectGlobalOffset();
     moveCaretState_.Reset();
     ResetTouchSelectState();
@@ -7801,6 +7811,7 @@ void RichEditorPattern::HandleTouchDown(const TouchLocationInfo& info)
 
 void RichEditorPattern::HandleTouchUp()
 {
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleTouchUp, fingers=%{public}d", --touchedFingerCount_);
     HandleTouchUpAfterLongPress();
     ResetTouchAndMoveCaretState();
     ResetTouchSelectState();
@@ -8476,12 +8487,18 @@ void RichEditorPattern::CopySelectionMenuParams(SelectOverlayInfo& selectInfo, T
     CopyBindSelectionMenuParams(selectInfo, menuParams);
 }
 
+void RichEditorPattern::ProcessOverlay(const OverlayRequest& request)
+{
+    // this selectOverlay_ and selectOverlay_ in TextPattern are two distinct objects.
+    selectOverlay_->ProcessOverlay(request);
+}
+
 void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secondHandle, bool isCopyAll,
     TextResponseType responseType, bool handleReverse)
 {
     CHECK_NULL_VOID(!IsPreviewTextInputting());
     textResponseType_ = responseType;
-    selectOverlay_->ProcessOverlay({.animation = true});
+    ProcessOverlay({ .animation = true });
 }
 
 void RichEditorPattern::SetIsEnableSubWindowMenu()
@@ -8863,6 +8880,9 @@ void RichEditorPattern::UpdateAIMenuOptions()
     SetIsAskCeliaEnabled(isAskCeliaEnabled);
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "UpdateAIMenuOptions isShowAIMenuOption=%{public}d "
         "isAskCeliaEnabled=%{public}d", isShowAIMenuOption_, isAskCeliaEnabled_);
+    if (!IsSupportAskCelia()) {
+        SetIsAskCeliaEnabled(false);
+    }
     CHECK_NULL_VOID(dataDetectorAdapter_);
     if (isAskCeliaEnabled_ && !NeedShowAIDetect() &&
         dataDetectorAdapter_->textDetectResult_.menuOptionAndAction.empty()) {
@@ -8880,12 +8900,6 @@ Offset RichEditorPattern::ConvertGlobalToTextOffset(const Offset& globalOffset)
         localOffset = ConvertGlobalToLocalOffset(globalOffset);
     }
     return ConvertTouchOffsetToTextOffset(localOffset);
-}
-
-bool RichEditorPattern::CheckAIPreviewMenuEnable()
-{
-    return dataDetectorAdapter_ && dataDetectorAdapter_->enablePreviewMenu_ && NeedShowAIDetect() &&
-           copyOption_ != CopyOptions::None;
 }
 
 void RichEditorPattern::InitAiSelection(const Offset& globalOffset, bool isBetweenSelection)

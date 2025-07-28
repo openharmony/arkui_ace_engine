@@ -85,6 +85,16 @@ void SetCurrentTime0Impl(Ark_VideoController peer,
     CHECK_NULL_VOID(peerImpl);
     peerImpl->TriggerSetCurrentTime(Converter::Convert<float>(*value));
 }
+void SetCurrentTime1Impl(Ark_VideoController peer,
+                         const Ark_Number* value,
+                         Ark_SeekMode seekMode)
+{
+    CHECK_NULL_VOID(value);
+    auto peerImpl = reinterpret_cast<VideoControllerPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    auto seekModeValue = Converter::OptConvert<SeekMode>(seekMode).value_or(SeekMode::SEEK_PREVIOUS_SYNC);
+    peerImpl->TriggerSetCurrentTime(Converter::Convert<float>(*value), seekModeValue);
+}
 void RequestFullscreenImpl(Ark_VideoController peer,
                            Ark_Boolean value)
 {
@@ -97,16 +107,6 @@ void ExitFullscreenImpl(Ark_VideoController peer)
     auto peerImpl = reinterpret_cast<VideoControllerPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
     peerImpl->TriggerExitFullscreen();
-}
-void SetCurrentTime1Impl(Ark_VideoController peer,
-                         const Ark_Number* value,
-                         Ark_SeekMode seekMode)
-{
-    CHECK_NULL_VOID(value);
-    auto peerImpl = reinterpret_cast<VideoControllerPeerImpl*>(peer);
-    CHECK_NULL_VOID(peerImpl);
-    auto seekModeValue = Converter::OptConvert<SeekMode>(seekMode).value_or(SeekMode::SEEK_PREVIOUS_SYNC);
-    peerImpl->TriggerSetCurrentTime(Converter::Convert<float>(*value), seekModeValue);
 }
 void ResetImpl(Ark_VideoController peer)
 {
@@ -125,15 +125,12 @@ const GENERATED_ArkUIVideoControllerAccessor* GetVideoControllerAccessor()
         VideoControllerAccessor::PauseImpl,
         VideoControllerAccessor::StopImpl,
         VideoControllerAccessor::SetCurrentTime0Impl,
+        VideoControllerAccessor::SetCurrentTime1Impl,
         VideoControllerAccessor::RequestFullscreenImpl,
         VideoControllerAccessor::ExitFullscreenImpl,
-        VideoControllerAccessor::SetCurrentTime1Impl,
         VideoControllerAccessor::ResetImpl,
     };
     return &VideoControllerAccessorImpl;
 }
 
-struct VideoControllerPeer {
-    virtual ~VideoControllerPeer() = default;
-};
 }

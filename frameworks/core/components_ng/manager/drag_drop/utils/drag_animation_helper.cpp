@@ -229,6 +229,13 @@ void DragAnimationHelper::PlayNodeResetAnimation(const RefPtr<DragEventActuator>
         option.GetOnFinishEvent());
 }
 
+float DragAnimationHelper::GetLiftingNodeScale(const RefPtr<RenderContext>& renderContext)
+{
+    CHECK_NULL_RETURN(renderContext, PIXELMAP_DRAG_SCALE_MULTIPLE);
+    VectorF defaultScale = VectorF(PIXELMAP_DRAG_SCALE_MULTIPLE, PIXELMAP_DRAG_SCALE_MULTIPLE);
+    return renderContext->GetTransformScaleValue(defaultScale).x;
+}
+
 void DragAnimationHelper::PlayGatherAnimation(const RefPtr<FrameNode>& frameNode,
     const RefPtr<OverlayManager>& overlayManager)
 {
@@ -258,7 +265,8 @@ void DragAnimationHelper::PlayGatherAnimation(const RefPtr<FrameNode>& frameNode
     auto frameNodeSize = geometryNode->GetFrameSize();
     auto renderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    GatherAnimationInfo gatherAnimationInfo = { PIXELMAP_DRAG_SCALE_MULTIPLE, frameNodeSize.Width(),
+    auto scale = GetLiftingNodeScale(renderContext);
+    GatherAnimationInfo gatherAnimationInfo = { scale, frameNodeSize.Width(),
         frameNodeSize.Height(), gatherNodeCenter, renderContext->GetBorderRadius() };
     AnimationUtils::Animate(
         option,

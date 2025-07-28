@@ -40,7 +40,7 @@ public:
     void ResetCheckMarkColor() override;
     void CreateWithColorResourceObj(const RefPtr<ResourceObject>& resObj, const CheckBoxGroupColorType& type) override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
-    static void SetSelectAll(FrameNode* frameNode, bool isSelected);
+    static void SetSelectAll(FrameNode* frameNode, const std::optional<bool>& isSelected);
     static void SetSelectedColor(FrameNode* frameNode, const Color& color);
     static void SetUnSelectedColor(FrameNode* frameNode, const Color& color);
     static void SetWidth(FrameNode* frameNode, const Dimension& width);
@@ -48,7 +48,7 @@ public:
     static void SetCheckMarkColor(FrameNode* frameNode, const Color& color);
     static void SetCheckMarkSize(FrameNode* frameNode, const Dimension& size);
     static void SetCheckMarkWidth(FrameNode* frameNode, const Dimension& width);
-    static void SetCheckboxGroupStyle(FrameNode* frameNode, CheckBoxStyle checkboxGroupStyle);
+    static void SetCheckboxGroupStyle(FrameNode* frameNode,  const std::optional<CheckBoxStyle>& checkboxGroupStyle);
     static void SetCheckboxGroupName(FrameNode* frameNode, const std::optional<std::string>& groupName);
 
     static std::string GetCheckboxGroupName(FrameNode* frameNode);
@@ -69,6 +69,7 @@ public:
     static void SetSelectedColorByUser(FrameNode* frameNode, bool flag);
     static void ResetSelectedColor(FrameNode* frameNode);
     static void ResetUnSelectedColor(FrameNode* frameNode);
+    static void SetChangeEvent(FrameNode* frameNode, GroupChangeEvent&& changeEvent);
 
 private:
     static std::string ColorTypeToString(const CheckBoxGroupColorType& checkBoxGroupColorType);

@@ -949,6 +949,7 @@ public:
     std::string TextContentTypeToString() const;
     virtual std::string GetPlaceholderFont() const;
     RefPtr<TextFieldTheme> GetTheme() const;
+    void InitTheme();
     std::string GetTextColor() const;
     std::string GetCaretColor() const;
     std::string GetPlaceholderColor() const;
@@ -1888,6 +1889,7 @@ private:
     void SetAccessibilityActionOverlayAndSelection();
     void SetAccessibilityEditAction();
     void SetAccessibilityMoveTextAction();
+    void SetAccessibilityErrorText();
     void SetAccessibilityClearAction();
     void SetAccessibilityPasswordIconAction();
     void SetAccessibilityUnitAction();
@@ -2029,6 +2031,8 @@ private:
     void OnAccessibilityEventTextChange(const std::string& changeType, const std::string& changeString);
     void FireOnWillAttachIME();
     Offset GetCaretClickLocalOffset(const Offset& offset);
+    bool ShouldSkipUpdateParagraph();
+    void UpdateParagraphForDragNode(bool skipUpdate);
 
     RectF frameRect_;
     RectF textRect_;
@@ -2214,6 +2218,7 @@ private:
     std::u16string bodyTextInPreivewing_;
     PreviewRange lastCursorRange_ = {};
     std::u16string lastTextValue_ = u"";
+    float lastCursorLeft_ = 0.0f;
     float lastCursorTop_ = 0.0f;
     bool showKeyBoardOnFocus_ = true;
     bool isTextSelectionMenuShow_ = true;

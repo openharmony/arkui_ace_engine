@@ -33,7 +33,6 @@
 #include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
 
 namespace OHOS::Ace::NG {
-
 namespace {
 const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
 
@@ -42,6 +41,9 @@ const int32_t MAX_NUM_SIZE = 4;
 
 RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
 {
+    prevRange_ = std::pair(info_.startIndex_, info_.endIndex_);
+    reachedEnd_ = info_.offsetEnd_;
+
     auto gridLayoutProperty = GetLayoutProperty<GridLayoutProperty>();
     CHECK_NULL_RETURN(gridLayoutProperty, nullptr);
     std::vector<std::string> cols;
@@ -90,6 +92,10 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
     if (ScrollablePattern::AnimateRunning()) {
         result->SetLineSkipping(!disableSkip);
     }
+    if (adapter_) {
+        result->SetItemAdapterFeature(adapter_->requestFeature);
+        result->SetLazyFeature(!!adapter_->requestItemFunc);
+    }
     return result;
 }
 
@@ -137,7 +143,6 @@ void GridPattern::OnModifyDone()
     if (multiSelectable_ && !isMouseEventInit_) {
         InitMouseEvent();
     }
-
     if (!multiSelectable_ && isMouseEventInit_) {
         UninitMouseEvent();
     }
@@ -226,7 +231,6 @@ void GridPattern::MultiSelectWithoutKeyboard(const RectF& selectedZone)
             context->OnMouseSelectUpdate(true, ITEM_FILL_COLOR, ITEM_FILL_COLOR);
         }
     }
-
     DrawSelectedZone(selectedZone);
 }
 
@@ -497,11 +501,19 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
         }
         return true;
     }
-    auto userOffset = FireOnWillScroll(-offset);
-    info_.currentOffset_ -= userOffset;
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    UpdateOffsetHelper(offset);
     ScrollablePattern::MarkScrollBarProxyDirty();
     return true;
+}
+
+void GridPattern::UpdateOffsetHelper(float offset)
+{
+    auto userOffset = FireOnWillScroll(-offset);
+    info_.currentOffset_ -= userOffset;
+    auto host = GetHost();
+    if (host) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
 }
 
 bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -581,6 +593,28 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
     CHECK_NULL_RETURN(paintProperty, false);
     return paintProperty->GetFadingEdge().value_or(false) || paintProperty->HasContentClip();
+}
+
+void GridPattern::CheckGridItemRange(const std::pair<int32_t, int32_t>& range)
+{
+    if (!adapter_) {
+        return;
+    }
+    adapter_->requestFeature.first = false;
+    adapter_->requestFeature.second = false;
+    LOGI("CheckGridItemRange, range: %{public}d, %{public}d.", adapter_->range.first, adapter_->range.second);
+    if (adapter_->range.first != range.first || adapter_->range.second != range.second) {
+        if (adapter_->range.first > range.first) {
+            adapter_->requestFeature.first = true;
+        }
+        if (adapter_->range.second < range.second) {
+            adapter_->requestFeature.second = true;
+        }
+        if (adapter_->requestItemFunc) {
+            LOGI("request more items, range: %{public}d, %{public}d.", range.first, range.second);
+            adapter_->requestItemFunc(range.first, range.second);
+        }
+    }
 }
 
 void GridPattern::CheckScrollable()
@@ -1343,8 +1377,8 @@ void GridPattern::GetEventDumpInfo()
     onScrollIndex ? DumpLog::GetInstance().AddDesc("hasOnScrollIndex: true")
                   : DumpLog::GetInstance().AddDesc("hasOnScrollIndex: false");
     auto onJSFrameNodeScrollIndex = hub->GetJSFrameNodeOnGridScrollIndex();
-    onJSFrameNodeScrollIndex ? DumpLog::GetInstance().AddDesc("hasFrameNodeOnScrollIndex: true")
-                             : DumpLog::GetInstance().AddDesc("hasFrameNodeOnScrollIndex: false");
+    onJSFrameNodeScrollIndex ? DumpLog::GetInstance().AddDesc("nodeOnScrollIndex: true")
+                             : DumpLog::GetInstance().AddDesc("nodeOnScrollIndex: false");
 }
 
 void GridPattern::GetEventDumpInfo(std::unique_ptr<JsonValue>& json)
@@ -1357,7 +1391,7 @@ void GridPattern::GetEventDumpInfo(std::unique_ptr<JsonValue>& json)
     auto onScrollIndex = hub->GetOnScrollIndex();
     json->Put("hasOnScrollIndex", onScrollIndex ? "true" : "false");
     auto onJSFrameNodeScrollIndex = hub->GetJSFrameNodeOnGridScrollIndex();
-    json->Put("hasFrameNodeOnScrollIndex", onJSFrameNodeScrollIndex ? "true" : "false");
+    json->Put("nodeOnScrollIndex", onJSFrameNodeScrollIndex ? "true" : "false");
 }
 
 std::string GridPattern::GetIrregularIndexesString() const
@@ -1430,7 +1464,7 @@ void GridPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, s
     StopAnimate();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    int32_t totalChildCount = host->TotalChildCount();
+    int32_t totalChildCount = host->GetTotalChildCount();
     if (((index >= 0) && (index < totalChildCount)) || (index == LAST_ITEM)) {
         if (extraOffset.has_value()) {
             info_.extraOffset_ = -extraOffset.value();

@@ -993,11 +993,13 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionHandleMouseEventInValidSession, 
     auto sessionWrapper = AceType::DynamicCast<SessionWrapperImpl>(pattern->sessionWrapper_);
     EXPECT_NE(sessionWrapper, nullptr);
     pattern->isVisible_ = true;
-    pattern->OnWindowHide();
+    pattern->curVisible_ = true;
     pattern->OnWindowShow();
-    pattern->isVisible_ = false;
     pattern->OnWindowHide();
+    EXPECT_EQ(pattern->isVisible_, false);
+    EXPECT_EQ(pattern->curVisible_, false);
     pattern->OnWindowShow();
+    pattern->OnWindowHide();
 #endif
 }
 
@@ -1883,6 +1885,7 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentTest016, TestSize.Level
      */
     int32_t instanceId = 1;
     pattern->RegisterPipelineEvent(instanceId);
+    EXPECT_NE(pattern->surfacePositionCallBackId_, 0);
 
     /**
      * @tc.steps: step3. test UnRegisterPipelineEvent.
@@ -1914,6 +1917,14 @@ HWTEST_F(UIExtensionComponentTestNg, FireOnTerminatedCallbackTestNg, TestSize.Le
     auto onTerminatedFuntionEQ =
         [](int32_t code, const RefPtr<WantWrap>& wantWrap) { EXPECT_EQ(code, CODE); };
     pattern->SetOnTerminatedCallback(onTerminatedFuntionEQ);
+
+    pattern->sessionType_ = SessionType::INVALID_TYPE;
+    pattern->FireOnTerminatedCallback(CODE, nullptr);
+    pattern->sessionType_ = SessionType::UI_EXTENSION_ABILITY;
+    pattern->FireOnTerminatedCallback(CODE, nullptr);
+    pattern->usage_ = UIExtensionUsage::MODAL;
+    pattern->FireOnTerminatedCallback(CODE, nullptr);
+    pattern->usage_ = UIExtensionUsage::EMBEDDED;
     /**
      * @tc.steps: step3. fire onTerminatedFuntion.
      */

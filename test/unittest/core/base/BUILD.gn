@@ -105,12 +105,6 @@ ace_unittest("view_abstract_model_test_ng") {
   sources = [ "view_abstract_model_test_ng.cpp" ]
 }
 
-ace_unittest("view_abstract_model_static_test_ng") {
-  type = "new"
-  module_output = "basic"
-  sources = [ "view_abstract_model_static_test_ng.cpp" ]
-}
-
 ace_unittest("short_cuts_little_test_ng") {
   type = "new"
   module_output = "basic"
@@ -161,7 +155,6 @@ group("core_base_unittest") {
     ":view_full_update_model_ng_test",
     ":view_partial_update_model_test_ng",
     ":view_stack_processor_test_ng",
-    ":view_abstract_model_static_test_ng",
   ]
 
   if (ace_engine_feature_enable_split_mode &&

@@ -406,11 +406,10 @@ JsiRef<JsiValue> JsiFunction::Call(JsiRef<JsiValue> thisVal, int argc, JsiRef<Js
     panda::JsiFastNativeScope fastNativeScope(vm);
     LocalScope scope(vm);
     panda::TryCatch trycatch(vm);
-    std::string funcName;
+    bool traceEnabled = false;
     if (SystemProperties::GetDebugEnabled()) {
-        funcName = GetHandle()->GetName(vm)->ToString(vm);
+        traceEnabled = AceTraceBeginWithArgs("ExecuteJS[%s]", GetHandle()->GetName(vm)->ToString(vm).c_str());
     }
-    ACE_SCOPED_TRACE("ExecuteJS[%s]", funcName.c_str());
     std::vector<panda::Local<panda::JSValueRef>> arguments;
     for (int i = 0; i < argc; ++i) {
         arguments.emplace_back(argv[i].Get().GetLocalHandle());
@@ -424,6 +423,9 @@ JsiRef<JsiValue> JsiFunction::Call(JsiRef<JsiValue> thisVal, int argc, JsiRef<Js
             trycatch.HasCaught());
         runtime->HandleUncaughtException(trycatch);
         result = JSValueRef::Undefined(vm);
+    }
+    if (traceEnabled) {
+        AceTraceEnd();
     }
     return JsiRef<JsiValue>::Make(result);
 }

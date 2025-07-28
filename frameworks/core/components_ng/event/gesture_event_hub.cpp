@@ -105,6 +105,12 @@ bool GestureEventHub::ProcessTouchTestHit(const OffsetF& coordinateOffset, const
 {
     auto host = GetFrameNode();
     CHECK_NULL_RETURN(host, false);
+    auto eventHub = eventHub_.Upgrade();
+    auto getEventTargetImpl = eventHub ? eventHub->CreateGetEventTargetImpl() : nullptr;
+    if (scrollableActuator_) {
+        scrollableActuator_->CollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets,
+            localPoint, host, targetComponent, responseLinkResult, touchId);
+    }
     size_t idx = innerTargets.size();
     size_t newIdx = 0;
     ProcessEventTouchTestHit(coordinateOffset, touchRestrict, innerTargets,
@@ -148,10 +154,6 @@ bool GestureEventHub::ProcessEventTouchTestHit(const OffsetF& coordinateOffset, 
     CHECK_NULL_RETURN(host, false);
     auto eventHub = eventHub_.Upgrade();
     auto getEventTargetImpl = eventHub ? eventHub->CreateGetEventTargetImpl() : nullptr;
-    if (scrollableActuator_) {
-        scrollableActuator_->CollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets,
-            localPoint, host, targetComponent, responseLinkResult, touchId);
-    }
     if (dragEventActuator_ && !dragEventActuator_->GetIsNewFwk()) {
         dragEventActuator_->AddTouchListener(touchRestrict);
     }
@@ -1484,7 +1486,7 @@ void GestureEventHub::DumpVelocityInfoFroPanEvent(int32_t fingerId)
     panEventActuator_->DumpVelocityInfo(fingerId);
 }
 
-GestureEvent GestureEventHub::GetGestureEventInfo()
+const GestureEvent GestureEventHub::GetGestureEventInfo()
 {
     RefPtr<ClickRecognizer> clickRecognizer;
     if (clickEventActuator_) {
@@ -1497,7 +1499,7 @@ GestureEvent GestureEventHub::GetGestureEventInfo()
     return clickRecognizer->GetGestureEventInfo();
 }
 
-ClickInfo GestureEventHub::GetClickInfo()
+const ClickInfo GestureEventHub::GetClickInfo()
 {
     RefPtr<ClickRecognizer> clickRecognizer;
     if (clickEventActuator_) {

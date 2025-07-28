@@ -2341,6 +2341,7 @@ bool WebDelegate::InitWebSurfaceDelegate(const WeakPtr<PipelineBase>& context)
 void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineBase>& context)
 {
     if (!PrepareInitOHOSWeb(context)) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "PrepareInitOHOSWeb failed.");
         return;
     }
     if (!isCreateWebView_) {
@@ -6555,9 +6556,16 @@ void WebDelegate::OnGetTouchHandleHotZone(std::shared_ptr<OHOS::NWeb::NWebTouchH
     auto theme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_VOID(theme);
     auto touchHandleSize = theme->GetHandleHotZoneRadius().ConvertToPx();
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
     if (hotZone) {
-        hotZone->SetWidth(touchHandleSize);
-        hotZone->SetHeight(touchHandleSize);
+        if (webPattern->IsShowHandle()) {
+            hotZone->SetWidth(touchHandleSize);
+            hotZone->SetHeight(touchHandleSize);
+        } else {
+            hotZone->SetWidth(theme->GetHandleLineWidth().ConvertToPx());
+            hotZone->SetHeight(0);
+        }
     }
 }
 
@@ -8445,6 +8453,13 @@ void WebDelegate::KeyboardReDispatch(const std::shared_ptr<OHOS::NWeb::NWebKeyEv
     auto webPattern = webPattern_.Upgrade();
     CHECK_NULL_VOID(webPattern);
     webPattern->KeyboardReDispatch(event, isUsed);
+}
+
+void WebDelegate::OnTakeFocus(const std::shared_ptr<OHOS::NWeb::NWebKeyEvent>& event)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->OnTakeFocus(event);
 }
 
 void WebDelegate::OnCursorUpdate(double x, double y, double width, double height)

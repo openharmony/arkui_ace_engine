@@ -303,9 +303,71 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     SetScrollSource(SCROLL_FROM_NONE);
     MarkSelectedItems();
     UpdateListDirectionInCardStyle();
+    CheckListItemRange(listLayoutAlgorithm->GetItemAdapterRange());
     snapTrigByScrollBar_ = false;
     ChangeCanStayOverScroll();
     return true;
+}
+
+void ListPattern::CheckListItemRange(const std::pair<int32_t, int32_t>& range)
+{
+    if (!adapter_) {
+        return;
+    }
+    adapter_->requestFeature.first = false;
+    adapter_->requestFeature.second = false;
+    if (adapter_->range.first != range.first || adapter_->range.second != range.second) {
+        if (adapter_->range.first > range.first) {
+            adapter_->requestFeature.first = true;
+        }
+        if (adapter_->range.second < range.second) {
+            adapter_->requestFeature.second = true;
+        }
+        if (adapter_->requestItemFunc) {
+            LOGI("request more items, range: %{public}d, %{public}d.", range.first, range.second);
+            adapter_->requestItemFunc(range.first, range.second);
+        }
+    }
+}
+
+void ListPattern::CheckScrollItemRange()
+{
+    if (itemPosition_.empty() && !adapter_) {
+        return;
+    }
+    auto startPos = startMainPos_ - currentDelta_;
+    auto endPos = endMainPos_ - currentDelta_;
+    if (startIndex_ == 0) {
+        startPos += GetChainDelta(0);
+    }
+    if (endIndex_ == maxListItemIndex_) {
+        endPos += GetChainDelta(endIndex_);
+    }
+    if (Positive(startPos)) {
+        // request more items.
+        float requestItemNum = startPos /
+                               (itemPosition_.rbegin()->second.endPos - itemPosition_.begin()->second.startPos) *
+                               itemPosition_.size();
+        if (adapter_->requestItemFunc) {
+            LOGI("request more items, range: %{public}d, %{public}d.",
+                static_cast<int32_t>(adapter_->range.first - std::ceil(requestItemNum)), adapter_->range.second);
+            adapter_->requestItemFunc(adapter_->range.first - std::ceil(requestItemNum), adapter_->range.second);
+        }
+        return;
+    }
+
+    if (LessNotEqual(endPos, contentMainSize_)) {
+        // request more items.
+        float requestItemNum = (contentMainSize_ - endPos) /
+                               (itemPosition_.rbegin()->second.endPos - itemPosition_.begin()->second.startPos) *
+                               itemPosition_.size();
+        if (adapter_->requestItemFunc) {
+            LOGI("request more items, range: %{public}d, %{public}d.", adapter_->range.first,
+                static_cast<int32_t>(adapter_->range.second + std::ceil(requestItemNum)));
+            adapter_->requestItemFunc(adapter_->range.first, adapter_->range.second + std::ceil(requestItemNum));
+        }
+        adapter_->requestFeature.second = true;
+    }
 }
 
 void ListPattern::UpdateListDirectionInCardStyle()
@@ -856,7 +918,7 @@ bool ListPattern::IsAtBottom(bool considerRepeat) const
     float endMainPos = endMainPos_;
     float startMainPos = startMainPos_;
     auto contentMainSize = contentMainSize_ - contentEndOffset_ - contentStartOffset_;
-    if (GreatNotEqual(contentMainSize, endMainPos - startMainPos) && !isStackFromEnd_) {
+    if (startIndex_ == 0 && GreatNotEqual(contentMainSize, endMainPos - startMainPos) && !isStackFromEnd_) {
         endMainPos = startMainPos + contentMainSize;
     }
     auto maxListItemIndex = considerRepeat ? GetMaxIndexByRepeat() : maxListItemIndex_;
@@ -989,6 +1051,12 @@ OverScrollOffset ListPattern::GetOutBoundaryOffset(float delta, bool useChainDel
         offset.end = std::max(offset.end, 0.0);
     }
     return offset;
+}
+
+void ListPattern::UpdateOffsetHelper(float lastDelta)
+{
+    auto userOffset = FireOnWillScroll(currentDelta_ - lastDelta);
+    currentDelta_ = lastDelta + userOffset;
 }
 
 bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
@@ -3082,15 +3150,15 @@ void ListPattern::GetEventDumpInfo()
     onScrollIndex ? DumpLog::GetInstance().AddDesc("hasOnScrollIndex: true")
                   : DumpLog::GetInstance().AddDesc("hasOnScrollIndex: false");
     auto onJSFrameNodeScrollIndex = hub->GetJSFrameNodeOnListScrollIndex();
-    onJSFrameNodeScrollIndex ? DumpLog::GetInstance().AddDesc("hasFrameNodeOnScrollIndex: true")
-                             : DumpLog::GetInstance().AddDesc("hasFrameNodeOnScrollIndex: false");
+    onJSFrameNodeScrollIndex ? DumpLog::GetInstance().AddDesc("nodeOnScrollIndex: true")
+                             : DumpLog::GetInstance().AddDesc("nodeOnScrollIndex: false");
     auto onScrollVisibleContentChange = hub->GetOnScrollVisibleContentChange();
-    onScrollVisibleContentChange ? DumpLog::GetInstance().AddDesc("hasOnScrollVisibleContentChange: true")
-                                 : DumpLog::GetInstance().AddDesc("hasOnScrollVisibleContentChange: false");
+    onScrollVisibleContentChange ? DumpLog::GetInstance().AddDesc("hasOnScrollChange: true")
+                                 : DumpLog::GetInstance().AddDesc("hasOnScrollChange: false");
     auto onJSFrameNodeScrollVisibleContentChange = hub->GetJSFrameNodeOnScrollVisibleContentChange();
     onJSFrameNodeScrollVisibleContentChange
-        ? DumpLog::GetInstance().AddDesc("hasFrameNodeOnScrollVisibleContentChange: true")
-        : DumpLog::GetInstance().AddDesc("hasFrameNodeOnScrollVisibleContentChange: false");
+        ? DumpLog::GetInstance().AddDesc("nodeOnScrollChange: true")
+        : DumpLog::GetInstance().AddDesc("nodeOnScrollChange: false");
 }
 
 void ListPattern::GetEventDumpInfo(std::unique_ptr<JsonValue>& json)
@@ -3103,12 +3171,11 @@ void ListPattern::GetEventDumpInfo(std::unique_ptr<JsonValue>& json)
     auto onScrollIndex = hub->GetOnScrollIndex();
     json->Put("hasOnScrollIndex", onScrollIndex ? "true" : "false");
     auto onJSFrameNodeScrollIndex = hub->GetJSFrameNodeOnListScrollIndex();
-    json->Put("hasFrameNodeOnScrollIndex", onJSFrameNodeScrollIndex ? "true" : "false");
-
+    json->Put("nodeOnScrollIndex", onJSFrameNodeScrollIndex ? "true" : "false");
     auto onScrollVisibleContentChange = hub->GetOnScrollVisibleContentChange();
-    json->Put("hasOnScrollVisibleContentChange", onScrollVisibleContentChange ? "true" : "false");
+    json->Put("hasOnScrollChange", onScrollVisibleContentChange ? "true" : "false");
     auto onJSFrameNodeScrollVisibleContentChange = hub->GetJSFrameNodeOnScrollVisibleContentChange();
-    json->Put("hasFrameNodeOnScrollVisibleContentChange", onJSFrameNodeScrollVisibleContentChange ? "true" : "false");
+    json->Put("nodeOnScrollChange", onJSFrameNodeScrollVisibleContentChange ? "true" : "false");
 }
 
 DisplayMode ListPattern::GetDefaultScrollBarDisplayMode() const

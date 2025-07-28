@@ -593,22 +593,13 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     CHECK_NULL_RETURN(textFieldLayoutAlgorithm, false);
     auto paragraph = textFieldLayoutAlgorithm->GetParagraph();
     float paragraphWidth = 0.0f;
+    bool skipUpdateParagraph = false;
     if (paragraph) {
+        skipUpdateParagraph = ShouldSkipUpdateParagraph();
         paragraph_ = paragraph;
         paragraphWidth = std::max(paragraph->GetLongestLine(), 0.0f);
     }
-    if (!IsDragging()) {
-        do {
-            if (!dragNode_) {
-                break;
-            }
-            auto dragNodePattern = AceType::DynamicCast<TextDragPattern>(dragNode_->GetPattern());
-            if (!dragNodePattern) {
-                break;
-            }
-            dragNodePattern->UpdateParagraph(paragraph_);
-        } while (false);
-    }
+    UpdateParagraphForDragNode(skipUpdateParagraph);
     auto textRect = textFieldLayoutAlgorithm->GetTextRect();
     auto isSameSizeMouseMenu = NearEqual(paragraphWidth, paragraphWidth_) &&
                                     NearEqual(textRect.GetSize(), textRect_.GetSize()) && IsUsingMouse();
@@ -821,12 +812,14 @@ void TextFieldPattern::UpdateCaretInfoToController(bool forceUpdate)
     };
     if (!forceUpdate && lastCursorRange_ == miscTextConfigRange &&
         lastTextValue_ == contentController_->GetTextUtf16Value() &&
-        NearEqual(miscTextConfig.value().cursorInfo.top, lastCursorTop_)) {
+        NearEqual(miscTextConfig.value().cursorInfo.top, lastCursorTop_) &&
+        NearEqual(miscTextConfig.value().cursorInfo.left, lastCursorLeft_)) {
         return;
     }
     lastCursorRange_.Set(miscTextConfig.value().range.start, miscTextConfig.value().range.end);
     lastTextValue_ = contentController_->GetTextUtf16Value();
     lastCursorTop_ = miscTextConfig.value().cursorInfo.top;
+    lastCursorLeft_ = miscTextConfig.value().cursorInfo.left;
     MiscServices::CursorInfo cursorInfo = miscTextConfig.value().cursorInfo;
     MiscServices::InputMethodController::GetInstance()->OnCursorUpdate(cursorInfo);
     MiscServices::InputMethodController::GetInstance()->OnSelectionChange(
@@ -7030,6 +7023,25 @@ RefPtr<TextFieldTheme> TextFieldPattern::GetTheme() const
     return theme;
 }
 
+void TextFieldPattern::InitTheme()
+{
+    auto tmpHost = GetHost();
+    CHECK_NULL_VOID(tmpHost);
+    auto context = tmpHost->GetContext();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<TextFieldTheme>(tmpHost->GetThemeScopeId());
+    textFieldTheme_ = theme;
+    // for normal app add version protection, enable keyboard as default start from API 10 or higher
+    if (context->GetMinPlatformVersion() > KEYBOARD_DEFAULT_API) {
+        if (theme) {
+            independentControlKeyboard_ = theme->GetIndependentControlKeyboard();
+            needToRequestKeyboardOnFocus_ = !independentControlKeyboard_;
+        } else {
+            needToRequestKeyboardOnFocus_ = true;
+        }
+    }
+}
+
 std::string TextFieldPattern::GetTextColor() const
 {
     auto theme = GetTheme();
@@ -7966,15 +7978,10 @@ void TextFieldPattern::FromJson(const std::unique_ptr<JsonValue>& json)
 
 void TextFieldPattern::SetAccessibilityAction()
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto accessibilityProperty = host->GetAccessibilityProperty<TextFieldAccessibilityProperty>();
-    CHECK_NULL_VOID(accessibilityProperty);
-    accessibilityProperty->SetAccessibilityGroup(true);
-    accessibilityProperty->SetErrorText(UtfUtils::Str16DebugToStr8(GetErrorTextString()));
     SetAccessibilityActionOverlayAndSelection();
     SetAccessibilityActionGetAndSetCaretPosition();
     SetAccessibilityMoveTextAction();
+    SetAccessibilityErrorText();
 }
 
 void TextFieldPattern::SetAccessibilityActionOverlayAndSelection()
@@ -8087,6 +8094,19 @@ void TextFieldPattern::SetAccessibilityMoveTextAction()
         auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
         pattern->SetCaretPosition(caretPosition);
     });
+}
+
+void TextFieldPattern::SetAccessibilityErrorText()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<TextFieldAccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    if (!IsDisabled() && IsShowError()) {
+        accessibilityProperty->SetErrorText(UtfUtils::Str16DebugToStr8(GetErrorTextString()));
+    } else {
+        accessibilityProperty->SetErrorText("");
+    }
 }
 
 void TextFieldPattern::StopEditing()
@@ -8503,18 +8523,6 @@ void TextFieldPattern::OnAttachToFrameNode()
         frameNode->OnAccessibilityEvent(AccessibilityEventType::TEXT_SELECTION_UPDATE);
     };
     selectController_->SetOnAccessibility(std::move(onTextSelectorChange));
-
-    auto theme = pipeline->GetTheme<TextFieldTheme>(frameNode->GetThemeScopeId());
-    textFieldTheme_ = theme;
-    // for normal app add version protection, enable keyboard as default start from API 10 or higher
-    if (pipeline->GetMinPlatformVersion() > KEYBOARD_DEFAULT_API) {
-        if (theme) {
-            independentControlKeyboard_ = theme->GetIndependentControlKeyboard();
-            needToRequestKeyboardOnFocus_ = !independentControlKeyboard_;
-        } else {
-            needToRequestKeyboardOnFocus_ = true;
-        }
-    }
 }
 
 bool TextFieldPattern::NeedPaintSelect()
@@ -10795,6 +10803,8 @@ void TextFieldPattern::AddInsertCommand(const std::u16string& insertValue, Input
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_SCOPED_TRACE("TextInput[%d]AddInsertCommand freeze:[%d] previewText:[%d]", host->GetId(),
+        host->IsFreeze(), GetIsPreviewText());
     if (reason != InputReason::PASTE) {
         if (!HasFocus()) {
             int32_t frameId = host->GetId();
@@ -11931,5 +11941,30 @@ Offset TextFieldPattern::GetCaretClickLocalOffset(const Offset& offset)
         localOffset.SetY(contentRect_.Bottom() - PreferredLineHeight() / 2.0f);
     }
     return localOffset;
+}
+
+bool TextFieldPattern::ShouldSkipUpdateParagraph()
+{
+    if (IsDragging() || !dragNode_ || !IsNormalInlineState()) {
+        return false;
+    }
+    auto dragNodePattern = AceType::DynamicCast<TextDragPattern>(dragNode_->GetPattern());
+    CHECK_NULL_RETURN(dragNodePattern, false);
+    if (!dragNodePattern->IsAnimating()) {
+        return false;
+    }
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Destroy the paragraph after the drag floating animation ends.");
+    dragNodePattern->UpdateAnimatingParagraph();
+    return true;
+}
+
+void TextFieldPattern::UpdateParagraphForDragNode(bool skipUpdate)
+{
+    if (IsDragging() || !dragNode_ || skipUpdate) {
+        return;
+    }
+    auto dragNodePattern = AceType::DynamicCast<TextDragPattern>(dragNode_->GetPattern());
+    CHECK_NULL_VOID(dragNodePattern);
+    dragNodePattern->UpdateParagraph(paragraph_);
 }
 } // namespace OHOS::Ace::NG

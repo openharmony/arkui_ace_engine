@@ -213,7 +213,7 @@ void TextTimerPattern::RegisterVisibleAreaChangeCallback()
         pattern->OnVisibleAreaChange(visible);
     };
     std::vector<double> ratioList = {0.0};
-    pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false);
+    pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false, true);
 }
 
 void TextTimerPattern::OnVisibleAreaChange(bool visible)

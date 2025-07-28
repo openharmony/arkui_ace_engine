@@ -201,7 +201,7 @@ HWTEST_F(SwiperAccessibilityTestNg, UpdateFocusable001, TestSize.Level1)
     auto indicatorFocusHub = indicatorNode_->GetOrCreateFocusHub();
     EXPECT_TRUE(indicatorFocusHub->GetFocusable());
     auto accessibilityProperty = indicatorNode_->GetAccessibilityProperty<AccessibilityProperty>();
-    EXPECT_EQ(accessibilityProperty->GetAccessibilityLevel(), "auto");
+    EXPECT_EQ(accessibilityProperty->GetAccessibilityLevel(), "yes");
 
     frameNode_->RemoveChildAtIndex(0);
     FlushUITasks();
@@ -214,6 +214,16 @@ HWTEST_F(SwiperAccessibilityTestNg, UpdateFocusable001, TestSize.Level1)
 
     FlushUITasks();
     EXPECT_FALSE(indicatorFocusHub->GetFocusable());
-    EXPECT_EQ(accessibilityProperty->GetAccessibilityLevel(), "no");
+}
+
+/**
+ * @tc.name: IndicatorAccessibilityProperty001
+ * @tc.desc: Test IndicatorAccessibilityProperty GetAccessibilityLevel
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAccessibilityTestNg, IndicatorAccessibilityProperty001, TestSize.Level1)
+{
+    auto indicatorAccessibilityProperty = AceType::MakeRefPtr<IndicatorAccessibilityProperty>();
+    EXPECT_EQ(indicatorAccessibilityProperty->GetAccessibilityLevel(), "auto");
 }
 } // namespace OHOS::Ace::NG

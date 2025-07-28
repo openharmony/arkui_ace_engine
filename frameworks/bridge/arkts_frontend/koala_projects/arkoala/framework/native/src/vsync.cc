@@ -18,11 +18,8 @@ void vsyncCallback(Ark_PipelineContext context) {
 }
 
 void impl_SetVsyncCallback(Ark_NativePointer pipelineContext) {
-    Ark_PipelineContext pipelineContextCast = (Ark_PipelineContext)pipelineContext;
-    auto api = GetArkUIExtendedNodeAPI();
-    if (api) {
-        api->setVsyncCallback(pipelineContextCast, vsyncCallback);
-    }
+    Ark_PipelineContext pipelineContextCast = (Ark_PipelineContext) pipelineContext;
+    GetArkUIExtendedNodeAPI()->setVsyncCallback(pipelineContextCast, vsyncCallback);
 }
 KOALA_INTEROP_V1(SetVsyncCallback, Ark_NativePointer)
 
@@ -52,10 +49,6 @@ KOALA_INTEROP_V1(UnblockVsyncWait, Ark_NativePointer)
 Ark_NativePointer impl_GetPipelineContext(Ark_NativePointer nodePtr)
 {
     Ark_NodeHandle nodePtrCast = (Ark_NodeHandle) nodePtr;
-    auto api = GetArkUIExtendedNodeAPI();
-    if (api) {
-        return api->getPipelineContext(nodePtrCast);
-    }
-    return nullptr;
+    return GetArkUIExtendedNodeAPI()->getPipelineContext(nodePtrCast);
 }
 KOALA_INTEROP_1(GetPipelineContext, Ark_NativePointer, Ark_NativePointer)

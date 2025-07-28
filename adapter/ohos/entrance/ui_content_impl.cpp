@@ -1707,7 +1707,8 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
 #endif
     // create container
     if (runtime_) {
-        instanceId_ = Container::GenerateId<STAGE_CONTAINER>();
+        instanceId_ = isDynamicRender_ ?
+            Container::GenerateId<DC_CONTAINER>() : Container::GenerateId<STAGE_CONTAINER>();
     } else {
         instanceId_ = Container::GenerateId<FA_SUBWINDOW_CONTAINER>();
     }
@@ -2778,12 +2779,14 @@ void UIContentImpl::InitializeDisplayAvailableRect(const RefPtr<Platform::AceCon
     auto& DMManager = Rosen::DisplayManager::GetInstance();
     auto window = container->GetUIWindow(instanceId_);
     uint64_t displayId = 0;
-    if (window && window->GetDisplayId() != DISPLAY_ID_INVALID) {
-        displayId = window->GetDisplayId();
-        listenedDisplayId_ = displayId;
-    } else if (window) {
-        TAG_LOGW(AceLogTag::ACE_WINDOW, "initialize display available rect invalid. window name is %{public}s",
-            window->GetWindowName().c_str());
+    if (window) {
+        if (window->GetDisplayId() != DISPLAY_ID_INVALID) {
+            displayId = window->GetDisplayId();
+            listenedDisplayId_ = displayId;
+        } else {
+            TAG_LOGW(AceLogTag::ACE_WINDOW, "initialize display available rect invalid. window name is %{public}s",
+                window->GetWindowName().c_str());
+        }
     }
     availableAreaChangedListener_ = new AvailableAreaChangedListener(instanceId_);
     DMManager.RegisterAvailableAreaListener(availableAreaChangedListener_, displayId);
@@ -2816,7 +2819,9 @@ void UIContentImpl::Foreground()
         PerfMonitor::GetPerfMonitor()->SetAppStartStatus();
         PerfMonitor::GetPerfMonitor()->NotifyAppJankStatsBegin();
     }
-    ContainerScope::UpdateRecentForeground(instanceId_);
+    if (!isDynamicRender_) {
+        ContainerScope::UpdateRecentForeground(instanceId_);
+    }
     Platform::AceContainer::OnShow(instanceId_);
     // set the flag isForegroundCalled to be true
     auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -2867,7 +2872,9 @@ SerializedGesture UIContentImpl::GetFormSerializedGesture()
 void UIContentImpl::Focus()
 {
     LOGI("[%{public}s][%{public}s][%{public}d]: window focus", bundleName_.c_str(), moduleName_.c_str(), instanceId_);
-    ContainerScope::UpdateRecentActive(instanceId_);
+    if (!isDynamicRender_) {
+        ContainerScope::UpdateRecentActive(instanceId_);
+    }
     Platform::AceContainer::OnActive(instanceId_);
     CHECK_NULL_VOID(window_);
     std::string windowName = window_->GetWindowName();

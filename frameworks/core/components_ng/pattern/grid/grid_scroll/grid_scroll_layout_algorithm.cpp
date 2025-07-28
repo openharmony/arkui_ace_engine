@@ -89,6 +89,10 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             frameSize_.SetWidth(round(frameSize_.Width()));
             frameSize_.SetHeight(round(frameSize_.Height()));
         }
+        if (pipeline && pipeline->GetFrontendType() == FrontendType::ARK_TS) {
+            currentItemRowSpan_ = 1;
+            currentItemColSpan_ = 1;
+        }
     }
 
     InitialItemsCrossSize(gridLayoutProperty, frameSize_, info_.GetChildrenCount());
@@ -1160,7 +1164,8 @@ inline void UpdateStartIndexByStartLine(GridLayoutInfo& info_)
 }
 } // namespace
 
-bool GridScrollLayoutAlgorithm::MeasureExistingLine(int32_t line, float& mainLength, int32_t& endIdx)
+bool GridScrollLayoutAlgorithm::MeasureExistingLine(
+    int32_t line, float& mainLength, int32_t& endIdx, bool isScrollableSpringMotionRunning)
 {
     auto it = info_.gridMatrix_.find(line);
     if (it == info_.gridMatrix_.end() || info_.lineHeightMap_.find(line) == info_.lineHeightMap_.end()) {
@@ -1196,6 +1201,11 @@ bool GridScrollLayoutAlgorithm::MeasureExistingLine(int32_t line, float& mainLen
     }
 
     if (NonNegative(cellAveLength_)) { // Means at least one item has been measured
+        auto deltaHeight = info_.lineHeightMap_[line] - cellAveLength_;
+        if (Positive(deltaHeight) && isScrollableSpringMotionRunning) {
+            mainLength += deltaHeight;
+            info_.currentOffset_ = mainLength;
+        }
         info_.lineHeightMap_[line] = cellAveLength_;
         mainLength += cellAveLength_ + mainGap_;
     }
@@ -1215,8 +1225,13 @@ bool GridScrollLayoutAlgorithm::UseCurrentLines(
     bool runOutOfRecord = false;
     // Measure grid items row by row
     int32_t tempEndIndex = -1;
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, runOutOfRecord);
+    auto pattern = host->GetPattern<GridPattern>();
+    CHECK_NULL_RETURN(pattern, runOutOfRecord);
+    auto isScrollableSpringMotionRunning = pattern->IsScrollableSpringMotionRunning();
     while (LessNotEqual(mainLength, mainSize)) {
-        if (!MeasureExistingLine(++currentMainLineIndex_, mainLength, tempEndIndex)) {
+        if (!MeasureExistingLine(++currentMainLineIndex_, mainLength, tempEndIndex, isScrollableSpringMotionRunning)) {
             runOutOfRecord = true;
             break;
         }

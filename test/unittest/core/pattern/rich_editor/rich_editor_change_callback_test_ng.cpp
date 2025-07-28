@@ -1700,4 +1700,54 @@ HWTEST_F(RichEditorChangeCallbackTestNg, HandleSurfaceChanged001, TestSize.Level
     }
 }
 
+/**
+ * @tc.name: IsStopBackPress001
+ * @tc.desc: test IsStopBackPress
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorChangeCallbackTestNg, IsStopBackPress001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->isStopBackPress_ = false;
+    richEditorPattern->isCustomKeyboardAttached_ = true;
+    auto result = richEditorPattern->OnBackPressed();
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: OnBackPressed001
+ * @tc.desc: test OnBackPressed
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorChangeCallbackTestNg, OnBackPressed001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    EXPECT_EQ(richEditorPattern->OnBackPressed(), false);
+
+    richEditorPattern->textSelector_.Update(0, 1);
+    richEditorPattern->CalculateHandleOffsetAndShowOverlay();
+    richEditorPattern->ShowSelectOverlay(
+        richEditorPattern->textSelector_.firstHandle, richEditorPattern->textSelector_.secondHandle, false);
+    EXPECT_TRUE(richEditorPattern->SelectOverlayIsOn());
+    RectF rect(0, 0, 5, 5);
+    richEditorPattern->CreateHandles();
+    richEditorPattern->textSelector_.Update(0, 5);
+    richEditorPattern->textSelector_.Update(0, 5);
+    richEditorPattern->selectOverlay_->OnHandleMoveDone(rect, true);
+    EXPECT_EQ(richEditorPattern->OnBackPressed(), true);
+
+    auto func = []() {};
+    richEditorPattern->SetCustomKeyboard(func);
+    richEditorPattern->RequestCustomKeyboard();
+    EXPECT_EQ(richEditorPattern->OnBackPressed(), true);
+
+    richEditorPattern->imeShown_ = true;
+    EXPECT_EQ(richEditorPattern->OnBackPressed(), true);
+}
+
 } // namespace OHOS::Ace::NG

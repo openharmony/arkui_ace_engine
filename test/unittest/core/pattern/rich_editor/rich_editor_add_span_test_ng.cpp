@@ -168,6 +168,14 @@ HWTEST_F(RichEditorAddSpanTestNg, AddImageSpan002, TestSize.Level1)
     EXPECT_EQ(index, 1);
     EXPECT_EQ(richEditorPattern->caretPosition_, 2);
     EXPECT_FALSE(richEditorPattern->textSelector_.IsValid());
+
+    GestureEventFunc callback = [](GestureEvent& info) {
+        info.SetPreventDefault(true);
+    };
+    options.userGestureOption.onClick = callback;
+    options.offset = 2;
+    index = richEditorPattern->AddImageSpan(options, TextChangeReason::UNKNOWN, false, 0);
+    EXPECT_EQ(index, 2);
 }
 
 /**
@@ -655,6 +663,47 @@ HWTEST_F(RichEditorAddSpanTestNg, AddImageSpan004, TestSize.Level1)
     auto hasVerticalAlign = verticalAlign.has_value();
     EXPECT_TRUE(hasVerticalAlign);
     EXPECT_EQ(verticalAlign.value(), VerticalAlign::FOLLOW_PARAGRAPH);
+}
+
+/**
+ * @tc.name: ResetFirstNodeStyle001
+ * @tc.desc: test ResetFirstNodeStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorAddSpanTestNg, ResetFirstNodeStyle001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get richEditor controller
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
+
+    /**
+     * @tc.steps: step2. initalize symbol span properties
+     */
+    TextStyle style;
+    style.SetFontSize(FONT_SIZE_VALUE);
+    SymbolSpanOptions options;
+    options.symbolId = SYMBOL_ID;
+    options.style = style;
+
+    /**
+     * @tc.steps: step3. add symbol span
+     */
+    auto index1 = richEditorController->AddSymbolSpan(options);
+    EXPECT_EQ(index1, 0);
+    auto index2 = richEditorController->AddSymbolSpan(options);
+    EXPECT_EQ(index2, 1);
+    auto index3 = richEditorController->AddSymbolSpan(options);
+    EXPECT_EQ(index3, 2);
+    auto index4 = richEditorController->AddSymbolSpan(options);
+    EXPECT_EQ(index4, 3);
+    EXPECT_EQ(contentNode->GetChildren().size(), 4);
 }
 
 } // namespace OHOS::Ace::NG

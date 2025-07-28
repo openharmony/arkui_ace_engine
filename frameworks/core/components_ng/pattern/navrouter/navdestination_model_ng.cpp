@@ -244,6 +244,14 @@ void CreateToolBarNode(const RefPtr<NavDestinationGroupNode>& navDestinationNode
     navDestinationNode->UpdatePrevToolBarIsCustom(false);
 }
 
+RefPtr<NG::FrameNode> NavDestinationModelNG::CreateFrameNode(int32_t nodeId)
+{
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVDESTINATION_VIEW_ETS_TAG, nodeId);
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    return navDestinationNode;
+}
+
 void NavDestinationModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -795,9 +803,8 @@ void NavDestinationModelNG::SetTitleHeight(const Dimension& titleHeight, bool is
     }
 }
 
-void NavDestinationModelNG::SetTitleHeight(const RefPtr<ResourceObject>& resObj, bool isValid)
+void NavDestinationModelNG::SetTitleHeight(const Dimension& height, const RefPtr<ResourceObject>& resObj)
 {
-    CalcDimension height = ParseTitleHeight(resObj);
     SetTitleHeight(height);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -808,20 +815,12 @@ void NavDestinationModelNG::SetTitleHeight(const RefPtr<ResourceObject>& resObj,
     CHECK_NULL_VOID(titleBarNode);
     auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
     CHECK_NULL_VOID(titleBarLayoutProperty);
-    if (isValid) {
-        UpdateTitleHeight(titleBarNode, resObj);
-    } else {
-        titleBarLayoutProperty->ResetTitleHeight();
-    }
+    UpdateTitleHeight(titleBarNode, resObj);
 }
 
-CalcDimension NavDestinationModelNG::ParseTitleHeight(const RefPtr<ResourceObject>& resObj)
+CalcDimension NavDestinationModelNG::ParseTitleHeight(
+    const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& resObj)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_RETURN(frameNode, Dimension());
-    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
-    CHECK_NULL_RETURN(navDestinationGroupNode, Dimension());
-    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationGroupNode->GetTitleBarNode());
     CHECK_NULL_RETURN(titleBarNode, Dimension());
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
     CHECK_NULL_RETURN(titleBarPattern, Dimension());
@@ -862,7 +861,7 @@ void NavDestinationModelNG::UpdateTitleHeight(
         CHECK_NULL_VOID(titleBarNode);
         auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
         CHECK_NULL_VOID(titleBarLayoutProperty);
-        CalcDimension height = ParseTitleHeight(resObj);
+        CalcDimension height = ParseTitleHeight(titleBarNode, resObj);
         titleBarLayoutProperty->UpdateTitleHeight(height);
         titleBarNode->MarkModifyDone();
         titleBarNode->MarkDirtyNode();

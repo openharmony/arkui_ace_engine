@@ -16,7 +16,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 void ImageCommonMethods::ApplyColorFilterValues(
-    Ark_NativePointer node, const Ark_Union_ColorFilter_DrawingColorFilter* value)
+    Ark_NativePointer node, const Opt_Union_ColorFilter_DrawingColorFilter* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
