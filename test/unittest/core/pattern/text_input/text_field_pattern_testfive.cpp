@@ -1330,7 +1330,6 @@ HWTEST_F(TextFieldPatternTestFive, TextFieldMultiThreadTest01, TestSize.Level0)
     pattern_->HandleSetSelectionMultiThread(0, 0, false);
     EXPECT_EQ(pattern_->updateCaretInfoToControllerMultiThread_, true);
 
-    pattern_->OnModifyDoneMultiThread();
     pattern_->InitSurfaceChangedCallbackMultiThread();
     EXPECT_EQ(pattern_->initSurfaceChangedCallbackMultiThread_, true);
     pattern_->InitSurfaceChangedCallbackMultiThreadAction();
