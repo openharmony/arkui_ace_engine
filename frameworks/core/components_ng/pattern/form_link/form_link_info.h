@@ -36,17 +36,12 @@ public:
         formLinkRect_ = rect;
     }
 
-    std::unique_ptr<OHOS::Ace::JsonValue> ToJsonObject() const
+    std::string ToString()
     {
         auto json = JsonUtil::Create(true);
         json->Put("action", action_.c_str());
         json->Put("formLinkRect", formLinkRect_.ToString().c_str());
-        return json;
-    }
-
-    std::string ToString() const
-    {
-        return ToJsonObject()->ToString();
+        return json->ToString();
     }
 
 private:

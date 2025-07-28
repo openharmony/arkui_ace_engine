@@ -43,24 +43,18 @@ public:
     void SetBorder(const BorderStyle& borderStyle, const Dimension& borderWidth) override;
     void SetModeChangeEvent(ChangeEvent&& modeChangeEvent) override;
 
-// static methods.
-public:
-    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
-    static void SetPanelMode(FrameNode* frameNode, const std::optional<PanelMode>& mode);
-    static void SetPanelMiniHeight(FrameNode* frameNode, const std::optional<Dimension>& miniHeight);
-    static void SetPanelHalfHeight(FrameNode* frameNode, const std::optional<Dimension>& halfHeight);
+    static void SetPanelMode(FrameNode* frameNode, PanelMode mode);
+    static void SetPanelMiniHeight(FrameNode* frameNode, const Dimension& miniHeight);
+    static void SetPanelHalfHeight(FrameNode* frameNode, const Dimension& halfHeight);
     static void ResetPanelHalfHeight(FrameNode* frameNode);
-    static void SetPanelFullHeight(FrameNode* frameNode, const std::optional<Dimension>& fullHeight);
+    static void SetPanelFullHeight(FrameNode* frameNode, const Dimension& fullHeight);
     static void ResetPanelFullHeight(FrameNode* frameNode);
-    static void SetPanelBackgroundMask(FrameNode* frameNode, const std::optional<Color>& backgroundMask);
-    static void SetPanelType(FrameNode* frameNode, const std::optional<PanelType>& type);
-    static void SetPanelCustomHeight(FrameNode* frameNode, const std::optional<CalcDimension>& customHeight);
+    static void SetPanelBackgroundMask(FrameNode* frameNode, const Color& backgroundMask);
+    static void SetPanelType(FrameNode* frameNode, PanelType type);
+    static void SetPanelCustomHeight(FrameNode* frameNode, const CalcDimension& customHeight);
     static void SetShowCloseIcon(FrameNode* frameNode, bool showCloseIcon);
     static void SetHasDragBar(FrameNode* frameNode, bool hasDragBar);
     static void SetIsShow(FrameNode* frameNode, bool isShow);
-    static void SetOnSizeChange(FrameNode* frameNode, ChangeEvent&& changeEvent);
-    static void SetOnHeightChange(FrameNode* frameNode, HeightChangeEvent&& onHeightChange);
-    static void SetModeChangeEvent(FrameNode* frameNode, ChangeEvent&& modeChangeEvent);
 
 private:
     static RefPtr<SlidingPanelNode> GetOrCreateSlidingPanelNode(

@@ -243,4 +243,5 @@ const GENERATED_ArkUIRectShapeAccessor* GetRectShapeAccessor()
     };
     return &RectShapeAccessorImpl;
 }
+
 }

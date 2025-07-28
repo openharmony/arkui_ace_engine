@@ -30,7 +30,7 @@ void LinearIndicatorLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json
         return;
     }
 
-    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetThemeManager()->GetTheme<NG::LinearIndicatorTheme>();
     CHECK_NULL_VOID(theme);

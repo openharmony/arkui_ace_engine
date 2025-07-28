@@ -113,7 +113,7 @@ private:
 
 void PostTask(const TaskExecutor::Task& task, TaskExecutor::TaskType type, const std::string& name)
 {
-    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto taskExecutor = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
@@ -286,7 +286,7 @@ void FormPattern::UpdateBackgroundColorWhenUnTrustForm()
 
 void FormPattern::HandleSnapshot(uint32_t delayTime, const std::string& nodeIdStr)
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto executor = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID(executor);
@@ -2293,7 +2293,7 @@ void FormPattern::DoSkeletonAnimation()
         TAG_LOGD(AceLogTag::ACE_FORM, "DoSkeletonAnimation finishCallBack");
     };
 
-    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     AnimationOption option = AnimationOption();
     option.SetDuration(FORM_UNLOCK_ANIMATION_DUATION);
@@ -2398,7 +2398,7 @@ void FormPattern::InitAddUninstallAndSurfaceNodeCallback(int32_t instanceID)
         [weak = WeakClaim(this), instanceID](
             const std::shared_ptr<Rosen::RSSurfaceNode>& node, const AAFwk::Want& want) {
             ContainerScope scope(instanceID);
-            auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+            auto pipeline = PipelineContext::GetCurrentContext();
             CHECK_NULL_VOID(pipeline);
             auto executor = pipeline->GetTaskExecutor();
             CHECK_NULL_VOID(executor);

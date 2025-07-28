@@ -48,7 +48,7 @@ void SetTimePickerOptionsImpl(Ark_NativePointer node,
     if (pickerFormat.has_value() && pickerFormat.value() == TimePickerFormat::HOUR_MINUTE_SECOND) {
         showSeconds = true;
     }
-    TimePickerModelNG::SetHasSecond(frameNode, showSeconds);
+    // TimePickerModelNG::SetHasSecond(frameNode, showSeconds);
 
     auto selected = options ?
         Converter::OptConvert<PickerTime>(options->value.selected) :
@@ -267,8 +267,8 @@ void DigitalCrownSensitivityImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = EnumToInt(value ? Converter::OptConvert<CrownSensitivity>(*value) : std::nullopt);
-    TimePickerModelNG::SetDigitalCrownSensitivity(frameNode, convValue);
+    // auto convValue = EnumToInt(value ? Converter::OptConvert<CrownSensitivity>(*value) : std::nullopt);
+    // TimePickerModelNG::SetDigitalCrownSensitivity(frameNode, convValue);
 }
 void EnableCascadeImpl(Ark_NativePointer node,
                        const Opt_Boolean* value)
@@ -288,17 +288,17 @@ void _onChangeEvent_selectedImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(callback);
-    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onEvent = [arkCallback = CallbackHelper(*callback), weakNode](const BaseEventInfo* event) {
-        CHECK_NULL_VOID(event);
-        const auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(event);
-        CHECK_NULL_VOID(eventInfo);
-        auto selectedStr = eventInfo->GetSelectedStr();
-        auto result = Converter::ArkValue<Ark_Date>(selectedStr);
-        PipelineContext::SetCallBackNode(weakNode);
-        arkCallback.Invoke(result);
-    };
-    TimePickerModelNG::SetChangeEvent(frameNode, std::move(onEvent));
+    // WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    // auto onEvent = [arkCallback = CallbackHelper(*callback), weakNode](const BaseEventInfo* event) {
+    //     CHECK_NULL_VOID(event);
+    //     const auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(event);
+    //     CHECK_NULL_VOID(eventInfo);
+    //     auto selectedStr = eventInfo->GetSelectedStr();
+    //     auto result = Converter::ArkValue<Ark_Date>(selectedStr);
+    //     PipelineContext::SetCallBackNode(weakNode);
+    //     arkCallback.Invoke(result);
+    // };
+    // TimePickerModelNG::SetChangeEvent(frameNode, std::move(onEvent));
 }
 } // TimePickerAttributeModifier
 const GENERATED_ArkUITimePickerModifier* GetTimePickerModifier()

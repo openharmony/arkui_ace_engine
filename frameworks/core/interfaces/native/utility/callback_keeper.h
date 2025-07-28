@@ -18,10 +18,10 @@
 
 #pragma once
 
-#include <variant>
 #include "base/log/log_wrapper.h"
 #include "core/interfaces/native/utility/base_keeper.h"
 #include "core/interfaces/native/utility/callback_helper.h"
+#include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG {
 template<typename TCallbackType>
@@ -37,18 +37,23 @@ private:
 };
 
 namespace {
-using ReverseResultHandler = std::variant<std::function<void()>, std::function<void(const void*)>,
-    std::function<void(Ark_Boolean)>, std::function<void(Ark_Number)>, std::function<void(Ark_Number, Ark_Number)>>;
+using ReverseResultHandler = std::variant<
+    std::function<void()>,
+    std::function<void(const void *)>,
+    std::function<void(Ark_Boolean)>,
+    std::function<void(Ark_Number)>,
+    std::function<void(Ark_Number, Ark_Number)>
+>;
 }
 
 class CallbackKeeper : public BaseKeeper<ReverseResultHandler> {
 public:
-    using AnyResultHandlerType = std::function<void(const void*)>;
+    using AnyResultHandlerType = std::function<void(const void *)>;
     using ReverseHandler = std::function<void()>;
 
-    template<typename ArkResultType, typename ContinuationType, typename CallbackHelper, typename... Params>
+    template <typename ArkResultType, typename ContinuationType, typename CallbackHelper, typename... Params>
     static void InvokeWithResultHandler(
-        std::function<void(const void*)>&& handler, const CallbackHelper& helper, Params&&... args)
+        std::function<void(const void *)> &&handler, const CallbackHelper &helper, Params&&... args)
     {
         // create continuation
         // register handler
@@ -57,9 +62,9 @@ public:
         Release(continuation.resource.resourceId);
     }
 
-    template<typename ArkResultType, typename ContinuationType, typename CallbackHelper, typename... Params>
+    template <typename ArkResultType, typename ContinuationType, typename CallbackHelper, typename... Params>
     static void InvokeWithResultHandlerAsync(
-        std::function<void(const void*)>&& handler, const CallbackHelper& helper, Params&&... args)
+        std::function<void(const void *)> &&handler, const CallbackHelper &helper, Params&&... args)
     {
         // create continuation
         // register handler
@@ -70,13 +75,15 @@ public:
 
     // This defines the reverse callback for the specific handler type.
     // Possible the handler types are listed in ReverseResultHandler type
-    template<typename CallbackType, typename FinalHandlerType>
+    template <typename CallbackType, typename FinalHandlerType>
     static CallbackType RegisterReverseCallback(FinalHandlerType handler, bool autoHold = true)
     {
         // create callback resource
-        CallbackType callback { .resource = GetNextResource(),
+        CallbackType callback {
+            .resource = GetNextResource(),
             .call = &ReceiveResult<FinalHandlerType>,
-            .callSync = &ReceiveResultSync<FinalHandlerType> };
+            .callSync = &ReceiveResultSync<FinalHandlerType>
+        };
 
         // register handler
         storage_[callback.resource.resourceId] = { autoHold ? 1 : 0, std::move(ReverseResultHandler(handler)) };
@@ -84,26 +91,26 @@ public:
     }
 
     // This defines the reverse callback without parameters.
-    template<typename CallbackType>
+    template <typename CallbackType>
     static CallbackType DefineReverseCallback(ReverseHandler handler, bool autoHold = true)
     {
         return RegisterReverseCallback<CallbackType, ReverseHandler>(handler, autoHold);
     }
 
-    template<typename CallbackType>
+    template <typename CallbackType>
     static void ReleaseReverseCallback(CallbackType callback)
     {
         Release(callback.resource.resourceId);
     }
 
-    template<typename CallbackType = Callback_Void>
-    static AutoCallbackKeeper<CallbackType> Claim(ReverseHandler&& handler)
+    template <typename CallbackType = Callback_Void>
+    static AutoCallbackKeeper<CallbackType> Claim(ReverseHandler &&handler)
     {
         return AutoCallbackKeeper<CallbackType>(std::move(handler));
     }
 
 private:
-    template<typename FinalHandlerType, typename... Params>
+    template <typename FinalHandlerType, typename... Params>
     static void ReceiveResult(const Ark_Int32 resourceId, Params... args)
     {
         auto it = storage_.find(resourceId);
@@ -114,7 +121,7 @@ private:
         auto reverseResultHandler = it->second.data;
         if (auto handlerPtr = std::get_if<FinalHandlerType>(&reverseResultHandler); handlerPtr) {
             if constexpr (std::is_same_v<FinalHandlerType, AnyResultHandlerType>) {
-                auto arg0 = std::get<0>(std::tuple<Params...> { args... });
+                auto arg0 = std::get<0>(std::tuple<Params...>{args...});
                 (*handlerPtr)(reinterpret_cast<const void*>(&arg0));
             } else {
                 (*handlerPtr)(std::forward<Params>(args)...);
@@ -132,8 +139,7 @@ private:
 
 template<typename TCallbackType>
 inline AutoCallbackKeeper<TCallbackType>::AutoCallbackKeeper(std::function<void()>&& handler)
-    : arkCallback_(CallbackKeeper::DefineReverseCallback<TCallbackType>(std::move(handler)))
-{}
+    : arkCallback_(CallbackKeeper::DefineReverseCallback<TCallbackType>(std::move(handler))) {}
 
 template<typename TCallbackType>
 inline AutoCallbackKeeper<TCallbackType>::~AutoCallbackKeeper()

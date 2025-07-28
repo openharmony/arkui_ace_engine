@@ -37,8 +37,6 @@ public:
     {
         return screenSession_;
     }
-
-    void SetScreenSession(const sptr<Rosen::ScreenSession>& screenSession);
     uint32_t GetWindowPatternType() const override;
 
 protected:

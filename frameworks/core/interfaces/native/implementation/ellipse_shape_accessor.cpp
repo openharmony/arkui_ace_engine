@@ -151,4 +151,5 @@ const GENERATED_ArkUIEllipseShapeAccessor* GetEllipseShapeAccessor()
     };
     return &EllipseShapeAccessorImpl;
 }
+
 }

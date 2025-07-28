@@ -120,4 +120,5 @@ const GENERATED_ArkUIPinchGestureEventAccessor* GetPinchGestureEventAccessor()
     };
     return &PinchGestureEventAccessorImpl;
 }
+
 }

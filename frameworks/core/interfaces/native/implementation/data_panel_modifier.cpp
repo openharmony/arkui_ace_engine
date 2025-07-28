@@ -42,7 +42,7 @@ namespace OHOS::Ace::NG::Converter {
 struct DataPanelOptions {
     std::optional<std::vector<double>> values;
     std::optional<double> max;
-    std::optional<DataPanelType> type;
+    // std::optional<DataPanelType> type;
 };
 
 template<>
@@ -74,7 +74,7 @@ DataPanelOptions Convert(const Ark_DataPanelOptions& src)
     return {
         .values = doubleArray,
         .max = max,
-        .type = Converter::OptConvert<DataPanelType>(src.type)
+        // .type = Converter::OptConvert<DataPanelType>(src.type)
     };
 }
 
@@ -140,10 +140,11 @@ namespace DataPanelModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    auto frameNode = DataPanelModelNG::CreateFrameNode(id);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    // auto frameNode = DataPanelModelNG::CreateFrameNode(id);
+    // CHECK_NULL_RETURN(frameNode, nullptr);
+    // frameNode->IncRefCount();
+    // return AceType::RawPtr(frameNode);
+    return nullptr;
 }
 } // DataPanelModifier
 namespace DataPanelInterfaceModifier {
@@ -157,7 +158,7 @@ void SetDataPanelOptionsImpl(Ark_NativePointer node,
     if (panelOptions.has_value()) {
         DataPanelModelStatic::SetValues(frameNode, panelOptions.value().values);
         DataPanelModelStatic::SetMax(frameNode, panelOptions.value().max);
-        DataPanelModelStatic::SetType(frameNode, EnumToInt(panelOptions.value().type));
+        // DataPanelModelStatic::SetType(frameNode, EnumToInt(panelOptions.value().type));
     } else {
         DataPanelModelStatic::SetValues(frameNode, std::nullopt);
         DataPanelModelStatic::SetMax(frameNode, std::nullopt);

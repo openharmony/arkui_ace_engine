@@ -62,4 +62,5 @@ const GENERATED_ArkUIRotationGestureEventAccessor* GetRotationGestureEventAccess
     };
     return &RotationGestureEventAccessorImpl;
 }
+
 }

@@ -123,7 +123,6 @@ public:
         json->PutExtAttr("itemSpace",
             propItemSpace_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
         json->PutExtAttr("cachedCount", propCachedCount_.value_or(1), filter);
-        json->PutExtAttr("cachedIsShown", GetCachedIsShownValue(false) ? "true" : "false", filter);
         json->PutExtAttr("displayMode",
             propDisplayMode_.value_or(SwiperDisplayMode::STRETCH) == SwiperDisplayMode::AUTO_LINEAR ?
             "SwiperDisplayMode.AutoLinear" : "SwiperDisplayMode.Stretch", filter);
@@ -155,6 +154,7 @@ public:
         json->PutExtAttr("arrowColor",
             propArrowColor_.value_or(Color::TRANSPARENT).ColorToString().c_str(), filter);
         json->PutExtAttr("loop", propLoop_.value_or(true) ? "true" : "false", filter);
+        json->PutExtAttr("indicatorInteractive", propIndicatorInteractive_.value_or(true) ? "true" : "false", filter);
         json->PutExtAttr("disableSwipe", GetDisableSwipe().value_or(false) ? "true" : "false", filter);
         json->PutExtAttr("swipeByGroup", propSwipeByGroup_.value_or(false) ? "true" : "false", filter);
     }

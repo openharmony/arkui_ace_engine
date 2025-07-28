@@ -234,4 +234,5 @@ const GENERATED_ArkUITransitionEffectAccessor* GetTransitionEffectAccessor()
     };
     return &TransitionEffectAccessorImpl;
 }
+
 }

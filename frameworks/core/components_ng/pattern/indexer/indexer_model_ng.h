@@ -79,15 +79,14 @@ public:
     static void SetAdaptiveWidth(FrameNode* frameNode, bool state);
     static void SetFontSize(FrameNode* frameNode, const Dimension& fontSize);
     static void SetFontWeight(FrameNode* frameNode, const FontWeight weight);
-    static void SetSelectedFont(FrameNode* frameNode, const std::optional<Dimension>& fontSize,
-        const std::optional<FontWeight>& fontWeight, const std::optional<std::vector<std::string>>& fontFamily,
-        const std::optional<OHOS::Ace::FontStyle>& fontStyle);
-    static void SetPopupFont(FrameNode* frameNode, const std::optional<Dimension>& fontSize,
-        const std::optional<FontWeight>& fontWeight, const std::optional<std::vector<std::string>>& fontFamily,
-        const std::optional<OHOS::Ace::FontStyle>& fontStyle);
-    static void SetFont(FrameNode* frameNode, const std::optional<Dimension>& fontSize,
-        const std::optional<FontWeight>& fontWeight, const std::optional<std::vector<std::string>>& fontFamily,
-        const std::optional<OHOS::Ace::FontStyle>& fontStyle);
+    static void SetSelectedFont(FrameNode* frameNode, std::optional<Dimension>& fontSize,
+        std::optional<FontWeight>& fontWeight, std::optional<std::vector<std::string>>& fontFamily,
+        std::optional<OHOS::Ace::FontStyle>& fontStyle);
+    static void SetPopupFont(FrameNode* frameNode, std::optional<Dimension>& fontSize,
+        std::optional<FontWeight>& fontWeight, std::optional<std::vector<std::string>>& fontFamily,
+        std::optional<OHOS::Ace::FontStyle>& fontStyle);
+    static void SetFont(FrameNode* frameNode, std::optional<Dimension>& fontSize, std::optional<FontWeight>& fontWeight,
+        std::optional<std::vector<std::string>>& fontFamily, std::optional<OHOS::Ace::FontStyle>& fontStyle);
     static void SetPopupUnselectedColor(FrameNode* frameNode, const std::optional<Color>& color);
     static void SetPopupItemBackground(FrameNode* frameNode, const std::optional<Color>& color);
     static void SetColor(FrameNode* frameNode, const std::optional<Color>& color);

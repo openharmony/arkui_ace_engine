@@ -150,8 +150,8 @@ DialogProperties CreateDialogProperties(const DialogPropsForUpdate props)
     dialogProps.backgroundBlurStyle = static_cast<int32_t>(
         Converter::OptConvert<BlurStyle>(props.backgroundBlurStyle).value_or(BlurStyle::COMPONENT_REGULAR));
     dialogProps.backgroundColor = Converter::OptConvert<Color>(props.backgroundColor);
-    dialogProps.enableHoverMode =
-        Converter::OptConvert<bool>(props.enableHoverMode);
+    // dialogProps.enableHoverMode =
+    //     Converter::OptConvert<bool>(props.enableHoverMode).value_or(dialogProps.enableHoverMode);
     dialogProps.hoverModeArea = Converter::OptConvert<HoverModeAreaType>(props.hoverModeArea);
     dialogProps.autoCancel = Converter::OptConvert<bool>(props.autoCancel).value_or(dialogProps.autoCancel);
     dialogProps.isModal = Converter::OptConvert<bool>(props.isModal).value_or(dialogProps.isModal);

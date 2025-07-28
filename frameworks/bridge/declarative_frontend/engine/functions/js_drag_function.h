@@ -92,6 +92,9 @@ public:
     void StartDataLoading(const JSCallbackInfo& args);
     void EnableInternalDropAnimation(const JSCallbackInfo& args);
     void SetDataLoadParams(const JSCallbackInfo& args);
+    // use for ArkTs1.2
+    int64_t GetDragEventPointer();
+    static JSRef<JSObject> CreateDragEvent(void* dragEventPtr);
 
 private:
     static void Constructor(const JSCallbackInfo& args);

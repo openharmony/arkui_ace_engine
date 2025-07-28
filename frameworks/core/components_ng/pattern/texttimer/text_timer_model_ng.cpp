@@ -23,7 +23,6 @@
 #include "core/components_ng/pattern/texttimer/text_timer_pattern.h"
 
 namespace OHOS::Ace::NG {
-constexpr double MAX_COUNT_DOWN = 86400000.0;
 RefPtr<TextTimerController> TextTimerModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -179,18 +178,14 @@ RefPtr<TextTimerController> TextTimerModelNG::InitTextController(FrameNode* fram
     return pattern->GetTextTimerController();
 }
 
-void TextTimerModelNG::SetIsCountDown(FrameNode* frameNode, const std::optional<bool>& isCountDown)
+void TextTimerModelNG::SetIsCountDown(FrameNode* frameNode, bool isCountDown)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, IsCountDown, isCountDown.value_or(false), frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, IsCountDown, isCountDown, frameNode);
 }
 
-void TextTimerModelNG::SetInputCount(FrameNode* frameNode, const std::optional<double>& count)
+void TextTimerModelNG::SetInputCount(FrameNode* frameNode, double count)
 {
-    if (count && count.value() > 0 && count.value() < MAX_COUNT_DOWN) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, InputCount, count.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, InputCount, frameNode);
-    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, InputCount, count, frameNode);
 }
 
 void TextTimerModelNG::SetFontColor(FrameNode* frameNode, const Color& value)
@@ -202,49 +197,29 @@ void TextTimerModelNG::SetFontColor(FrameNode* frameNode, const Color& value)
     ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
 }
 
-void TextTimerModelNG::SetFontSize(FrameNode* frameNode, const std::optional<Dimension>& value)
+void TextTimerModelNG::SetFontSize(FrameNode* frameNode, const Dimension& value)
 {
-    if (value) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, FontSize, value.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, FontSize, frameNode);
-    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, FontSize, value, frameNode);
 }
 
-void TextTimerModelNG::SetFontStyle(FrameNode* frameNode, const std::optional<Ace::FontStyle>& value)
+void TextTimerModelNG::SetFontStyle(FrameNode* frameNode, Ace::FontStyle value)
 {
-    if (value.has_value()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, ItalicFontStyle, value.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, ItalicFontStyle, frameNode);
-    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, ItalicFontStyle, value, frameNode);
 }
 
-void TextTimerModelNG::SetFontWeight(FrameNode* frameNode, const std::optional<Ace::FontWeight>& value)
+void TextTimerModelNG::SetFontWeight(FrameNode* frameNode, FontWeight value)
 {
-    if (value.has_value()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, FontWeight, value.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, FontWeight, frameNode);
-    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, FontWeight, value, frameNode);
 }
 
-void TextTimerModelNG::SetFontFamily(FrameNode* frameNode, const std::optional<std::vector<std::string>>& value)
+void TextTimerModelNG::SetFontFamily(FrameNode* frameNode, const std::vector<std::string>& value)
 {
-    if (value && value->size() > 0) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, FontFamily, value.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, FontFamily, frameNode);
-    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, FontFamily, value, frameNode);
 }
 
-void TextTimerModelNG::SetFormat(FrameNode* frameNode, const std::optional<std::string>& format)
+void TextTimerModelNG::SetFormat(FrameNode* frameNode, const std::string& format)
 {
-    if (format) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, Format, format.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, Format, frameNode);
-    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, Format, format, frameNode);
 }
 
 void TextTimerModelNG::SetTextShadow(FrameNode* frameNode, const std::vector<Shadow>& value)

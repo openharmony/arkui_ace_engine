@@ -130,4 +130,5 @@ const GENERATED_ArkUITextStyle_styled_stringAccessor* GetTextStyle_styled_string
     };
     return &TextStyle_styled_stringAccessorImpl;
 }
+
 }

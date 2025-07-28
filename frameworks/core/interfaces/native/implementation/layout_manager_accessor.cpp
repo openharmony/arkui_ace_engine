@@ -155,4 +155,5 @@ const GENERATED_ArkUILayoutManagerAccessor* GetLayoutManagerAccessor()
     };
     return &LayoutManagerAccessorImpl;
 }
+
 }

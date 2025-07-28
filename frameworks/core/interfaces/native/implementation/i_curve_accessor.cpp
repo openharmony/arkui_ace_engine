@@ -59,4 +59,5 @@ const GENERATED_ArkUIICurveAccessor* GetICurveAccessor()
     };
     return &ICurveAccessorImpl;
 }
+
 }

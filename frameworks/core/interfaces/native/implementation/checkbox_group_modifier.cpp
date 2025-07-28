@@ -192,4 +192,5 @@ const GENERATED_ArkUICheckboxGroupModifier* GetCheckboxGroupModifier()
     };
     return &ArkUICheckboxGroupModifierImpl;
 }
+
 }

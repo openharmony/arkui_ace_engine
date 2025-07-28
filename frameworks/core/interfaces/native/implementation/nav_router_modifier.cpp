@@ -26,7 +26,10 @@ namespace NavRouterModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    return nullptr;
+    // auto frameNode = NavRouterModelNG::CreateFrameNode(id);
+    // CHECK_NULL_RETURN(frameNode, nullptr);
+    // frameNode->IncRefCount();
+    return {};
 }
 } // NavRouterModifier
 namespace NavRouterInterfaceModifier {
@@ -63,9 +66,10 @@ void OnStateChangeImpl(Ark_NativePointer node,
 void ModeImpl(Ark_NativePointer node,
               const Opt_NavRouteMode* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto enumMode = Converter::OptConvert<NavRouteMode>(*value);
+    // auto frameNode = reinterpret_cast<FrameNode *>(node);
+    // CHECK_NULL_VOID(frameNode);
+    // auto enumMode = Converter::OptConvert<NavRouteMode>(*value);
+    // NavRouterModelNG::SetNavRouteMode(frameNode, EnumToInt(enumMode));
 }
 } // NavRouterAttributeModifier
 const GENERATED_ArkUINavRouterModifier* GetNavRouterModifier()

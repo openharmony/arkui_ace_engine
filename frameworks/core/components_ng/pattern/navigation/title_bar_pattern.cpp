@@ -120,12 +120,10 @@ void SetBackButtonImgAboveVersionTen(const RefPtr<FrameNode>& backButtonNode,
         return;
     }
 
-    if (titleBarLayoutProperty->HasImageSource()) {
-        ImageSourceInfo imageSourceInfo = titleBarLayoutProperty->GetImageSourceValue();
-        SetImageSourceInfoFillColor(imageSourceInfo);
-        backButtonImageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
-        backButtonNode->MarkModifyDone();
-    }
+    ImageSourceInfo imageSourceInfo = titleBarLayoutProperty->GetImageSourceValue();
+    SetImageSourceInfoFillColor(imageSourceInfo);
+    backButtonImageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
+    backButtonNode->MarkModifyDone();
 }
 
 void SetBackButtonImgBelowVersionTen(const RefPtr<FrameNode>& backButtonNode,
@@ -136,13 +134,10 @@ void SetBackButtonImgBelowVersionTen(const RefPtr<FrameNode>& backButtonNode,
     if (!backButtonNode || !titleBarLayoutProperty || !backButtonImageLayoutProperty) {
         return;
     }
-
-    if (titleBarLayoutProperty->HasImageSource()) {
-        ImageSourceInfo imageSourceInfo = titleBarLayoutProperty->GetImageSourceValue();
-        SetImageSourceInfoFillColor(imageSourceInfo);
-        backButtonImageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
-        backButtonNode->MarkModifyDone();
-    }
+    ImageSourceInfo imageSourceInfo = titleBarLayoutProperty->GetImageSourceValue();
+    SetImageSourceInfoFillColor(imageSourceInfo);
+    backButtonImageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
+    backButtonNode->MarkModifyDone();
 }
 
 void HandleDefaultIconForNavDestination(
@@ -309,6 +304,7 @@ void UpdateImageBackButton(const RefPtr<FrameNode>& backButtonNode, const RefPtr
         auto backButtonImageNode = FrameNode::CreateFrameNode(V2::BACK_BUTTON_IMAGE_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
         CHECK_NULL_VOID(backButtonImageNode);
+        ImageSourceInfo imageSourceInfo = titleBarLayoutProperty->GetImageSourceValue();
         auto backButtonImageLayoutProperty = backButtonImageNode->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(backButtonImageLayoutProperty);
         backButtonImageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
@@ -845,7 +841,7 @@ void TitleBarPattern::SpringAnimation(float startPos, float endPos)
     SetTempTitleBarHeightVp(maxTitleBarHeight_ + overDragOffset_ / 6.0f);
     UpdateScaleByDragOverDragOffset(overDragOffset_);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContext();
     if (pipeline) {
         pipeline->FlushUITasks();
     }
@@ -871,7 +867,7 @@ void TitleBarPattern::SpringAnimation(float startPos, float endPos)
             pattern->tempTitleOffsetY_ = 0.0f;
             pattern->isFreeTitleUpdated_ = false;
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-            auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+            auto pipeline = PipelineContext::GetCurrentContext();
             if (pipeline) {
                 pipeline->FlushUITasks();
             }
@@ -944,7 +940,7 @@ void TitleBarPattern::AnimateTo(float offset, bool isFullTitleMode)
                 pattern->isFreeTitleUpdated_ = false;
             }
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-            auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+            auto pipeline = PipelineContext::GetCurrentContext();
             if (pipeline) {
                 pipeline->FlushUITasks();
             }
@@ -1135,7 +1131,7 @@ void TitleBarPattern::OnAttachToFrameNode()
             .edges = SAFE_AREA_EDGE_TOP };
         host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
     }
-    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
 
     auto halfFoldHoverCallbackId = pipelineContext->RegisterHalfFoldHoverChangedCallback(
@@ -1444,7 +1440,7 @@ void TitleBarPattern::UpdateBackgroundStyle(RefPtr<FrameNode>& host)
 void TitleBarPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
 
     if (HasHalfFoldHoverChangedCallbackId()) {

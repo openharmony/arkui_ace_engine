@@ -80,9 +80,9 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
 #ifdef WINDOW_SCENE_SUPPORTED
-    auto frameNode = UIExtensionModelNG::CreateFrameNode(id);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    // auto frameNode = UIExtensionModelNG::CreateFrameNode(id);
+    // frameNode->IncRefCount();
+    return {};
 #else
     return {};
 #endif //WINDOW_SCENE_SUPPORTED
@@ -133,17 +133,17 @@ void OnRemoteReadyImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    auto onRemoteReady =
-        [arkCallback = CallbackHelper(*optValue)](const RefPtr<UIExtensionProxy>& proxy) {
-            auto accessor = GetUIExtensionProxyAccessor();
-            CHECK_NULL_VOID(accessor);
-            auto peer = accessor->ctor();
-            CHECK_NULL_VOID(peer);
-            auto uiExtensionProxyPeerPtr = reinterpret_cast<UIExtensionProxyPeer*>(peer);
-            uiExtensionProxyPeerPtr->SetProxy(proxy);
-            arkCallback.Invoke(peer);
-        };
-    UIExtensionModelNG::SetOnRemoteReady(frameNode, std::move(onRemoteReady));
+    // auto onRemoteReady =
+    //     [arkCallback = CallbackHelper(*optValue)](const RefPtr<UIExtensionProxy>& proxy) {
+    //         auto accessor = GetUIExtensionProxyAccessor();
+    //         CHECK_NULL_VOID(accessor);
+    //         auto peer = accessor->ctor();
+    //         CHECK_NULL_VOID(peer);
+    //         auto uiExtensionProxyPeerPtr = reinterpret_cast<UIExtensionProxyPeer*>(peer);
+    //         uiExtensionProxyPeerPtr->SetProxy(proxy);
+    //         arkCallback.Invoke(peer);
+    //     };
+    // UIExtensionModelNG::SetOnRemoteReady(frameNode, std::move(onRemoteReady));
 #endif //WINDOW_SCENE_SUPPORTED
 }
 void OnReceiveImpl(Ark_NativePointer node,
@@ -197,7 +197,7 @@ void OnResultImpl(Ark_NativePointer node,
             arkCallback.Invoke(parameter);
 #endif
         };
-    UIExtensionModelNG::SetOnResult(frameNode, std::move(onResult));
+    // UIExtensionModelNG::SetOnResult(frameNode, std::move(onResult));
 #endif //WINDOW_SCENE_SUPPORTED
 }
 void OnReleaseImpl(Ark_NativePointer node,
@@ -211,12 +211,12 @@ void OnReleaseImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    auto onRelease =
-        [arkCallback = CallbackHelper(*optValue)](int32_t index) {
-            Ark_Number arkIndex = Converter::ArkValue<Ark_Number>(index);
-            arkCallback.Invoke(arkIndex);
-        };
-    UIExtensionModelNG::SetOnRelease(frameNode, std::move(onRelease));
+    // auto onRelease =
+    //     [arkCallback = CallbackHelper(*optValue)](int32_t index) {
+    //         Ark_Number arkIndex = Converter::ArkValue<Ark_Number>(index);
+    //         arkCallback.Invoke(arkIndex);
+    //     };
+    // UIExtensionModelNG::SetOnRelease(frameNode, std::move(onRelease));
 #endif //WINDOW_SCENE_SUPPORTED
 }
 void OnErrorImpl(Ark_NativePointer node,
@@ -230,20 +230,20 @@ void OnErrorImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    auto instanceId = ContainerScope::CurrentId();
-    auto weakNode = AceType::WeakClaim<NG::FrameNode>(frameNode);
-    auto onError = [arkCallback = CallbackHelper(*optValue), instanceId, weakNode](
-        int32_t code, const std::string& name, const std::string& message) {
-        ContainerScope scope(instanceId);
-        auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
-        CHECK_NULL_VOID(pipelineContext);
-        pipelineContext->UpdateCurrentActiveNode(weakNode);
-        arkCallback.Invoke(Ark_BusinessError{
-            .name  = Converter::ArkValue<Ark_String>(name, Converter::FC),
-            .message = Converter::ArkValue<Ark_String>(message, Converter::FC),
-            .code = Converter::ArkValue<Ark_Number>(code)});
-    };
-    UIExtensionModelNG::SetOnError(frameNode, std::move(onError));
+    // auto instanceId = ContainerScope::CurrentId();
+    // auto weakNode = AceType::WeakClaim<NG::FrameNode>(frameNode);
+    // auto onError = [arkCallback = CallbackHelper(*optValue), instanceId, weakNode](
+    //     int32_t code, const std::string& name, const std::string& message) {
+    //     ContainerScope scope(instanceId);
+    //     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    //     CHECK_NULL_VOID(pipelineContext);
+    //     pipelineContext->UpdateCurrentActiveNode(weakNode);
+    //     arkCallback.Invoke(Ark_BusinessError{
+    //         .name  = Converter::ArkValue<Ark_String>(name, Converter::FC),
+    //         .message = Converter::ArkValue<Ark_String>(message, Converter::FC),
+    //         .code = Converter::ArkValue<Ark_Number>(code)});
+    // };
+    // UIExtensionModelNG::SetOnError(frameNode, std::move(onError));
 #endif //WINDOW_SCENE_SUPPORTED
 }
 void OnTerminatedImpl(Ark_NativePointer node,
@@ -291,7 +291,7 @@ void OnTerminatedImpl(Ark_NativePointer node,
             arkCallback.Invoke(terminatedInfo);
 #endif
         };
-    UIExtensionModelNG::SetOnTerminated(frameNode, std::move(onTerminated));
+    // UIExtensionModelNG::SetOnTerminated(frameNode, std::move(onTerminated));
 #endif //WINDOW_SCENE_SUPPORTED
 }
 void OnDrawReadyImpl(Ark_NativePointer node,

@@ -386,4 +386,5 @@ const GENERATED_ArkUIStyledStringAccessor* GetStyledStringAccessor()
     };
     return &StyledStringAccessorImpl;
 }
+
 }

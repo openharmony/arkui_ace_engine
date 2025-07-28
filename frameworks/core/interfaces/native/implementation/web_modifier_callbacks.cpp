@@ -594,27 +594,27 @@ bool OnSslErrorEventReceive(const CallbackHelper<Callback_OnSslErrorEventReceive
 bool OnSslError(const CallbackHelper<OnSslErrorEventCallback>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
-    ContainerScope scope(instanceId);
-    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_RETURN(pipelineContext, false);
-    pipelineContext->UpdateCurrentActiveNode(weakNode);
-    auto* eventInfo = TypeInfoHelper::DynamicCast<WebAllSslErrorEvent>(info);
-    CHECK_NULL_RETURN(eventInfo, false);
-    Ark_SslErrorEvent parameter;
-    parameter.error = Converter::ArkValue<Ark_SslError>(static_cast<Converter::SslError>(eventInfo->GetError()));
-    parameter.isFatalError = Converter::ArkValue<Ark_Boolean>(eventInfo->GetIsFatalError());
-    parameter.isMainFrame = Converter::ArkValue<Ark_Boolean>(eventInfo->GetIsMainFrame());
-    auto original = eventInfo->GetOriginalUrl();
-    parameter.originalUrl = Converter::ArkValue<Ark_String>(original);
-    auto referrer = eventInfo->GetReferrer();
-    parameter.referrer = Converter::ArkValue<Ark_String>(referrer);
-    auto url = eventInfo->GetUrl();
-    parameter.url = Converter::ArkValue<Ark_String>(url);
-    auto peer = new SslErrorHandlerPeer();
-    // need check
+    // ContainerScope scope(instanceId);
+    // auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    // CHECK_NULL_RETURN(pipelineContext, false);
+    // pipelineContext->UpdateCurrentActiveNode(weakNode);
+    // auto* eventInfo = TypeInfoHelper::DynamicCast<WebAllSslErrorEvent>(info);
+    // CHECK_NULL_RETURN(eventInfo, false);
+    // Ark_SslErrorEvent parameter;
+    // parameter.error = Converter::ArkValue<Ark_SslError>(static_cast<Converter::SslError>(eventInfo->GetError()));
+    // parameter.isFatalError = Converter::ArkValue<Ark_Boolean>(eventInfo->GetIsFatalError());
+    // parameter.isMainFrame = Converter::ArkValue<Ark_Boolean>(eventInfo->GetIsMainFrame());
+    // auto original = eventInfo->GetOriginalUrl();
+    // parameter.originalUrl = Converter::ArkValue<Ark_String>(original);
+    // auto referrer = eventInfo->GetReferrer();
+    // parameter.referrer = Converter::ArkValue<Ark_String>(referrer);
+    // auto url = eventInfo->GetUrl();
+    // parameter.url = Converter::ArkValue<Ark_String>(url);
+    // auto peer = new SslErrorHandlerPeer();
+    // // need check
     // peer->handler = eventInfo->GetResult();
-    parameter.handler = peer;
-    arkCallback.Invoke(parameter);
+    // parameter.handler = peer;
+    // arkCallback.Invoke(parameter);
     return true;
 }
 

@@ -113,7 +113,7 @@ void SlidingPanelPattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToFrame(true);
-    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->AddWindowSizeChangeCallback(host->GetId());
 }
@@ -155,7 +155,7 @@ void SlidingPanelPattern::OnWindowSizeChanged(int32_t width, int32_t height, Win
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     context->AddAfterLayoutTask([weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
@@ -870,8 +870,7 @@ void SlidingPanelPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const In
     }
     auto layoutProperty = GetLayoutProperty<SlidingPanelLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    static const char* PANEL_TYPE[] = { "PanelType.Minibar", "PanelType.Foldable", "PanelType.Temporary",
-        "PanelType.CUSTOM" };
+    static const char* PANEL_TYPE[] = { "PanelType.Minibar", "PanelType.Foldable", "PanelType.Temporary" };
     json->PutExtAttr("type",
         PANEL_TYPE[static_cast<int32_t>(layoutProperty->GetPanelType().value_or(PanelType::FOLDABLE_BAR))], filter);
     static const char* PANEL_MODE[] = { "PanelMode.Mini", "PanelMode.Half", "PanelMode.Full" };
@@ -886,7 +885,7 @@ void SlidingPanelPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const In
     json->PutExtAttr("fullHeight",
         layoutProperty->GetFullHeight().value_or(fullHeight_).ToString().c_str(), filter);
     json->PutExtAttr("customHeight",
-        layoutProperty->GetCustomHeight().value_or(customHeight_).ToString().c_str(), filter);
+        layoutProperty->GetFullHeight().value_or(customHeight_).ToString().c_str(), filter);
     json->PutExtAttr("backgroundMask",
         layoutProperty->GetBackgroundColor().value_or(Color::TRANSPARENT).ColorToString().c_str(), filter);
     json->PutExtAttr("showCloseIcon",
@@ -956,7 +955,7 @@ void SlidingPanelPattern::AddOrRemoveCloseIconNode(const RefPtr<SlidingPanelLayo
         auto closeIcon = FrameNode::GetOrCreateFrameNode(V2::PANEL_CLOSE_ICON_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<CloseIconPattern>(); });
         auto closeIconLayoutProperty = closeIcon->GetLayoutProperty<CloseIconLayoutProperty>();
-        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+        auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto closeIconTheme = pipeline->GetTheme<CloseIconTheme>();
         closeIconLayoutProperty->UpdateCloseIconWidth(closeIconTheme->GetCloseIconWidth());

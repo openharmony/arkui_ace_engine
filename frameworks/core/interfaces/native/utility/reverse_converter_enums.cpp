@@ -1007,6 +1007,7 @@ void AssignArkValue(Ark_EffectScope& dst, const OHOS::Ace::ScopeType& src)
         default: dst = static_cast<Ark_EffectScope>(-1);
     }
 }
+
 void AssignArkValue(Ark_EffectDirection& dst, const OHOS::Ace::CommonSubType& src)
 {
     switch (src) {

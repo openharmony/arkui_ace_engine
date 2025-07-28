@@ -93,7 +93,6 @@ public:
                 alignItems = "VerticalAlign.Bottom";
             }
         }
-        json->PutExtAttr("isReverse", std::to_string(GetIsReverse().value_or(false)).c_str(), filter);
         json->PutExtAttr("space", GetSpaceValue(Dimension(0.0f)).ToString().c_str(), filter);
         json->PutExtAttr("alignItems", alignItems.c_str(), filter);
         auto justifyContent = V2::ConvertFlexAlignToStirng(GetMainAxisAlign().value_or(FlexAlign::FLEX_START));

@@ -223,4 +223,5 @@ const GENERATED_ArkUIAccessibilityHoverEventAccessor* GetAccessibilityHoverEvent
     };
     return &AccessibilityHoverEventAccessorImpl;
 }
+
 }

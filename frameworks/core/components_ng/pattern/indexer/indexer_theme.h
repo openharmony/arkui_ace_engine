@@ -64,9 +64,6 @@ inline constexpr double BUBBLE_BOX_SIZE = 56.0;
 inline constexpr double BUBBLE_BOX_RADIUS = 16.0;
 inline constexpr double BOX_RADIUS = 6.0;
 inline constexpr double ZERO_RADIUS = 0.0;
-inline constexpr double POPUP_ITEM_DEFAULT_RADIUS = 24.0;
-inline constexpr double ITEM_DEFAULT_RADIUS = 8.0;
-inline constexpr double RADIUS_OFFSET = 4.0;
 inline constexpr double BUBBLE_FONT_SIZE = 24.0;
 inline constexpr double BUBBLE_POSITION_X = 60.0;
 inline constexpr double BUBBLE_POSITION_Y = 48.0;
@@ -76,7 +73,6 @@ inline constexpr double INDEXER_ITEM_SIZE = 16.0;      // circle mode, item size
 inline constexpr double INDEXER_ITEM_TEXT_SIZE = 12.0; // circle, mode font size (VP)
 inline constexpr float INDEXER_LIST_DIVIDER = 1.0;
 inline constexpr float INDEXER_BUBBLE_INVALID_SPACE = -1.0f;
-inline constexpr Dimension DEFAULT_ITEM_SIZE = 16.0_vp;
 // data for circle mode
 inline constexpr int32_t INDEXER_COLLAPSE_ITEM_COUNT = 4;
 inline constexpr double INDEXER_CIRCLE_ITEM_SIZE = 24.0;          // circle mode, item size (VP)

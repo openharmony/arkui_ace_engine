@@ -21,21 +21,21 @@
 #include "core/components_ng/pattern/data_panel/data_panel_pattern.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-void SetDefaultBorderRadius(void)
-{
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        return;
-    }
-    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<DataPanelTheme>();
-    CHECK_NULL_VOID(theme);
-    auto defaultRadiusDimension = theme->GetDefaultBorderRadius();
-    ViewAbstract::SetBorderRadius(defaultRadiusDimension);
-    ViewAbstract::SetClipEdge(true);
-}
-} // namespace
+// namespace {
+// void SetDefaultBorderRadius(void)
+// {
+//     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+//         return;
+//     }
+//     auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+//     CHECK_NULL_VOID(pipeline);
+//     auto theme = pipeline->GetTheme<DataPanelTheme>();
+//     CHECK_NULL_VOID(theme);
+//     auto defaultRadiusDimension = theme->GetDefaultBorderRadius();
+//     ViewAbstract::SetBorderRadius(defaultRadiusDimension);
+//     ViewAbstract::SetClipEdge(true);
+// }
+// } // namespace
 
 void DataPanelModelStatic::SetTrackBackground(FrameNode* frameNode, const std::optional<Color>& trackBackgroundColor)
 {
@@ -85,13 +85,13 @@ void DataPanelModelStatic::SetMax(FrameNode* frameNode, const std::optional<doub
 
 void DataPanelModelStatic::SetType(FrameNode* frameNode, const std::optional<int32_t>& type)
 {
-    if (type.has_value()) {
-        ACE_UPDATE_NODE_PAINT_PROPERTY(DataPanelPaintProperty, DataPanelType, type.value(), frameNode);
-        if (type.value() != static_cast<int32_t>(DataPanelType::CIRCLE)) {
-            SetDefaultBorderRadius();
-        }
-    } else {
-        ACE_RESET_NODE_PAINT_PROPERTY(DataPanelPaintProperty, DataPanelType, frameNode);
-    }
+    // if (type.has_value()) {
+    //     ACE_UPDATE_NODE_PAINT_PROPERTY(DataPanelPaintProperty, DataPanelType, type.value(), frameNode);
+    //     if (type.value() != static_cast<int32_t>(DataPanelType::CIRCLE)) {
+    //         SetDefaultBorderRadius();
+    //     }
+    // } else {
+    //     ACE_RESET_NODE_PAINT_PROPERTY(DataPanelPaintProperty, DataPanelType, frameNode);
+    // }
 }
 } // namespace OHOS::Ace::NG

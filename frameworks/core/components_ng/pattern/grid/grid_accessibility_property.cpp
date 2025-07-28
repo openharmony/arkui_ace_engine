@@ -42,7 +42,7 @@ int32_t GridAccessibilityProperty::GetBeginIndex() const
     CHECK_NULL_RETURN(frameNode, -1);
     auto gridPattern = frameNode->GetPattern<GridPattern>();
     CHECK_NULL_RETURN(gridPattern, -1);
-    auto&& gridLayoutInfo = gridPattern->GetGridLayoutInfo();
+    auto gridLayoutInfo = gridPattern->GetGridLayoutInfo();
     return gridLayoutInfo.startIndex_;
 }
 
@@ -52,7 +52,7 @@ int32_t GridAccessibilityProperty::GetEndIndex() const
     CHECK_NULL_RETURN(frameNode, -1);
     auto gridPattern = frameNode->GetPattern<GridPattern>();
     CHECK_NULL_RETURN(gridPattern, -1);
-    auto&& gridLayoutInfo = gridPattern->GetGridLayoutInfo();
+    auto gridLayoutInfo = gridPattern->GetGridLayoutInfo();
     return gridLayoutInfo.endIndex_;
 }
 
@@ -72,7 +72,7 @@ AceCollectionInfo GridAccessibilityProperty::GetCollectionInfo() const
     CHECK_NULL_RETURN(frameNode, aceCollectionInfo);
     auto gridPattern = frameNode->GetPattern<GridPattern>();
     CHECK_NULL_RETURN(gridPattern, aceCollectionInfo);
-    auto&& gridLayoutInfo = gridPattern->GetGridLayoutInfo();
+    auto gridLayoutInfo = gridPattern->GetGridLayoutInfo();
     aceCollectionInfo.rows = static_cast<int32_t>(gridLayoutInfo.gridMatrix_.size());
     if (aceCollectionInfo.rows > 0) {
         aceCollectionInfo.columns = static_cast<int32_t>(gridLayoutInfo.gridMatrix_.begin()->second.size());

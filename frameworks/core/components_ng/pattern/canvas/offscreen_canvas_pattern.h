@@ -32,7 +32,7 @@ public:
     OffscreenCanvasPattern(int32_t width, int32_t height);
     ~OffscreenCanvasPattern() override = default;
 
-    virtual void FillRect(const Rect& rect);
+    void FillRect(const Rect& rect);
     void StrokeRect(const Rect& rect);
     void ClearRect(const Rect& rect);
     void Fill();

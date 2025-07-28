@@ -15,15 +15,11 @@
 
 #include "core/components_ng/pattern/window_scene/screen/screen_model.h"
 
-#include "core/components_ng/base/view_stack_processor.h"
-
-#ifndef ARKUI_CAPI_UNITTEST
 #include "screen_session_manager_client.h"
-#include "core/components_ng/pattern/window_scene/screen/screen_pattern.h"
+
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/window_scene/screen/screen_node.h"
-#else
-#include "test/unittest/capi/stubs/mock_window_scene.h"
-#endif
+#include "core/components_ng/pattern/window_scene/screen/screen_pattern.h"
 
 namespace OHOS::Ace::NG {
 void ScreenModel::Create(uint64_t screenId)
@@ -40,24 +36,6 @@ void ScreenModel::Create(uint64_t screenId)
     auto frameNode = ScreenNode::GetOrCreateScreenNode(V2::SCREEN_ETS_TAG, nodeId,
         [&screenSession]() { return AceType::MakeRefPtr<ScreenPattern>(screenSession); });
     stack->Push(frameNode);
-    frameNode->SetExclusiveEventForChild(true);
-    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, Alignment::TOP_LEFT);
-}
-
-RefPtr<FrameNode> ScreenModel::CreateFrameNode(int32_t nodeId)
-{
-    auto frameNode = ScreenNode::GetOrCreateScreenNode(V2::SCREEN_ETS_TAG, nodeId,
-        []() { return AceType::MakeRefPtr<ScreenPattern>(nullptr); });
-    return frameNode;
-}
-
-void ScreenModel::SetOptions(FrameNode* frameNode, uint64_t screenId)
-{
-    auto pattern = frameNode->GetPattern<ScreenPattern>();
-    CHECK_NULL_VOID(pattern);
-    auto screenSession = Rosen::ScreenSessionManagerClient::GetInstance().GetScreenSession(screenId);
-    CHECK_NULL_VOID(screenSession);
-    pattern->SetScreenSession(screenSession);
     frameNode->SetExclusiveEventForChild(true);
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, Alignment::TOP_LEFT);
 }

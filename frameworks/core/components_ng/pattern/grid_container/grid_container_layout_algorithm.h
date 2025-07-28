@@ -49,9 +49,7 @@ public:
 
         auto curLayoutProp = layoutWrapper->GetHostNode()->GetLayoutProperty<GridContainerLayoutProperty>();
         curLayoutProp->SetReserveObj(gridContainerLayoutProperty);
-        if (gridContainerLayoutProperty->HasContainerInfo()) {
-            curLayoutProp->UpdateContainerInfo(gridContainerLayoutProperty->GetContainerInfoValue());
-        }
+        curLayoutProp->UpdateContainerInfo(gridContainerLayoutProperty->GetContainerInfoValue());
         LinearLayoutAlgorithm::Measure(layoutWrapper);
     }
 };

@@ -129,10 +129,10 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
 #ifdef FORM_SUPPORTED
-    auto frameNode = FormModelNG::CreateFrameNode(id);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    // auto frameNode = FormModelNG::CreateFrameNode(id);
+    // CHECK_NULL_RETURN(frameNode, nullptr);
+    // frameNode->IncRefCount();
+    return {};
 #else
     return {};
 #endif
@@ -251,7 +251,7 @@ void OnAcquiredImpl(Ark_NativePointer node,
             .idString = Converter::ArkValue<Ark_String>(idString) };
         arkCallback.Invoke(parameter);
     };
-    FormModelNG::SetOnAcquired(frameNode, onAcquired);
+    // FormModelNG::SetOnAcquired(frameNode, onAcquired);
 #endif // FORM_SUPPORTED
 }
 void OnErrorImpl(Ark_NativePointer node,
@@ -284,7 +284,7 @@ void OnErrorImpl(Ark_NativePointer node,
         };
         arkCallback.Invoke(parameter);
     };
-    FormModelNG::SetOnError(frameNode, onError);
+    // FormModelNG::SetOnError(frameNode, onError);
 #endif // FORM_SUPPORTED
 }
 void OnRouterImpl(Ark_NativePointer node,
@@ -327,7 +327,7 @@ void OnUninstallImpl(Ark_NativePointer node,
         };
         arkCallback.Invoke(parameter);
     };
-    FormModelNG::SetOnUninstall(frameNode, onUninstall);
+    // FormModelNG::SetOnUninstall(frameNode, onUninstall);
 #endif // FORM_SUPPORTED
 }
 void OnLoadImpl(Ark_NativePointer node,
@@ -344,7 +344,7 @@ void OnLoadImpl(Ark_NativePointer node,
     auto onLoad = [arkCallback = CallbackHelper(*optValue)](const std::string& param) {
         arkCallback.Invoke();
     };
-    FormModelNG::SetOnLoad(frameNode, std::move(onLoad));
+    // FormModelNG::SetOnLoad(frameNode, std::move(onLoad));
 #endif // FORM_SUPPORTED
 }
 } // FormComponentAttributeModifier

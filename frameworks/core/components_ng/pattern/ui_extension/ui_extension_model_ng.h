@@ -27,10 +27,6 @@ struct ModalUIExtensionCallbacks;
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG {
-const SessionType DEFAULT_EMBEDDED_SESSION_TYPE = SessionType::EMBEDDED_UI_EXTENSION;
-const CalcDimension EMBEDDED_COMPONENT_MIN_WIDTH(10.0f, DimensionUnit::VP);
-const CalcDimension EMBEDDED_COMPONENT_MIN_HEIGHT(10.0f, DimensionUnit::VP);
-
 class ACE_EXPORT UIExtensionModelNG : public UIExtensionModel {
 public:
     static RefPtr<FrameNode> Create(const std::string& bundleName, const std::string& abilityName,
@@ -44,10 +40,6 @@ public:
         bool transferringCaller = false, bool densityDpi = true, bool isWindowModeFollowHost = false) override;
     // for Embedded Component
     void Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, SessionType sessionType) override;
-    static RefPtr<FrameNode> CreateEmbeddedFrameNode(int32_t nodeId);
-    static void UpdateEmbeddedFrameNode(FrameNode* frameNode,
-        const AAFwk::Want& wantWrap, SessionType sessionType);
-    // for dynamic component
     void Create(const UIExtensionConfig& config) override;
     void InitializeDynamicComponent(const RefPtr<FrameNode>& frameNode, const std::string& hapPath,
         const std::string& abcPath, const std::string& entryPoint, void* runtime) override;
@@ -73,21 +65,6 @@ public:
         std::function<void(int32_t code, const std::string& name, const std::string& message)>&& onError,
         NG::SessionType sessionType = NG::SessionType::UI_EXTENSION_ABILITY) override;
 
-    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
-    static void UpdateWant(FrameNode* frameNode, const AAFwk::Want& want, bool isTransferringCaller, bool densityDpi);
-    static void SetOnError(FrameNode* frameNode,
-        std::function<void(int32_t code, const std::string& name, const std::string& message)>&& onError,
-        NG::SessionType sessionType = NG::SessionType::UI_EXTENSION_ABILITY);
-    static void SetOnReceive(FrameNode* frameNode,
-        std::function<void(const AAFwk::WantParams&)>&& onReceive,
-        NG::SessionType sessionType = NG::SessionType::UI_EXTENSION_ABILITY);
-    static void SetOnRelease(FrameNode* frameNode, std::function<void(int32_t)>&& onRelease);
-    static void SetOnRemoteReady(FrameNode* frameNode,
-        std::function<void(const RefPtr<UIExtensionProxy>&)>&& onRemoteReady);
-    static void SetOnResult(FrameNode* frameNode, std::function<void(int32_t, const AAFwk::Want&)>&& onResult);
-    static void SetOnTerminated(FrameNode* frameNode,
-        std::function<void(int32_t, const RefPtr<WantWrap>&)>&& onTerminated,
-        NG::SessionType sessionType = NG::SessionType::UI_EXTENSION_ABILITY);
 private:
     void CreateSecurityUIExtension(const UIExtensionConfig& config);
     void CreateDynamicComponent(const UIExtensionConfig& config);

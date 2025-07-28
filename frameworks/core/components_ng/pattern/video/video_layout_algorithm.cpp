@@ -24,7 +24,7 @@ namespace {
 const Dimension LIFT_HEIGHT = 28.0_vp;
 float CalControlBarHeight(bool needLift = false)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, 0.0f);
     auto videoTheme = pipelineContext->GetTheme<VideoTheme>();
     CHECK_NULL_RETURN(videoTheme, 0.0f);

@@ -494,7 +494,7 @@ void TimePickerDialogModelNG::SetTimePickerDialogShow(PickerDialogInfo& pickerDi
     if (!executor) {
         return;
     }
-    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(theme);
@@ -592,14 +592,6 @@ void TimePickerModelNG::SetSelectedTime(FrameNode* frameNode, const PickerTime& 
     CHECK_NULL_VOID(frameNode);
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     timePickerRowPattern->SetSelectedTime(value);
-}
-
-void TimePickerModelNG::SetHasSecond(FrameNode* frameNode, bool hasSecond)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
-    CHECK_NULL_VOID(timePickerRowPattern);
-    timePickerRowPattern->SetHasSecond(hasSecond);
 }
 
 void TimePickerModelNG::SetDisappearTextStyle(
@@ -900,7 +892,7 @@ int32_t TimePickerModelNG::getTimepickerEnableCascade(FrameNode* frameNode)
 
 const Dimension TimePickerModelNG::ConvertFontScaleValue(const Dimension& fontSizeValue)
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, fontSizeValue);
     auto maxAppFontScale = pipeline->GetMaxAppFontScale();
     auto follow = pipeline->IsFollowSystem();
@@ -927,15 +919,6 @@ void TimePickerModelNG::HasUserDefinedOpacity()
     CHECK_NULL_VOID(renderContext);
     timePickerRowPattern->SetUserDefinedOpacity(renderContext->GetOpacityValue(1.0));
 }
-
-void TimePickerModelNG::SetChangeEvent(FrameNode* frameNode, TimeChangeEvent&& onChange)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<TimePickerEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetChangeEvent(std::move(onChange));
-}
-
 void TimePickerModelNG::SetDigitalCrownSensitivity(int32_t crownSensitivity)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -943,16 +926,12 @@ void TimePickerModelNG::SetDigitalCrownSensitivity(int32_t crownSensitivity)
     SetDigitalCrownSensitivity(frameNode, crownSensitivity);
 }
 
-void TimePickerModelNG::SetDigitalCrownSensitivity(FrameNode* frameNode, const std::optional<int32_t>& valueOpt)
+void TimePickerModelNG::SetDigitalCrownSensitivity(FrameNode* frameNode, int32_t crownSensitivity)
 {
-    if (!valueOpt) {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, DigitalCrownSensitivity, frameNode);
-        return;
-    }
-    auto crownSensitivity = *valueOpt;
     if (crownSensitivity < CROWN_SENSITIVITY_MIN || crownSensitivity > CROWN_SENSITIVITY_MAX) {
         return;
     }
+
     CHECK_NULL_VOID(frameNode);
     auto timePickerPattern = frameNode->GetPattern<TimePickerRowPattern>();
     CHECK_NULL_VOID(timePickerPattern);

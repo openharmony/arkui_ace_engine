@@ -68,4 +68,5 @@ const GENERATED_ArkUITextAreaControllerAccessor* GetTextAreaControllerAccessor()
     };
     return &TextAreaControllerAccessorImpl;
 }
+
 }

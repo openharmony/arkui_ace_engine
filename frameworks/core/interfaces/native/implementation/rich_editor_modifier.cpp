@@ -125,7 +125,7 @@ void AssignArkValue(Ark_RichEditorSelection& dst, const BaseEventInfo& src, Conv
             dst.spans.array = nullptr;
             return;
         }
-        dst.spans.length = resultObjects.size();
+        dst.spans.length = Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(resultObjects.size()));
         dst.spans.array = new Union_Span_Result[resultObjects.size()];
         size_t idx = 0;
         for (auto& resultObject : resultObjects) {
@@ -656,29 +656,29 @@ void OnCopyImpl(Ark_NativePointer node,
 void EditMenuOptionsImpl(Ark_NativePointer node,
                          const Opt_EditMenuOptions* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto optValue = Converter::GetOptPtr(value);
-    if (!optValue) {
-        // TODO: Reset value
-        return;
-    }
-    auto onCreateMenuCallback = [arkCreateMenu = CallbackHelper(optValue->onCreateMenu)](
-        const std::vector<NG::MenuItemParam>& systemMenuItems) -> std::vector<NG::MenuOptionsParam> {
-            auto menuItems = Converter::ArkValue<Array_TextMenuItem>(systemMenuItems, Converter::FC);
-            auto result = arkCreateMenu.InvokeWithOptConvertResult<std::vector<NG::MenuOptionsParam>,
-                Array_TextMenuItem, Callback_Array_TextMenuItem_Void>(menuItems);
-            return result.value_or(std::vector<NG::MenuOptionsParam>());
-        };
-    auto onMenuItemClick = [arkMenuItemClick = CallbackHelper(optValue->onMenuItemClick)](
-        NG::MenuItemParam menuOptionsParam) -> bool {
-            TextRange range {.start = menuOptionsParam.start, .end = menuOptionsParam.end};
-            auto menuItem = Converter::ArkValue<Ark_TextMenuItem>(menuOptionsParam);
-            auto arkRange = Converter::ArkValue<Ark_TextRange>(range);
-            auto arkResult = arkMenuItemClick.InvokeWithObtainResult<
-                Ark_Boolean, Callback_Boolean_Void>(menuItem, arkRange);
-            return Converter::Convert<bool>(arkResult);
-        };
+    // auto frameNode = reinterpret_cast<FrameNode *>(node);
+    // CHECK_NULL_VOID(frameNode);
+    // auto optValue = Converter::GetOptPtr(value);
+    // if (!optValue) {
+    //     // TODO: Reset value
+    //     return;
+    // }
+    // auto onCreateMenuCallback = [arkCreateMenu = CallbackHelper(optValue->onCreateMenu)](
+    //     const std::vector<NG::MenuItemParam>& systemMenuItems) -> std::vector<NG::MenuOptionsParam> {
+    //         auto menuItems = Converter::ArkValue<Array_TextMenuItem>(systemMenuItems, Converter::FC);
+    //         auto result = arkCreateMenu.InvokeWithOptConvertResult<std::vector<NG::MenuOptionsParam>,
+    //             Array_TextMenuItem, Callback_Array_TextMenuItem_Void>(menuItems);
+    //         return result.value_or(std::vector<NG::MenuOptionsParam>());
+    //     };
+    // auto onMenuItemClick = [arkMenuItemClick = CallbackHelper(optValue->onMenuItemClick)](
+    //     NG::MenuItemParam menuOptionsParam) -> bool {
+    //         TextRange range {.start = menuOptionsParam.start, .end = menuOptionsParam.end};
+    //         auto menuItem = Converter::ArkValue<Ark_TextMenuItem>(menuOptionsParam);
+    //         auto arkRange = Converter::ArkValue<Ark_TextRange>(range);
+    //         auto arkResult = arkMenuItemClick.InvokeWithObtainResult<
+    //             Ark_Boolean, Callback_Boolean_Void>(menuItem, arkRange);
+    //         return Converter::Convert<bool>(arkResult);
+    //     };
     // RichEditorModelNG::SetSelectionMenuOptions(frameNode, std::move(onCreateMenuCallback), std::move(onMenuItemClick));
 }
 void EnableKeyboardOnFocusImpl(Ark_NativePointer node,
@@ -708,10 +708,10 @@ void EnableHapticFeedbackImpl(Ark_NativePointer node,
 void BarStateImpl(Ark_NativePointer node,
                   const Opt_BarState* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<DisplayMode>(*value);
-    RichEditorModelNG::SetBarState(frameNode, convValue);
+    // auto frameNode = reinterpret_cast<FrameNode *>(node);
+    // CHECK_NULL_VOID(frameNode);
+    // auto convValue = Converter::OptConvert<DisplayMode>(*value);
+    // RichEditorModelNG::SetBarState(frameNode, convValue);
 }
 void MaxLengthImpl(Ark_NativePointer node,
                    const Opt_Number* value)

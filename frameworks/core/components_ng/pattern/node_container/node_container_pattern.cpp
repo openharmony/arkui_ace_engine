@@ -46,13 +46,6 @@ void NodeContainerPattern::RemakeNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto newNode = FireMakeFunction();
-    AddBaseNode(newNode);
-}
-
-void NodeContainerPattern::AddBaseNode(const RefPtr<UINode>& newNode)
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     auto oldChild = host->GetChildAtIndex(0);
     if ((!oldChild && !newNode) || (oldChild && oldChild == newNode)) {
         return;

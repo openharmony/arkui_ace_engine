@@ -231,6 +231,7 @@ void CheckSwiperDigitalParameters(SwiperDigitalParameters& p)
     ResetIfInvalid(p.fontSize);
     ResetIfInvalid(p.selectedFontSize);
 }
+
 } // namespace
 } // namespace OHOS::Ace::NG
 

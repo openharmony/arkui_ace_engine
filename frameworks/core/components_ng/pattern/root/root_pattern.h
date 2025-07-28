@@ -78,7 +78,7 @@ public:
         auto host = GetHost();
         CHECK_NULL_RETURN(host, false);
         auto children = host->GetChildren();
-        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+        auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_RETURN(pipeline, false);
         auto iter = std::find_if(children.begin(), children.end(),
             [](const RefPtr<UINode>& node) { return node->GetTag() == V2::STAGE_ETS_TAG; });

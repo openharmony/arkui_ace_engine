@@ -177,7 +177,7 @@ void LinearIndicatorPattern::RegisterVisibleChange()
     if (hasVisibleChangeRegistered_) {
         return;
     }
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -239,7 +239,7 @@ void LinearIndicatorPattern::DumpInfo()
 {
     auto layoutProperty = GetLayoutProperty<LinearIndicatorLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetThemeManager()->GetTheme<NG::LinearIndicatorTheme>();
     CHECK_NULL_VOID(theme);
@@ -265,7 +265,7 @@ void LinearIndicatorPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
 {
     auto layoutProperty = GetLayoutProperty<LinearIndicatorLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetThemeManager()->GetTheme<NG::LinearIndicatorTheme>();
     CHECK_NULL_VOID(theme);

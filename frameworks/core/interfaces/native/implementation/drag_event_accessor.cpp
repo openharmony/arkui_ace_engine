@@ -296,4 +296,5 @@ const GENERATED_ArkUIDragEventAccessor* GetDragEventAccessor()
     };
     return &DragEventAccessorImpl;
 }
+
 }

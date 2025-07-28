@@ -14,21 +14,25 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "arkoala_api_generated.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace FrictionMotionAccessor {
-void DestroyPeerImpl(Ark_FrictionMotion peer) {}
-Ark_FrictionMotion CtorImpl(const Ark_Number* friction, const Ark_Number* position, const Ark_Number* velocity)
+void DestroyPeerImpl(Ark_FrictionMotion peer)
+{
+}
+Ark_FrictionMotion CtorImpl(const Ark_Number* friction,
+                            const Ark_Number* position,
+                            const Ark_Number* velocity)
 {
     return {};
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return reinterpret_cast<void*>(&DestroyPeerImpl);
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-} // namespace FrictionMotionAccessor
+} // FrictionMotionAccessor
 const GENERATED_ArkUIFrictionMotionAccessor* GetFrictionMotionAccessor()
 {
     static const GENERATED_ArkUIFrictionMotionAccessor FrictionMotionAccessorImpl {
@@ -39,4 +43,4 @@ const GENERATED_ArkUIFrictionMotionAccessor* GetFrictionMotionAccessor()
     return &FrictionMotionAccessorImpl;
 }
 
-} // namespace OHOS::Ace::NG::GeneratedModifier
+}

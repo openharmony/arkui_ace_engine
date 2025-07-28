@@ -19,14 +19,11 @@
 #include <typeinfo>
 
 #include "base/utils/macros.h"
-#include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT ScreenModel {
 public:
     static void Create(uint64_t screenId);
-    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
-    static void SetOptions(FrameNode* frameNode, uint64_t screenId);
 };
 } // namespace OHOS::Ace::NG
 

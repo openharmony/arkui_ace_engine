@@ -36,18 +36,13 @@ public:
     void ClearBorder() override;
     void ClearBorderWidth() override;
     void ClearPadding() override;
-    static void InitCalendarPicker(FrameNode* pickerNode, const CalendarSettingData& settingData);
-    static void SetCalendarData(FrameNode* pickerNode, const std::optional<CalendarSettingData>& settingData);
     void SetMarkToday(bool isMarkToday) override;
     void CalendarPickerRemoveResObj(const std::string& key) override;
 
     static RefPtr<FrameNode> CreateNode(int32_t nodeId, const CalendarSettingData& settingData);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
-    static RefPtr<FrameNode> CreateEmptyFrameNode(int32_t nodeId);
     static void SetTextStyle(FrameNode* frameNode, const PickerTextStyle& textStyle);
-    static void SetTextStyle(FrameNode* frameNode, const std::optional<PickerTextStyle>& textStyle);
-    static void SetEdgeAlign(FrameNode* frameNode, const std::optional<CalendarEdgeAlign>& alignType,
-        const std::optional<DimensionOffset>& offset);
+    static void SetEdgeAlign(FrameNode* frameNode, const CalendarEdgeAlign& alignType, const DimensionOffset& offset);
     static void SetPadding(FrameNode* frameNode, const PaddingProperty& padding);
     static void ClearPadding(FrameNode* frameNode);
     static void ClearHeight(FrameNode* frameNode);

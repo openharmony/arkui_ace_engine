@@ -513,6 +513,8 @@ std::optional<uint32_t> ResourceConverter::ToSymbol()
     CHECK_NULL_RETURN(themeConstants_, std::nullopt);
     if (id_ == -1 && !params_.empty()) {
         return themeConstants_->GetSymbolByName(params_.front().c_str());
+    } else if (id_ != -1) {
+        return themeConstants_->GetSymbolById(id_);
     }
     return std::nullopt;
 }

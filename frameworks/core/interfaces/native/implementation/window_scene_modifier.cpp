@@ -30,11 +30,12 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
 #if defined(WINDOW_SCENE_SUPPORTED) || defined(ARKUI_CAPI_UNITTEST)
-    auto frameNode = WindowSceneModel::CreateNode(id);
-    if (frameNode) {
-        frameNode->IncRefCount();
-        return AceType::RawPtr(frameNode);
-    }
+    // auto frameNode = WindowSceneModel::CreateNode(id);
+    // if (frameNode) {
+    //     frameNode->IncRefCount();
+    //     return AceType::RawPtr(frameNode);
+    // }
+    return {};
 #endif
     return {};
 }

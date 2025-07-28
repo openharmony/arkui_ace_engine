@@ -83,4 +83,5 @@ const GENERATED_ArkUISwipeGestureEventAccessor* GetSwipeGestureEventAccessor()
     };
     return &SwipeGestureEventAccessorImpl;
 }
+
 }

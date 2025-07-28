@@ -1064,15 +1064,15 @@ void AssignCast(std::optional<LayoutStyle>& dst, const Ark_LayoutStyle& src)
     }
 }
 
-template<>
-void AssignCast(std::optional<DataPanelType>& dst, const Ark_DataPanelType& src)
-{
-    switch (src) {
-        case ARK_DATA_PANEL_TYPE_LINE: dst = DataPanelType::LINE; break;
-        case ARK_DATA_PANEL_TYPE_CIRCLE: dst = DataPanelType::CIRCLE; break;
-        default: LOGE("Unexpected enum value in Ark_DataPanelType: %{public}d", src);
-    }
-}
+// template<>
+// void AssignCast(std::optional<DataPanelType>& dst, const Ark_DataPanelType& src)
+// {
+//     switch (src) {
+//         case ARK_DATA_PANEL_TYPE_LINE: dst = DataPanelType::LINE; break;
+//         case ARK_DATA_PANEL_TYPE_CIRCLE: dst = DataPanelType::CIRCLE; break;
+//         default: LOGE("Unexpected enum value in Ark_DataPanelType: %{public}d", src);
+//     }
+// }
 
 template<>
 void AssignCast(std::optional<SliderModel::SliderMode>& dst, const Ark_SliderStyle& src)
@@ -2177,15 +2177,15 @@ void AssignCast(std::optional<VisibleType>& dst, const Ark_Visibility& src)
 template<>
 void AssignCast(std::optional<LaunchMode>& dst, const Ark_LaunchMode& value)
 {
-    // switch (value) {
-    //     case ARK_LAUNCH_MODE_STANDARD: dst = LaunchMode::STANDARD; break;
-    //     case ARK_LAUNCH_MODE_MOVE_TO_TOP_SINGLETON: dst = LaunchMode::MOVE_TO_TOP_SINGLETON; break;
-    //     case ARK_LAUNCH_MODE_POP_TO_SINGLETON: dst = LaunchMode::POP_TO_SINGLETON; break;
-    //     case ARK_LAUNCH_MODE_NEW_INSTANCE: dst = LaunchMode::NEW_INSTANCE; break;
-    //     default: {
-    //         LOGE("Unexpected enum value in Ark_LaunchMode: %{public}d", value);
-    //     }
-    // }
+    switch (value) {
+        case ARK_LAUNCH_MODE_STANDARD: dst = LaunchMode::STANDARD; break;
+        case ARK_LAUNCH_MODE_MOVE_TO_TOP_SINGLETON: dst = LaunchMode::MOVE_TO_TOP_SINGLETON; break;
+        // case ARK_LAUNCH_MODE_POP_TO_SINGLETON: dst = LaunchMode::POP_TO_SINGLETON; break;
+        case ARK_LAUNCH_MODE_NEW_INSTANCE: dst = LaunchMode::NEW_INSTANCE; break;
+        default: {
+            LOGE("Unexpected enum value in Ark_LaunchMode: %{public}d", value);
+        }
+    }
 }
 
 template<>

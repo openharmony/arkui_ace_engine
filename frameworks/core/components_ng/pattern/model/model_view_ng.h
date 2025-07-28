@@ -17,12 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_MODEL_MODEL_VIEW_NG_H
 
 #include "core/components_ng/pattern/model/model_light.h"
-#ifdef ARKUI_CAPI_UNITTEST
-#include "test/unittest/capi/stubs/mock_shader_input_buffer.h"
-#include "test/unittest/capi/stubs/mock_custom_render_descriptor.h"
-#else
 #include "core/components_ng/pattern/model/model_paint_property.h"
-#endif // ARKUI_CAPI_UNITTEST
 #include "core/components_ng/pattern/model/model_position.h"
 #include "core/components_ng/pattern/model/model_view.h"
 
@@ -44,15 +39,6 @@ public:
     std::optional<std::shared_ptr<Render3D::ShaderInputBuffer>> GetShaderInputBuffer() override;
 
     static void AddShaderInputBuffer(FrameNode* frameNode, const std::shared_ptr<Render3D::ShaderInputBuffer>& buffer);
-    static void AddCustomRender(FrameNode* frameNode,
-                                const std::shared_ptr<Render3D::CustomRenderDescriptor>& customRender);
-    static void AddShaderImageTexture(FrameNode* frameNode, const std::string& path);
-    static void SetBackground(FrameNode* frameNode, const std::string& value);
-    static void SetShader(FrameNode* frameNode, const std::string& path);
-    static void SetRenderWidth(FrameNode* frameNode, const std::optional<Dimension>& width);
-    static void SetRenderHeight(FrameNode* frameNode, const std::optional<Dimension>& width);
-    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
-    static void SetModelViewContext(FrameNode* frameNode, const ModelViewContext& context);
 private:
     // Camera and lights animations are done from the frontend with Animatable types.
     WeakPtr<FrameNode> frameNode_;
