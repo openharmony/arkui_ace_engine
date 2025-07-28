@@ -174,6 +174,7 @@ import { DividerStyle as DividerStyle_sidebar } from "./../sidebar"
 import { NodeContainer_AboutToResizeCallback } from "./../nodeContainer"
 import { drawing } from "@ohos/graphics/drawing"
 import promptAction from '@ohos/promptAction'
+import { UIContextUtil } from 'arkui/handwritten/UIContextUtil'
 
 export class Deserializer extends DeserializerBase {
     constructor(data: KSerializerBuffer | KUint8ArrayPtr, length: int32) {
@@ -1125,7 +1126,8 @@ export class Deserializer extends DeserializerBase {
         return UICommonEventInternal.fromPtr(ptr)
     }
     readUIContext(): UIContext {
-        return new UIContext(100000)
+        let uiContext = UIContextUtil.getOrCreateUIContextById(100000);
+        return uiContext
     }
     readUIExtensionProxy(): UIExtensionProxy {
         let valueDeserializer : Deserializer = this
