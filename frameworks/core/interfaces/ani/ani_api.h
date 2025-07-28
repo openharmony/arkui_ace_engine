@@ -201,6 +201,16 @@ struct ArkUIComponentSnapshotAsync {
     std::function<void(std::shared_ptr<ArkUIComponentSnapshotAsync>)> callBackJsFunction;
 };
 
+struct ArkUIXComponentParams {
+    std::string id;
+    ArkUI_Int32 type;
+    void* controller = nullptr;
+    std::function<void(void*)> nativeHandler = nullptr;
+    std::function<void(const std::string&)> onSurfaceCreated = nullptr;
+    std::function<void(const std::string&, float, float, float, float)> onSurfaceChanged = nullptr;
+    std::function<void(const std::string&)> onSurfaceDestroyed = nullptr;
+};
+
 struct ArkUIAniImageModifier {
     void (*setPixelMap)(ArkUINodeHandle node, void* pixelmap);
     void (*setDrawableDescriptor)(ArkUINodeHandle node, void* drawablem, int type);
@@ -411,10 +421,9 @@ struct ArkUIAniStateMgmtModifier {
     std::string (*getLanguageCode)();
 };
 struct ArkUIAniXComponentModifier {
-    void (*setXComponentControllerCallback)(ArkUINodeHandle node,
-        std::function<void(const std::string&)>&& onSurfaceCreated,
-        std::function<void(const std::string&, float, float, float, float)>&& onSurfaceChanged,
-        std::function<void(const std::string&)>&& onSurfaceDestroyed);
+    void (*setXComponentInitParameters)(ArkUINodeHandle node, const ArkUIXComponentParams& params);
+    void (*setScreenId)(ArkUINodeHandle node, uint64_t screenId);
+    void (*markBindNative)(ArkUINodeHandle node);
 };
 
 struct ArkUIAniConditionScopeModifier {

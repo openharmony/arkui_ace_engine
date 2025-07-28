@@ -15,41 +15,34 @@
 
 import { InteropNativeModule } from '@koalaui/interop';
 import { ArkBaseNode } from './ArkBaseNode';
-import { XComponentAttribute, ArkXComponentPeer, XComponentParameter, XComponentOptions, NativeXComponentParameters, OnNativeLoadCallback, XComponentControllerCallbackInternal, SurfaceRect } from '../../component/xcomponent';
+import { XComponentAttribute, ArkXComponentPeer, XComponentParameter, XComponentOptions, NativeXComponentParameters, OnNativeLoadCallback, setXComponentParametersANI, setXComponentOptionsANI, SurfaceRect } from '../../component/xcomponent';
 import { VoidCallback } from '../../component/units';
 import { ArkUIAniModule } from "arkui.ani";
 
 export class ArkXComponentNode extends ArkBaseNode implements XComponentAttribute {
-
     constructParam(...params: Object[]): this {
         return this;
     }
     getPeer() : ArkXComponentPeer {
         return this.peer as ArkXComponentPeer
     }
-    initialize(value: XComponentParameter): this {
+    initializeXComponentParameter(value: XComponentParameter): this {
+        setXComponentParametersANI(this.getPeer(), value);
         return this;
     }
-    initialize(value: XComponentOptions): this {
+    initializeXComponentOptions(value: XComponentOptions): this {
+        setXComponentOptionsANI(this.getPeer(), value);
+        return this;
+    }
+    initializeNativeXComponentParameters(value: NativeXComponentParameters): this {
         const peer = this.getPeer();
         if (peer === undefined) {
             return this;
         }
-        peer.setXComponentOptions1Attribute(value);
-        const controller = value.controller;
-        if (controller !== undefined) {
-            let callback: XComponentControllerCallbackInternal = {
-                onSurfaceCreated: controller.onSurfaceCreated as ((surfaceId: string) => void),
-                onSurfaceChanged: controller.onSurfaceChanged as ((surfaceId: string, surfaceRect: SurfaceRect) => void),
-                onSurfaceDestroyed: controller.onSurfaceDestroyed as ((surfaceId: string) => void),
-            } as XComponentControllerCallbackInternal;
-            ArkUIAniModule._XComponent_SetSurfaceCallback(peer.getPeerPtr(), callback);
-        }
+        ArkUIAniModule._XComponent_SetNativeXComponentParameters(peer.getPeerPtr(), value.type);
         return this;
     }
-    initialize(value: NativeXComponentParameters): this {
-        return this;
-    }
+    overload initialize { initializeXComponentParameter, initializeXComponentOptions, initializeNativeXComponentParameters }
     onLoad(value: OnNativeLoadCallback | undefined): this {
         this.getPeer()?.onLoadAttribute(value);
         return this;

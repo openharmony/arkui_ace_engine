@@ -37,6 +37,25 @@ ani_object AniUtils::CreateDouble(ani_env *env, double value)
     return personInfoObj;
 }
 
+ani_object AniUtils::CreateLong(ani_env *env, ani_long value)
+{
+    CHECK_NULL_RETURN(env, nullptr);
+    static const char *className = "Lstd/core/Long;";
+    ani_class long_cls;
+    if (ANI_OK != env->FindClass(className, &long_cls)) {
+        return nullptr;
+    }
+    ani_method longCtor;
+    if (ANI_OK != env->Class_FindMethod(long_cls, "<ctor>", "J:V", &longCtor)) {
+        return nullptr;
+    }
+    ani_object longObj;
+    if (ANI_OK != env->Object_New(long_cls, longCtor, &longObj, value)) {
+        return nullptr;
+    }
+    return longObj;
+}
+
 bool AniUtils::CheckType(ani_env *env, ani_object obj, const std::string& type)
 {
     CHECK_NULL_RETURN(env, false);

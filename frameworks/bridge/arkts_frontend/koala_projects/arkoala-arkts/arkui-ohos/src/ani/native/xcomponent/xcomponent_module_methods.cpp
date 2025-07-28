@@ -16,10 +16,19 @@
 #include "xcomponent_module_methods.h"
 
 #include "base/utils/utils.h"
+#include "base/utils/string_utils.h"
 #include "load.h"
+#include "utils/ani_utils.h"
 
 namespace OHOS::Ace::Ani {
 namespace {
+bool IsUndefined(ani_env* env, ani_ref obj)
+{
+    CHECK_NULL_RETURN(env, false);
+    ani_boolean isUndefined;
+    env->Reference_IsUndefined(obj, &isUndefined);
+    return isUndefined;
+}
 ani_status GetAniEnv(ani_vm* vm, ani_env** env)
 {
     CHECK_NULL_RETURN(vm, ANI_ERROR);
@@ -90,9 +99,18 @@ private:
     ani_ref func_ = nullptr;
 };
 
-void ConvertSurfaceIdCallback(ani_vm* vm,
-    std::function<void(const std::string&)>& callback, const std::shared_ptr<XComponentCallbackAni>& callbackAni)
+void ConvertSurfaceCreatedCallback(ani_vm* vm, ani_env* env, ani_object value,
+    std::function<void(const std::string&)>& callback)
 {
+    CHECK_NULL_VOID(env);
+    ani_ref onSurfaceCreatededRef = nullptr;
+    if (ANI_OK != env->Object_GetPropertyByName_Ref(value, "onSurfaceCreated", &onSurfaceCreatededRef)) {
+        return;
+    }
+    if (IsUndefined(env, onSurfaceCreatededRef)) {
+        return;
+    }
+    auto callbackAni = std::make_shared<XComponentCallbackAni>(env, onSurfaceCreatededRef);
     callback = [vm, callbackAni](const std::string& surfaceId) {
         CHECK_NULL_VOID(vm);
         CHECK_NULL_VOID(callbackAni);
@@ -110,10 +128,18 @@ void ConvertSurfaceIdCallback(ani_vm* vm,
     };
 }
 
-void ConvertSurfaceChangeCallback(ani_vm* vm,
-    std::function<void(const std::string&, float, float, float, float)>& callback,
-    const std::shared_ptr<XComponentCallbackAni>& callbackAni)
+void ConvertSurfaceChangeCallback(ani_vm* vm, ani_env* env, ani_object value,
+    std::function<void(const std::string&, float, float, float, float)>& callback)
 {
+    CHECK_NULL_VOID(env);
+    ani_ref onSurfaceChangedRef = nullptr;
+    if (ANI_OK != env->Object_GetPropertyByName_Ref(value, "onSurfaceChanged", &onSurfaceChangedRef)) {
+        return;
+    }
+    if (IsUndefined(env, onSurfaceChangedRef)) {
+        return;
+    }
+    auto callbackAni = std::make_shared<XComponentCallbackAni>(env, onSurfaceChangedRef);
     callback = [vm, callbackAni](const std::string& surfaceId,
         float width, float height, float offsetX, float offsetY) {
         CHECK_NULL_VOID(vm);
@@ -133,10 +159,85 @@ void ConvertSurfaceChangeCallback(ani_vm* vm,
         }
     };
 }
+
+void ConvertSurfaceDestroyedCallback(ani_vm* vm, ani_env* env, ani_object value,
+    std::function<void(const std::string&)>& callback)
+{
+    CHECK_NULL_VOID(env);
+    ani_ref onSurfaceDestroyedRef = nullptr;
+    if (ANI_OK != env->Object_GetPropertyByName_Ref(value, "onSurfaceDestroyed", &onSurfaceDestroyedRef)) {
+        return;
+    }
+    if (IsUndefined(env, onSurfaceDestroyedRef)) {
+        return;
+    }
+    auto callbackAni = std::make_shared<XComponentCallbackAni>(env, onSurfaceDestroyedRef);
+    callback = [vm, callbackAni](const std::string& surfaceId) {
+        CHECK_NULL_VOID(vm);
+        CHECK_NULL_VOID(callbackAni);
+        ani_env* env;
+        auto attachCurrentThreadStatus = GetAniEnv(vm, &env);
+        CHECK_NULL_VOID(env);
+        ani_string surfaceIdAni = CreateSurfaceIdAni(env, surfaceId);
+        CHECK_NULL_VOID(surfaceIdAni);
+        std::vector<ani_ref> args = { surfaceIdAni };
+        ani_ref ret = nullptr;
+        callbackAni->Call(env, args.size(), args.data(), &ret);
+        if (attachCurrentThreadStatus == ANI_OK) {
+            vm->DetachCurrentThread();
+        }
+    };
+}
+
+void ConvertNativeXComponentHandler(ani_vm* vm, ani_env* env, ani_object value,
+    std::function<void(void*)>& callback)
+{
+    CHECK_NULL_VOID(env);
+    ani_ref nativeHandlerRef = nullptr;
+    if (ANI_OK != env->Object_GetPropertyByName_Ref(value, "nativeHandler", &nativeHandlerRef)) {
+        return;
+    }
+    if (IsUndefined(env, nativeHandlerRef)) {
+        return;
+    }
+    auto callbackAni = std::make_shared<XComponentCallbackAni>(env, nativeHandlerRef);
+    callback = [vm, callbackAni](void* nativeXComponentPointer) {
+        CHECK_NULL_VOID(vm);
+        CHECK_NULL_VOID(callbackAni);
+        ani_env* env;
+        auto attachCurrentThreadStatus = GetAniEnv(vm, &env);
+        CHECK_NULL_VOID(env);
+        ani_object pointerObject = AniUtils::CreateLong(env, reinterpret_cast<ani_long>(nativeXComponentPointer));
+        CHECK_NULL_VOID(pointerObject);
+        std::vector<ani_ref> args = { pointerObject };
+        ani_ref ret = nullptr;
+        callbackAni->Call(env, args.size(), args.data(), &ret);
+        if (attachCurrentThreadStatus == ANI_OK) {
+            vm->DetachCurrentThread();
+        }
+    };
+}
+
+void* GetControllerPeerPoiner(ani_env* env, ani_object params)
+{
+    CHECK_NULL_RETURN(env, nullptr);
+    ani_ref controllerPtrRef;
+    if (ANI_OK != env->Object_GetPropertyByName_Ref(params, "controllerPtr", &controllerPtrRef)) {
+        return nullptr;
+    }
+    if (IsUndefined(env, controllerPtrRef)) {
+        return nullptr;
+    }
+    ani_long controllerPtr;
+    if (ANI_OK != env->Object_CallMethodByName_Long(
+        static_cast<ani_object>(controllerPtrRef), "longValue", ":J", &controllerPtr)) {
+        return nullptr;
+    }
+    return reinterpret_cast<void*>(controllerPtr);
+}
 } // namespace
 
-void SetXComponentControllerCallback(ani_env* env, [[maybe_unused]] ani_object aniClass,
-    ani_object node, ani_object callbackAni)
+void SetXComponentOptions(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long node, ani_object options)
 {
     CHECK_NULL_VOID(env);
     auto* arkNode = reinterpret_cast<ArkUINodeHandle>(node);
@@ -145,31 +246,78 @@ void SetXComponentControllerCallback(ani_env* env, [[maybe_unused]] ani_object a
     CHECK_NULL_VOID(modifier);
     auto xcomponentModifier = modifier->getArkUIAniXComponentModifier();
     CHECK_NULL_VOID(xcomponentModifier);
-    ani_ref onSurfaceCreatedAni = nullptr;
-    ani_ref onSurfaceChangedAni = nullptr;
-    ani_ref onSurfaceDestroyedAni = nullptr;
-    if (ANI_OK != env->Object_GetPropertyByName_Ref(callbackAni, "onSurfaceCreated", &onSurfaceCreatedAni)) {
+    ani_int type;
+    if (ANI_OK != env->Object_GetPropertyByName_Int(options, "type", &type)) {
         return;
     }
-    if (ANI_OK != env->Object_GetPropertyByName_Ref(callbackAni, "onSurfaceChanged", &onSurfaceChangedAni)) {
+    ani_long controllerPtr = reinterpret_cast<ani_long>(nullptr);
+    if (ANI_OK != env->Object_GetPropertyByName_Long(options, "controllerPtr", &controllerPtr)) {
         return;
     }
-    if (ANI_OK != env->Object_GetPropertyByName_Ref(callbackAni, "onSurfaceDestroyed", &onSurfaceDestroyedAni)) {
-        return;
-    }
-    auto onSurfaceCreatedCallback = std::make_shared<XComponentCallbackAni>(env, onSurfaceCreatedAni);
-    auto onSurfaceChangedCallback = std::make_shared<XComponentCallbackAni>(env, onSurfaceChangedAni);
-    auto onSurfaceDestroyedCallback = std::make_shared<XComponentCallbackAni>(env, onSurfaceDestroyedAni);
+    ArkUIXComponentParams xcParams = {
+        .type = static_cast<ArkUI_Int32>(type),
+        .controller = reinterpret_cast<void*>(controllerPtr),
+    };
     ani_vm* vm = nullptr;
     env->GetVM(&vm);
-    std::function<void(const std::string&)> onSurfaceCreated = nullptr;
-    std::function<void(const std::string&, float, float, float, float)> onSurfaceChanged = nullptr;
-    std::function<void(const std::string&)> onSurfaceDestroyed = nullptr;
-    ConvertSurfaceIdCallback(vm, onSurfaceCreated, onSurfaceCreatedCallback);
-    ConvertSurfaceChangeCallback(vm, onSurfaceChanged, onSurfaceChangedCallback);
-    ConvertSurfaceIdCallback(vm, onSurfaceDestroyed, onSurfaceDestroyedCallback);
-    xcomponentModifier->setXComponentControllerCallback(arkNode, std::move(onSurfaceCreated),
-        std::move(onSurfaceChanged), std::move(onSurfaceDestroyed));
+    ConvertSurfaceCreatedCallback(vm, env, options, xcParams.onSurfaceCreated);
+    ConvertSurfaceChangeCallback(vm, env, options, xcParams.onSurfaceChanged);
+    ConvertSurfaceDestroyedCallback(vm, env, options, xcParams.onSurfaceDestroyed);
+    xcomponentModifier->setXComponentInitParameters(arkNode, xcParams);
+    ani_ref screenIdRef;
+    if (ANI_OK != env->Object_GetPropertyByName_Ref(options, "screenId", &screenIdRef)) {
+        return;
+    }
+    if (!IsUndefined(env, screenIdRef)) {
+        ani_long screenId;
+        env->Object_CallMethodByName_Long(
+            static_cast<ani_object>(screenIdRef), "longValue", ":J", &screenId);
+        xcomponentModifier->setScreenId(arkNode, screenId);
+    }
 }
 
+void SetNativeXComponentParameters(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long node, ani_int type)
+{
+    CHECK_NULL_VOID(env);
+    auto* arkNode = reinterpret_cast<ArkUINodeHandle>(node);
+    CHECK_NULL_VOID(arkNode);
+    const auto* modifier = GetNodeAniModifier();
+    CHECK_NULL_VOID(modifier);
+    auto xcomponentModifier = modifier->getArkUIAniXComponentModifier();
+    CHECK_NULL_VOID(xcomponentModifier);
+    xcomponentModifier->markBindNative(arkNode);
+    ArkUIXComponentParams xcParams = {
+        .type = static_cast<ArkUI_Int32>(type),
+    };
+    xcomponentModifier->setXComponentInitParameters(arkNode, xcParams);
+}
+
+void SetXComponentParameters(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long node, ani_object params)
+{
+    CHECK_NULL_VOID(env);
+    auto* arkNode = reinterpret_cast<ArkUINodeHandle>(node);
+    CHECK_NULL_VOID(arkNode);
+    const auto* modifier = GetNodeAniModifier();
+    CHECK_NULL_VOID(modifier);
+    auto xcomponentModifier = modifier->getArkUIAniXComponentModifier();
+    CHECK_NULL_VOID(xcomponentModifier);
+    ani_ref idRef;
+    if (ANI_OK != env->Object_GetPropertyByName_Ref(params, "id", &idRef)) {
+        return;
+    }
+    ani_int type;
+    if (ANI_OK != env->Object_GetPropertyByName_Int(params, "type", &type)) {
+        return;
+    }
+    void* xcomponentControllerPtr = GetControllerPeerPoiner(env, params);
+    ArkUIXComponentParams xcParams = {
+        .id = AniUtils::ANIStringToStdString(env, static_cast<ani_string>(idRef)),
+        .type = static_cast<ArkUI_Int32>(type),
+        .controller = xcomponentControllerPtr,
+    };
+    ani_vm* vm = nullptr;
+    env->GetVM(&vm);
+    ConvertNativeXComponentHandler(vm, env, params, xcParams.nativeHandler);
+    xcomponentModifier->setXComponentInitParameters(arkNode, xcParams);
+}
 } // namespace OHOS::Ace::Ani

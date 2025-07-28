@@ -23,8 +23,9 @@ import { LocalStorage } from '@ohos.arkui.stateManagement';
 import { DrawContext } from "arkui/Graphics"
 import { AnimatableArithmetic, DrawModifier, AsyncCallback, Callback, DragItemInfo, ResourceColor } from "arkui/component"
 import { ArkCustomComponent } from "arkui/ArkCustomComponent"
-import { WaterFlowOptions, WaterFlowSections, XComponentControllerCallbackInternal, OverlayOptions } from "arkui/component"
+import { WaterFlowOptions, WaterFlowSections, OverlayOptions } from "arkui/component"
 import { ChildrenMainSize, PageTransitionOptions, PageTransitionCallback, SlideEffect, ScaleOptions, TranslateOptions } from "arkui/component"
+import { XComponentOptionsInternal, XComponentParametersInternal } from "arkui/component"
 import { HookDragInfo } from "arkui/handwritten"
 import { dragController } from "@ohos/arkui/dragController"
 import { componentSnapshot } from "@ohos/arkui/componentSnapshot"
@@ -220,7 +221,9 @@ export class ArkUIAniModule {
     native static _Env_GetLanguageCode(): string
 
     // for XComponent
-    native static _XComponent_SetSurfaceCallback(ptr: KPointer, callback: XComponentControllerCallbackInternal): void;
+    native static _XComponent_SetXComponentOptions(ptr: KPointer, options: XComponentOptionsInternal): void;
+    native static _XComponent_SetXComponentParameters(ptr: KPointer, params: XComponentParametersInternal): void;
+    native static _XComponent_SetNativeXComponentParameters(ptr: KPointer, params: KInt): void;
     // for ComponentContent
     native static _RemoveComponent_FromFrameNode(ptr: KPointer, content: KPointer): void
     native static _AddComponent_ToFrameNode(ptr: KPointer, content: KPointer): void

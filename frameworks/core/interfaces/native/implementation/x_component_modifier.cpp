@@ -53,8 +53,7 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
 #ifdef XCOMPONENT_SUPPORTED
-    auto frameNode = XComponentModelStatic::CreateFrameNode(
-        id, std::nullopt, XComponentType::SURFACE, std::nullopt);
+    auto frameNode = XComponentModelStatic::CreateFrameNode(id, false);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 #else
@@ -173,14 +172,6 @@ void EnableAnalyzerImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-#ifdef XCOMPONENT_SUPPORTED
-    auto convValue = Converter::OptConvert<bool>(*value);
-    if (!convValue) {
-        XComponentModelNG::EnableAnalyzer(frameNode, false);
-        return;
-    }
-    XComponentModelNG::EnableAnalyzer(frameNode, *convValue);
-#endif // XCOMPONENT_SUPPORTED
 }
 void EnableSecureImpl(Ark_NativePointer node,
                       const Opt_Boolean* value)

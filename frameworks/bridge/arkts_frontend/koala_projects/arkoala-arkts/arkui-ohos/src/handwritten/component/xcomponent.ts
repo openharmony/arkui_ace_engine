@@ -15,12 +15,24 @@
 
 
 import { TypeChecker } from "#components"
+import { KPointer, toPeerPtr } from "@koalaui/interop";
+import { int64, int32, uint64 } from "@koalaui/common"
 import { ArkUIAniModule } from "arkui.ani";
 
-export interface XComponentControllerCallbackInternal {
+export interface XComponentOptionsInternal {
+    type: int32;
+    controllerPtr: KPointer;
+    screenId?: uint64;
     onSurfaceCreated: ((surfaceId: string) => void);
     onSurfaceChanged: ((surfaceId: string, surfaceRect: SurfaceRect) => void);
     onSurfaceDestroyed: ((surfaceId: string) => void);
+}
+
+export interface XComponentParametersInternal {
+    id: string;
+    type: int32;
+    nativeHandler: ((pointer: int64) => void);
+    controllerPtr?: KPointer;
 }
 
 export class SurfaceRectAniInternal implements SurfaceRect {
@@ -42,21 +54,54 @@ export class TypedXComponentPeerInternal extends ArkXComponentPeer {
     }
 }
 
+function ConvertXComponentType(type: XComponentType): int32 {
+    return type == XComponentType.SURFACE ? 0 : 2;
+}
+
+export function setXComponentParametersANI(peer: ArkXComponentPeer, value: XComponentParameter): void {
+    if (peer === undefined) {
+        return;
+    }
+    let params: XComponentParametersInternal = {
+            id: value.id,
+            type: ConvertXComponentType(value.type),
+            nativeHandler: (ptr: int64) => {},
+    } as XComponentParametersInternal;
+    if (value.controller !== undefined) {
+        const controller = value.controller! as XComponentController;
+        params.controllerPtr = toPeerPtr(controller);
+    }
+    ArkUIAniModule._XComponent_SetXComponentParameters(peer.getPeerPtr(), params);
+}
+
+export function setXComponentOptionsANI(peer: ArkXComponentPeer, value: XComponentOptions): void {
+    if (peer === undefined) {
+        return;
+    }
+    const options: XComponentOptionsInternal = {
+        type: ConvertXComponentType(value.type),
+        controllerPtr: toPeerPtr(value.controller),
+        onSurfaceCreated: value.controller.onSurfaceCreated as ((surfaceId: string) => void),
+        onSurfaceChanged: value.controller.onSurfaceChanged as ((surfaceId: string, surfaceRect: SurfaceRect) => void),
+        onSurfaceDestroyed: value.controller.onSurfaceDestroyed as ((surfaceId: string) => void),
+    } as XComponentOptionsInternal;
+    if (value.screenId !== undefined) {
+        options.screenId = value.screenId! as uint64;
+    }
+    ArkUIAniModule._XComponent_SetXComponentOptions(peer.getPeerPtr(), options);
+}
+
 function hookSetXComponentOptions(component: ArkXComponentComponent,
     value: XComponentParameter | XComponentOptions | NativeXComponentParameters): void {
-    if (TypeChecker.isXComponentOptions(value, true, false, true, true)) {
-        const options_casted = value as (XComponentOptions)
-        const peer = component.getPeer();
-        peer?.setXComponentOptions1Attribute(options_casted)
-        if (peer !== undefined) {
-            const controller = options_casted.controller;
-            let callback: XComponentControllerCallbackInternal = {
-                onSurfaceCreated: controller.onSurfaceCreated as ((surfaceId: string) => void),
-                onSurfaceChanged: controller.onSurfaceChanged as ((surfaceId: string, surfaceRect: SurfaceRect) => void),
-                onSurfaceDestroyed: controller.onSurfaceDestroyed as ((surfaceId: string) => void),
-            } as XComponentControllerCallbackInternal;
-            ArkUIAniModule._XComponent_SetSurfaceCallback(peer.getPeerPtr(), callback);
-        }
-        return;
+    const peer = component.getPeer();
+    if (value instanceof XComponentParameter) {
+        const value_casted = value as XComponentParameter;
+        setXComponentParametersANI(peer, value_casted);
+    } else if (value instanceof XComponentOptions) {
+        const value_casted = value as XComponentOptions;
+        setXComponentOptionsANI(peer, value_casted);
+    } else {
+        const value_casted = value as NativeXComponentParameters;
+        ArkUIAniModule._XComponent_SetNativeXComponentParameters(peer.getPeerPtr(), ConvertXComponentType(value.type));
     }
 }
