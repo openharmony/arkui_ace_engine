@@ -230,6 +230,7 @@ void XComponentPatternV2::OnDetachFromMainTree()
 
 void XComponentPatternV2::OnDetachFromFrameNode(FrameNode* frameNode)
 {
+    CHECK_NULL_VOID(frameNode);
     UpdateUsesSuperMethod();
     if (usesSuperMethod_) {
         XComponentPattern::OnDetachFromFrameNode(frameNode);
