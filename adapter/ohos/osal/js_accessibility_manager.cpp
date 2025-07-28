@@ -2188,7 +2188,7 @@ void JsAccessibilityManager::WebSetScreenRect(const std::shared_ptr<NG::Transiti
             node->GetRectWidth(),
             node->GetRectHeight()
         };
-        if (!NearZero(commonProperty.scaleX, 1.0f) || !NearZero(commonProperty.scaleY, 1.0f)) {
+        if (!NearZero(commonProperty.scaleX) || !NearZero(commonProperty.scaleY)) {
             rectInt.SetRect(static_cast<int32_t>(std::floor(rectInt.GetX() * commonProperty.scaleX)),
                 static_cast<int32_t>(std::floor(rectInt.GetY() * commonProperty.scaleY)),
                 static_cast<int32_t>(std::floor(rectInt.Width() * commonProperty.scaleX)),
