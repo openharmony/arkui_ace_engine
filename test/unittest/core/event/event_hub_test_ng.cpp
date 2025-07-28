@@ -211,7 +211,6 @@ HWTEST_F(EventHubTestNg, EventHubPropertyTest003, TestSize.Level1)
      */
     eventHub->SetOnAppear([]() {});
     eventHub->FireOnAppear();
-
     eventHub->SetOnDisappear([]() {});
     eventHub->FireOnDisappear();
 }
