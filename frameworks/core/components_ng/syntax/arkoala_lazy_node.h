@@ -35,7 +35,7 @@ class ArkoalaLazyNode : public ForEachBaseNode {
 public:
     explicit ArkoalaLazyNode(int32_t id) : ForEachBaseNode(V2::JS_LAZY_FOR_EACH_ETS_TAG, id) {}
 
-    using CreateItemCb = std::function<RefPtr<FrameNode>(int32_t)>;
+    using CreateItemCb = std::function<RefPtr<UINode>(int32_t)>;
     using UpdateRangeCb = std::function<void(int32_t, int32_t)>;
 
     void SetTotalCount(int32_t value)
@@ -55,6 +55,8 @@ public:
     }
 
     RefPtr<FrameNode> GetFrameNode(int32_t index) final;
+
+    RefPtr<UINode> GetChildByIndex(int32_t index);
 
     RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache, bool addToRenderTree) override;
 
@@ -82,7 +84,7 @@ public:
     void OnDataChange(int32_t changeIndex, int32_t count, NotificationType type);
 
 private:
-    UniqueValuedMap<int32_t, WeakPtr<FrameNode>, WeakPtr<FrameNode>::Hash> items_;
+    UniqueValuedMap<int32_t, WeakPtr<UINode>, WeakPtr<UINode>::Hash> items_;
     CreateItemCb createItem_;
     UpdateRangeCb updateRange_;
     int32_t totalCount_ = 0;
