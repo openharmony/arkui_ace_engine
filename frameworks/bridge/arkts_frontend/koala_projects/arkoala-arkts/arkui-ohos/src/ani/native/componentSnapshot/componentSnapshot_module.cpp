@@ -267,10 +267,13 @@ void TriggerJsCallback(std::shared_ptr<ArkUIComponentSnapshotAsync> asyncCtx)
         if (pixmapItem) {
             resultRef[1] = pixmapItem;
         }
-    }
 #endif
+    }
     ani_status status = ANI_OK;
-    resultRef[0] = AniUtils::CreateBusinessError(asyncCtx->env, "", ERROR_CODE_NO_ERROR);
+    ani_ref businessError = AniUtils::CreateBusinessError(asyncCtx->env, "", asyncCtx->errCode);
+    if (businessError) {
+        resultRef[0] = businessError;
+    }
     if (asyncCtx->deferred) {
         // promise
         if (asyncCtx->errCode == OHOS::Ace::ERROR_CODE_NO_ERROR) {

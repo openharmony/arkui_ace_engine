@@ -119,7 +119,7 @@ void SetDragAllowDrop(ArkUINodeHandle node, const char** allowDrops, ArkUI_Int32
         frameNode->SetAllowDrop(allowDropSet);
         return;
     }
-    for (uint32_t i = 0; i < length; i++) {
+    for (int32_t i = 0; i < length; i++) {
         const char* allowDrop = *(allowDrops + i);
         if (allowDrop != nullptr) {
             allowDropSet.insert(std::string(allowDrop));
