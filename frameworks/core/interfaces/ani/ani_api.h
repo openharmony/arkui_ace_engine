@@ -155,7 +155,7 @@ struct ArkUIDragControllerAsync {
     const char* extraParams;
     bool hasHandle = false;
     SharedPointerWrapper touchPoint;
-    ani_ref unifiedData = nullptr;
+    SharedPointerWrapper unifiedData;
     SharedPointerWrapper pixelMap;
     std::vector<SharedPointerWrapper> pixelMapList;
     ArkUINodeHandle customBuilderNode = nullptr;

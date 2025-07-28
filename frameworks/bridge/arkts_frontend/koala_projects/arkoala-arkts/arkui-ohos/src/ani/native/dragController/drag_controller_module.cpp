@@ -756,17 +756,6 @@ std::optional<Dimension> ConvertDimensionType(ani_env* env, ani_ref touchPoint)
     return std::nullopt;
 }
 
-ani_ref TransformUnifiedDataFormANI(ani_env* env, ani_object dataObj)
-{
-    CHECK_NULL_RETURN(env, nullptr);
-    auto dataValue = OHOS::UDMF::AniConverter::UnwrapUnifiedData(env, dataObj);
-    auto unifiedData = reinterpret_cast<void*>(&dataValue);
-    if (!unifiedData) {
-        return nullptr;
-    }
-    return reinterpret_cast<ani_ref>(unifiedData);
-}
-
 bool CheckAndParseSecondParams(ani_env* env, ArkUIDragControllerAsync& asyncCtx, ani_object dragInfo)
 {
     if (AniUtils::IsUndefined(env, dragInfo)) {
@@ -808,7 +797,10 @@ bool CheckAndParseSecondParams(ani_env* env, ArkUIDragControllerAsync& asyncCtx,
         asyncCtx.extraParams = extraInfoLimited.c_str();
     }
     if (!AniUtils::IsUndefined(env, static_cast<ani_object>(dataAni))) {
-        asyncCtx.unifiedData = TransformUnifiedDataFormANI(env, static_cast<ani_object>(dataAni));
+        auto dataValue = OHOS::UDMF::AniConverter::UnwrapUnifiedData(env, static_cast<ani_object>(dataAni));
+        if (dataValue) {
+            asyncCtx.unifiedData = SharedPointerWrapper(dataValue);
+        }
     }
 
     std::shared_ptr<DimensionOffset> dimensionPtr = nullptr;
