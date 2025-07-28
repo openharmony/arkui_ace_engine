@@ -41,10 +41,7 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_SetClonedEventFingerIdByIndex00
 HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_SetClonedEventFingerIdByIndex002, TestSize.Level0)
 {
     ArkUITouchEvent touchEvent = {};
-    ArkUI_UIInputEvent event = {
-        ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, C_TOUCH_EVENT_ID, &touchEvent,
-        false // isCloned
-    };
+    ArkUI_UIInputEvent event = { ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, C_TOUCH_EVENT_ID, &touchEvent, false };
 
     auto result = OH_ArkUI_PointerEvent_SetClonedEventFingerIdByIndex(&event, 1, 0);
     EXPECT_EQ(result, ARKUI_ERROR_CODE_NOT_CLONED_POINTER_EVENT);
@@ -57,10 +54,7 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_SetClonedEventFingerIdByIndex00
  */
 HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_SetClonedEventFingerIdByIndex003, TestSize.Level0)
 {
-    ArkUI_UIInputEvent event = {
-        ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, C_TOUCH_EVENT_ID, nullptr,
-        true // isCloned
-    };
+    ArkUI_UIInputEvent event = { ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, C_TOUCH_EVENT_ID, nullptr, true };
 
     auto result = OH_ArkUI_PointerEvent_SetClonedEventFingerIdByIndex(&event, 1, 0);
     EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
@@ -75,10 +69,7 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_SetClonedEventFingerIdByIndex00
 {
     ArkUITouchPoint point = { .id = 0 };
     ArkUITouchEvent touchEvent = { .touchPointes = &point, .touchPointSize = 1 };
-    ArkUI_UIInputEvent event = {
-        ARKUI_UIINPUTEVENT_TYPE_TOUCH, C_TOUCH_EVENT_ID, &touchEvent,
-        true // isCloned
-    };
+    ArkUI_UIInputEvent event = { ARKUI_UIINPUTEVENT_TYPE_TOUCH, C_TOUCH_EVENT_ID, &touchEvent, true };
 
     // Test with negative index
     auto result1 = OH_ArkUI_PointerEvent_SetClonedEventFingerIdByIndex(&event, 1, -1);
@@ -98,10 +89,7 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_SetClonedEventFingerIdByIndex10
 {
     ArkUITouchPoint points[2] = { { .id = 0 }, { .id = 1 } };
     ArkUITouchEvent touchEvent = { .touchPointes = points, .touchPointSize = 2 };
-    ArkUI_UIInputEvent event = {
-        ARKUI_UIINPUTEVENT_TYPE_TOUCH, C_TOUCH_EVENT_ID, &touchEvent,
-        true // isCloned
-    };
+    ArkUI_UIInputEvent event = { ARKUI_UIINPUTEVENT_TYPE_TOUCH, C_TOUCH_EVENT_ID, &touchEvent, true };
 
     const int32_t testFingerId = 5;
     auto result = OH_ArkUI_PointerEvent_SetClonedEventFingerIdByIndex(&event, testFingerId, 1);
@@ -118,10 +106,7 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_SetClonedEventFingerIdByIndex10
 HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_SetClonedEventFingerIdByIndex102, TestSize.Level0)
 {
     ArkUITouchEvent touchEvent = {};
-    ArkUI_UIInputEvent event = {
-        ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, C_MOUSE_EVENT_ID, &touchEvent,
-        true // isCloned
-    };
+    ArkUI_UIInputEvent event = { ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, C_MOUSE_EVENT_ID, &touchEvent, true };
 
     auto result = OH_ArkUI_PointerEvent_SetClonedEventFingerIdByIndex(&event, 1, 0);
     EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
