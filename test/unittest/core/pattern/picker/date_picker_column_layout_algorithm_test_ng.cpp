@@ -26,6 +26,9 @@
 #include "core/components/button/button_theme.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/pattern/picker/datepicker_column_layout_algorithm.h"
+#include "core/components_ng/pattern/picker/datepicker_pattern.h"
+#include "core/components_ng/pattern/picker/datepicker_model_ng.h"
+#include "core/components_ng/pattern/flex/flex_layout_property.h"
 
 #undef private
 #undef protected
@@ -34,6 +37,10 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
+namespace {
+    constexpr float USER_IDEAL_SIZE_0 = 0.0f;
+    constexpr float USER_IDEAL_SIZE_400 = 400.0f;
+}
 
 class DatePickerColumnLayoutAlgorithmTest : public testing::Test {
 public:
@@ -354,4 +361,249 @@ HWTEST_F(DatePickerColumnLayoutAlgorithmTest, ReCalcItemHeightScale005, TestSize
     res = datePickerColumnLayoutAlgorithm.ReCalcItemHeightScale(userSetHeight, isDividerSpacing);
     EXPECT_EQ(res, expectValue);
 }
+
+/**
+ * @tc.name: BeforeCreateLayoutWrapper001
+ * @tc.desc: Test BeforeCreateLayoutWrapper when layoutPolicy is WRAP_CONTENT.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerColumnLayoutAlgorithmTest, BeforeCreateLayoutWrapper001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create DatePicker.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    EXPECT_EQ(element->GetTag(), V2::DATE_PICKER_ETS_TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto pickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+    pickerPattern->OnModifyDone();
+    auto layoutAlgorithm = pickerPattern->CreateLayoutAlgorithm();
+
+    /**
+     * @tc.steps: step2. Set a specified size for the DatePicker.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+
+    auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    pickerProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(USER_IDEAL_SIZE_400),
+        CalcLength(USER_IDEAL_SIZE_400)));
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_TRUE(layoutProperty->calcLayoutConstraint_->selfIdealSize.has_value());
+    EXPECT_EQ(layoutProperty->calcLayoutConstraint_->selfIdealSize->Width().value(), CalcLength(USER_IDEAL_SIZE_400));
+    EXPECT_EQ(layoutProperty->calcLayoutConstraint_->selfIdealSize->Height().value(), CalcLength(USER_IDEAL_SIZE_400));
+
+    /**
+     * @tc.steps: step3. Set widthLayoutPolicy_ and heightLayoutPolicy_ to LayoutCalPolicy::WRAP_CONTENT.
+     */
+    LayoutPolicyProperty layoutPolicyProperty;
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::WRAP_CONTENT;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::WRAP_CONTENT;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+
+    /**
+     * @tc.steps: step4. Call BeforeCreateLayoutWrapper function.
+     * @tc.expected: The width and height of the DatePicker will be set to 0.
+     */
+    pickerPattern->BeforeCreateLayoutWrapper();
+    EXPECT_TRUE(layoutProperty->calcLayoutConstraint_->selfIdealSize.has_value());
+    EXPECT_EQ(layoutProperty->calcLayoutConstraint_->selfIdealSize->Width().value(), CalcLength(USER_IDEAL_SIZE_0));
+    EXPECT_EQ(layoutProperty->calcLayoutConstraint_->selfIdealSize->Height().value(), CalcLength(USER_IDEAL_SIZE_0));
+}
+
+/**
+ * @tc.name: BeforeCreateLayoutWrapper002
+ * @tc.desc: Test BeforeCreateLayoutWrapper when layoutPolicy is FIX_AT_IDEAL_SIZE.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerColumnLayoutAlgorithmTest, BeforeCreateLayoutWrapper002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create DatePicker.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    EXPECT_EQ(element->GetTag(), V2::DATE_PICKER_ETS_TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto pickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+    pickerPattern->OnModifyDone();
+    auto layoutAlgorithm = pickerPattern->CreateLayoutAlgorithm();
+
+    /**
+     * @tc.steps: step2. Set a specified size for the DatePicker.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+
+    auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    pickerProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(USER_IDEAL_SIZE_400),
+        CalcLength(USER_IDEAL_SIZE_400)));
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_TRUE(layoutProperty->calcLayoutConstraint_->selfIdealSize.has_value());
+    EXPECT_EQ(layoutProperty->calcLayoutConstraint_->selfIdealSize->Width().value(), CalcLength(USER_IDEAL_SIZE_400));
+    EXPECT_EQ(layoutProperty->calcLayoutConstraint_->selfIdealSize->Height().value(), CalcLength(USER_IDEAL_SIZE_400));
+
+    /**
+     * @tc.steps: step3. Set widthLayoutPolicy_ and heightLayoutPolicy_ to LayoutCalPolicy::FIX_AT_IDEAL_SIZE.
+     */
+    LayoutPolicyProperty layoutPolicyProperty;
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+
+    /**
+     * @tc.steps: step4. Call BeforeCreateLayoutWrapper function.
+     * @tc.expected: The width and height of the DatePicker will be set to 0.
+     */
+    pickerPattern->BeforeCreateLayoutWrapper();
+    EXPECT_TRUE(layoutProperty->calcLayoutConstraint_->selfIdealSize.has_value());
+    EXPECT_EQ(layoutProperty->calcLayoutConstraint_->selfIdealSize->Width().value(), CalcLength(USER_IDEAL_SIZE_0));
+    EXPECT_EQ(layoutProperty->calcLayoutConstraint_->selfIdealSize->Height().value(), CalcLength(USER_IDEAL_SIZE_0));
+}
+
+/**
+ * @tc.name: BeforeCreateLayoutWrapper003
+ * @tc.desc: Test BeforeCreateLayoutWrapper when layoutPolicy is MATCH_PARENT.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerColumnLayoutAlgorithmTest, BeforeCreateLayoutWrapper003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create DatePicker.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    EXPECT_EQ(element->GetTag(), V2::DATE_PICKER_ETS_TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto pickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+    pickerPattern->OnModifyDone();
+    auto layoutAlgorithm = pickerPattern->CreateLayoutAlgorithm();
+
+    /**
+     * @tc.steps: step2. Set a specified size for the DatePicker.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+
+    auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    pickerProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(USER_IDEAL_SIZE_400),
+        CalcLength(USER_IDEAL_SIZE_400)));
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_TRUE(layoutProperty->calcLayoutConstraint_->selfIdealSize.has_value());
+    EXPECT_EQ(layoutProperty->calcLayoutConstraint_->selfIdealSize->Width().value(), CalcLength(USER_IDEAL_SIZE_400));
+    EXPECT_EQ(layoutProperty->calcLayoutConstraint_->selfIdealSize->Height().value(), CalcLength(USER_IDEAL_SIZE_400));
+
+    /**
+     * @tc.steps: step3. Set widthLayoutPolicy_ and heightLayoutPolicy_ to LayoutCalPolicy::MATCH_PARENT.
+     */
+    LayoutPolicyProperty layoutPolicyProperty;
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::MATCH_PARENT;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+
+    /**
+     * @tc.steps: step4. Call BeforeCreateLayoutWrapper function.
+     * @tc.expected: The width and height of the DatePicker will not be changed.
+     */
+    pickerPattern->BeforeCreateLayoutWrapper();
+    EXPECT_TRUE(layoutProperty->calcLayoutConstraint_->selfIdealSize.has_value());
+    EXPECT_EQ(layoutProperty->calcLayoutConstraint_->selfIdealSize->Width().value(), CalcLength(USER_IDEAL_SIZE_400));
+    EXPECT_EQ(layoutProperty->calcLayoutConstraint_->selfIdealSize->Height().value(), CalcLength(USER_IDEAL_SIZE_400));
+}
+
+/**
+ * @tc.name: BeforeCreateLayoutWrapper004
+ * @tc.desc: Test BeforeCreateLayoutWrapper when layoutPolicy is NO_MATCH.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerColumnLayoutAlgorithmTest, BeforeCreateLayoutWrapper004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create DatePicker.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    EXPECT_EQ(element->GetTag(), V2::DATE_PICKER_ETS_TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+
+    auto pickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+    pickerPattern->OnModifyDone();
+    auto layoutAlgorithm = pickerPattern->CreateLayoutAlgorithm();
+
+    /**
+     * @tc.steps: step2. Set a specified size for the DatePicker.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+
+    auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    pickerProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(USER_IDEAL_SIZE_400),
+        CalcLength(USER_IDEAL_SIZE_400)));
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_TRUE(layoutProperty->calcLayoutConstraint_->selfIdealSize.has_value());
+    EXPECT_EQ(layoutProperty->calcLayoutConstraint_->selfIdealSize->Width().value(), CalcLength(USER_IDEAL_SIZE_400));
+    EXPECT_EQ(layoutProperty->calcLayoutConstraint_->selfIdealSize->Height().value(), CalcLength(USER_IDEAL_SIZE_400));
+
+    /**
+     * @tc.steps: step3. Set widthLayoutPolicy_ and heightLayoutPolicy_ to LayoutCalPolicy::NO_MATCH.
+     */
+    LayoutPolicyProperty layoutPolicyProperty;
+    layoutPolicyProperty.widthLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutPolicyProperty.heightLayoutPolicy_ = LayoutCalPolicy::NO_MATCH;
+    layoutProperty->layoutPolicy_ = layoutPolicyProperty;
+
+    /**
+     * @tc.steps: step4. Call BeforeCreateLayoutWrapper function.
+     * @tc.expected: The width and height of the DatePicker will not be changed.
+     */
+    pickerPattern->BeforeCreateLayoutWrapper();
+    EXPECT_TRUE(layoutProperty->calcLayoutConstraint_->selfIdealSize.has_value());
+    EXPECT_EQ(layoutProperty->calcLayoutConstraint_->selfIdealSize->Width().value(), CalcLength(USER_IDEAL_SIZE_400));
+    EXPECT_EQ(layoutProperty->calcLayoutConstraint_->selfIdealSize->Height().value(), CalcLength(USER_IDEAL_SIZE_400));
+}
+
 } // namespace OHOS::Ace::NG

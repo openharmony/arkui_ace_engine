@@ -53,6 +53,7 @@ constexpr float MAX_PERCENT = 100.0f;
 const int32_t UNOPTION_COUNT = 2;
 constexpr float PICKER_MAXFONTSCALE = 1.0f;
 constexpr uint32_t PRECISION_TWO = 2;
+constexpr float DEFAULT_SIZE_ZERO = 0.0f;
 } // namespace
 
 void TextPickerPattern::OnAttachToFrameNode()
@@ -2181,6 +2182,19 @@ void TextPickerPattern::GetAndUpdateRealSelectedArr(const std::vector<NG::TextCa
     SetSelecteds(selectedArr);
     pickerProperty->UpdateSelecteds(selectedArr);
     pickerProperty->UpdateSelectedIndex(selectedArr);
+}
+
+void TextPickerPattern::BeforeCreateLayoutWrapper()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<TextPickerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
+    if (layoutPolicy.has_value() && (layoutPolicy->IsWrap() || layoutPolicy->IsFix())) {
+        layoutProperty->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(DEFAULT_SIZE_ZERO), CalcLength(DEFAULT_SIZE_ZERO)));
+    }
 }
 
 } // namespace OHOS::Ace::NG

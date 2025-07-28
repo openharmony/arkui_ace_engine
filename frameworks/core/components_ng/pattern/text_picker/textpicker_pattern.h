@@ -49,6 +49,8 @@ public:
 
     ~TextPickerPattern() override = default;
 
+    void BeforeCreateLayoutWrapper() override;
+
     bool IsAtomicNode() const override
     {
         return true;
