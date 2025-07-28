@@ -1,8 +1,8 @@
 {
     "compilerOptions": {
-        "package": "@ohos.arkui",
-        "outDir": "build-m3",
-        "baseUrl": "src",
+        "package": "arkui",
+        "outDir": "build",
+        "baseUrl": "./src",
         "paths": {
             "#components": ["./generated/arkts"],
             "#stateMgmtTool": ["./stateManagement/tools/arkts"],

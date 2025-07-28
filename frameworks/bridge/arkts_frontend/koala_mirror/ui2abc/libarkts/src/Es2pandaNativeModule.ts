@@ -185,18 +185,18 @@ export class Es2pandaNativeModule {
     _CreateDiagnosticKind(context: KNativePointer, message: string, type: Es2pandaPluginDiagnosticType): KNativePointer {
         throw new Error("Not implemented")
     }
-    _CreateDiagnosticInfo(context: KNativePointer, kind: KNativePointer, args: string[], argc: number): KNativePointer {
+    _CreateDiagnosticInfo(context: KNativePointer, kind: KNativePointer, args: string[], argc: number, pos: KNativePointer): KNativePointer {
         throw new Error("Not implemented")
     }
     _CreateSuggestionInfo(context: KNativePointer, kind: KNativePointer, args: string[],
-        argc: number, substitutionCode: string): KNativePointer {
+        argc: number, substitutionCode: string, range: KNativePointer): KNativePointer {
         throw new Error("Not implemented")
     }
     _LogDiagnostic(context: KNativePointer, kind: KNativePointer, argv: string[], argc: number, pos: KNativePointer): void {
         throw new Error("Not implemented")
     }
     _LogDiagnosticWithSuggestion(context: KNativePointer, diagnosticInfo: KNativePointer,
-        suggestionInfo?: KNativePointer, range?: KNativePointer): void {
+        suggestionInfo?: KNativePointer): void {
         throw new Error("Not implemented")
     }
     _SetUpSoPath(soPath: string): void {
