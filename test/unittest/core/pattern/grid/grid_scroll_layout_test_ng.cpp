@@ -2589,6 +2589,54 @@ HWTEST_F(GridScrollLayoutTestNg, UpdateCurrentOffset001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateCurrentOffset002
+ * @tc.desc: Test grid pattern UpdateCurrentOffset function
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollLayoutTestNg, UpdateCurrentOffset002, TestSize.Level1)
+{
+    /**
+     * @tc.cases: Test SCROLL_FROM_UPDATE
+     */
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateFixedItems(10);
+    CreateDone();
+    ViewAbstract::SetHeight(AceType::RawPtr(frameNode_), CalcLength(0.0f));
+    PaddingProperty padding = { CalcLength(2), CalcLength(4), CalcLength(6), CalcLength(8) };
+    layoutProperty_->UpdatePadding(padding);
+    FlushUITasks();
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    pattern_->info_.offsetEnd_ = true;
+    pattern_->UpdateCurrentOffset(-10.f, SCROLL_FROM_UPDATE);
+    EXPECT_EQ(pattern_->info_.currentOffset_, -10.f);
+}
+
+/**
+ * @tc.name: UpdateCurrentOffset003
+ * @tc.desc: Test grid pattern UpdateCurrentOffset function
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollLayoutTestNg, UpdateCurrentOffset003, TestSize.Level1)
+{
+    /**
+     * @tc.cases: Test SCROLL_FROM_UPDATE
+     */
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateFixedItems(10);
+    CreateDone();
+    ViewAbstract::SetHeight(AceType::RawPtr(frameNode_), CalcLength(0.0f));
+    PaddingProperty padding = { CalcLength(2), CalcLength(4), CalcLength(6), CalcLength(8) };
+    layoutProperty_->UpdatePadding(padding);
+    FlushUITasks();
+    ScrollToEdge(ScrollEdgeType::SCROLL_TOP, false);
+    pattern_->UpdateCurrentOffset(10.f, SCROLL_FROM_UPDATE);
+    EXPECT_EQ(pattern_->info_.currentOffset_, 10.f);
+}
+/**
  * @tc.name: Test GetTotalOffset
  * @tc.desc: Test GetTotalOffset when updating an item's height in the viewport
  * @tc.type: FUNC
