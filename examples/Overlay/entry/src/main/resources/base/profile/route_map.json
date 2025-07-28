@@ -337,6 +337,26 @@
       "buildFunction": "PopupBlurBuilder"
     },
     {
+      "name": "popupBuilderTest",
+      "pageSourceFile": "src/main/ets/pages/components/popup/popupBuilderTest.ets",
+      "buildFunction": "PopupBuilderTestBuilder"
+    },
+    {
+      "name": "PopupKeyboardTest",
+      "pageSourceFile": "src/main/ets/pages/components/popup/PopupKeyboardTest.ets",
+      "buildFunction": "PopupKeyboardBuilder"
+    },
+    {
+      "name": "UIContextPopupTest",
+      "pageSourceFile": "src/main/ets/pages/components/popup/UIContextPopup.ets",
+      "buildFunction": "UIContextPopupBuilder"
+    },
+    {
+      "name": "PopupBigTest",
+      "pageSourceFile": "src/main/ets/pages/components/popup/popupBigTest.ets",
+      "buildFunction": "PopupBigBuilder"
+    },
+    {
       "name": "ToastIndex",
       "pageSourceFile": "src/main/ets/pages/components/toast/Index.ets",
       "buildFunction": "ToastIndexBuilder"
