@@ -670,6 +670,7 @@ public:
     void NotifyKeyboardClosed() override
     {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "KeyboardClosed");
+        lastCaretPos_.reset();
         CHECK_NULL_VOID(HasFocus());
         CHECK_NULL_VOID(!customKeyboardBuilder_ || !isCustomKeyboardAttached_);
 
