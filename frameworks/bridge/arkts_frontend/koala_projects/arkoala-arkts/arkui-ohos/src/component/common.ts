@@ -8674,14 +8674,6 @@ export class ArkCommonMethodStyle implements CommonMethod {
     public alignRules(value: AlignRuleOption | undefined | LocalizedAlignRuleOptions | undefined): this {
         return this
     }
-    public alignRulesWithAlignRuleOptionTypedValue(value: AlignRuleOption | undefined): this {
-        this.alignRules(value);
-        return this;
-    }
-    public alignRulesWithLocalizedAlignRuleOptionsTypedValue(value: LocalizedAlignRuleOptions | undefined): this {
-        this.alignRules(value);
-        return this;
-    }
     public aspectRatio(value: number | undefined): this {
         return this
     }
