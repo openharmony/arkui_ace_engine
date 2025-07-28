@@ -1214,7 +1214,7 @@ private:
     bool setExternalSpanItemMultiThread_ = false;
     bool closeSelectOverlayMultiThread_ = false;
     bool closeSelectOverlayMultiThreadValue_ = false;
-    bool setTextSelectionMultiThread_ = true;
+    bool setTextSelectionMultiThread_ = false;
     int32_t setTextSelectionMultiThreadValue0_;
     int32_t setTextSelectionMultiThreadValue1_;
     // ----- multi thread state variables end -----
