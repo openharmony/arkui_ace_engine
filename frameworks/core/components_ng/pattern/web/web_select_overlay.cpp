@@ -1292,6 +1292,7 @@ bool WebSelectOverlay::ComputeMenuOffset(LayoutWrapper *layoutWrapper, OffsetF &
     member.layoutWrapper = layoutWrapper;
     member.windowOffset = windowOffset;
     member.menuHeight = menuRect.Height();
+    member.menuWidth = menuRect.Width();
     member.info = info;
     bool initSuccess = InitMenuAvoidStrategyMember(member);
     if (initSuccess) {
