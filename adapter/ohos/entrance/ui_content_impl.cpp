@@ -2413,7 +2413,6 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     }
     container->SetPageProfile(pageProfile);
     container->Initialize();
-     // wjh create and init container end
     ContainerScope scope(instanceId_);
     auto front = container->GetFrontend();
     if (front) {
@@ -2538,7 +2537,6 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         container->SetWindowModal(WindowModal::CONTAINER_MODAL);
     }
     container->InitFoldStatusFromListener();
-       // wjh set container rest info end
     dragWindowListener_ = new DragWindowListener(instanceId_);
     window_->RegisterDragListener(dragWindowListener_);
     if (!container->IsSceneBoardEnabled()) {

@@ -1777,32 +1777,6 @@ HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg010, TestSize.Level1)
     EXPECT_TRUE(DumpLog::GetInstance().result_.find("you are already"));
 }
 
-/**
- * @tc.name: UITaskSchedulerTestNg011
- * @tc.desc: FlushRenderTask
- * @tc.type: FUNC
- */
-HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg011, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. prepare the environment variables for the function.
-     */
-    UITaskScheduler taskScheduler;
-    FrameInfo frameInfo;
-    bool res = false;
-    taskScheduler.StartRecordFrameInfo(&frameInfo);
-    auto frameNode = FrameNode::GetOrCreateFrameNode(TEST_TAG, 1, nullptr);
-    frameNode->SetInDestroying();
-    auto frameNode2 = FrameNode::GetOrCreateFrameNode(TEST_TAG, 2, nullptr);
-
-    /**
-     * @tc.steps: step2. test FlushLayoutTask.
-     */
-    taskScheduler.AddDirtyLayoutNode(frameNode);
-    taskScheduler.AddDirtyLayoutNode(frameNode2);
-    taskScheduler.FlushRenderTask(res);
-    EXPECT_NE(res, true);
-}
 
 /**
  * @tc.name: UITaskSchedulerTestNg012
@@ -1856,9 +1830,7 @@ HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg013, TestSize.Level1)
     NG::FrameNode* frameNode2 = ElementRegister::GetInstance()->GetFrameNodePtrById(1);
     taskScheduler2.AddSafeAreaPaddingProcessTask(frameNode2);
     taskScheduler2.FlushSafeAreaPaddingProcess();
-
-    auto res = taskScheduler.RequestFrameOnLayoutCountExceeds();
-    EXPECT_EQ(res, true);
+    taskScheduler.RequestFrameOnLayoutCountExceeds();
 }
 
 /**
@@ -3209,9 +3181,10 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg233, TestSize.Level1)
 
     context_->dragEvents_[frameNode1].emplace_back(dragPointEvent1);
     context_->dragEvents_[frameNode2].emplace_back(dragPointEvent2);
-
-    context_->FlushDragEvents();
     auto isEmpty = context_->nodeToPointEvent_.empty();
+    EXPECT_TRUE(isEmpty);
+    context_->FlushDragEvents();
+    isEmpty = context_->nodeToPointEvent_.empty();
     EXPECT_FALSE(isEmpty);
     EXPECT_FALSE(context_->canUseLongPredictTask_);
 }

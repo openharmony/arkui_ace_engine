@@ -37,7 +37,10 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
-const float DEFAULT_DENSITY =  3.5f;
+const float DEFAULT_DENSITY = 3.5f;
+const float DEFAULT_NODE_OFFSET = 200.5f;
+const int32_t DEFAULT_PARENT_NODE_ID = 1;
+const int32_t DEFAULT_NODE_ID = 2;
 } // namespace
 class ObserverTestNg : public testing::Test {
 public:
@@ -367,7 +370,7 @@ HWTEST_F(ObserverTestNg, ObserverTestNg014, TestSize.Level1)
      * @tc.steps1: initialize parameters.
      */
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::SCROLL_ETS_TAG, 12, []() { return AceType::MakeRefPtr<ScrollPattern>(); });
+        V2::SCROLL_ETS_TAG, DEFAULT_NODE_ID, []() { return AceType::MakeRefPtr<ScrollPattern>(); });
     auto pattern = frameNode->GetPattern<ScrollablePattern>();
 
     /**
@@ -442,7 +445,7 @@ HWTEST_F(ObserverTestNg, ObserverTestNg016, TestSize.Level1)
     auto parentFrame = FrameNode::GetOrCreateFrameNode(
         V2::SCROLL_ETS_TAG, 100, []() { return AceType::MakeRefPtr<ScrollPattern>(); });
     auto parentPattern = parentFrame->GetPattern<ScrollablePattern>();
-    parentPattern->UpdateCurrentOffset(200.5, SCROLL_FROM_AXIS);
+    parentPattern->UpdateCurrentOffset(DEFAULT_NODE_ID, SCROLL_FROM_AXIS);
     auto childFrame = FrameNode::GetOrCreateFrameNode(
         V2::SCROLL_COMPONENT_TAG, 101, []() { return AceType::MakeRefPtr<ScrollPattern>(); });
     childFrame->SetParent(parentFrame);
@@ -454,7 +457,7 @@ HWTEST_F(ObserverTestNg, ObserverTestNg016, TestSize.Level1)
     auto info = UIObserverHandler::GetInstance().GetScrollEventState(childFrame);
     ASSERT_NE(info, nullptr);
     ASSERT_EQ(info->uniqueId, 100);
-    ASSERT_NE(info->offset, 200.5);
+    ASSERT_NE(info->offset, DEFAULT_NODE_OFFSET);
 }
 
 /**
@@ -468,16 +471,16 @@ HWTEST_F(ObserverTestNg, ObserverTestNg017, TestSize.Level1)
      * @tc.steps1: initialize parameters.
      */
     auto parentFrame = FrameNode::GetOrCreateFrameNode(
-        V2::PAGE_ETS_TAG, 100, []() { return AceType::MakeRefPtr<ScrollPattern>(); });
+        V2::PAGE_ETS_TAG, DEFAULT_PARENT_NODE_ID, []() { return AceType::MakeRefPtr<ScrollPattern>(); });
     auto parentPattern = parentFrame->GetPattern<ScrollablePattern>();
-    parentPattern->UpdateCurrentOffset(200.5, SCROLL_FROM_AXIS);
+    parentPattern->UpdateCurrentOffset(DEFAULT_NODE_OFFSET, SCROLL_FROM_AXIS);
     
     /**
      * @tc.steps2: call the function GetOrCreateFrameNode.
      * @tc.expected: The value of current->GetTag() is PAGE_ETS_TAG
      */
     auto childFrame = FrameNode::GetOrCreateFrameNode(
-        V2::SCROLL_ETS_TAG, 101, []() { return AceType::MakeRefPtr<ScrollPattern>(); });
+        V2::SCROLL_ETS_TAG, DEFAULT_NODE_ID, []() { return AceType::MakeRefPtr<ScrollPattern>(); });
     childFrame->SetParent(parentFrame);
 
     /**
@@ -496,7 +499,7 @@ HWTEST_F(ObserverTestNg, ObserverTestNg017, TestSize.Level1)
 HWTEST_F(ObserverTestNg, ObserverTestNg018, TestSize.Level1)
 {
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::SCROLL_ETS_TAG, 12, []() { return AceType::MakeRefPtr<ScrollPattern>(); });
+        V2::SCROLL_ETS_TAG, DEFAULT_NODE_ID, []() { return AceType::MakeRefPtr<ScrollPattern>(); });
     auto pattern = frameNode->GetPattern<ScrollablePattern>();
  
     pattern->SetAxis(Axis::VERTICAL);
