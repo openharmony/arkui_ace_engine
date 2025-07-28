@@ -31,6 +31,7 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_proxy.h"
 #include "frameworks/core/components_ng/pattern/pattern.h"
+#include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
@@ -59,11 +60,13 @@ protected:
 void DragDropProxyTestNg::SetUpTestCase()
 {
     MockPipelineContext::SetUp();
+    MockContainer::SetUp();
 }
 
 void DragDropProxyTestNg::TearDownTestCase()
 {
     MockPipelineContext::TearDown();
+    MockContainer::TearDown();
 }
 
 /**
@@ -554,5 +557,39 @@ HWTEST_F(DragDropProxyTestNg, DragDropProxyTest012, TestSize.Level1)
      */
     proxy->DestroyDragWindow();
     EXPECT_EQ(manager->currentId_, -1);
+}
+
+/**
+ * @tc.name: DragDropProxyTest013
+ * @tc.desc: Test OnDragStart DragEvent information
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropProxyTestNg, DragDropProxyTest013, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. construct a DragDropProxy.
+    */
+    auto proxy = AceType::MakeRefPtr<DragDropProxy>(PROXY_ID);
+    ASSERT_NE(proxy, nullptr);
+
+    /**
+    * @tc.steps: step2. construct a manager.
+    */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto manager = pipeline->GetDragDropManager();
+    ASSERT_NE(manager, nullptr);
+    manager->currentId_ = PROXY_ID;
+
+    /**
+    * @tc.steps: step3. call OnDragStart with GestureEvent.
+    */
+    GestureEvent info;
+    info.SetSourceTool(SourceTool::FINGER);
+    info.SetTargetDisplayId(1);
+    proxy->OnDragStart(info, EXTRA_INFO_DRAG_START, nullptr);
+    EXPECT_EQ(manager->preDragPointerEvent_.sourceTool, SourceTool::FINGER);
+    EXPECT_EQ(manager->preDragPointerEvent_.displayId, 1);
 }
 } // namespace OHOS::Ace::NG
