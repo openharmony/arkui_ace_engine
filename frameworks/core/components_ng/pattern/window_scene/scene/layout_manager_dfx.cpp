@@ -27,10 +27,10 @@ LayoutManagerDfx* LayoutManagerDfx::GetInstance()
     return &instance;
 }
 
-void LayoutManagerDfx::DumpFlushInfo(TraverseResult& res)
+void LayoutManagerDfx::DumpFlushInfo(const TraverseResult& res)
 {
     TAG_LOGI(AceLogTag::ACE_WINDOW_PIPELINE, "DumpFlushInfo screenId:%{public}" PRIu64, res.screenId);
-    for (auto& [winId, uiParam] : res.uiParams) {
+    for (const auto& [winId, uiParam] : res.uiParams) {
         TAG_LOGI(AceLogTag::ACE_WINDOW_PIPELINE, "%{public}d|%{public}s|%{public}s|%{public}f|%{public}f|%{public}f|"
             "%{public}f|%{public}d", winId, uiParam.sessionName_.c_str(), uiParam.rect_.ToString().c_str(),
             uiParam.scaleX_, uiParam.scaleY_, uiParam.transX_, uiParam.transY_, uiParam.interactive_);

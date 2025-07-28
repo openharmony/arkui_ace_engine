@@ -28,7 +28,7 @@ struct SessionUIParam;
 namespace OHOS::Ace::NG {
 constexpr uint32_t RECORD_LIST_MAX_CAPACITY = 10;
 
-struct recordResult {
+struct RecordResult {
     uint32_t size = 0;
     std::queue<TraverseResult> que;
 };
@@ -42,11 +42,11 @@ public:
 private:
     LayoutManagerDfx() = default;
     ~LayoutManagerDfx() = default;
-    void DumpFlushInfo(TraverseResult& res);
+    void DumpFlushInfo(const TraverseResult& res);
     void PerformUIParams();
 
     std::mutex recordMutex_;
-    recordResult recordRes_;
+    RecordResult recordRes_;
     int32_t curVsyncCnt_ = 0;
 };
 } // namespace OHOS::Ace::NG
