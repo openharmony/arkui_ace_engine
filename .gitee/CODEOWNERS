@@ -3057,6 +3057,10 @@ interfaces/native/node/waterflow_section_option.h @arkuiscroll
 interfaces/native/ui_input_event.h @arkuievent
 interfaces/native/implementation/overlay_accessor.cpp @arkuievent
 
+[ANI Interfaces]
+interfaces/ets/ani/overlayManager/ @arkuipopupwindow
+interfaces/ets/ani/promptaction/ @arkuipopupwindow
+
 [Innerkits Interfaces]
 interfaces/inner_api/ace/ace_forward_compatibility.cpp @arkuiframework
 interfaces/inner_api/ace/ace_forward_compatibility.h @arkuiframework
@@ -3138,6 +3142,20 @@ frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/han
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ReusablePool.ts @arkuistatemgmt
 frameworks/bridge/arkts_frontend/koala_projects/incremental/ @arkuistatemgmt
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/component/web.ts @arkwebinarkuireview
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/component/customDialogController.ts @arkuipopupwindow
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/@ohos.overlayManager.ts @arkuipopupwindow
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/@ohos.promptAction.ts @arkuipopupwindow
+frameworks/core/interfaces/native/implementation/action_sheet_accessor.cpp @arkuipopupwindow
+frameworks/core/interfaces/native/implementation/alert_dialog_accessor.cpp @arkuipopupwindow
+frameworks/core/interfaces/native/implementation/custom_dialog_controller_accessor.cpp @arkuipopupwindow
+frameworks/core/interfaces/native/implementation/custom_dialog_controller_peer_impl.cpp @arkuipopupwindow
+frameworks/core/interfaces/native/implementation/custom_dialog_controller_peer_impl.h @arkuipopupwindow
+frameworks/core/interfaces/native/implementation/dismiss_dialog_action_accessor.cpp @arkuipopupwindow
+frameworks/core/interfaces/native/implementation/dismiss_dialog_action_peer.h @arkuipopupwindow
+frameworks/core/interfaces/native/implementation/dismiss_popup_action_accessor.cpp @arkuipopupwindow
+frameworks/core/interfaces/native/implementation/dismiss_popup_action_peer.h @arkuipopupwindow
+frameworks/core/interfaces/native/implementation/level_order_accessor.cpp @arkuipopupwindow
+frameworks/core/interfaces/native/implementation/level_order_peer.h @arkuipopupwindow
 
 [Test source]
 test/mock/core/event/ @arkuievent
