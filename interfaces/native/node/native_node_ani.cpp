@@ -240,13 +240,13 @@ ArkUI_ErrorCode OH_ArkUI_NativeModule_GetNavDestinationAniParam(ArkUI_NodeHandle
             GET_PARAM_WITH_NAVDESTINATION_ID_METHOD, status);
         return ARKUI_ERROR_CODE_GET_INFO_FAILED;
     }
-    ani_string navDestinatinIdRef;
-    if ((status = env->String_NewUTF8(idBuffer, idLen, &navDestinatinIdRef)) != ANI_OK) {
+    ani_string navDestinationIdRef;
+    if ((status = env->String_NewUTF8(idBuffer, idLen, &navDestinationIdRef)) != ANI_OK) {
         LOGE("AceNavigation failed to create navDestinationId ani_string, status:%{public}d", status);
         return ARKUI_ERROR_CODE_GET_INFO_FAILED;
     }
     ani_ref paramRef;
-    if ((status = env->Class_CallStaticMethod_Ref(cls, getParamMethod, &paramRef, navDestinatinIdRef)) != ANI_OK) {
+    if ((status = env->Class_CallStaticMethod_Ref(cls, getParamMethod, &paramRef, navDestinationIdRef)) != ANI_OK) {
         LOGE("AceNavigation failed to get NavDestination param, status:%{public}d", status);
         return ARKUI_ERROR_CODE_GET_INFO_FAILED;
     }

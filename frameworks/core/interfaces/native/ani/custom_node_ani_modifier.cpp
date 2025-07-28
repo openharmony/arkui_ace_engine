@@ -253,9 +253,9 @@ const ArkUIAniCustomNodeModifier* GetCustomNodeAniModifier()
         .constructCustomNode = OHOS::Ace::NG::ConstructCustomNode,
         .requestFrame = OHOS::Ace::NG::RequestFrame,
         .queryNavigationInfo = OHOS::Ace::NG::QueryNavigationInfo,
-        .queryRouterPageInfo = OHOS::Ace::NG::QueryRouterPageInfo,
         .queryNavDestinationInfo = OHOS::Ace::NG::QueryNavDestinationInfo,
-        .queryNavDestinationInfo0 = OHOS::Ace::NG::QueryNavDestinationInfo0
+        .queryNavDestinationInfo0 = OHOS::Ace::NG::QueryNavDestinationInfo0,
+        .queryRouterPageInfo = OHOS::Ace::NG::QueryRouterPageInfo
     };
     return &impl;
 }
