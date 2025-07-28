@@ -15,6 +15,7 @@
 import { NavPathStack, NavigationOperation, NavBar, ResourceStr, Resource, NavDestinationMode } from "@ohos.arkui.component"
 import { UIContext } from "@ohos.arkui.UIContext"
 import UIAbilityContext from 'application.UIAbilityContext';
+import transfer from '@ohos.transfer';
 import type { Callback } from '@ohos.base';
 import hilog from '@ohos.hilog'
  
@@ -206,9 +207,13 @@ import hilog from '@ohos.hilog'
             }
             dynamicValue.setProperty('navigationId', ESValue.wrap(staticValue.navigationId));
             dynamicValue.setProperty('name', ESValue.wrap(staticValue.name));
-            dynamicValue.setProperty('state', ESValue.wrap(staticValue.state));
+            dynamicValue.setProperty('state', ESValue.wrapNumber(staticValue.state));
             dynamicValue.setProperty('index', ESValue.wrap(staticValue.index));
-            dynamicValue.setProperty('param', ESValue.wrap(staticValue.param));
+            if (staticValue.param === null || staticValue.param === undefined) {
+                dynamicValue.setProperty('param', ESValue.Null);
+            } else {
+                dynamicValue.setProperty('param', ESValue.wrap(staticValue.param));
+            }
             dynamicValue.setProperty('navDestinationId', ESValue.wrap(staticValue.navDestinationId));
             return dynamicValue as Any;
         }
@@ -289,17 +294,21 @@ import hilog from '@ohos.hilog'
         static transferDynamic(input: Object): Any {
             let dynamicValue = ESValue.instantiateEmptyObject()
             if (input == null || input == undefined) {
-            return dynamicValue;
+                return dynamicValue;
             }
             let staticValue = input as RouterPageInfo
             if (staticValue == null || staticValue == undefined) {
                 return dynamicValue;
             }
-            dynamicValue.setProperty('context', ESValue.wrap(staticValue.context));
+            if (staticValue.context === null || staticValue.context === undefined) {
+                dynamicValue.setProperty('context', ESValue.Null);
+            } else {
+                dynamicValue.setProperty('context', ESValue.wrap(staticValue.context));
+            }
             dynamicValue.setProperty('index', ESValue.wrap(staticValue.index));
             dynamicValue.setProperty('name', ESValue.wrap(staticValue.name));
             dynamicValue.setProperty('path', ESValue.wrap(staticValue.path));
-            dynamicValue.setProperty('state', ESValue.wrap(staticValue.state));
+            dynamicValue.setProperty('state', ESValue.wrapNumber(staticValue.state));
             dynamicValue.setProperty('pageId', ESValue.wrap(staticValue.pageId));
             return dynamicValue as Any;
         }
