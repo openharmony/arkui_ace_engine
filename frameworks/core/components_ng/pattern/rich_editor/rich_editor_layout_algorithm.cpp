@@ -537,8 +537,6 @@ void RichEditorLayoutAlgorithm::UpdateFrameSizeWithLayoutPolicy(LayoutWrapper* l
     CHECK_NULL_VOID(layoutWrapper);
     auto layoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
-    const auto& calcLayoutConstraint = layoutProperty->GetCalcLayoutConstraint();
-    CHECK_NULL_VOID(calcLayoutConstraint);
     const auto& layoutConstraint = layoutProperty->GetLayoutConstraint();
     CHECK_NULL_VOID(layoutConstraint.has_value());
     const auto& percentReference = layoutConstraint->percentReference;
@@ -549,8 +547,8 @@ void RichEditorLayoutAlgorithm::UpdateFrameSizeWithLayoutPolicy(LayoutWrapper* l
     auto contentSize = content->GetRect().GetSize();
     const auto& padding = layoutProperty->CreatePaddingAndBorder();
     AddPaddingToSize(padding, contentSize);
-    auto fixIdealSize = UpdateOptionSizeByCalcLayoutConstraint(OptionalSizeF(contentSize), calcLayoutConstraint,
-        percentReference);
+    auto fixIdealSize = UpdateOptionSizeByCalcLayoutConstraint(OptionalSizeF(contentSize),
+        layoutProperty->GetCalcLayoutConstraint(), percentReference);
     bool widthAdaptive = layoutPolicy->IsWidthAdaptive() && fixIdealSize.Width().has_value();
     bool heightAdaptive = layoutPolicy->IsHeightAdaptive() && fixIdealSize.Height().has_value();
     IF_TRUE(widthAdaptive, frameSize.SetWidth(fixIdealSize.Width().value()));
