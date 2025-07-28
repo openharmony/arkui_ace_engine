@@ -16,7 +16,6 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-// import { LengthUnit } from "./component/ArkArkuiExternalInterfaces"
 import { Resource } from "global.resource"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, pointer } from "@koalaui/interop"

@@ -365,7 +365,7 @@ private:
 
     static std::string ANIUtils_ANIStringToStdString(ani_env *env, ani_string ani_str)
     {
-        ani_size  strSize;
+        ani_size strSize;
         env->String_GetUTF8Size(ani_str, &strSize);
     
         std::vector<char> buffer(strSize + 1);

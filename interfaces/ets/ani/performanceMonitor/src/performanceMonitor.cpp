@@ -15,13 +15,13 @@
 
 #include <ani.h>
 #include <array>
-#include <iostream>
 #include <algorithm>
 #include <chrono>
 #include <future>
-#include <thread>
+#include <iostream>
 #include <map>
 #include <memory>
+#include <thread>
 #include <string>
 
 #include "frameworks/base/log/log_wrapper.h"
