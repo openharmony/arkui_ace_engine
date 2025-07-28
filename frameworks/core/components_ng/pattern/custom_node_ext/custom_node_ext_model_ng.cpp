@@ -115,6 +115,23 @@ void CustomNodeExtModelNG::SetOnWindowUnfocusedCallback(FrameNode* frameNode, st
     pattern->SetOnWindowUnfocusedCallback(std::move(onWindowUnfocused));
 }
 
+void CustomNodeExtModelNG::SetOnWindowActivatedCallback(FrameNode* frameNode, std::function<void()>&& onWindowActivated)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<CustomNodeExtPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOnWindowActivatedCallback(std::move(onWindowActivated));
+}
+
+void CustomNodeExtModelNG::SetOnWindowDeactivatedCallback(
+    FrameNode* frameNode, std::function<void()>&& onWindowDeactivated)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<CustomNodeExtPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOnWindowDeactivatedCallback(std::move(onWindowDeactivated));
+}
+
 void CustomNodeExtModelNG::SetOnAttachToMainTreeCallback(
     FrameNode* frameNode, std::function<void()>&& onAttachToMainTree)
 {

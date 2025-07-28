@@ -39,6 +39,8 @@ public:
     static void SetOnModifyDoneCallback(FrameNode* frameNode, std::function<void()>&& onModifyDone);
     static void SetOnWindowFocusedCallback(FrameNode* frameNode, std::function<void()>&& onWindowFocused);
     static void SetOnWindowUnfocusedCallback(FrameNode* frameNode, std::function<void()>&& onWindowUnfocused);
+    static void SetOnWindowActivatedCallback(FrameNode* frameNode, std::function<void()>&& onWindowActivated);
+    static void SetOnWindowDeactivatedCallback(FrameNode* frameNode, std::function<void()>&& onWindowDeactivated);
     static void SetOnAttachToMainTreeCallback(FrameNode* frameNode, std::function<void()>&& onAttachToMainTree);
     static void SetOnDetachFromMainTreeCallback(FrameNode* frameNode, std::function<void()>&& onDetachFromMainTree);
     static void SetOnAvoidInfoChangeCallback(FrameNode* frameNode, std::function<void()>&& onAvoidInfoChange);
