@@ -2184,6 +2184,27 @@ HWTEST_F(TextFieldUXTest, TextInputHalfLeading001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TextInputHalfLeading002
+ * @tc.desc: test TextInput halfLeading
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextInputHalfLeading002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with set halfLeading false
+     * @tc.expected: halfLeading is false
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetHalfLeading(false);
+    });
+
+    /**
+     * @tc.step: step2. test halfLeading
+     */
+    EXPECT_EQ(layoutProperty_->GetHalfLeading(), false);
+}
+
+/**
  * @tc.name: TextInputTextDecoration001
  * @tc.desc: test TextInput decoration
  * @tc.type: FUNC

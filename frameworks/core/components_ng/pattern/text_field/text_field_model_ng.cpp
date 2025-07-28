@@ -2225,6 +2225,13 @@ Dimension TextFieldModelNG::GetLineHeight(FrameNode* frameNode)
     return value;
 }
 
+bool TextFieldModelNG::GetHalfLeading(FrameNode* frameNode)
+{
+    bool value = false;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, HalfLeading, value, frameNode, value);
+    return value;
+}
+
 uint32_t TextFieldModelNG::GetMaxLines(FrameNode* frameNode)
 {
     uint32_t value = 3;

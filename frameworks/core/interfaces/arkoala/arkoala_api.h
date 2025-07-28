@@ -4563,6 +4563,7 @@ struct ArkUITextAreaModifier {
     ArkUI_Float32 (*getTextAreaAdaptMinFontSize)(ArkUINodeHandle node);
     ArkUI_Float32 (*getTextAreaAdaptMaxFontSize)(ArkUINodeHandle node);
     ArkUI_Float32 (*getTextAreaLineHeight)(ArkUINodeHandle node);
+    ArkUI_Bool (*getTextAreaHalfLeading)(ArkUINodeHandle node);
     ArkUI_Int32 (*getTextAreaMaxLines)(ArkUINodeHandle node);
     void (*setTextAreaPadding)(ArkUINodeHandle node, const struct ArkUISizeType* top, const struct ArkUISizeType* right,
         const struct ArkUISizeType* bottom, const struct ArkUISizeType* left, ArkUIPaddingRes* paddingRes);
@@ -4837,6 +4838,7 @@ struct ArkUITextInputModifier {
     ArkUI_Float32 (*getTextInputAdaptMinFontSize)(ArkUINodeHandle node);
     ArkUI_Float32 (*getTextInputAdaptMaxFontSize)(ArkUINodeHandle node);
     ArkUI_Float32 (*getTextInputLineHeight)(ArkUINodeHandle node);
+    ArkUI_Bool (*getTextInputHalfLeading)(ArkUINodeHandle node);
     ArkUI_Int32 (*getTextInputMaxLines)(ArkUINodeHandle node);
     ArkUI_CharPtr (*getTextInputFontFeature)(ArkUINodeHandle node);
     void (*setTextInputCustomKeyboard)(ArkUINodeHandle node, ArkUINodeHandle customKeyboard, bool supportAvoidance);

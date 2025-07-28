@@ -307,6 +307,7 @@ public:
     static Dimension GetAdaptMinFontSize(FrameNode* frameNode);
     static Dimension GetAdaptMaxFontSize(FrameNode* frameNode);
     static Dimension GetLineHeight(FrameNode* frameNode);
+    static bool GetHalfLeading(FrameNode* frameNode);
     static uint32_t GetMaxLines(FrameNode* frameNode);
     static void SetPadding(FrameNode* frameNode, NG::PaddingProperty& newPadding);
     static RefPtr<UINode> GetCustomKeyboard(FrameNode* frameNode);
