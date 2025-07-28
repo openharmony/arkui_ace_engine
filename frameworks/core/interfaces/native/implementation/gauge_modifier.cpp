@@ -25,6 +25,7 @@ namespace {
 constexpr double DEFAULT_GAUGE_VALUE = 0;
 constexpr double DEFAULT_GAUGE_MIN = 0;
 constexpr double DEFAULT_GAUGE_MAX = 100;
+constexpr Color ERROR_COLOR = Color(0xFFE84026);
 void SortColorStopOffset(std::vector<ColorStopArray>& colors)
 {
     for (auto& colorStopArray : colors) {
@@ -51,6 +52,8 @@ ColorStopArray Convert(const Ark_ResourceColor& src)
     const auto color = OptConvert<Color>(src);
     if (color) {
         colorStop.emplace_back(std::make_pair(*color, Dimension(0.0)));
+    } else {
+        colorStop.emplace_back(std::make_pair(ERROR_COLOR, Dimension(0.0)));
     }
     return colorStop;
 }
