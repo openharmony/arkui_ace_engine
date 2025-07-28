@@ -18,7 +18,15 @@ ace_unittest("geometry_transition_test_ng") {
   sources = [ "geometry_transition_test_ng.cpp" ]
 }
 
+ace_unittest("callback_thread_wrapper_test") {
+  type = "new"
+  sources = [ "callback_thread_wrapper_test.cpp" ]
+}
+
 group("core_animation_unittest") {
   testonly = true
-  deps = [ ":geometry_transition_test_ng" ]
+  deps = [
+    ":callback_thread_wrapper_test",
+    ":geometry_transition_test_ng",
+  ]
 }
