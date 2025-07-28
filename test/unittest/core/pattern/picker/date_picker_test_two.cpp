@@ -926,4 +926,357 @@ HWTEST_F(DatePickerTestTwoNg, DatePickerGetDateTest001, TestSize.Level1)
     EXPECT_EQ(solarResult.GetMonth(), 1);
     EXPECT_EQ(solarResult.GetDay(), 29);
 }
+
+// Helper function to verify LunarDate values
+inline void VerifyLunarDate(const LunarDate& date, int expectedYear, int expectedMonth, int expectedDay,
+    bool expectedLeapMonth)
+{
+    EXPECT_EQ(date.year, expectedYear);
+    EXPECT_EQ(date.month, expectedMonth);
+    EXPECT_EQ(date.day, expectedDay);
+    EXPECT_EQ(date.isLeapMonth, expectedLeapMonth);
+}
+
+// Helper function to verify PickerDate values
+inline void VerifySolarDate(const PickerDate& date, int expectedYear, int expectedMonth, int expectedDay)
+{
+    EXPECT_EQ(date.GetYear(), expectedYear);
+    EXPECT_EQ(date.GetMonth(), expectedMonth);
+    EXPECT_EQ(date.GetDay(), expectedDay);
+}
+
+/**
+ * @tc.name: DatePickerDialogLunarDateTest001
+ * @tc.desc: Test get date in leap month.
+ * @tc.type: FUNC
+ */
+ HWTEST_F(DatePickerTestTwoNg, DatePickerDialogLunarDateTest001, TestSize.Level1)
+ {
+    /**
+     * @tc.steps: step1. Create pickeDialog.
+     */
+    DatePickerSettingData settingData;
+    settingData.showTime = true;
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontWeight = FontWeight::W400;
+    buttonInfos.push_back(info1);
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto dateNode = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(0));
+    auto datePickerPattern = dateNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+    auto host = datePickerPattern->GetHost();
+    auto children = host->GetChildren();
+    auto iter = children.begin();
+    auto monthDays = (*iter);
+    ASSERT_NE(monthDays, nullptr);
+    auto stackMonthDays = AceType::DynamicCast<FrameNode>(monthDays);
+    auto monthDaysNode = AceType::DynamicCast<FrameNode>(stackMonthDays->GetLastChild()->GetLastChild());
+    ASSERT_NE(monthDaysNode, nullptr);
+
+    auto monthDaysDatePickerColumnPattern = monthDaysNode->GetPattern<DatePickerColumnPattern>();
+    ASSERT_NE(monthDaysDatePickerColumnPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. test normal 2025.6.30
+     * @tc.expected: isLeapMonth is false and SolarDate is correct.
+     */
+    monthDaysDatePickerColumnPattern->SetCurrentIndex(176);
+    LunarDate result = datePickerPattern->GetCurrentLunarDateByMonthDaysColumn(2025);
+    VerifyLunarDate(result, 2025, 6, 30, false);
+    PickerDate solarResult = datePickerPattern->LunarToSolar(result);
+    VerifySolarDate(solarResult, 2025, 7, 24);
+
+    /**
+     * @tc.steps: step3. test leap 2025.6.1
+     * @tc.expected: isLeapMonth is false and SolarDate is correct.
+     */
+    monthDaysDatePickerColumnPattern->SetCurrentIndex(177);
+    result = datePickerPattern->GetCurrentLunarDateByMonthDaysColumn(2025);
+    VerifyLunarDate(result, 2025, 6, 1, true);
+    solarResult = datePickerPattern->LunarToSolar(result);
+    VerifySolarDate(solarResult, 2025, 7, 25);
+}
+
+/**
+ * @tc.name: DatePickerDialogLunarDateTest002
+ * @tc.desc: Test get date in leap month.
+ * @tc.type: FUNC
+ */
+ HWTEST_F(DatePickerTestTwoNg, DatePickerDialogLunarDateTest002, TestSize.Level1)
+ {
+    /**
+     * @tc.steps: step1. Create pickeDialog.
+     */
+    DatePickerSettingData settingData;
+    settingData.showTime = true;
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontWeight = FontWeight::W400;
+    buttonInfos.push_back(info1);
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto dateNode = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(0));
+    auto datePickerPattern = dateNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+    auto host = datePickerPattern->GetHost();
+    auto children = host->GetChildren();
+    auto iter = children.begin();
+    auto monthDays = (*iter);
+    ASSERT_NE(monthDays, nullptr);
+    auto stackMonthDays = AceType::DynamicCast<FrameNode>(monthDays);
+    auto monthDaysNode = AceType::DynamicCast<FrameNode>(stackMonthDays->GetLastChild()->GetLastChild());
+    ASSERT_NE(monthDaysNode, nullptr);
+
+    auto monthDaysDatePickerColumnPattern = monthDaysNode->GetPattern<DatePickerColumnPattern>();
+    ASSERT_NE(monthDaysDatePickerColumnPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. test normal 1971.5.30
+     * @tc.expected: isLeapMonth is false and SolarDate is correct.
+     */
+    monthDaysDatePickerColumnPattern->SetCurrentIndex(146);
+    LunarDate result = datePickerPattern->GetCurrentLunarDateByMonthDaysColumn(1971);
+    VerifyLunarDate(result, 1971, 5, 30, false);
+    PickerDate solarResult = datePickerPattern->LunarToSolar(result);
+    VerifySolarDate(solarResult, 1971, 6, 22);
+
+    /**
+     * @tc.steps: step3. test leap 1971.5.1
+     * @tc.expected: isLeapMonth is false and SolarDate is correct.
+     */
+    monthDaysDatePickerColumnPattern->SetCurrentIndex(147);
+    result = datePickerPattern->GetCurrentLunarDateByMonthDaysColumn(1971);
+    VerifyLunarDate(result, 1971, 5, 1, true);
+    solarResult = datePickerPattern->LunarToSolar(result);
+    VerifySolarDate(solarResult, 1971, 6, 23);
+}
+
+/**
+ * @tc.name: DatePickerDialogLunarDateTest003
+ * @tc.desc: Test get date in leap month.
+ * @tc.type: FUNC
+ */
+ HWTEST_F(DatePickerTestTwoNg, DatePickerDialogLunarDateTest003, TestSize.Level1)
+ {
+    /**
+     * @tc.steps: step1. Create pickeDialog.
+     */
+    DatePickerSettingData settingData;
+    settingData.showTime = true;
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontWeight = FontWeight::W400;
+    buttonInfos.push_back(info1);
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto dateNode = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(0));
+    auto datePickerPattern = dateNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+    auto host = datePickerPattern->GetHost();
+    auto children = host->GetChildren();
+    auto iter = children.begin();
+    auto monthDays = (*iter);
+    ASSERT_NE(monthDays, nullptr);
+    auto stackMonthDays = AceType::DynamicCast<FrameNode>(monthDays);
+    auto monthDaysNode = AceType::DynamicCast<FrameNode>(stackMonthDays->GetLastChild()->GetLastChild());
+    ASSERT_NE(monthDaysNode, nullptr);
+
+    auto monthDaysDatePickerColumnPattern = monthDaysNode->GetPattern<DatePickerColumnPattern>();
+    ASSERT_NE(monthDaysDatePickerColumnPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. test normal 2001.4.30
+     * @tc.expected: isLeapMonth is false and SolarDate is correct.
+     */
+    monthDaysDatePickerColumnPattern->SetCurrentIndex(118);
+    LunarDate result = datePickerPattern->GetCurrentLunarDateByMonthDaysColumn(2001);
+    VerifyLunarDate(result, 2001, 4, 30, false);
+    PickerDate solarResult = datePickerPattern->LunarToSolar(result);
+    VerifySolarDate(solarResult, 2001, 5, 22);
+
+    /**
+     * @tc.steps: step3. test leap 2001.4.1
+     * @tc.expected: isLeapMonth is false and SolarDate is correct.
+     */
+    monthDaysDatePickerColumnPattern->SetCurrentIndex(119);
+    result = datePickerPattern->GetCurrentLunarDateByMonthDaysColumn(2001);
+    VerifyLunarDate(result, 2001, 4, 1, true);
+    solarResult = datePickerPattern->LunarToSolar(result);
+    VerifySolarDate(solarResult, 2001, 5, 23);
+}
+
+/**
+ * @tc.name: DatePickerDialogLunarDateTest004
+ * @tc.desc: Test get date in leap month.
+ * @tc.type: FUNC
+ */
+ HWTEST_F(DatePickerTestTwoNg, DatePickerDialogLunarDateTest004, TestSize.Level1)
+ {
+    /**
+     * @tc.steps: step1. Create pickeDialog.
+     */
+    DatePickerSettingData settingData;
+    settingData.showTime = true;
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontWeight = FontWeight::W400;
+    buttonInfos.push_back(info1);
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto dateNode = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(0));
+    auto datePickerPattern = dateNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+    auto host = datePickerPattern->GetHost();
+    auto children = host->GetChildren();
+    auto iter = children.begin();
+    auto monthDays = (*iter);
+    ASSERT_NE(monthDays, nullptr);
+    auto stackMonthDays = AceType::DynamicCast<FrameNode>(monthDays);
+    auto monthDaysNode = AceType::DynamicCast<FrameNode>(stackMonthDays->GetLastChild()->GetLastChild());
+    ASSERT_NE(monthDaysNode, nullptr);
+
+    auto monthDaysDatePickerColumnPattern = monthDaysNode->GetPattern<DatePickerColumnPattern>();
+    ASSERT_NE(monthDaysDatePickerColumnPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. test normal 2050.3.29
+     * @tc.expected: isLeapMonth is false and SolarDate is correct.
+     */
+    monthDaysDatePickerColumnPattern->SetCurrentIndex(87);
+    LunarDate result = datePickerPattern->GetCurrentLunarDateByMonthDaysColumn(2050);
+    VerifyLunarDate(result, 2050, 3, 29, false);
+    PickerDate solarResult = datePickerPattern->LunarToSolar(result);
+    VerifySolarDate(solarResult, 2050, 4, 20);
+
+    /**
+     * @tc.steps: step3. test leap 2050.3.1
+     * @tc.expected: isLeapMonth is false and SolarDate is correct.
+     */
+    monthDaysDatePickerColumnPattern->SetCurrentIndex(88);
+    result = datePickerPattern->GetCurrentLunarDateByMonthDaysColumn(2050);
+    VerifyLunarDate(result, 2050, 3, 1, true);
+    solarResult = datePickerPattern->LunarToSolar(result);
+    VerifySolarDate(solarResult, 2050, 4, 21);
+}
+
+/**
+ * @tc.name: DatePickerDialogLunarDateTest005
+ * @tc.desc: Test get date in leap month.
+ * @tc.type: FUNC
+ */
+ HWTEST_F(DatePickerTestTwoNg, DatePickerDialogLunarDateTest005, TestSize.Level1)
+ {
+    /**
+     * @tc.steps: step1. Create pickeDialog.
+     */
+    DatePickerSettingData settingData;
+    settingData.showTime = true;
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+    std::vector<ButtonInfo> buttonInfos;
+    ButtonInfo info1;
+    info1.fontWeight = FontWeight::W400;
+    buttonInfos.push_back(info1);
+    auto dialogNode =
+        DatePickerDialogView::Show(dialogProperties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    ASSERT_NE(dialogNode, nullptr);
+
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    auto customNode = dialogPattern->GetCustomNode();
+    auto pickerStack = AceType::DynamicCast<NG::FrameNode>(customNode->GetChildAtIndex(1));
+    auto dateNode = AceType::DynamicCast<NG::FrameNode>(pickerStack->GetChildAtIndex(0));
+    auto datePickerPattern = dateNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
+    auto host = datePickerPattern->GetHost();
+    auto children = host->GetChildren();
+    auto iter = children.begin();
+    auto monthDays = (*iter);
+    ASSERT_NE(monthDays, nullptr);
+    auto stackMonthDays = AceType::DynamicCast<FrameNode>(monthDays);
+    auto monthDaysNode = AceType::DynamicCast<FrameNode>(stackMonthDays->GetLastChild()->GetLastChild());
+    ASSERT_NE(monthDaysNode, nullptr);
+
+    auto monthDaysDatePickerColumnPattern = monthDaysNode->GetPattern<DatePickerColumnPattern>();
+    ASSERT_NE(monthDaysDatePickerColumnPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. test normal 2071.8.30
+     * @tc.expected: isLeapMonth is false and SolarDate is correct.
+     */
+    monthDaysDatePickerColumnPattern->SetCurrentIndex(235);
+    LunarDate result = datePickerPattern->GetCurrentLunarDateByMonthDaysColumn(2071);
+    VerifyLunarDate(result, 2071, 8, 30, false);
+    PickerDate solarResult = datePickerPattern->LunarToSolar(result);
+    VerifySolarDate(solarResult, 2071, 9, 23);
+
+    /**
+     * @tc.steps: step3. test leap 2071.8.1
+     * @tc.expected: isLeapMonth is false and SolarDate is correct.
+     */
+    monthDaysDatePickerColumnPattern->SetCurrentIndex(236);
+    result = datePickerPattern->GetCurrentLunarDateByMonthDaysColumn(2071);
+    VerifyLunarDate(result, 2071, 8, 1, true);
+    solarResult = datePickerPattern->LunarToSolar(result);
+    VerifySolarDate(solarResult, 2071, 9, 24);
+}
 } // namespace OHOS::Ace::NG
