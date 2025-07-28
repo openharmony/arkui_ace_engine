@@ -668,6 +668,13 @@ void addGestureToNodeWithRefCountDecrease(
     gesturePtr->SetGestureMask(gestureMask);
     gestureHub->AttachGesture(gesturePtr);
     // Gesture ptr ref count is not decrease, so need to decrease after attach to gestureEventHub.
+    GestureEventFunc clickEvent = NG::GetTapGestureEventFunc(gesturePtr);
+    if (clickEvent) {
+        auto focusHub = frameNode->GetOrCreateFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->SetFocusable(true, false);
+        focusHub->SetOnClickCallback(std::move(clickEvent));
+    }
     gesturePtr->DecRefCount();
 }
 
