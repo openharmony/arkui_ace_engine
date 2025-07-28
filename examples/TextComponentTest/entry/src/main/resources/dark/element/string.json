@@ -1,0 +1,52 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "module description"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "description"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "label"
+    },
+    {
+      "name": "fontWeight",
+      "value": "200"
+    },
+    {
+      "name": "textCreateContent",
+      "value": "深色模式"
+    },
+    {
+      "name": "TextFontFamily",
+      "value": "HarmonyOS Sans Condensed"
+    },
+    {
+      "name": "TextMinFontSizeFp",
+      "value": "4fp"
+    },
+    {
+      "name": "TextMaxFontSizeFp",
+      "value": "64fp"
+    },
+    {
+      "name": "TextResponseRegionWidth",
+      "value": "100%"
+    },
+    {
+      "name": "TextInputPlaceholder",
+      "value": "深色模式"
+    },
+    {
+      "name": "ModeWeight400_900",
+      "value": "900"
+    },
+    {
+      "name": "inputFilter",
+      "value": "[0-9]"
+    }
+  ]
+}

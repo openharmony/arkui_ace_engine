@@ -2,7 +2,79 @@
   "color": [
     {
       "name": "start_window_background",
+      "value": "#FFFFFF"
+    },
+    {
+      "name": "Pink",
+      "value": "#ffc0cb"
+    },
+    {
+      "name": "ColorRed",
+      "value": "#FF0000"
+    },
+    {
+      "name": "ColorBlue",
+      "value": "#0000FF"
+    },
+    {
+      "name": "ColorBrown",
+      "value": "#a52a2a"
+    },
+    {
+      "name": "ColorBlack",
       "value": "#000000"
+    },
+    {
+      "name": "ColorGrassGreen",
+      "value": "#00FF00"
+    },
+    {
+      "name": "ColorGreen",
+      "value": "#008000"
+    },
+    {
+      "name": "ColorOrange",
+      "value": "#ffa500"
+    },
+    {
+      "name": "ColorYellow",
+      "value": "#FFFF00"
+    },
+    {
+      "name": "ColorPink",
+      "value": "#ffc0cb"
+    },
+    {
+      "name": "ColorWhite",
+      "value": "#FFFFFF"
+    },
+    {
+      "name": "textColor",
+      "value": "#0000FF"
+    },
+    {
+      "name": "TextColor",
+      "value": "#0000FF"
+    },
+    {
+      "name": "TextShadowColor",
+      "value": "#0000FF"
+    },
+    {
+      "name": "TextdataDetectorConfigColor",
+      "value": "#0000FF"
+    },
+    {
+      "name": "TextdataDetectorConfigDecorationColor",
+      "value": "#FF00FF"
+    },
+    {
+      "name": "ModeColor",
+      "value": "#0000FF"
+    },
+    {
+      "name": "ModeColorYellow_Pink",
+      "value": "#FF00FF"
     }
   ]
 }
