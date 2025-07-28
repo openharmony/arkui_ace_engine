@@ -55,6 +55,8 @@ ohos_shared_library("ui_session") {
 
   external_deps = [
     "ability_base:want",
+    "access_token:libaccesstoken_sdk",
+    "access_token:libtokenid_sdk",
     "cJSON:cjson",
     "c_utils:utils",
     "graphic_2d:2d_graphics",
