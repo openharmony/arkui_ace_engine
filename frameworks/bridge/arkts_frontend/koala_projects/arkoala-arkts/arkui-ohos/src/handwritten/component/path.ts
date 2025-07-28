@@ -44,6 +44,16 @@ function hookPathAttributeModifier(component: ArkPathComponent, modifier: Attrib
         }
     }
     let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+        if (params.length < 1) {
+            return;
+        }
+        let options_casted: PathOptions | undefined = undefined
+        const param1_type = runtimeType(params[0])
+        if (RuntimeType.OBJECT == param1_type) {
+            options_casted = params[0] as PathOptions
+        }
+        let peer: ArkPathPeer = component.getPeer() as Object as ArkPathPeer;
+        peer?.setPathOptionsAttribute(options_casted)
     };
     let updaterReceiver = (): ArkPathComponent => {
         let componentNew: ArkPathComponent = new ArkPathComponent();

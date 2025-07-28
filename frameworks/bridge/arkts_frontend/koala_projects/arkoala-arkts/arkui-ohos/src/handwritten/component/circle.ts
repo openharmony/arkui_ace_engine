@@ -19,6 +19,8 @@ import { applyAttributeModifierBase, applyCommonModifier } from "../handwritten/
 import { CommonShapeMethodModifier } from '../CommonShapeMethodModifier';
 import { CommonModifier } from '../CommonModifier';
 import { runtimeType, RuntimeType } from "@koalaui/interop"
+import { PeerNode } from '../PeerNode';
+import { CommonMethodModifier } from '../CommonMethodModifier';
 
 
 export class CircleModifier extends CommonShapeMethodModifier implements CircleAttribute, AttributeModifier<CircleAttribute> {
@@ -31,10 +33,10 @@ export class CircleModifier extends CommonShapeMethodModifier implements CircleA
     applyFocusedAttribute(instance: CircleAttribute): void { }
     applyDisabledAttribute(instance: CircleAttribute): void { }
     applySelectedAttribute(instance: CircleAttribute): void { }
-    applyModifierPatch(peer: ArkCirclePeer): void {
+    applyModifierPatch(peer: PeerNode): void {
         super.applyModifierPatch(peer)
     }
-    mergeModifier(modifier: CircleModifier): void {
+    mergeModifier(modifier: CommonMethodModifier): void {
         super.mergeModifier(modifier)
     }
 }
@@ -62,6 +64,16 @@ function hookCircleAttributeModifier(component: ArkCircleComponent, modifier: At
         }
     }
     let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+        if (params.length < 1) {
+            return;
+        }
+        let options_casted: CircleOptions | undefined = undefined
+        const param1_type = runtimeType(params[0])
+        if (RuntimeType.OBJECT == param1_type) {
+            options_casted = params[0] as CircleOptions
+        }
+        let peer: ArkCirclePeer = component.getPeer() as Object as ArkCirclePeer;
+        peer?.setCircleOptionsAttribute(options_casted)
     };
     let updaterReceiver = (): ArkCircleComponent => {
         let componentNew: ArkCircleComponent = new ArkCircleComponent();

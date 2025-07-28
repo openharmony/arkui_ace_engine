@@ -18,6 +18,7 @@ import { AttributeUpdaterFlag, CommonMethodModifier } from './CommonMethodModifi
 import { Length, ResourceColor } from 'arkui/component/units';
 import { Resource } from 'global.resource';
 import { LineCapStyle, LineJoinStyle } from 'arkui/component/enums';
+import { PeerNode } from './PeerNode';
 
 export class CommonShapeMethodModifier extends CommonMethodModifier implements CommonShapeMethod {
     _stroke_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -42,8 +43,9 @@ export class CommonShapeMethodModifier extends CommonMethodModifier implements C
     _antiAlias_0_0value?: boolean | undefined
     _strokeDashArray_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _strokeDashArray_0_0value?: Array<Length> | undefined
-    applyModifierPatch(peer: ArkCommonShapeMethodPeer): void {
-        super.applyModifierPatch(peer)
+    applyModifierPatch(peerNode: PeerNode): void {
+        super.applyModifierPatch(peerNode)
+        const peer = peerNode as ArkCommonShapeMethodPeer
         if (this._stroke_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._stroke_0_flag) {
@@ -243,8 +245,12 @@ export class CommonShapeMethodModifier extends CommonMethodModifier implements C
             }
         }
     }
-    mergeModifier(modifier: CommonShapeMethodModifier): void {
-        super.mergeModifier(modifier)
+    mergeModifier(value: CommonMethodModifier): void {
+        super.mergeModifier(value)
+        if (!(value instanceof CommonShapeMethodModifier)) {
+            return;
+        }
+        const modifier = value as CommonShapeMethodModifier
         if (modifier._stroke_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._stroke_0_flag) {

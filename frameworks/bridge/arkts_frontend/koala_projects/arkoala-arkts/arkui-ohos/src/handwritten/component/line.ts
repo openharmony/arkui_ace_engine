@@ -44,6 +44,16 @@ function hookLineAttributeModifier(component: ArkLineComponent, modifier: Attrib
         }
     }
     let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+        if (params.length < 1) {
+            return;
+        }
+        let options_casted: LineOptions | undefined = undefined
+        const param1_type = runtimeType(params[0])
+        if (RuntimeType.OBJECT == param1_type) {
+            options_casted = params[0] as LineOptions
+        }
+        let peer: ArkLinePeer = component.getPeer() as Object as ArkLinePeer;
+        peer?.setLineOptionsAttribute(options_casted)
     };
     let updaterReceiver = (): ArkLineComponent => {
         let componentNew: ArkLineComponent = new ArkLineComponent();
