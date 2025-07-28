@@ -25,7 +25,7 @@ class AceAniGlobalReference : public AceType {
     DECLARE_ACE_TYPE(AceAniGlobalReference, AceType);
 
 public:
-    AceAniGlobalReference(ani_env* env, ani_ref ref) : env_(env)
+    AceAniGlobalReference(ani_env* env, ani_ref ref) : env_(env), ref_(nullptr)
     {
         if (env_) {
             env_->GlobalReference_Create(ref, &ref_);
