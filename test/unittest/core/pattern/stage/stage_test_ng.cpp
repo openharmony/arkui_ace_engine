@@ -115,6 +115,7 @@ HWTEST_F(StageTestNg, PageEventHubTest001, TestSize.Level1)
      */
     PageEventHub pageEventHub;
     auto groupManager = pageEventHub.GetGroupManager();
+    ASSERT_NE(groupManager, nullptr);
     groupManager->UpdateRadioGroupValue(TEST_GROUP_NAME, RADIO_ID_FIRST);
 
     /**

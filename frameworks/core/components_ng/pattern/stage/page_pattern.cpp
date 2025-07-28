@@ -243,7 +243,7 @@ void PagePattern::OnDetachFromFrameNode(FrameNode* frameNode)
 
 void PagePattern::OnWindowSizeChanged(int32_t /*width*/, int32_t /*height*/, WindowSizeChangeReason type)
 {
-    if (type == WindowSizeChangeReason::RESIZE) {
+    if (type != WindowSizeChangeReason::ROTATION) {
         return;
     }
     if (!isPageInTransition_) {
