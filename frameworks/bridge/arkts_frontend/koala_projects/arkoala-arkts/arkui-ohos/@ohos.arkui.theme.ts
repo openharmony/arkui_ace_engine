@@ -201,7 +201,7 @@ export class Colors {
                 result.sixth = Colors.makeResourceWithOpacity(brandColor as Resource, 0.05) as Resource;
             } else {
                 const brandColorValue = brandColor as number | string;
-                const argbColor = ArkUIAniModule._GetColorValue(brandColorValue);
+                const argbColor = Colors.getColorValue(brandColorValue);
                 result.primary = argbColor;
                 result.secondary = Colors.blendOpacity(argbColor, 0.6);
                 result.tertiary = Colors.blendOpacity(argbColor, 0.4);
@@ -233,51 +233,17 @@ export class Colors {
         return ((argbColor & 0x00ffffff) | ((outAlpha & 0xff) << 24)) >>> 0;
     }
 
-    // static convertColorEnumToValue(color: Color): string {
-    //     switch (color) {
-    //         case Color.WHITE:
-    //         case Color.White:
-    //             return '#ffffffff';
-    //         case Color.BLACK:
-    //         case Color.Black:
-    //             return '#ff000000';
-    //         case Color.BLUE:
-    //         case Color.Blue:
-    //             return '#ff0000ff';
-    //         case Color.BROWN:
-    //         case Color.Brown:
-    //             return '#ffa52a2a';
-    //         case Color.GRAY:
-    //         case Color.Gray:
-    //             return '#ff808080';
-    //         case Color.GREEN:
-    //         case Color.Green:
-    //             return '#ff008000';
-    //         case Color.GREY:
-    //         case Color.Grey:
-    //             return '#ff808080';
-    //         case Color.ORANGE:
-    //         case Color.Orange:
-    //             return '#ffffa500';
-    //         case Color.PINK:
-    //         case Color.Pink:
-    //             return '#ffffc0cb';
-    //         case Color.RED:
-    //         case Color.Red:
-    //             return '#ffff0000';
-    //         case Color.YELLOW:
-    //         case Color.Yellow:
-    //             return '#ffffff00';
-    //         case Color.TRANSPARENT:
-    //         case Color.Transparent:
-    //             return '#00000000';
-    //     }
-    //     // Do not match the color, return the default.
-    //     return '#ff000000';
-    // }
-
     static checkIsColor(value: ResourceColor): boolean {
         return value instanceof Color;
+    }
+
+    static getColorValue(src: number | string): int {
+        if (typeof src === 'number') {
+            return ArkUIAniModule._GetNumberColorValue(src as number);
+        } else if (typeof src === 'string') {
+            return ArkUIAniModule._GetStringColorValue(src as string);
+        }
+        return 0;
     }
 }
 

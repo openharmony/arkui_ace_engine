@@ -978,9 +978,14 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::AniTrace::AsyncTraceEnd)
         },
         ani_native_function {            
-            "_GetColorValue",
+            "_GetStringColorValue",
             nullptr,
-            reinterpret_cast<void*>(OHOS::Ace::Ani::GetColorValue)
+            reinterpret_cast<void*>(OHOS::Ace::Ani::GetStringColorValue)
+        },
+        ani_native_function {            
+            "_GetNumberColorValue",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::GetNumberColorValue)
         },
         ani_native_function {
             "_SendThemeToNative",

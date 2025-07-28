@@ -75,6 +75,8 @@ void* GetClickEventPointer(ani_env* env, [[maybe_unused]] ani_object obj, ani_lo
 void* GetHoverEventPointer(ani_env* env, [[maybe_unused]] ani_object obj, ani_long hoverEventPeer);
 void FrameNodeMarkDirtyNode(ani_env* env, ani_object obj, ani_long ptr);
 ani_int GetColorValue(ani_env* env, ani_object aniClass, ani_object src);
+ani_int GetStringColorValue(ani_env* env, ani_object aniClass, ani_string src);
+ani_int GetNumberColorValue(ani_env* env, ani_object aniClass, ani_double src);
 void SendThemeToNative(ani_env* env, ani_object aniClass, ani_array colorArray, ani_int id);
 void SetDefaultTheme(ani_env* env, ani_object aniClass, ani_array colorArray, ani_boolean isDark);
 void UpdateColorMode(ani_env* env, ani_object aniClass, ani_int colorMode);

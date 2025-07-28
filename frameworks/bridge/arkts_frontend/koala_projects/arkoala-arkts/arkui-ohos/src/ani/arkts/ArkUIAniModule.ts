@@ -280,6 +280,8 @@ export class ArkUIAniModule {
     native static _AsyncTraceBegin(traceName: string, taskId: KInt): void
     native static _AsyncTraceEnd(traceName: string, taskId: KInt): void
     native static _GetColorValue(color: number | string): KUInt
+    native static _GetStringColorValue(color: string): KUInt
+    native static _GetNumberColorValue(color: number): KUInt
     native static _SendThemeToNative(colorArray: ResourceColor[], elmtId: KInt): void
     native static _SetDefaultTheme(colorArray: ResourceColor[], isDark: boolean): void
     native static _UpdateColorMode(colorMode: KInt): void
