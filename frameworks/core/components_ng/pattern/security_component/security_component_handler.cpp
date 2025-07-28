@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/security_component/security_component_log.h"
 #include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
 #include "core/components_ng/property/gradient_property.h"
+#include "core/components_ng/render/render_context.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #ifdef SECURITY_COMPONENT_ENABLE
 #include "pointer_event.h"
@@ -37,6 +38,7 @@ constexpr uint64_t SECOND_TO_MILLISECOND = 1000;
 constexpr float HALF = 2.0f;
 const std::string SEC_COMP_ID = "security component id = ";
 const std::string SEC_COMP_TYPE = ", security component type = ";
+constexpr int32_t PARENT_EFFECT_CHECK_FUNC_NUM = 16;
 }
 
 static std::vector<uintptr_t> g_callList = {
@@ -588,15 +590,35 @@ bool SecurityComponentHandler::CheckRenderEffect(RefPtr<FrameNode>& node, std::s
     auto layoutProperty = node->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, false);
 
-    if (CheckOpacity(node, renderContext, message) || CheckBrightness(node, renderContext, message) ||
-        CheckVisibility(node, layoutProperty, message) || CheckBlur(node, renderContext, message) ||
-        CheckSaturate(node, renderContext, message) ||
-        CheckContrast(node, renderContext, message) || CheckInvert(node, renderContext, message) ||
-        CheckSepia(node, renderContext, message) || CheckHueRotate(node, renderContext, message) ||
-        CheckColorBlend(node, renderContext, message) || CheckClipMask(node, renderContext, message) ||
-        CheckForegroundColor(node, renderContext, message) || CheckSphericalEffect(node, renderContext, message) ||
-        CheckLightUpEffect(node, renderContext, message) || CheckPixelStretchEffect(node, renderContext, message) ||
-        CheckForegroundBlurStyle(node, renderContext, message) || CheckBlendMode(node, renderContext, message) ||
+    using CheckFunc = bool(*)(const RefPtr<FrameNode>& node,
+        const RefPtr<RenderContext>& renderContext, std::string& message);
+
+    const std::array<CheckFunc, PARENT_EFFECT_CHECK_FUNC_NUM> renderChecks = {
+        &CheckOpacity,
+        &CheckBrightness,
+        &CheckBlur,
+        &CheckSaturate,
+        &CheckContrast,
+        &CheckInvert,
+        &CheckSepia,
+        &CheckHueRotate,
+        &CheckColorBlend,
+        &CheckClipMask,
+        &CheckForegroundColor,
+        &CheckSphericalEffect,
+        &CheckLightUpEffect,
+        &CheckPixelStretchEffect,
+        &CheckForegroundBlurStyle,
+        &CheckBlendMode
+    };
+
+    for (auto check : renderChecks) {
+        if (check(node, renderContext, message)) {
+            return true;
+        }
+    }
+
+    if (CheckVisibility(node, layoutProperty, message) ||
         CheckForegroundEffect(node, message, renderContext, buttonInfo) ||
         CheckOverlayText(node, message, renderContext, buttonInfo)) {
         return true;
