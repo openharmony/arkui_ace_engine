@@ -427,10 +427,12 @@ void SwipeRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& c
             info.SetSourceTool(lastAxisEvent_.sourceTool);
             info.SetPressedKeyCodes(lastAxisEvent_.pressedCodes);
             info.CopyConvertInfoFrom(lastAxisEvent_.convertInfo);
+            info.SetTargetDisplayId(lastAxisEvent_.targetDisplayId);
         } else {
             info.SetSourceTool(lastTouchEvent_.sourceTool);
             info.SetPressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
             info.CopyConvertInfoFrom(lastTouchEvent_.convertInfo);
+            info.SetTargetDisplayId(lastTouchEvent_.targetDisplayId);
         }
         info.SetPointerEvent(lastPointEvent_);
         if (prevAngle_) {
@@ -517,8 +519,10 @@ void SwipeRecognizer::UpdateGestureEventInfo(std::shared_ptr<SwipeGestureEvent>&
     info->SetRawInputDeviceId(deviceId_);
     if (inputEventType_ == InputEventType::AXIS) {
         info->SetPressedKeyCodes(lastAxisEvent_.pressedCodes);
+        info->SetTargetDisplayId(lastAxisEvent_.targetDisplayId);
     } else {
         info->SetPressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
+        info->SetTargetDisplayId(lastTouchEvent_.targetDisplayId);
     }
 }
 

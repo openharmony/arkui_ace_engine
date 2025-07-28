@@ -328,6 +328,7 @@ bool FocusEventHandler::OnClick(const KeyEvent& event)
             auto targetImpl = eventHub->CreateGetEventTargetImpl();
             info.SetTarget(targetImpl().value_or(EventTarget()));
         }
+        info.SetTargetDisplayId(event.targetDisplayId);
         onClickCallback(info);
         return true;
     }
