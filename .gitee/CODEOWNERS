@@ -3290,5 +3290,6 @@ test/unittest/interfaces/ace_gesture/ @arkuievent
 test/unittest/interfaces/form_render/ @form_framework
 
 [Generated source]
+frameworks/bridge/arkts_frontend/koala_mirror/ @arkui-idlize
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/ @arkui-idlize
 frameworks/core/interfaces/native/generated/ @arkui-idlize
