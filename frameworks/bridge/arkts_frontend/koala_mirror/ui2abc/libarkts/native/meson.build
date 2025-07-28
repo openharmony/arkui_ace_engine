@@ -28,7 +28,7 @@ sources = [
     get_option('interop_src_dir') / 'common-interop.cc',
     get_option('interop_src_dir') / 'callback-resource.cc',
     get_option('interop_src_dir') / 'interop-logging.cc',
-    get_option('interop_src_dir') / 'napi/convertors-napi.cc',
+    get_option('interop_src_dir') / 'napi' / 'convertors-napi.cc',
 ]
 
 cflags = [

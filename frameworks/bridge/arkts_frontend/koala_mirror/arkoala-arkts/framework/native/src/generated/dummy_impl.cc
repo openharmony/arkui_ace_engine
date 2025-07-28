@@ -2502,18 +2502,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void DrawModifierImpl(Ark_NativePointer node,
-                          const Opt_DrawModifier* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setDrawModifier(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
     void ResponseRegionImpl(Ark_NativePointer node,
                             const Opt_Union_Array_Rectangle_Rectangle* value)
     {
@@ -2930,18 +2918,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             return;
         }
         string out("setForegroundColor(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void OnClick0Impl(Ark_NativePointer node,
-                      const Opt_Callback_ClickEvent_Void* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setOnClick0(");
         WriteToString(&out, value);
         out.append(") \n");
         appendGroupedLog(1, out);
@@ -3966,18 +3942,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void StateStylesImpl(Ark_NativePointer node,
-                         const Opt_StateStyles* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setStateStyles(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
     void RestoreIdImpl(Ark_NativePointer node,
                        const Opt_Number* value)
     {
@@ -4497,21 +4461,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         WriteToString(&out, options);
         out.append(", ");
         WriteToString(&out, sysOptions);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void OnClick1Impl(Ark_NativePointer node,
-                      const Opt_Callback_ClickEvent_Void* event,
-                      const Opt_Number* distanceThreshold)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setOnClick1(");
-        WriteToString(&out, event);
-        out.append(", ");
-        WriteToString(&out, distanceThreshold);
         out.append(") \n");
         appendGroupedLog(1, out);
     }
@@ -20828,7 +20777,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::KeyImpl,
             CommonMethodModifier::IdImpl,
             CommonMethodModifier::GeometryTransition0Impl,
-            CommonMethodModifier::StateStylesImpl,
             CommonMethodModifier::RestoreIdImpl,
             CommonMethodModifier::SphericalEffectImpl,
             CommonMethodModifier::LightUpEffectImpl,
@@ -23557,65 +23505,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return fnPtr<KNativePointer>(dummyClassFinalizer);
     }
     } // BaseContextAccessor
-    namespace BaseCustomDialogAccessor {
-    void DestroyPeerImpl(Ark_BaseCustomDialog peer)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("destroyPeer(");
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    Ark_BaseCustomDialog ConstructImpl(const Opt_Boolean* useSharedStorage,
-                                       const Opt_CustomObject* storage)
-    {
-        if (!needGroupedLog(1))
-        {
-            return reinterpret_cast<Ark_BaseCustomDialog>(100);
-        }
-        string out("new BaseCustomDialog(");
-        WriteToString(&out, useSharedStorage);
-        out.append(", ");
-        WriteToString(&out, storage);
-        out.append(") \n");
-        out.append("[return reinterpret_cast<Ark_BaseCustomDialog>(100)] \n");
-        appendGroupedLog(1, out);
-        return reinterpret_cast<Ark_BaseCustomDialog>(100);
-    }
-    Ark_NativePointer GetFinalizerImpl()
-    {
-        if (!needGroupedLog(1))
-        {
-            return fnPtr<KNativePointer>(dummyClassFinalizer);
-        }
-        string out("getFinalizer(");
-        out.append(") \n");
-        out.append("[return fnPtr<KNativePointer>(dummyClassFinalizer)] \n");
-        appendGroupedLog(1, out);
-        return fnPtr<KNativePointer>(dummyClassFinalizer);
-    }
-    Ark_CustomObject $_instantiateImpl(const Callback_T* factory,
-                                       const Opt_CustomObject* initializers,
-                                       const Opt_Callback_Void* content)
-    {
-        if (!needGroupedLog(1))
-        {
-            return {};
-        }
-        string out("$_instantiate(");
-        WriteToString(&out, factory);
-        out.append(", ");
-        WriteToString(&out, initializers);
-        out.append(", ");
-        WriteToString(&out, content);
-        out.append(") \n");
-        out.append("[return {}] \n");
-        appendGroupedLog(1, out);
-        return {};
-    }
-    } // BaseCustomDialogAccessor
     namespace BaseEventAccessor {
     void DestroyPeerImpl(Ark_BaseEvent peer)
     {
@@ -27557,7 +27446,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void ContentModifierCheckboxImpl(Ark_NativePointer node,
+    void ContentModifierCheckBoxImpl(Ark_NativePointer node,
                                      const Ark_Object* contentModifier,
                                      const CheckBoxModifierBuilder* builder)
     {
@@ -27565,7 +27454,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         {
             return;
         }
-        string out("contentModifierCheckbox(");
+        string out("contentModifierCheckBox(");
         WriteToString(&out, node);
         out.append(", ");
         WriteToString(&out, contentModifier);
@@ -48900,7 +48789,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return reinterpret_cast<Ark_TransitionEffect>(300);
     }
-    Ark_TransitionEffect GetIDENTITYImpl(Ark_TransitionEffect peer)
+    Ark_TransitionEffect GetIDENTITYImpl()
     {
         if (!needGroupedLog(1))
         {
@@ -48912,8 +48801,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return reinterpret_cast<Ark_TransitionEffect>(300);
     }
-    void SetIDENTITYImpl(Ark_TransitionEffect peer,
-                         Ark_TransitionEffect IDENTITY)
+    void SetIDENTITYImpl(Ark_TransitionEffect IDENTITY)
     {
         if (!needGroupedLog(1))
         {
@@ -48924,7 +48812,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_TransitionEffect GetOPACITYImpl(Ark_TransitionEffect peer)
+    Ark_TransitionEffect GetOPACITYImpl()
     {
         if (!needGroupedLog(1))
         {
@@ -48936,8 +48824,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return reinterpret_cast<Ark_TransitionEffect>(300);
     }
-    void SetOPACITYImpl(Ark_TransitionEffect peer,
-                        Ark_TransitionEffect OPACITY)
+    void SetOPACITYImpl(Ark_TransitionEffect OPACITY)
     {
         if (!needGroupedLog(1))
         {
@@ -48948,7 +48835,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_TransitionEffect GetSLIDEImpl(Ark_TransitionEffect peer)
+    Ark_TransitionEffect GetSLIDEImpl()
     {
         if (!needGroupedLog(1))
         {
@@ -48960,8 +48847,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return reinterpret_cast<Ark_TransitionEffect>(300);
     }
-    void SetSLIDEImpl(Ark_TransitionEffect peer,
-                      Ark_TransitionEffect SLIDE)
+    void SetSLIDEImpl(Ark_TransitionEffect SLIDE)
     {
         if (!needGroupedLog(1))
         {
@@ -48972,7 +48858,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_TransitionEffect GetSLIDE_SWITCHImpl(Ark_TransitionEffect peer)
+    Ark_TransitionEffect GetSLIDE_SWITCHImpl()
     {
         if (!needGroupedLog(1))
         {
@@ -48984,8 +48870,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return reinterpret_cast<Ark_TransitionEffect>(300);
     }
-    void SetSLIDE_SWITCHImpl(Ark_TransitionEffect peer,
-                             Ark_TransitionEffect SLIDE_SWITCH)
+    void SetSLIDE_SWITCHImpl(Ark_TransitionEffect SLIDE_SWITCH)
     {
         if (!needGroupedLog(1))
         {
@@ -51310,22 +51195,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_CustomObject ApplyStylesImpl(const Ark_CustomObject* self,
-                                     const CustomStyles* customStyles)
-    {
-        if (!needGroupedLog(1))
-        {
-            return {};
-        }
-        string out("applyStyles(");
-        WriteToString(&out, self);
-        out.append(", ");
-        WriteToString(&out, customStyles);
-        out.append(") \n");
-        out.append("[return {}] \n");
-        appendGroupedLog(1, out);
-        return {};
-    }
     void BindCompatibleProvideCallbackImpl(Ark_ExtendableComponent component,
                                            const Ark_CustomObject* createCompatibleState,
                                            const Ark_CustomObject* setCallback,
@@ -51766,20 +51635,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 
     struct BaseContextPeer {
         virtual ~BaseContextPeer() = default;
-    };
-    const GENERATED_ArkUIBaseCustomDialogAccessor* GetBaseCustomDialogAccessor()
-    {
-        static const GENERATED_ArkUIBaseCustomDialogAccessor BaseCustomDialogAccessorImpl {
-            BaseCustomDialogAccessor::DestroyPeerImpl,
-            BaseCustomDialogAccessor::ConstructImpl,
-            BaseCustomDialogAccessor::GetFinalizerImpl,
-            BaseCustomDialogAccessor::$_instantiateImpl,
-        };
-        return &BaseCustomDialogAccessorImpl;
-    }
-
-    struct BaseCustomDialogPeer {
-        virtual ~BaseCustomDialogPeer() = default;
     };
     const GENERATED_ArkUIBaseEventAccessor* GetBaseEventAccessor()
     {
@@ -56117,7 +55972,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GlobalScopeAccessor::$rawfileImpl,
             GlobalScopeAccessor::AnimateToImpl,
             GlobalScopeAccessor::AnimateToImmediatelyImpl,
-            GlobalScopeAccessor::ApplyStylesImpl,
             GlobalScopeAccessor::BindCompatibleProvideCallbackImpl,
             GlobalScopeAccessor::BorderRadiusesImpl,
             GlobalScopeAccessor::BorderStylesImpl,
@@ -56158,7 +56012,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetAxisEventAccessor,
             GetBackgroundColorStyleAccessor,
             GetBaseContextAccessor,
-            GetBaseCustomDialogAccessor,
             GetBaseEventAccessor,
             GetBaseGestureEventAccessor,
             GetBaselineOffsetStyleAccessor,

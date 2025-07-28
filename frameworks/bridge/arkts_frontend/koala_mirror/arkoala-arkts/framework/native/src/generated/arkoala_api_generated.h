@@ -199,7 +199,7 @@ typedef struct InteropObject {
 // The only include allowed in this file! Do not add anything else ever.
 #include <stdint.h>
 
-#define GENERATED_ARKUI_FULL_API_VERSION 132
+#define GENERATED_ARKUI_FULL_API_VERSION 133
 #define GENERATED_ARKUI_NODE_API_VERSION GENERATED_ARKUI_FULL_API_VERSION
 
 #define GENERATED_ARKUI_BASIC_NODE_API_VERSION 1
@@ -840,6 +840,9 @@ typedef struct Ark_TimePickerResult Ark_TimePickerResult;
 typedef struct Opt_TimePickerResult Opt_TimePickerResult;
 typedef struct Ark_TouchTestInfo Ark_TouchTestInfo;
 typedef struct Opt_TouchTestInfo Opt_TouchTestInfo;
+typedef struct TransitionEffectPeer TransitionEffectPeer;
+typedef struct TransitionEffectPeer* Ark_TransitionEffect;
+typedef struct Opt_TransitionEffect Opt_TransitionEffect;
 typedef struct Ark_TranslateResult Ark_TranslateResult;
 typedef struct Opt_TranslateResult Opt_TranslateResult;
 typedef struct Ark_Tuple_Number_Number Ark_Tuple_Number_Number;
@@ -1762,6 +1765,8 @@ typedef struct AppearSymbolEffectPeer* Ark_AppearSymbolEffect;
 typedef struct Opt_AppearSymbolEffect Opt_AppearSymbolEffect;
 typedef struct Ark_ASTCResource Ark_ASTCResource;
 typedef struct Opt_ASTCResource Opt_ASTCResource;
+typedef struct Ark_AsymmetricTransitionOption Ark_AsymmetricTransitionOption;
+typedef struct Opt_AsymmetricTransitionOption Opt_AsymmetricTransitionOption;
 typedef struct Ark_AutoPlayOptions Ark_AutoPlayOptions;
 typedef struct Opt_AutoPlayOptions Opt_AutoPlayOptions;
 typedef struct Ark_BackgroundBrightnessOptions Ark_BackgroundBrightnessOptions;
@@ -2267,8 +2272,6 @@ typedef struct Ark_SslErrorEvent Ark_SslErrorEvent;
 typedef struct Opt_SslErrorEvent Opt_SslErrorEvent;
 typedef struct Ark_StackOptions Ark_StackOptions;
 typedef struct Opt_StackOptions Opt_StackOptions;
-typedef struct Ark_StateStyles Ark_StateStyles;
-typedef struct Opt_StateStyles Opt_StateStyles;
 typedef struct Ark_StepperOptions Ark_StepperOptions;
 typedef struct Opt_StepperOptions Opt_StepperOptions;
 typedef struct Ark_StyledStringChangedListener Ark_StyledStringChangedListener;
@@ -2532,6 +2535,10 @@ typedef struct Ark_Colors Ark_Colors;
 typedef struct Opt_Colors Opt_Colors;
 typedef struct Ark_ComponentInfo Ark_ComponentInfo;
 typedef struct Opt_ComponentInfo Opt_ComponentInfo;
+typedef struct Ark_ContentCoverOptions Ark_ContentCoverOptions;
+typedef struct Opt_ContentCoverOptions Opt_ContentCoverOptions;
+typedef struct Ark_ContextMenuAnimationOptions Ark_ContextMenuAnimationOptions;
+typedef struct Opt_ContextMenuAnimationOptions Opt_ContextMenuAnimationOptions;
 typedef struct Ark_CopyEvent Ark_CopyEvent;
 typedef struct Opt_CopyEvent Opt_CopyEvent;
 typedef struct Ark_CutEvent Ark_CutEvent;
@@ -2994,8 +3001,12 @@ typedef struct Ark_CancelButtonOptions Ark_CancelButtonOptions;
 typedef struct Opt_CancelButtonOptions Opt_CancelButtonOptions;
 typedef struct Ark_CapsuleStyleOptions Ark_CapsuleStyleOptions;
 typedef struct Opt_CapsuleStyleOptions Opt_CapsuleStyleOptions;
+typedef struct Ark_ContextMenuOptions Ark_ContextMenuOptions;
+typedef struct Opt_ContextMenuOptions Opt_ContextMenuOptions;
 typedef struct Ark_CustomDialogControllerOptions Ark_CustomDialogControllerOptions;
 typedef struct Opt_CustomDialogControllerOptions Opt_CustomDialogControllerOptions;
+typedef struct Ark_CustomPopupOptions Ark_CustomPopupOptions;
+typedef struct Opt_CustomPopupOptions Opt_CustomPopupOptions;
 typedef struct Ark_DigitIndicator Ark_DigitIndicator;
 typedef struct Opt_DigitIndicator Opt_DigitIndicator;
 typedef struct Ark_EventTarget Ark_EventTarget;
@@ -3021,6 +3032,8 @@ typedef struct Opt_LayoutChild Opt_LayoutChild;
 typedef struct LongPressGestureEventPeer LongPressGestureEventPeer;
 typedef struct LongPressGestureEventPeer* Ark_LongPressGestureEvent;
 typedef struct Opt_LongPressGestureEvent Opt_LongPressGestureEvent;
+typedef struct Ark_MenuOptions Ark_MenuOptions;
+typedef struct Opt_MenuOptions Opt_MenuOptions;
 typedef struct Ark_MenuOutlineOptions Ark_MenuOutlineOptions;
 typedef struct Opt_MenuOutlineOptions Opt_MenuOutlineOptions;
 typedef struct MouseEventPeer MouseEventPeer;
@@ -3051,6 +3064,8 @@ typedef struct PinchGestureEventPeer* Ark_PinchGestureEvent;
 typedef struct Opt_PinchGestureEvent Opt_PinchGestureEvent;
 typedef struct Ark_PlaceholderStyle Ark_PlaceholderStyle;
 typedef struct Opt_PlaceholderStyle Opt_PlaceholderStyle;
+typedef struct Ark_PopupCommonOptions Ark_PopupCommonOptions;
+typedef struct Opt_PopupCommonOptions Opt_PopupCommonOptions;
 typedef struct Ark_PopupMessageOptions Ark_PopupMessageOptions;
 typedef struct Opt_PopupMessageOptions Opt_PopupMessageOptions;
 typedef struct Ark_ResizableOptions Ark_ResizableOptions;
@@ -3132,6 +3147,8 @@ typedef struct Ark_NativeEmbedDataInfo Ark_NativeEmbedDataInfo;
 typedef struct Opt_NativeEmbedDataInfo Opt_NativeEmbedDataInfo;
 typedef struct Ark_NativeEmbedTouchInfo Ark_NativeEmbedTouchInfo;
 typedef struct Opt_NativeEmbedTouchInfo Opt_NativeEmbedTouchInfo;
+typedef struct Ark_PopupOptions Ark_PopupOptions;
+typedef struct Opt_PopupOptions Opt_PopupOptions;
 typedef struct Ark_ResourceImageAttachmentOptions Ark_ResourceImageAttachmentOptions;
 typedef struct Opt_ResourceImageAttachmentOptions Opt_ResourceImageAttachmentOptions;
 typedef struct Ark_RichEditorImageSpanStyle Ark_RichEditorImageSpanStyle;
@@ -3158,6 +3175,8 @@ typedef struct Ark_TextPickerDialogOptions Ark_TextPickerDialogOptions;
 typedef struct Opt_TextPickerDialogOptions Opt_TextPickerDialogOptions;
 typedef struct Ark_Union_ComponentContent_SubTabBarStyle_BottomTabBarStyle_String_Resource_CustomBuilder_TabBarOptions Ark_Union_ComponentContent_SubTabBarStyle_BottomTabBarStyle_String_Resource_CustomBuilder_TabBarOptions;
 typedef struct Opt_Union_ComponentContent_SubTabBarStyle_BottomTabBarStyle_String_Resource_CustomBuilder_TabBarOptions Opt_Union_ComponentContent_SubTabBarStyle_BottomTabBarStyle_String_Resource_CustomBuilder_TabBarOptions;
+typedef struct Ark_Union_PopupOptions_CustomPopupOptions Ark_Union_PopupOptions_CustomPopupOptions;
+typedef struct Opt_Union_PopupOptions_CustomPopupOptions Opt_Union_PopupOptions_CustomPopupOptions;
 typedef struct Ark_Union_RichEditorUpdateTextSpanStyleOptions_RichEditorUpdateImageSpanStyleOptions_RichEditorUpdateSymbolSpanStyleOptions Ark_Union_RichEditorUpdateTextSpanStyleOptions_RichEditorUpdateImageSpanStyleOptions_RichEditorUpdateSymbolSpanStyleOptions;
 typedef struct Opt_Union_RichEditorUpdateTextSpanStyleOptions_RichEditorUpdateImageSpanStyleOptions_RichEditorUpdateSymbolSpanStyleOptions Opt_Union_RichEditorUpdateTextSpanStyleOptions_RichEditorUpdateImageSpanStyleOptions_RichEditorUpdateSymbolSpanStyleOptions;
 typedef struct Ark_Union_String_ImageAttachment_CustomSpan Ark_Union_String_ImageAttachment_CustomSpan;
@@ -3182,27 +3201,6 @@ typedef struct Ark_RichEditorSpan Ark_RichEditorSpan;
 typedef struct Opt_RichEditorSpan Opt_RichEditorSpan;
 typedef struct Ark_Union_ImageAttachmentInterface_Opt_AttachmentType Ark_Union_ImageAttachmentInterface_Opt_AttachmentType;
 typedef struct Opt_Union_ImageAttachmentInterface_Opt_AttachmentType Opt_Union_ImageAttachmentInterface_Opt_AttachmentType;
-typedef struct Ark_AsymmetricTransitionOption Ark_AsymmetricTransitionOption;
-typedef struct Opt_AsymmetricTransitionOption Opt_AsymmetricTransitionOption;
-typedef struct Ark_ContentCoverOptions Ark_ContentCoverOptions;
-typedef struct Opt_ContentCoverOptions Opt_ContentCoverOptions;
-typedef struct Ark_ContextMenuAnimationOptions Ark_ContextMenuAnimationOptions;
-typedef struct Opt_ContextMenuAnimationOptions Opt_ContextMenuAnimationOptions;
-typedef struct Ark_ContextMenuOptions Ark_ContextMenuOptions;
-typedef struct Opt_ContextMenuOptions Opt_ContextMenuOptions;
-typedef struct Ark_CustomPopupOptions Ark_CustomPopupOptions;
-typedef struct Opt_CustomPopupOptions Opt_CustomPopupOptions;
-typedef struct Ark_MenuOptions Ark_MenuOptions;
-typedef struct Opt_MenuOptions Opt_MenuOptions;
-typedef struct Ark_PopupCommonOptions Ark_PopupCommonOptions;
-typedef struct Opt_PopupCommonOptions Opt_PopupCommonOptions;
-typedef struct Ark_PopupOptions Ark_PopupOptions;
-typedef struct Opt_PopupOptions Opt_PopupOptions;
-typedef struct TransitionEffectPeer TransitionEffectPeer;
-typedef struct TransitionEffectPeer* Ark_TransitionEffect;
-typedef struct Opt_TransitionEffect Opt_TransitionEffect;
-typedef struct Ark_Union_PopupOptions_CustomPopupOptions Ark_Union_PopupOptions_CustomPopupOptions;
-typedef struct Opt_Union_PopupOptions_CustomPopupOptions Opt_Union_PopupOptions_CustomPopupOptions;
 typedef Ark_Object Ark_ContentModifier;
 typedef Opt_Object Opt_ContentModifier;
 typedef enum Ark_AccessibilityHoverType {
@@ -8215,6 +8213,10 @@ typedef struct Opt_TouchTestInfo {
     Ark_Tag tag;
     Ark_TouchTestInfo value;
 } Opt_TouchTestInfo;
+typedef struct Opt_TransitionEffect {
+    Ark_Tag tag;
+    Ark_TransitionEffect value;
+} Opt_TransitionEffect;
 typedef struct Ark_TranslateResult {
     /* kind: Interface */
     Ark_Number x;
@@ -12587,6 +12589,15 @@ typedef struct Opt_ASTCResource {
     Ark_Tag tag;
     Ark_ASTCResource value;
 } Opt_ASTCResource;
+typedef struct Ark_AsymmetricTransitionOption {
+    /* kind: Interface */
+    Ark_TransitionEffect appear;
+    Ark_TransitionEffect disappear;
+} Ark_AsymmetricTransitionOption;
+typedef struct Opt_AsymmetricTransitionOption {
+    Ark_Tag tag;
+    Ark_AsymmetricTransitionOption value;
+} Opt_AsymmetricTransitionOption;
 typedef struct Ark_AutoPlayOptions {
     /* kind: Interface */
     Ark_Boolean stopWhenTouched;
@@ -12700,6 +12711,7 @@ typedef struct Opt_BusinessError {
 typedef struct Ark_ButtonConfiguration {
     /* kind: Interface */
     Ark_Boolean enabled;
+    Ark_ContentModifier contentModifier;
     Ark_String label;
     Ark_Boolean pressed;
     ButtonTriggerClickCallback triggerClick;
@@ -12751,6 +12763,7 @@ typedef struct Opt_ChainWeightOptions {
 typedef struct Ark_CheckBoxConfiguration {
     /* kind: Interface */
     Ark_Boolean enabled;
+    Ark_ContentModifier contentModifier;
     Ark_String name;
     Ark_Boolean selected;
     Callback_Boolean_Void triggerChange;
@@ -14470,6 +14483,7 @@ typedef struct Opt_ProgressOptions {
 typedef struct Ark_RadioConfiguration {
     /* kind: Interface */
     Ark_Boolean enabled;
+    Ark_ContentModifier contentModifier;
     Ark_String value;
     Ark_Boolean checked;
     Callback_Boolean_Void triggerChange;
@@ -14492,6 +14506,7 @@ typedef struct Opt_RadioOptions {
 typedef struct Ark_RatingConfiguration {
     /* kind: Interface */
     Ark_Boolean enabled;
+    Ark_ContentModifier contentModifier;
     Ark_Number rating;
     Ark_Boolean indicator;
     Ark_Number stars;
@@ -14816,6 +14831,7 @@ typedef struct Opt_SlideRange {
 typedef struct Ark_SliderConfiguration {
     /* kind: Interface */
     Ark_Boolean enabled;
+    Ark_ContentModifier contentModifier;
     Ark_Number value;
     Ark_Number min;
     Ark_Number max;
@@ -14879,19 +14895,6 @@ typedef struct Opt_StackOptions {
     Ark_Tag tag;
     Ark_StackOptions value;
 } Opt_StackOptions;
-typedef struct Ark_StateStyles {
-    /* kind: Interface */
-    Opt_CustomStyles normal;
-    Opt_CustomStyles pressed;
-    Opt_CustomStyles disabled;
-    Opt_CustomStyles focused;
-    Opt_CustomStyles clicked;
-    Opt_CustomStyles selected;
-} Ark_StateStyles;
-typedef struct Opt_StateStyles {
-    Ark_Tag tag;
-    Ark_StateStyles value;
-} Opt_StateStyles;
 typedef struct Ark_StepperOptions {
     /* kind: Interface */
     Opt_Number index;
@@ -15180,7 +15183,9 @@ typedef struct Opt_TipsMessageType {
 typedef struct Ark_ToggleConfiguration {
     /* kind: Interface */
     Ark_Boolean enabled;
+    Ark_ContentModifier contentModifier;
     Ark_Boolean isOn;
+    Ark_Boolean toggleEnabled;
     Callback_Boolean_Void triggerChange;
 } Ark_ToggleConfiguration;
 typedef struct Opt_ToggleConfiguration {
@@ -16443,6 +16448,31 @@ typedef struct Opt_ComponentInfo {
     Ark_Tag tag;
     Ark_ComponentInfo value;
 } Opt_ComponentInfo;
+typedef struct Ark_ContentCoverOptions {
+    /* kind: Interface */
+    Opt_ResourceColor backgroundColor;
+    Opt_Callback_Void onAppear;
+    Opt_Callback_Void onDisappear;
+    Opt_Callback_Void onWillAppear;
+    Opt_Callback_Void onWillDisappear;
+    Opt_ModalTransition modalTransition;
+    Opt_Callback_DismissContentCoverAction_Void onWillDismiss;
+    Opt_TransitionEffect transition;
+} Ark_ContentCoverOptions;
+typedef struct Opt_ContentCoverOptions {
+    Ark_Tag tag;
+    Ark_ContentCoverOptions value;
+} Opt_ContentCoverOptions;
+typedef struct Ark_ContextMenuAnimationOptions {
+    /* kind: Interface */
+    Opt_AnimationNumberRange scale;
+    Opt_TransitionEffect transition;
+    Opt_AnimationNumberRange hoverScale;
+} Ark_ContextMenuAnimationOptions;
+typedef struct Opt_ContextMenuAnimationOptions {
+    Ark_Tag tag;
+    Ark_ContextMenuAnimationOptions value;
+} Opt_ContextMenuAnimationOptions;
 typedef struct Ark_CopyEvent {
     /* kind: Interface */
     Opt_VoidCallback preventDefault;
@@ -18946,6 +18976,35 @@ typedef struct Opt_CapsuleStyleOptions {
     Ark_Tag tag;
     Ark_CapsuleStyleOptions value;
 } Opt_CapsuleStyleOptions;
+typedef struct Ark_ContextMenuOptions {
+    /* kind: Interface */
+    Opt_Position offset;
+    Opt_Placement placement;
+    Opt_Boolean enableArrow;
+    Opt_Length arrowOffset;
+    Opt_Union_MenuPreviewMode_CustomBuilder preview;
+    Opt_BorderRadiusType previewBorderRadius;
+    Opt_Union_Length_BorderRadiuses_LocalizedBorderRadiuses borderRadius;
+    Opt_Callback_Void onAppear;
+    Opt_Callback_Void onDisappear;
+    Opt_Callback_Void aboutToAppear;
+    Opt_Callback_Void aboutToDisappear;
+    Opt_Padding layoutRegionMargin;
+    Opt_ContextMenuAnimationOptions previewAnimationOptions;
+    Opt_ResourceColor backgroundColor;
+    Opt_BlurStyle backgroundBlurStyle;
+    Opt_BackgroundBlurStyleOptions backgroundBlurStyleOptions;
+    Opt_BackgroundEffectOptions backgroundEffect;
+    Opt_TransitionEffect transition;
+    Opt_Boolean enableHoverMode;
+    Opt_Union_ResourceColor_EdgeColors outlineColor;
+    Opt_Union_Dimension_EdgeOutlineWidths outlineWidth;
+    Opt_HapticFeedbackMode hapticFeedbackMode;
+} Ark_ContextMenuOptions;
+typedef struct Opt_ContextMenuOptions {
+    Ark_Tag tag;
+    Ark_ContextMenuOptions value;
+} Opt_ContextMenuOptions;
 typedef struct Ark_CustomDialogControllerOptions {
     /* kind: Interface */
     Ark_Union_CustomBuilder_ExtendableComponent builder;
@@ -18991,6 +19050,37 @@ typedef struct Opt_CustomDialogControllerOptions {
     Ark_Tag tag;
     Ark_CustomDialogControllerOptions value;
 } Opt_CustomDialogControllerOptions;
+typedef struct Ark_CustomPopupOptions {
+    /* kind: Interface */
+    CustomNodeBuilder builder;
+    Opt_Placement placement;
+    Opt_Union_Color_String_Resource_Number popupColor;
+    Opt_Boolean enableArrow;
+    Opt_Boolean autoCancel;
+    Opt_PopupStateChangeCallback onStateChange;
+    Opt_Length arrowOffset;
+    Opt_Boolean showInSubWindow;
+    Opt_Union_Boolean_PopupMaskType mask;
+    Opt_Length targetSpace;
+    Opt_Position offset;
+    Opt_Dimension width;
+    Opt_ArrowPointPosition arrowPointPosition;
+    Opt_Dimension arrowWidth;
+    Opt_Dimension arrowHeight;
+    Opt_Dimension radius;
+    Opt_Union_ShadowOptions_ShadowStyle shadow;
+    Opt_BlurStyle backgroundBlurStyle;
+    Opt_Boolean focusable;
+    Opt_TransitionEffect transition;
+    Opt_Union_Boolean_Callback_DismissPopupAction_Void onWillDismiss;
+    Opt_Boolean enableHoverMode;
+    Opt_Boolean followTransformOfTarget;
+    Opt_KeyboardAvoidMode keyboardAvoidMode;
+} Ark_CustomPopupOptions;
+typedef struct Opt_CustomPopupOptions {
+    Ark_Tag tag;
+    Ark_CustomPopupOptions value;
+} Opt_CustomPopupOptions;
 typedef struct Ark_DigitIndicator {
     /* kind: Interface */
     Opt_Length _left;
@@ -19068,6 +19158,37 @@ typedef struct Opt_LongPressGestureEvent {
     Ark_Tag tag;
     Ark_LongPressGestureEvent value;
 } Opt_LongPressGestureEvent;
+typedef struct Ark_MenuOptions {
+    /* kind: Interface */
+    Opt_Position offset;
+    Opt_Placement placement;
+    Opt_Boolean enableArrow;
+    Opt_Length arrowOffset;
+    Opt_Union_MenuPreviewMode_CustomBuilder preview;
+    Opt_BorderRadiusType previewBorderRadius;
+    Opt_Union_Length_BorderRadiuses_LocalizedBorderRadiuses borderRadius;
+    Opt_Callback_Void onAppear;
+    Opt_Callback_Void onDisappear;
+    Opt_Callback_Void aboutToAppear;
+    Opt_Callback_Void aboutToDisappear;
+    Opt_Padding layoutRegionMargin;
+    Opt_ContextMenuAnimationOptions previewAnimationOptions;
+    Opt_ResourceColor backgroundColor;
+    Opt_BlurStyle backgroundBlurStyle;
+    Opt_BackgroundBlurStyleOptions backgroundBlurStyleOptions;
+    Opt_BackgroundEffectOptions backgroundEffect;
+    Opt_TransitionEffect transition;
+    Opt_Boolean enableHoverMode;
+    Opt_Union_ResourceColor_EdgeColors outlineColor;
+    Opt_Union_Dimension_EdgeOutlineWidths outlineWidth;
+    Opt_HapticFeedbackMode hapticFeedbackMode;
+    Opt_ResourceStr title;
+    Opt_Boolean showInSubWindow;
+} Ark_MenuOptions;
+typedef struct Opt_MenuOptions {
+    Ark_Tag tag;
+    Ark_MenuOptions value;
+} Opt_MenuOptions;
 typedef struct Ark_MenuOutlineOptions {
     /* kind: Interface */
     Opt_Union_Dimension_EdgeOutlineWidths width;
@@ -19192,6 +19313,35 @@ typedef struct Opt_PlaceholderStyle {
     Ark_Tag tag;
     Ark_PlaceholderStyle value;
 } Opt_PlaceholderStyle;
+typedef struct Ark_PopupCommonOptions {
+    /* kind: Interface */
+    Opt_Placement placement;
+    Opt_ResourceColor popupColor;
+    Opt_Boolean enableArrow;
+    Opt_Boolean autoCancel;
+    Opt_PopupStateChangeCallback onStateChange;
+    Opt_Length arrowOffset;
+    Opt_Boolean showInSubWindow;
+    Opt_Union_Boolean_PopupMaskType mask;
+    Opt_Length targetSpace;
+    Opt_Position offset;
+    Opt_Dimension width;
+    Opt_ArrowPointPosition arrowPointPosition;
+    Opt_Dimension arrowWidth;
+    Opt_Dimension arrowHeight;
+    Opt_Dimension radius;
+    Opt_Union_ShadowOptions_ShadowStyle shadow;
+    Opt_BlurStyle backgroundBlurStyle;
+    Opt_Boolean focusable;
+    Opt_TransitionEffect transition;
+    Opt_Union_Boolean_Callback_DismissPopupAction_Void onWillDismiss;
+    Opt_Boolean enableHoverMode;
+    Opt_Boolean followTransformOfTarget;
+} Ark_PopupCommonOptions;
+typedef struct Opt_PopupCommonOptions {
+    Ark_Tag tag;
+    Ark_PopupCommonOptions value;
+} Opt_PopupCommonOptions;
 typedef struct Ark_PopupMessageOptions {
     /* kind: Interface */
     Opt_ResourceColor textColor;
@@ -19570,6 +19720,39 @@ typedef struct Opt_NativeEmbedTouchInfo {
     Ark_Tag tag;
     Ark_NativeEmbedTouchInfo value;
 } Opt_NativeEmbedTouchInfo;
+typedef struct Ark_PopupOptions {
+    /* kind: Interface */
+    Ark_String message;
+    Opt_Placement placement;
+    Opt_PopupButton primaryButton;
+    Opt_PopupButton secondaryButton;
+    Opt_PopupStateChangeCallback onStateChange;
+    Opt_Length arrowOffset;
+    Opt_Boolean showInSubWindow;
+    Opt_Union_Boolean_PopupMaskType mask;
+    Opt_PopupMessageOptions messageOptions;
+    Opt_Length targetSpace;
+    Opt_Boolean enableArrow;
+    Opt_Position offset;
+    Opt_Union_Color_String_Resource_Number popupColor;
+    Opt_Boolean autoCancel;
+    Opt_Dimension width;
+    Opt_ArrowPointPosition arrowPointPosition;
+    Opt_Dimension arrowWidth;
+    Opt_Dimension arrowHeight;
+    Opt_Dimension radius;
+    Opt_Union_ShadowOptions_ShadowStyle shadow;
+    Opt_BlurStyle backgroundBlurStyle;
+    Opt_TransitionEffect transition;
+    Opt_Union_Boolean_Callback_DismissPopupAction_Void onWillDismiss;
+    Opt_Boolean enableHoverMode;
+    Opt_Boolean followTransformOfTarget;
+    Opt_KeyboardAvoidMode keyboardAvoidMode;
+} Ark_PopupOptions;
+typedef struct Opt_PopupOptions {
+    Ark_Tag tag;
+    Ark_PopupOptions value;
+} Opt_PopupOptions;
 typedef struct Ark_ResourceImageAttachmentOptions {
     /* kind: Interface */
     Opt_ResourceStr resourceValue;
@@ -19779,6 +19962,18 @@ typedef struct Opt_Union_ComponentContent_SubTabBarStyle_BottomTabBarStyle_Strin
     Ark_Tag tag;
     Ark_Union_ComponentContent_SubTabBarStyle_BottomTabBarStyle_String_Resource_CustomBuilder_TabBarOptions value;
 } Opt_Union_ComponentContent_SubTabBarStyle_BottomTabBarStyle_String_Resource_CustomBuilder_TabBarOptions;
+typedef struct Ark_Union_PopupOptions_CustomPopupOptions {
+    /* kind: UnionType */
+    Ark_Int32 selector;
+    union {
+        Ark_PopupOptions value0;
+        Ark_CustomPopupOptions value1;
+    };
+} Ark_Union_PopupOptions_CustomPopupOptions;
+typedef struct Opt_Union_PopupOptions_CustomPopupOptions {
+    Ark_Tag tag;
+    Ark_Union_PopupOptions_CustomPopupOptions value;
+} Opt_Union_PopupOptions_CustomPopupOptions;
 typedef struct Ark_Union_RichEditorUpdateTextSpanStyleOptions_RichEditorUpdateImageSpanStyleOptions_RichEditorUpdateSymbolSpanStyleOptions {
     /* kind: UnionType */
     Ark_Int32 selector;
@@ -19927,209 +20122,6 @@ typedef struct Opt_Union_ImageAttachmentInterface_Opt_AttachmentType {
     Ark_Tag tag;
     Ark_Union_ImageAttachmentInterface_Opt_AttachmentType value;
 } Opt_Union_ImageAttachmentInterface_Opt_AttachmentType;
-typedef struct Ark_AsymmetricTransitionOption {
-    /* kind: Interface */
-    Ark_TransitionEffect appear;
-    Ark_TransitionEffect disappear;
-} Ark_AsymmetricTransitionOption;
-typedef struct Opt_AsymmetricTransitionOption {
-    Ark_Tag tag;
-    Ark_AsymmetricTransitionOption value;
-} Opt_AsymmetricTransitionOption;
-typedef struct Ark_ContentCoverOptions {
-    /* kind: Interface */
-    Opt_ResourceColor backgroundColor;
-    Opt_Callback_Void onAppear;
-    Opt_Callback_Void onDisappear;
-    Opt_Callback_Void onWillAppear;
-    Opt_Callback_Void onWillDisappear;
-    Opt_ModalTransition modalTransition;
-    Opt_Callback_DismissContentCoverAction_Void onWillDismiss;
-    Opt_TransitionEffect transition;
-} Ark_ContentCoverOptions;
-typedef struct Opt_ContentCoverOptions {
-    Ark_Tag tag;
-    Ark_ContentCoverOptions value;
-} Opt_ContentCoverOptions;
-typedef struct Ark_ContextMenuAnimationOptions {
-    /* kind: Interface */
-    Opt_AnimationNumberRange scale;
-    Opt_TransitionEffect transition;
-    Opt_AnimationNumberRange hoverScale;
-} Ark_ContextMenuAnimationOptions;
-typedef struct Opt_ContextMenuAnimationOptions {
-    Ark_Tag tag;
-    Ark_ContextMenuAnimationOptions value;
-} Opt_ContextMenuAnimationOptions;
-typedef struct Ark_ContextMenuOptions {
-    /* kind: Interface */
-    Opt_Position offset;
-    Opt_Placement placement;
-    Opt_Boolean enableArrow;
-    Opt_Length arrowOffset;
-    Opt_Union_MenuPreviewMode_CustomBuilder preview;
-    Opt_BorderRadiusType previewBorderRadius;
-    Opt_Union_Length_BorderRadiuses_LocalizedBorderRadiuses borderRadius;
-    Opt_Callback_Void onAppear;
-    Opt_Callback_Void onDisappear;
-    Opt_Callback_Void aboutToAppear;
-    Opt_Callback_Void aboutToDisappear;
-    Opt_Padding layoutRegionMargin;
-    Opt_ContextMenuAnimationOptions previewAnimationOptions;
-    Opt_ResourceColor backgroundColor;
-    Opt_BlurStyle backgroundBlurStyle;
-    Opt_BackgroundBlurStyleOptions backgroundBlurStyleOptions;
-    Opt_BackgroundEffectOptions backgroundEffect;
-    Opt_TransitionEffect transition;
-    Opt_Boolean enableHoverMode;
-    Opt_Union_ResourceColor_EdgeColors outlineColor;
-    Opt_Union_Dimension_EdgeOutlineWidths outlineWidth;
-    Opt_HapticFeedbackMode hapticFeedbackMode;
-} Ark_ContextMenuOptions;
-typedef struct Opt_ContextMenuOptions {
-    Ark_Tag tag;
-    Ark_ContextMenuOptions value;
-} Opt_ContextMenuOptions;
-typedef struct Ark_CustomPopupOptions {
-    /* kind: Interface */
-    CustomNodeBuilder builder;
-    Opt_Placement placement;
-    Opt_Union_Color_String_Resource_Number popupColor;
-    Opt_Boolean enableArrow;
-    Opt_Boolean autoCancel;
-    Opt_PopupStateChangeCallback onStateChange;
-    Opt_Length arrowOffset;
-    Opt_Boolean showInSubWindow;
-    Opt_Union_Boolean_PopupMaskType mask;
-    Opt_Length targetSpace;
-    Opt_Position offset;
-    Opt_Dimension width;
-    Opt_ArrowPointPosition arrowPointPosition;
-    Opt_Dimension arrowWidth;
-    Opt_Dimension arrowHeight;
-    Opt_Dimension radius;
-    Opt_Union_ShadowOptions_ShadowStyle shadow;
-    Opt_BlurStyle backgroundBlurStyle;
-    Opt_Boolean focusable;
-    Opt_TransitionEffect transition;
-    Opt_Union_Boolean_Callback_DismissPopupAction_Void onWillDismiss;
-    Opt_Boolean enableHoverMode;
-    Opt_Boolean followTransformOfTarget;
-    Opt_KeyboardAvoidMode keyboardAvoidMode;
-} Ark_CustomPopupOptions;
-typedef struct Opt_CustomPopupOptions {
-    Ark_Tag tag;
-    Ark_CustomPopupOptions value;
-} Opt_CustomPopupOptions;
-typedef struct Ark_MenuOptions {
-    /* kind: Interface */
-    Opt_Position offset;
-    Opt_Placement placement;
-    Opt_Boolean enableArrow;
-    Opt_Length arrowOffset;
-    Opt_Union_MenuPreviewMode_CustomBuilder preview;
-    Opt_BorderRadiusType previewBorderRadius;
-    Opt_Union_Length_BorderRadiuses_LocalizedBorderRadiuses borderRadius;
-    Opt_Callback_Void onAppear;
-    Opt_Callback_Void onDisappear;
-    Opt_Callback_Void aboutToAppear;
-    Opt_Callback_Void aboutToDisappear;
-    Opt_Padding layoutRegionMargin;
-    Opt_ContextMenuAnimationOptions previewAnimationOptions;
-    Opt_ResourceColor backgroundColor;
-    Opt_BlurStyle backgroundBlurStyle;
-    Opt_BackgroundBlurStyleOptions backgroundBlurStyleOptions;
-    Opt_BackgroundEffectOptions backgroundEffect;
-    Opt_TransitionEffect transition;
-    Opt_Boolean enableHoverMode;
-    Opt_Union_ResourceColor_EdgeColors outlineColor;
-    Opt_Union_Dimension_EdgeOutlineWidths outlineWidth;
-    Opt_HapticFeedbackMode hapticFeedbackMode;
-    Opt_ResourceStr title;
-    Opt_Boolean showInSubWindow;
-} Ark_MenuOptions;
-typedef struct Opt_MenuOptions {
-    Ark_Tag tag;
-    Ark_MenuOptions value;
-} Opt_MenuOptions;
-typedef struct Ark_PopupCommonOptions {
-    /* kind: Interface */
-    Opt_Placement placement;
-    Opt_ResourceColor popupColor;
-    Opt_Boolean enableArrow;
-    Opt_Boolean autoCancel;
-    Opt_PopupStateChangeCallback onStateChange;
-    Opt_Length arrowOffset;
-    Opt_Boolean showInSubWindow;
-    Opt_Union_Boolean_PopupMaskType mask;
-    Opt_Length targetSpace;
-    Opt_Position offset;
-    Opt_Dimension width;
-    Opt_ArrowPointPosition arrowPointPosition;
-    Opt_Dimension arrowWidth;
-    Opt_Dimension arrowHeight;
-    Opt_Dimension radius;
-    Opt_Union_ShadowOptions_ShadowStyle shadow;
-    Opt_BlurStyle backgroundBlurStyle;
-    Opt_Boolean focusable;
-    Opt_TransitionEffect transition;
-    Opt_Union_Boolean_Callback_DismissPopupAction_Void onWillDismiss;
-    Opt_Boolean enableHoverMode;
-    Opt_Boolean followTransformOfTarget;
-} Ark_PopupCommonOptions;
-typedef struct Opt_PopupCommonOptions {
-    Ark_Tag tag;
-    Ark_PopupCommonOptions value;
-} Opt_PopupCommonOptions;
-typedef struct Ark_PopupOptions {
-    /* kind: Interface */
-    Ark_String message;
-    Opt_Placement placement;
-    Opt_PopupButton primaryButton;
-    Opt_PopupButton secondaryButton;
-    Opt_PopupStateChangeCallback onStateChange;
-    Opt_Length arrowOffset;
-    Opt_Boolean showInSubWindow;
-    Opt_Union_Boolean_PopupMaskType mask;
-    Opt_PopupMessageOptions messageOptions;
-    Opt_Length targetSpace;
-    Opt_Boolean enableArrow;
-    Opt_Position offset;
-    Opt_Union_Color_String_Resource_Number popupColor;
-    Opt_Boolean autoCancel;
-    Opt_Dimension width;
-    Opt_ArrowPointPosition arrowPointPosition;
-    Opt_Dimension arrowWidth;
-    Opt_Dimension arrowHeight;
-    Opt_Dimension radius;
-    Opt_Union_ShadowOptions_ShadowStyle shadow;
-    Opt_BlurStyle backgroundBlurStyle;
-    Opt_TransitionEffect transition;
-    Opt_Union_Boolean_Callback_DismissPopupAction_Void onWillDismiss;
-    Opt_Boolean enableHoverMode;
-    Opt_Boolean followTransformOfTarget;
-    Opt_KeyboardAvoidMode keyboardAvoidMode;
-} Ark_PopupOptions;
-typedef struct Opt_PopupOptions {
-    Ark_Tag tag;
-    Ark_PopupOptions value;
-} Opt_PopupOptions;
-typedef struct Opt_TransitionEffect {
-    Ark_Tag tag;
-    Ark_TransitionEffect value;
-} Opt_TransitionEffect;
-typedef struct Ark_Union_PopupOptions_CustomPopupOptions {
-    /* kind: UnionType */
-    Ark_Int32 selector;
-    union {
-        Ark_PopupOptions value0;
-        Ark_CustomPopupOptions value1;
-    };
-} Ark_Union_PopupOptions_CustomPopupOptions;
-typedef struct Opt_Union_PopupOptions_CustomPopupOptions {
-    Ark_Tag tag;
-    Ark_Union_PopupOptions_CustomPopupOptions value;
-} Opt_Union_PopupOptions_CustomPopupOptions;
 
 
 
@@ -20653,8 +20645,6 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                   const Opt_String* value);
     void (*setGeometryTransition0)(Ark_NativePointer node,
                                    const Opt_String* value);
-    void (*setStateStyles)(Ark_NativePointer node,
-                           const Opt_StateStyles* value);
     void (*setRestoreId)(Ark_NativePointer node,
                          const Opt_Number* value);
     void (*setSphericalEffect)(Ark_NativePointer node,
@@ -23689,16 +23679,6 @@ typedef struct GENERATED_ArkUIBaseContextAccessor {
     Ark_NativePointer (*getFinalizer)();
 } GENERATED_ArkUIBaseContextAccessor;
 
-typedef struct GENERATED_ArkUIBaseCustomDialogAccessor {
-    void (*destroyPeer)(Ark_BaseCustomDialog peer);
-    Ark_BaseCustomDialog (*construct)(const Opt_Boolean* useSharedStorage,
-                                      const Opt_CustomObject* storage);
-    Ark_NativePointer (*getFinalizer)();
-    Ark_CustomObject (*$_instantiate)(const Callback_T* factory,
-                                      const Opt_CustomObject* initializers,
-                                      const Opt_Callback_Void* content);
-} GENERATED_ArkUIBaseCustomDialogAccessor;
-
 typedef struct GENERATED_ArkUIBaseEventAccessor {
     void (*destroyPeer)(Ark_BaseEvent peer);
     Ark_BaseEvent (*construct)();
@@ -24326,27 +24306,42 @@ typedef struct GENERATED_ArkUIContentModifierHelperAccessor {
     void (*contentModifierButton)(Ark_NativePointer node,
                                   const Ark_Object* contentModifier,
                                   const ButtonModifierBuilder* builder);
-    void (*resetContentModifierButton)(Ark_NativePointer node);
-    void (*contentModifierCheckbox)(Ark_NativePointer node,
+    void (*contentModifierCheckBox)(Ark_NativePointer node,
                                     const Ark_Object* contentModifier,
                                     const CheckBoxModifierBuilder* builder);
-    void (*resetContentModifierCheckbox)(Ark_NativePointer node);
+    void (*contentModifierDataPanel)(Ark_NativePointer node,
+                                     const Ark_Object* contentModifier,
+                                     const DataPanelModifierBuilder* builder);
+    void (*contentModifierGauge)(Ark_NativePointer node,
+                                 const Ark_Object* contentModifier,
+                                 const GaugeModifierBuilder* builder);
+    void (*contentModifierLoadingProgress)(Ark_NativePointer node,
+                                           const Ark_Object* contentModifier,
+                                           const LoadingProgressModifierBuilder* builder);
+    void (*contentModifierProgress)(Ark_NativePointer node,
+                                    const Ark_Object* contentModifier,
+                                    const ProgressModifierBuilder* builder);
     void (*contentModifierRadio)(Ark_NativePointer node,
-                                const Ark_Object* contentModifier,
+                                 const Ark_Object* contentModifier,
                                  const RadioModifierBuilder* builder);
-    void (*resetContentModifierRadio)(Ark_NativePointer node);
     void (*contentModifierRating)(Ark_NativePointer node,
                                   const Ark_Object* contentModifier,
                                   const RatingModifierBuilder* builder);
-    void (*resetContentModifierRating)(Ark_NativePointer node);
+    void (*contentModifierMenuItem)(Ark_NativePointer node,
+                                    const Ark_Object* contentModifier,
+                                    const MenuItemModifierBuilder* builder);
     void (*contentModifierSlider)(Ark_NativePointer node,
                                   const Ark_Object* contentModifier,
                                   const SliderModifierBuilder* builder);
-    void (*resetContentModifierSlider)(Ark_NativePointer node);
+    void (*contentModifierTextClock)(Ark_NativePointer node,
+                                     const Ark_Object* contentModifier,
+                                     const TextClockModifierBuilder* builder);
+    void (*contentModifierTextTimer)(Ark_NativePointer node,
+                                     const Ark_Object* contentModifier,
+                                     const TextTimerModifierBuilder* builder);
     void (*contentModifierToggle)(Ark_NativePointer node,
                                   const Ark_Object* contentModifier,
                                   const ToggleModifierBuilder* builder);
-    void (*resetContentModifieToggle)(Ark_NativePointer node);
 } GENERATED_ArkUIContentModifierHelperAccessor;
 
 typedef struct GENERATED_ArkUIContextAccessor {
@@ -27579,18 +27574,14 @@ typedef struct GENERATED_ArkUITransitionEffectAccessor {
                                       const Ark_AnimateParam* value);
     Ark_TransitionEffect (*combine)(Ark_TransitionEffect peer,
                                     Ark_TransitionEffect transitionEffect);
-    Ark_TransitionEffect (*getIDENTITY)(Ark_TransitionEffect peer);
-    void (*setIDENTITY)(Ark_TransitionEffect peer,
-                        Ark_TransitionEffect IDENTITY);
-    Ark_TransitionEffect (*getOPACITY)(Ark_TransitionEffect peer);
-    void (*setOPACITY)(Ark_TransitionEffect peer,
-                       Ark_TransitionEffect OPACITY);
-    Ark_TransitionEffect (*getSLIDE)(Ark_TransitionEffect peer);
-    void (*setSLIDE)(Ark_TransitionEffect peer,
-                     Ark_TransitionEffect SLIDE);
-    Ark_TransitionEffect (*getSLIDE_SWITCH)(Ark_TransitionEffect peer);
-    void (*setSLIDE_SWITCH)(Ark_TransitionEffect peer,
-                            Ark_TransitionEffect SLIDE_SWITCH);
+    Ark_TransitionEffect (*getIDENTITY)();
+    void (*setIDENTITY)(Ark_TransitionEffect IDENTITY);
+    Ark_TransitionEffect (*getOPACITY)();
+    void (*setOPACITY)(Ark_TransitionEffect OPACITY);
+    Ark_TransitionEffect (*getSLIDE)();
+    void (*setSLIDE)(Ark_TransitionEffect SLIDE);
+    Ark_TransitionEffect (*getSLIDE_SWITCH)();
+    void (*setSLIDE_SWITCH)(Ark_TransitionEffect SLIDE_SWITCH);
 } GENERATED_ArkUITransitionEffectAccessor;
 
 typedef struct GENERATED_ArkUIUICommonEventAccessor {
@@ -27932,8 +27923,6 @@ typedef struct GENERATED_ArkUIGlobalScopeAccessor {
                       const Callback_Void* event);
     void (*animateToImmediately)(const Ark_AnimateParam* value,
                                  const Callback_Void* event);
-    Ark_CustomObject (*applyStyles)(const Ark_CustomObject* self,
-                                    const CustomStyles* customStyles);
     void (*bindCompatibleProvideCallback)(Ark_ExtendableComponent component,
                                           const Ark_CustomObject* createCompatibleState,
                                           const Ark_CustomObject* setCallback,
@@ -28099,7 +28088,6 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIAxisEventAccessor* (*getAxisEventAccessor)();
     const GENERATED_ArkUIBackgroundColorStyleAccessor* (*getBackgroundColorStyleAccessor)();
     const GENERATED_ArkUIBaseContextAccessor* (*getBaseContextAccessor)();
-    const GENERATED_ArkUIBaseCustomDialogAccessor* (*getBaseCustomDialogAccessor)();
     const GENERATED_ArkUIBaseEventAccessor* (*getBaseEventAccessor)();
     const GENERATED_ArkUIBaseGestureEventAccessor* (*getBaseGestureEventAccessor)();
     const GENERATED_ArkUIBaselineOffsetStyleAccessor* (*getBaselineOffsetStyleAccessor)();

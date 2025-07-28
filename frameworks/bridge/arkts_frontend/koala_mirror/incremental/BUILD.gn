@@ -21,12 +21,13 @@ koala_root = ".."
 node_version = "v16.20.2"
 host_arch = "${host_os}-${host_cpu}"
 
-npm_cmd("incremental_install") {
-    outputs = [
-        "$target_out_dir/incremental_install"
-    ]
-    project_path = rebase_path(".")
-    install = true
+if (current_toolchain == host_toolchain) {
+    npm_install("incremental_install") {
+        outputs = [
+            "$target_out_dir/incremental_install"
+        ]
+        project_path = rebase_path(".")
+    }
 }
 
 npm_cmd("incremental_build") {

@@ -4518,24 +4518,6 @@ void deserializeAndCallSyncCustomNodeBuilder(Ark_VMContext vmContext, KSerialize
     Callback_Pointer_Void _continuation = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativePointer value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Pointer_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Pointer_Void))))};
     _callSync(vmContext, _resourceId, parentNode, _continuation);
 }
-void deserializeAndCallCustomStyles(KSerializerBuffer thisArray, Ark_Int32 thisLength)
-{
-    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
-    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
-    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_String instance)>(thisDeserializer.readPointer());
-    thisDeserializer.readPointer();
-    Ark_String instance = static_cast<Ark_String>(thisDeserializer.readString());
-    _call(_resourceId, instance);
-}
-void deserializeAndCallSyncCustomStyles(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
-{
-    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
-    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
-    thisDeserializer.readPointer();
-    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_String instance)>(thisDeserializer.readPointer());
-    Ark_String instance = static_cast<Ark_String>(thisDeserializer.readString());
-    _callSync(vmContext, _resourceId, instance);
-}
 void deserializeAndCallDataPanelModifierBuilder(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
@@ -7397,7 +7379,6 @@ void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark
         case Kind_ContentWillScrollCallback: return deserializeAndCallContentWillScrollCallback(thisArray, thisLength);
         case Kind_Context_getGroupDir_Callback: return deserializeAndCallContext_getGroupDir_Callback(thisArray, thisLength);
         case Kind_CustomNodeBuilder: return deserializeAndCallCustomNodeBuilder(thisArray, thisLength);
-        case Kind_CustomStyles: return deserializeAndCallCustomStyles(thisArray, thisLength);
         case Kind_DataPanelModifierBuilder: return deserializeAndCallDataPanelModifierBuilder(thisArray, thisLength);
         case Kind_EditableTextOnChangeCallback: return deserializeAndCallEditableTextOnChangeCallback(thisArray, thisLength);
         case Kind_ErrorCallback: return deserializeAndCallErrorCallback(thisArray, thisLength);
@@ -7703,7 +7684,6 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
         case Kind_ContentWillScrollCallback: return deserializeAndCallSyncContentWillScrollCallback(vmContext, thisArray, thisLength);
         case Kind_Context_getGroupDir_Callback: return deserializeAndCallSyncContext_getGroupDir_Callback(vmContext, thisArray, thisLength);
         case Kind_CustomNodeBuilder: return deserializeAndCallSyncCustomNodeBuilder(vmContext, thisArray, thisLength);
-        case Kind_CustomStyles: return deserializeAndCallSyncCustomStyles(vmContext, thisArray, thisLength);
         case Kind_DataPanelModifierBuilder: return deserializeAndCallSyncDataPanelModifierBuilder(vmContext, thisArray, thisLength);
         case Kind_EditableTextOnChangeCallback: return deserializeAndCallSyncEditableTextOnChangeCallback(vmContext, thisArray, thisLength);
         case Kind_ErrorCallback: return deserializeAndCallSyncErrorCallback(vmContext, thisArray, thisLength);

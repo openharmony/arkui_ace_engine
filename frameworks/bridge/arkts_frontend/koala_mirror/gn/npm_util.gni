@@ -50,3 +50,11 @@ template("npm_cmd") {
         }
     }
 }
+
+template("npm_install") {
+    assert(current_toolchain == host_toolchain, "must be executed with host_toolchain")
+    forward_variables_from(invoker, "*")
+    npm_cmd(target_name) {
+        install = true
+    }
+}

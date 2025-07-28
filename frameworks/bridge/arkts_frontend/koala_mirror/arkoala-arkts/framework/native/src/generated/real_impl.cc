@@ -2006,10 +2006,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                  const Opt_String* value)
     {
     }
-    void StateStylesImpl(Ark_NativePointer node,
-                         const Opt_StateStyles* value)
-    {
-    }
     void RestoreIdImpl(Ark_NativePointer node,
                        const Opt_Number* value)
     {
@@ -8150,7 +8146,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::KeyImpl,
             CommonMethodModifier::IdImpl,
             CommonMethodModifier::GeometryTransition0Impl,
-            CommonMethodModifier::StateStylesImpl,
             CommonMethodModifier::RestoreIdImpl,
             CommonMethodModifier::SphericalEffectImpl,
             CommonMethodModifier::LightUpEffectImpl,
@@ -10441,30 +10436,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
     } // BaseContextAccessor
-    namespace BaseCustomDialogAccessor {
-    void DestroyPeerImpl(Ark_BaseCustomDialog peer)
-    {
-        auto peerImpl = reinterpret_cast<BaseCustomDialogPeerImpl *>(peer);
-        if (peerImpl) {
-            delete peerImpl;
-        }
-    }
-    Ark_BaseCustomDialog ConstructImpl(const Opt_Boolean* useSharedStorage,
-                                       const Opt_CustomObject* storage)
-    {
-        return {};
-    }
-    Ark_NativePointer GetFinalizerImpl()
-    {
-        return reinterpret_cast<void *>(&DestroyPeerImpl);
-    }
-    Ark_CustomObject $_instantiateImpl(const Callback_T* factory,
-                                       const Opt_CustomObject* initializers,
-                                       const Opt_Callback_Void* content)
-    {
-        return {};
-    }
-    } // BaseCustomDialogAccessor
     namespace BaseEventAccessor {
     void DestroyPeerImpl(Ark_BaseEvent peer)
     {
@@ -19942,36 +19913,32 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
-    Ark_TransitionEffect GetIDENTITYImpl(Ark_TransitionEffect peer)
+    Ark_TransitionEffect GetIDENTITYImpl()
     {
         return {};
     }
-    void SetIDENTITYImpl(Ark_TransitionEffect peer,
-                         Ark_TransitionEffect IDENTITY)
+    void SetIDENTITYImpl(Ark_TransitionEffect IDENTITY)
     {
     }
-    Ark_TransitionEffect GetOPACITYImpl(Ark_TransitionEffect peer)
-    {
-        return {};
-    }
-    void SetOPACITYImpl(Ark_TransitionEffect peer,
-                        Ark_TransitionEffect OPACITY)
-    {
-    }
-    Ark_TransitionEffect GetSLIDEImpl(Ark_TransitionEffect peer)
+    Ark_TransitionEffect GetOPACITYImpl()
     {
         return {};
     }
-    void SetSLIDEImpl(Ark_TransitionEffect peer,
-                      Ark_TransitionEffect SLIDE)
+    void SetOPACITYImpl(Ark_TransitionEffect OPACITY)
     {
     }
-    Ark_TransitionEffect GetSLIDE_SWITCHImpl(Ark_TransitionEffect peer)
+    Ark_TransitionEffect GetSLIDEImpl()
     {
         return {};
     }
-    void SetSLIDE_SWITCHImpl(Ark_TransitionEffect peer,
-                             Ark_TransitionEffect SLIDE_SWITCH)
+    void SetSLIDEImpl(Ark_TransitionEffect SLIDE)
+    {
+    }
+    Ark_TransitionEffect GetSLIDE_SWITCHImpl()
+    {
+        return {};
+    }
+    void SetSLIDE_SWITCHImpl(Ark_TransitionEffect SLIDE_SWITCH)
     {
     }
     } // TransitionEffectAccessor
@@ -20843,11 +20810,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                   const Callback_Void* event)
     {
     }
-    Ark_CustomObject ApplyStylesImpl(const Ark_CustomObject* self,
-                                     const CustomStyles* customStyles)
-    {
-        return {};
-    }
     void BindCompatibleProvideCallbackImpl(Ark_ExtendableComponent component,
                                            const Ark_CustomObject* createCompatibleState,
                                            const Ark_CustomObject* setCallback,
@@ -21064,20 +21026,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 
     struct BaseContextPeer {
         virtual ~BaseContextPeer() = default;
-    };
-    const GENERATED_ArkUIBaseCustomDialogAccessor* GetBaseCustomDialogAccessor()
-    {
-        static const GENERATED_ArkUIBaseCustomDialogAccessor BaseCustomDialogAccessorImpl {
-            BaseCustomDialogAccessor::DestroyPeerImpl,
-            BaseCustomDialogAccessor::ConstructImpl,
-            BaseCustomDialogAccessor::GetFinalizerImpl,
-            BaseCustomDialogAccessor::$_instantiateImpl,
-        };
-        return &BaseCustomDialogAccessorImpl;
-    }
-
-    struct BaseCustomDialogPeer {
-        virtual ~BaseCustomDialogPeer() = default;
     };
     const GENERATED_ArkUIBaseEventAccessor* GetBaseEventAccessor()
     {
@@ -25415,7 +25363,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GlobalScopeAccessor::$rawfileImpl,
             GlobalScopeAccessor::AnimateToImpl,
             GlobalScopeAccessor::AnimateToImmediatelyImpl,
-            GlobalScopeAccessor::ApplyStylesImpl,
             GlobalScopeAccessor::BindCompatibleProvideCallbackImpl,
             GlobalScopeAccessor::BorderRadiusesImpl,
             GlobalScopeAccessor::BorderStylesImpl,
@@ -25456,7 +25403,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetAxisEventAccessor,
             GetBackgroundColorStyleAccessor,
             GetBaseContextAccessor,
-            GetBaseCustomDialogAccessor,
             GetBaseEventAccessor,
             GetBaseGestureEventAccessor,
             GetBaselineOffsetStyleAccessor,

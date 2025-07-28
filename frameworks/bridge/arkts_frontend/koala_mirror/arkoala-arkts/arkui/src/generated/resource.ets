@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+package global.resource;
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 

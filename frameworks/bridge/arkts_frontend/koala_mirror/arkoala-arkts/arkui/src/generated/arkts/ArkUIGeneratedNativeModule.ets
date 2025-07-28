@@ -495,8 +495,6 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _CommonMethod_setGeometryTransition0(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _CommonMethod_setStateStyles(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
     native static _CommonMethod_setRestoreId(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _CommonMethod_setSphericalEffect(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
@@ -3158,12 +3156,6 @@ export class ArkUIGeneratedNativeModule {
     native static _BaseContext_construct(): KPointer
     @ani.unsafe.Direct
     native static _BaseContext_getFinalizer(): KPointer
-    @ani.unsafe.Direct
-    native static _BaseCustomDialog_construct(thisArray: KSerializerBuffer, thisLength: int32): KPointer
-    @ani.unsafe.Direct
-    native static _BaseCustomDialog_getFinalizer(): KPointer
-    @ani.unsafe.Direct
-    native static _BaseCustomDialog_$_instantiate(thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
     native static _BaseEvent_construct(): KPointer
     @ani.unsafe.Direct
@@ -6617,21 +6609,21 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _TransitionEffect_combine(ptr: KPointer, transitionEffect: KPointer): KPointer
     @ani.unsafe.Direct
-    native static _TransitionEffect_getIDENTITY(ptr: KPointer): KPointer
+    native static _TransitionEffect_getIDENTITY(): KPointer
     @ani.unsafe.Direct
-    native static _TransitionEffect_setIDENTITY(ptr: KPointer, IDENTITY: KPointer): void
+    native static _TransitionEffect_setIDENTITY(IDENTITY: KPointer): void
     @ani.unsafe.Direct
-    native static _TransitionEffect_getOPACITY(ptr: KPointer): KPointer
+    native static _TransitionEffect_getOPACITY(): KPointer
     @ani.unsafe.Direct
-    native static _TransitionEffect_setOPACITY(ptr: KPointer, OPACITY: KPointer): void
+    native static _TransitionEffect_setOPACITY(OPACITY: KPointer): void
     @ani.unsafe.Direct
-    native static _TransitionEffect_getSLIDE(ptr: KPointer): KPointer
+    native static _TransitionEffect_getSLIDE(): KPointer
     @ani.unsafe.Direct
-    native static _TransitionEffect_setSLIDE(ptr: KPointer, SLIDE: KPointer): void
+    native static _TransitionEffect_setSLIDE(SLIDE: KPointer): void
     @ani.unsafe.Direct
-    native static _TransitionEffect_getSLIDE_SWITCH(ptr: KPointer): KPointer
+    native static _TransitionEffect_getSLIDE_SWITCH(): KPointer
     @ani.unsafe.Direct
-    native static _TransitionEffect_setSLIDE_SWITCH(ptr: KPointer, SLIDE_SWITCH: KPointer): void
+    native static _TransitionEffect_setSLIDE_SWITCH(SLIDE_SWITCH: KPointer): void
     @ani.unsafe.Direct
     native static _UICommonEvent_construct(): KPointer
     @ani.unsafe.Direct
@@ -6975,8 +6967,6 @@ export class ArkUIGeneratedNativeModule {
     native static _GlobalScope_vp2px(value: number): number
     @ani.unsafe.Direct
     native static _GlobalScope_px2vp(value: number): number
-    @ani.unsafe.Direct
-    native static _GlobalScope_applyStyles(thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Quick
     native static _GlobalScope_setAppBgColor(value: KStringPtr): void
     @ani.unsafe.Direct
