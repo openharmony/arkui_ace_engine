@@ -27,57 +27,8 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RouterExtenderAccessor {
-namespace {
-void RegisterPageCallback(const RefPtr<FrameNode>& frameNode, const RefPtr<UINode>& jsViewNode)
-{
-    auto curPageNode = AceType::DynamicCast<PageNode>(frameNode);
-    CHECK_NULL_VOID(curPageNode);
-    auto pagePattern = curPageNode->GetPattern<NG::PagePattern>();
-    CHECK_NULL_VOID(pagePattern);
-    auto customNode = AceType::DynamicCast<CustomNode>(jsViewNode);
-    CHECK_NULL_VOID(customNode);
-    pagePattern->SetOnPageShow([weak = WeakPtr<CustomNode>(customNode)]() {
-        auto view = weak.Upgrade();
-        if (view) {
-            view->FireOnPageShow();
-        }
-    });
-    pagePattern->SetOnPageHide([weak = WeakPtr<CustomNode>(customNode)]() {
-        auto view = weak.Upgrade();
-        if (view) {
-            view->FireOnPageHide();
-        }
-    });
-    pagePattern->SetOnBackPressed([weak = WeakPtr<CustomNode>(customNode)]() {
-        auto view = weak.Upgrade();
-        if (view) {
-            return view->FireOnBackPressed();
-        }
-        return false;
-    });
-
-    pagePattern->SetPageTransitionFunc(
-        [weak = WeakPtr<CustomNode>(customNode), pageId = curPageNode->GetId(),
-            weakPage = WeakPtr<FrameNode>(curPageNode)]() {
-            auto custom = weak.Upgrade();
-            auto page = weakPage.Upgrade();
-            if (custom && page) {
-                auto pattern = page->GetPattern<PagePattern>();
-                CHECK_NULL_VOID(pattern);
-                NG::ScopedViewStackProcessor scopedViewStackProcessor;
-                NG::ViewStackProcessor::GetInstance()->SetPageNode(page);
-                // clear pageTransition effects and execute js to get latest pageTransition effects.
-                pattern->ClearPageTransitionEffect();
-                custom->FirePageTransition();
-                NG::ViewStackProcessor::GetInstance()->SetPageNode(nullptr);
-            }
-        });
-
-    pagePattern->MarkRenderDone();
-}
-}
 Ark_NativePointer PushImpl(const Ark_String* url, const Opt_Boolean* recover, Ark_NativePointer jsView,
-    const Opt_Callback_Void* finishCallback)
+    const Opt_Callback_Pointer_Void* finishCallback)
 {
     CHECK_NULL_RETURN(url, nullptr);
     CHECK_NULL_RETURN(recover, nullptr);
@@ -97,30 +48,21 @@ Ark_NativePointer PushImpl(const Ark_String* url, const Opt_Boolean* recover, Ar
     CHECK_NULL_RETURN(delegate, nullptr);
     std::function<void()> callback;
     if (finishCallback->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        callback = [finish = CallbackHelper(finishCallback->value)]() {
-            finish.Invoke();
+        callback = [finish = CallbackHelper(finishCallback->value), jsNode = jsView]() {
+            finish.Invoke(jsNode);
         };
     }
-    auto pageNode = delegate->PushExtender(pushUrl, "", recoverValue, std::move(callback));
-    CHECK_NULL_RETURN(pageNode, nullptr);
-    auto jsViewNode = reinterpret_cast<UINode*>(jsView);
-    CHECK_NULL_RETURN(jsViewNode, nullptr);
-    auto frameNode = AceType::Claim(reinterpret_cast<FrameNode*>(pageNode));
-    jsViewNode->MountToParent(frameNode);
-    frameNode->MarkDirtyNode();
-
-    RegisterPageCallback(frameNode, AceType::Claim(jsViewNode));
+    auto pageNode = delegate->PushExtender(pushUrl, "", recoverValue, std::move(callback), jsView);
     return pageNode;
 }
 
 Ark_NativePointer ReplaceImpl(const Ark_String* url, const Opt_Boolean* recover, Ark_NativePointer jsView,
-    const Opt_Callback_Void* enterFinishCallback, const Opt_Callback_Void* exitFinishCallback)
+    const Opt_Callback_Pointer_Void* enterFinishCallback)
 {
     CHECK_NULL_RETURN(url, nullptr);
     CHECK_NULL_RETURN(recover, nullptr);
     CHECK_NULL_RETURN(jsView, nullptr);
     CHECK_NULL_RETURN(enterFinishCallback, nullptr);
-    CHECK_NULL_RETURN(exitFinishCallback, nullptr);
     std::string pushUrl = Converter::Convert<std::string>(*url);
     if (pushUrl.empty()) {
         return nullptr;
@@ -135,25 +77,11 @@ Ark_NativePointer ReplaceImpl(const Ark_String* url, const Opt_Boolean* recover,
     CHECK_NULL_RETURN(delegate, nullptr);
     std::function<void()> callback;
     if (enterFinishCallback->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        callback = [finish = CallbackHelper(enterFinishCallback->value)]() {
-            finish.Invoke();
+        callback = [finish = CallbackHelper(enterFinishCallback->value), jsNode = jsView]() {
+            finish.Invoke(jsNode);
         };
     }
-    std::function<void()> replace;
-    if (exitFinishCallback->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        replace = [replaceBack = CallbackHelper(exitFinishCallback->value)]() {
-            replaceBack.Invoke();
-        };
-    }
-    auto pageNode = delegate->ReplaceExtender(pushUrl, "", recoverValue, std::move(callback), std::move(replace));
-    CHECK_NULL_RETURN(pageNode, nullptr);
-    auto jsViewNode = reinterpret_cast<UINode*>(jsView);
-    CHECK_NULL_RETURN(jsViewNode, nullptr);
-    auto frameNode = AceType::Claim(reinterpret_cast<FrameNode*>(pageNode));
-    jsViewNode->MountToParent(frameNode);
-    frameNode->MarkDirtyNode();
-
-    RegisterPageCallback(frameNode, AceType::Claim(jsViewNode));
+    auto pageNode = delegate->ReplaceExtender(pushUrl, "", recoverValue, std::move(callback), jsView);
     return pageNode;
 }
 
@@ -203,7 +131,7 @@ void BackWithOptionsImpl(const Ark_String* url, const Opt_Object* params)
 }
 
 Ark_NativePointer RunPageImpl(const Ark_String* url, const Opt_Boolean* recover, Ark_NativePointer jsView,
-    const Opt_Callback_Void* finishCallback)
+    const Opt_Callback_Pointer_Void* finishCallback)
 {
     CHECK_NULL_RETURN(url, nullptr);
     CHECK_NULL_RETURN(recover, nullptr);
@@ -223,19 +151,11 @@ Ark_NativePointer RunPageImpl(const Ark_String* url, const Opt_Boolean* recover,
     CHECK_NULL_RETURN(delegate, nullptr);
     std::function<void()> callback;
     if (finishCallback->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        callback = [finish = CallbackHelper(finishCallback->value)]() {
-            finish.Invoke();
+        callback = [finish = CallbackHelper(finishCallback->value), jsNode = jsView]() {
+            finish.Invoke(jsNode);
         };
     }
-    auto pageNode = delegate->RunPageExtender(pushUrl, "", recoverValue, std::move(callback));
-    CHECK_NULL_RETURN(pageNode, nullptr);
-    auto jsViewNode = reinterpret_cast<UINode*>(jsView);
-    CHECK_NULL_RETURN(jsViewNode, nullptr);
-    auto frameNode = AceType::Claim(reinterpret_cast<FrameNode*>(pageNode));
-    jsViewNode->MountToParent(frameNode);
-    jsViewNode->MarkDirtyNode();
-
-    RegisterPageCallback(frameNode, AceType::Claim(jsViewNode));
+    auto pageNode = delegate->RunPageExtender(pushUrl, "", recoverValue, std::move(callback), jsView);
     return pageNode;
 }
 

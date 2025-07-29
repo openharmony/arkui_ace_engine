@@ -24,6 +24,9 @@
 #include "core/components_ng/pattern/stage/page_node.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
+#if !defined(PREVIEW)
+#include "core/components_ng/syntax/static/detached_free_root_proxy_node.h"
+#endif
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -32,19 +35,81 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t INVALID_PAGE_INDEX = -1;
 constexpr int32_t MAX_ROUTER_STACK_SIZE = 32;
+void RegisterPageCallback(const RefPtr<FrameNode>& frameNode, void* jsViewNode)
+{
+    auto jsNode = AceType::Claim(reinterpret_cast<UINode*>(jsViewNode));
+    CHECK_NULL_VOID(jsNode);
+    auto curPageNode = AceType::DynamicCast<PageNode>(frameNode);
+    CHECK_NULL_VOID(curPageNode);
+    auto pagePattern = curPageNode->GetPattern<NG::PagePattern>();
+    CHECK_NULL_VOID(pagePattern);
+    auto customNode = AceType::DynamicCast<CustomNode>(jsNode);
+    CHECK_NULL_VOID(customNode);
+    pagePattern->SetOnPageShow([weak = WeakPtr<CustomNode>(customNode)]() {
+        auto view = weak.Upgrade();
+        if (view) {
+            view->FireOnPageShow();
+        }
+    });
+    pagePattern->SetOnPageHide([weak = WeakPtr<CustomNode>(customNode)]() {
+        auto view = weak.Upgrade();
+        if (view) {
+            view->FireOnPageHide();
+        }
+    });
+    pagePattern->SetOnBackPressed([weak = WeakPtr<CustomNode>(customNode)]() {
+        auto view = weak.Upgrade();
+        if (view) {
+            return view->FireOnBackPressed();
+        }
+        return false;
+    });
+
+    pagePattern->SetPageTransitionFunc(
+        [weak = WeakPtr<CustomNode>(customNode), pageId = curPageNode->GetId(),
+            weakPage = WeakPtr<FrameNode>(curPageNode)]() {
+            auto custom = weak.Upgrade();
+            auto page = weakPage.Upgrade();
+            if (custom && page) {
+                auto pattern = page->GetPattern<PagePattern>();
+                CHECK_NULL_VOID(pattern);
+                NG::ScopedViewStackProcessor scopedViewStackProcessor;
+                NG::ViewStackProcessor::GetInstance()->SetPageNode(page);
+                // clear pageTransition effects and execute js to get latest pageTransition effects.
+                pattern->ClearPageTransitionEffect();
+                custom->FirePageTransition();
+                NG::ViewStackProcessor::GetInstance()->SetPageNode(nullptr);
+            }
+        });
+
+    pagePattern->MarkRenderDone();
+    
+#if !defined(PREVIEW)
+    auto instanceId = Container::Current()->GetInstanceId();
+    auto proxyNode = AceType::MakeRefPtr<DetachedFreeRootProxyNode>(instanceId);
+    CHECK_NULL_VOID(proxyNode);
+    proxyNode->AddChild(jsNode);
+    proxyNode->MountToParent(curPageNode);
+#else
+    jsNode->MountToParent(curPageNode);
+#endif
+    curPageNode->MarkDirtyNode();
+}
 } // namespace
 
-RefPtr<FrameNode> PageRouterManager::PushExtender(const RouterPageInfo& target, std::function<void()>&& finishCallback)
+RefPtr<FrameNode> PageRouterManager::PushExtender(
+    const RouterPageInfo& target, std::function<void()>&& finishCallback, void* jsNode)
 {
     CHECK_RUN_ON(JS);
     if (inRouterOpt_) {
         auto context = PipelineContext::GetCurrentContext();
         CHECK_NULL_RETURN(context, nullptr);
         context->PostAsyncEvent(
-            [weak = WeakClaim(this), target]() {
+            [weak = WeakClaim(this), pageCallback = std::move(finishCallback), jsNode, target]() {
                 auto router = weak.Upgrade();
                 CHECK_NULL_VOID(router);
-                router->Push(target);
+                auto nonConstCallback = const_cast<std::function<void()>&&>(pageCallback);
+                router->PushExtender(target, std::move(nonConstCallback), jsNode);
             },
             "ArkUIPageRouterPush", TaskExecutor::TaskType::JS);
         return nullptr;
@@ -94,7 +159,7 @@ RefPtr<FrameNode> PageRouterManager::PushExtender(const RouterPageInfo& target, 
             return pageInfo.second;
         }
     }
-    auto loadPageSuccess = LoadPageExtender(GenerateNextPageId(), info, true, true, true);
+    auto loadPageSuccess = LoadPageExtender(GenerateNextPageId(), info, jsNode, true, true);
     if (!loadPageSuccess) {
         return nullptr;
     }
@@ -107,17 +172,18 @@ RefPtr<FrameNode> PageRouterManager::PushExtender(const RouterPageInfo& target, 
 }
 
 RefPtr<FrameNode> PageRouterManager::ReplaceExtender(const RouterPageInfo& target,
-    std::function<void()>&& enterFinishCallback, std::function<void()>&& exitFinishCallback)
+    std::function<void()>&& enterFinishCallback, void* jsNode)
 {
     CHECK_RUN_ON(JS);
     if (inRouterOpt_) {
         auto context = PipelineContext::GetCurrentContext();
         CHECK_NULL_RETURN(context, nullptr);
         context->PostAsyncEvent(
-            [weak = WeakClaim(this), target]() {
+            [weak = WeakClaim(this), pageCallback = std::move(enterFinishCallback), jsNode, target]() {
                 auto router = weak.Upgrade();
                 CHECK_NULL_VOID(router);
-                router->Replace(target);
+                auto nonConstCallback = const_cast<std::function<void()>&&>(pageCallback);
+                router->ReplaceExtender(target, std::move(nonConstCallback), jsNode);
             },
             "ArkUIPageRouterReplace", TaskExecutor::TaskType::JS);
         return nullptr;
@@ -198,7 +264,7 @@ RefPtr<FrameNode> PageRouterManager::ReplaceExtender(const RouterPageInfo& targe
 #if defined(ENABLE_SPLIT_MODE)
         stageManager->SetIsNewPageReplacing(true);
 #endif
-        bool loadPageSuccess = LoadPageExtender(GenerateNextPageId(), info, false, false);
+        bool loadPageSuccess = LoadPageExtender(GenerateNextPageId(), info, jsNode, false, false);
         if (loadPageSuccess) {
             pageNode = pageRouterStack_.back().Upgrade();
             auto pagePattern = pageNode->GetPattern<PagePattern>();
@@ -214,9 +280,6 @@ RefPtr<FrameNode> PageRouterManager::ReplaceExtender(const RouterPageInfo& targe
         return pageNode;
     }
     CHECK_NULL_RETURN(popNode, nullptr);
-    auto pagePattern = popNode->GetPattern<PagePattern>();
-    CHECK_NULL_RETURN(pagePattern, nullptr);
-    pagePattern->SetOnNodeDisposeCallback(std::move(exitFinishCallback));
     auto iter = pageRouterStack_.begin();
     std::advance(iter, popIndex);
     auto lastIter = pageRouterStack_.erase(iter);
@@ -245,14 +308,14 @@ RefPtr<FrameNode> PageRouterManager::ReplaceExtender(const RouterPageInfo& targe
 }
 
 RefPtr<FrameNode> PageRouterManager::RunPageExtender(
-    const RouterPageInfo& target, std::function<void()>&& finishCallback)
+    const RouterPageInfo& target, std::function<void()>&& finishCallback, void* jsNode)
 {
     PerfMonitor::GetPerfMonitor()->SetAppStartStatus();
     ACE_SCOPED_TRACE("PageRouterManager::RunPage");
     CHECK_RUN_ON(JS);
     RouterPageInfo info = target;
     info.path = info.url + ".js";
-    auto loadPageSuccess = LoadPageExtender(GenerateNextPageId(), info);
+    auto loadPageSuccess = LoadPageExtender(GenerateNextPageId(), info, jsNode);
     if (!loadPageSuccess) {
         return nullptr;
     }
@@ -265,7 +328,7 @@ RefPtr<FrameNode> PageRouterManager::RunPageExtender(
 }
 
 bool PageRouterManager::LoadPageExtender(
-    int32_t pageId, const RouterPageInfo& target, bool needHideLast, bool needTransition, bool /*isPush*/)
+    int32_t pageId, const RouterPageInfo& target, void* jsNode, bool needHideLast, bool needTransition)
 {
     ACE_SCOPED_TRACE_COMMERCIAL("load page: %s(id:%d)", target.url.c_str(), pageId);
     CHECK_RUN_ON(JS);
@@ -277,6 +340,8 @@ bool PageRouterManager::LoadPageExtender(
         TAG_LOGE(AceLogTag::ACE_ROUTER, "failed to create page in LoadPage");
         return false;
     }
+
+    RegisterPageCallback(pageNode, jsNode);
 
     pageRouterStack_.emplace_back(pageNode);
     if (!OnPageReady(pageNode, needHideLast, needTransition)) {

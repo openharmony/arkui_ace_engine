@@ -171,18 +171,18 @@ public:
     virtual void PushPage(const std::string& url, const std::string& params) = 0;
 
     // For ArkTS1.2
-    virtual void* PushExtender(
-        const std::string& url, const std::string& params, bool recoverable, std::function<void()>&& finishCallback)
+    virtual void* PushExtender(const std::string& url, const std::string& params, bool recoverable,
+        std::function<void()>&& finishCallback, void* jsNode)
     {
         return nullptr;
     };
     virtual void* ReplaceExtender(const std::string& url, const std::string& params, bool recoverable,
-        std::function<void()>&& enterFinishCallback, std::function<void()>&& exitFinishCallback)
+        std::function<void()>&& enterFinishCallback, void* jsNode)
     {
         return nullptr;
     };
-    virtual void* RunPageExtender(
-        const std::string& url, const std::string& params, bool recoverable, std::function<void()>&& finishCallback)
+    virtual void* RunPageExtender(const std::string& url, const std::string& params, bool recoverable,
+        std::function<void()>&& finishCallback, void* jsNode)
     {
         return nullptr;
     };

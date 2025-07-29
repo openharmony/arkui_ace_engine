@@ -21,7 +21,7 @@ import { int32, int8 } from "@koalaui/common";
 import { Serializer } from "../component/peers/Serializer";
 
 export class RouterExtender {
-    public static routerPush(options: router.RouterOptions, ptr: KPointer, finishCallback: () => void): KPointer {
+    public static routerPush(options: router.RouterOptions, ptr: KPointer, finishCallback: (node: KPointer) => void): KPointer {
         const thisSerializer : Serializer = Serializer.hold();
         const url = options.url as (string);
         thisSerializer.writeString(url);
@@ -41,7 +41,7 @@ export class RouterExtender {
         callback_type = runtimeType(finishCallback);
         thisSerializer.writeInt8(callback_type as int32);
         if ((RuntimeType.UNDEFINED) != (callback_type)) {
-            const value_value  = finishCallback! as (() => void);
+            const value_value  = finishCallback! as ((node: KPointer) => void);
             thisSerializer.holdAndWriteCallback(value_value);
         }
         const retVal = ArkUIGeneratedNativeModule._RouterExtender_RouterPush1attribute(thisSerializer.asBuffer(), thisSerializer.length());
@@ -49,7 +49,7 @@ export class RouterExtender {
         return retVal;
     }
 
-    public static routerReplace(options: router.RouterOptions, ptr: KPointer, enterFinishCallback: () => void, exitFinishCallback: () => void): KPointer {
+    public static routerReplace(options: router.RouterOptions, ptr: KPointer, enterFinishCallback: (node: KPointer) => void): KPointer {
         const thisSerializer : Serializer = Serializer.hold();
         const url = options.url as (string);
         thisSerializer.writeString(url);
@@ -69,17 +69,10 @@ export class RouterExtender {
         callback_type = runtimeType(enterFinishCallback);
         thisSerializer.writeInt8(callback_type as int32);
         if ((RuntimeType.UNDEFINED) != (callback_type)) {
-            const value_value  = enterFinishCallback! as (() => void);
+            const value_value  = enterFinishCallback! as ((node: KPointer) => void);
             thisSerializer.holdAndWriteCallback(value_value);
         }
 
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(exitFinishCallback)
-        thisSerializer.writeInt8(value_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
-            const value_value  = exitFinishCallback! as (() => void)
-            thisSerializer.holdAndWriteCallback(value_value)
-        }
         const retVal = ArkUIGeneratedNativeModule._RouterExtender_RouterReplace1attribute(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retVal
@@ -115,7 +108,7 @@ export class RouterExtender {
         ArkUIGeneratedNativeModule._RouterExtender_RouterClear()
     }
 
-    public static routerRunPage(options: router.RouterOptions, ptr: KPointer, finishCallback: () => void): KPointer {
+    public static routerRunPage(options: router.RouterOptions, ptr: KPointer, finishCallback: (node: KPointer) => void): KPointer {
         const thisSerializer : Serializer = Serializer.hold();
         const url = options.url as (string);
         thisSerializer.writeString(url);
@@ -135,7 +128,7 @@ export class RouterExtender {
         callback_type = runtimeType(finishCallback);
         thisSerializer.writeInt8(callback_type as int32);
         if ((RuntimeType.UNDEFINED) != (callback_type)) {
-            const value_value  = finishCallback! as (() => void);
+            const value_value  = finishCallback! as ((node: KPointer) => void);
             thisSerializer.holdAndWriteCallback(value_value);
         }
         const retVal = ArkUIGeneratedNativeModule._RouterExtender_RouterRunPage(thisSerializer.asBuffer(), thisSerializer.length());
