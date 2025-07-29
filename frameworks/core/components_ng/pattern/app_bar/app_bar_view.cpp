@@ -43,6 +43,7 @@ constexpr int32_t ATOMIC_SERVICE_MENU_BAR_WIDTH = 96;
 constexpr int32_t ATOMIC_SERVICE_MENU_BAR_MARGIN_RIGHT = 8;
 constexpr int32_t ATOMIC_SERVICE_MENU_BAR_MARGIN_LEFT = 12;
 constexpr int32_t INVALID_LISTENER_ID = -1;
+constexpr int32_t MENU_BAR_AY_Z_INDEX = -2;
 
 RefPtr<AppBarTheme> GetAppBarTheme()
 {
@@ -160,9 +161,20 @@ void AppBarView::BuildAppbar(RefPtr<PipelineBase> pipleline)
     auto pattern = atom->GetPattern<AtomicServicePattern>();
     CHECK_NULL_VOID(pattern);
     pattern->BeforeCreateLayoutWrapper();
+    InitAccessibility(Inspector::GetInspectorByKey(atom, "AtomicServiceMenubarRowId"));
     stageNodeWrapper->AddChild(appbar->contentStage_);
     stageNodeWrapper->MarkModifyDone();
     stageNodeWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE | PROPERTY_UPDATE_RENDER);
+}
+
+void AppBarView::InitAccessibility(RefPtr<UINode> uiNode)
+{
+    CHECK_NULL_VOID(uiNode);
+    auto frameNode = AceType::DynamicCast<FrameNode>(uiNode);
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityZIndex(MENU_BAR_AY_Z_INDEX);
 }
 
 RefPtr<FrameNode> AppBarView::BuildMenuBarRow()
