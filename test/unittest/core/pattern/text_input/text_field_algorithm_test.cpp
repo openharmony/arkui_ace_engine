@@ -430,6 +430,27 @@ HWTEST_F(TextFieldAlgorithmTest, CreateParagraph003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CreateParagraph004
+ * @tc.desc: Test the function CreateParagraph.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldAlgorithmTest, CreateParagraph004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    auto textInputLayoutAlgorithm =
+        AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    std::vector<std::u16string> strVec = { u"0", u"1", u"2" };
+    TextStyle textStyle;
+    textStyle.SetStrokeColor(textStyle.GetStrokeColor().ChangeAlpha(DRAGGED_TEXT_TRANSPARENCY_VALUE));
+    auto paragraphData = CreateParagraphData { false, textStyle.GetFontSize().ConvertToPx() };
+    textInputLayoutAlgorithm->CreateParagraph(textStyle, strVec, u"content", false, paragraphData);
+    EXPECT_NE(textInputLayoutAlgorithm->paragraph_, nullptr);
+}
+
+/**
  * @tc.name: AdaptInlineFocusFontSize001
  * @tc.desc: Test the function AdaptInlineFocusFontSize.
  * @tc.type: FUNC

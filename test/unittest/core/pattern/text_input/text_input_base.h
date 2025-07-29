@@ -41,6 +41,7 @@ constexpr int32_t WORD_LIMIT_LEN = 5;
 constexpr int32_t WORD_LIMIT_RETURN = 2;
 constexpr int32_t BEYOND_LIMIT_RETURN = 4;
 constexpr int32_t DEFAULT_RETURN_VALUE = -1;
+constexpr uint32_t DRAGGED_TEXT_TRANSPARENCY_VALUE = 0x40;
 const std::string DEFAULT_TEXT = "abcdefghijklmnopqrstuvwxyz";
 const std::u16string DEFAULT_TEXT_U16 = u"abcdefghijklmnopqrstuvwxyz";
 const std::string HELLO_TEXT = "hello";

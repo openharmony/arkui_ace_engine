@@ -786,6 +786,7 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, const
     TextStyle dragTextStyle = textStyle;
     Color color = textStyle.GetTextColor().ChangeAlpha(DRAGGED_TEXT_TRANSPARENCY);
     dragTextStyle.SetTextColor(color);
+    dragTextStyle.SetStrokeColor(textStyle.GetStrokeColor().ChangeAlpha(DRAGGED_TEXT_TRANSPARENCY));
     std::vector<TextStyle> textStyles { textStyle, dragTextStyle, textStyle };
 
     auto style = textStyles.begin();
