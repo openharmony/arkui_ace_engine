@@ -2896,6 +2896,8 @@ frameworks/core/interfaces/native/node/node_refresh_modifier.cpp @arkuiscroll
 frameworks/core/interfaces/native/node/node_refresh_modifier.h @arkuiscroll
 frameworks/core/interfaces/native/node/node_relative_container_modifier.cpp @arkuilayout
 frameworks/core/interfaces/native/node/node_relative_container_modifier.h @arkuilayout
+frameworks/core/interfaces/native/node/node_render_node_modifier.cpp @arkuiframework
+frameworks/core/interfaces/native/node/node_render_node_modifier.h @arkuiframework
 frameworks/core/interfaces/native/node/node_scroll_modifier.cpp @arkuiscroll
 frameworks/core/interfaces/native/node/node_scroll_modifier.h @arkuiscroll
 frameworks/core/interfaces/native/node/node_slider_modifier.cpp @arkuipopupwindow
@@ -3012,6 +3014,7 @@ interfaces/native/native_interface_xcomponent.cpp @arkuilayout
 interfaces/native/native_interface_xcomponent.h @arkuilayout
 interfaces/native/native_node.h @arkui_architecture
 interfaces/native/native_node_napi.h @arkuiframework
+interfaces/native/native_render.h @arkuiframework
 interfaces/native/native_styled_string.h @huawei_g_five
 interfaces/native/native_type.h @arkui_architecture
 interfaces/native/native_xcomponent_key_event.h @arkuilayout
@@ -3049,6 +3052,8 @@ interfaces/native/node/node_transition_imp.cpp @arkui_superman
 interfaces/native/node/node_utils.cpp @arkuiframework
 interfaces/native/node/progress_option.cpp @arkui_image
 interfaces/native/node/progress_option.h @arkui_image
+interfaces/native/node/render_node.cpp @arkuiframework
+interfaces/native/node/render_node.h @arkuiframework
 interfaces/native/node/resource.h @arkuiframework
 interfaces/native/node/styled_string.h @huawei_g_five
 interfaces/native/node/style_modifier.cpp @arkuiframework
