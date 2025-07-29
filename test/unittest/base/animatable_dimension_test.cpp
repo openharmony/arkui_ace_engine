@@ -239,8 +239,7 @@ HWTEST_F(AnimatableDimensionTest, AnimatableDimensionTest007, TestSize.Level1)
      * @tc.expected: status1 is equal to IDLE.
      */
     AnimatableDimension animatableDimensionObj1;
-    bool flagCbk = false;
-    animatableDimensionObj1.SetContextAndCallback(nullptr, [&flagCbk]() { flagCbk = true; });
+    animatableDimensionObj1.SetContextAndCallback(nullptr, []() {});
     auto status1 = animatableDimensionObj1.GetAnimationStatus();
     EXPECT_EQ(status1, AnimatorStatus::IDLE);
 
