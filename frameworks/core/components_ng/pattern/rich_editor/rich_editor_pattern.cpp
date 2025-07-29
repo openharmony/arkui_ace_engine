@@ -3506,16 +3506,7 @@ bool RichEditorPattern::ClickAISpan(const PointF& textOffset, const AISpan& aiSp
         CHECK_NULL_VOID(pattern);
         pattern->CalculateHandleOffsetAndShowOverlay();
     };
-    auto showSelectOverlayFunc = [weak = WeakClaim(this)](const RectF& firstHandle, const RectF& secondHandle) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->SetCaretPosition(pattern->textSelector_.destinationOffset);
-        auto focusHub = pattern->GetFocusHub();
-        CHECK_NULL_VOID(focusHub);
-        focusHub->RequestFocusImmediately();
-        IF_TRUE(!pattern->isEditing_, pattern->CloseKeyboard(true));
-        pattern->ShowSelectOverlay(firstHandle, secondHandle);
-    };
+    auto showSelectOverlayFunc = GetAISelectTextFunc();
 
     std::vector<RectF> aiRects = paragraphs_.GetRects(aiSpan.start, aiSpan.end);
     for (auto&& rect : aiRects) {
@@ -3543,7 +3534,21 @@ RefPtr<FrameNode> RichEditorPattern::CreateAIEntityMenu()
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
 
-    auto showSelectOverlayFunc = [weak = WeakClaim(this)](const RectF& firstHandle, const RectF& secondHandle) {
+    auto calculateHandleFunc = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->showSelect_ = true;
+        pattern->CalculateHandleOffsetAndShowOverlay();
+    };
+    auto showSelectOverlayFunc = GetAISelectTextFunc();
+
+    SetOnClickMenu(aiSpan->second, calculateHandleFunc, showSelectOverlayFunc);
+    auto [isShowCopy, isShowSelectText] = GetCopyAndSelectable();
+    return dataDetectorAdapter_->CreateAIEntityMenu(aiSpan->second, host, { isShowCopy, isShowSelectText });
+}
+
+std::function<void(const RectF& firstHandle, const RectF& secondHandle)> RichEditorPattern::GetAISelectTextFunc() {
+    return [weak = WeakClaim(this)](const RectF& firstHandle, const RectF& secondHandle) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->SetCaretPosition(pattern->textSelector_.destinationOffset);
@@ -3553,10 +3558,6 @@ RefPtr<FrameNode> RichEditorPattern::CreateAIEntityMenu()
         IF_TRUE(!pattern->isEditing_, pattern->CloseKeyboard(true));
         pattern->ShowSelectOverlay(firstHandle, secondHandle);
     };
-
-    SetOnClickMenu(aiSpan->second, nullptr, showSelectOverlayFunc);
-    auto [isShowCopy, isShowSelectText] = GetCopyAndSelectable();
-    return dataDetectorAdapter_->CreateAIEntityMenu(aiSpan->second, host, { isShowCopy, isShowSelectText });
 }
 
 void RichEditorPattern::AdjustAIEntityRect(RectF& aiRect)

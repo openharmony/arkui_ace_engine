@@ -670,6 +670,14 @@ HWTEST_F(RichEditorAITestOneNg, CreateAIEntityMenuTest, TestSize.Level1)
     pattern->dataDetectorAdapter_->aiSpanMap_ = aiSpanMap;
     menuNode = pattern->CreateAIEntityMenu();
     EXPECT_EQ(menuNode, 0);
+
+    /**
+     * @tc.steps: step3. aiSpan not found
+     */
+    aiSpan1.start = 6;
+    aiSpan1.end = 10;
+    menuNode = pattern->CreateAIEntityMenu();
+    EXPECT_EQ(menuNode, nullptr);
 }
 
 /**
