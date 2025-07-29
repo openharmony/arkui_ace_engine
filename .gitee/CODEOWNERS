@@ -185,7 +185,7 @@ adapter/ohos/osal/stylus_detector_callback.cpp @huawei_g_five
 adapter/ohos/osal/system_bar_style_ohos.cpp @arkuievent
 adapter/ohos/osal/system_bar_style_ohos.h @arkuievent
 adapter/ohos/osal/system_properties.cpp @arkuiframework
-adapter/ohos/osal/system_properties_multi_thread.cpp @wangyang2022
+adapter/ohos/osal/system_properties_multi_thread.cpp @arkuiframework
 adapter/ohos/osal/text_share_adapter.cpp @huawei_g_five
 adapter/ohos/osal/text_share_loader.cpp @huawei_g_five
 adapter/ohos/osal/text_share_mgr.cpp @huawei_g_five
@@ -2370,7 +2370,7 @@ frameworks/core/components_ng/base/distributed_ui.h @arkuiframework
 frameworks/core/components_ng/base/extension_handler.cpp @arkuiframework
 frameworks/core/components_ng/base/extension_handler.h @arkuiframework
 frameworks/core/components_ng/base/frame_node.cpp @arkui_architecture
-frameworks/core/components_ng/base/frame_node_multi_thread.cpp @wangyang2022
+frameworks/core/components_ng/base/frame_node_multi_thread.cpp @arkuiframework
 frameworks/core/components_ng/base/frame_node.h @arkui_architecture
 frameworks/core/components_ng/base/frame_scene_status.h @arkuiframework
 frameworks/core/components_ng/base/geometry_node.cpp @arkuiframework
@@ -2754,7 +2754,7 @@ frameworks/core/components_ng/render/polygon_painter.h @arkuilayout
 frameworks/core/components_ng/render/rect_painter.cpp @arkuilayout
 frameworks/core/components_ng/render/rect_painter.h @arkuilayout
 frameworks/core/components_ng/render/render_context.cpp @arkuiframework
-frameworks/core/components_ng/render/render_context_multi_thread.cpp @wangyang2022
+frameworks/core/components_ng/render/render_context_multi_thread.cpp @arkuiframework
 frameworks/core/components_ng/render/render_context_creator.cpp @arkuiframework
 frameworks/core/components_ng/render/render_context.h @arkuiframework
 frameworks/core/components_ng/render/render_property.cpp @arkuiframework
@@ -2811,8 +2811,8 @@ frameworks/core/interfaces/native/node/form_component_modifier.cpp @form_framewo
 frameworks/core/interfaces/native/node/form_component_modifier.h @form_framework
 frameworks/core/interfaces/native/node/frame_node_modifier.cpp @arkuiframework
 frameworks/core/interfaces/native/node/frame_node_modifier.h @arkuiframework
-frameworks/core/interfaces/native/node/frame_node_modifier_multi_thread.cpp @wangyang2022
-frameworks/core/interfaces/native/node/frame_node_modifier_multi_thread.h @wangyang2022
+frameworks/core/interfaces/native/node/frame_node_modifier_multi_thread.cpp @arkuiframework
+frameworks/core/interfaces/native/node/frame_node_modifier_multi_thread.h @arkuiframework
 frameworks/core/interfaces/native/node/gauge_modifier.cpp @arkui_image
 frameworks/core/interfaces/native/node/gauge_modifier.h @arkui_image
 frameworks/core/interfaces/native/node/grid_col_modifier.cpp @arkuilayout
@@ -2853,8 +2853,8 @@ frameworks/core/interfaces/native/node/node_animate.cpp @arkuiframework
 frameworks/core/interfaces/native/node/node_animate.h @arkuiframework
 frameworks/core/interfaces/native/node/node_api.cpp @arkui_architecture
 frameworks/core/interfaces/native/node/node_api.h @arkui_architecture
-frameworks/core/interfaces/native/node/node_api_multi_thread.cpp @wangyang2022
-frameworks/core/interfaces/native/node/node_api_multi_thread.h @wangyang2022
+frameworks/core/interfaces/native/node/node_api_multi_thread.cpp @arkuiframework
+frameworks/core/interfaces/native/node/node_api_multi_thread.h @arkuiframework
 frameworks/core/interfaces/native/node/node_canvas_modifier.cpp @arkuilayout
 frameworks/core/interfaces/native/node/node_canvas_modifier.h @arkuilayout
 frameworks/core/interfaces/native/node/node_checkbox_modifier.cpp @arkuipopupwindow
@@ -2990,7 +2990,7 @@ frameworks/core/interfaces/native/node/video_modifier.cpp @arkuilayout
 frameworks/core/interfaces/native/node/video_modifier.h @arkuilayout
 frameworks/core/interfaces/native/node/view_model.cpp @arkuiframework
 frameworks/core/interfaces/native/node/view_model.h @arkuiframework
-frameworks/core/interfaces/native/node/view_model_multi_thread.cpp @wangyang2022
+frameworks/core/interfaces/native/node/view_model_multi_thread.cpp @arkuiframework
 frameworks/core/interfaces/native/node/water_flow_modifier.cpp @arkuiscroll
 frameworks/core/interfaces/native/node/water_flow_modifier.h @arkuiscroll
 frameworks/core/interfaces/native/node/web_modifier.cpp @arkwebinarkuireview
@@ -3286,5 +3286,5 @@ test/unittest/interfaces/ace_gesture/ @arkuievent
 test/unittest/interfaces/form_render/ @form_framework
 
 [Generated source]
-frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/ @guozejun
-frameworks/core/interfaces/native/generated/ @guozejun
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/ @arkui-idlize
+frameworks/core/interfaces/native/generated/ @arkui-idlize
