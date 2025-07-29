@@ -61,8 +61,8 @@ void ScrollableTargetInfoAccessorWithId(ani_env* env, [[maybe_unused]] ani_objec
 void ScrollableTargetInfoAccessorWithPointer(
     ani_env* env, [[maybe_unused]] ani_object obj, ani_long input, ani_long pointer);
 void* TransferScrollableTargetInfoPointer(ani_env* env, ani_object obj, ani_long pointer);
-ani_long CreateDragEventAccessorWithPointer(ani_env* env, ani_object obj, ani_long pointer);
-ani_long GetDragEventPointer(ani_env* env, ani_object obj, ani_long pointer);
+void* CreateDragEventAccessorWithPointer(ani_env* env, ani_object obj, ani_long pointer);
+void* GetDragEventPointer(ani_env* env, ani_object obj, ani_long pointer);
 void* CreateTouchEventAccessorWithPointer(ani_env* env, [[maybe_unused]] ani_object obj, ani_long pointer);
 void* CreateMouseEventAccessorWithPointer(ani_env* env, [[maybe_unused]] ani_object obj, ani_long pointer);
 void* CreateAxisEventAccessorWithPointer(ani_env* env, [[maybe_unused]] ani_object obj, ani_long pointer);

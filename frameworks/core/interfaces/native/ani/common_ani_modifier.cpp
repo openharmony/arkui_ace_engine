@@ -483,24 +483,24 @@ void* TransferScrollableTargetInfoPointer(ani_long nativePtr)
     return reinterpret_cast<void*>(nativePointer);
 }
 
-ani_long TransferDragEventPointer(ani_long ptr)
+void* CreateDragEventAccessor(ani_long ptr)
 {
     CHECK_NULL_RETURN(ptr, 0);
     auto weak = OHOS::Ace::AceType::WeakClaim(reinterpret_cast<OHOS::Ace::DragEvent*>(ptr));
     auto dragEvent = weak.Upgrade();
     CHECK_NULL_RETURN(dragEvent, 0);
     auto peer = DragEventPeer::Create(dragEvent);
-    return reinterpret_cast<ani_long>(peer);
+    return reinterpret_cast<void*>(peer);
 }
 
-ani_long GetDragEventPointer(ani_long ptr)
+void* GetDragEventPointer(ani_long ptr)
 {
     CHECK_NULL_RETURN(ptr, 0);
     auto peer = reinterpret_cast<DragEventPeer*>(ptr);
     CHECK_NULL_RETURN(peer, 0);
     auto dragInfo = peer->dragInfo;
     CHECK_NULL_RETURN(dragInfo, 0);
-    return reinterpret_cast<ani_long>(AceType::RawPtr(dragInfo));
+    return reinterpret_cast<void*>(AceType::RawPtr(dragInfo));
 }
 
 void* TransferTouchEventPointer(ani_long nativePtr)
@@ -609,7 +609,7 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .scrollableTargetInfoAccessorWithId = OHOS::Ace::NG::ScrollableTargetInfoAccessorWithId,
         .scrollableTargetInfoAccessorWithPointer = OHOS::Ace::NG::ScrollableTargetInfoAccessorWithPointer,
         .transferScrollableTargetInfoPointer = OHOS::Ace::NG::TransferScrollableTargetInfoPointer,
-        .transferDragEventPointer = OHOS::Ace::NG::TransferDragEventPointer,
+        .createDragEventAccessor = OHOS::Ace::NG::CreateDragEventAccessor,
         .getDragEventPointer = OHOS::Ace::NG::GetDragEventPointer,
         .transferTouchEventPointer = OHOS::Ace::NG::TransferTouchEventPointer,
         .transferMouseEventPointer = OHOS::Ace::NG::TransferMouseEventPointer,

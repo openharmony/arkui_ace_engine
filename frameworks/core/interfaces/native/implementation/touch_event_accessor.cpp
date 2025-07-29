@@ -30,7 +30,7 @@ namespace OHOS::Ace::NG::Converter {
             case Ark_TouchType::ARK_TOUCH_TYPE_UP: dst = TouchType::UP; break;
             case Ark_TouchType::ARK_TOUCH_TYPE_MOVE: dst = TouchType::MOVE; break;
             case Ark_TouchType::ARK_TOUCH_TYPE_CANCEL: dst = TouchType::CANCEL; break;
-            default: LOGE("Unexpected enum value in Ark_MouseButton: %{public}d", src);
+            default: LOGE("Unexpected enum value in Ark_TouchType: %{public}d", src);
         }
     }
 } // namespace OHOS::Ace::NG::Converter
@@ -106,7 +106,7 @@ void SetTouchesImpl(Ark_TouchEvent peer,
     CHECK_NULL_VOID(info);
     CHECK_NULL_VOID(touches);
     auto touchList = Converter::Convert<std::list<TouchLocationInfo>>(*touches);
-    info->SetTouches(touchList);
+    info->SetTouches(std::move(touchList));
 }
 Array_TouchObject GetChangedTouchesImpl(Ark_TouchEvent peer)
 {
@@ -124,7 +124,7 @@ void SetChangedTouchesImpl(Ark_TouchEvent peer,
     CHECK_NULL_VOID(info);
     CHECK_NULL_VOID(changedTouches);
     auto touchList = Converter::Convert<std::list<TouchLocationInfo>>(*changedTouches);
-    info->SetChangedTouches(touchList);
+    info->SetChangedTouches(std::move(touchList));
 }
 Callback_Void GetStopPropagationImpl(Ark_TouchEvent peer)
 {
