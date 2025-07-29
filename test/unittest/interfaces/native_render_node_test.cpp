@@ -73,7 +73,6 @@ HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest001, TestSize.Level1)
     auto result = OH_ArkUI_RenderNodeUtils_AddRenderNode(rootCustomNode, rootRenderNode);
     ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
     auto button = nodeAPI->createNode(ARKUI_NODE_BUTTON);
-    ASSERT_NE(rootCustomNode, nullptr);
     result = OH_ArkUI_RenderNodeUtils_AddRenderNode(button, rootRenderNode);
     ASSERT_EQ(result, ERROR_CODE_PARAM_INVALID);
     result = OH_ArkUI_RenderNodeUtils_RemoveRenderNode(rootCustomNode, rootRenderNode);
@@ -193,6 +192,48 @@ HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest004, TestSize.Level1)
     ASSERT_EQ(count, 3); //3 represents the number of sub-nodes that have been added by the sub-nodes.
     OH_ArkUI_RenderNodeUtils_GetSize(nodeList[0], &w, &w);
     ASSERT_EQ(w, 100); //100 represents rsNodeFirstChild.
+}
+
+/**
+ * @tc.name: NativeRenderNodeTest005
+ * @tc.desc: Test renderNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest005, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootCustomNode = nodeAPI->createNode(ARKUI_NODE_CUSTOM);
+    ASSERT_NE(rootCustomNode, nullptr);
+    auto rootRenderNode = OH_ArkUI_RenderNodeUtils_CreateNode();
+    ASSERT_NE(rootRenderNode, nullptr);
+    auto rootRenderNode1 = OH_ArkUI_RenderNodeUtils_CreateNode();
+    ASSERT_NE(rootRenderNode1, nullptr);
+    auto result = OH_ArkUI_RenderNodeUtils_AddRenderNode(rootCustomNode, rootRenderNode);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    result = OH_ArkUI_RenderNodeUtils_AddRenderNode(rootCustomNode, rootRenderNode1);
+    ASSERT_EQ(result, ERROR_CODE_CHILD_EXISTED);
+}
+
+/**
+ * @tc.name: NativeRenderNodeTest006
+ * @tc.desc: Test renderNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest006, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootCustomNode = nodeAPI->createNode(ARKUI_NODE_CUSTOM);
+    ASSERT_NE(rootCustomNode, nullptr);
+    auto rootRenderNode = OH_ArkUI_RenderNodeUtils_CreateNode();
+    ASSERT_NE(rootRenderNode, nullptr);
+    auto rootRenderNode1 = OH_ArkUI_RenderNodeUtils_CreateNode();
+    ASSERT_NE(rootRenderNode1, nullptr);
+    auto result = OH_ArkUI_RenderNodeUtils_AddChild(rootRenderNode, rootRenderNode1);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    result = OH_ArkUI_RenderNodeUtils_AddRenderNode(rootCustomNode, rootRenderNode1);
+    ASSERT_EQ(result, ERROR_CODE_RENDER_PARENT_EXISTED);
 }
 
 /**
