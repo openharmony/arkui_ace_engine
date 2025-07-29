@@ -24,6 +24,7 @@ group("ani_pluginComponent_group") {
 
 #构建ANI库
 ohos_shared_library("pluginComponent_ani") {
+  shlib_type = "ani"
   deps = [ "$ace_root/build:libace_compatible" ]
   include_dirs = [
     "$ace_root/frameworks",

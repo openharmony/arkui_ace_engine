@@ -21,6 +21,7 @@ group("arkuiuiextension_group") {
 
 # build ani library
 ohos_shared_library("arkuiuiextension_ani") {
+  shlib_type = "ani"
   deps = [ "$ace_root/build:libace_compatible" ]
   defines = []
   include_dirs = [ "//foundation/arkui/ace_engine/frameworks" ]

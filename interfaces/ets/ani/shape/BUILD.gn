@@ -24,6 +24,7 @@ config("ani_config") {
 }
 
 ohos_shared_library("shape_ani") {
+  shlib_type = "ani"
   deps = [ "$ace_root/build:libace_compatible" ]
   public_configs = [ ":ani_config" ]
   sources = [ "./src/shape.cpp",

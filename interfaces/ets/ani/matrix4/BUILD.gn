@@ -25,6 +25,7 @@ config("ani_config") {
 
 #构建ANI库
 ohos_shared_library("matrix4_ani") {
+  shlib_type = "ani"
   deps = [ "$ace_root/build:libace_compatible" ]
   include_dirs = [ "./include" ]
   sources = [ "./src/matrix4.cpp" ]

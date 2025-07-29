@@ -23,6 +23,7 @@ group("ace_ani_native_package") {
 }
 
 ohos_shared_library("arkoala_native_ani") {
+  shlib_type = "ani"
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
 
