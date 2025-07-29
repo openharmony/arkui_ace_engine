@@ -335,6 +335,9 @@ void RichEditorOverlayModifier::StartFloatingCaretLand(const OffsetF& originCare
             auto richEditorPattern = AceType::DynamicCast<RichEditorPattern>(pattern.Upgrade());
             CHECK_NULL_VOID(richEditorPattern);
             richEditorPattern->ResetFloatingCaretState();
+            auto host = richEditorPattern->GetHost();
+            CHECK_NULL_VOID(host);
+            host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         });
 }
 } // namespace OHOS::Ace::NG
