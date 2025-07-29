@@ -1442,8 +1442,7 @@ bool NavigationGroupNode::UpdateNavDestinationVisibility(const RefPtr<NavDestina
         return false;
     }
     auto pattern = AceType::DynamicCast<NavDestinationPattern>(navDestination->GetPattern());
-    if (navDestination->GetPattern<NavDestinationPattern>()->GetCustomNode() != remainChild &&
-        !navDestination->IsOnAnimation()) {
+    if (navDestination->GetPattern<NavDestinationPattern>()->GetCustomNode() != remainChild) {
         // if curNode is visible, need remove in hideNodes_.
         hideNodes_.erase(
             std::remove_if(hideNodes_.begin(), hideNodes_.end(),
