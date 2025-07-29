@@ -82,9 +82,8 @@ GridSizeType GridContainerUtils::ProcessGridSizeType(const V2::BreakPoints& brea
         std::transform(threshold->sizeInfo.begin(), threshold->sizeInfo.end(), breakPoint.begin(), [](Dimension x) {
             return x.ConvertToVp();
         });
-        auto custlayoutBreakpoints = OHOS::Ace::WidthLayoutBreakPoint(breakPoint);
-        auto defaultBreakpoints = WidthLayoutBreakPoint(320.0, 600.0, 840.0, -1.0, -1.0);
-        auto breakpoint = GetWidthBreakpoint(defaultBreakpoints, custlayoutBreakpoints, pipeline);
+        auto custlayoutBreakpoints = WidthLayoutBreakPoint(breakPoint);
+        auto breakpoint = GetWidthBreakpoint(custlayoutBreakpoints, pipeline, breakpoints.userDefine);
         return static_cast<GridSizeType>(breakpoint);
     } else {
         windowWidth = size.Width();
@@ -113,17 +112,15 @@ WidthBreakpoint GetCalcWidthBreakpoint(
     return breakpoint;
 }
 
-WidthBreakpoint GridContainerUtils::GetWidthBreakpoint(const WidthLayoutBreakPoint &defaultBreakpoints,
-    const WidthLayoutBreakPoint &custlayoutBreakpoints, const RefPtr<PipelineBase>& pipeline)
+WidthBreakpoint GridContainerUtils::GetWidthBreakpoint(
+    const WidthLayoutBreakPoint &custlayoutBreakpoints, const RefPtr<PipelineBase>& pipeline, bool userDefine)
 {
-    auto finalBreakpoints = WidthLayoutBreakPoint();
+    auto finalBreakpoints = WidthLayoutBreakPoint(320.0, 600.0, 840.0, -1.0, -1.0);
     auto configBreakpoints = SystemProperties::GetWidthLayoutBreakpoints();
-    if (finalBreakpoints != custlayoutBreakpoints) {  // cust None
+    if (userDefine) {  // cust has value
         finalBreakpoints = custlayoutBreakpoints;
-    } else if (finalBreakpoints != configBreakpoints) {  // ccm None
+    } else if (configBreakpoints != WidthLayoutBreakPoint()) {  // ccm has value
         finalBreakpoints = configBreakpoints;
-    } else {
-        finalBreakpoints = defaultBreakpoints;
     }
     double density = pipeline->GetCurrentDensity();
     return GetCalcWidthBreakpoint(finalBreakpoints, density, pipeline->GetCurrentWindowRect().Width());

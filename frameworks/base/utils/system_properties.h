@@ -49,11 +49,6 @@ enum class FoldScreenType: int32_t {
 
 constexpr int32_t MCC_UNDEFINED = 0;
 constexpr int32_t MNC_UNDEFINED = 0;
-constexpr int32_t BREAKPOINT0 = 0;
-constexpr int32_t BREAKPOINT1 = 1;
-constexpr int32_t BREAKPOINT2 = 2;
-constexpr int32_t BREAKPOINT3 = 3;
-constexpr int32_t BREAKPOINT4 = 4;
 extern const char ENABLE_DEBUG_BOUNDARY_KEY[];
 extern const char ENABLE_TRACE_LAYOUT_KEY[];
 extern const char ENABLE_TRACE_INPUTEVENT_KEY[];
@@ -99,11 +94,11 @@ struct WidthLayoutBreakPoint {
           widthVPXL_(widthVPXL)
     {}
     WidthLayoutBreakPoint(std::vector<double> breakPoints)
-        : widthVPXS_(breakPoints.size() > BREAKPOINT0 ? breakPoints[BREAKPOINT0] : -1.0),
-          widthVPSM_(breakPoints.size() > BREAKPOINT1 ? breakPoints[BREAKPOINT1] : -1.0),
-          widthVPMD_(breakPoints.size() > BREAKPOINT2 ? breakPoints[BREAKPOINT2] : -1.0),
-          widthVPLG_(breakPoints.size() > BREAKPOINT3 ? breakPoints[BREAKPOINT3] : -1.0),
-          widthVPXL_(breakPoints.size() > BREAKPOINT4 ? breakPoints[BREAKPOINT4] : -1.0)
+        : widthVPXS_(breakPoints.size() > 0 ? breakPoints[0] : -1.0), // XS与SM临界值
+          widthVPSM_(breakPoints.size() > 1 ? breakPoints[1] : -1.0), // SM与MD临界值
+          widthVPMD_(breakPoints.size() > 2 ? breakPoints[2] : -1.0), // MD与LG临界值
+          widthVPLG_(breakPoints.size() > 3 ? breakPoints[3] : -1.0), // LG与XL临界值
+          widthVPXL_(breakPoints.size() > 4 ? breakPoints[4] : -1.0) // XL与XXL临界值
     {}
     bool operator==(WidthLayoutBreakPoint &v)
     {

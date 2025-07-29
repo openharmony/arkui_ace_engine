@@ -33,8 +33,8 @@ public:
     ~GridContainerUtils() override = default;
 
     static int CalcBreakPoint(const RefPtr<GridSizeInfo>& threshold, double windowWidth);
-    static WidthBreakpoint GetWidthBreakpoint(const WidthLayoutBreakPoint &defaultBreakpoints,
-    const WidthLayoutBreakPoint &custlayoutBreakpoints, const RefPtr<PipelineBase>& pipeline);
+    static WidthBreakpoint GetWidthBreakpoint(
+        const WidthLayoutBreakPoint &custlayoutBreakpoints, const RefPtr<PipelineBase> &pipeline, bool userDefine);
     static GridSizeType ProcessGridSizeType(const V2::BreakPoints& breakpoints, const Size& size,
         const WindowMode& mode, const RefPtr<PipelineBase>& pipeline = nullptr);
     static GridSizeType ProcessGridSizeType(
