@@ -325,6 +325,53 @@ HWTEST_F(ListLayoutTestNg, ContentEndOffset001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ListReMeasureTest001
+ * @tc.desc: Test List noLayoutItems_ performance
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListReMeasureTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create list
+     * @tc.expected: List index range is 0-3
+     */
+    ListModelNG model = CreateList();
+    CreateListItems(10);
+    CreateDone();
+    EXPECT_EQ(pattern_->startIndex_, 0);
+    EXPECT_EQ(pattern_->endIndex_, 3);
+
+    /**
+     * @tc.steps: step2. call measure of List for first time
+     * @tc.expected: List itemPosition_ index range is 0-3, layouted is false
+     */
+    auto layoutAlgorithm = AceType::DynamicCast<ListLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    EXPECT_TRUE(layoutAlgorithm);
+    layoutAlgorithm->Measure(AceType::RawPtr(frameNode_));
+    EXPECT_EQ(layoutAlgorithm->GetStartIndex(), 0); // 0: start index
+    EXPECT_EQ(layoutAlgorithm->GetEndIndex(), 3); // 3: end index
+    EXPECT_FALSE(layoutAlgorithm->isLayouted_);
+
+    /**
+     * @tc.steps: step3. change list mainSize to half and call measure of List for second time
+     * @tc.expected: check item 2 and item 3 in noLayoutedItems
+     */
+    EXPECT_TRUE(layoutAlgorithm);
+    EXPECT_TRUE(layoutAlgorithm->noLayoutedItems_.empty());
+    std::optional<float> width = 240.f; // 240.f: origin width
+    std::optional<float> height = 200.f; // 200.f: half of origin contentMainSize
+    OptionalSizeF selfIdealSizeTemp(width, height);
+    LayoutConstraintF contentConstraint;
+    contentConstraint.selfIdealSize = selfIdealSizeTemp;
+    layoutProperty_->layoutConstraint_ = contentConstraint;
+    layoutProperty_->contentConstraint_ = contentConstraint;
+    layoutAlgorithm->Measure(AceType::RawPtr(frameNode_));
+    EXPECT_FALSE(layoutAlgorithm->noLayoutedItems_.empty());
+    EXPECT_EQ(layoutAlgorithm->noLayoutedItems_.begin()->first, 2); // 2: start index
+    EXPECT_EQ(layoutAlgorithm->noLayoutedItems_.rbegin()->first, 3); // 3: end index
+}
+
+/**
  * @tc.name: ContentOffset001
  * @tc.desc: Test top content offset and bottom end offset
  * @tc.type: FUNC
@@ -2048,6 +2095,44 @@ HWTEST_F(ListLayoutTestNg, ChildrenMainSize006, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ListIsAtBottom001
+ * @tc.desc: test func IsAtBottom when List is at bottom and chain animation opened
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListIsAtBottom001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init List then slide List by Scroller to bottom.
+       @tc.expected: List is at bottom and startIndex_ is 1.
+     */
+    ListModelNG model = CreateList();
+    model.SetSpace(Dimension(SPACE));
+    model.SetInitialIndex(0);
+    CreateListItems(TOTAL_ITEM_NUMBER / 2); // 2: half of the total
+    CreateDone();
+    pattern_->ScrollToIndex(LAST_ITEM);
+    FlushUITasks();
+    EXPECT_TRUE(pattern_->IsAtBottom());
+    EXPECT_EQ(pattern_->startIndex_, 1); // 1: current start index.
+
+    /**
+     * @tc.steps: step2. slide List over bottom.
+     * @tc.expected: isAtBottom also return true and startIndex_ maintain 1.
+     */
+    UpdateCurrentOffset(-100.f);
+    EXPECT_TRUE(pattern_->IsAtBottom());
+    EXPECT_EQ(pattern_->startIndex_, 1); // 1: current start index.
+
+    /**
+     * @tc.steps: step3. simulate chain animation and item 1 out of screen for chain delta.
+     * @tc.expected: startIndex_ change to 2 and isAtBottom also return true.
+     */
+    pattern_->itemPosition_.erase(1);
+    pattern_->startMainPos_ = pattern_->itemPosition_[2].startPos - pattern_->spaceWidth_;
+    EXPECT_TRUE(pattern_->IsAtBottom());
+}
+
+/**
  * @tc.name: ListRepeatCacheCount001
  * @tc.desc: List cacheCount
  * @tc.type: FUNC
@@ -2231,6 +2316,7 @@ HWTEST_F(ListLayoutTestNg, ListRepeatCacheCount003, TestSize.Level1)
 HWTEST_F(ListLayoutTestNg, ListRepeatCacheCount004, TestSize.Level1)
 {
     ListModelNG model = CreateList();
+    model.SetSpace(Dimension(SPACE));
     ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
     CreateRepeatVirtualScrollNode(10, [this](int32_t idx) {
         CreateListItem();
@@ -2251,7 +2337,7 @@ HWTEST_F(ListLayoutTestNg, ListRepeatCacheCount004, TestSize.Level1)
     EXPECT_EQ(childrenCount, 5);
     auto cachedItem = frameNode_->GetChildByIndex(4)->GetHostNode();
     EXPECT_EQ(cachedItem->IsActive(), false);
-    EXPECT_EQ(GetChildY(frameNode_, 4), HEIGHT);
+    EXPECT_EQ(GetChildY(frameNode_, 4), HEIGHT + 4 * SPACE);
 
     /**
      * @tc.steps: step2. Update item4 size

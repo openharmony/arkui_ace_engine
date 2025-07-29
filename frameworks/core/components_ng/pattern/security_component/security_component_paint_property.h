@@ -23,7 +23,7 @@
 
 namespace OHOS::Ace::NG {
 class SecurityComponentPaintProperty : public PaintProperty {
-    DECLARE_ACE_TYPE(SecurityComponentPaintProperty, PaintProperty)
+    DECLARE_ACE_TYPE(SecurityComponentPaintProperty, PaintProperty);
 
 public:
     SecurityComponentPaintProperty() = default;

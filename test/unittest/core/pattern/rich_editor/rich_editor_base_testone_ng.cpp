@@ -150,7 +150,7 @@ void RichEditorBaseTestOneNg::OnDrawVerify(
     /**
      * @tc.steps: step7. When handle move done
      */
-    richEditorPattern->selectOverlay_->ProcessOverlay();
+    richEditorPattern->ProcessOverlay();
     RectF handleRect;
     richEditorPattern->selectOverlay_->OnHandleMoveDone(handleRect, true);
 

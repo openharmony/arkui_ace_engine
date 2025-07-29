@@ -15,9 +15,10 @@
 #include "window_scene_layout_manager.h"
 
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
-#include "core/components_ng/pattern/window_scene/scene/window_scene.h"
-#include "core/components_ng/pattern/window_scene/scene/panel_scene.h"
 #include "core/components_ng/pattern/window_scene/scene/input_scene.h"
+#include "core/components_ng/pattern/window_scene/scene/layout_manager_dfx.h"
+#include "core/components_ng/pattern/window_scene/scene/panel_scene.h"
+#include "core/components_ng/pattern/window_scene/scene/window_scene.h"
 #include "core/components_ng/pattern/window_scene/screen/screen_pattern.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -280,8 +281,10 @@ void WindowSceneLayoutManager::FlushWindowPatternInfo(const RefPtr<FrameNode>& s
         TAG_LOGI(AceLogTag::ACE_WINDOW_PIPELINE, "------------------- End FlushWindowPatternInfo ------------------");
     }
     RemoveAbnormalId();
+    auto recordRes = res;
     // cannot post ui task, since flush may not excute on next frame
     Rosen::SceneSessionManager::GetInstance().FlushUIParams(screenId, std::move(res.uiParams));
+    Ace::NG::LayoutManagerDfx::GetInstance()->ExecuteRecordUIParams(recordRes);
 }
 
 bool WindowSceneLayoutManager::IsRecentContainerState(const RefPtr<FrameNode>& node)
@@ -660,8 +663,6 @@ void WindowSceneLayoutManager::GetUINodeInfo(const RefPtr<FrameNode>& node,
         oss << " globalPos: [" << rsNode->GetGlobalPositionX() << ", " << rsNode->GetGlobalPositionY() << "],";
         oss << " pivot: [" << globalGeometry->GetPivotX() << ", " << globalGeometry->GetPivotY() << "],";
     } else {
-        TAG_LOGE(AceLogTag::ACE_WINDOW_PIPELINE, "globalGeometry null. screenId:%{public}" PRIu64 " tag:%{public}s"
-            "Id:%{public}d parentId:%{public}d", GetScreenId(node), node->GetTag().c_str(), node->GetId(), parentId);
         oss << " globalGeometry: [null],";
     }
     if (localGeometry) {
@@ -676,8 +677,6 @@ void WindowSceneLayoutManager::GetUINodeInfo(const RefPtr<FrameNode>& node,
         oss << " localPos: [" << localGeometry->GetX() << ", "
             << localGeometry->GetY() << "],";
     } else {
-        TAG_LOGE(AceLogTag::ACE_WINDOW_PIPELINE, "localGeometry null. screenId:%{public}" PRIu64 " tag:%{public}s"
-            "Id:%{public}d parentId:%{public}d", GetScreenId(node), node->GetTag().c_str(), node->GetId(), parentId);
         oss << " localGeometry: [null],";
     }
     oss << " requestZIndex: " << context->GetZIndexValue(ZINDEX_DEFAULT_VALUE);

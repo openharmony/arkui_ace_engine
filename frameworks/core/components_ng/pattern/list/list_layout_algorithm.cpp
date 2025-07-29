@@ -950,6 +950,7 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
     auto pattern = host->GetPattern<ListPattern>();
     CHECK_NULL_VOID(pattern);
     if (!isLayouted_) {
+        noLayoutedItems_ = std::move(itemPosition_);
         itemPosition_ = pattern->GetItemPosition();
     }
     auto prevTotalItemCount = pattern->GetMaxListItemIndex() + 1;
@@ -1101,6 +1102,20 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
         }
     }
     RecycleGroupItem(layoutWrapper);
+    UpdateNoLayoutedItems();
+}
+
+void ListLayoutAlgorithm::UpdateNoLayoutedItems()
+{
+    if (isLayouted_) {
+        return;
+    }
+    for (const auto& item : itemPosition_) {
+        noLayoutedItems_.erase(item.first);
+    }
+    for (const auto& item : recycledItemPosition_) {
+        noLayoutedItems_.erase(item.first);
+    }
 }
 
 LayoutDirection ListLayoutAlgorithm::LayoutDirectionForTargetIndex(LayoutWrapper* layoutWrapper, int startIndex)
@@ -1272,14 +1287,14 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t st
             endMainPos = layoutEndMainPos_.value_or(endMainPos_);
             forwardFeature_ = false;
         }
-    } while (LessNotEqual(currentEndPos + chainOffset, endMainPos + endFixPos) || forwardFeature_);
+    } while (LessOrEqual(currentEndPos + chainOffset, endMainPos + endFixPos) || forwardFeature_);
     currentEndPos += chainOffset;
 
     while (itemPosition_.size() > 1 && !targetIndex_) {
         auto pos = itemPosition_.rbegin();
         float chainDelta = GetChainOffset(pos->first);
-        if (GreatNotEqual(pos->second.endPos + chainDelta, endMainPos) &&
-            GreatOrEqual(pos->second.startPos + chainDelta, endMainPos)) {
+        if (GreatNotEqual(pos->second.endPos + chainDelta, endMainPos + endFixPos) &&
+            GreatOrEqual(pos->second.startPos + chainDelta, endMainPos + endFixPos)) {
             recycledItemPosition_.emplace(pos->first, pos->second);
             itemPosition_.erase(pos->first);
         } else {
@@ -1751,7 +1766,13 @@ void ListLayoutAlgorithm::CheckGroupMeasureBreak(const RefPtr<LayoutWrapper>& wr
 
 void ListLayoutAlgorithm::ResetLayoutItem(LayoutWrapper* layoutWrapper)
 {
-    for (auto& pos : recycledItemPosition_) {
+    ResetUnLayoutedItems(layoutWrapper, recycledItemPosition_);
+    ResetUnLayoutedItems(layoutWrapper, noLayoutedItems_);
+}
+
+void ListLayoutAlgorithm::ResetUnLayoutedItems(LayoutWrapper* layoutWrapper, PositionMap& positionMap)
+{
+    for (auto& pos : positionMap) {
         auto wrapper = GetListItem(layoutWrapper, pos.first);
         if (!wrapper) {
             ReportGetChildError("ResetLayoutItem", pos.first);
@@ -2257,6 +2278,7 @@ CachedIndexInfo ListLayoutAlgorithm::GetLayoutGroupCachedCount(LayoutWrapper* la
         wrapper->SetActive(true);
         wrapper->Layout();
         group->SyncItemsToCachedItemPosition();
+        recycledItemPosition_.erase(index);
     }
     bool forward = forwardCache > -1;
     bool backward = backwardCache > -1;

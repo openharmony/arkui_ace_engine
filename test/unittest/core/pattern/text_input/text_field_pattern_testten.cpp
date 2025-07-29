@@ -2449,6 +2449,10 @@ HWTEST_F(TextFieldPatternTestten, NotifyKeyboardClosedByUser001, TestSize.Level1
     ASSERT_NE(textFieldPattern, nullptr);
     textFieldPattern->NotifyKeyboardClosedByUser();
     EXPECT_EQ(textFieldPattern->isKeyboardClosedByUser_, false);
+    auto focusHub = textFieldPattern->GetFocusHub();
+    focusHub->currentFocus_ = true;
+    textFieldPattern->NotifyKeyboardClosedByUser();
+    EXPECT_EQ(textFieldPattern->isKeyboardClosedByUser_, false);
 }
 
 /**

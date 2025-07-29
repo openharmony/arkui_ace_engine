@@ -178,7 +178,7 @@ bool RosenWindow::GetIsRequestFrame()
 
 void RosenWindow::ForceFlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
 {
-    if (vsyncCallback_->onCallback) {
+    if (vsyncCallback_ && vsyncCallback_->onCallback) {
         LOGI("ArkUI force flush vsync for recover pipelinecontext.");
         vsyncCallback_->onCallback(nanoTimestamp, UINT64_MAX);
     }

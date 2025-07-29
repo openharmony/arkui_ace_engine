@@ -1251,6 +1251,7 @@ HWTEST_F(MarqueeTestNg, MarqueeTest017, TestSize.Level1)
     pattern->OnModifyDone();
     EXPECT_NE(pattern->animation_, nullptr);
     EXPECT_TRUE(marqueePaintProperty->GetPlayerStatusValue());
+    EXPECT_TRUE(pattern->playStatus_);
 
     /**
      * @tc.steps: step6. Create themeManager with marqueeLayoutProperty values and call OnModifyDone.

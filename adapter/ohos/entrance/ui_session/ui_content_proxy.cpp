@@ -20,7 +20,6 @@
 #include "adapter/ohos/entrance/ui_session/include/ui_service_hilog.h"
 
 namespace OHOS::Ace {
-
 int32_t UIContentServiceProxy::GetInspectorTree(const std::function<void(std::string, int32_t, bool)>& eventCallback)
 {
     MessageParcel data;

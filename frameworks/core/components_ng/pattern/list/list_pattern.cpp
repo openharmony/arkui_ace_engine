@@ -856,7 +856,7 @@ bool ListPattern::IsAtBottom(bool considerRepeat) const
     float endMainPos = endMainPos_;
     float startMainPos = startMainPos_;
     auto contentMainSize = contentMainSize_ - contentEndOffset_ - contentStartOffset_;
-    if (GreatNotEqual(contentMainSize, endMainPos - startMainPos) && !isStackFromEnd_) {
+    if (startIndex_ == 0 && GreatNotEqual(contentMainSize, endMainPos - startMainPos) && !isStackFromEnd_) {
         endMainPos = startMainPos + contentMainSize;
     }
     auto maxListItemIndex = considerRepeat ? GetMaxIndexByRepeat() : maxListItemIndex_;
@@ -2376,7 +2376,8 @@ void ListPattern::UpdatePosMap(const ListLayoutAlgorithm::PositionMap& itemPos)
         float height = pos.endPos - pos.startPos;
         if (pos.groupInfo) {
             bool groupAtStart = pos.groupInfo.value().atStart;
-            if (groupAtStart) {
+            bool groupAtEnd = pos.groupInfo.value().atEnd;
+            if (groupAtStart && groupAtEnd) {
                 posMap_->UpdatePos(index, { currentOffset_ + pos.startPos, height, pos.isGroup });
             } else {
                 posMap_->UpdatePosWithCheck(index, { currentOffset_ + pos.startPos, height, pos.isGroup });

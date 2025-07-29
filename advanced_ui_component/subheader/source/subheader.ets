@@ -379,7 +379,7 @@ export struct SubHeader {
         })
         .width('100%')
         .accessibilityGroup(this.isLeftAreaAccessibilityGroup())
-        .accessibilityDescription(this.select ? '' : Util.getStringByResource(125834353, ''))
+        .accessibilityRole(this.select ? undefined : AccessibilityRoleType.TITLE_BAR)
 
         if (this.isRightAreaExists()) {
           this.rightAreaParentAging();
@@ -400,7 +400,7 @@ export struct SubHeader {
         .width('100%')
         .flexShrink(1)
         .accessibilityGroup(this.isLeftAreaAccessibilityGroup())
-        .accessibilityDescription(this.select ? '' : Util.getStringByResource(125834353, ''))
+        .accessibilityRole(this.select ? undefined : AccessibilityRoleType.TITLE_BAR)
 
         if (this.isRightAreaExists()) {
           this.rightAreaParent();

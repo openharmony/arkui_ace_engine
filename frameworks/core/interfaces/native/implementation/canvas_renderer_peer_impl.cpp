@@ -328,8 +328,8 @@ std::shared_ptr<OHOS::Ace::Gradient> CanvasRendererPeerImpl::CreateConicGradient
         double density = GetDensity();
         auto gradient = std::make_shared<OHOS::Ace::Gradient>();
         gradient->SetType(Ace::GradientType::CONIC);
-        gradient->GetConicGradient().startAngle =
-            Ace::AnimatableDimension(Ace::Dimension(fmod(startAngle, (MULTI_BY_2 * M_PI))));
+        // gradient->GetConicGradient().startAngle =
+        //     Ace::AnimatableDimension(Ace::Dimension(fmod(startAngle, (MULTI_BY_2 * M_PI))));
         gradient->GetConicGradient().centerX = Ace::AnimatableDimension(Ace::Dimension(x * density));
         gradient->GetConicGradient().centerY = Ace::AnimatableDimension(Ace::Dimension(y * density));
         return gradient;

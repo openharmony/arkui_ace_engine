@@ -2486,7 +2486,7 @@ void JSViewAbstract::ParseDetentSelection(const JSRef<JSObject>& paramObj, NG::S
     }
     sheetStyle.detentSelection = sheetStruct;
 }
- 
+
 bool JSViewAbstract::ParseSheetDetents(const JSRef<JSVal>& args,
     std::vector<NG::SheetHeight>& sheetDetents, NG::SheetStyle& sheetStyle)
 {
@@ -3042,6 +3042,9 @@ void JSViewPopups::ParseMenuOutlineWidth(const JSRef<JSVal>& outlineWidthValue, 
 void JSViewPopups::ParseMenuOutlineWidthObject(const JSRef<JSVal>& outlineWidthValue, NG::MenuParam& menuParam,
     NG::BorderWidthProperty& outlineWidth)
 {
+    if (!outlineWidthValue->IsObject()) {
+        return;
+    }
     JSRef<JSObject> object = JSRef<JSObject>::Cast(outlineWidthValue);
     CalcDimension left;
     RefPtr<ResourceObject> leftResObj;
@@ -3166,6 +3169,9 @@ void JSViewPopups::ParseMenuOutlineColor(const JSRef<JSVal>& outlineColorValue, 
 void JSViewPopups::ParseMenuOutlineColorObject(const JSRef<JSVal>& outlineColorValue, NG::MenuParam& menuParam,
     NG::BorderColorProperty& outlineColor)
 {
+    if (!outlineColorValue->IsObject()) {
+        return;
+    }
     JSRef<JSObject> object = JSRef<JSObject>::Cast(outlineColorValue);
     Color left;
     RefPtr<ResourceObject> leftColorResObj;

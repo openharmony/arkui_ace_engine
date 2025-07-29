@@ -681,7 +681,7 @@ HWTEST_F(SheetPresentationTestThreeNg, GetWidthByScreenSizeType005, TestSize.Lev
 
 /**
  * @tc.name: SetCurrentHeight001
- * @tc.desc: Branch: if (height_ != currentHeight).
+ * @tc.desc: Branch: if (height_ != currentHeight || typeChanged_).
  *           Condition: 1.height_ = 500,
  *                      2.currentHeight = 700.
  * @tc.type: FUNC
@@ -749,6 +749,14 @@ HWTEST_F(SheetPresentationTestThreeNg, SetCurrentHeight001, TestSize.Level1)
     sheetPattern->height_ = 500;
     sheetPattern->SetCurrentHeight(700);
     EXPECT_EQ(sheetPattern->height_, 700);
+
+    sheetPattern->typeChanged_ = true;
+    auto scrollProps = scrollNode->GetLayoutProperty<ScrollLayoutProperty>();
+    ASSERT_NE(scrollProps, nullptr);
+    scrollProps->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(1000)));
+    sheetPattern->SetCurrentHeight(700);
+    EXPECT_EQ(scrollProps->GetCalcLayoutConstraint()->selfIdealSize->Height(),
+        NG::CalcLength(700 - sheetPattern->GetTitleBuilderHeight()));
     SheetPresentationTestThreeNg::TearDownTestCase();
 }
 

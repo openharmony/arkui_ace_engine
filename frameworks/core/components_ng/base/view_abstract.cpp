@@ -9754,6 +9754,10 @@ bool ViewAbstract::CreatePropertyAnimation(FrameNode* frameNode, AnimationProper
             "no animation generated because the value is same or first set, property:%{public}d",
             static_cast<int32_t>(property));
     }
+    auto pipeline = frameNode->GetContextWithCheck();
+    if (pipeline) {
+        pipeline->RequestFrame();
+    }
     return result;
 }
 

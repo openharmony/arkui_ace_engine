@@ -41,10 +41,7 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_SetClonedEventLocalPositionByIn
 HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_SetClonedEventLocalPositionByIndex002, TestSize.Level0)
 {
     ArkUITouchEvent touchEvent = {};
-    ArkUI_UIInputEvent event = {
-        ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, C_TOUCH_EVENT_ID, &touchEvent,
-        false // isCloned
-    };
+    ArkUI_UIInputEvent event = { ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, C_TOUCH_EVENT_ID, &touchEvent, false };
 
     auto result = OH_ArkUI_PointerEvent_SetClonedEventLocalPositionByIndex(&event, 10.0f, 20.0f, 0);
     EXPECT_EQ(result, ARKUI_ERROR_CODE_NOT_CLONED_POINTER_EVENT);
@@ -57,10 +54,7 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_SetClonedEventLocalPositionByIn
  */
 HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_SetClonedEventLocalPositionByIndex003, TestSize.Level0)
 {
-    ArkUI_UIInputEvent event = {
-        ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, C_TOUCH_EVENT_ID, nullptr,
-        true // isCloned
-    };
+    ArkUI_UIInputEvent event = { ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, C_TOUCH_EVENT_ID, nullptr, true };
 
     auto result = OH_ArkUI_PointerEvent_SetClonedEventLocalPositionByIndex(&event, 10.0f, 20.0f, 0);
     EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
@@ -74,10 +68,7 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_SetClonedEventLocalPositionByIn
 HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_SetClonedEventLocalPositionByIndex004, TestSize.Level0)
 {
     ArkUITouchEvent touchEvent = {};
-    ArkUI_UIInputEvent event = {
-        ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, C_TOUCH_EVENT_ID, &touchEvent,
-        true // isCloned
-    };
+    ArkUI_UIInputEvent event = { ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, C_TOUCH_EVENT_ID, &touchEvent, true };
 
     // Test with negative index
     auto result1 = OH_ArkUI_PointerEvent_SetClonedEventLocalPositionByIndex(&event, 10.0f, 20.0f, -1);
@@ -115,10 +106,7 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_SetClonedEventLocalPositionByIn
 HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_SetClonedEventLocalPositionByIndex102, TestSize.Level0)
 {
     ArkUITouchEvent touchEvent = {};
-    ArkUI_UIInputEvent event = {
-        ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, C_MOUSE_EVENT_ID, &touchEvent,
-        true // isCloned
-    };
+    ArkUI_UIInputEvent event = { ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, C_MOUSE_EVENT_ID, &touchEvent, true };
 
     auto result = OH_ArkUI_PointerEvent_SetClonedEventLocalPositionByIndex(&event, 10.0f, 20.0f, 0);
     EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);

@@ -951,6 +951,81 @@ HWTEST_F(RichEditorEditTestNg, GetParagraphNodes003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CalcSpansRange001
+ * @tc.desc: test calculate spans range after get paragraph nodes
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestNg, CalcSpansRange001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->caretPosition_ = 0;
+    richEditorPattern->InsertValue(INIT_VALUE_9);
+    auto nodes = richEditorPattern->GetParagraphNodes(50, 52);
+    EXPECT_EQ(nodes.size(), 0);
+    auto range = richEditorPattern->CalcSpansRange(nodes);
+    EXPECT_EQ(range.first, -1);
+    EXPECT_EQ(range.second, -1);
+
+    nodes = richEditorPattern->GetParagraphNodes(15, 20);
+    EXPECT_EQ(nodes.size(), 1);
+    range = richEditorPattern->CalcSpansRange(nodes);
+    EXPECT_EQ(range.first, 11);
+    EXPECT_EQ(range.second, 22);
+
+    nodes = richEditorPattern->GetParagraphNodes(5, 25);
+    EXPECT_EQ(nodes.size(), 3);
+    range = richEditorPattern->CalcSpansRange(nodes);
+    EXPECT_EQ(range.first, 0);
+    EXPECT_EQ(range.second, 32);
+}
+
+/**
+ * @tc.name: CalcSpansRange002
+ * @tc.desc: test calculate spans range
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestNg, CalcSpansRange002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    // all spanNodes empty
+    std::vector<RefPtr<SpanNode>> spanNodes;
+    spanNodes.push_back(nullptr);
+    spanNodes.push_back(nullptr);
+    auto range = richEditorPattern->CalcSpansRange(spanNodes);
+    EXPECT_EQ(range.first, -1);
+    EXPECT_EQ(range.second, -1);
+
+    // mutiple spanNodes fisrt without spanItem
+    spanNodes.clear();
+    RefPtr<SpanNode> firstNode = OHOS::Ace::NG::SpanNode::CreateSpanNode(1);
+    RefPtr<SpanNode> lastNode = OHOS::Ace::NG::SpanNode::CreateSpanNode(2);
+    firstNode->spanItem_ = nullptr;
+    lastNode->spanItem_->position = 10;
+    spanNodes.push_back(firstNode);
+    spanNodes.push_back(lastNode);
+    range = richEditorPattern->CalcSpansRange(spanNodes);
+    EXPECT_EQ(range.first, -1);
+    EXPECT_EQ(range.second, -1);
+
+    // mutiple spanNodes last without spanItem
+    spanNodes.clear();
+    firstNode = OHOS::Ace::NG::SpanNode::CreateSpanNode(3);
+    lastNode = OHOS::Ace::NG::SpanNode::CreateSpanNode(4);
+    firstNode->spanItem_->rangeStart = 5;
+    lastNode->spanItem_ = nullptr;
+    spanNodes.push_back(firstNode);
+    spanNodes.push_back(lastNode);
+    range = richEditorPattern->CalcSpansRange(spanNodes);
+    EXPECT_EQ(range.first, -1);
+    EXPECT_EQ(range.second, -1);
+}
+
+/**
  * @tc.name: GetParagraphLength001
  * @tc.desc: test get paragraph length
  * @tc.type: FUNC
