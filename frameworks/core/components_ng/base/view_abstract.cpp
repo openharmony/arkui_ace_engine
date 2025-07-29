@@ -24,6 +24,7 @@
 
 #include "base/error/error_code.h"
 #include "base/subwindow/subwindow_manager.h"
+#include "base/utils/multi_thread.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
@@ -6459,6 +6460,7 @@ void ViewAbstract::ReSetMagnifier(FrameNode* frameNode)
 void ViewAbstract::UpdateBackgroundBlurStyle(
     FrameNode* frameNode, const BlurStyleOption& bgBlurStyle, const SysOptions& sysOptions)
 {
+    FREE_NODE_CHECK(frameNode, UpdateBackgroundBlurStyle, frameNode, bgBlurStyle, sysOptions);
     CHECK_NULL_VOID(frameNode);
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
@@ -7524,6 +7526,7 @@ void ViewAbstract::SetAllowDrop(FrameNode* frameNode, const std::set<std::string
 
 void ViewAbstract::SetInspectorId(FrameNode* frameNode, const std::string& inspectorId)
 {
+    FREE_NODE_CHECK(frameNode, SetInspectorId, frameNode, inspectorId);
     if (frameNode) {
         if (frameNode->GetInspectorId().has_value() && frameNode->GetInspectorIdValue() != inspectorId) {
             ElementRegister::GetInstance()->RemoveFrameNodeByInspectorId(
@@ -7829,6 +7832,7 @@ void ViewAbstract::SetOnDetach(FrameNode* frameNode, std::function<void()> &&onD
 void ViewAbstract::SetOnAreaChanged(FrameNode* frameNode, std::function<void(const RectF &oldRect,
     const OffsetF &oldOrigin, const RectF &rect, const OffsetF &origin)> &&onAreaChanged)
 {
+    FREE_NODE_CHECK(frameNode, SetOnAreaChanged, frameNode, std::move(onAreaChanged));
     CHECK_NULL_VOID(frameNode);
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
@@ -7997,6 +8001,7 @@ NG::OverlayOptions ViewAbstract::GetOverlay(FrameNode* frameNode)
 void ViewAbstract::SetNeedFocus(FrameNode* frameNode, bool value)
 {
     CHECK_NULL_VOID(frameNode);
+    FREE_NODE_CHECK(frameNode, SetNeedFocus, frameNode, value);
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     if (value) {
@@ -9169,6 +9174,7 @@ bool ViewAbstract::GetRenderGroup(FrameNode* frameNode)
 void ViewAbstract::SetOnVisibleChange(FrameNode* frameNode, std::function<void(bool, double)>&& onVisibleChange,
     const std::vector<double> &ratioList)
 {
+    FREE_NODE_CHECK(frameNode, SetOnVisibleChange, frameNode, std::move(onVisibleChange), ratioList);
     CHECK_NULL_VOID(frameNode);
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
@@ -9180,6 +9186,8 @@ void ViewAbstract::SetOnVisibleAreaApproximateChange(FrameNode* frameNode,
     const std::function<void(bool, double)>&& onVisibleChange, const std::vector<double>& ratioList,
     int32_t expectedUpdateInterval)
 {
+    FREE_NODE_CHECK(frameNode, SetOnVisibleAreaApproximateChange, frameNode, std::move(onVisibleChange),
+        ratioList, expectedUpdateInterval);
     CHECK_NULL_VOID(frameNode);
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
@@ -9229,6 +9237,7 @@ Color ViewAbstract::GetColorBlend(FrameNode* frameNode)
 
 void ViewAbstract::ResetAreaChanged(FrameNode* frameNode)
 {
+    FREE_NODE_CHECK(frameNode, ResetAreaChanged, frameNode);
     CHECK_NULL_VOID(frameNode);
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
@@ -9238,6 +9247,7 @@ void ViewAbstract::ResetAreaChanged(FrameNode* frameNode)
 
 void ViewAbstract::ResetVisibleChange(FrameNode* frameNode)
 {
+    FREE_NODE_CHECK(frameNode, ResetVisibleChange, frameNode);
     CHECK_NULL_VOID(frameNode);
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);

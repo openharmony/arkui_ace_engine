@@ -206,6 +206,8 @@ public:
 
     void AnimateHoverEffectScale(bool isHovered) override;
     void AnimateHoverEffectBoard(bool isHovered) override;
+    void AnimateHoverEffectScaleMultiThread(bool isHovered);
+    void AnimateHoverEffectBoardMultiThread(bool isHovered);
     void UpdateBackBlurRadius(const Dimension& radius) override;
     void UpdateBackBlurStyle(
         const std::optional<BlurStyleOption>& bgBlurStyle, const SysOptions& sysOptions = SysOptions()) override;

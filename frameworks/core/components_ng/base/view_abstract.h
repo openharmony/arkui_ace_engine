@@ -1093,6 +1093,22 @@ private:
     static OEMVisualEffectFunc oemVisualEffectFunc;
     static std::mutex visualEffectMutex_;
 };
+
+// multi thread function start
+void SetInspectorIdMultiThread(FrameNode* frameNode, const std::string& inspectorId);
+void UpdateBackgroundBlurStyleMultiThread(FrameNode* frameNode, const BlurStyleOption& bgBlurStyle,
+    const SysOptions& sysOptions);
+void SetOnAreaChangedMultiThread(FrameNode* frameNode, std::function<void(const RectF& oldRect,
+    const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin)>&& onAreaChanged);
+void SetOnVisibleChangeMultiThread(FrameNode* frameNode, std::function<void(bool, double)> &&onVisibleChange,
+    const std::vector<double> &ratioList);
+void SetOnVisibleAreaApproximateChangeMultiThread(FrameNode* frameNode,
+    const std::function<void(bool, double)>&& onVisibleChange, const std::vector<double>& ratioList,
+    int32_t expectedUpdateInterval);
+void ResetAreaChangedMultiThread(FrameNode* frameNode);
+void ResetVisibleChangeMultiThread(FrameNode* frameNode);
+void SetNeedFocusMultiThread(FrameNode* frameNode, bool value);
+// multi thread function end
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_VIEW_ABSTRACT_H
