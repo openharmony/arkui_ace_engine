@@ -741,7 +741,7 @@ private:
         const RefPtr<FrameNode>& columnFrameNode, bool isZeroPrefixTypeHide, uint32_t selectedTime);
     void InitFocusEvent();
     void SetCallBack();
-    void UpdateDialogAgingButton(const RefPtr<FrameNode>& buttonNode, const bool isNext);
+    void UpdateDialogAgingButton(const RefPtr<FrameNode>& buttonNode, bool isNext);
     Dimension ConvertFontScaleValue(const Dimension& fontSizeValue);
 
     void UpdateTextStyleCommon(

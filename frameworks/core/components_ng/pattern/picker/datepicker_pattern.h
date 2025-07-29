@@ -859,7 +859,7 @@ private:
     void FlushChildNodes();
     void UpdateLunarSwitch();
     void UpdateDateOrder();
-    void UpdateDialogAgingButton(const RefPtr<FrameNode>& buttonNode, const bool isNext);
+    void UpdateDialogAgingButton(const RefPtr<FrameNode>& buttonNode, bool isNext);
     Dimension ConvertFontScaleValue(const Dimension& fontSizeValue);
 
     void UpdateTextStyleCommon(

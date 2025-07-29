@@ -62,7 +62,7 @@ HWTEST_F(ControlledAnimatorTestNg, SetIteration002, TestSize.Level1)
 
 /**
  * @tc.name: SetIteration003
- * @tc.desc: test SetIteration.
+ * @tc.desc: test iteration 2 for SetIteration to STOPPED
  * @tc.type: FUNC
  */
 HWTEST_F(ControlledAnimatorTestNg, SetIteration003, TestSize.Level1)
