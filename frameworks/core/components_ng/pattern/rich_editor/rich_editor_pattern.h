@@ -659,6 +659,7 @@ public:
     void SetInputMethodStatus(bool keyboardShown) override;
     bool ClickAISpan(const PointF& textOffset, const AISpan& aiSpan) override;
     RefPtr<FrameNode> CreateAIEntityMenu() override;
+    std::function<void(const RectF& firstHandle, const RectF& secondHandle)> GetAISelectTextFunc();
     void AdjustAIEntityRect(RectF& aiRect) override;
     WindowMode GetWindowMode();
     bool GetIsMidScene();
