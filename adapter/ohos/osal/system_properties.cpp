@@ -430,7 +430,7 @@ bool ReadIsVelocityWithinTimeWindow()
 
 bool ReadIsVelocityWithoutUpPoint()
 {
-    return system::GetBoolParameter("persist.sys.arkui.velocitytracker.withoutup", DEFAULT_IS_VELOCITY_WITHOUT_UP_POINT);
+    return system::GetBoolParameter("persist.sys.arkui.velocitytracker.withoutuppoint", DEFAULT_IS_VELOCITY_WITHOUT_UP_POINT);
 }
 } // namespace
 

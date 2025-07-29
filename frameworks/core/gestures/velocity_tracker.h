@@ -28,8 +28,6 @@ class VelocityTracker final {
 public:
     VelocityTracker() {
         static int32_t pointNum = SystemProperties::GetVelocityTrackerPointNumber();
-        xAxis_.SetCountNum(pointNum);
-        yAxis_.SetCountNum(pointNum);
         POINT_NUMBER = pointNum;
     }
     explicit VelocityTracker(Axis mainAxis) : mainAxis_(mainAxis) {}
@@ -143,8 +141,8 @@ private:
     bool isFirstPoint_ = true;
     TimeStamp lastTimePoint_;
     TimeStamp firstPointTime_;
-    LeastSquareImpl xAxis_ { LEAST_SQUARE_PARAM_NUM };
-    LeastSquareImpl yAxis_ { LEAST_SQUARE_PARAM_NUM };
+    LeastSquareImpl xAxis_ { LEAST_SQUARE_PARAM_NUM, POINT_NUMBER };
+    LeastSquareImpl yAxis_ { LEAST_SQUARE_PARAM_NUM, POINT_NUMBER };
     bool isVelocityDone_ = false;
 };
 
