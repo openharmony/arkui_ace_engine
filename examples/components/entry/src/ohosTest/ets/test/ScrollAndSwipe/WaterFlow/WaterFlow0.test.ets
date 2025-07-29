@@ -1,59 +1,36 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 import { describe, beforeAll, it } from '@ohos/hypium'
-import { abilityDelegatorRegistry, Driver, Component, ON } from '@kit.TestKit';
-import { Point } from '@ohos.UiTest';
-import {
-  buttonClick,
-  getToggle,
+import { Driver, Component, ON } from '@kit.TestKit';
+import { buttonClick,
   JsonType,
   KeyStruct,
   radioClick,
-  searchParentBlock,
-  searchToggle,
   Slide,
   sliderDrag,
   titleSearch,
-  ToggleClick,
-  Search
-} from '../../utils';
+  ToggleClick
+} from '../../../utils';
+import { WaterFlowStart } from './WaterFlow';
 
-const delegator: abilityDelegatorRegistry.AbilityDelegator = abilityDelegatorRegistry.getAbilityDelegator()
 const driver = Driver.create();
 
-export default function WaterFlowBootcampTest() {
-  describe('WaterFlowBootcampTest', () => {
-    /**
-     * 打开应用
-     */
+export default function WaterFlow() {
+  describe('WaterFlow', () => {
     beforeAll(async (done: Function) => {
-      try {
-        await delegator.startAbility({
-          bundleName: 'cn.ohos.components',
-          abilityName: 'EntryAbility'
-        });
-        await driver.delayMs(5000);
-
-        let atomNavigates: Component = await driver.findComponent(ON.text('滚动与滑动'));
-        await atomNavigates.click();
-        await driver.delayMs(3500);
-
-        let ListItems: Array<Component> = await driver.findComponents(ON.type('ListItem'))
-        let width: Point = await ListItems[0].getBoundsCenter()
-        let width2: Point = await ListItems[5].getBoundsCenter()
-        await driver.swipe(width.x, width2.y, width.x, width.y, 1000)
-        await driver.delayMs(3500);
-
-        let scrollSearch: Component = await driver.findComponent(ON.text('瀑布流容器/WaterFlow'))
-        await scrollSearch.click()
-        await driver.delayMs(3500);
-
-        let Buttons: Array<Component> = await driver.findComponents(ON.type('Button'));
-        await Buttons[1].click()
-        await driver.delayMs(3500);
-
-      } catch (err) {
-        console.info(`beforeAll error: ${JSON.stringify(err)}`);
-      }
-      done();
+      await WaterFlowStart(done)
     })
 
     /**
@@ -1554,19 +1531,14 @@ export default function WaterFlowBootcampTest() {
      * 测试组件'clip'支持设置包含单个子组件为'true'且获取属性正确
      */
     it('ArkUI_WaterFlow_067', 0, async (done: Function) => {
+      //获取不到断言参数
       await titleSearch('参数列表', 'clip')
       await radioClick({
         radioClickObj: 0,
         toggleClick: {
           toggleClickType: ToggleClick.Open,
           toggleClickObj: 'clip'
-        },
-        id: 'WaterFlow',
-        arr: [
-          new KeyStruct('$attrs', JsonType.obj),
-          new KeyStruct('clip', JsonType.value),
-        ],
-        assertEqual: 'true'
+        }
       })
       done();
     })

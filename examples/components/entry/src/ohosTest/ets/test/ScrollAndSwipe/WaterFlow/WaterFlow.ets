@@ -31,8 +31,8 @@ export async function WaterFlowStart(done: Function) {
 
   let ListItems: Array<Component> = await driver.findComponents(ON.type('ListItem'))
   let width: Point = await ListItems[0].getBoundsCenter()
-  let width2: Point = await ListItems[9].getBoundsCenter()
-  await driver.swipe(width.x, width2.y, width.x, width.y, 500)
+  let width2: Point = await ListItems[3].getBoundsCenter()
+  await driver.swipe(width.x, width2.y, width.x, width.y, 1000)
   await driver.delayMs(3500);
 
   let scrollSearch: Component = await driver.findComponent(ON.text('瀑布流容器/WaterFlow'))

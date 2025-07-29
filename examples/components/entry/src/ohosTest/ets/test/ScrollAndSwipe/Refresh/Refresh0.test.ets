@@ -1,107 +1,47 @@
-import { describe, beforeAll, it } from '@ohos/hypium'
-import { abilityDelegatorRegistry, Driver, Component } from '@kit.TestKit';
-import { ON, Point } from '@ohos.UiTest';
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import { describe, beforeAll, it} from '@ohos/hypium'
+import { Driver, Component } from '@kit.TestKit';
+import { ON } from '@ohos.UiTest';
 import {
   buttonClick,
   JsonType,
   KeyStruct,
   radioClick,
-  searchParentBlock,
   Slide,
   sliderDrag,
   titleSearch,
   ToggleClick,
-  Search,
-  getToggle,
-  searchToggle
-} from '../../utils';
+} from '../../../utils';
+import { RefreshStart } from './Refresh';
 
-const delegator: abilityDelegatorRegistry.AbilityDelegator = abilityDelegatorRegistry.getAbilityDelegator()
 const driver = Driver.create();
 
-export default function ScrollBarBootcampTest() {
-  describe('ScrollBarBootcampTest', () => {
-    /**
-     * 打开应用
-     */
+export default function Refresh0() {
+  describe('Refresh0', () => {
     beforeAll(async (done: Function) => {
-      try {
-        await delegator.startAbility({
-          bundleName: 'cn.ohos.components',
-          abilityName: 'EntryAbility'
-        });
-        await driver.delayMs(5000);
-
-        let atomNavigates: Component = await driver.findComponent(ON.text('滚动与滑动'));
-        await atomNavigates.click();
-        await driver.delayMs(3500);
-
-        let ListItems: Array<Component> = await driver.findComponents(ON.type('ListItem'))
-        let width: Point = await ListItems[0].getBoundsCenter()
-        let width2: Point = await ListItems[5].getBoundsCenter()
-        await driver.swipe(width.x, width2.y, width.x, width.y, 2000)
-        await driver.delayMs(5000);
-
-        let scrollSearch: Component = await driver.findComponent(ON.text('滚动条/ScrollBar'))
-        await scrollSearch.click()
-        await driver.delayMs(3500);
-
-        let Buttons: Array<Component> = await driver.findComponents(ON.type('Button'));
-        await Buttons[1].click()
-        await driver.delayMs(3500);
-
-      } catch (err) {
-        console.info(`beforeAll error: ${JSON.stringify(err)}`);
-      }
-      done();
+      await RefreshStart(done)
     })
 
     /**
-     * 测试组件'direction'支持设置包含单个子组件为'Vertical'且获取属性正确
+     * 测试组件'refreshing'支持设置包含单个子组件为'true'且获取属性正确
      */
-    it('ArkUI_ScrollBar_001', 0, async (done: Function) => {
-      await titleSearch('参数列表', 'direction')
-      await radioClick({
-        radioClickObj: 0,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-        },
-        id: 'ScrollBar',
-        arr: [
-          new KeyStruct('$attrs', JsonType.obj),
-          new KeyStruct('direction', JsonType.value),
-        ],
-        assertEqual: 'ScrollBarDirection.Vertical'
-      })
-      done();
-    })
-
-    /**
-     * 测试组件'direction'支持设置包含单个子组件为'Horizontal'且获取属性正确
-     */
-    it('ArkUI_ScrollBar_002', 0, async (done: Function) => {
-      await titleSearch('参数列表', 'direction')
-      await radioClick({
-        radioClickObj: 1,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close,
-        },
-        id: 'ScrollBar',
-        arr: [
-          new KeyStruct('$attrs', JsonType.obj),
-          new KeyStruct('direction', JsonType.value),
-        ],
-        assertEqual: 'ScrollBarDirection.Horizontal'
-      })
-      done();
-    })
-
-    /**
-     * 测试组件'scrollBarCustomItemType'支持设置包含单个子组件为'true'且获取属性正确
-     */
-    it('ArkUI_ScrollBar_003', 0, async (done: Function) => {
+    it('ArkUI_Refresh_001', 0, async (done: Function) => {
       //获取不到断言参数
-      await titleSearch('参数列表', 'scrollBarCustomItemType')
+      await titleSearch('参数列表', 'refreshing')
       await radioClick({
         radioClickObj: 0,
         toggleClick: {
@@ -112,11 +52,11 @@ export default function ScrollBarBootcampTest() {
     })
 
     /**
-     * 测试组件'scrollBarCustomItemType'支持设置包含单个子组件为'false'且获取属性正确
+     * 测试组件'refreshing'支持设置包含单个子组件为'false'且获取属性正确
      */
-    it('ArkUI_ScrollBar_004', 0, async (done: Function) => {
+    it('ArkUI_Refresh_002', 0, async (done: Function) => {
       //获取不到断言参数
-      await titleSearch('参数列表', 'scrollBarCustomItemType')
+      await titleSearch('参数列表', 'refreshing')
       await radioClick({
         radioClickObj: 1,
         toggleClick: {
@@ -127,83 +67,20 @@ export default function ScrollBarBootcampTest() {
     })
 
     /**
-     * 测试组件'state'支持设置包含单个子组件为'Auto'且获取属性正确
+     * 测试组件'refreshOffset'支持设置页签容器的数据值且获取属性正确
      */
-    it('ArkUI_ScrollBar_005', 0, async (done: Function) => {
-      await titleSearch('参数列表', 'state')
-      await radioClick({
-        radioClickObj: 0,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-          toggleClickObj: 'state'
-        },
-        id: 'ScrollBar',
-        arr: [
-          new KeyStruct('$attrs', JsonType.obj),
-          new KeyStruct('state', JsonType.value),
-        ],
-        assertEqual: 'BarState.Auto'
-      })
-      done();
-    })
-
-    /**
-     * 测试组件'state'支持设置包含单个子组件为'On'且获取属性正确
-     */
-    it('ArkUI_ScrollBar_006', 0, async (done: Function) => {
-      await titleSearch('参数列表', 'state')
-      await radioClick({
-        radioClickObj: 1,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-          toggleClickObj: 'state'
-        },
-        id: 'ScrollBar',
-        arr: [
-          new KeyStruct('$attrs', JsonType.obj),
-          new KeyStruct('state', JsonType.value),
-        ],
-        assertEqual: 'BarState.On'
-      })
-      done();
-    })
-
-    /**
-     * 测试组件'state'支持设置包含单个子组件为'Off'且获取属性正确
-     */
-    it('ArkUI_ScrollBar_007', 0, async (done: Function) => {
-      await titleSearch('参数列表', 'state')
-      await radioClick({
-        radioClickObj: 2,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close,
-          toggleClickObj: 'state'
-        },
-        id: 'ScrollBar',
-        arr: [
-          new KeyStruct('$attrs', JsonType.obj),
-          new KeyStruct('state', JsonType.value),
-        ],
-        assertEqual: 'BarState.Off'
-      })
-      done();
-    })
-
-    /**
-     * 测试组件'flexBasis'支持设置页签容器的数据值且获取属性正确
-     */
-    it('ArkUI_ScrollBar_008', 0, async (done: Function) => {
-      await titleSearch('参数列表', 'flexBasis')
+    it('ArkUI_Refresh_003', 0, async (done: Function) => {
+      await titleSearch('参数列表', 'refreshOffset')
       await sliderDrag({
         slideStar: Slide.start,
         toggleClick: {
           toggleClickType: ToggleClick.Open,
-          toggleClickObj: 'flexBasis'
+          toggleClickObj: 'refreshOffset'
         },
-        id: 'ScrollBar',
+        id: 'Refresh',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
-          new KeyStruct('flexBasis', JsonType.value),
+          new KeyStruct('refreshOffset', JsonType.value),
         ],
         assertEqual: '200.00vp'
       })
@@ -212,114 +89,91 @@ export default function ScrollBarBootcampTest() {
         slideStar: Slide.end,
         toggleClick: {
           toggleClickType: ToggleClick.Close,
-          toggleClickObj: 'flexBasis'
+          toggleClickObj: 'refreshOffset'
         },
-        id: 'ScrollBar',
+        id: 'Refresh',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
-          new KeyStruct('flexBasis', JsonType.value),
+          new KeyStruct('refreshOffset', JsonType.value),
         ],
-        assertEqual: '10.00vp'
+        assertEqual: '30.00vp'
       })
       done();
     })
 
     /**
-     * 测试组件'direction'支持设置包含单个子组件为'Auto'且获取属性正确
+     * 测试组件'pullToRefresh'支持设置包含单个子组件为'true'且获取属性正确
      */
-    it('ArkUI_ScrollBar_009', 0, async (done: Function) => {
-      //获取不到断言参数
-      await titleSearch('参数列表', 'direction')
+    it('ArkUI_Refresh_004', 0, async (done: Function) => {
+      await titleSearch('参数列表', 'pullToRefresh')
       await radioClick({
         radioClickObj: 0,
         toggleClick: {
           toggleClickType: ToggleClick.Open,
-          toggleClickObj: 'direction'
+          toggleClickObj: 'pullToRefresh'
         },
-      })
-      done();
-    })
-
-    /**
-     * 测试组件'direction'支持设置包含单个子组件为'Ltr'且获取属性正确
-     */
-    it('ArkUI_ScrollBar_010', 0, async (done: Function) => {
-      //获取不到断言参数
-      await titleSearch('参数列表', 'direction')
-      await radioClick({
-        radioClickObj: 1,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-          toggleClickObj: 'direction'
-        },
-      })
-      done();
-    })
-
-    /**
-     * 测试组件'direction'支持设置包含单个子组件为'Rtl'且获取属性正确
-     */
-    it('ArkUI_ScrollBar_011', 0, async (done: Function) => {
-      //获取不到断言参数
-      await titleSearch('参数列表', 'direction')
-      await radioClick({
-        radioClickObj: 2,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close,
-          toggleClickObj: 'direction'
-        },
-      })
-      done();
-    })
-
-    /**
-     * 测试组件'clip'支持设置包含单个子组件为'true'且获取属性正确
-     */
-    it('ArkUI_ScrollBar_012', 0, async (done: Function) => {
-      //获取不到断言参数
-      await titleSearch('参数列表', 'clip')
-      await radioClick({
-        radioClickObj: 0,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close,
-          toggleClickObj: 'clip'
-        },
-      })
-      done();
-    })
-
-    /**
-     * 测试组件'clip'支持设置包含单个子组件为'false'且获取属性正确
-     */
-    it('ArkUI_ScrollBar_013', 0, async (done: Function) => {
-      await titleSearch('参数列表', 'clip')
-      await radioClick({
-        radioClickObj: 1,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close,
-          toggleClickObj: 'clip'
-        },
-        id: 'ScrollBar',
+        id: 'Refresh',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
-          new KeyStruct('clip', JsonType.value),
+          new KeyStruct('pullToRefresh', JsonType.value),
         ],
-        assertEqual: 'false'
+        assertEqual: true
       })
       done();
     })
+
+    /**
+     * 测试组件'pullToRefresh'支持设置包含单个子组件为'false'且获取属性正确
+     */
+    it('ArkUI_Refresh_005', 0, async (done: Function) => {
+      //获取不到断言参数
+      await titleSearch('参数列表', 'pullToRefresh')
+      await radioClick({
+        radioClickObj: 1,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close,
+          toggleClickObj: 'pullToRefresh'
+        },
+      })
+      done();
+    })
+
+    /**
+     * 测试组件'ratio'支持设置页签容器的数据值且获取属性正确
+     */
+    it('ArkUI_Refresh_006', 0, async (done: Function) => {
+      //获取不到断言参数
+      await titleSearch('参数列表', 'ratio')
+      await sliderDrag({
+        slideStar: Slide.start,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open,
+          toggleClickObj: 'ratio'
+        },
+      })
+
+      await sliderDrag({
+        slideStar: Slide.end,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close,
+          toggleClickObj: 'ratio'
+        },
+      })
+      done();
+    })
+
 
     /**
      * 测试组件width且获取属性正确
      */
-    it('ArkUI_ScrollBar_Comp_0001', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0001', 0, async (done: Function) => {
       await titleSearch('基础属性', 'width');
       await sliderDrag({
         slideStar: Slide.start,
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-        id: 'Tabs',
+        id: 'Refresh',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('width', JsonType.value),
@@ -332,7 +186,7 @@ export default function ScrollBarBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-        id: 'Tabs',
+        id: 'Refresh',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('width', JsonType.value),
@@ -345,14 +199,14 @@ export default function ScrollBarBootcampTest() {
     /**
      * 测试组件height且获取属性正确
      */
-    it('ArkUI_ScrollBar_Comp_0002', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0002', 0, async (done: Function) => {
       await titleSearch('基础属性', 'height');
       await sliderDrag({
         slideStar: Slide.start,
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
-        id: 'Tabs',
+        id: 'Refresh',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('height', JsonType.value),
@@ -365,7 +219,7 @@ export default function ScrollBarBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Close,
         },
-        id: 'Tabs',
+        id: 'Refresh',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('height', JsonType.value),
@@ -378,14 +232,14 @@ export default function ScrollBarBootcampTest() {
     /**
      * 测试组件padding且获取属性正确
      */
-    it('ArkUI_ScrollBar_Comp_0003', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0003', 0, async (done: Function) => {
       await titleSearch('基础属性', 'padding');
       await sliderDrag({
         slideStar: Slide.start,
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
-        id: 'Tabs',
+        // id: 'Refresh',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('padding', JsonType.value),
@@ -398,7 +252,7 @@ export default function ScrollBarBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Close,
         },
-        id: 'Tabs',
+        id: 'Refresh',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('padding', JsonType.value),
@@ -411,14 +265,14 @@ export default function ScrollBarBootcampTest() {
     /**
      * 测试组件margin且获取属性正确
      */
-    it('ArkUI_ScrollBar_Comp_0004', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0004', 0, async (done: Function) => {
       await titleSearch('基础属性', 'margin');
       await sliderDrag({
         slideStar: Slide.start,
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
-        id: 'Tabs',
+        id: 'Refresh',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('margin', JsonType.value),
@@ -431,7 +285,7 @@ export default function ScrollBarBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Close,
         },
-        id: 'Tabs',
+        id: 'Refresh',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('margin', JsonType.value),
@@ -444,7 +298,7 @@ export default function ScrollBarBootcampTest() {
     /**
      * 测试开启constraintSize
      */
-    it('ArkUI_ScrollBar_Comp_0005', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0005', 0, async (done: Function) => {
       // 无断言
       await titleSearch('基础属性', 'constraintSize');
       let toggle: Array<Component> =
@@ -456,7 +310,7 @@ export default function ScrollBarBootcampTest() {
     /**
      * 测试组件constraintSize.minWidth且获取属性正确
      */
-    it('ArkUI_ScrollBar_Comp_0006', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0006', 0, async (done: Function) => {
       await titleSearch('基础属性', 'constraintSize');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('constraintSize')))
@@ -469,7 +323,7 @@ export default function ScrollBarBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
-        id: 'Tabs',
+        id: 'Refresh',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('constraintSize', JsonType.obj)
@@ -482,7 +336,7 @@ export default function ScrollBarBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Close,
         },
-        id: 'Tabs',
+        id: 'Refresh',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('constraintSize', JsonType.obj)
@@ -495,7 +349,7 @@ export default function ScrollBarBootcampTest() {
     /**
      * 测试组件constraintSize.minHeight且获取属性正确
      */
-    it('ArkUI_ScrollBar_Comp_0007', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0007', 0, async (done: Function) => {
       await titleSearch('基础属性', 'constraintSize');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('constraintSize')))
@@ -508,7 +362,7 @@ export default function ScrollBarBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
-        id: 'Tabs',
+        id: 'Refresh',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('constraintSize', JsonType.obj)
@@ -521,7 +375,7 @@ export default function ScrollBarBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-        id: 'Tabs',
+        id: 'Refresh',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('constraintSize', JsonType.obj)
@@ -534,7 +388,7 @@ export default function ScrollBarBootcampTest() {
     /**
      * 测试组件constraintSize.maxWidth且获取属性正确
      */
-    it('ArkUI_ScrollBar_Comp_0008', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0008', 0, async (done: Function) => {
       await titleSearch('基础属性', 'constraintSize');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('constraintSize')))
@@ -547,7 +401,7 @@ export default function ScrollBarBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-        id: 'Tabs',
+        id: 'Refresh',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('constraintSize', JsonType.obj)
@@ -560,7 +414,7 @@ export default function ScrollBarBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-        id: 'Tabs',
+        id: 'Refresh',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('constraintSize', JsonType.obj)
@@ -573,7 +427,7 @@ export default function ScrollBarBootcampTest() {
     /**
      * 测试组件constraintSize.maxHeight且获取属性正确
      */
-    it('ArkUI_ScrollBar_Comp_0009', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0009', 0, async (done: Function) => {
       await titleSearch('基础属性', 'constraintSize');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('constraintSize')))
@@ -586,7 +440,7 @@ export default function ScrollBarBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-        id: 'Tabs',
+        id: 'Refresh',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('constraintSize', JsonType.obj)
@@ -599,7 +453,7 @@ export default function ScrollBarBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-        id: 'Tabs',
+        id: 'Refresh',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('constraintSize', JsonType.obj)
@@ -612,7 +466,7 @@ export default function ScrollBarBootcampTest() {
     /**
      * 测试关闭constraintSize,无断言
      */
-    it('ArkUI_ScrollBar_Comp_0010', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0010', 0, async (done: Function) => {
       // 无断言
       await titleSearch('基础属性', 'constraintSize');
       let toggle: Array<Component> =
@@ -627,7 +481,7 @@ export default function ScrollBarBootcampTest() {
     /**
      * 测试开启position
      */
-    it('ArkUI_ScrollBar_Comp_0011', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0011', 0, async (done: Function) => {
       // 无断言
       await titleSearch('基础属性', 'position');
       let toggle: Array<Component> =
@@ -639,7 +493,7 @@ export default function ScrollBarBootcampTest() {
     /**
      * 测试组件position.top且获取属性正确
      */
-    it('ArkUI_ScrollBar_Comp_0012', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0012', 0, async (done: Function) => {
       //无值，只有xy的值
       await titleSearch('基础属性', 'position');
       let toggle: Component =
@@ -667,7 +521,7 @@ export default function ScrollBarBootcampTest() {
     /**
      * 测试组件position.bottom且获取属性正确
      */
-    it('ArkUI_ScrollBar_Comp_0013', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0013', 0, async (done: Function) => {
       //无值，只有xy的值
       await titleSearch('基础属性', 'position');
       let toggle: Component =
@@ -695,7 +549,7 @@ export default function ScrollBarBootcampTest() {
     /**
      * 测试组件position.left且获取属性正确
      */
-    it('ArkUI_ScrollBar_Comp_0014', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0014', 0, async (done: Function) => {
       await titleSearch('基础属性', 'position');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('position')))
@@ -723,7 +577,7 @@ export default function ScrollBarBootcampTest() {
     /**
      * 测试组件position.right且获取属性正确
      */
-    it('ArkUI_ScrollBar_Comp_0015', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0015', 0, async (done: Function) => {
       //无值，只有xy的值
       await titleSearch('基础属性', 'position');
       let toggle: Component =
@@ -751,7 +605,7 @@ export default function ScrollBarBootcampTest() {
     /**
      * 测试关闭position
      */
-    it('ArkUI_ScrollBar_Comp_0016', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0016', 0, async (done: Function) => {
       // 无断言
       await titleSearch('基础属性', 'position');
       let toggle: Array<Component> =
@@ -766,7 +620,7 @@ export default function ScrollBarBootcampTest() {
     /**
      * 测试开启markAnchor
      */
-    it('ArkUI_ScrollBar_Comp_0017', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0017', 0, async (done: Function) => {
       // 无断言
       await titleSearch('基础属性', 'markAnchor');
       let toggle: Array<Component> =
@@ -778,7 +632,7 @@ export default function ScrollBarBootcampTest() {
     /**
      * 测试组件markAnchor.x且获取属性正确
      */
-    it('ArkUI_ScrollBar_Comp_0018', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0018', 0, async (done: Function) => {
       await titleSearch('基础属性', 'position');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('markAnchor')))
@@ -791,7 +645,7 @@ export default function ScrollBarBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-        id: 'Tabs',
+        id: 'Refresh',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('markAnchor', JsonType.obj),
@@ -805,7 +659,7 @@ export default function ScrollBarBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-        id: 'Tabs',
+        id: 'Refresh',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('markAnchor', JsonType.obj),
@@ -819,7 +673,7 @@ export default function ScrollBarBootcampTest() {
     /**
      * 测试组件markAnchor.y且获取属性正确
      */
-    it('ArkUI_ScrollBar_Comp_0019', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0019', 0, async (done: Function) => {
       await titleSearch('基础属性', 'position');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('markAnchor')))
@@ -832,7 +686,7 @@ export default function ScrollBarBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-        id: 'Tabs',
+        id: 'Refresh',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('markAnchor', JsonType.obj),
@@ -846,7 +700,7 @@ export default function ScrollBarBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-        id: 'Tabs',
+        id: 'Refresh',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('markAnchor', JsonType.obj),
@@ -860,7 +714,7 @@ export default function ScrollBarBootcampTest() {
     /**
      * 测试关闭markAnchor
      */
-    it('ArkUI_ScrollBar_Comp_0020', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0020', 0, async (done: Function) => {
       // 无断言
       await titleSearch('基础属性', 'markAnchor');
       let toggle: Array<Component> =
@@ -875,7 +729,7 @@ export default function ScrollBarBootcampTest() {
     /**
      * 测试开启offset
      */
-    it('ArkUI_ScrollBar_Comp_0021', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0021', 0, async (done: Function) => {
       // 无断言
       await titleSearch('基础属性', 'offset');
       let toggle: Array<Component> =
@@ -887,7 +741,7 @@ export default function ScrollBarBootcampTest() {
     /**
      * 测试组件offset.x且获取属性正确
      */
-    it('ArkUI_ScrollBar_Comp_0022', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0022', 0, async (done: Function) => {
       await titleSearch('基础属性', 'offset');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('offset')))
@@ -900,7 +754,7 @@ export default function ScrollBarBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-        id: 'Tabs',
+        id: 'Refresh',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('offset', JsonType.obj),
@@ -914,7 +768,7 @@ export default function ScrollBarBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-        id: 'Tabs',
+        id: 'Refresh',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('offset', JsonType.obj),
@@ -928,7 +782,7 @@ export default function ScrollBarBootcampTest() {
     /**
      * 测试组件offset.y且获取属性正确
      */
-    it('ArkUI_ScrollBar_Comp_0023', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0023', 0, async (done: Function) => {
       await titleSearch('基础属性', 'offset');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('offset')))
@@ -941,7 +795,7 @@ export default function ScrollBarBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-        id: 'Tabs',
+        id: 'Refresh',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('offset', JsonType.obj),
@@ -955,7 +809,7 @@ export default function ScrollBarBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-        id: 'Tabs',
+        id: 'Refresh',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('offset', JsonType.obj),
@@ -969,7 +823,7 @@ export default function ScrollBarBootcampTest() {
     /**
      * 测试关闭offset
      */
-    it('ArkUI_ScrollBar_Comp_0024', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0024', 0, async (done: Function) => {
       // 无断言
       await titleSearch('基础属性', 'offset');
       let toggle: Array<Component> =
@@ -984,14 +838,14 @@ export default function ScrollBarBootcampTest() {
     /**
      * 测试组件borderStyle
      */
-    it('ArkUI_ScrollBar_Comp_0025', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0025', 0, async (done: Function) => {
       await titleSearch('基础属性', 'borderStyle');
       await radioClick({
         radioClickObj: 0,
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-        id: 'Tabs',
+        id: 'Refresh',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('borderStyle', JsonType.value)
@@ -1000,7 +854,7 @@ export default function ScrollBarBootcampTest() {
       })
       done();
     })
-    it('ArkUI_ScrollBar_Comp_0026', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0026', 0, async (done: Function) => {
       await titleSearch('基础属性', 'borderStyle');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('borderStyle')))
@@ -1009,7 +863,7 @@ export default function ScrollBarBootcampTest() {
       }
       await radioClick({
         radioClickObj: 1,
-        id: 'Tabs',
+        id: 'Refresh',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('borderStyle', JsonType.value)
@@ -1018,7 +872,7 @@ export default function ScrollBarBootcampTest() {
       })
       done();
     })
-    it('ArkUI_ScrollBar_Comp_0027', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0027', 0, async (done: Function) => {
       await titleSearch('基础属性', 'borderStyle');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('borderStyle')))
@@ -1030,7 +884,7 @@ export default function ScrollBarBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-        id: 'Tabs',
+        id: 'Refresh',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('borderStyle', JsonType.value)
@@ -1042,14 +896,14 @@ export default function ScrollBarBootcampTest() {
     /**
      * 测试组件borderWidth
      */
-    it('ArkUI_ScrollBar_Comp_0028', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0028', 0, async (done: Function) => {
       await titleSearch('基础属性', 'borderWidth');
       await sliderDrag({
         slideStar: Slide.start,
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-        id: 'Tabs',
+        id: 'Refresh',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('borderWidth', JsonType.value),
@@ -1062,7 +916,7 @@ export default function ScrollBarBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-        id: 'Tabs',
+        id: 'Refresh',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('borderWidth', JsonType.value),
@@ -1076,14 +930,14 @@ export default function ScrollBarBootcampTest() {
     /**
      * 测试组件borderColor
      */
-    it('ArkUI_ScrollBar_Comp_0029', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0029', 0, async (done: Function) => {
       await titleSearch('基础属性', 'borderColor');
       await buttonClick({
         buttonClickObj: 0,
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-        id: 'Tabs',
+        id: 'Refresh',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('borderColor', JsonType.value),
@@ -1094,7 +948,7 @@ export default function ScrollBarBootcampTest() {
       done();
 
     })
-    it('ArkUI_ScrollBar_Comp_0030', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0030', 0, async (done: Function) => {
       await titleSearch('基础属性', 'borderColor');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('borderColor')))
@@ -1103,7 +957,7 @@ export default function ScrollBarBootcampTest() {
       }
       await buttonClick({
         buttonClickObj: 1,
-        id: 'Tabs',
+        id: 'Refresh',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('borderColor', JsonType.value),
@@ -1114,7 +968,7 @@ export default function ScrollBarBootcampTest() {
       done();
 
     })
-    it('ArkUI_ScrollBar_Comp_0031', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0031', 0, async (done: Function) => {
       await titleSearch('基础属性', 'borderColor');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('borderColor')))
@@ -1123,7 +977,7 @@ export default function ScrollBarBootcampTest() {
       }
       await buttonClick({
         buttonClickObj: 2,
-        id: 'Tabs',
+        id: 'Refresh',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('borderColor', JsonType.value),
@@ -1133,7 +987,7 @@ export default function ScrollBarBootcampTest() {
 
       done();
     })
-    it('ArkUI_ScrollBar_Comp_0032', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0032', 0, async (done: Function) => {
       await titleSearch('基础属性', 'borderColor');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('borderColor')))
@@ -1142,7 +996,7 @@ export default function ScrollBarBootcampTest() {
       }
       await buttonClick({
         buttonClickObj: 3,
-        id: 'Tabs',
+        id: 'Refresh',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('borderColor', JsonType.value),
@@ -1153,7 +1007,7 @@ export default function ScrollBarBootcampTest() {
       done();
 
     })
-    it('ArkUI_ScrollBar_Comp_0033', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0033', 0, async (done: Function) => {
       await titleSearch('基础属性', 'borderColor');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('borderColor')))
@@ -1162,7 +1016,7 @@ export default function ScrollBarBootcampTest() {
       }
       await buttonClick({
         buttonClickObj: 4,
-        id: 'Tabs',
+        id: 'Refresh',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('borderColor', JsonType.value),
@@ -1173,7 +1027,7 @@ export default function ScrollBarBootcampTest() {
       done();
 
     })
-    it('ArkUI_ScrollBar_Comp_0034', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0034', 0, async (done: Function) => {
       await titleSearch('基础属性', 'borderColor');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('borderColor')))
@@ -1185,7 +1039,7 @@ export default function ScrollBarBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-        id: 'Tabs',
+        id: 'Refresh',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('borderColor', JsonType.value),
@@ -1199,14 +1053,14 @@ export default function ScrollBarBootcampTest() {
     /**
      * 测试组件borderRadius
      */
-    it('ArkUI_ScrollBar_Comp_0035', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0035', 0, async (done: Function) => {
       await titleSearch('基础属性', 'borderRadius');
       await sliderDrag({
         slideStar: Slide.start,
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-        id: 'Tabs',
+        id: 'Refresh',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('borderWidth', JsonType.value),
@@ -1219,7 +1073,7 @@ export default function ScrollBarBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-        id: 'Tabs',
+        id: 'Refresh',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('borderWidth', JsonType.value),
@@ -1233,7 +1087,7 @@ export default function ScrollBarBootcampTest() {
     /**
      * 测试组件background.align
      */
-    it('ArkUI_ScrollBar_Comp_0036', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0036', 0, async (done: Function) => {
       await titleSearch('基础属性', 'background.align');
       // 无法取到子组件状态
       await radioClick({
@@ -1244,7 +1098,7 @@ export default function ScrollBarBootcampTest() {
       })
       done();
     })
-    it('ArkUI_ScrollBar_Comp_0037', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0037', 0, async (done: Function) => {
       // 无法取到子组件状态
       await titleSearch('基础属性', 'background.align');
       let toggle: Component =
@@ -1257,7 +1111,7 @@ export default function ScrollBarBootcampTest() {
       })
       done();
     })
-    it('ArkUI_ScrollBar_Comp_0038', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0038', 0, async (done: Function) => {
       // 无法取到子组件状态
       await titleSearch('基础属性', 'background.align');
       let toggle: Component =
@@ -1270,7 +1124,7 @@ export default function ScrollBarBootcampTest() {
       })
       done();
     })
-    it('ArkUI_ScrollBar_Comp_0039', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0039', 0, async (done: Function) => {
       // 无法取到子组件状态
       await titleSearch('基础属性', 'background.align');
       let toggle: Component =
@@ -1283,7 +1137,7 @@ export default function ScrollBarBootcampTest() {
       })
       done();
     })
-    it('ArkUI_ScrollBar_Comp_0040', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0040', 0, async (done: Function) => {
       // 无法取到子组件状态
       await titleSearch('基础属性', 'background.align');
       let toggle: Component =
@@ -1296,7 +1150,7 @@ export default function ScrollBarBootcampTest() {
       })
       done();
     })
-    it('ArkUI_ScrollBar_Comp_0041', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0041', 0, async (done: Function) => {
       // 无法取到子组件状态
       await titleSearch('基础属性', 'background.align');
       let toggle: Component =
@@ -1309,7 +1163,7 @@ export default function ScrollBarBootcampTest() {
       })
       done();
     })
-    it('ArkUI_ScrollBar_Comp_0042', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0042', 0, async (done: Function) => {
       // 无法取到子组件状态
       await titleSearch('基础属性', 'background.align');
       let toggle: Component =
@@ -1322,7 +1176,7 @@ export default function ScrollBarBootcampTest() {
       })
       done();
     })
-    it('ArkUI_ScrollBar_Comp_0043', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0043', 0, async (done: Function) => {
       // 无法取到子组件状态
       await titleSearch('基础属性', 'background.align');
       let toggle: Component =
@@ -1335,7 +1189,7 @@ export default function ScrollBarBootcampTest() {
       })
       done();
     })
-    it('ArkUI_ScrollBar_Comp_0044', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0044', 0, async (done: Function) => {
       // 无法取到子组件状态
       await titleSearch('基础属性', 'background.align');
       let toggle: Component =
@@ -1354,14 +1208,14 @@ export default function ScrollBarBootcampTest() {
     /**
      * 测试组件backgroundColor
      */
-    it('ArkUI_ScrollBar_Comp_0045', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0045', 0, async (done: Function) => {
       await titleSearch('基础属性', 'backgroundColor');
       await buttonClick({
         buttonClickObj: 0,
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-        id: 'Tabs',
+        id: 'Refresh',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('backgroundColor', JsonType.value),
@@ -1372,7 +1226,7 @@ export default function ScrollBarBootcampTest() {
       done();
 
     })
-    it('ArkUI_ScrollBar_Comp_0046', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0046', 0, async (done: Function) => {
       await titleSearch('基础属性', 'backgroundColor');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('backgroundColor')))
@@ -1381,7 +1235,7 @@ export default function ScrollBarBootcampTest() {
       }
       await buttonClick({
         buttonClickObj: 1,
-        id: 'Tabs',
+        id: 'Refresh',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('backgroundColor', JsonType.value),
@@ -1392,7 +1246,7 @@ export default function ScrollBarBootcampTest() {
       done();
 
     })
-    it('ArkUI_ScrollBar_Comp_0047', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0047', 0, async (done: Function) => {
       await titleSearch('基础属性', 'backgroundColor');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('backgroundColor')))
@@ -1401,7 +1255,7 @@ export default function ScrollBarBootcampTest() {
       }
       await buttonClick({
         buttonClickObj: 2,
-        id: 'Tabs',
+        id: 'Refresh',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('backgroundColor', JsonType.value),
@@ -1412,7 +1266,7 @@ export default function ScrollBarBootcampTest() {
       done();
 
     })
-    it('ArkUI_ScrollBar_Comp_0048', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0048', 0, async (done: Function) => {
       await titleSearch('基础属性', 'backgroundColor');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('backgroundColor')))
@@ -1421,7 +1275,7 @@ export default function ScrollBarBootcampTest() {
       }
       await buttonClick({
         buttonClickObj: 3,
-        id: 'Tabs',
+        id: 'Refresh',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('backgroundColor', JsonType.value),
@@ -1432,7 +1286,7 @@ export default function ScrollBarBootcampTest() {
       done();
 
     })
-    it('ArkUI_ScrollBar_Comp_0049', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0049', 0, async (done: Function) => {
       await titleSearch('基础属性', 'backgroundColor');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('backgroundColor')))
@@ -1441,7 +1295,7 @@ export default function ScrollBarBootcampTest() {
       }
       await buttonClick({
         buttonClickObj: 4,
-        id: 'Tabs',
+        id: 'Refresh',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('backgroundColor', JsonType.value),
@@ -1452,7 +1306,7 @@ export default function ScrollBarBootcampTest() {
       done();
 
     })
-    it('ArkUI_ScrollBar_Comp_0050', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0050', 0, async (done: Function) => {
       await titleSearch('基础属性', 'backgroundColor');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('backgroundColor')))
@@ -1464,7 +1318,7 @@ export default function ScrollBarBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-        id: 'Tabs',
+        id: 'Refresh',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('backgroundColor', JsonType.value),
@@ -1478,7 +1332,7 @@ export default function ScrollBarBootcampTest() {
     /**
      * 测试组件backgroundImage.src
      */
-    it('ArkUI_ScrollBar_Comp_0051', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0051', 0, async (done: Function) => {
       await titleSearch('基础属性', 'backgroundImage.src');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('backgroundImage.src')))
@@ -1488,7 +1342,7 @@ export default function ScrollBarBootcampTest() {
       await driver.delayMs(3500)
       done();
     })
-    it('ArkUI_ScrollBar_Comp_0052', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0052', 0, async (done: Function) => {
       await titleSearch('基础属性', 'backgroundImage.src');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('backgroundImage.src')))
@@ -1501,14 +1355,14 @@ export default function ScrollBarBootcampTest() {
     /**
      * 测试组件backgroundImage.repeat
      */
-    it('ArkUI_ScrollBar_Comp_0053', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0053', 0, async (done: Function) => {
       await titleSearch('基础属性', 'backgroundImage.repeat');
       await radioClick({
         radioClickObj: 0,
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-        id: 'Tabs',
+        id: 'Refresh',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('backgroundImage', JsonType.value),
@@ -1519,7 +1373,7 @@ export default function ScrollBarBootcampTest() {
       done();
 
     })
-    it('ArkUI_ScrollBar_Comp_0054', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0054', 0, async (done: Function) => {
       await titleSearch('基础属性', 'backgroundImage.repeat');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle')
@@ -1530,7 +1384,7 @@ export default function ScrollBarBootcampTest() {
       }
       await radioClick({
         radioClickObj: 1,
-        id: 'Tabs',
+        id: 'Refresh',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('backgroundImage', JsonType.value),
@@ -1541,7 +1395,7 @@ export default function ScrollBarBootcampTest() {
       done();
 
     })
-    it('ArkUI_ScrollBar_Comp_0055', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0055', 0, async (done: Function) => {
       await titleSearch('基础属性', 'backgroundImage.repeat');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle')
@@ -1552,7 +1406,7 @@ export default function ScrollBarBootcampTest() {
       }
       await radioClick({
         radioClickObj: 2,
-        id: 'Tabs',
+        id: 'Refresh',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('backgroundImage', JsonType.value),
@@ -1563,7 +1417,7 @@ export default function ScrollBarBootcampTest() {
       done();
 
     })
-    it('ArkUI_ScrollBar_Comp_0056', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0056', 0, async (done: Function) => {
       await titleSearch('基础属性', 'backgroundImage.repeat');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle')
@@ -1577,7 +1431,7 @@ export default function ScrollBarBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-        id: 'Tabs',
+        id: 'Refresh',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('backgroundImage', JsonType.value),
@@ -1591,14 +1445,14 @@ export default function ScrollBarBootcampTest() {
     /**
      * 测试组件backgroundImageSize
      */
-    it('ArkUI_ScrollBar_Comp_0057', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0057', 0, async (done: Function) => {
       await titleSearch('基础属性', 'backgroundImageSize');
       await radioClick({
         radioClickObj: 0,
         toggleClick: {
           toggleClickType: ToggleClick.Open
         },
-        id: 'Tabs',
+        id: 'Refresh',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('backgroundImageSize', JsonType.value),
@@ -1609,7 +1463,7 @@ export default function ScrollBarBootcampTest() {
       done();
 
     })
-    it('ArkUI_ScrollBar_Comp_0058', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0058', 0, async (done: Function) => {
       await titleSearch('基础属性', 'backgroundImageSize');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('backgroundImageSize')))
@@ -1618,7 +1472,7 @@ export default function ScrollBarBootcampTest() {
       }
       await radioClick({
         radioClickObj: 1,
-        id: 'Tabs',
+        id: 'Refresh',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('backgroundImageSize', JsonType.value),
@@ -1629,7 +1483,7 @@ export default function ScrollBarBootcampTest() {
       done();
 
     })
-    it('ArkUI_ScrollBar_Comp_0059', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0059', 0, async (done: Function) => {
       await titleSearch('基础属性', 'backgroundImageSize');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('backgroundImageSize')))
@@ -1638,7 +1492,7 @@ export default function ScrollBarBootcampTest() {
       }
       await radioClick({
         radioClickObj: 2,
-        id: 'Tabs',
+        id: 'Refresh',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('backgroundImageSize', JsonType.value),
@@ -1649,7 +1503,7 @@ export default function ScrollBarBootcampTest() {
       done();
 
     })
-    it('ArkUI_ScrollBar_Comp_0060', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0060', 0, async (done: Function) => {
       await titleSearch('基础属性', 'backgroundImageSize');
       let toggle: Component =
         await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('backgroundImageSize')))
@@ -1661,7 +1515,7 @@ export default function ScrollBarBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Close
         },
-        id: 'Tabs',
+        id: 'Refresh',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('backgroundImageSize', JsonType.value),
@@ -1675,7 +1529,7 @@ export default function ScrollBarBootcampTest() {
     /**
      * 测试组件backgroundImagePosition.x
      */
-    it('ArkUI_ScrollBar_Comp_0061', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0061', 0, async (done: Function) => {
       // 获取不到
       await titleSearch('基础属性', 'backgroundImagePosition.x');
       await sliderDrag({
@@ -1698,7 +1552,7 @@ export default function ScrollBarBootcampTest() {
     /**
      * 测试组件backgroundImagePosition.y
      */
-    it('ArkUI_ScrollBar_Comp_0062', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0062', 0, async (done: Function) => {
       // 获取不到
       await titleSearch('基础属性', 'backgroundImagePosition.y');
       await sliderDrag({
@@ -1721,7 +1575,7 @@ export default function ScrollBarBootcampTest() {
     /**
      * 测试组件backgroundBlurStyle
      */
-    it('ArkUI_ScrollBar_Comp_0063', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0063', 0, async (done: Function) => {
       // 获取不到
       await titleSearch('基础属性', 'backgroundBlurStyle');
       await radioClick({
@@ -1730,9 +1584,11 @@ export default function ScrollBarBootcampTest() {
           toggleClickType: ToggleClick.Open
         },
       })
+
       done();
+
     })
-    it('ArkUI_ScrollBar_Comp_0064', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0064', 0, async (done: Function) => {
       // 获取不到
       await titleSearch('基础属性', 'backgroundBlurStyle');
       let toggle: Component =
@@ -1743,9 +1599,11 @@ export default function ScrollBarBootcampTest() {
       await radioClick({
         radioClickObj: 1,
       })
+
       done();
+
     })
-    it('ArkUI_ScrollBar_Comp_0065', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0065', 0, async (done: Function) => {
       // 获取不到
       await titleSearch('基础属性', 'backgroundBlurStyle');
       let toggle: Component =
@@ -1756,9 +1614,11 @@ export default function ScrollBarBootcampTest() {
       await radioClick({
         radioClickObj: 2,
       })
+
       done();
+
     })
-    it('ArkUI_ScrollBar_Comp_0066', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0066', 0, async (done: Function) => {
       // 获取不到
       await titleSearch('基础属性', 'backgroundBlurStyle');
       let toggle: Component =
@@ -1769,9 +1629,11 @@ export default function ScrollBarBootcampTest() {
       await radioClick({
         radioClickObj: 3,
       })
+
       done();
+
     })
-    it('ArkUI_ScrollBar_Comp_0067', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0067', 0, async (done: Function) => {
       // 获取不到
       await titleSearch('基础属性', 'backgroundBlurStyle');
       let toggle: Component =
@@ -1782,9 +1644,11 @@ export default function ScrollBarBootcampTest() {
       await radioClick({
         radioClickObj: 4,
       })
+
       done();
+
     })
-    it('ArkUI_ScrollBar_Comp_0068', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0068', 0, async (done: Function) => {
       // 获取不到
       await titleSearch('基础属性', 'backgroundBlurStyle');
       let toggle: Component =
@@ -1795,9 +1659,11 @@ export default function ScrollBarBootcampTest() {
       await radioClick({
         radioClickObj: 5,
       })
+
       done();
+
     })
-    it('ArkUI_ScrollBar_Comp_0069', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0069', 0, async (done: Function) => {
       // 获取不到
       await titleSearch('基础属性', 'backgroundBlurStyle');
       let toggle: Component =
@@ -1808,9 +1674,11 @@ export default function ScrollBarBootcampTest() {
       await radioClick({
         radioClickObj: 6,
       })
+
       done();
+
     })
-    it('ArkUI_ScrollBar_Comp_0070', 0, async (done: Function) => {
+    it('ArkUI_Refresh_Comp_0070', 0, async (done: Function) => {
       // 获取不到
       await titleSearch('基础属性', 'backgroundBlurStyle');
       let toggle: Component =
@@ -1820,6 +1688,189 @@ export default function ScrollBarBootcampTest() {
       }
       await radioClick({
         radioClickObj: 7,
+      })
+
+      done();
+
+    })
+    it('ArkUI_Refresh_Comp_0071', 0, async (done: Function) => {
+      // 获取不到
+      await titleSearch('基础属性', 'backgroundBlurStyle');
+      let toggle: Component =
+        await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('backgroundBlurStyle')))
+      if (await toggle.isChecked() === false) {
+        await toggle.click();
+      }
+      await radioClick({
+        radioClickObj: 8,
+      })
+
+      done();
+
+    })
+    it('ArkUI_Refresh_Comp_0072', 0, async (done: Function) => {
+      // 获取不到
+      await titleSearch('基础属性', 'backgroundBlurStyle');
+      let toggle: Component =
+        await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('backgroundBlurStyle')))
+      if (await toggle.isChecked() === false) {
+        await toggle.click();
+      }
+      await radioClick({
+        radioClickObj: 9,
+      })
+
+      done();
+
+    })
+    it('ArkUI_Refresh_Comp_0073', 0, async (done: Function) => {
+      // 获取不到
+      await titleSearch('基础属性', 'backgroundBlurStyle');
+      let toggle: Component =
+        await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('backgroundBlurStyle')))
+      if (await toggle.isChecked() === false) {
+        await toggle.click();
+      }
+      await radioClick({
+        radioClickObj: 10,
+      })
+
+      done();
+
+    })
+    it('ArkUI_Refresh_Comp_0074', 0, async (done: Function) => {
+      // 获取不到
+      await titleSearch('基础属性', 'backgroundBlurStyle');
+      let toggle: Component =
+        await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('backgroundBlurStyle')))
+      if (await toggle.isChecked() === false) {
+        await toggle.click();
+      }
+      await radioClick({
+        radioClickObj: 11,
+      })
+
+      done();
+
+    })
+    it('ArkUI_Refresh_Comp_0075', 0, async (done: Function) => {
+      // 获取不到
+      await titleSearch('基础属性', 'backgroundBlurStyle');
+      let toggle: Component =
+        await driver.findComponent(ON.type('Toggle').within(ON.type('Scroll')).isAfter(ON.text('backgroundBlurStyle')))
+      if (await toggle.isChecked() === false) {
+        await toggle.click();
+      }
+      await radioClick({
+        radioClickObj: 12,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close
+        },
+      })
+
+      done();
+
+    })
+    /**
+     * 测试组件backgroundBlurStyle.options
+     */
+    it('ArkUI_Refresh_Comp_0076', 0, async (done: Function) => {
+      // 无断言
+      await titleSearch('基础属性', 'backgroundBlurStyleParams.options.params');
+      let toggle: Component =
+        await driver.findComponent(ON.type('Toggle')
+          .within(ON.type('Scroll'))
+          .isAfter(ON.text('backgroundBlurStyleParams.options.params')))
+      if (await toggle.isChecked() === false) {
+        await toggle.click();
+      }
+      done();
+
+    })
+    it('ArkUI_Refresh_Comp_0077', 0, async (done: Function) => {
+      await titleSearch('基础属性', 'backgroundBlurStyleParams.options.params');
+      let toggle: Component =
+        await driver.findComponent(ON.type('Toggle')
+          .within(ON.type('Scroll'))
+          .isAfter(ON.text('backgroundBlurStyleParams.options.params')))
+      if (await toggle.isChecked() === false) {
+        await toggle.click();
+      }
+      await titleSearch('基础属性', 'backgroundBlurStyleParams.options.params.colorMode');
+      await radioClick({
+        radioClickObj: 0,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open
+        },
+        id: 'Refresh',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('backgroundBlurStyle', JsonType.obj),
+          new KeyStruct('options', JsonType.obj),
+          new KeyStruct('colorMode', JsonType.value)
+        ],
+        assertEqual: 'ThemeColorMode.System'
+      })
+      done();
+    })
+    it('ArkUI_Refresh_Comp_0078', 0, async (done: Function) => {
+      await titleSearch('基础属性', 'backgroundBlurStyleParams.options.params');
+      let toggle: Component =
+        await driver.findComponent(ON.type('Toggle')
+          .within(ON.type('Scroll'))
+          .isAfter(ON.text('backgroundBlurStyleParams.options.params')))
+      if (await toggle.isChecked() === false) {
+        await toggle.click();
+      }
+      await titleSearch('基础属性', 'backgroundBlurStyleParams.options.params.colorMode');
+      // 获取不到新值
+      await radioClick({
+        radioClickObj: 1,
+      })
+      done();
+    })
+    it('ArkUI_Refresh_Comp_0079', 0, async (done: Function) => {
+      // 获取不到新值
+      await titleSearch('基础属性', 'backgroundBlurStyleParams.options.params');
+      let toggle: Component =
+        await driver.findComponent(ON.type('Toggle')
+          .within(ON.type('Scroll'))
+          .isAfter(ON.text('backgroundBlurStyleParams.options.params')))
+      if (await toggle.isChecked() === false) {
+        await toggle.click();
+      }
+      await titleSearch('基础属性', 'backgroundBlurStyleParams.options.params.colorMode');
+      await radioClick({
+        radioClickObj: 2,
+        toggleClick: {
+          toggleClickType: ToggleClick.Close
+        }
+      })
+      done();
+    })
+    it('ArkUI_Refresh_Comp_0080', 0, async (done: Function) => {
+      await titleSearch('基础属性', 'backgroundBlurStyleParams.options.params');
+      let toggle: Component =
+        await driver.findComponent(ON.type('Toggle')
+          .within(ON.type('Scroll'))
+          .isAfter(ON.text('backgroundBlurStyleParams.options.params')))
+      if (await toggle.isChecked() === false) {
+        await toggle.click();
+      }
+      await titleSearch('基础属性', 'backgroundBlurStyleParams.options.params.adaptiveColor');
+      await radioClick({
+        radioClickObj: 0,
+        toggleClick: {
+          toggleClickType: ToggleClick.Open
+        },
+        id: 'Refresh',
+        arr: [
+          new KeyStruct('$attrs', JsonType.obj),
+          new KeyStruct('backgroundBlurStyle', JsonType.obj),
+          new KeyStruct('options', JsonType.obj),
+          new KeyStruct('adaptiveColor', JsonType.value)
+        ],
+        assertEqual: 'AdaptiveColor.Default'
       })
       done();
     })

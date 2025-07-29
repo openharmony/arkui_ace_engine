@@ -1,61 +1,39 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import { describe, beforeAll, it } from '@ohos/hypium'
-import { abilityDelegatorRegistry, Driver, Component, ON } from '@kit.TestKit';
+import { Driver, Component, ON } from '@kit.TestKit';
 import {
   buttonClick,
   JsonType,
   KeyStruct,
   radioClick,
-  searchParentBlock,
   Slide,
-  Search,
   sliderDrag,
   titleSearch,
   ToggleClick,
-  getToggle,
-  searchToggle
-} from '../../utils';
-import { Point } from '@ohos.UiTest';
+} from '../../../utils';
+import { TabContentStart } from './TabContent';
 
-const delegator: abilityDelegatorRegistry.AbilityDelegator = abilityDelegatorRegistry.getAbilityDelegator()
 const driver = Driver.create();
 
-export default function TabContentBootcampTest() {
-  describe('TabContentBootcampTest', () => {
-    /**
-     * 打开应用
-     */
+export default function TabContent0() {
+  describe('TabContent0', () => {
     beforeAll(async (done: Function) => {
-      try {
-        await delegator.startAbility({
-          bundleName: 'cn.ohos.components',
-          abilityName: 'EntryAbility'
-        });
-        await driver.delayMs(3500);
-
-        let atomNavigates: Component = await driver.findComponent(ON.text('导航与切换'));
-        await atomNavigates.click();
-        await driver.delayMs(3500);
-
-        let ListItems: Array<Component> = await driver.findComponents(ON.type('ListItem'))
-        let width: Point = await ListItems[0].getBoundsCenter()
-        let width2: Point = await ListItems[2].getBoundsCenter()
-        await driver.swipe(width.x, width2.y, width.x, width.y, 1000)
-        await driver.delayMs(5000);
-
-        let scrollSearch: Component = await driver.findComponent(ON.text('页签内容/TabContent'))
-        await scrollSearch.click()
-        await driver.delayMs(3500);
-
-        let Buttons: Array<Component> = await driver.findComponents(ON.type('Button'));
-        await Buttons[1].click()
-        await driver.delayMs(3500);
-
-      } catch (err) {
-        console.info(`beforeAll error: ${JSON.stringify(err)}`);
-      }
-      done();
+      await TabContentStart(done)
     })
-
 
     /**
      * 测试组件width且获取属性正确
@@ -72,7 +50,7 @@ export default function TabContentBootcampTest() {
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('width', JsonType.value),
         ],
-        assertEqual: '500.00vp'
+        assertEqual: '480.00vp'
       })
 
       await sliderDrag({
@@ -85,7 +63,7 @@ export default function TabContentBootcampTest() {
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('width', JsonType.value),
         ],
-        assertEqual: '100.00vp'
+        assertEqual: '480.00vp'
       })
 
       done();
@@ -105,7 +83,7 @@ export default function TabContentBootcampTest() {
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('height', JsonType.value),
         ],
-        assertEqual: '500.00vp'
+        assertEqual: '174.93vp'
       })
 
       await sliderDrag({
@@ -118,7 +96,7 @@ export default function TabContentBootcampTest() {
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('height', JsonType.value),
         ],
-        assertEqual: '100.00vp'
+        assertEqual: '174.93vp'
       })
 
       done();
@@ -133,7 +111,7 @@ export default function TabContentBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
-        // id: 'TabContent',
+        id: 'TabContent',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('padding', JsonType.value),

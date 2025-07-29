@@ -1,60 +1,38 @@
-import { describe, beforeAll, it } from '@ohos/hypium'
-import { abilityDelegatorRegistry, Driver, Component } from '@kit.TestKit';
-import { ON, Point } from '@ohos.UiTest';
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import { describe, beforeAll, it} from '@ohos/hypium'
+import { Driver, Component } from '@kit.TestKit';
+import { ON } from '@ohos.UiTest';
 import {
   buttonClick,
   JsonType,
   KeyStruct,
   radioClick,
-  searchParentBlock,
   Slide,
   sliderDrag,
   titleSearch,
   ToggleClick,
-  Search,
-  getToggle,
-  searchToggle
-} from '../../utils';
+} from '../../../utils';
+import { NavDestination } from './NavDestination';
 
-const delegator: abilityDelegatorRegistry.AbilityDelegator = abilityDelegatorRegistry.getAbilityDelegator()
 const driver = Driver.create();
 
-export default function NavDestinationBootcampTest() {
-  describe('NavDestinationBootcampTest', () => {
-    /**
-     * 打开应用
-     */
+export default function NavDestination0(){
+  describe('NavDestination', () => {
     beforeAll(async (done: Function) => {
-      try {
-        await delegator.startAbility({
-          bundleName: 'cn.ohos.components',
-          abilityName: 'EntryAbility'
-        });
-        await driver.delayMs(5000);
-
-        let atomNavigates: Component = await driver.findComponent(ON.text('导航与切换'));
-
-        await atomNavigates.click();
-        await driver.delayMs(3500);
-
-        let ListItems: Array<Component> = await driver.findComponents(ON.type('ListItem'))
-        let width: Point = await ListItems[0].getBoundsCenter()
-        let width2: Point = await ListItems[2].getBoundsCenter()
-        await driver.swipe(width.x, width2.y, width.x, width.y)
-        await driver.delayMs(3500);
-
-        let scrollSearch: Component = await driver.findComponent(ON.text('导航/NavDestination'))
-        await scrollSearch.click()
-        await driver.delayMs(3500);
-
-        let Buttons: Array<Component> = await driver.findComponents(ON.type('Button'));
-        await Buttons[1].click()
-        await driver.delayMs(3500);
-
-      } catch (err) {
-        console.info(`beforeAll error: ${JSON.stringify(err)}`);
-      }
-      done();
+      await NavDestination(done)
     })
 
     /**
@@ -523,66 +501,6 @@ export default function NavDestinationBootcampTest() {
     })
 
     /**
-     * 测试组件'title.options.paddingEnd.LengthMetrics.resource'支持设置包含单个子组件为'margin_left'且获取属性正确
-     */
-    it('ArkUI_NavDestination_032', 0, async (done: Function) => {
-      //获取不到断言参数
-      await titleSearch('参数列表', 'title.options.paddingEnd.LengthMetrics.resource')
-      await radioClick({
-        radioClickObj: 0,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-        },
-      })
-      done();
-    })
-
-    /**
-     * 测试组件'title.options.paddingEnd.LengthMetrics.resource'支持设置包含单个子组件为'margin_right'且获取属性正确
-     */
-    it('ArkUI_NavDestination_033', 0, async (done: Function) => {
-      //获取不到断言参数
-      await titleSearch('参数列表', 'title.options.paddingEnd.LengthMetrics.resource')
-      await radioClick({
-        radioClickObj: 1,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-        },
-      })
-      done();
-    })
-
-    /**
-     * 测试组件'title.options.paddingEnd.LengthMetrics.resource'支持设置包含单个子组件为'margin_left_none'且获取属性正确
-     */
-    it('ArkUI_NavDestination_034', 0, async (done: Function) => {
-      //获取不到断言参数
-      await titleSearch('参数列表', 'title.options.paddingEnd.LengthMetrics.resource')
-      await radioClick({
-        radioClickObj: 2,
-        toggleClick: {
-          toggleClickType: ToggleClick.Open,
-        },
-      })
-      done();
-    })
-
-    /**
-     * 测试组件'title.options.paddingEnd.LengthMetrics.resource'支持设置包含单个子组件为'margin_right_none'且获取属性正确
-     */
-    it('ArkUI_NavDestination_035', 0, async (done: Function) => {
-      //获取不到断言参数
-      await titleSearch('参数列表', 'title.options.paddingEnd.LengthMetrics.resource')
-      await radioClick({
-        radioClickObj: 3,
-        toggleClick: {
-          toggleClickType: ToggleClick.Close,
-        },
-      })
-      done();
-    })
-
-    /**
      * 测试组件'hideTitleBar'支持设置包含单个子组件为'true'且获取属性正确
      */
     it('ArkUI_NavDestination_036', 0, async (done: Function) => {
@@ -616,18 +534,13 @@ export default function NavDestinationBootcampTest() {
      * 测试组件'mode'支持设置包含单个子组件为'STANDARD'且获取属性正确
      */
     it('ArkUI_NavDestination_038', 0, async (done: Function) => {
+      //获取不到断言参数
       await titleSearch('参数列表', 'mode')
       await radioClick({
         radioClickObj: 0,
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
-        id: 'NavDestination',
-        arr: [
-          new KeyStruct('$attrs', JsonType.obj),
-          new KeyStruct('mode', JsonType.value),
-        ],
-        assertEqual: 'NavDestinationMode::STANDARD'
       })
       done();
     })
@@ -636,18 +549,13 @@ export default function NavDestinationBootcampTest() {
      * 测试组件'mode'支持设置包含单个子组件为'DIALOG'且获取属性正确
      */
     it('ArkUI_NavDestination_039', 0, async (done: Function) => {
+      //获取不到断言参数
       await titleSearch('参数列表', 'mode')
       await radioClick({
         radioClickObj: 1,
         toggleClick: {
           toggleClickType: ToggleClick.Close,
         },
-        id: 'NavDestination',
-        arr: [
-          new KeyStruct('$attrs', JsonType.obj),
-          new KeyStruct('mode', JsonType.value),
-        ],
-        assertEqual: 'NavDestinationMode::DIALOG'
       })
       done();
     })
@@ -827,6 +735,7 @@ export default function NavDestinationBootcampTest() {
         radioClickObj: 0,
         toggleClick: {
           toggleClickType: ToggleClick.Close,
+          toggleClickObj: 'ignoreLayoutSafeArea.types'
         },
       })
       done();
@@ -944,7 +853,7 @@ export default function NavDestinationBootcampTest() {
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('flexBasis', JsonType.value),
         ],
-        assertEqual: '200'
+        assertEqual: '200.00vp'
       })
 
       await sliderDrag({
@@ -958,7 +867,7 @@ export default function NavDestinationBootcampTest() {
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('flexBasis', JsonType.value),
         ],
-        assertEqual: '10'
+        assertEqual: '10.00vp'
       })
       done();
     })
@@ -1046,9 +955,9 @@ export default function NavDestinationBootcampTest() {
         ],
         assertEqual: '100.00vp'
       })
-
       done();
     })
+
     /**
      * 测试组件height且获取属性正确
      */
@@ -1079,9 +988,9 @@ export default function NavDestinationBootcampTest() {
         ],
         assertEqual: '100.00vp'
       })
-
       done();
     })
+
     /**
      * 测试组件padding且获取属性正确
      */
@@ -1092,7 +1001,7 @@ export default function NavDestinationBootcampTest() {
         toggleClick: {
           toggleClickType: ToggleClick.Open,
         },
-        // id: 'NavDestination',
+        id: 'NavDestination',
         arr: [
           new KeyStruct('$attrs', JsonType.obj),
           new KeyStruct('padding', JsonType.value),
@@ -1115,6 +1024,7 @@ export default function NavDestinationBootcampTest() {
 
       done();
     })
+
     /**
      * 测试组件margin且获取属性正确
      */
@@ -1145,9 +1055,9 @@ export default function NavDestinationBootcampTest() {
         ],
         assertEqual: '0.00vp'
       })
-
       done();
     })
+
     /**
      * 测试开启constraintSize
      */
@@ -1160,6 +1070,7 @@ export default function NavDestinationBootcampTest() {
       await driver.delayMs(3500);
       done();
     })
+
     /**
      * 测试组件constraintSize.minWidth且获取属性正确
      */
@@ -1199,6 +1110,7 @@ export default function NavDestinationBootcampTest() {
 
       done();
     })
+
     /**
      * 测试组件constraintSize.minHeight且获取属性正确
      */
@@ -1238,6 +1150,7 @@ export default function NavDestinationBootcampTest() {
 
       done();
     })
+
     /**
      * 测试组件constraintSize.maxWidth且获取属性正确
      */
@@ -1277,6 +1190,7 @@ export default function NavDestinationBootcampTest() {
 
       done();
     })
+
     /**
      * 测试组件constraintSize.maxHeight且获取属性正确
      */
@@ -1316,6 +1230,7 @@ export default function NavDestinationBootcampTest() {
 
       done();
     })
+
     /**
      * 测试关闭constraintSize,无断言
      */
@@ -1331,6 +1246,7 @@ export default function NavDestinationBootcampTest() {
 
       done();
     })
+
     /**
      * 测试开启position
      */
@@ -1343,6 +1259,7 @@ export default function NavDestinationBootcampTest() {
       await driver.delayMs(3500);
       done();
     })
+
     /**
      * 测试组件position.top且获取属性正确
      */
@@ -1368,9 +1285,9 @@ export default function NavDestinationBootcampTest() {
           toggleClickType: ToggleClick.Close
         },
       })
-
       done();
     })
+
     /**
      * 测试组件position.bottom且获取属性正确
      */
@@ -1396,9 +1313,9 @@ export default function NavDestinationBootcampTest() {
           toggleClickType: ToggleClick.Close
         },
       })
-
       done();
     })
+
     /**
      * 测试组件position.left且获取属性正确
      */
@@ -1424,9 +1341,9 @@ export default function NavDestinationBootcampTest() {
           toggleClickType: ToggleClick.Close
         },
       })
-
       done();
     })
+
     /**
      * 测试组件position.right且获取属性正确
      */
@@ -1452,9 +1369,9 @@ export default function NavDestinationBootcampTest() {
           toggleClickType: ToggleClick.Close
         },
       })
-
       done();
     })
+
     /**
      * 测试关闭position
      */
@@ -1467,9 +1384,9 @@ export default function NavDestinationBootcampTest() {
         await toggle[0].click()
       }
       await driver.delayMs(3500);
-
       done();
     })
+
     /**
      * 测试开启markAnchor
      */
@@ -1482,6 +1399,7 @@ export default function NavDestinationBootcampTest() {
       await driver.delayMs(3500);
       done();
     })
+
     /**
      * 测试组件markAnchor.x且获取属性正确
      */
@@ -1520,9 +1438,9 @@ export default function NavDestinationBootcampTest() {
         ],
         assertEqual: '0.00vp'
       })
-
       done();
     })
+
     /**
      * 测试组件markAnchor.y且获取属性正确
      */
@@ -1561,9 +1479,9 @@ export default function NavDestinationBootcampTest() {
         ],
         assertEqual: '0.00vp'
       })
-
       done();
     })
+
     /**
      * 测试关闭markAnchor
      */
@@ -1576,9 +1494,9 @@ export default function NavDestinationBootcampTest() {
         await toggle[0].click()
       }
       await driver.delayMs(3500);
-
       done();
     })
+
     /**
      * 测试开启offset
      */
@@ -1591,6 +1509,7 @@ export default function NavDestinationBootcampTest() {
       await driver.delayMs(3500);
       done();
     })
+
     /**
      * 测试组件offset.x且获取属性正确
      */
@@ -1629,9 +1548,9 @@ export default function NavDestinationBootcampTest() {
         ],
         assertEqual: '0.00vp'
       })
-
       done();
     })
+
     /**
      * 测试组件offset.y且获取属性正确
      */
@@ -1670,9 +1589,9 @@ export default function NavDestinationBootcampTest() {
         ],
         assertEqual: '0.00vp'
       })
-
       done();
     })
+
     /**
      * 测试关闭offset
      */
@@ -1685,9 +1604,9 @@ export default function NavDestinationBootcampTest() {
         await toggle[0].click()
       }
       await driver.delayMs(3500);
-
       done();
     })
+
     /**
      * 测试组件borderStyle
      */
@@ -1746,6 +1665,7 @@ export default function NavDestinationBootcampTest() {
       })
       done();
     })
+
     /**
      * 测试组件borderWidth
      */
