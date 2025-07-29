@@ -35,6 +35,16 @@ do {                                                                            
 }                                                                                          \
 while (0)
 
+std::string GetErrorProperty(ani_env* aniEnv, ani_error aniError, const char* property);
+void ErrorPrint(ani_env* env);
+inline void CheckAniFatalWithErrorMessage(ani_status result, ani_env* env)
+{
+    if (result != ANI_OK) {
+        ErrorPrint(env);
+        INTEROP_FATAL("ANI function failed (status: %d) at " __FILE__ " : %d", result, __LINE__);
+    }
+}
+
 template<class T>
 struct InteropTypeConverter {
     using InteropType = T;
@@ -1891,7 +1901,8 @@ void getKoalaANICallbackDispatcher(ani_class* clazz, ani_static_method* method);
   ani_env* env = reinterpret_cast<ani_env*>(venv);                                                      \
   ani_int result = 0;                                                                                   \
   long long args_casted = reinterpret_cast<long long>(args);                                            \
-  CHECK_ANI_FATAL(env->Class_CallStaticMethod_Int(clazz, method, &result, id, args_casted, length));    \
+  CheckAniFatalWithErrorMessage(                                                                        \
+      env->Class_CallStaticMethod_Int(clazz, method, &result, id, args_casted, length), env);           \
 }
 
 #define KOALA_INTEROP_CALL_INT(venv, id, length, args)                                                  \
