@@ -68,7 +68,7 @@ V2::ItemDivider Convert(const Ark_DividerStyleOptions& src)
 template<>
 DividerMode Convert(const Ark_DividerStyleOptions& src)
 {
-    DividerMode mode = OptConvert<DividerMode>(src.mode).value_or(mode);
+    DividerMode mode = OptConvert<DividerMode>(src.mode).value_or(DividerMode::FLOATING_ABOVE_MENU);
     return mode;
 }
 }
