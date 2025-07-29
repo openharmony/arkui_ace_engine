@@ -588,7 +588,7 @@ void AceContainer::UpdateResourceConfiguration(const std::string& jsonStr)
     }
     themeManager->UpdateConfig(resConfig);
     if (SystemProperties::GetResourceDecoupling()) {
-        ResourceManager::GetInstance().UpdateResourceConfig(resConfig);
+        ResourceManager::GetInstance().UpdateResourceConfig(GetBundleName(), GetModuleName(), instanceId_, resConfig);
     }
     taskExecutor_->PostTask(
         [weakThemeManager = WeakPtr<ThemeManager>(themeManager), colorScheme = colorScheme_, config = resConfig,
@@ -811,7 +811,7 @@ void AceContainer::UpdateDeviceConfig(const DeviceConfig& deviceConfig)
     }
     themeManager->UpdateConfig(resConfig);
     if (SystemProperties::GetResourceDecoupling()) {
-        ResourceManager::GetInstance().UpdateResourceConfig(resConfig);
+        ResourceManager::GetInstance().UpdateResourceConfig(GetBundleName(), GetModuleName(), instanceId_, resConfig);
     }
     taskExecutor_->PostTask(
         [weakThemeManager = WeakPtr<ThemeManager>(themeManager), colorScheme = colorScheme_,
