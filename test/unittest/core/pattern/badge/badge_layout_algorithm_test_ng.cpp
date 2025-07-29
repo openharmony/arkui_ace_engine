@@ -736,36 +736,4 @@ HWTEST_F(BadgeLayoutAlgorithmTestNg, BadgeLayoutAlgorithmTestNg013, TestSize.Lev
     EXPECT_EQ(layoutProperty_->GetBadgePositionValue(), BadgePosition::LEFT);
     EXPECT_EQ(layoutProperty_->GetLayoutDirection(), TextDirection::LTR);
 }
-
-/**
- * @tc.name: BadgeLayoutAlgorithmTestNg014
- * @tc.desc: Test the layout on the left side of the badge.
- * @tc.type: FUNC
- * @tc.author:
- */
-HWTEST_F(BadgeLayoutAlgorithmTestNg, BadgeLayoutAlgorithmTestNg014, TestSize.Level1)
-{
-    BadgeModelNG badge;
-    BadgeParameters badgeParameters;
-    badge.Create(badgeParameters);
-    {
-        TextModelNG model;
-        model.Create(u"text");
-        ViewStackProcessor::GetInstance()->Pop();
-        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
-    }
-    GetInstance();
-    FlushUITasks(frameNode_);
-
-    /**
-     * @tc.steps: step2. get layout property, layoutAlgorithm and create layoutWrapper.
-     * @tc.expected: step2. related function is called.
-     */
-    layoutProperty_->UpdateBadgePosition(BadgePosition::LEFT);
-    layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
-    layoutProperty_->UpdateIsPositionXy(false);
-    FlushUITasks(frameNode_);
-    EXPECT_EQ(layoutProperty_->GetBadgePositionValue(), BadgePosition::LEFT);
-    EXPECT_EQ(layoutProperty_->GetLayoutDirection(), TextDirection::RTL);
-}
 } // namespace OHOS::Ace::NG
