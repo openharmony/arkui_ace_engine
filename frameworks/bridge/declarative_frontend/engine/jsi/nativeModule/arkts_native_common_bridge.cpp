@@ -10889,25 +10889,23 @@ ArkUINativeModuleValue CommonBridge::SetOnVisibleAreaChange(ArkUIRuntimeCallInfo
     auto* frameNode = GetFrameNode(runtimeCallInfo);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(NUM_2);
-    Local<JSValueRef> secondeArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    JsiRef<JsiValue> secondeArg =
+        JsiRef<JsiValue>::FastMake(runtimeCallInfo->GetVM(), runtimeCallInfo->GetCallArgRef(NUM_1));
+
+    auto ratioArray = JSRef<JSArray>::Cast(secondeArg);
+    size_t size = ratioArray->Length();
     std::vector<double> ratioList;
-    if (secondeArg->IsArray(vm)) {
-        auto arrayObj = secondeArg->ToObject(vm);
-        uint32_t length = 0;
-        bool isArrayOrSharedArray = false;
-        bool isPendingException = false;
-        arrayObj->TryGetArrayLength(vm, &isPendingException, &isArrayOrSharedArray, &length);
-        for (uint32_t i = 0; i < length; ++i) {
-            auto element = arrayObj->Get(vm, i);
-            double ratio = 0.0;
-            bool isNumber = true;
-            element->GetValueDouble(isNumber);
-            if (isNumber) {
-                ratio = element->ToNumber(vm)->Value();
-                ratio = std::max(std::min(ratio, VISIBLE_RATIO_MAX), VISIBLE_RATIO_MIN);
-                ratioList.push_back(ratio);
-            }
+    for (size_t i = 0; i < size; i++) {
+        double ratio = 0.0;
+        JSViewAbstract::ParseJsDouble(ratioArray->GetValueAt(i), ratio);
+        if (LessOrEqual(ratio, VISIBLE_RATIO_MIN)) {
+            ratio = VISIBLE_RATIO_MIN;
         }
+
+        if (GreatOrEqual(ratio, VISIBLE_RATIO_MAX)) {
+            ratio = VISIBLE_RATIO_MAX;
+        }
+        ratioList.push_back(ratio);
     }
     CHECK_NULL_RETURN(thirdArg->IsFunction(vm), panda::JSValueRef::Undefined(vm));
     auto event = thirdArg->ToObject(vm);
