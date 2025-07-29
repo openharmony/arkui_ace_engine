@@ -1127,6 +1127,18 @@ void LayoutProperty::UpdateIgnoreLayoutSafeAreaOpts(const IgnoreLayoutSafeAreaOp
         ignoreLayoutSafeAreaOpts_ = std::make_unique<IgnoreLayoutSafeAreaOpts>();
     }
     if (ignoreLayoutSafeAreaOpts_->NeedUpdateWithCheck(opts)) {
+        bool preValid = (ignoreLayoutSafeAreaOpts_->type != LAYOUT_SAFE_AREA_TYPE_NONE) &&
+                        (ignoreLayoutSafeAreaOpts_->rawEdges != LAYOUT_SAFE_AREA_EDGE_NONE);
+        bool incomingValid = (opts.type != LAYOUT_SAFE_AREA_TYPE_NONE) && (opts.rawEdges != LAYOUT_SAFE_AREA_EDGE_NONE);
+        int inc = (preValid != incomingValid) ? (incomingValid ? 1 : -1) : 0;
+        auto host = GetHost();
+        if (inc && host) {
+            if (SystemProperties::GetMeasureDebugTraceEnabled()) {
+                ACE_MEASURE_SCOPED_TRACE("UpdateIgnoreCount:UpdateIgnoreLayoutSafeAreaOpts[%s][self:%d] updateCount=%d",
+                    host->GetTag().c_str(), host->GetId(), inc);
+            }
+            host->UpdateIgnoreCount(inc);
+        }
         *ignoreLayoutSafeAreaOpts_ = opts;
         propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
     }

@@ -2170,6 +2170,14 @@ void FrameNode::SetActive(bool active, bool needRebuildRenderContext)
 
     auto parent = GetAncestorNodeOfFrame(false);
     if (parent) {
+        if (subtreeIgnoreCount_ != 0 && activeChanged) {
+            int inc = isActive_ ? subtreeIgnoreCount_ : -subtreeIgnoreCount_;
+            if (SystemProperties::GetMeasureDebugTraceEnabled()) {
+                ACE_MEASURE_SCOPED_TRACE(
+                    "UpdateIgnoreCount:SetActive[%s][self:%d] updateCount=%d", tag_.c_str(), nodeId_, inc);
+            }
+            parent->UpdateIgnoreCount(inc);
+        }
         parent->MarkNeedSyncRenderTree();
         if (needRebuildRenderContext) {
             auto pipeline = GetContext();
@@ -4658,15 +4666,21 @@ void FrameNode::CollectDelayMeasureChild(LayoutWrapper* childWrapper)
     delayMeasureChildren_.emplace_back(childNode);
 }
 
-void FrameNode::PostTaskForIgnore(PipelineContext* pipeline)
+void FrameNode::PostTaskForIgnore()
 {
     if (delayMeasureChildren_.empty() && delayLayoutChildren_.empty()) {
         return;
     }
+    PostBundle(std::move(delayMeasureChildren_));
+}
+
+void FrameNode::PostBundle(std::vector<RefPtr<FrameNode>>&& nodes)
+{
+    auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     IgnoreLayoutSafeAreaBundle bundle;
     bundle.second = Claim(this);
-    bundle.first = std::move(delayMeasureChildren_);
+    bundle.first = std::move(nodes);
     pipeline->AddIgnoreLayoutSafeAreaBundle(std::move(bundle));
 }
 
@@ -4706,6 +4720,52 @@ bool FrameNode::PostponedTaskForIgnore()
     }
     delayLayoutChildren_.clear();
     return true;
+}
+
+void FrameNode::TraverseForIgnore()
+{
+    if (!SubtreeWithIgnoreChild() || (layoutProperty_ && layoutProperty_->IsIgnoreOptsValid())) {
+        return;
+    }
+    std::vector<RefPtr<FrameNode>> effectedNodes;
+    int recheckCount = 0;
+    TraverseSubtreeToPostBundle(effectedNodes, recheckCount);
+    if (SystemProperties::GetMeasureDebugTraceEnabled()) {
+        ACE_MEASURE_SCOPED_TRACE("TraverseForIgnore[%s][self:%d] subtreeIgnoreCount=%d, recheckCount=%d", tag_.c_str(),
+            nodeId_, subtreeIgnoreCount_, recheckCount);
+    }
+    if (recheckCount != subtreeIgnoreCount_) {
+        UpdateIgnoreCount(recheckCount - subtreeIgnoreCount_);
+    }
+    if (!effectedNodes.empty()) {
+        PostBundle(std::move(effectedNodes));
+    }
+}
+
+void FrameNode::TraverseSubtreeToPostBundle(std::vector<RefPtr<FrameNode>>& subtreeCollection, int& subtreeRecheck)
+{
+    std::list<RefPtr<FrameNode>> children;
+    GenerateOneDepthVisibleFrame(children);
+    for (const auto& child : children) {
+        if (!child || !child->SubtreeWithIgnoreChild()) {
+            continue;
+        }
+        auto property = child->GetLayoutProperty();
+        if (property && property->IsIgnoreOptsValid()) {
+            subtreeCollection.emplace_back(child);
+        } else {
+            std::vector<RefPtr<FrameNode>> effectedNodes;
+            int recheckCount = 0;
+            child->TraverseSubtreeToPostBundle(effectedNodes, recheckCount);
+            if (recheckCount != child->subtreeIgnoreCount_) {
+                child->UpdateIgnoreCount(recheckCount - child->subtreeIgnoreCount_);
+            }
+            if (!effectedNodes.empty()) {
+                child->PostBundle(std::move(effectedNodes));
+            }
+        }
+        subtreeRecheck += child->subtreeIgnoreCount_;
+    }
 }
 
 bool FrameNode::EnsureDelayedMeasureBeingOnlyOnce()
@@ -4798,6 +4858,7 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
 
     if (isConstraintNotChanged_) {
         if (!CheckNeedForceMeasureAndLayout()) {
+            TraverseForIgnore();
             ACE_SCOPED_TRACE(
                 "SkipMeasure [%s][self:%d] reason:ConstraintNotChanged and no force-flag", tag_.c_str(), nodeId_);
             layoutAlgorithm_->SetSkipMeasure();
@@ -4854,7 +4915,7 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
         measureCallback_(kitNode_);
     }
 
-    PostTaskForIgnore(pipeline);
+    PostTaskForIgnore();
 
     layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
     if (SystemProperties::GetMeasureDebugTraceEnabled()) {
@@ -7241,5 +7302,41 @@ void FrameNode::UpdateBackground()
             renderContext_->UpdateCustomBackground();
         }
     }
+}
+
+void FrameNode::UpdateIgnoreCount(int inc)
+{
+    subtreeIgnoreCount_ += inc;
+    if (!isActive_) {
+        return;
+    }
+    auto parent = GetAncestorNodeOfFrame(false);
+    if (parent) {
+        parent->UpdateIgnoreCount(inc);
+    }
+}
+
+void FrameNode::MountToParent(const RefPtr<UINode>& parent,
+    int32_t slot, bool silently, bool addDefaultTransition, bool addModalUiextension)
+{
+    CHECK_NULL_VOID(parent);
+    parent->AddChild(AceType::Claim(this), slot, silently, addDefaultTransition, addModalUiextension);
+    if (SubtreeWithIgnoreChild()) {
+        auto parentFrame = GetAncestorNodeOfFrame(false);
+        if (parentFrame && IsActive()) {
+            if (SystemProperties::GetMeasureDebugTraceEnabled()) {
+                ACE_MEASURE_SCOPED_TRACE("UpdateIgnoreCount:MountToParent[%s][self:%d] updateCount=%d", tag_.c_str(),
+                    nodeId_, subtreeIgnoreCount_);
+            }
+            parentFrame->UpdateIgnoreCount(subtreeIgnoreCount_);
+        }
+    }
+    if (parent->IsInDestroying()) {
+        parent->SetChildrenInDestroying();
+    }
+    if (parent->GetPageId() != 0) {
+        SetHostPageId(parent->GetPageId());
+    }
+    AfterMountToParent();
 }
 } // namespace OHOS::Ace::NG
