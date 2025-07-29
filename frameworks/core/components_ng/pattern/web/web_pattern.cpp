@@ -5034,8 +5034,7 @@ RefPtr<TextFieldTheme> WebPattern::GetTheme() const
     CHECK_NULL_RETURN(tmpHost, nullptr);
     auto context = tmpHost->GetContext();
     CHECK_NULL_RETURN(context, nullptr);
-    auto theme = context->GetTheme<TextFieldTheme>(tmpHost->GetThemeScopeId());
-    return theme;
+    return context->GetTheme(tmpHost->GetThemeScopeId());
 }
 
 bool WebPattern::IsShowAIWrite()
@@ -5056,10 +5055,7 @@ bool WebPattern::IsShowAIWrite()
     }
     aiWriteAdapter_->SetBundleName(bundleName);
     aiWriteAdapter_->SetAbilityName(abilityName);
-    auto isAISupport = false;
-    if (textFieldTheme->GetAIWriteIsSupport() == "true") {
-        isAISupport = true;
-    }
+    auto isAISupport = textFieldTheme->GetAIWriteIsSupport() == "true";
     TAG_LOGI(AceLogTag::ACE_WEB, "Whether the device supports AI write: %{public}d, nodeId: %{public}d", isAISupport,
         host->GetId());
     return isAISupport;
