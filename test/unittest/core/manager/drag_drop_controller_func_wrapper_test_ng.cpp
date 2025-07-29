@@ -523,6 +523,9 @@ HWTEST_F(DragControllerFuncWrapperTestNg, DragControllerFuncWrapperTest0012, Tes
      */
     pipelineContext = AceType::DynamicCast<NG::PipelineContext>(pipeline);
     ASSERT_NE(pipelineContext, nullptr);
+    auto dragDropManager = pipelineContext->GetDragDropManager();
+    dragDropManager->SetIsShowBadgeAnimation(true);
+    EXPECT_EQ(dragDropManager->IsShowBadgeAnimation(), true);
     RefPtr<Subwindow> subWindow = nullptr;
     {
         auto mainPipeline = PipelineContext::GetMainPipelineContext();
