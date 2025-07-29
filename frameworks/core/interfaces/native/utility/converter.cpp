@@ -2538,24 +2538,6 @@ PickerTextStyle Convert(const Ark_TextPickerTextStyle& src)
 }
 
 template<>
-PickerTime Convert(const Ark_Date& src)
-{
-    auto milliseconds = static_cast<int64_t>(src);
-    const auto SEC_TO_MILLISEC = 1000L;
-    auto seconds = static_cast<time_t>(milliseconds / SEC_TO_MILLISEC);
-    struct std::tm time_info;
-#ifdef WINDOWS_PLATFORM
-    errno_t err = localtime_s(&time_info, &seconds);
-    if (err) {
-        LOGE("Invalid argument to localtime_s.");
-    }
-#else
-    localtime_r(&seconds, &time_info);
-#endif
-    return PickerTime(time_info.tm_hour, time_info.tm_min, time_info.tm_sec);
-}
-
-template<>
 PickerTime Convert(const Ark_TimePickerResult& src)
 {
     auto second = Converter::OptConvert<uint32_t>(src.second).value_or(0);
@@ -2701,6 +2683,28 @@ void AssignCast(std::optional<PickerDate>& dst, const Ark_Date& src)
         dst = DATE_MIN;
     } else if (dst->GetDay() < DATE_MIN.GetDay() || dst->GetDay() > maxDay) {
         dst = DATE_MIN;
+    }
+}
+
+template<>
+void AssignCast(std::optional<PickerTime>& dst, const Ark_Date& src)
+{
+    auto milliseconds = static_cast<int64_t>(src);
+    const auto SEC_TO_MILLISEC = 1000L;
+    auto seconds = static_cast<time_t>(milliseconds / SEC_TO_MILLISEC);
+    struct std::tm time_info;
+#ifdef WINDOWS_PLATFORM
+    errno_t err = localtime_s(&time_info, &seconds);
+    if (err) {
+        LOGE("Invalid argument to localtime_s.");
+    }
+#else
+    localtime_r(&seconds, &time_info);
+#endif
+    if (LessOrEqual(time_info.tm_year, 0)) {
+        dst = std::nullopt;
+    } else {
+        dst = PickerTime(time_info.tm_hour, time_info.tm_min, time_info.tm_sec);
     }
 }
 

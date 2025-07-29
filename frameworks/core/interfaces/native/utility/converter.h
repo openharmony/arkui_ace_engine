@@ -572,7 +572,6 @@ namespace Converter {
     template<> PickerSelectedType Convert(const Array_Number& src);
     template<> PickerTextStyle Convert(const Ark_PickerTextStyle& src);
     template<> PickerTextStyle Convert(const Ark_TextPickerTextStyle& src);
-    template<> PickerTime Convert(const Ark_Date& src);
     template<> PickerTime Convert(const Ark_TimePickerResult& src);
     template<> PickerValueType Convert(const Ark_String& src);
     template<> PickerValueType Convert(const Array_String& src);
@@ -767,6 +766,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<ParticleDisturbanceShapeType>& dst, const Ark_DisturbanceFieldShape& src);
     template<> void AssignCast(std::optional<DatePickerMode>& dst, const Ark_DatePickerMode& src);
     template<> void AssignCast(std::optional<PickerDate>& dst, const Ark_Date& src);
+    template<> void AssignCast(std::optional<PickerTime>& dst, const Ark_Date& src);
     template<> void AssignCast(std::optional<Placement>& dst, const Ark_Placement& src);
     template<> void AssignCast(std::optional<RectHeightStyle>& dst, const Ark_RectHeightStyle& src);
     template<> void AssignCast(std::optional<RectWidthStyle>& dst, const Ark_RectWidthStyle& src);
