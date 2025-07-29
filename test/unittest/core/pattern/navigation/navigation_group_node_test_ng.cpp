@@ -904,8 +904,8 @@ HWTEST_F(NavigationGroupNodeTestNg, GetNavBarOrHomeDestinationNode002, TestSize.
     navigationModel.SetNavigationStack(mockNavPathStack);
     auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(navigation, nullptr);
-    auto node = FrameNode::GetOrCreateFrameNode(V2::NAVBAR_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavBarPattern>(); });
+    auto node = FrameNode::GetOrCreateFrameNode(V2::NAVBAR_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavBarPattern>(); });
     ASSERT_NE(node, nullptr);
     navigation->navBarNode_ = node;
 
