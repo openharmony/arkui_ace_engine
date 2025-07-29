@@ -7274,14 +7274,33 @@ ArkUINativeModuleValue CommonBridge::SetKeyBoardShortCut(ArkUIRuntimeCallInfo* r
     if (arrLength > NUM_10) {
         arrLength = NUM_10;
     }
-    int32_t* keysIntArray = new int32_t[arrLength];
-    for (size_t i = 0; i < arrLength; i++) {
+    std::vector<OHOS::Ace::ModifierKey> keysVector(arrLength);
+    for (uint32_t i = 0; i < arrLength; i++) {
         Local<JSValueRef> objValue = keysArray->GetValueAt(vm, keysArg, i);
-        keysIntArray[i] = objValue->Int32Value(vm);
+        keysVector.emplace_back(static_cast<OHOS::Ace::ModifierKey>(objValue->Int32Value(vm)));
     }
-    GetArkUINodeModifiers()->getCommonModifier()->setKeyBoardShortCut(
-        nativeNode, stringValue.c_str(), keysIntArray, arrLength);
-    delete[] keysIntArray;
+    auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    if (runtimeCallInfo->GetArgsNumber() == NUM_4) {
+        Local<JSValueRef> actionArg = runtimeCallInfo->GetCallArgRef(NUM_3);
+        auto obj = actionArg->ToObject(vm);
+        auto containerId = Container::CurrentId();
+        panda::Local<panda::FunctionRef> func = obj;
+        auto flag = FrameNodeBridge::IsCustomFrameNode(frameNode);
+        auto onActionFunc = [vm, func = JSFuncObjRef(panda::CopyableGlobal(vm, func), flag),
+                                node = AceType::WeakClaim(frameNode), containerId]() {
+            panda::LocalScope pandaScope(vm);
+            panda::TryCatch trycatch(vm);
+            ContainerScope scope(containerId);
+            auto function = func.Lock();
+            CHECK_NULL_VOID(!function.IsEmpty());
+            CHECK_NULL_VOID(function->IsFunction(vm));
+            PipelineContext::SetCallBackNode(node);
+            function->Call(vm, function.ToLocal(), nullptr, 0);
+        };
+        ViewAbstractModelNG::SetKeyboardShortcut(frameNode, stringValue, keysVector, std::move(onActionFunc));
+        return panda::JSValueRef::Undefined(vm);
+    }
+    ViewAbstractModelNG::SetKeyboardShortcut(frameNode, stringValue, keysVector, nullptr);
     return panda::JSValueRef::Undefined(vm);
 }
 
