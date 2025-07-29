@@ -255,6 +255,7 @@ ani_object ANICreateDismissDialogAction(ani_env* env, const int32_t reason, cons
     status = env->Object_New(cls, ctor, &result, nativePtr);
     if (status != ANI_OK) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG, "DismissDialogAction NewObject fail. status: %{public}d", status);
+        delete dismissDialogAction;
         return result;
     }
 
