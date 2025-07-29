@@ -72,9 +72,8 @@ constexpr char EVENT_KEY_APP_ROTATION[] = "APP_ROTATION";
 constexpr char EVENT_KEY_WINDOW_MODE[] = "WINDOW_MODE";
 constexpr char EVENT_KEY_NON_MANUAL_POSTCARD_ACTION[] = "NON_MANUAL_POSTCARD_ACTION";
 constexpr char EVENT_KEY_TEXTFIELD_ERROR[] = "TEXTFIELD_ERROR";
-constexpr char EVENT_KEY_TEXTFIELD_ERROR_TYPE[] = "TEXTFIELD_ERROR_TYPE";
-constexpr char EVENT_KEY_CLIPBOARD_FAIL_TYPE[] = "EVENT_KEY_CLIPBOARD_FAIL_TYPE";
 constexpr char EVENT_KEY_FRAME_NODE_ID[] = "FRAME_NODE_ID";
+constexpr char EVENT_KEY_FRAME_NODE_DEPTH[] = "FRAME_NODE_DEPTH";
 constexpr char EVENT_KEY_CLIPBOARD_FAIL[] = "CLIPBOARD_FAIL";
 constexpr char EVENT_KEY_PAGE_NAME[] = "PAGE_NAME";
 constexpr char EVENT_KEY_FORM_NAME[] = "FORM_NAME";
@@ -634,16 +633,16 @@ void EventReport::ReportTextFieldErrorEvent(int32_t frameNodeId, int32_t depth, 
 {
     auto packageName = Container::CurrentBundleName();
     HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, EVENT_KEY_TEXTFIELD_ERROR,
-        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, EVENT_KEY_PACKAGE_NAME, packageName, EVENT_KEY_FRAME_NODE_ID,
-        frameNodeId, EVENT_KEY_PAGE_DEPTH, depth, EVENT_KEY_TEXTFIELD_ERROR_TYPE, errorType);
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, EVENT_KEY_BUNDLE_NAME, packageName, EVENT_KEY_FRAME_NODE_ID,
+        frameNodeId, EVENT_KEY_FRAME_NODE_DEPTH, depth, EVENT_KEY_ERROR_TYPE, errorType);
 }
 
 void EventReport::ReportClipboardFailEvent(const std::string& errorType)
 {
     auto packageName = Container::CurrentBundleName();
     HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, EVENT_KEY_CLIPBOARD_FAIL,
-        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, EVENT_KEY_PACKAGE_NAME, packageName,
-        EVENT_KEY_CLIPBOARD_FAIL_TYPE, errorType);
+        OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, EVENT_KEY_BUNDLE_NAME, packageName,
+        EVENT_KEY_ERROR_TYPE, errorType);
 }
 
 void EventReport::ReportReusedNodeSkipMeasureApp()
