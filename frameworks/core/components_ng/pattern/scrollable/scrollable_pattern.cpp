@@ -166,13 +166,14 @@ void ScrollablePattern::UpdateFadingEdge(const RefPtr<ScrollablePaintMethod>& pa
     CHECK_NULL_VOID(paintProperty);
     bool defaultFadingEdge = paintProperty->GetDefaultFadingEdge().value_or(false);
     bool hasFadingEdge = paintProperty->GetFadingEdge().value_or(defaultFadingEdge);
+    paint->SetHasFadingEdge(hasFadingEdge);
+    paint->SetNeedUpdateFadingEdge(hasFadingEdge || preHasFadingEdge_);
+    preHasFadingEdge_ = hasFadingEdge;
     if (!hasFadingEdge) {
         paint->SetOverlayRenderContext(overlayRenderContext);
-        paint->SetFadingInfo(false, false, prevHasFadingEdge_);
-        prevHasFadingEdge_ = hasFadingEdge;
+        paint->SetFadingInfo(false, false);
         return;
     }
-    prevHasFadingEdge_ = hasFadingEdge;
     auto isFadingTop = !IsAtTop();
     auto isFadingBottom = IsFadingBottom();
     float paddingBeforeContent = 0.0f;
@@ -203,7 +204,7 @@ void ScrollablePattern::UpdateFadeInfo(
     } else {
         percentFading = fadingEdgeLength.ConvertToPx() / fadeFrameSize;
     }
-    paint->SetFadingInfo(isFadingTop, isFadingBottom, true, (percentFading > 0.5f ? 0.5f : percentFading),
+    paint->SetFadingInfo(isFadingTop, isFadingBottom, (percentFading > 0.5f ? 0.5f : percentFading),
         startPercent_, endPercent_); // 0.5: Half
 }
 

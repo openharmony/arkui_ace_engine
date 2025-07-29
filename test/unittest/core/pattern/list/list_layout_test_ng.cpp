@@ -3257,6 +3257,137 @@ HWTEST_F(ListLayoutTestNg, FadingEdge004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: FadingEdge005
+ * @tc.desc: Test fadingEdge change from user
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, FadingEdge005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create List with fadingEdge
+     * @tc.expected: Would create a overlayNode attach to list and list blend mode is src_over
+     */
+    const Dimension fadingEdgeLength = Dimension(10.0f);
+    ListModelNG model = CreateList();
+    ScrollableModelNG::SetFadingEdge(true, fadingEdgeLength);
+    CreateListItems(10);
+    CreateDone();
+    auto renderContext = frameNode_->GetRenderContext();
+    EXPECT_TRUE(renderContext);
+    auto& graphicProps = renderContext->GetOrCreateGraphics();
+    EXPECT_TRUE(graphicProps);
+    auto blendMode = graphicProps->GetBackBlendMode();
+    EXPECT_EQ(blendMode, BlendMode::SRC_OVER);
+
+    /**
+     * @tc.steps: step2. user close fadingEdge
+     * @tc.expected: blend mode none is set to render context
+     */
+    ScrollableModelNG::SetFadingEdge(AceType::RawPtr(frameNode_), false);
+    frameNode_->MarkModifyDone();
+    FlushUITasks();
+    blendMode = graphicProps->GetBackBlendMode();
+    EXPECT_EQ(blendMode, BlendMode::NONE);
+
+    /**
+     * @tc.steps: step3. user re-open fadingEdge
+     * @tc.expected: blend mode src_over is set to render context
+     */
+    ScrollableModelNG::SetFadingEdge(AceType::RawPtr(frameNode_), true);
+    frameNode_->MarkModifyDone();
+    FlushUITasks();
+    blendMode = graphicProps->GetBackBlendMode();
+    EXPECT_EQ(blendMode, BlendMode::SRC_OVER);
+}
+
+/**
+ * @tc.name: FadingEdge006
+ * @tc.desc: Test fadingEdge change from user
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, FadingEdge006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create List without fadingEdge
+     * @tc.expected: Would create a overlayNode attach to list and list blend mode is null
+     */
+    ListModelNG model = CreateList();
+    CreateListItems(10);
+    CreateDone();
+    auto renderContext = frameNode_->GetRenderContext();
+    EXPECT_TRUE(renderContext);
+    auto& graphicProps = renderContext->GetOrCreateGraphics();
+    EXPECT_TRUE(graphicProps);
+    auto blendMode = graphicProps->GetBackBlendMode();
+    EXPECT_FALSE(blendMode);
+
+    /**
+     * @tc.steps: step2. user open fadingEdge
+     * @tc.expected: blend mode src_over is set to render context
+     */
+    ScrollableModelNG::SetFadingEdge(AceType::RawPtr(frameNode_), true);
+    frameNode_->MarkModifyDone();
+    FlushUITasks();
+    blendMode = graphicProps->GetBackBlendMode();
+    EXPECT_EQ(blendMode, BlendMode::SRC_OVER);
+
+    /**
+     * @tc.steps: step3. user re-close fadingEdge
+     * @tc.expected: blend mode none is set to render context
+     */
+    ScrollableModelNG::SetFadingEdge(AceType::RawPtr(frameNode_), false);
+    frameNode_->MarkModifyDone();
+    FlushUITasks();
+    blendMode = graphicProps->GetBackBlendMode();
+    EXPECT_EQ(blendMode, BlendMode::NONE);
+}
+
+/**
+ * @tc.name: FadingEdge007
+ * @tc.desc: Test fadingEdge change from itemTotalSize less than contentSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, FadingEdge007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create List with fadingEdge
+     * @tc.expected: Would create a overlayNode attach to list and list blend mode is src_over
+     */
+    const Dimension fadingEdgeLength = Dimension(10.0f);
+    ListModelNG model = CreateList();
+    ScrollableModelNG::SetFadingEdge(true, fadingEdgeLength);
+    CreateListItems(10);
+    CreateDone();
+    auto renderContext = frameNode_->GetRenderContext();
+    EXPECT_TRUE(renderContext);
+    auto& graphicProps = renderContext->GetOrCreateGraphics();
+    EXPECT_TRUE(graphicProps);
+    auto blendMode = graphicProps->GetBackBlendMode();
+    EXPECT_EQ(blendMode, BlendMode::SRC_OVER);
+
+    /**
+     * @tc.steps: step2. change itemTotalSize less than contentSize
+     * @tc.expected: blend mode maintain SRC_OVER and gradient color size is 4
+     */
+    pattern_->contentMainSize_ = FLT_MAX;
+    auto paintWrapper = frameNode_->CreatePaintWrapper();
+    RefPtr<ListPaintMethod> paintMethod = AceType::DynamicCast<ListPaintMethod>(paintWrapper->nodePaintImpl_);
+    pattern_->UpdateFadingEdge(paintMethod);
+    paintMethod->UpdateFadingGradient(renderContext);
+    EXPECT_EQ(blendMode, BlendMode::SRC_OVER);
+    EXPECT_FALSE(paintMethod->isFadingTop_);
+    auto overlayRenderContext = paintMethod->overlayRenderContext_;
+    EXPECT_TRUE(overlayRenderContext);
+    auto& gradientProp = overlayRenderContext->GetOrCreateGradient();
+    EXPECT_TRUE(gradientProp);
+    NG::Gradient gradient;
+    if (gradientProp->HasLastGradientType() || gradientProp->HasLinearGradient()) {
+        gradient = gradientProp->GetLinearGradientValue();
+    }
+    EXPECT_EQ(gradient.GetColors().size(), 4); // 4: both top and bottom have gradient
+}
+
+/**
  * @tc.name: InitialIndex001
  * @tc.desc: Test the initialIndex and scrollToIndex priority.
  * @tc.type: FUNC
