@@ -694,7 +694,7 @@ void PipelineContext::UpdateDVSyncTime(uint64_t nanoTimestamp, const std::string
         commandTimeUpdate_ = false;
     }
     if (commandTimeUpdate_) {
-        int64_t now = GetSysTimestamp();
+        uint64_t now = static_cast<uint64_t>(GetSysTimestamp());
         if (DVSyncChangeTime_ < now || dvsyncTimeUseCount_ >= MAX_DVSYNC_TIME_USE_COUNT) {
             commandTimeUpdate_ = false;
         }
