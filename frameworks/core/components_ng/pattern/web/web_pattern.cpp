@@ -5034,7 +5034,7 @@ RefPtr<TextFieldTheme> WebPattern::GetTheme() const
     CHECK_NULL_RETURN(tmpHost, nullptr);
     auto context = tmpHost->GetContext();
     CHECK_NULL_RETURN(context, nullptr);
-    return context->GetTheme(tmpHost->GetThemeScopeId());
+    return context->GetTheme<TextFieldTheme>(tmpHost->GetThemeScopeId());
 }
 
 bool WebPattern::IsShowAIWrite()
