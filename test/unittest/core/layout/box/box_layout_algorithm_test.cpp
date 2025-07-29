@@ -534,4 +534,39 @@ HWTEST_F(BoxLayoutAlgorithmTest, CalcLayoutPolicySingleSide001, TestSize.Level1)
     EXPECT_EQ(maxWidth, 60.0f);
     EXPECT_EQ(maxHeight, 50.0f);
 }
+
+/**
+ * @tc.name: WrapAndMatchParent001
+ * @tc.desc:test parent wrap and child match parent
+ * @tc.type: FUNC
+ */
+HWTEST_F(BoxLayoutAlgorithmTest, WrapAndMatchParent001, TestSize.Level1)
+{
+    RefPtr<FrameNode> row1;
+    auto layoutWrapper = CreateBox([this, &row1]() {
+        row1 = CreateRow([](RowModelNG model) {
+        });
+    });
+    auto geometryNode = layoutWrapper->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    EXPECT_FALSE(geometryNode->GetContent());
+
+    LayoutConstraintF parentLayoutConstraint;
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    layoutProperty->UpdateLayoutConstraint(parentLayoutConstraint);
+    layoutProperty->UpdateContentConstraint();
+
+    auto childLayoutProperty = row1->GetLayoutProperty();
+    ASSERT_NE(childLayoutProperty, nullptr);
+    childLayoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+    auto childGeometryNode = row1->GetGeometryNode();
+    ASSERT_NE(childGeometryNode, nullptr);
+    childGeometryNode->SetFrameSize(SizeF(60.0f, 60.0f));
+    BoxLayoutAlgorithm boxLayoutAlgorithm;
+    std::list<RefPtr<LayoutWrapper>> childList;
+    childList = layoutWrapper->GetAllChildrenWithBuild();
+    boxLayoutAlgorithm.PerformMeasureSelfWithChildList(Referenced::RawPtr(layoutWrapper), childList);
+
+    EXPECT_TRUE(NearEqual(geometryNode->GetFrameSize().Height(), 0.0f));
+}
 } // namespace OHOS::Ace::NG
