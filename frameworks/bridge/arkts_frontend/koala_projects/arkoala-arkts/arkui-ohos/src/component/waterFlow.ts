@@ -37,7 +37,7 @@ import { Scroller, OnScrollFrameBeginCallback } from "./scroll"
 import { WaterFlowHandWritten } from "../handwritten/WaterFlowImpl"
 
 export class ArkWaterFlowPeer extends ArkScrollableCommonMethodPeer {
-    protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+    constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
     public static create(component: ComponentBase | undefined, flags: int32 = 0): ArkWaterFlowPeer {
