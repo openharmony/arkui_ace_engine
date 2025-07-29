@@ -2316,6 +2316,7 @@ HWTEST_F(ListLayoutTestNg, ListRepeatCacheCount003, TestSize.Level1)
 HWTEST_F(ListLayoutTestNg, ListRepeatCacheCount004, TestSize.Level1)
 {
     ListModelNG model = CreateList();
+    model.SetSpace(Dimension(SPACE));
     ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
     CreateRepeatVirtualScrollNode(10, [this](int32_t idx) {
         CreateListItem();
@@ -2336,7 +2337,7 @@ HWTEST_F(ListLayoutTestNg, ListRepeatCacheCount004, TestSize.Level1)
     EXPECT_EQ(childrenCount, 5);
     auto cachedItem = frameNode_->GetChildByIndex(4)->GetHostNode();
     EXPECT_EQ(cachedItem->IsActive(), false);
-    EXPECT_EQ(GetChildY(frameNode_, 4), HEIGHT);
+    EXPECT_EQ(GetChildY(frameNode_, 4), HEIGHT + 4 * SPACE);
 
     /**
      * @tc.steps: step2. Update item4 size
