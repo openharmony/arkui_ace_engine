@@ -55,6 +55,7 @@ namespace {
     constexpr int32_t DEFAULT_MULTIPLE = 100;
     constexpr float GRADIENT_MIN_POSITION = 0.0f;
     constexpr float GRADIENT_DEFAULT_MIN_POSITION = 0.0f;
+    constexpr uint16_t UTF16_BOM = 0xFEFF;
     int32_t ConvertToVariableFontWeight(OHOS::Ace::FontWeight fontWeight)
     {
         OHOS::Ace::FontWeight convertValue;
@@ -668,8 +669,28 @@ SysOptions Convert(const Ark_SystemAdaptiveOptions& src)
 template<>
 std::u16string Convert(const Ark_String& src)
 {
+    if (src.chars == nullptr) return u"";
+    const char16_t* data = reinterpret_cast<const char16_t*>(src.chars);
+    if (data[0] == UTF16_BOM) {
+        // Handle utf16 strings
+        ++data;
+        return std::u16string(data, src.length);
+    }
     auto str8 =  Converter::Convert<std::string>(src);
     return UtfUtils::Str8ToStr16(str8);
+}
+
+template<>
+std::string Convert(const Ark_String& src)
+{
+    if (src.chars == nullptr) return "";
+    const char16_t* data = reinterpret_cast<const char16_t*>(src.chars);
+    if (data[0] == UTF16_BOM) {
+        // Handle utf16 strings
+        ++data;
+        return UtfUtils::Str16ToStr8(std::u16string(data, src.length));
+    }
+    return std::string(src.chars, src.length);
 }
 
 template<>
