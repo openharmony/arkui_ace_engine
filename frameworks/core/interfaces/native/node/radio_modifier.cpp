@@ -429,9 +429,7 @@ const ArkUIRadioModifier* GetRadioModifier()
     static const ArkUIRadioModifier modifier = {
         .setRadioChecked = SetRadioChecked,
         .resetRadioChecked = ResetRadioChecked,
-        .setRadioColorSetByUser = SetRadioColorSetByUser,
         .setRadioStyle = SetRadioStyle,
-        .setRadioStylePtr = SetRadioStylePtr,
         .resetRadioStyle = ResetRadioStyle,
         .setRadioWidth = SetRadioWidth,
         .resetRadioWidth = ResetRadioWidth,
@@ -456,8 +454,10 @@ const ArkUIRadioModifier* GetRadioModifier()
         .setRadioOptions = SetRadioOptions,
         .setRadioOnChange = SetRadioOnChange,
         .resetRadioOnChange = ResetRadioOnChange,
+        .setRadioStylePtr = SetRadioStylePtr,
         .setRadioMargin = SetRadioMargin,
         .resetRadioMargin = ResetRadioMargin,
+        .setRadioColorSetByUser = SetRadioColorSetByUser,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

@@ -315,6 +315,9 @@ void JSRadio::JsRadioStyle(const JSCallbackInfo& info)
 
 void JSRadio::SetCheckedBackgroundColor(const JSCallbackInfo& info, const RefPtr<RadioTheme>& theme)
 {
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        return;
+    }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> checkedBackgroundColor = obj->GetProperty("checkedBackgroundColor");
     Color checkedBackgroundColorVal;
@@ -333,6 +336,9 @@ void JSRadio::SetCheckedBackgroundColor(const JSCallbackInfo& info, const RefPtr
 
 void JSRadio::SetUncheckedBorderColor(const JSCallbackInfo& info, const RefPtr<RadioTheme>& theme)
 {
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        return;
+    }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> uncheckedBorderColor = obj->GetProperty("uncheckedBorderColor");
     Color uncheckedBorderColorVal;
@@ -360,6 +366,9 @@ void JSRadio::SetUncheckedBorderColor(const JSCallbackInfo& info, const RefPtr<R
 
 void JSRadio::SetIndicatorColor(const JSCallbackInfo& info, const RefPtr<RadioTheme>& theme)
 {
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        return;
+    }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> indicatorColor = obj->GetProperty("indicatorColor");
     Color indicatorColorVal;
