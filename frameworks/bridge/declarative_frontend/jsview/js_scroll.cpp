@@ -423,7 +423,11 @@ void JSScroll::SetScrollBarColor(const JSCallbackInfo& args)
     auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
     CHECK_NULL_VOID(theme);
     Color color(theme->GetForegroundColor());
-    JSViewAbstract::ParseJsColor(args[0], color);
+    RefPtr<ResourceObject> resObj;
+    JSViewAbstract::ParseJsColor(args[0], color, resObj);
+    if (SystemProperties::ConfigChangePerform()) {
+        ScrollModel::GetInstance()->CreateWithResourceObjScrollBarColor(resObj);
+    }
     ScrollModel::GetInstance()->SetScrollBarColor(color);
 }
 

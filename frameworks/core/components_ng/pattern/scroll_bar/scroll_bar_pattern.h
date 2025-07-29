@@ -325,6 +325,7 @@ public:
     }
 
     void OnColorConfigurationUpdate() override;
+    void OnColorModeChange(uint32_t colorMode) override;
 
     RefPtr<ScrollBarProxy> GetScrollBarProxy()
     {

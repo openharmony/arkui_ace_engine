@@ -27,6 +27,10 @@
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_model.h"
 
 namespace OHOS::Ace {
+enum class ScrollBarJsResType {
+    SCROLLBAR_COLOR
+};
+
 class ACE_FORCE_EXPORT ScrollBarModel {
 public:
     static ScrollBarModel* GetInstance();
@@ -38,6 +42,7 @@ public:
     virtual void SetEnableNestedScroll(bool enableNestedSroll) = 0;
     virtual void SetScrollBarColor(const Color& color) = 0;
     virtual void ResetScrollBarColor() = 0;
+    virtual void CreateWithResourceObj(ScrollBarJsResType jsResourceType, const RefPtr<ResourceObject>& resObj) {};
 private:
     static std::unique_ptr<ScrollBarModel> instance_;
     static std::mutex mutex_;

@@ -61,6 +61,10 @@ void WaterFlowTestNg::SetUpTestSuite()
     auto refreshThemeConstants = CreateThemeConstants(THEME_PATTERN_REFRESH);
     auto refreshTheme = RefreshThemeNG::Builder().Build(refreshThemeConstants);
     EXPECT_CALL(*themeManager, GetTheme(RefreshThemeNG::TypeId())).WillRepeatedly(Return(refreshTheme));
+    auto scrollbarThemeConstants = CreateThemeConstants(THEME_PATTERN_SCROLL_BAR);
+    auto scrollBarTheme = ScrollBarTheme::Builder().Build(scrollbarThemeConstants);
+    scrollBarTheme->foregroundColor_ = Color::RED;
+    EXPECT_CALL(*themeManager, GetTheme(ScrollBarTheme::TypeId())).WillRepeatedly(Return(scrollBarTheme));
     MockAnimationManager::Enable(true);
     auto container = Container::Current();
     ASSERT_TRUE(container);

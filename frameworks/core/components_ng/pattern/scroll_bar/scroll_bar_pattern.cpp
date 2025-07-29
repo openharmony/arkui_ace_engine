@@ -436,6 +436,13 @@ void ScrollBarPattern::OnColorConfigurationUpdate()
     paintProperty->SetDefaultScrollBarColor(barColor);
 }
 
+void ScrollBarPattern::OnColorModeChange(uint32_t colorMode)
+{
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    Pattern::OnColorModeChange(colorMode);
+    OnColorConfigurationUpdate();
+}
+
 bool ScrollBarPattern::UpdateScrollBarDisplay()
 {
     auto host = GetHost();

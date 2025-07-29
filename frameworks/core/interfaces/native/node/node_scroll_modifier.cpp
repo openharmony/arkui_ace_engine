@@ -607,6 +607,14 @@ void CreateWithResourceObjFriction(ArkUINodeHandle node, void* resObj)
     ScrollModelNG::CreateWithResourceObjFriction(frameNode, AceType::Claim(resourceObj));
 }
 
+void CreateWithResourceObjScrollBarColor(ArkUINodeHandle node, void* resObj)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* resourceObj = reinterpret_cast<ResourceObject*>(resObj);
+    ScrollModelNG::CreateWithResourceObjScrollBarColor(frameNode, AceType::Claim(resourceObj));
+}
+
 void CreateWithResourceObjSnap(ArkUINodeHandle node, const ArkUI_Float32* paginationValue, ArkUI_Int32 paginationSize,
     const int32_t* paginationParam, void* resObjs)
 {
@@ -829,6 +837,7 @@ const ArkUIScrollModifier* GetScrollModifier()
         .getScrollContentSize = GetScrollContentSize,
         .createWithResourceObjFriction = CreateWithResourceObjFriction,
         .createWithResourceObjSnap = CreateWithResourceObjSnap,
+        .createWithResourceObjScrollBarColor = CreateWithResourceObjScrollBarColor,
         .setMaxZoomScale = SetMaxZoomScale,
         .resetMaxZoomScale = ResetMaxZoomScale,
         .getMaxZoomScale = GetMaxZoomScale,

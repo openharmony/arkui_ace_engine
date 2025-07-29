@@ -16,7 +16,9 @@
 #include "scroll_bar_test_ng.h"
 
 #include "gtest/gtest.h"
+#include "test/mock/base/mock_system_properties.h"
 #include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/common/mock_resource_adapter_v2.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
@@ -1206,5 +1208,42 @@ HWTEST_F(ScrollBarTestNg, SetScrollBarColorTest002, TestSize.Level1)
     auto scrollBar = scrollPattern_->GetScrollBar();
     CHECK_NULL_VOID(scrollBar);
     EXPECT_EQ(scrollBar->GetForegroundColor(), Color::BLUE);
+}
+
+/**
+ * @tc.name: CreateWithResourceObj
+ * @tc.desc: Test CreateWithResourceObj in ScrollBaModelNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, CreateWithResourceObj001, TestSize.Level1)
+{
+    g_isConfigChangePerform = true;
+    ScrollBarModelNG scrollBarModel;
+    auto scrollBarProxy = scrollBarModel.GetScrollBarProxy(nullptr);
+    scrollBarModel.Create(
+        scrollBarProxy, true, true, static_cast<int>(Axis::VERTICAL), static_cast<int>(DisplayMode::ON));
+    GetScrollBar();
+
+    RefPtr<ResourceObject> invalidResObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+    scrollBarModel.CreateWithResourceObj(ScrollBarJsResType::SCROLLBAR_COLOR, invalidResObj);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
+
+    std::vector<ResourceObjectParams> params;
+    AddMockResourceData(0, Color::BLUE);
+    auto resObjWithString = AceType::MakeRefPtr<ResourceObject>(
+        0, static_cast<int32_t>(ResourceType::COLOR), params, "", "", Container::CurrentIdSafely());
+    scrollBarModel.CreateWithResourceObj(ScrollBarJsResType::SCROLLBAR_COLOR, resObjWithString);
+    pattern_->resourceMgr_->ReloadResources();
+    auto paintProperty = pattern_->GetPaintProperty<ScrollBarPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto color = paintProperty->GetScrollBarColorValue(Color::BLUE);
+    EXPECT_EQ(color, Color::BLUE);
+
+    scrollBarModel.CreateWithResourceObj(ScrollBarJsResType::SCROLLBAR_COLOR, resObjWithString);
+    pattern_->OnColorModeChange((uint32_t)ColorMode::DARK);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
+    g_isConfigChangePerform = false;
 }
 } // namespace OHOS::Ace::NG

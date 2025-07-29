@@ -16,6 +16,8 @@
 #include <memory>
 
 #include "gtest/gtest.h"
+#include "test/mock/base/mock_system_properties.h"
+#include "test/mock/core/common/mock_resource_adapter_v2.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
 #include "core/components_ng/pattern/list/list_pattern.h"
@@ -26,7 +28,37 @@ using namespace testing::ext;
 
 class ListPatternTwoTestNg : public TestNG {
 public:
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
+    void SetUp() override;
+    void TearDown() override;
 };
+
+void ListPatternTwoTestNg::SetUpTestSuite()
+{
+    TestNG::SetUpTestSuite();
+    ResetMockResourceData();
+    g_isConfigChangePerform = false;
+}
+
+void ListPatternTwoTestNg::TearDownTestSuite()
+{
+    TestNG::TearDownTestSuite();
+    ResetMockResourceData();
+    g_isConfigChangePerform = false;
+}
+
+void ListPatternTwoTestNg::SetUp()
+{
+    ResetMockResourceData();
+    g_isConfigChangePerform = false;
+}
+
+void ListPatternTwoTestNg::TearDown()
+{
+    ResetMockResourceData();
+    g_isConfigChangePerform = false;
+}
 
 /**
  * @tc.name: CalcAlignForFocusToGroupItem
@@ -850,5 +882,40 @@ HWTEST_F(ListPatternTwoTestNg, ScrollToSnapIndex_ScrollSnapAlign_NONE, TestSize.
      */
     auto result = listPattern->ScrollToSnapIndex(SnapDirection::FORWARD, ScrollSnapAlign::NONE);
     EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: OnColorModeChange00
+ * @tc.desc: Test ListPattern OnColorModeChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTwoTestNg, OnColorModeChange00, TestSize.Level1)
+{
+    g_isConfigChangePerform = true;
+
+    /**
+     * @tc.steps: step1. Construct the objects for test
+     */
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+    ASSERT_NE(listPattern, nullptr);
+    auto listNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 1, listPattern);
+    ASSERT_NE(listNode, nullptr);
+
+    /**
+     * @tc.steps: Test
+     */
+    listPattern->OnColorModeChange(static_cast<int32_t>(ColorMode::DARK));
+    auto paintProperty = listPattern->GetPaintProperty<ScrollablePaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    EXPECT_NE(paintProperty->GetScrollBarProperty(), nullptr);
+
+    paintProperty = listPattern->GetPaintProperty<ScrollablePaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    paintProperty->ResetScrollBarProperty();
+    listPattern->OnColorModeChange(static_cast<int32_t>(ColorMode::DARK));
+    ASSERT_NE(paintProperty, nullptr);
+    EXPECT_EQ(paintProperty->GetScrollBarProperty(), nullptr);
+
+    g_isConfigChangePerform = false;
 }
 } // namespace OHOS::Ace::NG

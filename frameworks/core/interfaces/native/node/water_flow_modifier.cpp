@@ -434,6 +434,16 @@ ArkUI_Float32 GetWaterFlowBarWidth(ArkUINodeHandle node)
     return WaterFlowModelNG::GetScrollBarWidth(frameNode);
 }
 
+void CreateWaterFlowScrollBarColorWithResourceObj(ArkUINodeHandle node, void* colorRawPtr)
+{
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* colorPtr = reinterpret_cast<ResourceObject*>(colorRawPtr);
+    auto colorResObj = AceType::Claim(colorPtr);
+    WaterFlowModelNG::ParseResObjScrollBarColor(frameNode, colorResObj);
+}
+
 void SetWaterFlowScrollBarColor(ArkUINodeHandle node, ArkUI_CharPtr value)
 {
     CHECK_NULL_VOID(value);
@@ -447,6 +457,8 @@ void ResetWaterFlowScrollBarColor(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ScrollableModelNG::ResetScrollBarColor(frameNode);
+
+    CreateWaterFlowScrollBarColorWithResourceObj(node, nullptr);
 }
 
 ArkUI_Uint32 GetWaterFlowScrollBarColor(ArkUINodeHandle node)
@@ -771,6 +783,7 @@ const ArkUIWaterFlowModifier* GetWaterFlowModifier()
         .resetWaterFlowFadingEdge = ResetWaterFlowFadingEdge,
         .setOnWaterFlowScrollIndexCallBack = SetOnWaterFlowScrollIndexCallBack,
         .resetOnWaterFlowScrollIndex = ResetOnWaterFlowScrollIndex,
+        .createWaterFlowScrollBarColorWithResourceObj = CreateWaterFlowScrollBarColorWithResourceObj,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

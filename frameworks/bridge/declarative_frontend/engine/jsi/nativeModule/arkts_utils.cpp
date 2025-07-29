@@ -1451,6 +1451,18 @@ bool ArkTSUtils::ParseJsIntegerArray(const EcmaVM* vm, Local<JSValueRef> values,
     return true;
 }
 
+bool ArkTSUtils::ParseJsString(const EcmaVM* vm, const Local<JSValueRef>& jsValue, std::string& result,
+    RefPtr<ResourceObject>& resourceObject, const NodeInfo& nodeInfo)
+{
+    if (!jsValue->IsString(vm) && !jsValue->IsObject(vm)) {
+        return false;
+    }
+    Color color;
+    bool ret = ArkTSUtils::ParseJsColor(vm, jsValue, color, resourceObject, nodeInfo);
+    result = ret ? color.ToString() : "";
+    return ret;
+}
+
 bool ArkTSUtils::ParseJsString(const EcmaVM* vm, const Local<JSValueRef>& jsValue, std::string& result)
 {
     RefPtr<ResourceObject> resourceObject;

@@ -85,6 +85,7 @@ public:
     virtual void SetOnReachStart(std::function<void()>&& onReachStart) = 0;
     virtual void SetOnReachEnd(std::function<void()>&& onReachEnd) = 0;
     virtual void CreateWithResourceObjFriction(const RefPtr<ResourceObject>& resObj) {};
+    virtual void CreateWithResourceObjScrollBarColor(const RefPtr<ResourceObject>& resObj) {};
     virtual void SetSyncLoad(bool syncLoad) {}
 
     virtual DisplayMode GetDisplayMode() const = 0;

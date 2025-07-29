@@ -76,14 +76,14 @@ DisplayMode JSScrollable::ParseDisplayMode(const JSCallbackInfo& info, DisplayMo
     return static_cast<DisplayMode>(displayMode);
 }
 
-std::string JSScrollable::ParseBarColor(const JSCallbackInfo& info)
+std::string JSScrollable::ParseBarColor(const JSCallbackInfo& info, RefPtr<ResourceObject>& resObj)
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, "");
     auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
     CHECK_NULL_RETURN(theme, "");
     Color color(theme->GetForegroundColor());
-    JSViewAbstract::ParseJsColor(info[0], color);
+    JSViewAbstract::ParseJsColor(info[0], color, resObj);
     return color.ColorToString();
 }
 

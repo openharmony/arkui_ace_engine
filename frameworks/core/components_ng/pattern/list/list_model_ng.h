@@ -85,6 +85,7 @@ public:
     void CreateWithResourceObjLaneGutter(const RefPtr<ResourceObject>& resObj) override;
     void CreateWithResourceObjLaneConstrain(const RefPtr<ResourceObject>& resObjMinLengthValue,
         const RefPtr<ResourceObject>& resObjMaxLengthValue) override;
+    void CreateWithResourceObjScrollBarColor(const RefPtr<ResourceObject>& resObj) override;
 
     static RefPtr<ScrollControllerBase> GetOrCreateController(FrameNode* frameNode);
     static void ScrollToEdge(FrameNode* frameNode, ScrollEdgeType scrollEdgeType, bool smooth);
@@ -190,6 +191,7 @@ public:
     static void ParseResObjDividerEndMargin(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
     static void CreateWithResourceObjLaneConstrain(FrameNode* frameNode,
         const RefPtr<ResourceObject>& resObjMinLengthValue, const RefPtr<ResourceObject>& resObjMaxLengthValue);
+    static void CreateWithResourceObjScrollBarColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
 
 private:
     void AddDragFrameNodeToManager() const;
