@@ -2035,6 +2035,50 @@ HWTEST_F(SheetPresentationTestThreeNg, GetSheetTypeFromSheetManager002, TestSize
 }
 
 /**
+ * @tc.name: GetSheetTypeFromSheetManager003
+ * @tc.desc: Test SheetPresentationPattern::GetSheetTypeFromSheetManager.
+ *           Condition: sheetStyle.instanceId is 100001
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestThreeNg, GetSheetTypeFromSheetManager003, TestSize.Level1)
+{
+    SheetPresentationTestThreeNg::SetUpTestCase();
+    SheetPresentationTestThreeNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
+    /**
+     * @tc.steps: step1. create sheet page, get sheet pattern.
+     */
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto pattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto sheeLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(sheeLayoutProperty, nullptr);
+    sheeLayoutProperty->UpdateSheetStyle(SheetStyle());
+    /**
+     * @tc.steps: step2. sheetThemeType_ = "auto".
+     */
+    pattern->sheetThemeType_ = "auto";
+    RefPtr<DisplayInfo> displayInfo = AceType::MakeRefPtr<DisplayInfo>();
+    displayInfo->SetFoldStatus(FoldStatus::EXPAND);
+    MockContainer::Current()->SetDisplayInfo(displayInfo);
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->SetDisplayWindowRectInfo({ 0, 0, 1600, 800 });
+    /**
+     * @tc.steps: step2. Set preferType is Bottom.
+     * @tc.expected: the sheetType is Bottom.
+     */
+    SheetStyle sheetStyle;
+    sheetStyle.sheetType = SheetType::SHEET_CENTER;
+    sheetStyle.instanceId = 100001;
+    sheeLayoutProperty->UpdateSheetStyle(sheetStyle);
+    EXPECT_EQ(pattern->GetSheetTypeFromSheetManager(), SheetType::SHEET_CENTER);
+    SheetPresentationTestThreeNg::TearDownTestCase();
+}
+
+/**
  * @tc.name: HandleMultiDetentKeyboardAvoid001
  * @tc.desc: Test HandleMultiDetentKeyboardAvoid function.
  * @tc.type: FUNC

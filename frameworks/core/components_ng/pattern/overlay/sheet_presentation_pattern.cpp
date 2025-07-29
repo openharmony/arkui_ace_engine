@@ -1880,6 +1880,9 @@ SheetType SheetPresentationPattern::GetSheetTypeFromSheetManager() const
     auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_RETURN(layoutProperty, sheetType);
     auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
+    if (sheetStyle.instanceId.has_value()) {
+        return GetSheetType();
+    }
     if (sheetStyle.showInSubWindow.value_or(false)) {
         return ComputeSheetTypeInSubWindow();
     }
