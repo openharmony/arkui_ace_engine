@@ -18,6 +18,7 @@ import("//foundation/arkui/ace_engine/adapter/ohos/build/common.gni")
 
 #构建ANI库
 ohos_shared_library("componentSnapshot_ani") {
+  shlib_type = "ani"
   deps = [ "$ace_root/build:libace_compatible" ]
   include_dirs = [ "./include" ]
   sources = [ "./src/componentSnapshot.cpp" ]
