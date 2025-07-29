@@ -7113,6 +7113,7 @@ void RichEditorPattern::HandleSelect(CaretMoveIntent direction)
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleSelect blocked during preview text input");
         return;
     }
+    ResetTouchAndMoveCaretState(false);
     CloseSelectOverlay();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
