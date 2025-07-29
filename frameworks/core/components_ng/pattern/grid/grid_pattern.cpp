@@ -463,24 +463,27 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
     bool irregular = UseIrregularLayout();
     float mainGap = GetMainGap();
     auto itemsHeight = info_.GetTotalHeightOfItemsInView(mainGap, irregular);
+    float mainContentSize = GetMainContentSize();
     if (info_.offsetEnd_) {
         if (source == SCROLL_FROM_UPDATE) {
             float overScroll = 0.0f;
-            if (GetTotalHeight() <= GetMainContentSize()) {
+            if (GetTotalHeight() <= mainContentSize) {
                 overScroll = GetTotalOffset();
             } else if (irregular) {
-                overScroll = info_.GetDistanceToBottom(GetMainContentSize(), itemsHeight, mainGap);
+                overScroll = info_.GetDistanceToBottom(mainContentSize, itemsHeight, mainGap);
             } else {
-                overScroll = info_.currentOffset_ - (GetMainContentSize() - itemsHeight);
+                overScroll = info_.currentOffset_ - (mainContentSize - itemsHeight);
             }
-            auto friction = CalculateFriction(std::abs(overScroll) / GetMainContentSize());
-            offset *= friction;
+            if (!NearZero(mainContentSize)) {
+                auto friction = CalculateFriction(std::abs(overScroll) / mainContentSize);
+                offset *= friction;
+            }
         }
         auto userOffset = FireOnWillScroll(-offset);
         info_.currentOffset_ -= userOffset;
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 
-        if (GreatNotEqual(info_.currentOffset_, GetMainContentSize() - itemsHeight)) {
+        if (GreatNotEqual(info_.currentOffset_, mainContentSize - itemsHeight)) {
             info_.offsetEnd_ = false;
             info_.reachEnd_ = false;
         }
@@ -489,8 +492,10 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
     }
     if (info_.reachStart_) {
         if (source == SCROLL_FROM_UPDATE) {
-            auto friction = CalculateFriction(std::abs(info_.currentOffset_) / GetMainContentSize());
-            offset *= friction;
+            if (!NearZero(mainContentSize)) {
+                auto friction = CalculateFriction(std::abs(info_.currentOffset_) / mainContentSize);
+                offset *= friction;
+            }
         }
         auto userOffset = FireOnWillScroll(-offset);
         info_.currentOffset_ -= userOffset;
