@@ -907,6 +907,7 @@ public:
     
     void SetMouseEventResult(const JSCallbackInfo& args)
     {
+        RETURN_IF_CALLING_FROM_M114();
         if (eventResult_) {
             bool result = true;
             bool stopPropagation = true;
@@ -4125,6 +4126,7 @@ void JSWeb::NativeEmbedOptions(const JSCallbackInfo& args)
         WebModel::GetInstance()->SetIntrinsicSizeEnabled(*enable);
     }
 
+    RETURN_IF_CALLING_FROM_M114();
     auto cssDisplayChangeObj = paramObject->GetProperty("supportCssDisplayChange");
     if (cssDisplayChangeObj->IsBoolean()) {
         bool cssDisplayChange = cssDisplayChangeObj->ToBoolean();
@@ -5766,6 +5768,7 @@ void JSWeb::OnNativeEmbedGestureEvent(const JSCallbackInfo& args)
 
 void JSWeb::OnNativeEmbedMouseEvent(const JSCallbackInfo& args)
 {
+    RETURN_IF_CALLING_FROM_M114();
     if (args.Length() < 1 || !args[0]->IsFunction()) {
         return;
     }
