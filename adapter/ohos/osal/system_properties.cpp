@@ -425,12 +425,14 @@ int32_t ReadVelocityTrackerPointNumber()
 
 bool ReadIsVelocityWithinTimeWindow()
 {
-    return system::GetBoolParameter("persist.sys.arkui.velocitytracker.withintimewindow", DEFAULT_IS_VELOCITY_WITHIN_TIME_WINDOW);
+    return system::GetBoolParameter(
+        "persist.sys.arkui.velocitytracker.withintimewindow", DEFAULT_IS_VELOCITY_WITHIN_TIME_WINDOW);
 }
 
 bool ReadIsVelocityWithoutUpPoint()
 {
-    return system::GetBoolParameter("persist.sys.arkui.velocitytracker.withoutuppoint", DEFAULT_IS_VELOCITY_WITHOUT_UP_POINT);
+    return system::GetBoolParameter(
+        "persist.sys.arkui.velocitytracker.withoutuppoint", DEFAULT_IS_VELOCITY_WITHOUT_UP_POINT);
 }
 } // namespace
 
