@@ -1246,9 +1246,9 @@ int32_t SystemProperties::GetVelocityTrackerPointNumber()
     return velocityTrackerPointNumber_;
 }
 
-bool SystemProperties::IsVelocityWithinTimewindow()
+bool SystemProperties::IsVelocityWithinTimeWindow()
 {
-    return isVelocityWithinTimewindow_;
+    return isVelocityWithinTimeWindow_;
 }
 
 bool SystemProperties::IsVelocityWithoutUpPoint()

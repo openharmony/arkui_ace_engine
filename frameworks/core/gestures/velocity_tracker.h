@@ -26,7 +26,8 @@ namespace OHOS::Ace {
 
 class VelocityTracker final {
 public:
-    VelocityTracker() {
+    VelocityTracker()
+    {
         static int32_t pointNum = SystemProperties::GetVelocityTrackerPointNumber();
         xAxis_.SetCountNum(pointNum);
         yAxis_.SetCountNum(pointNum);

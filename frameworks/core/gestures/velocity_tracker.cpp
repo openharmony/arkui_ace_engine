@@ -17,6 +17,7 @@
 
 namespace OHOS::Ace {
 int32_t VelocityTracker::POINT_NUMBER = SystemProperties::GetVelocityTrackerPointNumber();
+
 namespace {
 static constexpr int32_t MAX_INDEX = 4;
 
