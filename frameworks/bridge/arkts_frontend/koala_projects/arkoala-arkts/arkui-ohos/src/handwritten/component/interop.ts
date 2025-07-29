@@ -70,8 +70,6 @@ export function compatibleComponent(
         if (staticComponent !== undefined) {
             bindCompatibleProvideCallback(staticComponent!);
             bindCompatibleLocalStorageCallback(staticComponent!);
-        } else {
-            throw new Error('fail to find static component to bind state manager');
         }
         const result = init();
         const dynamicComponent = result.component;
