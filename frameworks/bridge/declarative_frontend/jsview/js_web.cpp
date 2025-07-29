@@ -6422,6 +6422,7 @@ void JSWeb::DataDetectorConfig(const JSCallbackInfo& args)
 
 void JSWeb::BypassVsyncCondition(int32_t webBypassVsyncCondition)
 {
+    RETURN_IF_CALLING_FROM_M114();
     auto condition = WebBypassVsyncCondition::NONE;
     switch (webBypassVsyncCondition) {
         case 0:
