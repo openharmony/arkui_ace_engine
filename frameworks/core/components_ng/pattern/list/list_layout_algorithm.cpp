@@ -950,6 +950,7 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
     auto pattern = host->GetPattern<ListPattern>();
     CHECK_NULL_VOID(pattern);
     if (!isLayouted_) {
+        noLayoutedItems_ = std::move(itemPosition_);
         itemPosition_ = pattern->GetItemPosition();
     }
     auto prevTotalItemCount = pattern->GetMaxListItemIndex() + 1;
@@ -1101,6 +1102,20 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
         }
     }
     RecycleGroupItem(layoutWrapper);
+    UpdateNoLayoutedItems();
+}
+
+void ListLayoutAlgorithm::UpdateNoLayoutedItems()
+{
+    if (isLayouted_) {
+        return;
+    }
+    for (const auto& item : itemPosition_) {
+        noLayoutedItems_.erase(item.first);
+    }
+    for (const auto& item : recycledItemPosition_) {
+        noLayoutedItems_.erase(item.first);
+    }
 }
 
 LayoutDirection ListLayoutAlgorithm::LayoutDirectionForTargetIndex(LayoutWrapper* layoutWrapper, int startIndex)
@@ -1751,7 +1766,13 @@ void ListLayoutAlgorithm::CheckGroupMeasureBreak(const RefPtr<LayoutWrapper>& wr
 
 void ListLayoutAlgorithm::ResetLayoutItem(LayoutWrapper* layoutWrapper)
 {
-    for (auto& pos : recycledItemPosition_) {
+    ResetUnLayoutedItems(layoutWrapper, recycledItemPosition_);
+    ResetUnLayoutedItems(layoutWrapper, noLayoutedItems_);
+}
+
+void ListLayoutAlgorithm::ResetUnLayoutedItems(LayoutWrapper* layoutWrapper, PositionMap& positionMap)
+{
+    for (auto& pos : positionMap) {
         auto wrapper = GetListItem(layoutWrapper, pos.first);
         if (!wrapper) {
             ReportGetChildError("ResetLayoutItem", pos.first);

@@ -325,6 +325,53 @@ HWTEST_F(ListLayoutTestNg, ContentEndOffset001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ListReMeasureTest001
+ * @tc.desc: Test List noLayoutItems_ performance
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListReMeasureTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create list
+     * @tc.expected: List index range is 0-3
+     */
+    ListModelNG model = CreateList();
+    CreateListItems(10);
+    CreateDone();
+    EXPECT_EQ(pattern_->startIndex_, 0);
+    EXPECT_EQ(pattern_->endIndex_, 3);
+
+    /**
+     * @tc.steps: step2. call measure of List for first time
+     * @tc.expected: List itemPosition_ index range is 0-3, layouted is false
+     */
+    auto layoutAlgorithm = AceType::DynamicCast<ListLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    EXPECT_TRUE(layoutAlgorithm);
+    layoutAlgorithm->Measure(AceType::RawPtr(frameNode_));
+    EXPECT_EQ(layoutAlgorithm->GetStartIndex(), 0); // 0: start index
+    EXPECT_EQ(layoutAlgorithm->GetEndIndex(), 3); // 3: end index
+    EXPECT_FALSE(layoutAlgorithm->isLayouted_);
+
+    /**
+     * @tc.steps: step3. change list mainSize to half and call measure of List for second time
+     * @tc.expected: check item 2 and item 3 in noLayoutedItems
+     */
+    EXPECT_TRUE(layoutAlgorithm);
+    EXPECT_TRUE(layoutAlgorithm->noLayoutedItems_.empty());
+    std::optional<float> width = 240.f; // 240.f: origin width
+    std::optional<float> height = 200.f; // 200.f: half of origin contentMainSize
+    OptionalSizeF selfIdealSizeTemp(width, height);
+    LayoutConstraintF contentConstraint;
+    contentConstraint.selfIdealSize = selfIdealSizeTemp;
+    layoutProperty_->layoutConstraint_ = contentConstraint;
+    layoutProperty_->contentConstraint_ = contentConstraint;
+    layoutAlgorithm->Measure(AceType::RawPtr(frameNode_));
+    EXPECT_FALSE(layoutAlgorithm->noLayoutedItems_.empty());
+    EXPECT_EQ(layoutAlgorithm->noLayoutedItems_.begin()->first, 2); // 2: start index
+    EXPECT_EQ(layoutAlgorithm->noLayoutedItems_.rbegin()->first, 3); // 3: end index
+}
+
+/**
  * @tc.name: ContentOffset001
  * @tc.desc: Test top content offset and bottom end offset
  * @tc.type: FUNC
