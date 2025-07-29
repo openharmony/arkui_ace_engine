@@ -740,6 +740,24 @@ HWTEST_F(RichEditorCaretTestNg, OnCaretTwinkling001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: StartFloatingCaretLand
+ * @tc.desc: test rich_editor_pattern.cpp StartFloatingCaretLand function
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorCaretTestNg, StartFloatingCaretLand001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->floatingCaretState_.isFloatingCaretVisible = true;
+    auto richEditorOverlay = AceType::DynamicCast<RichEditorOverlayModifier>(richEditorPattern->overlayMod_);
+    ASSERT_NE(richEditorOverlay, nullptr);
+    richEditorOverlay->caretLanding_ = true;
+    richEditorPattern->StartFloatingCaretLand();
+    EXPECT_FALSE(richEditorOverlay->caretLanding_);
+}
+
+/**
  * @tc.name: CalcMoveDownPos001
  * @tc.desc: test CalcMoveDownPos
  * @tc.type: FUNC
