@@ -1513,8 +1513,8 @@ void TextPattern::HandleSingleClickEvent(GestureEvent& info)
     }
     if (selectOverlay_->SelectOverlayIsOn() && !selectOverlay_->IsUsingMouse() &&
         GlobalOffsetInSelectedArea(info.GetGlobalLocation())) {
-        selectOverlay_->ToggleMenu();
         selectOverlay_->SwitchToOverlayMode();
+        selectOverlay_->ToggleMenu();
         return;
     }
     if (!isMousePressed_ && !isTryEntityDragging_) {

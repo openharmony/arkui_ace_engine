@@ -465,13 +465,12 @@ void TextSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag)
         CHECK_NULL_VOID(textPattern);
         textPattern->UpdateParentGlobalOffset();
         textPattern->CalculateHandleOffsetAndShowOverlay();
+        UpdateViewPort();
         if (isDragging && isDraggingFirstHandle_) {
-            UpdateViewPort();
             UpdateSecondHandleOffset();
             return;
         }
         if (isDragging && !isDraggingFirstHandle_) {
-            UpdateViewPort();
             UpdateFirstHandleOffset();
             return;
         }
