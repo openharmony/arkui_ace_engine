@@ -70,7 +70,7 @@ import hilog from '@ohos.hilog'
             }
             staticValue.navigationId = navigationId.toString();
             let navPathStack = dynamicValue.getProperty("pathStack");
-            staticValue.pathStack = navPathStack.toStaticObject() as NavPathStack;
+            staticValue.pathStack = navPathStack.unwrap() as NavPathStack;
             return staticValue;
         }
 
@@ -257,7 +257,9 @@ import hilog from '@ohos.hilog'
                 return staticValue;
             }
             let context = dynamicValue.getProperty('context');
-            staticValue.context = context.toStaticObject() as UIContext | UIAbilityContext;
+            if (context.typeOf() !== 'undefined' && context.typeOf() !== 'null') {
+                staticValue.context = context.unwrap() as UIContext | UIAbilityContext;
+            }
 
             let index = dynamicValue.getProperty('index');
             if (!index.isNumber()) {
