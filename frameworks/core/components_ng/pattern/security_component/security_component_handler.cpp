@@ -38,7 +38,7 @@ constexpr uint64_t SECOND_TO_MILLISECOND = 1000;
 constexpr float HALF = 2.0f;
 const std::string SEC_COMP_ID = "security component id = ";
 const std::string SEC_COMP_TYPE = ", security component type = ";
-constexpr int32_t PARENT_EFFECT_CHECK_FUNC_NUM = 16;
+constexpr int32_t PARENT_EFFECT_CHECK_FUNC_NUM = 15;
 }
 
 static std::vector<uintptr_t> g_callList = {
@@ -582,15 +582,15 @@ bool SecurityComponentHandler::CheckOverlayText(const RefPtr<FrameNode>& node, s
     return false;
 }
 
-bool SecurityComponentHandler::CheckRenderEffect(RefPtr<FrameNode>& node, std::string& message,
-    OHOS::Security::SecurityComponent::SecCompBase& buttonInfo)
+bool SecurityComponentHandler::CheckRenderEffect(const RefPtr<FrameNode>& secNode, RefPtr<FrameNode>& parentNode,
+    std::string& message, OHOS::Security::SecurityComponent::SecCompBase& buttonInfo)
 {
-    const auto& renderContext = node->GetRenderContext();
+    const auto& renderContext = parentNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
-    auto layoutProperty = node->GetLayoutProperty();
+    auto layoutProperty = parentNode->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, false);
 
-    using CheckFunc = bool(*)(const RefPtr<FrameNode>& node,
+    using CheckFunc = bool(*)(const RefPtr<FrameNode>& parentNode,
         const RefPtr<RenderContext>& renderContext, std::string& message);
 
     const std::array<CheckFunc, PARENT_EFFECT_CHECK_FUNC_NUM> renderChecks = {
@@ -603,7 +603,6 @@ bool SecurityComponentHandler::CheckRenderEffect(RefPtr<FrameNode>& node, std::s
         &CheckSepia,
         &CheckHueRotate,
         &CheckColorBlend,
-        &CheckClipMask,
         &CheckForegroundColor,
         &CheckSphericalEffect,
         &CheckLightUpEffect,
@@ -613,15 +612,18 @@ bool SecurityComponentHandler::CheckRenderEffect(RefPtr<FrameNode>& node, std::s
     };
 
     for (auto check : renderChecks) {
-        if (check(node, renderContext, message)) {
+        if (check(parentNode, renderContext, message)) {
             return true;
         }
     }
 
-    if (CheckVisibility(node, layoutProperty, message) ||
-        CheckForegroundEffect(node, message, renderContext, buttonInfo) ||
-        CheckOverlayText(node, message, renderContext, buttonInfo)) {
+    if (CheckVisibility(parentNode, layoutProperty, message) ||
+        CheckForegroundEffect(parentNode, message, renderContext, buttonInfo) ||
+        CheckOverlayText(parentNode, message, renderContext, buttonInfo)) {
         return true;
+    }
+    if (secNode->GetTag() != V2::SAVE_BUTTON_ETS_TAG) {
+        return CheckClipMask(parentNode, renderContext, message);
     }
     return false;
 }
@@ -696,7 +698,8 @@ bool SecurityComponentHandler::CheckParentNodesEffect(RefPtr<FrameNode>& node,
         if (parentNode->CheckTopWindowBoundary()) {
             break;
         }
-        if (CheckRenderEffect(parentNode, message, buttonInfo) || CheckParentBorder(parentNode, frameRect, message)) {
+        if (CheckRenderEffect(node, parentNode, message, buttonInfo) ||
+            CheckParentBorder(parentNode, frameRect, message)) {
             message = SEC_COMP_ID + scId + SEC_COMP_TYPE + scType + message;
             return true;
         }
@@ -710,7 +713,7 @@ bool SecurityComponentHandler::CheckParentNodesEffect(RefPtr<FrameNode>& node,
             return true;
         }
         RefPtr<RenderContext> parentRenderContext = parentNode->GetRenderContext();
-        if ((parentRenderContext == nullptr) ||
+        if ((node->GetTag() == V2::SAVE_BUTTON_ETS_TAG) || (parentRenderContext == nullptr) ||
             !parentRenderContext->GetClipEdge().value_or(false)) {
             parent = parent->GetParent();
             continue;
@@ -1335,6 +1338,9 @@ void SecurityComponentHandler::CheckSecurityComponentClickEvent(const RefPtr<Fra
         SC_LOG_ERROR("SecurityComponentCheckFail: The text of the security component is out of range.");
         message = SEC_COMP_ID + std::to_string(node->GetId()) + SEC_COMP_TYPE +
             node->GetTag() + ", the text of the security component is out of range";
+        return;
+    }
+    if (node->GetTag() == V2::SAVE_BUTTON_ETS_TAG) {
         return;
     }
     if (CheckComponentCoveredStatus(node->GetId(), message)) {

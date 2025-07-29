@@ -631,6 +631,34 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTe
 }
 
 /**
+ * @tc.name: SecurityComponentCheckParentNodesEffectTest023
+ * @tc.desc: Test security component CheckParentNodesEffect
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentCheckParentNodesEffectTest023, TestSize.Level1)
+{
+    RefPtr<FrameNode> parentFrameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::SAVE_BUTTON_ETS_TAG);
+    ASSERT_NE(parentFrameNode, nullptr);
+    RefPtr<FrameNode> childFrameNode = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::SAVE_BUTTON_ETS_TAG);
+    ASSERT_NE(childFrameNode, nullptr);
+    parentFrameNode->AddChild(childFrameNode);
+
+    // security component is not completely displayed
+    OHOS::Security::SecurityComponent::SecCompBase buttonInfo;
+    std::string message;
+    ASSERT_FALSE(SecurityComponentHandler::CheckParentNodesEffect(childFrameNode, buttonInfo, message));
+    RefPtr<RenderContext> parentRenderContext = parentFrameNode->GetRenderContext();
+    auto parentFrameRect = parentRenderContext->GetPaintRectWithTransform();
+    RefPtr<RenderContext> childRenderContext = childFrameNode->GetRenderContext();
+    auto childFrameRect = childRenderContext->GetPaintRectWithTransform();
+    ASSERT_EQ(parentFrameRect.Width(), childFrameRect.Width());
+    ASSERT_EQ(parentFrameRect.Height(), childFrameRect.Height());
+}
+
+/**
  * @tc.name: SecurityComponentCheckGetBorderRadiusTest001
  * @tc.desc: Test security component CheckParentNodesEffect
  * @tc.type: FUNC
