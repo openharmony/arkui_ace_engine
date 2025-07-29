@@ -625,7 +625,7 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
     return &impl;
 }
 
-void SetDrawModifier(ani_env* env, ani_long ptr, ani_int flag, ani_object fnObj)
+void SetDrawModifier(ani_env* env, ani_long ptr, uint32_t flag, ani_object fnObj)
 {
     Framework::AniGraphicsModule::SetDrawModifier(env, ptr, flag, fnObj);
 }
