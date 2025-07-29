@@ -1,16 +1,200 @@
 {
   "float": [
     {
-      "name": "float_40",
-      "value": "40"
+      "name": "float_1",
+      "value": "30.6"
+    },
+    {
+      "name": "float_2",
+      "value": "10.0"
+    },
+    {
+      "name": "dy_n",
+      "value": "-50.0"
+    },
+    {
+      "name": "dx",
+      "value": "50.0"
+    },
+    {
+      "name": "float_0",
+      "value": "0"
     },
     {
       "name": "float_10",
       "value": "10"
     },
     {
+      "name": "float_minus10",
+      "value": "-10"
+    },
+    {
+      "name": "float_20",
+      "value": "20"
+    },
+    {
+      "name": "float_minus20",
+      "value": "-20"
+    },
+    {
+      "name": "float_30",
+      "value": "30"
+    },
+    {
+      "name": "float_minus30",
+      "value": "-30"
+    },
+    {
+      "name": "float_o",
+      "value": "0"
+    },
+    {
+      "name": "float_360",
+      "value": "360"
+    },
+    {
+      "name": "float_780",
+      "value": "780"
+    },
+    {
+      "name": "float_un",
+      "value": "30.6"
+    },
+    {
+      "name": "float_40",
+      "value": "40"
+    },
+    {
+      "name": "float_50",
+      "value": "50"
+    },
+    {
       "name": "float_60",
       "value": "60"
+    },
+    {
+      "name": "float_70",
+      "value": "70"
+    },
+    {
+      "name": "float_80",
+      "value": "30"
+    },
+    {
+      "name": "float_90",
+      "value": "90"
+    },
+    {
+      "name": "float_100",
+      "value": "100"
+    },
+    {
+      "name": "float_200",
+      "value": "200"
+    },
+    {
+      "name": "float_300",
+      "value": "300"
+    },
+    {
+      "name": "float_400",
+      "value": "400"
+    },
+    {
+      "name": "float_500",
+      "value": "500"
+    },
+    {
+      "name": "float_600",
+      "value": "600"
+    },
+    {
+      "name": "float_900",
+      "value": "900"
+    },
+    {
+      "name": "float_1000",
+      "value": "1000"
+    },
+    {
+      "name": "float_1200",
+      "value": "1200"
+    },
+    {
+      "name": "float_1500",
+      "value": "1500"
+    },
+    {
+      "name": "float_minus_30",
+      "value": "-30"
+    },
+    {
+      "name": "float_minus_10",
+      "value": "-10"
+    },
+    {
+      "name": "float_minus_20",
+      "value": "-20"
+    },
+    {
+      "name": "float_minus_40",
+      "value": "-40"
+    },
+    {
+      "name": "float_minus_50",
+      "value": "-50"
+    },
+    {
+      "name": "float_minus_60",
+      "value": "-60"
+    },
+    {
+      "name": "float_minus_70",
+      "value": "-70"
+    },
+    {
+      "name": "float_minus_80",
+      "value": "-30"
+    },
+    {
+      "name": "float_minus_90",
+      "value": "-90"
+    },
+    {
+      "name": "float_minus_100",
+      "value": "-100"
+    },
+    {
+      "name": "float_minus_200",
+      "value": "-200"
+    },
+    {
+      "name": "float_3",
+      "value": "3"
+    },
+    {
+      "name": "float_4",
+      "value": "4"
+    },
+    {
+      "name": "float_5",
+      "value": "5"
+    },
+    {
+      "name": "float_6",
+      "value": "6"
+    },
+    {
+      "name": "float_7",
+      "value": "7"
+    },
+    {
+      "name": "float_8",
+      "value": "8"
+    },
+    {
+      "name": "float_9",
+      "value": "9"
     }
   ]
 }
