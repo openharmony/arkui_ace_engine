@@ -171,6 +171,16 @@ void MockPipelineContext::TearDown()
     predictTasks_.clear();
 }
 
+std::string PipelineContext::GetBundleName()
+{
+    return "";
+}
+
+std::string PipelineContext::GetModuleName()
+{
+    return "";
+}
+
 RefPtr<MockPipelineContext> MockPipelineContext::GetCurrent()
 {
     return pipeline_;

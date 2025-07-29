@@ -1116,6 +1116,7 @@ std::vector<OptionParam> GetCreateMenuOptionsParams(const std::vector<MenuOption
         params.emplace_back(
             GetItemContent(item.id, item.content.value_or("")), "", item.labelInfo.value_or(""), callback);
         SetMenuOptionsItem(params, item, info);
+        params.back().icon = item.icon.value_or("");
         itemNum++;
     }
     return params;
@@ -1217,7 +1218,7 @@ void UpdatePasteOpacityFont(bool isPaste, RefPtr<FrameNode>& leftRowNode, const 
     menuItemPattern->SetBlockClick(param.disableSystemClick);
 }
 
-void SetMenuItemIcon(const RefPtr<FrameNode>& menuItem, const OptionParam& param, RefPtr<FrameNode>& leftRow)
+void SetMenuItemSymbolIcon(const RefPtr<FrameNode>& menuItem, const OptionParam& param, RefPtr<FrameNode>& leftRow)
 {
     auto symbol = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<TextPattern>(); });
@@ -1242,6 +1243,48 @@ void SetMenuItemIcon(const RefPtr<FrameNode>& menuItem, const OptionParam& param
     symbol->MountToParent(leftRow);
 }
 
+void UpdateIconSrc(RefPtr<FrameNode>& node, const Dimension& horizontalSize, const Dimension& verticalSize,
+    const Color& color, const bool& useDefaultIcon)
+{
+    auto props = node->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(props);
+    props->UpdateAlignment(Alignment::CENTER);
+    CalcSize idealSize = { CalcLength(horizontalSize), CalcLength(verticalSize) };
+    MeasureProperty layoutConstraint;
+    layoutConstraint.selfIdealSize = idealSize;
+    props->UpdateCalcLayoutProperty(layoutConstraint);
+    if (useDefaultIcon) {
+        auto iconRenderProperty = node->GetPaintProperty<ImageRenderProperty>();
+        CHECK_NULL_VOID(iconRenderProperty);
+        iconRenderProperty->UpdateSvgFillColor(color);
+    }
+}
+
+void SetMenuItemImageIcon(const RefPtr<FrameNode>& menuItem, const OptionParam& param, RefPtr<FrameNode>& leftRow)
+{
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    auto iconNode = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    CHECK_NULL_VOID(iconNode);
+    auto props = iconNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(props);
+    MarginProperty margin;
+    bool iconIsEmpty = param.icon.empty();
+    if (!iconIsEmpty) {
+        ImageSourceInfo imageSourceInfo(param.icon, pipeline->GetBundleName(), pipeline->GetModuleName());
+        props->UpdateImageSourceInfo(imageSourceInfo);
+    }
+    margin.right = CalcLength(theme->GetIconContentPadding());
+    Ace::NG::UpdateIconSrc(
+        iconNode, theme->GetIconSideLength(), theme->GetIconSideLength(), theme->GetMenuIconColor(), iconIsEmpty);
+    props->UpdateMargin(margin);
+    iconNode->MarkModifyDone();
+    iconNode->MountToParent(leftRow);
+}
+
 void SetupMenuItemChildrenAndFocus(const RefPtr<FrameNode>& menuItem, const std::string& content,
     const std::string& labelInfo, const RefPtr<SelectTheme>& theme, const OptionParam& param, bool isPaste)
 {
@@ -1254,7 +1297,11 @@ void SetupMenuItemChildrenAndFocus(const RefPtr<FrameNode>& menuItem, const std:
     leftRowLayoutProps->UpdateCrossAxisAlign(FlexAlign::CENTER);
     leftRowLayoutProps->UpdateSpace(theme->GetIconContentPadding());
     if (!isPaste) {
-        SetMenuItemIcon(menuItem, param, leftRow);
+        if (param.symbolId != 0) {
+            SetMenuItemSymbolIcon(menuItem, param, leftRow);
+        } else {
+            SetMenuItemImageIcon(menuItem, param, leftRow);
+        }
     }
     auto leftTextNode = CreateMenuTextNode(content, leftRow, param.isAIMenuOption || param.isAskCeliaOption);
     CHECK_NULL_VOID(leftTextNode);
