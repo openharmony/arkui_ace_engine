@@ -42,7 +42,7 @@ enum EventQueryType {
 
 declare type UIStatesChangeHandler = (node: FrameNode, currentUIStates: number) => void;
 
-+class FrameNode extends Disposable {
+class FrameNode extends Disposable {
   public _nodeId: number;
   protected _commonAttribute: ArkComponent;
   protected _commonEvent: UICommonEvent;
@@ -58,7 +58,9 @@ declare type UIStatesChangeHandler = (node: FrameNode, currentUIStates: number) 
   protected nodePtr_: NodePtr;
   protected instanceId_?: number;
   private nodeAdapterRef_?: NodeAdapter;
-  constructor(uiContext: UIContext, type: string, options?: object) {
+  public type_: string | undefined;
+  public rawPtr_: number | undefined;
+  constructor(uiContext: UIContext, type: string, options?: object, point?: number) {
     super();
     if (uiContext === undefined) {
       throw Error('Node constructor error, param uiContext error');
@@ -85,9 +87,18 @@ declare type UIStatesChangeHandler = (node: FrameNode, currentUIStates: number) 
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
     if (type === undefined || type === "CustomFrameNode") {
       this.renderNode_ = new RenderNode('CustomFrameNode');
-      result = getUINativeModule().frameNode.createFrameNode(this);
-    } else {
-      result = getUINativeModule().frameNode.createTypedFrameNode(this, type, options);
+      if (point === null || point === undefined) {
+        result = getUINativeModule().frameNode.createFrameNode(this);
+      } else {
+        result = getUINativeModule().frameNode.createTransFrameNode(this, point);
+      }
+    }
+    else {
+      if (point === null || point === undefined) {
+        result = getUINativeModule().frameNode.createTypedFrameNode(this, type, options);
+      } else {
+        result = getUINativeModule().frameNode.createTransTypedFrameNode(this, type, options, point);
+      }
     }
     __JSScopeUtil__.restoreInstanceId();
     this._nativeRef = result?.nativeStrongRef;
@@ -95,6 +106,8 @@ declare type UIStatesChangeHandler = (node: FrameNode, currentUIStates: number) 
     this.nodePtr_ = this._nativeRef?.getNativeHandle();
     this.renderNode_?.setNodePtr(result?.nativeStrongRef);
     this.renderNode_?.setFrameNode(new WeakRef(this));
+    this.type_ = type;
+    this.rawPtr_ = result?.rawPtr_;
     if (result === undefined || this._nodeId === -1) {
       return;
     }

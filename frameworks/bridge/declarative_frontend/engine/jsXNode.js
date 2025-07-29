@@ -872,8 +872,11 @@ var UIState;
     UIState[UIState["DISABLED"] = 1 << 2] = "DISABLED";
     UIState[UIState["SELECTED"] = 1 << 3] = "SELECTED";
 })(UIState || (UIState = {}));
+function createFrameNodeByTrans(point, uiContext, nodeType) {
+   return new TransFrameNode(uiContext, nodeType, null, point);
+}
 class FrameNode extends Disposable {
-    constructor(uiContext, type, options) {
+    constructor(uiContext, type, options, point) {
         super();
         if (uiContext === undefined) {
             throw Error('Node constructor error, param uiContext error');
@@ -899,10 +902,18 @@ class FrameNode extends Disposable {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         if (type === undefined || type === "CustomFrameNode") {
             this.renderNode_ = new RenderNode('CustomFrameNode');
-            result = getUINativeModule().frameNode.createFrameNode(this);
+            if (point === null || point === undefined) {
+                result = getUINativeModule().frameNode.createFrameNode(this);
+            } else {
+                result = getUINativeModule().frameNode.createTransFrameNode(this, point);
+            }
         }
         else {
-            result = getUINativeModule().frameNode.createTypedFrameNode(this, type, options);
+            if (point === null || point === undefined) {
+                result = getUINativeModule().frameNode.createTypedFrameNode(this, type, options);
+            } else {
+                result = getUINativeModule().frameNode.createTransTypedFrameNode(this, type, options, point);
+            }
         }
         __JSScopeUtil__.restoreInstanceId();
         this._nativeRef = result?.nativeStrongRef;
@@ -910,6 +921,8 @@ class FrameNode extends Disposable {
         this.nodePtr_ = this._nativeRef?.getNativeHandle();
         this.renderNode_?.setNodePtr(result?.nativeStrongRef);
         this.renderNode_?.setFrameNode(new WeakRef(this));
+        this.type_ = type;
+        this.rawPtr_= result?.rawPtr_;
         if (result === undefined || this._nodeId === -1) {
             return;
         }
@@ -3078,6 +3091,51 @@ class XComponentNode extends FrameNode {
         return false;
     }
 }
+
+export class TransFrameNode extends FrameNode {
+    constructor(uiContext, type, options, point) {
+        super(uiContext, type, options, point);
+    }
+    isTransferred() {
+        return true;
+    }
+    getRenderNode() {
+        throw Error('frameNode created by transferDynamic not support getRenderNode');
+    }
+    getCustomProperty(name) {
+        throw Error('frameNode created by transferDynamic not support getCustomProperty');
+    }
+    get commonAttribute() {
+        throw Error('frameNode created by transferDynamic not support commonAttribute');
+    }
+    get commonEvent() {
+        throw Error('frameNode created by transferDynamic not support commonEvent');
+    }
+    get gestureEvent() {
+        throw Error('frameNode created by transferDynamic not support gestureEvent');
+    }
+    setMeasuredSize(size) {
+        throw Error('frameNode created by transferDynamic not support setMeasuredSize');
+    }
+    setLayoutPosition(position) {
+        throw Error('frameNode created by transferDynamic not support setLayoutPosition');
+    }
+    measure(constraint) {
+        throw Error('frameNode created by transferDynamic not support measure');
+    }
+    layout(position) {
+        throw Error('frameNode created by transferDynamic not support layout');
+    }
+    setNeedsLayout() {
+        throw Error('frameNode created by transferDynamic not support setNeedsLayout');
+    }
+    invalidate() {
+        throw Error('frameNode created by transferDynamic not support invalidate');
+    }
+    addComponentContent(content) {
+        throw Error('frameNode created by transferDynamic not support addComponentContent');
+    }
+}
 /*
  * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -3233,7 +3291,7 @@ export default {
     NodeController, BuilderNode, BaseNode, RenderNode, FrameNode, FrameNodeUtils,
     NodeRenderType, XComponentNode, LengthMetrics, ColorMetrics, LengthUnit, LengthMetricsUnit, ShapeMask, ShapeClip,
     edgeColors, edgeWidths, borderStyles, borderRadiuses, Content, ComponentContent, NodeContent,
-    typeNode, NodeAdapter, ExpandMode, UIState
+    typeNode, NodeAdapter, ExpandMode, UIState, createFrameNodeByTrans
 };
 /*
  * Copyright (c) 2025 Huawei Device Co., Ltd.
