@@ -35,7 +35,13 @@ void FocusHubTestNg::TearDownTestSuite()
 
 void FocusHubTestNg::SetUp() {}
 
-void FocusHubTestNg::TearDown() {}
+void FocusHubTestNg::TearDown()
+{
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    ASSERT_NE(context->rootNode_, nullptr);
+    context->rootNode_->children_.clear();
+}
 
 /**
  * @tc.name: FocusHubCreateTest001
@@ -2925,5 +2931,59 @@ HWTEST_F(FocusHubTestNg, FocusEventGetFocusIntensionTest001, TestSize.Level1)
     keyEvent.code = KeyCode::KEY_TAB;
     keyEvent.pressedCodes = { KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_TAB };
     EXPECT_EQ(FocusEvent::GetFocusIntension(keyEvent), FocusIntension::SHIFT_TAB);
+}
+
+/**
+ * @tc.name: LostFocusToTabstopTest001
+ * @tc.desc: Test LostFocusToTabstop.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, LostFocusToTabstopTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: CreateTree.
+     */
+    auto context = MockPipelineContext::GetCurrent();
+    auto focusManager = context->GetOrCreateFocusManager();
+    auto pagePattern = AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>());
+    auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 1, pagePattern);
+    pageNode->onMainTree_ = true;
+    auto pageFocusHub = pageNode->GetOrCreateFocusHub();
+    context->rootNode_->AddChild(pageNode);
+    auto column = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 2, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto column2 = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 2, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto column3 = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 2, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    column->onMainTree_ = true;
+    column2->onMainTree_ = true;
+    column3->onMainTree_ = true;
+    auto columnFocusHub = column->GetOrCreateFocusHub();
+    auto columnFocusHub2 = column2->GetOrCreateFocusHub();
+    auto columnFocusHub3 = column3->GetOrCreateFocusHub();
+    auto buttonNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, 3, AceType::MakeRefPtr<ButtonPattern>());
+    buttonNode->onMainTree_ = true;
+    auto buttonFocusHub = buttonNode->GetOrCreateFocusHub();
+    pageNode->AddChild(column);
+    column->AddChild(column2);
+    column2->AddChild(column3);
+    column3->AddChild(buttonNode);
+    pagePattern->FocusViewShow();
+    context->FlushFocusView();
+    pagePattern->TriggerFocusMove();
+    EXPECT_EQ(buttonFocusHub->IsCurrentFocus(), true);
+
+    /**
+     * @tc.steps2: SetTabStop and test RequestNextFocusOfKeyEsc.
+     */
+    columnFocusHub->SetTabStop(true);
+    columnFocusHub2->SetTabStop(true);
+    buttonFocusHub->RequestNextFocusOfKeyEsc();
+    EXPECT_EQ(columnFocusHub2->IsCurrentFocus(), true);
+    EXPECT_EQ(buttonFocusHub->IsCurrentFocus(), false);
+    EXPECT_EQ(columnFocusHub3->IsCurrentFocus(), false);
+    columnFocusHub2->RequestNextFocusOfKeyEsc();
+    EXPECT_EQ(columnFocusHub->IsCurrentFocus(), true);
+    EXPECT_EQ(columnFocusHub2->IsCurrentFocus(), false);
+    columnFocusHub3->RequestNextFocusOfKeyEsc();
+    EXPECT_EQ(columnFocusHub->IsCurrentFocus(), true);
 }
 } // namespace OHOS::Ace::NG 

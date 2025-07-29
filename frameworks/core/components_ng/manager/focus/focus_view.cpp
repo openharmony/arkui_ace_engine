@@ -338,7 +338,7 @@ bool FocusView::RequestDefaultFocus()
         SetIsViewRootScopeFocused(true);
         auto ret = viewRootScope->RequestFocusImmediatelyInner(FocusReason::VIEW_SWITCH);
         // set neverShown_ false when request focus on focus view success
-        neverShown_ &= ret;
+        neverShown_ &= !ret;
         TAG_LOGD(AceLogTag::ACE_FOCUS, "Request rootScope: %{public}s/%{public}d ret: %{public}d.",
             viewRootScope->GetFrameName().c_str(), viewRootScope->GetFrameId(), ret);
         return ret;
