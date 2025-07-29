@@ -5268,24 +5268,23 @@ void JSWeb::MediaOptions(const JSCallbackInfo& args)
         WebModel::GetInstance()->SetAudioExclusive(audioExclusive);
     }
 
-    if (OHOS::ArkWeb::getActiveWebEngineVersion() > OHOS::ArkWeb::ArkWebEngineVersion::M114) {
-        auto audioSessionTypeObj = paramObject->GetProperty("audioSessionType");
-        auto audioSessionType = WebAudioSessionType::AUTO;
-        if (audioSessionTypeObj->IsNumber()) {
-            int32_t audioSessionTypeIntValue = audioSessionTypeObj->ToNumber<int32_t>();
-            switch (audioSessionTypeIntValue) {
-                case 0:
-                    audioSessionType = WebAudioSessionType::AUTO;
-                    break;
-                case WEB_AUDIO_SESSION_TYPE_AMBIENT:
-                    audioSessionType = WebAudioSessionType::AMBIENT;
-                    break;
-                default:
-                    audioSessionType = WebAudioSessionType::AUTO;
-            }
+    RETURN_IF_CALLING_FROM_M114();
+    auto audioSessionTypeObj = paramObject->GetProperty("audioSessionType");
+    auto audioSessionType = WebAudioSessionType::AUTO;
+    if (audioSessionTypeObj->IsNumber()) {
+        int32_t audioSessionTypeIntValue = audioSessionTypeObj->ToNumber<int32_t>();
+        switch (audioSessionTypeIntValue) {
+            case 0:
+                audioSessionType = WebAudioSessionType::AUTO;
+                break;
+            case WEB_AUDIO_SESSION_TYPE_AMBIENT:
+                audioSessionType = WebAudioSessionType::AMBIENT;
+                break;
+            default:
+                audioSessionType = WebAudioSessionType::AUTO;
         }
-        WebModel::GetInstance()->SetAudioSessionType(audioSessionType);
     }
+    WebModel::GetInstance()->SetAudioSessionType(audioSessionType);
 }
 
 JSRef<JSVal> FirstContentfulPaintEventToJSValue(const FirstContentfulPaintEvent& eventInfo)
