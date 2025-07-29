@@ -16,6 +16,7 @@
 #include "core/gestures/velocity_tracker.h"
 
 namespace OHOS::Ace {
+int32_t VelocityTracker::POINT_NUMBER = SystemProperties::GetVelocityTrackerPointNumber();
 namespace {
 static constexpr int32_t MAX_INDEX = 4;
 
@@ -136,7 +137,8 @@ void VelocityTracker::UpdateTouchPoint(const TouchEvent& event, bool end, float 
     std::chrono::duration<double> diffTime = event.time - lastTimePoint_;
     lastTimePoint_ = event.time;
     lastPosition_ = event.GetOffset();
-    if (end) {
+    auto noUpPointEnabled = SystemProperties::IsVelocityWithoutUpPoint();
+    if (end && !noUpPointEnabled) {
         Offset oriDelta;
         if (isFirstPoint_) {
             oriDelta = delta_;
@@ -152,6 +154,11 @@ void VelocityTracker::UpdateTouchPoint(const TouchEvent& event, bool end, float 
     // nanoseconds duration to seconds.
     std::chrono::duration<double> duration = event.time - firstTrackPoint_.time;
     auto seconds = duration.count();
+    auto timeWindowEnabled = SystemProperties::IsVelocityWithinTimeWindow();
+    if (timeWindowEnabled && seconds > DURATION_LONGEST_THRESHOLD) {
+        xAxis_.PopFrontPoint();
+        yAxis_.PopFrontPoint();
+    }
     xAxis_.UpdatePoint(seconds, event.x);
     yAxis_.UpdatePoint(seconds, event.y);
 }

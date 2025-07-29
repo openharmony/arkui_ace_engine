@@ -51,6 +51,14 @@ public:
         yVals_.emplace_back(yVal);
     }
 
+    void PopFrontPoint()
+    {
+        if (!xVals_.empty() && !yVals_.empty()) {
+            xVals_.erase(xVals_.begin());
+            yVals_.erase(yVals_.begin());
+        }
+    }
+
     /**
      * @brief Set the Count Num which to compute.
      *
