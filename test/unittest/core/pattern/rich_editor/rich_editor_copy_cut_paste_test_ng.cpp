@@ -606,7 +606,7 @@ HWTEST_F(RichEditorCopyCutPasteTestNg, CopySpansForClipboard, TestSize.Level1)
     spanItem1->content = content;
     richEditorPattern->spans_.push_back(spanItem);
     richEditorPattern->spans_.push_back(spanItem1);
-    auto copySpans = richEditorPattern->CopySpansForClipboard();
+    auto copySpans = richEditorPattern->CopySpansForClipboard(richEditorPattern->spans_);
     std::u16string resultContent = u"";
     int32_t resultPosition = -1;
     if (!copySpans.empty()) {
@@ -675,6 +675,28 @@ HWTEST_F(RichEditorCopyCutPasteTestNg, AddUdmfData001, TestSize.Level1)
     } else {
         EXPECT_EQ(event->GetData(), 0);
     }
+}
+
+/**
+ * @tc.name: AsyncHandleOnCopyStyledStringHtml
+ * @tc.desc: Test AsyncHandleOnCopyStyledStringHtml.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorCopyCutPasteTestNg, AsyncHandleOnCopyStyledStringHtml, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    /**
+     * @tc.steps: step2. set AsyncHandleOnCopyStyledStringHtml func param.
+     */
+    auto spanString = AceType::MakeRefPtr<SpanString>(u"123456789");
+    /**
+     * @tc.steps: step3. Excute function for AsyncHandleOnCopyStyledStringHtml.
+     */
+    richEditorPattern->AsyncHandleOnCopyStyledStringHtml(spanString);
+    EXPECT_EQ(spanString->GetString(), "123456789");
+    EXPECT_EQ(spanString->GetLength(), 9);
 }
 
 }

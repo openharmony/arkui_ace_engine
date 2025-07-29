@@ -958,11 +958,12 @@ void TextPattern::AsyncHandleOnCopySpanStringHtml(RefPtr<SpanString>& subSpanStr
     auto taskExecutor = GetTaskExecutorItem();
     CHECK_NULL_VOID(taskExecutor);
     std::list<RefPtr<SpanItem>> spans = GetSpanSelectedContent();
+    auto multiTypeRecordImpl = AceType::MakeRefPtr<MultiTypeRecordImpl>();
+    subSpanString->EncodeTlv(multiTypeRecordImpl->GetSpanStringBuffer());
+    multiTypeRecordImpl->SetPlainText(subSpanString->GetString());
     taskExecutor->PostTask(
-        [spans, subSpanString, weak = WeakClaim(this), task = WeakClaim(RawPtr(taskExecutor))]() {
-            auto multiTypeRecordImpl = AceType::MakeRefPtr<MultiTypeRecordImpl>();
-            subSpanString->EncodeTlv(multiTypeRecordImpl->GetSpanStringBuffer());
-            multiTypeRecordImpl->SetPlainText(subSpanString->GetString());
+        [spans, multiTypeRecordImpl, weak = WeakClaim(this), task = WeakClaim(RawPtr(taskExecutor))]() {
+            CHECK_NULL_VOID(multiTypeRecordImpl);
             std::string htmlText = HtmlUtils::ToHtml(spans);
             multiTypeRecordImpl->SetHtmlText(htmlText);
 
