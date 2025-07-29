@@ -13,9 +13,10 @@
  * limitations under the License.
  */
 
+import { int32 } from '@koalaui/common'
 import { AttributeModifier } from 'arkui/component/common';
 import { SymbolGlyphAttribute } from 'arkui/component/symbolglyph';
-import { RuntimeType } from "@koalaui/interop";
+import { RuntimeType, runtimeType } from "@koalaui/interop";
 
 import { AttributeUpdaterFlag, CommonMethodModifier } from './CommonMethodModifier';
 import { PeerNode } from './PeerNode';
@@ -25,12 +26,23 @@ import { ResourceColor } from "./component/units";
 import { Resource } from 'global.resource';
 
 export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolGlyphAttribute, AttributeModifier<SymbolGlyphAttribute> {
+    constructor(src?: Resource) {
+        super()
+        let src_type: int32 = RuntimeType.UNDEFINED
+        src_type = runtimeType(src)
+        if (RuntimeType.UNDEFINED != src_type) {
+            this.setSymbolGlyphOptions(src)
+        }
+    }
+
     applyNormalAttribute(instance: SymbolGlyphAttribute): void { }
     applyPressedAttribute(instance: SymbolGlyphAttribute): void { }
     applyFocusedAttribute(instance: SymbolGlyphAttribute): void { }
     applyDisabledAttribute(instance: SymbolGlyphAttribute): void { }
     applySelectedAttribute(instance: SymbolGlyphAttribute): void { }
 
+    _setSymbolGlyphOptions_flag:  AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _setSymbolGlyphOptions0_value?: Resource | undefined
     _fontSize_flag:  AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _fontSize0_value?: number | string | Resource | undefined
     _fontColor_flag:  AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -48,6 +60,17 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
     _symbolEffect_flag:  AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _symbolEffect0_value?: SymbolEffect | undefined
     _symbolEffect1_value?: boolean | number | undefined
+
+    public setSymbolGlyphOptions(value: Resource | undefined): this {
+        if (this._setSymbolGlyphOptions_flag === AttributeUpdaterFlag.INITIAL ||
+            this._setSymbolGlyphOptions0_value !== value || !Type.of(value).isPrimitive()) {
+            this._setSymbolGlyphOptions0_value = value
+            this._setSymbolGlyphOptions_flag = AttributeUpdaterFlag.UPDATE
+        } else {
+            this._setSymbolGlyphOptions_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
 
     public fontSize(value: number | string | Resource | undefined): this {
         if (this._fontSize_flag === AttributeUpdaterFlag.INITIAL ||
@@ -138,6 +161,23 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
     applyModifierPatch(value: PeerNode): void {
         super.applyModifierPatch(value)
         const peerNode: ArkSymbolGlyphPeer = value as ArkSymbolGlyphPeer
+        if (this._setSymbolGlyphOptions_flag !== AttributeUpdaterFlag.INITIAL) {
+            switch (this._setSymbolGlyphOptions_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peerNode.setSymbolGlyphOptionsAttribute((this._setSymbolGlyphOptions0_value as Resource | undefined))
+                    this._setSymbolGlyphOptions_flag = AttributeUpdaterFlag.RESET
+                    break
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._setSymbolGlyphOptions_flag = AttributeUpdaterFlag.RESET
+                    break
+                }
+                default: {
+                    this._setSymbolGlyphOptions_flag = AttributeUpdaterFlag.INITIAL
+                    peerNode.setSymbolGlyphOptionsAttribute(undefined)
+                }
+            }
+        }
         if (this._fontSize_flag !== AttributeUpdaterFlag.INITIAL) {
             switch (this._fontSize_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
@@ -291,6 +331,18 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
         super.mergeModifier(value)
         if (value instanceof SymbolGlyphModifier) {
             const symbolGlyphModifier = value as SymbolGlyphModifier;
+            if (symbolGlyphModifier._setSymbolGlyphOptions_flag !== AttributeUpdaterFlag.INITIAL) {
+                switch (symbolGlyphModifier._setSymbolGlyphOptions_flag) {
+                    case AttributeUpdaterFlag.UPDATE:
+                    case AttributeUpdaterFlag.SKIP: {
+                        this.setSymbolGlyphOptions(symbolGlyphModifier._setSymbolGlyphOptions0_value)
+                        break
+                    }
+                    default: {
+                        this.setSymbolGlyphOptions(undefined)
+                    }
+                }
+            }
             if (symbolGlyphModifier._fontSize_flag !== AttributeUpdaterFlag.INITIAL) {
                 switch (symbolGlyphModifier._fontSize_flag) {
                     case AttributeUpdaterFlag.UPDATE:

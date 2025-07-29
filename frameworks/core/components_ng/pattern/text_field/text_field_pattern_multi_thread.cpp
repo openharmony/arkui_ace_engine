@@ -155,24 +155,21 @@ void TextFieldPattern::OnAttachToMainTreeMultiThreadAddition()
         processDefaultStyleAndBehaviorsMultiThread_ = false;
         ProcessDefaultStyleAndBehaviorsMultiThread();
     }
-    if (handleCountStyleMultiThread_) {
-        handleCountStyleMultiThread_ = false;
-        HandleCountStyle();
-    }
-    if (startTwinklingMultiThread_) {
-        startTwinklingMultiThread_ = false;
-        StartTwinkling();
-    }
+    MultiThreadDelayedExecution(); // Delayed operation
 }
 
 void TextFieldPattern::OnDetachFromMainTreeMultiThread()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    FrameNode* node = RawPtr(host);
+    CHECK_NULL_VOID(node);
     isDetachFromMainTree_ = true;
     RemoveTextFieldInfo();
-    FrameNode* node = RawPtr(host);
-    CloseSelectOverlay();
+    RemoveFillContentMap();
+    if (selectOverlay_) {
+        CloseSelectOverlay();
+    }
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     if (HasSurfaceChangedCallback()) {
@@ -212,111 +209,7 @@ void TextFieldPattern::HandleSetSelectionMultiThread(int32_t start, int32_t end,
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-void TextFieldPattern::OnModifyDoneMultiThread()
-{
-    Pattern::OnModifyDone();
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto context = host->GetContext();
-    CHECK_NULL_VOID(context);
-    auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    auto textFieldTheme = GetTheme();
-    CHECK_NULL_VOID(textFieldTheme);
-    directionKeysMoveFocusOut_ = textFieldTheme->GetDirectionKeysMoveFocusOut();
-    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
-    CheckIfNeedToResetKeyboard();
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto textFieldPaintProperty = host->GetPaintPropertyPtr<TextFieldPaintProperty>();
-    if (textFieldPaintProperty && textFieldPaintProperty->HasBorderColorFlagByUser()) {
-        textFieldPaintProperty->UpdateBorderColorFlagByUser(
-            renderContext->GetBorderColorValue(BorderColorProperty {}));
-    }
-    isTransparent_ = renderContext->GetOpacityValue(1.0f) == 0.0f;
-    ApplyNormalTheme();
-    ApplyUnderlineTheme();
-    ApplyInlineTheme();
-    ProcessInnerPadding();
-    ProcessNumberOfLines();
-
-    InitClickEvent();
-    InitLongPressEvent();
-    InitFocusEvent();
-    InitMouseEvent();
-    InitTouchEvent();
-
-    SetAccessibilityAction();
-    FilterInitializeText();
-    InitDisableColor();
-    ProcessResponseArea();
-    if (!shiftFlag_) {
-        InitDragEvent();
-    }
-    Register2DragDropManager();
-    ProcessUnderlineColorOnModifierDone();
-    if (!clipboard_ && context) {
-        clipboard_ = ClipboardProxy::GetInstance()->GetClipboard(context->GetTaskExecutor());
-    }
-    if (barState_.has_value() && barState_.value() != layoutProperty->GetDisplayModeValue(DisplayMode::AUTO) &&
-        HasFocus() && IsNormalInlineState()) {
-        lastTextRectY_ = textRect_.GetY();
-    }
-    OnModifyDoneMultiThreadPart();
-}
-
-void TextFieldPattern::OnModifyDoneMultiThreadPart()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    if (!IsDisabled() && IsShowError()) {
-        SetShowError();
-    } else {
-        CleanErrorNode();
-    }
-    // The textRect position can't be changed by only redraw.
-    if (!initTextRect_) {
-        auto border = GetBorderWidthProperty();
-        textRect_.SetLeft(GetPaddingLeft() + GetBorderLeft(border));
-        textRect_.SetTop(GetPaddingTop() + GetBorderTop(border));
-        AdjustTextRectByCleanNode(textRect_);
-        initTextRect_ = true;
-    }
-    CalculateDefaultCursor();
-
-    ProcessSelection();
-    isTextChangedAtCreation_ = false;
-    if (layoutProperty->GetTypeChangedValue(false)) {
-        layoutProperty->ResetTypeChanged();
-        operationRecords_.clear();
-        redoOperationRecords_.clear();
-    }
-    ProcessScroll();
-    ProcessCounter();
-    Register2DragDropManager();
-    auto autoFillContainerNode = firstAutoFillContainerNode_.Upgrade();
-    if (autoFillContainerNode) {
-        UpdateTextFieldInfo();
-    }
-    TriggerAvoidWhenCaretGoesDown();
-    selectOverlay_->SetMenuTranslateIsSupport(IsShowTranslate());
-    selectOverlay_->SetIsSupportMenuSearch(IsShowSearch());
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    SetIsEnableSubWindowMenu();
-    isModifyDone_ = true;
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
-        InitCancelButtonMouseEvent();
-        InitPasswordButtonMouseEvent();
-    }
-
-    // Multi Thread
-    OnModifyDoneMultiThreadAddition();
-}
-
-void TextFieldPattern::OnModifyDoneMultiThreadAddition()
+void TextFieldPattern::MultiThreadDelayedExecution()
 {
     if (setShowKeyBoardOnFocusMultiThread_) {
         setShowKeyBoardOnFocusMultiThread_ = false;
@@ -357,6 +250,10 @@ void TextFieldPattern::OnModifyDoneMultiThreadAddition()
         setCustomKeyboardWithNodeMultiThread_ = false;
         SetCustomKeyboardWithNodeMultiThreadAction(setCustomKeyboardWithNodeMultiThreadValue_);
         setCustomKeyboardWithNodeMultiThreadValue_.Reset();
+    }
+    if (moveCaretToContentRectMultiThread_) {
+        moveCaretToContentRectMultiThread_ = false;
+        MoveCaretToContentRectMultiThread(moveCaretToContentRectMultiThreadValue_);
     }
 }
 
@@ -410,7 +307,13 @@ void TextFieldPattern::InitSurfacePositionChangedCallbackMultiThreadAction()
 void TextFieldPattern::SetCaretPositionMultiThread(int32_t position, bool moveContent)
 {
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Set caret position to %{public}d", position);
-    selectController_->MoveCaretToContentRect(position, TextAffinity::DOWNSTREAM, true, moveContent);
+    moveCaretToContentRectMultiThread_ = true;
+    moveCaretToContentRectMultiThreadValue_ = {
+        .index = position,
+        .textAffinity = TextAffinity::DOWNSTREAM,
+        .isEditorValueChanged = true,
+        .moveContent = moveContent
+    };
     updateCaretInfoToControllerMultiThread_ = true;
     if (HasFocus() && !magnifierController_->GetShowMagnifier()) {
         startTwinklingMultiThread_ = true;
@@ -419,6 +322,12 @@ void TextFieldPattern::SetCaretPositionMultiThread(int32_t position, bool moveCo
     CancelDelayProcessOverlay();
     triggerAvoidOnCaretChangeMultiThread_ = true;
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void TextFieldPattern::MoveCaretToContentRectMultiThread(const MoveCaretToContentRectData& value)
+{
+    selectController_->MoveCaretToContentRect(
+        value.index, value.textAffinity, value.isEditorValueChanged, value.moveContent);
 }
 
 void TextFieldPattern::SetSelectionFlagMultiThread(
@@ -436,7 +345,11 @@ void TextFieldPattern::SetSelectionFlagMultiThread(
     bool isShowMenu = selectOverlay_->IsCurrentMenuVisibile();
     isTouchPreviewText_ = false;
     if (selectionStart == selectionEnd) {
-        selectController_->MoveCaretToContentRect(selectionEnd, TextAffinity::DOWNSTREAM);
+        moveCaretToContentRectMultiThread_ = true;
+        moveCaretToContentRectMultiThreadValue_ = {
+            .index = selectionEnd,
+            .textAffinity = TextAffinity::DOWNSTREAM,
+        };
         startTwinklingMultiThread_ = true;
     } else {
         cursorVisible_ = false;
