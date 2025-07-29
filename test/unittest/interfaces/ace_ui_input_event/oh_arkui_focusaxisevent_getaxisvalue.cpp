@@ -14,9 +14,8 @@
  */
 
 #include "../ui_input_event_test.h"
-
-#include "interfaces/native/ui_input_event.h"
 #include "interfaces/native/event/ui_input_event_impl.h"
+#include "interfaces/native/ui_input_event.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -30,22 +29,16 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_FocusAxisEvent_GetAxisValue_NullEvent, TestS
 HWTEST_F(UIInputEventTest, OH_ArkUI_FocusAxisEvent_GetAxisValue_WrongEventTypeId, TestSize.Level0)
 {
     ArkUIFocusAxisEvent axisEvent = {};
-    ArkUI_UIInputEvent inputEvent = {
-        ARKUI_UIINPUTEVENT_TYPE_UNKNOWN,
+    ArkUI_UIInputEvent inputEvent = { ARKUI_UIINPUTEVENT_TYPE_UNKNOWN,
         C_AXIS_EVENT_ID, // not C_FOCUS_AXIS_EVENT_ID
-        &axisEvent
-    };
+        &axisEvent };
     auto result = OH_ArkUI_FocusAxisEvent_GetAxisValue(&inputEvent, UI_FOCUS_AXIS_EVENT_ABS_X);
     EXPECT_EQ(result, 0.0) << "EventTypeId != C_FOCUS_AXIS_EVENT_ID, expected 0.0, got " << result;
 }
 
 HWTEST_F(UIInputEventTest, OH_ArkUI_FocusAxisEvent_GetAxisValue_InputEventNull, TestSize.Level0)
 {
-    ArkUI_UIInputEvent inputEvent = {
-        ARKUI_UIINPUTEVENT_TYPE_UNKNOWN,
-        C_FOCUS_AXIS_EVENT_ID,
-        nullptr
-    };
+    ArkUI_UIInputEvent inputEvent = { ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, C_FOCUS_AXIS_EVENT_ID, nullptr };
     auto result = OH_ArkUI_FocusAxisEvent_GetAxisValue(&inputEvent, UI_FOCUS_AXIS_EVENT_ABS_X);
     EXPECT_EQ(result, 0.0) << "inputEvent is nullptr, expected 0.0, got " << result;
 }
@@ -62,11 +55,7 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_FocusAxisEvent_GetAxisValue_AxisVariants, Te
     axisEvent.absHat0XValue = 7.7;
     axisEvent.absHat0YValue = 8.8;
 
-    ArkUI_UIInputEvent inputEvent = {
-        ARKUI_UIINPUTEVENT_TYPE_UNKNOWN,
-        C_FOCUS_AXIS_EVENT_ID,
-        &axisEvent
-    };
+    ArkUI_UIInputEvent inputEvent = { ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, C_FOCUS_AXIS_EVENT_ID, &axisEvent };
 
     struct AxisTestCase {
         int32_t axis;
@@ -87,9 +76,8 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_FocusAxisEvent_GetAxisValue_AxisVariants, Te
     int count = 0;
     for (const auto& testCase : cases) {
         double result = OH_ArkUI_FocusAxisEvent_GetAxisValue(&inputEvent, testCase.axis);
-        EXPECT_DOUBLE_EQ(result, testCase.expected) << "index = " << count
-            << " : axis = " << testCase.axisName << " expected = " << testCase.expected
-            << " actual = " << result;
+        EXPECT_DOUBLE_EQ(result, testCase.expected) << "index = " << count << " : axis = " << testCase.axisName
+                                                    << " expected = " << testCase.expected << " actual = " << result;
         count++;
     }
 }
