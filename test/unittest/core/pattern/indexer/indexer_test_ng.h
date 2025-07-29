@@ -64,6 +64,11 @@ public:
         return { "#", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L" };
     }
 
+    std::vector<std::string> GetMidCollapseArrayValue()
+    {
+        return { "#", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P" };
+    }
+
     std::function<std::vector<std::string>(const int32_t selected)> GetPopupData()
     {
         return [](int32_t) -> std::vector<std::string> { return { "白", "别" }; };
