@@ -402,4 +402,11 @@ void SelectModelStatic::SetControlSize(FrameNode* frameNode, const std::optional
         pattern->SetControlSize(ControlSize::NORMAL);
     }
 }
+
+void SelectModelStatic::SetBackgroundColor(FrameNode* frameNode, const std::optional<Color>& color)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SelectPaintProperty, BackgroundColor, color.value_or(Color::TRANSPARENT), frameNode);
+    ViewAbstract::SetBackgroundColor(frameNode, color.value_or(Color::TRANSPARENT));
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SelectPaintProperty, BackgroundColorSetByUser, true, frameNode);
+}
 } // namespace OHOS::Ace::NG
