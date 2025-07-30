@@ -97,6 +97,17 @@ ohos_unittest("ui_input_event_test") {
     "oh_arkui_pointerevent_gettouchareaheight_test.cpp",
     "oh_arkui_pointerevent_getinteractionhandbyindex_test.cpp",
     "oh_arkui_pointerevent_getinteractionhand_test.cpp",
+    "oh_arkui_pointerevent_gethistorysize_test.cpp",
+    "oh_arkui_pointerevent_gethistoryeventtime_test.cpp",
+    "oh_arkui_pointerevent_gethistorypointercount_test.cpp",
+    "oh_arkui_axisevent_getverticalaxisvalue_test.cpp",
+    "oh_arkui_axisevent_gethorizontalaxisvalue_test.cpp",
+    "oh_arkui_axisevent_getpinchaxisscalevalue_test.cpp",
+    "oh_arkui_axisevent_getaxisaction_test.cpp",
+    "oh_arkui_pointerevent_setintercepthittestmode_test.cpp",
+    "oh_arkui_pointerevent_setstoppropagation_test.cpp",
+    "oh_arkui_mouseevent_getmousebutton_test.cpp",
+    "oh_arkui_mouseevent_getmouseaction_test.cpp",
   ]
 
   configs = [
