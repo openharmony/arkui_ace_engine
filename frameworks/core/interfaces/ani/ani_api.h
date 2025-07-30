@@ -309,7 +309,7 @@ struct ArkUIAniCommonModifier {
     void* (*getHoverEventPointer)(ani_long peer);
     ArkUI_Uint32 (*getColorValueByString)(const std::string& src);
     ArkUI_Uint32 (*getColorValueByNumber)(ArkUI_Uint32 src);
-    void (*sendThemeToNative)(ani_env* env, ani_array colors, ani_int id);
+    void (*sendThemeToNative)(ani_env* env, const std::vector<ani_object>& colors, ani_int id);
     void (*setDefaultTheme)(ani_env* env, ani_array colors, ani_boolean isDark);
     void (*updateColorMode)(ani_int colorMode);
     void (*restoreColorMode)();

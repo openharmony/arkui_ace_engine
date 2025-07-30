@@ -16,6 +16,7 @@
 #include "core/interfaces/native/ani/ani_theme.h"
 
 #include <cstdint>
+#include <vector>
 
 #include "ani.h"
 
@@ -26,15 +27,10 @@
 namespace OHOS::Ace::NG {
 std::map<int32_t, AniTheme> AniThemeScope::aniThemes = {};
 
-void AniThemeColors::SetColors(ani_env* env, ani_array colors)
+void AniThemeColors::SetColors(ani_env* env, const std::vector<ani_object>& colors)
 {
-    ani_size length;
-    env->Array_GetLength(colors, &length);
-    for (int i = 0; i < length; i++) {
-        // type ResourceColor = number | string | Resource
-        ani_ref value;
-        env->Array_Get_Ref((ani_array_ref)colors, i, &value);
-        colors_.push_back((ani_object)value);
+    for (auto& color : colors) {
+        colors_.push_back(color);
     }
     env->GetVM(&vm_);
 }

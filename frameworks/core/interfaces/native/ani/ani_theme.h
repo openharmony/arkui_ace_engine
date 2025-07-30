@@ -95,7 +95,7 @@ public:
     AniThemeColors() = default;
     virtual ~AniThemeColors() = default;
 
-    void SetColors(ani_env* env, ani_array colors);
+    void SetColors(ani_env* env, const std::vector<ani_object>& colors);
 
     Color Brand() const
     {

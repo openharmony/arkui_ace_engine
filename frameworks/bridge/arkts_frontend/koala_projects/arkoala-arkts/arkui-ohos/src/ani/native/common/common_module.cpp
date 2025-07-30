@@ -673,7 +673,16 @@ void SendThemeToNative(ani_env* env, ani_object aniClass, ani_array colorArray, 
     if (!modifier) {
         return;
     }
-    modifier->getCommonAniModifier()->sendThemeToNative(env, colorArray, id);
+    std::vector<ani_object> colors;
+    ani_size length;
+    env->Array_GetLength(colorArray, &length);
+    for (int i = 0; i < length; i++) {
+        // type ResourceColor = number | string | Resource
+        ani_ref value;
+        env->Array_Get_Ref((ani_array_ref)colorArray, i, &value);
+        colors.push_back((ani_object)value);
+    }
+    modifier->getCommonAniModifier()->sendThemeToNative(env, colors, id);
 }
 
 void SetDefaultTheme(ani_env* env, ani_object aniClass, ani_array colorArray, ani_boolean isDark)
