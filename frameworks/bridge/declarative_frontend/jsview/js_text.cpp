@@ -430,17 +430,22 @@ void JSText::SetSelectedBackgroundColor(const JSCallbackInfo& info)
     }
     Color selectedColor;
     RefPtr<ResourceObject> resObj;
-    if (ParseJsColor(info[0], selectedColor, resObj)) {
-        RegisterResource<Color>("SelectedBackgroundColor", resObj, selectedColor);
-        return;
-    } else{
+    UnRegisterResource("SelectedBackgroundColor");
+    if (!ParseJsColor(info[0], selectedColor, resObj)) {
         auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipelineContext);
         auto theme = pipelineContext->GetTheme<TextTheme>();
+        CHECK_NULL_VOID(theme);
+        selectedColor = theme->GetSelectedColor();
+    }
+    if (SystemProperties::ConfigChangePerform() && resObj) {
+        RegisterResource<Color>("SelectedBackgroundColor", resObj, selectedColor);
+    }
+    // Alpha = 255 means opaque
+    if (selectedColor.GetAlpha() == JSThemeUtils::DEFAULT_ALPHA) {
         // Default setting of 20% opacity
         selectedColor = selectedColor.ChangeOpacity(JSThemeUtils::DEFAULT_OPACITY);
     }
-    UnRegisterResource("SelectedBackgroundColor");
     TextModel::GetInstance()->SetSelectedBackgroundColor(selectedColor);
 }
 
