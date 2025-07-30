@@ -485,12 +485,12 @@ static ani_status CreateAniDouble(ani_env* env, double value, ani_object& result
 {
     ani_status state;
     ani_class doubleClass;
-    if ((state = env->FindClass("Lstd/core/Double;", &doubleClass)) != ANI_OK) {
+    if ((state = env->FindClass("std.core.Double", &doubleClass)) != ANI_OK) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY, "FindClass std/core/doubleClass failed, %{public}d", state);
         return state;
     }
     ani_method doubleClassCtor;
-    if ((state = env->Class_FindMethod(doubleClass, "<ctor>", "D:V", &doubleClassCtor)) != ANI_OK) {
+    if ((state = env->Class_FindMethod(doubleClass, "<ctor>", "d:", &doubleClassCtor)) != ANI_OK) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY, "Class_FindMethod Double ctor failed, %{public}d", state);
         return state;
     }
@@ -555,7 +555,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     }
 
     ani_namespace ns;
-    status = env->FindNamespace("L@ohos/promptAction/promptAction;", &ns);
+    status = env->FindNamespace("C{@ohos.promptAction.promptAction}", &ns);
     if (status != ANI_OK) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY, "PromptAction FindNamespace fail. status: %{public}d", status);
         return ANI_ERROR;

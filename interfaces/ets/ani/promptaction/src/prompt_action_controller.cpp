@@ -41,7 +41,7 @@ void PromptActionDialogController::Close()
 
 ani_long ANICreateDialogController(ani_env* env, ani_object object)
 {
-    static const char *className = "L@ohos/promptAction/promptAction/DialogController;";
+    static const char *className = "@ohos.promptAction.promptAction.DialogController";
     ani_class cls;
     ani_status status = env->FindClass(className, &cls);
     if (status != ANI_OK) {
@@ -77,7 +77,7 @@ void ANICleanDialogController(ani_env* env, ani_object object)
 
 ani_status BindDialogController(ani_env* env)
 {
-    static const char *className = "L@ohos/promptAction/promptAction/DialogController;";
+    static const char *className = "@ohos.promptAction.promptAction.DialogController";
     ani_class cls;
     ani_status status = env->FindClass(className, &cls);
     if (status != ANI_OK) {
@@ -95,7 +95,7 @@ ani_status BindDialogController(ani_env* env)
         return ANI_ERROR;
     }
 
-    static const char *cleanerName = "L@ohos/promptAction/promptAction/Cleaner;";
+    static const char *cleanerName = "@ohos.promptAction.promptAction.Cleaner";
     ani_class cleanerCls;
     status = env->FindClass(cleanerName, &cleanerCls);
     if (status != ANI_OK) {
@@ -128,7 +128,7 @@ static ani_enum_item CommonControllerGetState(ani_env* env, ani_object object)
 {
     ani_enum_item enumItem = nullptr;
     ani_enum enumType;
-    ani_status status = env->FindEnum("L@ohos/promptAction/promptAction/CommonState;", &enumType);
+    ani_status status = env->FindEnum("@ohos.promptAction.promptAction.CommonState", &enumType);
     if (status != ANI_OK) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY, "CommonState FindEnum fail. status: %{public}d", status);
         return enumItem;
@@ -145,14 +145,14 @@ static ani_enum_item CommonControllerGetState(ani_env* env, ani_object object)
 ani_status BindCommonController(ani_env* env)
 {
     ani_class commonControllerCls;
-    ani_status status = env->FindClass("L@ohos/promptAction/promptAction/CommonController;", &commonControllerCls);
+    ani_status status = env->FindClass("@ohos.promptAction.promptAction.CommonController", &commonControllerCls);
     if (status != ANI_OK) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY, "CommonController FindClass fail. status: %{public}d", status);
         return ANI_ERROR;
     }
 
     std::array commonControllerMethods = {
-        ani_native_function { "<ctor>", ":V", reinterpret_cast<void*>(CreateCommonController) },
+        ani_native_function { "<ctor>", ":", reinterpret_cast<void*>(CreateCommonController) },
         ani_native_function { "close", nullptr, reinterpret_cast<void*>(CommonControllerClose) },
         ani_native_function { "getState", nullptr, reinterpret_cast<void*>(CommonControllerGetState) },
     };
@@ -212,7 +212,7 @@ void ANIDismissDialog(ani_env* env, ani_object object)
 
 ani_status BindDismissDialogAction(ani_env* env)
 {
-    static const char *className = "L@ohos/promptAction/DismissDialogActionInner;";
+    static const char *className = "@ohos.promptAction.DismissDialogActionInner";
     ani_class cls;
     ani_status status = env->FindClass(className, &cls);
     if (status != ANI_OK) {
@@ -234,7 +234,7 @@ ani_status BindDismissDialogAction(ani_env* env)
 ani_object ANICreateDismissDialogAction(ani_env* env, const int32_t reason, const int32_t instanceId)
 {
     ani_object result = {};
-    static const char *className = "L@ohos/promptAction/DismissDialogActionInner;";
+    static const char *className = "@ohos.promptAction.DismissDialogActionInner";
     ani_class cls;
     ani_status status = env->FindClass(className, &cls);
     if (status != ANI_OK) {
@@ -260,7 +260,7 @@ ani_object ANICreateDismissDialogAction(ani_env* env, const int32_t reason, cons
     }
 
     ani_enum enumType;
-    status = env->FindEnum("Larkui/component/common/DismissReason;", &enumType);
+    status = env->FindEnum("arkui.component.common.DismissReason", &enumType);
     if (status != ANI_OK) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DIALOG, "DismissReason FindEnum fail. status: %{public}d", status);
         return result;

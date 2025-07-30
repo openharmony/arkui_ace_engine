@@ -518,13 +518,13 @@ static RefPtr<Motion> ParseOptionToMotion(const std::shared_ptr<Napi::AnimatorOp
 
 static ani_object createDouble(ani_env *env, double value)
 {
-    static const char *className = "Lstd/core/Double;";
+    static const char *className = "std.core.Double";
     ani_class persion_cls;
     if (ANI_OK != env->FindClass(className, &persion_cls)) {
         return nullptr;
     }
     ani_method personInfoCtor;
-    if (ANI_OK != env->Class_FindMethod(persion_cls, "<ctor>", "D:V", &personInfoCtor)) {
+    if (ANI_OK != env->Class_FindMethod(persion_cls, "<ctor>", "d:", &personInfoCtor)) {
         return nullptr;
     }
     ani_object personInfoObj;
@@ -648,7 +648,7 @@ static void SetOnrepeat([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_obje
 static ani_object AnimatorTransferStatic(ani_env *aniEnv, ani_object, ani_object input)
 {
     ani_object animatorObj = {};
-    static const char *className = "L@ohos/animator/AnimatorResultInner;";
+    static const char *className = "@ohos.animator.AnimatorResultInner";
     ani_class cls;
     if (ANI_OK != aniEnv->FindClass(className, &cls)) {
         TAG_LOGI(AceLogTag::ACE_ANIMATION, "[ANI] find class fail");
@@ -695,7 +695,7 @@ static ani_object AnimatorTransferStatic(ani_env *aniEnv, ani_object, ani_object
 void ParseExpectedFrameRateRange(ani_env *env, ani_object objOption,
     FrameRateRange& frameRateRange)
 {
-    static const char *className = "L@ohos/arkui/component/Common/ExpectedFrameRateRange;";
+    static const char *className = "@ohos.arkui.component.Common.ExpectedFrameRateRange";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         return;
@@ -787,7 +787,7 @@ std::string AnimationDirectionToString(const AnimationDirection& direction)
 ani_object ANICreate(ani_env *env, [[maybe_unused]] ani_object object, [[maybe_unused]] ani_object aniOption)
 {
     ani_object animatorObj = {};
-    static const char *className = "L@ohos/animator/AnimatorResultInner;";
+    static const char *className = "@ohos.animator.AnimatorResultInner";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         TAG_LOGI(AceLogTag::ACE_ANIMATION, "[ANI] find class fail");
@@ -802,7 +802,7 @@ ani_object ANICreate(ani_env *env, [[maybe_unused]] ani_object object, [[maybe_u
 
     // create animatot and construct animatorResult
     auto option = std::make_shared<Napi::AnimatorOption>();
-    if (IsInstanceOfCls(env, aniOption, "L@ohos/animator/SimpleAnimatorOptions;")) {
+    if (IsInstanceOfCls(env, aniOption, "@ohos.animator.SimpleAnimatorOptions")) {
         auto simpleAnimatorOption = GetJsSimpleAnimatorOption(env, aniOption);
         if (simpleAnimatorOption == nullptr) {
             return animatorObj;
@@ -949,7 +949,7 @@ ani_object ANISetSimpleAnimatorFill(ani_env* env, [[maybe_unused]] ani_object ob
         return object;
     }
     ani_enum fillModerEnum;
-    if (ANI_OK != env->FindEnum("Larkui/component/enums/FillMode;", &fillModerEnum)) {
+    if (ANI_OK != env->FindEnum("arkui.component.enums.FillMode", &fillModerEnum)) {
         return object;
     }
     ani_boolean isEnum;
@@ -973,7 +973,7 @@ ani_object ANISetSimpleAnimatorDirection(ani_env* env, [[maybe_unused]] ani_obje
         return object;
     }
     ani_enum PlayModeEnum;
-    if (ANI_OK != env->FindEnum("Larkui/component/enums/PlayMode;", &PlayModeEnum)) {
+    if (ANI_OK != env->FindEnum("arkui.component.enums.PlayMode", &PlayModeEnum)) {
         return object;
     }
     ani_boolean isEnum;
@@ -1018,7 +1018,7 @@ ani_object ANISetSimpleAnimatorIterations(ani_env* env, [[maybe_unused]] ani_obj
 
 ani_status BindAnimator(ani_env *env)
 {
-    static const char *className = "L@ohos/animator/Animator;";
+    static const char *className = "@ohos.animator.Animator";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         TAG_LOGI(AceLogTag::ACE_ANIMATION, "[ANI] Bind Animator fail");
@@ -1040,7 +1040,7 @@ ani_status BindAnimator(ani_env *env)
 
 ani_status BindAnimatorResult(ani_env *env)
 {
-    static const char *className = "L@ohos/animator/AnimatorResultInner;";
+    static const char *className = "@ohos.animator.AnimatorResultInner";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         TAG_LOGI(AceLogTag::ACE_ANIMATION, "[ANI] bind animator result fail");
@@ -1048,17 +1048,17 @@ ani_status BindAnimatorResult(ani_env *env)
     }
 
     std::array methods = {
-        ani_native_function{"play", ":V", reinterpret_cast<void *>(JSPlay)},
-        ani_native_function{"reverse", ":V", reinterpret_cast<void *>(JSReverse)},
-        ani_native_function{"cancel", ":V", reinterpret_cast<void *>(JSCancel)},
-        ani_native_function{"pause", ":V", reinterpret_cast<void *>(JSPause)},
-        ani_native_function{"finish", ":V", reinterpret_cast<void *>(JSFinish)},
+        ani_native_function{"play", ":", reinterpret_cast<void *>(JSPlay)},
+        ani_native_function{"reverse", ":", reinterpret_cast<void *>(JSReverse)},
+        ani_native_function{"cancel", ":", reinterpret_cast<void *>(JSCancel)},
+        ani_native_function{"pause", ":", reinterpret_cast<void *>(JSPause)},
+        ani_native_function{"finish", ":", reinterpret_cast<void *>(JSFinish)},
         ani_native_function{"setOnFinish", nullptr, reinterpret_cast<void *>(SetOnfinish)},
         ani_native_function{"setOnCancel", nullptr, reinterpret_cast<void *>(SetOncancel)},
         ani_native_function{"setOnRepeat", nullptr, reinterpret_cast<void *>(SetOnrepeat)},
         ani_native_function{"setOnFrame", nullptr, reinterpret_cast<void *>(SetOnframe)},
-        ani_native_function{"update", "L@ohos/animator/AnimatorOptions;:V", reinterpret_cast<void *>(ANIUpdate)},
-        ani_native_function{"reset", "L@ohos/animator/AnimatorOptions;:V", reinterpret_cast<void *>(ANIReset)},
+        ani_native_function{"update", "C{@ohos.animator.AnimatorOptions}:", reinterpret_cast<void *>(ANIUpdate)},
+        ani_native_function{"reset", "C{@ohos.animator.AnimatorOptions}:", reinterpret_cast<void *>(ANIReset)},
         ani_native_function{"setExpectedFrameRateRange", nullptr,
             reinterpret_cast<void *>(JSSetExpectedFrameRateRange)},
         ani_native_function{ "nativeTransferStatic", nullptr, reinterpret_cast<void*>(AnimatorTransferStatic)}
@@ -1073,7 +1073,7 @@ ani_status BindAnimatorResult(ani_env *env)
 
 ani_status BindSimpleAnimatorOptions(ani_env *env)
 {
-    static const char *className = "L@ohos/animator/SimpleAnimatorOptions;";
+    static const char *className = "@ohos.animator.SimpleAnimatorOptions";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         TAG_LOGI(AceLogTag::ACE_ANIMATION, "[ANI] bind SimpleAnimatorOptions result fail");
@@ -1082,7 +1082,7 @@ ani_status BindSimpleAnimatorOptions(ani_env *env)
 
     std::array methods = {
         ani_native_function {
-            "<ctor>", "DD:V", reinterpret_cast<void*>(ANICreateSimpleAnimatorOptionsWithParam) },
+            "<ctor>", "dd:", reinterpret_cast<void*>(ANICreateSimpleAnimatorOptionsWithParam) },
         ani_native_function {
             "duration", nullptr, reinterpret_cast<void*>(ANISetSimpleAnimatorDuration) },
         ani_native_function {

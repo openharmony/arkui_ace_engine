@@ -22,7 +22,7 @@ struct RectPeer {
 
 void ANICreateRectShape(ani_env* env, [[maybe_unused]] ani_object object)
 {
-    static const char* className = "L@ohos/arkui/shape/RectShape;";
+    static const char* className = "@ohos.arkui.shape.RectShape";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         return;
@@ -47,7 +47,7 @@ void ANICreateRectShapeWithParam(
     RectPeer* shapePeer = new RectPeer();
     auto rect = AceType::MakeRefPtr<ShapeRect>();
 
-    if (IsInstanceOfCls(env, aniOption, "L@ohos/arkui/shape/RectShapeOptions;")) {
+    if (IsInstanceOfCls(env, aniOption, "@ohos.arkui.shape.RectShapeOptions")) {
         ani_ref params_ref;
         if (ANI_OK != env->Object_GetPropertyByName_Ref(aniOption, "radius", &params_ref)) {
             return;
@@ -61,13 +61,13 @@ void ANICreateRectShapeWithParam(
             rect->SetRadiusWidth(radiusVal);
             rect->SetRadiusWidth(radiusVal);
         }
-    } else if (IsInstanceOfCls(env, aniOption, "L@ohos/arkui/shape/RoundRectShapeOptions;")) {
+    } else if (IsInstanceOfCls(env, aniOption, "@ohos.arkui.shape.RoundRectShapeOptions")) {
         OHOS::Ace::CalcDimension radiusWidthVal;
         ParseStringAndNumberOption(env, aniOption, radiusWidthVal, "radiusWidth",
-            "L@ohos/arkui/shape/RoundRectShapeOptions;");
+            "@ohos.arkui.shape.RoundRectShapeOptions");
         OHOS::Ace::CalcDimension radiusHeightVal;
         ParseStringAndNumberOption(env, aniOption, radiusHeightVal, "radiusHeight",
-            "L@ohos/arkui/shape/RoundRectShapeOptions;");
+            "@ohos.arkui.shape.RoundRectShapeOptions");
         rect->SetRadiusWidth(radiusWidthVal);
         rect->SetRadiusHeight(radiusHeightVal);
     }
@@ -94,7 +94,7 @@ ani_object ANIRectShapeWidth(ani_env* env, [[maybe_unused]] ani_object object, [
     if (GetIsUndefinedObject(env, aniOption)) {
         return object;
     }
-    static const char* className = "L@ohos/arkui/shape/RectShape;";
+    static const char* className = "@ohos.arkui.shape.RectShape";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         return nullptr;
@@ -115,7 +115,7 @@ ani_object ANIRectShapeHeight(ani_env* env, [[maybe_unused]] ani_object object, 
     if (GetIsUndefinedObject(env, aniOption)) {
         return object;
     }
-    static const char* className = "L@ohos/arkui/shape/RectShape;";
+    static const char* className = "@ohos.arkui.shape.RectShape";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         return nullptr;
@@ -141,12 +141,12 @@ ani_object ANIRectShapeSize(ani_env* env, [[maybe_unused]] ani_object object, [[
         return object;
     }
     CalcDimension width;
-    ParseOption(env, aniOption, width, "width", "Larkui/component/units/SizeOptions;");
+    ParseOption(env, aniOption, width, "width", "arkui.component.units.SizeOptions");
     if (rectObj->rectShape) {
         rectObj->rectShape->SetWidth(width);
     }
     CalcDimension height;
-    ParseOption(env, aniOption, height, "height", "Larkui/component/units/SizeOptions;");
+    ParseOption(env, aniOption, height, "height", "arkui.component.units.SizeOptions");
     if (rectObj->rectShape) {
         rectObj->rectShape->SetHeight(height);
     }
@@ -163,9 +163,9 @@ ani_object ANIRectShapePosition(ani_env* env, [[maybe_unused]] ani_object object
         return object;
     }
     CalcDimension dx;
-    ParseOption(env, aniOption, dx, "x", "Larkui/component/units/Position;");
+    ParseOption(env, aniOption, dx, "x", "arkui.component.units.Position");
     CalcDimension dy;
-    ParseOption(env, aniOption, dy, "y", "Larkui/component/units/Position;");
+    ParseOption(env, aniOption, dy, "y", "arkui.component.units.Position");
     DimensionOffset position(dx, dy);
     if (rectObj->rectShape) {
         rectObj->rectShape->SetPosition(position);
@@ -183,9 +183,9 @@ ani_object ANIRectShapeOffset(ani_env* env, [[maybe_unused]] ani_object object, 
         return object;
     }
     CalcDimension dx;
-    ParseOption(env, aniOption, dx, "x", "Larkui/component/units/Position;");
+    ParseOption(env, aniOption, dx, "x", "arkui.component.units.Position");
     CalcDimension dy;
-    ParseOption(env, aniOption, dy, "y", "Larkui/component/units/Position;");
+    ParseOption(env, aniOption, dy, "y", "arkui.component.units.Position");
     DimensionOffset position(dx, dy);
     if (rectObj->rectShape) {
         rectObj->rectShape->SetOffset(position);
@@ -276,15 +276,15 @@ ani_object ANIRectShapeRadius(ani_env* env, ani_object object, [[maybe_unused]] 
 
 ani_status RectShape::BindRectShape(ani_env* env)
 {
-    static const char* className = "L@ohos/arkui/shape/RectShape;";
+    static const char* className = "@ohos.arkui.shape.RectShape";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         return ANI_ERROR;
     }
 
     std::array methods = {
-        ani_native_function { "<ctor>", ":V", reinterpret_cast<void*>(ANICreateRectShape) },
-        ani_native_function { "<ctor>", "Lstd/core/Object;:V", reinterpret_cast<void*>(ANICreateRectShapeWithParam) },
+        ani_native_function { "<ctor>", ":", reinterpret_cast<void*>(ANICreateRectShape) },
+        ani_native_function { "<ctor>", "C{std.core.Object}:", reinterpret_cast<void*>(ANICreateRectShapeWithParam) },
         ani_native_function { "width", nullptr, reinterpret_cast<void*>(ANIRectShapeWidth) },
         ani_native_function { "radiusWidth", nullptr, reinterpret_cast<void*>(ANIRectShapeRadiusWidth) },
         ani_native_function { "radiusHeight", nullptr, reinterpret_cast<void*>(ANIRectShapeRadiusHeight) },

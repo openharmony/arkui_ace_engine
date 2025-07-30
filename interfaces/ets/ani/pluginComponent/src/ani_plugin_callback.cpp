@@ -25,7 +25,7 @@
 
 namespace OHOS::Ace::Ani {
     std::atomic_size_t ANIPluginCallback::uuid_ = 0;
-    constexpr char PLUGINCOMPONENT_TEMPLATE_CLASSNAME[] = "L@ohos/pluginComponent/PluginComponentTemplateImpl;";
+    constexpr char PLUGINCOMPONENT_TEMPLATE_CLASSNAME[] = "@ohos.pluginComponent.PluginComponentTemplateImpl";
     
 bool AceJSPluginRequestParam::operator==(const AceJSPluginRequestParam& param) const
 {
@@ -281,7 +281,7 @@ ani_ref ANIPluginCallback::MakePluginTemplateObject(const PluginComponentTemplat
     ani_class pluginTemplateCls;
     cbInfo_.env->FindClass(PLUGINCOMPONENT_TEMPLATE_CLASSNAME, &pluginTemplateCls);
     ani_method PTOCtor;
-    cbInfo_.env->Class_FindMethod(pluginTemplateCls, "<ctor>", ":V", &PTOCtor);
+    cbInfo_.env->Class_FindMethod(pluginTemplateCls, "<ctor>", ":", &PTOCtor);
     ani_object PTOObj;
     cbInfo_.env->Object_New(pluginTemplateCls, PTOCtor, &PTOObj);
     cbInfo_.env->Object_SetPropertyByName_Ref(PTOObj, "source", AceWrapStringToAni(cbInfo_.env,

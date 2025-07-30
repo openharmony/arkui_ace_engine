@@ -39,18 +39,18 @@ struct AppInfo {
 };
 /* copied from arkcompiler_ets_frontend vmloader.cc*/
 const AppInfo KOALA_APP_INFO = {
-    "Larkui/ArkUIEntry/Application;",
+    "arkui.ArkUIEntry.Application",
     "createApplication",
-    "Lstd/core/String;Lstd/core/String;ZLstd/core/String;Larkui/UserView/UserView;Larkui/UserView/EntryPoint;"
-    ":Larkui/ArkUIEntry/Application;",
+    "C{std.core.String}C{std.core.String}zC{std.core.String}C{arkui.UserView.UserView}C{arkui.UserView.EntryPoint}"
+    ":C{arkui.ArkUIEntry.Application}",
     "start",
-    ":J",
+    ":l",
     "enter",
-    "IIJ:Z",
+    "iil:z",
     "emitEvent",
-    "IIII:V",
+    "iiii:",
     "checkCallbacks",
-    ":V",
+    ":",
 };
 
 void RunArkoalaEventLoop(ani_env* env, ani_ref app)

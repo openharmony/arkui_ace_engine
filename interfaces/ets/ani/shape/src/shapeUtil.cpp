@@ -35,7 +35,7 @@ std::unordered_map<int, uint32_t> colorMap = {
 bool GetIsStringObject(ani_env *env, ani_ref object_ref)
 {
     ani_class stringClass;
-    if (ANI_OK != env->FindClass("Lstd/core/String;", &stringClass)) {
+    if (ANI_OK != env->FindClass("std.core.String", &stringClass)) {
         return false;
     }
     ani_boolean isString;
@@ -47,7 +47,7 @@ bool GetIsStringObject(ani_env *env, ani_ref object_ref)
 bool GetIsNumberObject(ani_env *env, ani_ref object_ref)
 {
     ani_class numberClass;
-    if (ANI_OK != env->FindClass("Lstd/core/Numeric;", &numberClass)) {
+    if (ANI_OK != env->FindClass("std.core.Numeric", &numberClass)) {
         return false;
     }
     ani_boolean isNumber;
@@ -69,7 +69,7 @@ bool GetIsUndefinedObject(ani_env *env, ani_ref object_ref)
 bool GetIsResourceObject(ani_env *env, ani_ref object_ref)
 {
     ani_class resourceClass;
-    if (ANI_OK != env->FindClass("Lstd/core/Object;", &resourceClass)) {
+    if (ANI_OK != env->FindClass("std.core.Object", &resourceClass)) {
         return false;
     }
     ani_boolean isResource = false;
@@ -82,7 +82,7 @@ bool GetIsResourceObject(ani_env *env, ani_ref object_ref)
 bool GetIsArrayObject(ani_env *env, ani_ref object_ref)
 {
     ani_class arrayClass;
-    if (ANI_OK != env->FindClass("Lescompat/Array;", &arrayClass)) {
+    if (ANI_OK != env->FindClass("escompat.Array", &arrayClass)) {
         return false;
     }
     ani_boolean isArray;
@@ -98,14 +98,14 @@ void processResourceType(ani_env *env, ani_object value, ani_ref params_ref, siz
     for (int i = 0; i < int(length); i++) {
         ani_ref stringEntryRef;
         if (ANI_OK != env->Object_CallMethodByName_Ref(static_cast<ani_object>(params_ref),
-            "$_get", "I:Lstd/core/Object;", &stringEntryRef, (ani_int)i)) {
+            "$_get", "i:C{std.core.Object}", &stringEntryRef, (ani_int)i)) {
             break;
         }
         auto stringContent = ANIUtils_ANIStringToStdString(env, static_cast<ani_string>(stringEntryRef));
         strings.emplace_back(stringContent);
     }
     ani_class stringCls = nullptr;
-    if (ANI_OK != env->FindClass("Lstd/core/String;", &stringCls)) {
+    if (ANI_OK != env->FindClass("std.core.String", &stringCls)) {
         return;
     }
     ani_ref undefinedRef = nullptr;
@@ -116,7 +116,7 @@ void processResourceType(ani_env *env, ani_object value, ani_ref params_ref, siz
     ani_string ani_first_str;
     if (ANI_OK == env->String_NewUTF8(resName.c_str(), resName.size(), &ani_first_str)) {
         if (ANI_OK != env->Object_CallMethodByName_Void(static_cast<ani_object>(params_ref),
-            "$_set", "ILstd/core/Object;:V", index, ani_first_str)) {
+            "$_set", "iC{std.core.Object}:", index, ani_first_str)) {
             return;
         }
     }
@@ -127,7 +127,7 @@ void processResourceType(ani_env *env, ani_object value, ani_ref params_ref, siz
             break;
         }
         if (ANI_OK != env->Object_CallMethodByName_Void(static_cast<ani_object>(params_ref),
-            "$_set", "ILstd/core/Object;:V", index, ani_str)) {
+            "$_set", "iC{std.core.Object}:", index, ani_str)) {
             break;
         }
         index++;
@@ -488,7 +488,7 @@ bool ParseResourceParamName(ani_env *env, ani_object objects, ResourceInfo& info
     for (int i = 0; i < int(length); i++) {
         ani_ref stringEntryRef;
         if (ANI_OK != env->Object_CallMethodByName_Ref(static_cast<ani_object>(params_ref),
-            "$_get", "I:Lstd/core/Object;", &stringEntryRef, (ani_int)i)) {
+            "$_get", "i:C{std.core.Object}", &stringEntryRef, (ani_int)i)) {
             return false;
         }
         strings.emplace_back(ANIUtils_ANIStringToStdString(env, static_cast<ani_string>(stringEntryRef)));
@@ -752,7 +752,7 @@ bool ParseOption(ani_env* env, ani_object options,
 bool GetIsColorEnum(ani_env *env, ani_ref object_ref)
 {
     ani_enum colorEnum;
-    if (ANI_OK != env->FindEnum("Larkui/component/enums/Color;", &colorEnum)) {
+    if (ANI_OK != env->FindEnum("arkui.component.enums.Color", &colorEnum)) {
         return false;
     }
     ani_boolean isEnum;
@@ -878,7 +878,7 @@ void ParseArray([[maybe_unused]] ani_env* env,
     for (int i = 0; i < static_cast<int32_t>(length); i++) {
         ani_ref pointRef;
         if (ANI_OK != env->Object_CallMethodByName_Ref(
-            static_cast<ani_object>(options), "$_get", "I:Lstd/core/Object;", &pointRef, (ani_int)i)) {
+            static_cast<ani_object>(options), "$_get", "i:C{std.core.Object}", &pointRef, (ani_int)i)) {
             break;
         }
         OHOS::Ace::CalcDimension result;

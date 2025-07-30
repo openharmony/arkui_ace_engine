@@ -56,11 +56,11 @@ ani_object WrapStsError(ani_env* env, const std::string& msg)
         return nullptr;
     }
 
-    if ((status = env->FindClass("Lescompat/Error;", &cls)) != ANI_OK) {
+    if ((status = env->FindClass("escompat.Error", &cls)) != ANI_OK) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "FindClass failed %{public}d", status);
         return nullptr;
     }
-    if ((status = env->Class_FindMethod(cls, "<ctor>", "Lstd/core/String;Lescompat/ErrorOptions;:V", &method)) !=
+    if ((status = env->Class_FindMethod(cls, "<ctor>", "C{std.core.String}C{escompat.ErrorOptions}:", &method)) !=
         ANI_OK) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "Class_FindMethod failed %{public}d", status);
         return nullptr;
@@ -77,11 +77,11 @@ static ani_ref CreateStsError(ani_env* env, ani_int code, const std::string& msg
 {
     ani_class cls;
     ani_status status = ANI_OK;
-    if ((status = env->FindClass("L@ohos/base/BusinessError;", &cls)) != ANI_OK) {
+    if ((status = env->FindClass("C{@ohos.base.BusinessError}", &cls)) != ANI_OK) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "FindClass failed %{public}d", status);
     }
     ani_method ctor;
-    if ((status = env->Class_FindMethod(cls, "<ctor>", "DLescompat/Error;:V", &ctor)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", "dC{escompat.Error}:", &ctor)) != ANI_OK) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "Class_FindMethod failed %{public}d", status);
     }
     ani_object error = WrapStsError(env, msg);
@@ -196,7 +196,7 @@ void OnComplete(SnapshotAsyncCtx* asyncCtx, std::function<void()> finishCallback
 bool IsFunctionObjectWith2Param(ani_env* env, ani_ref obj)
 {
     ani_class funcClass;
-    if (ANI_OK != env->FindClass("Lstd/core/Function2;", &funcClass)) {
+    if (ANI_OK != env->FindClass("std.core.Function2", &funcClass)) {
         return false;
     }
     ani_boolean result;
@@ -243,7 +243,7 @@ static bool GetOptionsScale(ani_env* env, ani_object options, float& value)
         return false;
     }
     ani_class optionsClass;
-    if (ANI_OK != env->FindClass("L@ohos/arkui/componentSnapshot/componentSnapshot/SnapshotOptions;", &optionsClass)) {
+    if (ANI_OK != env->FindClass("@ohos.arkui.componentSnapshot.componentSnapshot.SnapshotOptions", &optionsClass)) {
         return false;
     }
     ani_boolean isOptions;
@@ -284,7 +284,7 @@ static bool GetOptionsWaitUntilRenderFinished(ani_env* env, ani_object options, 
     }
 
     ani_class optionsClass;
-    if (ANI_OK != env->FindClass("L@ohos/arkui/componentSnapshot/componentSnapshot/SnapshotOptions;", &optionsClass)) {
+    if (ANI_OK != env->FindClass("@ohos.arkui.componentSnapshot.componentSnapshot.SnapshotOptions", &optionsClass)) {
         return false;
     }
     ani_boolean isOptions;

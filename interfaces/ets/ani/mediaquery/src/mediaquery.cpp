@@ -48,7 +48,7 @@ struct MediaQueryResult {
     {
         ani_boolean match = false;
         ani_string media = nullptr;
-        static const char *className = "L@ohos/mediaquery/mediaquery/Mediaquery;";
+        static const char *className = "@ohos.mediaquery.mediaquery.Mediaquery";
         ani_class cls;
         if (ANI_OK != env->FindClass(className, &cls)) {
             return;
@@ -74,7 +74,7 @@ struct MediaQueryResult {
     {
         ani_boolean match;
         ani_string media;
-        static const char *className = "L@ohos/mediaquery/mediaquery/Result;";
+        static const char *className = "@ohos.mediaquery.mediaquery.Result";
         ani_class cls;
         if (ANI_OK != env->FindClass(className, &cls)) {
             return;
@@ -299,7 +299,7 @@ public:
     void AniSerializer([[maybe_unused]] ani_env *env, ani_object& result) override
     {
         MediaQueryResult::AniSerializer(env, result);
-        static const char *mediaquery = "L@ohos/mediaquery/mediaquery/Mediaquery;";
+        static const char *mediaquery = "@ohos.mediaquery.mediaquery.Mediaquery";
         ani_class cls2;
         if (ANI_OK != env->FindClass(mediaquery, &cls2)) {
             std::cerr << "Not found '" << mediaquery << "'" << std::endl;
@@ -433,7 +433,7 @@ static ani_object JSMatchMediaSync([[maybe_unused]] ani_env *env, ani_string con
     utf8Buffer[bytes_written] = '\0';
     std::string mediaCondition = std::string(utf8Buffer);
 
-    static const char *className = "L@ohos/mediaquery/mediaquery/Mediaquery;";
+    static const char *className = "@ohos.mediaquery.mediaquery.Mediaquery";
     ani_object mediaquery_obj = {};
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
@@ -462,7 +462,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     }
 
     ani_namespace ns;
-    if (ANI_OK != env->FindNamespace("L@ohos/mediaquery/mediaquery;", &ns)) {
+    if (ANI_OK != env->FindNamespace("@ohos.mediaquery.mediaquery", &ns)) {
         return ANI_ERROR;
     }
     std::array methods = {
@@ -473,7 +473,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         return ANI_ERROR;
     }
 
-    static const char *className = "L@ohos/mediaquery/mediaquery/Mediaquery;";
+    static const char *className = "@ohos.mediaquery.mediaquery.Mediaquery";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         return ANI_ERROR;

@@ -40,7 +40,7 @@ std::string ANIUtils_ANIStringToStdString(ani_env *env, ani_string ani_str)
 }
 bool GetToastMessage(ani_env *env, ani_object options, std::string& messageString)
 {
-    static const char *className = "L@system/prompt/ShowToastOptions;";
+    static const char *className = "@system.prompt.ShowToastOptions";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         return false;
@@ -57,7 +57,7 @@ bool GetToastMessage(ani_env *env, ani_object options, std::string& messageStrin
 }
 bool GetToastDuration(ani_env *env, ani_object options, int32_t& durationInt)
 {
-    static const char *className = "L@system/prompt/ShowToastOptions;";
+    static const char *className = "@system.prompt.ShowToastOptions";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         std::cerr << "Not found '" << className << "'" << std::endl;
@@ -84,7 +84,7 @@ bool GetToastDuration(ani_env *env, ani_object options, int32_t& durationInt)
 }
 bool GetToastBottom(ani_env *env, ani_object options, std::string& bottomString)
 {
-    static const char *className = "L@system/prompt/ShowToastOptions;";
+    static const char *className = "@system.prompt.ShowToastOptions";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         return false;
@@ -101,10 +101,10 @@ bool GetToastBottom(ani_env *env, ani_object options, std::string& bottomString)
         return false;
     }
     ani_class stringClass;
-    env->FindClass("Lstd/core/String;", &stringClass);
+    env->FindClass("std.core.String", &stringClass);
 
     ani_class numberClass;
-    env->FindClass("Lstd/core/Numeric;", &numberClass);
+    env->FindClass("std.core.Numeric", &numberClass);
 
     ani_boolean isString;
     env->Object_InstanceOf(static_cast<ani_object>(bottom_ref), stringClass, &isString);
@@ -159,7 +159,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     if (ANI_OK != vm->GetEnv(ANI_VERSION_1, &env)) {
         return ANI_ERROR;
     }
-    static const char *className = "L@system/prompt/Prompt;";
+    static const char *className = "@system.prompt.Prompt";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         return ANI_ERROR;

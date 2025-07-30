@@ -53,22 +53,22 @@ struct AppInfo {
 };
 /* copied from arkcompiler_ets_frontend vmloader.cc*/
 const AppInfo KOALA_APP_INFO = {
-    "Larkui/ArkUIEntry/Application;",
+    "arkui.ArkUIEntry.Application",
     "createApplication",
-    "Lstd/core/String;Lstd/core/String;ZLstd/core/String;Larkui/UserView/UserView;Larkui/UserView/EntryPoint;"
-    ":Larkui/ArkUIEntry/Application;",
+    "C{std.core.String}C{std.core.String}zC{std.core.String}C{arkui.UserView.UserView}C{arkui.UserView.EntryPoint}"
+    ":C{arkui.ArkUIEntry.Application}",
     "start",
-    ":J",
+    ":l",
     "enter",
-    "IIJ:Z",
+    "iil:z",
     "emitEvent",
-    "IIII:V",
+    "iiii:",
     "checkCallbacks",
-    ":V",
+    ":",
     "handleMessage",
-    "JILstd/core/String;:Z",
+    "liC{std.core.String}:z",
     "registerNativeModulePreloader",
-    ":V",
+    ":",
 };
 
 std::string GetErrorProperty(ani_env* aniEnv, ani_error aniError, const char* property)
@@ -189,13 +189,13 @@ ani_object LegacyLoadPage(ani_env* env)
         ani_ref entryClassRef = nullptr;
 
         ani_class cls = nullptr;
-        if ((state = env->FindClass("Lstd/core/RuntimeLinker;", &cls)) != ANI_OK) {
+        if ((state = env->FindClass("std.core.RuntimeLinker", &cls)) != ANI_OK) {
             LOGE("FindClass RuntimeLinker failed, %{public}d", state);
             break;
         }
 
         ani_method loadClassMethod;
-        if ((state = env->Class_FindMethod(cls, "loadClass", "Lstd/core/String;Lstd/core/Boolean;:Lstd/core/Class;",
+        if ((state = env->Class_FindMethod(cls, "loadClass", "C{std.core.String}C{std.core.Boolean}:C{std.core.Class}",
                  &loadClassMethod)) != ANI_OK) {
             LOGE("Class_FindMethod loadClass failed, %{public}d", state);
             break;
@@ -218,7 +218,7 @@ ani_object LegacyLoadPage(ani_env* env)
         entryClass = static_cast<ani_class>(entryClassRef);
 
         ani_method entryMethod = nullptr;
-        if (env->Class_FindMethod(entryClass, "<ctor>", ":V", &entryMethod) != ANI_OK) {
+        if (env->Class_FindMethod(entryClass, "<ctor>", ":", &entryMethod) != ANI_OK) {
             LOGE("Class_FindMethod ctor failed");
             break;
         }
@@ -348,13 +348,13 @@ ani_object ArktsFrontend::CallGetUIContextFunc(int32_t instanceId)
     CHECK_NULL_RETURN(env, result);
 
     ani_class uiContextClass;
-    if ((status = env->FindClass("Larkui/handwritten/UIContextUtil/UIContextUtil;", &uiContextClass)) != ANI_OK) {
+    if ((status = env->FindClass("arkui.handwritten.UIContextUtil.UIContextUtil", &uiContextClass)) != ANI_OK) {
         LOGE("FindClass UIContext failed, %{public}d", status);
         return result;
     }
     ani_ref aniRef = nullptr;
     if ((status = env->Class_CallStaticMethodByName_Ref(uiContextClass, "getOrCreateUIContextById",
-        "I:L@ohos/arkui/UIContext/UIContext;", &aniRef, instanceId)) != ANI_OK) {
+        "i:C{@ohos.arkui.UIContext.UIContext}", &aniRef, instanceId)) != ANI_OK) {
         LOGE("Class_CallStaticMethodByName_Ref failed, %{public}d", status);
         return result;
     }
@@ -472,7 +472,7 @@ void ArktsFrontend::OpenStateMgmtInterop()
 
     ani_status state;
 
-    static const char* moduleName = "Larkui/component/interop;";
+    static const char* moduleName = "arkui.component.interop";
     ani_module interopModule;
     state = env->FindModule(moduleName, &interopModule);
     if (state != ANI_OK) {
@@ -481,7 +481,7 @@ void ArktsFrontend::OpenStateMgmtInterop()
     }
 
     ani_function fn;
-    state = env->Module_FindFunction(interopModule, "openInterop", ":V", &fn);
+    state = env->Module_FindFunction(interopModule, "openInterop", ":", &fn);
     if (state != ANI_OK) {
         LOGE("Cannot find function openInterop in module %{public}d", state);
     }

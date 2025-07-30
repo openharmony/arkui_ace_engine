@@ -47,7 +47,7 @@ ani_object AniUtils::CreateDouble(ani_env* env, double value)
         return nullptr;
     }
     ani_method doubleCtor;
-    if (ANI_OK != env->Class_FindMethod(doubleCls, "<ctor>", "D:V", &doubleCtor)) {
+    if (ANI_OK != env->Class_FindMethod(doubleCls, "<ctor>", "d:", &doubleCtor)) {
         return nullptr;
     }
     ani_object doubleObj;

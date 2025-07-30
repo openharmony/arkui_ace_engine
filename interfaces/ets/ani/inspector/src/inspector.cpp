@@ -24,10 +24,10 @@
 namespace {
 const char LAYOUT_TYPE[] = "layout";
 const char DRAW_TYPE[] = "draw";
-const char ANI_INSPECTOR_NS[] = "L@ohos/arkui/inspector/inspector;";
-const char ANI_COMPONENT_OBSERVER_CLS[] = "L@ohos/arkui/inspector/inspector/ComponentObserverImpl;";
-const char KOALA_INSPECTOR_CLS[] = "L@koalaui/arkts-arkui/generated/arkts/ohos/arkui/inspector/Inspector;";
-const char KOALA_COMPONENT_CLS[] = "L@koalaui/arkts-arkui/generated/arkts/ohos/arkui/inspector/ComponentObserver;";
+const char ANI_INSPECTOR_NS[] = "@ohos.arkui.inspector.inspector";
+const char ANI_COMPONENT_OBSERVER_CLS[] = "@ohos.arkui.inspector.inspector.ComponentObserverImpl";
+const char KOALA_INSPECTOR_CLS[] = "@koalaui.arkts-arkui.generated.arkts.ohos.arkui.inspector.Inspector";
+const char KOALA_COMPONENT_CLS[] = "@koalaui.arkts-arkui.generated.arkts.ohos.arkui.inspector.ComponentObserver";
 } // namespace
  
 namespace OHOS::Ace {

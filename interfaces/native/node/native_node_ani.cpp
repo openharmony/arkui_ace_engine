@@ -24,13 +24,13 @@
 #include "core/interfaces/native/implementation/node_content_peer.h"
 
 namespace {
-constexpr char NAV_PATH_STACK_CLASS[] = "Larkui/component/navigation/NavPathStack;";
+constexpr char NAV_PATH_STACK_CLASS[] = "arkui.component.navigation.NavPathStack";
 constexpr char GET_PARAM_WITH_NAVDESTINATION_ID_METHOD[] = "getParamWithNavDestinationId";
 
 int32_t GetFrameNodeFromAniObject(ani_env* env, ani_object frameNodePeerObj, OHOS::Ace::NG::FrameNode ** frameNode)
 {
     ani_class pointerClass;
-    env->FindClass("Lstd/core/Long;", &pointerClass);
+    env->FindClass("std.core.Long", &pointerClass);
     ani_boolean isPointer;
     ani_status status = env->Object_InstanceOf(frameNodePeerObj, pointerClass, &isPointer);
     if (status != ANI_OK || !isPointer) {
@@ -39,7 +39,7 @@ int32_t GetFrameNodeFromAniObject(ani_env* env, ani_object frameNodePeerObj, OHO
     }
 
     ani_long frameNodePeerPtr;
-    status = env->Object_CallMethodByName_Long(frameNodePeerObj, "unboxed", ":J", &frameNodePeerPtr);
+    status = env->Object_CallMethodByName_Long(frameNodePeerObj, "unboxed", ":l", &frameNodePeerPtr);
     if (status != ANI_OK) {
         LOGE("fail to unbox frameNodePeerObj");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
@@ -186,7 +186,7 @@ int32_t OH_ArkUI_NativeModule_GetNodeContentFromAniValue(
     }
     ani_object nodeContentPeerObj = static_cast<ani_object>(nodeContentPeerRef);
     ani_class pointerClass;
-    env->FindClass("Lstd/core/Long;", &pointerClass);
+    env->FindClass("std.core.Long", &pointerClass);
     ani_boolean isPointer;
     ani_status status = env->Object_InstanceOf(nodeContentPeerObj, pointerClass, &isPointer);
     if (status != ANI_OK || !isPointer) {
@@ -195,7 +195,7 @@ int32_t OH_ArkUI_NativeModule_GetNodeContentFromAniValue(
     }
 
     ani_long nodeContentPeerPtr;
-    status = env->Object_CallMethodByName_Long(nodeContentPeerObj, "unboxed", ":J", &nodeContentPeerPtr);
+    status = env->Object_CallMethodByName_Long(nodeContentPeerObj, "unboxed", ":l", &nodeContentPeerPtr);
     if (status != ANI_OK) {
         LOGE("unbox nodeContentPeerObj fail");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;

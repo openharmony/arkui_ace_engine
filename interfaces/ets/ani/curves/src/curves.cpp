@@ -181,7 +181,7 @@ static ani_string CubicBezier([[maybe_unused]] ani_env *env,
 static ani_object CubicBezierCurve([[maybe_unused]] ani_env *env,
     ani_double x1, ani_double y1, ani_double x2, ani_double y2)
 {
-    static const char *className = "L@ohos/curves/curves/Curves;";
+    static const char *className = "@ohos.curves.curves.Curves";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         return nullptr;
@@ -206,7 +206,7 @@ static ani_object CubicBezierCurve([[maybe_unused]] ani_env *env,
 static ani_object SpringCurve([[maybe_unused]] ani_env* env,
     ani_double velocity, ani_double mass, ani_double stiffness, ani_double damping)
 {
-    static const char* className = "L@ohos/curves/curves/Curves;";
+    static const char* className = "@ohos.curves.curves.Curves";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         return nullptr;
@@ -293,7 +293,7 @@ static ani_object SpringResponsiveMotion([[maybe_unused]] ani_env *env,
     ani_object response, ani_object dampingFraction, ani_object overlapDuration)
 {
     CurvesObj* springResponsiveMotion = new CurvesObj();
-    static const char *className = "L@ohos/curves/curves/Curves;";
+    static const char *className = "@ohos.curves.curves.Curves";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         return nullptr;
@@ -315,7 +315,7 @@ static ani_object SpringResponsiveMotion([[maybe_unused]] ani_env *env,
 static ani_object SpringMotion([[maybe_unused]] ani_env *env,
     ani_object response, ani_object dampingFraction, ani_object overlapDuration)
 {
-    static const char *className = "L@ohos/curves/curves/Curves;";
+    static const char *className = "@ohos.curves.curves.Curves";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         return nullptr;
@@ -349,7 +349,7 @@ static ani_object InitCurve([[maybe_unused]] ani_env* env, ani_enum_item enumIte
     }
     std::string curveString = GetCurvesInitInternalMap(curveType);
 
-    static const char* className = "L@ohos/curves/curves/Curves;";
+    static const char* className = "@ohos.curves.curve.Curves";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         std::cerr << "Not found '" << className << "'" << std::endl;
@@ -373,7 +373,7 @@ static ani_object InitCurve([[maybe_unused]] ani_env* env, ani_enum_item enumIte
 static ani_object InterpolatingSpring([[maybe_unused]] ani_env* env,
     ani_double velocity, ani_double mass, ani_double stiffness, ani_double damping)
 {
-    static const char* className = "L@ohos/curves/curves/Curves;";
+    static const char* className = "@ohos.curves.curves.Curves";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         std::cerr << "Not found '" << className << "'" << std::endl;
@@ -411,7 +411,7 @@ static ani_object InterpolatingSpring([[maybe_unused]] ani_env* env,
 
 static ani_object StepsCurve([[maybe_unused]] ani_env* env, ani_double count, ani_boolean end)
 {
-    static const char* className = "L@ohos/curves/curves/Curves;";
+    static const char* className = "@ohos.curves.curves.Curves";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         std::cerr << "Not found '" << className << "'" << std::endl;
@@ -445,13 +445,13 @@ static ani_object StepsCurve([[maybe_unused]] ani_env* env, ani_double count, an
 
 static ani_object createDouble(ani_env *env, double value)
 {
-    static const char *className = "Lstd/core/Double;";
+    static const char *className = "std.core.Double";
     ani_class persion_cls;
     if (ANI_OK != env->FindClass(className, &persion_cls)) {
         return nullptr;
     }
     ani_method personInfoCtor;
-    if (ANI_OK != env->Class_FindMethod(persion_cls, "<ctor>", "D:V", &personInfoCtor)) {
+    if (ANI_OK != env->Class_FindMethod(persion_cls, "<ctor>", "d:", &personInfoCtor)) {
         return nullptr;
     }
     ani_object personInfoObj;
@@ -463,7 +463,7 @@ static ani_object createDouble(ani_env *env, double value)
 
 static ani_object CustomCurve([[maybe_unused]] ani_env* env, ani_object callbackObj)
 {
-    static const char* className = "L@ohos/curves/curves/Curves;";
+    static const char* className = "@ohos.curves.curves.Curves";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         std::cerr << "Not found '" << className << "'" << std::endl;
@@ -515,7 +515,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         return ANI_ERROR;
     }
     ani_namespace ns;
-    if (ANI_OK != env->FindNamespace("L@ohos/curves/curves;", &ns)) {
+    if (ANI_OK != env->FindNamespace("@ohos.curves.curves", &ns)) {
         return ANI_ERROR;
     }
     std::array methods = {
@@ -533,7 +533,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         return ANI_ERROR;
     }
 
-    static const char *classNameCurves = "L@ohos/curves/curves/Curves;";
+    static const char *classNameCurves = "@ohos.curves.curves.Curves";
     ani_class clsCurves;
     if (ANI_OK != env->FindClass(classNameCurves, &clsCurves)) {
         return ANI_ERROR;
