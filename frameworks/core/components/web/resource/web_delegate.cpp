@@ -6275,6 +6275,10 @@ bool WebDelegate::OnDragAndDropData(const void* data, size_t len, int width, int
     if (!webPattern) {
         return false;
     }
+
+    uint32_t res = pixelMap_->GetPixelMapSharedPtr()->SetMemoryName(
+        webPattern->GetPixelMapName(pixelMap_->GetPixelMapSharedPtr(), "drag"));
+    TAG_LOGI(AceLogTag::ACE_WEB, "SetMemoryName result is %{public}d", res);
     return webPattern->NotifyStartDragTask();
 }
 
@@ -6292,6 +6296,10 @@ bool WebDelegate::OnDragAndDropDataUdmf(std::shared_ptr<OHOS::NWeb::NWebDragData
     dragData_ = dragData;
     auto webPattern = webPattern_.Upgrade();
     CHECK_NULL_RETURN(webPattern, false);
+
+    uint32_t res = pixelMap_->GetPixelMapSharedPtr()->SetMemoryName(
+        webPattern->GetPixelMapName(pixelMap_->GetPixelMapSharedPtr(), "drag"));
+    TAG_LOGI(AceLogTag::ACE_WEB, "SetMemoryName result is %{public}d", res);
 
     if (webPattern->IsRootNeedExportTexture()) {
         return false;
@@ -8537,8 +8545,14 @@ void WebDelegate::CreateOverlay(void* data, size_t len, int width, int height, i
 {
     auto webPattern = webPattern_.Upgrade();
     CHECK_NULL_VOID(webPattern);
-    webPattern->CreateOverlay(PixelMap::ConvertSkImageToPixmap(static_cast<const uint32_t*>(data), len, width, height),
-        offsetX, offsetY, rectWidth, rectHeight, pointX, pointY);
+
+    RefPtr<OHOS::Ace::PixelMap> pixelMap =
+        PixelMap::ConvertSkImageToPixmap(static_cast<const uint32_t*>(data), len, width, height);
+    uint32_t res = pixelMap->GetPixelMapSharedPtr()->SetMemoryName(
+        webPattern->GetPixelMapName(pixelMap->GetPixelMapSharedPtr(), "AI"));
+    TAG_LOGI(AceLogTag::ACE_WEB, "SetMemoryName result is %{public}d", res);
+
+    webPattern->CreateOverlay(pixelMap, offsetX, offsetY, rectWidth, rectHeight, pointX, pointY);
 }
 
 void WebDelegate::OnOverlayStateChanged(int offsetX, int offsetY, int rectWidth, int rectHeight)

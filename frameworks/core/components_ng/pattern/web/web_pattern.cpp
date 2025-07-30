@@ -5179,6 +5179,20 @@ void WebPattern::UpdateLocalCursorStyle(int32_t windowId, const OHOS::NWeb::Curs
     }
 }
 
+std::string WebPattern::GetPixelMapName(std::shared_ptr<Media::PixelMap> pixelMap, std::string featureName)
+{
+    if (!pixelMap) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "GetPixelMapName error, PixelMap is null");
+        return "undefined_";
+    }
+    auto frameNode = GetHost();
+    CHECK_NULL_RETURN(frameNode, "undefined_");
+    std::string memNameStr = "web-" + std::to_string(pixelMap->GetWidth()) + "x" +
+                             std::to_string(pixelMap->GetHeight()) + "-" + featureName + "-" +
+                             std::to_string(frameNode->GetId());
+    return memNameStr;
+}
+
 void WebPattern::UpdateCustomCursor(int32_t windowId, std::shared_ptr<OHOS::NWeb::NWebCursorInfo> info)
 {
     int32_t x = 0;
@@ -5207,6 +5221,8 @@ void WebPattern::UpdateCustomCursor(int32_t windowId, std::shared_ptr<OHOS::NWeb
     }
     std::shared_ptr<Media::PixelMap> cursorPixelMap(pixelMap.release());
     CHECK_NULL_VOID(cursorPixelMap);
+    uint32_t res = cursorPixelMap->SetMemoryName(GetPixelMapName(cursorPixelMap, "cursor"));
+    TAG_LOGI(AceLogTag::ACE_WEB, "SetMemoryName result is %{public}d", res);
     auto mouseStyle = MouseStyle::CreateMouseStyle();
     CHECK_NULL_VOID(mouseStyle);
     mouseStyle->SetCustomCursor(windowId, x, y, cursorPixelMap);
