@@ -1195,6 +1195,10 @@ public:
     void OnOnlineRenderToForeground();
     void NotifyForNextTouchEvent();
 
+    std::string GetAllTextInfo() const;
+    int GetSelectStartIndex() const;
+    int GetSelectEndIndex() const;
+
     void OnViewportFitChange(OHOS::NWeb::ViewportFit viewportFit);
     void OnAreaChange(const OHOS::Ace::Rect& area);
     void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type);

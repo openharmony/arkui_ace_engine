@@ -5031,6 +5031,154 @@ bool WebPattern::RequestAutoFill(AceAutoFillType autoFillType, const std::vector
            AceAutoFillError::ACE_AUTO_FILL_SUCCESS;
 }
 
+std::string WebPattern::GetAllTextInfo() const
+{
+    CHECK_NULL_RETURN(delegate_, std::string());
+    return delegate_->GetAllTextInfo();
+}
+
+int WebPattern::GetSelectStartIndex() const
+{
+    CHECK_NULL_RETURN(delegate_, 0);
+    return delegate_->GetSelectStartIndex();
+}
+
+int WebPattern::GetSelectEndIndex() const
+{
+    CHECK_NULL_RETURN(delegate_, 0);
+    return delegate_->GetSelectEndIndex();
+}
+
+void WebPattern::GetHandleInfo(SelectOverlayInfo& infoHandle)
+{
+    firstInfoHandle_ = infoHandle.firstHandle.paintRect;
+    secondInfoHandle_ = infoHandle.secondHandle.paintRect;
+}
+
+RefPtr<TextFieldTheme> WebPattern::GetTheme() const
+{
+    auto tmpHost = GetHost();
+    CHECK_NULL_RETURN(tmpHost, nullptr);
+    auto context = tmpHost->GetContext();
+    CHECK_NULL_RETURN(context, nullptr);
+    return context->GetTheme<TextFieldTheme>(tmpHost->GetThemeScopeId());
+}
+
+bool WebPattern::IsShowAIWrite()
+{
+    auto container = Container::Current();
+    if (container && container->IsSceneBoardWindow()) {
+        return false;
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto textFieldTheme = GetTheme();
+    CHECK_NULL_RETURN(textFieldTheme, false);
+    auto bundleName = textFieldTheme->GetAIWriteBundleName();
+    auto abilityName = textFieldTheme->GetAIWriteAbilityName();
+    if (bundleName.empty() || abilityName.empty()) {
+        TAG_LOGW(AceLogTag::ACE_WEB, "Failed to obtain AI write package name!");
+        return false;
+    }
+    aiWriteAdapter_->SetBundleName(bundleName);
+    aiWriteAdapter_->SetAbilityName(abilityName);
+    auto isAISupport = textFieldTheme->GetAIWriteIsSupport() == "true";
+    TAG_LOGI(AceLogTag::ACE_WEB, "Whether the device supports AI write: %{public}d, nodeId: %{public}d", isAISupport,
+        host->GetId());
+    return isAISupport;
+}
+
+void WebPattern::HandleOnAIWrite()
+{
+    AIWriteInfo info;
+    GetAIWriteInfo(info);
+    CloseSelectOverlay();
+    CloseKeyboard();
+    auto callback = [weak = WeakClaim(this), info](std::vector<uint8_t>& buffer) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleAIWriteResult(info.selectStart, info.selectEnd, buffer);
+        auto aiWriteAdapter = pattern->aiWriteAdapter_;
+        CHECK_NULL_VOID(aiWriteAdapter);
+        aiWriteAdapter->CloseModalUIExtension();
+    };
+
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    aiWriteAdapter_->SetPipelineContext(pipeline);
+    aiWriteAdapter_->ShowModalUIExtension(info, callback);
+}
+
+void WebPattern::FormatIndex(int32_t& startIndex, int32_t& endIndex)
+{
+    startIndex = std::min(startIndex, endIndex);
+    endIndex = std::max(startIndex, endIndex);
+    startIndex = std::clamp(startIndex, 0, static_cast<int32_t>(content_.length()));
+    endIndex = std::clamp(endIndex, 0, static_cast<int32_t>(content_.length()));
+}
+
+std::u16string WebPattern::GetSelectedValue(int32_t startIndex, int32_t endIndex)
+{
+    auto allText = GetAllTextInfo();
+    content_ = UtfUtils::Str8ToStr16(allText);
+    FormatIndex(startIndex, endIndex);
+    startIndex = std::clamp(startIndex, 0, static_cast<int32_t>(content_.length()));
+    auto selectedValue = content_.substr(startIndex, endIndex - startIndex);
+    if (selectedValue.empty()) {
+        selectedValue = TextEmojiProcessor::SubU16string(startIndex, endIndex - startIndex, content_);
+    }
+    return selectedValue;
+}
+
+void WebPattern::GetAIWriteInfo(AIWriteInfo& info)
+{
+    info.firstHandle = firstInfoHandle_.ToString();
+    info.secondHandle = secondInfoHandle_.ToString();
+    info.selectStart = GetSelectStartIndex();
+    info.selectEnd = GetSelectEndIndex();
+
+    // serialize the selected text
+    auto selectContent = GetSelectInfo();
+    std::u16string selectContentAllValue = UtfUtils::Str8ToStr16(selectContent);
+    RefPtr<SpanString> spanString = AceType::MakeRefPtr<SpanString>(selectContentAllValue);
+    spanString->EncodeTlv(info.selectBuffer);
+    info.selectLength = static_cast<int32_t>(aiWriteAdapter_->GetSelectLengthOnlyText(spanString->GetU16string()));
+
+    // serialize the sentenced-level text
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto contentAll = UtfUtils::Str8ToStr16(GetAllTextInfo());
+    auto sentenceStart = 0;
+    auto sentenceEnd = static_cast<int32_t>(contentAll.length());
+    TAG_LOGD(AceLogTag::ACE_WEB, "Selected range=[%{public}d--%{public}d], content size=%{public}zu", info.selectStart,
+        info.selectEnd, spanString->GetString().size());
+    for (int32_t i = info.selectStart; i >= 0; --i) {
+        if (aiWriteAdapter_->IsSentenceBoundary(contentAll[i])) {
+            sentenceStart = i + 1;
+            break;
+        }
+    }
+    for (int32_t i = info.selectEnd; i < info.selectLength; i++) {
+        if (aiWriteAdapter_->IsSentenceBoundary(contentAll[i])) {
+            sentenceEnd = i;
+            break;
+        }
+    }
+    info.start = info.selectStart - sentenceStart;
+    info.end = info.selectEnd - sentenceStart;
+    auto sentenceContent = GetSelectedValue(sentenceStart, sentenceEnd);
+    spanString = AceType::MakeRefPtr<SpanString>(sentenceContent);
+    spanString->EncodeTlv(info.sentenceBuffer);
+    TAG_LOGD(AceLogTag::ACE_WEB, "Sentence range=[%{public}d--%{public}d], content size=%{public}zu", sentenceStart,
+        sentenceEnd, spanString->GetString().size());
+    info.componentType = host->GetTag();
+}
+
+void WebPattern::HandleAIWriteResult(int32_t start, int32_t end, std::vector<uint8_t>& buffer)
+{
+    return;
+}
+
 bool WebPattern::RequestAutoSave()
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "RequestAutoSave");
