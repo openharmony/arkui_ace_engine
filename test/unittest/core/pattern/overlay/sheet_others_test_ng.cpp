@@ -606,6 +606,91 @@ HWTEST_F(SheetOthersTestNg, IsSingleDetents003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsSingleDetents004
+ * @tc.desc: Branch: isSingle = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetOthersTestNg, IsSingleDetents004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.Set one sheet height.
+     * @tc.expected: true.
+     */
+    SheetOthersTestNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetPattern = AceType::MakeRefPtr<SheetPresentationPattern>(
+        ElementRegister::GetInstance()->MakeUniqueId(), V2::SHEET_WRAPPER_TAG, std::move(callback));
+    SheetStyle sheetStyle;
+    EXPECT_TRUE(sheetPattern->IsSingleDetents(sheetStyle));
+    sheetStyle.sheetHeight.height = 200.0_vp;
+    EXPECT_TRUE(sheetPattern->IsSingleDetents(sheetStyle));
+    sheetStyle.sheetHeight.sheetMode = SheetMode::AUTO;
+    EXPECT_TRUE(sheetPattern->IsSingleDetents(sheetStyle));
+    sheetStyle.detents = {};
+    EXPECT_TRUE(sheetPattern->IsSingleDetents(sheetStyle));
+    /**
+     * @tc.steps: step2.Set one detent, test function IsSingleDetents.
+     * @tc.expected: true.
+     */
+    sheetStyle.detents = { SheetHeight({ 300.0_vp }) };
+    EXPECT_TRUE(sheetPattern->IsSingleDetents(sheetStyle));
+    sheetStyle.detents = { SheetHeight({ 600.0_vp, SheetMode::MEDIUM }) };
+    EXPECT_TRUE(sheetPattern->IsSingleDetents(sheetStyle));
+    sheetStyle.detents = { SheetHeight({ 600.0_vp, SheetMode::AUTO }) };
+    EXPECT_TRUE(sheetPattern->IsSingleDetents(sheetStyle));
+    /**
+     * @tc.steps: step2.Set muti detents, test function IsSingleDetents.
+     * @tc.expected: true.
+     */
+    sheetStyle.detents = { SheetHeight({ 500.0_vp }), SheetHeight({ 500.0_vp }) };
+    sheetPattern->unSortedSheetDentents_ = { 500.0f, 500.0f };
+    EXPECT_TRUE(sheetPattern->IsSingleDetents(sheetStyle));
+    sheetStyle.detents = { SheetHeight({ 500.0_vp }), SheetHeight({ 500.0_vp }), SheetHeight({ 500.0_vp }) };
+    sheetPattern->unSortedSheetDentents_ = { 500.0f, 500.0f, 500.0f };
+    EXPECT_TRUE(sheetPattern->IsSingleDetents(sheetStyle));
+    SheetOthersTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: IsSingleDetents005
+ * @tc.desc: Branch: isSingle = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetOthersTestNg, IsSingleDetents005, TestSize.Level1)
+{
+    SheetOthersTestNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetPattern = AceType::MakeRefPtr<SheetPresentationPattern>(
+        ElementRegister::GetInstance()->MakeUniqueId(), V2::SHEET_WRAPPER_TAG, std::move(callback));
+    SheetStyle sheetStyle;
+    sheetStyle.detents = { SheetHeight({ 500.0_vp }), SheetHeight({ 600.0_vp }) };
+    sheetPattern->unSortedSheetDentents_ = { 500.0f, 600.0f };
+    EXPECT_FALSE(sheetPattern->IsSingleDetents(sheetStyle));
+    sheetStyle.detents = { SheetHeight({ 500.0_vp }), SheetHeight({ 600.0_vp }), SheetHeight({ 700.0_vp }) };
+    sheetPattern->unSortedSheetDentents_ = { 500.0f, 600.0f, 700.0f };
+    EXPECT_FALSE(sheetPattern->IsSingleDetents(sheetStyle));
+    sheetStyle.detents = { SheetHeight({ 500.0_vp }), SheetHeight({ 600.0_vp, SheetMode::MEDIUM }),
+        SheetHeight({ 1000.0_vp, SheetMode::LARGE }) };
+    sheetPattern->unSortedSheetDentents_ = { 500.0f, 600.0f, 1000.0f };
+    EXPECT_FALSE(sheetPattern->IsSingleDetents(sheetStyle));
+    sheetStyle.detents = { SheetHeight({ 600.0_vp, SheetMode::MEDIUM }), SheetHeight({ 1000.0_vp, SheetMode::LARGE }) };
+    sheetPattern->unSortedSheetDentents_ = { 600.0f, 1000.0f };
+    EXPECT_FALSE(sheetPattern->IsSingleDetents(sheetStyle));
+    /**
+     * @tc.steps: step2.Set ont detent is fit content, test function IsSingleDetents.
+     * @tc.expected: false.
+     */
+    sheetStyle.detents = { SheetHeight({ 600.0_vp, SheetMode::MEDIUM }), SheetHeight({ 600.0_vp, SheetMode::AUTO }) };
+    sheetPattern->unSortedSheetDentents_ = { 600.0f, 600.0f };
+    EXPECT_FALSE(sheetPattern->IsSingleDetents(sheetStyle));
+    sheetStyle.detents = { SheetHeight({ 600.0_vp, SheetMode::MEDIUM }), SheetHeight({ 600.0_vp, SheetMode::AUTO }),
+        SheetHeight({ 600.0_vp }) };
+    sheetPattern->unSortedSheetDentents_ = { 600.0f, 600.0f, 600.0f };
+    EXPECT_FALSE(sheetPattern->IsSingleDetents(sheetStyle));
+    SheetOthersTestNg::TearDownTestCase();
+}
+
+/**
  * @tc.name: CreateCloseIconButtonNode001
  * @tc.desc: Branch: if (!Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) = false
  * @tc.type: FUNC
