@@ -50,7 +50,7 @@ public:
         xAxis_.Reset();
         yAxis_.Reset();
         touchEventTime_.clear();
-        mIndex = 0;
+        mIndex_ = 0;
     }
 
     void UpdateTouchPoint(const TouchEvent& event, bool end = false, float range = TOUCH_STILL_THRESHOLD);
