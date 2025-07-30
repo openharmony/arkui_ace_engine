@@ -637,9 +637,6 @@ template("declarative_js_engine") {
           "jsview/models/web_model_impl.cpp",
         ]
       }
-      external_deps += [
-        "webview:libarkweb_utils",
-      ]
     }
 
     if (defined(config.form_components_support) &&
@@ -1113,9 +1110,6 @@ template("declarative_js_engine_ng") {
         "jsview/js_richtext.cpp",
         "jsview/js_web.cpp",
         "jsview/js_web_controller.cpp",
-      ]
-      external_deps += [
-        "webview:libarkweb_utils",
       ]
     }
 

@@ -28,7 +28,6 @@
 #include "base/memory/referenced.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
-#include "base/web/webview/arkweb_utils/arkweb_utils.h"
 #if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
 #include "base/web/webview/ohos_interface/include/ohos_nweb/nweb.h"
 #endif
@@ -6488,7 +6487,6 @@ void JSWeb::GestureFocusMode(int32_t gestureFocusMode)
 
 void JSWeb::OnPdfScrollAtBottom(const JSCallbackInfo& args)
 {
-    RETURN_IF_CALLING_FROM_M114();
     TAG_LOGI(AceLogTag::ACE_WEB, "JSWeb::OnPdfScrollAtBottom, callback set");
     if (args.Length() < 1 || !args[0]->IsFunction()) {
         return;
@@ -6517,7 +6515,6 @@ void JSWeb::OnPdfScrollAtBottom(const JSCallbackInfo& args)
 
 void JSWeb::OnPdfLoadEvent(const JSCallbackInfo& args)
 {
-    RETURN_IF_CALLING_FROM_M114();
     TAG_LOGI(AceLogTag::ACE_WEB, "JSWeb::OnPdfLoadEvent, callback set");
     if (args.Length() < 1 || !args[0]->IsFunction()) {
         return;
