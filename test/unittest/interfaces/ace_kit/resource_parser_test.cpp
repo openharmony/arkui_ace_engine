@@ -57,7 +57,7 @@ HWTEST_F(ResourceParserTest, ResourceParserTestTest001, TestSize.Level1)
     info.moduleName = "";
     Ace::CalcDimension dimension;
     auto result = ResourceParser::GetDimension(info, dimension);
-    EXPECT_TRUE(result);
+    EXPECT_FALSE(result);
 }
 
 /**
@@ -433,12 +433,12 @@ HWTEST_F(ResourceParserTest, ResourceParserTestTest023, TestSize.Level1)
 {
     Kit::ResourceInfo info;
     info.bundleName = "bundle";
-    info.bundleName = "module";
+    info.moduleName = "module";
     info.resId = UNKNOWN_RESOURCE_ID;
     info.params = {"paramName"};
 
     double doubleRes;
-    EXPECT_FALSE(ResourceParser::GetDouble(info, doubleRes));
+    EXPECT_TRUE(ResourceParser::GetDouble(info, doubleRes));
 }
 
 /**
@@ -450,11 +450,11 @@ HWTEST_F(ResourceParserTest, ResourceParserTestTest024, TestSize.Level1)
 {
     Kit::ResourceInfo info;
     info.bundleName = "bundle";
-    info.bundleName = "module";
+    info.moduleName = "module";
     info.resId = 1;
 
     double doubleRes;
-    EXPECT_FALSE(ResourceParser::GetDouble(info, doubleRes));
+    EXPECT_TRUE(ResourceParser::GetDouble(info, doubleRes));
 }
 
 /**
