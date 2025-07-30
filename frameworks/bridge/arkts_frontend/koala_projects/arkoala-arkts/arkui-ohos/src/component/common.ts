@@ -1605,11 +1605,11 @@ export class TextContentControllerBase implements MaterializedBase {
 export interface UICommonEvent {
     setOnClick(callback_: ((event: ClickEvent) => void) | undefined): void
     setOnTouch(callback_: ((event: TouchEvent) => void) | undefined): void
-    setOnAppear(callback_: (() => void) | undefined): void
-    setOnDisappear(callback_: (() => void) | undefined): void
+    setOnAppear(callback_: ((data: undefined) => void) | undefined): void
+    setOnDisappear(callback_: ((data: undefined) => void) | undefined): void
     setOnKeyEvent(callback_: ((event: KeyEvent) => void) | undefined): void
-    setOnFocus(callback_: (() => void) | undefined): void
-    setOnBlur(callback_: (() => void) | undefined): void
+    setOnFocus(callback_: ((data: undefined) => void) | undefined): void
+    setOnBlur(callback_: ((data: undefined) => void) | undefined): void
     setOnHover(callback_: HoverCallback | undefined): void
     setOnMouse(callback_: ((event: MouseEvent) => void) | undefined): void
     setOnSizeChange(callback_: SizeChangeCallback | undefined): void
@@ -1641,13 +1641,13 @@ export class UICommonEventInternal implements MaterializedBase,UICommonEvent {
         this.setOnTouch_serialize(callback__casted)
         return
     }
-    public setOnAppear(callback_: (() => void) | undefined): void {
-        const callback__casted = callback_ as ((() => void) | undefined)
+    public setOnAppear(callback_: ((data: undefined) => void) | undefined): void {
+        const callback__casted = callback_ as (((data: undefined) => void) | undefined)
         this.setOnAppear_serialize(callback__casted)
         return
     }
-    public setOnDisappear(callback_: (() => void) | undefined): void {
-        const callback__casted = callback_ as ((() => void) | undefined)
+    public setOnDisappear(callback_: ((data: undefined) => void) | undefined): void {
+        const callback__casted = callback_ as (((data: undefined) => void) | undefined)
         this.setOnDisappear_serialize(callback__casted)
         return
     }
@@ -1656,13 +1656,13 @@ export class UICommonEventInternal implements MaterializedBase,UICommonEvent {
         this.setOnKeyEvent_serialize(callback__casted)
         return
     }
-    public setOnFocus(callback_: (() => void) | undefined): void {
-        const callback__casted = callback_ as ((() => void) | undefined)
+    public setOnFocus(callback_: ((data: undefined) => void) | undefined): void {
+        const callback__casted = callback_ as (((data: undefined) => void) | undefined)
         this.setOnFocus_serialize(callback__casted)
         return
     }
-    public setOnBlur(callback_: (() => void) | undefined): void {
-        const callback__casted = callback_ as ((() => void) | undefined)
+    public setOnBlur(callback_: ((data: undefined) => void) | undefined): void {
+        const callback__casted = callback_ as (((data: undefined) => void) | undefined)
         this.setOnBlur_serialize(callback__casted)
         return
     }
@@ -1711,7 +1711,7 @@ export class UICommonEventInternal implements MaterializedBase,UICommonEvent {
         ArkUIGeneratedNativeModule._UICommonEvent_setOnTouch(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private setOnAppear_serialize(callback_: (() => void) | undefined): void {
+    private setOnAppear_serialize(callback_: ((data: undefined) => void) | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let callback__type : int32 = RuntimeType.UNDEFINED
         callback__type = runtimeType(callback_)
@@ -1723,7 +1723,7 @@ export class UICommonEventInternal implements MaterializedBase,UICommonEvent {
         ArkUIGeneratedNativeModule._UICommonEvent_setOnAppear(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private setOnDisappear_serialize(callback_: (() => void) | undefined): void {
+    private setOnDisappear_serialize(callback_: ((data: undefined) => void) | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let callback__type : int32 = RuntimeType.UNDEFINED
         callback__type = runtimeType(callback_)
@@ -1747,7 +1747,7 @@ export class UICommonEventInternal implements MaterializedBase,UICommonEvent {
         ArkUIGeneratedNativeModule._UICommonEvent_setOnKeyEvent(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private setOnFocus_serialize(callback_: (() => void) | undefined): void {
+    private setOnFocus_serialize(callback_: ((data: undefined) => void) | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let callback__type : int32 = RuntimeType.UNDEFINED
         callback__type = runtimeType(callback_)
@@ -1759,7 +1759,7 @@ export class UICommonEventInternal implements MaterializedBase,UICommonEvent {
         ArkUIGeneratedNativeModule._UICommonEvent_setOnFocus(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private setOnBlur_serialize(callback_: (() => void) | undefined): void {
+    private setOnBlur_serialize(callback_: ((data: undefined) => void) | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let callback__type : int32 = RuntimeType.UNDEFINED
         callback__type = runtimeType(callback_)
