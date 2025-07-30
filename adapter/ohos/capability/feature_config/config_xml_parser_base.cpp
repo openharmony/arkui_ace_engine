@@ -38,7 +38,7 @@ std::vector<std::string> ConfigXMLParserBase::sysPaths_ = { "/system/variant/pho
     "/system/variant/tablet/base/", "/system/variant/pc/base/", "/system/variant/watch/base/",
     "/system/variant/tv/base/", "/system/variant/car/base/", "/system/variant/smarthomehost/base/" };
 
-std::string ConfigXMLParserBase::configPath_ = "etc/arkui/arkui_performance_config.xml";
+std::string ConfigXMLParserBase::configPath_ = "etc/arkui/arkui_async_build_config.xml";
 
 ConfigXMLParserBase::~ConfigXMLParserBase()
 {
