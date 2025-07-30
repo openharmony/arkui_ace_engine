@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 
+#ifdef XCOMPONENT_SUPPORTED
 #include "x_component_controller_peer_impl.h"
 
-#ifdef XCOMPONENT_SUPPORTED
 #include "base/utils/utils.h"
-#include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/callback_helper.h"
+#include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/peer_utils.h"
 #include "core/interfaces/native/utility/promise_helper.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 void XComponentControllerPeerImpl::TriggerStartImageAnalyzer(Ark_VMContext vmContext, Ark_AsyncWorkerPtr asyncWorker,
