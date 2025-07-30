@@ -1,0 +1,12 @@
+{
+  "dependencies": {
+    "@panda/sdk": "^1.5.0-dev.32018"
+  },
+
+  "scripts": {
+    "clean": "make clean",
+    "build": "make framework",
+    "compile": "make framework",
+    "test": "make test"
+  }
+}
