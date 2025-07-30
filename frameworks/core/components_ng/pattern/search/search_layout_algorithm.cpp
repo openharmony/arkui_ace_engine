@@ -558,14 +558,14 @@ double SearchLayoutAlgorithm::CalcSearchHeight(
     auto searchHeight =
         (constraint.selfIdealSize.Height().has_value()) ? constraint.selfIdealSize.Height().value() : themeHeight;
     auto layoutPolicy = TextBase::GetLayoutCalPolicy(layoutWrapper, false);
-    if (layoutPolicy == LayoutCalPolicy::MATCH_PARENT) {
-        searchHeight = constraint.parentIdealSize.Height().value_or(constraint.maxSize.Height());
-    }
+    auto shouldMatchParent =
+        layoutPolicy == LayoutCalPolicy::MATCH_PARENT && constraint.parentIdealSize.Height().has_value();
+    searchHeight = shouldMatchParent ? constraint.parentIdealSize.Height().value() : searchHeight;
     auto padding = layoutProperty->CreatePaddingAndBorder();
     auto verticalPadding = padding.top.value_or(0.0f) + padding.bottom.value_or(0.0f);
     searchHeight = std::max(verticalPadding, static_cast<float>(searchHeight));
     auto searchHeightAdapt = searchHeight;
-    if (!IsFixedHeightMode(layoutWrapper) && layoutPolicy != LayoutCalPolicy::MATCH_PARENT) {
+    if (!IsFixedHeightMode(layoutWrapper) && !shouldMatchParent) {
         searchHeightAdapt = std::max(searchHeightAdapt, CalcSearchAdaptHeight(layoutWrapper));
         renderContext->SetClipToBounds(false);
     } else {
@@ -581,7 +581,7 @@ double SearchLayoutAlgorithm::CalcSearchHeight(
     auto hasHeight = calcLayoutConstraint->selfIdealSize.has_value() &&
         calcLayoutConstraint->selfIdealSize->Height().has_value();
     if (hasMinSize && ((hasMaxSize && constraint.minSize.Height() >= constraint.maxSize.Height())
-        || (!hasMaxSize && !hasHeight && layoutPolicy != LayoutCalPolicy::MATCH_PARENT))) {
+        || (!hasMaxSize && !hasHeight && !shouldMatchParent))) {
         return constraint.minSize.Height();
     }
     if (hasMinSize) {

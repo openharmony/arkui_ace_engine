@@ -2061,8 +2061,7 @@ HWTEST_F(MarqueeTestNg, HandleWidthConstraint, TestSize.Level1)
     calcContext.layoutConstraint.parentIdealSize.Reset();
     calcContext.layoutConstraint.maxSize.SetWidth(1080);
     marqueeLayoutAlgorithm->HandleWidthConstraint(LayoutCalPolicy::MATCH_PARENT, 100.0f, calcContext);
-    ASSERT_NE(calcContext.optionalSize.Width(), std::nullopt);
-    EXPECT_EQ(calcContext.optionalSize.Width().value(), 1080.0f);
+    EXPECT_EQ(calcContext.optionalSize.Width(), std::nullopt);
 }
 
 /**
@@ -2154,7 +2153,6 @@ HWTEST_F(MarqueeTestNg, HandleHeightConstraint, TestSize.Level1)
     calcContext.layoutConstraint.parentIdealSize.Reset();
     calcContext.layoutConstraint.maxSize.SetHeight(1080);
     marqueeLayoutAlgorithm->HandleHeightConstraint(LayoutCalPolicy::MATCH_PARENT, 100.0f, calcContext);
-    ASSERT_NE(calcContext.optionalSize.Height(), std::nullopt);
-    EXPECT_EQ(calcContext.optionalSize.Height().value(), 1080.0f);
+    EXPECT_EQ(calcContext.optionalSize.Height(), std::nullopt);
 }
 } // namespace OHOS::Ace::NG

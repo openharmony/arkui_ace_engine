@@ -38,8 +38,9 @@ void MarqueeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     // use marquee constrain size as text child max constrain size
     if (layoutConstraint->selfIdealSize.Height().has_value()) {
         textLayoutConstraint.selfIdealSize.SetHeight(layoutConstraint->selfIdealSize.Height().value());
-    } else if (heightLayoutPolicy == LayoutCalPolicy::MATCH_PARENT) {
-        textLayoutConstraint.selfIdealSize.SetHeight(maxSize.Height());
+    } else if (heightLayoutPolicy == LayoutCalPolicy::MATCH_PARENT &&
+               layoutConstraint->parentIdealSize.Height().has_value()) {
+        textLayoutConstraint.selfIdealSize.SetHeight(layoutConstraint->parentIdealSize.Height().value());
     }
     // measure text, and add marquee padding to text child
     PaddingProperty textPadding;
@@ -160,8 +161,9 @@ void MarqueeLayoutAlgorithm::HandleWidthConstraint(
             break;
         }
         case LayoutCalPolicy::MATCH_PARENT:
-            context.optionalSize.SetWidth(
-                context.layoutConstraint.parentIdealSize.Width().value_or(context.layoutConstraint.maxSize.Width()));
+            if (context.layoutConstraint.parentIdealSize.Width().has_value()) {
+                context.optionalSize.SetWidth(context.layoutConstraint.parentIdealSize.Width().value());
+            }
             break;
         default:
             break;
@@ -191,8 +193,9 @@ void MarqueeLayoutAlgorithm::HandleHeightConstraint(
             break;
         }
         case LayoutCalPolicy::MATCH_PARENT:
-            context.optionalSize.SetHeight(
-                context.layoutConstraint.parentIdealSize.Height().value_or(context.layoutConstraint.maxSize.Height()));
+            if (context.layoutConstraint.parentIdealSize.Height().has_value()) {
+                context.optionalSize.SetHeight(context.layoutConstraint.parentIdealSize.Height().value());
+            }
             break;
         default:
             break;
