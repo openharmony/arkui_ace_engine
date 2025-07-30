@@ -32,6 +32,23 @@ std::unordered_map<int, uint32_t> colorMap = {
     {PromptActionColor::PROMPT_ACTION_COLOR_TRANSPARENT, 0x00000000},
 };
 
+ani_object CreateANILongObject(ani_env *env, int64_t longValue)
+{
+    ani_class longCls {};
+    env->FindClass("std.core.Long", &longCls);
+    ani_method ctor {};
+    env->Class_FindMethod(longCls, "<ctor>", "l:", &ctor);
+    ani_object result {};
+    ani_long aniLong = static_cast<ani_long>(longValue);
+    ani_status status = env->Object_New(longCls, ctor, &result, aniLong);
+    if (status != ANI_OK) {
+        ani_ref undefinedRef;
+        env->GetUndefined(&undefinedRef);
+        return static_cast<ani_object>(undefinedRef);
+    }
+    return result;
+}
+
 ani_object CreateANIDoubleObject(ani_env *env, double doubleValue)
 {
     ani_class doubleCls {};
