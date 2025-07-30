@@ -1589,16 +1589,16 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage057, TestSi
     auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
     auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNode, nullptr);
-    EXPECT_CALL(
-        *(AceType::DynamicCast<MockInteractionInterface>(MockInteractionInterface::GetInstance())), GetDragSummary(_))
+    EXPECT_CALL(*(AceType::DynamicCast<MockInteractionInterface>(MockInteractionInterface::GetInstance())),
+        GetDragSummary(_, _, _, _, _))
         .WillRepeatedly(testing::Return(1));
     EXPECT_CALL(
         *(AceType::DynamicCast<MockInteractionInterface>(MockInteractionInterface::GetInstance())), GetDragExtraInfo(_))
         .WillRepeatedly(testing::Return(1));
     dragDropManager->RequireSummary();
 
-    EXPECT_CALL(
-        *(AceType::DynamicCast<MockInteractionInterface>(MockInteractionInterface::GetInstance())), GetDragSummary(_))
+    EXPECT_CALL(*(AceType::DynamicCast<MockInteractionInterface>(MockInteractionInterface::GetInstance())),
+        GetDragSummary(_, _, _, _, _))
         .WillRepeatedly(testing::Return(0));
     EXPECT_CALL(
         *(AceType::DynamicCast<MockInteractionInterface>(MockInteractionInterface::GetInstance())), GetDragExtraInfo(_))
@@ -2118,13 +2118,13 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage074, TestSi
     
     dragDropManager->summaryMap_ = {{"general.png", 143}};
     auto mockUdmfClient = static_cast<MockUdmfClient*>(UdmfClient::GetInstance());
-    EXPECT_CALL(*mockUdmfClient, IsBelongsTo(_, _)).WillOnce(testing::Return(true));
+    EXPECT_CALL(*mockUdmfClient, IsAppropriateType(_, _)).WillOnce(testing::Return(true));
     ret = dragDropManager->IsDropAllowed(frameNode);
     EXPECT_TRUE(ret);
 
     dragDropManager->summaryMap_ = {{"general.image", 143}};
     mockUdmfClient = static_cast<MockUdmfClient*>(UdmfClient::GetInstance());
-    EXPECT_CALL(*mockUdmfClient, IsBelongsTo(_, _)).WillOnce(testing::Return(false));
+    EXPECT_CALL(*mockUdmfClient, IsAppropriateType(_, _)).WillOnce(testing::Return(false));
     ret = dragDropManager->IsDropAllowed(frameNode);
     EXPECT_FALSE(ret);
 }

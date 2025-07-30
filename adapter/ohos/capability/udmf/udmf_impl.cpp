@@ -203,25 +203,21 @@ int32_t UdmfClientImpl::Cancel(const std::string& key)
     return static_cast<int32_t>(UDMF::UdmfAsyncClient::GetInstance().Cancel(key));
 }
 
-int32_t UdmfClientImpl::GetSummary(std::string& key, std::map<std::string, int64_t>& summaryMap,
-    std::map<std::string, int64_t>& detailedSummaryMap)
+int32_t UdmfClientImpl::GetSummary(std::string& key, DragSummaryInfo& dragSummaryInfo)
 {
     auto& client = UDMF::UdmfClient::GetInstance();
     UDMF::Summary summary;
-    UDMF::Summary detailedSummary;
     UDMF::QueryOption queryOption;
     queryOption.key = key;
-    int32_t ret = client.GetSummary(queryOption, detailedSummary);
+    int32_t ret = client.GetSummary(queryOption, summary);
     if (ret != 0) {
         return ret;
     }
-    detailedSummaryMap = detailedSummary.summary;
-    ret = client.GetParentType(detailedSummary, summary);
-    if (ret != 0) {
-        TAG_LOGW(AceLogTag::ACE_DRAG, "UDMF Convert summary failed, return value is %{public}d", ret);
-        return ret;
-    }
-    summaryMap = summary.summary;
+    dragSummaryInfo.summary = summary.summary;
+    dragSummaryInfo.detailedSummary = summary.specificSummary;
+    dragSummaryInfo.summaryFormat = summary.summaryFormat;
+    dragSummaryInfo.version = summary.version;
+    dragSummaryInfo.totalSize = summary.totalSize;
     return ret;
 }
 
@@ -677,21 +673,16 @@ std::vector<uint8_t> UdmfClientImpl::GetSpanStringEntry(const RefPtr<UnifiedData
     return GetSpanStringRecord(unifiedData);
 }
 
-bool UdmfClientImpl::IsBelongsTo(const std::string& summary, const std::string& allowDropType)
+bool UdmfClientImpl::IsAppropriateType(DragSummaryInfo& dragSummaryInfo, const std::set<std::string>& allowTypes)
 {
-    std::shared_ptr<UDMF::TypeDescriptor> typeDescriptor;
-    auto ret = UDMF::UtdClient::GetInstance().GetTypeDescriptor(summary, typeDescriptor);
-    if (ret != 0) {
-        TAG_LOGW(AceLogTag::ACE_DRAG, "UDMF get typeDescriptor failed, return value is %{public}d", ret);
-        return false;
-    }
-    CHECK_NULL_RETURN(typeDescriptor, false);
-    bool result = false;
-    ret = typeDescriptor->BelongsTo(allowDropType, result);
-    if (ret != 0) {
-        TAG_LOGW(AceLogTag::ACE_DRAG, "UDMF determine the belonging failed, return value is %{public}d", ret);
-    }
-    return result;
+    UDMF::Summary summary;
+    summary.summary = dragSummaryInfo.summary;
+    summary.specificSummary = dragSummaryInfo.detailedSummary;
+    summary.summaryFormat = dragSummaryInfo.summaryFormat;
+    summary.totalSize = dragSummaryInfo.totalSize;
+    auto& client = UDMF::UdmfClient::GetInstance();
+    std::vector<std::string> allowTypesArr(allowTypes.begin(), allowTypes.end());
+    return client.IsAppropriateType(summary, allowTypesArr);
 }
 
 #if defined(ACE_STATIC)

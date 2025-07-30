@@ -1421,7 +1421,7 @@ HWTEST_F(DragDropManagerTestNgNew, DragDropManagerTest049, TestSize.Level1)
      */
     dragDropManager->summaryMap_.clear();
     auto mockUdmfClient = static_cast<MockUdmfClient*>(UdmfClient::GetInstance());
-    EXPECT_CALL(*mockUdmfClient, IsBelongsTo(_, _)).WillOnce(testing::Return(true));
+    EXPECT_CALL(*mockUdmfClient, IsAppropriateType(_, _)).WillRepeatedly(testing::Return(true));
     dragDropManager->UpdateDragAllowDrop(frameNode, DragBehavior::COPY, -1);
     EXPECT_TRUE(dragDropManager->summaryMap_.empty());
 
