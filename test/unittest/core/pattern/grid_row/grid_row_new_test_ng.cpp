@@ -69,6 +69,7 @@ HWTEST_F(GridRowNewTestNG, Example, TestSize.Level1)
         breakpoints.breakpoints = { "1000px" };
         // test case runtime, get window width = 0
         breakpoints.reference = V2::BreakPointsReference::WindowSize;
+        breakpoints.userDefine = true;
 
         ACE_UPDATE_LAYOUT_PROPERTY(GridRowLayoutProperty, Columns, col);
         ACE_UPDATE_LAYOUT_PROPERTY(GridRowLayoutProperty, Gutter, gutter);
@@ -130,6 +131,7 @@ HWTEST_F(GridRowNewTestNG, GridRowIgnoreLayoutSafeArea001, TestSize.Level1)
         breakpoints.breakpoints = { "1000px" };
         // test case runtime, get window width = 0
         breakpoints.reference = V2::BreakPointsReference::WindowSize;
+        breakpoints.userDefine = true;
 
         ACE_UPDATE_LAYOUT_PROPERTY(GridRowLayoutProperty, Columns, col);
         ACE_UPDATE_LAYOUT_PROPERTY(GridRowLayoutProperty, Gutter, gutter);
@@ -200,6 +202,7 @@ HWTEST_F(GridRowNewTestNG, GridRowIgnoreLayoutSafeArea002, TestSize.Level1)
         breakpoints.breakpoints = { "1000px" };
         // test case runtime, get window width = 0
         breakpoints.reference = V2::BreakPointsReference::WindowSize;
+        breakpoints.userDefine = true;
 
         ACE_UPDATE_LAYOUT_PROPERTY(GridRowLayoutProperty, Columns, col);
         ACE_UPDATE_LAYOUT_PROPERTY(GridRowLayoutProperty, Gutter, gutter);

@@ -27,6 +27,7 @@ constexpr int MD = 2;
 constexpr int LG = 3;
 constexpr int XL = 4;
 constexpr int XXL = 5;
+constexpr int BREAKPOINTSIZE = 5;
 RefPtr<GridSizeInfo> ParseBreakpoints(const BreakPoints& breakpoints)
 {
     auto sizeInfo = AceType::MakeRefPtr<GridSizeInfo>();
@@ -48,6 +49,18 @@ RefPtr<GridSizeInfo> ParseBreakpoints(const RefPtr<BreakPoints>& breakpoints)
 
 } // namespace
 
+int GridContainerUtils::CalcBreakPoint(const RefPtr<GridSizeInfo> &threshold, double windowWidth)
+{
+    int index = 0;
+    for (const auto &cur : threshold->sizeInfo) {
+        if (GreatNotEqual(cur.ConvertToPx(), windowWidth)) {
+            break;
+        }
+        index++;
+    }
+    return index;
+}
+
 GridSizeType GridContainerUtils::ProcessGridSizeType(const V2::BreakPoints& breakpoints, const Size& size,
     const WindowMode& mode, const RefPtr<PipelineBase>& pipeline)
 {
@@ -59,21 +72,58 @@ GridSizeType GridContainerUtils::ProcessGridSizeType(const V2::BreakPoints& brea
             return GridSizeType::UNDEFINED;
         }
         windowWidth = pipeline->GetDisplayWindowRectInfo().GetSize().Width();
-        if (mode == WindowMode::WINDOW_MODE_FLOATING
-            && Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
+        if (mode == WindowMode::WINDOW_MODE_FLOATING &&
+            Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
             windowWidth -= 2 * (CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx();
+            int index = CalcBreakPoint(threshold, windowWidth);
+            return static_cast<GridSizeType>(index);
         }
+        std::vector<double> breakPoint(BREAKPOINTSIZE);
+        std::transform(threshold->sizeInfo.begin(), threshold->sizeInfo.end(), breakPoint.begin(), [](Dimension x) {
+            return x.ConvertToVp();
+        });
+        auto custlayoutBreakpoints = WidthLayoutBreakPoint(breakPoint);
+        auto breakpoint = GetWidthBreakpoint(custlayoutBreakpoints, pipeline, breakpoints.userDefine);
+        return static_cast<GridSizeType>(breakpoint);
     } else {
         windowWidth = size.Width();
     }
-    int index = 0;
-    for (const auto& cur : threshold->sizeInfo) {
-        if (GreatNotEqual(cur.ConvertToPx(), windowWidth)) {
-            break;
-        }
-        index++;
-    }
+    int index = CalcBreakPoint(threshold, windowWidth);
     return static_cast<GridSizeType>(index);
+}
+
+WidthBreakpoint GetCalcWidthBreakpoint(
+    const OHOS::Ace::WidthLayoutBreakPoint &finalBreakpoints, double density, double width)
+{
+    WidthBreakpoint breakpoint;
+    if (finalBreakpoints.widthVPXS_ < 0 || GreatNotEqual(finalBreakpoints.widthVPXS_ * density, width)) {
+        breakpoint = WidthBreakpoint::WIDTH_XS;
+    } else if (finalBreakpoints.widthVPSM_ < 0 || GreatNotEqual(finalBreakpoints.widthVPSM_ * density, width)) {
+        breakpoint = WidthBreakpoint::WIDTH_SM;
+    } else if (finalBreakpoints.widthVPMD_ < 0 || GreatNotEqual(finalBreakpoints.widthVPMD_ * density, width)) {
+        breakpoint = WidthBreakpoint::WIDTH_MD;
+    } else if (finalBreakpoints.widthVPLG_ < 0 || GreatNotEqual(finalBreakpoints.widthVPLG_ * density, width)) {
+        breakpoint = WidthBreakpoint::WIDTH_LG;
+    } else if (finalBreakpoints.widthVPXL_ < 0 || GreatNotEqual(finalBreakpoints.widthVPXL_ * density, width)) {
+        breakpoint = WidthBreakpoint::WIDTH_XL;
+    } else {
+        breakpoint = WidthBreakpoint::WIDTH_XXL;
+    }
+    return breakpoint;
+}
+
+WidthBreakpoint GridContainerUtils::GetWidthBreakpoint(
+    const WidthLayoutBreakPoint &custlayoutBreakpoints, const RefPtr<PipelineBase>& pipeline, bool userDefine)
+{
+    auto finalBreakpoints = WidthLayoutBreakPoint(320.0, 600.0, 840.0, -1.0, -1.0);
+    auto configBreakpoints = SystemProperties::GetWidthLayoutBreakpoints();
+    if (userDefine) {  // cust has value
+        finalBreakpoints = custlayoutBreakpoints;
+    } else if (configBreakpoints != WidthLayoutBreakPoint()) {  // ccm has value
+        finalBreakpoints = configBreakpoints;
+    }
+    double density = pipeline->GetCurrentDensity();
+    return GetCalcWidthBreakpoint(finalBreakpoints, density, pipeline->GetCurrentWindowRect().Width());
 }
 
 GridSizeType GridContainerUtils::ProcessGridSizeType(
