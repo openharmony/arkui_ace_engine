@@ -3799,7 +3799,7 @@ void ViewAbstract::BindPopup(
             SubwindowManager::GetInstance()->ShowPopupNG(
                 targetNode, popupInfo, param->GetOnWillDismiss(), param->GetInteractiveDismiss());
         } else {
-            SubwindowManager::GetInstance()->HidePopupNG(targetId);
+            SubwindowManager::GetInstance()->HidePopupNG(targetId, instanceId);
         }
         return;
     }

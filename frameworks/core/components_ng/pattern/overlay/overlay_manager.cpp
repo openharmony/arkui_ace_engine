@@ -2592,7 +2592,10 @@ void OverlayManager::HideCustomPopups()
             popupInfo.markNeedUpdate = true;
             auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
             if (showInSubWindow) {
-                SubwindowManager::GetInstance()->HidePopupNG(targetNodeId);
+                auto pipelineContext = popupNode->GetContextRefPtr();
+                CHECK_NULL_VOID(pipelineContext);
+                auto containerId = pipelineContext->GetInstanceId();
+                SubwindowManager::GetInstance()->HidePopupNG(targetNodeId, containerId);
             } else {
                 HidePopup(targetNodeId, popupInfo);
             }
@@ -2618,7 +2621,10 @@ void OverlayManager::HideAllPopups()
             popupInfo.markNeedUpdate = true;
             auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
             if (showInSubWindow) {
-                SubwindowManager::GetInstance()->HidePopupNG(targetNodeId);
+                auto pipelineContext = popupNode->GetContextRefPtr();
+                CHECK_NULL_VOID(pipelineContext);
+                auto containerId = pipelineContext->GetInstanceId();
+                SubwindowManager::GetInstance()->HidePopupNG(targetNodeId, containerId);
             } else {
                 HidePopup(targetNodeId, popupInfo);
             }
