@@ -80,3 +80,45 @@ ohos_shared_library("arkoala_native_ani") {
   }
   output_extension = "so"
 }
+
+if (use_linux) {
+  ohos_shared_library("arkoala_native_ani_linux") {
+    subsystem_name = ace_engine_subsystem
+    part_name = ace_engine_part
+  
+    include_dirs = [ "./" ]
+  
+    sources = [
+      "animation/animation_ani_impl.cpp",
+      "common/common_module.cpp",
+      "condition_scope/condition_scope.cpp",
+      "content_slot/content_slot_module.cpp",
+      "custom_node/custom_node_module.cpp",
+      "interop/interop_module.cpp",
+      "list/list_children_main_size_module.cpp",
+      "load.cpp",
+      "module_linux.cpp",
+      "stateMgmt/stateMgmt_module.cpp",
+      "utils/ani_utils.cpp",
+      "water_flow/waterFlowSection_module.cpp",
+      "xcomponent/xcomponent_module_methods.cpp",
+    ]
+  
+    external_deps = [
+      "hilog:libhilog",
+      "napi:ace_napi",
+      "runtime_core:ani",
+    ]
+  
+    configs = [ "$ace_root:ace_config" ]
+    defines = []
+    if (pixel_map_support) {
+      defines += [ "PIXEL_MAP_SUPPORTED" ]
+    }
+    if (enable_rosen_backend) {
+      defines += [ "ENABLE_ROSEN_BACKEND" ]
+    }
+    output_name = "arkoala_native_ani"
+    output_extension = "so"
+  }
+}

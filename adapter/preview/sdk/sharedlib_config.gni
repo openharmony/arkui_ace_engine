@@ -339,6 +339,22 @@ napi_modules = [
         ]
       },
     ]
+    if (use_linux) {
+      shard_libs += [
+        {
+          label = "//foundation/arkui/ace_engine/frameworks/bridge/arkts_frontend:ArkoalaNative_ark"
+          subsystem_name = "arkui"
+          part_name = "ace_engine"
+          lib_names = [ "ArkoalaNative_ark" ]
+        },
+        {
+          label = "//foundation/arkui/ace_engine/frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native:arkoala_native_ani_linux"
+          subsystem_name = "arkui"
+          part_name = "ace_engine"
+          lib_names = [ "arkoala_native_ani" ]
+        },
+      ]
+    }
   },
   {
     prefix = "util"
@@ -629,6 +645,45 @@ if (defined(use_rosen_drawing) && use_rosen_drawing) {
   ]
 }
 
+if (use_mac || use_mingw_win || use_linux) {
+  common_bin += [
+    {
+      label = "//third_party/zlib:shared_libz"
+      subsystem_name = "thirdparty"
+      part_name = "zlib"
+      lib_names = [ "shared_libz" ]
+    },
+  ]
+}
+
+if (use_linux) {
+  common_bin += [
+    {
+      label = "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog"
+      subsystem_name = "hiviewdfx"
+      part_name = "hilog"
+      lib_names = [ "hilog" ]
+    },
+    {
+      label = "//third_party/cares:c_ares"
+      subsystem_name = "thirdparty"
+      part_name = "cares"
+      lib_names = [ "c_ares" ]
+    },
+    {
+      label = "//third_party/brotli:brotli_shared"
+      subsystem_name = "thirdparty"
+      part_name = "brotli"
+      lib_names = [ "brotli_shared" ]
+    },
+    {
+      label = "//arkcompiler/runtime_core/static_core/plugins/ets/runtime/ani:ani"
+      subsystem_name = "arkcompiler"
+      part_name = "runtime_core"
+    },
+  ]
+}
+
 if (use_mac || use_mingw_win) {
   common_bin += [
     {
@@ -660,12 +715,6 @@ if (use_mac || use_mingw_win) {
       label = "//foundation/distributeddatamgr/kv_store/kvstoremock/distributeddb:distributeddb_mock"
       subsystem_name = "distributeddatamgr"
       part_name = "kv_store"
-    },
-    {
-      label = "//third_party/zlib:shared_libz"
-      subsystem_name = "thirdparty"
-      part_name = "zlib"
-      lib_names = [ "shared_libz" ]
     },
     {
       label = "//foundation/filemanagement/file_api/utils/filemgmt_libhilog:filemgmt_libhilog"

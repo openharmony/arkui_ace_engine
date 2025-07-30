@@ -20,7 +20,9 @@
 #include <cstring>
 #include <string>
 #include <vector>
+#ifndef __linux__
 #include <charconv>
+#endif
 
 #include "interop-types.h"
 #include "interop-logging.h"
@@ -605,7 +607,7 @@ inline void WriteToString(std::string *result, InteropUInt32 value)
 template <>
 inline void WriteToString(std::string *result, InteropFloat32 value)
 {
-#if (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && (__MAC_OS_X_VERSION_MAX_ALLOWED < 130300L))
+#if ((defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && (__MAC_OS_X_VERSION_MAX_ALLOWED < 130300L)) || defined(__linux__))
   // to_chars() is not available on older macOS.
   char buf[20];
   snprintf(buf, sizeof buf, "%f", value);

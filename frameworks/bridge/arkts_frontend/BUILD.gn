@@ -131,9 +131,11 @@ ohos_shared_library("ArkoalaNative_ark") {
     "koala_projects/interop/src/cpp/types/signatures.cc",
   ]
 
-  deps = [
-    "koala_projects/arkoala-arkts/arkui-ohos/src/ani/native:arkoala_native_ani",
-  ]
+  if (use_linux) {
+    deps = [ "koala_projects/arkoala-arkts/arkui-ohos/src/ani/native:arkoala_native_ani_linux" ]
+  } else {
+    deps = [ "koala_projects/arkoala-arkts/arkui-ohos/src/ani/native:arkoala_native_ani" ]
+  }
 
   configs = [ ":arkoala_native_config" ]
 
