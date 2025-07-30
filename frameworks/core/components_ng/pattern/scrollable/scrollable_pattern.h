@@ -1067,7 +1067,7 @@ private:
     /******************************************************************************
      * NestableScrollContainer implementations
      */
-    ScrollResult HandleExtScroll(float velocity = 0.f);
+    void HandleExtScroll(float velocity = 0.f);
     ScrollResult HandleScroll(
         float offset, int32_t source, NestedState state = NestedState::GESTURE, float velocity = 0.f) override;
     bool HandleScrollVelocity(float velocity, const RefPtr<NestableScrollContainer>& child = nullptr) override;

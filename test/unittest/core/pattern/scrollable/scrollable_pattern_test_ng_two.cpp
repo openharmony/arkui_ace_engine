@@ -21,6 +21,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 using namespace testing;
@@ -234,5 +235,318 @@ HWTEST_F(ScrollableTestNg, ProcessScrollOverCallback002, TestSize.Level1)
     scrollable->notifyScrollOverCallback_ = [&number](double velocity) { number += velocity; };
     scrollable->ProcessScrollOverCallback(2.0);
     EXPECT_EQ(number, 6.0);
+}
+
+/**
+ * @tc.name: HandleScrollImpl001
+ * @tc.desc: Test Scrollable HandleScrollImpl
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableTestNg, HandleScrollImpl001, TestSize.Level1)
+{
+    /**
+      * @tc.steps: step1. create scrollablePattern.
+      */
+    RefPtr<ListPattern> scrollablePattern = AceType::MakeRefPtr<ListPattern>();
+
+    /**
+      * @tc.steps: step2. call HandlePanExtAccept function.
+      * @tc.expected: result equals.
+      */
+    float offset = 0;
+    int32_t source = SCROLL_FROM_START;
+    scrollablePattern->needLinked_ = true;
+    scrollablePattern->isNeedCollectOffset_ = true;
+    auto result = scrollablePattern->HandleScrollImpl(offset, source);
+    EXPECT_EQ(result, true);
+
+    uint64_t vsync = 0;
+    const uint32_t DVSYNC_OFFSET_SIZE_TEMP = 10;
+    while (scrollablePattern->offsets_.size() < DVSYNC_OFFSET_SIZE_TEMP) {
+        scrollablePattern->offsets_.push({vsync, offset});
+        vsync++;
+    };
+    scrollablePattern->HandleExtScroll();
+    result = scrollablePattern->HandleScrollImpl(offset, source);
+    EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: HandleScroll001
+ * @tc.desc: Test Scrollable HandleScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableTestNg, HandleScroll001, TestSize.Level1)
+{
+    /**
+      * @tc.steps: step1. create scrollablePattern.
+      */
+    RefPtr<ListPattern> scrollablePattern = AceType::MakeRefPtr<ListPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollablePattern);
+    ASSERT_NE(frameNode, nullptr);
+    MockPipelineContext::SetUp();
+    auto context = MockPipelineContext::GetCurrent();
+    uint64_t now = GetSysTimestamp();
+    context->vsyncTime_ = now + 54000000;
+    frameNode->context_ = AceType::RawPtr(context);
+    scrollablePattern->frameNode_ = frameNode;
+    /**
+      * @tc.steps: step2. call HandleExtScroll function.
+      * @tc.expected: result equals.
+      */
+    float offset = 0;
+    int32_t source = 0;
+    NestedState state = NestedState::GESTURE;
+    float velocity = 0;
+    scrollablePattern->isExtScroll_ = true;
+    scrollablePattern->HandleScroll(offset, source, state, velocity);
+    EXPECT_EQ(scrollablePattern->isExtScroll_, false);
+
+    auto result = scrollablePattern->HandleScroll(offset, source, state, velocity);
+    EXPECT_EQ(result.remain, 0);
+}
+
+/**
+ * @tc.name: HandleExtScroll001
+ * @tc.desc: Test Scrollable HandleScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableTestNg, HandleExtScroll001, TestSize.Level1)
+{
+    /**
+      * @tc.steps: step1. create scrollablePattern.
+      */
+    RefPtr<ListPattern> scrollablePattern = AceType::MakeRefPtr<ListPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollablePattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto context = MockPipelineContext::GetCurrent();
+    uint64_t now = GetSysTimestamp();
+    context->vsyncTime_ = now + 54000000;
+    frameNode->context_ = AceType::RawPtr(context);
+    scrollablePattern->frameNode_ = frameNode;
+    scrollablePattern->isNeedCollectOffset_ = true;
+
+    const uint32_t DVSYNC_OFFSET_SIZE_TEMP = 10;
+    float offset = 0;
+    uint64_t base = now - 30000000;
+    while (scrollablePattern->offsets_.size() < DVSYNC_OFFSET_SIZE_TEMP) {
+        scrollablePattern->offsets_.push({base, offset});
+        base += 8333333;
+        offset += 5;
+    };
+    scrollablePattern->HandleExtScroll();
+    EXPECT_EQ(scrollablePattern->isNeedCollectOffset_, false);
+}
+
+/**
+ * @tc.name: HandleExtScroll002
+ * @tc.desc: Test Scrollable HandleScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableTestNg, HandleExtScroll002, TestSize.Level1)
+{
+    /**
+      * @tc.steps: step1. create scrollablePattern.
+      */
+    RefPtr<ListPattern> scrollablePattern = AceType::MakeRefPtr<ListPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollablePattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto context = MockPipelineContext::GetCurrent();
+    uint64_t now = GetSysTimestamp();
+    context->vsyncTime_ = now + 54000000;
+    frameNode->context_ = AceType::RawPtr(context);
+    scrollablePattern->frameNode_ = frameNode;
+    scrollablePattern->isNeedCollectOffset_ = true;
+
+    scrollablePattern->HandleExtScroll();
+    EXPECT_EQ(scrollablePattern->isNeedCollectOffset_, true);
+}
+
+/**
+ * @tc.name: HandleExtScroll003
+ * @tc.desc: Test Scrollable HandleScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableTestNg, HandleExtScroll003, TestSize.Level1)
+{
+    /**
+      * @tc.steps: step1. create scrollablePattern.
+      */
+    RefPtr<ListPattern> scrollablePattern = AceType::MakeRefPtr<ListPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollablePattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto context = MockPipelineContext::GetCurrent();
+    uint64_t now = GetSysTimestamp();
+    context->vsyncTime_ = now + 54000000;
+    frameNode->context_ = AceType::RawPtr(context);
+    scrollablePattern->frameNode_ = frameNode;
+    scrollablePattern->isNeedCollectOffset_ = false;
+
+    scrollablePattern->HandleExtScroll();
+    EXPECT_EQ(scrollablePattern->isNeedCollectOffset_, false);
+}
+
+/**
+ * @tc.name: HandleExtScroll004
+ * @tc.desc: Test Scrollable HandleScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableTestNg, HandleExtScroll004, TestSize.Level1)
+{
+    /**
+      * @tc.steps: step1. create scrollablePattern.
+      */
+    RefPtr<ListPattern> scrollablePattern = AceType::MakeRefPtr<ListPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollablePattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto context = MockPipelineContext::GetCurrent();
+    uint64_t now = GetSysTimestamp();
+    context->vsyncTime_ = now + 60000000;
+    frameNode->context_ = AceType::RawPtr(context);
+    scrollablePattern->frameNode_ = frameNode;
+    scrollablePattern->isNeedCollectOffset_ = false;
+
+    const uint32_t DVSYNC_OFFSET_SIZE_TEMP = 10;
+    float offset = 0;
+    uint64_t base = now - 30000000;
+    while (scrollablePattern->offsets_.size() < DVSYNC_OFFSET_SIZE_TEMP) {
+        scrollablePattern->offsets_.push({base, offset});
+        base += 8333333;
+        offset += 5;
+    };
+    scrollablePattern->HandleExtScroll();
+    EXPECT_EQ(scrollablePattern->isNeedCollectOffset_, false);
+    scrollablePattern->isNeedCollectOffset_ = true;
+    scrollablePattern->HandleExtScroll();
+    EXPECT_EQ(scrollablePattern->isNeedCollectOffset_, false);
+}
+
+/**
+ * @tc.name: HandleExtScroll005
+ * @tc.desc: Test Scrollable HandleScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableTestNg, HandleExtScroll005, TestSize.Level1)
+{
+    /**
+      * @tc.steps: step1. create scrollablePattern.
+      */
+    RefPtr<ListPattern> scrollablePattern = AceType::MakeRefPtr<ListPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollablePattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto context = MockPipelineContext::GetCurrent();
+    uint64_t now = GetSysTimestamp();
+    context->vsyncTime_ = now + 16666666;
+    frameNode->context_ = AceType::RawPtr(context);
+    scrollablePattern->frameNode_ = frameNode;
+    scrollablePattern->isNeedCollectOffset_ = true;
+
+    const uint32_t DVSYNC_OFFSET_SIZE_TEMP = 10;
+    float offset = 0;
+    uint64_t base = now - 80000000;
+    while (scrollablePattern->offsets_.size() < DVSYNC_OFFSET_SIZE_TEMP) {
+        scrollablePattern->offsets_.push({base, offset});
+        base += 8333333;
+        offset += 5;
+    };
+    scrollablePattern->HandleExtScroll();
+    EXPECT_EQ(scrollablePattern->isNeedCollectOffset_, true);
+}
+
+/**
+ * @tc.name: HandleExtScroll006
+ * @tc.desc: Test Scrollable HandleScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableTestNg, HandleExtScroll006, TestSize.Level1)
+{
+    /**
+      * @tc.steps: step1. create scrollablePattern.
+      */
+    RefPtr<ListPattern> scrollablePattern = AceType::MakeRefPtr<ListPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollablePattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto context = MockPipelineContext::GetCurrent();
+    uint64_t now = GetSysTimestamp();
+    context->vsyncTime_ = now;
+    frameNode->context_ = AceType::RawPtr(context);
+    scrollablePattern->frameNode_ = frameNode;
+    scrollablePattern->isNeedCollectOffset_ = true;
+
+    const uint32_t DVSYNC_OFFSET_SIZE_TEMP = 10;
+    float offset = 0;
+    uint64_t base = now - 90000000;
+    while (scrollablePattern->offsets_.size() < DVSYNC_OFFSET_SIZE_TEMP) {
+        scrollablePattern->offsets_.push({base, offset});
+        base += 8333333;
+        offset += 5;
+    };
+    scrollablePattern->HandleExtScroll();
+    EXPECT_EQ(scrollablePattern->isNeedCollectOffset_, true);
+}
+
+/**
+ * @tc.name: HandleExtScroll007
+ * @tc.desc: Test Scrollable HandleScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableTestNg, HandleExtScroll007, TestSize.Level1)
+{
+    /**
+      * @tc.steps: step1. create scrollablePattern.
+      */
+    RefPtr<ListPattern> scrollablePattern = AceType::MakeRefPtr<ListPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollablePattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto context = MockPipelineContext::GetCurrent();
+    uint64_t now = GetSysTimestamp();
+    context->vsyncTime_ = now + 60000000;
+    frameNode->context_ = AceType::RawPtr(context);
+    scrollablePattern->frameNode_ = frameNode;
+    scrollablePattern->isNeedCollectOffset_ = true;
+
+    const uint32_t DVSYNC_OFFSET_SIZE_TEMP = 10;
+    float offset = 0;
+    uint64_t base = now - 30000000;
+    while (scrollablePattern->offsets_.size() < DVSYNC_OFFSET_SIZE_TEMP) {
+        scrollablePattern->offsets_.push({base, offset});
+        base += 8333333;
+        offset += 5;
+    };
+    scrollablePattern->HandleExtScroll();
+    EXPECT_EQ(scrollablePattern->isNeedCollectOffset_, false);
+}
+
+/**
+ * @tc.name: HandleExtScroll008
+ * @tc.desc: Test Scrollable HandleScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableTestNg, HandleExtScroll008, TestSize.Level1)
+{
+    /**
+      * @tc.steps: step1. create scrollablePattern.
+      */
+    RefPtr<ListPattern> scrollablePattern = AceType::MakeRefPtr<ListPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollablePattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto context = MockPipelineContext::GetCurrent();
+    uint64_t now = GetSysTimestamp();
+    context->vsyncTime_ = now;
+    frameNode->context_ = AceType::RawPtr(context);
+    scrollablePattern->frameNode_ = frameNode;
+    scrollablePattern->isNeedCollectOffset_ = true;
+
+    const uint32_t DVSYNC_OFFSET_SIZE_TEMP = 10;
+    float offset = 0;
+    uint64_t base = now - 70000000;
+    while (scrollablePattern->offsets_.size() < DVSYNC_OFFSET_SIZE_TEMP) {
+        scrollablePattern->offsets_.push({base, offset});
+        base += 8333333;
+        offset += 5;
+    };
+    scrollablePattern->HandleExtScroll();
+    EXPECT_EQ(scrollablePattern->isNeedCollectOffset_, true);
+    MockPipelineContext::TearDown();
 }
 } // namespace OHOS::Ace::NG

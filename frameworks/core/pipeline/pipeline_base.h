@@ -1756,6 +1756,7 @@ protected:
     uint64_t DVSyncChangeTime_ = 0;
     bool commandTimeUpdate_ = false;
     bool dvsyncTimeUpdate_ = false;
+    int32_t dvsyncTimeUseCount_ = 0;
 private:
     void DumpFrontend() const;
     double ModifyKeyboardHeight(double keyboardHeight) const;

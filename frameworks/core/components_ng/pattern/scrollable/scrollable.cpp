@@ -664,13 +664,12 @@ void Scrollable::HandleDragStart(const OHOS::Ace::GestureEvent& info)
     }
 }
 
-ScrollResult Scrollable::HandleExtScroll()
+void Scrollable::HandleExtScroll()
 {
     if (handleExtScrollCallback_ != nullptr) {
         // call NestableScrollContainer::HandleExtScroll
-        return handleExtScrollCallback_();
+        handleExtScrollCallback_();
     }
-    return {0, false };
 }
 
 ScrollResult Scrollable::HandleScroll(double offset, int32_t source, NestedState state)

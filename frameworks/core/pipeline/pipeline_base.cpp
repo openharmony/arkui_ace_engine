@@ -1140,5 +1140,6 @@ void PipelineBase::SetUiDVSyncCommandTime(uint64_t vsyncTime)
     DVSyncChangeTime_ = vsyncTime;
     commandTimeUpdate_ = true;
     dvsyncTimeUpdate_ = true;
+    dvsyncTimeUseCount_ = 0;
 }
 } // namespace OHOS::Ace

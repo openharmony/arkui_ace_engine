@@ -645,12 +645,11 @@ void ScrollablePattern::SetHandleExtScrollCallback(const RefPtr<Scrollable>& scr
 {
     // move HandleScroll and HandleOverScroll to ScrollablePattern by setting callbacks to scrollable
     CHECK_NULL_VOID(scrollable);
-    auto handleScroll = [weak = AceType::WeakClaim(this)]() -> ScrollResult {
+    auto handleScroll = [weak = AceType::WeakClaim(this)]() -> void {
         auto pattern = weak.Upgrade();
         if (pattern) {
-            return pattern->HandleExtScroll(pattern->GetVelocity());
+            pattern->HandleExtScroll(pattern->GetVelocity());
         }
-        return {};
     };
     scrollable->SetHandleExtScrollCallback(std::move(handleScroll));
 }
@@ -2190,12 +2189,12 @@ bool ScrollablePattern::HandleScrollImpl(float offset, int32_t source)
 
     // Now: HandleScroll moved to ScrollablePattern, directly call HandleScrollImpl in
     // ScrollablePattern::HandleScroll
-    auto context = GetContext();
     double overOffset = offset;
     if (!OnScrollPosition(overOffset, source)) {
         return false;
     }
     if (isNeedCollectOffset_) {
+        auto context = GetContext();
         uint64_t currentVsync = 0;
         if (context != nullptr) {
             currentVsync = context->GetVsyncTime();
@@ -2566,7 +2565,7 @@ float ScrollablePattern::GetDVSyncOffset()
         return 0;
     }
     uint64_t currentVsync = context->GetVsyncTime();
-    uint64_t currentTime = GetSysTimestamp();
+    uint64_t currentTime = static_cast<uint64_t>(GetSysTimestamp());
     bool needUpdateCommandTime = false;
     if (currentVsync >= offsets_.back().first && currentVsync - currentTime > DVSYNC_DELAY_TIME_BASE) {
         currentTime += DVSYNC_OFFSET_TIME;
@@ -2599,7 +2598,7 @@ float ScrollablePattern::GetDVSyncOffset()
     return dvsyncOffset;
 }
 
-ScrollResult ScrollablePattern::HandleExtScroll(float velocity)
+void ScrollablePattern::HandleExtScroll(float velocity)
 {
     float dvsyncOffset = GetDVSyncOffset();
     if (dvsyncOffset != 0) {
@@ -2607,8 +2606,6 @@ ScrollResult ScrollablePattern::HandleExtScroll(float velocity)
         HandleScroll(dvsyncOffset, SCROLL_FROM_ANIMATION, NestedState::CHILD_SCROLL, velocity);
         isExtScroll_ = false;
     }
-    ScrollResult result = { 0, true };
-    return result;
 }
 
 ScrollResult ScrollablePattern::HandleScroll(float offset, int32_t source, NestedState state, float velocity)
