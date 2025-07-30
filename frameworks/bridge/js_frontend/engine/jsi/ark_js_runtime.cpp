@@ -32,6 +32,10 @@ static constexpr auto PANDA_MAIN_FUNCTION = "_GLOBAL::func_main_0";
 constexpr auto DEBUGGER = "@Debugger";
 #endif
 
+constexpr int8_t FILE_FORMAT_INVALID = -1;
+constexpr int8_t FILE_DYNAMIC = 0;
+constexpr int8_t FILE_STATIC = 1;
+
 Local<JSValueRef> FunctionCallback(panda::JsiRuntimeCallInfo* info)
 {
     auto package = reinterpret_cast<PandaFunctionData*>(info->GetData());
@@ -202,6 +206,35 @@ bool ArkJSRuntime::IsExecuteModuleInAbcFile(
     LocalScope scope(vm_);
     panda::TryCatch trycatch(vm_);
     bool ret = JSNApi::IsExecuteModuleInAbcFile(vm_, bundleName, moduleName, ohmurl);
+    HandleUncaughtException(trycatch);
+    return ret;
+}
+
+bool ArkJSRuntime::IsStaticOrInvalidFile(const uint8_t *data, int32_t size)
+{
+    JSExecutionScope executionScope(vm_);
+    LocalScope scope(vm_);
+    panda::TryCatch trycatch(vm_);
+    int8_t fileType = static_cast<int8_t>(JSNApi::GetFileType(data, size));
+    bool ret;
+    switch (fileType) {
+        case FILE_DYNAMIC:
+            ret = false;
+            LOGI("ArkJSRuntime::IsStaticOrInvalidFile, file is dynamic");
+            break;
+        case FILE_STATIC:
+            ret = true;
+            LOGI("ArkJSRuntime::IsStaticOrInvalidFile, file is static");
+            break;
+        case FILE_FORMAT_INVALID:
+            ret = true;
+            LOGE("ArkJSRuntime::IsStaticOrInvalidFile, file is invalid. reason is param invalid");
+            break;
+        default:
+            ret = true;
+            LOGE("ArkJSRuntime::IsStaticOrInvalidFile, file is invalid");
+    }
+
     HandleUncaughtException(trycatch);
     return ret;
 }
