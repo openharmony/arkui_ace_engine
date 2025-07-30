@@ -3157,6 +3157,22 @@ frameworks/core/interfaces/native/implementation/dismiss_popup_action_peer.h @ar
 frameworks/core/interfaces/native/implementation/level_order_accessor.cpp @arkuipopupwindow
 frameworks/core/interfaces/native/implementation/level_order_peer.h @arkuipopupwindow
 
+frameworks/core/interfaces/native/implementation/calendar_controller_accessor.cpp @arkui_image
+frameworks/core/interfaces/native/implementation/calendar_controller_peer.h @arkui_image
+frameworks/core/interfaces/native/implementation/calendar_modifier.cpp @arkui_image
+frameworks/core/interfaces/native/implementation/calendar_picker_dialog_accessor.cpp @arkui_image
+frameworks/core/interfaces/native/implementation/calendar_picker_modifier.cpp @arkui_image
+frameworks/core/interfaces/native/implementation/date_picker_dialog_accessor.cpp @arkui_image
+frameworks/core/interfaces/native/implementation/date_picker_modifier.cpp @arkui_image
+frameworks/core/interfaces/native/implementation/date_picker_selected_ops_accessor.cpp @arkui_image
+frameworks/core/interfaces/native/implementation/text_picker_dialog_accessor.cpp @arkui_image
+frameworks/core/interfaces/native/implementation/text_picker_modifier.cpp @arkui_image
+frameworks/core/interfaces/native/implementation/text_picker_selected_ops_accessor.cpp @arkui_image
+frameworks/core/interfaces/native/implementation/text_picker_value_ops_accessor.cpp @arkui_image
+frameworks/core/interfaces/native/implementation/time_picker_dialog_accessor.cpp @arkui_image
+frameworks/core/interfaces/native/implementation/time_picker_modifier.cpp @arkui_image
+frameworks/core/interfaces/native/implementation/time_picker_selected_ops_accessor.cpp @arkui_image
+
 [Test source]
 test/mock/core/event/ @arkuievent
 test/mock/core/accessibility/ @arkuiabilitygroup
