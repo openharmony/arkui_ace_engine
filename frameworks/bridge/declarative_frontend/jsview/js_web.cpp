@@ -1834,8 +1834,8 @@ public:
         if (param_) {
             type = param_->GetMediaType();
         }
-        if (type > 1) {
-            RETURN_IF_CALLING_FROM_M114();
+        if (type > 1 && ArkWeb::getActiveWebEngineVersion() < ArkWeb::ArkWebEngineVersion::M132) {
+            return;
         }
         auto jsType = JSVal(ToJSValue(type));
         auto descriptionRef = JSRef<JSVal>::Make(jsType);
@@ -1932,7 +1932,9 @@ public:
 
     void Undo(const JSCallbackInfo& args)
     {
-        RETURN_IF_CALLING_FROM_M114();
+        if (ArkWeb::getActiveWebEngineVersion() < ArkWeb::ArkWebEngineVersion::M132) {
+            return;
+        }
         if (result_) {
             result_->Undo();
         }
@@ -1940,7 +1942,9 @@ public:
 
     void Redo(const JSCallbackInfo& args)
     {
-        RETURN_IF_CALLING_FROM_M114();
+        if (ArkWeb::getActiveWebEngineVersion() < ArkWeb::ArkWebEngineVersion::M132) {
+            return;
+        }
         if (result_) {
             result_->Redo();
         }
@@ -1948,7 +1952,9 @@ public:
 
     void PasteAndMatchStyle(const JSCallbackInfo& args)
     {
-        RETURN_IF_CALLING_FROM_M114();
+        if (ArkWeb::getActiveWebEngineVersion() < ArkWeb::ArkWebEngineVersion::M132) {
+            return;
+        }
         if (result_) {
             result_->PasteAndMatchStyle();
         }
@@ -3985,8 +3991,9 @@ void JSWeb::BindSelectionMenu(const JSCallbackInfo& info)
         return;
     }
     WebElementType elementType = static_cast<WebElementType>(info[0]->ToNumber<int32_t>());
-    if (elementType == WebElementType::LINK) {
-        RETURN_IF_CALLING_FROM_M114();
+    if (elementType == WebElementType::LINK &&
+        ArkWeb::getActiveWebEngineVersion() < ArkWeb::ArkWebEngineVersion::M132) {
+        return;
     }
     ResponseType responseType =
         static_cast<ResponseType>(info[SELECTION_MENU_CONTENT_PARAM_INDEX]->ToNumber<int32_t>());
@@ -6392,7 +6399,9 @@ void JSWeb::EnableWebAVSession(const JSCallbackInfo& args)
 
 void JSWeb::EnableDataDetector(const JSCallbackInfo& args)
 {
-    RETURN_IF_CALLING_FROM_M114();
+    if (ArkWeb::getActiveWebEngineVersion() < ArkWeb::ArkWebEngineVersion::M132) {
+        return;
+    }
     if (args.Length() < 1 || !args[0]->IsBoolean()) {
         return;
     }
@@ -6402,7 +6411,9 @@ void JSWeb::EnableDataDetector(const JSCallbackInfo& args)
 
 void JSWeb::DataDetectorConfig(const JSCallbackInfo& args)
 {
-    RETURN_IF_CALLING_FROM_M114();
+    if (ArkWeb::getActiveWebEngineVersion() < ArkWeb::ArkWebEngineVersion::M132) {
+        return;
+    }
     if (args.Length() < 1) {
         return;
     }
@@ -6442,7 +6453,9 @@ void JSWeb::EnableFollowSystemFontWeight(bool enableFollowSystemFontWeight)
 
 void JSWeb::GestureFocusMode(int32_t gestureFocusMode)
 {
-    RETURN_IF_CALLING_FROM_M114();
+    if (ArkWeb::getActiveWebEngineVersion() < ArkWeb::ArkWebEngineVersion::M132) {
+        return;
+    }
     if (gestureFocusMode < static_cast<int32_t>(GestureFocusMode::DEFAULT) ||
         gestureFocusMode > static_cast<int32_t>(GestureFocusMode::GESTURE_TAP_AND_LONG_PRESS)) {
         TAG_LOGE(AceLogTag::ACE_WEB, "GestureFocusMode param err");
