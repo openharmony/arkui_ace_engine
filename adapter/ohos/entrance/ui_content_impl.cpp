@@ -72,6 +72,7 @@
 
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
+#include "adapter/ohos/capability/feature_config/arkui_feature_param_manager.h"
 #include "adapter/ohos/entrance/ace_application_info.h"
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/ace_new_pipe_judgement.h"
@@ -80,7 +81,6 @@
 #include "adapter/ohos/entrance/cj_utils/cj_utils.h"
 #include "adapter/ohos/entrance/dialog_container.h"
 #include "adapter/ohos/entrance/dynamic_component/uv_task_wrapper_impl.h"
-#include "adapter/ohos/entrance/feature_config/arkui_feature_param_manager.h"
 #include "adapter/ohos/entrance/file_asset_provider_impl.h"
 #include "adapter/ohos/entrance/form_utils_impl.h"
 #include "adapter/ohos/entrance/global_pipeline_context_manager.h"

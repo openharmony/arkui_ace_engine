@@ -81,6 +81,7 @@ template("ace_ohos_standard_source_set") {
       # AudioHaptic
       "$ace_root/adapter/ohos/entrance/picker/picker_haptic_factory.cpp",
     ]
+
     if (enable_audio_framework && enable_player_framework) {
       sources += [
         "$ace_root/adapter/ohos/entrance/picker/picker_haptic_controller.cpp",

@@ -13,26 +13,31 @@
  * limitations under the License.
  */
 
-#ifndef UI_NODE_GC_PARAMS_PARSER_H
-#define UI_NODE_GC_PARAMS_PARSER_H
+#ifndef FRAME_BASED_CREATOR_PARSER_H
+#define FRAME_BASED_CREATOR_PARSER_H
 
-#include "adapter/ohos/entrance/feature_config/config_xml_parser_base.h"
+#include "adapter/ohos/capability/feature_config/config_xml_parser_base.h"
 
 namespace OHOS::Ace {
-  
-class UINodeGcParamParser : public ConfigXMLParserBase {
+class SyncloadParser : public ConfigXMLParserBase {
 public:
-    UINodeGcParamParser() = default;
-    ~UINodeGcParamParser() = default;
+    SyncloadParser() = default;
+    ~SyncloadParser() = default;
 
     ParseErrCode ParseFeatureParam(xmlNode &node) override;
-    static bool IsUINodeGcEnable();
 
+    static bool IsSyncloadEnable();
+    static uint32_t GetSyncloadResponseDeadline();
 private:
-    void SetParsedParams();
+    // 0-999 is valid
+    bool IsValidDigits(const std::string &str);
+
+    static constexpr uint32_t MAX_TIMER_SIZE = 3; // 3 is max size for responseDeadline
+    static constexpr uint32_t MS_TO_NS = 1000000; // 1000000 change time form ms to ns
 
     static bool enabled_;
+    static uint32_t responseDeadline_;
 };
-}  // namespace OHOS::Ace
+}  // namespace OHOS::Ace::NG
 
-#endif  // UI_NODE_GC_PARAMS_PARSER_H
+#endif  // FRAME_BASED_CREATOR_PARSER_H

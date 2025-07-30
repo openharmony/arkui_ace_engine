@@ -89,19 +89,6 @@ ParseErrCode ConfigXMLParserBase::ParsePerformanceConfigXMLWithBundleName(const 
     return ret;
 }
 
-/*
-<PerformanceOptConfig>
-    <bundleName name="com.test.hap">
-        <feature id="UINodeGcParamParser" enable="true"/>
-        <feature id="SyncloadParser" enable="true" value="50"/>
-    </bundleName>
-    <bundleName name="com.huawei.hmos.photos">
-        <feature id="UINodeGcParamParser" enable="true"/>
-        <feature id="SyncloadParser" enable="true" value="20"/>
-    </bundleName>
-</PerformanceOptConfig>
-*/
-
 ParseErrCode ConfigXMLParserBase::ParseInternalWithBundleName(xmlNode& node, const std::string& bundleName)
 {
     xmlNode* currNode = &node;

@@ -16,8 +16,8 @@
 #include "gtest/gtest.h"
 #define private public
 #define protected public
-#include "adapter/ohos/entrance/feature_config/features/sync_load_parser.h"
-#include "adapter/ohos/entrance/feature_config/features/ui_node_gc_params_parser.h"
+#include "adapter/ohos/capability/feature_config/features/sync_load_parser.h"
+#include "adapter/ohos/capability/feature_config/features/ui_node_gc_params_parser.h"
 #undef private
 #undef protected
 using namespace testing;

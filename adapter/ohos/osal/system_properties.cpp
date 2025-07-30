@@ -74,9 +74,11 @@ constexpr int32_t FOLD_TYPE_TWO = 2;
 constexpr int32_t FOLD_TYPE_FOUR = 4;
 constexpr float DEFAULT_SCROLL_COEFFICEIENT = 2.0f;
 
-static bool syncloadDefaultValue_ = false;
-static bool uiNodeGcEnable_ = false;
-static uint32_t syncloadResponseDeadline = 500000000;
+static bool g_syncloadDefaultValue = false;
+static bool g_uiNodeGcEnable = false;
+static uint32_t g_syncloadResponseDeadline = 500000000; // default max response delay is 50ms.
+
+} // namespace
 
 bool IsOpIncEnabled()
 {
@@ -876,7 +878,7 @@ void SystemProperties::InitDeviceInfo(
     formSkeletonBlurEnabled_ = system::GetBoolParameter("const.form.skeleton_view.blur_style_enable", true);
     formSharedImageCacheThreshold_ =
         system::GetIntParameter("const.form.shared_image.cache_threshold", DEFAULT_FORM_SHARED_IMAGE_CACHE_THRESHOLD);
-    syncLoadEnabled_ = system::GetBoolParameter("persist.ace.scrollable.syncload.enable", syncloadDefaultValue_);
+    syncLoadEnabled_ = system::GetBoolParameter("persist.ace.scrollable.syncload.enable", g_syncloadDefaultValue);
     whiteBlockEnabled_ = system::GetParameter("persist.resourceschedule.whiteblock", "0") == "1";
     mapSearchPrefix_ = system::GetParameter("const.arkui.mapSearch", "");
     if (isRound_) {
@@ -1371,22 +1373,22 @@ std::string SystemProperties::GetMapSearchPrefix()
 
 void SystemProperties::SetParsedSyncDefaultLoad(bool enable, uint32_t syncloadResponseDeadline)
 {
-    syncloadDefaultValue_ = enable;
-    syncloadResponseDeadline_ = syncloadResponseDeadline;
+    g_syncloadDefaultValue = enable;
+    g_syncloadResponseDeadline = syncloadResponseDeadline;
 }
 
 uint32_t SystemProperties::GetSyncloadResponseDeadline()
 {
-    return syncloadResponseDeadline_;
+    return g_syncloadResponseDeadline;
 }
 
 void SystemProperties::SetUINodeGcEnable(bool enable)
 {
-    uiNodeGcEnable_ =  enable;
+    g_uiNodeGcEnable =  enable;
 }
 
 bool SystemProperties::IsUINodeGcEnable()
 {
-    return uiNodeGcEnable_;
+    return g_uiNodeGcEnable;
 }
 } // namespace OHOS::Ace

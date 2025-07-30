@@ -15,8 +15,8 @@
 
 #include "arkui_feature_param_manager.h"
 
-#include "adapter/ohos/entrance/feature_config/features/sync_load_parser.h"
-#include "adapter/ohos/entrance/feature_config/features/ui_node_gc_params_parser.h"
+#include "adapter/ohos/capability/feature_config/features/sync_load_parser.h"
+#include "adapter/ohos/capability/feature_config/features/ui_node_gc_params_parser.h"
 #include "interfaces/inner_api/ace/arkui_log.h"
 
 namespace OHOS::Ace {

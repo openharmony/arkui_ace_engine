@@ -25,10 +25,10 @@ ohos_unittest("arkui_feature_param_manager_test") {
   sources = [
     "arkui_feature_param_manager_test.cpp",
     # xml parser
-    "$ace_root/adapter/ohos/entrance/feature_config/arkui_feature_param_manager.cpp",
-    "$ace_root/adapter/ohos/entrance/feature_config/config_xml_parser_base.cpp",
-    "$ace_root/adapter/ohos/entrance/feature_config/features/ui_node_gc_params_parser.cpp",
-    "$ace_root/adapter/ohos/entrance/feature_config/features/sync_load_parser.cpp",
+    "$ace_root/adapter/ohos/capability/feature_config/arkui_feature_param_manager.cpp",
+    "$ace_root/adapter/ohos/capability/feature_config/config_xml_parser_base.cpp",
+    "$ace_root/adapter/ohos/capability/feature_config/features/ui_node_gc_params_parser.cpp",
+    "$ace_root/adapter/ohos/capability/feature_config/features/sync_load_parser.cpp",
     "$ace_root/test/mock/base/mock_system_properties.cpp",
   ]
 
@@ -48,10 +48,10 @@ ohos_unittest("parser_test") {
   sources = [
     "parser_test.cpp",
     # xml parser
-    "$ace_root/adapter/ohos/entrance/feature_config/arkui_feature_param_manager.cpp",
-    "$ace_root/adapter/ohos/entrance/feature_config/config_xml_parser_base.cpp",
-    "$ace_root/adapter/ohos/entrance/feature_config/features/ui_node_gc_params_parser.cpp",
-    "$ace_root/adapter/ohos/entrance/feature_config/features/sync_load_parser.cpp",
+    "$ace_root/adapter/ohos/capability/feature_config/arkui_feature_param_manager.cpp",
+    "$ace_root/adapter/ohos/capability/feature_config/config_xml_parser_base.cpp",
+    "$ace_root/adapter/ohos/capability/feature_config/features/ui_node_gc_params_parser.cpp",
+    "$ace_root/adapter/ohos/capability/feature_config/features/sync_load_parser.cpp",
     "$ace_root/test/mock/base/mock_system_properties.cpp",
   ]
   external_deps = [

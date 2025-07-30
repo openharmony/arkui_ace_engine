@@ -16,7 +16,7 @@
 #include "gtest/gtest.h"
 #define private public
 #define protected public
-#include "adapter/ohos/entrance/feature_config/arkui_feature_param_manager.h"
+#include "adapter/ohos/capability/feature_config/arkui_feature_param_manager.h"
 #undef private
 #undef protected
 using namespace testing;
