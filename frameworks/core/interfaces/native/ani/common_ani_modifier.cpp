@@ -617,7 +617,7 @@ ArkUI_Uint32 GetColorValueByNumber(ArkUI_Uint32 src)
     return color.GetValue();
 }
 
-void SendThemeToNative(ani_env* env, ani_array colorArray, ani_int id)
+void SendThemeToNative(ani_env* env, const std::vector<ani_object>& colorArray, ani_int id)
 {
     auto colors = AniThemeColors();
     colors.SetColors(env, colorArray);
