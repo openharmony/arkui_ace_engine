@@ -24,6 +24,7 @@ group("ani_inspector_group") {
 
 #构建ANI库
 ohos_shared_library("inspector_ani") {
+  shlib_type = "ani"
   deps = [ 
     "$ace_root/build:libace_compatible",
     "$ace_root/frameworks/core:ace_container_scope"
