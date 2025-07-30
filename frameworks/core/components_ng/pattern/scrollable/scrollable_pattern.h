@@ -1242,7 +1242,7 @@ private:
     WeakPtr<NestableScrollContainer> scrollOriginChild_;
     float nestedScrollVelocity_ = 0.0f;
     uint64_t nestedScrollTimestamp_ = 0;
-    bool prevHasFadingEdge_ = false;
+    bool preHasFadingEdge_ = false;
     float scrollStartOffset_ = 0.0f;
 
     bool isRoundScroll_ = false;
