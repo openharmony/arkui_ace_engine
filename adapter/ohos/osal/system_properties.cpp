@@ -76,7 +76,7 @@ constexpr float DEFAULT_SCROLL_COEFFICEIENT = 2.0f;
 
 static bool syncloadDefaultValue_ = false;
 static bool uiNodeGcEnable_ = false;
-static unint32_t syncloadResponseDeadline = 500000000;
+static uint32_t syncloadResponseDeadline = 500000000;
 
 bool IsOpIncEnabled()
 {
