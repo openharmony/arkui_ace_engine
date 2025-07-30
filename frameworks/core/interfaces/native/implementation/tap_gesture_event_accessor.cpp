@@ -41,4 +41,5 @@ const GENERATED_ArkUITapGestureEventAccessor* GetTapGestureEventAccessor()
     };
     return &TapGestureEventAccessorImpl;
 }
+
 }

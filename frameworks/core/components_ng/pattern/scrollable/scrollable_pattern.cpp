@@ -244,11 +244,6 @@ void ScrollablePattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
     } else {
         json->PutExtAttr("friction", GetFriction(), filter);
     }
-#ifdef SUPPORT_DIGITAL_CROWN
-    json->PutExtAttr("digitCrownSensitivity",
-        (std::to_string(static_cast<int32_t>(crownSensitivity_))).c_str(), filter);
-#endif
-    json->PutExtAttr("backToTop", backToTop_, filter);
 }
 
 void ScrollablePattern::SetAxis(Axis axis)

@@ -73,10 +73,11 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
 #ifdef WINDOW_SCENE_SUPPORTED
-    auto frameNode = UIExtensionModelNG::CreateEmbeddedFrameNode(id);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    // auto frameNode = UIExtensionModelNG::CreateEmbeddedFrameNode(id);
+    // CHECK_NULL_RETURN(frameNode, nullptr);
+    // frameNode->IncRefCount();
+    // return AceType::RawPtr(frameNode);
+    return {};
 #else
     return {};
 #endif // WINDOW_SCENE_SUPPORTED
@@ -148,7 +149,7 @@ void OnTerminatedImpl(Ark_NativePointer node,
             arkCallback.Invoke(terminatedInfo);
 #endif
         };
-    UIExtensionModelNG::SetOnTerminated(frameNode, std::move(onTerminated));
+    // UIExtensionModelNG::SetOnTerminated(frameNode, std::move(onTerminated));
 #endif
 }
 void OnErrorImpl(Ark_NativePointer node,
@@ -175,7 +176,7 @@ void OnErrorImpl(Ark_NativePointer node,
             .message = Converter::ArkValue<Ark_String>(message, Converter::FC),
             .code = Converter::ArkValue<Ark_Number>(code)});
     };
-    UIExtensionModelNG::SetOnError(frameNode, std::move(onError));
+    // UIExtensionModelNG::SetOnError(frameNode, std::move(onError));
 #endif
 }
 } // EmbeddedComponentAttributeModifier

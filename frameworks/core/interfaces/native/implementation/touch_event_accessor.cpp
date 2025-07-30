@@ -151,4 +151,5 @@ const GENERATED_ArkUITouchEventAccessor* GetTouchEventAccessor()
     };
     return &TouchEventAccessorImpl;
 }
+
 }

@@ -77,18 +77,18 @@ public:
      *
      * @param targetIdx The target GridItem index to fill.
      *
-     * @return Line index of the last filled line.
+     * @return Line index in which Item [targetIdx] resides.
      */
     int32_t FillMatrixOnly(int32_t targetIdx);
 
     /**
-     * @brief Fills the gridMatrix in forward direction in range [startLine, targetLine).
+     * @brief Fills the gridMatrix in forward direction until lines prior to [targetLine] are all filled.
      * Measure isn't performed, and lineHeightMap_ isn't updated.
      *
      * @param startingLine The starting line index.
-     * @param targetLine The target line index to fill up to (exclusive).
+     * @param targetLine The target GridItem index to fill up to.
      *
-     * @return Last item index filled.
+     * @return Last item index filled to reach [targetLine].
      */
     int32_t FillMatrixByLine(int32_t startingLine, int32_t targetLine);
 
@@ -134,17 +134,11 @@ public:
      * @param itemIdx The index of the GridItem.
      * @param col The column index where the item is being added.
      * @param row The row index where the item is being added.
-     * @return item height and LayoutConstraint
      */
     std::pair<float, LayoutConstraintF> MeasureItem(
         const FillParameters& params, int32_t itemIdx, int32_t col, int32_t row, bool isCache);
 
-    void MeasureItem(const FillParameters& params, LayoutWrapper* child, int32_t itemIdx, int32_t col, int32_t row);
-
 private:
-    std::pair<float, LayoutConstraintF> MeasureItemInner(
-        const FillParameters& params, LayoutWrapper* node, int32_t itemIdx, int32_t col, int32_t row, bool isCache = false);
-
     /**
      * @brief Fills one GridItem into the Grid.
      *
@@ -231,7 +225,7 @@ private:
      * @param col column index of item's top-left corner
      * @param size size of the item.
      */
-    void SetItemInfo(const LayoutWrapper* item, int32_t idx, int32_t row, int32_t col, GridItemSize size);
+    void SetItemInfo(const RefPtr<LayoutWrapper>& item, int32_t idx, int32_t row, int32_t col, GridItemSize size);
 
     int32_t posY_ = 0;  /**< The current row index in the grid. */
     int32_t posX_ = -1; /**< The current column index in the grid. */

@@ -99,16 +99,16 @@ void RichEditorModelStatic::SetEnterKeyType(FrameNode* frameNode, const std::opt
 
 void RichEditorModelStatic::SetSelectedBackgroundColor(FrameNode* frameNode, const std::optional<Color>& selectedColor)
 {
-    auto pattern = frameNode->GetPattern<RichEditorPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetSelectedBackgroundColor(selectedColor);
+    // auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    // CHECK_NULL_VOID(pattern);
+    // pattern->SetSelectedBackgroundColor(selectedColor);
 }
 
 void RichEditorModelStatic::SetCaretColor(FrameNode* frameNode, const std::optional<Color>& color)
 {
-    auto pattern = frameNode->GetPattern<RichEditorPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetCaretColor(color);
+    // auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    // CHECK_NULL_VOID(pattern);
+    // pattern->SetCaretColor(color);
 }
 
 void RichEditorModelStatic::SetAboutToDelete(

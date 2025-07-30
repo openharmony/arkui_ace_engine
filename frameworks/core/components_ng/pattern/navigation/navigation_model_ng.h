@@ -137,8 +137,6 @@ public:
     static void SetSubtitle(FrameNode* frameNode, const std::string& subtitle);
     static void SetHideBackButton(FrameNode* frameNode, bool hideBackButton);
     static void SetTitleMode(FrameNode* frameNode, NG::NavigationTitleMode mode);
-    static void SetOnNavigationModeChange(FrameNode* frameNode,
-        std::function<void(NG::NavigationMode)>&& onModeChange);
     static void SetRecoverable(FrameNode* frameNode, bool recoverable);
     static void SetEnableDragBar(FrameNode* frameNode, bool enableDragBar);
     static void SetEnableToolBarAdaptation(FrameNode* frameNode, bool enable);
@@ -159,9 +157,6 @@ public:
     static void SetMenuItemAction(FrameNode* frameNode, std::function<void()>&& action, uint32_t index);
     static void SetMenuItemSymbol(FrameNode* frameNode,
         std::function<void(WeakPtr<NG::FrameNode>)>&& symbol, uint32_t index);
-    static void SetOnTitleModeChange(FrameNode* frameNode,
-        std::function<void(NG::NavigationTitleMode)>&& onTitleModeChange,
-        std::function<void(const BaseEventInfo* baseInfo)>&& eventInfo);
     static void SetCustomTitle(FrameNode* frameNode, const RefPtr<AceType>& customNode);
     static RefPtr<FrameNode> GetCustomTitle(FrameNode* frameNode);
     static void SetTitleHeight(FrameNode* frameNode, const Dimension& height, bool isValid = true);
@@ -170,6 +165,10 @@ public:
     static void SetOnCoordScrollEndAction(FrameNode* frameNode, std::function<void()>&& onCoordScrollEnd);
     static void SetSystemBarStyle(FrameNode* frameNode, const RefPtr<SystemBarStyle>& style);
     static bool IsDoubleBindBlock(const RefPtr<NavigationPattern>& navigationPattern);
+    static void SetOnNavigationModeChange(FrameNode* frameNode, std::function<void(NG::NavigationMode)>&& onModeChange);
+    static void SetOnTitleModeChange(FrameNode* frameNode,
+        std::function<void(NG::NavigationTitleMode)>&& onTitleModeChange,
+        std::function<void(const BaseEventInfo* baseInfo)>&& eventInfo);
     static void SetIsCustomAnimation(FrameNode* frameNode, bool isCustom);
     static void SetToolBarItems(FrameNode* frameNode, std::vector<NG::BarItem>&& toolBarItems);
     static RefPtr<NG::NavigationStack> GetNavigationStack(FrameNode* frameNode);

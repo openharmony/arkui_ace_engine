@@ -47,11 +47,6 @@ public:
         return startIndex_;
     }
 
-    float GetPendingDelta() const override
-    {
-        return delta_;
-    }
-
     void UpdateOffset(float delta) override
     {
         delta_ += delta;
@@ -228,8 +223,6 @@ public:
      */
     bool TryConvertLargeDeltaToJump(float viewport, int32_t itemCnt);
 
-    float GetAverageItemHeight() const;
-
     /**
      * @brief prepare lanes in the current section.
      *
@@ -328,6 +321,8 @@ private:
      * @param bound item index boundary (inclusive)
      */
     float EstimateSectionHeight(uint32_t section, float average, int32_t startBound, int32_t endBound) const;
+
+    float GetAverageItemHeight() const;
 
     void ClearData();
 

@@ -98,7 +98,7 @@ Ark_String GetTextImpl(Ark_TextContentControllerBase peer,
     auto rangeConv = range ? Converter::OptConvert<TextRange>(*range) : std::nullopt;
     std::u16string content = peer->controller_->GetText();
     int32_t startIndex = 0;
-    int32_t endIndex = content.length();
+    int32_t endIndex = static_cast<int32_t>(content.length());
     if (rangeConv) {
         startIndex = rangeConv->start;
         startIndex = startIndex < 0 ? 0 : startIndex;

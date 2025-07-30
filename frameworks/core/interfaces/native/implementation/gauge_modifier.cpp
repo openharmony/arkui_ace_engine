@@ -121,10 +121,10 @@ namespace GaugeModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    auto frameNode = GaugeModelNG::CreateFrameNode(id);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    // auto frameNode = GaugeModelNG::CreateFrameNode(id);
+    // CHECK_NULL_RETURN(frameNode, nullptr);
+    // frameNode->IncRefCount();
+    return {};
 }
 } // GaugeModifier
 namespace GaugeInterfaceModifier {
@@ -147,7 +147,7 @@ void SetGaugeOptionsImpl(Ark_NativePointer node,
     GaugeModelStatic::SetValue(frameNode, value);
     GaugeModelStatic::SetMin(frameNode, min);
     GaugeModelStatic::SetMax(frameNode, max);
-    GaugeModelNG::SetIsShowLimitValue(frameNode, min || max);
+    // GaugeModelNG::SetIsShowLimitValue(frameNode, min || max);
 }
 } // GaugeInterfaceModifier
 namespace GaugeAttributeModifier {
@@ -243,27 +243,24 @@ void StrokeWidthImpl(Ark_NativePointer node,
 void DescriptionImpl(Ark_NativePointer node,
                      const Opt_CustomNodeBuilder* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto optValue = Converter::GetOptPtr(value);
-    if (!optValue) {
-        // TODO: Reset value
-        return;
-    }
-    CallbackHelper(*optValue).BuildAsync([frameNode](const RefPtr<UINode>& uiNode) {
-        GaugeModelNG::SetDescription(frameNode, uiNode);
-        }, node);
+    // auto frameNode = reinterpret_cast<FrameNode *>(node);
+    // CHECK_NULL_VOID(frameNode);
+    // auto optValue = Converter::GetOptPtr(value);
+    // if (!optValue) {
+    //     // TODO: Reset value
+    //     return;
+    // }
+    // CallbackHelper(*optValue).BuildAsync([frameNode](const RefPtr<UINode>& uiNode) {
+    //     GaugeModelNG::SetDescription(frameNode, uiNode);
+    //     }, node);
 }
 void TrackShadowImpl(Ark_NativePointer node,
                      const Opt_GaugeShadowOptions* value)
 {
     // auto frameNode = reinterpret_cast<FrameNode *>(node);
     // CHECK_NULL_VOID(frameNode);
-    // CHECK_NULL_VOID(value);
-    // GaugeShadowOptions gaugeShadowOptions;
-    // gaugeShadowOptions.isShadowVisible = false;
-    // const auto shadow = value ? Converter::Convert<GaugeShadowOptions>(*value)
-    //     : gaugeShadowOptions;
+    // auto convValue = value ? Converter::OptConvert<GaugeShadowOptions>(*value) : std::nullopt;
+    // auto shadow = convValue.value_or(GaugeShadowOptions { .isShadowVisible = false });
     // GaugeModelNG::SetShadowOptions(frameNode, shadow);
 }
 void IndicatorImpl(Ark_NativePointer node,

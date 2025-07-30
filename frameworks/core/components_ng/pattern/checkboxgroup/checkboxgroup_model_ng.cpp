@@ -112,14 +112,6 @@ void CheckBoxGroupModelNG::SetChangeEvent(GroupChangeEvent&& changeEvent)
     eventHub->SetChangeEvent(std::move(changeEvent));
 }
 
-void CheckBoxGroupModelNG::SetChangeEvent(FrameNode* frameNode, GroupChangeEvent&& changeEvent)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<CheckBoxGroupEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetChangeEvent(std::move(changeEvent));
-}
-
 void CheckBoxGroupModelNG::SetResponseRegion(const std::vector<DimensionRect>& responseRegion)
 {
     NG::ViewAbstract::SetResponseRegion(responseRegion);
@@ -138,16 +130,12 @@ RefPtr<FrameNode> CheckBoxGroupModelNG::CreateFrameNode(int32_t nodeId)
     return frameNode;
 }
 
-void CheckBoxGroupModelNG::SetSelectAll(FrameNode* frameNode, const std::optional<bool>& isSelected)
+void CheckBoxGroupModelNG::SetSelectAll(FrameNode* frameNode, bool isSelected)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<CheckBoxGroupPattern>();
     pattern->SetUpdateFlag(true);
-    if (isSelected.has_value()) {
-        ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupSelect, isSelected.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupSelect, frameNode);
-    }
+    ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupSelect, isSelected, frameNode);
 }
 
 void CheckBoxGroupModelNG::SetSelectedColor(FrameNode* frameNode, const Color& color)
@@ -193,15 +181,10 @@ void CheckBoxGroupModelNG::SetCheckboxGroupStyle(CheckBoxStyle checkboxGroupStyl
     ACE_UPDATE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupSelectedStyle, checkboxGroupStyle);
 }
 
-void CheckBoxGroupModelNG::SetCheckboxGroupStyle(
-    FrameNode* frameNode, const std::optional<CheckBoxStyle>& checkboxGroupStyle)
+void CheckBoxGroupModelNG::SetCheckboxGroupStyle(FrameNode* frameNode, CheckBoxStyle checkboxGroupStyle)
 {
-    if (checkboxGroupStyle.has_value()) {
-        ACE_UPDATE_NODE_PAINT_PROPERTY(
-            CheckBoxGroupPaintProperty, CheckBoxGroupSelectedStyle, checkboxGroupStyle.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupSelectedStyle, frameNode);
-    }
+    ACE_UPDATE_NODE_PAINT_PROPERTY(
+        CheckBoxGroupPaintProperty, CheckBoxGroupSelectedStyle, checkboxGroupStyle, frameNode);
 }
 
 void CheckBoxGroupModelNG::SetCheckboxGroupName(FrameNode* frameNode, const std::optional<std::string>& groupName)

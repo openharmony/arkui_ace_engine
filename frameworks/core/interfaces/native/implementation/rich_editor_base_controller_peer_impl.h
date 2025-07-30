@@ -77,9 +77,9 @@ public:
     void SetSelection(int32_t selectionStart, int32_t selectionEnd,
         const std::optional<SelectionOptions>& options, bool isForward) override
     {
-        if (auto controller = handler_.Upgrade(); controller) {
-            // controller->SetSelection(selectionStart, selectionEnd, options, isForward);
-        }
+        // if (auto controller = handler_.Upgrade(); controller) {
+        //     controller->SetSelection(selectionStart, selectionEnd, options, isForward);
+        // }
     }
 
     bool IsEditing() override
@@ -130,7 +130,7 @@ public:
         if (auto controller = handler_.Upgrade(); controller) {
             auto richEditorController = AceType::DynamicCast<RichEditorController>(controller);
             CHECK_NULL_RETURN(richEditorController, nullptr);
-            return richEditorController->GetPattern();
+            return nullptr;
         }
         return nullptr;
     }

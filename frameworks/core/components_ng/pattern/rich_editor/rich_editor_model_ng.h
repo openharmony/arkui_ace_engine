@@ -76,17 +76,17 @@ public:
     static void SetOnDidIMEInput(FrameNode* frameNode, std::function<void(const TextRange&)>&& callback);
     static void SetCopyOption(FrameNode* frameNode, CopyOptions& copyOptions);
     static void SetOnSelectionChange(FrameNode* frameNode, std::function<void(const BaseEventInfo*)>&& callback);
-    static void SetCaretColor(FrameNode* frameNode, const std::optional<Color>& color);
+    static void SetCaretColor(FrameNode* frameNode, const Color& color);
     static void SetOnSelect(FrameNode* frameNode, std::function<void(const BaseEventInfo*)>&& callback);
     static void SetOnReady(FrameNode* frameNode, std::function<void()>&& callback);
     static void SetOnDeleteComplete(FrameNode* frameNode, std::function<void()>&& callback);
     static void SetOnEditingChange(FrameNode* frameNode, std::function<void(const bool&)>&& callback);
-    static void SetSelectedBackgroundColor(FrameNode* frameNode, const std::optional<Color>& selectedColor);
+    static void SetSelectedBackgroundColor(FrameNode* frameNode, const Color& selectedColor);
     static void SetOnPaste(FrameNode* frameNode, std::function<void(NG::TextCommonEvent&)>&& func);
     static void SetOnCut(FrameNode* frameNode, std::function<void(NG::TextCommonEvent&)>&& func);
     static void SetOnCopy(FrameNode* frameNode, std::function<void(NG::TextCommonEvent&)>&& func);
     void SetEnterKeyType(TextInputAction value) override;
-    static void SetEnterKeyType(FrameNode* frameNode, const std::optional<TextInputAction>& action);
+    static void SetEnterKeyType(FrameNode* frameNode, const TextInputAction& action);
     void SetOnSubmit(std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func) override;
     static void SetOnSubmit(FrameNode* frameNode, std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& callback);
     static void SetAboutToIMEInput(FrameNode* frameNode, std::function<bool(const RichEditorInsertValue&)>&& callback);
@@ -97,7 +97,7 @@ public:
         const OnPrepareMenuCallback&& onPrepareMenuCallback);
     static void SetPreviewMenuParam(FrameNode* frameNode,
         TextSpanType spanType, std::function<void()>& buildFunc, const SelectMenuParam& menuParam);
-    static void SetBarState(FrameNode* frameNode, const std::optional<DisplayMode>& mode);
+    static void SetBarState(FrameNode* frameNode, DisplayMode mode);
     static void SetMaxLength(FrameNode* frameNode, std::optional<int32_t> value);
     static void SetMaxLines(FrameNode* frameNode, uint32_t value);
     static void SetEnableAutoSpacing(FrameNode* frameNode, bool enabled);

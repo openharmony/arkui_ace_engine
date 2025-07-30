@@ -270,7 +270,6 @@ void NavDestinationGroupNode::ToJsonValue(std::unique_ptr<JsonValue>& json, cons
     json->PutExtAttr("mode", mode_ == NavDestinationMode::DIALOG
         ? "NavDestinationMode::DIALOG"
         : "NavDestinationMode::STANDARD", filter);
-    json->PutExtAttr("recoverable", recoverable_ ? "true" : "false", filter);
     json->PutExtAttr("systemTransition", TransitionTypeToString(systemTransitionType_), filter);
 }
 
@@ -707,7 +706,7 @@ void NavDestinationGroupNode::UpdateTextNodeListAsRenderGroup(
         CollectTextNodeAsRenderGroup(isPopPage);
     } else {
         CHECK_NULL_VOID(proxy);
-        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+        auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         pipeline->AddAfterLayoutTask([weakNavDestiniation = WeakClaim(this),
             weakProxy = WeakPtr<NavigationTransitionProxy>(proxy)] () {
@@ -916,7 +915,7 @@ int32_t NavDestinationGroupNode::DoSystemSlideTransition(NavigationOperation ope
         // translate animation
         bool isRight = (systemTransitionType_ & NavigationSystemTransitionType::SLIDE_RIGHT)
             != NavigationSystemTransitionType::NONE;
-        std::function<void()> translateEvent = [weak = WeakClaim(this), isEnter, isRight]() {
+        std::function<void()> translateEvent = [weak = WeakClaim(this), isEnter, isRight, operation]() {
             auto navDestination = weak.Upgrade();
             CHECK_NULL_VOID(navDestination);
             auto renderContext = navDestination->GetRenderContext();

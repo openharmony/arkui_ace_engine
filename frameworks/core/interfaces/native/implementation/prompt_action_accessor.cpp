@@ -45,7 +45,7 @@ bool ContainerIsScenceBoard()
     if (!container) {
         container = Container::GetActive();
     }
-    return container;//&& container->IsScenceBoardWindow();
+    return container && container->IsSceneBoardWindow();
 }
 #endif
 
@@ -116,10 +116,9 @@ void ShowToastImpl(const Ark_ShowToastOptions* options)
     if ((OHOS::Ace::SystemProperties::GetExtSurfaceEnabled() || !ContainerIsService()) && !ContainerIsScenceBoard() &&
         toastInfo.showMode == OHOS::Ace::NG::ToastShowMode::DEFAULT) {
         ShowToastCommon(toastInfo, std::move(toastCallback));
+    } else if (OHOS::Ace::SubwindowManager::GetInstance() != nullptr) {
+        OHOS::Ace::SubwindowManager::GetInstance()->ShowToast(toastInfo, std::move(toastCallback));
     }
-    // else if (OHOS::Ace::SubwindowManager::GetInstance() != nullptr) {
-    //     OHOS::Ace::SubwindowManager::GetInstance()->ShowToast(toastInfo, std::move(toastCallback));
-    // }
 #else
     if (toastInfo.showMode == OHOS::Ace::NG::ToastShowMode::DEFAULT) {
         ShowToastCommon(toastInfo, std::move(toastCallback));

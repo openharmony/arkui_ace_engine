@@ -65,7 +65,7 @@ constexpr char UI_EXTENSION_TYPE_KEY[] = "ability.want.params.uiExtensionType";
 SecurityUIExtensionPattern::SecurityUIExtensionPattern()
     : PlatformPattern::PlatformPattern(AceLogTag::ACE_SECURITYUIEXTENSION, 0)
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto uiExtensionManager = pipeline->GetUIExtensionManager();
     CHECK_NULL_VOID(uiExtensionManager);
@@ -85,7 +85,7 @@ void SecurityUIExtensionPattern::UnregisterResources()
 {
     PLATFORM_LOGI("UnregisterResources.");
     ContainerScope scope(instanceId_);
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto uiExtensionManager = pipeline->GetUIExtensionManager();
     CHECK_NULL_VOID(uiExtensionManager);
@@ -564,7 +564,7 @@ bool SecurityUIExtensionPattern::HandleKeyEvent(const KeyEvent& event)
 
 void SecurityUIExtensionPattern::HandleFocusEvent()
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     if (pipeline->GetIsFocusActive()) {
         DispatchFocusActiveEvent(true);
@@ -595,7 +595,7 @@ void SecurityUIExtensionPattern::HandleBlurEvent()
 {
     DispatchFocusActiveEvent(false);
     DispatchFocusState(false);
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto uiExtensionManager = pipeline->GetUIExtensionManager();
     CHECK_NULL_VOID(uiExtensionManager);
@@ -781,7 +781,7 @@ void SecurityUIExtensionPattern::OnMountToParentDone()
 
 void SecurityUIExtensionPattern::RegisterVisibleAreaChange()
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
         auto uiExtension = weak.Upgrade();
@@ -974,7 +974,7 @@ void SecurityUIExtensionPattern::ResetAccessibilityChildTreeCallback()
 {
     CHECK_NULL_VOID(accessibilityChildTreeCallback_);
     ContainerScope scope(instanceId_);
-    auto ngPipeline = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto ngPipeline = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(ngPipeline);
     auto frontend = ngPipeline->GetFrontend();
     CHECK_NULL_VOID(frontend);

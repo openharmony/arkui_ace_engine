@@ -23,16 +23,14 @@ GridLayoutRangeSolver::GridLayoutRangeSolver(GridLayoutInfo* info, LayoutWrapper
     : info_(info), wrapper_(wrapper)
 {
     auto props = AceType::DynamicCast<GridLayoutProperty>(wrapper_->GetLayoutProperty());
-    if (props->GetLayoutOptions()) {
-        opts_ = &props->GetLayoutOptions().value();
-    }
+    opts_ = &props->GetLayoutOptions().value();
 };
 
 using Result = GridLayoutRangeSolver::StartingRowInfo;
 Result GridLayoutRangeSolver::FindStartingRow(float mainGap)
 {
     if (info_->gridMatrix_.empty() || info_->lineHeightMap_.empty()) {
-        return { -1, -1, 0.0f };
+        return { 0, 0, 0.0f };
     }
     if (NearZero(info_->currentOffset_)) {
         return { info_->startMainLineIndex_, info_->startIndex_, 0.0f };
@@ -127,7 +125,7 @@ Result GridLayoutRangeSolver::SolveBackward(float mainGap, float targetLen, int3
     while (idx > 0 && LessNotEqual(len, targetLen)) {
         auto it = info_->lineHeightMap_.find(--idx);
         if (it == info_->lineHeightMap_.end()) {
-            return { -1, -1, 0.0f };
+            return { 0, 0, 0.0f };
         }
         len += it->second + mainGap;
     }
@@ -176,7 +174,7 @@ std::pair<int32_t, int32_t> GridLayoutRangeSolver::CheckMultiRow(const int32_t i
 
         // skip the columns occupied by this item
         const int32_t itemIdx = std::abs(it->second);
-        if (opts_ && opts_->irregularIndexes.find(itemIdx) != opts_->irregularIndexes.end()) {
+        if (opts_->irregularIndexes.find(itemIdx) != opts_->irregularIndexes.end()) {
             if (opts_->getSizeByIndex) {
                 auto size = opts_->getSizeByIndex(itemIdx);
                 c += (info_->axis_ == Axis::VERTICAL ? size.columns : size.rows) - 1;

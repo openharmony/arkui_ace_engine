@@ -104,11 +104,6 @@ public:
         return layoutInfo_->endIndex_;
     }
 
-    float GetPendingDelta() const
-    {
-        return layoutInfo_->GetPendingDelta();
-    }
-
     int32_t GetChildrenCount() const;
 
     float GetTotalOffset() const override
@@ -239,8 +234,6 @@ private:
     {
         return DisplayMode::OFF;
     }
-
-private:
     void OnModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void CheckScrollable();

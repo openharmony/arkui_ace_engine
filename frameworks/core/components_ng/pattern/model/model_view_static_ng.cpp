@@ -27,89 +27,89 @@
 
 namespace OHOS::Ace::NG {
 
-void ModelViewNG::SetModelViewContext(FrameNode* frameNode, const ModelViewContext& context)
-{
-    auto pattern = frameNode->GetPattern<ModelPattern>();
-    pattern->SetModelViewContext(context);
-}
+// void ModelViewNG::SetModelViewContext(FrameNode* frameNode, const ModelViewContext& context)
+// {
+//     auto pattern = frameNode->GetPattern<ModelPattern>();
+//     pattern->SetModelViewContext(context);
+// }
 
 
-RefPtr<FrameNode> ModelViewNG::CreateFrameNode(int32_t nodeId)
-{
-    static uint32_t staticKey = 0;
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::MODEL_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ModelPattern>(staticKey++); });
-    return frameNode;
-}
+// RefPtr<FrameNode> ModelViewNG::CreateFrameNode(int32_t nodeId)
+// {
+//     static uint32_t staticKey = 0;
+//     auto frameNode = FrameNode::GetOrCreateFrameNode(
+//         V2::MODEL_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ModelPattern>(staticKey++); });
+//     return frameNode;
+// }
 
-void ModelViewNG::SetBackground(FrameNode* frameNode, const std::string& value)
-{
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ModelPaintProperty, ModelBackground, value, frameNode);
-}
+// void ModelViewNG::SetBackground(FrameNode* frameNode, const std::string& value)
+// {
+//     ACE_UPDATE_NODE_PAINT_PROPERTY(ModelPaintProperty, ModelBackground, value, frameNode);
+// }
 
-void ModelViewNG::SetRenderHeight(FrameNode* frameNode, const std::optional<Dimension>& height)
-{
-    Dimension value;
-    if (height) {
-        value = height.value();
-    } else {
-        value.SetValue(1.0);
-    }
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ModelPaintProperty, RenderHeight, value.Value(), frameNode);
-}
+// void ModelViewNG::SetRenderHeight(FrameNode* frameNode, const std::optional<Dimension>& height)
+// {
+//     Dimension value;
+//     if (height) {
+//         value = height.value();
+//     } else {
+//         value.SetValue(1.0);
+//     }
+//     ACE_UPDATE_NODE_PAINT_PROPERTY(ModelPaintProperty, RenderHeight, value.Value(), frameNode);
+// }
 
-void ModelViewNG::SetRenderWidth(FrameNode* frameNode, const std::optional<Dimension>& width)
-{
-    Dimension value;
-    if (width) {
-        value = width.value();
-    } else {
-        value.SetValue(1.0);
-    }
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ModelPaintProperty, RenderWidth, value.Value(), frameNode);
-}
+// void ModelViewNG::SetRenderWidth(FrameNode* frameNode, const std::optional<Dimension>& width)
+// {
+//     Dimension value;
+//     if (width) {
+//         value = width.value();
+//     } else {
+//         value.SetValue(1.0);
+//     }
+//     ACE_UPDATE_NODE_PAINT_PROPERTY(ModelPaintProperty, RenderWidth, value.Value(), frameNode);
+// }
 
-void ModelViewNG::SetShader(FrameNode* frameNode, const std::string& path)
-{
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ModelPaintProperty, ShaderPath, path, frameNode);
-}
+// void ModelViewNG::SetShader(FrameNode* frameNode, const std::string& path)
+// {
+//     ACE_UPDATE_NODE_PAINT_PROPERTY(ModelPaintProperty, ShaderPath, path, frameNode);
+// }
 
-void ModelViewNG::AddShaderImageTexture(FrameNode* frameNode, const std::string& path)
-{
-    auto paintProperty = frameNode->GetPaintProperty<ModelPaintProperty>();
-    if (!paintProperty) {
-        LOGE("model paint property is null!");
-        return;
-    }
+// void ModelViewNG::AddShaderImageTexture(FrameNode* frameNode, const std::string& path)
+// {
+//     auto paintProperty = frameNode->GetPaintProperty<ModelPaintProperty>();
+//     if (!paintProperty) {
+//         LOGE("model paint property is null!");
+//         return;
+//     }
 
-    const auto& images = paintProperty->GetModelImageTexturePathsValue({ });
-    for (auto& image : images) {
-        if (image == path) {
-            return;
-        }
-    }
+//     const auto& images = paintProperty->GetModelImageTexturePathsValue({ });
+//     for (auto& image : images) {
+//         if (image == path) {
+//             return;
+//         }
+//     }
 
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ModelPaintProperty, ModelSingleImageTexturePath, path, frameNode);
-}
+//     ACE_UPDATE_NODE_PAINT_PROPERTY(ModelPaintProperty, ModelSingleImageTexturePath, path, frameNode);
+// }
 
-void ModelViewNG::AddCustomRender(FrameNode* frameNode,
-                                  const std::shared_ptr<Render3D::CustomRenderDescriptor>& customRender)
-{
-    if (!customRender) {
-        return;
-    }
+// void ModelViewNG::AddCustomRender(FrameNode* frameNode,
+//                                   const std::shared_ptr<Render3D::CustomRenderDescriptor>& customRender)
+// {
+//     if (!customRender) {
+//         return;
+//     }
 
-    auto paintProperty = frameNode->GetPaintProperty<ModelPaintProperty>();
-    if (!paintProperty) {
-        LOGE("model paint property is null!");
-        return;
-    }
+//     auto paintProperty = frameNode->GetPaintProperty<ModelPaintProperty>();
+//     if (!paintProperty) {
+//         LOGE("model paint property is null!");
+//         return;
+//     }
 
-    const auto curCustomRender = paintProperty->GetModelCustomRenderValue({ });
-    if (!curCustomRender || (curCustomRender->GetUri() != customRender->GetUri())) {
-        ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelCustomRender, customRender);
-    }
-}
+//     const auto curCustomRender = paintProperty->GetModelCustomRenderValue({ });
+//     if (!curCustomRender || (curCustomRender->GetUri() != customRender->GetUri())) {
+//         ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelCustomRender, customRender);
+//     }
+// }
 // void ModelViewNG::AddShaderInputBuffer(FrameNode* frameNode, const std::shared_ptr<Render3D::ShaderInputBuffer>& buffer)
 // {
 //     ACE_UPDATE_NODE_PAINT_PROPERTY(ModelPaintProperty, ModelShaderInputBuffer, buffer, frameNode);

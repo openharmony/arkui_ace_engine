@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
-#include "layout/sliding_window/water_flow_large_delta_converter.h"
 
 #include "base/log/dump_log.h"
 #include "base/utils/utils.h"
@@ -359,7 +358,6 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     layoutInfo_->duringPositionCalc_ = false;
     layoutInfo_->targetIndex_.reset();
     layoutInfo_->extraOffset_.reset();
-    layoutInfo_->jumpForRecompose_ = WaterFlowLayoutInfoBase::EMPTY_JUMP_INDEX;
     UpdateScrollBarOffset();
     CheckScrollable();
 

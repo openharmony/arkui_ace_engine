@@ -63,7 +63,6 @@ void TabsNode::AddChildToGroup(const RefPtr<UINode>& child, int32_t slot)
 void TabsNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     FrameNode::ToJsonValue(json, filter);
-    json->Delete("scrollable");
     json->PutFixedAttr("scrollable", Scrollable(), filter, FIXED_ATTR_SCROLLABLE);
     /* no fixed attr below, just return */
     if (filter.IsFastFilter()) {
@@ -89,10 +88,8 @@ void TabsNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilt
         json->PutExtAttr("barMode", "BarMode.Fixed", filter);
     }
     json->PutExtAttr("barWidth", std::to_string(GetBarWidth().Value()).c_str(), filter);
-    json->PutExtAttr("barWidthAttr", GetBarWidthAttr().ToString().c_str(), filter);
     json->PutExtAttr("barHeight",
         GetBarAdaptiveHeight() ? "auto" : std::to_string(GetBarHeight().Value()).c_str(), filter);
-    json->PutExtAttr("barHeightAttr", GetBarHeightAttr().ToString().c_str(), filter);
     json->PutExtAttr("fadingEdge", GetFadingEdge() ? "true" : "false", filter);
     json->PutExtAttr("barBackgroundColor", GetBarBackgroundColor().ColorToString().c_str(), filter);
     json->PutExtAttr("barBackgroundBlurStyle",
@@ -196,18 +193,6 @@ Dimension TabsNode::GetBarWidth() const
     return Dimension(PipelineBase::Px2VpWithCurrentDensity(frameSize.Width()), DimensionUnit::VP);
 }
 
-Dimension TabsNode::GetBarWidthAttr() const
-{
-    if (!tabBarId_.has_value()) {
-        return 0.0_vp;
-    }
-    auto tabBarNode = GetFrameNode(V2::TAB_BAR_ETS_TAG, tabBarId_.value());
-    CHECK_NULL_RETURN(tabBarNode, 0.0_vp);
-    auto tabBarProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
-    CHECK_NULL_RETURN(tabBarProperty, 0.0_vp);
-    return tabBarProperty->GetTabBarWidth().value_or(0.0_vp);
-}
-
 bool TabsNode::GetBarAdaptiveHeight() const
 {
     if (!tabBarId_.has_value()) {
@@ -231,18 +216,6 @@ Dimension TabsNode::GetBarHeight() const
     CHECK_NULL_RETURN(geometryNode, 0.0_vp);
     auto frameSize = geometryNode->GetFrameSize();
     return Dimension(PipelineBase::Px2VpWithCurrentDensity(frameSize.Height()), DimensionUnit::VP);
-}
-
-Dimension TabsNode::GetBarHeightAttr() const
-{
-    if (!tabBarId_.has_value()) {
-        return 0.0_vp;
-    }
-    auto tabBarNode = GetFrameNode(V2::TAB_BAR_ETS_TAG, tabBarId_.value());
-    CHECK_NULL_RETURN(tabBarNode, 0.0_vp);
-    auto tabBarProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
-    CHECK_NULL_RETURN(tabBarProperty, 0.0_vp);
-    return tabBarProperty->GetTabBarHeight().value_or(0.0_vp);
 }
 
 Color TabsNode::GetBarBackgroundColor() const
@@ -295,12 +268,6 @@ std::unique_ptr<JsonValue> TabsNode::GetBarBackgroundBlurStyleOptions() const
     jsonBlurStyle->Put("type", BLUR_TYPE[static_cast<int>(styleOption.blurType)]);
     jsonBlurStyle->Put("inactiveColor", styleOption.inactiveColor.ColorToString().c_str());
     jsonBlurStyle->Put("scale", styleOption.scale);
-    std::string grayscale = "[0,0]";
-    if (styleOption.blurOption.grayscale.size() > 1) {
-        grayscale = ("[" + std::to_string(styleOption.blurOption.grayscale[0]) + "," +
-            std::to_string(styleOption.blurOption.grayscale[1]) + "]");
-    }
-    jsonBlurStyle->Put("blurOption", grayscale.c_str());
     return jsonBlurStyle;
 }
 
@@ -381,7 +348,7 @@ std::string TabsNode::GetEdgeEffect() const
     CHECK_NULL_RETURN(swiperNode, ret);
     auto paintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
     CHECK_NULL_RETURN(paintProperty, ret);
-    EdgeEffect edgeEffect = paintProperty->GetEdgeEffect().value_or(EdgeEffect::SPRING);
+    EdgeEffect edgeEffect = paintProperty->GetEdgeEffect().value();
     switch (edgeEffect) {
         case EdgeEffect::SPRING:
             ret = "EdgeEffect::SPRING";
@@ -413,7 +380,7 @@ std::unique_ptr<JsonValue> TabsNode::GetBarBackgroundEffect() const
     CHECK_NULL_RETURN(tabBarNode, jsonEffect);
     auto tabBarRenderContext = tabBarNode->GetRenderContext();
     CHECK_NULL_RETURN(tabBarRenderContext, jsonEffect);
-    EffectOption effectOption = tabBarRenderContext->GetBackgroundEffect().value_or(EffectOption());
+    EffectOption effectOption = tabBarRenderContext->GetBackgroundEffect().value_or(effectOption);
     jsonEffect->Put("radius", effectOption.radius.Value());
     jsonEffect->Put("saturation", effectOption.saturation);
     jsonEffect->Put("brightness", effectOption.brightness);
@@ -422,12 +389,12 @@ std::unique_ptr<JsonValue> TabsNode::GetBarBackgroundEffect() const
     jsonEffect->Put("policy", POLICY[static_cast<int>(effectOption.policy)]);
     jsonEffect->Put("type", BLUR_TYPE[static_cast<int>(effectOption.blurType)]);
     jsonEffect->Put("inactiveColor", effectOption.inactiveColor.ColorToString().c_str());
-    std::string grayscale = "[0,0]";
+    auto grayscale = "[0,0]";
     if (effectOption.blurOption.grayscale.size() > 1) {
         grayscale = ("[" + std::to_string(effectOption.blurOption.grayscale[0]) + "," +
-            std::to_string(effectOption.blurOption.grayscale[1]) + "]");
+            std::to_string(effectOption.blurOption.grayscale[1]) + "]").c_str();
     }
-    jsonEffect->Put("blurOption", grayscale.c_str());
+    jsonEffect->Put("blurOption", grayscale);
     return jsonEffect;
 }
 } // namespace OHOS::Ace::NG

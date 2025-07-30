@@ -41,14 +41,6 @@ RefPtr<AceType> CanvasModelNG::GetTaskPool(RefPtr<AceType>& pattern)
     return pattern;
 }
 
-void CanvasModelNG::DetachRenderContext(FrameNode* frameNode)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<CanvasPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->DetachRenderContext();
-}
-
 void CanvasModelNG::SetOnReady(std::function<void()>&& onReady)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

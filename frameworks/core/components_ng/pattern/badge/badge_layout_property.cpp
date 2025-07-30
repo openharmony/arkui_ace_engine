@@ -39,7 +39,7 @@ void BadgeLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const In
     if (filter.IsFastFilter()) {
         return;
     }
-    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
     CHECK_NULL_VOID(badgeTheme);

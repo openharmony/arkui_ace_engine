@@ -360,7 +360,7 @@ auto g_bindMenuOptionsParam = [](
         menuParam.positionOffset.SetY(offsetVal.value().second->ConvertToPx());
     }
     menuParam.placement = OptConvert<Placement>(menuOptions.placement);
-    menuParam.enableHoverMode = OptConvert<bool>(menuOptions.enableHoverMode);
+    // menuParam.enableHoverMode = OptConvert<bool>(menuOptions.enableHoverMode).value_or(menuParam.enableHoverMode);
     menuParam.backgroundColor = OptConvert<Color>(menuOptions.backgroundColor);
     auto backgroundBlurStyle = OptConvert<BlurStyle>(menuOptions.backgroundBlurStyle);
     menuParam.backgroundBlurStyle = backgroundBlurStyle ?
@@ -385,7 +385,7 @@ auto g_bindContextMenuParams = [](MenuParam& menuParam, const std::optional<Ark_
     menuParam.placement = Placement::BOTTOM_LEFT;
     menuParam.type = NG::MenuType::CONTEXT_MENU;
     auto weakNode = AceType::WeakClaim(frameNode);
-    g_bindMenuOptionsParam(menuOption.value(), menuParam, weakNode);
+    // g_bindMenuOptionsParam(menuOption.value(), menuParam, weakNode);
     auto optParam = Converter::OptConvert<NG::MenuParam>(menuOption->previewAnimationOptions);
     if (optParam) {
         menuParam.previewAnimationOptions = optParam->previewAnimationOptions;
@@ -3344,7 +3344,7 @@ void Rotate0Impl(Ark_NativePointer node,
         [&convValue](const Ark_String& str) {
             std::string degreeStr = Converter::Convert<std::string>(str);
             float angle = static_cast<float>(StringUtils::StringToDegree(degreeStr));
-            int32_t indA = 3;
+            uint32_t indA = 3;
             if (convValue->vec5f.size() > indA) {
                 convValue->vec5f[indA] = angle;
             }
@@ -4319,13 +4319,13 @@ void AccessibilityDefaultFocusImpl(Ark_NativePointer node,
 void AccessibilityUseSamePageImpl(Ark_NativePointer node,
                                   const Opt_AccessibilitySamePageMode* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<Ark_AccessibilitySamePageMode>(value);
-    if (!convValue) {
-        return;
-    }
-    auto pageMode = AccessibilityUtils::GetPageModeType(convValue.value());
+    // auto frameNode = reinterpret_cast<FrameNode *>(node);
+    // CHECK_NULL_VOID(frameNode);
+    // auto convValue = Converter::OptConvertPtr<Ark_AccessibilitySamePageMode>(value);
+    // if (!convValue) {
+    //     return;
+    // }
+    // auto pageMode = AccessibilityUtils::GetPageModeType(convValue.value());
 }
 void AccessibilityScrollTriggerableImpl(Ark_NativePointer node,
                                         const Opt_Boolean* value)
@@ -4344,19 +4344,19 @@ void AccessibilityScrollTriggerableImpl(Ark_NativePointer node,
 void AccessibilityRoleImpl(Ark_NativePointer node,
                            const Opt_AccessibilityRoleType* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    bool resetValue = false;
-    std::string role;
-    auto convValue = Converter::OptConvertPtr<Ark_AccessibilityRoleType>(value);
-    if (!convValue) {
-        return;
-    }
-    auto roleType = static_cast<AccessibilityRoleType>(convValue.value());
-    role = AccessibilityUtils::GetRoleByType(roleType);
-    if (role.empty()) {
-        resetValue = true;
-    }
+    // auto frameNode = reinterpret_cast<FrameNode *>(node);
+    // CHECK_NULL_VOID(frameNode);
+    // bool resetValue = false;
+    // std::string role;
+    // auto convValue = Converter::OptConvertPtr<Ark_AccessibilityRoleType>(value);
+    // if (!convValue) {
+    //     return;
+    // }
+    // auto roleType = static_cast<AccessibilityRoleType>(convValue.value());
+    // role = AccessibilityUtils::GetRoleByType(roleType);
+    // if (role.empty()) {
+    //     resetValue = true;
+    // }
 }
 void OnAccessibilityFocusImpl(Ark_NativePointer node,
                               const Opt_AccessibilityFocusCallback* value)
@@ -4691,17 +4691,17 @@ void OnSizeChangeImpl(Ark_NativePointer node,
 void AccessibilityFocusDrawLevelImpl(Ark_NativePointer node,
                                      const Opt_FocusDrawLevel* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    int32_t drawLevel = 0;
-    auto convValue = Converter::OptConvertPtr<Ark_FocusDrawLevel>(value);
-    if (convValue.has_value()) {
-        drawLevel = AccessibilityUtils::GetFocusDrawLevel(static_cast<int32_t>(convValue.value()));
-        if (drawLevel == -1) {
-            drawLevel = 0;
-        }
-    }
+    // auto frameNode = reinterpret_cast<FrameNode *>(node);
+    // CHECK_NULL_VOID(frameNode);
+    // CHECK_NULL_VOID(value);
+    // int32_t drawLevel = 0;
+    // auto convValue = Converter::OptConvertPtr<Ark_FocusDrawLevel>(value);
+    // if (convValue.has_value()) {
+    //     drawLevel = AccessibilityUtils::GetFocusDrawLevel(static_cast<int32_t>(convValue.value()));
+    //     if (drawLevel == -1) {
+    //         drawLevel = 0;
+    //     }
+    // }
 }
 void CustomPropertyImpl(Ark_NativePointer node,
                         const Opt_String* name,

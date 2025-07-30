@@ -2955,4 +2955,24 @@ ACE_FORCE_EXPORT const ArkUIAnyAPI* GetArkUIAPI(ArkUIAPIVariantKind kind, ArkUI_
         }
     }
 }
+
+__attribute__((constructor)) static void provideEntryPoint(void)
+{
+#ifdef WINDOWS_PLATFORM
+    // mingw has no setenv :(.
+    static char entryPointString[64];
+    if (snprintf_s(entryPointString, sizeof entryPointString, sizeof entryPointString - 1,
+        "__LIBACE_ENTRY_POINT=%llx", static_cast<unsigned long long>(reinterpret_cast<uintptr_t>(&GetArkUIAPI))) < 0) {
+        return;
+    }
+    putenv(entryPointString);
+#else
+    char entryPointString[64];
+    if (snprintf_s(entryPointString, sizeof entryPointString, sizeof entryPointString - 1,
+        "%llx", static_cast<unsigned long long>(reinterpret_cast<uintptr_t>(&GetArkUIAPI))) < 0) {
+        return;
+    }
+    setenv("__LIBACE_ENTRY_POINT", entryPointString, 1);
+#endif
+}
 }

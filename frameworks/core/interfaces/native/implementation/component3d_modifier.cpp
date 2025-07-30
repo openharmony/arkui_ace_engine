@@ -43,10 +43,7 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
 #ifdef MODEL_COMPONENT_SUPPORTED
-    auto frameNode = ModelViewNG::CreateFrameNode(id);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    return nullptr;
 #else
     return nullptr;
 #endif // MODEL_COMPONENT_SUPPORTED
@@ -79,7 +76,7 @@ void SetComponent3DOptionsImpl(Ark_NativePointer node,
             [frameNode, surfaceType](const Ark_ResourceStr& value0) {
                 std::string bundleName = Converter::Convert<std::string>(value0.value1.bundleName);
                 std::string moduleName = Converter::Convert<std::string>(value0.value1.moduleName);
-                ModelViewNG::SetModelViewContext(frameNode, { bundleName, moduleName, surfaceType });
+                // ModelViewNG::SetModelViewContext(frameNode, { bundleName, moduleName, surfaceType });
             },
             [](const Ark_Scene& value) {
 #if defined(KIT_3D_ENABLE)
@@ -162,7 +159,7 @@ void EnvironmentImpl(Ark_NativePointer node,
     if (srcPath) {
         std::string ohosPath("");
         SetOhosPath(srcPath.value(), ohosPath);
-        ModelViewNG::SetBackground(frameNode, ohosPath);
+        // ModelViewNG::SetBackground(frameNode, ohosPath);
     }
     #endif
 }
@@ -176,7 +173,7 @@ void ShaderImpl(Ark_NativePointer node,
     if (srcPath) {
         std::string ohosPath("");
         SetOhosPath(srcPath.value(), ohosPath);
-        ModelViewNG::SetShader(frameNode, ohosPath);
+        // ModelViewNG::SetShader(frameNode, ohosPath);
     }
     #endif
 }
@@ -190,7 +187,7 @@ void ShaderImageTextureImpl(Ark_NativePointer node,
     if (srcPath) {
         std::string ohosPath("");
         SetOhosPath(srcPath.value(), ohosPath);
-        ModelViewNG::AddShaderImageTexture(frameNode, ohosPath);
+        // ModelViewNG::AddShaderImageTexture(frameNode, ohosPath);
     }
     #endif
 }
@@ -227,7 +224,7 @@ void RenderWidthImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<Dimension>(*value);
     Validator::ValidatePositive(convValue);
-    ModelViewNG::SetRenderWidth(frameNode, convValue);
+    // ModelViewNG::SetRenderWidth(frameNode, convValue);
     #endif
 }
 void RenderHeightImpl(Ark_NativePointer node,
@@ -238,7 +235,7 @@ void RenderHeightImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<Dimension>(*value);
     Validator::ValidatePositive(convValue);
-    ModelViewNG::SetRenderHeight(frameNode, convValue);
+    // ModelViewNG::SetRenderHeight(frameNode, convValue);
     #endif
 }
 void CustomRenderImpl(Ark_NativePointer node,
@@ -256,7 +253,7 @@ void CustomRenderImpl(Ark_NativePointer node,
     }
     auto uriString = Converter::OptConvert<std::string>(*uri); //uriString.value_or("")
     auto customRender = std::make_shared<OHOS::Render3D::CustomRenderDescriptor>(uriString.value_or(""), *update);
-    ModelViewNG::AddCustomRender(frameNode, customRender);
+    // ModelViewNG::AddCustomRender(frameNode, customRender);
     #endif
 }
 } // Component3DAttributeModifier

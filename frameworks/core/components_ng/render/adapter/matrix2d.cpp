@@ -15,9 +15,7 @@
 
 #include "frameworks/core/components_ng/render/adapter/matrix2d.h"
 #include "include/core/SkMatrix.h"
-#ifndef ARKUI_CAPI_UNITTEST
 #include "2d_graphics/include/utils/matrix.h"
-#endif // ARKUI_CAPI_UNITTEST
 #include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace::NG {

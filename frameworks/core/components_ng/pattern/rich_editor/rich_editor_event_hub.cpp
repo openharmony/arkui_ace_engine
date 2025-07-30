@@ -705,9 +705,7 @@ void RichEditorEventHub::SetOnStyledStringDidChange(std::function<void(const Sty
 
 void RichEditorEventHub::FireOnStyledStringDidChange(const StyledStringChangeValue& info)
 {
-    if (onStyledStringDidChange_) {
-        onStyledStringDidChange_(info);
-    }
+    onStyledStringDidChange_(info);
 }
 
 bool RichEditorEventHub::HasOnStyledStringDidChange() const

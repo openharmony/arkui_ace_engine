@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "base/geometry/dimension.h"
 #include "core/components_ng/pattern/data_panel/data_panel_model_ng.h"
 
 #include "core/common/resource/resource_manager.h"
@@ -31,7 +30,7 @@ void SetDefaultBorderRadius(void)
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         return;
     }
-    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<DataPanelTheme>();
     CHECK_NULL_VOID(theme);
@@ -62,12 +61,6 @@ void DataPanelModelNG::Create(const std::vector<double>& values, double max, int
         ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, StrokeWidthSetByUser, false);
         ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, ValueColorsSetByUser, false);
     }
-}
-
-RefPtr<FrameNode> DataPanelModelNG::CreateFrameNode(int32_t nodeId)
-{
-    return FrameNode::GetOrCreateFrameNode(
-        V2::DATA_PANEL_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<DataPanelPattern>(); });
 }
 
 void DataPanelModelNG::SetEffect(bool isCloseEffect)
