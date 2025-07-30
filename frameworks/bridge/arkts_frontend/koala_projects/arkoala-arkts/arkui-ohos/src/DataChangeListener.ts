@@ -62,7 +62,9 @@ export class InternalListener implements DataChangeListener {
     }
 
     onDataAdd(index: number): void {
-        if (index < 0) return
+        if (index < 0) {
+            return
+        }
         if (this.startIndex === Number.POSITIVE_INFINITY) {
             ++this.version.value
         }
@@ -71,7 +73,9 @@ export class InternalListener implements DataChangeListener {
     }
 
     onDataMove(from: number, to: number): void {
-        if (from < 0 || to < 0) return
+        if (from < 0 || to < 0) {
+            return
+        }
         if (this.startIndex === Number.POSITIVE_INFINITY) {
             ++this.version.value
         }
@@ -80,7 +84,9 @@ export class InternalListener implements DataChangeListener {
     }
 
     onDataDelete(index: number): void {
-        if (index < 0) return
+        if (index < 0) {
+            return
+        }
         if (this.startIndex === Number.POSITIVE_INFINITY) {
             ++this.version.value
         }
@@ -89,7 +95,9 @@ export class InternalListener implements DataChangeListener {
     }
 
     onDataChange(index: number): void {
-        if (index < 0) return
+        if (index < 0) {
+            return
+        }
         if (this.startIndex === Number.POSITIVE_INFINITY) {
             ++this.version.value
         }
