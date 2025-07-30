@@ -50,6 +50,7 @@
 #include "base/subwindow/subwindow_manager.h"
 #include "base/thread/background_task_executor.h"
 #include "base/utils/utils.h"
+#include "core/common/force_split/force_split_utils.h"
 #include "core/common/multi_thread_build_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
@@ -5456,6 +5457,29 @@ void UIContentImpl::SetForceSplitEnable(
     }
     taskExecutor->PostTask(std::move(forceSplitTask), TaskExecutor::TaskType::UI,
         isRouter ? "ArkUISetForceSplitEnable" : "ArkUISetNavigationForceSplitEnable");
+}
+
+void UIContentImpl::SetForceSplitConfig(const std::string& configJsonStr)
+{
+    ContainerScope scope(instanceId_);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_VOID(context);
+    NG::ForceSplitConfig config;
+    if (!NG::ForceSplitUtils::ParseForceSplitConfig(configJsonStr, config)) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "Failed to parse forceSplit config!");
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "ForceSplitConfig: enableHook:%{public}d, navId:%{public}s,"
+        "navDepth:%{public}s", config.isArkUIHookEnabled,
+        (config.navigationId.has_value() ? config.navigationId.value().c_str() : "NA"),
+        (config.navigationDepth.has_value() ? std::to_string(config.navigationDepth.value()).c_str() : "NA"));
+    context->SetIsArkUIHookEnabled(config.isArkUIHookEnabled);
+    auto navManager = context->GetNavigationManager();
+    CHECK_NULL_VOID(navManager);
+    navManager->SetForceSplitNavigationId(config.navigationId);
+    navManager->SetForceSplitNavigationDepth(config.navigationDepth);
 }
 
 void UIContentImpl::ProcessDestructCallbacks()

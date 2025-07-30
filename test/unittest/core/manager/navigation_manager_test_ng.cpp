@@ -419,9 +419,9 @@ HWTEST_F(NavigationManagerTestNg, IsOuterMostNavigation002, TestSize.Level1)
         V2::NAVDESTINATION_VIEW_ETS_TAG, 3, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     ASSERT_NE(dest3, nullptr);
     dest3->SetDepth(2);
-    manager->AddNavigationDumpCallback(dest1->GetId(), dest1->GetDepth(), [](int) {});
-    manager->AddNavigationDumpCallback(dest2->GetId(), dest2->GetDepth(), [](int) {});
-    manager->AddNavigationDumpCallback(dest3->GetId(), dest3->GetDepth(), [](int) {});
+    manager->AddNavigationDumpCallback(dest1, [](int) {});
+    manager->AddNavigationDumpCallback(dest2, [](int) {});
+    manager->AddNavigationDumpCallback(dest3, [](int) {});
 
     EXPECT_TRUE(manager->IsOuterMostNavigation(dest1->GetId(), dest1->GetDepth()));
 }
@@ -450,9 +450,9 @@ HWTEST_F(NavigationManagerTestNg, IsOuterMostNavigation003, TestSize.Level1)
         V2::NAVDESTINATION_VIEW_ETS_TAG, 3, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     ASSERT_NE(dest3, nullptr);
     dest3->SetDepth(2);
-    manager->AddNavigationDumpCallback(dest1->GetId(), dest1->GetDepth(), [](int) {});
-    manager->AddNavigationDumpCallback(dest2->GetId(), dest2->GetDepth(), [](int) {});
-    manager->AddNavigationDumpCallback(dest3->GetId(), dest3->GetDepth(), [](int) {});
+    manager->AddNavigationDumpCallback(dest1, [](int) {});
+    manager->AddNavigationDumpCallback(dest2, [](int) {});
+    manager->AddNavigationDumpCallback(dest3, [](int) {});
 
     EXPECT_FALSE(manager->IsOuterMostNavigation(dest2->GetId(), dest2->GetDepth()));
 }

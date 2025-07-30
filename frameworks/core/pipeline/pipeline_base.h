@@ -867,6 +867,15 @@ public:
         return focusWindowId_.has_value();
     }
 
+    void SetIsArkUIHookEnabled(bool enable)
+    {
+        isArkUIHookEnabled_ = enable;
+    }
+    bool IsArkUIHookEnabled() const
+    {
+        return isArkUIHookEnabled_;
+    }
+
     void SetRealHostWindowId(uint32_t realHostWindowId)
     {
         realHostWindowId_ = realHostWindowId;
@@ -1677,6 +1686,7 @@ protected:
     double rootWidth_ = 0.0;
     int32_t width_ = 0;
     int32_t height_ = 0;
+    bool isArkUIHookEnabled_ = false;
     FrontendType frontendType_;
     WindowModal windowModal_ = WindowModal::NORMAL;
 
