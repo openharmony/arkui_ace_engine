@@ -17,26 +17,10 @@
 
 #include "base/log/log.h"
 #include "core/common/ace_engine.h"
-#if !defined(PREVIEW)
-#include "core/components_ng/syntax/static/detached_free_root_proxy_node.h"
-#endif
 #include "core/interfaces/native/implementation/frame_node_peer_impl.h"
 #include "frameworks/core/components_ng/render/adapter/component_snapshot.h"
 
 namespace OHOS::Ace::NG {
-#if !defined(PREVIEW)
-RefPtr<OHOS::Ace::NG::DetachedFreeRootProxyNode> CreateProxyNode(const RefPtr<UINode>& uiNode)
-{
-    CHECK_NULL_RETURN(uiNode, nullptr);
-    auto container = Container::Current();
-    CHECK_NULL_RETURN(container, nullptr);
-    auto instanceId = container->GetInstanceId();
-    auto proxyNode = AceType::MakeRefPtr<DetachedFreeRootProxyNode>(instanceId);
-    CHECK_NULL_RETURN(proxyNode, nullptr);
-    proxyNode->AddChild(uiNode);
-    return proxyNode;
-}
-#endif
 
 struct SnapshotAsyncCtx {
     ani_env* env = nullptr;
@@ -128,11 +112,7 @@ void CreateFromBuilder(
         OnComplete(asyncCtx, finishCallback);
     };
 #ifdef ENABLE_ROSEN_BACKEND
-#if !defined(PREVIEW)
-    ComponentSnapshot::Create(CreateProxyNode(uinode), std::move(jsCallback), true, snapShotParam);
-#else
     ComponentSnapshot::Create(uinode, std::move(jsCallback), true, snapShotParam);
-#endif
 #endif
 }
 
@@ -154,11 +134,7 @@ void CreateFromComponent(
         OnComplete(asyncCtx, finishCallback);
     };
 #ifdef ENABLE_ROSEN_BACKEND
-#if !defined(PREVIEW)
-    ComponentSnapshot::Create(CreateProxyNode(uinode), std::move(jsCallback), true, snapShotParam);
-#else
     ComponentSnapshot::Create(uinode, std::move(jsCallback), true, snapShotParam);
-#endif
 #endif
 }
 
