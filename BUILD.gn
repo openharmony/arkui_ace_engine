@@ -69,7 +69,6 @@ config("ace_config") {
 
   if (is_arkui_x) {
     cflags -= [
-      "-Werror=deprecated-copy",
       "-Werror=anon-enum-enum-conversion",
       "-Werror=incompatible-pointer-types",
     ]
