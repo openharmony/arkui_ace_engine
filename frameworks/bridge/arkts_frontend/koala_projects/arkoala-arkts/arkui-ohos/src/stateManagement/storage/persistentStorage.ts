@@ -19,12 +19,20 @@ import { AppStorage } from './appStorage';
 import { ArkUIAniModule } from 'arkui.ani';
 import { StateMgmtConsole } from '../tools/stateMgmtDFX';
 
-interface IAniStorage {
-    get(key: string): string | undefined;
-    set(key: string, val: string): void;
-    has(key: string): boolean;
+export const enum AreaMode {
+    EL1 = 0,
+    EL2 = 1,
+    EL3 = 2,
+    EL4 = 3,
+    EL5 = 4
+}
+
+export interface IAniStorage {
+    get(key: string, areaMode: AreaMode = AreaMode.EL2): string | undefined;
+    set(key: string, val: string, areaMode: AreaMode = AreaMode.EL2): void;
+    has(key: string, areaMode: AreaMode = AreaMode.EL2): boolean;
     clear(): void;
-    delete(key: string): void;
+    delete(key: string, areaMode: AreaMode = AreaMode.EL2): void;
 }
 
 // class JsonElement{}
@@ -90,20 +98,20 @@ class TypedMap {
     }
 }
 
-class AniStorage implements IAniStorage {
-    get(key: string): string | undefined {
+export class AniStorage implements IAniStorage {
+    get(key: string, areaMode: AreaMode = AreaMode.EL2): string | undefined {
         return ArkUIAniModule._PersistentStorage_Get(key);
     }
-    set(key: string, val: string): void {
+    set(key: string, val: string, areaMode: AreaMode = AreaMode.EL2): void {
         ArkUIAniModule._PersistentStorage_Set(key, val);
     }
-    has(key: string): boolean {
+    has(key: string, areaMode: AreaMode = AreaMode.EL2): boolean {
         return ArkUIAniModule._PersistentStorage_Has(key);
     }
     clear(): void {
         ArkUIAniModule._PersistentStorage_Clear();
     }
-    delete(key: string): void {
+    delete(key: string, areaMode: AreaMode = AreaMode.EL2): void {
         ArkUIAniModule._PersistentStorage_Delete(key);
     }
 }
