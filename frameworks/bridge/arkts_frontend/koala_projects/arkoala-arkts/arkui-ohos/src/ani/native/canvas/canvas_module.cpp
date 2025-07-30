@@ -18,6 +18,7 @@
 #include "load.h"
 #include "pixel_map_taihe_ani.h"
 #include "utils/ani_utils.h"
+#include "canvas_ani/ani_canvas.h"
 
 #include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
@@ -199,7 +200,9 @@ void CanvasModule::PutImageData0(ani_env* env, [[maybe_unused]] ani_object aniCl
     ani_arraybuffer arrayBuffer = static_cast<ani_arraybuffer>(buffer);
     uint8_t* data = nullptr;
     ani_size length = 0;
-    env->ArrayBuffer_GetInfo(arrayBuffer, reinterpret_cast<void**>(&data), &length);
+    if (env->ArrayBuffer_GetInfo(arrayBuffer, reinterpret_cast<void**>(&data), &length) != ANI_OK) {
+        return;
+    }
     CHECK_NULL_VOID(data);
     const auto* modifier = GetNodeAniModifier();
     CHECK_NULL_VOID(modifier);
@@ -221,12 +224,33 @@ void CanvasModule::PutImageData1(ani_env* env, [[maybe_unused]] ani_object aniCl
     ani_arraybuffer arrayBuffer = static_cast<ani_arraybuffer>(buffer);
     uint8_t* data = nullptr;
     ani_size length = 0;
-    env->ArrayBuffer_GetInfo(arrayBuffer, reinterpret_cast<void**>(&data), &length);
+    if (env->ArrayBuffer_GetInfo(arrayBuffer, reinterpret_cast<void**>(&data), &length) != ANI_OK) {
+        return;
+    }
     CHECK_NULL_VOID(data);
     const auto* modifier = GetNodeAniModifier();
     CHECK_NULL_VOID(modifier);
     auto* canvasModifier = modifier->getCanvasAniModifier();
     CHECK_NULL_VOID(canvasModifier);
     canvasModifier->putImageData1(peer, data, length, dx, dy, width, height, dirtyX, dirtyY, dirtyWidth, dirtyHeight);
+}
+
+ani_object CanvasModule::GetDrawingCanvas(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long peerPtr)
+{
+    ani_ref aniRef;
+    env->GetUndefined(&aniRef);
+    ani_object undefined = static_cast<ani_object>(aniRef);
+    
+    auto* peer = reinterpret_cast<ArkUIDrawingRenderingContext>(peerPtr);
+    CHECK_NULL_RETURN(peer, undefined);
+    const auto* modifier = GetNodeAniModifier();
+    CHECK_NULL_RETURN(modifier, undefined);
+    auto* canvasModifier = modifier->getCanvasAniModifier();
+    CHECK_NULL_RETURN(canvasModifier, undefined);
+    auto* drawingCanvas = canvasModifier->getDrawingCanvas(peer);
+    CHECK_NULL_RETURN(drawingCanvas, undefined);
+    auto* canvas = reinterpret_cast<Rosen::Drawing::Canvas*>(drawingCanvas);
+    CHECK_NULL_RETURN(canvas, undefined);
+    return Rosen::Drawing::AniCanvas::CreateAniCanvas(env, canvas);
 }
 } // namespace OHOS::Ace::Ani

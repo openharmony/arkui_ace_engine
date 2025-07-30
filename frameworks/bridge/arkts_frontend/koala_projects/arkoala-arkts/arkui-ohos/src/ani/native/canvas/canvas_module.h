@@ -45,6 +45,7 @@ public:
     static void PutImageData1(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long peerPtr, ani_object array,
         ani_double dx, ani_double dy, ani_int width, ani_int height, ani_double dirtyX, ani_double dirtyY,
         ani_double dirtyWidth, ani_double dirtyHeight);
+    static ani_object GetDrawingCanvas(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long peerPtr);
 };
 } // namespace OHOS::Ace::Ani
 

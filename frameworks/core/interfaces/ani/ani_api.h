@@ -39,6 +39,7 @@ struct _ArkUINodeContent;
 struct _ArkUICanvasRenderer;
 struct _ArkUIImageData;
 struct _ArkUIImageBitmap;
+struct _ArkUIDrawingRenderingContext;
 typedef class __ani_ref* ani_ref;
 typedef class __ani_object* ani_object;
 typedef struct __ani_env ani_env;
@@ -62,6 +63,7 @@ typedef _ArkUIStyledString* ArkUIStyledString;
 typedef _ArkUICanvasRenderer* ArkUICanvasRenderer;
 typedef _ArkUIImageData* ArkUIImageData;
 typedef _ArkUIImageBitmap* ArkUIImageBitmap;
+typedef _ArkUIDrawingRenderingContext* ArkUIDrawingRenderingContext;
 typedef struct WebviewControllerInfo {
     std::function<int32_t()> getWebIdFunc = nullptr;
     std::function<void(int32_t)> completeWindowNewFunc = nullptr;
@@ -441,6 +443,7 @@ struct ArkUIAniCanvasModifier {
     void (*putImageData1)(ArkUICanvasRenderer peer, uint8_t* data, ani_size length, ani_double dx, ani_double dy,
         ani_int width, ani_int height, ani_double dirtyX, ani_double dirtyY, ani_double dirtyWidth,
         ani_double dirtyHeight);
+    void* (*getDrawingCanvas)(ArkUIDrawingRenderingContext peer);
 };
 
 struct ArkUIAniModifiers {

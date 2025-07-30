@@ -235,6 +235,15 @@ void PutImageData1(ArkUICanvasRenderer peer, uint8_t* buffer, ani_size bufferLen
     CopyFromBuffer(imageData, buffer, static_cast<size_t>(bufferLength), imgWidth);
     peerImpl->PutImageData(imageData);
 }
+
+void* GetDrawingCanvas(ArkUIDrawingRenderingContext peer)
+{
+    auto peerImpl = reinterpret_cast<GeneratedModifier::DrawingRenderingContextPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, nullptr);
+    auto canvas = peerImpl->GetCanvas();
+    CHECK_NULL_RETURN(canvas, nullptr);
+    return reinterpret_cast<void*>(canvas.get());
+}
 } // namespace CanvasAniModifier
 
 const ArkUIAniCanvasModifier* GetCanvasAniModifier()
@@ -250,6 +259,7 @@ const ArkUIAniCanvasModifier* GetCanvasAniModifier()
         .getImageData = CanvasAniModifier::GetImageData,
         .putImageData0 = CanvasAniModifier::PutImageData0,
         .putImageData1 = CanvasAniModifier::PutImageData1,
+        .getDrawingCanvas = CanvasAniModifier::GetDrawingCanvas,
     };
     return &impl;
 }

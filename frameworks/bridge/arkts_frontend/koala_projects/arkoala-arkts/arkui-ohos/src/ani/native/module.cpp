@@ -926,6 +926,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "JLescompat/Uint8ClampedArray;DDIIDDDD:V",
             reinterpret_cast<void*>(OHOS::Ace::Ani::CanvasModule::PutImageData1)
         },
+        ani_native_function {
+            "_DrawingRenderingContext_GetCanvas",
+            "J:L@ohos/graphics/drawing/drawing/Canvas;",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CanvasModule::GetDrawingCanvas)
+        },
     };
 
     auto bindRst = env->Class_BindNativeMethods(cls, methods.data(), methods.size());
