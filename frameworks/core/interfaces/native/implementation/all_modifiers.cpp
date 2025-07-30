@@ -381,6 +381,7 @@ const GENERATED_ArkUIBounceSymbolEffectAccessor* GetBounceSymbolEffectAccessor()
 const GENERATED_ArkUIBuilderNodeOpsAccessor* GetBuilderNodeOpsAccessor();
 const GENERATED_ArkUIPulseSymbolEffectAccessor* GetPulseSymbolEffectAccessor();
 const GENERATED_ArkUITabsControllerAccessor* GetTabsControllerAccessor();
+const GENERATED_ArkUITabsExtenderAccessor* GetTabsExtenderAccessor();
 const GENERATED_ArkUITabContentTransitionProxyAccessor* GetTabContentTransitionProxyAccessor();
 const GENERATED_ArkUITextControllerAccessor* GetTextControllerAccessor();
 const GENERATED_ArkUITextAreaControllerAccessor* GetTextAreaControllerAccessor();
@@ -750,6 +751,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetBuilderNodeOpsAccessor,
         GetPulseSymbolEffectAccessor,
         GetTabsControllerAccessor,
+        GetTabsExtenderAccessor,
         GetTabContentTransitionProxyAccessor,
         GetTextControllerAccessor,
         GetTextAreaControllerAccessor,

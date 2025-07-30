@@ -596,7 +596,13 @@ RefPtr<SwiperPaintProperty> TabsModelNG::GetSwiperPaintProperty()
 
 void TabsModelNG::Pop()
 {
-    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    HandleApplyAttributesFinish(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ViewStackProcessor::GetInstance()->PopContainer();
+}
+
+void TabsModelNG::HandleApplyAttributesFinish(FrameNode* frameNode)
+{
+    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
     CHECK_NULL_VOID(tabsNode);
     auto tabsLayoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
     CHECK_NULL_VOID(tabsLayoutProperty);
@@ -636,8 +642,6 @@ void TabsModelNG::Pop()
 
     swiperNode->MarkModifyDone();
     swiperNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-
-    ViewStackProcessor::GetInstance()->PopContainer();
 }
 
 RefPtr<TabsNode> TabsModelNG::GetOrCreateTabsNode(

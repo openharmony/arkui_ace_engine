@@ -38,6 +38,7 @@
 #include "core/components_ng/pattern/tabs/tab_bar_paint_property.h"
 #include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
 #include "core/components_ng/pattern/tabs/tabs_controller.h"
+#include "core/components_ng/pattern/tabs/tabs_model_ng.h"
 #include "core/components_ng/pattern/tabs/tabs_node.h"
 #include "core/components_ng/pattern/tabs/tabs_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -805,5 +806,10 @@ void TabsModelStatic::SetOnChangeEvent(FrameNode* frameNode, std::function<void(
     auto tabPattern = tabsNode->GetPattern<TabsPattern>();
     CHECK_NULL_VOID(tabPattern);
     tabPattern->SetOnIndexChangeEvent(std::move(onChangeEvent));
+}
+
+void TabsModelStatic::ApplyAttributesFinish(FrameNode* frameNode)
+{
+    TabsModelNG::HandleApplyAttributesFinish(frameNode);
 }
 } // namespace OHOS::Ace::NG
