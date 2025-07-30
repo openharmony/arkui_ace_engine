@@ -104,6 +104,10 @@ bool IsEnum(ani_env *env, ani_object object, const char *enum_descriptor)
 
 bool GetBoolParam(ani_env* env, ani_object object, bool& result)
 {
+    if (!IsClassObject(env, object, "std.core.Boolean")) {
+        return false;
+    }
+
     ani_boolean resultValue;
     ani_status status = env->Object_CallMethodByName_Boolean(object, "unboxed", nullptr, &resultValue);
     if (status != ANI_OK) {
@@ -130,6 +134,10 @@ bool GetBoolParam(ani_env* env, ani_object object, const char *name, bool& resul
 
 bool GetInt32Param(ani_env* env, ani_object object, int32_t& result)
 {
+    if (!IsClassObject(env, object, "std.core.Int")) {
+        return false;
+    }
+
     ani_int resultValue;
     ani_status status = env->Object_CallMethodByName_Int(object, "unboxed", nullptr, &resultValue);
     if (status != ANI_OK) {
@@ -156,6 +164,10 @@ bool GetInt32Param(ani_env* env, ani_object object, const char *name, int32_t& r
 
 bool GetInt64Param(ani_env* env, ani_object object, int64_t& result)
 {
+    if (!IsClassObject(env, object, "std.core.Long")) {
+        return false;
+    }
+
     ani_long resultValue;
     ani_status status = env->Object_CallMethodByName_Long(object, "unboxed", nullptr, &resultValue);
     if (status != ANI_OK) {
@@ -182,6 +194,10 @@ bool GetInt64Param(ani_env* env, ani_object object, const char *name, int64_t& r
 
 bool GetDoubleParam(ani_env* env, ani_object object, double& result)
 {
+    if (!IsClassObject(env, object, "std.core.Double")) {
+        return false;
+    }
+
     ani_double resultValue;
     ani_status status = env->Object_CallMethodByName_Double(object, "unboxed", nullptr, &resultValue);
     if (status != ANI_OK) {
@@ -437,8 +453,8 @@ void PrefixEmptyBundleName(ani_env *env, ani_object object)
 
 ResourceStruct CheckResourceStruct(ani_env *env, ani_object object)
 {
-    ani_double idDouble;
-    ani_status status = env->Object_GetPropertyByName_Double(object, "id", &idDouble);
+    ani_long aniId;
+    ani_status status = env->Object_GetPropertyByName_Long(object, "id", &aniId);
     if (status != ANI_OK) {
         ani_ref idRef;
         status = env->Object_GetPropertyByName_Ref(object, "id", &idRef);
@@ -448,7 +464,7 @@ ResourceStruct CheckResourceStruct(ani_env *env, ani_object object)
         return ResourceStruct::DYNAMIC_V1;
     }
 
-    int32_t idInt = static_cast<int32_t>(idDouble);
+    int32_t idInt = static_cast<int32_t>(aniId);
     if (idInt == UNKNOWN_RESOURCE_ID) {
         return ResourceStruct::DYNAMIC_V2;
     }
@@ -616,14 +632,14 @@ void CompleteResourceParamV1(ani_env *env, ani_object object)
     }
 
     ModifyResourceParam(env, object, resType, resName);
-    ani_double aniId = static_cast<ani_double>(static_cast<double>(UNKNOWN_RESOURCE_ID));
-    status = env->Object_SetPropertyByName_Double(object, "id", aniId);
+    ani_long aniId = static_cast<ani_long>(static_cast<int64_t>(UNKNOWN_RESOURCE_ID));
+    status = env->Object_SetPropertyByName_Long(object, "id", aniId);
     if (status != ANI_OK) {
         return;
     }
 
-    ani_double aniType = static_cast<ani_double>(static_cast<double>(resType));
-    status = env->Object_SetPropertyByName_Double(object, "type", aniType);
+    ani_int aniType = static_cast<ani_int>(static_cast<int32_t>(resType));
+    status = env->Object_SetPropertyByName_Int(object, "type", aniType);
     if (status != ANI_OK) {
         return;
     }
@@ -673,8 +689,8 @@ void CompleteResourceParamV2(ani_env *env, ani_object object)
         return;
     }
 
-    ani_double aniType = static_cast<ani_double>(static_cast<double>(resType));
-    status = env->Object_SetPropertyByName_Double(object, "type", aniType);
+    ani_int aniType = static_cast<ani_int>(static_cast<int32_t>(resType));
+    status = env->Object_SetPropertyByName_Int(object, "type", aniType);
     if (status != ANI_OK) {
         return;
     }
@@ -712,16 +728,14 @@ bool GetResourceParam(ani_env *env, ani_object object, ResourceInfo& result)
     }
 
     CompleteResourceParam(env, object);
-    ani_double id;
-    ani_status status = env->Object_GetPropertyByName_Double(object, "id", &id);
+    ani_long aniId;
+    ani_status status = env->Object_GetPropertyByName_Long(object, "id", &aniId);
     if (status == ANI_OK) {
-        result.resId = static_cast<int32_t>(id);
+        result.resId = static_cast<int32_t>(aniId);
     }
     GetStringParamOpt(env, object, "bundleName", result.bundleName);
     GetStringParamOpt(env, object, "moduleName", result.moduleName);
-    double type = 0;
-    GetDoubleParam(env, object, "type", type);
-    result.type = static_cast<int32_t>(type);
+    GetInt32Param(env, object, "type", result.type);
     GetStringArrayParam(env, object, "params", result.params);
     return true;
 }
