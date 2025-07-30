@@ -22,8 +22,16 @@
 
 // For types with the same name on ets and jni
 #define KOALA_INTEROP_TYPEDEF(func, lang, CPP_TYPE, SIG_TYPE, CODE_TYPE) \
-  if (std::strcmp(func, "sigType") == 0) if (type == CPP_TYPE) return SIG_TYPE; \
-  if (std::strcmp(func, "codeType") == 0) if (type == CPP_TYPE) return CODE_TYPE;
+    if (std::strcmp(func, "sigType") == 0) {                             \
+        if (type == (CPP_TYPE)) {                                          \
+            return (SIG_TYPE);                                             \
+        }                                                                \
+    }                                                                    \
+    if (std::strcmp(func, "codeType") == 0) {                            \
+        if (type == (CPP_TYPE)) {                                          \
+            return (CODE_TYPE);                                            \
+        }                                                                \
+    }
 
 // For types with distinct names on ets and jni
 #define KOALA_INTEROP_TYPEDEF_LS(func, lang, CPP_TYPE, ETS_SIG_TYPE, ETS_CODE_TYPE, JNI_SIG_TYPE, JNI_CODE_TYPE) \

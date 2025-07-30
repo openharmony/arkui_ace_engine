@@ -33,7 +33,7 @@ void AssignArkValue(Ark_AccessibilityHoverType& dst, const AccessibilityHoverAct
         case AccessibilityHoverAction::HOVER_CANCEL: dst = ARK_ACCESSIBILITY_HOVER_TYPE_HOVER_CANCEL; break;
         default:
             dst = static_cast<Ark_AccessibilityHoverType>(-1);
-            LOGE("Unexpected enum value in Ark_AccessibilityHoverType: %{public}d", src);
+            LOGW("Unexpected enum value in Ark_AccessibilityHoverType: %{public}d", src);
             break;
     }
 }

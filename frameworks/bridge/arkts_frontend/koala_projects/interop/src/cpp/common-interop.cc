@@ -242,8 +242,9 @@ void impl_StopGroupedLog(KInt index) {
 KOALA_INTEROP_V1(StopGroupedLog, KInt)
 
 void impl_AppendGroupedLog(KInt index, const KStringPtr& message) {
-    if (GetDefaultLogger()->needGroupedLog(index))
+    if (GetDefaultLogger()->needGroupedLog(index)) {
         GetDefaultLogger()->appendGroupedLog(index, message.c_str());
+    }
 }
 KOALA_INTEROP_V2(AppendGroupedLog, KInt, KStringPtr)
 
@@ -302,7 +303,7 @@ KInt impl_LoadVirtualMachine(KVMContext vmContext, KInt vmKind, const KStringPtr
 
     static LoadVirtualMachine_t impl = nullptr;
     if (!impl) impl = reinterpret_cast<LoadVirtualMachine_t>(getImpl(nativeLibPath, "LoadVirtualMachine"));
-    if (!impl) KOALA_INTEROP_THROW_STRING(vmContext, "Cannot load VM", -1);
+    if (!impl) { KOALA_INTEROP_THROW_STRING(vmContext, "Cannot load VM", -1); }
     const ForeignVMContext foreignVM = {
         vmContext, &callCallback
     };
@@ -312,21 +313,21 @@ KOALA_INTEROP_CTX_3(LoadVirtualMachine, KInt, KInt, KStringPtr, KStringPtr)
 
 KNativePointer impl_StartApplication(const KStringPtr& appUrl, const KStringPtr& appParams) {
     static StartApplication_t impl = nullptr;
-    if (!impl) impl = reinterpret_cast<StartApplication_t>(getImpl(nullptr, "StartApplication"));
+    if (!impl) { impl = reinterpret_cast<StartApplication_t>(getImpl(nullptr, "StartApplication")); }
     return impl(appUrl.c_str(), appParams.c_str());
 }
 KOALA_INTEROP_2(StartApplication, KNativePointer, KStringPtr, KStringPtr)
 
 KBoolean impl_RunApplication(const KInt arg0, const KInt arg1) {
     static RunApplication_t impl = nullptr;
-    if (!impl) impl = reinterpret_cast<RunApplication_t>(getImpl(nullptr, "RunApplication"));
+    if (!impl) { impl = reinterpret_cast<RunApplication_t>(getImpl(nullptr, "RunApplication")); }
     return impl(arg0, arg1);
 }
 KOALA_INTEROP_2(RunApplication, KBoolean, KInt, KInt)
 
 KStringPtr impl_EmitEvent(KVMContext vmContext, KInt type, KInt target, KInt arg0, KInt arg1) {
     static EmitEvent_t impl = nullptr;
-    if (!impl) impl = reinterpret_cast<EmitEvent_t>(getImpl(nullptr, "EmitEvent"));
+    if (!impl) { impl = reinterpret_cast<EmitEvent_t>(getImpl(nullptr, "EmitEvent")); }
     const char* out = impl(type, target, arg0, arg1);
     auto size = std::string(out).size();
     KStringPtr result(out, size, true);
@@ -336,7 +337,7 @@ KOALA_INTEROP_CTX_4(EmitEvent, KStringPtr, KInt, KInt, KInt, KInt)
 
 void impl_RestartWith(const KStringPtr& page) {
     static RestartWith_t impl = nullptr;
-    if (!impl) impl = reinterpret_cast<RestartWith_t>(getImpl(nullptr, "RestartWith"));
+    if (!impl) { impl = reinterpret_cast<RestartWith_t>(getImpl(nullptr, "RestartWith")); }
     impl(page.c_str());
 }
 KOALA_INTEROP_V1(RestartWith, KStringPtr)
@@ -454,7 +455,7 @@ KOALA_INTEROP_V1(NativeLog, KStringPtr)
 void resolveDeferred(KVMDeferred* deferred, uint8_t* argsData, int32_t argsLength) {
 #ifdef KOALA_NAPI
     auto status = napi_call_threadsafe_function((napi_threadsafe_function)deferred->handler, deferred, napi_tsfn_nonblocking);
-    if (status != napi_ok) LOGE("cannot call thread-safe function; status=%d", status);
+    if (status != napi_ok) { LOGE("cannot call thread-safe function; status=%d", status); }
     napi_release_threadsafe_function((napi_threadsafe_function)deferred->handler, napi_tsfn_release);
 #endif
 }
@@ -471,7 +472,7 @@ void resolveDeferredImpl(napi_env env, napi_value js_callback, KVMDeferred* defe
     napi_value undefined = nullptr;
     napi_get_undefined(env, &undefined);
     auto status = napi_resolve_deferred(env, (napi_deferred)deferred->context, undefined);
-    if (status != napi_ok) LOGE("cannot resolve deferred; status=%d", status);
+    if (status != napi_ok) { LOGE("cannot resolve deferred; status=%d", status); }
     delete deferred;
 }
 #endif
@@ -487,7 +488,9 @@ KVMDeferred* CreateDeferred(KVMContext vmContext, KVMObjectHandle* promiseHandle
     napi_value resourceName;
     napi_create_string_utf8(env, "Async", 5, &resourceName);
     auto status = napi_create_promise(env, (napi_deferred*)&deferred->context, &promise);
-    if (status != napi_ok) LOGE("cannot make a promise; status=%d", status);
+    if (status != napi_ok) {
+        LOGE("cannot make a promise; status=%d", status);
+    }
     status = napi_create_threadsafe_function(env,
         nullptr,
         nullptr,
@@ -499,7 +502,9 @@ KVMDeferred* CreateDeferred(KVMContext vmContext, KVMObjectHandle* promiseHandle
         deferred,
         (napi_threadsafe_function_call_js)resolveDeferredImpl,
         (napi_threadsafe_function*)&deferred->handler);
-    if (status != napi_ok) LOGE("cannot make threadsafe function; status=%d", status);
+    if (status != napi_ok) {
+        LOGE("cannot make threadsafe function; status=%d", status);
+    }
     *promiseHandle = (KVMObjectHandle)promise;
 #endif
     return deferred;
@@ -640,8 +645,9 @@ KoalaWork::KoalaWork(InteropVMContext vmContext,
     void (*complete)(InteropNativePointer handle)
 ): vmContext(vmContext), handle(handle), execute(execute), complete(complete) {
 #ifdef KOALA_FOREIGN_NAPI
-    if (g_foreignVMContext == nullptr)
+    if (g_foreignVMContext == nullptr) {
         INTEROP_FATAL("Can not launch async work while foreign VM context is not available. Please ensure you have called SetForeignVMContext");
+    }
     foreignVMContext = g_foreignVMContext;
     napi_env env = (napi_env)foreignVMContext;
     napi_value resourceName = nullptr;
@@ -720,10 +726,12 @@ KInteropReturnBuffer impl_RawReturnData(KVMContext vmContext, KInt v1, KInt v2) 
 KOALA_INTEROP_CTX_2(RawReturnData, KInteropReturnBuffer, KInt, KInt)
 
 KInteropNumber impl_IncrementNumber(KInteropNumber number) {
-    if (number.tag == 102)
+    if (number.tag == 102) {
         number.i32++;
-    else
+    }
+    else {
         number.f32 += 1.f;
+    }
     return number;
 }
 KOALA_INTEROP_1(IncrementNumber, KInteropNumber, KInteropNumber)

@@ -104,9 +104,6 @@ struct InteropTypeConverter<KInteropBuffer> {
         (void*)copy,
         &result
       );
-      if (status != napi_ok) {
-        // do smth here
-      }
       return result;
     };
     static void release(napi_env env, InteropType value, KInteropBuffer converted) {}
@@ -116,11 +113,11 @@ template<>
 struct InteropTypeConverter<KStringPtr> {
     using InteropType = napi_value;
     static KStringPtr convertFrom(napi_env env, InteropType value) {
-        if (value == nullptr) return KStringPtr();
+        if (value == nullptr) { return KStringPtr(); }
         KStringPtr result;
         size_t length = 0;
         napi_status status = napi_get_value_string_utf8(env, value, nullptr, 0, &length);
-        if (status != 0) return result;
+        if (status != 0) { return result; }
         result.resize(length);
         status = napi_get_value_string_utf8(env, value, result.data(), length + 1, nullptr);
         return result;
@@ -477,44 +474,44 @@ inline KSerializerBuffer getArgument<KSerializerBuffer>(const CallbackInfo& info
 
 template <>
 inline KLength getArgument<KLength>(const CallbackInfo& info, int index) {
-  KLength result { 0 };
-  NAPI_ASSERT_INDEX(info, index, result);
-  auto value = info[index];
-  napi_valuetype type;
-  auto status = napi_typeof(info.Env(), value, &type);
-  if (status != 0) return result;
-  switch (type) {
-    case napi_number: {
-      result.value = getFloat32(info.Env(), value);
-      result.unit = 1;
-      result.type = 0;
-      break;
+    KLength result { 0 };
+    NAPI_ASSERT_INDEX(info, index, result);
+    auto value = info[index];
+    napi_valuetype type;
+    auto status = napi_typeof(info.Env(), value, &type);
+    if (status != 0) { return result; }
+    switch (type) {
+        case napi_number: {
+            result.value = getFloat32(info.Env(), value);
+            result.unit = 1;
+            result.type = 0;
+            break;
+        }
+        case napi_string: {
+            KStringPtr string = getString(info.Env(), value);
+            parseKLength(string, &result);
+            result.type = 1;
+            result.resource = 0;
+            break;
+        }
+        case napi_object: {
+            result.value = 0;
+            result.unit = 1;
+            result.type = 2;
+            napi_value field;
+            napi_status status = napi_get_named_property(info.Env(), value, "id", &field);
+            if (status == 0) {
+                status = napi_get_value_int32(info.Env(), field, &result.resource);
+                if (status != 0) { result.resource = 0; }
+            } else {
+                result.resource = 0;
+            }
+            break;
+        }
+        default:
+            INTEROP_FATAL("Error, unexpected KLength type");
     }
-    case napi_string: {
-      KStringPtr string = getString(info.Env(), value);
-      parseKLength(string, &result);
-      result.type = 1;
-      result.resource = 0;
-      break;
-    }
-    case napi_object: {
-      result.value = 0;
-      result.unit = 1;
-      result.type = 2;
-      napi_value field;
-      napi_status status = napi_get_named_property(info.Env(), value, "id", &field);
-      if (status == 0) {
-        status = napi_get_value_int32(info.Env(), field, &result.resource);
-        if (status != 0) result.resource = 0;
-      } else {
-        result.resource = 0;
-      }
-      break;
-    }
-    default:
-      INTEROP_FATAL("Error, unexpected KLength type");
-  }
-  return result;
+    return result;
 }
 
 
@@ -1413,49 +1410,53 @@ public:
 napi_value getKoalaNapiCallbackDispatcher(napi_env env);
 // TODO: can/shall we cache bridge reference?
 
-#define KOALA_INTEROP_CALL_VOID(venv, id, length, args)                            \
-{                                                                                  \
-  napi_env env = reinterpret_cast<napi_env>(venv);                                 \
-  napi_value bridge = getKoalaNapiCallbackDispatcher(env),                         \
-     global = nullptr, return_val = nullptr;                                       \
-  napi_handle_scope scope = nullptr;                                               \
-  napi_open_handle_scope(env, &scope);                                             \
-  napi_status status = napi_get_global(env, &global);                              \
-  napi_value node_args[3];                                                         \
-  napi_create_int32(env, id, &node_args[0]);                                       \
-  napi_value buffer = nullptr;                                                     \
-  napi_create_external_arraybuffer(env,                                            \
-    args, length,                                                                  \
-    [](napi_env, void* data, void* hint) {}, nullptr, &buffer);                    \
-  napi_create_typedarray(env, napi_uint8_array, length, buffer, 0, &node_args[1]); \
-  napi_create_int32(env, length, &node_args[2]);                                   \
-  status = napi_call_function(env, global, bridge, 3, node_args, &return_val);     \
-  if (status != napi_ok) NODEJS_GET_AND_THROW_LAST_ERROR((env));                   \
-  napi_close_handle_scope(env, scope);                                             \
+#define KOALA_INTEROP_CALL_VOID(venv, id, length, args)                              \
+{                                                                                    \
+    napi_env env = reinterpret_cast<napi_env>(venv);                                 \
+    napi_value bridge = getKoalaNapiCallbackDispatcher(env),                         \
+       global = nullptr, return_val = nullptr;                                       \
+    napi_handle_scope scope = nullptr;                                               \
+    napi_open_handle_scope(env, &scope);                                             \
+    napi_status status = napi_get_global(env, &global);                              \
+    napi_value node_args[3];                                                         \
+    napi_create_int32(env, id, &node_args[0]);                                       \
+    napi_value buffer = nullptr;                                                     \
+    napi_create_external_arraybuffer(env,                                            \
+      args, length,                                                                  \
+      [](napi_env, void* data, void* hint) {}, nullptr, &buffer);                    \
+    napi_create_typedarray(env, napi_uint8_array, length, buffer, 0, &node_args[1]); \
+    napi_create_int32(env, length, &node_args[2]);                                   \
+    status = napi_call_function(env, global, bridge, 3, node_args, &return_val);     \
+    if (status != napi_ok) {                                                         \
+        NODEJS_GET_AND_THROW_LAST_ERROR((env));                                      \
+    }                                                                                \
+    napi_close_handle_scope(env, scope);                                             \
 }
 
 #define KOALA_INTEROP_CALL_INT(venv, id, length, args)                             \
 {                                                                                  \
-  napi_env env = reinterpret_cast<napi_env>(venv);                                 \
-  napi_value bridge = getKoalaNapiCallbackDispatcher(env),                         \
-     global = nullptr, return_val = nullptr;                                       \
-  napi_handle_scope scope = nullptr;                                               \
-  napi_open_handle_scope(env, &scope);                                             \
-  napi_status status = napi_get_global(env, &global);                              \
-  napi_value node_args[3];                                                         \
-  napi_create_int32(env, id, &node_args[0]);                                       \
-  napi_value buffer = nullptr;                                                     \
-  napi_create_external_arraybuffer(env,                                            \
-    args, length,                                                                  \
-    [](napi_env, void* data, void* hint) {}, nullptr, &buffer);                    \
-  napi_create_typedarray(env, napi_uint8_array, length, buffer, 0, &node_args[1]); \
-  napi_create_int32(env, length, &node_args[2]);                                   \
-  status = napi_call_function(env, global, bridge, 3, node_args, &return_val);     \
-  if (status != napi_ok) NODEJS_GET_AND_THROW_LAST_ERROR((env));                   \
-  int result;                                                                      \
-  status = napi_get_value_int32(env, return_val, &result);                         \
-  napi_close_handle_scope(env, scope);                                             \
-  return result;                                                                   \
+    napi_env env = reinterpret_cast<napi_env>(venv);                                 \
+    napi_value bridge = getKoalaNapiCallbackDispatcher(env),                         \
+       global = nullptr, return_val = nullptr;                                       \
+    napi_handle_scope scope = nullptr;                                               \
+    napi_open_handle_scope(env, &scope);                                             \
+    napi_status status = napi_get_global(env, &global);                              \
+    napi_value node_args[3];                                                         \
+    napi_create_int32(env, id, &node_args[0]);                                       \
+    napi_value buffer = nullptr;                                                     \
+    napi_create_external_arraybuffer(env,                                            \
+      args, length,                                                                  \
+      [](napi_env, void* data, void* hint) {}, nullptr, &buffer);                    \
+    napi_create_typedarray(env, napi_uint8_array, length, buffer, 0, &node_args[1]); \
+    napi_create_int32(env, length, &node_args[2]);                                   \
+    status = napi_call_function(env, global, bridge, 3, node_args, &return_val);     \
+    if (status != napi_ok) {                                                         \
+        NODEJS_GET_AND_THROW_LAST_ERROR((env));                                      \
+    }                                                                                \
+    int result;                                                                      \
+    status = napi_get_value_int32(env, return_val, &result);                         \
+    napi_close_handle_scope(env, scope);                                             \
+    return result;                                                                   \
 }
 
 #define KOALA_INTEROP_CALL_VOID_INTS32(venv, id, argc, args) KOALA_INTEROP_CALL_VOID(venv, id, (argc) * sizeof(int32_t), args)

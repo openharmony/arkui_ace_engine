@@ -301,7 +301,7 @@ namespace Converter {
     template<>
     inline long Convert(const Ark_Number& src)
     {
-        LOGE("Ark_Number doesn`t support long type");
+        LOGW("Ark_Number doesn`t support long type");
         return static_cast<long>(Convert<int>(src));
     }
 
@@ -314,7 +314,7 @@ namespace Converter {
     template<>
     inline double Convert(const Ark_Number& src)
     {
-        LOGE("Ark_Number doesn`t support double type");
+        LOGW("Ark_Number doesn`t support double type");
         return src.tag == INTEROP_TAG_FLOAT32 ? static_cast<double>(src.f32) : static_cast<double>(src.i32);
     }
 
@@ -363,7 +363,7 @@ namespace Converter {
     template<>
     inline ImageSourceInfo Convert(const Ark_DrawableDescriptor& value)
     {
-        LOGE("Convert [Ark_DrawableDescriptor] to [ImageSourceInfo] is not supported");
+        LOGW("Convert [Ark_DrawableDescriptor] to [ImageSourceInfo] is not supported");
         return ImageSourceInfo();
     }
 
@@ -381,7 +381,7 @@ namespace Converter {
     template<>
     inline ImageSourceInfo Convert(const Ark_LinearGradient_common& value)
     {
-        LOGE("Convert [Ark_LinearGradient] to [ImageSourceInfo] is not supported");
+        LOGW("Convert [Ark_LinearGradient] to [ImageSourceInfo] is not supported");
         return ImageSourceInfo();
     }
 
@@ -436,19 +436,19 @@ namespace Converter {
     template<>
     inline void AssignCast(std::optional<Dimension>& dst, const Ark_CustomObject& src)
     {
-        LOGE("ARKOALA Converter Ark_CustomObject -> Dimension is not implemented.");
+        LOGW("ARKOALA Converter Ark_CustomObject -> Dimension is not implemented.");
     }
 
     template<>
     inline void AssignCast(std::optional<Ark_CharPtr>& dst, const Ark_Resource& src)
     {
-        LOGE("ARKOALA Converter -> Resource support (String) is not implemented.");
+        LOGW("ARKOALA Converter -> Resource support (String) is not implemented.");
     }
 
     template<>
     inline void AssignCast(std::optional<Color>& dst, const Ark_ColoringStrategy& src)
     {
-        LOGE("ARKOALA Converter Ark_ColoringStrategy -> Color is not implemented.");
+        LOGW("ARKOALA Converter Ark_ColoringStrategy -> Color is not implemented.");
     }
 
     template<>

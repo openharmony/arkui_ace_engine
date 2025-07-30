@@ -23,6 +23,7 @@
 
 #include "core/components_ng/pattern/text/span_model.h"
 #include "core/components_ng/pattern/text/span_node.h"
+
 namespace OHOS::Ace::NG {
 class ACE_EXPORT SpanModelStatic {
 public:

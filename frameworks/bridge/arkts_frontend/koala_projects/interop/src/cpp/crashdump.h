@@ -26,7 +26,9 @@ static void onCrashHandler(int signo) {
     void* stack[20];
     size_t size = backtrace(stack, 20);
     backtrace_symbols_fd(stack, size, STDERR_FILENO);
-    if (oldCrashHandler) oldCrashHandler(signo);
+    if (oldCrashHandler) {
+        oldCrashHandler(signo);
+    }
 }
 
 static void installCrashHandlers() {

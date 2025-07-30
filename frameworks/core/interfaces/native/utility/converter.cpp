@@ -254,8 +254,8 @@ void AssignLinearGradientDirection(std::shared_ptr<OHOS::Ace::NG::LinearGradient
     }
 }
 
-void stubCall(const Ark_Int32 _) {}
-void stubHoldRelease(Ark_Int32 _) {}
+void StubCall(const Ark_Int32 _) {}
+void StubHoldRelease(Ark_Int32 _) {}
 
 uint32_t ColorAlphaAdapt(uint32_t origin)
 {
@@ -968,7 +968,7 @@ BorderStyleProperty Convert(const Ark_BorderStyle& src)
 template<>
 Dimension Convert(const Ark_CustomObject& src)
 {
-    LOGE("Convert [Ark_CustomObject] to [Dimension] is not supported");
+    LOGW("Convert [Ark_CustomObject] to [Dimension] is not supported");
     return Dimension();
 }
 
