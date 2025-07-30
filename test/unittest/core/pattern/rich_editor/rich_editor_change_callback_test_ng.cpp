@@ -1680,6 +1680,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, OnAreaChangedInner001, TestSize.Level1)
     richEditorPattern->OnAreaChangedInner();
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, -1);
     EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, -1);
+    EXPECT_NE(richEditorPattern->parentGlobalOffset_, OffsetF(0, 1));
 }
 
 /**
