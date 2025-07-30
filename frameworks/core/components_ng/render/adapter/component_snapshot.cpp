@@ -654,6 +654,38 @@ std::pair<int32_t, std::shared_ptr<Media::PixelMap>> ComponentSnapshot::GetSyncB
     return captureResult;
 }
 
+void ComponentSnapshot::SetRSUIContext(
+    const RefPtr<FrameNode>& frameNode, const std::shared_ptr<Rosen::RSUIContext>& rsUIContext)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetAttachedContext()) {
+        return;
+    }
+    auto children = frameNode->GetChildren();
+    for (const auto& child : children) {
+        CHECK_NULL_VOID(child);
+        auto childFrameNode = AceType::DynamicCast<FrameNode>(child);
+        CHECK_NULL_VOID(childFrameNode);
+        auto context = AceType::DynamicCast<RosenRenderContext>(childFrameNode->GetRenderContext());
+        CHECK_NULL_VOID(context);
+        auto rsNode = context->GetRSNode();
+        CHECK_NULL_VOID(rsNode);
+        rsNode->SetRSUIContext(rsUIContext);
+        SetRSUIContext(childFrameNode, rsUIContext);
+    }
+}
+
+std::shared_ptr<Rosen::RSUIContext> ComponentSnapshot::GetRSUIContext(const RefPtr<PipelineContext>& pipeline)
+{
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto window = pipeline->GetWindow();
+    CHECK_NULL_RETURN(window, nullptr);
+    auto rsUIDirector = window->GetRSUIDirector();
+    CHECK_NULL_RETURN(rsUIDirector, nullptr);
+    auto rsUIContext = rsUIDirector->GetRSUIContext();
+    return rsUIContext;
+}
+
 // Note: do not use this method, it's only called in drag procedure process.
 std::shared_ptr<Media::PixelMap> ComponentSnapshot::CreateSync(
     const RefPtr<AceType>& customNode, const SnapshotParam& param)
@@ -676,6 +708,8 @@ std::shared_ptr<Media::PixelMap> ComponentSnapshot::CreateSync(
         stackNode->AddChild(uiNode);
         node = stackNode;
     }
+    auto rsUIContext = GetRSUIContext(pipeline);
+    SetRSUIContext(node, rsUIContext);
     ACE_SCOPED_TRACE("ComponentSnapshot::CreateSync_Tag=%s_Id=%d_Key=%s", node->GetTag().c_str(), node->GetId(),
         node->GetInspectorId().value_or("").c_str());
     std::string imageIds = "";
