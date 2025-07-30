@@ -17,10 +17,10 @@ import("//build/ohos.gni")
 generate_static_abc("swipe_refresher_ets_abc") {
   base_url = "./"
   files = [ "./@ohos.arkui.advanced.SwipeRefresher.ets" ]
-  #ui_enable = "True"
+  ui_enable = "True"
   is_boot_abc = "True"
   device_dst_file = "/system/framework/swipe_refresher_ets_abc.abc"
-  dst_file = target_out_dir + "/swipe_refresher_ets_abc"
+  dst_file = target_out_dir + "/swipe_refresher_ets_abc/modules_static.abc"
   out_puts = [ target_out_dir + "/swipe_refresher_ets_abc/modules_static.abc" ]
 }
 
