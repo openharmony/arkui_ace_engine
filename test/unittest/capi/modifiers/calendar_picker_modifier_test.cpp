@@ -335,7 +335,7 @@ HWTEST_F(CalendarPickerModifierTest, setOnChangeTest, TestSize.Level1)
     ASSERT_NE(modifier_->setOnChange0, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<CalendarPickerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<CalendarPickerEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     static std::optional<PickerDate> expected = std::nullopt;

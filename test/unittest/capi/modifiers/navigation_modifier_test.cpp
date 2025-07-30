@@ -830,7 +830,7 @@ HWTEST_F(NavigationModifierTest, setOnNavBarStateChangeTest, TestSize.Level1)
 {
     Callback_Boolean_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<NavigationEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NavigationEventHub>();
 
     struct CheckEvent {
         int32_t nodeId;
@@ -863,7 +863,7 @@ HWTEST_F(NavigationModifierTest, setOnNavigationModeChangeTest, TestSize.Level1)
 {
     Callback_NavigationMode_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<NavigationEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NavigationEventHub>();
 
     struct CheckEvent {
         int32_t nodeId;
@@ -1063,7 +1063,7 @@ HWTEST_F(NavigationModifierTest, onTitleModeChangeTest, TestSize.Level1)
 {
     const int32_t contextId = 123;
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<NavigationEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<NavigationEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     static std::optional<Ark_NavigationTitleMode> checkInvoke;

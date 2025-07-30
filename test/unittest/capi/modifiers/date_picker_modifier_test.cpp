@@ -1026,7 +1026,7 @@ HWTEST_F(DatePickerModifierTest, setOnChangeTest, TestSize.Level1)
     ASSERT_NE(modifier_->setOnChange, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<DatePickerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<DatePickerEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {
@@ -1127,7 +1127,7 @@ HWTEST_F(DatePickerModifierTest, setOnDateChangeTest, TestSize.Level1)
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<DatePickerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<DatePickerEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     static std::optional<PickerDate> selectedDate = std::nullopt;
@@ -1920,7 +1920,7 @@ HWTEST_F(DatePickerModifierTest, setOnDateChange1Test, TestSize.Level1)
     ASSERT_NE(modifier_->setOnDateChange1, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<DatePickerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<DatePickerEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     static std::optional<PickerDate> selectedDate = std::nullopt;
@@ -2007,7 +2007,7 @@ HWTEST_F(DatePickerModifierTest, setOnChangeEventSelectedTest, TestSize.Level1)
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<DatePickerEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<DatePickerEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     static std::optional<PickerDate> selectedDate = std::nullopt;

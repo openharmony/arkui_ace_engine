@@ -1680,7 +1680,7 @@ HWTEST_F(CommonMethodModifierTest17, DISABLED_bindPopupCustomPopupOptionsOnState
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
     ASSERT_NE(popupInfo.popupNode, nullptr);
     
-    auto eventHub = popupInfo.popupNode->GetEventHub<BubbleEventHub>();
+    auto eventHub = popupInfo.popupNode->GetOrCreateEventHub<BubbleEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     eventHub->FireChangeEvent(true);
@@ -1729,7 +1729,7 @@ HWTEST_F(CommonMethodModifierTest17, DISABLED_bindPopupCustomPopupOptionsOnState
     auto popupInfo = overlayManager->GetPopupInfo(blankRef->GetId());
     ASSERT_NE(popupInfo.popupNode, nullptr);
     
-    auto eventHub = popupInfo.popupNode->GetEventHub<BubbleEventHub>();
+    auto eventHub = popupInfo.popupNode->GetOrCreateEventHub<BubbleEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     eventHub->FireChangeEvent(true);

@@ -487,7 +487,7 @@ HWTEST_F(MarqueeModifierTest, setOnStartTest, TestSize.Level1)
     ASSERT_NE(modifier_->setOnStart, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<MarqueeEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<MarqueeEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     static constexpr int32_t contextId = 123;
@@ -515,7 +515,7 @@ HWTEST_F(MarqueeModifierTest, setOnBounceTest, TestSize.Level1)
     ASSERT_NE(modifier_->setOnBounce, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<MarqueeEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<MarqueeEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     static constexpr int32_t contextId = 123;
@@ -543,7 +543,7 @@ HWTEST_F(MarqueeModifierTest, setOnFinishTest, TestSize.Level1)
     ASSERT_NE(modifier_->setOnFinish, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<MarqueeEventHub>();
+    auto eventHub = frameNode->GetOrCreateEventHub<MarqueeEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
     static constexpr int32_t contextId = 123;

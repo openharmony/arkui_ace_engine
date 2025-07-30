@@ -197,7 +197,7 @@ HWTEST_F(SearchModifierTest2, setOnWillChangeTest, TestSize.Level1)
 
     auto searchTextField = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     CHECK_NULL_VOID(searchTextField);
-    auto eventHub = searchTextField->GetEventHub<TextFieldEventHub>();
+    auto eventHub = searchTextField->GetOrCreateEventHub<TextFieldEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto result = eventHub->FireOnWillChangeEvent(expectedChangeValueInfo);
     EXPECT_TRUE(result);

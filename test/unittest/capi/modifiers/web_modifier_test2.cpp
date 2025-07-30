@@ -75,7 +75,7 @@ class WebModifierTest2 : public ModifierTestBase<GENERATED_ArkUIWebModifier,
 HWTEST_F(WebModifierTest2, onOverScrollTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     double xOffset = 6.6f;
     double yOffset = 8.9f;
 
@@ -115,7 +115,7 @@ HWTEST_F(WebModifierTest2, onOverScrollTest, TestSize.Level1)
 HWTEST_F(WebModifierTest2, onSafeBrowsingCheckResultTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     ThreatType type = ThreatType::RISK;
 
     struct CheckEvent {
@@ -152,7 +152,7 @@ HWTEST_F(WebModifierTest2, onSafeBrowsingCheckResultTest, TestSize.Level1)
 HWTEST_F(WebModifierTest2, onNavigationEntryCommittedTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     std::string url = "url";
     NavigationType type = NavigationType::NAVIGATION_TYPE_NEW_SUBFRAME;
     bool isMainFrame = true;
@@ -206,7 +206,7 @@ HWTEST_F(WebModifierTest2, onNavigationEntryCommittedTest, TestSize.Level1)
 HWTEST_F(WebModifierTest2, onIntelligentTrackingPreventionResultTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     std::string host = "host";
     std::string trackerHost = "trackerHost";
 
@@ -247,7 +247,7 @@ HWTEST_F(WebModifierTest2, onIntelligentTrackingPreventionResultTest, TestSize.L
 HWTEST_F(WebModifierTest2, onNativeEmbedVisibilityChangeTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     bool visibility = true;
     std::string embedId = "embed_id";
 
@@ -288,7 +288,7 @@ HWTEST_F(WebModifierTest2, onNativeEmbedVisibilityChangeTest, TestSize.Level1)
 HWTEST_F(WebModifierTest2, onOverrideUrlLoadingTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     std::map<std::string, std::string> headers = {};
     std::string method = "method";
     std::string url = "url";
@@ -340,7 +340,7 @@ HWTEST_F(WebModifierTest2, onOverrideUrlLoadingTest, TestSize.Level1)
 HWTEST_F(WebModifierTest2, onRenderProcessNotRespondingTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     std::string jsStack = "jsStack";
     int pid = 5;
     RenderProcessNotRespondingReason reason = RenderProcessNotRespondingReason::NAVIGATION_COMMIT_TIMEOUT;
@@ -386,7 +386,7 @@ HWTEST_F(WebModifierTest2, onRenderProcessNotRespondingTest, TestSize.Level1)
 HWTEST_F(WebModifierTest2, onRenderProcessRespondingTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     std::string type = "onRenderProcessResponding";
 
     struct CheckEvent {
@@ -419,7 +419,7 @@ HWTEST_F(WebModifierTest2, onRenderProcessRespondingTest, TestSize.Level1)
 HWTEST_F(WebModifierTest2, onViewportFitChangedTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     ViewportFit viewportFit = ViewportFit::CONTAINS;
 
     struct CheckEvent {
@@ -456,7 +456,7 @@ HWTEST_F(WebModifierTest2, onViewportFitChangedTest, TestSize.Level1)
 HWTEST_F(WebModifierTest2, onInterceptKeyboardAttachTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     RefPtr<WebCustomKeyboardHandler> customKeyboardHandler = Referenced::MakeRefPtr<MockWebCustomKeyboardHandler>();
     std::map<std::string, std::string> attributes = {{"key1", "value1"}, {"key2", "value2"}};
 
@@ -512,7 +512,7 @@ HWTEST_F(WebModifierTest2, setOnInterceptKeyEventTest, TestSize.Level1)
 #ifdef WEB_SUPPORTED
     ASSERT_NE(modifier_->setOnInterceptKeyEvent, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     struct CheckEvent {
         int32_t resourceId;
         KeyCode code = KeyCode::KEY_UNKNOWN;
@@ -558,7 +558,7 @@ HWTEST_F(WebModifierTest2, setOnInterceptKeyEventTest, TestSize.Level1)
 HWTEST_F(WebModifierTest2, onAdsBlockedTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     std::string url = "url";
     std::vector<std::string> adsBlocked = { "item1", "item2" };
 
@@ -597,7 +597,7 @@ HWTEST_F(WebModifierTest2, onAdsBlockedTest, TestSize.Level1)
 HWTEST_F(WebModifierTest2, onNativeEmbedLifecycleChangeTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     ASSERT_NE(webEventHub, nullptr);
     std::string embedId = "embed_id";
     std::string surfaceId = "surface_id";
@@ -639,7 +639,7 @@ HWTEST_F(WebModifierTest2, onNativeEmbedGestureEventTest, TestSize.Level1)
 {
     static const std::string expectedType = "xxx";
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    auto webEventHub = frameNode->GetOrCreateEventHub<WebEventHub>();
     ASSERT_NE(webEventHub, nullptr);
     std::string embedId = "embed_id";
     TouchEventInfo touchEventInfo(expectedType);
