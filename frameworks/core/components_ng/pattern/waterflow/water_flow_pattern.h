@@ -104,6 +104,11 @@ public:
         return layoutInfo_->endIndex_;
     }
 
+    float GetPendingDelta() const
+    {
+        return layoutInfo_->GetPendingDelta();
+    }
+
     int32_t GetChildrenCount() const;
 
     float GetTotalOffset() const override

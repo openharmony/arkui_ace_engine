@@ -393,6 +393,7 @@ struct GridLayoutInfo {
     int32_t endMainLineIndex_ = 0;
 
     int32_t jumpIndex_ = EMPTY_JUMP_INDEX;
+    int32_t jumpForRecompose_ = EMPTY_JUMP_INDEX; // new mark index to notify frontend recomposition
     std::optional<float> extraOffset_;
     int32_t crossCount_ = 0;
     int32_t childrenCount_ = 0;

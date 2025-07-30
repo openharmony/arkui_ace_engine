@@ -746,6 +746,7 @@ build_component_ng("pattern_ng") {
       "picker/datepicker_dialog_view.cpp",
       "text_picker/textpicker_dialog_view.cpp",
       "time_picker/timepicker_dialog_view.cpp",
+      "waterflow/layout/sliding_window/water_flow_large_delta_converter.cpp",
       "waterflow/water_flow_model_ng_multi_thread.cpp",
     ]
   }

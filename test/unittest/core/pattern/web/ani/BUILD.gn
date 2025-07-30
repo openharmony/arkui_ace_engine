@@ -143,6 +143,7 @@ ohos_unittest("web_pattern_static_unit_test_ohos") {
     "$ace_root/frameworks/core/components_ng/pattern/grid/grid_accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/grid/grid_adaptive/grid_adaptive_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/grid/grid_event_hub.cpp",
+    #"$ace_root/frameworks/core/components_ng/pattern/grid/grid_fill_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/grid/grid_item_accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/grid/grid_item_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/grid/grid_item_layout_property.cpp",

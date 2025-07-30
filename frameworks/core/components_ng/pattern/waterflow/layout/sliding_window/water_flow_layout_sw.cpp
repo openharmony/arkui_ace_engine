@@ -408,9 +408,6 @@ bool WaterFlowLayoutSW::FillBackSection(float viewportBound, int32_t& idx, int32
         q.pop();
         info_->idxToLane_[idx] = laneIdx;
         const float mainLen = MeasureChild(idx, laneIdx);
-        if (Negative(mainLen)) {
-            return true;
-        }
         float endPos = FillBackHelper(mainLen, idx++, laneIdx);
         if (LessNotEqual(endPos, viewportBound)) {
             q.push({ endPos, laneIdx });
@@ -455,9 +452,6 @@ bool WaterFlowLayoutSW::FillFrontSection(float viewportBound, int32_t& idx, int3
         q.pop();
         info_->idxToLane_[idx] = laneIdx;
         const float mainLen = MeasureChild(idx, laneIdx, false);
-        if (Negative(mainLen)) {
-            return true;
-        }
         float startPos = FillFrontHelper(mainLen, idx--, laneIdx);
         if (GreatNotEqual(startPos, viewportBound)) {
             q.push({ startPos, laneIdx });
@@ -513,9 +507,6 @@ void WaterFlowLayoutSW::RecoverBack(float viewportBound, int32_t& idx, int32_t m
     while (!lanes.empty() && idx <= maxChildIdx && info_->idxToLane_.count(idx)) {
         size_t laneIdx = info_->idxToLane_.at(idx);
         const float mainLen = MeasureChild(idx, laneIdx);
-        if (Negative(mainLen)) {
-            return;
-        }
         float endPos = FillBackHelper(mainLen, idx++, laneIdx);
         if (GreatOrEqual(endPos, viewportBound)) {
             lanes.erase(laneIdx);
@@ -540,9 +531,6 @@ void WaterFlowLayoutSW::RecoverFront(float viewportBound, int32_t& idx, int32_t 
     while (!lanes.empty() && idx >= minChildIdx && info_->idxToLane_.count(idx)) {
         size_t laneIdx = info_->idxToLane_.at(idx);
         const float mainLen = MeasureChild(idx, laneIdx, false);
-        if (Negative(mainLen)) {
-            return;
-        }
         float startPos = FillFrontHelper(mainLen, idx--, laneIdx);
         if (LessOrEqual(startPos, viewportBound)) {
             lanes.erase(laneIdx);
@@ -748,7 +736,7 @@ void WaterFlowLayoutSW::AdjustOverScroll()
 float WaterFlowLayoutSW::MeasureChild(int32_t idx, size_t lane, bool forward) const
 {
     auto child = wrapper_->GetOrCreateChildByIndex(nodeIdx(idx), !cacheDeadline_, cacheDeadline_.has_value());
-    CHECK_NULL_RETURN(child, -1.0f);
+    CHECK_NULL_RETURN(child, 0.0f);
     float userHeight = WaterFlowLayoutUtils::GetUserDefHeight(sections_, info_->GetSegment(idx), idx);
     if (NonNegative(userHeight)) {
         WaterFlowLayoutUtils::UpdateItemIdealSize(child, axis_, userHeight);
