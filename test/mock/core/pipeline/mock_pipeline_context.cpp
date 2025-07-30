@@ -224,6 +224,9 @@ PipelineContext::PipelineContext()
     if (navigationMgr_) {
         navigationMgr_->SetPipelineContext(WeakClaim(this));
     }
+    if (forceSplitMgr_) {
+        forceSplitMgr_->SetPipelineContext(WeakClaim(this));
+    }
 }
 
 float PipelineContext::GetCurrentRootWidth()
@@ -1046,7 +1049,7 @@ void PipelineContext::RegisterOverlayNodePositionsUpdateCallback(
 
 void PipelineContext::TriggerOverlayNodePositionsUpdateCallback(std::vector<Ace::RectF> rects) {}
 
-bool PipelineContext::IsContainerModalVisible()
+bool PipelineContext::IsContainerModalVisible() const
 {
     return false;
 }

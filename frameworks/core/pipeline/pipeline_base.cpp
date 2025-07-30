@@ -200,6 +200,34 @@ uint64_t PipelineBase::GetTimeFromExternalTimer()
     return (ts.tv_sec * secToNanosec + ts.tv_nsec);
 }
 
+double PipelineBase::Vp2PxInner(double vpValue) const
+{
+    double density = GetWindowDensity();
+    if (LessOrEqual(density, 1.0)) {
+        density = GetDensity();
+    }
+    return vpValue * density;
+}
+
+double PipelineBase::CalcPageWidth(double rootWidth) const
+{
+    if (!isCurrentInForceSplitMode_) {
+        return rootWidth;
+    }
+    // Divider Width equal to 1.0_vp
+    constexpr double HALF = 2.0;
+    return (rootWidth - Vp2PxInner(1.0)) / HALF;
+}
+
+double PipelineBase::GetPageWidth() const
+{
+    auto pageWidth = rootWidth_;
+    if (IsContainerModalVisible()) {
+        pageWidth -= 2 * Vp2PxInner((CONTAINER_BORDER_WIDTH + CONTENT_PADDING).Value());
+    }
+    return CalcPageWidth(pageWidth);
+}
+
 void PipelineBase::RequestFrame()
 {
     if (window_) {
@@ -512,6 +540,7 @@ void PipelineBase::UpdateRootSizeAndScale(int32_t width, int32_t height)
         if (IsContainerModalVisible()) {
             pageWidth -= 2 * (CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx();
         }
+        pageWidth = CalcPageWidth(pageWidth);
         designWidthScale_ =
             windowConfig.autoDesignWidth ? density_ : pageWidth / windowConfig.designWidth;
         windowConfig.designWidthScale = designWidthScale_;

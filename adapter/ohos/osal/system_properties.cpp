@@ -302,6 +302,11 @@ bool IsNavigationBlurEnabled()
     return (system::GetParameter("persist.ace.navigation.blur.enabled", "0") == "1");
 }
 
+bool IsForceSplitIgnoreOrientationEnabled()
+{
+    return (system::GetParameter("persist.ace.navigation.ignoreorientation.enabled", "0") == "1");
+}
+
 bool IsGridCacheEnabled()
 {
     return (system::GetParameter("persist.ace.grid.cache.enabled", "1") == "1");
@@ -679,6 +684,7 @@ bool SystemProperties::enableScrollableItemPool_ = IsEnableScrollableItemPool();
 bool SystemProperties::resourceDecoupling_ = IsResourceDecoupling();
 bool SystemProperties::configChangePerform_ = IsConfigChangePerform();
 bool SystemProperties::navigationBlurEnabled_ = IsNavigationBlurEnabled();
+bool SystemProperties::forceSplitIgnoreOrientationEnabled_ = IsForceSplitIgnoreOrientationEnabled();
 bool SystemProperties::gridCacheEnabled_ = IsGridCacheEnabled();
 bool SystemProperties::gridIrregularLayoutEnable_ = IsGridIrregularLayoutEnabled();
 std::pair<float, float> SystemProperties::brightUpPercent_ = GetPercent();
@@ -862,6 +868,7 @@ void SystemProperties::InitDeviceInfo(
     resourceDecoupling_ = IsResourceDecoupling();
     configChangePerform_ = IsConfigChangePerform();
     navigationBlurEnabled_ = IsNavigationBlurEnabled();
+    forceSplitIgnoreOrientationEnabled_ = IsForceSplitIgnoreOrientationEnabled();
     gridCacheEnabled_ = IsGridCacheEnabled();
     gridIrregularLayoutEnable_ = IsGridIrregularLayoutEnabled();
     sideBarContainerBlurEnable_ = IsSideBarContainerBlurEnable();
@@ -1055,6 +1062,11 @@ bool SystemProperties::GetDisplaySyncSkipEnabled()
 bool SystemProperties::GetNavigationBlurEnabled()
 {
     return navigationBlurEnabled_;
+}
+
+bool SystemProperties::GetForceSplitIgnoreOrientationEnabled()
+{
+    return forceSplitIgnoreOrientationEnabled_;
 }
 
 bool SystemProperties::GetCacheNavigationNodeEnable()

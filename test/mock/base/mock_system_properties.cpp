@@ -69,6 +69,7 @@ int32_t SystemProperties::devicePhysicalWidth_ = 0;
 int32_t SystemProperties::devicePhysicalHeight_ = 0;
 bool SystemProperties::enableScrollableItemPool_ = false;
 bool SystemProperties::navigationBlurEnabled_ = false;
+bool SystemProperties::forceSplitIgnoreOrientationEnabled_ = false;
 bool SystemProperties::cacheNavigationNodeEnable_ = false;
 bool SystemProperties::gridCacheEnabled_ = true;
 bool SystemProperties::gridIrregularLayoutEnable_ = true;
@@ -192,6 +193,11 @@ bool SystemProperties::GetDisplaySyncSkipEnabled()
 bool SystemProperties::GetNavigationBlurEnabled()
 {
     return navigationBlurEnabled_;
+}
+
+bool SystemProperties::GetForceSplitIgnoreOrientationEnabled()
+{
+    return forceSplitIgnoreOrientationEnabled_;
 }
 
 bool SystemProperties::GetCacheNavigationNodeEnable()
