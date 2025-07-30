@@ -623,7 +623,7 @@ float WaterFlowLayoutInfo::EstimateTotalHeight() const
     if (!itemInfos_.empty()) {
         // in segmented layout
         childCount = static_cast<int32_t>(itemInfos_.size());
-    } else if (maxHeight_ && repeatDifference_ == 0) {
+    } else if (itemEnd_ && repeatDifference_ == 0) {
         // in original layout, already reach end.
         return maxHeight_;
     } else {

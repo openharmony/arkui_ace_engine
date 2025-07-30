@@ -1269,4 +1269,52 @@ HWTEST_F(WaterFlowTestNg, WaterFlowInitializeWithFooterTest001, TestSize.Level1)
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     EXPECT_EQ(secObj->GetSectionInfo().size(), 0);
 }
+
+/**
+ * @tc.name: FooterScrollBarTest001
+ * @tc.desc: Test scrollbar visibility during data switching with footer
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, FooterScrollBarTest001, TestSize.Level1) {
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetFooter(GetDefaultHeaderBuilder());
+    CreateDone();
+
+    // Verify initial empty state: only footer with small content height
+    EXPECT_TRUE(IsEqual(pattern_->layoutInfo_->GetContentHeight(), 50.0f));
+    EXPECT_LT(pattern_->layoutInfo_->GetContentHeight(), pattern_->layoutInfo_->lastMainSize_);
+
+    // Add sufficient data items to trigger scrolling
+    CreateWaterFlowItems(50);
+    CreateDone();
+    FlushUITasks();
+
+    // Verify state with data: should be scrollable
+    EXPECT_EQ(pattern_->layoutInfo_->footerIndex_, 0);
+    EXPECT_TRUE(pattern_->IsScrollable());
+
+    // Delete all data items, keep only footer
+    int totalChildren = frameNode_->GetTotalChildCount();
+    for (int i = 1; i < totalChildren; ++i) {
+        frameNode_->RemoveChildAtIndex(1);
+        frameNode_->ChildrenUpdatedFrom(1);
+    }
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks();
+
+    // Verify state after data deletion: back to footer-only state
+    EXPECT_EQ(frameNode_->GetTotalChildCount(), 1);
+    EXPECT_TRUE(GetChildFrameNode(frameNode_, 0)->IsActive());
+
+    // Re-add data (critical test scenario: empty data -> has data)
+    CreateWaterFlowItems(50);
+    CreateDone();
+    FlushUITasks();
+
+    // Verify state after data restoration
+    EXPECT_EQ(pattern_->layoutInfo_->footerIndex_, 0);
+    EXPECT_TRUE(pattern_->IsScrollable());
+}
 } // namespace OHOS::Ace::NG
