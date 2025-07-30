@@ -22,8 +22,7 @@
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/components_ng/pattern/navigation/title_bar_pattern.h"
-#include "core/components_ng/pattern/navigation/tool_bar_pattern.h"
+#include "core/components_ng/pattern/navigation/navdestination_pattern_base.h"
 
 namespace OHOS::Ace::NG {
 constexpr double HALF = 0.5;
@@ -260,17 +259,13 @@ void NavDestinationGroupNode::ToJsonValue(std::unique_ptr<JsonValue>& json, cons
         std::string subtitle = NavigationTitleUtil::GetSubtitleString(titleBarNode);
         json->PutExtAttr("title", title.c_str(), filter);
         json->PutExtAttr("subtitle", subtitle.c_str(), filter);
-        auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
-        if (titleBarPattern) {
-            titleBarPattern->GetTitleBarOptions().ToJsonValue(json, filter);
-        }
     }
-    auto toolBarNode = AceType::DynamicCast<NavToolbarNode>(toolBarNode_);
-    if (toolBarNode) {
-        auto toolBarPattern = toolBarNode->GetPattern<NavToolbarPattern>();
-        if (toolBarPattern) {
-            toolBarPattern->GetToolBarOptions().ToJsonValue(json, filter);
-        }
+    auto navBarPattern = GetPattern<NavDestinationPatternBase>();
+    if (navBarPattern) {
+        auto menuOptionsJson = JsonUtil::Create(true);
+        auto moreButtonOptions = navBarPattern->GetMenuOptions();
+        moreButtonOptions.ToJsonValue(menuOptionsJson, filter);
+        json->PutExtAttr("menuOptions", menuOptionsJson, filter);
     }
     json->PutExtAttr("mode", mode_ == NavDestinationMode::DIALOG
         ? "NavDestinationMode::DIALOG"

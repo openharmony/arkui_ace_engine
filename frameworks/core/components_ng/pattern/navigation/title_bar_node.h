@@ -118,6 +118,7 @@ public:
     {
         return needAvoidContainerModal_;
     }
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     void OnAttachToMainTree(bool recursive) override;
     void OnDetachFromMainTree(bool recursive, PipelineContext* context) override;

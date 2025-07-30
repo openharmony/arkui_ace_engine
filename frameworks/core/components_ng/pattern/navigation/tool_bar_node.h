@@ -75,6 +75,7 @@ public:
     {
         return isHideItemText_;
     }
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
 private:
     RefPtr<UINode> toolbarContainerNode_;

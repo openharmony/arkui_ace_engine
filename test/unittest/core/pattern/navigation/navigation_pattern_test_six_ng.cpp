@@ -880,6 +880,42 @@ HWTEST_F(NavigationPatternTestSixNg, TitleBarNode_ToJsonValue_001, TestSize.Leve
 }
 
 /**
+ * @tc.name: Menu_ToJsonValue001
+ * @tc.desc: Simple test for NavDestinationGroupNode::ToJsonValue focusing on menuOptions coverage
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestSixNg, Menu_ToJsonValue001, TestSize.Level1)
+{
+    MockPipelineContext::SetUp();
+    MockContainer::SetUp();
+
+    auto groupNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+
+    auto navPattern = groupNode->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(navPattern, nullptr);
+
+    NavigationMenuOptions menuOptions;
+    BlurStyleOption blurOpt;
+    blurOpt.blurStyle = BlurStyle::THIN;
+    menuOptions.mbOptions.bgOptions.blurStyleOption = blurOpt;
+    navPattern->SetMenuOptions(menuOptions);
+
+    groupNode->layoutProperty_ = AceType::MakeRefPtr<NavDestinationLayoutPropertyBase>();
+
+    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+    InspectorFilter filter;
+    groupNode->ToJsonValue(json, filter);
+
+    auto menuOptionsJson = json->GetValue("menuOptions");
+    ASSERT_NE(menuOptionsJson, nullptr);
+
+    MockPipelineContext::TearDown();
+    MockContainer::TearDown();
+}
+
+/**
  * @tc.name: UpdateColorModeForNodes001
  * @tc.desc: Both continue and body execution occur in the for loop; the nodeBase branch
  * @tc.type: FUNC
