@@ -78,8 +78,6 @@ static bool g_syncloadDefaultValue = false;
 static bool g_uiNodeGcEnable = false;
 static uint32_t g_syncloadResponseDeadline = 500000000; // default max response delay is 50ms.
 
-} // namespace
-
 bool IsOpIncEnabled()
 {
     return (system::GetParameter(IS_OPINC_ENABLE, "2") == "2");
