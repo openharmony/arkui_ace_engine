@@ -1113,6 +1113,19 @@ HWTEST_F(AppBarTestNg, TestOnBackPressedCallback032, TestSize.Level1)
 }
 
 /**
+ * @tc.name: InitAccessibility001
+ * @tc.desc: Test InitAccessibility
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppBarTestNg, InitAccessibility001, TestSize.Level1)
+{
+    auto stage = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    AppBarView::InitAccessibility(stage);
+    auto stageAccessibilityProperty = stage->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    EXPECT_EQ(stageAccessibilityProperty->GetAccessibilityZIndex(), -2);
+}
+
+/**
  * @tc.name: BuildAppbar001
  * @tc.desc: Test BuildAppbar
  * @tc.type: FUNC
