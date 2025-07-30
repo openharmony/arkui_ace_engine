@@ -1,80 +1,72 @@
 {
   "float": [
     {
-      "name": "page_text_font_size",
-      "value": "50fp"
-    },
-    {
       "name": "TextWith",
-      "value": "50"
+      "value": "500"
     },
     {
       "name": "TextHeight",
-      "value": "50"
+      "value": "200"
     },
     {
       "name": "TextFontSize",
-      "value": "16"
+      "value": "32"
     },
     {
       "name": "TextMinFontScale",
-      "value": "0"
+      "value": "1.0"
     },
     {
       "name": "TextMaxFontScale",
-      "value": "3.2"
+      "value": "1.0"
     },
     {
       "name": "TextShadowRadius",
-      "value": "10"
+      "value": "1"
     },
     {
       "name": "TextShadowOffsetX",
-      "value": "50"
-    },
-    {
-      "name": "TextShadowOffsetY",
       "value": "0"
     },
     {
+      "name": "TextShadowOffsetY",
+      "value": "50"
+    },
+    {
       "name": "TextIndent",
-      "value": "10"
+      "value": "50"
     },
     {
       "name": "TextLineHeight",
-      "value": "20"
+      "value": "50"
     },
     {
       "name": "TextLineSpacing",
-      "value": "5"
+      "value": "50"
     },
     {
       "name": "TextMinFontSize",
-      "value": "16"
+      "value": "4"
     },
     {
       "name": "TextMaxFontSize",
-      "value": "16"
-    },
-    {
-      "name": "TextLetterSpacing",
-      "value": "5"
+      "value": "32"
     },
     {
       "name": "TextBaselineOffset",
-      "value": "5"
+      "value": "50"
     },
     {
       "name": "ModeNumber5_20",
-      "value": "5"
-    },
-    {
-      "name": "ModeNumber20_50",
       "value": "20"
     },
     {
+      "name": "ModeNumber20_50",
+      "value": "50"
+    },
+    {
       "name": "ModeWeight400_900",
-      "value": "400"
+      "value": "900"
     }
   ]
 }

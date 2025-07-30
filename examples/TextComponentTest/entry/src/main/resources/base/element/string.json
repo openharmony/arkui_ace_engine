@@ -13,6 +13,42 @@
       "value": "label"
     },
     {
+      "name": "fontWeight",
+      "value": "900"
+    },
+    {
+      "name": "textCreateContent",
+      "value": "浅色模式"
+    },
+    {
+      "name": "TextFontFamily",
+      "value": "HarmonyOS Sans"
+    },
+    {
+      "name": "TextMinFontSizeFp",
+      "value": "16fp"
+    },
+    {
+      "name": "TextMaxFontSizeFp",
+      "value": "16fp"
+    },
+    {
+      "name": "TextResponseRegionWidth",
+      "value": "50%"
+    },
+    {
+      "name": "TextInputPlaceholder",
+      "value": "浅色模式"
+    },
+    {
+      "name": "ModeWeight400_900",
+      "value": "400"
+    },
+    {
+      "name": "inputFilter",
+      "value": "[a-z]"
+    },
+    {
       "name": "Long",
       "value": "长文本测试\\n长文本测试长文本测试长文本测试长文本测试长文本测试长文本测试长文本测试长文本测试长文本测试长文本测试长文本测试长文本测试长文本测试长文本测试长文本测试长文本测试长文本测试长文本测试\\n长文本测试长文本测试长文本测试长文本测试长文本测试长文本测试长文本测试"
     },

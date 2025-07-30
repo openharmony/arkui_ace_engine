@@ -15,24 +15,24 @@
 
 @Entry
 @Component
-struct Index {
-  @State message: string = 'Hello World';
-
+struct Index_TextArea {
   build() {
-    RelativeContainer() {
-      Text(this.message)
-        .id('HelloWorld')
-        .fontSize($r('app.float.page_text_font_size'))
-        .fontWeight(FontWeight.Bold)
-        .alignRules({
-          center: { anchor: '__container__', align: VerticalAlign.Center },
-          middle: { anchor: '__container__', align: HorizontalAlign.Center }
-        })
-        .onClick(() => {
-          this.message = 'Welcome';
-        })
+    Scroll() {
+      Column() {
+        Column() {
+          Text(' 测试点 TextArea create placeholder ')
+          TextArea({ placeholder: $r('app.string.TextInputPlaceholder') }).borderColor(Color.Red)
+        }.borderWidth(1)
+
+        Blank().borderWidth(5).height(1)
+
+        Column() {
+          Text(' 测试点 TextArea create text ')
+          TextArea({ text: $r('app.string.TextInputPlaceholder') })
+        }.borderWidth(1).borderColor(Color.Red)
+
+        Blank().borderWidth(5).height(1)
+      }
     }
-    .height('100%')
-    .width('100%')
   }
 }
