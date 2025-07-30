@@ -480,6 +480,8 @@ void XComponentPattern::OnRebuildFrame()
     CHECK_NULL_VOID(renderContext);
     CHECK_NULL_VOID(handlingSurfaceRenderContext_);
     renderContext->AddChild(handlingSurfaceRenderContext_, 0);
+    auto pipeline = host->GetContext();
+    handlingSurfaceRenderContext_->SetRSUIContext(pipeline);
     SetSurfaceNodeToGraphic();
 }
 
@@ -1531,6 +1533,8 @@ bool XComponentPattern::StopTextureExport()
     CHECK_NULL_RETURN(renderContext, false);
     renderContext->ClearChildren();
     renderContext->AddChild(handlingSurfaceRenderContext_, 0);
+    auto pipeline = host->GetContext();
+    handlingSurfaceRenderContext_->SetRSUIContext(pipeline);
     renderContext->SetIsNeedRebuildRSTree(true);
     return true;
 }
