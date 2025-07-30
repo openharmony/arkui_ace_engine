@@ -61,9 +61,16 @@ EventDataInt sampleData6 = {
     {275, 5456, 15267}
 };
 
+EventDataInt sampleData7 = {
+    {100, 5479, 16579}, {107, 5479, 16542}, {114, 5479, 16497}, {121, 5476, 16458}, {128, 5472, 16403},
+    {135, 5470, 16350}, {142, 5467, 16284}, {149, 5465, 16225}, {156, 5463, 16163}, {163, 5463, 16113},
+    {170, 5463, 16058}, {177, 5463, 16001}, {184, 5463, 15948}, {191, 5461, 15896}, {198, 5461, 15843}
+};
+
 std::vector<EventDataInt> sampleDatas = {
     sampleData1, sampleData2, sampleData3,
-    sampleData4, sampleData5, sampleData6
+    sampleData4, sampleData5, sampleData6,
+    sampleData7
 };
 
 EventDataInt flagShipLowSpeed1 = {
