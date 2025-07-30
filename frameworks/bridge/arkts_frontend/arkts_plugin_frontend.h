@@ -212,7 +212,7 @@ private:
     RefPtr<TaskExecutor> taskExecutor_;
     RefPtr<PipelineContext> pipeline_;
     ani_env* env_; // ani_env
-    ani_ref app_;
+    ani_ref app_ = nullptr;
     bool foregroundFrontend_ = false;
     std::string pluginBundleName_;
     std::string pluginModuleName_;
