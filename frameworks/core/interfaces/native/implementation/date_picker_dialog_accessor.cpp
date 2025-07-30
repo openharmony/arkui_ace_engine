@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <functional>
+#include <utility>
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -23,63 +25,32 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DatePickerDialogAccessor {
-void BuildDialogPropertiesCallbacks(const Ark_DatePickerDialogOptions options, DialogProperties& dialogProps)
-{
-    auto didAppearCallbackOpt = Converter::OptConvert<VoidCallback>(options.onDidAppear);
-    if (didAppearCallbackOpt) {
-        auto onDidAppear = [arkCallback = CallbackHelper(*didAppearCallbackOpt)]() -> void {
-            arkCallback.Invoke();
-        };
-        dialogProps.onDidAppear = onDidAppear;
-    }
-    auto didDisappearCallbackOpt = Converter::OptConvert<VoidCallback>(options.onDidDisappear);
-    if (didDisappearCallbackOpt) {
-        auto onDidDisappear = [arkCallback = CallbackHelper(*didDisappearCallbackOpt)]() -> void {
-            arkCallback.Invoke();
-        };
-        dialogProps.onDidDisappear = onDidDisappear;
-    }
-    auto willAppearCallbackOpt = Converter::OptConvert<VoidCallback>(options.onWillAppear);
-    if (willAppearCallbackOpt) {
-        auto onWillAppear = [arkCallback = CallbackHelper(*willAppearCallbackOpt)]() -> void {
-            arkCallback.Invoke();
-        };
-        dialogProps.onWillAppear = onWillAppear;
-    }
-    auto willDisappearCallbackOpt = Converter::OptConvert<VoidCallback>(options.onWillDisappear);
-    if (willDisappearCallbackOpt) {
-        auto onWillDisappear = [arkCallback = CallbackHelper(*willDisappearCallbackOpt)]() -> void {
-            arkCallback.Invoke();
-        };
-        dialogProps.onWillDisappear = onWillDisappear;
-    }
-}
-DialogProperties BuildDialogProperties(const Ark_DatePickerDialogOptions options)
-{
-    DialogProperties dialogProps;
-    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_RETURN(pipeline, dialogProps);
-    auto dialogTheme = pipeline->GetTheme<DialogTheme>();
-    CHECK_NULL_RETURN(dialogTheme, dialogProps);
 
-    dialogProps.alignment = dialogTheme->GetAlignment();
-    if (dialogProps.alignment == DialogAlignment::BOTTOM) {
-        dialogProps.offset = DimensionOffset(Offset(0, -dialogTheme->GetMarginBottom().ConvertToPx()));
+PickerDialogInfo BuildDatePickerDialogInfo(const Ark_DatePickerDialogOptions options)
+{
+    PickerDialogInfo dialogInfo;
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(pipeline, dialogInfo);
+    auto dialogTheme = pipeline->GetTheme<DialogTheme>();
+    CHECK_NULL_RETURN(dialogTheme, dialogInfo);
+
+    dialogInfo.alignment = dialogTheme->GetAlignment();
+    if (dialogInfo.alignment == DialogAlignment::BOTTOM) {
+        dialogInfo.offset = DimensionOffset(Offset(0, -dialogTheme->GetMarginBottom().ConvertToPx()));
     }
-    dialogProps.customStyle = false;
-    dialogProps.backgroundBlurStyle = static_cast<int32_t>(Converter::OptConvert<BlurStyle>(
+    dialogInfo.backgroundBlurStyle = static_cast<int32_t>(Converter::OptConvert<BlurStyle>(
         options.backgroundBlurStyle).value_or(BlurStyle::COMPONENT_REGULAR));
-    dialogProps.backgroundColor = Converter::OptConvert<Color>(options.backgroundColor);
-    dialogProps.shadow = Converter::OptConvert<Shadow>(options.shadow);
-    dialogProps.maskRect = Converter::OptConvert<DimensionRect>(options.maskRect);
+    dialogInfo.backgroundColor = Converter::OptConvert<Color>(options.backgroundColor);
+    dialogInfo.shadow = Converter::OptConvert<Shadow>(options.shadow);
+    dialogInfo.maskRect = Converter::OptConvert<DimensionRect>(options.maskRect);
     auto enableHoverMode = Converter::OptConvert<bool>(options.enableHoverMode);
     if (enableHoverMode.has_value()) {
-        dialogProps.enableHoverMode = enableHoverMode.value();
+        dialogInfo.enableHoverMode = enableHoverMode.value();
     }
-    dialogProps.hoverModeArea = Converter::OptConvert<HoverModeAreaType>(options.hoverModeArea);
-    BuildDialogPropertiesCallbacks(options, dialogProps);
-    return dialogProps;
+    dialogInfo.hoverModeArea = Converter::OptConvert<HoverModeAreaType>(options.hoverModeArea);
+    return dialogInfo;
 }
+
 DatePickerSettingData BuildSettingData(const Ark_DatePickerDialogOptions options)
 {
     DatePickerSettingData settingData;
@@ -125,6 +96,88 @@ DatePickerSettingData BuildSettingData(const Ark_DatePickerDialogOptions options
     }
     return settingData;
 }
+
+PickerDialogEvent BuildPickerDialogEvents(const Ark_DatePickerDialogOptions options)
+{
+    PickerDialogEvent dialogEvent;
+    auto didAppearCallbackOpt = Converter::OptConvert<VoidCallback>(options.onDidAppear);
+    if (didAppearCallbackOpt) {
+        auto onDidAppear = [arkCallback = CallbackHelper(*didAppearCallbackOpt)]() -> void {
+            arkCallback.Invoke();
+        };
+        dialogEvent.onDidAppear = onDidAppear;
+    }
+    auto didDisappearCallbackOpt = Converter::OptConvert<VoidCallback>(options.onDidDisappear);
+    if (didDisappearCallbackOpt) {
+        auto onDidDisappear = [arkCallback = CallbackHelper(*didDisappearCallbackOpt)]() -> void {
+            arkCallback.Invoke();
+        };
+        dialogEvent.onDidDisappear = onDidDisappear;
+    }
+    auto willAppearCallbackOpt = Converter::OptConvert<VoidCallback>(options.onWillAppear);
+    if (willAppearCallbackOpt) {
+        auto onWillAppear = [arkCallback = CallbackHelper(*willAppearCallbackOpt)]() -> void {
+            arkCallback.Invoke();
+        };
+        dialogEvent.onWillAppear = onWillAppear;
+    }
+    auto willDisappearCallbackOpt = Converter::OptConvert<VoidCallback>(options.onWillDisappear);
+    if (willDisappearCallbackOpt) {
+        auto onWillDisappear = [arkCallback = CallbackHelper(*willDisappearCallbackOpt)]() -> void {
+            arkCallback.Invoke();
+        };
+        dialogEvent.onWillDisappear = onWillDisappear;
+    }
+    return dialogEvent;
+}
+
+PickerDialogInteractiveEvent BuildSelectInteractiveEvents(const Ark_DatePickerDialogOptions arkOptions)
+{
+    PickerDialogInteractiveEvent events;
+    // onCancel
+    auto cancelCallbackOpt = Converter::OptConvert<VoidCallback>(arkOptions.onCancel);
+    if (cancelCallbackOpt) {
+        events.cancelEvent = [arkCallback = CallbackHelper(*cancelCallbackOpt)]() -> void {
+            arkCallback.Invoke();
+        };
+    }
+    // onAccept
+    auto acceptCallbackOpt = Converter::OptConvert<Callback_DatePickerResult_Void>(arkOptions.onAccept);
+    if (acceptCallbackOpt) {
+        events.acceptEvent = [arkCallback = CallbackHelper(*acceptCallbackOpt)](const std::string& info) -> void {
+            auto result = Converter::ArkValue<Ark_DatePickerResult>(info);
+            arkCallback.Invoke(result);
+        };
+    }
+    // onChange
+    auto changeCallbackOpt = Converter::OptConvert<Callback_DatePickerResult_Void>(arkOptions.onChange);
+    if (changeCallbackOpt) {
+        events.changeEvent = [arkCallback = CallbackHelper(*changeCallbackOpt)](const std::string& info) -> void {
+            auto result = Converter::ArkValue<Ark_DatePickerResult>(info);
+            arkCallback.Invoke(result);
+        };
+    }
+    // onDateAccept
+    auto dateAcceptCallbackOpt = Converter::OptConvert<Callback_Date_Void>(arkOptions.onDateAccept);
+    if (dateAcceptCallbackOpt) {
+        events.dateAcceptEvent =
+            [arkCallback = CallbackHelper(*dateAcceptCallbackOpt)](const std::string& info) -> void {
+            auto result = Converter::ArkValue<Ark_Date>(info);
+            arkCallback.Invoke(result);
+        };
+    }
+    // onDateChange
+    auto dateChangeCallbackOpt = Converter::OptConvert<Callback_Date_Void>(arkOptions.onDateChange);
+    if (dateChangeCallbackOpt) {
+        events.dateChangeEvent =
+            [arkCallback = CallbackHelper(*dateChangeCallbackOpt)](const std::string& info) -> void {
+            auto result = Converter::ArkValue<Ark_Date>(info);
+            arkCallback.Invoke(result);
+        };
+    }
+    return events;
+}
+
 std::vector<ButtonInfo> BuildButtonInfos(const Ark_DatePickerDialogOptions options)
 {
     std::vector<ButtonInfo> buttonInfos;
@@ -138,45 +191,7 @@ std::vector<ButtonInfo> BuildButtonInfos(const Ark_DatePickerDialogOptions optio
     }
     return buttonInfos;
 }
-std::map<std::string, DialogEvent> CreateDialogEvent(const Ark_DatePickerDialogOptions options)
-{
-    std::map<std::string, DialogEvent> dialogEvent;
-    auto acceptCallbackOpt = Converter::OptConvert<Callback_DatePickerResult_Void>(options.onAccept);
-    if (acceptCallbackOpt) {
-        auto onAcceptFunc = [arkCallback = CallbackHelper(*acceptCallbackOpt)](const std::string& info) -> void {
-            auto result = Converter::ArkValue<Ark_DatePickerResult>(info);
-            arkCallback.Invoke(result);
-        };
-        dialogEvent["acceptId"] = onAcceptFunc;
-    }
-    auto changeCallbackOpt = Converter::OptConvert<Callback_DatePickerResult_Void>(options.onChange);
-    if (changeCallbackOpt) {
-        auto onChangeFunc = [arkCallback = CallbackHelper(*changeCallbackOpt)](const std::string& info) -> void {
-            auto result = Converter::ArkValue<Ark_DatePickerResult>(info);
-            arkCallback.Invoke(result);
-        };
-        dialogEvent["changeId"] = onChangeFunc;
-    }
-    auto dateAcceptCallbackOpt = Converter::OptConvert<Callback_Date_Void>(options.onDateAccept);
-    if (dateAcceptCallbackOpt) {
-        auto onDateAcceptFunc = [arkCallback = CallbackHelper(*dateAcceptCallbackOpt)](
-                                    const std::string& info) -> void {
-            auto result = Converter::ArkValue<Ark_Date>(info);
-            arkCallback.Invoke(result);
-        };
-        dialogEvent["dateAcceptId"] = onDateAcceptFunc;
-    }
-    auto dateChangeCallbackOpt = Converter::OptConvert<Callback_Date_Void>(options.onDateChange);
-    if (dateChangeCallbackOpt) {
-        auto onDateChangeFunc = [arkCallback = CallbackHelper(*dateChangeCallbackOpt)](
-                                    const std::string& info) -> void {
-            auto result = Converter::ArkValue<Ark_Date>(info);
-            arkCallback.Invoke(result);
-        };
-        dialogEvent["dateChangeId"] = onDateChangeFunc;
-    }
-    return dialogEvent;
-}
+
 void ShowImpl(const Opt_DatePickerDialogOptions* options)
 {
     CHECK_NULL_VOID(options);
@@ -184,21 +199,19 @@ void ShowImpl(const Opt_DatePickerDialogOptions* options)
     if (!arkOptionsOpt.has_value()) { return; }
 
     Ark_DatePickerDialogOptions arkOptions = *arkOptionsOpt;
-    DialogProperties dialogProps = BuildDialogProperties(arkOptions);
+    PickerDialogInfo dialogInfo = BuildDatePickerDialogInfo(arkOptions);
     DatePickerSettingData settingData = BuildSettingData(arkOptions);
+    PickerDialogInteractiveEvent interEvents = BuildSelectInteractiveEvents(arkOptions);
+    DatePickerType pickType = DATE;
+    PickerDialogEvent datePickerDialogEvent = BuildPickerDialogEvents(arkOptions);
     std::vector<ButtonInfo> buttonInfos = BuildButtonInfos(arkOptions);
-    std::map<std::string, DialogEvent> dialogEvent = CreateDialogEvent(arkOptions);
-    std::map<std::string, DialogGestureEvent> dialogCancelEvent;
-    auto cancelCallbackOpt = Converter::OptConvert<VoidCallback>(arkOptions.onCancel);
-    if (cancelCallbackOpt) {
-        auto onCancelFunc = [arkCallback = CallbackHelper(*cancelCallbackOpt)](const GestureEvent& info) -> void {
-            arkCallback.Invoke();
-        };
-        dialogCancelEvent["cancelId"] = onCancelFunc;
-    }
-    DatePickerDialogView::Show(dialogProps, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    DatePickerDialogModel::GetInstance()->SetDatePickerDialogShow(dialogInfo, settingData,
+        std::move(interEvents.cancelEvent), std::move(interEvents.acceptEvent), std::move(interEvents.changeEvent),
+        std::move(interEvents.dateAcceptEvent), std::move(interEvents.dateChangeEvent),
+        pickType, datePickerDialogEvent, buttonInfos);
 }
 } // DatePickerDialogAccessor
+
 const GENERATED_ArkUIDatePickerDialogAccessor* GetDatePickerDialogAccessor()
 {
     static const GENERATED_ArkUIDatePickerDialogAccessor DatePickerDialogAccessorImpl {
