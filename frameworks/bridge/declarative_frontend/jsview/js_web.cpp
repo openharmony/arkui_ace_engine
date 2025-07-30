@@ -3660,6 +3660,7 @@ JSRef<JSVal> OnOverrideErrorPageEventToJSValue(const OnOverrideErrorPageEvent& e
 
 void JSWeb::OnOverrideErrorPage(const JSCallbackInfo& args)
 {
+    RETURN_IF_CALLING_FROM_M114();
     if ((args.Length() <= 0) || !args[0]->IsFunction()) {
         return;
     }
