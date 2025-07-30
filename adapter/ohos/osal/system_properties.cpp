@@ -63,9 +63,9 @@ float animationScale_ = DEFAULT_ANIMATION_SCALE;
 constexpr int32_t DEFAULT_DRAG_START_DAMPING_RATIO = 20;
 constexpr int32_t DEFAULT_DRAG_START_PAN_DISTANCE_THRESHOLD_IN_VP = 10;
 constexpr int32_t DEFAULT_FORM_SHARED_IMAGE_CACHE_THRESHOLD = 20;
-constexpr int32_t DEFAULT_VELOCITY_TRACKER_POINT_NUMBER = 5;
-constexpr bool DEFAULT_IS_VELOCITY_WITHIN_TIME_WINDOW = false;
-constexpr bool DEFAULT_IS_VELOCITY_WITHOUT_UP_POINT = false;
+constexpr int32_t DEFAULT_VELOCITY_TRACKER_POINT_NUMBER = 20;
+constexpr bool DEFAULT_IS_VELOCITY_WITHIN_TIME_WINDOW = true;
+constexpr bool DEFAULT_IS_VELOCITY_WITHOUT_UP_POINT = true;
 std::shared_mutex mutex_;
 const std::regex FOLD_TYPE_REGEX("^(\\d+)(,\\d+){3,}$");
 #ifdef ENABLE_ROSEN_BACKEND

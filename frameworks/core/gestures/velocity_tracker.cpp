@@ -125,6 +125,9 @@ double UpdateAxisVelocity(LeastSquareImpl& axis)
 
 void VelocityTracker::UpdateTouchPoint(const TouchEvent& event, bool end, float range)
 {
+    if (end && SystemProperties::IsVelocityWithoutUpPoint()) {
+        return;
+    }
     if (isFirstPoint_) {
         firstTrackPoint_ = event;
         isFirstPoint_ = false;
@@ -139,10 +142,6 @@ void VelocityTracker::UpdateTouchPoint(const TouchEvent& event, bool end, float 
     lastTimePoint_ = event.time;
     lastPosition_ = event.GetOffset();
     if (end) {
-        auto noUpPointEnabled = SystemProperties::IsVelocityWithoutUpPoint();
-        if (noUpPointEnabled) {
-            return;
-        }
         Offset oriDelta;
         if (isFirstPoint_) {
             oriDelta = delta_;
@@ -156,12 +155,14 @@ void VelocityTracker::UpdateTouchPoint(const TouchEvent& event, bool end, float 
         }
     }
     // nanoseconds duration to seconds.
-    std::chrono::duration<double> duration = event.time - firstTrackPoint_.time;
+    touchEventTime_.push_back(event.time);
+    std::chrono::duration<double> duration = event.time - touchEventTime_[mIndex_];
     auto seconds = duration.count();
     auto timeWindowEnabled = SystemProperties::IsVelocityWithinTimeWindow();
     if (timeWindowEnabled && seconds > DURATION_LONGEST_THRESHOLD) {
         xAxis_.PopFrontPoint();
         yAxis_.PopFrontPoint();
+        mIndex_++;
     }
     xAxis_.UpdatePoint(seconds, event.x);
     yAxis_.UpdatePoint(seconds, event.y);

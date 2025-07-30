@@ -29,7 +29,7 @@ constexpr char PROPERTY_DEVICE_TYPE_WEARABLE[] = "wearable";
 constexpr char PROPERTY_DEVICE_TYPE_CAR[] = "car";
 constexpr int32_t DEFAULT_FORM_SHARED_IMAGE_CACHE_THRESHOLD = 20;
 
-constexpr int32_t DEFAULT_VELOCITY_TRACKER_POINTNUMBER_VALUE = 5;
+constexpr int32_t DEFAULT_VELOCITY_TRACKER_POINTNUMBER_VALUE = 20;
 
 static constexpr char UNDEFINED_PARAM[] = "undefined parameter";
 
@@ -129,8 +129,8 @@ WidthLayoutBreakPoint SystemProperties::widthLayoutBreakpoints_ = WidthLayoutBre
 HeightLayoutBreakPoint SystemProperties::heightLayoutBreakpoints_ = HeightLayoutBreakPoint();
 bool SystemProperties::syncLoadEnabled_ = true;
 int32_t SystemProperties::velocityTrackerPointNumber_ = DEFAULT_VELOCITY_TRACKER_POINTNUMBER_VALUE;
-bool SystemProperties::isVelocityWithinTimeWindow_ = false;
-bool SystemProperties::isVelocityWithoutUpPoint_ = false;
+bool SystemProperties::isVelocityWithinTimeWindow_ = true;
+bool SystemProperties::isVelocityWithoutUpPoint_ = true;
 
 bool SystemProperties::IsOpIncEnable()
 {
