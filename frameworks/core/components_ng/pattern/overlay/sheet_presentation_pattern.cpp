@@ -1104,6 +1104,7 @@ void SheetPresentationPattern::SheetTransitionForOverlay(bool isTransitionIn, bo
     AnimationOption option = sheetObject_->GetAnimationOptionForOverlay(isTransitionIn, isFirstTransition);
     // Init other animation information, includes the starting point of the animation.
     sheetObject_->InitAnimationForOverlay(isTransitionIn, isFirstTransition);
+    StopModifySheetTransition();
     AnimationUtils::Animate(
         option,
         sheetObject_->GetAnimationPropertyCallForOverlay(isTransitionIn), // Moving effect end point
