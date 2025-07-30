@@ -613,6 +613,14 @@ public:
         delegate->HandleAutoFillEvent(result);
     }
 
+    void OnReceiveValueV2(std::shared_ptr<NWeb::NWebHapValue> value) override
+    {
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called");
+        auto delegate = delegate_.Upgrade();
+        CHECK_NULL_VOID(delegate);
+        delegate->HandleAutoFillEvent(value);
+    }
+
 private:
     WeakPtr<WebDelegate> delegate_;
 };

@@ -54,6 +54,7 @@
 #include "system_ability_definition.h"
 #include "unicode/ucnv.h"
 #include "transaction/rs_interfaces.h"
+#include "webview_value.h"
 #include "web_configuration_observer.h"
 #include "web_javascript_execute_callback.h"
 #include "web_javascript_result_callback.h"
@@ -63,6 +64,7 @@
 #endif
 
 #include "core/common/container.h"
+#include "base/include/ark_web_errno.h"
 
 namespace OHOS::Ace {
 
@@ -1602,10 +1604,16 @@ void WebDelegate::ClosePort(std::string& port)
 void WebDelegate::PostPortMessage(std::string& port, std::string& data)
 {
     if (nweb_) {
-        auto webMsg = std::make_shared<OHOS::NWeb::NWebMessage>(NWebValue::Type::NONE);
-        webMsg->SetType(NWebValue::Type::STRING);
-        webMsg->SetString(data);
-        nweb_->PostPortMessage(port, webMsg);
+        auto romMsg = std::make_shared<OHOS::NWeb::WebViewValue>(NWebRomValue::Type::NONE);
+        romMsg->SetType(NWebRomValue::Type::STRING);
+        romMsg->SetString(data);
+        nweb_->PostPortMessageV2(port, romMsg);
+        if (ArkWebGetErrno() != RESULT_OK) {
+            auto webMsg = std::make_shared<OHOS::NWeb::NWebMessage>(NWebValue::Type::NONE);
+            webMsg->SetType(NWebValue::Type::STRING);
+            webMsg->SetString(data);
+            nweb_->PostPortMessage(port, webMsg);
+        }
     }
 }
 
@@ -3277,6 +3285,16 @@ public:
         bool ret = delegate->HandleAutoFillEvent(result);
         result->SetType(NWebValue::Type::BOOLEAN);
         result->SetBoolean(ret);
+    }
+
+    void OnReceiveValueV2(std::shared_ptr<NWebHapValue> value) override
+    {
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called");
+        auto delegate = delegate_.Upgrade();
+        CHECK_NULL_VOID(delegate);
+        bool ret = delegate->HandleAutoFillEvent(value);
+        value->SetType(NWebHapValue::Type::BOOLEAN);
+        value->SetBool(ret);
     }
 
 private:
@@ -6943,10 +6961,16 @@ void WebDelegate::NotifyAutoFillViewData(const std::string& jsonStr)
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
             CHECK_NULL_VOID(delegate->nweb_);
-            auto webMessage = std::make_shared<OHOS::NWeb::NWebMessage>(NWebValue::Type::NONE);
-            webMessage->SetType(NWebValue::Type::STRING);
-            webMessage->SetString(jsonStr);
-            delegate->nweb_->FillAutofillData(webMessage);
+            auto romMessage = std::make_shared<OHOS::NWeb::WebViewValue>(NWebRomValue::Type::NONE);
+            romMessage->SetType(NWebRomValue::Type::STRING);
+            romMessage->SetString(jsonStr);
+            delegate->nweb_->FillAutofillDataV2(romMessage);
+            if (ArkWebGetErrno() != RESULT_OK) {
+                auto webMessage = std::make_shared<OHOS::NWeb::NWebMessage>(NWebValue::Type::NONE);
+                webMessage->SetType(NWebValue::Type::STRING);
+                webMessage->SetString(jsonStr);
+                delegate->nweb_->FillAutofillData(webMessage);
+            }
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebNotifyAutoFillViewData");
 }
@@ -6966,6 +6990,13 @@ void WebDelegate::AutofillCancel(const std::string& fillContent)
 }
 
 bool WebDelegate::HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson)
+{
+    auto pattern = webPattern_.Upgrade();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->HandleAutoFillEvent(viewDataJson);
+}
+
+bool WebDelegate::HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebHapValue>& viewDataJson)
 {
     auto pattern = webPattern_.Upgrade();
     CHECK_NULL_RETURN(pattern, false);

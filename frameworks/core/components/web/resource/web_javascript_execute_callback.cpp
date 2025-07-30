@@ -27,6 +27,16 @@ void WebJavaScriptExecuteCallBack::OnReceiveValue(std::shared_ptr<NWebMessage> r
     }
 }
 
+void WebJavaScriptExecuteCallBack::OnReceiveValueV2(std::shared_ptr<NWebHapValue> value)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    if (callback_ && value && value->GetType() == NWebHapValue::Type::STRING) {
+        callback_(value->GetString());
+    }
+}
+
 void WebMessageValueCallBackImpl::OnReceiveValue(std::shared_ptr<NWebMessage> result)
 {
     auto delegate = webDelegate_.Upgrade();
@@ -34,6 +44,16 @@ void WebMessageValueCallBackImpl::OnReceiveValue(std::shared_ptr<NWebMessage> re
     ContainerScope scope(delegate->GetInstanceId());
     if (callback_ && result && result->GetType() == NWebValue::Type::STRING) {
         callback_(result->GetString());
+    }
+}
+
+void WebMessageValueCallBackImpl::OnReceiveValueV2(std::shared_ptr<NWebHapValue> value)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    if (callback_ && value && value->GetType() == NWebHapValue::Type::STRING) {
+        callback_(value->GetString());
     }
 }
 } // OHOS::Ace
