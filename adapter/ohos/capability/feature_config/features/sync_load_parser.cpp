@@ -13,31 +13,16 @@
  * limitations under the License.
  */
 
-#include "sync_load_parser.h"
+#include "adapter/ohos/capability/feature_config/features/sync_load_parser.h"
 
-#include <cctype>
-
-#include "base/utils/system_properties.h"
-#include "interfaces/inner_api/ace/arkui_log.h"
+#include "adapter/ohos/capability/feature_config/feature_param_manager.h"
+#include "base/utils/string_utils.h"
+#include "base/log/log.h"
 
 namespace OHOS::Ace {
-
-bool SyncloadParser::enabled_ = false;
-uint32_t SyncloadParser::responseDeadline_ = 50000000;  // default time 50ms
-
-bool SyncloadParser::IsSyncloadEnable()
-{
-    return enabled_;
-}
-
-uint32_t SyncloadParser::GetSyncloadResponseDeadline()
-{
-    return responseDeadline_;
-}
-
 bool SyncloadParser::IsValidDigits(const std::string& str)
 {
-    if (str.empty() || str.size() > MAX_TIMER_SIZE) {
+    if (str.empty() || str.size() > FeatureParamManager::MAX_TIMER_SIZE) {
         return false;
     }
     for (char ch : str) {
@@ -50,16 +35,16 @@ bool SyncloadParser::IsValidDigits(const std::string& str)
 
 ParseErrCode SyncloadParser::ParseFeatureParam(xmlNode& node)
 {
-    enabled_ = ExtractPropertyValue("enable", node) == "true";
-    auto responseDeadline = ExtractPropertyValue("value", node);
-    if (!IsValidDigits(responseDeadline)) {
-        LOGW("SyncloadParser::ParseFeatureParam invalid digits %{public}s", responseDeadline.c_str());
+    auto& instance = FeatureParamManager::GetInstance();
+    auto enabled = ExtractPropertyValue("enable", node) == "true";
+    auto responseDeadlineStr = ExtractPropertyValue("value", node);
+    if (!IsValidDigits(responseDeadlineStr)) {
+        LOGW("SyncloadParser::ParseFeatureParam invalid digits %{public}s", responseDeadlineStr.c_str());
         return PARSE_TYPE_ERROR;
     }
-    responseDeadline_ = std::stoi(responseDeadline) * MS_TO_NS;
-    LOGI("SyncloadParser::ParseFeatureParam %{public}d deadline %{public}u", enabled_, responseDeadline_);
-
+    auto deadline = StringUtils::StringToInt(responseDeadlineStr, FeatureParamManager::DEFAULT_SYNCLOAD_DEADLINE);
+    instance.SetSyncLoadEnableParam(enabled, deadline * FeatureParamManager::MS_TO_NS);
     return PARSE_EXEC_SUCCESS;
 }
 
-} // namespace OHOS::Ace::NG
+} // namespace OHOS::Ace

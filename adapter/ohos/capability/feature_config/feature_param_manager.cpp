@@ -13,11 +13,12 @@
  * limitations under the License.
  */
 
-#include "arkui_feature_param_manager.h"
+#include "adapter/ohos/capability/feature_config/feature_param_manager.h"
 
 #include "adapter/ohos/capability/feature_config/features/sync_load_parser.h"
 #include "adapter/ohos/capability/feature_config/features/ui_node_gc_params_parser.h"
-#include "interfaces/inner_api/ace/arkui_log.h"
+#include "base/log/log.h"
+#include "base/utils/system_properties.h"
 
 namespace OHOS::Ace {
 #define ADD_PARSER_MODLE(cls)         \
@@ -25,17 +26,17 @@ namespace OHOS::Ace {
         #cls, std::make_shared<cls>() \
     }
 
-std::unordered_map<std::string, std::shared_ptr<ConfigXMLParserBase>> ArkUIFeatureParamManager::featureParamMap_ = {
+std::unordered_map<std::string, std::shared_ptr<ConfigXMLParserBase>> FeatureParamManager::featureParamMap_ = {
     ADD_PARSER_MODLE(UINodeGcParamParser),
     ADD_PARSER_MODLE(SyncloadParser),
 };
 
-void ArkUIFeatureParamManager::Init(const std::string& bundleName)
+void FeatureParamManager::Init(const std::string& bundleName)
 {
     FeatureParamParseEntry(bundleName);
 }
 
-void ArkUIFeatureParamManager::FeatureParamParseEntry(const std::string& bundleName)
+void FeatureParamManager::FeatureParamParseEntry(const std::string& bundleName)
 {
     if (!featureParser_) {
         featureParser_ = std::make_unique<ConfigXMLParserBase>();
@@ -49,5 +50,31 @@ void ArkUIFeatureParamManager::FeatureParamParseEntry(const std::string& bundleN
     if (featureParser_->ParsePerformanceConfigXMLWithBundleName(bundleName) != PARSE_EXEC_SUCCESS) {
         LOGW("ArkUiFeatureParamManager failed to parse xml file");
     }
+}
+
+void FeatureParamManager::SetSyncLoadEnableParam(bool enabled, uint32_t deadline)
+{
+    syncLoadEnabled_ = enabled;
+    syncloadResponseDeadline_ = deadline;
+}
+
+bool FeatureParamManager::IsSyncLoadEnabled()
+{
+    return syncLoadEnabled_ || SystemProperties::IsSyncLoadEnabled();
+}
+
+uint32_t FeatureParamManager::GetSyncloadResponseDeadline()
+{
+    return syncloadResponseDeadline_;
+}
+
+void FeatureParamManager::SetUINodeGcEnabled(bool enabled)
+{
+    uiNodeGcEnabled_ = enabled;
+}
+
+bool FeatureParamManager::IsUINodeGcEnabled()
+{
+    return uiNodeGcEnabled_;
 }
 } // namespace OHOS::Ace

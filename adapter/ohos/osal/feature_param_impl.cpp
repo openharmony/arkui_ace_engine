@@ -13,16 +13,25 @@
  * limitations under the License.
  */
 
-#include "adapter/ohos/capability/feature_config/features/ui_node_gc_params_parser.h"
+#include "base/utils/feature_param_impl.h"
 
 #include "adapter/ohos/capability/feature_config/feature_param_manager.h"
 
 namespace OHOS::Ace {
-ParseErrCode UINodeGcParamParser::ParseFeatureParam(xmlNode& node)
+
+bool FeatureParamImpl::IsSyncLoadEnabled()
 {
-    auto& instance = FeatureParamManager::GetInstance();
-    instance.SetUINodeGcEnabled(ExtractPropertyValue("enable", node) == "true");
-    return PARSE_EXEC_SUCCESS;
+    return FeatureParamManager::GetInstance().IsSyncLoadEnabled();
 }
 
-}  // namespace OHOS::Ace
+uint32_t FeatureParamImpl::GetSyncloadResponseDeadline()
+{
+    return FeatureParamManager::GetInstance().GetSyncloadResponseDeadline();
+}
+
+bool FeatureParamImpl::IsUINodeGcEnabled()
+{
+    return FeatureParamManager::GetInstance().IsUINodeGcEnabled();
+}
+
+} // OHOS::Ace

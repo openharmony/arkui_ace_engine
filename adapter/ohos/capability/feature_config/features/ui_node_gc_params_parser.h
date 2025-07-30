@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef UI_NODE_GC_PARAMS_PARSER_H
-#define UI_NODE_GC_PARAMS_PARSER_H
+#ifndef FOUNDATION_ACE_ADAPTER_OHOS_CAPABILITY_FEATURE_CONFIG_FEATURES_UI_NODE_GC_PARAMS_PARSER_H
+#define FOUNDATION_ACE_ADAPTER_OHOS_CAPABILITY_FEATURE_CONFIG_FEATURES_UI_NODE_GC_PARAMS_PARSER_H
 
 #include "adapter/ohos/capability/feature_config/config_xml_parser_base.h"
 
@@ -25,14 +25,8 @@ public:
     UINodeGcParamParser() = default;
     ~UINodeGcParamParser() = default;
 
-    ParseErrCode ParseFeatureParam(xmlNode &node) override;
-    static bool IsUINodeGcEnable();
-
-private:
-    void SetParsedParams();
-
-    static bool enabled_;
+    ParseErrCode ParseFeatureParam(xmlNode& node) override;
 };
 }  // namespace OHOS::Ace
 
-#endif  // UI_NODE_GC_PARAMS_PARSER_H
+#endif  // FOUNDATION_ACE_ADAPTER_OHOS_CAPABILITY_FEATURE_CONFIG_FEATURES_UI_NODE_GC_PARAMS_PARSER_H

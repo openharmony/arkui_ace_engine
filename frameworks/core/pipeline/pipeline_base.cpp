@@ -19,7 +19,7 @@
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
 #include "base/subwindow/subwindow_manager.h"
-#include "base/utils/system_properties.h"
+#include "base/utils/feature_param_impl.h"
 #include "core/common/ace_engine.h"
 #include "core/common/font_manager.h"
 #include "core/common/manager_interface.h"
@@ -775,7 +775,8 @@ void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint64_t frameCount)
 bool PipelineBase::ReachResponseDeadline() const
 {
     if (currRecvTime_ >= 0) {
-        return currRecvTime_ + SystemProperties::GetSyncloadResponseDeadline() < GetSysTimestamp();
+        auto deadline = FeatureParamImpl::GetSyncloadResponseDeadline();
+        return currRecvTime_ + deadline < GetSysTimestamp();
     }
     return false;
 }

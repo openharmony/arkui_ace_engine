@@ -106,10 +106,6 @@ bool g_isMultiInstanceEnabled = false;
 WidthLayoutBreakPoint SystemProperties::widthLayoutBreakpoints_ = WidthLayoutBreakPoint();
 HeightLayoutBreakPoint SystemProperties::heightLayoutBreakpoints_ = HeightLayoutBreakPoint();
 
-static bool g_syncloadDefaultValue = false;
-static bool g_uiNodeGcEnable = false;
-static uint32_t g_syncloadResponseDeadline = 500000000; // default max response delay is 50ms.
-
 float SystemProperties::GetFontWeightScale()
 {
     // Default value of font weight scale is 1.0.
@@ -361,26 +357,5 @@ int32_t SystemProperties::GetWhiteBlockCacheCountValue()
 std::string SystemProperties::GetMapSearchPrefix()
 {
     return "";
-}
-
-void SystemProperties::SetParsedSyncDefaultLoad(bool enable, uint32_t syncloadResponseDeadline)
-{
-    g_syncloadDefaultValue = enable;
-    g_syncloadResponseDeadline = syncloadResponseDeadline;
-}
-
-uint32_t SystemProperties::GetSyncloadResponseDeadline()
-{
-    return g_syncloadResponseDeadline;
-}
-
-void SystemProperties::SetUINodeGcEnable(bool enable)
-{
-    g_uiNodeGcEnable =  enable;
-}
-
-bool SystemProperties::IsUINodeGcEnable()
-{
-    return g_uiNodeGcEnable;
 }
 } // namespace OHOS::Ace

@@ -16,6 +16,7 @@
 #include "gtest/gtest.h"
 #define private public
 #define protected public
+#include "adapter/ohos/capability/feature_config/feature_param_manager.h"
 #include "adapter/ohos/capability/feature_config/features/sync_load_parser.h"
 #include "adapter/ohos/capability/feature_config/features/ui_node_gc_params_parser.h"
 #undef private
@@ -91,20 +92,20 @@ HWTEST_F(ParserTest, ATC_IsValidDigits_ShouldReturnTrue_WhenStringHasMultipleDig
 
 /**
  * @tc.name: STATIC_VALUE
- * @tc.desc: IsSyncloadEnable GetSyncloadResponseDeadline
+ * @tc.desc: IsSyncLoadEnabled GetSyncloadResponseDeadline
  * @tc.type: FUNC
  */
 HWTEST_F(ParserTest, STATIC_VALUE, TestSize.Level1)
 {
-    syncLoadParser.enabled_ = true;
-    syncLoadParser.responseDeadline_ = 80;
-    auto enable = OHOS::Ace::SyncloadParser::IsSyncloadEnable();
-    auto time = OHOS::Ace::SyncloadParser::GetSyncloadResponseDeadline();
+    auto& instance = OHOS::Ace::FeatureParamManager::GetInstance();
+    instance.SetSyncLoadEnableParam(true, 80);
+    auto enable = instance.IsSyncLoadEnabled();
+    auto time = instance.GetSyncloadResponseDeadline();
     EXPECT_EQ(enable, true);
     EXPECT_EQ(time, 80);
 
-    uiNodeGcParamParser.enabled_ = true;
-    enable = OHOS::Ace::UINodeGcParamParser::IsUINodeGcEnable();
+    instance.SetUINodeGcEnabled(true);
+    enable = instance.IsUINodeGcEnabled();
     EXPECT_EQ(enable, true);
 }
 
@@ -118,7 +119,7 @@ HWTEST_F(ParserTest, ParseFeatureParam, TestSize.Level1)
     xmlNode node;
     auto ret = syncLoadParser.ParseFeatureParam(node);
     EXPECT_EQ(ret, OHOS::Ace::PARSE_TYPE_ERROR);
-    EXPECT_EQ(OHOS::Ace::SyncloadParser::IsSyncloadEnable(), false);
+    EXPECT_EQ(OHOS::Ace::FeatureParamManager::GetInstance().IsSyncLoadEnabled(), false);
     uiNodeGcParamParser.ParseFeatureParam(node);
-    EXPECT_EQ(OHOS::Ace::UINodeGcParamParser::IsUINodeGcEnable(), false);
+    EXPECT_EQ(OHOS::Ace::FeatureParamManager::GetInstance().IsUINodeGcEnabled(), false);
 }

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FRAME_BASED_CREATOR_PARSER_H
-#define FRAME_BASED_CREATOR_PARSER_H
+#ifndef FOUNDATION_ACE_ADAPTER_OHOS_CAPABILITY_FEATURE_CONFIG_FEATURES_SYNC_LOAD_PARSER_H
+#define FOUNDATION_ACE_ADAPTER_OHOS_CAPABILITY_FEATURE_CONFIG_FEATURES_SYNC_LOAD_PARSER_H
 
 #include "adapter/ohos/capability/feature_config/config_xml_parser_base.h"
 
@@ -24,20 +24,11 @@ public:
     SyncloadParser() = default;
     ~SyncloadParser() = default;
 
-    ParseErrCode ParseFeatureParam(xmlNode &node) override;
-
-    static bool IsSyncloadEnable();
-    static uint32_t GetSyncloadResponseDeadline();
+    ParseErrCode ParseFeatureParam(xmlNode& node) override;
 private:
     // 0-999 is valid
-    bool IsValidDigits(const std::string &str);
-
-    static constexpr uint32_t MAX_TIMER_SIZE = 3; // 3 is max size for responseDeadline
-    static constexpr uint32_t MS_TO_NS = 1000000; // 1000000 change time form ms to ns
-
-    static bool enabled_;
-    static uint32_t responseDeadline_;
+    bool IsValidDigits(const std::string& str);
 };
 }  // namespace OHOS::Ace::NG
 
-#endif  // FRAME_BASED_CREATOR_PARSER_H
+#endif  // FOUNDATION_ACE_ADAPTER_OHOS_CAPABILITY_FEATURE_CONFIG_FEATURES_SYNC_LOAD_PARSER_H

@@ -778,12 +778,6 @@ public:
         return debugThreadSafeNodeEnable_;
     }
 
-    // used for xml config
-    static void SetParsedSyncDefaultLoad(bool enable, uint32_t syncloadResponseDeadline);
-    static uint32_t GetSyncloadResponseDeadline();
-    static void SetUINodeGcEnable(bool enable);
-    static bool IsUINodeGcEnable();
-
 private:
     static bool opincEnabled_;
     static bool developerModeOn_;

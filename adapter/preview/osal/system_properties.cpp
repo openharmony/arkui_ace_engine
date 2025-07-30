@@ -28,7 +28,6 @@ constexpr char PROPERTY_DEVICE_TYPE_TWO_IN_ONE[] = "2in1";
 constexpr char PROPERTY_DEVICE_TYPE_WEARABLE[] = "wearable";
 constexpr char PROPERTY_DEVICE_TYPE_CAR[] = "car";
 constexpr int32_t DEFAULT_FORM_SHARED_IMAGE_CACHE_THRESHOLD = 20;
-constexpr int32_t DEFAULT_RESPONSE_DELAY = 50000000; // default max response delay is 50ms.
 
 static constexpr char UNDEFINED_PARAM[] = "undefined parameter";
 
@@ -471,23 +470,5 @@ int32_t SystemProperties::GetWhiteBlockCacheCountValue()
 std::string SystemProperties::GetMapSearchPrefix()
 {
     return "";
-}
-
-void SystemProperties::SetParsedSyncDefaultLoad(bool enable, uint32_t syncloadResponseDeadline)
-{
-}
-
-uint32_t SystemProperties::GetSyncloadResponseDeadline()
-{
-    return DEFAULT_RESPONSE_DELAY;
-}
-
-void SystemProperties::SetUINodeGcEnable(bool enable)
-{
-}
-
-bool SystemProperties::IsUINodeGcEnable()
-{
-    return false;
 }
 } // namespace OHOS::Ace

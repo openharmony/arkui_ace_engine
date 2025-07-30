@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-#include "config_xml_parser_base.h"
+#include "adapter/ohos/capability/feature_config/config_xml_parser_base.h"
 
-#include "arkui_feature_param_manager.h"
-#include "interfaces/inner_api/ace/arkui_log.h"
+#include "adapter/ohos/capability/feature_config/feature_param_manager.h"
+#include "base/log/log.h"
 
 namespace OHOS::Ace {
 
@@ -27,18 +27,17 @@ enum ParseXmlNodeIndex : uint32_t {
     PARSE_XML_FEATURE,
 };
 
-std::vector<std::string> ConfigXMLParserBase::xmlNodeNameVec_ = {
+namespace {
+static std::vector<std::string> xmlNodeNameVec_ = {
     "undefine",             // PARSE_XML_UNDEFINED
     "PerformanceOptConfig", // PARSE_XML_PERFORMANCE_OPT_CONFIG
     "bundleName",           // PARSE_XML_BUNDLE_NAME
     "feature",              // PARSE_XML_FEATURE
 };
 
-std::vector<std::string> ConfigXMLParserBase::sysPaths_ = { "/system/variant/phone/base/",
-    "/system/variant/tablet/base/", "/system/variant/pc/base/", "/system/variant/watch/base/",
-    "/system/variant/tv/base/", "/system/variant/car/base/", "/system/variant/smarthomehost/base/" };
-
-std::string ConfigXMLParserBase::configPath_ = "etc/arkui/arkui_async_build_config.xml";
+static std::vector<std::string> sysPaths_ = { "" };
+static std::string configPath_ = "etc/arkui/arkui_async_build_config.xml";
+} // namespace
 
 ConfigXMLParserBase::~ConfigXMLParserBase()
 {
@@ -108,8 +107,6 @@ ParseErrCode ConfigXMLParserBase::ParseInternalWithBundleName(xmlNode& node, con
         }
 
         std::string xmlBundleName = ExtractPropertyValue("name", *currNode);
-        LOGI("ConfigXMLParserBase ParseInternalWithBundleName xmlBundleName %{public}s bundleName %{public}s",
-            xmlBundleName.c_str(), bundleName.c_str());
         if (xmlBundleName == bundleName) {
             ParseFeatures(*(currNode->children));
             break;
@@ -120,7 +117,7 @@ ParseErrCode ConfigXMLParserBase::ParseInternalWithBundleName(xmlNode& node, con
 
 void ConfigXMLParserBase::ParseFeatures(xmlNode& node)
 {
-    auto& featureMap = ArkUIFeatureParamManager::GetInstance().featureParamMap_;
+    auto& featureMap = FeatureParamManager::GetInstance().featureParamMap_;
 
     // travel features
     xmlNode* currNode = &node;

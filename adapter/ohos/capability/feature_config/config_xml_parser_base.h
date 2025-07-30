@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef CONFIG_XML_PARSER_BASE_H
-#define CONFIG_XML_PARSER_BASE_H
+#ifndef FOUNDATION_ACE_ADAPTER_OHOS_CAPABILITY_FEATURE_CONFIGCONFIG_XML_PARSER_BASE_H
+#define FOUNDATION_ACE_ADAPTER_OHOS_CAPABILITY_FEATURE_CONFIGCONFIG_XML_PARSER_BASE_H
 
 #include <string>
 
@@ -40,29 +40,25 @@ class ConfigXMLParserBase {
 public:
     virtual ~ConfigXMLParserBase();
 
-    virtual ParseErrCode ParseFeatureParam(xmlNode &node)
+    virtual ParseErrCode ParseFeatureParam(xmlNode& node)
     {
         return PARSE_NO_PARAM;
     }
 
 protected:
-    std::string ExtractPropertyValue(const std::string &propName, xmlNode &node);
+    std::string ExtractPropertyValue(const std::string& propName, xmlNode& node);
 
 private:
     void Destroy();
     ParseErrCode LoadPerformanceConfigXML();
-    ParseErrCode ParsePerformanceConfigXMLWithBundleName(const std::string &bundleName);
-    ParseErrCode ParseXmlNodeNameWithIndex(xmlNode &node, uint32_t nodeNameIndex);
-    ParseErrCode ParseInternalWithBundleName(xmlNode &node, const std::string &bundleName);
-    void ParseFeatures(xmlNode &node);
-
-    static std::vector<std::string> sysPaths_;
-    static std::string configPath_;
-    static std::vector<std::string> xmlNodeNameVec_;
+    ParseErrCode ParsePerformanceConfigXMLWithBundleName(const std::string& bundleName);
+    ParseErrCode ParseXmlNodeNameWithIndex(xmlNode& node, uint32_t nodeNameIndex);
+    ParseErrCode ParseInternalWithBundleName(xmlNode& node, const std::string& bundleName);
+    void ParseFeatures(xmlNode& node);
 
     xmlDoc* xmlSysDocument_ = nullptr;
 
-    friend class ArkUIFeatureParamManager;
+    friend class FeatureParamManager;
 };
 }  // namespace OHOS::Ace
-#endif  // CONFIG_XML_PARSER_BASE_H
+#endif  // FOUNDATION_ACE_ADAPTER_OHOS_CAPABILITY_FEATURE_CONFIG_CONFIG_XML_PARSER_BASE_H

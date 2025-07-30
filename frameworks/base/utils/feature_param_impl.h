@@ -13,16 +13,25 @@
  * limitations under the License.
  */
 
-#include "adapter/ohos/capability/feature_config/features/ui_node_gc_params_parser.h"
+#ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_FEATURE_PARAM_IMPL_H
+#define FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_FEATURE_PARAM_IMPL_H
 
-#include "adapter/ohos/capability/feature_config/feature_param_manager.h"
+#include <string>
+
+#include "ui/base/macros.h"
 
 namespace OHOS::Ace {
-ParseErrCode UINodeGcParamParser::ParseFeatureParam(xmlNode& node)
-{
-    auto& instance = FeatureParamManager::GetInstance();
-    instance.SetUINodeGcEnabled(ExtractPropertyValue("enable", node) == "true");
-    return PARSE_EXEC_SUCCESS;
-}
+class ACE_FORCE_EXPORT FeatureParamImpl {
+public:
+    FeatureParamImpl() = default;
+    ~FeatureParamImpl() = default;
 
+    // SyncloadParser
+    static bool IsSyncLoadEnabled();
+    static uint32_t GetSyncloadResponseDeadline();
+    // UINodeGcParamParser
+    static bool IsUINodeGcEnabled();
+};
 }  // namespace OHOS::Ace
+
+#endif // FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_FEATURE_PARAM_IMPL_H

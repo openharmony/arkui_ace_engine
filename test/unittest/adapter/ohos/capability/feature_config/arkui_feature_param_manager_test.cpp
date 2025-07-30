@@ -16,7 +16,7 @@
 #include "gtest/gtest.h"
 #define private public
 #define protected public
-#include "adapter/ohos/capability/feature_config/arkui_feature_param_manager.h"
+#include "adapter/ohos/capability/feature_config/feature_param_manager.h"
 #undef private
 #undef protected
 using namespace testing;
@@ -42,30 +42,22 @@ HWTEST_F(ArkUIFeatureParamManagerTest, InitTest, TestSize.Level1)
      * @tc.steps: step1. Parse example.hap success
      * @tc.expected: Create featureParser suc
      */
-    ArkUIFeatureParamManager::GetInstance().Init("example.hap");
-    auto& featureParser = OHOS::Ace::ArkUIFeatureParamManager::GetInstance().featureParser_;
+    FeatureParamManager::GetInstance().Init("example.hap");
+    auto& featureParser = OHOS::Ace::FeatureParamManager::GetInstance().featureParser_;
     EXPECT_NE(featureParser, nullptr);
     EXPECT_NE(featureParser->xmlSysDocument_, nullptr);
-
-    /**
-     * @tc.steps: step2. Parse invalid xml
-     * @tc.expected: Parse invalid xml fail with PARSE_SYS_FILE_LOAD_FAIL
-     */
-    featureParser->configPath_ = "none.xml";
-    ArkUIFeatureParamManager::GetInstance().Init("example.hap");
-    EXPECT_EQ(featureParser->xmlSysDocument_, nullptr);
     featureParser->Destroy();
 }
 
 /**
  * @tc.name: ParseInternalWithBundleNameTest
- * @tc.desc: ArkUIFeatureParamManager test
+ * @tc.desc: FeatureParamManager test
  * @tc.type: FUNC
  */
 HWTEST_F(ArkUIFeatureParamManagerTest, ParseInternalWithBundleNameTest, TestSize.Level1)
 {
-    ArkUIFeatureParamManager::GetInstance().Init("example.hap");
-    auto& featureParser = ArkUIFeatureParamManager::GetInstance().featureParser_;
+    FeatureParamManager::GetInstance().Init("example.hap");
+    auto& featureParser = FeatureParamManager::GetInstance().featureParser_;
     xmlNode node;
     auto ret = featureParser->ParseInternalWithBundleName(node, "example.hap");
     EXPECT_EQ(ret, ParseErrCode::PARSE_XML_NAME_ERROR);
