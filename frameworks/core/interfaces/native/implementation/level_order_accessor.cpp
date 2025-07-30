@@ -32,6 +32,7 @@ void DestroyPeerImpl(Ark_LevelOrder peer)
 Ark_LevelOrder ConstructImpl()
 {
     auto peer = PeerUtils::CreatePeer<LevelOrderPeer>();
+    CHECK_NULL_RETURN(peer, nullptr);
     peer->levelOrder = new (std::nothrow) NG::LevelOrder();
     return peer;
 }
@@ -44,7 +45,10 @@ Ark_LevelOrder ClampImpl(const Ark_Number* order)
     auto peer = PeerUtils::CreatePeer<LevelOrderPeer>();
     CHECK_NULL_RETURN(peer, nullptr);
     peer->levelOrder = new (std::nothrow) NG::LevelOrder();
-    CHECK_NULL_RETURN(peer->levelOrder, nullptr);
+    if (!peer->levelOrder) {
+        PeerUtils::DestroyPeer(peer);
+        return nullptr;
+    }
     peer->levelOrder->SetOrder(Converter::Convert<double>(*order));
     return peer;
 }
