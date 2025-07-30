@@ -296,6 +296,7 @@ void MenuWrapperPattern::HideSubMenuByDepth(const RefPtr<FrameNode>& menuItem)
     CHECK_NULL_VOID(menuPattern);
     auto curDepth = menuPattern->GetSubMenuDepth();
     auto children = host->GetChildren();
+    bool clearShowedSubMenu = true;
     for (auto child = children.rbegin(); child != children.rend(); ++child) {
         auto childNode = DynamicCast<FrameNode>(*child);
         CHECK_NULL_VOID(childNode);
@@ -307,14 +308,26 @@ void MenuWrapperPattern::HideSubMenuByDepth(const RefPtr<FrameNode>& menuItem)
         if (subMenuPattern->GetSubMenuDepth() <= curDepth) {
             break;
         }
-        if (subMenuPattern->GetSubMenuDepth() == (curDepth + 1)) {
-            subMenuPattern->RemoveParentHoverStyle();
+        auto parentMenuItem = subMenuPattern->GetParentMenuItem();
+        CHECK_NULL_VOID(parentMenuItem);
+        auto parentItemPattern = parentMenuItem->GetPattern<MenuItemPattern>();
+        CHECK_NULL_VOID(parentItemPattern);
+        if (parentItemPattern->HasHideTask()) {
+            clearShowedSubMenu = false;
+            continue;
         }
+        if (parentMenuItem->GetId() == menuItem->GetId()) {
+            clearShowedSubMenu = false;
+            break;
+        }
+        subMenuPattern->RemoveParentHoverStyle();
         UpdateMenuAnimation(host);
         SendToAccessibility(childNode, false);
         host->RemoveChild(childNode);
     }
-    menuPattern->SetShowedSubMenu(nullptr);
+    if (clearShowedSubMenu) {
+        menuPattern->SetShowedSubMenu(nullptr);
+    }
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
 }
 
