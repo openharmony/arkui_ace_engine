@@ -1752,7 +1752,7 @@ private:
     bool NeedShowPlaceholder() const;
     bool IsSelectAll() override;
     std::pair<int32_t, int32_t> GetSpanRangeByResultObject(const ResultObject& result);
-    std::list<RefPtr<SpanItem>> CopySpansForClipboard();
+    std::list<RefPtr<SpanItem>> CopySpansForClipboard(const std::list<RefPtr<SpanItem>>& spans);
 #ifdef CROSS_PLATFORM
     bool UnableStandardInputCrossPlatform(TextInputConfiguration& config, bool isFocusViewChanged);
 #endif
