@@ -358,4 +358,18 @@ std::string SystemProperties::GetMapSearchPrefix()
 {
     return "";
 }
+
+uint32_t SystemProperties::GetSyncloadResponseDeadline()
+{
+    return 50000000; // default deadline 50ms
+}
+
+void SystemProperties::SetUINodeGcEnable(bool enable)
+{
+}
+
+bool SystemProperties::IsUINodeGcEnable()
+{
+    return false;
+}
 } // namespace OHOS::Ace

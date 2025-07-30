@@ -305,5 +305,7 @@ group("entrance_unittest") {
     ":high_contrast_observer_test",
     ":layout_inspector_test",
     ":rs_adapter_test",
+    "feature_config:arkui_feature_param_manager_test",
+    "feature_config:parser_test",
   ]
 }

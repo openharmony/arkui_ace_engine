@@ -36,6 +36,13 @@ template("ace_capability_ohos_source_set") {
       "statusbar/statusbar_event_proxy_ohos.cpp",
       "time/time_event_proxy_ohos.cpp",
     ]
+    # xml parser
+    sources += [
+      "$ace_root/adapter/ohos/entrance/feature_config/arkui_feature_param_manager.cpp",
+      "$ace_root/adapter/ohos/entrance/feature_config/config_xml_parser_base.cpp",
+      "$ace_root/adapter/ohos/entrance/feature_config/features/ui_node_gc_params_parser.cpp",
+      "$ace_root/adapter/ohos/entrance/feature_config/features/sync_load_parser.cpp",
+    ]
     include_dirs = []
 
     deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]

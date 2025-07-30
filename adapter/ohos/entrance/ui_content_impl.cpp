@@ -80,6 +80,7 @@
 #include "adapter/ohos/entrance/cj_utils/cj_utils.h"
 #include "adapter/ohos/entrance/dialog_container.h"
 #include "adapter/ohos/entrance/dynamic_component/uv_task_wrapper_impl.h"
+#include "adapter/ohos/entrance/feature_config/arkui_feature_param_manager.h"
 #include "adapter/ohos/entrance/file_asset_provider_impl.h"
 #include "adapter/ohos/entrance/form_utils_impl.h"
 #include "adapter/ohos/entrance/global_pipeline_context_manager.h"
@@ -2208,6 +2209,8 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     }
 #endif
 #endif
+    // init xml config for performance feature
+    ArkUIFeatureParamManager::GetInstance().Init(bundleName_);
     SetDeviceProperties();
     bool configChangePerform = std::any_of(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
         return metaDataItem.name == "configColorModeChangePerformanceInArkUI" && metaDataItem.value == "true";

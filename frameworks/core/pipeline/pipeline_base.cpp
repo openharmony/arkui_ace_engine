@@ -19,6 +19,7 @@
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
 #include "base/subwindow/subwindow_manager.h"
+#include "base/utils/system_properties.h"
 #include "core/common/ace_engine.h"
 #include "core/common/font_manager.h"
 #include "core/common/manager_interface.h"
@@ -36,7 +37,6 @@
 namespace OHOS::Ace {
 
 constexpr int32_t DEFAULT_VIEW_SCALE = 1;
-constexpr int32_t DEFAULT_RESPONSE_DELAY = 70000000; // default max response delay is 70ms.
 
 PipelineBase::PipelineBase(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
     RefPtr<AssetManager> assetManager, const RefPtr<Frontend>& frontend, int32_t instanceId)
@@ -775,7 +775,7 @@ void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint64_t frameCount)
 bool PipelineBase::ReachResponseDeadline() const
 {
     if (currRecvTime_ >= 0) {
-        return currRecvTime_ + DEFAULT_RESPONSE_DELAY < GetSysTimestamp();
+        return currRecvTime_ + SystemProperties::GetSyncloadResponseDeadline() < GetSysTimestamp();
     }
     return false;
 }
