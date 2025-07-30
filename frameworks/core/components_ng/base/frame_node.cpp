@@ -1765,7 +1765,7 @@ void FrameNode::TriggerOnAreaChangeCallback(uint64_t nanoTimestamp, int32_t area
         eventHub_->HandleOnAreaChange(
             lastFrameRect_, lastParentOffsetToWindow_, currFrameRect, currParentOffsetToWindow);
     } else {
-        //if in this branch, next time cache is not trusted
+        // if in this branch, next time cache is not trusted
         ClearCachedGlobalOffset();
     }
     pattern_->OnAreaChangedInner();
@@ -1902,7 +1902,7 @@ bool FrameNode::IsFrameDisappear(uint64_t timestamp, int32_t isVisibleChangeMinD
     }
     bool isFrameDisappear = !isOnShow || !isOnMainTree || !isSelfVisible;
     if (isFrameDisappear) {
-        //if in this branch, next time cache is not trusted
+        // if in this branch, next time cache is not trusted
         ClearCachedIsFrameDisappear();
         return true;
     }
@@ -1920,7 +1920,7 @@ bool FrameNode::IsFrameAncestorDisappear(uint64_t timestamp, int32_t isVisibleCh
     bool result = !curIsVisible || !curFrameIsActive;
     RefPtr<FrameNode> parentUi = GetAncestorNodeOfFrame(false);
     if (!parentUi || result) {
-        //if in this branch, next time cache is not trusted
+        // if in this branch, next time cache is not trusted
         ClearCachedIsFrameDisappear();
         return result;
     }

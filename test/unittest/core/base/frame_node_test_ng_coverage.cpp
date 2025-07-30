@@ -1522,6 +1522,126 @@ HWTEST_F(FrameNodeTestNg, FrameNodeIsFrameDisappear05, TestSize.Level1)
 }
 
 /**
+ * @tc.name: FrameNodIsFrameDisappear06
+ * @tc.desc: Test the function IsFrameDisappear OnShow branch
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeIsFrameDisappear06, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto parentNode = FrameNode::CreateFrameNode("parentNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto frameNode = FrameNode::CreateFrameNode("frameNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto frameNode2 = FrameNode::CreateFrameNode("frameNode2", 2, AceType::MakeRefPtr<Pattern>(), true);
+    parentNode->SetDepth(1);
+    frameNode->SetDepth(2);
+    frameNode2->SetDepth(3);
+    parentNode->isActive_ = true;
+    frameNode->isActive_ = true;
+    frameNode2->onMainTree_ = true;
+    frameNode2->isActive_ = true;
+    auto context = frameNode2->GetContext();
+    context->onShow_ = true;
+    frameNode->SetParent(AceType::WeakClaim(AceType::RawPtr(parentNode)));
+    frameNode2->SetParent(AceType::WeakClaim(AceType::RawPtr(frameNode)));
+
+    /**
+     * @tc.steps: step2. create layoutProperty.
+     */
+    auto parentLayoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    parentLayoutProperty->propVisibility_ = VisibleType::INVISIBLE;
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    layoutProperty->propVisibility_ = VisibleType::VISIBLE;
+    auto layoutProperty2 = AceType::MakeRefPtr<LayoutProperty>();
+    layoutProperty2->propVisibility_ = VisibleType::VISIBLE;
+
+    /**
+     * @tc.steps: step3. call the function IsFrameDisappear and create TIMESTAMP_1 cache.
+     * @tc.expected: expect res is true
+     */
+    parentNode->SetLayoutProperty(parentLayoutProperty);
+    frameNode->SetLayoutProperty(layoutProperty);
+    frameNode2->SetLayoutProperty(layoutProperty2);
+    EXPECT_TRUE(frameNode2->IsFrameDisappear(TIMESTAMP_1));
+
+    /**
+     * @tc.steps: step4. set onshow false and call the function IsFrameDisappear.
+     * @tc.expected: expect res is true
+     */
+    parentLayoutProperty->propVisibility_ = VisibleType::VISIBLE;
+    context->onShow_ = false;
+    EXPECT_TRUE(frameNode2->IsFrameDisappear(TIMESTAMP_2, 1));
+
+    /**
+     * @tc.steps: step5. call the function IsFrameDisappear and no use TIMESTAMP_1 cache.
+     * @tc.expected: expect res is true
+     */
+    context->onShow_ = true;
+    EXPECT_FALSE(frameNode2->IsFrameDisappear(TIMESTAMP_3, 0));
+}
+
+/**
+ * @tc.name: FrameNodIsFrameDisappear07
+ * @tc.desc: Test the function IsFrameDisappear result true branch
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeIsFrameDisappear07, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto parentNode = FrameNode::CreateFrameNode("parentNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto frameNode = FrameNode::CreateFrameNode("frameNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto frameNode2 = FrameNode::CreateFrameNode("frameNode2", 2, AceType::MakeRefPtr<Pattern>(), true);
+    parentNode->SetDepth(1);
+    frameNode->SetDepth(2);
+    frameNode2->SetDepth(3);
+    parentNode->isActive_ = true;
+    frameNode->isActive_ = true;
+    frameNode2->onMainTree_ = true;
+    frameNode2->isActive_ = true;
+    auto context = frameNode2->GetContext();
+    context->onShow_ = true;
+    frameNode->SetParent(AceType::WeakClaim(AceType::RawPtr(parentNode)));
+    frameNode2->SetParent(AceType::WeakClaim(AceType::RawPtr(frameNode)));
+
+    /**
+     * @tc.steps: step2. create layoutProperty.
+     */
+    auto parentLayoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    parentLayoutProperty->propVisibility_ = VisibleType::VISIBLE;
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    layoutProperty->propVisibility_ = VisibleType::VISIBLE;
+    auto layoutProperty2 = AceType::MakeRefPtr<LayoutProperty>();
+    layoutProperty2->propVisibility_ = VisibleType::VISIBLE;
+
+    /**
+     * @tc.steps: step3. call the function IsFrameDisappear and create TIMESTAMP_1 cache.
+     * @tc.expected: expect res is false
+     */
+    parentNode->SetLayoutProperty(parentLayoutProperty);
+    frameNode->SetLayoutProperty(layoutProperty);
+    frameNode2->SetLayoutProperty(layoutProperty2);
+    EXPECT_FALSE(frameNode2->IsFrameDisappear(TIMESTAMP_1));
+
+    /**
+     * @tc.steps: step4. set frameNode2 INVISIBLE and call the function IsFrameDisappear.
+     * @tc.expected: expect res is false
+     */
+    parentLayoutProperty->propVisibility_ = VisibleType::INVISIBLE;
+    layoutProperty2->propVisibility_ = VisibleType::INVISIBLE;
+    EXPECT_TRUE(frameNode2->IsFrameDisappear(TIMESTAMP_2, 1));
+
+    /**
+     * @tc.steps: step5. call the function IsFrameDisappear and no use TIMESTAMP_1 cache.
+     * @tc.expected: expect res is true
+     */
+    layoutProperty2->propVisibility_ = VisibleType::VISIBLE;
+    EXPECT_TRUE(frameNode2->IsFrameDisappear(TIMESTAMP_3, 3));
+}
+
+/**
  * @tc.name: FrameNodeCalculateOffsetRelativeToWindow01
  * @tc.desc: Test the function CalculateOffsetRelativeToWindow
  * @tc.type: FUNC
