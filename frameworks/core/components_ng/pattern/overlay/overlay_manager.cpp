@@ -656,6 +656,26 @@ static RefPtr<PipelineContext> GetPipeContextByWeakPtr(const WeakPtr<FrameNode>&
 
     return context;
 }
+
+// when one process not suppose handle other page event, firstly add, then remove
+static void HandleAccessibilityPageEventControl(const RefPtr<FrameNode>& node, bool isAdd)
+{
+    if (!AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
+        return;
+    }
+    CHECK_NULL_VOID(node);
+    auto pipelineContext = node->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto frontend = pipelineContext->GetFrontend();
+    CHECK_NULL_VOID(frontend);
+    auto accessibilityManager = frontend->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    if (isAdd) {
+        accessibilityManager->AddToPageEventController(node);
+    } else {
+        accessibilityManager->ReleasePageEvent(node, true, true);
+    }
+}
 } // namespace
 
 OverlayManager::OverlayManager(const RefPtr<FrameNode>& rootNode) : rootNodeWeak_(rootNode)
@@ -1392,6 +1412,7 @@ void OverlayManager::SendToAccessibility(const WeakPtr<FrameNode> node, bool isS
                 static_cast<int32_t>(AccessibilityEventType::PAGE_OPEN));
         }
     } else {
+        HandleAccessibilityPageEventControl(menu, false);
         menu->OnAccessibilityEvent(AccessibilityEventType::PAGE_CLOSE,
             WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
         TAG_LOGI(AceLogTag::ACE_OVERLAY, "Send event to %{public}d",
@@ -1566,6 +1587,7 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPr
         overlayManager->SendToAccessibility(menuWK, false);
         overlayManager->OnPopMenuAnimationFinished(menuWK, rootWeak, weak, id);
     });
+    HandleAccessibilityPageEventControl(menu, true);
     ShowMenuClearAnimation(menu, option, showPreviewAnimation, startDrag);
 }
 
@@ -1590,6 +1612,7 @@ void OverlayManager::ShowMenuDisappearTransition(const RefPtr<FrameNode>& menu)
     }
 
     if (renderContext->HasDisappearTransition()) {
+        HandleAccessibilityPageEventControl(menu, true);
         renderContext->SetTransitionOutCallback([rootWeak = rootNodeWeak_, menuWK = WeakClaim(RawPtr(menu)),
                                                     id = Container::CurrentId(), weak = WeakClaim(this)] {
             ContainerScope scope(id);

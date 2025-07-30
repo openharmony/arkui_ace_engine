@@ -22,6 +22,7 @@
 #define protected public
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/common/mock_frontend.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
@@ -76,6 +77,42 @@ const std::vector<std::string> FONT_FAMILY_VALUE = { "cursive" };
 constexpr int32_t EXPECT_CALL_TWICE_TIMES = 2;
 constexpr int32_t EXPECT_CALL_THREE_TIMES = 3;
 } // namespace
+
+class MockAccessibilityManager : public AccessibilityManager {
+public:
+    MOCK_METHOD(void, SendAccessibilityAsyncEvent, (const AccessibilityEvent&), (override));
+    MOCK_METHOD(
+        void, SendWebAccessibilityAsyncEvent, (const AccessibilityEvent&, const RefPtr<NG::WebPattern>&), (override));
+    MOCK_METHOD(void, UpdateVirtualNodeFocus, (), (override));
+    MOCK_METHOD(int64_t, GenerateNextAccessibilityId, (), (override));
+    MOCK_METHOD(RefPtr<AccessibilityNode>, CreateSpecializedNode, (const std::string&, int32_t, int32_t), (override));
+    MOCK_METHOD(RefPtr<AccessibilityNode>, CreateAccessibilityNode, (const std::string&, int32_t, int32_t, int32_t),
+        (override));
+    MOCK_METHOD(RefPtr<AccessibilityNode>, GetAccessibilityNodeById, (NodeId), (const, override));
+    MOCK_METHOD(std::string, GetInspectorNodeById, (NodeId), (const, override));
+    MOCK_METHOD(void, RemoveAccessibilityNodes, (RefPtr<AccessibilityNode>&), (override));
+    MOCK_METHOD(void, RemoveAccessibilityNodeById, (NodeId), (override));
+    MOCK_METHOD(void, ClearPageAccessibilityNodes, (int32_t), (override));
+    MOCK_METHOD(void, SetRootNodeId, (int32_t), (override));
+    MOCK_METHOD(void, TrySaveTargetAndIdNode,
+        (const std::string&, const std::string&, const RefPtr<AccessibilityNode>&), (override));
+    MOCK_METHOD(void, HandleComponentPostBinding, (), (override));
+    MOCK_METHOD(void, OnDumpInfo, (const std::vector<std::string>&), (override));
+    MOCK_METHOD(void, OnDumpInfoNG, (const std::vector<std::string>&, uint32_t, bool), (override));
+    MOCK_METHOD(void, SetCardViewPosition, (int, float, float), (override));
+    MOCK_METHOD(void, SetCardViewParams, (const std::string&, bool), (override));
+    MOCK_METHOD(void, SetSupportAction, (uint32_t, bool), (override));
+    MOCK_METHOD(void, ClearNodeRectInfo, (RefPtr<AccessibilityNode>&, bool), (override));
+    MOCK_METHOD(void, AddComposedElement, (const std::string&, const RefPtr<ComposedElement>&), (override));
+    MOCK_METHOD(void, RemoveComposedElementById, (const std::string&), (override));
+    MOCK_METHOD(WeakPtr<ComposedElement>, GetComposedElementFromPage, (NodeId), (override));
+    MOCK_METHOD(void, TriggerVisibleChangeEvent, (), (override));
+    MOCK_METHOD(void, AddVisibleChangeNode, (NodeId, double, VisibleRatioCallback), (override));
+    MOCK_METHOD(void, RemoveVisibleChangeNode, (NodeId), (override));
+    MOCK_METHOD(bool, IsVisibleChangeNodeExists, (NodeId), (override));
+    MOCK_METHOD(void, UpdateEventTarget, (NodeId, BaseEventInfo&), (override));
+    MOCK_METHOD(void, SetWindowPos, (int32_t, int32_t, int32_t), (override));
+};
 
 class OverlayManagerMenuTestNg : public testing::Test {
 public:
@@ -1592,5 +1629,63 @@ HWTEST_F(OverlayManagerMenuTestNg, IsSceneBoardWindow001, TestSize.Level1)
     EXPECT_TRUE(isSceneBoard);
     mockContainer->isSubContainer_ = false;
     mockContainer->SetIsSceneBoardWindow(false);
+}
+
+/**
+ * @tc.name: HandleAccessibilityPageEventControl_AccessibilityDisabled
+ * @tc.desc: Test that HandleAccessibilityPageEventControl returns early when is disabled.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerMenuTestNg, HandleAccessibilityPageEventControl_AccessibilityDisabled, TestSize.Level1)
+{
+    bool oldState = AceApplicationInfo::GetInstance().IsAccessibilityEnabled();
+    AceApplicationInfo::GetInstance().SetAccessibilityEnabled(false);
+    auto rootNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    auto menuWrapperNode = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto menuNode = FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<MenuPattern>(1, "text", MenuType::MENU));
+    menuNode->MountToParent(menuWrapperNode);
+    menuWrapperNode->MountToParent(rootNode);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->SendToAccessibility(menuWrapperNode, false);
+    EXPECT_NE(menuWrapperNode, nullptr);
+    AceApplicationInfo::GetInstance().SetAccessibilityEnabled(oldState);
+}
+
+/**
+ * @tc.name: HandleAccessibilityPageEventControl_AddAndRemove
+ * @tc.desc: Test both isAdd=true and isAdd=false branches through PopMenuAnimation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerMenuTestNg, HandleAccessibilityPageEventControl_AddAndRemove, TestSize.Level1)
+{
+    bool oldState = AceApplicationInfo::GetInstance().IsAccessibilityEnabled();
+    AceApplicationInfo::GetInstance().SetAccessibilityEnabled(true);
+    auto rootNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    auto menuWrapperPattern = AceType::MakeRefPtr<MenuWrapperPattern>(1);
+    menuWrapperPattern->menuStatus_ = MenuStatus::SHOW;
+    auto menuWrapperNode = FrameNode::CreateFrameNode(
+        V2::MENU_WRAPPER_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), menuWrapperPattern);
+    auto menuNode = FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<MenuPattern>(1, "text", MenuType::MENU));
+    menuNode->MountToParent(menuWrapperNode);
+    menuWrapperNode->MountToParent(rootNode);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto frontend = AceType::MakeRefPtr<MockFrontend>();
+    auto accessibilityManager = AceType::MakeRefPtr<MockAccessibilityManager>();
+    EXPECT_CALL(*frontend, GetAccessibilityManager()).WillRepeatedly(Return(accessibilityManager));
+    pipeline->weakFrontend_ = AceType::WeakClaim(AceType::RawPtr(frontend));
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->menuMap_[1] = menuWrapperNode;
+    overlayManager->SendToAccessibility(menuWrapperNode, false);
+    EXPECT_NE(menuWrapperNode, nullptr);
+    overlayManager->PopMenuAnimation(menuWrapperNode, false, false);
+    EXPECT_NE(menuWrapperNode, nullptr);
+    AceApplicationInfo::GetInstance().SetAccessibilityEnabled(oldState);
 }
 } // namespace OHOS::Ace::NG
