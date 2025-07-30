@@ -42,7 +42,7 @@ Ark_NativePointer RegisterBindSheetShowCallbackImpl(Ark_NativePointer node, Ark_
     auto sheetOptions = options ? Converter::OptConvert<Ark_SheetOptions>(*options) : std::nullopt;
     if (sheetOptions) {
         BindSheetUtil::ParseLifecycleCallbacks(cbs, sheetOptions.value());
-        BindSheetUtil::ParseFuntionalCallbacks(cbs, sheetOptions.value());
+        BindSheetUtil::ParseFunctionalCallbacks(cbs, sheetOptions.value());
         Converter::VisitUnion(sheetOptions->title,
             [&sheetStyle](const Ark_SheetTitleOptions& value) {
                 sheetStyle.isTitleBuilder = false;

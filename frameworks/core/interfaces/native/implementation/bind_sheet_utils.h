@@ -52,8 +52,10 @@ public:
     };
 
     static void ParseLifecycleCallbacks(SheetCallbacks& callbacks, const Ark_SheetOptions& sheetOptions);
-    static void ParseFuntionalCallbacks(SheetCallbacks& callbacks, const Ark_SheetOptions& sheetOptions);
+    static void ParseFunctionalCallbacks(SheetCallbacks& callbacks, const Ark_SheetOptions& sheetOptions);
     static void ParseSheetParams(SheetStyle& sheetStyle, const Ark_SheetOptions& sheetOptions);
+    static void ModifySheetStyle(
+        const RefPtr<NG::FrameNode>& sheetContentRefptr, SheetStyle& sheetStyle, bool isPartialUpdate);
     static void ParseContentCoverCallbacks(WeakPtr<FrameNode> weakNode, const Ark_ContentCoverOptions& options,
         std::function<void()>& onShowCallback, std::function<void()>& onDismissCallback,
         std::function<void()>& onWillShowCallback, std::function<void()>& onWillDismissCallback,

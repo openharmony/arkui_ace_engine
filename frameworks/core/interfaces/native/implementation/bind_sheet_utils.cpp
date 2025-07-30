@@ -14,6 +14,8 @@
  */
 #include "frameworks/core/interfaces/native/implementation/bind_sheet_utils.h"
 
+#include "core/components_ng/pattern/overlay/sheet_theme.h"
+
 namespace OHOS::Ace::NG {
 constexpr int32_t EFFECT_EDGE_ZERO = 0;
 constexpr int32_t EFFECT_EDGE_ONE = 1;
@@ -74,7 +76,7 @@ void BindSheetUtil::ParseLifecycleCallbacks(SheetCallbacks& callbacks, const Ark
         };
     }
 }
-void BindSheetUtil::ParseFuntionalCallbacks(SheetCallbacks& callbacks, const Ark_SheetOptions& sheetOptions)
+void BindSheetUtil::ParseFunctionalCallbacks(SheetCallbacks& callbacks, const Ark_SheetOptions& sheetOptions)
 {
     auto onWillDismiss = Converter::OptConvert<Callback_DismissSheetAction_Void>(sheetOptions.onWillDismiss);
     if (onWillDismiss) {
@@ -160,8 +162,8 @@ void BindSheetUtil::ParseSheetParams(SheetStyle& sheetStyle, const Ark_SheetOpti
                 }
                 break;
         }
+        sheetStyle.detents = detents;
     }
-    sheetStyle.detents = detents;
     sheetStyle.backgroundBlurStyle = OptConvert<BlurStyleOption>(sheetOptions.blurStyle);
     sheetStyle.showCloseIcon = OptConvert<bool>(sheetOptions.showClose);
     sheetStyle.interactive = OptConvert<bool>(sheetOptions.enableOutsideInteractive);
@@ -213,6 +215,37 @@ void BindSheetUtil::ParseSheetParams(SheetStyle& sheetStyle, const Ark_SheetOpti
     sheetOffset.SetY(offsetVal.second.value().ConvertToPx());
     sheetStyle.bottomOffset = sheetOffset;
 }
+
+void BindSheetUtil::ModifySheetStyle(
+    const RefPtr<NG::FrameNode>& sheetContentRefptr, SheetStyle& sheetStyle, bool isPartialUpdate)
+{
+    // When isPartialUpdate is false, set some unassigned fields in the sheetStyle to the default value
+    if (isPartialUpdate) {
+        return;
+    }
+    CHECK_NULL_VOID(sheetContentRefptr);
+    auto pipelineContext = sheetContentRefptr->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto themeManager = pipelineContext->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto sheetTheme = themeManager->GetTheme<OHOS::Ace::NG::SheetTheme>(sheetContentRefptr->GetThemeScopeId());
+
+    if (!sheetStyle.showCloseIcon.has_value()) {
+        sheetStyle.showCloseIcon = (sheetTheme != nullptr) ? sheetTheme->GetShowCloseIcon() : true;
+    }
+    if (!sheetStyle.showDragBar.has_value()) {
+        sheetStyle.showDragBar = true;
+    }
+    if (!sheetStyle.enableFloatingDragBar.has_value()) {
+        sheetStyle.enableFloatingDragBar = false;
+    }
+    if (!sheetStyle.sheetHeight.sheetMode.has_value()) {
+        sheetStyle.sheetHeight.sheetMode = sheetTheme != nullptr ?
+                                   static_cast<NG::SheetMode>(sheetTheme->GetSheetHeightDefaultMode()) :
+                                   NG::SheetMode::LARGE;
+    }
+}
+
 void BindSheetUtil::ParseContentCoverCallbacks(WeakPtr<FrameNode> weakNode, const Ark_ContentCoverOptions& options,
     std::function<void()>& onShowCallback, std::function<void()>& onDismissCallback,
     std::function<void()>& onWillShowCallback, std::function<void()>& onWillDismissCallback,

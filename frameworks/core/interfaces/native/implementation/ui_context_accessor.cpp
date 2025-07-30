@@ -21,6 +21,8 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/pipeline/pipeline_base.h"
 #include "arkoala_api_generated.h"
+#include "core/interfaces/native/implementation/bind_sheet_utils.h"
+#include "core/interfaces/native/implementation/frame_node_peer_impl.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace UIContextAccessor {
@@ -126,23 +128,91 @@ void SetDynamicDimmingImpl(Ark_UIContext peer,
 {
 }
 void OpenBindSheetImpl(Ark_VMContext vmContext,
-                       Ark_UIContext peer,
-                       Ark_ComponentContent bindSheetContent,
-                       const Opt_SheetOptions* sheetOptions,
+                       Ark_NativePointer bindSheetContent,
+                       const Opt_SheetOptions* options,
                        const Opt_Number* targetId)
 {
+    FrameNodePeer* sheetContentNode = bindSheetContent ? reinterpret_cast<FrameNodePeer*>(bindSheetContent) : nullptr;
+    RefPtr<NG::FrameNode> sheetContentRefptr = FrameNodePeer::GetFrameNodeByPeer(sheetContentNode);
+    SheetStyle sheetStyle;
+    sheetStyle.sheetHeight.sheetMode = NG::SheetMode::LARGE;
+    sheetStyle.showDragBar = true;
+    sheetStyle.showInPage = false;
+    BindSheetUtil::SheetCallbacks cbs;
+    auto sheetOptions = Converter::OptConvertPtr<Ark_SheetOptions>(options);
+    if (sheetOptions) {
+        BindSheetUtil::ParseLifecycleCallbacks(cbs, sheetOptions.value());
+        BindSheetUtil::ParseFunctionalCallbacks(cbs, sheetOptions.value());
+        Converter::VisitUnion(sheetOptions->title,
+            [&sheetStyle](const Ark_SheetTitleOptions& value) {
+                sheetStyle.isTitleBuilder = false;
+                sheetStyle.sheetTitle = Converter::OptConvert<std::string>(value.title);
+                sheetStyle.sheetSubtitle = Converter::OptConvert<std::string>(value.subtitle);
+            },
+            [&sheetStyle, bindSheetContent, &cbs](const CustomNodeBuilder& value) {
+                sheetStyle.isTitleBuilder = true;
+                cbs.titleBuilder = [callback = CallbackHelper(value), bindSheetContent]() {
+                    auto uiNode = callback.BuildSync(bindSheetContent);
+                    ViewStackProcessor::GetInstance()->Push(uiNode);
+                };
+            }, []() {});
+        BindSheetUtil::ParseSheetParams(sheetStyle, sheetOptions.value());
+    }
+    auto id = targetId->value.i32;
+
+    ViewContextModel::GetInstance()->OpenBindSheet(sheetContentRefptr,
+        std::move(cbs.titleBuilder), sheetStyle, std::move(cbs.onAppear), std::move(cbs.onDisappear),
+        std::move(cbs.shouldDismiss), std::move(cbs.onWillDismiss),  std::move(cbs.onWillAppear),
+        std::move(cbs.onWillDisappear), std::move(cbs.onHeightDidChange),
+        std::move(cbs.onDetentsDidChange), std::move(cbs.onWidthDidChange),
+        std::move(cbs.onTypeDidChange), std::move(cbs.sheetSpringBack), Container::CurrentId(), id);
 }
 void UpdateBindSheetImpl(Ark_VMContext vmContext,
-                         Ark_UIContext peer,
-                         Ark_ComponentContent bindSheetContent,
-                         const Ark_SheetOptions* sheetOptions,
+                         Ark_NativePointer bindSheetContent,
+                         const Opt_SheetOptions* options,
                          const Opt_Boolean* partialUpdate)
 {
+    FrameNodePeer* sheetContentNode = bindSheetContent ? reinterpret_cast<FrameNodePeer*>(bindSheetContent) : nullptr;
+    RefPtr<NG::FrameNode> sheetContentRefptr = FrameNodePeer::GetFrameNodeByPeer(sheetContentNode);
+
+    auto partialUpdateVal = Converter::OptConvertPtr<bool>(partialUpdate).value_or(false);
+
+    SheetStyle sheetStyle;
+    sheetStyle.sheetHeight.sheetMode = NG::SheetMode::LARGE;
+    sheetStyle.showDragBar = true;
+    sheetStyle.showInPage = false;
+    auto sheetOptions = Converter::OptConvertPtr<Ark_SheetOptions>(options);
+    BindSheetUtil::SheetCallbacks cbs;
+    if (sheetOptions) {
+        BindSheetUtil::ParseLifecycleCallbacks(cbs, sheetOptions.value());
+        BindSheetUtil::ParseFunctionalCallbacks(cbs, sheetOptions.value());
+        Converter::VisitUnion(sheetOptions->title,
+            [&sheetStyle](const Ark_SheetTitleOptions& value) {
+                sheetStyle.isTitleBuilder = false;
+                sheetStyle.sheetTitle = Converter::OptConvert<std::string>(value.title);
+                sheetStyle.sheetSubtitle = Converter::OptConvert<std::string>(value.subtitle);
+            },
+            [&sheetStyle, bindSheetContent, &cbs](const CustomNodeBuilder& value) {
+                sheetStyle.isTitleBuilder = true;
+                cbs.titleBuilder = [callback = CallbackHelper(value), bindSheetContent]() {
+                    auto uiNode = callback.BuildSync(bindSheetContent);
+                    ViewStackProcessor::GetInstance()->Push(uiNode);
+                };
+            }, []() {});
+        BindSheetUtil::ParseSheetParams(sheetStyle, sheetOptions.value());
+        BindSheetUtil::ModifySheetStyle(sheetContentRefptr, sheetStyle, partialUpdateVal);
+    }
+
+    auto ret = ViewContextModel::GetInstance()->UpdateBindSheet(
+        sheetContentRefptr, sheetStyle, partialUpdateVal, Container::CurrentId());
 }
 void CloseBindSheetImpl(Ark_VMContext vmContext,
-                        Ark_UIContext peer,
-                        Ark_ComponentContent bindSheetContent)
+                        Ark_NativePointer bindSheetContent)
 {
+    FrameNodePeer* sheetContentNode = bindSheetContent ? reinterpret_cast<FrameNodePeer*>(bindSheetContent) : nullptr;
+    RefPtr<NG::FrameNode> sheetContentRefptr = FrameNodePeer::GetFrameNodeByPeer(sheetContentNode);
+    auto ret =
+        ViewContextModel::GetInstance()->CloseBindSheet(sheetContentRefptr, Container::CurrentId());
 }
 void ClearResourceCacheImpl(Ark_VMContext vmContext,
                             Ark_UIContext peer)
