@@ -131,6 +131,7 @@ build_component_ng("pattern_ng") {
     "divider/divider_modifier.cpp",
     "divider/divider_pattern.cpp",
     "effect_component/effect_component_model_ng.cpp",
+    "effect_component/effect_component_model_static.cpp",
     "effect_component/effect_component_pattern.cpp",
     "flex/flex_layout_algorithm.cpp",
     "flex/flex_model_ng.cpp",

@@ -13,8 +13,10 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/effect_component/effect_component_model_ng.h"
+
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/effect_component/effect_component_model_ng.h"
+#include "core/components_ng/pattern/effect_component/effect_component_model_static.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
@@ -23,7 +25,7 @@ namespace EffectComponentModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    auto frameNode = EffectComponentModelNG::CreateFrameNode(id);
+    auto frameNode = EffectComponentModelStatic::CreateFrameNode(id);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
