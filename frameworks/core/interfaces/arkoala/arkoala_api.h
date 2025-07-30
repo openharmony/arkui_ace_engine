@@ -1043,6 +1043,19 @@ struct ArkUIPickerEdgeAlignStruct {
     void* dyRawPtr;
 };
 
+struct ArkUIPickerBackgroundStyleStruct {
+    ArkUI_Uint32 colorValue;
+    ArkUI_Float32* values;
+    ArkUI_Int32* units;
+    ArkUI_Int32 length;
+    ArkUI_Bool isColorSetByUser;
+    void* colorRawPtr;
+    void* topLeftRawPtr;
+    void* topRightRawPtr;
+    void* bottomLeftRawPtr;
+    void* bottomRightRawPtr;
+};
+
 struct ArkUISliderShowStepOptions {
     uint32_t step;
     const char* text;
@@ -6016,6 +6029,8 @@ struct ArkUITextPickerModifier {
         ArkUINodeHandle node, ArkUITextCascadePickerRangeContentArray arry, ArkUI_Int32 rangeType);
     void (*setTextPickerSelectedBackgroundStyle)(ArkUINodeHandle node, ArkUI_Bool* getValue, ArkUI_Uint32 color,
         ArkUI_Float32* value, ArkUI_Int32* unit, ArkUI_Int32 size);
+    void (*setTextPickerSelectedBackgroundStyleWithResObj)(ArkUINodeHandle node, ArkUI_Bool* isHasValue,
+        const struct ArkUIPickerBackgroundStyleStruct* backgroundStyleStruct);
     void (*getTextPickerSelectedBackgroundStyle)(ArkUINodeHandle node, ArkUINumberValue* result, ArkUI_Int32 size);
     void (*resetTextPickerSelectedBackgroundStyle)(ArkUINodeHandle node);
 };

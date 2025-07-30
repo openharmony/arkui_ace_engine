@@ -34,6 +34,9 @@
 #include "core/components_ng/pattern/picker/datepicker_row_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_dialog_view.h"
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "core/event/crown_event.h"
+#endif
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;
@@ -50,6 +53,8 @@ public:
     DatePickerPattern() : LinearLayoutPattern(false) {};
 
     ~DatePickerPattern() override = default;
+
+    void BeforeCreateLayoutWrapper() override;
 
     void OnColorModeChange(uint32_t colorMode) override
     {
@@ -634,7 +639,7 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_RETURN(pipeline, FocusPattern());
         auto pickerTheme = pipeline->GetTheme<PickerTheme>();
         CHECK_NULL_RETURN(pickerTheme, FocusPattern());

@@ -15,6 +15,7 @@
 
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
@@ -22,16 +23,36 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace GlobalScopeAccessor {
-Ark_Context GetContextImpl(const Opt_CustomObject* component)
+Ark_ComponentInfo GetRectangleByIdImpl(const Ark_String* id)
 {
     return {};
 }
-void PostCardActionImpl(const Ark_CustomObject* component,
-                        const Ark_CustomObject* action)
+Ark_Edges EdgeColorsImpl(const Ark_Number* all)
+{
+    return {};
+}
+Ark_Edges EdgeWidthsImpl(const Ark_Number* all)
+{
+    return {};
+}
+Ark_BorderRadiuses BorderRadiusesImpl(const Ark_Number* all)
+{
+    return {};
+}
+Ark_WrappedBuilder WrapBuilderImpl(const Callback_WrappedBuilder_Args_Void* builder)
+{
+    return {};
+}
+Ark_Context GetContextImpl(const Opt_Object* component)
+{
+    return {};
+}
+void PostCardActionImpl(const Ark_Object* component,
+                        const Ark_Object* action)
 {
 }
 Ark_Resource Dollar_rImpl(const Ark_String* value,
-                          const Array_CustomObject* params)
+                          const Array_Object* params)
 {
     return {};
 }
@@ -168,22 +189,38 @@ Ark_Number Px2lpxImpl(const Ark_Number* value)
     double lpxValue = pxValue / windowConfig.designWidthScale;
     return Converter::ArkValue<Ark_Number>(lpxValue);
 }
-Ark_CustomObject GetInspectorNodesImpl()
+Ark_Object GetInspectorNodesImpl()
 {
     return {};
 }
-Ark_CustomObject GetInspectorNodeByIdImpl(const Ark_Number* id)
+Ark_Object GetInspectorNodeByIdImpl(const Ark_Number* id)
 {
     return {};
 }
 void SetAppBgColorImpl(const Ark_String* value)
 {
+    CHECK_NULL_VOID(value);
+    auto backgroundColorStr = Converter::Convert<std::string>(*value);
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->SetAppBgColor(Color::ColorFromString(backgroundColorStr));
 }
 void Profiler_registerVsyncCallbackImpl(const Profiler_Callback_String_Void* callback_)
 {
+    CHECK_NULL_VOID(callback_);
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    auto onVsyncFunc = [arkCallback = CallbackHelper(*callback_)](const std::string& value) {
+        auto arkStringValue = Converter::ArkValue<Ark_String>(value);
+        arkCallback.Invoke(arkStringValue);
+    };
+    pipelineContext->SetOnVsyncProfiler(onVsyncFunc);
 }
 void Profiler_unregisterVsyncCallbackImpl()
 {
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->ResetOnVsyncProfiler();
 }
 void CursorControl_setCursorImpl(Ark_PointerStyle value)
 {
@@ -227,6 +264,11 @@ Ark_Boolean FocusControl_requestFocusImpl(const Ark_String* value)
 const GENERATED_ArkUIGlobalScopeAccessor* GetGlobalScopeAccessor()
 {
     static const GENERATED_ArkUIGlobalScopeAccessor GlobalScopeAccessorImpl {
+        GlobalScopeAccessor::GetRectangleByIdImpl,
+        GlobalScopeAccessor::EdgeColorsImpl,
+        GlobalScopeAccessor::EdgeWidthsImpl,
+        GlobalScopeAccessor::BorderRadiusesImpl,
+        GlobalScopeAccessor::WrapBuilderImpl,
         GlobalScopeAccessor::GetContextImpl,
         GlobalScopeAccessor::PostCardActionImpl,
         GlobalScopeAccessor::Dollar_rImpl,
@@ -251,7 +293,4 @@ const GENERATED_ArkUIGlobalScopeAccessor* GetGlobalScopeAccessor()
     return &GlobalScopeAccessorImpl;
 }
 
-struct GlobalScopePeer {
-    virtual ~GlobalScopePeer() = default;
-};
 }

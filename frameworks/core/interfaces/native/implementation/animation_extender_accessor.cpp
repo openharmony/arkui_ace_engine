@@ -13,23 +13,19 @@
  * limitations under the License.
  */
 
-#include "base/utils/time_util.h"
-#include "bridge/common/utils/engine_helper.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/view_context/view_context_model_ng.h"
-#include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/callback_helper.h"
-#include "core/interfaces/native/utility/validators.h"
 #include "arkoala_api_generated.h"
+
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/view_context/view_context_model.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "core/interfaces/native/utility/callback_helper.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace {
-    constexpr uint32_t DEFAULT_DURATION = 1000; // ms
-    constexpr int64_t MICROSEC_TO_MILLISEC = 1000;
-}
+constexpr uint32_t DEFAULT_DURATION = 1000; // ms
+constexpr int64_t MICROSEC_TO_MILLISEC = 1000;
+} // namespace
 namespace AnimationExtenderAccessor {
 void SetClipRectImpl(Ark_NativePointer node,
                      Ark_Float32 x,
@@ -44,7 +40,6 @@ void SetClipRectImpl(Ark_NativePointer node,
 
     renderContext->ClipWithRRect(RectF(x, y, width, height), RadiusF(EdgeF(0.0f, 0.0f)));
 }
-
 void OpenImplicitAnimationImpl(const Ark_AnimateParam* param)
 {
     auto currentId = Container::CurrentIdSafelyWithCheck();
@@ -76,9 +71,10 @@ void OpenImplicitAnimationImpl(const Ark_AnimateParam* param)
     if (SystemProperties::GetRosenBackendEnabled()) {
         option.SetAllowRunningAsynchronously(true);
     }
+#ifndef ARKUI_CAPI_UNITTEST
     ViewContextModel::GetInstance()->openAnimation(option);
+#endif
 }
-
 void CloseImplicitAnimationImpl()
 {
     auto currentId = Container::CurrentIdSafelyWithCheck();
@@ -94,16 +90,52 @@ void CloseImplicitAnimationImpl()
             AceLogTag::ACE_FORM, "[Form animation] Form finish callback triggered animation cannot exceed 1000ms.");
         return;
     }
+#ifndef ARKUI_CAPI_UNITTEST
     AnimationOption option;
     ViewContextModel::GetInstance()->closeAnimation(option, true);
+#endif
 }
-
 void StartDoubleAnimationImpl(Ark_NativePointer node,
                               const Ark_DoubleAnimationParam* param)
 {
     auto* frameNode = AceType::DynamicCast<FrameNode>(reinterpret_cast<UINode*>(node));
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(param);
+
+    auto curve = Converter::OptConvert<RefPtr<Curve>>(param->curve).value_or(Framework::CreateCurve(-1, true));
+    auto duration = Converter::Convert<int32_t>(param->duration);
+    auto delay = Converter::Convert<int32_t>(param->delay);
+    auto propertyName = Converter::Convert<std::string>(param->propertyName);
+    auto startValue = Converter::Convert<float>(param->startValue);
+    auto endValue = Converter::Convert<float>(param->endValue);
+
+    auto progressFunction = Converter::OptConvert<Callback_Extender_OnProgress>(param->onProgress);
+    if (progressFunction) {
+        auto progressCallbackFn = [cb = CallbackHelper(progressFunction.value())](float progress) {
+            cb.Invoke(static_cast<Ark_Float32>(progress));
+        };
+
+        frameNode->CreateAnimatablePropertyFloat(propertyName, startValue, progressCallbackFn);
+        progressCallbackFn(startValue);
+    }
+
+    AnimationOption option(curve, duration);
+    option.SetDelay(delay);
+
+    auto finishFunction = Converter::OptConvert<Callback_Extender_OnFinish>(param->onFinish);
+    if (finishFunction) {
+        auto finishCallbackFn = [cb = CallbackHelper(finishFunction.value()), frameNode, propertyName]() {
+            frameNode->DeleteAnimatablePropertyFloat(propertyName);
+            cb.Invoke();
+        };
+
+        AnimationUtils::OpenImplicitAnimation(option, option.GetCurve(), finishCallbackFn);
+    } else {
+        AnimationUtils::OpenImplicitAnimation(option, option.GetCurve(), nullptr);
+    }
+
+    frameNode->UpdateAnimatablePropertyFloat(propertyName, endValue);
+    AnimationUtils::CloseImplicitAnimation();
 }
 void AnimationTranslateImpl(Ark_NativePointer node,
                             const Ark_TranslateOptions* value)
@@ -127,7 +159,6 @@ void AnimationTranslateImpl(Ark_NativePointer node,
     ViewAbstract::SetTranslate(frameNode, options);
 }
 } // AnimationExtenderAccessor
-
 const GENERATED_ArkUIAnimationExtenderAccessor* GetAnimationExtenderAccessor()
 {
     static const GENERATED_ArkUIAnimationExtenderAccessor AnimationExtenderAccessorImpl {

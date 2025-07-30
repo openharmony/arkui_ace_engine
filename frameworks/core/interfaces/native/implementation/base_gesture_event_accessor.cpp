@@ -15,31 +15,18 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/implementation/base_gesture_event_peer.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-
-namespace OHOS::Ace::NG::Converter {
-    void AssignArkValue(Ark_FingerInfo& dst, const FingerInfo& src)
-    {
-        dst.id = Converter::ArkValue<Ark_Number>(src.fingerId_);
-        dst.globalX = Converter::ArkValue<Ark_Number>(src.globalLocation_.GetX());
-        dst.globalY = Converter::ArkValue<Ark_Number>(src.globalLocation_.GetY());
-        dst.localX = Converter::ArkValue<Ark_Number>(src.localLocation_.GetX());
-        dst.localY = Converter::ArkValue<Ark_Number>(src.localLocation_.GetY());
-        dst.displayX = Converter::ArkValue<Ark_Number>(src.screenLocation_.GetX());
-        dst.displayY = Converter::ArkValue<Ark_Number>(src.screenLocation_.GetY());
-    }
-}
+#include "core/interfaces/native/implementation/base_gesture_event_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace BaseGestureEventAccessor {
 void DestroyPeerImpl(Ark_BaseGestureEvent peer)
 {
-    delete peer;
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_BaseGestureEvent CtorImpl()
 {
-    return new BaseGestureEventPeerImpl();
+    return PeerUtils::CreatePeer<BaseGestureEventPeerImpl>();
 }
 Ark_NativePointer GetFinalizerImpl()
 {

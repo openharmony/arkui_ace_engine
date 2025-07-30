@@ -24,13 +24,13 @@ namespace AccessibilityHoverEventAccessor {
 namespace {
 const Ark_Number DefaultValueArkNumber = Converter::ArkValue<Ark_Number>(0);
 } // namespace
-void DestroyPeerImpl(AccessibilityHoverEventPeer* peer)
+void DestroyPeerImpl(Ark_AccessibilityHoverEvent peer)
 {
-    delete peer;
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_AccessibilityHoverEvent CtorImpl()
 {
-    return new AccessibilityHoverEventPeer();
+    return PeerUtils::CreatePeer<AccessibilityHoverEventPeer>();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -50,8 +50,10 @@ void SetTypeImpl(Ark_AccessibilityHoverEvent peer,
     CHECK_NULL_VOID(peer);
     auto info = peer->GetEventInfo();
     CHECK_NULL_VOID(info);
-    auto value = Converter::OptConvert<AccessibilityHoverAction>(type).value_or(AccessibilityHoverAction::UNKNOWN);
-    info->SetActionType(value);
+    auto optValue = Converter::OptConvert<AccessibilityHoverAction>(type);
+    if (optValue.has_value()) {
+        info->SetActionType(optValue.value());
+    }
 }
 Ark_Number GetXImpl(Ark_AccessibilityHoverEvent peer)
 {

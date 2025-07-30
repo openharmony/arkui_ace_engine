@@ -1518,16 +1518,26 @@ HWTEST_F(MenuViewTestNg, Create002, TestSize.Level1)
  */
 HWTEST_F(MenuViewTestNg, UpdateMenuProperties002, TestSize.Level1)
 {
+    std::vector<OptionParam> optionParams;
+    OptionParam param1;
+    optionParams.emplace_back(param1);
+
     MenuParam menuParam;
+    menuParam.placement = Placement::NONE;
     menuParam.anchorPosition = OffsetF(10.0f, 10.0f);
     menuParam.previewMode = MenuPreviewMode::IMAGE;
     menuParam.placement = OHOS::Ace::Placement::TOP;
     ASSERT_NE(wrapperNode_, nullptr);
     ASSERT_NE(menuFrameNode_, nullptr);
+
+    auto menuWrapperNode = MenuView::Create(std::move(optionParams), 1, "", MenuType::MENU, menuParam);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    EXPECT_EQ(menuWrapperNode->GetChildren().size(), 1);
+
     MenuView::UpdateMenuProperties(wrapperNode_, menuFrameNode_, menuParam, MenuType::MENU);
     auto menuProperty = menuFrameNode_->GetLayoutProperty<MenuLayoutProperty>();
     ASSERT_NE(menuProperty, nullptr);
-    EXPECT_EQ(menuProperty->HasAnchorPosition(), true);
+    EXPECT_TRUE(menuProperty->HasAnchorPosition());
 }
 
 /**

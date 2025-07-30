@@ -86,6 +86,7 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation001, TestSize.Level1
     pattern_->itemPosition_.emplace(std::make_pair(1, swiperItemInfo));
     pattern_->PlaySpringAnimation(dragVelocity);
     EXPECT_TRUE(pattern_->springAnimationIsRunning_);
+    EXPECT_EQ(pattern_->scrollState_, ScrollState::FLING);
 }
 
 /**
@@ -140,11 +141,14 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation003, TestSize.Level1
     swiperItemInfo.endPos = -1.0f;
     pattern_->itemPosition_.emplace(std::make_pair(1, swiperItemInfo));
     pattern_->PlaySpringAnimation(dragVelocity);
+    EXPECT_EQ(pattern_->scrollState_, ScrollState::FLING);
     pattern_->StopSpringAnimationAndFlushImmediately();
     EXPECT_FALSE(pattern_->springAnimationIsRunning_);
+    EXPECT_EQ(pattern_->scrollState_, ScrollState::IDLE);
     pattern_->springAnimationIsRunning_ = true;
     pattern_->StopSpringAnimationAndFlushImmediately();
     EXPECT_FALSE(pattern_->springAnimationIsRunning_);
+    EXPECT_EQ(pattern_->scrollState_, ScrollState::IDLE);
 }
 
 /**
@@ -203,6 +207,7 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation005, TestSize.Level1
         AceType::DynamicCast<AnimatablePropertyFloat>(frameNode_->GetAnimatablePropertyFloat("spring")->GetProperty())
             ->GetStagingValue(),
         0.0f);
+    EXPECT_EQ(pattern_->scrollState_, ScrollState::FLING);
 }
 
 /**
@@ -227,6 +232,7 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation006, TestSize.Level1
         AceType::DynamicCast<AnimatablePropertyFloat>(frameNode_->GetAnimatablePropertyFloat("spring")->GetProperty())
             ->GetStagingValue(),
         0.0f);
+    EXPECT_EQ(pattern_->scrollState_, ScrollState::FLING);
 }
 
 /**
@@ -692,16 +698,19 @@ HWTEST_F(SwiperAnimationTestNg, StopTranslateAnimation001, TestSize.Level1)
      */
     pattern_->ShowPrevious();
     EXPECT_TRUE(pattern_->propertyAnimationIsRunning_);
+    EXPECT_EQ(pattern_->scrollState_, ScrollState::FLING);
     EXPECT_EQ(GetChildX(frameNode_, 2), -480.0f);
     EXPECT_EQ(GetChildX(frameNode_, 3), -240.0f);
     MockAnimationManager::GetInstance().Tick();
     EXPECT_TRUE(pattern_->propertyAnimationIsRunning_);
+    EXPECT_EQ(pattern_->scrollState_, ScrollState::FLING);
     for (int i = 0; i < 4; ++i) {
         EXPECT_EQ(
             GetChildFrameNode(frameNode_, i)->GetRenderContext()->GetTranslateXYProperty(), OffsetF(240.0f, 0.0f));
     }
     pattern_->FinishAnimation();
     EXPECT_FALSE(pattern_->propertyAnimationIsRunning_);
+    EXPECT_EQ(pattern_->scrollState_, ScrollState::IDLE);
     // jumped to final position
     EXPECT_EQ(pattern_->currentIndex_, -2);
     EXPECT_EQ(GetChildX(frameNode_, 2), 0.0f);
@@ -712,14 +721,17 @@ HWTEST_F(SwiperAnimationTestNg, StopTranslateAnimation001, TestSize.Level1)
      */
     pattern_->ShowNext();
     EXPECT_TRUE(pattern_->propertyAnimationIsRunning_);
+    EXPECT_EQ(pattern_->scrollState_, ScrollState::FLING);
     MockAnimationManager::GetInstance().Tick();
     EXPECT_TRUE(pattern_->propertyAnimationIsRunning_);
+    EXPECT_EQ(pattern_->scrollState_, ScrollState::FLING);
     for (int i = 0; i < 4; ++i) {
         EXPECT_EQ(
             GetChildFrameNode(frameNode_, i)->GetRenderContext()->GetTranslateXYProperty(), OffsetF(-240.0f, 0.0f));
     }
     MockAnimationManager::GetInstance().Tick();
     EXPECT_FALSE(pattern_->propertyAnimationIsRunning_);
+    EXPECT_EQ(pattern_->scrollState_, ScrollState::IDLE);
     FlushUITasks();
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 3)->IsActive());
     EXPECT_EQ(GetChildX(frameNode_, 0), 0.0f);

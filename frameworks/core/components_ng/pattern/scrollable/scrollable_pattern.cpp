@@ -36,7 +36,6 @@
 #include "core/components_ng/pattern/scrollable/scrollable.h"
 #include "core/components_ng/pattern/scrollable/scrollable_event_hub.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
-#include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/syntax/for_each_node.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
@@ -245,6 +244,11 @@ void ScrollablePattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
     } else {
         json->PutExtAttr("friction", GetFriction(), filter);
     }
+#ifdef SUPPORT_DIGITAL_CROWN
+    json->PutExtAttr("digitCrownSensitivity",
+        (std::to_string(static_cast<int32_t>(crownSensitivity_))).c_str(), filter);
+#endif
+    json->PutExtAttr("backToTop", backToTop_, filter);
 }
 
 void ScrollablePattern::SetAxis(Axis axis)
@@ -2342,15 +2346,13 @@ int32_t ScrollablePattern::ScrollToTarget(
     auto scrollToOffset = pattern->GetTotalOffset();
     TAG_LOGI(AceLogTag::ACE_SCROLLABLE,
         "ScrollToTarget, scrollable:%{public}d, target:%{public}d, offset:%{public}f, align:%{public}d, "
-        "currentOffset:%{public}f, offsetToScrollabl:%{public}f",
+        "currentOffset:%{public}f, offsetToScrollable:%{public}f",
         scrollable->GetId(), target->GetId(), targetOffset, targetAlign, scrollToOffset, offsetToScrollable);
 
     offsetToScrollable += targetOffset;
     if (pattern->IsReverse()) {
-        offsetToScrollable += target->GetGeometryNode()->GetPaddingSize().MainSize(axis);
-        offsetToScrollable = pattern->GetMainContentSize() +
-                             ScrollableUtils::CheckHeightExpansion(scrollable->GetLayoutProperty(), axis) -
-                             offsetToScrollable;
+        offsetToScrollable += target->GetGeometryNode()->GetFrameSize().MainSize(axis);
+        offsetToScrollable = scrollable->GetGeometryNode()->GetFrameSize(true).MainSize(axis) - offsetToScrollable;
     }
     scrollToOffset += offsetToScrollable;
     if (targetAlign == ScrollAlign::CENTER) {

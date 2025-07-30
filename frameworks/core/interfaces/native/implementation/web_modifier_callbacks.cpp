@@ -15,7 +15,19 @@
 #ifdef WEB_SUPPORTED
 
 #include "core/interfaces/native/implementation/web_modifier_callbacks.h"
+#ifndef PREVIEW
+#ifdef ARKUI_CAPI_UNITTEST
+#include "base/image/pixel_map.h"
+#include "test/unittest/capi/stubs/mock_image_source.h"
+#else
+#include "pixel_map.h"
+#include "image_source.h"
+#endif // ARKUI_CAPI_UNITTEST
+#else
+#include "image_source_preview.h"
+#endif // PREVIEW
 
+#include "core/components_ng/pattern/web/web_model_ng.h"
 #include "core/interfaces/native/implementation/console_message_peer_impl.h"
 #include "core/interfaces/native/implementation/controller_handler_peer_impl.h"
 #include "core/interfaces/native/implementation/client_authentication_handler_peer_impl.h"
@@ -28,6 +40,7 @@
 #include "core/interfaces/native/implementation/js_result_peer_impl.h"
 #include "core/interfaces/native/implementation/http_auth_handler_peer_impl.h"
 #include "core/interfaces/native/implementation/permission_request_peer_impl.h"
+#include "core/interfaces/native/implementation/pixel_map_peer.h"
 #include "core/interfaces/native/implementation/screen_capture_handler_peer_impl.h"
 #include "core/interfaces/native/implementation/ssl_error_handler_peer_impl.h"
 #include "core/interfaces/native/implementation/web_context_menu_param_peer_impl.h"
@@ -569,7 +582,8 @@ bool OnSslErrorEventReceive(const CallbackHelper<Callback_OnSslErrorEventReceive
     Ark_OnSslErrorEventReceiveEvent parameter;
     parameter.error = Converter::ArkValue<Ark_SslError>(static_cast<Converter::SslError>(eventInfo->GetError()));
     Converter::ArkArrayHolder<Array_Buffer> vecHolder(eventInfo->GetCertChainData());
-    parameter.certChainData = Converter::ArkValue<Opt_Array_Buffer>(vecHolder.ArkValue());
+    auto tempValue = vecHolder.ArkValue();
+    parameter.certChainData = Converter::ArkValue<Opt_Array_Buffer>(tempValue);
     auto peer = new SslErrorHandlerPeer();
     peer->handler = eventInfo->GetResult();
     parameter.handler = peer;
@@ -629,6 +643,26 @@ bool OnClientAuthentication(const CallbackHelper<Callback_OnClientAuthentication
     return false;
 }
 
+static bool HandleWindowNewEvent(const WebWindowNewEvent* eventInfo)
+{
+    auto handler = eventInfo->GetWebWindowNewHandler();
+    if ((handler) && (!handler->IsFrist())) {
+        int32_t parentId = -1;
+        auto controllerInfo = ControllerHandlerPeer::PopController(handler->GetId(), &parentId);
+        if (controllerInfo.getWebIdFunc) {
+            handler->SetWebController(controllerInfo.getWebIdFunc());
+        }
+        if (controllerInfo.completeWindowNewFunc) {
+            controllerInfo.completeWindowNewFunc(parentId);
+        }
+        if (controllerInfo.releaseRefFunc) {
+            controllerInfo.releaseRefFunc();
+        }
+        return false;
+    }
+    return true;
+}
+
 void OnWindowNew(const CallbackHelper<Callback_OnWindowNewEvent_Void>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info)
 {
@@ -638,6 +672,9 @@ void OnWindowNew(const CallbackHelper<Callback_OnWindowNewEvent_Void>& arkCallba
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto* eventInfo = TypeInfoHelper::DynamicCast<WebWindowNewEvent>(info.get());
     CHECK_NULL_VOID(eventInfo);
+    if (!HandleWindowNewEvent(eventInfo)) {
+        return;
+    }
     Ark_OnWindowNewEvent parameter;
     parameter.isAlert = Converter::ArkValue<Ark_Boolean>(eventInfo->IsAlert());
     parameter.isUserTrigger = Converter::ArkValue<Ark_Boolean>(eventInfo->IsUserTrigger());
@@ -694,6 +731,49 @@ void OnTouchIconUrlReceived(const CallbackHelper<Callback_OnTouchIconUrlReceived
 #endif // ARKUI_CAPI_UNITTEST
 }
 
+Media::PixelFormat GetPixelFormat(NG::TransImageColorType colorType)
+{
+    Media::PixelFormat pixelFormat;
+    switch (colorType) {
+        case NG::TransImageColorType::COLOR_TYPE_UNKNOWN:
+            pixelFormat = Media::PixelFormat::UNKNOWN;
+            break;
+        case NG::TransImageColorType::COLOR_TYPE_RGBA_8888:
+            pixelFormat = Media::PixelFormat::RGBA_8888;
+            break;
+        case NG::TransImageColorType::COLOR_TYPE_BGRA_8888:
+            pixelFormat = Media::PixelFormat::BGRA_8888;
+            break;
+        default:
+            pixelFormat = Media::PixelFormat::UNKNOWN;
+            break;
+    }
+    return pixelFormat;
+}
+
+Media::AlphaType GetAlphaType(NG::TransImageAlphaType alphaType)
+{
+    Media::AlphaType imageAlphaType;
+    switch (alphaType) {
+        case NG::TransImageAlphaType::ALPHA_TYPE_UNKNOWN:
+            imageAlphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_UNKNOWN;
+            break;
+        case NG::TransImageAlphaType::ALPHA_TYPE_OPAQUE:
+            imageAlphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_OPAQUE;
+            break;
+        case NG::TransImageAlphaType::ALPHA_TYPE_PREMULTIPLIED:
+            imageAlphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_PREMUL;
+            break;
+        case NG::TransImageAlphaType::ALPHA_TYPE_POSTMULTIPLIED:
+            imageAlphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_UNPREMUL;
+            break;
+        default:
+            imageAlphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_UNKNOWN;
+            break;
+    }
+    return imageAlphaType;
+}
+
 void OnFaviconReceived(const CallbackHelper<Callback_OnFaviconReceivedEvent_Void>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info)
 {
@@ -701,11 +781,38 @@ void OnFaviconReceived(const CallbackHelper<Callback_OnFaviconReceivedEvent_Void
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
-    pipelineContext->PostAsyncEvent([arkCallback]() {
+    auto func = [arkCallback, info]() {
         Ark_OnFaviconReceivedEvent parameter;
+        auto* eventInfo = TypeInfoHelper::DynamicCast<FaviconReceivedEvent>(info.get());
+        auto data = eventInfo->GetHandler()->GetData();
+        size_t width = eventInfo->GetHandler()->GetWidth();
+        size_t height = eventInfo->GetHandler()->GetHeight();
+        int colorType = eventInfo->GetHandler()->GetColorType();
+        int alphaType = eventInfo->GetHandler()->GetAlphaType();
+
+        Media::InitializationOptions opt;
+        opt.size.width = static_cast<int32_t>(width);
+        opt.size.height = static_cast<int32_t>(height);
+        opt.pixelFormat = GetPixelFormat(NG::TransImageColorType(colorType));
+        opt.alphaType = GetAlphaType(NG::TransImageAlphaType(alphaType));
+        opt.editable = true;
+        auto pixelMap = Media::PixelMap::Create(opt);
+        CHECK_NULL_VOID(pixelMap);
+        uint32_t stride = width << 2;
+        uint64_t bufferSize = stride * height;
+        pixelMap->WritePixels(static_cast<const uint8_t*>(data), bufferSize);
+        parameter.favicon = PeerUtils::CreatePeer<PixelMapPeer>();
+        CHECK_NULL_VOID(parameter.favicon);
+        parameter.favicon->pixelMap = PixelMap::Create(std::move(pixelMap));
+        CHECK_NULL_VOID(parameter.favicon->pixelMap);
         LOGE("WebAttributeModifier::OnFaviconReceivedImpl PixelMap supporting is not implemented yet");
         arkCallback.Invoke(parameter);
-        }, "ArkUIWebFaviconReceived");
+    };
+#ifdef ARKUI_CAPI_UNITTEST
+    func();
+#else
+    pipelineContext->PostAsyncEvent([func]() { func(); }, "ArkUIWebFaviconReceived");
+#endif // ARKUI_CAPI_UNITTEST
 }
 
 void OnPageVisible(const CallbackHelper<Callback_OnPageVisibleEvent_Void>& arkCallback,
@@ -1114,7 +1221,7 @@ WebKeyboardOption OnWebKeyboard(const CallbackHelper<WebKeyboardCallback>& arkCa
     attributes.values = arkValues.array;
     parameter.attributes = attributes;
 
-    auto frameNode = refNode.GetRawPtr();
+    auto frameNode = Referenced::RawPtr(refNode);
     const auto arkResult = arkCallback.InvokeWithObtainResult<Ark_WebKeyboardOptions,
         Callback_WebKeyboardOptions_Void>(parameter);
     opt.isSystemKeyboard_ = Converter::Convert<bool>(arkResult.useSystemKeyboard);
@@ -1152,3 +1259,4 @@ void OnAdsBlocked(const CallbackHelper<OnAdsBlockedCallback>& arkCallback,
 
 } // namespace OHOS::Ace::NG::GeneratedModifier::WebAttributeModifier
 #endif // WEB_SUPPORTED
+

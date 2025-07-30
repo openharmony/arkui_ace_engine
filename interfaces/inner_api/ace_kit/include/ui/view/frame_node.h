@@ -23,6 +23,7 @@
 #include <string>
 
 #include "ui/base/ace_type.h"
+#include "ui/base/macros.h"
 #include "ui/base/referenced.h"
 #include "ui/properties/dirty_flag.h"
 #include "ui/properties/gradient_property.h"

@@ -21,8 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SwiperContentTransitionProxyAccessor {
 void DestroyPeerImpl(Ark_SwiperContentTransitionProxy peer)
 {
-    CHECK_NULL_VOID(peer);
-    peer->handler = nullptr;
     delete peer;
 }
 Ark_SwiperContentTransitionProxy CtorImpl()

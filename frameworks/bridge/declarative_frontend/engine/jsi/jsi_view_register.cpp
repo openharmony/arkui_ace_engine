@@ -124,6 +124,7 @@ void RegisterCardUpdateCallback(int64_t cardId, const panda::Local<panda::Object
     };
 
     auto container = Container::Current();
+    CHECK_NULL_VOID(container);
     if (container->IsFRSCardContainer() || container->IsDynamicRender()) {
         auto frontEnd = AceType::DynamicCast<FormFrontendDeclarative>(container->GetCardFrontend(cardId).Upgrade());
         CHECK_NULL_VOID(frontEnd);

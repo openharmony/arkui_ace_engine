@@ -19,7 +19,6 @@ import { PropDecoratedVariable } from './decoratorProp';
 import { WatchFuncType, WatchFunc, WatchIdType } from './decoratorWatch';
 import { setObservationDepth } from '../base/iObservedObject';
 import { BackingValue } from '../base/backingValue';
-import { requestFrame } from "../tools/requestFrame";
 
 export interface __MkPropReturnType<T> {
     prop: PropDecoratedVariable<T>;
@@ -82,7 +81,6 @@ export class StateDecoratedVariable<T> extends DecoratedV1VariableBase<T>
 
             this.meta_.fireChange();
             this.execWatchFuncs();
-            requestFrame();
         }
     }
 

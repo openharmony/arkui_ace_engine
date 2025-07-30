@@ -1049,4 +1049,17 @@ HWTEST_F(ImagePainterTestNg, ImagePainterTestNg_ApplyImageAlignmentFit18, TestSi
     EXPECT_NE(itImageFit5, imagePainter.ALIMENT_OPERATIONS.end());
     EXPECT_EQ(itImageFit5->second(AceApplicationInfo::GetInstance().isRightToLeft_), Alignment::BOTTOM_LEFT);
 }
+
+/**
+ * @tc.name: ImagePainterTestNg_DrawingClamp
+ * @tc.desc: Test cast to DrawingClamp
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePainterTestNg, ImagePainterTestNg_DrawingClamp, TestSize.Level1)
+{
+    RSClamp rsClamp = Testing::TestingClamp::NO_CLAMP;
+    EXPECT_EQ(rsClamp, Testing::TestingClamp::NO_CLAMP);
+    rsClamp = Testing::TestingClamp::YES_CLAMP;
+    EXPECT_EQ(rsClamp, Testing::TestingClamp::YES_CLAMP);
+}
 } // namespace OHOS::Ace

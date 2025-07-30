@@ -28,6 +28,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
+#include "base/web/webview/arkweb_utils/arkweb_utils.h"
 #if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
 #include "base/web/webview/ohos_interface/include/ohos_nweb/nweb.h"
 #endif
@@ -907,6 +908,7 @@ public:
     
     void SetMouseEventResult(const JSCallbackInfo& args)
     {
+        RETURN_IF_CALLING_FROM_M114();
         if (eventResult_) {
             bool result = true;
             bool stopPropagation = true;
@@ -2770,9 +2772,22 @@ void JSWeb::SetCallbackFromController(const JSRef<JSObject> controller)
             if (!param) {
                 return;
             }
+
+            napi_env env = GetNapiEnv();
+            if (!env) {
+                return;
+            }
+            napi_handle_scope scope = nullptr;
+            auto napi_status = napi_open_handle_scope(env, &scope);
+            if (napi_status != napi_ok) {
+                return;
+            }
+
             JSRef<JSVal> argv[] = {
                 FaviconReceivedEventToJSValue(static_cast<const FaviconReceivedEvent&>(*param)) };
             func->Call(webviewController, 1, argv);
+
+            napi_close_handle_scope(env, scope);
         };
     }
 
@@ -3657,6 +3672,7 @@ JSRef<JSVal> OnOverrideErrorPageEventToJSValue(const OnOverrideErrorPageEvent& e
 
 void JSWeb::OnOverrideErrorPage(const JSCallbackInfo& args)
 {
+    RETURN_IF_CALLING_FROM_M114();
     if ((args.Length() <= 0) || !args[0]->IsFunction()) {
         return;
     }
@@ -4128,6 +4144,7 @@ void JSWeb::NativeEmbedOptions(const JSCallbackInfo& args)
         WebModel::GetInstance()->SetIntrinsicSizeEnabled(*enable);
     }
 
+    RETURN_IF_CALLING_FROM_M114();
     auto cssDisplayChangeObj = paramObject->GetProperty("supportCssDisplayChange");
     if (cssDisplayChangeObj->IsBoolean()) {
         bool cssDisplayChange = cssDisplayChangeObj->ToBoolean();
@@ -5769,6 +5786,7 @@ void JSWeb::OnNativeEmbedGestureEvent(const JSCallbackInfo& args)
 
 void JSWeb::OnNativeEmbedMouseEvent(const JSCallbackInfo& args)
 {
+    RETURN_IF_CALLING_FROM_M114();
     if (args.Length() < 1 || !args[0]->IsFunction()) {
         return;
     }
@@ -6467,6 +6485,7 @@ void JSWeb::GestureFocusMode(int32_t gestureFocusMode)
 
 void JSWeb::OnPdfScrollAtBottom(const JSCallbackInfo& args)
 {
+    RETURN_IF_CALLING_FROM_M114();
     TAG_LOGI(AceLogTag::ACE_WEB, "JSWeb::OnPdfScrollAtBottom, callback set");
     if (args.Length() < 1 || !args[0]->IsFunction()) {
         return;
@@ -6495,6 +6514,7 @@ void JSWeb::OnPdfScrollAtBottom(const JSCallbackInfo& args)
 
 void JSWeb::OnPdfLoadEvent(const JSCallbackInfo& args)
 {
+    RETURN_IF_CALLING_FROM_M114();
     TAG_LOGI(AceLogTag::ACE_WEB, "JSWeb::OnPdfLoadEvent, callback set");
     if (args.Length() < 1 || !args[0]->IsFunction()) {
         return;

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { AttributeModifier } from "./";
+import { AttributeModifier, ArkCommonMethodPeer } from "./component/common";
 
 export type Initializer<T> = (...params:Object[]) => T;
 
@@ -35,6 +35,7 @@ export class AttributeUpdater<T, C = Initializer<T>> implements AttributeModifie
     }
     private value: T | undefined = undefined;
     private constructorParams: C | undefined = undefined;
+    public peerNode_?: ArkCommonMethodPeer;
 
     public set attribute(value: T) {
         this.value = value

@@ -35,46 +35,40 @@ void SetIndicatorComponentOptionsImpl(Ark_NativePointer node,
 } // IndicatorComponentInterfaceModifier
 namespace IndicatorComponentAttributeModifier {
 void InitialIndexImpl(Ark_NativePointer node,
-                      const Ark_Number* value)
+                      const Opt_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
 }
 void CountImpl(Ark_NativePointer node,
-               const Ark_Number* value)
+               const Opt_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
 }
 void StyleImpl(Ark_NativePointer node,
-               const Ark_Union_DotIndicator_DigitIndicator* value)
+               const Opt_Union_DotIndicator_DigitIndicator* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
 }
 void LoopImpl(Ark_NativePointer node,
-              Ark_Boolean value)
+              const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::Convert<bool>(value);
 }
 void VerticalImpl(Ark_NativePointer node,
-                  Ark_Boolean value)
+                  const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::Convert<bool>(value);
 }
 void OnChangeImpl(Ark_NativePointer node,
-                  const Callback_Number_Void* value)
+                  const Opt_Callback_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
 }
 } // IndicatorComponentAttributeModifier
 const GENERATED_ArkUIIndicatorComponentModifier* GetIndicatorComponentModifier()

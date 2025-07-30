@@ -63,6 +63,7 @@ constexpr int32_t RATIO_ZERO = 0;
 constexpr int32_t RATIO_ONE = 1;
 constexpr int32_t SECOND_PAGE = 1;
 constexpr float PICKER_MAXFONTSCALE = 1.0f;
+constexpr float DEFAULT_SIZE_ZERO = 0.0f;
 } // namespace
 bool DatePickerPattern::inited_ = false;
 const std::string DatePickerPattern::empty_;
@@ -3221,4 +3222,18 @@ void DatePickerPattern::UpdateSelectedTextStyle(const PickerTextStyle& textStyle
         [&](const std::vector<std::string>& fontFamily) { pickerProperty->UpdateSelectedFontFamily(fontFamily); }
     );
 }
+
+void DatePickerPattern::BeforeCreateLayoutWrapper()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
+    if (layoutPolicy.has_value() && (layoutPolicy->IsWrap() || layoutPolicy->IsFix())) {
+        layoutProperty->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(DEFAULT_SIZE_ZERO), CalcLength(DEFAULT_SIZE_ZERO)));
+    }
+}
+
 } // namespace OHOS::Ace::NG

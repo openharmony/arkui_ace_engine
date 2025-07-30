@@ -1248,4 +1248,110 @@ HWTEST_F(RichEditorMenuTestNg, HandleOnShare001, TestSize.Level1)
     int32_t ret = value.length();
     EXPECT_EQ(ret, 0);
 }
+
+/**
+ * @tc.name: SetMenuParam001
+ * @tc.desc: test SetMenuParam
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorMenuTestNg, SetMenuParam001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
+    AddImageSpan();
+    std::function<void()> tempFunc = []() { };
+    std::function<void()>& func = tempFunc;
+    SelectMenuParam menuParam;
+    richEditorPattern->SetPreviewMenuParam(TextSpanType::IMAGE, func, menuParam);
+    EXPECT_TRUE(static_cast<bool>(richEditorPattern->oneStepDragController_));
+}
+
+/**
+ * @tc.name: HandleExtendAction001
+ * @tc.desc: test HandleExtendAction
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorMenuTestNg, HandleExtendAction001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->HandleExtendAction(ACTION_SELECT_ALL);
+    EXPECT_TRUE(richEditorPattern->showSelect_);
+
+    richEditorPattern->HandleExtendAction(ACTION_CUT);
+    EXPECT_EQ(richEditorPattern->copyOption_, CopyOptions::None);
+
+    richEditorPattern->HandleExtendAction(ACTION_COPY);
+    EXPECT_EQ(richEditorPattern->copyOption_, CopyOptions::None);
+
+    auto eventHub = richEditorNode_->GetOrCreateEventHub<RichEditorEventHub>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    TextCommonEvent event;
+    eventHub->FireOnPaste(event);
+    richEditorPattern->HandleExtendAction(ACTION_PASTE);
+    EXPECT_EQ(richEditorPattern->clipboard_, nullptr);
+}
+
+/**
+ * @tc.name: HandleExtendAction002
+ * @tc.desc: test HandleExtendAction
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorMenuTestNg, HandleExtendAction002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->HandleExtendAction(2);
+    EXPECT_TRUE(richEditorPattern->selectMenuInfo_.showCopyAll);
+}
+
+/**
+ * @tc.name: CheckEditorTypeChange001
+ * @tc.desc: test CheckEditorTypeChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorMenuTestNg, CheckEditorTypeChange001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorPattern->CheckEditorTypeChange();
+
+    SelectOverlayInfo selectOverlayInfo;
+    selectOverlayInfo.singleLineHeight = 143;
+    auto root = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto selectOverlayManager = AceType::MakeRefPtr<SelectOverlayManager>(root);
+    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo, nullptr, false);
+    richEditorPattern->selectOverlayProxy_ = proxy;
+    richEditorPattern->UpdateSelectOverlayOrCreate(selectOverlayInfo, true);
+    richEditorPattern->CheckEditorTypeChange();
+
+    richEditorPattern->selectOverlayProxy_->GetSelectOverlayMangerInfo().menuInfo.editorType =
+        static_cast<int32_t>(TextSpanType::TEXT);
+    richEditorPattern->CheckEditorTypeChange();
+
+    richEditorPattern->selectOverlayProxy_->GetSelectOverlayMangerInfo().menuInfo.editorType =
+        static_cast<int32_t>(TextSpanType::NONE);
+    richEditorPattern->selectedType_ = TextSpanType::TEXT;
+    richEditorPattern->CheckEditorTypeChange();
+
+    richEditorPattern->selectOverlayProxy_->GetSelectOverlayMangerInfo().menuInfo.editorType =
+        static_cast<int32_t>(TextSpanType::TEXT);
+    richEditorPattern->selectedType_ = TextSpanType::TEXT;
+    richEditorPattern->CheckEditorTypeChange();
+
+    richEditorPattern->selectOverlayProxy_->selectOverlayId_ = 1;
+    richEditorPattern->CheckEditorTypeChange();
+
+    EXPECT_TRUE(richEditorPattern->selectOverlayProxy_);
+}
+
 }

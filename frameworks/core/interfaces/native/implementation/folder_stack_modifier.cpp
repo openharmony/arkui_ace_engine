@@ -51,19 +51,23 @@ void SetFolderStackOptionsImpl(Ark_NativePointer node,
 } // FolderStackInterfaceModifier
 namespace FolderStackAttributeModifier {
 void AlignContentImpl(Ark_NativePointer node,
-                      Ark_Alignment value)
+                      const Opt_Alignment* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    FolderStackModelNGStatic::SetAlignment(frameNode, Converter::OptConvert<Alignment>(value));
+    FolderStackModelNGStatic::SetAlignment(frameNode, Converter::OptConvert<Alignment>(*value));
 }
 void OnFolderStateChangeImpl(Ark_NativePointer node,
-                             const OnFoldStatusChangeCallback* value)
+                             const Opt_OnFoldStatusChangeCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto onChange = [arkCallback = CallbackHelper(*value)](const FolderEventInfo& folderEventInfo) {
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // TODO: Reset value
+        return;
+    }
+    auto onChange = [arkCallback = CallbackHelper(*optValue)](const FolderEventInfo& folderEventInfo) {
         Ark_OnFoldStatusChangeInfo eventInfo;
         eventInfo.foldStatus = Converter::ArkValue<Ark_FoldStatus>(folderEventInfo.GetFolderState());
         arkCallback.Invoke(eventInfo);
@@ -71,12 +75,16 @@ void OnFolderStateChangeImpl(Ark_NativePointer node,
     FolderStackModelNG::SetOnFolderStateChange(frameNode, std::move(onChange));
 }
 void OnHoverStatusChangeImpl(Ark_NativePointer node,
-                             const OnHoverStatusChangeCallback* value)
+                             const Opt_OnHoverStatusChangeCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto onChange = [arkCallback = CallbackHelper(*value)](const FolderEventInfo& folderEventInfo) {
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // TODO: Reset value
+        return;
+    }
+    auto onChange = [arkCallback = CallbackHelper(*optValue)](const FolderEventInfo& folderEventInfo) {
         Ark_HoverEventParam eventInfo;
         eventInfo.foldStatus = Converter::ArkValue<Ark_FoldStatus>(folderEventInfo.GetFolderState());
         arkCallback.Invoke(eventInfo);
@@ -84,18 +92,28 @@ void OnHoverStatusChangeImpl(Ark_NativePointer node,
     FolderStackModelNG::SetOnHoverStatusChange(frameNode, std::move(onChange));
 }
 void EnableAnimationImpl(Ark_NativePointer node,
-                         Ark_Boolean value)
+                         const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    FolderStackModelNG::SetEnableAnimation(frameNode, Converter::Convert<bool>(value));
+    auto convValue = Converter::OptConvert<bool>(*value);
+    if (!convValue) {
+        // TODO: Reset value
+        return;
+    }
+    FolderStackModelNG::SetEnableAnimation(frameNode, *convValue);
 }
 void AutoHalfFoldImpl(Ark_NativePointer node,
-                      Ark_Boolean value)
+                      const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    FolderStackModelNG::SetAutoHalfFold(frameNode, Converter::Convert<bool>(value));
+    auto convValue = Converter::OptConvert<bool>(*value);
+    if (!convValue) {
+        // TODO: Reset value
+        return;
+    }
+    FolderStackModelNG::SetAutoHalfFold(frameNode, *convValue);
 }
 } // FolderStackAttributeModifier
 const GENERATED_ArkUIFolderStackModifier* GetFolderStackModifier()

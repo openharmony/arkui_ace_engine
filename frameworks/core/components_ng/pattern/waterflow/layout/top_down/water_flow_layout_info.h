@@ -55,6 +55,10 @@ public:
     {
         return firstIndex_;
     }
+    float GetPendingDelta() const override
+    {
+        return 0.0f; // not implemented
+    }
     int32_t GetCrossIndex(int32_t itemIndex) const override;
 
     void UpdateStartIndex() override;

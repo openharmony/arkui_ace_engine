@@ -71,7 +71,7 @@ int32_t Container::CurrentIdSafely()
 
 RefPtr<Container> Container::Current()
 {
-    return AceEngine::Get().GetContainer(ContainerScope::CurrentId());
+    return AceEngine::Get().GetContainer(Container::CurrentIdSafely());
 }
 
 RefPtr<Container> Container::CurrentSafely()

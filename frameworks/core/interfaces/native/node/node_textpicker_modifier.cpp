@@ -19,6 +19,7 @@
 #include "core/components_ng/pattern/tabs/tabs_model.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/pattern/text_picker/textpicker_model_ng.h"
+#include "core/common/resource/resource_parse_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -83,22 +84,32 @@ void InitTextPickerTextStyle(const char* fontInfo, uint32_t color, int32_t fontS
     textStyle.textColor = Color(color);
 }
 
-void SetTextPickerTextStyleResObj(NG::PickerTextStyle& textStyle, void* fontSizeRawPtr, void* fontFamilyRawPtr,
-    void* textColorRawPtr)
+void SetTextPickerTextStyleResObj(NG::PickerTextStyle& textStyle,
+    const struct ArkUIPickerTextStyleStruct* textStyleStruct)
 {
-    auto* fontSizePtr = reinterpret_cast<ResourceObject*>(fontSizeRawPtr);
+    auto* fontSizePtr = reinterpret_cast<ResourceObject*>(textStyleStruct->fontSizeRawPtr);
     if (fontSizePtr) {
         textStyle.fontSizeResObj = AceType::Claim(fontSizePtr);
     }
 
-    auto* fontFamilyPtr = reinterpret_cast<ResourceObject*>(fontFamilyRawPtr);
+    auto* fontFamilyPtr = reinterpret_cast<ResourceObject*>(textStyleStruct->fontFamilyRawPtr);
     if (fontFamilyPtr) {
         textStyle.fontFamilyResObj = AceType::Claim(fontFamilyPtr);
     }
 
-    auto* textColorPtr = reinterpret_cast<ResourceObject*>(textColorRawPtr);
+    auto* textColorPtr = reinterpret_cast<ResourceObject*>(textStyleStruct->textColorRawPtr);
     if (textColorPtr) {
         textStyle.textColorResObj = AceType::Claim(textColorPtr);
+    }
+
+    auto* minFontSizePtr = reinterpret_cast<ResourceObject*>(textStyleStruct->minFontSizeRawPtr);
+    if (minFontSizePtr) {
+        textStyle.minFontSizeResObj = AceType::Claim(minFontSizePtr);
+    }
+
+    auto* maxFontSizePtr = reinterpret_cast<ResourceObject*>(textStyleStruct->maxFontSizeRawPtr);
+    if (maxFontSizePtr) {
+        textStyle.maxFontSizeResObj = AceType::Claim(maxFontSizePtr);
     }
 }
 
@@ -254,8 +265,7 @@ void SetTextPickerTextStyleWithResObj(ArkUINodeHandle node, const struct ArkUIPi
     } else {
         textStyle.textOverflow = TEXT_OVERFLOWS[0];
     }
-    SetTextPickerTextStyleResObj(textStyle, textStyleStruct->fontSizeRawPtr, textStyleStruct->fontFamilyRawPtr,
-        textStyleStruct->textColorRawPtr);
+    SetTextPickerTextStyleResObj(textStyle, textStyleStruct);
     TextPickerModelNG::SetNormalTextStyle(frameNode, theme, textStyle);
 }
 
@@ -324,8 +334,7 @@ void SetTextPickerSelectedTextStyleWithResObj(ArkUINodeHandle node,
     } else {
         textStyle.textOverflow = TEXT_OVERFLOWS[0];
     }
-    SetTextPickerTextStyleResObj(textStyle, textStyleStruct->fontSizeRawPtr, textStyleStruct->fontFamilyRawPtr,
-        textStyleStruct->textColorRawPtr);
+    SetTextPickerTextStyleResObj(textStyle, textStyleStruct);
     TextPickerModelNG::SetSelectedTextStyle(frameNode, theme, textStyle);
 }
 
@@ -394,8 +403,7 @@ void SetTextPickerDisappearTextStyleWithResObj(ArkUINodeHandle node,
     } else {
         textStyle.textOverflow = TEXT_OVERFLOWS[0];
     }
-    SetTextPickerTextStyleResObj(textStyle, textStyleStruct->fontSizeRawPtr, textStyleStruct->fontFamilyRawPtr,
-        textStyleStruct->textColorRawPtr);
+    SetTextPickerTextStyleResObj(textStyle, textStyleStruct);
     TextPickerModelNG::SetDisappearTextStyle(frameNode, theme, textStyle);
 }
 
@@ -881,8 +889,7 @@ void SetTextPickerDefaultTextStyleWithResObj(ArkUINodeHandle node,
     } else {
         textStyle.textOverflow = TEXT_OVERFLOWS[0];
     }
-    SetTextPickerTextStyleResObj(textStyle, textStyleStruct->fontSizeRawPtr,
-        textStyleStruct->fontFamilyRawPtr, textStyleStruct->textColorRawPtr);
+    SetTextPickerTextStyleResObj(textStyle, textStyleStruct);
     TextPickerModelNG::SetDefaultTextStyle(frameNode, theme, textStyle);
 }
 
@@ -969,6 +976,79 @@ void SetTextPickerSelectedBackgroundStyle(ArkUINodeHandle node, ArkUI_Bool* getV
         pickerBgStyle.borderRadius->radiusBottomRight = Dimension(
             value[BOTTOMRIGHT], static_cast<DimensionUnit>(unit[BOTTOMRIGHT]));
     }
+    TextPickerModelNG::SetSelectedBackgroundStyle(frameNode, pickerBgStyle);
+}
+
+#define TEXT_PICKER_ADD_RADIUS_RESOURCE(radiusProp, propName, dimensionMember) \
+    auto propName##Update = [](const RefPtr<ResourceObject>& obj, BorderRadiusProperty& prop) { \
+        CalcDimension dim; \
+        ResourceParseUtils::ParseResDimensionVp(obj, dim); \
+        prop.dimensionMember = dim; \
+    }; \
+    const std::string resourceKey = std::string("borderRadius.") + #dimensionMember; \
+    (radiusProp)->AddResource(resourceKey, propName##ResObj, std::move(propName##Update))
+
+void AddRadiusResource(const struct ArkUIPickerBackgroundStyleStruct* backgroundStyleStruct,
+    PickerBackgroundStyle& pickerBgStyle)
+{
+    auto* topLeftResPtr = reinterpret_cast<ResourceObject*>(backgroundStyleStruct->topLeftRawPtr);
+    auto topLeftResObj = AceType::Claim(topLeftResPtr);
+    auto* topRightResPtr = reinterpret_cast<ResourceObject*>(backgroundStyleStruct->topRightRawPtr);
+    auto topRightResObj = AceType::Claim(topRightResPtr);
+    auto* bottomLeftResPtr = reinterpret_cast<ResourceObject*>(backgroundStyleStruct->bottomLeftRawPtr);
+    auto bottomLeftResObj = AceType::Claim(bottomLeftResPtr);
+    auto* bottomRightResPtr = reinterpret_cast<ResourceObject*>(backgroundStyleStruct->bottomRightRawPtr);
+    auto bottomRightResObj = AceType::Claim(bottomRightResPtr);
+    if (topLeftResObj) {
+        TEXT_PICKER_ADD_RADIUS_RESOURCE(pickerBgStyle.borderRadius, topLeft, radiusTopLeft);
+    }
+    if (topRightResObj) {
+        TEXT_PICKER_ADD_RADIUS_RESOURCE(pickerBgStyle.borderRadius, topRight, radiusTopRight);
+    }
+    if (bottomLeftResObj) {
+        TEXT_PICKER_ADD_RADIUS_RESOURCE(pickerBgStyle.borderRadius, bottomLeft, radiusBottomLeft);
+    }
+    if (bottomRightResObj) {
+        TEXT_PICKER_ADD_RADIUS_RESOURCE(pickerBgStyle.borderRadius, bottomRight, radiusBottomRight);
+    }
+}
+
+void SetTextPickerSelectedBackgroundStyleWithResObj(ArkUINodeHandle node, ArkUI_Bool* isHasValue,
+    const struct ArkUIPickerBackgroundStyleStruct* backgroundStyleStruct)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(theme);
+    PickerBackgroundStyle pickerBgStyle;
+    pickerBgStyle.color = theme->GetSelectedBackgroundColor();
+    pickerBgStyle.borderRadius = theme->GetSelectedBorderRadius();
+    if (isHasValue[GETCOLOR]) {
+        pickerBgStyle.color = Color(backgroundStyleStruct->colorValue);
+        pickerBgStyle.textColorSetByUser = backgroundStyleStruct->isColorSetByUser;
+        auto* colorPtr = reinterpret_cast<ResourceObject*>(backgroundStyleStruct->colorRawPtr);
+        pickerBgStyle.colorResObj = AceType::Claim(colorPtr);
+    }
+    if (isHasValue[GETTOPLEFT]) {
+        pickerBgStyle.borderRadius->radiusTopLeft = Dimension(backgroundStyleStruct->values[TOPLEFT],
+            static_cast<DimensionUnit>(backgroundStyleStruct->units[TOPLEFT]));
+    }
+    if (isHasValue[GETTOPRIGHT]) {
+        pickerBgStyle.borderRadius->radiusTopRight = Dimension(backgroundStyleStruct->values[TOPRIGHT],
+            static_cast<DimensionUnit>(backgroundStyleStruct->units[TOPRIGHT]));
+    }
+    if (isHasValue[GETBOTTOMLEFT]) {
+        pickerBgStyle.borderRadius->radiusBottomLeft = Dimension(backgroundStyleStruct->values[BOTTOMLEFT],
+            static_cast<DimensionUnit>(backgroundStyleStruct->units[BOTTOMLEFT]));
+    }
+    if (isHasValue[GETBOTTOMRIGHT]) {
+        pickerBgStyle.borderRadius->radiusBottomRight = Dimension(backgroundStyleStruct->values[BOTTOMRIGHT],
+            static_cast<DimensionUnit>(backgroundStyleStruct->units[BOTTOMRIGHT]));
+    }
+
+    AddRadiusResource(backgroundStyleStruct, pickerBgStyle);
     TextPickerModelNG::SetSelectedBackgroundStyle(frameNode, pickerBgStyle);
 }
 
@@ -1061,6 +1141,7 @@ const ArkUITextPickerModifier* GetTextPickerModifier()
         .setTextPickerIconRangeStr = SetTextPickerIconRangeStr,
         .setTextCascadePickRangeContent = SetTextCascadePickRangeContent,
         .setTextPickerSelectedBackgroundStyle = SetTextPickerSelectedBackgroundStyle,
+        .setTextPickerSelectedBackgroundStyleWithResObj = SetTextPickerSelectedBackgroundStyleWithResObj,
         .getTextPickerSelectedBackgroundStyle = GetTextPickerSelectedBackgroundStyle,
         .resetTextPickerSelectedBackgroundStyle = ResetTextPickerSelectedBackgroundStyle,
     };

@@ -48,6 +48,7 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
     auto stageManager = context->GetStageManager();
     CHECK_NULL_RETURN(stageManager, nullptr);
     auto stageNode = stageManager->GetStageNode();
+    TAG_LOGD(AceLogTag::ACE_NATIVE_NODE, "createRootNode: stageNode %{public}p", AceType::RawPtr(stageNode));
 
     // create page node as CAPI root node to support existing
     // PageNode functionality like status bar offset supporting for example

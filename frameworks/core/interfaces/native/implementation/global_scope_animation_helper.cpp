@@ -31,6 +31,24 @@ constexpr int32_t MAX_FLUSH_COUNT = 2;
 }
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+bool CheckRunOnThreadByThreadId(int32_t currentId, bool defaultRes)
+{
+    auto container = Container::GetContainer(currentId);
+    CHECK_NULL_RETURN(container, defaultRes);
+    auto executor = container->GetTaskExecutor();
+    CHECK_NULL_RETURN(executor, defaultRes);
+    return executor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI);
+}
+void RecordAnimationFinished(int32_t count)
+{
+    if (Recorder::EventRecorder::Get().IsRecordEnable(Recorder::EventCategory::CATEGORY_ANIMATION)) {
+        Recorder::EventParamsBuilder builder;
+        builder.SetEventCategory(Recorder::EventCategory::CATEGORY_ANIMATION)
+            .SetEventType(Recorder::EventType::ANIMATION_FINISHED)
+            .SetExtra(Recorder::KEY_COUNT, std::to_string(count));
+        Recorder::EventRecorder::Get().OnEvent(std::move(builder));
+    }
+}
 int64_t GetFormAnimationTimeInterval(const RefPtr<PipelineBase>& pipelineContext)
 {
     CHECK_NULL_RETURN(pipelineContext, 0);
@@ -220,6 +238,12 @@ void AnimateToInner(const Ark_AnimateParam* value,
 {
     CHECK_NULL_VOID(value);
     auto currentId = Container::CurrentIdSafelyWithCheck();
+    if (!CheckRunOnThreadByThreadId(currentId, true)) {
+        auto localContainerId = ContainerScope::CurrentLocalId();
+        if (localContainerId > 0 && CheckRunOnThreadByThreadId(localContainerId, false)) {
+            currentId = localContainerId;
+        }
+    }
     ContainerScope scope(currentId);
     auto scopedDelegate = EngineHelper::GetCurrentDelegateSafely();
     CHECK_NULL_VOID(scopedDelegate);
@@ -238,17 +262,19 @@ void AnimateToInner(const Ark_AnimateParam* value,
         count = GetAnimationFinishCount();
         onFinishEvent = [arkCallback = CallbackHelper(*onFinish),
                             id = Container::CurrentIdSafely(), traceStreamPtr, count]() mutable {
+            RecordAnimationFinished(count.value_or(1));
             ContainerScope scope(id);
             arkCallback.Invoke();
             AceAsyncTraceEnd(0, traceStreamPtr->str().c_str(), true);
         };
     } else {
         onFinishEvent = [traceStreamPtr, count]() {
+            RecordAnimationFinished(count.value_or(1));
             AceAsyncTraceEnd(0, traceStreamPtr->str().c_str(), true);
         };
     }
     AnimationOption option = Converter::Convert<AnimationOption>(*value);
-    // Validator::ValidateAnimationOption(option, pipelineContext->IsFormRender());
+    Validator::ValidateAnimationOption(option, pipelineContext->IsFormRender());
     option.SetOnFinishEvent(onFinishEvent);
     FillTraceStream(traceStreamPtr, option);
     AceAsyncTraceBegin(0, traceStreamPtr->str().c_str(), true);

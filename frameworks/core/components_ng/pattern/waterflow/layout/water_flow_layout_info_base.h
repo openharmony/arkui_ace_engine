@@ -39,10 +39,11 @@ public:
     /* Factory method */
     static RefPtr<WaterFlowLayoutInfoBase> Create(WaterFlowLayoutMode mode);
 
-    /* PURE GETTERs */
+    /* GETTERs */
     virtual WaterFlowLayoutMode Mode() const = 0;
     virtual float Offset() const = 0;     // total offset of content
     virtual int32_t FirstIdx() const = 0; // for compatibility
+    virtual float GetPendingDelta() const = 0;
 
     virtual void UpdateOffset(float delta) = 0;
 

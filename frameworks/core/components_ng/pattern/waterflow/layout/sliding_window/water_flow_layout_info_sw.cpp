@@ -14,6 +14,7 @@
  */
 #include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_info_sw.h"
 #include "base/log/event_report.h"
+#include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_large_delta_converter.h"
 
 #include <numeric>
 
@@ -896,25 +897,16 @@ void WaterFlowLayoutInfoSW::EstimateTotalOffset(int32_t prevStart, int32_t start
 
 bool WaterFlowLayoutInfoSW::TryConvertLargeDeltaToJump(float viewport, int32_t itemCnt)
 {
-    using std::abs, std::round, std::clamp;
-    const float offset = StartPos() + delta_;
     if (LessOrEqual(abs(delta_), viewport * 2.0f)) {
         return false;
     }
-    const int32_t startIdx = StartIndex();
-    const auto curSec = static_cast<uint32_t>(GetSegment(startIdx)); // change function return type to uint later
-    if (curSec >= lanes_.size() || curSec >= mainGap_.size()) {
+    auto converter = WaterFlowLargeDeltaConverter(*this);
+    int32_t res = converter.Convert(delta_);
+    if (res < 0) {
         return false;
     }
 
-    const auto crossCnt = static_cast<float>(lanes_[curSec].size());
-    const float average = GetAverageItemHeight() + mainGap_[curSec];
-    if (NearZero(average)) {
-        return false;
-    }
-
-    jumpIndex_ = startIdx - static_cast<int32_t>(round(offset * crossCnt / average));
-    jumpIndex_ = clamp(jumpIndex_, 0, itemCnt - 1);
+    jumpIndex_ = std::min(res, itemCnt - 1);
     align_ = ScrollAlign::START;
     delta_ = 0.0f;
     return true;

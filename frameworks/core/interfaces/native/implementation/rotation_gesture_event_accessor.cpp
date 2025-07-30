@@ -22,11 +22,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace RotationGestureEventAccessor {
 void DestroyPeerImpl(Ark_RotationGestureEvent peer)
 {
-    delete peer;
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_RotationGestureEvent CtorImpl()
 {
-    return new RotationGestureEventPeer;
+    return PeerUtils::CreatePeer<RotationGestureEventPeer>();
 }
 Ark_NativePointer GetFinalizerImpl()
 {

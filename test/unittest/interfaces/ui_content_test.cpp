@@ -17,6 +17,7 @@
 #include "ability_info.h"
 #include "context_impl.h"
 #include "gtest/gtest.h"
+#include "core/common/container_consts.h"
 #include "interfaces/inner_api/ace/ui_content.h"
 
 using namespace testing;
@@ -52,5 +53,17 @@ HWTEST_F(UiContentTest, GetUIContent001, TestSize.Level1)
     EXPECT_TRUE(ret == nullptr);
     std::string ret2 = UIContent::GetCurrentUIStackInfo();
     EXPECT_TRUE(ret2 == std::string());
+}
+
+/**
+ * @tc.name: GetUIContent002
+ * @tc.desc: test GetUIContent
+ * @tc.type: FUNC
+ */
+HWTEST_F(UiContentTest, GetUIContent002, TestSize.Level1)
+{
+    int32_t instanceId = DC_CONTAINER * CONTAINER_ID_DIVIDE_SIZE;
+    UIContent* ret = UIContent::GetUIContent(instanceId);
+    EXPECT_TRUE(ret == nullptr);
 }
 } // namespace OHOS::Ace

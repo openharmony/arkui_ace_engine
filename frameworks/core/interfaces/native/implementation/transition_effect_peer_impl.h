@@ -15,8 +15,14 @@
 #ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_CLIENT_TRANSITION_EFFECT_PEER_IMPL_H
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_CLIENT_TRANSITION_EFFECT_PEER_IMPL_H
 #include "core/components_ng/property/transition_property.h"
+#include "core/interfaces/native/utility/peer_utils.h"
 
 struct TransitionEffectPeer {
+protected:
+    TransitionEffectPeer() = default;
+    ~TransitionEffectPeer() = default;
+    friend OHOS::Ace::NG::PeerUtils;
+public:
     OHOS::Ace::RefPtr<OHOS::Ace::NG::ChainedTransitionEffect> handler;
 };
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_CLIENT_TRANSITION_EFFECT_PEER_IMPL_H

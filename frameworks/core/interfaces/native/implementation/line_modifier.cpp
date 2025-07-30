@@ -22,6 +22,9 @@
 #include "core/interfaces/native/generated/interface/node_api.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+    constexpr int32_t SHAPE_POINT_DIM = 2;
+} // namespace
 struct LineOptions {
     std::optional<Dimension> width;
     std::optional<Dimension> height;
@@ -56,34 +59,43 @@ namespace LineInterfaceModifier {
 void SetLineOptionsImpl(Ark_NativePointer node,
                         const Opt_LineOptions* options)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(options);
-    auto opt = Converter::OptConvert<LineOptions>(*options);
-    CHECK_NULL_VOID(opt);
-    if (opt->width) {
-        ShapeAbstractModelNG::SetWidth(frameNode, opt->width.value());
-    }
-
-    if (opt->height) {
-        ShapeAbstractModelNG::SetHeight(frameNode, opt->height.value());
-    }
+    // auto frameNode = reinterpret_cast<FrameNode *>(node);
+    // CHECK_NULL_VOID(frameNode);
+    // CHECK_NULL_VOID(options);
+    // auto opt = Converter::OptConvert<LineOptions>(*options);
+    // CHECK_NULL_VOID(opt);
+    // if (opt->width) {
+    //     ShapeAbstractModelNG::SetWidth(frameNode, opt->width);
+    // }
+    // if (opt->height) {
+    //     ShapeAbstractModelNG::SetHeight(frameNode, opt->height);
+    // }
 }
 } // LineInterfaceModifier
 namespace LineAttributeModifier {
 void StartPointImpl(Ark_NativePointer node,
-                    const Array_Length* value)
+                    const Opt_ShapePoint* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
+    auto convValue = Converter::OptConvert<ShapePoint>(*value);
+    if (!convValue) {
+        // TODO: Reset value
+        return;
+    }
+    LineModelNG::StartPoint(frameNode, *convValue);
 }
 void EndPointImpl(Ark_NativePointer node,
-                  const Array_Length* value)
+                  const Opt_ShapePoint* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
+    auto convValue = Converter::OptConvert<ShapePoint>(*value);
+    if (!convValue) {
+        // TODO: Reset value
+        return;
+    }
+    LineModelNG::EndPoint(frameNode, *convValue);
 }
 } // LineAttributeModifier
 const GENERATED_ArkUILineModifier* GetLineModifier()

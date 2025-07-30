@@ -2519,6 +2519,7 @@ void SwiperPattern::StopSpringAnimationImmediately()
         auto host = swiper->GetHost();
         CHECK_NULL_VOID(host);
         host->UpdateAnimatablePropertyFloat(SPRING_PROPERTY_NAME, swiper->currentIndexOffset_);
+        swiper->FireScrollStateEvent(ScrollState::IDLE);
     });
     OnSpringAnimationFinish();
 }
@@ -4947,7 +4948,7 @@ std::shared_ptr<SwiperParameters> SwiperPattern::GetSwiperParameters() const
 {
     if (swiperParameters_ == nullptr) {
         swiperParameters_ = std::make_shared<SwiperParameters>();
-        auto pipelineContext = PipelineBase::GetCurrentContext();
+        auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_RETURN(pipelineContext, swiperParameters_);
         auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
         CHECK_NULL_RETURN(swiperIndicatorTheme, swiperParameters_);
@@ -4988,7 +4989,7 @@ std::shared_ptr<SwiperDigitalParameters> SwiperPattern::GetSwiperDigitalParamete
 {
     if (swiperDigitalParameters_ == nullptr) {
         swiperDigitalParameters_ = std::make_shared<SwiperDigitalParameters>();
-        auto pipelineContext = PipelineBase::GetCurrentContext();
+        auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_RETURN(pipelineContext, swiperDigitalParameters_);
         auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
         swiperDigitalParameters_->fontColor = swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor();
@@ -5157,7 +5158,7 @@ void SwiperPattern::UpdatePaintProperty(const RefPtr<FrameNode>& indicatorNode)
     CHECK_NULL_VOID(indicatorNode);
     auto paintProperty = indicatorNode->GetPaintProperty<DotIndicatorPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
     CHECK_NULL_VOID(swiperIndicatorTheme);
@@ -5709,18 +5710,22 @@ void SwiperPattern::SaveArrowProperty(const RefPtr<FrameNode>& arrowNode)
     CHECK_NULL_VOID(props);
     const auto arrowProps = arrowNode->GetLayoutProperty<SwiperArrowLayoutProperty>();
     CHECK_NULL_VOID(arrowProps);
+    auto pipelineContext = PipelineBase::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    CHECK_NULL_VOID(theme);
     arrowProps->UpdateDirection(props->GetDirection().value_or(Axis::HORIZONTAL));
     arrowProps->UpdateIndex(props->GetIndex().value_or(0));
     arrowProps->UpdateLoop(props->GetLoop().value_or(true));
     arrowProps->UpdateEnabled(paintProps->GetEnabled().value_or(true));
-    arrowProps->UpdateDisplayArrow(props->GetDisplayArrowValue());
-    arrowProps->UpdateHoverShow(props->GetHoverShowValue());
-    arrowProps->UpdateIsShowBackground(props->GetIsShowBackgroundValue());
-    arrowProps->UpdateBackgroundSize(props->GetBackgroundSizeValue());
-    arrowProps->UpdateBackgroundColor(props->GetBackgroundColorValue());
-    arrowProps->UpdateArrowSize(props->GetArrowSizeValue());
-    arrowProps->UpdateArrowColor(props->GetArrowColorValue());
-    arrowProps->UpdateIsSidebarMiddle(props->GetIsSidebarMiddleValue());
+    arrowProps->UpdateDisplayArrow(props->GetDisplayArrowValue(false));
+    arrowProps->UpdateHoverShow(props->GetHoverShowValue(false));
+    arrowProps->UpdateIsShowBackground(props->GetIsShowBackgroundValue(theme->GetIsShowArrowBackground()));
+    arrowProps->UpdateBackgroundSize(props->GetBackgroundSizeValue(theme->GetSmallArrowBackgroundSize()));
+    arrowProps->UpdateBackgroundColor(props->GetBackgroundColorValue(theme->GetSmallArrowBackgroundColor()));
+    arrowProps->UpdateArrowSize(props->GetArrowSizeValue(theme->GetSmallArrowSize()));
+    arrowProps->UpdateArrowColor(props->GetArrowColorValue(theme->GetSmallArrowColor()));
+    arrowProps->UpdateIsSidebarMiddle(props->GetIsSidebarMiddleValue(theme->GetIsSidebarMiddle()));
 }
 
 void SwiperPattern::SetAccessibilityAction()
@@ -7298,6 +7303,7 @@ void SwiperPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
     json->PutExtAttr("currentIndex", currentIndex_, filter);
     json->PutExtAttr("currentOffset", currentOffset_, filter);
     json->PutExtAttr("uiCastJumpIndex", uiCastJumpIndex_.value_or(-1), filter);
+    json->PutExtAttr("indicatorInteractive", isIndicatorInteractive_ ? "true" : "false", filter);
 
     if (indicatorIsBoolean_) {
         return;
@@ -7305,6 +7311,7 @@ void SwiperPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
 
     auto indicatorType = GetIndicatorType();
     const char* indicator = "indicator";
+    json->Delete(indicator);
     if (indicatorType == SwiperIndicatorType::DOT) {
         json->PutExtAttr(indicator, SwiperHelper::GetDotIndicatorStyle(GetSwiperParameters()).c_str(), filter);
     } else if (indicatorType == SwiperIndicatorType::ARC_DOT) {

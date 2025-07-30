@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/flex/flex_model_ng_static.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
+#include "core/components_ng/base/view_abstract_model_static.h"
 
 namespace OHOS::Ace::NG {
 
@@ -167,16 +168,39 @@ void SetFlexOptionsImpl(Ark_NativePointer node,
 } // FlexInterfaceModifier
 namespace FlexAttributeModifier {
 void PointLightImpl(Ark_NativePointer node,
-                    const Ark_PointLightStyle* value)
+                    const Opt_PointLightStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
 #ifdef POINT_LIGHT_ENABLE
     auto pointLightStyle = Converter::OptConvert<Converter::PointLightStyle>(*value);
     auto uiNode = reinterpret_cast<Ark_NodeHandle>(node);
     auto themeConstants = Converter::GetThemeConstants(uiNode, "", "");
     CHECK_NULL_VOID(themeConstants);
+    if (pointLightStyle) {
+        if (pointLightStyle->lightSource) {
+            ViewAbstractModelStatic::SetLightPosition(frameNode, pointLightStyle->lightSource->x,
+                pointLightStyle->lightSource->y,
+                pointLightStyle->lightSource->z);
+            ViewAbstractModelStatic::SetLightIntensity(frameNode,
+                pointLightStyle->lightSource->intensity);
+            ViewAbstractModelStatic::SetLightColor(frameNode, pointLightStyle->lightSource->lightColor);
+        } else {
+            ViewAbstractModelStatic::SetLightPosition(frameNode, std::nullopt, std::nullopt, std::nullopt);
+            ViewAbstractModelStatic::SetLightIntensity(frameNode, std::nullopt);
+            ViewAbstractModelStatic::SetLightColor(frameNode, std::nullopt);
+        }
+        // illuminated
+        ViewAbstractModelStatic::SetLightIlluminated(frameNode, pointLightStyle->illuminationType, themeConstants);
+        // bloom
+        ViewAbstractModelStatic::SetBloom(frameNode, pointLightStyle->bloom, themeConstants);
+    } else {
+        ViewAbstractModelStatic::SetLightPosition(frameNode, std::nullopt, std::nullopt, std::nullopt);
+        ViewAbstractModelStatic::SetLightIntensity(frameNode, std::nullopt);
+        ViewAbstractModelStatic::SetLightColor(frameNode, std::nullopt);
+        ViewAbstractModelStatic::SetLightIlluminated(frameNode, std::nullopt, themeConstants);
+        ViewAbstractModelStatic::SetBloom(frameNode, std::nullopt, themeConstants);
+    }
 #endif
 }
 } // FlexAttributeModifier

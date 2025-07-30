@@ -1,0 +1,73 @@
+{
+  "rootElement": {
+    "nodeId": 1302,
+    "kind": "ComponentRoot",
+    "children": [
+      {
+        "nodeId": 1303,
+        "kind": "Line",
+        "children": [],
+        "startPoint_value": [
+          null,
+          null
+        ],
+        "endPoint_value": [
+          null,
+          null
+        ]
+      },
+      {
+        "nodeId": 1304,
+        "kind": "Line",
+        "children": [],
+        "startPoint_value": [
+          null,
+          null
+        ],
+        "endPoint_value": [
+          null,
+          null
+        ]
+      },
+      {
+        "nodeId": 1305,
+        "kind": "Line",
+        "children": [],
+        "startPoint_value": [
+          null,
+          null
+        ],
+        "endPoint_value": [
+          null,
+          null
+        ]
+      },
+      {
+        "nodeId": 1306,
+        "kind": "Line",
+        "children": [],
+        "startPoint_value": [
+          null,
+          null
+        ],
+        "endPoint_value": [
+          null,
+          null
+        ]
+      },
+      {
+        "nodeId": 1307,
+        "kind": "Line",
+        "children": [],
+        "startPoint_value": [
+          null,
+          null
+        ],
+        "endPoint_value": [
+          null,
+          null
+        ]
+      }
+    ]
+  }
+}

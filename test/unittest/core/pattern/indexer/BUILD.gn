@@ -19,6 +19,8 @@ ace_unittest("indexer_test_ng") {
     "arcindexer_pattern_test_ng.cpp",
     "indexer_accessibility_test_ng.cpp",
     "indexer_layout_test_ng.cpp",
+    "indexer_pattern_test_ng.cpp",
+    "indexer_pattern_test_two_ng.cpp",
     "indexer_select_test_ng.cpp",
     "indexer_test_ng.cpp",
   ]

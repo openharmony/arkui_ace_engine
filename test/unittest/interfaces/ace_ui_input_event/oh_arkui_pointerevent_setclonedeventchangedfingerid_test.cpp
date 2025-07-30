@@ -39,10 +39,7 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_SetClonedEventChangedFingerId00
 HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_SetClonedEventChangedFingerId002, TestSize.Level0)
 {
     ArkUITouchEvent touchEvent = {};
-    ArkUI_UIInputEvent event = {
-        ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, C_TOUCH_EVENT_ID, &touchEvent,
-        false // isCloned
-    };
+    ArkUI_UIInputEvent event = { ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, C_TOUCH_EVENT_ID, &touchEvent, false };
 
     auto result = OH_ArkUI_PointerEvent_SetClonedEventChangedFingerId(&event, 1);
     EXPECT_EQ(result, ARKUI_ERROR_CODE_NOT_CLONED_POINTER_EVENT);
@@ -55,10 +52,7 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_SetClonedEventChangedFingerId00
  */
 HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_SetClonedEventChangedFingerId003, TestSize.Level0)
 {
-    ArkUI_UIInputEvent event = {
-        ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, C_TOUCH_EVENT_ID, nullptr,
-        true // isCloned
-    };
+    ArkUI_UIInputEvent event = { ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, C_TOUCH_EVENT_ID, nullptr, true };
 
     auto result = OH_ArkUI_PointerEvent_SetClonedEventChangedFingerId(&event, 1);
     EXPECT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
@@ -73,10 +67,7 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_SetClonedEventChangedFingerId10
 {
     ArkUITouchPoint touchPoint = { .id = 0 };
     ArkUITouchEvent touchEvent = { .actionTouchPoint = touchPoint };
-    ArkUI_UIInputEvent event = {
-        ARKUI_UIINPUTEVENT_TYPE_TOUCH, C_TOUCH_EVENT_ID, &touchEvent,
-        true // isCloned
-    };
+    ArkUI_UIInputEvent event = { ARKUI_UIINPUTEVENT_TYPE_TOUCH, C_TOUCH_EVENT_ID, &touchEvent, true };
 
     const int32_t testFingerId = 5;
     auto result = OH_ArkUI_PointerEvent_SetClonedEventChangedFingerId(&event, testFingerId);
@@ -94,10 +85,7 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_SetClonedEventChangedFingerId10
 {
     ArkUITouchPoint touchPoint = { .id = 0 };
     ArkUITouchEvent touchEvent = { .actionTouchPoint = touchPoint };
-    ArkUI_UIInputEvent event = {
-        ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, C_MOUSE_EVENT_ID, &touchEvent,
-        true // isCloned
-    };
+    ArkUI_UIInputEvent event = { ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, C_MOUSE_EVENT_ID, &touchEvent, true };
 
     const int32_t testFingerId = 1;
     auto result = OH_ArkUI_PointerEvent_SetClonedEventChangedFingerId(&event, testFingerId);

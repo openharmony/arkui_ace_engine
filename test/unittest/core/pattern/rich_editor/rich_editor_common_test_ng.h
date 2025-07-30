@@ -36,6 +36,7 @@ const std::u16string INIT_VALUE_5 = u"hello5";
 const std::u16string INIT_VALUE_6 = u"hello6";
 const std::u16string INIT_VALUE_7 = u"hello7";
 const std::u16string INIT_VALUE_8 = u"hello8";
+const std::u16string INIT_VALUE_9 = u"paragraph1\nparagraph2\nparagraph3";
 const std::u16string EMPTY_STRING = u"";
 const std::list<std::u16string> INIT_VALUES = { u"hello1", u"hello2", u"hello3", u"hello4", u"hello5" };
 const std::list<std::u16string> INIT_VALUES_EMPTY = {};

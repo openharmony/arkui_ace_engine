@@ -166,6 +166,31 @@ void PatternLockModelNG::SetActiveColorByUser(FrameNode* frameNode, bool isByuse
     ACE_UPDATE_NODE_PAINT_PROPERTY(PatternLockPaintProperty, ActiveColorSetByUser, isByuserSet, frameNode);
 }
 
+void PatternLockModelNG::SetPathColor(FrameNode* frameNode, const Color& pathColor)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(PatternLockPaintProperty, PathColor, pathColor, frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(PatternLockPaintProperty, PathColorSetByUser, true, frameNode);
+}
+
+// const RefPtr<V2::PatternLockController> PatternLockModelNG::GetController(FrameNode* frameNode)
+// {
+//     CHECK_NULL_RETURN(frameNode, nullptr);
+//     auto pattern = frameNode->GetPattern<PatternLockPattern>();
+//     CHECK_NULL_RETURN(pattern, nullptr);
+//     return pattern->GetPatternLockController();
+// }
+
+// void PatternLockModelNG::SetActiveColor(FrameNode* frameNode, const std::optional<Color>& activeColor)
+// {
+//     ACE_UPDATE_NODE_PAINT_PROPERTY(PatternLockPaintProperty, SelectedColor, selectedColor, frameNode);
+//     ACE_UPDATE_NODE_PAINT_PROPERTY(PatternLockPaintProperty, SelectedColorSetByUser, true, frameNode);
+// }
+
+void PatternLockModelNG::SetSelectedColorByUser(FrameNode* frameNode, bool isByuserSet)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(PatternLockPaintProperty, SelectedColorSetByUser, isByuserSet, frameNode);
+}
+
 void PatternLockModelNG::SetCircleRadius(FrameNode* frameNode, const Dimension& radius)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(PatternLockPaintProperty, CircleRadius, radius, frameNode);
@@ -175,11 +200,6 @@ void PatternLockModelNG::SetSelectedColor(FrameNode* frameNode, const Color& sel
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(PatternLockPaintProperty, SelectedColor, selectedColor, frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(PatternLockPaintProperty, SelectedColorSetByUser, true, frameNode);
-}
-
-void PatternLockModelNG::SetSelectedColorByUser(FrameNode* frameNode, bool isByuserSet)
-{
-    ACE_UPDATE_NODE_PAINT_PROPERTY(PatternLockPaintProperty, SelectedColorSetByUser, isByuserSet, frameNode);
 }
 
 void PatternLockModelNG::SetSideLength(FrameNode* frameNode, const Dimension& sideLength)
@@ -192,26 +212,14 @@ void PatternLockModelNG::SetAutoReset(FrameNode* frameNode, bool isAutoReset)
     ACE_UPDATE_NODE_PAINT_PROPERTY(PatternLockPaintProperty, AutoReset, isAutoReset, frameNode);
 }
 
-void PatternLockModelNG::SetStrokeWidth(FrameNode* frameNode, const Dimension& lineWidth)
-{
-    ACE_UPDATE_NODE_PAINT_PROPERTY(PatternLockPaintProperty, PathStrokeWidth, lineWidth, frameNode);
-}
-
-void PatternLockModelNG::SetRegularColor(FrameNode* frameNode, const Color& regularColor)
-{
-    ACE_UPDATE_NODE_PAINT_PROPERTY(PatternLockPaintProperty, RegularColor, regularColor, frameNode);
-    ACE_UPDATE_NODE_PAINT_PROPERTY(PatternLockPaintProperty, RegularColorSetByUser, true, frameNode);
-}
-
 void PatternLockModelNG::SetRegularColorByUser(FrameNode* frameNode, bool isByuserSet)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(PatternLockPaintProperty, RegularColorSetByUser, isByuserSet, frameNode);
 }
 
-void PatternLockModelNG::SetPathColor(FrameNode* frameNode, const Color& pathColor)
+void PatternLockModelNG::SetStrokeWidth(FrameNode* frameNode, const Dimension& lineWidth)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(PatternLockPaintProperty, PathColor, pathColor, frameNode);
-    ACE_UPDATE_NODE_PAINT_PROPERTY(PatternLockPaintProperty, PathColorSetByUser, true, frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(PatternLockPaintProperty, PathStrokeWidth, lineWidth, frameNode);
 }
 
 void PatternLockModelNG::SetPathColorByUser(FrameNode* frameNode, bool isByuserSet)
@@ -219,10 +227,10 @@ void PatternLockModelNG::SetPathColorByUser(FrameNode* frameNode, bool isByuserS
     ACE_UPDATE_NODE_PAINT_PROPERTY(PatternLockPaintProperty, PathColorSetByUser, isByuserSet, frameNode);
 }
 
-void PatternLockModelNG::SetActiveCircleColor(FrameNode* frameNode, const Color& activeCircleColor)
+void PatternLockModelNG::SetRegularColor(FrameNode* frameNode, const Color& regularColor)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(PatternLockPaintProperty, ActiveCircleColor, activeCircleColor, frameNode);
-    ACE_UPDATE_NODE_PAINT_PROPERTY(PatternLockPaintProperty, ActiveCircleColorSetByUser, true, frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(PatternLockPaintProperty, RegularColor, regularColor, frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(PatternLockPaintProperty, RegularColorSetByUser, true, frameNode);
 }
 
 void PatternLockModelNG::SetActiveCircleColorByUser(FrameNode* frameNode, bool isByuserSet)
@@ -234,6 +242,12 @@ void PatternLockModelNG::SetActiveCircleColorByUser(FrameNode* frameNode, bool i
 void PatternLockModelNG::SetActiveCircleRadius(FrameNode* frameNode, const Dimension& activeCircleRadius)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(PatternLockPaintProperty, ActiveCircleRadius, activeCircleRadius, frameNode);
+}
+
+void PatternLockModelNG::SetActiveCircleColor(FrameNode* frameNode, const Color& activeCircleColor)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(PatternLockPaintProperty, ActiveCircleColor, activeCircleColor, frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(PatternLockPaintProperty, ActiveCircleColorSetByUser, true, frameNode);
 }
 
 void PatternLockModelNG::SetEnableWaveEffect(FrameNode* frameNode, bool enableWaveEffect)

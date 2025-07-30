@@ -68,6 +68,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace FormLinkModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id, Ark_Int32 flags)
 {
+    LOGI("id is: %{public}d", id);
     auto frameNode = FormLinkModel::GetStsInstance()->StsCreateFrameNode();
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
@@ -90,20 +91,22 @@ std::string ToString(const FormLinkOptions& formLinkOptions)
 
 void SetFormLinkOptionsImpl(Ark_NativePointer node, const Ark_FormLinkOptions* options)
 {
+    LOGI("Call");
     auto frameNode = reinterpret_cast<FrameNode*>(node); // RefPtr<OHOS::Ace::NG::FrameNode>
 
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
     FormLinkOptions formLinkOptions = Converter::Convert<FormLinkOptions>(*options);
-    std::string opt = ToString(formLinkOptions);
+    std::string info = ToString(formLinkOptions);
 
-    LOGI("End, StsSetAction: %{public}s", opt.c_str());
-    FormLinkModel::GetStsInstance()->StsSetAction(frameNode, opt);
+    LOGI("End, StsSetAction: %{public}s", info.c_str());
+    FormLinkModel::GetStsInstance()->StsSetAction(frameNode, info);
 }
 } // namespace FormLinkInterfaceModifier
 
 const GENERATED_ArkUIFormLinkModifier* GetFormLinkModifier()
 {
+    LOGI("Call");
     static const GENERATED_ArkUIFormLinkModifier ArkUIFormLinkModifierImpl {
         FormLinkModifier::ConstructImpl,
         FormLinkInterfaceModifier::SetFormLinkOptionsImpl,

@@ -22,11 +22,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LongPressGestureEventAccessor {
 void DestroyPeerImpl(Ark_LongPressGestureEvent peer)
 {
-    delete peer;
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_LongPressGestureEvent CtorImpl()
 {
-    return new LongPressGestureEventPeer();
+    return PeerUtils::CreatePeer<LongPressGestureEventPeer>();
 }
 Ark_NativePointer GetFinalizerImpl()
 {

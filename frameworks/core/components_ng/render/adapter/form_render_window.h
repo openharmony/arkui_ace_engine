@@ -107,6 +107,7 @@ public:
     void Lock() override;
     void Unlock() override;
     int64_t GetVSyncPeriod() const override;
+    void RecordFrameTime(uint64_t timeStamp, const std::string& name) override;
 
 private:
     WeakPtr<TaskExecutor> taskExecutor_ = nullptr;

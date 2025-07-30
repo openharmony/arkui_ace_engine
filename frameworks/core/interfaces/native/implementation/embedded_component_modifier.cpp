@@ -27,6 +27,42 @@
 namespace OHOS::Ace::NG {
 namespace {
 #ifdef WINDOW_SCENE_SUPPORTED
+#ifdef WRONG_GEN
+AAFwk::Want CreateWant(const Ark_Want* want)
+{
+    AAFwk::Want aaFwkWant;
+    CHECK_NULL_RETURN(want, aaFwkWant);
+    auto bundleName = Converter::OptConvert<std::string>(want->bundleName);
+    auto abilityName = Converter::OptConvert<std::string>(want->abilityName);
+    auto deviceId = Converter::OptConvert<std::string>(want->deviceId);
+    auto moduleName = Converter::OptConvert<std::string>(want->moduleName);
+    aaFwkWant.SetElementName(
+        deviceId.value_or(""), bundleName.value_or(""), abilityName.value_or(""), moduleName.value_or(""));
+    auto uri = Converter::OptConvert<std::string>(want->uri);
+    if (uri) {
+        aaFwkWant.SetUri(uri.value());
+    }
+    auto type = Converter::OptConvert<std::string>(want->type);
+    if (type) {
+        aaFwkWant.SetType(type.value());
+    }
+    auto flags = Converter::OptConvert<int32_t>(want->flags);
+    if (flags) {
+        aaFwkWant.SetFlags(flags.value());
+    }
+    auto action = Converter::OptConvert<std::string>(want->action);
+    if (action) {
+        aaFwkWant.SetAction(action.value());
+    }
+    LOGE("CreateWant - 'want->parameters' is not supported");
+    auto entitiesArray = Converter::OptConvert<Array_String>(want->entities);
+    if (entitiesArray) {
+        auto entities = Converter::Convert<std::vector<std::string>>(entitiesArray.value());
+        aaFwkWant.SetEntities(entities);
+    }
+    return aaFwkWant;
+}
+#endif
 #endif //WINDOW_SCENE_SUPPORTED
 }
 }
@@ -37,7 +73,10 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
 #ifdef WINDOW_SCENE_SUPPORTED
-    return {};
+    auto frameNode = UIExtensionModelNG::CreateEmbeddedFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 #else
     return {};
 #endif // WINDOW_SCENE_SUPPORTED
@@ -49,30 +88,35 @@ void SetEmbeddedComponentOptionsImpl(Ark_NativePointer node,
                                      Ark_EmbeddedType type)
 {
 #ifdef WINDOW_SCENE_SUPPORTED
+#ifdef WRONG_GEN
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    // need check
-    // ViewAbstractModelNG::SetWidth(frameNode, EMBEDDED_COMPONENT_MIN_WIDTH);
-    // ViewAbstractModelNG::SetHeight(frameNode, EMBEDDED_COMPONENT_MIN_HEIGHT);
-    // ViewAbstractModelNG::SetMinWidth(frameNode, EMBEDDED_COMPONENT_MIN_WIDTH);
-    // ViewAbstractModelNG::SetMinHeight(frameNode, EMBEDDED_COMPONENT_MIN_HEIGHT);
-    // auto typeOpt = Converter::OptConvert<SessionType>(type);
-    // auto sessionType = typeOpt ? typeOpt.value() : DEFAULT_EMBEDDED_SESSION_TYPE;
-    // need check
-    // UIExtensionModelNG::UpdateEmbeddedFrameNode(frameNode, CreateWant(loader), sessionType);
+    ViewAbstractModelNG::SetWidth(frameNode, EMBEDDED_COMPONENT_MIN_WIDTH);
+    ViewAbstractModelNG::SetHeight(frameNode, EMBEDDED_COMPONENT_MIN_HEIGHT);
+    ViewAbstractModelNG::SetMinWidth(frameNode, EMBEDDED_COMPONENT_MIN_WIDTH);
+    ViewAbstractModelNG::SetMinHeight(frameNode, EMBEDDED_COMPONENT_MIN_HEIGHT);
+    auto typeOpt = Converter::OptConvert<SessionType>(type);
+    auto sessionType = typeOpt ? typeOpt.value() : DEFAULT_EMBEDDED_SESSION_TYPE;
+    UIExtensionModelNG::UpdateEmbeddedFrameNode(frameNode, CreateWant(loader), sessionType);
+#endif
 #endif
 }
 } // EmbeddedComponentInterfaceModifier
 namespace EmbeddedComponentAttributeModifier {
 void OnTerminatedImpl(Ark_NativePointer node,
-                      const Callback_TerminationInfo_Void* value)
+                      const Opt_Callback_TerminationInfo_Void* value)
 {
 #ifdef WINDOW_SCENE_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // TODO: Reset value
+        return;
+    }
     auto onTerminated =
-        [arkCallback = CallbackHelper(*value)](int32_t code, const RefPtr<WantWrap>& wantWrape) {
+        [arkCallback = CallbackHelper(*optValue)](int32_t code, const RefPtr<WantWrap>& wantWrape) {
+#ifdef WRONG_GEN
             auto want = wantWrape->GetWant();
             Ark_Want arkWant;
             auto bundleName = want.GetBundle();
@@ -102,21 +146,25 @@ void OnTerminatedImpl(Ark_NativePointer node,
             terminatedInfo.code = Converter::ArkValue<Ark_Number>(code);
             terminatedInfo.want = Converter::ArkValue<Opt_Want>(arkWant);
             arkCallback.Invoke(terminatedInfo);
+#endif
         };
-    // need check
-    // UIExtensionModelNG::SetOnTerminated(frameNode, std::move(onTerminated));
+    UIExtensionModelNG::SetOnTerminated(frameNode, std::move(onTerminated));
 #endif
 }
 void OnErrorImpl(Ark_NativePointer node,
-                 const ErrorCallback* value)
+                 const Opt_ErrorCallback* value)
 {
 #ifdef WINDOW_SCENE_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // TODO: Reset value
+        return;
+    }
     auto instanceId = ContainerScope::CurrentId();
     auto weakNode = AceType::WeakClaim<NG::FrameNode>(frameNode);
-    auto onError = [arkCallback = CallbackHelper(*value), instanceId, weakNode](
+    auto onError = [arkCallback = CallbackHelper(*optValue), instanceId, weakNode](
         int32_t code, const std::string& name, const std::string& message) {
         ContainerScope scope(instanceId);
         auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
@@ -127,8 +175,7 @@ void OnErrorImpl(Ark_NativePointer node,
             .message = Converter::ArkValue<Ark_String>(message, Converter::FC),
             .code = Converter::ArkValue<Ark_Number>(code)});
     };
-    // need check
-    // UIExtensionModelNG::SetOnError(frameNode, std::move(onError));
+    UIExtensionModelNG::SetOnError(frameNode, std::move(onError));
 #endif
 }
 } // EmbeddedComponentAttributeModifier

@@ -1312,6 +1312,7 @@ HWTEST_F(UINodeTestNg, GetFilePath001, TestSize.Level1)
      */
     auto parentId = ElementRegister::GetInstance()->MakeUniqueId();
     auto node = FrameNode::CreateFrameNode("filePathNode", parentId, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(node, nullptr);
     node->tag_ = V2::COMMON_VIEW_ETS_TAG;
 
     node->SetFilePath("abc");

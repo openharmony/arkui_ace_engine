@@ -99,8 +99,14 @@
             "https://gitee.com/zhufenghao",
             "https://gitee.com/cr_wanghui",
             "https://gitee.com/chenjiadong0322",
-            "https://gitee.com/smileJuliet",
-            "https://gitee.com/bc_yx"
+            "https://gitee.com/qianlf",
+            "https://gitee.com/bc_yx",
+            "https://gitee.com/zhouge94",
+            "https://gitee.com/cloud_nine",
+            "https://gitee.com/hjoksky",
+            "https://gitee.com/zhang-yinglie",
+            "https://gitee.com/whuqincheng",
+            "https://gitee.com/ring_king"
         ],
         "https://gitee.com/arkui_cj": [
             "https://gitee.com/persisting",
@@ -401,7 +407,7 @@
             "group": "https://gitee.com/arkuilayout"
         },
         "https://gitee.com/libing23": {
-            "info": "[web-基础框架 libing]",
+            "info": "[web-交互安全 libing]",
             "group": "https://gitee.com/arkwebinarkuireview"
         },
         "https://gitee.com/LongLie": {
@@ -424,12 +430,36 @@
             "info": "[web-网络加载 chenjiadong]",
             "group": "https://gitee.com/arkwebinarkuireview"
         },
-        "https://gitee.com/smileJuliet": {
-            "info": "[web-性能优化 yangshimiao]",
+        "https://gitee.com/qianlf": {
+            "info": "[web-性能优化 qianliangfang]",
             "group": "https://gitee.com/arkwebinarkuireview"
         },
         "https://gitee.com/bc_yx": {
             "info": "[web-性能优化 liurongliang]",
+            "group": "https://gitee.com/arkwebinarkuireview"
+        },
+        "https://gitee.com/zhouge94": {
+            "info": "[web-性能优化 zhouge]",
+            "group": "https://gitee.com/arkwebinarkuireview"
+        },
+        "https://gitee.com/cloud_nine": {
+            "info": "[web-基础框架 chenyunjiu]",
+            "group": "https://gitee.com/arkwebinarkuireview"
+        },
+        "https://gitee.com/hjoksky": {
+            "info": "[web-稳定性&DFX chenshijun]",
+            "group": "https://gitee.com/arkwebinarkuireview"
+        },
+        "https://gitee.com/zhang-yinglie": {
+            "info": "[web-南向 zhangyinglie]",
+            "group": "https://gitee.com/arkwebinarkuireview"
+        },
+        "https://gitee.com/whuqincheng": {
+            "info": "[web-多媒体 liweiyang]",
+            "group": "https://gitee.com/arkwebinarkuireview"
+        },
+        "https://gitee.com/ring_king": {
+            "info": "[web-编译构建 renkang]",
             "group": "https://gitee.com/arkwebinarkuireview"
         },
         "https://gitee.com/persisting": {

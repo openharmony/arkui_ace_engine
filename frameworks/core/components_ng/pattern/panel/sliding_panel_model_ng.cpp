@@ -62,7 +62,7 @@ void SlidingPanelModelNG::Create(bool isShow)
 
     auto renderContext = columnNode->GetRenderContext();
     if (renderContext) {
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto dragBarTheme = pipeline->GetTheme<DragBarTheme>();
         CHECK_NULL_VOID(dragBarTheme);
@@ -219,39 +219,103 @@ void SlidingPanelModelNG::SetModeChangeEvent(ChangeEvent&& modeChangeEvent)
     eventHub->SetModeChangeEvent(std::move(modeChangeEvent));
 }
 
-void SlidingPanelModelNG::SetPanelMode(FrameNode* frameNode, PanelMode mode)
+RefPtr<FrameNode> SlidingPanelModelNG::CreateFrameNode(int32_t nodeId)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, PanelMode, mode, frameNode);
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::PANEL_ETS_TAG, nodeId);
+    auto panelNode = GetOrCreateSlidingPanelNode(
+        V2::PANEL_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<SlidingPanelPattern>(); });
+
+    // Create Column node to mount to Panel.
+    auto columnId = panelNode->GetColumnId();
+    auto columnNode = FrameNode::GetOrCreateFrameNode(
+        V2::COLUMN_ETS_TAG, columnId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    columnNode->MountToParent(panelNode);
+    auto contentId = panelNode->GetContentId();
+    auto contentNode = FrameNode::GetOrCreateFrameNode(
+        V2::COLUMN_ETS_TAG, contentId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    auto contentLayoutProperty = contentNode->GetLayoutProperty<LayoutProperty>();
+    CHECK_NULL_RETURN(contentLayoutProperty, panelNode);
+    contentLayoutProperty->UpdateLayoutWeight(1.0f);
+    contentNode->MountToParent(columnNode);
+
+    auto renderContext = columnNode->GetRenderContext();
+    if (renderContext) {
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+        CHECK_NULL_RETURN(pipeline, panelNode);
+        auto dragBarTheme = pipeline->GetTheme<DragBarTheme>();
+        CHECK_NULL_RETURN(dragBarTheme, panelNode);
+        renderContext->UpdateBackgroundColor(dragBarTheme->GetPanelBgColor());
+        BorderRadiusProperty radius;
+        radius.radiusTopLeft = PANEL_RADIUS;
+        radius.radiusTopRight = PANEL_RADIUS;
+        renderContext->UpdateBorderRadius(radius);
+        renderContext->UpdateClipEdge(true);
+    }
+
+    return panelNode;
 }
 
-void SlidingPanelModelNG::SetPanelFullHeight(FrameNode* frameNode, const Dimension& fullHeight)
+void SlidingPanelModelNG::SetPanelMode(FrameNode* frameNode, const std::optional<PanelMode>& mode)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, FullHeight, fullHeight, frameNode);
+    if (mode.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, PanelMode, mode.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, PanelMode, frameNode);
+    }
 }
 
-void SlidingPanelModelNG::SetPanelHalfHeight(FrameNode* frameNode, const Dimension& halfHeight)
+void SlidingPanelModelNG::SetPanelFullHeight(FrameNode* frameNode, const std::optional<Dimension>& fullHeight)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, HalfHeight, halfHeight, frameNode);
+    if (fullHeight.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, FullHeight, fullHeight.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, FullHeight, frameNode);
+    }
 }
 
-void SlidingPanelModelNG::SetPanelMiniHeight(FrameNode* frameNode, const Dimension& miniHeight)
+void SlidingPanelModelNG::SetPanelHalfHeight(FrameNode* frameNode, const std::optional<Dimension>& halfHeight)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, MiniHeight, miniHeight, frameNode);
+    if (halfHeight.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, HalfHeight, halfHeight.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, HalfHeight, frameNode);
+    }
 }
 
-void SlidingPanelModelNG::SetPanelBackgroundMask(FrameNode* frameNode, const Color& backgroundMask)
+void SlidingPanelModelNG::SetPanelMiniHeight(FrameNode* frameNode, const std::optional<Dimension>& miniHeight)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, BackgroundMask, backgroundMask, frameNode);
+    if (miniHeight.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, MiniHeight, miniHeight.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, MiniHeight, frameNode);
+    }
 }
 
-void SlidingPanelModelNG::SetPanelType(FrameNode* frameNode, PanelType type)
+void SlidingPanelModelNG::SetPanelBackgroundMask(FrameNode* frameNode, const std::optional<Color>& backgroundMask)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, PanelType, type, frameNode);
+    if (backgroundMask.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, BackgroundMask, backgroundMask.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, BackgroundMask, frameNode);
+    }
 }
 
-void SlidingPanelModelNG::SetPanelCustomHeight(FrameNode* frameNode, const CalcDimension& customHeight)
+void SlidingPanelModelNG::SetPanelType(FrameNode* frameNode, const std::optional<PanelType>& type)
 {
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, CustomHeight, customHeight, frameNode);
+    if (type.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, PanelType, type.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, PanelType, frameNode);
+    }
+}
+
+void SlidingPanelModelNG::SetPanelCustomHeight(FrameNode* frameNode, const std::optional<CalcDimension>& customHeight)
+{
+    if (customHeight.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, CustomHeight, customHeight.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, CustomHeight, frameNode);
+    }
 }
 
 void SlidingPanelModelNG::SetShowCloseIcon(FrameNode* frameNode, bool showCloseIcon)
@@ -293,5 +357,29 @@ void SlidingPanelModelNG::ResetPanelFullHeight(FrameNode* frameNode)
         auto fullHeight = Dimension(frameSize.Height() - BLANK_MIN_HEIGHT.ConvertToPx());
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, FullHeight, fullHeight, frameNode);
     }
+}
+
+void SlidingPanelModelNG::SetOnSizeChange(FrameNode* frameNode, ChangeEvent&& changeEvent)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<SlidingPanelEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnSizeChange(std::move(changeEvent));
+};
+
+void SlidingPanelModelNG::SetOnHeightChange(FrameNode* frameNode, HeightChangeEvent&& onHeightChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<SlidingPanelEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnHeightChange(std::move(onHeightChange));
+}
+
+void SlidingPanelModelNG::SetModeChangeEvent(FrameNode* frameNode, ChangeEvent&& modeChangeEvent)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<SlidingPanelEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetModeChangeEvent(std::move(modeChangeEvent));
 }
 } // namespace OHOS::Ace::NG

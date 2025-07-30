@@ -22,8 +22,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DataResubmissionHandlerAccessor {
 void DestroyPeerImpl(Ark_DataResubmissionHandler peer)
 {
-    CHECK_NULL_VOID(peer);
-    peer->handler = nullptr;
     delete peer;
 }
 Ark_DataResubmissionHandler CtorImpl()
@@ -57,7 +55,4 @@ const GENERATED_ArkUIDataResubmissionHandlerAccessor* GetDataResubmissionHandler
     return &DataResubmissionHandlerAccessorImpl;
 }
 
-struct DataResubmissionHandlerPeer {
-    virtual ~DataResubmissionHandlerPeer() = default;
-};
 }

@@ -31,6 +31,7 @@ void DestroyPeerImpl(Ark_TextStyle_styled_string peer)
 }
 Ark_TextStyle_styled_string CtorImpl(const Opt_TextStyleInterface* value)
 {
+    auto peer = new TextStyle_styled_stringPeer();
     Font font;
 
     auto options = value ? Converter::OptConvert<Ark_TextStyleInterface>(*value) : std::nullopt;
@@ -62,7 +63,6 @@ Ark_TextStyle_styled_string CtorImpl(const Opt_TextStyleInterface* value)
         font.fontFamiliesNG = fontFamilies;
         font.fontStyle = Converter::OptConvert<Ace::FontStyle>(options->fontStyle).value_or(Ace::FontStyle::NORMAL);
     }
-    auto peer = new TextStyle_styled_stringPeer();
     peer->span = Referenced::MakeRefPtr<FontSpan>(font);
 
     return peer;
@@ -71,54 +71,49 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_ResourceColor GetFontColorImpl(Ark_TextStyle_styled_string peer)
+Opt_ResourceColor GetFontColorImpl(Ark_TextStyle_styled_string peer)
 {
-    Ark_ResourceColor invalidValue = {};
+    auto invalidValue = Converter::ArkValue<Opt_ResourceColor>();
     CHECK_NULL_RETURN(peer && peer->span, invalidValue);
     auto color = peer->span->GetFont().fontColor;
-    auto value = Converter::ArkUnion<Opt_ResourceColor, Ark_String>(color, Converter::FC);
-    return Converter::GetOpt(value).value_or(invalidValue);
+    return Converter::ArkUnion<Opt_ResourceColor, Ark_String>(color, Converter::FC);
 }
-Ark_String GetFontFamilyImpl(Ark_TextStyle_styled_string peer)
+Opt_String GetFontFamilyImpl(Ark_TextStyle_styled_string peer)
 {
-    std::string retStr = "";
-    CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_String>(retStr, Converter::FC));
-    CHECK_NULL_RETURN(peer->span, Converter::ArkValue<Ark_String>(retStr, Converter::FC));
+    auto invalidValue = Converter::ArkValue<Opt_String>();
+    CHECK_NULL_RETURN(peer, invalidValue);
+    CHECK_NULL_RETURN(peer->span, invalidValue);
     if (!peer->span->GetFont().fontFamiliesNG.has_value()) {
-        return Converter::ArkValue<Ark_String>(retStr, Converter::FC);
+        return invalidValue;
     }
     auto fontFamilies = peer->span->GetFont().fontFamiliesNG.value();
-    retStr = std::accumulate(fontFamilies.begin(), fontFamilies.end(), std::string());
-    return Converter::ArkValue<Ark_String>(retStr, Converter::FC);
+    auto retStr = std::accumulate(fontFamilies.begin(), fontFamilies.end(), std::string());
+    return Converter::ArkValue<Opt_String>(retStr, Converter::FC);
 }
-Ark_Number GetFontSizeImpl(Ark_TextStyle_styled_string peer)
+Opt_Number GetFontSizeImpl(Ark_TextStyle_styled_string peer)
 {
-    CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_Number>(0));
-    CHECK_NULL_RETURN(peer->span, Converter::ArkValue<Ark_Number>(0));
+    auto invalidValue = Converter::ArkValue<Opt_Number>();
+    CHECK_NULL_RETURN(peer, invalidValue);
+    CHECK_NULL_RETURN(peer->span, invalidValue);
     if (!peer->span->GetFont().fontSize.has_value()) {
-        return Converter::ArkValue<Ark_Number>(0);
+        return invalidValue;
     }
     auto ret = peer->span->GetFont().fontSize.value().ConvertToVp();
-    return Converter::ArkValue<Ark_Number>(ret);
+    return Converter::ArkValue<Opt_Number>(ret);
 }
-Ark_Number GetFontWeightImpl(Ark_TextStyle_styled_string peer)
+Opt_Number GetFontWeightImpl(Ark_TextStyle_styled_string peer)
 {
-    CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_Number>(0));
-    CHECK_NULL_RETURN(peer->span, Converter::ArkValue<Ark_Number>(0));
-    if (!peer->span->GetFont().fontWeight.has_value()) {
-        return Converter::ArkValue<Ark_Number>(0);
-    }
-    auto ret = static_cast<int32_t>(peer->span->GetFont().fontWeight.value());
-    return Converter::ArkValue<Ark_Number>(ret);
+    auto invalidValue = Converter::ArkValue<Opt_Number>();
+    CHECK_NULL_RETURN(peer, invalidValue);
+    CHECK_NULL_RETURN(peer->span, invalidValue);
+    return Converter::ArkValue<Opt_Number>(EnumToInt(peer->span->GetFont().fontWeight));
 }
-Ark_FontStyle GetFontStyleImpl(Ark_TextStyle_styled_string peer)
+Opt_FontStyle GetFontStyleImpl(Ark_TextStyle_styled_string peer)
 {
-    CHECK_NULL_RETURN(peer, Ark_FontStyle::ARK_FONT_STYLE_NORMAL);
-    CHECK_NULL_RETURN(peer->span, Ark_FontStyle::ARK_FONT_STYLE_NORMAL);
-    if (!peer->span->GetFont().fontStyle.has_value()) {
-        return Ark_FontStyle::ARK_FONT_STYLE_NORMAL;
-    }
-    return Converter::ArkValue<Ark_FontStyle>(peer->span->GetFont().fontStyle.value());
+    auto invalidValue = Converter::ArkValue<Opt_FontStyle>();
+    CHECK_NULL_RETURN(peer, invalidValue);
+    CHECK_NULL_RETURN(peer->span, invalidValue);
+    return Converter::ArkValue<Opt_FontStyle>(peer->span->GetFont().fontStyle);
 }
 } // TextStyle_styled_stringAccessor
 const GENERATED_ArkUITextStyle_styled_stringAccessor* GetTextStyle_styled_stringAccessor()

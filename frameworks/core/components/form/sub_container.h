@@ -16,8 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_FORM_SUB_CONTAINER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_FORM_SUB_CONTAINER_H
 
+#ifndef ARKUI_CAPI_UNITTEST
 #include "ashmem.h"
 #include "form_ashmem.h"
+#endif // ARKUI_CAPI_UNITTEST
 
 #include "base/thread/task_executor.h"
 #include "core/common/frontend.h"
@@ -26,6 +28,17 @@
 #include "frameworks/bridge/card_frontend/card_frontend_declarative.h"
 #include "frameworks/core/pipeline/pipeline_context.h"
 #include "frameworks/core/pipeline_ng/pipeline_context.h"
+
+#ifdef ARKUI_CAPI_UNITTEST
+namespace OHOS {
+class Ashmem;
+template<typename T>
+class sptr;
+namespace AppExecFwk {
+class FormAshmem;
+}
+} // namespace OHOS::Ace
+#endif // ARKUI_CAPI_UNITTEST
 
 namespace OHOS::Ace {
 class ACE_EXPORT SubContainer : public virtual AceType {

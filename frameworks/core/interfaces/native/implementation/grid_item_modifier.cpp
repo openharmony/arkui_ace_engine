@@ -19,6 +19,7 @@
 #include "arkoala_api_generated.h"
 
 #include "core/components_ng/pattern/grid/grid_item_model_ng.h"
+#include "core/components_ng/pattern/grid/grid_item_model_static.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
 
 namespace OHOS::Ace::NG::Converter {
@@ -44,7 +45,7 @@ namespace GridItemModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    auto frameNode = GridItemModelNG::CreateFrameNode(id);
+    auto frameNode = GridItemModelStatic::CreateFrameNode(id);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -59,77 +60,112 @@ void SetGridItemOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     std::optional<GridItemStyle> style = Converter::OptConvert<GridItemStyle>(*value);
     if (style) {
-        GridItemModelNG::SetGridItemStyle(frameNode, style.value());
+        GridItemModelStatic::SetGridItemStyle(frameNode, style.value());
     }
 }
 } // GridItemInterfaceModifier
 namespace GridItemAttributeModifier {
 void RowStartImpl(Ark_NativePointer node,
-                  const Ark_Number* value)
+                  const Opt_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    GridItemModelNG::SetRowStart(frameNode, Converter::Convert<int32_t>(*value));
+    auto convValue = Converter::OptConvert<int32_t>(*value);
+    if (!convValue) {
+        // TODO: Reset value
+        return;
+    }
+    GridItemModelStatic::SetRowStart(frameNode, *convValue);
 }
 void RowEndImpl(Ark_NativePointer node,
-                const Ark_Number* value)
+                const Opt_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    GridItemModelNG::SetRowEnd(frameNode, Converter::Convert<int32_t>(*value));
+    auto convValue = Converter::OptConvert<int32_t>(*value);
+    if (!convValue) {
+        // TODO: Reset value
+        return;
+    }
+    GridItemModelStatic::SetRowEnd(frameNode, *convValue);
 }
 void ColumnStartImpl(Ark_NativePointer node,
-                     const Ark_Number* value)
+                     const Opt_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    GridItemModelNG::SetColumnStart(frameNode, Converter::Convert<int32_t>(*value));
+    auto convValue = Converter::OptConvert<int32_t>(*value);
+    if (!convValue) {
+        // TODO: Reset value
+        return;
+    }
+    GridItemModelStatic::SetColumnStart(frameNode, *convValue);
 }
 void ColumnEndImpl(Ark_NativePointer node,
-                   const Ark_Number* value)
+                   const Opt_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    GridItemModelNG::SetColumnEnd(frameNode, Converter::Convert<int32_t>(*value));
+    auto convValue = Converter::OptConvert<int32_t>(*value);
+    if (!convValue) {
+        // TODO: Reset value
+        return;
+    }
+    GridItemModelStatic::SetColumnEnd(frameNode, *convValue);
 }
 void ForceRebuildImpl(Ark_NativePointer node,
-                      Ark_Boolean value)
+                      const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    GridItemModelNG::SetForceRebuild(frameNode, Converter::Convert<bool>(value));
+    auto convValue = Converter::OptConvert<bool>(*value);
+    if (!convValue) {
+        // TODO: Reset value
+        return;
+    }
+    GridItemModelStatic::SetForceRebuild(frameNode, *convValue);
 }
 void SelectableImpl(Ark_NativePointer node,
-                    Ark_Boolean value)
+                    const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    GridItemModelNG::SetSelectable(frameNode, Converter::Convert<bool>(value));
+    auto convValue = Converter::OptConvert<bool>(*value);
+    if (!convValue) {
+        // TODO: Reset value
+        return;
+    }
+    GridItemModelStatic::SetSelectable(frameNode, *convValue);
 }
 void SelectedImpl(Ark_NativePointer node,
-                  Ark_Boolean value)
+                  const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    GridItemModelNG::SetSelected(frameNode, Converter::Convert<bool>(value));
+    auto convValue = Converter::OptConvert<bool>(*value);
+    if (!convValue) {
+        GridItemModelStatic::SetSelected(frameNode, false);
+        return;
+    }
+    GridItemModelStatic::SetSelected(frameNode, *convValue);
 }
 void OnSelectImpl(Ark_NativePointer node,
-                  const Callback_Boolean_Void* value)
+                  const Opt_Callback_Boolean_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto onSelect = [arkCallback = CallbackHelper(*value)](bool isSelected) {
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // TODO: Reset value
+        return;
+    }
+    auto onSelect = [arkCallback = CallbackHelper(*optValue)](bool isSelected) {
         arkCallback.Invoke(isSelected);
     };
-    GridItemModelNG::SetOnSelect(frameNode, onSelect);
+    GridItemModelStatic::SetOnSelect(frameNode, onSelect);
 }
 void _onChangeEvent_selectedImpl(Ark_NativePointer node,
-                                 const Callback_Boolean_Void* callback)
+                                 const Callback_Opt_Boolean_Void* callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -137,9 +173,9 @@ void _onChangeEvent_selectedImpl(Ark_NativePointer node,
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
     auto onEvent = [arkCallback = CallbackHelper(*callback), weakNode](bool isSelected) {
         PipelineContext::SetCallBackNode(weakNode);
-        arkCallback.Invoke(Converter::ArkValue<Ark_Boolean>(isSelected));
+        arkCallback.Invoke(Converter::ArkValue<Opt_Boolean>(isSelected));
     };
-    GridItemModelNG::SetSelectChangeEvent(frameNode, std::move(onEvent));
+    GridItemModelStatic::SetSelectChangeEvent(frameNode, std::move(onEvent));
 }
 } // GridItemAttributeModifier
 const GENERATED_ArkUIGridItemModifier* GetGridItemModifier()

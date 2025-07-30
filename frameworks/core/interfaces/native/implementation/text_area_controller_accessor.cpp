@@ -22,8 +22,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextAreaControllerAccessor {
 void DestroyPeerImpl(Ark_TextAreaController peer)
 {
-    CHECK_NULL_VOID(peer);
-    peer->controller_ = nullptr;
     delete peer;
 }
 Ark_TextAreaController CtorImpl()

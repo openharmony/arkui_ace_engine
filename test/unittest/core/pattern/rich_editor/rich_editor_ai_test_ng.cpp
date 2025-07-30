@@ -670,5 +670,49 @@ HWTEST_F(RichEditorAITestOneNg, CreateAIEntityMenuTest, TestSize.Level1)
     pattern->dataDetectorAdapter_->aiSpanMap_ = aiSpanMap;
     menuNode = pattern->CreateAIEntityMenu();
     EXPECT_EQ(menuNode, 0);
+
+    /**
+     * @tc.steps: step3. aiSpan not found
+     */
+    aiSpan1.start = 6;
+    aiSpan1.end = 10;
+    menuNode = pattern->CreateAIEntityMenu();
+    EXPECT_EQ(menuNode, nullptr);
 }
+
+/**
+ * @tc.name: NeedAiAnalysis001
+ * @tc.desc: test NeedAiAnalysis
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorAITestOneNg, NeedAiAnalysis001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init and call function.
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateNodePaintMethod();
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
+    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
+    /**
+     * @tc.steps: step2. change parameter and call function.
+     */
+    std::string content = "";
+    richEditorPattern->isSpanStringMode_ = true;
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"");
+    CaretUpdateType targeType1 = CaretUpdateType::PRESSED;
+    int32_t pos = 0;
+    int32_t spanStart = 10;
+    auto ret = richEditorPattern->NeedAiAnalysis(targeType1, pos, spanStart, content);
+    EXPECT_FALSE(ret);
+    /**
+     * @tc.steps: step3. change parameter and call function.
+     */
+    CaretUpdateType targeType2 = CaretUpdateType::DOUBLE_CLICK;
+    ret = richEditorPattern->NeedAiAnalysis(targeType2, pos, spanStart, content);
+    EXPECT_FALSE(ret);
+}
+
 }

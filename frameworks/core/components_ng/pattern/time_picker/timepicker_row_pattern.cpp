@@ -62,6 +62,7 @@ const uint32_t INDEX_SECOND_ADD_ZERO = 10;
 const uint32_t INDEX_SECOND_END = 59;
 const uint32_t SIZE_OF_AMPM_COLUMN_OPTION = 2;
 constexpr float PICKER_MAXFONTSCALE = 1.0f;
+constexpr float DEFAULT_SIZE_ZERO = 0.0f;
 } // namespace
 
 void TimePickerRowPattern::OnAttachToFrameNode()
@@ -2398,6 +2399,19 @@ void TimePickerRowPattern::UpdateSelectedTextStyle(const PickerTextStyle& textSt
         [&](const Dimension& fontSize) { pickerProperty->UpdateSelectedFontSize(fontSize); },
         [&](const std::vector<std::string>& fontFamily) { pickerProperty->UpdateSelectedFontFamily(fontFamily); }
     );
+}
+
+void TimePickerRowPattern::BeforeCreateLayoutWrapper()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<TimePickerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
+    if (layoutPolicy.has_value() && (layoutPolicy->IsWrap() || layoutPolicy->IsFix())) {
+        layoutProperty->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(DEFAULT_SIZE_ZERO), CalcLength(DEFAULT_SIZE_ZERO)));
+    }
 }
 
 } // namespace OHOS::Ace::NG

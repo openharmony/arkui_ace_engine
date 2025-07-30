@@ -421,4 +421,28 @@ HWTEST_F(CustomNodeExtTestNg, CustomNodeExtGetModifier001, TestSize.Level1)
     ASSERT_NE(overlayModifier, nullptr);
 }
 
+/**
+ * @tc.name: CustomNodeExtSetBeforeCreateLayoutWrapperCallback001
+ * @tc.desc: Test the set of BeforeCreateLayoutWrapperCallback in CustomNodeExt.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomNodeExtTestNg, CustomNodeExtSetBeforeCreateLayoutWrapperCallback001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Invoke CustomNodeExt Create function.
+     * @tc.expected: Create CustomNodeExt.
+     */
+    auto customExtFrameNode = CreateNode();
+    ASSERT_NE(customExtFrameNode, nullptr);
+    auto pattern = customExtFrameNode->GetPattern<CustomNodeExtPattern>();
+
+    /**
+     * @tc.steps: step2. CustomNodeExtPattern set BeforeCreateLayoutWrapperCallback.
+     * @tc.expected: beforeCreateLayoutWrapperCallback_ has value.
+     */
+    auto beforeCreateLayoutWrapperCallbackfunction = [](){};
+    CustomNodeExtModelNG::SetBeforeCreateLayoutWrapperCallback(AceType::RawPtr(customExtFrameNode),
+        std::move(beforeCreateLayoutWrapperCallbackfunction));
+    ASSERT_NE(pattern->beforeCreateLayoutWrapperCallback_, nullptr);
+}
 } // namespace OHOS::Ace::NG

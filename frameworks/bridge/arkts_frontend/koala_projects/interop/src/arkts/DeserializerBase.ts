@@ -14,19 +14,16 @@
  */
 
 import { float32, int32, int64, float32FromBits, uint8 } from "@koalaui/common"
-import { pointer, KUint8ArrayPtr, KSerializerBuffer, nullptr } from "./InteropTypes"
+import { pointer, KUint8ArrayPtr, KSerializerBuffer } from "./InteropTypes"
 import { NativeBuffer } from "./NativeBuffer"
 import { InteropNativeModule } from "./InteropNativeModule"
 import { Tags, CallbackResource } from "./SerializerBase";
-import { ResourceHolder, Disposable } from "./ResourceManager"
-import { unsafeMemory } from "std/core"
+import { ResourceHolder } from "./ResourceManager"
 
-export class DeserializerBase implements Disposable {
-    private _position : int64 = 0
-    private _buffer: KSerializerBuffer
-    private readonly _isOwnBuffer: boolean;
+export class DeserializerBase {
+    private position = 0
+    private readonly _buffer: KSerializerBuffer
     private readonly _length: int32
-    private readonly _end: int64
     private static customDeserializers: CustomDeserializer | undefined = new DateDeserializer()
 
     static registerCustomDeserializer(deserializer: CustomDeserializer) {
@@ -43,120 +40,115 @@ export class DeserializerBase implements Disposable {
 
     constructor(buffer: KUint8ArrayPtr|KSerializerBuffer, length: int32) {
         if (buffer instanceof KUint8ArrayPtr) {
-            const newBuffer = InteropNativeModule._Malloc(length)
-            this._isOwnBuffer = true
+            this._buffer = InteropNativeModule._Malloc(length)
             for (let i = 0; i < length; i++) {
-                unsafeMemory.writeInt8(newBuffer + i, buffer[i] as byte)
+                DeserializerBase.writeu8(this._buffer, i, length, buffer[i])
             }
-            this._buffer = newBuffer
         } else {
             this._buffer = buffer
         }
-
-        const newBuffer =  this._buffer;
         this._length = length
-        this._position = newBuffer
-        this._end = newBuffer + length;
     }
 
-    public final dispose() {
-        if (this._isOwnBuffer) {
-            InteropNativeModule._Free(this._buffer)
-            this._buffer = 0
-            this._position = 0
-        }
+    // TODO: get rid of length.
+    private static writeu8(buffer: KSerializerBuffer, offset: int32, length: int32, value: int32): void {
+        InteropNativeModule._WriteByte(buffer, offset as int64, length as int64, value as uint8)
+    }
+    // TODO: get rid of length.
+    private static readu8(buffer: KSerializerBuffer, offset: int32, length: int32): int32 {
+        return (InteropNativeModule._ReadByte(buffer, offset as int64, length as int64) as byte) & 0xff
     }
 
     final asBuffer(): KSerializerBuffer {
         return this._buffer
     }
 
+    final currentPosition(): int32 {
+        return this.position
+    }
+
     final resetCurrentPosition(): void {
-        this._position = this._buffer
+        this.position = 0
+    }
+
+    private checkCapacity(value: int32) {
+        if (value > this._length) {
+            throw new Error(`${value} is less than remaining buffer length`)
+        }
     }
 
     final readInt8(): int32 {
-        const pos = this._position
-        const newPos = pos + 1
-
-        if (newPos > this._end) {
-            throw new Error(`value size(1) is less than remaining buffer length`)
-        }
-
-        this._position = newPos
-        return unsafeMemory.readInt8(pos)
+        this.checkCapacity(1)
+        const value = DeserializerBase.readu8(this._buffer, this.position, this._length)
+        this.position += 1
+        return value
     }
 
     final readInt32(): int32 {
-        const pos = this._position
-        const newPos = pos + 4
-
-        if (newPos > this._end) {
-            throw new Error(`value size(4) is less than remaining buffer length`)
+        this.checkCapacity(4)
+        let res: int32 = 0;
+        for (let i = 0; i < 4; i++) {
+            let byteVal = DeserializerBase.readu8(this._buffer, this.position + i, this._length) as int32
+            byteVal &= 0xff
+            res = (res | byteVal << (8 * i)) as int32
         }
-
-        this._position = newPos
-        return unsafeMemory.readInt32(pos)
+        this.position += 4
+        return res
     }
 
     final readPointer(): pointer {
-        const pos = this._position
-        const newPos = pos + 8
-
-        if (newPos > this._end) {
-            throw new Error(`value size(8) is less than remaining buffer length`)
+        this.checkCapacity(8)
+        let res: int64 = 0;
+        for (let i = 0; i < 8; i++) {
+            let byteVal = DeserializerBase.readu8(this._buffer, this.position + i, this._length) as int64;
+            byteVal &= 0xff
+            res = (res | byteVal << (8 * i)) as int64;
         }
-
-        this._position = newPos
-        return unsafeMemory.readInt64(pos)
+        this.position += 8
+        return res
     }
 
     final readInt64(): int64 {
-        const pos = this._position
-        const newPos = pos + 8
-
-        if (newPos > this._end) {
-            throw new Error(`value size(8) is less than remaining buffer length`)
+        this.checkCapacity(8)
+        let res: int64 = 0;
+        for (let i = 0; i < 8; i++) {
+            let byteVal = DeserializerBase.readu8(this._buffer, this.position + i, this._length) as int64;
+            byteVal &= 0xff
+            res = (res | byteVal << (8 * i)) as int64;
         }
-
-        this._position = newPos
-        return unsafeMemory.readInt64(pos)
+        this.position += 8
+        return res
     }
 
     final readFloat32(): float32 {
-        const pos = this._position
-        const newPos = pos + 4
-
-        if (newPos > this._end) {
-            throw new Error(`value size(4) is less than remaining buffer length`)
+        this.checkCapacity(4)
+        let res: int32 = 0;
+        for (let i = 0; i < 4; i++) {
+            let byteVal = DeserializerBase.readu8(this._buffer, this.position + i, this._length) as int32;
+            byteVal &= 0xff
+            res = (res | byteVal << (8 * i)) as int32;
         }
-
-
-        this._position = newPos
-        return unsafeMemory.readFloat32(pos)
+        this.position += 4
+        return float32FromBits(res)
     }
 
     final readBoolean(): boolean {
-        const pos = this._position
-        const newPos = pos + 1
-
-        if (newPos > this._end) {
-            throw new Error(`value size(1) is less than remaining buffer length`)
-        }
-
-
-        this._position = newPos
-        const value = unsafeMemory.readInt8(pos);
-        if (value == 5)
-            return false;
-
+        this.checkCapacity(1)
+        const value = DeserializerBase.readu8(this._buffer, this.position, this._length)
+        this.position += 1
         return value == 1
     }
 
-    final readFunction(): int32 {
+    readFunction(): int32 {
         // TODO: not exactly correct.
-        return this.readInt32()
+        const id = this.readInt32()
+        return id
     }
+
+    // readMaterialized(): object {
+    //     const ptr = this.readPointer()
+    //     return { ptr: ptr }
+    // }
 
     final readCallbackResource(): CallbackResource {
         return ({
@@ -167,17 +159,12 @@ export class DeserializerBase implements Disposable {
     }
 
     final readString(): string {
-        const encodedLength = this.readInt32();
-        const pos = this._position
-        const newPos = pos + encodedLength
-
-        if (newPos > this._end) {
-            throw new Error(`value size(${encodedLength}) is less than remaining buffer length`)
-        }
-
-        this._position = newPos
-        // NOTE: skip null-terminated byte
-        return unsafeMemory.readString(pos, encodedLength - 1)
+        const length = this.readInt32()
+        this.checkCapacity(length)
+        // read without null-terminated byte
+        const value = InteropNativeModule._Utf8ToString(this._buffer, this.position, length)
+        this.position += length
+        return value
     }
 
     final readCustomObject(kind: string): object {
@@ -194,26 +181,46 @@ export class DeserializerBase implements Disposable {
     }
 
     final readNumber(): number | undefined {
-        const pos = this._position
-        const tag = this.readInt8() as int
-        switch (tag) {
-            case Tags.UNDEFINED as int:
-                return undefined;
-            case Tags.INT32  as int:
-                return this.readInt32()
-            case Tags.FLOAT32  as int:
-                return this.readFloat32()
-            default:
-                throw new Error(`Unknown number tag: ${tag}`)
+        const tag = this.readInt8()
+        if (tag == Tags.UNDEFINED) {
+            return undefined
+        } else if (tag == Tags.INT32) {
+            return this.readInt32()
+        } else if (tag == Tags.FLOAT32) {
+            return this.readFloat32()
+        } else {
+            throw new Error(`Unknown number tag: ${tag}`)
         }
     }
 
-    final readObject():object {
+    readObject():object {
         const resource = this.readCallbackResource()
         return ResourceHolder.instance().get(resource.resourceId)
     }
 
+    static lengthUnitFromInt(unit: int32): string {
+        let suffix: string
+        switch (unit) {
+            case 0:
+                suffix = "px"
+                break
+            case 1:
+                suffix = "vp"
+                break
+            case 3:
+                suffix = "%"
+                break
+            case 4:
+                suffix = "lpx"
+                break
+            default:
+                suffix = "<unknown>"
+        }
+        return suffix
+    }
+
     final readBuffer(): NativeBuffer {
+        /* not implemented */
         const resource = this.readCallbackResource()
         const data = this.readPointer()
         const length = this.readInt64()

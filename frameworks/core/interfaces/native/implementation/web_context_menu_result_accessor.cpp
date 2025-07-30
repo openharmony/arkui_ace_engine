@@ -16,14 +16,12 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/implementation/web_context_menu_result_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "arkoala_api_generated.h"
+
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WebContextMenuResultAccessor {
 void DestroyPeerImpl(Ark_WebContextMenuResult peer)
 {
-    CHECK_NULL_VOID(peer);
-    peer->handler = nullptr;
     delete peer;
 }
 Ark_WebContextMenuResult CtorImpl()
@@ -81,7 +79,4 @@ const GENERATED_ArkUIWebContextMenuResultAccessor* GetWebContextMenuResultAccess
     return &WebContextMenuResultAccessorImpl;
 }
 
-struct WebContextMenuResultPeer {
-    virtual ~WebContextMenuResultPeer() = default;
-};
 }

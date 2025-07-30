@@ -20,9 +20,14 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-bool InRange(float number, float boundaryStart, float boundaryEnd)
+bool InRangeStart(float number, float boundaryStart, float boundaryEnd)
 {
-    return GreatOrEqual(number, boundaryStart) && LessOrEqual(number, boundaryEnd);
+    return GreatOrEqual(number, boundaryStart) && LessOrEqual(number, boundaryEnd + 1.0f);
+}
+
+bool InRangeEnd(float number, float boundaryStart, float boundaryEnd)
+{
+    return GreatOrEqual(number, boundaryStart - 1.0f) && LessOrEqual(number, boundaryEnd);
 }
 
 bool CheckPaddingBorderGap(ExpandEdges& incomingExpand, const PaddingPropertyF& innerSpace)
@@ -488,7 +493,7 @@ void LayoutWrapper::ParseSafeAreaPaddingSides(const PaddingPropertyF& parentSafe
     if (!NearZero(parentSafeAreaPadding.left.value_or(0.0f))) {
         auto innerSpaceLeftLength = parentInnerSpace.left.value_or(0.0f);
         // left side safeArea range is [border + padding, border + padding + safeAreaPadding]
-        if (InRange(adjustingRect.Left(), innerSpaceLeftLength,
+        if (InRangeStart(adjustingRect.Left(), innerSpaceLeftLength,
             innerSpaceLeftLength + parentSafeAreaPadding.left.value_or(0.0f))) {
             rollingExpand.left = adjustingRect.Left() - innerSpaceLeftLength;
         }
@@ -496,7 +501,7 @@ void LayoutWrapper::ParseSafeAreaPaddingSides(const PaddingPropertyF& parentSafe
     if (!NearZero(parentSafeAreaPadding.top.value_or(0.0f))) {
         auto innerSpaceTopLength = parentInnerSpace.top.value_or(0.0f);
         // top side safeArea padding range is [top border + padding, top border + padding + safeAreaPadding]
-        if (InRange(adjustingRect.Top(), innerSpaceTopLength,
+        if (InRangeStart(adjustingRect.Top(), innerSpaceTopLength,
             innerSpaceTopLength + parentSafeAreaPadding.top.value_or(0.0f))) {
             rollingExpand.top = adjustingRect.Top() - innerSpaceTopLength;
         }
@@ -506,7 +511,7 @@ void LayoutWrapper::ParseSafeAreaPaddingSides(const PaddingPropertyF& parentSafe
         auto innerSpaceRightLength = parentInnerSpace.right.value_or(0.0f);
         // right side safeArea padding range is
         // [parentWidth - (right border + padding) - right safeAreaPadding, parentWidth - (right border + padding)]
-        if (InRange(adjustingRect.Right(),
+        if (InRangeEnd(adjustingRect.Right(),
             parentWidth - innerSpaceRightLength - parentSafeAreaPadding.right.value_or(0.0f),
             parentWidth - innerSpaceRightLength)) {
             rollingExpand.right = parentWidth - innerSpaceRightLength - adjustingRect.Right();
@@ -518,7 +523,7 @@ void LayoutWrapper::ParseSafeAreaPaddingSides(const PaddingPropertyF& parentSafe
         // [parentHeight - (bottom border + padding) - bottom safeAreaPadding,
         // parentHeight - (bottom border + padding)]
         auto innerSpaceBottomLength = parentInnerSpace.bottom.value_or(0.0f);
-        if (InRange(adjustingRect.Bottom(),
+        if (InRangeEnd(adjustingRect.Bottom(),
             parentHeight - innerSpaceBottomLength - parentSafeAreaPadding.bottom.value_or(0.0f),
             parentHeight - innerSpaceBottomLength)) {
             rollingExpand.bottom = parentHeight - innerSpaceBottomLength - adjustingRect.Bottom();

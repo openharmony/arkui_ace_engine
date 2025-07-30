@@ -30,12 +30,11 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
 #if defined(WINDOW_SCENE_SUPPORTED) || defined(ARKUI_CAPI_UNITTEST)
-    // auto frameNode = WindowSceneModel::CreateNode(id);
-    // if (frameNode) {
-    //     frameNode->IncRefCount();
-    //     return AceType::RawPtr(frameNode);
-    // }
-    return {};
+    auto frameNode = WindowSceneModel::CreateNode(id);
+    if (frameNode) {
+        frameNode->IncRefCount();
+        return AceType::RawPtr(frameNode);
+    }
 #endif
     return {};
 }
@@ -53,23 +52,18 @@ void SetWindowSceneOptionsImpl(Ark_NativePointer node,
 } // WindowSceneInterfaceModifier
 namespace WindowSceneAttributeModifier {
 void AttractionEffectImpl(Ark_NativePointer node,
-                          const Ark_Position* destination,
-                          const Ark_Number* fraction)
+                          const Opt_Position* destination,
+                          const Opt_Number* fraction)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(destination);
-    CHECK_NULL_VOID(fraction);
-    AttractionEffect effect;
-    effect.fraction = Converter::Convert<float>(*fraction);
-    effect.destinationX = CalcDimension(0);
-    effect.destinationY = CalcDimension(0);
-    if (auto x = Converter::OptConvert<Dimension>(destination->x); x) {
-        effect.destinationX = x.value();
-    }
-    if (auto y = Converter::OptConvert<Dimension>(destination->y); y) {
-        effect.destinationY = y.value();
-    }
+    auto optDestination = Converter::GetOptPtr(destination);
+    auto x = optDestination ? Converter::OptConvert<Dimension>(optDestination->x) : std::nullopt;
+    auto y = optDestination ? Converter::OptConvert<Dimension>(optDestination->y) : std::nullopt;
+    AttractionEffect effect{};
+    effect.fraction = Converter::OptConvert<float>(*fraction).value_or(effect.fraction);
+    effect.destinationX = x.value_or(effect.destinationX);
+    effect.destinationY = y.value_or(effect.destinationY);
 #if defined(WINDOW_SCENE_SUPPORTED) || defined(ARKUI_CAPI_UNITTEST)
     WindowSceneModel::SetAttractionEffect(effect);
 #endif

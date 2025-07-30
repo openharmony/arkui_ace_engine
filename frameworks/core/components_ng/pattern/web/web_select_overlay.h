@@ -71,7 +71,8 @@ struct MenuAvoidStrategyMember {
     double keyboardInsetStart = 0.0;
     double keyboardHeight = 0.0;
     double avoidFromText = 0.0;
-    double avoidPosition = 0.0;
+    double avoidPositionX = 0.0;
+    double avoidPositionY = 0.0;
     double defaultAvoidY = 0.0;
     double menuHeight = 0.0;
     double menuWidth = 0.0;

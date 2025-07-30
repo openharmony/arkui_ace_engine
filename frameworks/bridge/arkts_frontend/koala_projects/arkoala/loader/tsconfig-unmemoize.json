@@ -1,0 +1,53 @@
+{
+    "compilerOptions": {
+        "target": "es2017",
+        "module": "ESNext",
+        "lib": ["ESNext", "ESNext.WeakRef", "DOM"],
+        "moduleResolution": "node",
+        "composite": true,
+        "incremental": true,
+        "declarationMap": true,
+        "sourceMap": true,
+        "declaration": true,
+        "noEmitOnError": true,
+        "strict": true,
+        "skipLibCheck": true,
+        "removeComments": false,
+        "plugins": [
+            { "transform": "@koalaui/compiler-plugin/build/lib/src/koala-transformer.js", 
+              "trace": false, 
+              "only_unmemoize": true,
+              "unmemoizeDir": "build/unmemoized" }
+        ],
+        "outDir": "build/junk",
+        "baseUrl": "..",
+        "types": ["arkoala-runtime"],
+        "paths": {
+            "#common/wrappers/*": ["../interop/src/napi/wrappers/*", "../interop/src/wasm/wrappers/*"],
+            "#arkcompat": ["../arkui-common/src/typescript"],
+            "#arkcompat/*": ["../arkui-common/src/typescript/*"],
+            "@koalaui/arkui-common": ["../arkui-common/src/typescript"]
+        }
+    },
+    "exclude": [
+        "node_modules", "build", "dist", "lib", "src/ets/**/*.ts"
+    ],
+    "include": [
+        "src/**/*", "generated/**/*", "web/**.*"
+    ],
+    "references": [
+        { "path": "../../incremental/common" },
+        { "path": "../../incremental/compiler-plugin" },
+        { "path": "../../incremental/runtime" },
+        { "path": "../framework" },
+        { "path": "../arkui-common" },
+        { "path": "../arkui" },
+        { "path": "../extension-component" },
+        { "path": "../../incremental/runtime/tsconfig-unmemoize.json" },
+        { "path": "../framework/tsconfig-unmemoize.json" },
+        { "path": "../arkui-common/tsconfig-unmemoize-ts.json" },
+        { "path": "../arkui/tsconfig-unmemoize.json" },
+        { "path": "../extension-component/tsconfig-unmemoize.json" }
+
+    ]
+}

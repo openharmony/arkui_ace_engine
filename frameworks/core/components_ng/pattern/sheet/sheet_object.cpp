@@ -198,7 +198,6 @@ void SheetObject::InitAnimationForOverlay(bool isTransitionIn, bool isFirstTrans
         sheetPattern->FireOnTypeDidChange();
         sheetPattern->FireOnWidthDidChange();
         ACE_SCOPED_TRACE("Sheet start admission");
-        sheetPattern->SetBottomStyleHotAreaInSubwindow();
     }
 }
 

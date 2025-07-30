@@ -608,7 +608,7 @@ double RosenRenderCustomPaint::MeasureTextInner(const MeasureContext& context)
     if (context.fontSize) {
         txtStyle.fontSize = context.fontSize.value().ConvertToPx();
     } else {
-        auto pipelineContext = PipelineBase::GetCurrentContext();
+        auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_RETURN(pipelineContext, 0.0);
         auto textTheme = pipelineContext->GetTheme<TextTheme>();
         txtStyle.fontSize = textTheme->GetTextStyle().GetFontSize().ConvertToPx();
@@ -641,7 +641,7 @@ double RosenRenderCustomPaint::MeasureTextInner(const MeasureContext& context)
 
 bool RosenRenderCustomPaint::IsApplyIndent(const MeasureContext& context, double& indent)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, false);
     if (context.textIndent.value().Unit() != DimensionUnit::PERCENT) {
         indent = context.textIndent.value().ConvertToPx();
@@ -696,7 +696,7 @@ Size RosenRenderCustomPaint::MeasureTextSizeInner(const MeasureContext& context)
     if (context.fontSize.has_value()) {
         txtStyle.fontSize = context.fontSize.value().ConvertToPx();
     } else {
-        auto pipelineContext = PipelineBase::GetCurrentContext();
+        auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_RETURN(pipelineContext, Size(0.0, 0.0));
         auto textTheme = pipelineContext->GetTheme<TextTheme>();
         txtStyle.fontSize = textTheme->GetTextStyle().GetFontSize().ConvertToPx();
@@ -706,7 +706,7 @@ Size RosenRenderCustomPaint::MeasureTextSizeInner(const MeasureContext& context)
     txtStyle.fontWeight = ConvertTxtFontWeight(fontWeightStr);
     auto fontWeightValue = (static_cast<int32_t>(
             ConvertTxtFontWeight(fontWeightStr)) + 1) * 100;
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
     if (pipelineContext) {
         fontWeightValue = fontWeightValue * pipelineContext->GetFontWeightScale();
     }

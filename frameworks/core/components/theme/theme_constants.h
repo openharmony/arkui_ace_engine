@@ -190,6 +190,14 @@ public:
     uint32_t GetSymbolById(uint32_t resId) const;
 
     /*
+     * Get int value from platform constants.
+     * NOTE: false will be returned if not found or value is not uint32_t.
+     * @param[in] key Target key.
+     * @return uint32_t value corresponding to the name.
+     */
+    uint32_t GetSymbolById(const int32_t& resId) const;
+
+    /*
      * Get int array value from platform constants.
      * NOTE: empty array will be returned if not found or value is not boolean.
      * @param[in] key Target key.

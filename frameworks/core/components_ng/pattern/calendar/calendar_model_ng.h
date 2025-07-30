@@ -54,6 +54,22 @@ public:
     static void SetNextData(const ObtainedMonth& nextData);
     static void SetCalendarDay(const CalendarDay& calendarDay);
 
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static void SetOptions(FrameNode* frameNode, const CalendarData& calendarData);
+    static void SetShowLunar(FrameNode* frameNode, bool showLunar);
+    static void SetShowHoliday(FrameNode* frameNode, bool showHoliday);
+    static void SetNeedSlide(FrameNode* frameNode, bool needSlide);
+    static void SetStartOfWeek(FrameNode* frameNode, int32_t startOfWeek);
+    static void SetOffDays(FrameNode* frameNode, const std::optional<std::string>& offDays);
+    static void SetDirection(FrameNode* frameNode, const std::optional<Axis>& dir);
+    static void SetCurrentDayStyle(FrameNode* frameNode, const CurrentDayStyleData& dataStyle);
+    static void SetNonCurrentDayStyle(FrameNode* frameNode, const NonCurrentDayStyleData& dataStyle);
+    static void SetTodayStyle(FrameNode* frameNode, const TodayStyleData& dataStyle);
+    static void SetWeekStyle(FrameNode* frameNode, const WeekStyleData& dataStyle);
+    static void SetWorkStateStyle(FrameNode* frameNode, const WorkStateStyleData& dataStyle);
+    static void SetOnSelectChange(FrameNode* frameNode, std::function<void(const std::string&)>&& selectedChangeEvent);
+    static void SetOnRequestData(FrameNode* frameNode, std::function<void(const std::string&)>&& requestData);
+
 private:
     static void Create(const CalendarData& calendarData);
     static RefPtr<FrameNode> Create();

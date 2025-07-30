@@ -61,7 +61,6 @@ DialogProperties BuildDialogProperties(const Ark_DatePickerDialogOptions options
     CHECK_NULL_RETURN(pipeline, dialogProps);
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     CHECK_NULL_RETURN(dialogTheme, dialogProps);
-    
     dialogProps.alignment = dialogTheme->GetAlignment();
     if (dialogProps.alignment == DialogAlignment::BOTTOM) {
         dialogProps.offset = DimensionOffset(Offset(0, -dialogTheme->GetMarginBottom().ConvertToPx()));
@@ -178,10 +177,9 @@ std::map<std::string, DialogEvent> CreateDialogEvent(const Ark_DatePickerDialogO
 void ShowImpl(const Opt_DatePickerDialogOptions* options)
 {
     CHECK_NULL_VOID(options);
-    if (options->tag == ARK_TAG_UNDEFINED) { return; }
-    auto arkOptionsOpt =  Converter::OptConvert<Ark_DatePickerDialogOptions>(options->value);
+    auto arkOptionsOpt = Converter::OptConvert<Ark_DatePickerDialogOptions>(*options);
     if (!arkOptionsOpt.has_value()) { return; }
-    
+
     Ark_DatePickerDialogOptions arkOptions = *arkOptionsOpt;
     DialogProperties dialogProps = BuildDialogProperties(arkOptions);
     DatePickerSettingData settingData = BuildSettingData(arkOptions);

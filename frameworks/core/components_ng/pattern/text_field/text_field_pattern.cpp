@@ -11135,6 +11135,7 @@ double TextFieldPattern::GetPercentReferenceWidth() const
 void TextFieldPattern::NotifyKeyboardClosedByUser()
 {
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "NotifyKeyboardClosedByUser");
+    CHECK_NULL_VOID(HasFocus());
     isKeyboardClosedByUser_ = true;
     FocusHub::LostFocusToViewRoot();
     isKeyboardClosedByUser_ = false;

@@ -18,7 +18,6 @@ import { DataOperation, DataOperationType, DataAddOperation, DataDeleteOperation
 import { int32 } from "@koalaui/common"
 import { MutableState } from "@koalaui/runtime";
 import { DataChangeListener } from "./component/lazyForEach";
-import { requestFrame } from "./stateManagement";
 
 export class InternalListener implements DataChangeListener {
     readonly parent: pointer
@@ -95,7 +94,6 @@ export class InternalListener implements DataChangeListener {
         if (index < 0) return
         if (this.startIndex === Number.POSITIVE_INFINITY) {
             ++this.version.value
-            requestFrame()
         }
         this.startIndex = Math.min(this.startIndex, index)
     }
@@ -159,5 +157,15 @@ export class InternalListener implements DataChangeListener {
     }
     onDataChanged(index: number): void {
         this.onDataChange(index)
+    }
+
+    /**
+     * @internal
+     * Notify data change without updating MutableState. Safe to call during composition.
+     */
+    update(start: number, end: number, countDiff: number): void {
+        this.startIndex = Math.min(start, this.startIndex)
+        this.endIndex = Math.max(end, this.endIndex)
+        this.changeCount += countDiff
     }
 }

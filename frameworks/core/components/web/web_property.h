@@ -274,7 +274,7 @@ public:
         }
     }
 
-    bool AccessStep(int32_t step)
+    virtual bool AccessStep(int32_t step)
     {
         if (accessStepImpl_) {
             return accessStepImpl_(step);
@@ -289,7 +289,7 @@ public:
         }
     }
 
-    bool AccessBackward()
+    virtual bool AccessBackward()
     {
         if (accessBackwardImpl_) {
             return accessBackwardImpl_();
@@ -297,7 +297,7 @@ public:
         return false;
     }
 
-    bool AccessForward()
+    virtual bool AccessForward()
     {
         if (accessForwardImpl_) {
             return accessForwardImpl_();
@@ -305,21 +305,21 @@ public:
         return false;
     }
 
-    void Backward()
+    virtual void Backward()
     {
         if (backwardImpl_) {
             backwardImpl_();
         }
     }
 
-    void Forward()
+    virtual void Forward()
     {
         if (forwardimpl_) {
             forwardimpl_();
         }
     }
 
-    void ClearHistory()
+    virtual void ClearHistory()
     {
         if (clearHistoryImpl_) {
             clearHistoryImpl_();
@@ -404,7 +404,7 @@ public:
 
     using LoadDataWithBaseUrlImpl = std::function<void(
         std::string, std::string, std::string, std::string, std::string)>;
-    void LoadDataWithBaseUrl(std::string baseUrl, std::string data, std::string mimeType, std::string encoding,
+    virtual void LoadDataWithBaseUrl(std::string baseUrl, std::string data, std::string mimeType, std::string encoding,
         std::string historyUrl) const
     {
         if (loadDataWithBaseUrlImpl_) {
@@ -430,7 +430,7 @@ public:
     }
 
     using OnInactiveImpl = std::function<void()>;
-    void OnInactive() const
+    virtual void OnInactive() const
     {
         if (onInactiveImpl_) {
             onInactiveImpl_();
@@ -443,7 +443,7 @@ public:
     }
 
     using OnActiveImpl = std::function<void()>;
-    void OnActive() const
+    virtual void OnActive() const
     {
         if (onActiveImpl_) {
             onActiveImpl_();
@@ -456,7 +456,7 @@ public:
     }
 
     using ZoomImpl = std::function<void(float)>;
-    void Zoom(float factor) const
+    virtual void Zoom(float factor) const
     {
         if (zoomImpl_) {
             zoomImpl_(factor);
@@ -497,7 +497,7 @@ public:
     }
 
     using RefreshImpl = std::function<void()>;
-    void Refresh() const
+    virtual void Refresh() const
     {
         if (refreshImpl_) {
             refreshImpl_();
@@ -509,7 +509,7 @@ public:
     }
 
     using StopLoadingImpl = std::function<void()>;
-    void StopLoading() const
+    virtual void StopLoading() const
     {
         if (stopLoadingImpl_) {
             stopLoadingImpl_();
@@ -521,7 +521,7 @@ public:
     }
 
     using GetHitTestResultImpl = std::function<int()>;
-    int GetHitTestResult()
+    virtual int GetHitTestResult()
     {
         if (getHitTestResultImpl_) {
             return getHitTestResultImpl_();
@@ -701,7 +701,7 @@ public:
     using AddJavascriptInterfaceImpl = std::function<void(
         const std::string&,
         const std::vector<std::string>&)>;
-    void AddJavascriptInterface(
+    virtual void AddJavascriptInterface(
         const std::string& objectName,
         const std::vector<std::string>& methodList)
     {
@@ -715,7 +715,7 @@ public:
     }
 
     using RemoveJavascriptInterfaceImpl = std::function<void(std::string, const std::vector<std::string>&)>;
-    void RemoveJavascriptInterface(std::string objectName, const std::vector<std::string>& methodList)
+    virtual void RemoveJavascriptInterface(std::string objectName, const std::vector<std::string>& methodList)
     {
         if (removeJavascriptInterfaceImpl_) {
             removeJavascriptInterfaceImpl_(objectName, methodList);
@@ -744,7 +744,7 @@ public:
     }
 
     using RequestFocusImpl = std::function<void()>;
-    void RequestFocus()
+    virtual void RequestFocus()
     {
         if (requestFocusImpl_) {
             return requestFocusImpl_();

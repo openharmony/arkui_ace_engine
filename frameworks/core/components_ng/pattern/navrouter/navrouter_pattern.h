@@ -62,10 +62,36 @@ public:
         return mode_;
     }
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
+    {
+        Pattern::ToJsonValue(json, filter);
+         /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        json->PutExtAttr("mode", this->NavRouteModeToString(mode_).c_str(), filter);
+    }
+
+
 private:
     RefPtr<ClickEvent> clickListener_;
     RefPtr<RouteInfo> routeInfo_;
     NavRouteMode mode_ = NavRouteMode::PUSH_WITH_RECREATE;
+
+    const std::string NavRouteModeToString(const NavRouteMode& mode) const {
+        switch (mode) {
+            case NavRouteMode::PUSH_WITH_RECREATE:
+                return "NavRouteMode.PUSH_WITH_RECREATE";
+            case NavRouteMode::PUSH:
+                return "NavRouteMode.PUSH";
+            case NavRouteMode::REPLACE:
+                return "NavRouteMode.REPLACE";
+            default:
+                return "";
+        }
+    }
 };
 } // namespace OHOS::Ace::NG
 

@@ -21,11 +21,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TapGestureEventAccessor {
 void DestroyPeerImpl(Ark_TapGestureEvent peer)
 {
-    delete peer;
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_TapGestureEvent CtorImpl()
 {
-    return new TapGestureEventPeer();
+    return PeerUtils::CreatePeer<TapGestureEventPeer>();
 }
 Ark_NativePointer GetFinalizerImpl()
 {

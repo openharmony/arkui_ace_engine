@@ -15,7 +15,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #ifdef WEB_SUPPORTED
-#include "core/components_ng/pattern/web/web_model_ng.h"
+#include "core/components_ng/pattern/web/ani/web_model_static.h"
 #endif // WEB_SUPPORTED
 #include "core/interfaces/native/implementation/controller_handler_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
@@ -48,13 +48,13 @@ void SetWebControllerImpl(Ark_ControllerHandler peer,
     }
 
     if (controller == nullptr) {
-        // WebModelNG::NotifyPopupWindowResultStatic(parentNWebId, false);
+        WebModelStatic::NotifyPopupWindowResultStatic(parentNWebId, false);
         return;
     }
 
     int32_t childWebId = controller->nwebId;
     if (childWebId == parentNWebId || childWebId != -1) {
-        // WebModelNG::NotifyPopupWindowResultStatic(parentNWebId, false);
+        WebModelStatic::NotifyPopupWindowResultStatic(parentNWebId, false);
         return;
     }
     ControllerHandlerPeer::ChildWindowInfo info { parentNWebId, Referenced::Claim(controller) };
@@ -74,7 +74,4 @@ const GENERATED_ArkUIControllerHandlerAccessor* GetControllerHandlerAccessor()
     return &ControllerHandlerAccessorImpl;
 }
 
-struct ControllerHandlerPeer {
-    virtual ~ControllerHandlerPeer() = default;
-};
 }

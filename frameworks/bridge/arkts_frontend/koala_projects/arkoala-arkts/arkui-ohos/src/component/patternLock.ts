@@ -17,31 +17,22 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
-import { unsafeCast, int32, float32, int64 } from "@koalaui/common"
-import { Serializer } from "./../generated/peers/Serializer"
-import { CallbackKind } from "./../generated/peers/CallbackKind"
-import { Deserializer } from "./../generated/peers/Deserializer"
-import { CallbackTransformer } from "./../generated/peers/CallbackTransformer"
-import { NodeAttach, remember } from "@koalaui/runtime"
-import { ResourceColor, Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions } from "./units"
-import { LengthMetrics } from "../Graphics"
-import { CommonMethod, DrawModifier, Rectangle, Callback_Array_TouchTestInfo_TouchResult, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, Callback_ClickEvent_Void, ClickEvent, Callback_Boolean_HoverEvent_Void, HoverEvent, AccessibilityCallback, Callback_MouseEvent_Void, MouseEvent, Callback_TouchEvent_Void, TouchEvent, Callback_KeyEvent_Void, KeyEvent, Callback_KeyEvent_Boolean, AnimateParam, TransitionOptions, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, Callback_Area_Area_Void, Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs, Literal_Number_offset_span, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, DragEvent, CustomBuilder, DragItemInfo, Callback_DragEvent_String_Void, UniformDataType, Callback_PreDragStatus_Void, PreDragStatus, Type_CommonMethod_linearGradient_value, Tuple_ResourceColor_Number, Type_CommonMethod_sweepGradient_value, Tuple_Length_Length, Type_CommonMethod_radialGradient_value, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, GestureModifier, BackgroundBrightnessOptions, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, Callback_TouchEvent_HitTestMode, SizeChangeCallback, SafeAreaType, SafeAreaEdge, Literal_Alignment_align, BlurStyle, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, ComponentContent, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback } from "./common"
-import { HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Color, Visibility, ItemAlign, Direction, GradientDirection, ObscuredReasons, RenderFit, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey } from "./enums"
-import { ResizableOptions } from "./image"
-import { Resource } from "global/resource";
-import { Callback_Void } from "./abilityComponent"
-import { FocusBoxStyle, FocusPriority } from "./focus"
-import { CircleShape } from "./../generated/ArkCircleShapeMaterialized"
-import { EllipseShape } from "./../generated/ArkEllipseShapeMaterialized"
-import { PathShape } from "./../generated/ArkPathShapeMaterialized"
-import { RectShape } from "./../generated/ArkRectShapeMaterialized"
-import { AttributeModifier } from "./../component/common" 
-import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureType, GestureMask } from "./gesture"
-import { PixelMap } from "./../generated/ArkPixelMapMaterialized"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
+import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
+import { Serializer } from "./peers/Serializer"
+import { CallbackKind } from "./peers/CallbackKind"
+import { Deserializer } from "./peers/Deserializer"
+import { CallbackTransformer } from "./peers/CallbackTransformer"
+import { ComponentBase } from "./../ComponentBase"
+import { PeerNode } from "./../PeerNode"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { Length, ResourceColor } from "./units"
 import { Callback_Number_Void } from "./alphabetIndexer"
-import { ArkPatternLockComponent } from "./../generated/ArkPatternLock"
-import { ArkPatternLockPeer } from "./../generated/peers/ArkPatternLockPeer"
+import { Resource } from "global/resource"
+import { Color } from "./enums"
+import { NodeAttach, remember } from "@koalaui/runtime"
+import { LengthMetrics } from "../Graphics"
+
 export class PatternLockControllerInternal {
     public static fromPtr(ptr: KPointer): PatternLockController {
         const obj : PatternLockController = new PatternLockController()
@@ -65,8 +56,9 @@ export class PatternLockController implements MaterializedBase {
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._PatternLockController_getFinalizer()
     }
-    public reset(): undefined {
-        return this.reset_serialize()
+    public reset(): void {
+        this.reset_serialize();
+        return;
     }
     public setChallengeResult(result: PatternLockChallengeResult): void {
         const result_casted = result as (PatternLockChallengeResult)
@@ -78,7 +70,303 @@ export class PatternLockController implements MaterializedBase {
         return retval
     }
     private setChallengeResult_serialize(result: PatternLockChallengeResult): void {
-        ArkUIGeneratedNativeModule._PatternLockController_setChallengeResult(this.peer!.ptr, result.valueOf())
+        ArkUIGeneratedNativeModule._PatternLockController_setChallengeResult(this.peer!.ptr, TypeChecker.PatternLockChallengeResult_ToNumeric(result))
+    }
+}
+export class ArkPatternLockPeer extends ArkCommonMethodPeer {
+    protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+        super(peerPtr, id, name, flags)
+    }
+    public static create(component: ComponentBase | undefined, flags: int32 = 0): ArkPatternLockPeer {
+        const peerId  = PeerNode.nextId()
+        const _peerPtr  = ArkUIGeneratedNativeModule._PatternLock_construct(peerId, flags)
+        const _peer  = new ArkPatternLockPeer(_peerPtr, peerId, "PatternLock", flags)
+        component?.setPeer(_peer)
+        return _peer
+    }
+    setPatternLockOptionsAttribute(controller?: PatternLockController): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let controller_type : int32 = RuntimeType.UNDEFINED
+        controller_type = runtimeType(controller)
+        thisSerializer.writeInt8(controller_type as int32)
+        if ((RuntimeType.UNDEFINED) != (controller_type)) {
+            const controller_value  = controller!
+            thisSerializer.writePatternLockController(controller_value)
+        }
+        ArkUIGeneratedNativeModule._PatternLockInterface_setPatternLockOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    sideLengthAttribute(value: Length | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeLength(value_value)
+        }
+        ArkUIGeneratedNativeModule._PatternLockAttribute_sideLength(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    circleRadiusAttribute(value: Length | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeLength(value_value)
+        }
+        ArkUIGeneratedNativeModule._PatternLockAttribute_circleRadius(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    backgroundColorAttribute(value: ResourceColor | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (TypeChecker.isColor(value_value)) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as Color
+                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_value_0))
+            }
+            else if (RuntimeType.NUMBER == value_value_type) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as number
+                thisSerializer.writeNumber(value_value_1)
+            }
+            else if (RuntimeType.STRING == value_value_type) {
+                thisSerializer.writeInt8(2 as int32)
+                const value_value_2  = value_value as string
+                thisSerializer.writeString(value_value_2)
+            }
+            else if (RuntimeType.OBJECT == value_value_type) {
+                thisSerializer.writeInt8(3 as int32)
+                const value_value_3  = value_value as Resource
+                thisSerializer.writeResource(value_value_3)
+            }
+        }
+        ArkUIGeneratedNativeModule._PatternLockAttribute_backgroundColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    regularColorAttribute(value: ResourceColor | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (TypeChecker.isColor(value_value)) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as Color
+                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_value_0))
+            }
+            else if (RuntimeType.NUMBER == value_value_type) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as number
+                thisSerializer.writeNumber(value_value_1)
+            }
+            else if (RuntimeType.STRING == value_value_type) {
+                thisSerializer.writeInt8(2 as int32)
+                const value_value_2  = value_value as string
+                thisSerializer.writeString(value_value_2)
+            }
+            else if (RuntimeType.OBJECT == value_value_type) {
+                thisSerializer.writeInt8(3 as int32)
+                const value_value_3  = value_value as Resource
+                thisSerializer.writeResource(value_value_3)
+            }
+        }
+        ArkUIGeneratedNativeModule._PatternLockAttribute_regularColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    selectedColorAttribute(value: ResourceColor | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (TypeChecker.isColor(value_value)) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as Color
+                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_value_0))
+            }
+            else if (RuntimeType.NUMBER == value_value_type) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as number
+                thisSerializer.writeNumber(value_value_1)
+            }
+            else if (RuntimeType.STRING == value_value_type) {
+                thisSerializer.writeInt8(2 as int32)
+                const value_value_2  = value_value as string
+                thisSerializer.writeString(value_value_2)
+            }
+            else if (RuntimeType.OBJECT == value_value_type) {
+                thisSerializer.writeInt8(3 as int32)
+                const value_value_3  = value_value as Resource
+                thisSerializer.writeResource(value_value_3)
+            }
+        }
+        ArkUIGeneratedNativeModule._PatternLockAttribute_selectedColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    activeColorAttribute(value: ResourceColor | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (TypeChecker.isColor(value_value)) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as Color
+                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_value_0))
+            }
+            else if (RuntimeType.NUMBER == value_value_type) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as number
+                thisSerializer.writeNumber(value_value_1)
+            }
+            else if (RuntimeType.STRING == value_value_type) {
+                thisSerializer.writeInt8(2 as int32)
+                const value_value_2  = value_value as string
+                thisSerializer.writeString(value_value_2)
+            }
+            else if (RuntimeType.OBJECT == value_value_type) {
+                thisSerializer.writeInt8(3 as int32)
+                const value_value_3  = value_value as Resource
+                thisSerializer.writeResource(value_value_3)
+            }
+        }
+        ArkUIGeneratedNativeModule._PatternLockAttribute_activeColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    pathColorAttribute(value: ResourceColor | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (TypeChecker.isColor(value_value)) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as Color
+                thisSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_value_0))
+            }
+            else if (RuntimeType.NUMBER == value_value_type) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as number
+                thisSerializer.writeNumber(value_value_1)
+            }
+            else if (RuntimeType.STRING == value_value_type) {
+                thisSerializer.writeInt8(2 as int32)
+                const value_value_2  = value_value as string
+                thisSerializer.writeString(value_value_2)
+            }
+            else if (RuntimeType.OBJECT == value_value_type) {
+                thisSerializer.writeInt8(3 as int32)
+                const value_value_3  = value_value as Resource
+                thisSerializer.writeResource(value_value_3)
+            }
+        }
+        ArkUIGeneratedNativeModule._PatternLockAttribute_pathColor(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    pathStrokeWidthAttribute(value: number | string | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            let value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_type = runtimeType(value_value)
+            if (RuntimeType.NUMBER == value_value_type) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as number
+                thisSerializer.writeNumber(value_value_0)
+            }
+            else if (RuntimeType.STRING == value_value_type) {
+                thisSerializer.writeInt8(1 as int32)
+                const value_value_1  = value_value as string
+                thisSerializer.writeString(value_value_1)
+            }
+        }
+        ArkUIGeneratedNativeModule._PatternLockAttribute_pathStrokeWidth(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onPatternCompleteAttribute(value: ((input: Array<number>) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._PatternLockAttribute_onPatternComplete(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    autoResetAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._PatternLockAttribute_autoReset(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onDotConnectAttribute(value: ((index: number) => void) | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._PatternLockAttribute_onDotConnect(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    activateCircleStyleAttribute(value: CircleStyleOptions | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeCircleStyleOptions(value_value)
+        }
+        ArkUIGeneratedNativeModule._PatternLockAttribute_activateCircleStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    skipUnselectedPointAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._PatternLockAttribute_skipUnselectedPoint(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
     }
 }
 export enum PatternLockChallengeResult {
@@ -89,45 +377,209 @@ export interface CircleStyleOptions {
     color?: ResourceColor;
     radius?: LengthMetrics;
     enableWaveEffect?: boolean;
+    enableForeground?: boolean;
 }
+export type PatternLockInterface = (controller?: PatternLockController) => PatternLockAttribute;
 export type Callback_Array_Number_Void = (input: Array<number>) => void;
-/** @memo:stable */
 export interface PatternLockAttribute extends CommonMethod {
-    /** @memo */
-    setPatternLockOptions(controller?: PatternLockController): this
-    /** @memo */
-    sideLength(value: Length): this
-    /** @memo */
-    circleRadius(value: Length): this
-    /** @memo */
-    backgroundColor(value: ResourceColor): this
-    /** @memo */
-    regularColor(value: ResourceColor): this
-    /** @memo */
-    selectedColor(value: ResourceColor): this
-    /** @memo */
-    activeColor(value: ResourceColor): this
-    /** @memo */
-    pathColor(value: ResourceColor): this
-    /** @memo */
-    pathStrokeWidth(value: number | string): this
-    /** @memo */
-    onPatternComplete(value: ((input: Array<number>) => void)): this
-    /** @memo */
-    autoReset(value: boolean): this
-    /** @memo */
-    onDotConnect(value: ((index: number) => void)): this
-    /** @memo */
-    activateCircleStyle(value?: CircleStyleOptions): this
+    sideLength(value: Length | undefined): this
+    circleRadius(value: Length | undefined): this
+    backgroundColor(value: ResourceColor | undefined): this
+    regularColor(value: ResourceColor | undefined): this
+    selectedColor(value: ResourceColor | undefined): this
+    activeColor(value: ResourceColor | undefined): this
+    pathColor(value: ResourceColor | undefined): this
+    pathStrokeWidth(value: number | string | undefined): this
+    onPatternComplete(value: ((input: Array<number>) => void) | undefined): this
+    autoReset(value: boolean | undefined): this
+    onDotConnect(value: ((index: number) => void) | undefined): this
+    activateCircleStyle(value: CircleStyleOptions | undefined): this
+    skipUnselectedPoint(value: boolean | undefined): this
+}
+export class ArkPatternLockStyle extends ArkCommonMethodStyle implements PatternLockAttribute {
+    sideLength_value?: Length | undefined
+    circleRadius_value?: Length | undefined
+    backgroundColor_value?: ResourceColor | undefined
+    regularColor_value?: ResourceColor | undefined
+    selectedColor_value?: ResourceColor | undefined
+    activeColor_value?: ResourceColor | undefined
+    pathColor_value?: ResourceColor | undefined
+    pathStrokeWidth_value?: number | string | undefined
+    onPatternComplete_value?: ((input: Array<number>) => void) | undefined
+    autoReset_value?: boolean | undefined
+    onDotConnect_value?: ((index: number) => void) | undefined
+    activateCircleStyle_value?: CircleStyleOptions | undefined
+    skipUnselectedPoint_value?: boolean | undefined
+    public sideLength(value: Length | undefined): this {
+        return this
+    }
+    public circleRadius(value: Length | undefined): this {
+        return this
+    }
+    public backgroundColor(value: ResourceColor | undefined): this {
+        return this
+    }
+    public regularColor(value: ResourceColor | undefined): this {
+        return this
+    }
+    public selectedColor(value: ResourceColor | undefined): this {
+        return this
+    }
+    public activeColor(value: ResourceColor | undefined): this {
+        return this
+    }
+    public pathColor(value: ResourceColor | undefined): this {
+        return this
+    }
+    public pathStrokeWidth(value: number | string | undefined): this {
+        return this
+    }
+    public onPatternComplete(value: ((input: Array<number>) => void) | undefined): this {
+        return this
+    }
+    public autoReset(value: boolean | undefined): this {
+        return this
+    }
+    public onDotConnect(value: ((index: number) => void) | undefined): this {
+        return this
+    }
+    public activateCircleStyle(value: CircleStyleOptions | undefined): this {
+        return this
+    }
+    public skipUnselectedPoint(value: boolean | undefined): this {
+        return this
+        }
+}
+export class ArkPatternLockComponent extends ArkCommonMethodComponent implements PatternLockAttribute {
+    getPeer(): ArkPatternLockPeer {
+        return (this.peer as ArkPatternLockPeer)
+    }
+    public setPatternLockOptions(controller?: PatternLockController): this {
+        if (this.checkPriority("setPatternLockOptions")) {
+            const controller_casted = controller as (PatternLockController | undefined)
+            this.getPeer()?.setPatternLockOptionsAttribute(controller_casted)
+            return this
+        }
+        return this
+    }
+    public sideLength(value: Length | undefined): this {
+        if (this.checkPriority("sideLength")) {
+            const value_casted = value as (Length | undefined)
+            this.getPeer()?.sideLengthAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public circleRadius(value: Length | undefined): this {
+        if (this.checkPriority("circleRadius")) {
+            const value_casted = value as (Length | undefined)
+            this.getPeer()?.circleRadiusAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public backgroundColor(value: ResourceColor | undefined): this {
+        if (this.checkPriority("backgroundColor")) {
+            const value_casted = value as (ResourceColor | undefined)
+            this.getPeer()?.backgroundColorAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public regularColor(value: ResourceColor | undefined): this {
+        if (this.checkPriority("regularColor")) {
+            const value_casted = value as (ResourceColor | undefined)
+            this.getPeer()?.regularColorAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public selectedColor(value: ResourceColor | undefined): this {
+        if (this.checkPriority("selectedColor")) {
+            const value_casted = value as (ResourceColor | undefined)
+            this.getPeer()?.selectedColorAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public activeColor(value: ResourceColor | undefined): this {
+        if (this.checkPriority("activeColor")) {
+            const value_casted = value as (ResourceColor | undefined)
+            this.getPeer()?.activeColorAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public pathColor(value: ResourceColor | undefined): this {
+        if (this.checkPriority("pathColor")) {
+            const value_casted = value as (ResourceColor | undefined)
+            this.getPeer()?.pathColorAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public pathStrokeWidth(value: number | string | undefined): this {
+        if (this.checkPriority("pathStrokeWidth")) {
+            const value_casted = value as (number | string | undefined)
+            this.getPeer()?.pathStrokeWidthAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onPatternComplete(value: ((input: Array<number>) => void) | undefined): this {
+        if (this.checkPriority("onPatternComplete")) {
+            const value_casted = value as (((input: Array<number>) => void) | undefined)
+            this.getPeer()?.onPatternCompleteAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public autoReset(value: boolean | undefined): this {
+        if (this.checkPriority("autoReset")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.autoResetAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onDotConnect(value: ((index: number) => void) | undefined): this {
+        if (this.checkPriority("onDotConnect")) {
+            const value_casted = value as (((index: number) => void) | undefined)
+            this.getPeer()?.onDotConnectAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public activateCircleStyle(value: CircleStyleOptions | undefined): this {
+        if (this.checkPriority("activateCircleStyle")) {
+            const value_casted = value as (CircleStyleOptions | undefined)
+            this.getPeer()?.activateCircleStyleAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public skipUnselectedPoint(value: boolean | undefined): this {
+        if (this.checkPriority("skipUnselectedPoint")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.skipUnselectedPointAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    
+    public applyAttributesFinish(): void {
+        // we call this function outside of class, so need to make it public
+        super.applyAttributesFinish()
+    }
 }
 /** @memo */
 export function PatternLock(
-  /** @memo */
-  style: ((attributes: PatternLockAttribute) => void) | undefined,
-  controller?: PatternLockController | undefined, 
-  /** @memo */
-  content_?: () => void,
-) {
+    /** @memo */
+    style: ((attributes: PatternLockAttribute) => void) | undefined,
+    controller?: PatternLockController,
+    /** @memo */
+    content_?: (() => void) | undefined,
+): void {
     const receiver = remember(() => {
         return new ArkPatternLockComponent()
     })

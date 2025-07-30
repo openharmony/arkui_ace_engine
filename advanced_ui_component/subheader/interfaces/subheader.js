@@ -591,7 +591,7 @@ export class SubHeader extends ViewPU {
                         });
                         Row.width('100%');
                         Row.accessibilityGroup(this.isLeftAreaAccessibilityGroup());
-                        Row.accessibilityDescription(this.select ? '' : Util.getStringByResource(125834353, ''));
+                        Row.accessibilityRole(this.select ? undefined : AccessibilityRoleType.TITLE_BAR);
                     }, Row);
                     this.leftArea.bind(this)();
                     Row.pop();
@@ -626,7 +626,7 @@ export class SubHeader extends ViewPU {
                         Row.width('100%');
                         Row.flexShrink(1);
                         Row.accessibilityGroup(this.isLeftAreaAccessibilityGroup());
-                        Row.accessibilityDescription(this.select ? '' : Util.getStringByResource(125834353, ''));
+                        Row.accessibilityRole(this.select ? undefined : AccessibilityRoleType.TITLE_BAR);
                     }, Row);
                     this.leftArea.bind(this)();
                     Row.pop();

@@ -66,7 +66,8 @@ public:
 
     double GetDensity()
     {
-        return 0;
+        double density = OHOS::Ace::PipelineBase::GetCurrentDensity();
+        return ((GetUnit() == OHOS::Ace::CanvasUnit::DEFAULT) && !OHOS::Ace::NearZero(density)) ? density : 1.0;
     }
 
 private:

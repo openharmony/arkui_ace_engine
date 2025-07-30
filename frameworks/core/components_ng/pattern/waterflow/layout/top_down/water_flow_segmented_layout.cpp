@@ -63,8 +63,9 @@ void WaterFlowSegmentedLayout::Measure(LayoutWrapper* wrapper)
 
     info_->axis_ = axis_ = props_->GetAxis();
     auto [idealSize, matchChildren] = WaterFlowLayoutUtils::PreMeasureSelf(wrapper_, axis_);
+    const float prevOffset = pattern->GetPrevOffset();
     syncLoad_ = props_->GetSyncLoad().value_or(!SystemProperties::IsSyncLoadEnabled()) || matchChildren ||
-                info_->targetIndex_.has_value();
+                info_->targetIndex_.has_value() || !NearEqual(info_->currentOffset_, prevOffset);
     GetExpandArea(props_, info_);
 
     Init(idealSize);
@@ -485,8 +486,6 @@ void WaterFlowSegmentedLayout::MeasureToTarget(int32_t targetIdx, std::optional<
 void WaterFlowSegmentedLayout::Fill(int32_t startIdx)
 {
     const float expandMainSize = mainSize_ + info_->expandHeight_;
-    const float prevOffset = wrapper_->GetHostNode()->GetPattern<WaterFlowPattern>()->GetPrevOffset();
-    auto notScrolling = NearEqual(info_->currentOffset_, prevOffset);
     for (int32_t i = startIdx; i < info_->GetChildrenCount(); ++i) {
         auto position = WaterFlowLayoutUtils::GetItemPosition(info_, i, mainGaps_[info_->GetSegment(i)]);
         if (GreatOrEqual(position.startMainPos + info_->currentOffset_, expandMainSize)) {
@@ -511,7 +510,7 @@ void WaterFlowSegmentedLayout::Fill(int32_t startIdx)
             Fill(i);
             break;
         }
-        if (!syncLoad_ && notScrolling && wrapper_->ReachResponseDeadline()) {
+        if (!syncLoad_ && wrapper_->ReachResponseDeadline()) {
             info_->measureInNextFrame_ = true;
             break;
         }

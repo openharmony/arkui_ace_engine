@@ -77,14 +77,7 @@ export function memoEntry1<T, R>(
  * This function allows to run a memo function in a non-memo context.
  * @internal
  */
-/** @memo:entry */
-export function memoEntry2<T1, T2, R>(
-    __memo_context: StateContext,
-    __memo_id: KoalaCallsiteKey,
-    /** @memo */
-    entry: (arg1: T1, arg2: T2) => R,
-    arg1: T1,
-    arg2: T2,
-): R {
-    return entry(arg1, arg2)
+export function memoEntry2<T1, T2, R>(__memo_context: StateContext, __memo_id: KoalaCallsiteKey, 
+entry: (__memo_context: __memo_context_type, __memo_id: __memo_id_type, arg1: T1, arg2: T2) => R, arg1: T1, arg2: T2): R {
+    return entry(__memo_context, __memo_id + (0x5b5706bdf1 as __memo_id_type), arg1, arg2);
 }

@@ -68,6 +68,8 @@ namespace GeneratedViewModel {
     Ark_NodeHandle createImageAnimatorNode(Ark_Int32 nodeId);
     Ark_NodeHandle createImageSpanNode(Ark_Int32 nodeId);
     Ark_NodeHandle createIndicatorComponentNode(Ark_Int32 nodeId);
+    Ark_NodeHandle createLazyGridLayoutNode(Ark_Int32 nodeId);
+    Ark_NodeHandle createLazyVGridLayoutNode(Ark_Int32 nodeId);
     Ark_NodeHandle createLineNode(Ark_Int32 nodeId);
     Ark_NodeHandle createLinearIndicatorNode(Ark_Int32 nodeId);
     Ark_NodeHandle createListNode(Ark_Int32 nodeId);
@@ -82,6 +84,7 @@ namespace GeneratedViewModel {
     Ark_NodeHandle createMenuItemGroupNode(Ark_Int32 nodeId);
     Ark_NodeHandle createNavDestinationNode(Ark_Int32 nodeId);
     Ark_NodeHandle createNavRouterNode(Ark_Int32 nodeId);
+    Ark_NodeHandle createNavigationNode(Ark_Int32 nodeId);
     Ark_NodeHandle createNavigatorNode(Ark_Int32 nodeId);
     Ark_NodeHandle createNodeContainerNode(Ark_Int32 nodeId);
     Ark_NodeHandle createPanelNode(Ark_Int32 nodeId);
@@ -198,6 +201,8 @@ namespace GeneratedBridge {
             case GENERATED_ARKUI_IMAGE_ANIMATOR: return GeneratedViewModel::createImageAnimatorNode(id);
             case GENERATED_ARKUI_IMAGE_SPAN: return GeneratedViewModel::createImageSpanNode(id);
             case GENERATED_ARKUI_INDICATOR_COMPONENT: return GeneratedViewModel::createIndicatorComponentNode(id);
+            case GENERATED_ARKUI_LAZY_GRID_LAYOUT: return GeneratedViewModel::createLazyGridLayoutNode(id);
+            case GENERATED_ARKUI_LAZY_VGRID_LAYOUT: return GeneratedViewModel::createLazyVGridLayoutNode(id);
             case GENERATED_ARKUI_LINE: return GeneratedViewModel::createLineNode(id);
             case GENERATED_ARKUI_LINEAR_INDICATOR: return GeneratedViewModel::createLinearIndicatorNode(id);
             case GENERATED_ARKUI_LIST: return GeneratedViewModel::createListNode(id);
@@ -212,6 +217,7 @@ namespace GeneratedBridge {
             case GENERATED_ARKUI_MENU_ITEM_GROUP: return GeneratedViewModel::createMenuItemGroupNode(id);
             case GENERATED_ARKUI_NAV_DESTINATION: return GeneratedViewModel::createNavDestinationNode(id);
             case GENERATED_ARKUI_NAV_ROUTER: return GeneratedViewModel::createNavRouterNode(id);
+            case GENERATED_ARKUI_NAVIGATION: return GeneratedViewModel::createNavigationNode(id);
             case GENERATED_ARKUI_NAVIGATOR: return GeneratedViewModel::createNavigatorNode(id);
             case GENERATED_ARKUI_NODE_CONTAINER: return GeneratedViewModel::createNodeContainerNode(id);
             case GENERATED_ARKUI_PANEL: return GeneratedViewModel::createPanelNode(id);
@@ -275,4 +281,3 @@ namespace GeneratedBridge {
 }
 
 }
-

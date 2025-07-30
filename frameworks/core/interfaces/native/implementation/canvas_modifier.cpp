@@ -60,8 +60,7 @@ void ContextSetOptionsHelper(FrameNode *frameNode, const T* context)
             peerImplPtr->SetCanvasPattern(pattern);
         },
         [frameNode]() {
-            // need check
-            // CanvasModelNG::DetachRenderContext(frameNode);
+            CanvasModelNG::DetachRenderContext(frameNode);
         });
 }
 
@@ -93,21 +92,29 @@ void SetCanvasOptions1Impl(Ark_NativePointer node,
 } // CanvasInterfaceModifier
 namespace CanvasAttributeModifier {
 void OnReadyImpl(Ark_NativePointer node,
-                 const VoidCallback* value)
+                 const Opt_VoidCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto onEvent = [arkCallback = CallbackHelper(*value)]() { arkCallback.Invoke(); };
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // TODO: Reset value
+        return;
+    }
+    auto onEvent = [arkCallback = CallbackHelper(*optValue)]() { arkCallback.Invoke(); };
     CanvasModelNG::SetOnReady(frameNode, std::move(onEvent));
 }
 void EnableAnalyzerImpl(Ark_NativePointer node,
-                        Ark_Boolean value)
+                        const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    // need check
-    // CanvasModelNG::EnableAnalyzer(frameNode, Converter::Convert<bool>(value));
+    auto convValue = Converter::OptConvert<bool>(*value);
+    if (!convValue) {
+        // TODO: Reset value
+        return;
+    }
+    CanvasModelNG::EnableAnalyzer(frameNode, *convValue);
 }
 } // CanvasAttributeModifier
 const GENERATED_ArkUICanvasModifier* GetCanvasModifier()

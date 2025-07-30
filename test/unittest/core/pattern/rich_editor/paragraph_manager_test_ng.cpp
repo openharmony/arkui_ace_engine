@@ -495,4 +495,160 @@ HWTEST_F(RichEditorParagraphManagetTestNg, RemoveBlankLineRectByHandler002, Test
     richEditorPattern->paragraphs_.RemoveBlankLineRectByHandler(rects, selectData);
     EXPECT_EQ(rects.size(), 1);
 }
+
+/**
+ * @tc.name: GetTextBoxes001
+ * @tc.desc: test GetTextBoxes
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorParagraphManagetTestNg, GetTextBoxes001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    richEditorPattern->textForDisplay_ = u"testShowHandles";
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->caretPosition_ = 1;
+    richEditorPattern->textSelector_.baseOffset = 1;
+    richEditorPattern->textSelector_.destinationOffset = 3;
+
+    std::vector<RectF> res;
+    auto ret = richEditorPattern->GetTextBoxes();
+    EXPECT_EQ(ret, res);
+
+
+    TextLineMetrics lineMetrics;
+    richEditorPattern->GetLineCount();
+    EXPECT_EQ(richEditorPattern->GetLineHeight(), 0.0f);
+    EXPECT_EQ(richEditorPattern->GetLetterSpacing(), 0.0f);
+    auto retLineMetrics = richEditorPattern->GetLineMetrics(-1);
+    EXPECT_EQ(retLineMetrics.x, 0);
+
+    auto retLineMetricsS = richEditorPattern->GetLineMetrics(2);
+    EXPECT_EQ(retLineMetricsS.x, 0);
+
+    int32_t scroll_from_update = 1;
+    richEditorPattern->richTextRect_ = RectF(0, 4, 100, 140);
+    richEditorPattern->contentRect_ = RectF(0, 1, 100, 160);
+    richEditorPattern->UpdateScrollStateAfterLayout(true);
+    EXPECT_FALSE(richEditorPattern->OnScrollCallback(10, scroll_from_update)) << "Reach Top Boundary";
+
+    EXPECT_EQ(richEditorPattern->MoveTextRect(0.0f), 0.0f);
+
+    auto offsetF = OffsetF(0.0f, 0.5f);
+    richEditorPattern->MoveCaretToContentRect(offsetF, 8.0f);
+    EXPECT_EQ(richEditorPattern->GetTextRect(), richEditorPattern->richTextRect_);
+
+    richEditorPattern->MoveCaretToContentRect(1.0f, 10);
+    EXPECT_EQ(richEditorPattern->GetTextRect(), richEditorPattern->richTextRect_);
+
+    richEditorPattern->contentChange_ = true;
+    EXPECT_EQ(richEditorPattern->GetCrossOverHeight(), 0.0f);
+}
+
+/**
+ * @tc.name: GetTextBoxes002
+ * @tc.desc: test GetTextBoxes
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorParagraphManagetTestNg, GetTextBoxes002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    richEditorPattern->textForDisplay_ = u"testShowHandles";
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->caretPosition_ = 1;
+    richEditorPattern->textSelector_.baseOffset = 1;
+    richEditorPattern->textSelector_.destinationOffset = 3;
+
+    std::vector<RectF> res;
+    auto ret = richEditorPattern->GetTextBoxes();
+    EXPECT_EQ(ret, res);
+
+    TextLineMetrics lineMetrics;
+    richEditorPattern->GetLineCount();
+    EXPECT_EQ(richEditorPattern->GetLineHeight(), 0.0f);
+    EXPECT_EQ(richEditorPattern->GetLetterSpacing(), 0.0f);
+    auto retLineMetrics = richEditorPattern->GetLineMetrics(-1);
+    EXPECT_EQ(retLineMetrics.x, 0);
+
+    auto retLineMetricsS = richEditorPattern->GetLineMetrics(2);
+    EXPECT_EQ(retLineMetricsS.x, 0);
+
+    int32_t scroll_from_update = 1;
+    richEditorPattern->richTextRect_ = RectF(0, 4, 100, 140);
+    richEditorPattern->contentRect_ = RectF(0, 1, 100, 160);
+    richEditorPattern->overlayMod_ = nullptr;
+    richEditorPattern->UpdateScrollStateAfterLayout(true);
+    EXPECT_FALSE(richEditorPattern->OnScrollCallback(10, scroll_from_update)) << "Reach Top Boundary";
+}
+
+/**
+ * @tc.name: GetTextBoxes003
+ * @tc.desc: test GetTextBoxes
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorParagraphManagetTestNg, GetTextBoxes003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    richEditorPattern->textForDisplay_ = u"testShowHandles";
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->caretPosition_ = 1;
+
+    richEditorPattern->textSelector_.baseOffset = 0;
+    richEditorPattern->textSelector_.destinationOffset = 10;
+    ParagraphManager::ParagraphInfo paragraphInfo;
+    RefPtr<MockParagraph> mockParagraph = AceType::MakeRefPtr<MockParagraph>();
+    EXPECT_CALL(*mockParagraph, GetRectsForRange(_, _, _))
+        .WillRepeatedly(Invoke([&](int32_t start, int32_t end, std::vector<RectF>& selectedRects) {
+            selectedRects.emplace_back(RectF(0, 0, 100, 20));
+        }));
+    const OHOS::Ace::NG::ParagraphStyle expectedStyle;
+    LeadingMargin leadingMarginOne;
+    EXPECT_CALL(*mockParagraph, GetParagraphStyle()).WillRepeatedly(ReturnRef(expectedStyle));
+    paragraphInfo.paragraph = mockParagraph;
+    paragraphInfo.paragraphStyle = expectedStyle;
+    paragraphInfo.start = 0;
+    paragraphInfo.end = 10;
+    richEditorPattern->paragraphs_.paragraphs_.emplace_back(paragraphInfo);
+    richEditorPattern->paragraphs_.AddParagraph(std::move(paragraphInfo));
+    auto textBoxes = richEditorPattern->GetTextBoxes();
+    EXPECT_NE(textBoxes.size(), 0);
+}
+
+/**
+ * @tc.name: GetTextBoxes004
+ * @tc.desc: test GetTextBoxes
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorParagraphManagetTestNg, GetTextBoxes004, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    richEditorPattern->textForDisplay_ = u"testShowHandles";
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->caretPosition_ = 1;
+
+    ParagraphStyle paragraphStyle = {};
+    paragraphStyle.leadingMargin = LeadingMargin();
+    richEditorPattern->textSelector_.baseOffset = 0;
+    richEditorPattern->textSelector_.destinationOffset = 10;
+    ParagraphManager::ParagraphInfo paragraphInfoOne;
+    RefPtr<MockParagraph> mockParagraphOne = AceType::MakeRefPtr<MockParagraph>();
+    EXPECT_CALL(*mockParagraphOne, GetRectsForRange(_, _, _))
+        .WillRepeatedly(Invoke([&](int32_t start, int32_t end, std::vector<RectF>& selectedRects) {
+            selectedRects.emplace_back(RectF(0, 0, 100, 20));
+        }));
+    LeadingMargin leadingMarginOne;
+    EXPECT_CALL(*mockParagraphOne, GetParagraphStyle()).WillRepeatedly(ReturnRef(paragraphStyle));
+    paragraphInfoOne.paragraph = mockParagraphOne;
+    paragraphInfoOne.paragraphStyle = paragraphStyle;
+    paragraphInfoOne.start = 0;
+    paragraphInfoOne.end = 10;
+    richEditorPattern->paragraphs_.paragraphs_.emplace_back(paragraphInfoOne);
+    richEditorPattern->paragraphs_.AddParagraph(std::move(paragraphInfoOne));
+    auto textBoxes = richEditorPattern->GetTextBoxes();
+    EXPECT_NE(textBoxes.size(), 0);
+}
+
 } // namespace OHOS::Ace::NG

@@ -564,4 +564,117 @@ HWTEST_F(RichEditorCopyCutPasteTestNg, HandleOnCut004, TestSize.Level1)
     EXPECT_EQ(isEventCalled, true);
 }
 
+/**
+ * @tc.name: SetSubSpans001
+ * @tc.desc: test SetSubSpans
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorCopyCutPasteTestNg, SetSubSpans001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<SpanItem>();
+    RefPtr<SpanItem> spanItem1 = AceType::MakeRefPtr<SpanItem>();
+    spanItem->spanItemType = SpanItemType::SYMBOL;
+    spanItem1->spanItemType = SpanItemType::NORMAL;
+    spanItem1->position = 0;
+    richEditorPattern->spans_.push_back(spanItem);
+    richEditorPattern->spans_.push_back(spanItem1);
+    RefPtr<SpanString> spanString = AceType::MakeRefPtr<SpanString>(INIT_VALUE_1);
+    richEditorPattern->SetSubSpans(spanString, 1, 1, spanString->spans_);
+    EXPECT_EQ(spanString->spans_.size(), 0);
+}
+
+/**
+ * @tc.name: CopySpansForClipboard
+ * @tc.desc: test CopySpansForClipboard function
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorCopyCutPasteTestNg, CopySpansForClipboard, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<SpanItem>();
+    RefPtr<SpanItem> spanItem1 = AceType::MakeRefPtr<SpanItem>();
+    spanItem->spanItemType = SpanItemType::SYMBOL;
+    spanItem1->spanItemType = SpanItemType::NORMAL;
+    int32_t position = 2;
+    spanItem1->position = position;
+    std::u16string content = u"123";
+    spanItem1->content = content;
+    richEditorPattern->spans_.push_back(spanItem);
+    richEditorPattern->spans_.push_back(spanItem1);
+    auto copySpans = richEditorPattern->CopySpansForClipboard();
+    std::u16string resultContent = u"";
+    int32_t resultPosition = -1;
+    if (!copySpans.empty()) {
+        for (const auto& spanItem : copySpans) {
+            if (spanItem->spanItemType == SpanItemType::NORMAL) {
+                resultContent = spanItem->content;
+                resultPosition = spanItem->position;
+            }
+        }
+    }
+    EXPECT_EQ(resultContent, content);
+    EXPECT_EQ(resultPosition, position);
+}
+
+/**
+ * @tc.name: OnModifyDone001
+ * @tc.desc: test OnModifyDone
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorCopyCutPasteTestNg, OnModifyDone001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->clipboard_ = nullptr;
+    richEditorPattern->OnModifyDone();
+    EXPECT_TRUE(richEditorPattern->clipboard_);
+}
+
+/**
+ * @tc.name: AddUdmfData001
+ * @tc.desc: test AddUdmfData
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorCopyCutPasteTestNg, AddUdmfData001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    ResultObject resultObject;
+    richEditorPattern->dragResultObjects_.emplace_back(resultObject);
+
+    resultObject.type = SelectSpanType::TYPESYMBOLSPAN;
+    richEditorPattern->dragResultObjects_.emplace_back(resultObject);
+
+    resultObject.type = SelectSpanType::TYPEIMAGE;
+    resultObject.valueString = INIT_VALUE_1;
+    richEditorPattern->dragResultObjects_.emplace_back(resultObject);
+
+    resultObject.type = SelectSpanType::TYPEIMAGE;
+    resultObject.valueString.clear();
+    richEditorPattern->dragResultObjects_.emplace_back(resultObject);
+
+    resultObject.type = SelectSpanType::TYPEIMAGE;
+    resultObject.valuePixelMap = PixelMap::CreatePixelMap(nullptr);
+    ASSERT_NE(resultObject.valuePixelMap, nullptr);
+    richEditorPattern->dragResultObjects_.emplace_back(resultObject);
+
+    richEditorPattern->AddImageSpan(IMAGE_SPAN_OPTIONS_1);
+
+    auto event = AceType::MakeRefPtr<Ace::DragEvent>();
+    richEditorPattern->AddUdmfData(event);
+    if (UdmfClient::GetInstance()->CreateUnifiedData()) {
+        EXPECT_NE(event->GetData(), 0);
+    } else {
+        EXPECT_EQ(event->GetData(), 0);
+    }
+}
+
 }

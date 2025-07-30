@@ -19,7 +19,7 @@ const OBSERVABLE_TARGET = "target"
 
 export function getObservableTarget(proxy: Object): Object {
     try {
-        return Reflect.get(proxy, OBSERVABLE_TARGET) ?? proxy
+        return (Reflect.get(proxy, OBSERVABLE_TARGET) ?? proxy) as Object
     } catch (error) {
         return proxy
     }
@@ -257,7 +257,7 @@ class CustomArrayProxyHandler<T> extends DefaultArrayProxyHandler<T> {
         return super.set(target, name, value)
     }
 
-    override invoke(target: Array<T>, method: Method, args: NullishType[]): NullishType {
+    override invoke(target: Array<T>, method: Method, args: FixedArray<NullishType>): NullishType {
         const observable = ObservableHandler.find(target)
         if (observable) {
             const name = method.getName()

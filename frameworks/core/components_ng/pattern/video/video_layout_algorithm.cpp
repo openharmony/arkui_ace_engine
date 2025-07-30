@@ -24,7 +24,7 @@ namespace {
 const Dimension LIFT_HEIGHT = 28.0_vp;
 float CalControlBarHeight(bool needLift = false)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, 0.0f);
     auto videoTheme = pipelineContext->GetTheme<VideoTheme>();
     CHECK_NULL_RETURN(videoTheme, 0.0f);
@@ -65,9 +65,10 @@ void VideoLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
 void VideoLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
-    auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
-    auto contentSize = layoutWrapper->GetGeometryNode()->GetContentSize();
     auto layoutProperty = DynamicCast<VideoLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    auto layoutConstraint = layoutProperty->CreateChildConstraint();
+    auto contentSize = layoutWrapper->GetGeometryNode()->GetContentSize();
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(host);
     auto pattern = DynamicCast<VideoPattern>(host->GetPattern());

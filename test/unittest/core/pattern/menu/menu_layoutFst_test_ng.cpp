@@ -1763,6 +1763,15 @@ HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg042, TestSize.Level1)
     clickPosition = 80.0f;
     result = menuLayoutAlgorithm->VerticalLayout(size, clickPosition, false);
     EXPECT_FLOAT_EQ(result, 100.0f);
+
+    menuLayoutAlgorithm->topSpace_ = 200.0f;
+    result = menuLayoutAlgorithm->VerticalLayout(size, clickPosition, false);
+    EXPECT_EQ(menuLayoutAlgorithm->placement_, Placement::TOP);
+    EXPECT_FLOAT_EQ(result, 100.0f);
+
+    menuLayoutAlgorithm->wrapperRect_ =  Rect(0, 0, 0, 0);
+    result = menuLayoutAlgorithm->VerticalLayout(size, clickPosition, false);
+    EXPECT_FLOAT_EQ(result, 0.0f);
 }
 
 /**

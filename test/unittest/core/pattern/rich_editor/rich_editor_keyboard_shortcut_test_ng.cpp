@@ -291,6 +291,13 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts102, TestS
     richEditorPattern->paragraphs_.minParagraphFontSize = style.GetFontSize().ConvertToPx();
     richEditorPattern->HandleSelect(CaretMoveIntent::Up);
     EXPECT_EQ(richEditorPattern->textSelector_.GetTextStart(), 0);
+
+    // during move caret
+    richEditorPattern->floatingCaretState_.isFloatingCaretVisible = true;
+    richEditorPattern->moveCaretState_.isMoveCaret = true;
+    richEditorPattern->HandleSelect(CaretMoveIntent::Up);
+    EXPECT_FALSE(richEditorPattern->floatingCaretState_.isFloatingCaretVisible);
+    EXPECT_FALSE(richEditorPattern->moveCaretState_.isMoveCaret);
 }
 
 /**

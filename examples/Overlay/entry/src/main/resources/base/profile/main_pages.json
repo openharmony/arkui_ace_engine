@@ -5,6 +5,8 @@
     "pages/components/dialog/embeddedDialogPageTwo",
     "pages/components/dialog/page/CustomDialogTestLevel0_0",
     "pages/components/dialog/page/CustomDialogTestLevel0_1",
-    "pages/components/dialog/page/CustomDialogTestLevel0_2"
+    "pages/components/dialog/page/CustomDialogTestLevel0_2",
+    "pages/components/dialog/page/CustomDialogTestLevel0_3",
+    "pages/components/dialog/page/CustomDialogTestLevel0_4"
   ]
 }

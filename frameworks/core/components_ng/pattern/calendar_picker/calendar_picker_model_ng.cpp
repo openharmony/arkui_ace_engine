@@ -55,6 +55,13 @@ RefPtr<FrameNode> CalendarPickerModelNG::CreateFrameNode(int32_t nodeId)
     return CalendarPickerModelNG::CreateNode(nodeId, settingData);
 }
 
+RefPtr<FrameNode> CalendarPickerModelNG::CreateEmptyFrameNode(int32_t nodeId)
+{
+    auto pickerNode = FrameNode::GetOrCreateFrameNode(
+        V2::CALENDAR_PICKER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CalendarPickerPattern>(); });
+    return pickerNode;
+}
+
 void CalendarPickerModelNG::LayoutPicker(const RefPtr<CalendarPickerPattern>& pickerPattern,
     RefPtr<FrameNode>& pickerNode, const CalendarSettingData& settingData, const RefPtr<CalendarTheme>& theme)
 {
@@ -141,7 +148,7 @@ RefPtr<FrameNode> CalendarPickerModelNG::CreateButtonImageChild(bool isAdd, cons
     CHECK_NULL_RETURN(imageNode, nullptr);
     imageNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(theme->GetEntryArrowWidth()), CalcLength(theme->GetEntryArrowHeight())));
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto iconTheme = pipeline->GetTheme<IconTheme>();
     std::string iconPath;
@@ -230,7 +237,7 @@ void CalendarPickerModelNG::CreateDateNode(int32_t contentId, const CalendarSett
 
 RefPtr<FrameNode> CalendarPickerModelNG::CreateDateTextNode(const std::string& textContent)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, nullptr);
     RefPtr<CalendarTheme> calendarTheme = pipeline->GetTheme<CalendarTheme>();
     CHECK_NULL_RETURN(calendarTheme, nullptr);
@@ -251,35 +258,7 @@ RefPtr<FrameNode> CalendarPickerModelNG::CreateNode(int32_t nodeId, const Calend
 {
     auto pickerNode = FrameNode::GetOrCreateFrameNode(
         V2::CALENDAR_PICKER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CalendarPickerPattern>(); });
-    auto pickerPattern = pickerNode->GetPattern<CalendarPickerPattern>();
-    CHECK_NULL_RETURN(pickerPattern, pickerNode);
-    auto pipelineContext = pickerNode->GetContext();
-    CHECK_NULL_RETURN(pipelineContext, pickerNode);
-    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
-    CHECK_NULL_RETURN(theme, pickerNode);
-    pickerPattern->SetCalendarData(settingData);
-    pickerNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
-        CalcSize(std::nullopt, CalcLength(theme->GetEntryHeight())));
-    BorderWidthProperty borderWidth;
-    borderWidth.SetBorderWidth(theme->GetEntryBorderWidth());
-    pickerNode->GetLayoutProperty()->UpdateBorderWidth(borderWidth);
-    CHECK_NULL_RETURN(pickerNode->GetRenderContext(), pickerNode);
-    BorderColorProperty borderColor;
-    borderColor.SetColor(theme->GetEntryBorderColor());
-    pickerNode->GetRenderContext()->UpdateBorderColor(borderColor);
-    BorderRadiusProperty borderRadius;
-    borderRadius.SetRadius(theme->GetEntryBorderRadius());
-    pickerNode->GetRenderContext()->UpdateBorderRadius(borderRadius);
-    pickerNode->GetRenderContext()->SetClipToFrame(true);
-    pickerNode->GetRenderContext()->SetClipToBounds(true);
-    pickerNode->GetRenderContext()->UpdateClipEdge(true);
-    CHECK_NULL_RETURN(pickerNode->GetLayoutProperty<LinearLayoutProperty>(), pickerNode);
-    pickerNode->GetLayoutProperty<LinearLayoutProperty>()->UpdateMainAxisAlign(FlexAlign::FLEX_START);
-    pickerNode->GetLayoutProperty<LinearLayoutProperty>()->UpdateCrossAxisAlign(FlexAlign::CENTER);
-    pickerNode->GetLayoutProperty<LinearLayoutProperty>()->UpdateMeasureType(MeasureType::MATCH_CONTENT);
-    CalendarPickerModelNG::LayoutPicker(pickerPattern, pickerNode, settingData, theme);
-
-    pickerNode->MarkModifyDone();
+    InitCalendarPicker(Referenced::RawPtr(pickerNode), settingData);
     return pickerNode;
 }
 
@@ -298,7 +277,7 @@ void CalendarPickerModelNG::SetEdgeAlign(const CalendarEdgeAlign& alignType, con
 
 void CalendarPickerModelNG::SetTextStyle(const PickerTextStyle& textStyle)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     RefPtr<CalendarTheme> calendarTheme = pipeline->GetTheme<CalendarTheme>();
     CHECK_NULL_VOID(calendarTheme);
@@ -373,6 +352,34 @@ void CalendarPickerModelNG::SetTextStyle(FrameNode* frameNode, const PickerTextS
         CalendarPickerLayoutProperty, Weight, textStyle.fontWeight.value_or(FontWeight::NORMAL), frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(
         CalendarPickerLayoutProperty, NormalTextColorSetByUser, textStyle.textColorSetByUser, frameNode);
+}
+
+void CalendarPickerModelNG::SetTextStyle(FrameNode* frameNode, const std::optional<PickerTextStyle>& textStyle)
+{
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    RefPtr<CalendarTheme> calendarTheme = pipeline->GetTheme<CalendarTheme>();
+    CHECK_NULL_VOID(calendarTheme);
+    if (textStyle.has_value()) {
+        auto style = textStyle.value();
+        if (style.fontSize.has_value() && style.fontSize->IsValid()) {
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(CalendarPickerLayoutProperty, FontSize, style.fontSize.value(), frameNode);
+        } else {
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+                CalendarPickerLayoutProperty, FontSize, calendarTheme->GetEntryFontSize(), frameNode);
+        }
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(CalendarPickerLayoutProperty, Color,
+            style.textColor.value_or(calendarTheme->GetEntryFontColor()), frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            CalendarPickerLayoutProperty, Weight, style.fontWeight.value_or(FontWeight::NORMAL), frameNode);
+    } else {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(CalendarPickerLayoutProperty, FontSize,
+            calendarTheme->GetEntryFontSize(), frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(CalendarPickerLayoutProperty, Color,
+            calendarTheme->GetEntryFontColor(), frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(CalendarPickerLayoutProperty, Weight,
+            FontWeight::NORMAL, frameNode);
+    }
 }
 
 void CalendarPickerModelNG::ClearBorderColor()
@@ -458,6 +465,52 @@ void CalendarPickerModelNG::ClearPadding()
     linearLayoutProperty->UpdatePadding(padding);
 }
 
+void CalendarPickerModelNG::SetCalendarData(FrameNode* pickerNode, const std::optional<CalendarSettingData>& data)
+{
+    CHECK_NULL_VOID(pickerNode);
+    if (data) {
+        CalendarPickerModelNG::InitCalendarPicker(pickerNode, data.value());
+    } else {
+        CalendarSettingData emptyData;
+        CalendarPickerModelNG::InitCalendarPicker(pickerNode, emptyData);
+    }
+}
+
+void CalendarPickerModelNG::InitCalendarPicker(FrameNode* pickerNode, const CalendarSettingData& settingData)
+{
+    CHECK_NULL_VOID(pickerNode);
+    auto pickerPattern = pickerNode->GetPattern<CalendarPickerPattern>();
+    CHECK_NULL_VOID(pickerPattern);
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+    CHECK_NULL_VOID(theme);
+    pickerPattern->SetCalendarData(settingData);
+    pickerNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(std::nullopt, CalcLength(theme->GetEntryHeight())));
+    BorderWidthProperty borderWidth;
+    borderWidth.SetBorderWidth(theme->GetEntryBorderWidth());
+    pickerNode->GetLayoutProperty()->UpdateBorderWidth(borderWidth);
+    CHECK_NULL_VOID(pickerNode->GetRenderContext());
+    BorderColorProperty borderColor;
+    borderColor.SetColor(theme->GetEntryBorderColor());
+    pickerNode->GetRenderContext()->UpdateBorderColor(borderColor);
+    BorderRadiusProperty borderRadius;
+    borderRadius.SetRadius(theme->GetEntryBorderRadius());
+    pickerNode->GetRenderContext()->UpdateBorderRadius(borderRadius);
+    pickerNode->GetRenderContext()->SetClipToFrame(true);
+    pickerNode->GetRenderContext()->SetClipToBounds(true);
+    pickerNode->GetRenderContext()->UpdateClipEdge(true);
+    CHECK_NULL_VOID(pickerNode->GetLayoutProperty<LinearLayoutProperty>());
+    pickerNode->GetLayoutProperty<LinearLayoutProperty>()->UpdateMainAxisAlign(FlexAlign::FLEX_START);
+    pickerNode->GetLayoutProperty<LinearLayoutProperty>()->UpdateCrossAxisAlign(FlexAlign::CENTER);
+    pickerNode->GetLayoutProperty<LinearLayoutProperty>()->UpdateMeasureType(MeasureType::MATCH_CONTENT);
+    RefPtr<FrameNode> pickerNodeRef = AceType::Claim<FrameNode>(pickerNode);
+    CalendarPickerModelNG::LayoutPicker(pickerPattern, pickerNodeRef, settingData, theme);
+
+    pickerNode->MarkModifyDone();
+}
+
 RefPtr<CalendarTheme> GetCalendarTheme()
 {
     auto pipeline = PipelineBase::GetCurrentContextSafely();
@@ -500,17 +553,25 @@ DimensionOffset CalendarPickerModelNG::GetEdgeOffset(FrameNode* frameNode)
 }
 
 void CalendarPickerModelNG::SetEdgeAlign(
-    FrameNode* frameNode, const CalendarEdgeAlign& alignType, const DimensionOffset& offset)
+    FrameNode* frameNode, const std::optional<CalendarEdgeAlign>& alignType,
+    const std::optional<DimensionOffset>& offset)
 {
-    auto layoutProperty = frameNode->GetLayoutProperty<CalendarPickerLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
     auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
     CHECK_NULL_VOID(pickerPattern);
-    pickerPattern->SetCalendarEdgeAlign(alignType);
-    pickerPattern->SetCalendarDialogOffset(offset);
-
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(CalendarPickerLayoutProperty, DialogAlignType, alignType, frameNode);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(CalendarPickerLayoutProperty, DialogOffset, offset, frameNode);
+    if (offset) {
+        pickerPattern->SetCalendarDialogOffset(offset.value());
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(CalendarPickerLayoutProperty, DialogOffset, offset.value(), frameNode);
+    } else {
+        pickerPattern->SetCalendarDialogOffset(DimensionOffset());
+        ACE_RESET_NODE_LAYOUT_PROPERTY(CalendarPickerLayoutProperty, DialogOffset, frameNode);
+    }
+    if (alignType) {
+        pickerPattern->SetCalendarEdgeAlign(alignType.value());
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(CalendarPickerLayoutProperty, DialogAlignType, alignType.value(), frameNode);
+    } else {
+        pickerPattern->SetCalendarEdgeAlign(CalendarEdgeAlign::EDGE_ALIGN_END);
+        ACE_RESET_NODE_LAYOUT_PROPERTY(CalendarPickerLayoutProperty, DialogAlignType, frameNode);
+    }
 }
 
 void CalendarPickerModelNG::SetPadding(FrameNode* frameNode, const PaddingProperty& padding)

@@ -30,7 +30,7 @@ KInt impl_CheckArkoalaGeneratedEvents(KByte* result, KInt size) {
 KOALA_INTEROP_2(CheckArkoalaGeneratedEvents, KInt, KByte*, KInt)
 
 KInt impl_InjectEvent(KByte* data, KInt size) {
-    if ((size_t)size >= sizeof(EventBuffer::buffer) || data == NULL)
+    if ((size_t)size >= sizeof(EventBuffer::buffer))
         return 0;
 
     EventBuffer event;
@@ -45,3 +45,4 @@ KOALA_INTEROP_2(InjectEvent, KInt, KByte*, KInt)
 
 void impl_EmulateTextInputEvent(KInt nodeId, const KStringPtr& text) {
 }
+// KOALA_INTEROP_V2(EmulateTextInputEvent, KInt, KStringPtr) // TODO Where to place it?

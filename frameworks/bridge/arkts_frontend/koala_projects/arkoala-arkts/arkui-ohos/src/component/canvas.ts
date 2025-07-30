@@ -17,34 +17,26 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
-import { unsafeCast, int32, float32, int64 } from "@koalaui/common"
-import { Serializer } from "./../generated/peers/Serializer"
-import { CallbackKind } from "./../generated/peers/CallbackKind"
-import { Deserializer } from "./../generated/peers/Deserializer"
-import { CallbackTransformer } from "./../generated/peers/CallbackTransformer"
-import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, Margin, LocalizedMargin, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, Edges, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, VoidCallback } from "./units"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
+import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
+import { Serializer } from "./peers/Serializer"
+import { CallbackKind } from "./peers/CallbackKind"
+import { Deserializer } from "./peers/Deserializer"
+import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { Matrix2D, Matrix2DInternal } from "./matrix2d"
-import { PixelMap, PixelMapInternal } from "./../generated/ArkPixelMapMaterialized"
-import { FrameNode, FrameNodeInternal } from "../FrameNode"
-import { ImageAnalyzerConfig, ImageAIOptions } from "./imageCommon"
-import { Callback_Void } from "./abilityComponent"
-import { DrawingCanvas, DrawingCanvasInternal } from "./../generated/ArkDrawingCanvasMaterialized"
+import { Size } from "./../Graphics"
+import { LengthMetricsUnit, LengthMetrics} from "../Graphics"
+import { PixelMap } from "#external"
+import { ArkUIAniModule } from "arkui.ani"
+import { DrawingCanvas, DrawingCanvasInternal } from "./arkui-drawing"
+import { ComponentBase } from "./../ComponentBase"
+import { PeerNode } from "./../PeerNode"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { VoidCallback } from "./units"
+import { ImageAIOptions, ImageAnalyzerConfig } from "./imageCommon"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { CommonMethod, DrawModifier, Rectangle, Callback_Array_TouchTestInfo_TouchResult, TouchTestInfo, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, VisualEffect, Filter, BorderImageOption, OutlineStyle, Callback_ClickEvent_Void, ClickEvent, Callback_Boolean_HoverEvent_Void, HoverEvent, AccessibilityCallback, Callback_MouseEvent_Void, MouseEvent, Callback_TouchEvent_Void, TouchEvent, Callback_KeyEvent_Void, KeyEvent, Callback_KeyEvent_Boolean, AnimateParam, TransitionOptions, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, Callback_Area_Area_Void, Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs, Literal_Number_offset_span, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, DragEvent, CustomBuilder, DragItemInfo, Callback_DragEvent_String_Void, UniformDataType, Callback_PreDragStatus_Void, PreDragStatus, Type_CommonMethod_linearGradient_value, Tuple_ResourceColor_Number, Type_CommonMethod_sweepGradient_value, Tuple_Length_Length, Type_CommonMethod_radialGradient_value, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, GestureModifier, BackgroundBrightnessOptions, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, Callback_TouchEvent_HitTestMode, SizeChangeCallback, SafeAreaType, SafeAreaEdge, Literal_Alignment_align, BlurStyle, BackgroundBlurStyleOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, DragPreviewOptions, DragInteractionOptions, ComponentContent, OverlayOptions, BlendMode, BlendApplyType, Blender, GeometryTransitionOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback } from "./common"
-import { HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Color, Visibility, ItemAlign, Direction, GradientDirection, ObscuredReasons, RenderFit, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey } from "./enums"
-import { LengthMetrics, LengthMetricsUnit } from "../Graphics"
-import { ResizableOptions } from "./image"
-import { Resource } from "global/resource";
-import { FocusBoxStyle, FocusPriority } from "./focus"
-import { CircleShape } from "./../generated/ArkCircleShapeMaterialized"
-import { EllipseShape } from "./../generated/ArkEllipseShapeMaterialized"
-import { PathShape } from "./../generated/ArkPathShapeMaterialized"
-import { RectShape } from "./../generated/ArkRectShapeMaterialized"
-import { AttributeModifier } from "./../component/common" 
-import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureType, GestureMask } from "./gesture"
-import { ArkCanvasComponent } from "./../generated/ArkCanvas"
-import { ArkCanvasPeer } from "./../generated/peers/ArkCanvasPeer"
+import { FrameNode, FrameNodeInternal } from "../FrameNode"
+
 export class CanvasGradientInternal {
     public static fromPtr(ptr: KPointer): CanvasGradient {
         const obj : CanvasGradient = new CanvasGradient()
@@ -220,47 +212,8 @@ export class CanvasPath implements MaterializedBase {
         ArkUIGeneratedNativeModule._CanvasPath_rect(this.peer!.ptr, x, y, w, h)
     }
 }
-export class Path2DInternal {
-    public static fromPtr(ptr: KPointer): Path2D {
-        const obj : Path2D = new Path2D()
-        obj.peer = new Finalizable(ptr, Path2D.getFinalizer())
-        return obj
-    }
-}
-export class Path2D extends CanvasPath implements MaterializedBase {
-    static ctor_path2d(): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._Path2D_ctor()
-        return retval
-    }
-    constructor() {
-        super()
-        const ctorPtr : KPointer = Path2D.ctor_path2d()
-        this.peer = new Finalizable(ctorPtr, Path2D.getFinalizer())
-    }
-    static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._Path2D_getFinalizer()
-    }
-    public addPath(path: Path2D, transform?: Matrix2D): void {
-        const path_casted = path as (Path2D)
-        const transform_casted = transform as (Matrix2D | undefined)
-        this.addPath_serialize(path_casted, transform_casted)
-        return
-    }
-    private addPath_serialize(path: Path2D, transform?: Matrix2D): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        let transform_type : int32 = RuntimeType.UNDEFINED
-        transform_type = runtimeType(transform)
-        thisSerializer.writeInt8(transform_type as int32)
-        if ((RuntimeType.UNDEFINED) != (transform_type)) {
-            const transform_value  = transform!
-            thisSerializer.writeMatrix2D(transform_value)
-        }
-        ArkUIGeneratedNativeModule._Path2D_addPath(this.peer!.ptr, toPeerPtr(path), thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-}
 export interface CanvasPattern {
-    setTransform(transform: Matrix2D): void
+    setTransform(transform: Matrix2D | undefined): void
 }
 export class CanvasPatternInternal implements MaterializedBase,CanvasPattern {
     peer?: Finalizable | undefined = undefined
@@ -392,7 +345,7 @@ export class ImageData implements MaterializedBase {
     constructor(width?: number, height?: number, data?: NativeBuffer) {
         if (((width) !== (undefined)) || ((height) !== (undefined)) || ((data) !== (undefined)))
         {
-            const ctorPtr : KPointer = ImageData.ctor_imagedata((width)!, (height)!, (data)!)
+            const ctorPtr : KPointer = ImageData.ctor_imagedata((width)!, (height)!, data)
             this.peer = new Finalizable(ctorPtr, ImageData.getFinalizer())
         }
     }
@@ -410,7 +363,7 @@ export class ImageData implements MaterializedBase {
     }
     private getData_serialize(): NativeBuffer {
         const retval  = ArkUIGeneratedNativeModule._ImageData_getData(this.peer!.ptr)
-        return new Deserializer(retval, retval.length).readBuffer()
+        return new Deserializer(retval, retval.length as int32).readBuffer()
     }
     private getHeight_serialize(): number {
         const retval  = ArkUIGeneratedNativeModule._ImageData_getHeight(this.peer!.ptr)
@@ -454,13 +407,13 @@ export class RenderingContextSettings implements MaterializedBase {
         return retval
     }
     constructor(antialias?: boolean) {
-        const ctorPtr : KPointer = RenderingContextSettings.ctor_renderingcontextsettings((antialias)!)
+        const ctorPtr : KPointer = RenderingContextSettings.ctor_renderingcontextsettings(antialias)
         this.peer = new Finalizable(ctorPtr, RenderingContextSettings.getFinalizer())
     }
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._RenderingContextSettings_getFinalizer()
     }
-    private getAntialias(): boolean {
+    private getAntialias(): boolean | undefined {
         return this.getAntialias_serialize()
     }
     private setAntialias(antialias: boolean): void {
@@ -468,12 +421,387 @@ export class RenderingContextSettings implements MaterializedBase {
         this.setAntialias_serialize(antialias_casted)
         return
     }
-    private getAntialias_serialize(): boolean {
+    private getAntialias_serialize(): boolean | undefined {
         const retval  = ArkUIGeneratedNativeModule._RenderingContextSettings_getAntialias(this.peer!.ptr)
-        return retval
+        throw new Error("Object deserialization is not implemented.")
     }
     private setAntialias_serialize(antialias: boolean): void {
         ArkUIGeneratedNativeModule._RenderingContextSettings_setAntialias(this.peer!.ptr, antialias ? 1 : 0)
+    }
+}
+export class OffscreenCanvasInternal {
+    public static fromPtr(ptr: KPointer): OffscreenCanvas {
+        const obj : OffscreenCanvas = new OffscreenCanvas(undefined, undefined)
+        obj.peer = new Finalizable(ptr, OffscreenCanvas.getFinalizer())
+        return obj
+    }
+}
+export class OffscreenCanvas implements MaterializedBase {
+    peer?: Finalizable | undefined = undefined
+    public getPeer(): Finalizable | undefined {
+        return this.peer
+    }
+    get height(): number {
+        return this.getHeight()
+    }
+    set height(height: number) {
+        this.setHeight(height)
+    }
+    get width(): number {
+        return this.getWidth()
+    }
+    set width(width: number) {
+        this.setWidth(width)
+    }
+    static ctor_offscreencanvas(width: number, height: number): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._OffscreenCanvas_ctor(width, height)
+        return retval
+    }
+    constructor(width?: number, height?: number) {
+        if (((width) !== (undefined)) || ((height) !== (undefined)))
+        {
+            const ctorPtr : KPointer = OffscreenCanvas.ctor_offscreencanvas((width)!, (height)!)
+            this.peer = new Finalizable(ctorPtr, OffscreenCanvas.getFinalizer())
+        }
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._OffscreenCanvas_getFinalizer()
+    }
+    public transferToImageBitmap(): ImageBitmap {
+        return this.transferToImageBitmap_serialize()
+    }
+    public getContext2d(options?: RenderingContextSettings): OffscreenCanvasRenderingContext2D {
+        const options_casted = options as (RenderingContextSettings | undefined)
+        return this.getContext2d_serialize(options_casted)
+    }
+    private getHeight(): number {
+        return this.getHeight_serialize()
+    }
+    private setHeight(height: number): void {
+        const height_casted = height as (number)
+        this.setHeight_serialize(height_casted)
+        return
+    }
+    private getWidth(): number {
+        return this.getWidth_serialize()
+    }
+    private setWidth(width: number): void {
+        const width_casted = width as (number)
+        this.setWidth_serialize(width_casted)
+        return
+    }
+    getContext(contextType: string, options: RenderingContextSettings): OffscreenCanvasRenderingContext2D {
+        throw new Error("TBD")
+    }
+    private transferToImageBitmap_serialize(): ImageBitmap {
+        const retval  = ArkUIGeneratedNativeModule._OffscreenCanvas_transferToImageBitmap(this.peer!.ptr)
+        const obj : ImageBitmap = ImageBitmapInternal.fromPtr(retval)
+        return obj
+    }
+    private getContext2d_serialize(options?: RenderingContextSettings): OffscreenCanvasRenderingContext2D {
+        const thisSerializer : Serializer = Serializer.hold()
+        let options_type : int32 = RuntimeType.UNDEFINED
+        options_type = runtimeType(options)
+        thisSerializer.writeInt8(options_type as int32)
+        if ((RuntimeType.UNDEFINED) != (options_type)) {
+            const options_value  = options!
+            thisSerializer.writeRenderingContextSettings(options_value)
+        }
+        const retval  = ArkUIGeneratedNativeModule._OffscreenCanvas_getContext2d(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        const obj : OffscreenCanvasRenderingContext2D = OffscreenCanvasRenderingContext2DInternal.fromPtr(retval)
+        return obj
+    }
+    private getHeight_serialize(): number {
+        const retval  = ArkUIGeneratedNativeModule._OffscreenCanvas_getHeight(this.peer!.ptr)
+        return retval
+    }
+    private setHeight_serialize(height: number): void {
+        ArkUIGeneratedNativeModule._OffscreenCanvas_setHeight(this.peer!.ptr, height)
+    }
+    private getWidth_serialize(): number {
+        const retval  = ArkUIGeneratedNativeModule._OffscreenCanvas_getWidth(this.peer!.ptr)
+        return retval
+    }
+    private setWidth_serialize(width: number): void {
+        ArkUIGeneratedNativeModule._OffscreenCanvas_setWidth(this.peer!.ptr, width)
+    }
+}
+export class DrawingRenderingContextInternal {
+    public static fromPtr(ptr: KPointer): DrawingRenderingContext {
+        const obj : DrawingRenderingContext = new DrawingRenderingContext(undefined)
+        obj.peer = new Finalizable(ptr, DrawingRenderingContext.getFinalizer())
+        return obj
+    }
+}
+export class DrawingRenderingContext implements MaterializedBase {
+    peer?: Finalizable | undefined = undefined
+    public getPeer(): Finalizable | undefined {
+        return this.peer
+    }
+    get size(): Size {
+        throw new Error("Not implemented")
+    }
+    get canvas(): DrawingCanvas {
+        return this.getCanvas()
+    }
+    static ctor_drawingrenderingcontext(unit?: LengthMetricsUnit): KPointer {
+        const thisSerializer : Serializer = Serializer.hold()
+        let unit_type : int32 = RuntimeType.UNDEFINED
+        unit_type = runtimeType(unit)
+        thisSerializer.writeInt8(unit_type as int32)
+        if ((RuntimeType.UNDEFINED) != (unit_type)) {
+            const unit_value  = (unit as LengthMetricsUnit)
+            thisSerializer.writeInt32(TypeChecker.LengthMetricsUnit_ToNumeric(unit_value))
+        }
+        const retval  = ArkUIGeneratedNativeModule._DrawingRenderingContext_ctor(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    constructor(unit?: LengthMetricsUnit) {
+        const ctorPtr : KPointer = DrawingRenderingContext.ctor_drawingrenderingcontext(unit)
+        this.peer = new Finalizable(ctorPtr, DrawingRenderingContext.getFinalizer())
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._DrawingRenderingContext_getFinalizer()
+    }
+    public invalidate(): void {
+        this.invalidate_serialize()
+        return
+    }
+    private getSize(): Size {
+        return this.getSize_serialize()
+    }
+    private getCanvas(): DrawingCanvas {
+        return this.getCanvas_serialize()
+    }
+    private invalidate_serialize(): void {
+        ArkUIGeneratedNativeModule._DrawingRenderingContext_invalidate(this.peer!.ptr)
+    }
+    private getSize_serialize(): Size {
+        const retval  = ArkUIGeneratedNativeModule._DrawingRenderingContext_getSize(this.peer!.ptr)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
+        const returnResult : Size = retvalDeserializer.readSize()
+        return returnResult
+    }
+    private getCanvas_serialize(): DrawingCanvas {
+        const retval  = ArkUIGeneratedNativeModule._DrawingRenderingContext_getCanvas(this.peer!.ptr)
+        const obj : DrawingCanvas = DrawingCanvasInternal.fromPtr(retval)
+        return obj
+    }
+}
+export class ArkCanvasPeer extends ArkCommonMethodPeer {
+    protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
+        super(peerPtr, id, name, flags)
+    }
+    public static create(component: ComponentBase | undefined, flags: int32 = 0): ArkCanvasPeer {
+        const peerId  = PeerNode.nextId()
+        const _peerPtr  = ArkUIGeneratedNativeModule._Canvas_construct(peerId, flags)
+        const _peer  = new ArkCanvasPeer(_peerPtr, peerId, "Canvas", flags)
+        component?.setPeer(_peer)
+        return _peer
+    }
+    setCanvasOptions0Attribute(context?: CanvasRenderingContext2D | DrawingRenderingContext): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let context_type : int32 = RuntimeType.UNDEFINED
+        context_type = runtimeType(context)
+        thisSerializer.writeInt8(context_type as int32)
+        if ((RuntimeType.UNDEFINED) != (context_type)) {
+            const context_value  = context!
+            let context_value_type : int32 = RuntimeType.UNDEFINED
+            context_value_type = runtimeType(context_value)
+            if (TypeChecker.isCanvasRenderingContext2D(context_value, false, false, false)) {
+                thisSerializer.writeInt8(0 as int32)
+                const context_value_0  = context_value as CanvasRenderingContext2D
+                thisSerializer.writeCanvasRenderingContext2D(context_value_0)
+            }
+            else if (TypeChecker.isDrawingRenderingContext(context_value, false, false)) {
+                thisSerializer.writeInt8(1 as int32)
+                const context_value_1  = context_value as DrawingRenderingContext
+                thisSerializer.writeDrawingRenderingContext(context_value_1)
+            }
+        }
+        ArkUIGeneratedNativeModule._CanvasInterface_setCanvasOptions0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setCanvasOptions1Attribute(context: CanvasRenderingContext2D | DrawingRenderingContext, imageAIOptions: ImageAIOptions): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let context_type : int32 = RuntimeType.UNDEFINED
+        context_type = runtimeType(context)
+        if (TypeChecker.isCanvasRenderingContext2D(context, false, false, false)) {
+            thisSerializer.writeInt8(0 as int32)
+            const context_0  = context as CanvasRenderingContext2D
+            thisSerializer.writeCanvasRenderingContext2D(context_0)
+        }
+        else if (TypeChecker.isDrawingRenderingContext(context, false, false)) {
+            thisSerializer.writeInt8(1 as int32)
+            const context_1  = context as DrawingRenderingContext
+            thisSerializer.writeDrawingRenderingContext(context_1)
+        }
+        thisSerializer.writeImageAIOptions(imageAIOptions)
+        ArkUIGeneratedNativeModule._CanvasInterface_setCanvasOptions1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    onReadyAttribute(value: VoidCallback | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.holdAndWriteCallback(value_value)
+        }
+        ArkUIGeneratedNativeModule._CanvasAttribute_onReady(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    enableAnalyzerAttribute(value: boolean | undefined): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value  = value!
+            thisSerializer.writeBoolean(value_value)
+        }
+        ArkUIGeneratedNativeModule._CanvasAttribute_enableAnalyzer(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+}
+export type CanvasFillRule = string;
+export type CanvasLineCap = string;
+export type CanvasLineJoin = string;
+export type CanvasDirection = string;
+export type CanvasTextAlign = string;
+export type CanvasTextBaseline = string;
+export type ImageSmoothingQuality = string;
+export interface TextMetrics {
+    actualBoundingBoxAscent: number;
+    actualBoundingBoxDescent: number;
+    actualBoundingBoxLeft: number;
+    actualBoundingBoxRight: number;
+    alphabeticBaseline: number;
+    emHeightAscent: number;
+    emHeightDescent: number;
+    fontBoundingBoxAscent: number;
+    fontBoundingBoxDescent: number;
+    hangingBaseline: number;
+    ideographicBaseline: number;
+    width: number;
+    height: number;
+}
+export interface CanvasAttribute extends CommonMethod {
+    onReady(value: VoidCallback | undefined): this
+    enableAnalyzer(value: boolean | undefined): this
+}
+export class ArkCanvasStyle extends ArkCommonMethodStyle implements CanvasAttribute {
+    onReady_value?: VoidCallback | undefined
+    enableAnalyzer_value?: boolean | undefined
+    public onReady(value: VoidCallback | undefined): this {
+        return this
+    }
+    public enableAnalyzer(value: boolean | undefined): this {
+        return this
+    }
+}
+export class ArkCanvasComponent extends ArkCommonMethodComponent implements CanvasAttribute {
+    getPeer(): ArkCanvasPeer {
+        return (this.peer as ArkCanvasPeer)
+    }
+    public setCanvasOptions(context?: CanvasRenderingContext2D | DrawingRenderingContext, imageAIOptions?: ImageAIOptions): this {
+        if (this.checkPriority("setCanvasOptions")) {
+            const context_type = runtimeType(context)
+            const imageAIOptions_type = runtimeType(imageAIOptions)
+            if ((RuntimeType.OBJECT == context_type) || (RuntimeType.OBJECT == context_type) || (RuntimeType.UNDEFINED == context_type)) {
+                const context_casted = context as (CanvasRenderingContext2D | DrawingRenderingContext | undefined)
+                this.getPeer()?.setCanvasOptions0Attribute(context_casted)
+                return this
+            }
+            if ((TypeChecker.isCanvasRenderingContext2D(context, false, false, false)) || (TypeChecker.isDrawingRenderingContext(context, false, false))) {
+                const context_casted = context as (CanvasRenderingContext2D | DrawingRenderingContext)
+                const imageAIOptions_casted = imageAIOptions as (ImageAIOptions)
+                this.getPeer()?.setCanvasOptions1Attribute(context_casted, imageAIOptions_casted)
+                return this
+            }
+            throw new Error("Can not select appropriate overload")
+        }
+        return this
+    }
+    public onReady(value: VoidCallback | undefined): this {
+        if (this.checkPriority("onReady")) {
+            const value_casted = value as (VoidCallback | undefined)
+            this.getPeer()?.onReadyAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public enableAnalyzer(value: boolean | undefined): this {
+        if (this.checkPriority("enableAnalyzer")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.enableAnalyzerAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public applyAttributesFinish(): void {
+        // we call this function outside of class, so need to make it public
+        super.applyAttributesFinish()
+    }
+}
+/** @memo */
+export function Canvas(
+    /** @memo */
+    style: ((attributes: CanvasAttribute) => void) | undefined,
+    context?: CanvasRenderingContext2D | DrawingRenderingContext, imageAIOptions?: ImageAIOptions,
+    /** @memo */
+    content_?: (() => void) | undefined,
+): void {
+    const receiver = remember(() => {
+        return new ArkCanvasComponent()
+    })
+    NodeAttach<ArkCanvasPeer>((): ArkCanvasPeer => ArkCanvasPeer.create(receiver), (_: ArkCanvasPeer) => {
+        receiver.setCanvasOptions(context,imageAIOptions)
+        style?.(receiver)
+        content_?.()
+        receiver.applyAttributesFinish()
+    })
+}
+export class Path2DInternal {
+    public static fromPtr(ptr: KPointer): Path2D {
+        const obj : Path2D = new Path2D()
+        obj.peer = new Finalizable(ptr, Path2D.getFinalizer())
+        return obj
+    }
+}
+export class Path2D extends CanvasPath implements MaterializedBase {
+    static ctor_path2d(): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._Path2D_ctor()
+        return retval
+    }
+    constructor() {
+        super()
+        const ctorPtr : KPointer = Path2D.ctor_path2d()
+        this.peer = new Finalizable(ctorPtr, Path2D.getFinalizer())
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._Path2D_getFinalizer()
+    }
+    public addPath(path: Path2D, transform?: Matrix2D): void {
+        const path_casted = path as (Path2D)
+        const transform_casted = transform as (Matrix2D | undefined)
+        this.addPath_serialize(path_casted, transform_casted)
+        return
+    }
+    private addPath_serialize(path: Path2D, transform?: Matrix2D): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let transform_type : int32 = RuntimeType.UNDEFINED
+        transform_type = runtimeType(transform)
+        thisSerializer.writeInt8(transform_type as int32)
+        if ((RuntimeType.UNDEFINED) != (transform_type)) {
+            const transform_value  = transform!
+            thisSerializer.writeMatrix2D(transform_value)
+        }
+        ArkUIGeneratedNativeModule._Path2D_addPath(this.peer!.ptr, toPeerPtr(path), thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
     }
 }
 export class CanvasRendererInternal {
@@ -484,6 +812,12 @@ export class CanvasRendererInternal {
     }
 }
 export class CanvasRenderer extends CanvasPath implements MaterializedBase {
+    get letterSpacing(): LengthMetrics | string {
+        throw new Error("Not implemented")
+    }
+    set letterSpacing(letterSpacing: LengthMetrics | string) {
+        this.setLetterSpacing(letterSpacing)
+    }
     get globalAlpha(): number {
         return this.getGlobalAlpha()
     }
@@ -626,14 +960,14 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         const dy_type = runtimeType(dy)
         const dw_type = runtimeType(dw)
         const dh_type = runtimeType(dh)
-        if (((TypeChecker.isImageBitmap(image, false, false)) || (TypeChecker.isPixelMap(image, false, false))) && (RuntimeType.UNDEFINED == sw_type) && (RuntimeType.UNDEFINED == sh_type) && (RuntimeType.UNDEFINED == dx_type) && (RuntimeType.UNDEFINED == dy_type) && (RuntimeType.UNDEFINED == dw_type) && (RuntimeType.UNDEFINED == dh_type)) {
+        if ((TypeChecker.isImageBitmap(image, false, false)) || (TypeChecker.isPixelMap(image, false, false))) {
             const image_casted = image as (ImageBitmap | PixelMap)
             const dx_casted = sx as (number)
             const dy_casted = sy as (number)
             this.drawImage0_serialize(image_casted, dx_casted, dy_casted)
             return
         }
-        if (((TypeChecker.isImageBitmap(image, false, false)) || (TypeChecker.isPixelMap(image, false, false))) && (RuntimeType.NUMBER == sw_type) && (RuntimeType.NUMBER == sh_type) && (RuntimeType.UNDEFINED == dx_type) && (RuntimeType.UNDEFINED == dy_type) && (RuntimeType.UNDEFINED == dw_type) && (RuntimeType.UNDEFINED == dh_type)) {
+        if ((TypeChecker.isImageBitmap(image, false, false)) || (TypeChecker.isPixelMap(image, false, false))) {
             const image_casted = image as (ImageBitmap | PixelMap)
             const dx_casted = sx as (number)
             const dy_casted = sy as (number)
@@ -642,7 +976,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
             this.drawImage1_serialize(image_casted, dx_casted, dy_casted, dw_casted, dh_casted)
             return
         }
-        if (((TypeChecker.isImageBitmap(image, false, false)) || (TypeChecker.isPixelMap(image, false, false))) && (RuntimeType.NUMBER == sw_type) && (RuntimeType.NUMBER == sh_type) && (RuntimeType.NUMBER == dx_type) && (RuntimeType.NUMBER == dy_type) && (RuntimeType.NUMBER == dw_type) && (RuntimeType.NUMBER == dh_type)) {
+        if ((TypeChecker.isImageBitmap(image, false, false)) || (TypeChecker.isPixelMap(image, false, false))) {
             const image_casted = image as (ImageBitmap | PixelMap)
             const sx_casted = sx as (number)
             const sy_casted = sy as (number)
@@ -695,16 +1029,8 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
     }
     public stroke(path?: Path2D): void {
         const path_type = runtimeType(path)
-        if (RuntimeType.UNDEFINED == path_type) {
-            this.stroke0_serialize()
-            return
-        }
-        if (RuntimeType.OBJECT == path_type) {
-            const path_casted = path as (Path2D)
-            this.stroke1_serialize(path_casted)
-            return
-        }
-        throw new Error("Can not select appropriate overload")
+        this.stroke0_serialize()
+        return
     }
     public createLinearGradient(x0: number, y0: number, x1: number, y1: number): CanvasGradient {
         const x0_casted = x0 as (number)
@@ -713,7 +1039,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         const y1_casted = y1 as (number)
         return this.createLinearGradient_serialize(x0_casted, y0_casted, x1_casted, y1_casted)
     }
-    public createPattern(image: ImageBitmap, repetition?: string): CanvasPattern | undefined {
+    public createPattern(image: ImageBitmap, repetition: string | undefined): CanvasPattern | undefined {
         const image_casted = image as (ImageBitmap)
         const repetition_casted = repetition as (string | undefined)
         return this.createPattern_serialize(image_casted, repetition_casted)
@@ -736,11 +1062,11 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
     public createImageData(sw: ImageData | number, sh?: number): ImageData {
         const sw_type = runtimeType(sw)
         const sh_type = runtimeType(sh)
-        if ((RuntimeType.OBJECT == sw_type) && (RuntimeType.UNDEFINED == sh_type)) {
+        if (RuntimeType.OBJECT == sw_type) {
             const imagedata_casted = sw as (ImageData)
             return this.createImageData1_serialize(imagedata_casted)
         }
-        if ((RuntimeType.NUMBER == sw_type) && (RuntimeType.NUMBER == sh_type)) {
+        if (RuntimeType.NUMBER == sw_type) {
             const sw_casted = sw as (number)
             const sh_casted = sh as (number)
             return this.createImageData0_serialize(sw_casted, sh_casted)
@@ -874,12 +1200,12 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         const d_type = runtimeType(d)
         const e_type = runtimeType(e)
         const f_type = runtimeType(f)
-        if (((RuntimeType.OBJECT == a_type) || (RuntimeType.UNDEFINED == a_type)) && (RuntimeType.UNDEFINED == b_type) && (RuntimeType.UNDEFINED == c_type) && (RuntimeType.UNDEFINED == d_type) && (RuntimeType.UNDEFINED == e_type) && (RuntimeType.UNDEFINED == f_type)) {
+        if ((RuntimeType.OBJECT == a_type) || (RuntimeType.UNDEFINED == a_type)) {
             const transform_casted = a as (Matrix2D | undefined)
             this.setTransform1_serialize(transform_casted)
             return
         }
-        if ((RuntimeType.NUMBER == a_type) && (RuntimeType.NUMBER == b_type) && (RuntimeType.NUMBER == c_type) && (RuntimeType.NUMBER == d_type) && (RuntimeType.NUMBER == e_type) && (RuntimeType.NUMBER == f_type)) {
+        if (RuntimeType.NUMBER == a_type) {
             const a_casted = a as (number)
             const b_casted = b as (number)
             const c_casted = c as (number)
@@ -927,6 +1253,14 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
     }
     public reset(): void {
         this.reset_serialize()
+        return
+    }
+    private getLetterSpacing(): LengthMetrics | string {
+        return this.getLetterSpacing_serialize()
+    }
+    private setLetterSpacing(letterSpacing: LengthMetrics | string): void {
+        const letterSpacing_casted = letterSpacing as (LengthMetrics | string)
+        this.setLetterSpacing_serialize(letterSpacing_casted)
         return
     }
     private getGlobalAlpha(): number {
@@ -1100,8 +1434,10 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         }
         else if (TypeChecker.isPixelMap(image, false, false)) {
             thisSerializer.writeInt8(1 as int32)
-            const image_1  = image as PixelMap
-            thisSerializer.writePixelMap(image_1)
+            const pixelMap = image as PixelMap
+            let ptr = ArkUIAniModule._ConvertUtils_ConvertFromPixelMapAni(pixelMap)
+            const ptr_value: KPointer  = ptr as KPointer
+            thisSerializer.writePointer(ptr_value)
         }
         ArkUIGeneratedNativeModule._CanvasRenderer_drawImage0(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length(), dx, dy)
         thisSerializer.release()
@@ -1117,8 +1453,10 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         }
         else if (TypeChecker.isPixelMap(image, false, false)) {
             thisSerializer.writeInt8(1 as int32)
-            const image_1  = image as PixelMap
-            thisSerializer.writePixelMap(image_1)
+            const pixelMap = image as PixelMap
+            let ptr = ArkUIAniModule._ConvertUtils_ConvertFromPixelMapAni(pixelMap)
+            const ptr_value: KPointer  = ptr as KPointer
+            thisSerializer.writePointer(ptr_value)
         }
         ArkUIGeneratedNativeModule._CanvasRenderer_drawImage1(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length(), dx, dy, dw, dh)
         thisSerializer.release()
@@ -1134,8 +1472,10 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         }
         else if (TypeChecker.isPixelMap(image, false, false)) {
             thisSerializer.writeInt8(1 as int32)
-            const image_1  = image as PixelMap
-            thisSerializer.writePixelMap(image_1)
+            const pixelMap = image as PixelMap
+            let ptr = ArkUIAniModule._ConvertUtils_ConvertFromPixelMapAni(pixelMap)
+            const ptr_value: KPointer  = ptr as KPointer
+            thisSerializer.writePointer(ptr_value)
         }
         ArkUIGeneratedNativeModule._CanvasRenderer_drawImage2(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length(), sx, sy, sw, sh, dx, dy, dw, dh)
         thisSerializer.release()
@@ -1202,7 +1542,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         const obj : CanvasGradient = CanvasGradientInternal.fromPtr(retval)
         return obj
     }
-    private createPattern_serialize(image: ImageBitmap, repetition?: string): CanvasPattern | undefined {
+    private createPattern_serialize(image: ImageBitmap, repetition: string | undefined): CanvasPattern | undefined {
         const thisSerializer : Serializer = Serializer.hold()
         let repetition_type : int32 = RuntimeType.UNDEFINED
         repetition_type = runtimeType(repetition)
@@ -1242,7 +1582,8 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
     }
     private getPixelMap_serialize(sx: number, sy: number, sw: number, sh: number): PixelMap {
         const retval  = ArkUIGeneratedNativeModule._CanvasRenderer_getPixelMap(this.peer!.ptr, sx, sy, sw, sh)
-        const obj : PixelMap = PixelMapInternal.fromPtr(retval)
+        const ptr : KPointer = retval as KPointer
+        const obj : PixelMap = ArkUIAniModule._ConvertUtils_ConvertToPixelMapAni(ptr)
         return obj
     }
     private putImageData0_serialize(imagedata: ImageData, dx: number | string, dy: number | string): void {
@@ -1353,7 +1694,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
     }
     private getLineDash_serialize(): Array<number> {
         const retval  = ArkUIGeneratedNativeModule._CanvasRenderer_getLineDash(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const buffer_length : int32 = retvalDeserializer.readInt32()
         let buffer : Array<number> = new Array<number>(buffer_length)
         for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
@@ -1401,7 +1742,7 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
     }
     private measureText_serialize(text: string): TextMetrics {
         const retval  = ArkUIGeneratedNativeModule._CanvasRenderer_measureText(this.peer!.ptr, text)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
+        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
         const returnResult : TextMetrics = retvalDeserializer.readTextMetrics()
         return returnResult
     }
@@ -1458,8 +1799,10 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         value_type = runtimeType(value)
         thisSerializer.writeInt8(value_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_type)) {
-            const value_value  = value!
-            thisSerializer.writePixelMap(value_value)
+            const pixelMap = value as PixelMap
+            let ptr = ArkUIAniModule._ConvertUtils_ConvertFromPixelMapAni(pixelMap)
+            const ptr_value: KPointer  = ptr as KPointer
+            thisSerializer.writePointer(ptr_value)
         }
         ArkUIGeneratedNativeModule._CanvasRenderer_setPixelMap(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -1475,6 +1818,27 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
     }
     private reset_serialize(): void {
         ArkUIGeneratedNativeModule._CanvasRenderer_reset(this.peer!.ptr)
+    }
+    private getLetterSpacing_serialize(): LengthMetrics | string {
+        const retval  = ArkUIGeneratedNativeModule._CanvasRenderer_getLetterSpacing(this.peer!.ptr)
+        throw new Error("Object deserialization is not implemented.")
+    }
+    private setLetterSpacing_serialize(letterSpacing: LengthMetrics | string): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        let letterSpacing_type : int32 = RuntimeType.UNDEFINED
+        letterSpacing_type = runtimeType(letterSpacing)
+        if (RuntimeType.OBJECT == letterSpacing_type) {
+            thisSerializer.writeInt8(0 as int32)
+            const letterSpacing_0  = letterSpacing as LengthMetrics
+            thisSerializer.writeLengthMetrics(letterSpacing_0)
+        }
+        else if (RuntimeType.STRING == letterSpacing_type) {
+            thisSerializer.writeInt8(1 as int32)
+            const letterSpacing_1  = letterSpacing as string
+            thisSerializer.writeString(letterSpacing_1)
+        }
+        ArkUIGeneratedNativeModule._CanvasRenderer_setLetterSpacing(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
     }
     private getGlobalAlpha_serialize(): number {
         const retval  = ArkUIGeneratedNativeModule._CanvasRenderer_getGlobalAlpha(this.peer!.ptr)
@@ -1697,7 +2061,7 @@ export class CanvasRenderingContext2D extends CanvasRenderer implements Material
     }
     constructor(settings?: RenderingContextSettings) {
         super()
-        const ctorPtr : KPointer = CanvasRenderingContext2D.ctor_canvasrenderingcontext2d((settings)!)
+        const ctorPtr : KPointer = CanvasRenderingContext2D.ctor_canvasrenderingcontext2d(settings)
         this.peer = new Finalizable(ctorPtr, CanvasRenderingContext2D.getFinalizer())
     }
     static getFinalizer(): KPointer {
@@ -1721,14 +2085,14 @@ export class CanvasRenderingContext2D extends CanvasRenderer implements Material
         this.onOnAttach_serialize(callback__casted)
         return
     }
-    public offOnAttach(callback_?: (() => void)): void {
-        const callback__casted = callback_ as ((() => void) | undefined)
-        this.offOnAttach_serialize(callback__casted)
-        return
-    }
     public onOnDetach(callback_: (() => void)): void {
         const callback__casted = callback_ as ((() => void))
         this.onOnDetach_serialize(callback__casted)
+        return
+    }
+    public offOnAttach(callback_?: (() => void)): void {
+        const callback__casted = callback_ as ((() => void) | undefined)
+        this.offOnAttach_serialize(callback__casted)
         return
     }
     public offOnDetach(callback_?: (() => void)): void {
@@ -1788,6 +2152,12 @@ export class CanvasRenderingContext2D extends CanvasRenderer implements Material
         ArkUIGeneratedNativeModule._CanvasRenderingContext2D_onOnAttach(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    private onOnDetach_serialize(callback_: (() => void)): void {
+        const thisSerializer : Serializer = Serializer.hold()
+        thisSerializer.holdAndWriteCallback(callback_)
+        ArkUIGeneratedNativeModule._CanvasRenderingContext2D_onOnDetach(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     private offOnAttach_serialize(callback_?: (() => void)): void {
         const thisSerializer : Serializer = Serializer.hold()
         let callback__type : int32 = RuntimeType.UNDEFINED
@@ -1798,12 +2168,6 @@ export class CanvasRenderingContext2D extends CanvasRenderer implements Material
             thisSerializer.holdAndWriteCallback(callback__value)
         }
         ArkUIGeneratedNativeModule._CanvasRenderingContext2D_offOnAttach(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    private onOnDetach_serialize(callback_: (() => void)): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.holdAndWriteCallback(callback_)
-        ArkUIGeneratedNativeModule._CanvasRenderingContext2D_onOnDetach(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     private offOnDetach_serialize(callback_?: (() => void)): void {
@@ -1857,7 +2221,7 @@ export class OffscreenCanvasRenderingContext2D extends CanvasRenderer implements
         super()
         if (((width) !== (undefined)) || ((height) !== (undefined)) || ((settings) !== (undefined)))
         {
-            const ctorPtr : KPointer = OffscreenCanvasRenderingContext2D.ctor_offscreencanvasrenderingcontext2d((width)!, (height)!, (settings)!)
+            const ctorPtr : KPointer = OffscreenCanvasRenderingContext2D.ctor_offscreencanvasrenderingcontext2d((width)!, (height)!, settings)
             this.peer = new Finalizable(ctorPtr, OffscreenCanvasRenderingContext2D.getFinalizer())
         }
     }
@@ -1897,218 +2261,4 @@ export class OffscreenCanvasRenderingContext2D extends CanvasRenderer implements
         const obj : ImageBitmap = ImageBitmapInternal.fromPtr(retval)
         return obj
     }
-}
-export class OffscreenCanvasInternal {
-    public static fromPtr(ptr: KPointer): OffscreenCanvas {
-        const obj : OffscreenCanvas = new OffscreenCanvas(undefined, undefined)
-        obj.peer = new Finalizable(ptr, OffscreenCanvas.getFinalizer())
-        return obj
-    }
-}
-export class OffscreenCanvas implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
-    get height(): number {
-        return this.getHeight()
-    }
-    set height(height: number) {
-        this.setHeight(height)
-    }
-    get width(): number {
-        return this.getWidth()
-    }
-    set width(width: number) {
-        this.setWidth(width)
-    }
-    static ctor_offscreencanvas(width: number, height: number): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._OffscreenCanvas_ctor(width, height)
-        return retval
-    }
-    constructor(width?: number, height?: number) {
-        if (((width) !== (undefined)) || ((height) !== (undefined)))
-        {
-            const ctorPtr : KPointer = OffscreenCanvas.ctor_offscreencanvas((width)!, (height)!)
-            this.peer = new Finalizable(ctorPtr, OffscreenCanvas.getFinalizer())
-        }
-    }
-    static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._OffscreenCanvas_getFinalizer()
-    }
-    public transferToImageBitmap(): ImageBitmap {
-        return this.transferToImageBitmap_serialize()
-    }
-    public getContext2d(options?: RenderingContextSettings): OffscreenCanvasRenderingContext2D {
-        const options_casted = options as (RenderingContextSettings | undefined)
-        return this.getContext2d_serialize(options_casted)
-    }
-    private getHeight(): number {
-        return this.getHeight_serialize()
-    }
-    private setHeight(height: number): void {
-        const height_casted = height as (number)
-        this.setHeight_serialize(height_casted)
-        return
-    }
-    private getWidth(): number {
-        return this.getWidth_serialize()
-    }
-    private setWidth(width: number): void {
-        const width_casted = width as (number)
-        this.setWidth_serialize(width_casted)
-        return
-    }
-    getContext(contextType: string, options: RenderingContextSettings): OffscreenCanvasRenderingContext2D {
-        throw new Error("TBD")
-    }
-    private transferToImageBitmap_serialize(): ImageBitmap {
-        const retval  = ArkUIGeneratedNativeModule._OffscreenCanvas_transferToImageBitmap(this.peer!.ptr)
-        const obj : ImageBitmap = ImageBitmapInternal.fromPtr(retval)
-        return obj
-    }
-    private getContext2d_serialize(options?: RenderingContextSettings): OffscreenCanvasRenderingContext2D {
-        const thisSerializer : Serializer = Serializer.hold()
-        let options_type : int32 = RuntimeType.UNDEFINED
-        options_type = runtimeType(options)
-        thisSerializer.writeInt8(options_type as int32)
-        if ((RuntimeType.UNDEFINED) != (options_type)) {
-            const options_value  = options!
-            thisSerializer.writeRenderingContextSettings(options_value)
-        }
-        const retval  = ArkUIGeneratedNativeModule._OffscreenCanvas_getContext2d(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-        const obj : OffscreenCanvasRenderingContext2D = OffscreenCanvasRenderingContext2DInternal.fromPtr(retval)
-        return obj
-    }
-    private getHeight_serialize(): number {
-        const retval  = ArkUIGeneratedNativeModule._OffscreenCanvas_getHeight(this.peer!.ptr)
-        return retval
-    }
-    private setHeight_serialize(height: number): void {
-        ArkUIGeneratedNativeModule._OffscreenCanvas_setHeight(this.peer!.ptr, height)
-    }
-    private getWidth_serialize(): number {
-        const retval  = ArkUIGeneratedNativeModule._OffscreenCanvas_getWidth(this.peer!.ptr)
-        return retval
-    }
-    private setWidth_serialize(width: number): void {
-        ArkUIGeneratedNativeModule._OffscreenCanvas_setWidth(this.peer!.ptr, width)
-    }
-}
-export class DrawingRenderingContextInternal {
-    public static fromPtr(ptr: KPointer): DrawingRenderingContext {
-        const obj : DrawingRenderingContext = new DrawingRenderingContext(undefined)
-        obj.peer = new Finalizable(ptr, DrawingRenderingContext.getFinalizer())
-        return obj
-    }
-}
-export class DrawingRenderingContext implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
-    get size(): Size {
-        throw new Error("Not implemented")
-    }
-    get canvas(): DrawingCanvas {
-        return this.getCanvas()
-    }
-    static ctor_drawingrenderingcontext(unit?: LengthMetricsUnit): KPointer {
-        const thisSerializer : Serializer = Serializer.hold()
-        let unit_type : int32 = RuntimeType.UNDEFINED
-        unit_type = runtimeType(unit)
-        thisSerializer.writeInt8(unit_type as int32)
-        if ((RuntimeType.UNDEFINED) != (unit_type)) {
-            const unit_value  = unit!
-            thisSerializer.writeLengthMetricsUnit(unit_value)
-        }
-        const retval  = ArkUIGeneratedNativeModule._DrawingRenderingContext_ctor(thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-        return retval
-    }
-    constructor(unit?: LengthMetricsUnit) {
-        const ctorPtr : KPointer = DrawingRenderingContext.ctor_drawingrenderingcontext((unit)!)
-        this.peer = new Finalizable(ctorPtr, DrawingRenderingContext.getFinalizer())
-    }
-    static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._DrawingRenderingContext_getFinalizer()
-    }
-    public invalidate(): void {
-        this.invalidate_serialize()
-        return
-    }
-    private getSize(): Size {
-        return this.getSize_serialize()
-    }
-    private getCanvas(): DrawingCanvas {
-        return this.getCanvas_serialize()
-    }
-    private invalidate_serialize(): void {
-        ArkUIGeneratedNativeModule._DrawingRenderingContext_invalidate(this.peer!.ptr)
-    }
-    private getSize_serialize(): Size {
-        const retval  = ArkUIGeneratedNativeModule._DrawingRenderingContext_getSize(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length)
-        const returnResult : Size = retvalDeserializer.readSize()
-        return returnResult
-    }
-    private getCanvas_serialize(): DrawingCanvas {
-        const retval  = ArkUIGeneratedNativeModule._DrawingRenderingContext_getCanvas(this.peer!.ptr)
-        const obj : DrawingCanvas = DrawingCanvasInternal.fromPtr(retval)
-        return obj
-    }
-}
-export type CanvasFillRule = string;
-export type CanvasLineCap = string;
-export type CanvasLineJoin = string;
-export type CanvasDirection = string;
-export type CanvasTextAlign = string;
-export type CanvasTextBaseline = string;
-export type ImageSmoothingQuality = string;
-export interface TextMetrics {
-    actualBoundingBoxAscent: number;
-    actualBoundingBoxDescent: number;
-    actualBoundingBoxLeft: number;
-    actualBoundingBoxRight: number;
-    alphabeticBaseline: number;
-    emHeightAscent: number;
-    emHeightDescent: number;
-    fontBoundingBoxAscent: number;
-    fontBoundingBoxDescent: number;
-    hangingBaseline: number;
-    ideographicBaseline: number;
-    width: number;
-    height: number;
-}
-export interface Size {
-    width: number;
-    height: number;
-}
-/** @memo:stable */
-export interface CanvasAttribute extends CommonMethod {
-    /** @memo */
-    setCanvasOptions(context?: CanvasRenderingContext2D | DrawingRenderingContext | undefined | CanvasRenderingContext2D | DrawingRenderingContext, imageAIOptions?: ImageAIOptions): this
-    /** @memo */
-    onReady(value: VoidCallback): this
-    /** @memo */
-    enableAnalyzer(value: boolean): this
-}
-/** @memo */
-export function Canvas(
-  /** @memo */
-  style: ((attributes: CanvasAttribute) => void) | undefined,
-  context?: CanvasRenderingContext2D | DrawingRenderingContext | undefined | CanvasRenderingContext2D | DrawingRenderingContext | undefined, imageAIOptions?: ImageAIOptions | undefined, 
-  /** @memo */
-  content_?: () => void,
-) {
-    const receiver = remember(() => {
-        return new ArkCanvasComponent()
-    })
-    NodeAttach<ArkCanvasPeer>((): ArkCanvasPeer => ArkCanvasPeer.create(receiver), (_: ArkCanvasPeer) => {
-        receiver.setCanvasOptions(context,imageAIOptions)
-        style?.(receiver)
-        content_?.()
-        receiver.applyAttributesFinish()
-    })
 }

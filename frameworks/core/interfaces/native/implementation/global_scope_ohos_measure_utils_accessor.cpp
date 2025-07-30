@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "base/utils/measure_util.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -170,55 +171,49 @@ std::string ConvertToFontWeight(const Opt_Union_Number_String_FontWeight& src)
         []() {});
     return fontWeight;
 }
-
-
 Ark_Number MeasureTextImpl(const Ark_MeasureOptions* options)
 {
-    // need check
-    // MeasureContext context;
-    // auto fontSizeUnit = AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)
-    //                         ? DimensionUnit::FP
-    //                         : DimensionUnit::VP;
-    // context.fontSize = ConvertToDimension(options->fontSize, fontSizeUnit);
-    // context.letterSpacing = ConvertToDimension(options->letterSpacing);
-    // context.fontStyle =
-    //     Converter::OptConvert<OHOS::Ace::FontStyle>(options->fontStyle).value_or(OHOS::Ace::FontStyle::NORMAL);
-    // context.textContent = Converter::OptConvert<std::string>(options->textContent).value_or("");
-    // context.fontWeight = ConvertToFontWeight(options->fontWeight);
-    // context.fontFamily = Converter::OptConvert<std::string>(options->fontFamily).value_or("");
-    // auto textWidth = MeasureUtil::MeasureText(context);
-    // return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(textWidth));
-    return Converter::ArkValue<Ark_Number>(0);
+    MeasureContext context;
+    auto fontSizeUnit = AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)
+                            ? DimensionUnit::FP
+                            : DimensionUnit::VP;
+    context.fontSize = ConvertToDimension(options->fontSize, fontSizeUnit);
+    context.letterSpacing = ConvertToDimension(options->letterSpacing);
+    context.fontStyle =
+        Converter::OptConvert<OHOS::Ace::FontStyle>(options->fontStyle).value_or(OHOS::Ace::FontStyle::NORMAL);
+    context.textContent = Converter::OptConvert<std::string>(options->textContent).value_or("");
+    context.fontWeight = ConvertToFontWeight(options->fontWeight);
+    context.fontFamily = Converter::OptConvert<std::string>(options->fontFamily).value_or("");
+    auto textWidth = MeasureUtil::MeasureText(context);
+    return Converter::ArkValue<Ark_Number>(static_cast<int32_t>(textWidth));
 }
 Ark_SizeOptions MeasureTextSizeImpl(const Ark_MeasureOptions* options)
 {
-    // need check
-    // MeasureContext context;
-    // auto fontSizeUnit = AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)
-    //                         ? DimensionUnit::FP
-    //                         : DimensionUnit::VP;
-    // context.fontSize = ConvertToDimension(options->fontSize, fontSizeUnit);
-    // context.constraintWidth = ConvertToDimension(options->constraintWidth);
-    // context.letterSpacing = ConvertToDimension(options->letterSpacing);
-    // context.fontStyle =
-    //     Converter::OptConvert<OHOS::Ace::FontStyle>(options->fontStyle).value_or(OHOS::Ace::FontStyle::NORMAL);
-    // context.textContent = Converter::OptConvert<std::string>(options->textContent).value_or("");
-    // context.fontWeight = ConvertToFontWeight(options->fontWeight);
-    // context.fontFamily = Converter::OptConvert<std::string>(options->fontFamily).value_or("");
-    // context.textAlign = Converter::OptConvert<TextAlign>(options->textAlign).value_or(TextAlign::START);
-    // context.textOverlayFlow = Converter::OptConvert<TextOverflow>(options->overflow).value_or(TextOverflow::CLIP);
-    // context.maxlines = Converter::OptConvert<int32_t>(options->maxLines).value_or(0);
-    // context.lineHeight = ConvertToDimension(options->lineHeight);
-    // context.baselineOffset = ConvertToDimension(options->baselineOffset);
-    // context.textCase = Converter::OptConvert<TextCase>(options->textCase).value_or(TextCase::NORMAL);
-    // context.textIndent = ConvertToDimension(options->textIndent);
-    // context.wordBreak = Converter::OptConvert<WordBreak>(options->wordBreak).value_or(WordBreak::BREAK_WORD);
-    // auto textSize = MeasureUtil::MeasureTextSize(context);
-    // return {
-    //     .width = Converter::ArkValue<Opt_Length>(textSize.Width()),
-    //     .height = Converter::ArkValue<Opt_Length>(textSize.Height())
-    // };
-    return {};
+    MeasureContext context;
+    auto fontSizeUnit = AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)
+                            ? DimensionUnit::FP
+                            : DimensionUnit::VP;
+    context.fontSize = ConvertToDimension(options->fontSize, fontSizeUnit);
+    context.constraintWidth = ConvertToDimension(options->constraintWidth);
+    context.letterSpacing = ConvertToDimension(options->letterSpacing);
+    context.fontStyle =
+        Converter::OptConvert<OHOS::Ace::FontStyle>(options->fontStyle).value_or(OHOS::Ace::FontStyle::NORMAL);
+    context.textContent = Converter::OptConvert<std::string>(options->textContent).value_or("");
+    context.fontWeight = ConvertToFontWeight(options->fontWeight);
+    context.fontFamily = Converter::OptConvert<std::string>(options->fontFamily).value_or("");
+    context.textAlign = Converter::OptConvert<TextAlign>(options->textAlign).value_or(TextAlign::START);
+    context.textOverlayFlow = Converter::OptConvert<TextOverflow>(options->overflow).value_or(TextOverflow::CLIP);
+    context.maxlines = Converter::OptConvert<int32_t>(options->maxLines).value_or(0);
+    context.lineHeight = ConvertToDimension(options->lineHeight);
+    context.baselineOffset = ConvertToDimension(options->baselineOffset);
+    context.textCase = Converter::OptConvert<TextCase>(options->textCase).value_or(TextCase::NORMAL);
+    context.textIndent = ConvertToDimension(options->textIndent);
+    context.wordBreak = Converter::OptConvert<WordBreak>(options->wordBreak).value_or(WordBreak::BREAK_WORD);
+    auto textSize = MeasureUtil::MeasureTextSize(context);
+    return {
+        .width = Converter::ArkValue<Opt_Length>(textSize.Width()),
+        .height = Converter::ArkValue<Opt_Length>(textSize.Height())
+    };
 }
 } // GlobalScope_ohos_measure_utilsAccessor
 const GENERATED_ArkUIGlobalScope_ohos_measure_utilsAccessor* GetGlobalScope_ohos_measure_utilsAccessor()
@@ -229,5 +224,4 @@ const GENERATED_ArkUIGlobalScope_ohos_measure_utilsAccessor* GetGlobalScope_ohos
     };
     return &GlobalScope_ohos_measure_utilsAccessorImpl;
 }
-
 }

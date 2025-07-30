@@ -13,19 +13,19 @@
  * limitations under the License.
  */
 
-// import image from '@ohos.multimedia.image';
-// import { BusinessError, AsyncCallback } from '@ohos.base';
-// import { CustomBuilder } from '@ohos.arkui.component';
+import image from '@ohos.multimedia.image';
+import { BusinessError, AsyncCallback } from '@ohos.base';
+import { CustomBuilder } from '@ohos.arkui.component';
 
-// export default namespace componentSnapshot {
+export default namespace componentSnapshot {
 
-//     loadLibrary("componentSnapshot_ani");
+    loadLibrary("componentSnapshot_ani");
 
-//     export interface SnapshotOptions {
-//         scale?: number
-//         waitUntilRenderFinished?: boolean
-//     }
+    export interface SnapshotOptions {
+        scale?: number
+        waitUntilRenderFinished?: boolean
+    }
 
-//     export native function createFromBuilder(builder: CustomBuilder, callback: AsyncCallback<image.PixelMap>,
-//         delay?: number, checkImageStatus?: boolean, options?: SnapshotOptions): void;
-// }
+    export native function createFromBuilder(builder: CustomBuilder, callback: AsyncCallback<image.PixelMap>,
+        delay?: number, checkImageStatus?: boolean, options?: SnapshotOptions): void;
+}

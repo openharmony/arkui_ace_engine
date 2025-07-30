@@ -134,16 +134,18 @@ public:
             return;
         }
         auto jsonDashArray = JsonUtil::CreateArray(true);
-        for (size_t i = 0; i < propValues_.value().size(); ++i) {
-            auto index = std::to_string(i);
-            double value = propValues_.value()[i];
-            jsonDashArray->Put(index.c_str(), value);
+        if (propValues_.has_value()) {
+            for (size_t i = 0; i < propValues_.value().size(); ++i) {
+                auto index = std::to_string(i);
+                double value = propValues_.value()[i];
+                jsonDashArray->Put(index.c_str(), value);
+            }
         }
         bool closeEffect = false;
         if (propEffect_.has_value()) {
             closeEffect = !propEffect_.value();
         }
-        auto pipelineContext = PipelineBase::GetCurrentContext();
+        auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipelineContext);
         auto theme = pipelineContext->GetTheme<DataPanelTheme>();
         json->PutExtAttr("max", std::to_string(propMax_.value_or(100)).c_str(), filter);
@@ -169,7 +171,7 @@ public:
         if (propValueColors_.has_value()) {
             valueColors = propValueColors_.value();
         } else {
-            auto pipelineContext = PipelineBase::GetCurrentContext();
+            auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
             CHECK_NULL_VOID(pipelineContext);
             auto theme = pipelineContext->GetTheme<DataPanelTheme>();
             auto colors = theme->GetColorsArray();
@@ -202,7 +204,7 @@ public:
         if (filter.IsFastFilter()) {
             return;
         }
-        auto pipelineContext = PipelineBase::GetCurrentContext();
+        auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipelineContext);
         auto theme = pipelineContext->GetTheme<DataPanelTheme>();
         DataPanelShadow trackShadow;

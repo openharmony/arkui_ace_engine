@@ -230,6 +230,58 @@ HWTEST_F(TextTestNineNg, OnMenuItemAction001, TestSize.Level1)
     EXPECT_FALSE(pattern->SelectOverlayIsOn());
 }
 
+/**
+ * @tc.name: OnMenuItemAction002
+ * @tc.desc: test OnMenuItemAction, call memuCallback.onAIMenuOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNineNg, OnMenuItemAction002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get text pattern
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    stack->StartGetAccessRecordingFor(0);
+    TextModelNG textModelNG;
+    textModelNG.Create("TextValue");
+    stack->StopGetAccessRecording();
+    auto frameNode = AceType::DynamicCast<FrameNode>(stack->Finish());
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    FlushUITasks(frameNode);
+
+    /**
+     * @tc.steps: step2. request focus
+     */
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    focusHub->RequestFocusImmediately();
+    FlushUITasks(frameNode);
+
+    /**
+     * @tc.step: step3. create a scene where the text menu has popped up
+     */
+
+    pattern->textSelector_.Update(0, 2);
+    pattern->CalculateHandleOffsetAndShowOverlay();
+    OverlayRequest request;
+    request.menuIsShow = true;
+    request.hideHandle = false;
+    request.animation = false;
+    request.hideHandleLine = false;
+    request.requestCode = 0;
+    pattern->ShowSelectOverlay(request);
+
+    /**
+     * @tc.step: step4. test OnMenuItemAction
+     */
+    pattern->isMousePressed_ = true;
+    auto info = pattern->selectOverlay_->GetSelectOverlayInfos();
+    info->menuCallback.onAIMenuOption("");
+    EXPECT_FALSE(pattern->SelectOverlayIsOn());
+    info->menuCallback.onAIMenuOption("test");
+    EXPECT_FALSE(pattern->SelectOverlayIsOn());
+}
+
 HWTEST_F(TextTestNineNg, CheckHandleVisible001, TestSize.Level1)
 {
     /**

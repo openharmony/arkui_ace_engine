@@ -26,6 +26,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
+#include "core/components_ng/property/measure_utils.h"
 
 #undef private
 #undef protected
@@ -1321,6 +1322,41 @@ HWTEST_F(LayoutPropertyTestNgTwo, TestIsExpandConstraintNeeded, TestSize.Level1)
     EXPECT_EQ(layoutProperty->IsExpandConstraintNeeded(), false);
     layoutProperty->ignoreLayoutSafeAreaOpts_->edges = LAYOUT_SAFE_AREA_EDGE_VERTICAL;
     EXPECT_EQ(layoutProperty->IsExpandConstraintNeeded(), true);
+}
+
+/**
+ * @tc.name: TestConvertSafeAreaPadding
+ * @tc.desc: Test ConvertWithResidueToPaddingPropertyF
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNgTwo, TestConvertSafeAreaPadding, TestSize.Level1)
+{
+    std::unique_ptr<PaddingProperty> safeAreaPadding = std::make_unique<PaddingProperty>();
+    *safeAreaPadding = {
+        .left = CalcLength(50, DimensionUnit::VP),
+        .right = CalcLength(50, DimensionUnit::VP),
+        .top = CalcLength(50, DimensionUnit::VP),
+        .bottom = CalcLength(50, DimensionUnit::VP)
+    };
+    ScaleProperty scaleProperty = {
+        .vpScale = 3.25,
+        .fpScale = 1.0,
+        .lpxScale = 1.0
+    };
+    PaddingPropertyF fract = {
+        .left = 0.4f + 0.4f,
+        .right = 0.4f + 0.4f,
+        .top = 0.4f + 0.4f,
+        .bottom = 0.4f + 0.4f
+    };
+    PaddingPropertyF expectedRes = {
+        .left = 163.0f,
+        .right = 163.0f,
+        .top = 163.0f,
+        .bottom = 163.0f
+    };
+    auto res = ConvertWithResidueToPaddingPropertyF(safeAreaPadding, scaleProperty, fract);
+    EXPECT_EQ(res, expectedRes);
 }
 
 /**

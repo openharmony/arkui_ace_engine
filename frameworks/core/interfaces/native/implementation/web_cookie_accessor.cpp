@@ -61,7 +61,4 @@ const GENERATED_ArkUIWebCookieAccessor* GetWebCookieAccessor()
     return &WebCookieAccessorImpl;
 }
 
-struct WebCookiePeer {
-    virtual ~WebCookiePeer() = default;
-};
 }

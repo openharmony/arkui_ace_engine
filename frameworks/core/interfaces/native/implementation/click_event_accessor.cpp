@@ -29,11 +29,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ClickEventAccessor {
 void DestroyPeerImpl(Ark_ClickEvent peer)
 {
-    delete peer;
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_ClickEvent CtorImpl()
 {
-    return new ClickEventPeer();
+    return PeerUtils::CreatePeer<ClickEventPeer>();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -201,6 +201,14 @@ void SetYImpl(Ark_ClickEvent peer,
     offset.SetY(newY, animation);
     info->SetLocalLocation(offset);
 }
+Opt_InteractionHand GetHandImpl(Ark_ClickEvent peer)
+{
+    return {};
+}
+void SetHandImpl(Ark_ClickEvent peer,
+                 Ark_InteractionHand hand)
+{
+}
 Callback_Void GetPreventDefaultImpl(Ark_ClickEvent peer)
 {
     CHECK_NULL_RETURN(peer, {});
@@ -219,6 +227,7 @@ Callback_Void GetPreventDefaultImpl(Ark_ClickEvent peer)
 void SetPreventDefaultImpl(Ark_ClickEvent peer,
                            const Callback_Void* preventDefault)
 {
+    LOGE("ClickEventAccessor::SetPreventDefaultImpl wen can only GET preventDefault callback");
 }
 } // ClickEventAccessor
 const GENERATED_ArkUIClickEventAccessor* GetClickEventAccessor()
@@ -243,6 +252,8 @@ const GENERATED_ArkUIClickEventAccessor* GetClickEventAccessor()
         ClickEventAccessor::SetXImpl,
         ClickEventAccessor::GetYImpl,
         ClickEventAccessor::SetYImpl,
+        ClickEventAccessor::GetHandImpl,
+        ClickEventAccessor::SetHandImpl,
         ClickEventAccessor::GetPreventDefaultImpl,
         ClickEventAccessor::SetPreventDefaultImpl,
     };

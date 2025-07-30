@@ -72,7 +72,7 @@ public:
     static void SetCanacelIconSrc(FrameNode* frameNode,
         const std::string& iconSrc, const std::string& bundleName, const std::string& moduleName);
     static void SetCancelIconColor(FrameNode* frameNode, const std::optional<Color>& iconColor);
-    // static void SetBackgroundColor(FrameNode* frameNode, const std::optional<Color>& color);
+    static void SetBackgroundColor(FrameNode* frameNode, const std::optional<Color>& color);
     static void SetShowCounterBorder(FrameNode* frameNode, const std::optional<bool>& value);
     static void SetWordBreak(FrameNode* frameNode, const std::optional<Ace::WordBreak>& valueOpt);
     static void SetLineBreakStrategy(FrameNode* frameNode, const std::optional<LineBreakStrategy>& valueOpt);
@@ -95,7 +95,12 @@ public:
     static void SetShowPasswordIcon(FrameNode* frameNode, const std::optional<bool>& value);
     static void SetShowUnderline(FrameNode* frameNode, const std::optional<bool>& showUnderLine);
     static void SetSelectAllValue(FrameNode* frameNode, const std::optional<bool>& isSelectAllValue);
+    static void SetDefaultCancelIcon(FrameNode* frameNode);
 
+    static void SetWidthAuto(FrameNode* frameNode, bool val);
+    static void SetPadding(FrameNode* frameNode, const NG::PaddingProperty& newPadding, bool tmp);
+    static void SetMargin(FrameNode* frameNode);
+    static void SetBackBorder(FrameNode* frameNode);
 private:
 
 };

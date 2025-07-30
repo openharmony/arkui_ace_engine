@@ -610,7 +610,7 @@ HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest121, TestSize.Level1)
     auto borderRadius = OH_ArkUI_RenderNodeUtils_CreateNodeBorderRadiusOption();
     ASSERT_NE(borderRadius, nullptr);
     OH_ArkUI_RenderNodeUtils_SetNodeBorderRadiusOptionEdgeRadius(borderRadius, 10, ARKUI_EDGE_DIRECTION_TOP);
-    OH_ArkUI_RenderNodeUtils_SetNodeBorderRadiusOptionEdgeRadius(borderRadius, 15, ARKUI_EDGE_DIRECTION_LEFT);
+    OH_ArkUI_RenderNodeUtils_SetNodeBorderRadiusOptionEdgeRadius(borderRadius, 15, ARKUI_EDGE_DIRECTION_BOTTOM);
     OH_ArkUI_RenderNodeUtils_DisposeNodeBorderRadiusOption(borderRadius);
 }
 
@@ -913,11 +913,13 @@ HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest138, TestSize.Level1)
     OH_ArkUI_RenderNodeUtils_SetCircleShapeOptionCenterX(circleShape, 50.0f);
     OH_ArkUI_RenderNodeUtils_SetCircleShapeOptionCenterY(circleShape, 50.0f);
     OH_ArkUI_RenderNodeUtils_SetCircleShapeOptionRadius(circleShape, 30.0f);
+    auto result = OH_ArkUI_RenderNodeUtils_SetClip(renderNode, nullptr);
+    ASSERT_EQ(result, ERROR_CODE_PARAM_INVALID);
 
     auto clipOption = OH_ArkUI_RenderNodeUtils_CreateRenderNodeClipOptionFromCircleShape(circleShape);
     ASSERT_NE(clipOption, nullptr);
 
-    auto result = OH_ArkUI_RenderNodeUtils_SetClip(renderNode, clipOption);
+    result = OH_ArkUI_RenderNodeUtils_SetClip(renderNode, clipOption);
     ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
 
     OH_ArkUI_RenderNodeUtils_DisposeRenderNodeClipOption(clipOption);

@@ -14,9 +14,7 @@
  */
 
 #include "core/components_ng/pattern/window_scene/root/root_scene_model.h"
-
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/window_scene/root/root_scene_node.h"
 
 namespace OHOS::Ace::NG {
 void RootSceneModel::Create()
@@ -26,5 +24,10 @@ void RootSceneModel::Create()
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::ROOT_SCENE_ETS_TAG, nodeId);
     auto rootSceneNode = RootSceneNode::GetOrCreateRootSceneNode(nodeId);
     stack->Push(rootSceneNode);
+}
+
+RefPtr<RootSceneNode> RootSceneModel::CreateRootSceneNode(int32_t nodeId)
+{
+    return RootSceneNode::GetOrCreateRootSceneNode(nodeId);
 }
 } // namespace OHOS::Ace::NG

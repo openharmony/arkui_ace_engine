@@ -1,0 +1,32 @@
+{
+  "rootElement": {
+    "nodeId": 1002,
+    "kind": "ComponentRoot",
+    "children": [
+      {
+        "nodeId": 1003,
+        "kind": "Column",
+        "children": [
+          {
+            "nodeId": 1004,
+            "kind": "Text",
+            "children": [],
+            "setTextOptions_content": "Test1",
+            "height_value": "100px"
+          },
+          {
+            "nodeId": 1005,
+            "kind": "Text",
+            "children": [],
+            "setTextOptions_content": "Test2",
+            "height_value": "100px"
+          }
+        ],
+        "width_value": "100%",
+        "height_value": "100%",
+        "alignItems_value": 0,
+        "justifyContent_value": 2
+      }
+    ]
+  }
+}

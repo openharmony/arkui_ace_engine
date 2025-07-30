@@ -1,0 +1,42 @@
+{
+    "extends": "@koalaui/build-common/tsconfig.json",
+    "compilerOptions": {
+        "outDir": "build/junk",
+        "lib": ["ES2020"],
+        "rootDirs": ["src", "test"],
+        "baseUrl": ".",
+        "module": "CommonJS",
+        "experimentalDecorators": true,
+        "plugins": [
+            { 
+                "transform": "@koalaui/compiler-plugin/build/lib/src/koala-transformer.js", 
+                "trace": false, 
+                "only_unmemoize": true,
+                "unmemoizeDir": "./build/unmemoized"
+            }
+        ],
+        "types": ["arkoala-arkui"],
+        "paths": {
+            "@koalaui/runtime": [
+                "../../incremental/runtime/src"
+            ],
+            "#arkcompat/*": [
+                "./src/arkts/*",
+            ],
+
+            "#arkcompat": [
+                "./src/arkts",
+            ]
+        }
+    },
+    "include": [
+        "src/index.ts",
+        "src/ArkState.ts",
+        "src/arkts/**/*.ts"
+    ],
+    "references": [
+        { "path": "../../incremental/compiler-plugin" },
+        { "path": "../../incremental/common" },
+        { "path": "../../incremental/runtime/tsconfig-unmemoize.json" }
+    ]
+}

@@ -45,7 +45,4 @@ const GENERATED_ArkUIScrollMotionAccessor* GetScrollMotionAccessor()
     return &ScrollMotionAccessorImpl;
 }
 
-struct ScrollMotionPeer {
-    virtual ~ScrollMotionPeer() = default;
-};
 }

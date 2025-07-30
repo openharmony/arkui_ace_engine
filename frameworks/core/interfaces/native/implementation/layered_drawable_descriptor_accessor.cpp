@@ -63,7 +63,4 @@ const GENERATED_ArkUILayeredDrawableDescriptorAccessor* GetLayeredDrawableDescri
     return &LayeredDrawableDescriptorAccessorImpl;
 }
 
-struct LayeredDrawableDescriptorPeer {
-    virtual ~LayeredDrawableDescriptorPeer() = default;
-};
 }

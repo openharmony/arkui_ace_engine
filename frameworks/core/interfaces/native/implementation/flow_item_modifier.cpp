@@ -15,7 +15,6 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/components_ng/pattern/waterflow/water_flow_item_model_ng.h"
 #include "arkoala_api_generated.h"
 #include "frameworks/core/components_ng/pattern/waterflow/water_flow_item_model_ng.h"
 

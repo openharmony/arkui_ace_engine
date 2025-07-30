@@ -89,6 +89,8 @@ public:
     using PositionMap = std::map<int32_t, ListItemInfo>;
     static constexpr int32_t LAST_ITEM = -1;
 
+    static constexpr uint32_t INITIAL_RANGE_SECOND = 2;
+
     ListLayoutAlgorithm(int32_t itemStartIndex = 0)
         : itemStartIndex_(itemStartIndex)
     {}
@@ -359,7 +361,9 @@ public:
     void Layout(LayoutWrapper* layoutWrapper) override;
     void UpdateOverlay(LayoutWrapper* layoutWrapper);
 
+    bool RequestForward(LayoutWrapper* layoutWrapper, int32_t currentIndex, float currentEndPos, float chainOffset);
     void LayoutForward(LayoutWrapper* layoutWrapper, int32_t startIndex, float startPos);
+    bool RequestBackward(LayoutWrapper* layoutWrapper, int32_t currentIndex, float currentStartPos, float chainOffset);
     void LayoutBackward(LayoutWrapper* layoutWrapper, int32_t endIndex, float endPos);
 
     void BeginLayoutForward(float startPos, LayoutWrapper* layoutWrapper);
@@ -441,9 +445,31 @@ public:
 
     void ResetLayoutItem(LayoutWrapper* layoutWrapper);
 
+    void ResetUnLayoutedItems(LayoutWrapper* layoutWrapper, PositionMap& positionMap);
+
     std::pair<int32_t, float> GetSnapStartIndexAndPos();
 
     std::pair<int32_t, float> GetSnapEndIndexAndPos();
+
+    const std::pair<int32_t, int32_t>& GetItemAdapterRange() const
+    {
+        return range_;
+    }
+
+    void SetTotalItemCount(int32_t count, bool needUpdate = true)
+    {
+        totalItemCount_ = count;
+    }
+
+    void SetItemAdapterFeature(const std::pair<bool, bool>& requestFeature)
+    {
+        requestFeature_ = requestFeature;
+    }
+
+    void SetLazyFeature(bool isLazy)
+    {
+        isLazyFeature_ = isLazy;
+    }
 
     bool GetStackFromEnd() const
     {
@@ -543,6 +569,7 @@ protected:
     int32_t UpdateDefaultCachedCount(const int32_t oldCachedCount, const int32_t itemCount);
     bool IsListLanesEqual(const RefPtr<LayoutWrapper>& wrapper) const;
     void ReportGetChildError(const std::string& funcName, int32_t index) const;
+    void UpdateNoLayoutedItems();
 
     Axis axis_ = Axis::VERTICAL;
     int32_t laneIdx4Divider_ = 0;
@@ -632,6 +659,7 @@ protected:
     PositionMap itemPosition_;
     PositionMap recycledItemPosition_;
     PositionMap cachedItemPosition_;
+    PositionMap noLayoutedItems_;
     int32_t preStartIndex_ = 0;
     float currentOffset_ = 0.0f;
     float adjustOffset_ = 0.0f;
@@ -709,6 +737,10 @@ private:
     float laneGutter_ = 0.0f;
 
     V2::StickyStyle stickyStyle_ = V2::StickyStyle::NONE;
+
+    std::pair<int32_t, int32_t> range_ = { -1, -1 };
+    std::pair<bool, bool> requestFeature_ = { false, false };
+    bool isLazyFeature_ = false;
 
     float chainInterval_ = 0.0f;
     int32_t draggingIndex_ = -1;

@@ -43,7 +43,7 @@ std::shared_ptr<ani_ref> AniContextModule::GetAniContext()
 #endif
 
     if (currentInstance >= MIN_SUBCONTAINER_ID && currentInstance < MIN_PLUGIN_SUBCONTAINER_ID) {
-        currentInstance = SubwindowManager::GetInstance()->GetParentContainerId(currentInstance);
+        // currentInstance = SubwindowManager::GetInstance()->GetParentContainerId(currentInstance);
     }
 
     if (currentInstance <= 0) {

@@ -712,6 +712,7 @@ void SliderPattern::SetStepPointsAccessibilityVirtualNodeEvent(
     CHECK_NULL_VOID(gestureHub);
     if (isClickAbled && !pointAccessibilityNodeEventVec_[index]) {
         auto clickHandle = [weak = WeakClaim(this), index, reverse](GestureEvent& info) {
+            (void)reverse;
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->FireChangeEvent(SliderChangeMode::Begin);

@@ -122,7 +122,9 @@ SizeF ShapeContainerLayoutAlgorithm::GetChildrenSize(LayoutWrapper* layoutWrappe
     float maxWidth = 0.0f;
     float maxHeight = 0.0f;
 
-    auto childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, maxSize);
+    auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
     auto layoutPolicy = layoutWrapper->GetLayoutProperty()->GetLayoutPolicyProperty();
     if (layoutPolicy.has_value()) {
         if (layoutPolicy->IsWidthAdaptive() && !childLayoutConstraint.parentIdealSize.Width().has_value()) {

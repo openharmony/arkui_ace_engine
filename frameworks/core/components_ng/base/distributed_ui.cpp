@@ -65,7 +65,7 @@ SerializeableObjectArray DistributedUI::DumpUITree()
 {
     ResetDirtyNodes();
 
-    auto context = NG::PipelineContext::GetCurrentContext();
+    auto context = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(context, SerializeableObjectArray());
     auto pageRootNode = currentPageId_ ? context->GetStageManager()->GetPageById(currentPageId_)
                                        : context->GetStageManager()->GetLastPage();
@@ -95,7 +95,7 @@ void DistributedUI::UnSubscribeUpdate()
 
 void DistributedUI::ProcessSerializeableInputEvent(const SerializeableObjectArray& array)
 {
-    auto context = NG::PipelineContext::GetCurrentContext();
+    auto context = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
 
     TouchEvent event;
@@ -119,7 +119,7 @@ void DistributedUI::UpdateUITree(const SerializeableObjectArray& array)
     }
     pendingUpdates_.emplace_back(std::move((SerializeableObjectArray&)array));
 
-    auto context = NG::PipelineContext::GetCurrentContext();
+    auto context = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     context->RequestFrame();
 }
@@ -643,7 +643,7 @@ void DistributedUI::DelNode(const std::unique_ptr<NodeObject>& nodeObject)
 
 void DistributedUI::UpdateUITreeInner(SerializeableObjectArray& nodeArray)
 {
-    auto context = NG::PipelineContext::GetCurrentContext();
+    auto context = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     auto pageRootNode = context->GetStageManager()->GetLastPage();
     CHECK_NULL_VOID(pageRootNode);
@@ -668,7 +668,7 @@ void DistributedUI::RestoreUITreeInner(const SerializeableObjectArray& nodeArray
         return;
     }
 
-    auto context = NG::PipelineContext::GetCurrentContext();
+    auto context = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     auto pageRootNode = context->GetStageManager()->GetLastPage();
     CHECK_NULL_VOID(pageRootNode);

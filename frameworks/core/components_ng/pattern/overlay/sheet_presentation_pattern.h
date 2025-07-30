@@ -304,7 +304,7 @@ public:
 
     void InitialLayoutProps();
     void UpdateDragBarStatus();
-
+    bool IsSingleDetents(const NG::SheetStyle& sheetStyle);
     bool IsScrollable() const;
     void AvoidAiBar();
 
@@ -363,7 +363,7 @@ public:
 
     void SetCurrentHeight(float currentHeight)
     {
-        if (height_ != currentHeight) {
+        if (height_ != currentHeight || typeChanged_) {
             height_ = currentHeight;
             ChangeScrollHeight(height_);
         }
@@ -1170,7 +1170,7 @@ private:
     std::string DrawClipPathRight(const SizeF&, const BorderRadiusProperty&);
 
     SheetType GetSheetTypeFromSheetManager() const;
-    
+
     uint32_t broadcastPreDetentsIndex_ = 0;
     SheetAccessibilityDetents sheetDetents_ = SheetAccessibilityDetents::HIGH;
 

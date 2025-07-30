@@ -96,6 +96,9 @@ void JSMenu::Font(const JSCallbackInfo& info)
 void JSMenu::HandleFontObject(
     const JSCallbackInfo& info, CalcDimension& fontSize, std::string& weight, RefPtr<ResourceObject>& fontSizeResObj)
 {
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        return;
+    }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> size = obj->GetProperty("size");
     if (!size->IsNull()) {

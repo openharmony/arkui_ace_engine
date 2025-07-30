@@ -18,7 +18,7 @@
 #include "core/interfaces/native/utility/validators.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/callback_helper.h"
-#include "core/components_ng/pattern/dialog/custom_dialog_controller_model_ng.h"
+#include "core/components_ng/pattern/dialog/custom_dialog_controller_model_static.h"
 #include "core/components/theme/shadow_theme.h"
 
 namespace {
@@ -287,15 +287,13 @@ void CustomDialogControllerPeerImpl::OpenDialog()
         }
     }
     dialogProperties_.isSysBlurStyle = true;
-    // need check
-    // CustomDialogControllerModelNG::SetOpenDialog(dialogProperties_, dialogs_, WeakClaim(this), std::move(builder_));
+    CustomDialogControllerModelStatic::SetOpenDialog(dialogProperties_, dialogs_, WeakClaim(this), std::move(builder_));
 }
 
 void CustomDialogControllerPeerImpl::CloseDialog()
 {
     ContainerScope scope(instanceId_);
-    // need check
-    // CustomDialogControllerModelNG::SetCloseDialog(dialogProperties_, dialogs_, WeakClaim(this));
+    CustomDialogControllerModelStatic::SetCloseDialog(dialogProperties_, dialogs_, WeakClaim(this));
 }
 
 RefPtr<UINode> CustomDialogControllerPeerImpl::GetWindowScene() const

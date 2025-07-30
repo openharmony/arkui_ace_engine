@@ -38,9 +38,16 @@ public:
         return false;
     }
 
-    void SetAction(const std::string& action)
+    void SetAction(const std::string& action);
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
-        formLinkInfo_.SetAction(action);
+        Pattern::ToJsonValue(json, filter);
+        if (filter.IsFastFilter()) {
+            return;
+        }
+        auto info = formLinkInfo_.ToString();
+        json->Put("formLinkInfo", formLinkInfo_.ToJsonObject());
     }
 
 private:

@@ -16,6 +16,7 @@
 #include "ui/base/ace_type.h"
 #include "ui/resource/resource_parser.h"
 
+#include "base/utils/string_utils.h"
 #include "base/utils/system_properties.h"
 #include "core/common/container.h"
 #include "core/common/resource/resource_manager.h"
@@ -38,19 +39,45 @@ static RefPtr<Ace::ResourceAdapter> CreateResourceWrapper(const ResourceInfo& in
     return resourceAdapter;
 }
 
-bool ResourceParser::GetDimension(const ResourceInfo& resourceInfo, Ace::Dimension& dimension)
+bool ResourceParser::GetDimension(const ResourceInfo& resourceInfo, Ace::CalcDimension& dimension)
 {
     auto resourceWrapper = CreateResourceWrapper(resourceInfo);
     if (!resourceWrapper) {
         return false;
     }
 
+    auto resType = resourceInfo.type;
     if (resourceInfo.resId == UNKNOWN_RESOURCE_ID) {
-        dimension = resourceWrapper->GetDimensionByName(resourceInfo.params[0]);
+        if (resourceInfo.params.empty()) {
+            return false;
+        }
+
+        auto param = resourceInfo.params[0];
+        if (resType == static_cast<int32_t>(ResourceType::STRING)) {
+            auto value = resourceWrapper->GetStringByName(param);
+            return StringUtils::StringToCalcDimensionNG(value, dimension, false, DimensionUnit::VP);
+        }
+        if (resType == static_cast<int32_t>(ResourceType::INTEGER)) {
+            auto value = std::to_string(resourceWrapper->GetIntByName(param));
+            return StringUtils::StringToDimensionWithUnitNG(value, dimension, DimensionUnit::VP);
+        }
+        dimension = resourceWrapper->GetDimensionByName(param);
+        return true;
     } else {
-        dimension = resourceWrapper->GetDimension(resourceInfo.resId);
+        if (resType == static_cast<int32_t>(ResourceType::STRING)) {
+            auto value = resourceWrapper->GetString(static_cast<uint32_t>(resourceInfo.resId));
+            return StringUtils::StringToCalcDimensionNG(value, dimension, false, DimensionUnit::VP);
+        }
+        if (resType == static_cast<int32_t>(ResourceType::INTEGER)) {
+            auto value = std::to_string(resourceWrapper->GetInt(static_cast<uint32_t>(resourceInfo.resId)));
+            return StringUtils::StringToDimensionWithUnitNG(value, dimension, DimensionUnit::VP);
+        }
+        if (resType == static_cast<int32_t>(ResourceType::FLOAT)) {
+            dimension = resourceWrapper->GetDimension(static_cast<uint32_t>(resourceInfo.resId));
+            return true;
+        }
     }
-    return true;
+    return false;
 }
 
 bool ResourceParser::GetColor(const ResourceInfo& resourceInfo, Ace::Color& color)

@@ -20,9 +20,9 @@
 #include "core/components_ng/pattern/search/search_node.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/ace_engine_types.h"
-#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/validators.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
 #include "core/interfaces/native/implementation/search_controller_accessor_peer.h"
@@ -31,6 +31,8 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr float SCALE_LIMIT = 1.f;
+
 void resetNegative(std::optional<OHOS::Ace::Dimension> &dim)
 {
     if (dim && dim->IsNegative()) {
@@ -47,6 +49,7 @@ void resetPercent(std::optional<OHOS::Ace::Dimension> &dim)
 struct SearchButtonOptions {
     std::optional< OHOS::Ace::Dimension> width;
     std::optional<Color> color;
+    std::optional<bool> autoDisable;
 };
 
 struct SearchOptions {
@@ -118,6 +121,7 @@ SearchButtonOptions Convert(const Ark_SearchButtonOptions& src)
     SearchButtonOptions buttonOptions;
     buttonOptions.color = OptConvert<Color> (src.fontColor);
     buttonOptions.width = OptConvert<Dimension> (src.fontSize);
+    buttonOptions.autoDisable = OptConvert<bool> (src.autoDisable);
     return buttonOptions;
 }
 } // namespace Converter
@@ -158,20 +162,18 @@ void SetSearchOptionsImpl(Ark_NativePointer node,
 } // SearchInterfaceModifier
 namespace SearchAttributeModifier {
 void FontColorImpl(Ark_NativePointer node,
-                   const Ark_ResourceColor* value)
+                   const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
     auto fontColor = Converter::OptConvert<Color>(*value);
     SearchModelStatic::SetTextColor(frameNode, fontColor);
 }
 void SearchIconImpl(Ark_NativePointer node,
-                    const Ark_Union_IconOptions_SymbolGlyphModifier* value)
+                    const Opt_Union_IconOptions_SymbolGlyphModifier* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
     auto iconObjOpt = Converter::OptConvert<UnionIconOptionsObject>(*value);
     if (iconObjOpt) {
         auto arkIconOpt = std::get_if<Ark_IconOptions>(&iconObjOpt.value());
@@ -181,14 +183,15 @@ void SearchIconImpl(Ark_NativePointer node,
         } else {
             LOGE("ARKOALA SearchAttributeModifier.SearchIcon -> handling CustomObject not implemented.");
         }
+    } else {
+        SearchModelStatic::SetSearchDefaultIcon(frameNode);
     }
 }
 void CancelButtonImpl(Ark_NativePointer node,
-                      const Ark_Union_CancelButtonOptions_CancelButtonSymbolOptions* value)
+                      const Opt_Union_CancelButtonOptions_CancelButtonSymbolOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
     auto cancelOptions = Converter::OptConvert<UnionButtonOptions>(*value);
     if (cancelOptions) {
         auto options = std::get_if<Ark_CancelButtonOptions>(&cancelOptions.value());
@@ -200,55 +203,57 @@ void CancelButtonImpl(Ark_NativePointer node,
         } else {
             LOGE("ARKOALA SearchAttributeModifier.CancelButton -> handling OptCustomObject not implemented.");
         }
+    } else {
+        SearchModelStatic::SetCancelDefaultIcon(frameNode);
     }
 }
 void TextIndentImpl(Ark_NativePointer node,
-                    const Ark_Length* value)
+                    const Opt_Length* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
     auto indentValue = Converter::OptConvert<Dimension>(*value);
     SearchModelStatic::SetTextIndent(frameNode, indentValue);
 }
 void OnEditChangeImpl(Ark_NativePointer node,
-                      const Callback_Boolean_Void* value)
+                      const Opt_Callback_Boolean_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto onEditChange = [arkCallback = CallbackHelper(*value)](bool value) {
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // TODO: Reset value
+        return;
+    }
+    auto onEditChange = [arkCallback = CallbackHelper(*optValue)](bool value) {
         arkCallback.Invoke(value);
     };
     SearchModelNG::SetOnEditChange(frameNode, std::move(onEditChange));
 }
 void SelectedBackgroundColorImpl(Ark_NativePointer node,
-                                 const Ark_ResourceColor* value)
+                                 const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
     auto placeHolderColor = Converter::OptConvert<Color>(*value);
     SearchModelStatic::SetSelectedBackgroundColor(frameNode, placeHolderColor);
 }
 void CaretStyleImpl(Ark_NativePointer node,
-                    const Ark_CaretStyle* value)
+                    const Opt_CaretStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto caretStyle = Converter::Convert<Converter::CaretStyle>(*value);
+    auto caretStyle = Converter::OptConvert<Converter::CaretStyle>(*value).value_or(Converter::CaretStyle{});
     SearchModelStatic::SetCaretColor(frameNode, caretStyle.color);
     resetNegative(caretStyle.width);
     resetPercent(caretStyle.width);
     SearchModelStatic::SetCaretWidth(frameNode, caretStyle.width);
 }
 void PlaceholderColorImpl(Ark_NativePointer node,
-                          const Ark_ResourceColor* value)
+                          const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
     auto placeHolderColor = Converter::OptConvert<Color>(*value);
     SearchModelStatic::SetPlaceholderColor(frameNode, placeHolderColor);
 }
@@ -271,41 +276,47 @@ void TextFontImpl(Ark_NativePointer node,
     SearchModelStatic::SetTextFont(frameNode, fontValue);
 }
 void EnterKeyTypeImpl(Ark_NativePointer node,
-                      Ark_EnterKeyType value)
+                      const Opt_EnterKeyType* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    SearchModelStatic::SetSearchEnterKeyType(frameNode, Converter::OptConvert<TextInputAction>(value));
+    SearchModelStatic::SetSearchEnterKeyType(frameNode, Converter::OptConvert<TextInputAction>(*value));
 }
 void OnSubmit0Impl(Ark_NativePointer node,
-                   const Callback_String_Void* value)
+                   const Opt_Callback_String_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto onSubmit = [arkCallback = CallbackHelper(*value)](const std::u16string& value,
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // TODO: Reset value
+        return;
+    }
+    auto onSubmit = [arkCallback = CallbackHelper(*optValue)](const std::u16string& value,
         NG::TextFieldCommonEvent&
     ) {
         Converter::ConvContext ctx;
-        const std::string u8Value = UtfUtils::Str16DebugToStr8(value);
-        auto arkStringValue = Converter::ArkValue<Ark_String>(u8Value, &ctx);
+        auto arkStringValue = Converter::ArkValue<Ark_String>(value, &ctx);
         arkCallback.Invoke(arkStringValue);
     };
     SearchModelNG::SetOnSubmit(frameNode, std::move(onSubmit));
 }
 void OnSubmit1Impl(Ark_NativePointer node,
-                   const SearchSubmitCallback* value)
+                   const Opt_SearchSubmitCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // TODO: Reset value
+        return;
+    }
     auto weakNode = AceType::WeakClaim(frameNode);
-    auto onSubmit = [arkCallback = CallbackHelper(*value), node = weakNode](
-            const std::u16string& value, NG::TextFieldCommonEvent& info) {
+    auto onSubmit = [arkCallback = CallbackHelper(*optValue), node = weakNode](
+		    const std::u16string& value, NG::TextFieldCommonEvent& info) {
         PipelineContext::SetCallBackNode(node);
         Converter::ConvContext ctx;
-        const std::string u8Value = UtfUtils::Str16DebugToStr8(value);
-        auto arkStringValue = Converter::ArkValue<Ark_String>(u8Value, &ctx);
+        auto arkStringValue = Converter::ArkValue<Ark_String>(value, &ctx);
         const auto event = Converter::ArkSubmitEventSync(info);
         auto eventArkValue = Converter::ArkValue<Opt_SubmitEvent, Ark_SubmitEvent>(event.ArkValue());
         arkCallback.InvokeSync(arkStringValue, eventArkValue);
@@ -313,28 +324,40 @@ void OnSubmit1Impl(Ark_NativePointer node,
     SearchModelNG::SetOnSubmit(frameNode, std::move(onSubmit));
 }
 void OnChangeImpl(Ark_NativePointer node,
-                  const EditableTextOnChangeCallback* value)
+                  const Opt_EditableTextOnChangeCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto onChange = [arkCallback = CallbackHelper(*value)](const ChangeValueInfo& changeValueInfo) {
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        SearchModelNG::SetOnChange(frameNode, nullptr);
+        return;
+    }
+    auto onChange = [arkCallback = CallbackHelper(*optValue)](const ChangeValueInfo& info) {
         Converter::ConvContext ctx;
-        const std::string u8Text = UtfUtils::Str16DebugToStr8(changeValueInfo.value);
-        PreviewText prevText = changeValueInfo.previewText;
-        auto textArkString = Converter::ArkValue<Ark_String>(u8Text, &ctx);
-        auto textArkPrevText = Converter::ArkValue<Opt_PreviewText>(prevText, &ctx);
-        arkCallback.Invoke(textArkString, textArkPrevText);
+        auto textArkString = Converter::ArkValue<Ark_String>(info.value, &ctx);
+        auto textArkPrevText = Converter::ArkValue<Opt_PreviewText>(info.previewText, &ctx);
+        auto options = Converter::ArkValue<Opt_TextChangeOptions>();
+        options.tag = INTEROP_TAG_OBJECT;
+        options.value.rangeBefore = Converter::ArkValue<Ark_TextRange>(info.rangeBefore);
+        options.value.rangeAfter = Converter::ArkValue<Ark_TextRange>(info.rangeAfter);
+        options.value.oldContent = Converter::ArkValue<Ark_String>(info.oldContent, &ctx);
+        options.value.oldPreviewText = Converter::ArkValue<Ark_PreviewText>(info.oldPreviewText, &ctx);
+        arkCallback.InvokeSync(textArkString, textArkPrevText, options);
     };
     SearchModelNG::SetOnChange(frameNode, std::move(onChange));
 }
 void OnTextSelectionChangeImpl(Ark_NativePointer node,
-                               const OnTextSelectionChangeCallback* value)
+                               const Opt_OnTextSelectionChangeCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto onTextSelectionChange = [arkCallback = CallbackHelper(*value)](
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // TODO: Reset value
+        return;
+    }
+    auto onTextSelectionChange = [arkCallback = CallbackHelper(*optValue)](
         int32_t selectionStart, int32_t selectionEnd
     ) {
         auto arkSelectionStart = Converter::ArkValue<Ark_Number>(selectionStart);
@@ -344,12 +367,16 @@ void OnTextSelectionChangeImpl(Ark_NativePointer node,
     SearchModelNG::SetOnTextSelectionChange(frameNode, std::move(onTextSelectionChange));
 }
 void OnContentScrollImpl(Ark_NativePointer node,
-                         const OnContentScrollCallback* value)
+                         const Opt_OnContentScrollCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto onContentScroll = [arkCallback = CallbackHelper(*value)](float totalOffsetX, float totalOffsetY) {
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // TODO: Reset value
+        return;
+    }
+    auto onContentScroll = [arkCallback = CallbackHelper(*optValue)](float totalOffsetX, float totalOffsetY) {
         auto arkTotalOffsetX = Converter::ArkValue<Ark_Number>(totalOffsetX);
         auto arkTotalOffsetY = Converter::ArkValue<Ark_Number>(totalOffsetY);
         arkCallback.Invoke(arkTotalOffsetX, arkTotalOffsetY);
@@ -357,44 +384,53 @@ void OnContentScrollImpl(Ark_NativePointer node,
     SearchModelNG::SetOnContentScroll(frameNode, std::move(onContentScroll));
 }
 void OnCopyImpl(Ark_NativePointer node,
-                const Callback_String_Void* value)
+                const Opt_Callback_String_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto onCopy = [arkCallback = CallbackHelper(*value)](const std::u16string& value) {
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // TODO: Reset value
+        return;
+    }
+    auto onCopy = [arkCallback = CallbackHelper(*optValue)](const std::u16string& value) {
         Converter::ConvContext ctx;
-        const std::string u8Value = UtfUtils::Str16DebugToStr8(value);
-        auto textArkString = Converter::ArkValue<Ark_String>(u8Value, &ctx);
+        auto textArkString = Converter::ArkValue<Ark_String>(value, &ctx);
         arkCallback.Invoke(textArkString);
     };
     SearchModelNG::SetOnCopy(frameNode, std::move(onCopy));
 }
 void OnCutImpl(Ark_NativePointer node,
-               const Callback_String_Void* value)
+               const Opt_Callback_String_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto onCut = [arkCallback = CallbackHelper(*value)](const std::u16string& value) {
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // TODO: Reset value
+        return;
+    }
+    auto onCut = [arkCallback = CallbackHelper(*optValue)](const std::u16string& value) {
         Converter::ConvContext ctx;
-        const std::string u8Value = UtfUtils::Str16DebugToStr8(value);
-        auto textArkString = Converter::ArkValue<Ark_String>(u8Value, &ctx);
+        auto textArkString = Converter::ArkValue<Ark_String>(value, &ctx);
         arkCallback.Invoke(textArkString);
     };
     SearchModelNG::SetOnCut(frameNode, std::move(onCut));
 }
 void OnPasteImpl(Ark_NativePointer node,
-                 const OnPasteCallback* value)
+                 const Opt_OnPasteCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto onPaste = [arkCallback = CallbackHelper(*value)](const std::u16string& content,
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // TODO: Reset value
+        return;
+    }
+    auto onPaste = [arkCallback = CallbackHelper(*optValue)](const std::u16string& content,
         NG::TextCommonEvent& event) -> void {
         Converter::ConvContext ctx;
-        const std::string u8Content = UtfUtils::Str16DebugToStr8(content);
-        auto arkContent = Converter::ArkValue<Ark_String>(u8Content, &ctx);
+        auto arkContent = Converter::ArkValue<Ark_String>(content, &ctx);
         auto keeper = CallbackKeeper::Claim([&event]() {
             event.SetPreventDefault(true);
         });
@@ -406,128 +442,160 @@ void OnPasteImpl(Ark_NativePointer node,
     SearchModelNG::SetOnPasteWithEvent(frameNode, std::move(onPaste));
 }
 void CopyOptionImpl(Ark_NativePointer node,
-                    Ark_CopyOptions value)
+                    const Opt_CopyOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    SearchModelStatic::SetCopyOption(frameNode, Converter::OptConvert<CopyOptions>(value));
+    SearchModelStatic::SetCopyOption(frameNode, Converter::OptConvert<CopyOptions>(*value));
 }
 void MaxLengthImpl(Ark_NativePointer node,
-                   const Ark_Number* value)
+                   const Opt_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto maxLength = Converter::Convert<int>(*value);
-    if (GreatOrEqual(maxLength, 0)) {
-        SearchModelNG::SetMaxLength(frameNode, maxLength);
+    auto maxLength = Converter::OptConvert<int>(*value);
+    Validator::ValidateNonNegative(maxLength);
+    if (maxLength) {
+        SearchModelNG::SetMaxLength(frameNode, *maxLength);
     } else {
         SearchModelNG::ResetMaxLength(frameNode);
     }
 }
 void TextAlignImpl(Ark_NativePointer node,
-                   Ark_TextAlign value)
+                   const Opt_TextAlign* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    SearchModelStatic::SetTextAlign(frameNode, Converter::OptConvert<TextAlign>(value));
+    SearchModelStatic::SetTextAlign(frameNode, Converter::OptConvert<TextAlign>(*value));
 }
 void EnableKeyboardOnFocusImpl(Ark_NativePointer node,
-                               Ark_Boolean value)
+                               const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    SearchModelNG::RequestKeyboardOnFocus(frameNode, Converter::Convert<bool>(value));
+    auto convValue = Converter::OptConvert<bool>(*value);
+    SearchModelStatic::RequestKeyboardOnFocus(frameNode, convValue);
 }
 void SelectionMenuHiddenImpl(Ark_NativePointer node,
-                             Ark_Boolean value)
+                             const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto isHidden = Converter::Convert<bool>(value);
-    SearchModelNG::SetSelectionMenuHidden(frameNode, isHidden);
+    auto convValue = Converter::OptConvert<bool>(*value);
+    SearchModelStatic::SetSelectionMenuHidden(frameNode, convValue);
 }
 void MinFontSizeImpl(Ark_NativePointer node,
-                     const Ark_Union_Number_String_Resource* value)
+                     const Opt_Union_Number_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto optValue = Converter::OptConvert<Dimension>(*value);
+    std::optional<Dimension> optValue = std::nullopt;
+    if (value->tag != INTEROP_TAG_UNDEFINED) {
+        optValue = Converter::OptConvertFromArkNumStrRes(value->value);
+    }
     resetNegative(optValue);
     resetPercent(optValue);
     SearchModelStatic::SetAdaptMinFontSize(frameNode, optValue);
 }
 void MaxFontSizeImpl(Ark_NativePointer node,
-                     const Ark_Union_Number_String_Resource* value)
+                     const Opt_Union_Number_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto optValue = Converter::OptConvert<Dimension>(*value);
+    std::optional<Dimension> optValue = std::nullopt;
+    if (value->tag != INTEROP_TAG_UNDEFINED) {
+        optValue = Converter::OptConvertFromArkNumStrRes(value->value);
+    }
     resetNegative(optValue);
     resetPercent(optValue);
     SearchModelStatic::SetAdaptMaxFontSize(frameNode, optValue);
 }
-void DecorationImpl(Ark_NativePointer node,
-                    const Ark_TextDecorationOptions* value)
+void MinFontScaleImpl(Ark_NativePointer node,
+                      const Opt_Union_Number_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto options = Converter::Convert<Converter::TextDecorationOptions>(*value);
-    SearchModelStatic::SetTextDecoration(frameNode, options.textDecoration);
-    SearchModelStatic::SetTextDecorationColor(frameNode, options.color);
-    SearchModelStatic::SetTextDecorationStyle(frameNode, options.textDecorationStyle);
+    auto convValue = Converter::OptConvert<float>(*value);
+    Validator::ValidateNonNegative(convValue);
+    Validator::ValidateLessOrEqual(convValue, SCALE_LIMIT);
+    SearchModelStatic::SetMinFontScale(frameNode, convValue);
+}
+void MaxFontScaleImpl(Ark_NativePointer node,
+                      const Opt_Union_Number_Resource* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvert<float>(*value);
+    Validator::ValidateNonNegative(convValue);
+    Validator::ValidateGreatOrEqual(convValue, SCALE_LIMIT);
+    SearchModelStatic::SetMaxFontScale(frameNode, convValue);
+}
+void DecorationImpl(Ark_NativePointer node,
+                    const Opt_TextDecorationOptions* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::optional<Converter::TextDecorationOptions> options =
+        Converter::OptConvert<Converter::TextDecorationOptions>(*value).value_or(Converter::TextDecorationOptions());
+    SearchModelStatic::SetTextDecoration(frameNode, options->textDecoration);
+    SearchModelStatic::SetTextDecorationColor(frameNode, options->color);
+    SearchModelStatic::SetTextDecorationStyle(frameNode, options->textDecorationStyle);
 }
 void LetterSpacingImpl(Ark_NativePointer node,
-                       const Ark_Union_Number_String_Resource* value)
+                       const Opt_Union_Number_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto spacing = Converter::OptConvert<Dimension>(*value);
+    std::optional<Dimension> spacing = std::nullopt;
+    if (value->tag != INTEROP_TAG_UNDEFINED) {
+        spacing = Converter::OptConvertFromArkNumStrRes(value->value);
+    }
     resetNegative(spacing);
     resetPercent(spacing);
     SearchModelStatic::SetLetterSpacing(frameNode, spacing);
 }
 void LineHeightImpl(Ark_NativePointer node,
-                    const Ark_Union_Number_String_Resource* value)
+                    const Opt_Union_Number_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
     auto optValue = Converter::OptConvert<Dimension>(*value);
     resetNegative(optValue);
     SearchModelStatic::SetLineHeight(frameNode, optValue);
 }
 void TypeImpl(Ark_NativePointer node,
-              Ark_SearchType value)
+              const Opt_SearchType* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    SearchModelStatic::SetType(frameNode, Converter::OptConvert<TextInputType>(value));
+    SearchModelStatic::SetType(frameNode, Converter::OptConvert<TextInputType>(*value));
 }
 void FontFeatureImpl(Ark_NativePointer node,
-                     const Ark_String* value)
+                     const Opt_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto fontFeatureSettings = Converter::Convert<std::string>(*value);
-    SearchModelNG::SetFontFeature(frameNode, ParseFontFeatureSettings(fontFeatureSettings));
+    auto fontFeatureSettings = Converter::OptConvert<std::string>(*value);
+    if (!fontFeatureSettings) {
+        return;
+    }
+    SearchModelNG::SetFontFeature(frameNode, ParseFontFeatureSettings(*fontFeatureSettings));
 }
 void OnWillInsertImpl(Ark_NativePointer node,
-                      const Callback_InsertValue_Boolean* value)
+                      const Opt_Callback_InsertValue_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto onWillInsert = [callback = CallbackHelper(*value)](const InsertValueInfo& value) -> bool {
-        std::string u8InsertValue = UtfUtils::Str16DebugToStr8(value.insertValue);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // TODO: Reset value
+        return;
+    }
+    auto onWillInsert = [callback = CallbackHelper(*optValue)](const InsertValueInfo& value) -> bool {
+        Converter::ConvContext ctx;
         Ark_InsertValue insertValue = {
             .insertOffset = Converter::ArkValue<Ark_Number>(value.insertOffset),
-            .insertValue = Converter::ArkValue<Ark_String>(u8InsertValue)
+            .insertValue = Converter::ArkValue<Ark_String>(value.insertValue, &ctx)
         };
         return callback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(insertValue)
             .value_or(true);
@@ -535,34 +603,41 @@ void OnWillInsertImpl(Ark_NativePointer node,
     SearchModelNG::SetOnWillInsertValueEvent(frameNode, std::move(onWillInsert));
 }
 void OnDidInsertImpl(Ark_NativePointer node,
-                     const Callback_InsertValue_Void* value)
+                     const Opt_Callback_InsertValue_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto onDidInsert = [arkCallback = CallbackHelper(*value)](const InsertValueInfo& value) {
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // TODO: Reset value
+        return;
+    }
+    auto onDidInsert = [arkCallback = CallbackHelper(*optValue)](const InsertValueInfo& value) {
         Converter::ConvContext ctx;
-        std::string u8InsertValue = UtfUtils::Str16DebugToStr8(value.insertValue);
         Ark_InsertValue insertValue = {
             .insertOffset = Converter::ArkValue<Ark_Number>(value.insertOffset),
-            .insertValue = Converter::ArkValue<Ark_String>(u8InsertValue)
+            .insertValue = Converter::ArkValue<Ark_String>(value.insertValue, &ctx)
         };
         arkCallback.Invoke(insertValue);
     };
     SearchModelNG::SetOnDidInsertValueEvent(frameNode, std::move(onDidInsert));
 }
 void OnWillDeleteImpl(Ark_NativePointer node,
-                      const Callback_DeleteValue_Boolean* value)
+                      const Opt_Callback_DeleteValue_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto onWillDelete = [callback = CallbackHelper(*value)](const DeleteValueInfo& value) -> bool {
-        std::string u8DeleteValue = UtfUtils::Str16DebugToStr8(value.deleteValue);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // TODO: Reset value
+        return;
+    }
+    auto onWillDelete = [callback = CallbackHelper(*optValue)](const DeleteValueInfo& value) -> bool {
+        Converter::ConvContext ctx;
         Ark_DeleteValue deleteValue = {
             .deleteOffset = Converter::ArkValue<Ark_Number>(value.deleteOffset),
             .direction = Converter::ArkValue<Ark_TextDeleteDirection>(value.direction),
-            .deleteValue = Converter::ArkValue<Ark_String>(u8DeleteValue)
+            .deleteValue = Converter::ArkValue<Ark_String>(value.deleteValue, &ctx)
         };
         return callback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(deleteValue)
             .value_or(true);
@@ -570,93 +645,182 @@ void OnWillDeleteImpl(Ark_NativePointer node,
     SearchModelNG::SetOnWillDeleteEvent(frameNode, std::move(onWillDelete));
 }
 void OnDidDeleteImpl(Ark_NativePointer node,
-                     const Callback_DeleteValue_Void* value)
+                     const Opt_Callback_DeleteValue_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto onDidDelete = [arkCallback = CallbackHelper(*value)](const DeleteValueInfo& value) {
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // TODO: Reset value
+        return;
+    }
+    auto onDidDelete = [arkCallback = CallbackHelper(*optValue)](const DeleteValueInfo& value) {
         Converter::ConvContext ctx;
-        std::string u8DeleteValue = UtfUtils::Str16DebugToStr8(value.deleteValue);
         Ark_DeleteValue deleteValue = {
             .deleteOffset = Converter::ArkValue<Ark_Number>(value.deleteOffset),
             .direction = Converter::ArkValue<Ark_TextDeleteDirection>(value.direction),
-            .deleteValue = Converter::ArkValue<Ark_String>(u8DeleteValue)
+            .deleteValue = Converter::ArkValue<Ark_String>(value.deleteValue, &ctx)
         };
         arkCallback.Invoke(deleteValue);
     };
     SearchModelNG::SetOnDidDeleteEvent(frameNode, std::move(onDidDelete));
 }
 void EditMenuOptionsImpl(Ark_NativePointer node,
-                         Ark_EditMenuOptions value)
+                         const Opt_EditMenuOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    LOGE("ARKOALA SearchAttributeModifier.EditMenuOptionsImpl -> Method is not implemented.");
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // TODO: Reset value
+        return;
+    }
+    auto onCreateMenuCallback = [arkCreateMenu = CallbackHelper(optValue->onCreateMenu)](
+        const std::vector<NG::MenuItemParam>& systemMenuItems) -> std::vector<NG::MenuOptionsParam> {
+            auto menuItems = Converter::ArkValue<Array_TextMenuItem>(systemMenuItems, Converter::FC);
+            auto result = arkCreateMenu.InvokeWithOptConvertResult<std::vector<NG::MenuOptionsParam>,
+                Array_TextMenuItem, Callback_Array_TextMenuItem_Void>(menuItems);
+            return result.value_or(std::vector<NG::MenuOptionsParam>());
+        };
+    auto onMenuItemClick = [arkMenuItemClick = CallbackHelper(optValue->onMenuItemClick)](
+        NG::MenuItemParam menuOptionsParam) -> bool {
+            TextRange range {.start = menuOptionsParam.start, .end = menuOptionsParam.end};
+            auto menuItem = Converter::ArkValue<Ark_TextMenuItem>(menuOptionsParam);
+            auto arkRange = Converter::ArkValue<Ark_TextRange>(range);
+            auto arkResult = arkMenuItemClick.InvokeWithObtainResult<
+                Ark_Boolean, Callback_Boolean_Void>(menuItem, arkRange);
+            return Converter::Convert<bool>(arkResult);
+        };
+    SearchModelStatic::SetSelectionMenuOptions(frameNode, std::move(onCreateMenuCallback), std::move(onMenuItemClick));
 }
 void EnablePreviewTextImpl(Ark_NativePointer node,
-                           Ark_Boolean value)
+                           const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    SearchModelNG::SetEnablePreviewText(frameNode, Converter::Convert<bool>(value));
+    auto convValue = Converter::OptConvert<bool>(*value);
+    SearchModelStatic::SetEnablePreviewText(frameNode, convValue);
 }
 void EnableHapticFeedbackImpl(Ark_NativePointer node,
-                              Ark_Boolean value)
+                              const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    SearchModelNG::SetEnableHapticFeedback(frameNode, Converter::Convert<bool>(value));
+    auto convValue = Converter::OptConvert<bool>(*value);
+    SearchModelStatic::SetEnableHapticFeedback(frameNode, convValue);
+}
+void AutoCapitalizationModeImpl(Ark_NativePointer node,
+                                const Opt_AutoCapitalizationMode* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+}
+void HalfLeadingImpl(Ark_NativePointer node,
+                     const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelStatic::SetHalfLeading(frameNode, value ? Converter::OptConvert<bool>(*value) : std::nullopt);
+}
+void StopBackPressImpl(Ark_NativePointer node,
+                       const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelStatic::SetStopBackPress(frameNode, value ? Converter::OptConvert<bool>(*value) : std::nullopt);
+}
+void OnWillChangeImpl(Ark_NativePointer node,
+                      const Opt_Callback_EditableTextChangeValue_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        return;
+    }
+    auto onWillChange = [callback = CallbackHelper(*optValue)](const ChangeValueInfo& value) -> bool {
+        Converter::ConvContext ctx;
+        Ark_EditableTextChangeValue changeValue = {
+            .content = Converter::ArkValue<Ark_String>(value.value, &ctx),
+            .previewText = {
+                .tag = INTEROP_TAG_OBJECT,
+                .value = Converter::ArkValue<Ark_PreviewText>(value.previewText),
+            },
+            .options = {
+                .tag = INTEROP_TAG_OBJECT,
+                .value.rangeBefore = Converter::ArkValue<Ark_TextRange>(value.rangeBefore),
+                .value.rangeAfter = Converter::ArkValue<Ark_TextRange>(value.rangeAfter),
+                .value.oldContent = Converter::ArkValue<Ark_String>(value.oldContent, &ctx),
+                .value.oldPreviewText = Converter::ArkValue<Ark_PreviewText>(value.oldPreviewText, &ctx),
+            }
+        };
+        return callback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(changeValue)
+            .value_or(true);
+    };
+    SearchModelNG::SetOnWillChangeEvent(frameNode, std::move(onWillChange));
+}
+void KeyboardAppearanceImpl(Ark_NativePointer node,
+                            const Opt_KeyboardAppearance* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = value ? Converter::OptConvert<KeyboardAppearance>(*value) : std::nullopt;
+    SearchModelStatic::SetKeyboardAppearance(frameNode, convValue);
 }
 void SearchButtonImpl(Ark_NativePointer node,
-                      const Ark_String* value,
+                      const Opt_String* value,
                       const Opt_SearchButtonOptions* option)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    if (value) {
-        auto buttonText = Converter::Convert<std::string>(*value);
-        SearchModelNG::SetSearchButton(frameNode, buttonText);
-    }
-    CHECK_NULL_VOID(option);
-    auto buttonOptions = Converter::OptConvert<SearchButtonOptions>(*option);
-    if (buttonOptions) {
-        SearchModelStatic::SetSearchButtonFontColor(frameNode, buttonOptions->color);
-        resetNegative(buttonOptions->width);
-        resetPercent(buttonOptions->width);
-        SearchModelStatic::SetSearchButtonFontSize(frameNode, buttonOptions->width);
-    }
+    std::optional<std::string> convValue = Converter::OptConvert<std::string>(*value).value_or("");
+    SearchModelNG::SetSearchButton(frameNode, *convValue);
+    std::optional<SearchButtonOptions> buttonOptions =
+        Converter::OptConvert<SearchButtonOptions>(*option).value_or(SearchButtonOptions());
+    SearchModelStatic::SetSearchButtonFontColor(frameNode, buttonOptions->color);
+    resetNegative(buttonOptions->width);
+    resetPercent(buttonOptions->width);
+    SearchModelStatic::SetSearchButtonFontSize(frameNode, buttonOptions->width);
+    SearchModelStatic::SetSearchButtonAutoDisable(frameNode, buttonOptions->autoDisable);
 }
 void InputFilterImpl(Ark_NativePointer node,
-                     const Ark_ResourceStr* value,
+                     const Opt_ResourceStr* value,
                      const Opt_Callback_String_Void* error)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    CHECK_NULL_VOID(error);
     auto valueString = Converter::OptConvert<std::string>(*value);
-    auto errorEvent = [frameNode](const std::u16string& val) {
-        std::string u8Val = UtfUtils::Str16DebugToStr8(val);
-        auto errortArkString = Converter::ArkValue<Ark_String>(u8Val);
-    };
+    std::optional<Callback_String_Void> arkErrorEvent = error ? Converter::GetOpt(*error) : std::nullopt;
+    std::function<void(const std::u16string&)> errorEvent = nullptr;
+    if (arkErrorEvent) {
+        errorEvent = [callback = CallbackHelper(*arkErrorEvent)](const std::u16string& val) {
+            auto errortArkString = Converter::ArkValue<Ark_String>(val, Converter::FC);
+            callback.Invoke(errortArkString);
+        };
+    }
     SearchModelNG::SetInputFilter(frameNode, valueString.value_or(""), errorEvent);
 }
 void CustomKeyboardImpl(Ark_NativePointer node,
-                        const CustomNodeBuilder* value,
+                        const Opt_CustomNodeBuilder* value,
                         const Opt_KeyboardOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        SearchModelStatic::SetCustomKeyboard(frameNode, nullptr, false);
+        return;
+    }
     KeyboardOptions keyboardOptions = {.supportAvoidance = false};
     auto convOptions = options ? Converter::OptConvert<KeyboardOptions>(*options) : keyboardOptions;
-    auto customNodeBuilder = [callback = CallbackHelper(*value), node]() {
-        auto builderNode = callback.BuildSync(node);
-        NG::ViewStackProcessor::GetInstance()->Push(builderNode);
-    };
     bool supportAvoidance = convOptions.has_value() ? convOptions->supportAvoidance : false;
-    SearchModelStatic::SetCustomKeyboard(frameNode, std::move(customNodeBuilder), supportAvoidance);
+    CallbackHelper(*optValue).BuildAsync([frameNode, supportAvoidance](const RefPtr<UINode>& uiNode) {
+        auto customNodeBuilder = [uiNode]() {
+            NG::ViewStackProcessor::GetInstance()->Push(uiNode);
+        };
+        SearchModelStatic::SetCustomKeyboard(frameNode, std::move(customNodeBuilder), supportAvoidance);
+        }, node);
 }
 void _onChangeEvent_valueImpl(Ark_NativePointer node,
                               const Callback_String_Void* callback)
@@ -666,8 +830,7 @@ void _onChangeEvent_valueImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(callback);
     auto onEvent = [arkCallback = CallbackHelper(*callback)](const std::u16string& content) {
         Converter::ConvContext ctx;
-        std::string u8Content = UtfUtils::Str16DebugToStr8(content);
-        auto arkContent = Converter::ArkValue<Ark_String>(u8Content, &ctx);
+        auto arkContent = Converter::ArkValue<Ark_String>(content, &ctx);
         arkCallback.Invoke(arkContent);
     };
     SearchModelStatic::SetOnChangeEvent(frameNode, std::move(onEvent));
@@ -704,6 +867,8 @@ const GENERATED_ArkUISearchModifier* GetSearchModifier()
         SearchAttributeModifier::SelectionMenuHiddenImpl,
         SearchAttributeModifier::MinFontSizeImpl,
         SearchAttributeModifier::MaxFontSizeImpl,
+        SearchAttributeModifier::MinFontScaleImpl,
+        SearchAttributeModifier::MaxFontScaleImpl,
         SearchAttributeModifier::DecorationImpl,
         SearchAttributeModifier::LetterSpacingImpl,
         SearchAttributeModifier::LineHeightImpl,
@@ -716,6 +881,11 @@ const GENERATED_ArkUISearchModifier* GetSearchModifier()
         SearchAttributeModifier::EditMenuOptionsImpl,
         SearchAttributeModifier::EnablePreviewTextImpl,
         SearchAttributeModifier::EnableHapticFeedbackImpl,
+        SearchAttributeModifier::AutoCapitalizationModeImpl,
+        SearchAttributeModifier::HalfLeadingImpl,
+        SearchAttributeModifier::StopBackPressImpl,
+        SearchAttributeModifier::OnWillChangeImpl,
+        SearchAttributeModifier::KeyboardAppearanceImpl,
         SearchAttributeModifier::SearchButtonImpl,
         SearchAttributeModifier::InputFilterImpl,
         SearchAttributeModifier::CustomKeyboardImpl,

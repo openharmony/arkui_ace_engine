@@ -62,7 +62,6 @@ public:
     virtual int32_t ExeAppAIFunction(
         const std::string& funcName, const std::string& params, const std::function<void(uint32_t)>& finishCallback)
         override;
-
 private:
     static inline BrokerDelegator<UIContentServiceProxy> delegator_;
     sptr<UiReportStub> report_ = nullptr;

@@ -84,7 +84,7 @@ ArkUI_Int32 AddRenderNode(ArkUINodeHandle node, ArkUIRenderNodeHandle child)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
     if (frameNode->TotalChildCount() > 0) {
-        return ERROR_CODE_PARAM_INVALID;
+        return ERROR_CODE_CHILD_EXISTED;
     }
     CHECK_NULL_RETURN(frameNode->GetRenderContext(), ERROR_CODE_PARAM_INVALID);
     auto rsContext = AceType::DynamicCast<RosenRenderContext>(frameNode->GetRenderContext());
@@ -92,10 +92,13 @@ ArkUI_Int32 AddRenderNode(ArkUINodeHandle node, ArkUIRenderNodeHandle child)
     auto rsNode = rsContext->GetRSNode();
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     if (rsNode->GetChildren().size() > 0) {
-        return ERROR_CODE_PARAM_INVALID;
+        return ERROR_CODE_CHILD_EXISTED;
     }
     auto childNodePtr = GetRsNodeFromStruct(child);
     CHECK_NULL_RETURN(childNodePtr, ERROR_CODE_PARAM_INVALID);
+    if (rsNode->GetParent()) {
+        return ERROR_CODE_RENDER_PARENT_EXISTED;
+    }
     rsNode->AddChild(childNodePtr, -1);
     auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, ERROR_CODE_NO_ERROR);
@@ -221,7 +224,7 @@ ArkUI_Int32 GetChild(ArkUIRenderNodeHandle node, int32_t index, ArkUIRenderNodeH
     auto rsNodePtr = GetRsNodeFromStruct(node);
     CHECK_NULL_RETURN(rsNodePtr, ERROR_CODE_PARAM_INVALID);
     auto renderNode = rsNodePtr->GetChildByIndex(index);
-    CHECK_NULL_RETURN(renderNode, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(renderNode, ERROR_CODE_CHILD_RENDER_NOT_EXIST);
     RenderNodeStruct* nodeStruct = new RenderNodeStruct { .rsNode = renderNode, .nodeId = renderNode->GetId() };
     *child = reinterpret_cast<ArkUIRenderNodeHandle>(nodeStruct);
     *childId = renderNode->GetId();
@@ -268,7 +271,7 @@ ArkUI_Int32 GetFirstChild(ArkUIRenderNodeHandle node, ArkUIRenderNodeHandle* chi
         *childId = renderNode->GetId();
         return ERROR_CODE_NO_ERROR;
     }
-    return ERROR_CODE_PARAM_INVALID;
+    return ERROR_CODE_CHILD_RENDER_NOT_EXIST;
 }
 
 ArkUI_Int32 GetNextSibling(ArkUIRenderNodeHandle node, ArkUIRenderNodeHandle* slibing, int32_t* childId)
@@ -287,7 +290,7 @@ ArkUI_Int32 GetNextSibling(ArkUIRenderNodeHandle node, ArkUIRenderNodeHandle* sl
         *childId = slibingNode->GetId();
         return ERROR_CODE_NO_ERROR;
     }
-    return ERROR_CODE_PARAM_INVALID;
+    return ERROR_CODE_CHILD_RENDER_NOT_EXIST;
 }
 
 ArkUI_Int32 GetPreviousSibling(ArkUIRenderNodeHandle node, ArkUIRenderNodeHandle* slibing, int32_t* childId)
@@ -305,7 +308,7 @@ ArkUI_Int32 GetPreviousSibling(ArkUIRenderNodeHandle node, ArkUIRenderNodeHandle
         *childId = slibingNode->GetId();
         return ERROR_CODE_NO_ERROR;
     }
-    return ERROR_CODE_PARAM_INVALID;
+    return ERROR_CODE_CHILD_RENDER_NOT_EXIST;
 }
 
 ArkUI_Int32 GetChildrenCount(ArkUIRenderNodeHandle node, int32_t* count)
@@ -354,7 +357,8 @@ int32_t SetSize(ArkUIRenderNodeHandle handle, int32_t width, int32_t height)
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     rsNode->SetBoundsWidth(width);
     rsNode->SetBoundsHeight(height);
-    rsNode->SetFrame(0, 0, width, height);
+    auto vector4f = rsNode->GetStagingProperties().GetFrame();
+    rsNode->SetFrame(vector4f.x_, vector4f.y_, width, height);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -372,10 +376,11 @@ int32_t SetPosition(ArkUIRenderNodeHandle handle, int32_t x, int32_t y)
 {
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
-    OHOS::Rosen::Vector4f vector4f;
+    auto vector4f = rsNode->GetStagingProperties().GetBounds();
     vector4f.x_ = x;
     vector4f.y_ = y;
-    rsNode->SetBounds(vector4f);
+    rsNode->SetFrame(vector4f.x_, vector4f.y_, vector4f.z_, vector4f.w_);
+    rsNode->SetBounds(vector4f.x_, vector4f.y_, vector4f.z_, vector4f.w_);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -383,7 +388,7 @@ int32_t GetPosition(ArkUIRenderNodeHandle handle, int32_t* x, int32_t* y)
 {
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
-    auto vector4f = rsNode->GetStagingProperties().GetBounds();
+    auto vector4f = rsNode->GetStagingProperties().GetFrame();
     *x = vector4f.x_;
     *y = vector4f.y_;
     return ERROR_CODE_NO_ERROR;
@@ -825,9 +830,8 @@ int32_t SetDrawRegion(ArkUIRenderNodeHandle handle, float x, float y, float w, f
 {
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
-    std::shared_ptr<OHOS::Rosen::RectF> rect = std::make_shared<OHOS::Rosen::RectF>();
-    rect->SetAll(x, y, w, h);
-    rsNode->SetDrawRegion(rect);
+    std::shared_ptr<Rosen::RectF> drawRect = std::make_shared<Rosen::RectF>(x, y, w, h);
+    rsNode->SetDrawRegion(drawRect);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -1007,7 +1011,7 @@ ArkUI_Int32 GetVector2Property(ArkUIPropertyHandle property, float* x, float* y)
 
 ArkUIPropertyHandle CreateColorProperty(uint32_t color)
 {
-    auto property = std::make_shared<RSProperty<Rosen::RSColor>>(Rosen::RSColor(color));
+    auto property = std::make_shared<RSProperty<Rosen::RSColor>>(Rosen::RSColor::FromArgbInt(color));
     RenderPropertyStruct* propertyStruct =
         new RenderPropertyStruct { .colorProperty = property, .propertyType = ArkUIPropertyType::PROPERTY_COLOR };
     return reinterpret_cast<ArkUIPropertyHandle>(propertyStruct);
@@ -1020,7 +1024,7 @@ ArkUI_Int32 SetColorProperty(ArkUIPropertyHandle property, uint32_t color)
     if (propertyStruct->propertyType != ArkUIPropertyType::PROPERTY_COLOR) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    propertyStruct->colorProperty->Set(Rosen::RSColor(color));
+    propertyStruct->colorProperty->Set(Rosen::RSColor::FromArgbInt(color));
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -1099,7 +1103,7 @@ ArkUI_Int32 GetVector2AnimatableProperty(ArkUIPropertyHandle property, float* x,
 
 ArkUIPropertyHandle CreateColorAnimatableProperty(uint32_t color)
 {
-    auto property = std::make_shared<RSAnimatableProperty<Rosen::RSColor>>(Rosen::RSColor(color));
+    auto property = std::make_shared<RSAnimatableProperty<Rosen::RSColor>>(Rosen::RSColor::FromArgbInt(color));
     RenderPropertyStruct* propertyStruct = new RenderPropertyStruct { .colorAnimatableProperty = property,
         .propertyType = ArkUIPropertyType::ANIMATABLE_PROPERTY_COLOR };
     return reinterpret_cast<ArkUIPropertyHandle>(propertyStruct);
@@ -1112,7 +1116,7 @@ ArkUI_Int32 SetColorAnimatableProperty(ArkUIPropertyHandle property, uint32_t co
     if (propertyStruct->propertyType != ArkUIPropertyType::ANIMATABLE_PROPERTY_COLOR) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    propertyStruct->colorAnimatableProperty->Set(Rosen::RSColor(color));
+    propertyStruct->colorAnimatableProperty->Set(Rosen::RSColor::FromArgbInt(color));
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -1256,6 +1260,9 @@ ArkUI_Int32 SetCircleClip(ArkUIRenderNodeHandle node, ArkUICircleShape shape)
 {
     auto rsNodePtr = GetRsNodeFromStruct(node);
     CHECK_NULL_RETURN(rsNodePtr, ERROR_CODE_PARAM_INVALID);
+    RSRecordingPath rsPath;
+    rsPath.AddCircle(shape.centerX, shape.centerY, shape.radius);
+    rsNodePtr->SetClipBounds(Rosen::RSPath::CreateRSPath(rsPath));
     return ERROR_CODE_NO_ERROR;
 }
 

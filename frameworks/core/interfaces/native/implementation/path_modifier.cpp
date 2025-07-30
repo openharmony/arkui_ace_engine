@@ -76,12 +76,16 @@ void SetPathOptionsImpl(Ark_NativePointer node,
 } // PathInterfaceModifier
 namespace PathAttributeModifier {
 void CommandsImpl(Ark_NativePointer node,
-                  const Ark_String* value)
+                  const Opt_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    PathModelNG::SetCommands(frameNode, Converter::Convert<std::string>(*value));
+    auto convValue = Converter::OptConvert<std::string>(*value);
+    if (!convValue) {
+        // TODO: Reset value
+        return;
+    }
+    PathModelNG::SetCommands(frameNode, *convValue);
 }
 } // PathAttributeModifier
 const GENERATED_ArkUIPathModifier* GetPathModifier()

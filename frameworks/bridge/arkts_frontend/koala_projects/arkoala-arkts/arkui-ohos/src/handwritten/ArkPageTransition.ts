@@ -17,15 +17,11 @@ import { int32 } from "@koalaui/common"
 import { contextNode, remember, scheduleCallback } from "@koalaui/runtime"
 import { PeerNode, PeerNodeType } from "../PeerNode"
 import {
-    CurrentRouter,
-    CurrentRouterTransitionState
-} from "./Router"
-import {
     ArkPageTransitionData,
     ArkPageTransitionEnterComponent,
     ArkPageTransitionExitComponent,
 } from "./ArkPageTransitionData"
-import { PageTransitionOptions } from "../generated"
+import { PageTransitionOptions } from "../component"
 
 // TODO: import it when panda is fixed.
 enum RouterTransitionVisibility {
@@ -39,7 +35,6 @@ enum RouterTransitionVisibility {
 function NotifyPageTransition(pageId: int32, style: ArkPageTransitionData, state: RouterTransitionVisibility) {
     const node = contextNode<PeerNode>(PeerNodeType)
     // console.log("NotifyPageTransition: shall notify", "page", pageId, "state is", RouterTransitionVisibility[state])
-    const router = CurrentRouter()
     scheduleCallback(() => {
         // TODO: make it driven by actual animation.
         /*
@@ -65,10 +60,6 @@ export function ArkPageTransitionEnter(
 ) {
     const receiver = remember(() => new ArkPageTransitionEnterComponent(params))
     style?.(receiver)
-    const state = CurrentRouterTransitionState()
-    if (state !== undefined && state.visibility == RouterTransitionVisibility.Showing) {
-        NotifyPageTransition(state.pageId, receiver, RouterTransitionVisibility.Showing)
-    }
 }
 
 /** @memo */
@@ -80,8 +71,4 @@ export function ArkPageTransitionExit(
 ) {
     const receiver = remember(() => new ArkPageTransitionExitComponent(params))
     style?.(receiver)
-    const state = CurrentRouterTransitionState()
-        if (state !== undefined && state.visibility == RouterTransitionVisibility.Hiding) {
-            NotifyPageTransition(state.pageId, receiver, RouterTransitionVisibility.Hiding)
-    }
 }

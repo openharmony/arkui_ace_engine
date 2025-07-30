@@ -14,12 +14,14 @@
  */
 #include <numeric>
 
+#include "arkoala_api_generated.h"
+
 #include "core/common/container.h"
 #include "core/common/resource/resource_manager.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "arkoala_api_generated.h"
 
 static thread_local std::vector<int32_t> restoreInstanceIds_;
 
@@ -63,9 +65,8 @@ Ark_Int32 GetResourceIdImpl(const Ark_String* bundleName,
     auto resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
     CHECK_NULL_RETURN(resourceAdapter, -1);
     uint32_t resId = resourceAdapter->GetResId(resourceStr);
-    return static_cast<Ark_Int32>(resId);
+    return resId;
 }
-#ifdef ACE_STATIC
 void ResourceManagerResetImpl()
 {
     ResourceManager::GetInstance().Reset();
@@ -82,15 +83,13 @@ void SetFrameCallbackImpl(const Callback_Number_Void* onFrameCallback,
         auto delayTime = Converter::ArkValue<Ark_Number>(delayTimeInt);
         callback.Invoke(delayTime);
     };
-    auto onIdleCallbackFunc = [callback = CallbackHelper(*onIdleCallback)](double delayTimeInt,
-        int32_t frameCount) -> void {
+    auto onIdleCallbackFunc = [callback = CallbackHelper(*onIdleCallback)](double delayTimeInt) -> void {
         auto delayTime = Converter::ArkValue<Ark_Number>(delayTimeInt);
         callback.Invoke(delayTime);
     };
-    context->AddFrameCallback(std::move(onFrameCallbackFunc), std::move(onIdleCallbackFunc), delayTimeInt);
+    // context->AddFrameCallback(std::move(onFrameCallbackFunc), std::move(onIdleCallbackFunc), delayTimeInt);
 }
-#endif
-} // SystemOpsAccessor
+} // namespace SystemOpsAccessor
 const GENERATED_ArkUISystemOpsAccessor* GetSystemOpsAccessor()
 {
     static const GENERATED_ArkUISystemOpsAccessor SystemOpsAccessorImpl {
@@ -99,12 +98,10 @@ const GENERATED_ArkUISystemOpsAccessor* GetSystemOpsAccessor()
         SystemOpsAccessor::SyncInstanceIdImpl,
         SystemOpsAccessor::RestoreInstanceIdImpl,
         SystemOpsAccessor::GetResourceIdImpl,
-#ifdef ACE_STATIC
         SystemOpsAccessor::ResourceManagerResetImpl,
         SystemOpsAccessor::SetFrameCallbackImpl,
-#endif
     };
     return &SystemOpsAccessorImpl;
 }
 
-}
+} // namespace OHOS::Ace::NG::GeneratedModifier

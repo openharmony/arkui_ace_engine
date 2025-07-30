@@ -315,20 +315,10 @@ HWTEST_F(SwiperIndicatorTestNg, HandleTouchEvent001, TestSize.Level1)
     CreateSwiper();
     CreateSwiperItems();
     CreateSwiperDone();
-
-    /**
-     * @tc.steps: step2. isPressed_ is false, and input UP event.
-     * @tc.expected: not call HandleTouchUp
-     */
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
-    auto frameNode = indicatorPattern->GetHost();
-    EXPECT_EQ(indicatorPattern->isPressed_, false);
-    indicatorPattern->HandleTouchEvent(CreateTouchEventInfo(TouchType::UP, FIRST_POINT));
-    EXPECT_EQ(indicatorPattern->isPressed_, false);
-    EXPECT_NE(frameNode->layoutProperty_->GetPropertyChangeFlag(), PROPERTY_UPDATE_RENDER);
 
     /**
-     * @tc.steps: step3. isPressed_ is true, and input DOWN event.
+     * @tc.steps: step2. isPressed_ is true, and input DOWN event.
      * @tc.expected: not call HandleTouchUp
      */
     indicatorPattern->isPressed_ = true;
@@ -336,7 +326,7 @@ HWTEST_F(SwiperIndicatorTestNg, HandleTouchEvent001, TestSize.Level1)
     EXPECT_EQ(indicatorPattern->isPressed_, true);
 
     /**
-     * @tc.steps: step4. isPressed_ is true, and input UP event.
+     * @tc.steps: step3. isPressed_ is true, and input UP event.
      * @tc.expected: call HandleTouchUp
      */
     indicatorPattern->isPressed_ = true;
@@ -344,7 +334,7 @@ HWTEST_F(SwiperIndicatorTestNg, HandleTouchEvent001, TestSize.Level1)
     EXPECT_EQ(indicatorPattern->isPressed_, false);
 
     /**
-     * @tc.steps: step5. isPressed_ is true, and input CANCEL event.
+     * @tc.steps: step4. isPressed_ is true, and input CANCEL event.
      * @tc.expected: call HandleTouchUp
      */
     indicatorPattern->isPressed_ = true;
@@ -1364,6 +1354,7 @@ HWTEST_F(SwiperIndicatorTestNg, HandleDragEnd001, TestSize.Level1)
     /**
      * @tc.steps: step2. call HandleMouseEvent.
      */
+    indicatorPattern->isPressed_ = true;
     indicatorPattern->isLongPressed_ = true;
     indicatorPattern->HandleDragEnd(20.0f);
     EXPECT_FALSE(indicatorPattern->isLongPressed_);
@@ -1405,6 +1396,7 @@ HWTEST_F(SwiperIndicatorTestNg, HandleDragEnd002, TestSize.Level1)
     /**
      * @tc.steps: step2. call HandleDragEnd.
      */
+    indicatorPattern->isPressed_ = true;
     indicatorPattern->isLongPressed_ = true;
     indicatorPattern->HandleDragEnd(20.0f);
     EXPECT_FALSE(indicatorPattern->isLongPressed_);
@@ -1446,6 +1438,7 @@ HWTEST_F(SwiperIndicatorTestNg, HandleDragEnd003, TestSize.Level1)
     /**
      * @tc.steps: step2. call HandleDragEnd.
      */
+    indicatorPattern->isPressed_ = true;
     indicatorPattern->isLongPressed_ = true;
     indicatorPattern->HandleDragEnd(20.0f);
     EXPECT_FALSE(indicatorPattern->isLongPressed_);

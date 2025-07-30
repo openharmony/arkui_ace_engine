@@ -142,6 +142,14 @@ template("ace_core_interfaces_native_node") {
       "runtime/runtime_init.cpp"
     ]
 
+    sources += [
+      "ani/common_ani_modifier.cpp",
+      "ani/content_slot_ani_modifier.cpp",
+      "ani/image_ani_modifier.cpp",
+      "ani/node_ani_modifier.cpp",
+      "ani/web_ani_modifier.cpp",
+    ]
+
     deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
     if (defined(config.web_components_support) &&
         config.web_components_support) {
@@ -202,6 +210,10 @@ template("ace_core_interfaces_native_node") {
       ]
     }
 
+    if (ace_engine_feature_enable_upgrade_skia) {
+      defines += [ "USE_NEW_SKIA" ]
+    }
+    
     external_deps = [
       "graphic_2d:drawing_napi_impl",
       "graphic_2d:librender_service_client",

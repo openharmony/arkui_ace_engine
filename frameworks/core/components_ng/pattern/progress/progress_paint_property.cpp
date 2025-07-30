@@ -25,7 +25,7 @@ constexpr float PROGRSS_MAX_VALUE = 100.f;
 void ProgressPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     PaintProperty::ToJsonValue(json, filter);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto progressTheme = pipeline->GetTheme<ProgressTheme>(GetThemeScopeId());
     CHECK_NULL_VOID(progressTheme);
@@ -55,6 +55,7 @@ void ProgressPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const 
     json->PutExtAttr("capsuleBorderColor",
         (GetBorderColor().value_or(progressTheme->GetBorderColor())).ColorToString().c_str(), filter);
     json->PutExtAttr("progressGradientColor", ToJsonGradientColor().c_str(), filter);
+    json->PutExtAttr("privacySensitive", GetIsSensitive().value_or(false), filter);
 }
 
 std::string ProgressPaintProperty::ProgressOptions() const
@@ -73,7 +74,7 @@ std::string ProgressPaintProperty::ToJsonGradientColor() const
     if (propGradientColor_.has_value()) {
         colors = propGradientColor_.value();
     } else {
-        auto pipelineContext = PipelineBase::GetCurrentContext();
+        auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_RETURN(pipelineContext, "");
         auto theme = pipelineContext->GetTheme<ProgressTheme>(GetThemeScopeId());
         auto endColor = theme->GetRingProgressEndSideColor();

@@ -1567,6 +1567,9 @@ HWTEST_F(TextTestFiveNg, OnAncestorNodeChanged001, TestSize.Level1)
     frameNodeChangeInfoFlag = FRAME_NODE_CHANGE_GEOMETRY_CHANGE;
     textSelectOverlay->OnAncestorNodeChanged(frameNodeChangeInfoFlag);
     EXPECT_EQ(textSelectOverlay->handleLevelMode_, HandleLevelMode::OVERLAY);
+    auto viewPort = textSelectOverlay->GetAncestorNodeViewPort();
+    ASSERT_TRUE(viewPort.has_value());
+    EXPECT_EQ(viewPort.value(), RectF(0.0f, 0.0f, 0.0f, 0.0f));
 }
 
 /**
