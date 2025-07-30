@@ -170,7 +170,6 @@ function registerSyncCallbackProcessor() {
 export class Application {
     private manager: StateManager | undefined = undefined
     private uiContext: UIContextImpl | undefined = undefined
-    private timer: MutableState<int64> | undefined = undefined
     private currentCrash: Object | undefined = undefined
     private enableDumpTree = false
     private exitApp: boolean = false
@@ -221,7 +220,6 @@ export class Application {
             this.manager!.isDebugMode = uiContext.isDebugMode_;
             let instanceId = uiContext.getInstanceId();
             this.manager!.setThreadChecker(() => uiContext.checkThread(instanceId));
-            this.timer = getAnimationTimer() ?? createAnimationTimer(this.manager!)
             /** @memo */
             let builder: UserViewBuilder
             if (this.entryPoint) {
@@ -365,7 +363,6 @@ export class Application {
             drawCurrentCrash(this.currentCrash!)
         } else {
             try {
-                this.timer!.value = Date.now() as int64
                 this.loopIteration2(arg0, arg1) // loop iteration without callbacks execution
                 if (this.enableDumpTree) {
                     dumpTree(this.rootState!.value)
