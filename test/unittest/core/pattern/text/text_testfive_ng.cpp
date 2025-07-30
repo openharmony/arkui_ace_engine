@@ -3416,7 +3416,7 @@ HWTEST_F(TextTestFiveNg, TextEnableAutoSpacing, TestSize.Level1)
      */
     TextModelNG::SetEnableAutoSpacing(frameNode, false);
     /**
-     * @tc.expected: Get EnableAutoSpacing Value
+     * @tc.expected: Get EnableAutoSpacing Value.
      */
     EXPECT_EQ(textLayoutProperty->GetEnableAutoSpacing(), false);
     EXPECT_EQ(TextModelNG::GetEnableAutoSpacing(frameNode), false);
