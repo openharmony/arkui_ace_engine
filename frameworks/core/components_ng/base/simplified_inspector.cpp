@@ -167,9 +167,9 @@ void SimplifiedInspector::TestScrollToTarget(
     const int32_t PARAM_NODE_ID = 2;
     const int32_t PARAM_OFFSET = 3;
     const int32_t PARAM_ALIGN = 4;
-    auto id = std::stoi(params[PARAM_NODE_ID]);
-    auto offset = std::stof(params[PARAM_OFFSET]);
-    auto align = std::stoi(params[PARAM_ALIGN]);
+    auto id = StringUtils::StringToInt(params[PARAM_NODE_ID]);
+    auto offset = StringUtils::StringToFloat(params[PARAM_OFFSET]);
+    auto align = StringUtils::StringToInt(params[PARAM_ALIGN]);
     ScrollCommand command { TargetType::NODE, id, offset, static_cast<ScrollAlign>(align) };
     ScrollToTarget(command, pageRootNode);
 }
