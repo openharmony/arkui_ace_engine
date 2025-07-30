@@ -138,7 +138,7 @@ KOALA_INTEROP_1(StringLength, KInt, KNativePointer)
 
 void impl_StringData(KNativePointer ptr, KByte* bytes, KUInt size) {
     string* s = reinterpret_cast<string*>(ptr);
-    if (s) memcpy(bytes, s->c_str(), size);
+    if (s) memcpy_s(bytes, size, s->c_str(), size);
 }
 KOALA_INTEROP_V3(StringData, KNativePointer, KByte*, KUInt)
 

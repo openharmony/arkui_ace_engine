@@ -48,6 +48,7 @@ void MarqueePattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
     THREAD_SAFE_NODE_CHECK(frameNode, OnDetachFromFrameNode,
         frameNode);  // call OnDetachFromFrameNodeMultiThread() by multi thread
+    CHECK_NULL_VOID(frameNode);
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowSizeChangeCallback(frameNode->GetId());
