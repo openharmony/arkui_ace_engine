@@ -58,19 +58,30 @@ void SetTimePickerOptionsImpl(Ark_NativePointer node,
         TimePickerModelNG::SetSelectedTime(frameNode, selected.value());
     }
 
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(theme);
+    auto startTime = theme->GetDefaultStartTime();
+    auto endTime = theme->GetDefaultEndTime();
     auto start = options ?
         Converter::OptConvert<PickerTime>(options->value.start) :
         std::nullopt;
     if (start.has_value()) {
-        TimePickerModelNG::SetStartTime(frameNode, start.value());
+        startTime = start.value();
     }
-
     auto end = options ?
         Converter::OptConvert<PickerTime>(options->value.end) :
         std::nullopt;
     if (end.has_value()) {
-        TimePickerModelNG::SetEndTime(frameNode, end.value());
+        endTime = end.value();
     }
+    if (startTime.ToMinutes() > endTime.ToMinutes()) {
+        startTime = theme->GetDefaultStartTime();
+        endTime = theme->GetDefaultEndTime();
+    }
+    TimePickerModelNG::SetStartTime(frameNode, startTime);
+    TimePickerModelNG::SetEndTime(frameNode, endTime);
 }
 } // TimePickerInterfaceModifier
 namespace TimePickerAttributeModifier {
