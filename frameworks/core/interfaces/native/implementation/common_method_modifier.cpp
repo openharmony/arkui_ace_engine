@@ -47,6 +47,7 @@
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/generated/interface/ui_node_api.h"
 #include "core/interfaces/native/implementation/color_metrics_peer.h"
+#include "core/interfaces/native/implementation/dismiss_popup_action_peer.h"
 #include "core/interfaces/native/implementation/drag_event_peer.h"
 #include "core/interfaces/native/implementation/focus_axis_event_peer.h"
 #include "core/interfaces/native/implementation/gesture_group_interface_peer.h"
@@ -114,32 +115,39 @@ RefPtr<OHOS::Ace::NG::DetachedFreeRootProxyNode> CreateProxyNode(const RefPtr<UI
 
 Ark_GestureRecognizer CreateArkGestureRecognizer(const RefPtr<NGGestureRecognizer>& recognizer)
 {
+    Ark_GestureRecognizer peer = nullptr;
     auto tapRecognizer = AceType::DynamicCast<ClickRecognizer>(recognizer);
     if (tapRecognizer) {
-        return reinterpret_cast<Ark_GestureRecognizer>(Converter::ArkValue<Ark_TapRecognizer>(tapRecognizer));
+        peer = Converter::ArkValue<Ark_TapRecognizer>(tapRecognizer);
+        return peer;
     }
     auto longPressRecognizer = AceType::DynamicCast<LongPressRecognizer>(recognizer);
     if (longPressRecognizer) {
-        return reinterpret_cast<Ark_GestureRecognizer>(
-            Converter::ArkValue<Ark_LongPressRecognizer>(longPressRecognizer));
+        peer = Converter::ArkValue<Ark_LongPressRecognizer>(longPressRecognizer);
+        return peer;
     }
     auto panRecognizer = AceType::DynamicCast<PanRecognizer>(recognizer);
     if (panRecognizer) {
-        return reinterpret_cast<Ark_GestureRecognizer>(Converter::ArkValue<Ark_PanRecognizer>(panRecognizer));
+        peer = Converter::ArkValue<Ark_PanRecognizer>(panRecognizer);
+        return peer;
     }
     auto pinchRecognizer = AceType::DynamicCast<PinchRecognizer>(recognizer);
     if (pinchRecognizer) {
-        return reinterpret_cast<Ark_GestureRecognizer>(Converter::ArkValue<Ark_PinchRecognizer>(pinchRecognizer));
+        peer = Converter::ArkValue<Ark_PinchRecognizer>(pinchRecognizer);
+        return peer;
     }
     auto swipeRecognizer = AceType::DynamicCast<SwipeRecognizer>(recognizer);
     if (swipeRecognizer) {
-        return reinterpret_cast<Ark_GestureRecognizer>(Converter::ArkValue<Ark_SwipeRecognizer>(swipeRecognizer));
+        peer = Converter::ArkValue<Ark_SwipeRecognizer>(swipeRecognizer);
+        return peer;
     }
     auto rotationRecognizer = AceType::DynamicCast<RotationRecognizer>(recognizer);
     if (rotationRecognizer) {
-        return reinterpret_cast<Ark_GestureRecognizer>(Converter::ArkValue<Ark_RotationRecognizer>(rotationRecognizer));
+        peer = Converter::ArkValue<Ark_RotationRecognizer>(rotationRecognizer);
+        return peer;
     }
-    return Converter::ArkValue<Ark_GestureRecognizer>(recognizer);
+    peer = Converter::ArkValue<Ark_GestureRecognizer>(recognizer);
+    return peer;
 }
 }
 struct EdgesParamOptions {
@@ -472,15 +480,6 @@ Dimension ClampAngleDimension(const std::optional<Dimension>& angle, float minAn
 }
 
 namespace GeneratedModifier {
-const GENERATED_ArkUIGestureRecognizerAccessor* GetGestureRecognizerAccessor();
-const GENERATED_ArkUITapRecognizerAccessor* GetTapRecognizerAccessor();
-const GENERATED_ArkUILongPressRecognizerAccessor* GetLongPressRecognizerAccessor();
-const GENERATED_ArkUIPanRecognizerAccessor* GetPanRecognizerAccessor();
-const GENERATED_ArkUIPinchRecognizerAccessor* GetPinchRecognizerAccessor();
-const GENERATED_ArkUISwipeRecognizerAccessor* GetSwipeRecognizerAccessor();
-const GENERATED_ArkUIRotationRecognizerAccessor* GetRotationRecognizerAccessor();
-const GENERATED_ArkUIDismissPopupActionAccessor* GetDismissPopupActionAccessor();
-
 namespace CommonMethodModifier {
 void BackgroundEffect1Impl(
     Ark_NativePointer node, const Opt_BackgroundEffectOptions* options, const Opt_SystemAdaptiveOptions* sysOptions);
@@ -1698,70 +1697,63 @@ void AssignArkValue(Ark_TouchTestInfo& dst, const OHOS::Ace::NG::TouchTestInfo& 
 // this creates the peer for Materialized object. DO NOT FORGET TO RELEASE IT
 void AssignArkValue(Ark_GestureRecognizer &dst, const RefPtr<NG::NGGestureRecognizer>& src)
 {
-    auto accessor = GeneratedModifier::GetGestureRecognizerAccessor();
-    CHECK_NULL_VOID(accessor);
-    dst = accessor->ctor();
+    dst = PeerUtils::CreatePeer<GestureRecognizerPeer>();
     if (dst) {
+        dst->IncRefCount();
         dst->Update(src);
     }
 }
 // this creates the peer for Materialized object. DO NOT FORGET TO RELEASE IT
 void AssignArkValue(Ark_TapRecognizer &dst, const RefPtr<NG::ClickRecognizer>& src)
 {
-    auto accessor = GeneratedModifier::GetTapRecognizerAccessor();
-    CHECK_NULL_VOID(accessor);
-    dst = accessor->ctor();
+    dst = PeerUtils::CreatePeer<TapRecognizerPeer>();
     if (dst) {
+        dst->IncRefCount();
         dst->Update(src);
     }
 }
 // this creates the peer for Materialized object. DO NOT FORGET TO RELEASE IT
 void AssignArkValue(Ark_LongPressRecognizer &dst, const RefPtr<NG::LongPressRecognizer>& src)
 {
-    auto accessor = GeneratedModifier::GetLongPressRecognizerAccessor();
-    CHECK_NULL_VOID(accessor);
-    dst = accessor->ctor();
+    dst = PeerUtils::CreatePeer<LongPressRecognizerPeer>();
     if (dst) {
+        dst->IncRefCount();
         dst->Update(src);
     }
 }
 // this creates the peer for Materialized object. DO NOT FORGET TO RELEASE IT
 void AssignArkValue(Ark_PanRecognizer &dst, const RefPtr<NG::PanRecognizer>& src)
 {
-    auto accessor = GeneratedModifier::GetPanRecognizerAccessor();
-    CHECK_NULL_VOID(accessor);
-    dst = accessor->ctor();
+    dst = PeerUtils::CreatePeer<PanRecognizerPeer>();
     if (dst) {
+        dst->IncRefCount();
         dst->Update(src);
     }
 }
 // this creates the peer for Materialized object. DO NOT FORGET TO RELEASE IT
 void AssignArkValue(Ark_PinchRecognizer &dst, const RefPtr<NG::PinchRecognizer>& src)
 {
-    auto accessor = GeneratedModifier::GetPinchRecognizerAccessor();
-    CHECK_NULL_VOID(accessor);
-    dst = accessor->ctor();
+    dst = PeerUtils::CreatePeer<PinchRecognizerPeer>();
     if (dst) {
+        dst->IncRefCount();
         dst->Update(src);
     }
 }
 // this creates the peer for Materialized object. DO NOT FORGET TO RELEASE IT
 void AssignArkValue(Ark_SwipeRecognizer &dst, const RefPtr<NG::SwipeRecognizer>& src)
 {
-    auto accessor = GeneratedModifier::GetSwipeRecognizerAccessor();
-    CHECK_NULL_VOID(accessor);
-    dst = accessor->ctor();
+    dst = PeerUtils::CreatePeer<SwipeRecognizerPeer>();
     if (dst) {
+        dst->IncRefCount();
         dst->Update(src);
     }
 }
 // this creates the peer for Materialized object. DO NOT FORGET TO RELEASE IT
 void AssignArkValue(Ark_RotationRecognizer &dst, const RefPtr<NG::RotationRecognizer>& src)
 {
-    auto accessor = GeneratedModifier::GetRotationRecognizerAccessor();
-    CHECK_NULL_VOID(accessor);
-    dst = accessor->ctor();
+    dst = PeerUtils::CreatePeer<RotationRecognizerPeer>();
     if (dst) {
+        dst->IncRefCount();
         dst->Update(src);
     }
 }
@@ -1799,24 +1791,6 @@ void AssignArkValue(Ark_FingerInfo& dst, const FingerInfo& src)
     dst.displayY = ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(src.screenLocation_.GetY()));
     dst.hand.tag = InteropTag::INTEROP_TAG_OBJECT;
     dst.hand.value = static_cast<Ark_InteractionHand>(src.operatingHand_);
-}
-
-template<>
-template<>
-ArkArrayHolder<Array_FingerInfo>::ArkArrayHolder(const std::list<FingerInfo>& data)
-{
-    std::transform(data.begin(), data.end(), std::back_inserter(data_), [](const FingerInfo& src) {
-        return OHOS::Ace::NG::Converter::ArkValue<Ark_FingerInfo>(src);
-    });
-}
-
-template<>
-template<>
-ArkArrayHolder<Array_GestureRecognizer>::ArkArrayHolder(const std::list<RefPtr<NG::NGGestureRecognizer>>& data)
-{
-    std::transform(data.begin(), data.end(), std::back_inserter(data_), [](const RefPtr<NG::NGGestureRecognizer>& src) {
-        return OHOS::Ace::NG::CreateArkGestureRecognizer(src);
-    });
 }
 } // namespace Converter
 } // namespace OHOS::Ace::NG
@@ -2052,10 +2026,10 @@ void OnChildTouchTestImpl(Ark_NativePointer node,
             item.subRect.SetHeight(PipelineBase::Px2VpWithCurrentDensity(item.subRect.Height()));
         }
 
-        Converter::ArkArrayHolder<Array_TouchTestInfo> holder(touchInfoUpd);
+        auto arkTouchInfo = Converter::ArkValue<Array_TouchTestInfo>(touchInfoUpd, Converter::FC);
         auto resultOpt =
             callback.InvokeWithOptConvertResult<NG::TouchResult, Ark_TouchResult, Callback_TouchResult_Void>(
-                holder.ArkValue()
+                arkTouchInfo
         );
         static const NG::TouchResult defaultRes{ NG::TouchTestStrategy::DEFAULT, "" };
         return resultOpt.value_or(defaultRes);
@@ -4919,8 +4893,7 @@ void OnGestureRecognizerJudgeBegin1Impl(Ark_NativePointer node,
 
         auto arkGestEvent = Converter::ArkValue<Ark_BaseGestureEvent>(info);
         auto arkValCurrent = CreateArkGestureRecognizer(current);
-        Converter::ArkArrayHolder<Array_GestureRecognizer> holderOthers(others);
-        auto arkValOthers = holderOthers.ArkValue();
+        auto arkValOthers = Converter::ArkValue<Array_GestureRecognizer>(others, Converter::FC);
         auto resultOpt = callback.InvokeWithOptConvertResult<GestureJudgeResult, Ark_GestureJudgeResult,
             Callback_GestureJudgeResult_Void>(arkGestEvent, arkValCurrent, arkValOthers);
         return resultOpt.value_or(defVal);
@@ -4951,8 +4924,7 @@ void ShouldBuiltInRecognizerParallelWithImpl(Ark_NativePointer node,
         PipelineContext::SetCallBackNode(node);
 
         auto arkValCurrent = Converter::ArkValue<Ark_GestureRecognizer>(current);
-        Converter::ArkArrayHolder<Array_GestureRecognizer> holderOthers(others);
-        auto arkValOthers = holderOthers.ArkValue();
+        auto arkValOthers = ArkValue<Array_GestureRecognizer>(others, Converter::FC);
         auto resultOpt = callback.InvokeWithOptConvertResult<RefPtr<NG::NGGestureRecognizer>, Ark_GestureRecognizer,
             Callback_GestureRecognizer_Void>(arkValCurrent, arkValOthers);
         return resultOpt.value_or(nullptr);
@@ -5503,12 +5475,9 @@ void BindPopupImpl(Ark_NativePointer node,
             },
             [&popupParam](const Callback_DismissPopupAction_Void& value) {
                 auto callback = [arkCallback = CallbackHelper(value)](int32_t reason) {
-                    Ark_DismissPopupAction parameter = GetDismissPopupActionAccessor()->construct();
-                    auto reasonValue = Converter::ArkValue<Ark_DismissReason>(
-                        static_cast<BindSheetDismissReason>(reason));
-                    GetDismissPopupActionAccessor()->setReason(parameter, reasonValue);
+                    auto parameter = PeerUtils::CreatePeer<DismissPopupActionPeer>();
+                    parameter->reason = static_cast<BindSheetDismissReason>(reason);
                     arkCallback.InvokeSync(parameter);
-                    GetDismissPopupActionAccessor()->destroyPeer(parameter);
                 };
                 popupParam->SetOnWillDismiss(std::move(callback));
                 popupParam->SetInteractiveDismiss(true);

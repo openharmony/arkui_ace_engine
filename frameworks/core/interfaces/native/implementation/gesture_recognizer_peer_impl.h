@@ -22,7 +22,9 @@
 const int32_t DEFAULT_FINGERS = 1;
 const bool DEFAULT_LIMIT = false;
 
-struct GestureRecognizerPeer {
+struct GestureRecognizerPeer : public OHOS::Ace::AceType {
+    DECLARE_ACE_TYPE(GestureRecognizerPeer, OHOS::Ace::AceType);
+public:
     OHOS::Ace::WeakPtr<OHOS::Ace::NG::NGGestureRecognizer> GetRecognizer()
     {
         return recognizer_;
@@ -53,6 +55,8 @@ private:
 };
 
 struct MultiFingerRecognizerPeer : public GestureRecognizerPeer {
+    DECLARE_ACE_TYPE(MultiFingerRecognizerPeer, GestureRecognizerPeer);
+public:
     void Update(const OHOS::Ace::RefPtr<OHOS::Ace::NG::MultiFingersRecognizer>& recognizer)
     {
         GestureRecognizerPeer::Update(recognizer);

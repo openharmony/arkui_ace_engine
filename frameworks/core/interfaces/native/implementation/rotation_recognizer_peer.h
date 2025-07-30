@@ -21,6 +21,8 @@
 const double DEFAULT_ANGLE = 1.0;
 
 struct RotationRecognizerPeer : public MultiFingerRecognizerPeer {
+    DECLARE_ACE_TYPE(RotationRecognizerPeer, MultiFingerRecognizerPeer);
+public:
     void Update(const OHOS::Ace::RefPtr<OHOS::Ace::NG::RotationRecognizer>& recognizer)
     {
         MultiFingerRecognizerPeer::Update(recognizer);
