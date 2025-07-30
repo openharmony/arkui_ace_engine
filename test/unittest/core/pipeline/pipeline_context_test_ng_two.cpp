@@ -2561,6 +2561,26 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg406, TestSize.Level1)
 }
 
 /**
+ * @tc.name: PipelineContextTestNg407
+ * @tc.desc: Test OnDumpInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg407, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Call the function OnDumpInfo.
+     * @tc.expected: Test that the member window_ is empty.
+     */
+    ASSERT_NE(context_, nullptr);
+    std::vector<std::string> params;
+    params.push_back("-simplify");
+    params.push_back("-compname");
+    params.push_back("test");
+    auto ret = context_->OnDumpInfo(params);
+    EXPECT_TRUE(ret);
+}
+
+/**
  * @tc.name: FlushMouseEventForHover001
  * @tc.desc: Test FlushMouseEventForHover.
  * @tc.type: FUNC

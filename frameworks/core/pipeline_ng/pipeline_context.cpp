@@ -3559,7 +3559,11 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
         StylusDetectorDefault::GetInstance()->ExecuteCommand(params);
     } else if (params[0] == "-simplify") {
         LOGI("start collect simplify dump info");
-        rootNode_->DumpTree(0);
+        if (params.size() >= 3 && params[1] == "-compname") {
+            rootNode_->DumpTreeByComponentName(params[2]);
+        } else {
+            rootNode_->DumpTree(0);
+        }
         DumpLog::GetInstance().OutPutByCompress();
         LOGI("end collect simplify dump info");
     } else if (params[0] == "-resource") {
@@ -3578,6 +3582,9 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
         DumpForceColor(params);
     } else if (params[0] == "-bindaicaller" && params.size() >= PARAM_NUM) {
         OnDumpBindAICaller(params);
+    } else if (params[0] == "-compname" && params.size() >= PARAM_NUM) {
+        rootNode_->DumpTreeByComponentName(params[1]);
+        DumpLog::GetInstance().OutPutDefault();
     }
     return true;
 }
