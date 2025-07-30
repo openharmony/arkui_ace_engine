@@ -323,6 +323,7 @@ bool FocusEventHandler::OnClick(const KeyEvent& event)
             info.SetGlobalDisplayLocation(globalWindowOffset);
         }
         info.SetSourceTool(SourceTool::UNKNOWN);
+        info.SetPatternName(node->GetTag().c_str());
         auto eventHub = node->GetOrCreateEventHub<EventHub>();
         if (eventHub) {
             auto targetImpl = eventHub->CreateGetEventTargetImpl();
