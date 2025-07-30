@@ -2423,6 +2423,7 @@ frameworks/core/components_ng/manager/BUILD.gn @arkui_architecture
 frameworks/core/components_ng/manager/display_sync/ @arkuiframework
 frameworks/core/components_ng/manager/drag_drop/ @arkuievent
 frameworks/core/components_ng/manager/focus/ @arkuievent
+frameworks/core/components_ng/manager/force_split/ @arkui_superman
 frameworks/core/components_ng/manager/frame_rate/ @arkuiframework
 frameworks/core/components_ng/manager/full_screen/ @arkuilayout
 frameworks/core/components_ng/manager/memory/ @arkui_image
@@ -3178,6 +3179,7 @@ test/unittest/core/layout/ @arkuilayout
 test/unittest/core/layout/safe_area/ @arkuilayout
 test/unittest/core/manager/  @arkuievent
 test/unittest/core/manager/avoid_info_manager_test_ng.cpp  @arkui_superman
+test/unittest/core/manager/force_split_manager_test_ng.cpp  @arkui_superman
 test/unittest/core/manager/safe_area_manager_test_ng.cpp  @arkuilayout
 test/unittest/core/manager/navigation_manager_test_ng.cpp  @arkui_superman
 test/unittest/core/pattern/animator/ @arkui_superman

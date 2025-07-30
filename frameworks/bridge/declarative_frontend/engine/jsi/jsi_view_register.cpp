@@ -1125,6 +1125,14 @@ panda::Local<panda::JSValueRef> Lpx2Px(panda::JsiRuntimeCallInfo* runtimeCallInf
     if (pipelineContext && pipelineContext->IsContainerModalVisible()) {
         width -= 2 * (CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx();
     }
+
+    if (pipelineContext) {
+        double effectiveWidth = pipelineContext->CalcPageWidth(width);
+        if (effectiveWidth > 0) {
+            width = effectiveWidth;
+        }
+    }
+
     if (!windowConfig.autoDesignWidth) {
         windowConfig.UpdateDesignWidthScale(width);
     }
@@ -1159,6 +1167,14 @@ panda::Local<panda::JSValueRef> Px2Lpx(panda::JsiRuntimeCallInfo* runtimeCallInf
     if (pipelineContext && pipelineContext->IsContainerModalVisible()) {
         width -= 2 * (CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx();
     }
+
+    if (pipelineContext) {
+        double effectiveWidth = pipelineContext->CalcPageWidth(width);
+        if (effectiveWidth > 0) {
+            width = effectiveWidth;
+        }
+    }
+
     if (!windowConfig.autoDesignWidth) {
         windowConfig.UpdateDesignWidthScale(width);
     }

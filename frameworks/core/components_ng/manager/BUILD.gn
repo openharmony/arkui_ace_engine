@@ -46,6 +46,7 @@ build_component_ng("manager_ng") {
     "event/json_child_report.cpp",
     "focus/focus_manager.cpp",
     "focus/focus_view.cpp",
+    "force_split/force_split_manager.cpp",
     "form_event/form_event_manager.cpp",
     "form_gesture/form_gesture_manager.cpp",
     "form_visible/form_visible_manager.cpp",

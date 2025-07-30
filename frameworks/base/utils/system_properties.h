@@ -646,6 +646,8 @@ public:
 
     static bool GetGridIrregularLayoutEnabled();
 
+    static bool GetForceSplitIgnoreOrientationEnabled();
+
     static bool WaterFlowUseSegmentedLayout();
 
     static bool GetSideBarContainerBlurEnable();
@@ -846,6 +848,7 @@ private:
     static bool configChangePerform_;
     static bool enableScrollableItemPool_;
     static bool navigationBlurEnabled_;
+    static bool forceSplitIgnoreOrientationEnabled_;
     static bool gridCacheEnabled_;
     static bool gridIrregularLayoutEnable_;
     static bool sideBarContainerBlurEnable_;
