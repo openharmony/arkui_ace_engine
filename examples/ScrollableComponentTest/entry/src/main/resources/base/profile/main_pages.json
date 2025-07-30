@@ -75,6 +75,7 @@
     "pages/grid/GridPinchToZoom",
     "pages/grid/ItemDragWithVibrator",
     "pages/grid/GridScrollWithSelect",
+    "pages/grid/GridDragAndPan",
     "pages/Scroll/ScrollMainPage",
     "pages/Scroll/InfiniteScrolling",
     "pages/Scroll/CustomSnap",
