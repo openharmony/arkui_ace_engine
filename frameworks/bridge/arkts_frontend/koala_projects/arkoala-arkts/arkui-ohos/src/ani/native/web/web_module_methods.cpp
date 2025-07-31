@@ -78,12 +78,12 @@ void SetWebOptions(ani_env* env, ani_class aniClass, ani_long node, ani_object o
     auto setHapPathFunc = [vm, object = savePtr](const std::string& hapPath) {
         ani_string aniHapPath = nullptr;
         ani_env* envTemp = GetAniEnv(vm);
-        if (!envTemp || envTemp->String_NewUTF8(hapPath.c_str(), hapPath.size(), &aniHapPath) != ANI_OK) {
-            envTemp->GlobalReference_Delete(object);
+        if (!envTemp) {
             return;
         }
-        if (envTemp->Object_CallMethodByName_Void(
-            reinterpret_cast<ani_object>(object), "_setHapPath", "Lstd/core/String;:V", aniHapPath) != ANI_OK) {
+        if (envTemp->String_NewUTF8(hapPath.c_str(), hapPath.size(), &aniHapPath) != ANI_OK ||
+            envTemp->Object_CallMethodByName_Void(
+                reinterpret_cast<ani_object>(object), "_setHapPath", "Lstd/core/String;:V", aniHapPath) != ANI_OK) {
             envTemp->GlobalReference_Delete(object);
             return;
         }
