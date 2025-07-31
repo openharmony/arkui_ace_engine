@@ -837,8 +837,8 @@ class TypedFrameNode<T extends ArkComponent> extends FrameNode {
   }
 
   dispose(){
-    this._nativeRef?.dispose();
     super.dispose();
+    this._nativeRef?.dispose();
   }
 
   initialize(...args: Object[]): T {
