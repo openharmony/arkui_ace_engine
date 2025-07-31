@@ -21,6 +21,8 @@
 const int32_t DEFAULT_COUNT = 1;
 
 struct TapRecognizerPeer : public MultiFingerRecognizerPeer {
+    DECLARE_ACE_TYPE(TapRecognizerPeer, MultiFingerRecognizerPeer);
+public:
     void Update(const OHOS::Ace::RefPtr<OHOS::Ace::NG::ClickRecognizer>& recognizer)
     {
         MultiFingerRecognizerPeer::Update(recognizer);

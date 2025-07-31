@@ -22,6 +22,8 @@
 const double DEFAULT_DISTANCE = 5.0;
 
 struct PinchRecognizerPeer : public MultiFingerRecognizerPeer {
+    DECLARE_ACE_TYPE(PinchRecognizerPeer, MultiFingerRecognizerPeer);
+public:
     void Update(const OHOS::Ace::RefPtr<OHOS::Ace::NG::PinchRecognizer>& recognizer)
     {
         MultiFingerRecognizerPeer::Update(recognizer);
