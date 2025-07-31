@@ -830,7 +830,7 @@ template<>
 Color Convert(const Ark_Number& src)
 {
     uint32_t value = static_cast<uint32_t>(Convert<int>(src));
-    return Color((value <= 0xFFFFFF && value > 0) ? value + 0xFF000000U : value);
+    return Color(ColorAlphaAdapt(value));
 }
 
 template<>
