@@ -22,6 +22,7 @@ group("advanced_ui_component_static") {
       "splitlayout:splitLayout",
       "composeListItem:composeListItem",
       "subheader:subHeader",
+      "editabletitlebar:editableTitleBar",
     ]
   }
 }
