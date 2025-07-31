@@ -160,6 +160,7 @@ export {
     __memo_transformed_before,
     __memo_transformed_after,
 } from "./internals"
+export { Dependencies } from "./states/Dependency"
 
 export { IncrementalNode } from "./tree/IncrementalNode"
 export { PrimeNumbers } from "./tree/PrimeNumbers"
