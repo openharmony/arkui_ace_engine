@@ -561,6 +561,15 @@ public:
     // Only used for the toolbar in 'container_modal' component
     void SetToolbarManagerNavigationMode(NavigationMode mode);
 
+    void SetIsTargetForceSplitNav(bool isTargetForceSplitNav)
+    {
+        isTargetForceSplitNav_ = isTargetForceSplitNav;
+    }
+    bool GetIsTargetForceSplitNav() const
+    {
+        return isTargetForceSplitNav_;
+    }
+
     bool CreateHomeDestination(RefPtr<UINode>& customNode, RefPtr<NavDestinationGroupNode>& homeDest);
     bool IsHomeDestinationVisible();
     void FireHomeDestinationLifeCycleIfNeeded(NavDestinationLifecycle lifecycle, bool isModeChange = false,
@@ -817,6 +826,7 @@ private:
     bool forceSplitSuccess_ = false;
     bool forceSplitUseNavBar_ = false;
     bool homeNodeTouched_ = false;
+    bool isTargetForceSplitNav_ = false;
     WeakPtr<NavDestinationGroupNode> homeNode_;
     std::vector<WeakPtr<NavDestinationGroupNode>> prePrimaryNodes_;
     std::vector<WeakPtr<NavDestinationGroupNode>> primaryNodes_;

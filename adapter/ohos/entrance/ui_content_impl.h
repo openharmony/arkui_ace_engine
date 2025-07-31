@@ -385,6 +385,7 @@ public:
 
     void SetForceSplitEnable(bool isForceSplit, const std::string& homePage,
         bool isRouter = true, bool ignoreOrientation = false) override;
+    void SetForceSplitConfig(const std::string& configJsonStr) override;
 
     void AddDestructCallback(void* key, const std::function<void()>& callback)
     {

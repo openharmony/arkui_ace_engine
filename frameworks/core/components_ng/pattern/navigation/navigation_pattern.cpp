@@ -632,6 +632,7 @@ void NavigationPattern::OnDetachFromMainTree()
     backupStyle_.reset();
     currStyle_.reset();
     pageNode_ = nullptr;
+    SetIsTargetForceSplitNav(false);
 }
 
 bool NavigationPattern::IsTopNavDestination(const RefPtr<UINode>& node) const
@@ -3162,7 +3163,7 @@ void NavigationPattern::AddToDumpManager()
         }
         auto infos = stack->DumpStackInfo();
     };
-    mgr->AddNavigationDumpCallback(node->GetId(), node->GetDepth(), callback);
+    mgr->AddNavigationDumpCallback(node, callback);
 }
 
 void NavigationPattern::RemoveFromDumpManager()
@@ -5134,23 +5135,21 @@ void NavigationPattern::UnregisterForceSplitListener(PipelineContext* context, i
 
 void NavigationPattern::TryForceSplitIfNeeded(const SizeF& frameSize)
 {
+    /**
+     * If do not support forced split,
+     * or the force split navigation is not the current navigation,
+     * return directly.
+     */
+    if (!GetIsTargetForceSplitNav()) {
+        return;
+    }
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     auto context = hostNode->GetContext();
     CHECK_NULL_VOID(context);
-    auto navManager = context->GetNavigationManager();
-    CHECK_NULL_VOID(navManager);
-    if (!navManager->IsForceSplitSupported()) {
-        return;
-    }
-
-    auto container = Container::GetContainer(context->GetInstanceId());
-    CHECK_NULL_VOID(container);
-    auto windowManager = context->GetWindowManager();
-    CHECK_NULL_VOID(windowManager);
-    auto property = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
-    CHECK_NULL_VOID(property);
     bool forceSplitSuccess = false;
     bool forceSplitUseNavBar = false;
+    auto navManager = context->GetNavigationManager();
+    CHECK_NULL_VOID(navManager);
     if (navManager->IsForceSplitEnable()) {
         /**
          * The force split mode must meet the following conditions to take effect:
@@ -5161,32 +5160,37 @@ void NavigationPattern::TryForceSplitIfNeeded(const SizeF& frameSize)
          *   5. Navigation width greater than 600vp
          *   6. It belongs to the outermost Navigation within the page
          */
+        auto container = Container::GetContainer(context->GetInstanceId());
+        CHECK_NULL_VOID(container);
         bool isMainWindow = container->IsMainWindow();
         bool isInAppMainPage = pageNode_.Upgrade() != nullptr;
         auto thresholdWidth = SPLIT_THRESHOLD_WIDTH.ConvertToPx();
         auto dipScale = context->GetDipScale();
         bool ignoreOrientation = navManager->GetIgnoreOrientation();
         auto orientation = SystemProperties::GetDeviceOrientation();
+        auto windowManager = context->GetWindowManager();
+        CHECK_NULL_VOID(windowManager);
         auto windowMode = windowManager->GetWindowMode();
         bool isInSplitScreenMode = windowMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
             windowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
-        bool isOuterMostNav = navManager->IsOuterMostNavigation(hostNode->GetId(), hostNode->GetDepth());
-        forceSplitSuccess = isMainWindow && isInAppMainPage && isOuterMostNav &&
+        forceSplitSuccess = isMainWindow && isInAppMainPage &&
             (ignoreOrientation || orientation == DeviceOrientation::LANDSCAPE) &&
             thresholdWidth < frameSize.Width() && !isInSplitScreenMode;
         /**
          * When NavBar is not hidden and its width is greater than 0,
          * it is considered that there is content in NavBar, and NavBar is used as the homepage
          */
+        auto property = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
+        CHECK_NULL_VOID(property);
         bool navBarHasContent = !property->GetHideNavBarValue(false) &&
             (!userSetNavBarWidthFlag_ || GreatNotEqual(initNavBarWidthValue_.Value(), 0)) &&
             (GreatNotEqual(property->GetMaxNavBarWidthValue(DEFAULT_NAV_BAR_WIDTH).Value(), 0));
         forceSplitUseNavBar = forceSplitSuccess && navBarHasContent;
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "calc splitMode, isMainWindow:%{public}d, isInAppMainPage:%{public}d, "
-            "isInSplitScreenMode:%{public}d, isOuterMostNav:%{public}d, ignoreOrientation:%{public}d, "
+            "isInSplitScreenMode:%{public}d, ignoreOrientation:%{public}d, "
             "orientation: %{public}s, dipScale: %{public}f, thresholdWidth: %{public}f, curWidth: %{public}f, "
             "navBarHasContent:%{public}d, forceSplitSuccess:%{public}d, forceSplitUseNavBar:%{public}d",
-            isMainWindow, isInAppMainPage, isInSplitScreenMode, isOuterMostNav, ignoreOrientation,
+            isMainWindow, isInAppMainPage, isInSplitScreenMode, ignoreOrientation,
             DeviceOrientationToString(orientation), dipScale, thresholdWidth, frameSize.Width(), navBarHasContent,
             forceSplitSuccess, forceSplitUseNavBar);
     }

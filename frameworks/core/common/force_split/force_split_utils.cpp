@@ -19,6 +19,7 @@
 #include <vector>
 
 #include "base/geometry/dimension.h"
+#include "base/json/json_util.h"
 #include "core/common/container.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -36,6 +37,10 @@ const std::vector<std::string> PRIMARY_PAGE_PREFIX = {"main", "home", "index", "
 const std::vector<std::string> TRANS_PAGE_PREFIX = {"guide", "load", "splash", "login"};
 constexpr int32_t PRIMARY_DESTINATION_CHILD_NODE_DEPTH_THRESHOLD = 50;
 constexpr int32_t PRIMARY_DESTINATION_CHILD_NODE_COUNT_THRESHOLD = 100;
+constexpr char ENABLE_HOOK_KEY[] = "enableHook";
+constexpr char NAVIGATION_OPTIONS_KEY[] = "navigationOptions";
+constexpr char NAVIGATION_OPTIONS_ID_KEY[] = "id";
+constexpr char NAVIGATION_OPTIONS_DEPTH_KEY[] = "depth";
 }
 
 RefPtr<FrameNode> ForceSplitUtils::CreatePlaceHolderContent(const RefPtr<PipelineContext>& context)
@@ -207,6 +212,44 @@ RefPtr<FrameNode> ForceSplitUtils::CreatePlaceHolderNode()
         TAG_LOGE(AceLogTag::ACE_NAVIGATION, "failed to create PlaceHolder content");
     }
     return phNode;
+}
+
+bool ForceSplitUtils::ParseForceSplitConfig(const std::string& configJsonStr, ForceSplitConfig& config)
+{
+    auto configJson = JsonUtil::ParseJsonString(configJsonStr);
+    if (!configJson || !configJson->IsObject()) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "Error, arkUIOptions is an invalid json object!");
+        return false;
+    }
+    config.isArkUIHookEnabled = configJson->GetBool(ENABLE_HOOK_KEY, false);
+    if (!configJson->Contains(NAVIGATION_OPTIONS_KEY)) {
+        return true;
+    }
+    auto navOptions = configJson->GetValue(NAVIGATION_OPTIONS_KEY);
+    if (!navOptions || !navOptions->IsObject()) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "Error, navigationOptions is an invalid json object!");
+        return false;
+    }
+    if (navOptions->Contains(NAVIGATION_OPTIONS_ID_KEY)) {
+        auto idJson = navOptions->GetValue(NAVIGATION_OPTIONS_ID_KEY);
+        if (!idJson->IsString()) {
+            TAG_LOGE(AceLogTag::ACE_NAVIGATION, "Error, navigationOptions.id is not string!");
+            return false;
+        }
+        auto idStr = idJson->GetString();
+        if (!idStr.empty()) {
+            config.navigationId = idStr;
+        }
+    }
+    if (navOptions->Contains(NAVIGATION_OPTIONS_DEPTH_KEY)) {
+        auto depthJson = navOptions->GetValue(NAVIGATION_OPTIONS_DEPTH_KEY);
+        if (!depthJson->IsNumber()) {
+            TAG_LOGE(AceLogTag::ACE_NAVIGATION, "Error, navigationOptions.depth is not number!");
+            return false;
+        }
+        config.navigationDepth = navOptions->GetInt(NAVIGATION_OPTIONS_DEPTH_KEY);
+    }
+    return true;
 }
 } // namespace OHOS::Ace::NG
 

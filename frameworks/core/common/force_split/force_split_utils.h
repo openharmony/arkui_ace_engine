@@ -23,12 +23,19 @@ namespace OHOS::Ace::NG {
 
 class NavDestinationGroupNode;
 
+struct ForceSplitConfig {
+    bool isArkUIHookEnabled = false;
+    std::optional<std::string> navigationId;
+    std::optional<int32_t> navigationDepth;
+};
+
 class ForceSplitUtils {
 public:
     static RefPtr<FrameNode> CreatePlaceHolderContent(const RefPtr<PipelineContext>& context);
     static RefPtr<NavDestinationGroupNode> CreatePlaceHolderNavDestination(const RefPtr<PipelineContext>& context);
     static bool IsNavDestinationHomePage(const RefPtr<NavDestinationGroupNode>& node);
     static RefPtr<FrameNode> CreatePlaceHolderNode();
+    static bool ParseForceSplitConfig(const std::string& configJsonStr, ForceSplitConfig& config);
 };
 
 } // namespace OHOS::Ace::NG
