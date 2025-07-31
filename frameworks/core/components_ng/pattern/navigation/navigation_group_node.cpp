@@ -963,7 +963,7 @@ void NavigationGroupNode::CreateAnimationWithPush(const TransitionUnitInfo& preI
                 CHECK_NULL_VOID(nodeBase);
                 nodeBase->SystemTransitionPushEnd(true);
             }
-    }, option.GetOnFinishEvent());
+    }, option.GetOnFinishEvent(), nullptr /* repeatCallback */, GetContextRefPtr());
     if (newPushAnimation) {
         pushAnimations_.emplace_back(newPushAnimation);
     }
