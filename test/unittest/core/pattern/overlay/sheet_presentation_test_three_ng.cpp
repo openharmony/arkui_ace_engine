@@ -1181,6 +1181,28 @@ HWTEST_F(SheetPresentationTestThreeNg, GetCurrentScrollHeight003, TestSize.Level
 }
 
 /**
+ * @tc.name: SheetTransitionForOverlay001
+ * @tc.desc: SheetTransitionForOverlay
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestThreeNg, SheetTransitionForOverlay001, TestSize.Level1)
+{
+    SheetPresentationTestThreeNg::SetUpTestCase();
+        auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->InitSheetObject();
+    sheetPattern->sheetType_ = SheetType::SHEET_BOTTOM_OFFSET;
+    sheetPattern->SheetTransitionForOverlay(true, false);
+    EXPECT_NE(sheetPattern->preType_, SheetType::SHEET_BOTTOM_OFFSET);
+    EXPECT_EQ(sheetPattern->animation_, nullptr);
+    SheetPresentationTestThreeNg::TearDownTestCase();
+}
+
+/**
  * @tc.name: IsShowInSubWindowTest001
  * @tc.desc: Branch: return sheetStyle.showInSubWindow.value_or(false);
  *           Condition: 1.sheetStyle.showInSubWindow = true.
