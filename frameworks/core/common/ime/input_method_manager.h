@@ -25,6 +25,8 @@ class InputMethodManager final {
 public:
     static InputMethodManager* GetInstance();
     void OnFocusNodeChange(const RefPtr<NG::FrameNode>& focusNode, FocusReason focusReason);
+    void ManageFocusNode(const RefPtr<NG::FrameNode>& focusNode, FocusReason focusReason,
+        bool saveKeyboard = false);
     void SetWindowFocus(bool windowFocus);
     bool NeedSoftKeyboard() const;
     // Close the keyboard in-process

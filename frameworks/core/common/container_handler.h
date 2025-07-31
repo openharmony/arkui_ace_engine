@@ -81,6 +81,8 @@ public:
         return hostConfig_;
     }
 
+    virtual void GetHostFocusWindowSceneCloseKeyboard(const std::function<void(bool)>& getKeyCallback) {};
+
 protected:
     HostConfig hostConfig_;
 };

@@ -53,6 +53,10 @@ RefPtr<UINode> WindowSceneHelper::FindWindowScene(const RefPtr<FrameNode>& targe
         return nullptr;
     }
 
+    if (targetNode->GetTag() == V2::WINDOW_SCENE_ETS_TAG) {
+        return targetNode;
+    }
+
     TAG_LOGD(AceLogTag::ACE_KEYBOARD, "FindWindowScene start.");
     auto parent = targetNode->GetParent();
     while (parent && parent->GetTag() != V2::WINDOW_SCENE_ETS_TAG) {
