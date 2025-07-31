@@ -13386,3 +13386,5 @@ export interface Bindable<T> {
     readonly value: T;
     readonly onChange: (value: T) => void;
 }
+export type BindableResourceStr = string | Resource | ResourceStr | Bindable<ResourceStr> | Bindable<Resource> | Bindable<string>
+export type BindableResourceStrArray = string[] | Resource[] | ResourceStr[] | Bindable<ResourceStr[]> | Bindable<Resource[]> | Bindable<string[]>
