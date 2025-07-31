@@ -89,9 +89,6 @@ public:
             return;
         }
         makeFunc_ = std::move(makeFunc);
-        if (ratingModifier_) {
-            ratingModifier_->SetUseContentModifier(true);
-        }
     }
 
     bool UseContentModifier()

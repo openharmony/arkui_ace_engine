@@ -1127,6 +1127,9 @@ void RatingPattern::FireBuilder()
     CHECK_NULL_VOID(contentModifierNode_);
     host->AddChild(contentModifierNode_, 0);
     host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
+    if (ratingModifier_) {
+        ratingModifier_->SetUseContentModifier(UseContentModifier());
+    }
 }
 
 RefPtr<FrameNode> RatingPattern::BuildContentModifierNode()
