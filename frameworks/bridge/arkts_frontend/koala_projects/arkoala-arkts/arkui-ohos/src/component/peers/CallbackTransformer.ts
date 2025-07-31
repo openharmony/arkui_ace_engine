@@ -19,13 +19,26 @@ import { CustomBuilder } from "../common"
 import { CustomNodeBuilder } from "../customBuilder"
 import { UIContextUtil } from 'arkui/handwritten/UIContextUtil'
 import { UIContextImpl } from 'arkui/handwritten/UIContextImpl'
+import { ObserveSingleton } from "../../stateManagement/base/observeSingleton"
+import { ExtendableComponent } from "@component_handwritten/extendableComponent"
 
 export class CallbackTransformer {
     static transformFromCustomBuilder(value: CustomBuilder): CustomNodeBuilder {
         let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+        let currentRenderingComponent = ObserveSingleton.instance.renderingComponent;
+        let currentExtendableComponent = ExtendableComponent.current;
         return (parentNodeId: KPointer): KPointer => {
-            const peer = context.getDetachedRootEntryManager().createUiDetachedFreeRoot(() => new IncrementalNode(), value)
-            return peer ? peer.peer.ptr : nullptr;
+            let lastRenderingComponent = ObserveSingleton.instance.renderingComponent;
+            let lastExtendableComponent = ExtendableComponent.current;
+            ObserveSingleton.instance.renderingComponent = currentRenderingComponent;
+            ExtendableComponent.current = currentExtendableComponent;
+            try {
+                const peer = context.getDetachedRootEntryManager().createUiDetachedFreeRoot(() => new IncrementalNode(), value)
+                return peer ? peer.peer.ptr : nullptr;
+            } finally {
+                ObserveSingleton.instance.renderingComponent = lastRenderingComponent;
+                ExtendableComponent.current = lastExtendableComponent;
+            }
         }
     }
     static transformToCustomBuilder(value: CustomNodeBuilder): CustomBuilder {
