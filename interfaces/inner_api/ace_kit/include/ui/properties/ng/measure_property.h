@@ -276,6 +276,11 @@ struct PaddingPropertyT<float> {
         return OffsetF(left.value_or(0.0f), top.value_or(0.0f));
     }
 
+    OffsetF MirrorOffset() const
+    {
+        return OffsetF(-right.value_or(0.0f), top.value_or(0.0f));
+    }
+
     bool Empty()
     {
         return !left.has_value() && !right.has_value() && !top.has_value() && !bottom.has_value();

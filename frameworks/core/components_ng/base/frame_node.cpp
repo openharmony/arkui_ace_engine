@@ -4608,7 +4608,7 @@ void FrameNode::UpdatePercentSensitive()
 
 bool FrameNode::PreMeasure(const std::optional<LayoutConstraintF>& parentConstraint)
 {
-    if (GetHasPreMeasured()) {
+    if (GetEscapeDelayForIgnore() || (GetIgnoreLayoutProcess() && GetHasPreMeasured())) {
         return false;
     }
     auto parent = GetAncestorNodeOfFrame(true);
@@ -4673,7 +4673,6 @@ void FrameNode::PostTaskForIgnore(PipelineContext* pipeline)
 bool FrameNode::PostponedTaskForIgnore()
 {
     auto pattern = GetPattern();
-    RefPtr<FrameNode> parent = GetAncestorNodeOfFrame(false);
     if (!pattern->PostponedTaskForIgnoreEnabled()) {
         delayLayoutChildren_.clear();
         return false;
@@ -4685,17 +4684,23 @@ bool FrameNode::PostponedTaskForIgnore()
             IgnoreLayoutSafeAreaOpts options = { .type = NG::LAYOUT_SAFE_AREA_TYPE_NONE,
                 .edges = NG::LAYOUT_SAFE_AREA_EDGE_NONE };
             auto property = node->GetLayoutProperty();
-            if (!property) {
-                continue;
-            }
-            auto&& nodeOpts = property->GetIgnoreLayoutSafeAreaOpts();
-            if (nodeOpts) {
-                options = *nodeOpts;
+            if (property) {
+                options = property->GenIgnoreOpts();
             }
             ExpandEdges sae = node->GetAccumulatedSafeAreaExpand(false, options);
-            auto offset = node->GetGeometryNode()->GetMarginFrameOffset();
-            offset -= sae.Offset();
-            node->GetGeometryNode()->SetMarginFrameOffset(offset);
+            bool isRtl = false;
+            auto containerProperty = GetLayoutProperty();
+            if (containerProperty) {
+                isRtl = containerProperty->DecideMirror();
+            }
+            auto selfIgnoreAdjust = isRtl ? sae.MirrorOffset() : sae.Offset();
+            auto geometryNode = node->GetGeometryNode();
+            if (geometryNode) {
+                geometryNode->SetIgnoreAdjust(selfIgnoreAdjust);
+                auto offset = geometryNode->GetMarginFrameOffset();
+                offset -= selfIgnoreAdjust;
+                geometryNode->SetMarginFrameOffset(offset);
+            }
             node->Layout();
         }
     }
@@ -4703,9 +4708,24 @@ bool FrameNode::PostponedTaskForIgnore()
     return true;
 }
 
+bool FrameNode::EnsureDelayedMeasureBeingOnlyOnce()
+{
+    auto parent = GetAncestorNodeOfFrame(true);
+    CHECK_NULL_RETURN(parent, false);
+    auto pattern = parent->GetPattern();
+    CHECK_NULL_RETURN(pattern, false);
+    if (pattern->ChildPreMeasureHelperEnabled() && !CheckHasPreMeasured()) {
+        return true;
+    }
+    return false;
+}
+
 // This will call child and self measure process.
 void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint)
 {
+    if (GetIgnoreLayoutProcess() && EnsureDelayedMeasureBeingOnlyOnce()) {
+        return;
+    }
     ACE_LAYOUT_TRACE_BEGIN("Measure[%s][self:%d][parent:%d][key:%s]", tag_.c_str(), nodeId_,
         GetAncestorNodeOfFrame(true) ? GetAncestorNodeOfFrame(true)->GetId() : 0, GetInspectorIdValue("").c_str());
     if (SystemProperties::GetMeasureDebugTraceEnabled()) {

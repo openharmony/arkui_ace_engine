@@ -858,6 +858,8 @@ public:
     // layout wrapper function override
     const RefPtr<LayoutAlgorithmWrapper>& GetLayoutAlgorithm(bool needReset = false) override;
 
+    bool EnsureDelayedMeasureBeingOnlyOnce();
+
     bool PreMeasure(const std::optional<LayoutConstraintF>& parentConstraint);
 
     bool ChildPreMeasureHelper(LayoutWrapper* childWrapper, const std::optional<LayoutConstraintF>& parentConstraint);

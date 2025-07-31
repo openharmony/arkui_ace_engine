@@ -1325,6 +1325,23 @@ HWTEST_F(LayoutPropertyTestNgTwo, TestIsExpandConstraintNeeded, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TestMirrorOffset
+ * @tc.desc: Test PaddingPropertyT MirrorOffset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNgTwo, TestMirrorOffset, TestSize.Level1)
+{
+    PaddingPropertyF edges = {
+        .left = 10.0f,
+        .right = 20.0f,
+        .top = 30.0f,
+        .bottom = 40.0f
+    };
+    OffsetF expectedRes(-20.0f, 30.0f);
+    EXPECT_EQ(edges.MirrorOffset(), expectedRes);
+}
+
+/**
  * @tc.name: TestConvertSafeAreaPadding
  * @tc.desc: Test ConvertWithResidueToPaddingPropertyF
  * @tc.type: FUNC
