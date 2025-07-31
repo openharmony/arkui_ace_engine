@@ -2356,8 +2356,11 @@ void PipelineContext::AvoidanceLogic(float keyboardHeight, const std::shared_ptr
         keyboardHeight += safeAreaManager_->GetSafeHeight();
         float positionY = 0.0f;
         auto manager = DynamicCast<TextFieldManagerNG>(PipelineBase::GetTextFieldManager());
+        float keyboardOffset = manager ? manager->GetClickPositionOffset() : safeAreaManager_->GetKeyboardOffset();
         if (manager) {
-            positionY = manager->GetFocusedNodeCaretRect().Top() - safeAreaManager_->GetKeyboardOffset();
+            positionY = manager->GetIfFocusTextFieldIsInline() ?
+                static_cast<float>(manager->GetClickPosition().GetY()) - keyboardOffset :
+                manager->GetFocusedNodeCaretRect().Top() - safeAreaManager_->GetKeyboardOffset();
         }
         auto bottomLen = safeAreaManager_->GetNavSafeArea().bottom_.IsValid() ?
             safeAreaManager_->GetNavSafeArea().bottom_.Length() : 0;
