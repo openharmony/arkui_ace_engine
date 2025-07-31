@@ -128,8 +128,15 @@ void CheckBoxPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode, host);
     host->GetLayoutProperty()->UpdateAlignment(Alignment::CENTER);
     RegisterVisibleAreaChange();
+}
+
+void CheckBoxPattern::OnAttachToMainTree()
+{
+    auto host = GetHost();
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
 }
 
 void CheckBoxPattern::SetBuilderNodeHidden()
