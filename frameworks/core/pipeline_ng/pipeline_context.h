@@ -1334,6 +1334,10 @@ private:
 
     uint64_t GetResampleStamp() const;
     void ConsumeTouchEvents(std::list<TouchEvent>& touchEvents, std::unordered_map<int, TouchEvent>& idToTouchPoints);
+    void ConsumeTouchEventsInterpolation(
+        const std::unordered_set<int32_t>& ids, const std::map<int32_t, int32_t>& timestampToIds,
+        std::unordered_map<int32_t, TouchEvent>& newIdTouchPoints,
+        const std::unordered_map<int, TouchEvent>& idToTouchPoints);
     void AccelerateConsumeTouchEvents(
         std::list<TouchEvent>& touchEvents, std::unordered_map<int, TouchEvent>& idToTouchPoints);
     void SetTouchAccelarate(bool isEnable) override

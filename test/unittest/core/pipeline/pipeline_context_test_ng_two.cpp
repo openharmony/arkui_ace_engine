@@ -2605,5 +2605,30 @@ HWTEST_F(PipelineContextTestNg, FlushMouseEventForHover001, TestSize.Level1)
     context_->FlushMouseEventForHover();
     EXPECT_EQ(context_->lastMouseEvent_->button, MouseButton::LEFT_BUTTON);
 }
+
+/**
+ * @tc.name: ConsumeTouchEventsInterpolationTest001
+ * @tc.desc: Test ConsumeTouchEventsInterpolation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, ConsumeTouchEventsInterpolationTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Create consumeTouchEventsInterpolation testcase.
+     */
+    std::unordered_set<int32_t> ids = { 1, 2, 3 };
+    std::map<int32_t, int32_t> timestampToIds = { { 1, 0 }, { 2, 1 }, { 3, 2 }, { 4, 3 } };
+    std::unordered_map<int32_t, TouchEvent> newIdTouchPoints;
+    TouchEvent touchEventBefore = TouchEvent();
+    touchEventBefore.time = TimeStamp(std::chrono::nanoseconds(BEFORE_VSYNC_TIME));
+    TouchEvent touchEventAfter = TouchEvent();
+    touchEventAfter.time = TimeStamp(std::chrono::nanoseconds(AFTER_VSYNC_TIME));
+    std::unordered_map<int, TouchEvent> idToTouchPoints = { { 2, touchEventBefore }, { 3, touchEventAfter } };
+    ASSERT_NE(context_, nullptr);
+    context_->resampleTimeStamp_ = DEFAULT_VSYNC_TIME;
+    context_->historyPointsById_.clear();
+    context_->ConsumeTouchEventsInterpolation(ids, timestampToIds, newIdTouchPoints, idToTouchPoints);
+    EXPECT_EQ(context_->historyPointsById_.size(), 1);
+}
 } // namespace NG
 } // namespace OHOS::Ace
