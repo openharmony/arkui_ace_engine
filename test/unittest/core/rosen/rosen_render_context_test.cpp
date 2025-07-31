@@ -2277,4 +2277,20 @@ HWTEST_F(RosenRenderContextTest, ShouldSkipAffineTransformation001, TestSize.Lev
     rosenRenderContext->rsNode_ = nullptr;
     ASSERT_EQ(rosenRenderContext->rsNode_, nullptr);
 }
+
+/**
+ * @tc.name: RSUIContext001
+ * @tc.desc: Test RSUIContext001 Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, RSUIContext001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    ComponentSnapshot snapshot;
+    snapshot.SetRSUIContext(frameNode, nullptr);
+    auto pipeline = MockPipelineContext::GetCurrentContext();
+    auto rsUIContext = snapshot.GetRSUIContext(pipeline);
+    EXPECT_EQ(rsUIContext, nullptr);
+}
 } // namespace OHOS::Ace::NG
