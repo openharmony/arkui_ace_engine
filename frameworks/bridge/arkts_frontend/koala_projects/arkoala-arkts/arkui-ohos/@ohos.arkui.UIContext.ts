@@ -142,6 +142,10 @@ export class Router {
         throw Error("getStateRoot not implemented in Router!");
     }
 
+    public getPreState(): ComputableState<IncrementalNode> | undefined {
+        throw Error("getPreState not implemented in Router!");
+    }
+
     public showAlertBeforeBackPage(options: router.EnableAlertOptions): void {
         throw Error("showAlertBeforeBackPage not implemented in Router!");
     }

@@ -305,20 +305,24 @@ export class Application {
         // NativeModule._NativeLog("ARKTS: updateState")
         let uiContextRouter = this.uiContext!.getRouter();
         let rootState = uiContextRouter.getStateRoot();
+        let preState = uiContextRouter.getPreState();
         ObserveSingleton.instance.updateDirty();
-        this.updateStates(this.manager!, rootState)
+        this.updateStates(this.manager!, rootState, preState);
         while (StateUpdateLoop.len) {
             StateUpdateLoop.consume();
             ObserveSingleton.instance.updateDirty();
-            this.updateStates(this.manager!, rootState)
+            this.updateStates(this.manager!, rootState, preState);
         }
         // Here we request to draw a frame and call custom components callbacks.
         rootState!.value;
+        if (preState) {
+            preState!.value;
+        }
         // Call callbacks and sync
         callScheduledCallbacks();
     }
 
-    updateStates(manager: StateManager, root: ComputableState<IncrementalNode>) {
+    updateStates(manager: StateManager, root: ComputableState<IncrementalNode>, pre: ComputableState<IncrementalNode> | undefined) {
         if (this.instanceId < 0) {
             InteropNativeModule._NativeLog(
                 `ArkTS updateStates failed due to instanceId: ${this.instanceId} is illegal`)
@@ -348,6 +352,9 @@ export class Application {
                 // Compute new tree state
                 try {
                     root.value
+                    if (pre) {
+                        pre!.value;
+                    }
                     for (const detachedRoot of detachedRoots.values()) {
                         detachedRoot.compute()
                     }
