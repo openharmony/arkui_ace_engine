@@ -193,7 +193,7 @@ export class PeerNode extends IncrementalNode {
         if (parent != undefined && parent.isKind(PeerNodeType)) {
             (parent as PeerNode).peer.removeChild(this.peer.ptr)
         }
-        this.peer.close()
+        this.peer.dispose()
         PeerNode.peerNodeMap.delete(this.id)
         this._reusePool?.forEach((pool: ReusablePool) =>
             pool.dispose()
