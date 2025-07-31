@@ -137,7 +137,7 @@ export struct SelectTitleBar {
                 Select(this.options)
                   .selected(this.selected)
                   .value(this.selected >= 0 && this.selected < this.options.length ?
-                  this.options[this.selected].value : '')
+                  this.options[this.selected.toInt()].value : '')
                   .font({
                     size: this.hidesBackButton && !this.subtitle
                       ? $r('sys.float.ohos_id_text_size_headline7')
@@ -159,7 +159,7 @@ export struct SelectTitleBar {
               Select(this.options)
                 .selected(this.selected)
                 .value(this.selected >= 0 && this.selected < this.options.length ?
-                this.options[this.selected].value : '')
+                this.options[this.selected.toInt()].value : '')
                 .font({
                   size: this.hidesBackButton && !this.subtitle
                     ? $r('sys.float.ohos_id_text_size_headline7')

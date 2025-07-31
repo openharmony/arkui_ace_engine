@@ -156,8 +156,8 @@ export struct TabTitleBar {
 
     this.tabItems.forEach((tabItem: TabTitleBarTabItem, index: number) => {
       if (tabItem.icon !== undefined || tabItem.symbolStyle !== undefined) {
-        if (Math.abs(this.imageWidths[Math.floor(index)]) > TabContentItem.imageHotZoneWidth) {
-          tabOffset += this.imageWidths[Math.floor(index)];
+        if (Math.abs(this.imageWidths[Math.floor(index).toInt()]) > TabContentItem.imageHotZoneWidth) {
+          tabOffset += this.imageWidths[Math.floor(index).toInt()];
         } else {
           tabOffset += TabContentItem.imageHotZoneWidth;
         }
@@ -196,7 +196,7 @@ export struct TabTitleBar {
                         this.currentIndex = itemIndex;
                       },
                       onImageComplete: (width: number) => {
-                        this.imageWidths[index] = width;
+                        this.imageWidths[index.toInt()] = width;
                         this.loadOffsets();
                       }
                     })
