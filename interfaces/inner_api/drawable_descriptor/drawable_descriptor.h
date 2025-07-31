@@ -76,7 +76,7 @@ using UniqueImageSource = std::unique_ptr<Media::ImageSource>;
 struct DrawableItem {
     UINT8 data_;
     size_t len_ = 0;
-    RState state_;
+    RState state_ = RState::INVALID_FORMAT;
 };
 
 class DRAWABLE_FORCE_EXPORT DrawableDescriptor {

@@ -281,6 +281,10 @@ napi_value JsDrawableDescriptor::GetPixelMap(napi_env env, napi_callback_info in
     void* native = nullptr;
     napi_unwrap(env, thisVar, &native);
     auto* drawable = reinterpret_cast<DrawableDescriptor*>(native);
+    if (drawable == nullptr) {
+        napi_close_escapable_handle_scope(env, scope);
+        return nullptr;
+    }
     auto pixmap = drawable->GetPixelMap();
 
     napi_value result = Media::PixelMapNapi::CreatePixelMap(env, pixmap);

@@ -171,14 +171,17 @@ std::vector<uint32_t> GetResIdInJson(const MediaData& jsonBuf, const std::vector
         if (pos != std::string::npos) {
             idStr = value.substr(pos + 1);
         } else {
+            cJSON_Delete(roots);
             return ids;
         }
         uint32_t resId = 0;
         if (!SafeStringToUint(idStr, resId)) {
+            cJSON_Delete(roots);
             return ids;
         }
         ids.push_back(resId);
     }
+    cJSON_Delete(roots);
     return ids;
 }
 
