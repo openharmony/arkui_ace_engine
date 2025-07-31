@@ -663,11 +663,11 @@ void JsDragSpringLoadingContext::UpdateConfiguration(const JSCallbackInfo& args)
     int32_t updateNotifyCount = jsObj->GetPropertyValue<int32_t>("updateNotifyCount", NG::DEFAULT_UPDATE_NOTIFY_COUNT);
     int32_t updateToFinishInterval =
         jsObj->GetPropertyValue<int32_t>("updateToFinishInterval", NG::DEFAULT_UPDATE_TO_FINISH_INTERVAL);
-    config->stillTimeLimit = (stillTimeLimit >= 0) ? stillTimeLimit : NG::DEFAULT_STILL_TIME_LIMIT;
-    config->updateInterval = (updateInterval >= 0) ? updateInterval : NG::DEFAULT_UPDATE_INTERVAL;
-    config->updateNotifyCount = (updateNotifyCount >= 0) ? updateNotifyCount : NG::DEFAULT_UPDATE_NOTIFY_COUNT;
+    config->stillTimeLimit = (stillTimeLimit > 0) ? stillTimeLimit : NG::DEFAULT_STILL_TIME_LIMIT;
+    config->updateInterval = (updateInterval > 0) ? updateInterval : NG::DEFAULT_UPDATE_INTERVAL;
+    config->updateNotifyCount = (updateNotifyCount > 0) ? updateNotifyCount : NG::DEFAULT_UPDATE_NOTIFY_COUNT;
     config->updateToFinishInterval =
-        (updateToFinishInterval >= 0) ? updateToFinishInterval : NG::DEFAULT_UPDATE_TO_FINISH_INTERVAL;
+        (updateToFinishInterval > 0) ? updateToFinishInterval : NG::DEFAULT_UPDATE_TO_FINISH_INTERVAL;
     context_->SetDragSpringLoadingConfiguration(std::move(config));
 }
 

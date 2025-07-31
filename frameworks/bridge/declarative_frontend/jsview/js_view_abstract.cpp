@@ -8129,7 +8129,7 @@ void JSViewAbstract::JsOnDragSpringLoading(const JSCallbackInfo& info)
         if (!CheckJSCallbackInfo("JsOnDragSpringLoading", jsVal, checkList)) {
             return;
         }
-        NG::OnDrapDropSpringLoadingFunc onDragSpringLoading = nullptr;
+        NG::OnDragDropSpringLoadingFunc onDragSpringLoading = nullptr;
         WeakPtr<NG::FrameNode> frameNode =
             AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
         if (jsVal->IsFunction()) {
@@ -13299,10 +13299,13 @@ void JSViewAbstract::ParseDragSpringLoadingConfiguration(
     auto setConfigurationPropertyIfValid =
         [&configuration, &config](const char* propName,
             std::function<void(const RefPtr<NG::DragSpringLoadingConfiguration>&, int32_t)> setter) {
+            CHECK_NULL_VOID(propName);
+            CHECK_NULL_VOID(config);
+            CHECK_NULL_VOID(setter);
             auto propObj = configuration->GetProperty(propName);
             if (propObj->IsNumber()) {
                 auto value = propObj->ToNumber<int32_t>();
-                if (value >= 0) {
+                if (value > 0) {
                     setter(config, value);
                 }
             }

@@ -126,8 +126,8 @@ public:
     void SetOnPreDrag(OnPreDragFunc&& onPreDragFunc);
     const OnPreDragFunc& GetOnPreDrag() const;
     void SetOnDragStart(OnDragStartFunc&& onDragStart);
-    void SetCustomerOnDragSpringLoading(OnDrapDropSpringLoadingFunc&& onDragSpringLoading);
-    const OnDrapDropSpringLoadingFunc& GetCustomerOnDragSpringLoading() const;
+    void SetCustomerOnDragSpringLoading(OnDragDropSpringLoadingFunc&& onDragSpringLoading);
+    const OnDragDropSpringLoadingFunc& GetCustomerOnDragSpringLoading() const;
 
     const OnDragStartFunc& GetOnDragStart() const
     {
@@ -355,7 +355,7 @@ private:
 
     OnDragStartFunc defaultOnDragStart_;
     OnDragFunc customerOnDragEnter_;
-    OnDrapDropSpringLoadingFunc customerOnDragSpringLoading_;
+    OnDragDropSpringLoadingFunc customerOnDragSpringLoading_;
     OnDragFunc customerOnDragLeave_;
     OnDragFunc customerOnDragMove_;
     OnDragFunc customerOnDrop_;
