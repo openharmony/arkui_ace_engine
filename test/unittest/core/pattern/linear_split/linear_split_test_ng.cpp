@@ -1336,7 +1336,6 @@ HWTEST_F(LinearSplitTestNg, IgnoreLayoutSafeArea002, TestSize.Level1)
 HWTEST_F(LinearSplitTestNg, RegisterResObj, TestSize.Level1)
 {
     g_isConfigChangePerform = true;
-    SystemProperties::ConfigChangePerform();
     std::string bundleName = "com.example.test";
     std::string moduleName = "entry";
     RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
@@ -1346,6 +1345,7 @@ HWTEST_F(LinearSplitTestNg, RegisterResObj, TestSize.Level1)
     EXPECT_EQ(divider.resMap_.size(), 1);
     LinearSplitModelNG::RegisterResObj(resObj, divider, "columnSplit.divider.endMargin");
     divider.ReloadResources();
+    g_isConfigChangePerform = false;
     EXPECT_EQ(divider.resMap_.size(), 2);
 }
 } // namespace OHOS::Ace::NG
