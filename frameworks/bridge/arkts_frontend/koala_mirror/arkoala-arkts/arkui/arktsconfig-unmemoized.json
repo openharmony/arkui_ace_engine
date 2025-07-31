@@ -16,7 +16,7 @@
         "build/unmemoized/src/**/*.ts", "build/unmemoized/src/*.ts"
     ],
     "exclude": [
-	"src/ets/**/*",
+	    "src/**/*",
         "build/unmemoized/src/generated/ts/*.ts",
         "build/unmemoized/generated/main.ts"
     ]

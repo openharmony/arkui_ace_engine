@@ -22,6 +22,9 @@
 #include "base/utils/string_utils.h"
 #include "bridge/common/utils/utils.h"
 #include "core/common/card_scope.h"
+#include "core/common/container.h"
+#include "core/common/resource/resource_manager.h"
+#include "core/common/resource/resource_object.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/text/text_model.h"
 #include "core/components/theme/shadow_theme.h"
@@ -52,7 +55,6 @@ namespace {
     constexpr int32_t DEFAULT_MULTIPLE = 100;
     constexpr float GRADIENT_MIN_POSITION = 0.0f;
     constexpr float GRADIENT_DEFAULT_MIN_POSITION = 0.0f;
-    constexpr uint16_t UTF16_BOM = 0xFEFF;
     int32_t ConvertToVariableFontWeight(OHOS::Ace::FontWeight fontWeight)
     {
         OHOS::Ace::FontWeight convertValue;
@@ -252,8 +254,8 @@ void AssignLinearGradientDirection(std::shared_ptr<OHOS::Ace::NG::LinearGradient
     }
 }
 
-void stubCall(const Ark_Int32 _) {}
-void stubHoldRelease(Ark_Int32 _) {}
+void StubCall(const Ark_Int32 _) {}
+void StubHoldRelease(Ark_Int32 _) {}
 
 uint32_t ColorAlphaAdapt(uint32_t origin)
 {
@@ -286,6 +288,9 @@ ResourceConverter::ResourceConverter(const Ark_Resource& resource)
             CHECK_NULL_VOID(themeManager);
             themeConstants_ = themeManager->GetThemeConstants(bundleName_.c_str(), moduleName_.c_str());
         }
+        auto resObj = AceType::MakeRefPtr<ResourceObject>(bundleName_, moduleName_, Container::CurrentIdSafely());
+        auto resAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resObj);
+        resWrapper_ = AceType::MakeRefPtr<ResourceWrapper>(themeConstants_, resAdapter);
     } else {
         LOGE("ResourceConverter illegal id tag: id.tag = %{public}d", resource.id.tag);
     }
@@ -295,10 +300,10 @@ std::optional<std::string> ResourceConverter::GetStringResource()
 {
     std::optional<std::string> result;
     if (id_ != -1) {
-        result = themeConstants_->GetString(id_);
+        result = resWrapper_->GetString(id_);
         ReplaceHolder(result.value(), params_, 0);
     } else if (!params_.empty()) {
-        result = themeConstants_->GetStringByName(params_.front());
+        result = resWrapper_->GetStringByName(params_.front());
         ReplaceHolder(result.value(), params_, 1);
     } else {
         LOGE("Unknown resource value OHOS::Ace::NG::Converter::ResourceConverter");
@@ -310,7 +315,7 @@ std::optional<std::string> ResourceConverter::GetRawfilePath()
 {
     std::optional<std::string> result;
     if (!params_.empty()) {
-        result = themeConstants_->GetRawfile(params_.front());
+        result = resWrapper_->GetRawfile(params_.front());
     }
     return result;
 }
@@ -319,9 +324,9 @@ std::optional<std::string> ResourceConverter::GetMediaPath()
 {
     std::optional<std::string> result;
     if (id_ != -1) {
-        result = themeConstants_->GetMediaPath(id_);
+        result = resWrapper_->GetMediaPath(id_);
     } else if (!params_.empty()) {
-        result = themeConstants_->GetMediaPathByName(params_.front());
+        result = resWrapper_->GetMediaPathByName(params_.front());
     }
     return result;
 }
@@ -330,10 +335,10 @@ std::optional<std::string> ResourceConverter::GetPluralResource()
 {
     std::optional<std::string> result;
     if (id_ != -1 && params_.size() == 2) {  // 2 means quantity and count in params_
-        result = themeConstants_->GetPluralString(id_, StringUtils::StringToInt(params_[0]));
+        result = resWrapper_->GetPluralString(id_, StringUtils::StringToInt(params_[0]));
         ReplaceHolder(result.value(), params_, 1);
     } else if (params_.size() == 3) {  // 3 means resName, quantity and count in params_
-        result = themeConstants_->GetPluralStringByName(params_[0], StringUtils::StringToInt(params_[1]));
+        result = resWrapper_->GetPluralStringByName(params_[0], StringUtils::StringToInt(params_[1]));
         ReplaceHolder(result.value(), params_, 2);  // 2 means data get from params_[2]
     } else {
         LOGE("Invalid PLURAL resource OHOS::Ace::NG::Converter::ResourceConverter");
@@ -345,9 +350,9 @@ std::optional<int32_t> ResourceConverter::GetIntegerResource()
 {
     std::optional<int32_t> result;
     if (id_ != -1) {
-        result = themeConstants_->GetInt(id_);
+        result = resWrapper_->GetInt(id_);
     } else if (!params_.empty()) {
-        result = themeConstants_->GetIntByName(params_.front());
+        result = resWrapper_->GetIntByName(params_.front());
     } else {
         LOGE("Unknown INTEGER value OHOS::Ace::NG::Converter::ResourceConverter");
     }
@@ -358,9 +363,9 @@ std::optional<double> ResourceConverter::GetFloatResource()
 {
     std::optional<double> result;
     if (id_ != -1) {
-        result = themeConstants_->GetDouble(id_);
+        result = resWrapper_->GetDouble(id_);
     } else if (!params_.empty()) {
-        result = themeConstants_->GetDoubleByName(params_.front());
+        result = resWrapper_->GetDoubleByName(params_.front());
     } else {
         LOGE("Unknown FLOAT value OHOS::Ace::NG::Converter::ResourceConverter");
     }
@@ -370,7 +375,7 @@ std::optional<double> ResourceConverter::GetFloatResource()
 std::optional<std::string> ResourceConverter::ToString()
 {
     std::optional<std::string> result;
-    CHECK_NULL_RETURN(themeConstants_, result);
+    CHECK_NULL_RETURN(resWrapper_, result);
 
     if (type_ == ResourceType::STRING) {
         result = GetStringResource();
@@ -394,12 +399,12 @@ std::optional<std::string> ResourceConverter::ToString()
 
 std::optional<StringArray> ResourceConverter::ToStringArray()
 {
-    CHECK_NULL_RETURN(themeConstants_, std::nullopt);
+    CHECK_NULL_RETURN(resWrapper_, std::nullopt);
     if (type_ == ResourceType::STRARRAY) {
         if (id_ != -1) {
-            return themeConstants_->GetStringArray(id_);
+            return resWrapper_->GetStringArray(id_);
         } else if (params_.size() > 0) {
-            return themeConstants_->GetStringArrayByName(params_.front());
+            return resWrapper_->GetStringArrayByName(params_.front());
         } else {
             LOGE("Unknown STRARRAY value OHOS::Ace::NG::Converter::ResourceConverter");
         }
@@ -409,13 +414,13 @@ std::optional<StringArray> ResourceConverter::ToStringArray()
 
 std::optional<StringArray> ResourceConverter::ToFontFamilies()
 {
-    CHECK_NULL_RETURN(themeConstants_, std::nullopt);
+    CHECK_NULL_RETURN(resWrapper_, std::nullopt);
     if (type_ == ResourceType::STRING) {
         std::optional<std::string> str;
         if (id_ != -1) {
-            str = themeConstants_->GetString(id_);
+            str = resWrapper_->GetString(id_);
         } else if (!params_.empty()) {
-            str = themeConstants_->GetStringByName(params_.front());
+            str = resWrapper_->GetStringByName(params_.front());
         } else {
             LOGE("ResourceConverter::ToFontFamilies Unknown resource value");
         }
@@ -432,16 +437,16 @@ std::optional<StringArray> ResourceConverter::ToFontFamilies()
 
 std::optional<Dimension> ResourceConverter::ToDimension()
 {
-    CHECK_NULL_RETURN(themeConstants_, std::nullopt);
+    CHECK_NULL_RETURN(resWrapper_, std::nullopt);
     if (type_ == ResourceType::INTEGER) {
         auto resource = ToInt();
         if (!resource) return std::nullopt;
         return Dimension(*resource, DimensionUnit::VP);
     } else if (type_ == ResourceType::FLOAT) {
         if (id_ == -1 && !params_.empty()) {
-            return themeConstants_->GetDimensionByName(params_.front());
+            return resWrapper_->GetDimensionByName(params_.front());
         } else if (id_ != -1) {
-            return themeConstants_->GetDimension(id_);
+            return resWrapper_->GetDimension(id_);
         } else {
             LOGE("ResourceConverter::ToDimension Unknown resource value");
         }
@@ -451,13 +456,13 @@ std::optional<Dimension> ResourceConverter::ToDimension()
 
 std::optional<CalcLength> ResourceConverter::ToCalcLength()
 {
-    CHECK_NULL_RETURN(themeConstants_, std::nullopt);
+    CHECK_NULL_RETURN(resWrapper_, std::nullopt);
     if (type_ == ResourceType::STRING) {
         if (id_ != -1) {
-            return CalcLength(themeConstants_->GetString(id_));
+            return CalcLength(resWrapper_->GetString(id_));
         }
         if (!params_.empty()) {
-            return CalcLength(themeConstants_->GetStringByName(params_.front()));
+            return CalcLength(resWrapper_->GetStringByName(params_.front()));
         }
         LOGE("ResourceConverter::ToCalcLength Unknown resource value");
         return std::nullopt;
@@ -469,26 +474,26 @@ std::optional<CalcLength> ResourceConverter::ToCalcLength()
 std::optional<float> ResourceConverter::ToFloat()
 {
     std::optional<float> optFloat = std::nullopt;
-    CHECK_NULL_RETURN(themeConstants_, std::nullopt);
+    CHECK_NULL_RETURN(resWrapper_, std::nullopt);
     if (type_ == ResourceType::FLOAT) {
         if (id_ == -1 && params_.size() > 0) {
-            optFloat = static_cast<float>(themeConstants_->GetDoubleByName(params_[0]));
+            optFloat = static_cast<float>(resWrapper_->GetDoubleByName(params_[0]));
         } else {
-            optFloat = static_cast<float>(themeConstants_->GetDouble(id_));
+            optFloat = static_cast<float>(resWrapper_->GetDouble(id_));
         }
     } else if (type_ == ResourceType::INTEGER) {
         if (id_ == -1 && params_.size() > 0) {
-            optFloat = static_cast<float>(themeConstants_->GetIntByName(params_[0]));
+            optFloat = static_cast<float>(resWrapper_->GetIntByName(params_[0]));
         } else {
-            optFloat = static_cast<float>(themeConstants_->GetInt(id_));
+            optFloat = static_cast<float>(resWrapper_->GetInt(id_));
         }
     } else if (type_ == ResourceType::STRING) {
         std::optional<std::string> result;
         if (id_ != -1) {
-            result = themeConstants_->GetString(id_);
+            result = resWrapper_->GetString(id_);
             ReplaceHolder(result.value(), params_, 0);
         } else if (!params_.empty()) {
-            result = themeConstants_->GetStringByName(params_.front());
+            result = resWrapper_->GetStringByName(params_.front());
             ReplaceHolder(result.value(), params_, 1);
         }
         if (result.has_value()) {
@@ -503,20 +508,20 @@ std::optional<float> ResourceConverter::ToFloat()
 
 std::optional<int32_t> ResourceConverter::ToInt()
 {
-    CHECK_NULL_RETURN(themeConstants_, std::nullopt);
+    CHECK_NULL_RETURN(resWrapper_, std::nullopt);
     if (type_ == ResourceType::INTEGER) {
-        return themeConstants_->GetInt(id_);
+        return resWrapper_->GetInt(id_);
     }
     return std::nullopt;
 }
 
 std::optional<uint32_t> ResourceConverter::ToSymbol()
 {
-    CHECK_NULL_RETURN(themeConstants_, std::nullopt);
+    CHECK_NULL_RETURN(resWrapper_, std::nullopt);
     if (id_ == -1 && !params_.empty()) {
-        return themeConstants_->GetSymbolByName(params_.front().c_str());
+        return resWrapper_->GetSymbolByName(params_.front().c_str());
     } else if (id_ != -1) {
-        return themeConstants_->GetSymbolById(id_);
+        return resWrapper_->GetSymbolById(id_);
     }
     return std::nullopt;
 }
@@ -524,27 +529,27 @@ std::optional<uint32_t> ResourceConverter::ToSymbol()
 std::optional<Color> ResourceConverter::ToColor()
 {
     std::optional<Color> result;
-    CHECK_NULL_RETURN(themeConstants_, result);
+    CHECK_NULL_RETURN(resWrapper_, result);
     if (id_ == -1 && params_.size() > 0) {
-        result = themeConstants_->GetColorByName(params_[0]);
+        result = resWrapper_->GetColorByName(params_[0]);
         return result;
     }
 
     switch (type_) {
         case ResourceType::STRING: {
             Color color;
-            if (Color::ParseColorString(themeConstants_->GetString(id_), color)) {
+            if (Color::ParseColorString(resWrapper_->GetString(id_), color)) {
                 result = color;
             }
             break;
         }
 
         case ResourceType::INTEGER:
-            result = Color(ColorAlphaAdapt(themeConstants_->GetInt(id_)));
+            result = Color(ColorAlphaAdapt(resWrapper_->GetInt(id_)));
             break;
 
         case ResourceType::COLOR:
-            result = themeConstants_->GetColor(id_);
+            result = resWrapper_->GetColor(id_);
             break;
 
         default:
@@ -556,9 +561,9 @@ std::optional<Color> ResourceConverter::ToColor()
 
 std::optional<bool> ResourceConverter::ToBoolean()
 {
-    CHECK_NULL_RETURN(themeConstants_, std::nullopt);
+    CHECK_NULL_RETURN(resWrapper_, std::nullopt);
     if (type_ == ResourceType::BOOLEAN) {
-        return themeConstants_->GetBoolean(id_);
+        return resWrapper_->GetBoolean(id_);
     }
     return std::nullopt;
 }
@@ -663,28 +668,8 @@ SysOptions Convert(const Ark_SystemAdaptiveOptions& src)
 template<>
 std::u16string Convert(const Ark_String& src)
 {
-    if (src.chars == nullptr) return u"";
-    const char16_t* data = reinterpret_cast<const char16_t*>(src.chars);
-    if (data[0] == UTF16_BOM) {
-        // Handle utf16 strings
-        ++data;
-        return std::u16string(data, src.length);
-    }
     auto str8 =  Converter::Convert<std::string>(src);
     return UtfUtils::Str8ToStr16(str8);
-}
-
-template<>
-std::string Convert(const Ark_String& src)
-{
-    if (src.chars == nullptr) return "";
-    const char16_t* data = reinterpret_cast<const char16_t*>(src.chars);
-    if (data[0] == UTF16_BOM) {
-        // Handle utf16 strings
-        ++data;
-        return UtfUtils::Str16ToStr8(std::u16string(data, src.length));
-    }
-    return std::string(src.chars, src.length);
 }
 
 template<>
@@ -983,7 +968,7 @@ BorderStyleProperty Convert(const Ark_BorderStyle& src)
 template<>
 Dimension Convert(const Ark_CustomObject& src)
 {
-    LOGE("Convert [Ark_CustomObject] to [Dimension] is not supported");
+    LOGW("Convert [Ark_CustomObject] to [Dimension] is not supported");
     return Dimension();
 }
 
@@ -1174,6 +1159,14 @@ std::pair<std::optional<Color>, Dimension> Convert(const Ark_ColorStop& src)
 }
 
 template<>
+std::pair<std::optional<Dimension>, std::optional<Dimension>> Convert(const Ark_Position& src)
+{
+    auto x = OptConvert<Dimension>(src.x);
+    auto y = OptConvert<Dimension>(src.y);
+    return {x, y};
+}
+
+template<>
 Gradient Convert(const Ark_LinearGradient_common& value)
 {
     NG::Gradient gradient;
@@ -1332,6 +1325,13 @@ void AssignCast(std::optional<DateTimeType>& dst, const Ark_DateTimeOptions& src
         type.minuteType = ZeroPrefixType::SHOW;
         if (minuteStr == TIMEPICKER_OPTIONS_NUMERIC_VAL) {
             type.minuteType = ZeroPrefixType::HIDE;
+        }
+    }
+    auto secondStr = OptConvert<std::string>(src.second);
+    if (secondStr) {
+        type.secondType = ZeroPrefixType::SHOW;
+        if (secondStr == TIMEPICKER_OPTIONS_NUMERIC_VAL) {
+            type.secondType = ZeroPrefixType::HIDE;
         }
     }
     dst = type;
@@ -1501,6 +1501,42 @@ uint32_t Convert(const Ark_LayoutSafeAreaType& src)
 }
 
 template<>
+OverlayOptions Convert(const Ark_OverlayOptions& src)
+{
+    OverlayOptions dst;
+    auto align = Converter::OptConvert<Alignment>(src.align);
+    if (align) {
+        dst.align = align.value();
+    }
+    auto x = Converter::OptConvert<Dimension>(src.offset.value.x);
+    if (x) {
+        dst.x = x.value();
+    }
+    auto y = Converter::OptConvert<Dimension>(src.offset.value.y);
+    if (y) {
+        dst.y = y.value();
+    }
+    return dst;
+}
+
+template<>
+BindSheetDismissReason Convert(const Ark_DismissReason& src)
+{
+    switch (src) {
+        case Ark_DismissReason::ARK_DISMISS_REASON_PRESS_BACK:
+            return BindSheetDismissReason::BACK_PRESSED;
+        case Ark_DismissReason::ARK_DISMISS_REASON_TOUCH_OUTSIDE:
+            return BindSheetDismissReason::TOUCH_OUTSIDE;
+        case Ark_DismissReason::ARK_DISMISS_REASON_CLOSE_BUTTON:
+            return BindSheetDismissReason::CLOSE_BUTTON;
+        default:
+            LOGE("Unexpected enum value in Ark_DismissReason: %{public}d", src);
+            break;
+    }
+    return BindSheetDismissReason::CLOSE_BUTTON;
+}
+
+template<>
 NG::NavigationBackgroundOptions Convert(const Ark_MoreButtonOptions& src)
 {
     NG::NavigationBackgroundOptions options;
@@ -1516,6 +1552,7 @@ NG::NavigationBackgroundOptions Convert(const Ark_MoreButtonOptions& src)
 
     if (src.backgroundBlurStyleOptions.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
         styleOptions = Converter::Convert<BlurStyleOption>(src.backgroundBlurStyleOptions.value);
+        options.blurStyleOption = styleOptions;
     }
 
     if (src.backgroundBlurStyle.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
@@ -1523,14 +1560,14 @@ NG::NavigationBackgroundOptions Convert(const Ark_MoreButtonOptions& src)
         if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
             blurStyle <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
             styleOptions.blurStyle = static_cast<BlurStyle>(blurStyle);
+            options.blurStyleOption = styleOptions;
         }
     }
 
     if (src.backgroundEffect.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
         effectOption = Converter::Convert<EffectOption>(src.backgroundEffect.value);
+        options.effectOption = effectOption;
     }
-    options.blurStyleOption = styleOptions;
-    options.effectOption = effectOption;
     return options;
 }
 
@@ -1782,6 +1819,17 @@ template<>
 RefPtr<Curve> Convert(const Ark_ICurve& src)
 {
     return src ? src->handler : nullptr;
+}
+
+template<>
+void AssignCast(std::optional<RefPtr<Curve>>& dst, const Ark_String& src)
+{
+    auto curve = Framework::CreateCurve(Converter::Convert<std::string>(src), false);
+    if (curve) {
+        dst = curve;
+    } else {
+        dst = std::nullopt;
+    }
 }
 
 void ParseDragPreviewMode(DragPreviewOption& previewOption, const Ark_DragPreviewOptions &src)
@@ -2211,6 +2259,19 @@ BlurStyleOption Convert(const Ark_BackgroundBlurStyleOptions& src)
 }
 
 template<>
+BlurStyleOption Convert(const Ark_ForegroundBlurStyleOptions& src)
+{
+    BlurStyleOption dst;
+    dst.colorMode = OptConvert<ThemeColorMode>(src.colorMode).value_or(dst.colorMode);
+    dst.adaptiveColor = OptConvert<AdaptiveColor>(src.adaptiveColor).value_or(dst.adaptiveColor);
+    if (auto scaleOpt = OptConvert<float>(src.scale); scaleOpt) {
+        dst.scale = static_cast<double>(*scaleOpt);
+    }
+    dst.blurOption = OptConvert<BlurOption>(src.blurOptions).value_or(dst.blurOption);
+    return dst;
+}
+
+template<>
 BorderColorProperty Convert(const Ark_EdgeColors& src)
 {
     BorderColorProperty dst;
@@ -2226,17 +2287,18 @@ template<>
 BorderColorProperty Convert(const Ark_LocalizedEdgeColors& src)
 {
     BorderColorProperty dst;
-    LOGE("Converter::AssignTo(std::optional<BorderColorProperty> &, const Ark_LocalizedEdgeColors&)"
-        " handles invalid structure"
-    );
-    // the src.left/.right should be used instead .start/.end, interface_sdk-js/issues/IB0DVD
-    dst.startColor = OptConvert<Color>(src.start);
+    dst.leftColor = OptConvert<Color>(src.start);
     dst.topColor = OptConvert<Color>(src.top);
-    dst.endColor = OptConvert<Color>(src.end);
+    dst.rightColor = OptConvert<Color>(src.end);
     dst.bottomColor = OptConvert<Color>(src.bottom);
     dst.multiValued = true;
+
+    auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
+    dst.leftColor = isRightToLeft? OptConvert<Color>(src.end) : OptConvert<Color>(src.start);
+    dst.rightColor = isRightToLeft? OptConvert<Color>(src.start) : OptConvert<Color>(src.end);
     return dst;
 }
+
 
 template<>
 BorderColorProperty Convert(const Ark_ResourceColor& src)
@@ -2358,13 +2420,20 @@ BorderWidthProperty Convert(const Ark_LocalizedEdgeWidths& src)
     BorderWidthProperty widthProperty;
     widthProperty.topDimen = Converter::OptConvert<Dimension>(src.top);
     Validator::ValidateNonNegative(widthProperty.topDimen);
-    widthProperty.startDimen = Converter::OptConvert<Dimension>(src.start);
+    widthProperty.leftDimen = Converter::OptConvert<Dimension>(src.start);
     Validator::ValidateNonNegative(widthProperty.leftDimen);
     widthProperty.bottomDimen = Converter::OptConvert<Dimension>(src.bottom);
     Validator::ValidateNonNegative(widthProperty.bottomDimen);
-    widthProperty.endDimen = Converter::OptConvert<Dimension>(src.end);
+    widthProperty.rightDimen = Converter::OptConvert<Dimension>(src.end);
     Validator::ValidateNonNegative(widthProperty.rightDimen);
     widthProperty.multiValued = true;
+
+    auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
+    widthProperty.leftDimen =
+        isRightToLeft? Converter::OptConvert<Dimension>(src.end) : Converter::OptConvert<Dimension>(src.start);
+    widthProperty.rightDimen =
+        isRightToLeft? Converter::OptConvert<Dimension>(src.start) : Converter::OptConvert<Dimension>(src.end);
+
     return widthProperty;
 }
 
@@ -2466,24 +2535,6 @@ PickerTextStyle Convert(const Ark_TextPickerTextStyle& src)
     style.maxFontSize = Converter::OptConvert<Dimension>(src.maxFontSize);
     style.textOverflow = Converter::OptConvert<TextOverflow>(src.overflow);
     return style;
-}
-
-template<>
-PickerTime Convert(const Ark_Date& src)
-{
-    auto milliseconds = static_cast<int64_t>(src);
-    const auto SEC_TO_MILLISEC = 1000L;
-    auto seconds = static_cast<time_t>(milliseconds / SEC_TO_MILLISEC);
-    struct std::tm time_info;
-#ifdef WINDOWS_PLATFORM
-    errno_t err = localtime_s(&time_info, &seconds);
-    if (err) {
-        LOGE("Invalid argument to localtime_s.");
-    }
-#else
-    localtime_r(&seconds, &time_info);
-#endif
-    return PickerTime(time_info.tm_hour, time_info.tm_min, time_info.tm_sec);
 }
 
 template<>
@@ -2632,6 +2683,28 @@ void AssignCast(std::optional<PickerDate>& dst, const Ark_Date& src)
         dst = DATE_MIN;
     } else if (dst->GetDay() < DATE_MIN.GetDay() || dst->GetDay() > maxDay) {
         dst = DATE_MIN;
+    }
+}
+
+template<>
+void AssignCast(std::optional<PickerTime>& dst, const Ark_Date& src)
+{
+    auto milliseconds = static_cast<int64_t>(src);
+    const auto SEC_TO_MILLISEC = 1000L;
+    auto seconds = static_cast<time_t>(milliseconds / SEC_TO_MILLISEC);
+    struct std::tm time_info;
+#ifdef WINDOWS_PLATFORM
+    errno_t err = localtime_s(&time_info, &seconds);
+    if (err) {
+        LOGE("Invalid argument to localtime_s.");
+    }
+#else
+    localtime_r(&seconds, &time_info);
+#endif
+    if (LessOrEqual(time_info.tm_year, 0)) {
+        dst = std::nullopt;
+    } else {
+        dst = PickerTime(time_info.tm_hour, time_info.tm_min, time_info.tm_sec);
     }
 }
 
@@ -2935,6 +3008,35 @@ OHOS::Ace::TextMetrics Convert(const Ark_TextMetrics& src)
     dst.ideographicBaseline = static_cast<double>(Converter::Convert<float>(src.ideographicBaseline));
     dst.width = static_cast<double>(Converter::Convert<float>(src.width));
     dst.height = static_cast<double>(Converter::Convert<float>(src.height));
+    return dst;
+}
+
+template<>
+TouchLocationInfo Convert(const Ark_TouchObject& src)
+{
+    TouchLocationInfo dst(src.id.i32);
+    double windowX = Converter::Convert<double>(src.windowX);
+    double windowY = Converter::Convert<double>(src.windowY);
+    double x = Converter::Convert<double>(src.x);
+    double y = Converter::Convert<double>(src.y);
+    double displayX = Converter::Convert<double>(src.displayX);
+    double displayY = Converter::Convert<double>(src.displayY);
+
+    dst.SetGlobalLocation(Offset(PipelineBase::Vp2PxWithCurrentDensity(windowX),
+        PipelineBase::Vp2PxWithCurrentDensity(windowY)));
+    dst.SetLocalLocation(Offset(PipelineBase::Vp2PxWithCurrentDensity(x),
+        PipelineBase::Vp2PxWithCurrentDensity(y)));
+    dst.SetScreenLocation(Offset(PipelineBase::Vp2PxWithCurrentDensity(displayX),
+        PipelineBase::Vp2PxWithCurrentDensity(displayY)));
+    auto pressedTimeOpt = Converter::OptConvert<int32_t>(src.pressedTime);
+    std::chrono::nanoseconds nanoseconds(static_cast<int64_t>(pressedTimeOpt.value_or(0)));
+    TimeStamp time(nanoseconds);
+    dst.SetPressedTime(time);
+    dst.SetForce(Converter::OptConvert<float>(src.pressure).value_or(0.0f));
+    dst.SetWidth(Converter::OptConvert<int32_t>(src.width).value_or(0));
+    dst.SetHeight(Converter::OptConvert<int32_t>(src.height).value_or(0));
+    dst.SetOperatingHand(static_cast<int32_t>(src.hand.value));
+    dst.SetTouchType(Converter::Convert<std::optional<TouchType>>(src.type).value_or(TouchType::UNKNOWN));
     return dst;
 }
 

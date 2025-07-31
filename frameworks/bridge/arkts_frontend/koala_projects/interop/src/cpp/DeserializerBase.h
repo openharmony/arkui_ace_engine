@@ -20,7 +20,7 @@
 #include <cstring>
 #include <string>
 #include <vector>
-#if (!defined(__linux__))
+#ifndef __linux__
 #include <charconv>
 #endif
 
@@ -329,8 +329,9 @@ public:
     if (length > 0)
     {
       value = malloc(length * sizeof(E));
-      memset(value, 0, length * sizeof(E));
-      toClean.push_back(value);
+      if (value && memset_s(value, length * sizeof(E), 0, length * sizeof(E)) == 0) {
+        toClean.push_back(value);
+      }
     }
     array->length = length;
     array->array = reinterpret_cast<E *>(value);
@@ -344,9 +345,9 @@ public:
     if (length > 0)
     {
       keys = malloc(length * sizeof(K));
-      memset(keys, 0, length * sizeof(K));
-      toClean.push_back(keys);
-
+      if (keys && memset_s(keys, length * sizeof(K), 0, length * sizeof(K)) == 0) {
+        toClean.push_back(keys);
+      }
       values = malloc(length * sizeof(V));
       memset(values, 0, length * sizeof(V));
       toClean.push_back(values);
@@ -544,28 +545,12 @@ public:
 
   InteropString readString()
   {
-    InteropString result {};
+    InteropString result;
     InteropInt32 length = readInt32();
     check(length);
-
     // We refer to string data in-place.
-    constexpr int terminatorLen = 1;
-    constexpr int minUtfSize = 6;
-    constexpr uint16_t UTF16_BOM = 0xFEFF;
-    uint16_t* currentData = reinterpret_cast<uint16_t*>(data + position);
-    if (length >= minUtfSize && currentData[0] == UTF16_BOM) {
-      // Handle utf16 strings
-      constexpr int bomLen = 1;
-      constexpr int bytesOccupiedEveryChar = 2;
-      result.chars = (const char *)(data + position);
-      result.length = length / bytesOccupiedEveryChar - bomLen - terminatorLen;
-      currentData[bomLen + result.length] = u'\0';
-    } else {
-      // Handle utf8 strings (only contains latin)
-      result.chars = (const char *)(data + position);
-      result.length = length - terminatorLen;
-      data[position + result.length] = '\0';
-    }
+    result.chars = (const char *)(data + position);
+    result.length = length - 1;
     this->position += length;
     return result;
   }

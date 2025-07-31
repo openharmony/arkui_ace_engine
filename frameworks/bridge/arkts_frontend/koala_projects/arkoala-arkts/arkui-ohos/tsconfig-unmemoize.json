@@ -67,6 +67,9 @@
             "@ohos.router": [
                 "./@ohos.router.ts"
             ],
+            "@ohos/arkui/shape": [ 
+                "./@ohos.arkui.shape.ts"
+            ],
             "@ohos/arkui/observer": [
                 "./@ohos.arkui.observer.ts"
             ],
@@ -109,6 +112,7 @@
         "./@ohos.arkui.dragController.ts",
         "./@ohos.arkui.inspector.ts",
         "./global/**/*.ts",
+        "./@ohos.arkui.shape.ts",
         "./@ohos.router.ts",
         "./@ohos.arkui.observer.ts",
         "./@ohos.mediaquery.ts",

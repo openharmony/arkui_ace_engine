@@ -190,3 +190,48 @@ void getKoalaANICallbackDispatcher(ani_class* clazz, ani_static_method* method) 
     *clazz = g_koalaANICallbackDispatcher.clazz;
     *method = g_koalaANICallbackDispatcher.method;
 }
+
+std::string GetErrorProperty(ani_env* aniEnv, ani_error aniError, const char* property)
+{
+    std::string propertyValue;
+    ani_status status = ANI_ERROR;
+    ani_type errorType = nullptr;
+    if ((status = aniEnv->Object_GetType(aniError, &errorType)) != ANI_OK) {
+        return propertyValue;
+    }
+    ani_method getterMethod = nullptr;
+    if ((status = aniEnv->Class_FindGetter(static_cast<ani_class>(errorType), property, &getterMethod)) != ANI_OK) {
+        return propertyValue;
+    }
+    ani_ref aniRef = nullptr;
+    if ((status = aniEnv->Object_CallMethod_Ref(aniError, getterMethod, &aniRef)) != ANI_OK) {
+        return propertyValue;
+    }
+    ani_string aniString = reinterpret_cast<ani_string>(aniRef);
+    ani_size sz {};
+    if ((status = aniEnv->String_GetUTF8Size(aniString, &sz)) != ANI_OK) {
+        return propertyValue;
+    }
+    propertyValue.resize(sz + 1);
+    if ((status = aniEnv->String_GetUTF8SubString(
+        aniString, 0, sz, propertyValue.data(), propertyValue.size(), &sz))!= ANI_OK) {
+        return propertyValue;
+    }
+    propertyValue.resize(sz);
+    return propertyValue;
+}
+void ErrorPrint(ani_env* env)
+{
+    if (!env) {
+        return;
+    }
+    ani_error aniError;
+    env->GetUnhandledError(&aniError);
+    env->ResetError();
+    std::string errorMsg = GetErrorProperty(env, aniError, "message");
+    std::string errorName = GetErrorProperty(env, aniError, "name");
+    std::string errorStack = GetErrorProperty(env, aniError, "stack");
+    LOGI("[%{public}s] Cannot load main : \nerrorMsg: %{public}s, \nerrorName: "
+            "%{public}s, \nerrorStack: %{public}s",
+        __func__, errorMsg.c_str(), errorName.c_str(), errorStack.c_str());
+}

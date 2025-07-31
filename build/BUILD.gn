@@ -166,30 +166,6 @@ ohos_shared_library("libace_compatible") {
   subsystem_name = ace_engine_subsystem
 }
 
-if (is_ohos) {
-  group("libevent_adapter") {
-    # fake target for ohos
-  }
-} else if (use_linux || use_mingw_win || use_mac) {
-  ohos_shared_library("libevent_adapter") {
-    sources = [ "../adapter/preview/entrance/samples/event_adapter.cpp" ]
-    include_dirs = [
-      "$ace_root",
-      "$ace_root/frameworks",
-      "$ace_root/interfaces/inner_api/ace_kit/include",
-    ]
-
-    external_deps = [
-      "glfw:glfw",
-      "graphic_2d:librender_service_client",
-    ]
-
-    public_external_deps = external_deps
-    part_name = ace_engine_part
-    subsystem_name = ace_engine_subsystem
-  }
-}
-
 if (!is_asan) {
   ohos_shared_library("libace") {
     external_deps = []

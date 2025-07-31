@@ -43,6 +43,7 @@ struct DatePickerOptions {
     PickerDate start;
     PickerDate end;
     PickerDate selected;
+    DatePickerMode mode;
 };
 } // namespace
 namespace Converter {
@@ -61,6 +62,11 @@ void AssignCast(std::optional<DatePickerOptions>& dst, const Ark_DatePickerOptio
     opt = Converter::OptConvert<PickerDate>(src.selected);
     if (opt) {
         options.selected = *opt;
+    }
+
+    auto mode = Converter::OptConvert<DatePickerMode>(src.mode);
+    if (mode) {
+        options.mode = *mode;
     }
     dst = options;
 }
@@ -109,6 +115,8 @@ void SetDatePickerOptionsImpl(Ark_NativePointer node,
     DatePickerModelNG::SetStartDate(frameNode, startDate);
     DatePickerModelNG::SetEndDate(frameNode, endDate);
     DatePickerModelNG::SetSelectedDate(frameNode, opt->selected);
+
+    DatePickerModelNG::SetMode(frameNode, opt->mode);
 }
 } // DatePickerInterfaceModifier
 namespace DatePickerAttributeModifier {

@@ -16,13 +16,13 @@
 import { int32 } from "@koalaui/common"
 import { PeerNode } from "arkui/PeerNode"
 import { KPointer } from "@koalaui/interop"
-import { ArkCommonMethodComponent, DragDropOps, DragEvent, CustomBuilder, DragItemInfo, PreviewConfiguration, OnDragEventCallback, DropOptions } from '../component'
+import { ArkCommonMethodComponent, DragDropOps, DragEvent, CustomBuilder, DragItemInfo, PreviewConfiguration,
+    OnDragEventCallback, DropOptions } from '../component'
 import { InteropNativeModule, runtimeType, RuntimeType, toPeerPtr} from "@koalaui/interop"
 import { ArkUIAniModule } from "arkui.ani"
 import { createUiDetachedRoot } from "arkui/ArkUIEntry"
-import { ArkComponentRootPeer } from "arkui/component";
+import { ArkComponentRootPeer } from "arkui/component"
 import { PixelMap, UniformDataType, DataSyncOptions} from "#external"
-
 export class HookDragInfo {
     pixelMap?: PixelMap;
     id?: string;
@@ -47,7 +47,6 @@ export class HookDragInfo {
         }
     }
 }
-
 
 export function hookRegisterOnDragStartImpl(node: ArkCommonMethodComponent, onDragStartCallback: (((event: DragEvent, extraParams?: string) => CustomBuilder | DragItemInfo) | undefined)): void {
     DragDropOps.registerOnDragStart(node.getPeer().getPeerPtr(), (node: KPointer, dragEvent: DragEvent, extraParam: string) => {
@@ -91,11 +90,11 @@ export function hookRegisterOnDragStartImpl(node: ArkCommonMethodComponent, onDr
                 let customNode = createBuilderNodeTree()
                 ArkUIAniModule._DragEvent_Set_CustomNode(toPeerPtr(dragEvent), customNode)
             } 
-            const value_pixelMap = itemInfo.pixelMap as PixelMap
+            const value_pixelMap = itemInfo.pixelMap
             let value_pixelMap_type: int32 = RuntimeType.UNDEFINED
             value_pixelMap_type = runtimeType(value_pixelMap)
             if ((RuntimeType.UNDEFINED) !== (value_pixelMap_type)) {
-                ArkUIAniModule._DragEvent_Set_PixelMap(toPeerPtr(dragEvent), value_pixelMap)
+                ArkUIAniModule._DragEvent_Set_PixelMap(toPeerPtr(dragEvent), value_pixelMap as PixelMap)
             }
         }
     })
@@ -144,33 +143,11 @@ export function hookDragPreview(node: ArkCommonMethodComponent, preview: CustomB
             return
         }
     }
-
-    if ((RuntimeType.OBJECT == config_type)) {
-        const preview_casted = preview as (CustomBuilder | DragItemInfo | string | undefined)
-        const config_casted = config as (PreviewConfiguration)
-        node.getPeer()?.dragPreview1Attribute(preview_casted, config_casted)
-        return
-    } else {
-        const value_casted = preview as (CustomBuilder | DragItemInfo | string | undefined)
-        node.getPeer()?.dragPreview0Attribute(value_casted)
-        return
-    }
+    DragDropOps.registerDragPreview(node.getPeer().getPeerPtr(), preview, config)
 }
 
 export function hookOnDrop(node: ArkCommonMethodComponent, eventCallback: ((event: DragEvent,extraParams?: string) => void) | OnDragEventCallback | undefined, dropOptions?: DropOptions) {
-    const eventCallback_type = runtimeType(eventCallback)
-    const dropOptions_type = runtimeType(dropOptions)
-    if ((RuntimeType.FUNCTION === eventCallback_type) && (RuntimeType.UNDEFINED === dropOptions_type)) {
-        const value_casted = eventCallback as (((event: DragEvent,extraParams?: string) => void) | undefined)
-        node.getPeer()?.onDrop0Attribute(value_casted)
-        return
-    }
-    if ((RuntimeType.FUNCTION === eventCallback_type) || (RuntimeType.UNDEFINED !== dropOptions_type)) {
-        const eventCallback_casted = eventCallback as (OnDragEventCallback | undefined)
-        const dropOptions_casted = dropOptions as (DropOptions)
-        node.getPeer()?.onDrop1Attribute(eventCallback_casted, dropOptions_casted)
-        return
-    }
+    DragDropOps.registerOnDrop(node.getPeer().getPeerPtr(), eventCallback, dropOptions)
 }
 
 export function hookDragEventStartDataLoading(node: KPointer, options: DataSyncOptions): string {

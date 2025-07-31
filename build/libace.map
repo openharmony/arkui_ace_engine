@@ -250,6 +250,7 @@
       OHOS::Ace::Gradient::*;
       OHOS::Ace::CanvasPath2D::*;
       OHOS::Ace::NG::Matrix2D::*;
+      OHOS::Ace::NG::MatrixUtil::*;
       OHOS::Ace::NG::CanvasPattern::*;
       OHOS::Ace::NG::OffscreenCanvasPattern::*;
       OHOS::Ace::DatePickerDialogModel::*;

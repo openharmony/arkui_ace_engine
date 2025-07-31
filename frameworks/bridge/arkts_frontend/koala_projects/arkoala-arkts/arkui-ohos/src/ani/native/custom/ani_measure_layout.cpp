@@ -57,13 +57,10 @@ bool ParseAniDimensionVp(ani_env* env, ani_object obj, CalcDimension& result)
     // 'vp' -> the value varies with pixel density of device.
     return ParseAniDimension(env, obj, result, DimensionUnit::VP);
 }
-
-ani_object GenConstraintNG(ani_env* env, const NG::LayoutConstraintF& parentConstraint)
+ani_object SetConstraintNG(ani_env* env, double minWidth, double minHeight, double maxWidth, double maxHeight)
 {
-    auto minSize = parentConstraint.minSize;
-    auto maxSize = parentConstraint.maxSize;
-    ani_class cls;
     ani_object constraint_obj;
+    ani_class cls;
     static const char *className = "Larkui/ani/arkts/ArkUIAniCustomNodeModule/ConstraintSizeOptionsInner;";
     if (ANI_OK != env->FindClass(className, &cls)) {
         return nullptr;
@@ -73,68 +70,75 @@ ani_object GenConstraintNG(ani_env* env, const NG::LayoutConstraintF& parentCons
     if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
         return nullptr;
     }
-    ani_object minWidth;
-    ani_object minHeight;
-    ani_object maxWidth;
-    ani_object maxHeight;
-    minWidth = AniUtils::CreateDouble(env, 0.0f);
-    minHeight = AniUtils::CreateDouble(env, 0.0f);
-    maxWidth = AniUtils::CreateDouble(env, 0.0f);
-    maxHeight =AniUtils::CreateDouble(env, 0.0f);
-    if (ANI_OK != env->Object_New(cls, ctor, &constraint_obj, minWidth, minHeight, maxWidth, maxHeight)) {
+    ani_object minWidth_;
+    ani_object minHeight_;
+    ani_object maxWidth_;
+    ani_object maxHeight_;
+    minWidth_ = AniUtils::CreateDouble(env, minWidth);
+    minHeight_ = AniUtils::CreateDouble(env, minHeight);
+    maxWidth_ = AniUtils::CreateDouble(env, maxWidth);
+    maxHeight_ =AniUtils::CreateDouble(env, maxHeight);
+    if (ANI_OK != env->Object_New(cls, ctor, &constraint_obj, minWidth_, minHeight_, maxWidth_, maxHeight_)) {
         return nullptr;
     }
-
-    auto pipeline = PipelineBase::GetCurrentContext();
-    if (!pipeline) {
-        return constraint_obj;
+    if (ANI_OK != env->Object_SetPropertyByName_Ref(constraint_obj, "maxWidth", maxWidth_)) {
+        return nullptr;
     }
-    minWidth = AniUtils::CreateDouble(env, minSize.Width() / pipeline->GetDipScale());
-    minHeight = AniUtils::CreateDouble(env, minSize.Height() / pipeline->GetDipScale());
-    maxWidth = AniUtils::CreateDouble(env, maxSize.Width() / pipeline->GetDipScale());
-    maxHeight = AniUtils::CreateDouble(env, maxSize.Height() / pipeline->GetDipScale());
-    if (ANI_OK != env->Object_New(cls, ctor, &constraint_obj, minWidth, minHeight, maxWidth, maxHeight)) {
-        TAG_LOGW(AceLogTag::ACE_LAYOUT, "GenConstraintNG failed.");
+    if (ANI_OK != env->Object_SetPropertyByName_Ref(constraint_obj, "maxHeight", maxHeight_)) {
+        return nullptr;
+    }
+    if (ANI_OK != env->Object_SetPropertyByName_Ref(constraint_obj, "minWidth", minWidth_)) {
+        return nullptr;
+    }
+    if (ANI_OK != env->Object_SetPropertyByName_Ref(constraint_obj, "minHeight", minHeight_)) {
         return nullptr;
     }
     return constraint_obj;
 }
 
+ani_object GenConstraintNG(ani_env* env, const NG::LayoutConstraintF& parentConstraint)
+{
+    auto minSize = parentConstraint.minSize;
+    auto maxSize = parentConstraint.maxSize;
+    ani_object constraint_obj = nullptr;
+
+    double minWidth = 0.0f;
+    double minHeight = 0.0f;
+    double maxWidth = 0.0f;
+    double maxHeight = 0.0f;
+
+    constraint_obj = SetConstraintNG(env, minWidth, minHeight, maxWidth, maxHeight);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    if (!pipeline) {
+        return constraint_obj;
+    }
+    if (NearZero(pipeline->GetDipScale())) {
+        TAG_LOGE(AceLogTag::ACE_LAYOUT, "GetDipScale failed.");
+        return nullptr;
+    } else {
+        minWidth = minSize.Width() / pipeline->GetDipScale();
+        minHeight = minSize.Height() / pipeline->GetDipScale();
+        maxWidth = maxSize.Width() / pipeline->GetDipScale();
+        maxHeight = maxSize.Height() / pipeline->GetDipScale();
+    }
+    constraint_obj = SetConstraintNG(env, minWidth, minHeight, maxWidth, maxHeight);
+    return constraint_obj;
+}
+
 ani_object GenPlaceChildrenConstraintNG(ani_env* env, const NG::SizeF& size, RefPtr<NG::LayoutProperty> layoutProperty)
 {
-    ani_object constraint_obj;
-    ani_class cls;
-    static const char *className = "Larkui/ani/arkts/ArkUIAniCustomNodeModule/ConstraintSizeOptionsInner;";
-    if (ANI_OK != env->FindClass(className, &cls)) {
-        return nullptr;
-    }
+    ani_object constraint_obj = nullptr;
+    double minWidth = 0.0f;
+    double minHeight = 0.0f;
+    double maxWidth = 0.0f;
+    double maxHeight = 0.0f;
 
-    ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
-        return nullptr;
-    }
-
-    ani_object minWidth;
-    ani_object minHeight;
-    ani_object maxWidth;
-    ani_object maxHeight;
     auto pipeline = PipelineBase::GetCurrentContext();
     if (!layoutProperty || !pipeline) {
-        minWidth = AniUtils::CreateDouble(env, 0.0f);
-        minHeight = AniUtils::CreateDouble(env, 0.0f);
-        maxWidth = AniUtils::CreateDouble(env, 0.0f);
-        maxHeight =AniUtils::CreateDouble(env, 0.0f);
-        if (ANI_OK != env->Object_New(cls, ctor, &constraint_obj, minWidth, minHeight, maxWidth, maxHeight)) {
-            return nullptr;
-        }
-
+        constraint_obj = SetConstraintNG(env, minWidth, minHeight, maxWidth, maxHeight);
         return constraint_obj;
     }
     auto minSize = layoutProperty->GetLayoutConstraint().value().minSize;
-
-    minWidth = AniUtils::CreateDouble(env, minSize.Width() / pipeline->GetDipScale());
-    minHeight = AniUtils::CreateDouble(env, minSize.Height() / pipeline->GetDipScale());
-
     auto parentNode = AceType::DynamicCast<NG::FrameNode>(layoutProperty->GetHost()->GetParent());
     if (parentNode && parentNode->GetTag() == V2::COMMON_VIEW_ETS_TAG) {
         layoutProperty = parentNode->GetLayoutProperty();
@@ -150,15 +154,18 @@ ani_object GenPlaceChildrenConstraintNG(ani_env* env, const NG::SizeF& size, Ref
     auto bottomBorder = borderWidth ? borderWidth->bottomDimen->ConvertToVp() : 0.0f;
     auto leftBorder = borderWidth ? borderWidth->leftDimen->ConvertToVp() : 0.0f;
     auto rightBorder = borderWidth ? borderWidth->rightDimen->ConvertToVp() : 0.0f;
-
-    maxWidth = AniUtils::CreateDouble(env, size.Width() / pipeline->GetDipScale() - leftPadding - rightPadding -
-        leftBorder - rightBorder);
-    maxHeight =AniUtils::CreateDouble(env, size.Height() / pipeline->GetDipScale() - topPadding - bottomPadding -
-        topBorder - bottomBorder);
-    if (ANI_OK != env->Object_New(cls, ctor, &constraint_obj, minWidth, minHeight, maxWidth, maxHeight)) {
-        TAG_LOGW(AceLogTag::ACE_LAYOUT, "GenPlaceChildrenConstraintNG failed.");
+    if (NearZero(pipeline->GetDipScale())) {
+        TAG_LOGE(AceLogTag::ACE_LAYOUT, "GetDipScale failed.");
         return nullptr;
+    } else {
+        minWidth = minSize.Width() / pipeline->GetDipScale();
+        minHeight = minSize.Height() / pipeline->GetDipScale();
+        maxWidth = size.Width() / pipeline->GetDipScale() - leftPadding - rightPadding -
+            leftBorder - rightBorder;
+        maxHeight =size.Height() / pipeline->GetDipScale() - topPadding - bottomPadding -
+            topBorder - bottomBorder;
     }
+    constraint_obj = SetConstraintNG(env, minWidth, minHeight, maxWidth, maxHeight);
     return constraint_obj;
 }
 
@@ -620,7 +627,7 @@ void JSMeasureLayoutParamNG::Update(ani_env* env,  NG::LayoutWrapper* layoutWrap
 ani_object ANIGetMargin(ani_env* env,  ani_object object)
 {
     auto ptr = static_cast<NG::MeasureLayoutChild*>(Unwrap(env, object));
-
+    CHECK_NULL_RETURN(ptr, nullptr);
     auto child = ptr->GetOrCreateChild();
     if (!(child && child->GetLayoutProperty())) {
         return GenEdgesGlobalized(env, {}, TextDirection::LTR);
@@ -632,6 +639,7 @@ ani_object ANIGetMargin(ani_env* env,  ani_object object)
 ani_object ANIGetPadding(ani_env* env, [[maybe_unused]] ani_object object)
 {
     auto ptr = static_cast<NG::MeasureLayoutChild*>(Unwrap(env, object));
+    CHECK_NULL_RETURN(ptr, nullptr);
     auto child = ptr->GetOrCreateChild();
     if (!(child && child->GetLayoutProperty())) {
         return GenEdgesGlobalized(env, {}, TextDirection::LTR);
@@ -643,6 +651,7 @@ ani_object ANIGetPadding(ani_env* env, [[maybe_unused]] ani_object object)
 ani_object ANIGetBorderWidth(ani_env* env, [[maybe_unused]] ani_object object)
 {
     auto ptr = static_cast<NG::MeasureLayoutChild*>(Unwrap(env, object));
+    CHECK_NULL_RETURN(ptr, nullptr);
     auto child = ptr->GetOrCreateChild();
     if (!(child && child->GetLayoutProperty())) {
         return GenBorderWidthGlobalized(env, {}, TextDirection::LTR);
@@ -655,6 +664,7 @@ ani_object ANIGetBorderWidth(ani_env* env, [[maybe_unused]] ani_object object)
 ani_object ANIMeasure(ani_env* env, ani_object aniClass, ani_object sizeObj)
 {
     auto ptr = static_cast<NG::MeasureLayoutChild*>(Unwrap(env, aniClass));
+    CHECK_NULL_RETURN(ptr, nullptr);
     auto child = ptr->GetOrCreateChild();
     if (!child) {
         return AniUtils::GetUndefined(env);
@@ -752,6 +762,7 @@ ani_object ANIMeasure(ani_env* env, ani_object aniClass, ani_object sizeObj)
 ani_object ANIPlaceChildren(ani_env* env, ani_object aniClass, ani_object positionObj)
 {
     auto ptr = static_cast<NG::MeasureLayoutChild*>(Unwrap(env, aniClass));
+    CHECK_NULL_RETURN(ptr, nullptr);
     auto child = ptr->GetChild();
     if (!child) {
         return AniUtils::GetUndefined(env);

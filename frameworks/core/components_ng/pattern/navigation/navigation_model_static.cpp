@@ -607,14 +607,14 @@ void NavigationModelStatic::SetMenuItems(FrameNode* frameNode, std::vector<NG::B
 
 void NavigationModelStatic::SetMenuOptions(FrameNode* frameNode, NG::NavigationMenuOptions&& opt)
 {
-    // CHECK_NULL_VOID(frameNode);
-    // auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
-    // CHECK_NULL_VOID(navigationGroupNode);
-    // auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
-    // CHECK_NULL_VOID(navBarNode);
-    // auto navBarPattern = navBarNode->GetPattern<NavBarPattern>();
-    // CHECK_NULL_VOID(navBarPattern);
-    // navBarPattern->SetMenuOptions(std::move(opt));
+    CHECK_NULL_VOID(frameNode);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    CHECK_NULL_VOID(navBarNode);
+    auto navBarPattern = navBarNode->GetPattern<NavBarPattern>();
+    CHECK_NULL_VOID(navBarPattern);
+    navBarPattern->SetMenuOptions(opt);
 }
 
 void NavigationModelStatic::SetHideToolBar(FrameNode* frameNode, bool hideToolBar, bool animated)
@@ -632,18 +632,18 @@ void NavigationModelStatic::SetHideToolBar(FrameNode* frameNode, bool hideToolBa
 
 void NavigationModelStatic::SetTitlebarOptions(FrameNode* frameNode, NavigationTitlebarOptions&& opt)
 {
-    // auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
-    // CHECK_NULL_VOID(navigationGroupNode);
-    // auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
-    // CHECK_NULL_VOID(navBarNode);
-    // auto navBarPattern = navBarNode->GetPattern<NavBarPattern>();
-    // CHECK_NULL_VOID(navBarPattern);
-    // navBarPattern->SetTitleBarStyle(opt.brOptions.barStyle);
-    // auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
-    // CHECK_NULL_VOID(titleBarNode);
-    // auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
-    // CHECK_NULL_VOID(titleBarPattern);
-    // titleBarPattern->SetTitlebarOptions(std::move(opt));
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    CHECK_NULL_VOID(navBarNode);
+    auto navBarPattern = navBarNode->GetPattern<NavBarPattern>();
+    CHECK_NULL_VOID(navBarPattern);
+    navBarPattern->SetTitleBarStyle(opt.brOptions.barStyle);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_VOID(titleBarPattern);
+    titleBarPattern->SetTitlebarOptions(opt);
 }
 
 void NavigationModelStatic::SetToolBarItems(FrameNode* frameNode, std::vector<NG::BarItem>&& toolBarItems)
@@ -757,15 +757,15 @@ void NavigationModelStatic::ParseCommonTitle(
     return;
 }
 
-void NavigationModelStatic::SetIgnoreLayoutSafeArea(FrameNode* frameNode, const SafeAreaExpandOpts& opts)
+void NavigationModelStatic::SetIgnoreLayoutSafeArea(FrameNode* frameNode, const NG::IgnoreLayoutSafeAreaOpts& opts)
 {
-    // auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
-    // CHECK_NULL_VOID(navigationGroupNode);
-    // auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
-    // CHECK_NULL_VOID(navBarNode);
-    // auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
-    // CHECK_NULL_VOID(navBarLayoutProperty);
-    // navBarLayoutProperty->UpdateIgnoreLayoutSafeArea(opts);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    CHECK_NULL_VOID(navBarNode);
+    auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
+    CHECK_NULL_VOID(navBarLayoutProperty);
+    navBarLayoutProperty->UpdateIgnoreLayoutSafeAreaOpts(opts);
 }
 
 bool NavigationModelStatic::CreateBackButtonNode(RefPtr<FrameNode>& backButtonNode)

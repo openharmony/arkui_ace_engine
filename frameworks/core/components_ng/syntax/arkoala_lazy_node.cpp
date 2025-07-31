@@ -94,6 +94,7 @@ void ArkoalaLazyNode::OnDataChange(int32_t changeIndex, int32_t count, Notificat
     int64_t accessibilityId = GetAccessibilityId();
     if (parent) {
         parent->NotifyChange(changeIndex, count, accessibilityId, type);
+        parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 }
 } // namespace OHOS::Ace::NG

@@ -343,8 +343,6 @@ private:
 #else
     void AttachView(std::shared_ptr<Window> window, AceViewPreview* view, double density, int32_t width, int32_t height,
         UIEnvCallback callback);
-    void InitThemeManagerTask();
-    void InitEnvCallbackTask(UIEnvCallback callback);
 #endif
 
     RefPtr<AceViewPreview> aceView_ = nullptr;

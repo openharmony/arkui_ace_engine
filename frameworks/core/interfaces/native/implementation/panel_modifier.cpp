@@ -60,172 +60,67 @@ namespace PanelModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    auto frameNode = SlidingPanelModelNG::CreateFrameNode(id);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    return nullptr;
 }
 } // PanelModifier
 namespace PanelInterfaceModifier {
 void SetPanelOptionsImpl(Ark_NativePointer node,
                          Ark_Boolean show)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::Convert<bool>(show);
-    SlidingPanelModelNG::SetIsShow(frameNode, convValue);
 }
 } // PanelInterfaceModifier
 namespace PanelAttributeModifier {
 void ModeImpl(Ark_NativePointer node,
               const Opt_PanelMode* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    SlidingPanelModelNG::SetPanelMode(frameNode, Converter::OptConvert<PanelMode>(*value));
 }
 void TypeImpl(Ark_NativePointer node,
               const Opt_PanelType* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    SlidingPanelModelNG::SetPanelType(frameNode, Converter::OptConvert<PanelType>(*value));
 }
 void DragBarImpl(Ark_NativePointer node,
                  const Opt_Boolean* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
-    if (!convValue) {
-        // TODO: Reset value
-        return;
-    }
-    SlidingPanelModelNG::SetHasDragBar(frameNode, *convValue);
 }
 void CustomHeightImpl(Ark_NativePointer node,
                       const Opt_Union_Dimension_PanelHeight* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto customHeight = Converter::OptConvert<CalcDimension>(*value);
-    Validator::ValidateNonNegative(customHeight);
-    Validator::ValidateNonPercent(customHeight);
-    Validator::ValidateNonEmpty(customHeight);
-    SlidingPanelModelNG::SetPanelCustomHeight(frameNode, customHeight);
 }
 void FullHeightImpl(Ark_NativePointer node,
                     const Opt_Union_Number_String* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto fullHeight = Converter::OptConvert<Dimension>(*value);
-    Validator::ValidateNonNegative(fullHeight);
-    Validator::ValidateNonPercent(fullHeight);
-    SlidingPanelModelNG::SetPanelFullHeight(frameNode, fullHeight);
 }
 void HalfHeightImpl(Ark_NativePointer node,
                     const Opt_Union_Number_String* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto halfHeight = Converter::OptConvert<Dimension>(*value);
-    Validator::ValidateNonNegative(halfHeight);
-    Validator::ValidateNonPercent(halfHeight);
-    SlidingPanelModelNG::SetPanelHalfHeight(frameNode, halfHeight);
 }
 void MiniHeightImpl(Ark_NativePointer node,
                     const Opt_Union_Number_String* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto miniHeight = Converter::OptConvert<Dimension>(*value);
-    Validator::ValidateNonNegative(miniHeight);
-    Validator::ValidateNonPercent(miniHeight);
-    SlidingPanelModelNG::SetPanelMiniHeight(frameNode, miniHeight);
 }
 void ShowImpl(Ark_NativePointer node,
               const Opt_Boolean* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
-    if (!convValue) {
-        // TODO: Reset value
-        return;
-    }
-    SlidingPanelModelNG::SetIsShow(frameNode, *convValue);
 }
 void BackgroundMaskImpl(Ark_NativePointer node,
                         const Opt_ResourceColor* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto colorValue = Converter::OptConvert<Color>(*value);
-    SlidingPanelModelNG::SetPanelBackgroundMask(frameNode, colorValue);
 }
 void ShowCloseIconImpl(Ark_NativePointer node,
                        const Opt_Boolean* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
-    if (!convValue) {
-        // TODO: Reset value
-        return;
-    }
-    SlidingPanelModelNG::SetShowCloseIcon(frameNode, *convValue);
 }
 void OnChangeImpl(Ark_NativePointer node,
                   const Opt_Callback_Number_Number_PanelMode_Void* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto optValue = Converter::GetOptPtr(value);
-    if (!optValue) {
-        // TODO: Reset value
-        return;
-    }
-    auto onEvent = [arkCallback = CallbackHelper(*optValue)](const BaseEventInfo* info) {
-        const auto* eventInfo = TypeInfoHelper::DynamicCast<SlidingPanelSizeChangeEvent>(info);
-        auto width = Converter::ArkValue<Ark_Number>(eventInfo->GetWidth());
-        auto height = Converter::ArkValue<Ark_Number>(eventInfo->GetHeight());
-        auto mode = Converter::ArkValue<Ark_PanelMode>(eventInfo->GetMode());
-        arkCallback.Invoke(width, height, mode);
-    };
-    SlidingPanelModelNG::SetOnSizeChange(frameNode, std::move(onEvent));
 }
 void OnHeightChangeImpl(Ark_NativePointer node,
                         const Opt_Callback_Number_Void* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto optValue = Converter::GetOptPtr(value);
-    if (!optValue) {
-        // TODO: Reset value
-        return;
-    }
-    auto onEvent = [arkCallback = CallbackHelper(*optValue)](const int32_t value) {
-        auto arkIndex = Converter::ArkValue<Ark_Number>(value);
-        arkCallback.Invoke(arkIndex);
-    };
-    SlidingPanelModelNG::SetOnHeightChange(frameNode, std::move(onEvent));
 }
 void _onChangeEvent_modeImpl(Ark_NativePointer node,
                              const Callback_Opt_PanelMode_Void* callback)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(callback);
-    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onEvent = [arkCallback = CallbackHelper(*callback), weakNode](const BaseEventInfo* baseEventInfo) {
-        auto eventInfo = TypeInfoHelper::DynamicCast<SlidingPanelSizeChangeEvent>(baseEventInfo);
-        CHECK_NULL_VOID(eventInfo);
-        auto mode = Converter::ArkValue<Opt_PanelMode>(eventInfo->GetMode());
-        PipelineContext::SetCallBackNode(weakNode);
-        arkCallback.Invoke(mode);
-    };
-    SlidingPanelModelNG::SetModeChangeEvent(frameNode, std::move(onEvent));
 }
 } // PanelAttributeModifier
 const GENERATED_ArkUIPanelModifier* GetPanelModifier()

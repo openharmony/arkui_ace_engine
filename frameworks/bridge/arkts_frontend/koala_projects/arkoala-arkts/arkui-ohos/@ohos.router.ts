@@ -1,8 +1,23 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import { InteropNativeModule } from "@koalaui/interop/InteropNativeModule"
 import { Router } from "arkui/handwritten"
 import { PeerNode } from "arkui/PeerNode"
 import { UserViewBuilder } from "arkui/UserView"
-import { ComputableState, State } from "@koalaui/runtime"
+import { ComputableState, State, IncrementalNode } from "@koalaui/runtime"
 import { UIContextImpl } from "arkui/handwritten/UIContextImpl";
 import { UIContextUtil } from "arkui/handwritten/UIContextUtil"
 
@@ -10,6 +25,7 @@ namespace router {
     export interface RouterOptions {
         url: string
         params?: Object
+        recoverable?: boolean
     }
     
     export enum RouterMode {
@@ -22,6 +38,10 @@ namespace router {
         name: string;
         path: string;
         params: Object;
+    }
+
+    export interface EnableAlertOptions {
+        message: string;
     }
 
     export function error(prefix: string, e: Object|null|undefined): string {
@@ -75,6 +95,18 @@ namespace router {
         return globalRouterImp!.getStateByUrl(url);
     }
 
+    export function showAlertBeforeBackPage(options: router.EnableAlertOptions): void {
+        let uiContext: UIContextImpl = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+        const globalRouterImp = uiContext.getRouter().getRouter();
+        globalRouterImp!.showAlertBeforeBackPage(options);
+    }
+
+    export function hideAlertBeforeBackPage(): void {
+        let uiContext: UIContextImpl = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+        const globalRouterImp = uiContext.getRouter().getRouter();
+        globalRouterImp!.hideAlertBeforeBackPage();
+    }
+
     export function pushUrl(options: RouterOptions): void {
         InteropNativeModule._NativeLog("AceRouter:enter ohos pushUrl " + options.url)
         let uiContext: UIContextImpl = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
@@ -110,7 +142,7 @@ namespace router {
         globalRouterImp!.UpdateVisiblePagePeerNode(node, index);
     }
 
-    export function getStateRoot(): ComputableState<PeerNode> {
+    export function getStateRoot(): ComputableState<IncrementalNode> {
         let uiContext: UIContextImpl = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
         const globalRouterImp = uiContext.getRouter().getRouter();
         return globalRouterImp!.getEntryRootValue();

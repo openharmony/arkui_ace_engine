@@ -178,12 +178,12 @@ void NavDestinationModelStatic::SetOnInactive(FrameNode* frameNode, std::functio
 
 void NavDestinationModelStatic::SetMenuOptions(FrameNode* frameNode, NavigationMenuOptions&& opt)
 {
-    // CHECK_NULL_VOID(frameNode);
-    // auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
-    // CHECK_NULL_VOID(navDestinationNode);
-    // auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
-    // CHECK_NULL_VOID(navDestinationPattern);
-    // navDestinationPattern->SetMenuOptions(std::move(opt));
+    CHECK_NULL_VOID(frameNode);
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationNode);
+    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(navDestinationPattern);
+    navDestinationPattern->SetMenuOptions(opt);
 }
 
 void NavDestinationModelStatic::CreateBackButton(const RefPtr<NavDestinationGroupNode>& navDestinationNode)
@@ -426,17 +426,17 @@ void NavDestinationModelStatic::SetRecoverable(FrameNode* frameNode, const std::
 
 void NavDestinationModelStatic::SetTitlebarOptions(FrameNode* frameNode, NavigationTitlebarOptions&& opt)
 {
-    // CHECK_NULL_VOID(frameNode);
-    // auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
-    // CHECK_NULL_VOID(navDestinationNode);
-    // auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
-    // CHECK_NULL_VOID(navDestinationPattern);
-    // navDestinationPattern->SetTitleBarStyle(opt.brOptions.barStyle);
-    // auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationNode->GetTitleBarNode());
-    // CHECK_NULL_VOID(titleBarNode);
-    // auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
-    // CHECK_NULL_VOID(titleBarPattern);
-    // titleBarPattern->SetTitlebarOptions(std::move(opt));
+    CHECK_NULL_VOID(frameNode);
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationNode);
+    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(navDestinationPattern);
+    navDestinationPattern->SetTitleBarStyle(opt.brOptions.barStyle);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_VOID(titleBarPattern);
+    titleBarPattern->SetTitlebarOptions(opt);
 }
 
 void NavDestinationModelStatic::ParseCommonTitle(FrameNode* frameNode, const NG::NavigationTitleInfo& titleInfo)
@@ -484,13 +484,13 @@ void NavDestinationModelStatic::SetHideToolBar(FrameNode* frameNode, bool hideTo
     navDestinationLayoutProperty->UpdateIsAnimatedToolBar(animated);
 }
 
-void NavDestinationModelStatic::SetIgnoreLayoutSafeArea(FrameNode* frameNode, const SafeAreaExpandOpts& opts)
+void NavDestinationModelStatic::SetIgnoreLayoutSafeArea(FrameNode* frameNode, const NG::IgnoreLayoutSafeAreaOpts& opts)
 {
-    // auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
-    // CHECK_NULL_VOID(navDestination);
-    // auto navdestinationLayoutProperty = navDestination->GetLayoutProperty<NavDestinationLayoutProperty>();
-    // CHECK_NULL_VOID(navdestinationLayoutProperty);
-    // navdestinationLayoutProperty->UpdateIgnoreLayoutSafeArea(opts);
+    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestination);
+    auto navdestinationLayoutProperty = navDestination->GetLayoutProperty<NavDestinationLayoutProperty>();
+    CHECK_NULL_VOID(navdestinationLayoutProperty);
+    navdestinationLayoutProperty->UpdateIgnoreLayoutSafeAreaOpts(opts);
 }
 
 void NavDestinationModelStatic::SetToolbarConfiguration(FrameNode* frameNode, 

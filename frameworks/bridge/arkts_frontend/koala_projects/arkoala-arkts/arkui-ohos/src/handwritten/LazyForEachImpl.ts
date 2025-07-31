@@ -25,10 +25,20 @@ import { LazyItemNode } from "./LazyItemNode"
 import { ArkUIAniModule } from "../ani/arkts/ArkUIAniModule"
 import { CustomComponent } from "@component_handwritten/customComponent"
 
-let globalLazyItems: Set<ComputableState<LazyItemNode>> = new Set<ComputableState<LazyItemNode>>()
+let globalLazyItems = new Map<ComputableState<LazyItemNode>, int32>() // V: age
+
 export function updateLazyItems() {
-    for (let node of globalLazyItems) {
-        node.value
+    let postponed = false
+    globalLazyItems.forEach((age, node, map) => {
+        if (age === 0) {
+            postponed = true
+            map.set(node, 1)
+        } else {
+            node.value
+        }
+    })
+    if (postponed) {
+        // requestFrame()
     }
 }
 
@@ -174,7 +184,7 @@ class LazyItemPool implements Disposable {
         )
 
         this._activeItems.set(index, node)
-        globalLazyItems.add(node)
+        globalLazyItems.set(node, 0)
         return node.value.getPeerPtr()
     }
 

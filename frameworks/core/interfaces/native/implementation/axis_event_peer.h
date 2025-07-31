@@ -20,6 +20,13 @@
 
 struct AxisEventPeer
     : public OHOS::Ace::NG::GeneratedModifier::SomeEventPeer<OHOS::Ace::AxisInfo> {
+    static AxisEventPeer* Create(void* ptr)
+    {
+        auto* peer = OHOS::Ace::NG::PeerUtils::CreatePeer<AxisEventPeer>();
+        CHECK_NULL_RETURN(peer, nullptr);
+        peer->SetEventInfo(reinterpret_cast<OHOS::Ace::AxisInfo*>(ptr));
+        return peer;
+    }
 protected:
     AxisEventPeer() = default;
     ~AxisEventPeer() override = default;

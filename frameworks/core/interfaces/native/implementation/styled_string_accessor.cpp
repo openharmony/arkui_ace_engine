@@ -96,12 +96,11 @@ RefPtr<SpanBase> Convert(const Ark_StyleOptions& src)
             if (!CheckKeyAndValueTypeEqual(static_cast<int32_t>(src.styledKey), valueTypeId)) {
                 return;
             }
-            result = peer->span;
-            CHECK_NULL_VOID(result);
+            CHECK_NULL_VOID(peer->span);
             auto start = Converter::OptConvert<int32_t>(src.start).value_or(0);
+            start = std::max(0, start);
             auto end = Converter::OptConvert<int32_t>(src.length).value_or(0) + start;
-            result->UpdateStartIndex(start);
-            result->UpdateEndIndex(end);
+            result = peer->span->GetSubSpan(start, end);
         },
         [&result, &src](const Ark_UserDataSpan& peer) {
             auto start = Converter::OptConvert<int32_t>(src.start).value_or(0);
@@ -343,8 +342,7 @@ void Unmarshalling0Impl(Ark_VMContext vmContext,
                 copy(buff.begin(), buff.end(), reinterpret_cast<uint8_t*>(arkBuffer.data));
                 auto arkResult = arkCallback.InvokeWithObtainResult<Ark_UserDataSpan,
                     Callback_StyledStringMarshallingValue_Void>(arkBuffer);
-                LOGE("StyledStringAccessor::Unmarshalling0Impl. Ark_UserDataSpan is not implemented. %{public}p",
-                    arkResult.handle);
+                LOGE("StyledStringAccessor::Unmarshalling0Impl. Ark_UserDataSpan is not implemented.");
                 return AceType::MakeRefPtr<ExtSpan>(spanStart, spanLength); // Ark_UserDataSpan is temporarily ignored.
             };
         }

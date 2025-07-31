@@ -22,10 +22,6 @@ interface ResourceInfo {
     holdersCount: int32
 }
 
-export interface Disposable {
-    dispose(): void;
-}
-
 export class ResourceHolder {
     private static nextResourceId: ResourceId = 100 
     private resources: Map<ResourceId, ResourceInfo> = new Map<ResourceId, ResourceInfo>()
@@ -38,18 +34,21 @@ export class ResourceHolder {
     }
 
     public hold(resourceId: ResourceId) {
-        if (!this.resources.has(resourceId))
+        if (!this.resources.has(resourceId)) {
             throw new Error(`Resource ${resourceId} does not exists, can not hold`)
+        }
         this.resources.get(resourceId)!.holdersCount++
     }
 
     public release(resourceId: ResourceId) {
-        if (!this.resources.has(resourceId))
+        if (!this.resources.has(resourceId)) {
             throw new Error(`Resource ${resourceId} does not exists, can not release`)
+        }
         const resource = this.resources.get(resourceId)!
         resource.holdersCount--
-        if (resource.holdersCount <= 0)
+        if (resource.holdersCount <= 0) {
             this.resources.delete(resourceId)
+        }
     }
 
     public registerAndHold(resource: object): ResourceId {
@@ -62,8 +61,9 @@ export class ResourceHolder {
     }
 
     public get(resourceId: ResourceId): object {
-        if (!this.resources.has(resourceId))
+        if (!this.resources.has(resourceId)) {
             throw new Error(`Resource ${resourceId} does not exists`)
+        }
         return this.resources.get(resourceId)!.resource
     }
 

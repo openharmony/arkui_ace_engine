@@ -19,7 +19,6 @@
 #include "core/components_ng/pattern/grid/irregular/grid_irregular_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/irregular/grid_layout_range_solver.h"
 #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
-#include "core/components_ng/pattern/grid/irregular/grid_large_delta_converter.h"
 
 namespace OHOS::Ace::NG {
 class GridIrregularLayoutTest : public GridTestNg {};
@@ -87,8 +86,7 @@ HWTEST_F(GridIrregularLayoutTest, Measure001, TestSize.Level1)
     LayoutConstraintF constraint { .maxSize = { 610.0f, 600.0f }, .percentReference = { 610.0f, 600.0f } };
     layoutProperty_->layoutConstraint_ = constraint;
 
-    GridLayoutInfo info;
-    auto algorithm = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(info);
+    auto algorithm = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(GridLayoutInfo {});
     algorithm->info_.currentOffset_ = 0.0f;
     algorithm->info_.childrenCount_ = 10;
     algorithm->Measure(AceType::RawPtr(frameNode_));
@@ -97,6 +95,7 @@ HWTEST_F(GridIrregularLayoutTest, Measure001, TestSize.Level1)
     EXPECT_EQ(frameNode_->GetGeometryNode()->GetFrameSize().Width(), 610.0f);
     EXPECT_EQ(algorithm->crossLens_, cmp);
 
+    const auto& info = algorithm->info_;
     EXPECT_EQ(algorithm->mainGap_, 1.0f);
     EXPECT_EQ(algorithm->crossGap_, 5.0f);
     EXPECT_EQ(info.startMainLineIndex_, 0);
@@ -132,9 +131,8 @@ HWTEST_F(GridIrregularLayoutTest, Measure002, TestSize.Level1)
     LayoutConstraintF constraint { .maxSize = { 310.0f, 300.0f }, .percentReference = { 310.0f, 300.0f } };
     layoutProperty_->layoutConstraint_ = constraint;
 
-    GridLayoutInfo info;
-    auto algorithm = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(info);
-
+    auto algorithm = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(GridLayoutInfo {});
+    auto& info = algorithm->info_;
     info.currentOffset_ = 0.0f;
     info.childrenCount_ = 11;
     algorithm->Measure(AceType::RawPtr(frameNode_));
@@ -182,9 +180,8 @@ HWTEST_F(GridIrregularLayoutTest, Measure003, TestSize.Level1)
     LayoutConstraintF constraint { .maxSize = { 310.0f, 300.0f }, .percentReference = { 310.0f, 300.0f } };
     layoutProperty_->layoutConstraint_ = constraint;
 
-    GridLayoutInfo info;
-    auto algorithm = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(info);
-
+    auto algorithm = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(GridLayoutInfo {});
+    auto& info = algorithm->info_;
     info.currentOffset_ = 0.0f;
     info.childrenCount_ = 11;
     algorithm->Measure(AceType::RawPtr(frameNode_));
@@ -233,11 +230,10 @@ HWTEST_F(GridIrregularLayoutTest, Measure004, TestSize.Level1)
     LayoutConstraintF constraint { .maxSize = { 310.0f, 300.0f }, .percentReference = { 310.0f, 300.0f } };
     layoutProperty_->layoutConstraint_ = constraint;
 
-    GridLayoutInfo info;
-    auto algorithm = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(info);
+    auto algorithm = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(GridLayoutInfo {});
     algorithm->canOverScrollStart_ = false;
     algorithm->canOverScrollEnd_ = false;
-
+    auto& info = algorithm->info_;
     info.currentOffset_ = 0.0f;
     info.childrenCount_ = 8;
     algorithm->Measure(AceType::RawPtr(frameNode_));
@@ -314,9 +310,8 @@ HWTEST_F(GridIrregularLayoutTest, MeasureJump001, TestSize.Level1)
     LayoutConstraintF constraint { .maxSize = { 310.0f, 300.0f }, .percentReference = { 310.0f, 300.0f } };
     layoutProperty_->layoutConstraint_ = constraint;
     frameNode_->isConstraintNotChanged_ = true;
-    GridLayoutInfo info;
-    auto algorithm = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(info);
-
+    auto algorithm = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(GridLayoutInfo {});
+    auto& info = algorithm->info_;
     info.jumpIndex_ = 7;
     info.scrollAlign_ = ScrollAlign::AUTO;
     info.childrenCount_ = 10;
@@ -363,9 +358,8 @@ HWTEST_F(GridIrregularLayoutTest, MeasureTarget001, TestSize.Level1)
     LayoutConstraintF constraint { .maxSize = { 310.0f, 300.0f }, .percentReference = { 310.0f, 300.0f } };
     layoutProperty_->layoutConstraint_ = constraint;
 
-    GridLayoutInfo info;
-    auto algorithm = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(info);
-
+    auto algorithm = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(GridLayoutInfo {});
+    auto& info = algorithm->info_;
     info.childrenCount_ = 11;
 
     info.targetIndex_ = 10;
@@ -617,10 +611,9 @@ HWTEST_F(GridIrregularLayoutTest, Layout001, TestSize.Level1)
     frameNode_->GetGeometryNode()->SetFrameSize(SizeF { 200.0f, 500.0f });
     frameNode_->GetGeometryNode()->SetContentSize(SizeF { 200.0f, 500.0f });
 
-    GridLayoutInfo info;
-    auto algorithm = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(info);
+    auto algorithm = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(GridLayoutInfo {});
     algorithm->crossLens_ = { 50.0f, 50.0f, 50.0f };
-
+    auto& info = algorithm->info_;
     info.gridMatrix_ = {
         { 0, { { 0, 0 }, { 1, 0 }, { 2, 0 } } },  // 0 | 0 | 0
         { 1, { { 0, 2 }, { 1, 3 }, { 2, 4 } } },  // 2 | 3 | 4
@@ -654,10 +647,10 @@ HWTEST_F(GridIrregularLayoutTest, FindJumpLineIndex001, TestSize.Level1)
     model.SetLayoutOptions(GetOptionDemo1());
     CreateDone();
 
-    GridLayoutInfo info;
-    auto algo = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(info);
+    auto algo = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(GridLayoutInfo {});
     algo->wrapper_ = AceType::RawPtr(frameNode_);
 
+    auto& info = algo->info_;
     info.childrenCount_ = 11;
     info.crossCount_ = 3;
 
@@ -1042,11 +1035,10 @@ HWTEST_F(GridIrregularLayoutTest, PrepareLineHeights001, TestSize.Level1)
     CreateFixedItems(15);
     CreateDone();
 
-    GridLayoutInfo info;
-    auto algorithm = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(info);
+    auto algorithm = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(GridLayoutInfo {});
     algorithm->wrapper_ = AceType::RawPtr(frameNode_);
     algorithm->crossLens_ = { 1.0f, 1.0f, 1.0f };
-
+    auto& info = algorithm->info_;
     // because measuring children might not generate proper heights in test, we set them manually.
     decltype(info.lineHeightMap_) cmpH = { { 0, 200.0f }, { 1, 200.0f }, { 2, 200.0f }, { 3, 200.0f }, { 4, 200.0f } };
     info.lineHeightMap_ = cmpH;
@@ -1126,22 +1118,21 @@ HWTEST_F(GridIrregularLayoutTest, SkipLines001, TestSize.Level1)
     model.SetLayoutOptions(GetOptionDemo1());
     CreateDone();
 
-    GridLayoutInfo info;
-    auto algorithm = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(info);
+    auto algorithm = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(GridLayoutInfo {});
     algorithm->wrapper_ = AceType::RawPtr(frameNode_);
 
+    auto& info = algorithm->info_;
     info.crossCount_ = 3;
     info.lineHeightMap_ = { { 0, 200.0f }, { 1, 200.0f }, { 2, 200.0f } };
     info.gridMatrix_ = MATRIX_DEMO_1;
     info.childrenCount_ = 11;
 
-    auto converter = GridLargeDeltaConverter(info, frameNode_.GetRawPtr());
     info.currentOffset_ = -500.0f;
-    EXPECT_EQ(converter.SkipLinesForward(), 5);
+    EXPECT_EQ(algorithm->SkipLinesForward(), 5);
     info.currentOffset_ = -900.0f;
-    EXPECT_EQ(converter.SkipLinesForward(), 9);
+    EXPECT_EQ(algorithm->SkipLinesForward(), 9);
     info.currentOffset_ = -1500.0f;
-    EXPECT_EQ(converter.SkipLinesForward(), 10);
+    EXPECT_EQ(algorithm->SkipLinesForward(), 10);
 
     info.lineHeightMap_ = { { 3, 200.0f }, { 4, 200.0f } };
     info.startIndex_ = 5;
@@ -1149,13 +1140,13 @@ HWTEST_F(GridIrregularLayoutTest, SkipLines001, TestSize.Level1)
     info.endMainLineIndex_ = 4;
 
     info.currentOffset_ = 400.0f;
-    EXPECT_EQ(converter.SkipLinesBackward(), 2);
+    EXPECT_EQ(algorithm->SkipLinesBackward(), 2);
 
     info.currentOffset_ = 800.0f;
-    EXPECT_EQ(converter.SkipLinesBackward(), 1);
+    EXPECT_EQ(algorithm->SkipLinesBackward(), 1);
 
     info.currentOffset_ = 1500.0f;
-    EXPECT_EQ(converter.SkipLinesBackward(), 1);
+    EXPECT_EQ(algorithm->SkipLinesBackward(), 1);
 }
 
 /**
@@ -1170,10 +1161,10 @@ HWTEST_F(GridIrregularLayoutTest, SkipLines002, TestSize.Level1)
     model.SetLayoutOptions(GetOptionDemo11());
     CreateDone();
 
-    GridLayoutInfo info;
-    auto algorithm = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(info);
+    auto algorithm = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(GridLayoutInfo {});
     algorithm->wrapper_ = AceType::RawPtr(frameNode_);
 
+    auto& info = algorithm->info_;
     info.crossCount_ = 3;
     info.gridMatrix_ = MATRIX_DEMO_11;
     info.childrenCount_ = 10;
@@ -1185,14 +1176,13 @@ HWTEST_F(GridIrregularLayoutTest, SkipLines002, TestSize.Level1)
     info.endIndex_ = 9;
 
     info.currentOffset_ = 700.0f;
-    auto converter = GridLargeDeltaConverter(info, frameNode_.GetRawPtr());
-    EXPECT_EQ(converter.SkipLinesBackward(), 5);
+    EXPECT_EQ(algorithm->SkipLinesBackward(), 5);
 
     info.currentOffset_ = 1300.0f;
-    EXPECT_EQ(converter.SkipLinesBackward(), 2);
+    EXPECT_EQ(algorithm->SkipLinesBackward(), 2);
 
     info.currentOffset_ = 1600.0f;
-    EXPECT_EQ(converter.SkipLinesBackward(), 1);
+    EXPECT_EQ(algorithm->SkipLinesBackward(), 1);
 }
 
 /**
@@ -1208,11 +1198,11 @@ HWTEST_F(GridIrregularLayoutTest, TrySkipping001, TestSize.Level1)
     CreateFixedItems(8);
     CreateDone();
 
-    GridLayoutInfo info;
-    auto algorithm = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(info);
+    auto algorithm = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(GridLayoutInfo {});
     algorithm->wrapper_ = AceType::RawPtr(frameNode_);
     algorithm->crossLens_ = { 100.0f, 100.0f, 100.0f };
 
+    auto& info = algorithm->info_;
     info.crossCount_ = 3;
     info.childrenCount_ = 8;
 

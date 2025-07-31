@@ -26,17 +26,13 @@ import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Point } from "./point"
-export interface Matrix4Transit {
-    copy(): Matrix4Transit
-    invert(): Matrix4Transit
-    combine(options: Matrix4Transit): Matrix4Transit
-    translate(options: TranslateOption): Matrix4Transit
-    scale(options: ScaleOption): Matrix4Transit
-    skew(x: number, y: number): Matrix4Transit
-    rotate(options: RotateOption): Matrix4Transit
-    transformPoint(options: [ number, number ]): [ number, number ]
-    setPolyToPoly(options: PolyToPolyOptions): Matrix4Transit
-}
+
+import { Matrix4Transit as Matrix4Transit_, TranslateOption as  TranslateOption_, ScaleOption as  ScaleOption_, RotateOption as  RotateOption_, PolyToPolyOptions as PolyToPolyOptions_} from "#external"
+export type Matrix4Transit = Matrix4Transit_
+export type TranslateOption = TranslateOption_
+export type ScaleOption = ScaleOption_
+export type RotateOption = RotateOption_
+export type PolyToPolyOptions = PolyToPolyOptions_
 export class Matrix4TransitInternal implements MaterializedBase,Matrix4Transit {
     peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
@@ -159,31 +155,4 @@ export class Matrix4TransitInternal implements MaterializedBase,Matrix4Transit {
         obj.peer = new Finalizable(ptr, Matrix4TransitInternal.getFinalizer())
         return obj
     }
-}
-export interface TranslateOption {
-    x?: number;
-    y?: number;
-    z?: number;
-}
-export interface ScaleOption {
-    x?: number;
-    y?: number;
-    z?: number;
-    centerX?: number;
-    centerY?: number;
-}
-export interface RotateOption {
-    x?: number;
-    y?: number;
-    z?: number;
-    centerX?: number;
-    centerY?: number;
-    angle?: number;
-}
-export interface PolyToPolyOptions {
-    src: Array<Point>;
-    srcIndex?: number;
-    dst: Array<Point>;
-    dstIndex?: number;
-    pointCount?: number;
 }

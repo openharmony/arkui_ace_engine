@@ -22,7 +22,11 @@ import { BuilderNode, BuildOptions, voidBuilderFunc, TBuilderFunc } from "./Buil
 import { Content } from "./Content"
 import { KPointer, pointer } from "@koalaui/interop"
 
-export class ComponentContent<T = undefined> implements Content {
+export interface ComponentContentBase extends Content {
+
+}
+
+export class ComponentContent<T = undefined> implements ComponentContentBase {
     // the name of "builderNode_" is used in ace_engine/interfaces/native/node/native_node_ani.cpp.
     private builderNode_: BuilderNode<T>;
     private parentWeak_?: WeakRef<FrameNode>;
@@ -49,6 +53,7 @@ export class ComponentContent<T = undefined> implements Content {
         return this.builderNode_.getFrameNodeWithoutCheck();
     }
     getNodePtr(): KPointer | undefined {
+        // point to struct FrameNodePeer or undefined
         return this.builderNode_.getNodePtr();
     }
     reuse(param?: Record<string, Object>): void {
@@ -75,5 +80,10 @@ export class ComponentContent<T = undefined> implements Content {
         if (parent !== undefined) {
             parent.removeComponentContent(this);
         }
+    }
+
+    public getNodeWithoutProxy(): pointer | undefined {
+        // point to UINode or undefined
+        return this.builderNode_?.getNodeWithoutProxy()
     }
 }

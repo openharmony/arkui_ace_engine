@@ -96,13 +96,24 @@ export interface ParallelAttribute {
 }
 
 /** @memo */
-export function Parallel(
+export function ParallelizeUI(
     /** @memo */
     style: ((attributes: ParallelAttribute) => void) | undefined,
     options?: ParallelOption | undefined,
     /** @memo */
     content_?: () => void,
 ) {
+    const enable = rememberDisposable<boolean>(() => {
+        if (options?.enable == false) {
+            return false
+        }
+        return true;
+
+    }, () => { })
+    if (enable == false) {
+        content_?.()
+        return;
+    }
     Serializer.setMultithreadMode()
     const receiver = rememberDisposable<ParallelNode>(() => {
         return new ParallelNode();

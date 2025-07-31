@@ -132,9 +132,9 @@ void AssignArkValue(Ark_DragEvent& dragEvent, const RefPtr<OHOS::Ace::DragEvent>
 void AssignArkValue(Ark_TimePickerResult& dst, const std::string& src)
 {
     auto data = JsonUtil::ParseJsonString(src);
-    auto hour = data->GetValue("hour")->GetInt();
-    auto minute = data->GetValue("minute")->GetInt();
-    auto second = data->GetValue("second")->GetInt();
+    auto hour = data->GetValue(HOUR)->GetInt();
+    auto minute = data->GetValue(MINUTE)->GetInt();
+    auto second = data->GetValue(SECOND)->GetInt();
     dst = {
         .hour = ArkValue<Ark_Number>(hour),
         .minute = ArkValue<Ark_Number>(minute),
@@ -555,11 +555,11 @@ void AssignArkValue(Ark_SpanStyle& dst, const RefPtr<OHOS::Ace::SpanBase>& src)
             CreateStylePeer<ImageAttachmentPeer, OHOS::Ace::ImageSpan>(dst, src);
             break;
         case Ace::SpanType::CustomSpan: {
-            LOGE("Converter::AssignArkValue(Ark_SpanStyle) the Ark_CustomSpan is not implemented.");
+            LOGW("Converter::AssignArkValue(Ark_SpanStyle) the Ark_CustomSpan is not implemented.");
             break;
         }
         case Ace::SpanType::ExtSpan: {
-            LOGE("Converter::AssignArkValue(Ark_SpanStyle) the Ark_UserDataSpan is not implemented.");
+            LOGW("Converter::AssignArkValue(Ark_SpanStyle) the Ark_UserDataSpan is not implemented.");
             break;
         }
         default: LOGE("Unexpected enum value in SpanType: %{public}d", src->GetSpanType());
@@ -696,8 +696,8 @@ void AssignArkValue(Ark_TouchObject& dst, const OHOS::Ace::TouchLocationInfo& sr
         PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY()));
     
     dst.pressedTime.tag = Ark_Tag::INTEROP_TAG_OBJECT;
-    dst.pressedTime.value.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
-    dst.pressedTime.value.f32 = static_cast<float>(
+    dst.pressedTime.value.tag = Ark_Tag::INTEROP_TAG_INT32;
+    dst.pressedTime.value.i32 = static_cast<int32_t>(
         src.GetPressedTime().time_since_epoch().count());
 
     dst.pressure.tag = Ark_Tag::INTEROP_TAG_OBJECT;

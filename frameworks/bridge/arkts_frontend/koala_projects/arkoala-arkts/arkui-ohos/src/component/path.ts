@@ -22,12 +22,14 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonShapeMethodPeer, CommonShapeMethod, ArkCommonShapeMethodComponent, ArkCommonShapeMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod } from "./common"
+import { ArkCommonShapeMethodPeer, CommonShapeMethod, ArkCommonShapeMethodComponent, ArkCommonShapeMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod, AttributeModifier } from "./common"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { PathModifier } from "../PathModifier"
 
 export class ArkPathPeer extends ArkCommonShapeMethodPeer {
+    _attributeSet?: PathModifier
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -71,6 +73,7 @@ export interface PathOptions {
 export type PathInterface = (options?: PathOptions) => PathAttribute;
 export interface PathAttribute extends CommonShapeMethod {
     commands(value: string | undefined): this
+    attributeModifier(value: AttributeModifier<PathAttribute> | AttributeModifier<CommonMethod> | undefined): this { return this; }
 }
 export class ArkPathStyle extends ArkCommonShapeMethodStyle implements PathAttribute {
     commands_value?: string | undefined
@@ -102,6 +105,11 @@ export class ArkPathComponent extends ArkCommonShapeMethodComponent implements P
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+
+    public attributeModifier(modifier: AttributeModifier<PathAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        hookPathAttributeModifier(this, modifier);
+        return this
     }
 }
 /** @memo */

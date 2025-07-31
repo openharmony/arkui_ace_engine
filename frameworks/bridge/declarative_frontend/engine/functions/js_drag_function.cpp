@@ -807,4 +807,24 @@ JSRef<JSObject> JsDragFunction::CreateItemDragInfo(const ItemDragInfo& info)
     return itemDragInfoObj;
 }
 
+// use for ArkTs1.2 interop begin
+int64_t JsDragEvent::GetDragEventPointer()
+{
+    CHECK_NULL_RETURN(dragEvent_, 0);
+    return reinterpret_cast<int64_t>(AceType::RawPtr(dragEvent_));
+}
+
+JSRef<JSObject> JsDragEvent::CreateDragEvent(void* dragEventPtr)
+{
+    JSRef<JSObject> dragObj = JSClass<JsDragEvent>::NewInstance();
+    CHECK_NULL_RETURN(dragEventPtr, dragObj);
+    auto dragInfoPtr = reinterpret_cast<DragEvent*>(dragEventPtr);
+    auto dragEvent = AceType::Claim(dragInfoPtr);
+    CHECK_NULL_RETURN(dragEvent, dragObj);
+    auto jsDragEvent = Referenced::Claim(dragObj->Unwrap<JsDragEvent>());
+    CHECK_NULL_RETURN(jsDragEvent, dragObj);
+    jsDragEvent->SetDragEvent(dragEvent);
+    return dragObj;
+}
+//use for ArkTs1.2 end
 } // namespace OHOS::Ace::Framework

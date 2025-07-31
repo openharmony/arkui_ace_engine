@@ -16,74 +16,19 @@
 
 #include "load.h"
 #include "log/log.h"
+#include "utils/ani_utils.h"
+
 #include "base/error/error_code.h"
-#include "bridge/common/utils/engine_helper.h"
-#include "core/common/ace_engine.h"
 #ifdef PIXEL_MAP_SUPPORTED
-// #include "pixel_map_taihe_ani.h"
+#include "pixel_map_taihe_ani.h"
 #endif
 
 namespace OHOS::Ace::Ani {
 constexpr int32_t CALLBACK_PARAM_LENGTH = 2;
-ani_object WrapStsError(ani_env* env, const std::string& msg)
-{
-    ani_class cls {};
-    ani_method method {};
-    ani_object obj = nullptr;
-    ani_status status = ANI_ERROR;
-    if (env == nullptr) {
-        return nullptr;
-    }
-
-    ani_string aniMsg = nullptr;
-    if ((status = env->String_NewUTF8(msg.c_str(), msg.size(), &aniMsg)) != ANI_OK) {
-        return nullptr;
-    }
-
-    ani_ref undefRef;
-    if ((status = env->GetUndefined(&undefRef)) != ANI_OK) {
-        return nullptr;
-    }
-
-    if ((status = env->FindClass("Lescompat/Error;", &cls)) != ANI_OK) {
-        return nullptr;
-    }
-    if ((status = env->Class_FindMethod(cls, "<ctor>", "Lstd/core/String;Lescompat/ErrorOptions;:V", &method)) !=
-        ANI_OK) {
-        return nullptr;
-    }
-
-    if ((status = env->Object_New(cls, method, &obj, aniMsg, undefRef)) != ANI_OK) {
-        return nullptr;
-    }
-    return obj;
-}
-
-static ani_ref CreateStsError(ani_env* env, ani_int code, const std::string& msg)
-{
-    ani_class cls;
-    ani_status status = ANI_OK;
-    if ((status = env->FindClass("L@ohos/base/BusinessError;", &cls)) != ANI_OK) {
-        return nullptr;
-    }
-    ani_method ctor;
-    if ((status = env->Class_FindMethod(cls, "<ctor>", "DLescompat/Error;:V", &ctor)) != ANI_OK) {
-        return nullptr;
-    }
-    ani_object error = WrapStsError(env, msg);
-    if (error == nullptr) {
-        return nullptr;
-    }
-    ani_object obj = nullptr;
-    ani_double dCode(code);
-    if ((status = env->Object_New(cls, ctor, &obj, dCode, error)) != ANI_OK) {
-        return nullptr;
-    }
-    return reinterpret_cast<ani_ref>(obj);
-}
 
 static bool GetOptionsScale(ani_env* env, ani_object options, float& value)
 {
+    CHECK_NULL_RETURN(env, false);
     ani_boolean isUndefined;
     if (ANI_OK != env->Reference_IsUndefined(options, &isUndefined)) {
         return false;
@@ -124,6 +69,7 @@ static bool GetOptionsScale(ani_env* env, ani_object options, float& value)
 
 static bool GetOptionsWaitUntilRenderFinished(ani_env* env, ani_object options, bool& value)
 {
+    CHECK_NULL_RETURN(env, false);
     ani_boolean isUndefined;
     if (ANI_OK != env->Reference_IsUndefined(options, &isUndefined)) {
         return false;
@@ -163,57 +109,38 @@ static bool GetOptionsWaitUntilRenderFinished(ani_env* env, ani_object options, 
     return true;
 }
 
-static bool ParseRegionProperty(ani_env* env, ani_object regionObject, const char* regionType, ani_double& aniValue)
+static bool ParseLocalizedRegion(ani_env* env, ani_object regionObject, ArkUIComponentSnapshotOptions& snapShotOptions)
 {
-    ani_ref propertyRef;
-    if (ANI_OK != env->Object_GetPropertyByName_Ref(regionObject, regionType, &propertyRef)) {
-        return false;
-    }
-
-    ani_boolean isPropertyUndefined;
-    env->Reference_IsUndefined(propertyRef, &isPropertyUndefined);
-    if (!isPropertyUndefined) {
-        return false;
-    }
-
-    if (ANI_OK !=
-        env->Object_CallMethodByName_Double(static_cast<ani_object>(propertyRef), "unboxed", nullptr, &aniValue)) {
-        return false;
-    }
-    return true;
-}
-
-static bool ParseLocalizedRegion(ani_env* env, ani_object regionObject, OHOS::Ace::NG::SnapshotOptions& snapShotOptions)
-{
-    snapShotOptions.snapshotRegion = OHOS::Ace::NG::LocalizedSnapshotRegion {};
+    CHECK_NULL_RETURN(env, false);
+    snapShotOptions.snapshotRegion = ArkUILocalizedSnapshotRegion {};
     ani_boolean isUndefined;
     env->Reference_IsUndefined(regionObject, &isUndefined);
-    if (!isUndefined) {
+    if (isUndefined) {
         return false;
     }
     ani_double startANIValue;
-    if (!ParseRegionProperty(env, regionObject, "start", startANIValue)) {
+    if (ANI_OK != env->Object_GetPropertyByName_Double(regionObject, "start", &startANIValue)) {
         HILOGE("AceComponentSnapshot, The \"start\" attribute cannot be obtained from the parameter.");
         return false;
     }
     snapShotOptions.snapshotRegion.start = static_cast<double>(startANIValue);
 
     ani_double endANIValue;
-    if (!ParseRegionProperty(env, regionObject, "end", endANIValue)) {
+    if (ANI_OK != env->Object_GetPropertyByName_Double(regionObject, "end", &endANIValue)) {
         HILOGE("AceComponentSnapshot, The \"end\" attribute cannot be obtained from the parameter.");
         return false;
     }
     snapShotOptions.snapshotRegion.end = static_cast<double>(endANIValue);
 
     ani_double topANIValue;
-    if (!ParseRegionProperty(env, regionObject, "top", topANIValue)) {
+    if (ANI_OK != env->Object_GetPropertyByName_Double(regionObject, "top", &topANIValue)) {
         HILOGE("AceComponentSnapshot, The \"top\" attribute cannot be obtained from the parameter.");
         return false;
     }
     snapShotOptions.snapshotRegion.top = static_cast<double>(topANIValue);
 
     ani_double bottomANIValue;
-    if (!ParseRegionProperty(env, regionObject, "bottom", bottomANIValue)) {
+    if (ANI_OK != env->Object_GetPropertyByName_Double(regionObject, "bottom", &bottomANIValue)) {
         HILOGE("AceComponentSnapshot, The \"bottom\" attribute cannot be obtained from the parameter.");
         return false;
     }
@@ -221,37 +148,38 @@ static bool ParseLocalizedRegion(ani_env* env, ani_object regionObject, OHOS::Ac
     return true;
 }
 
-static bool ParseRegion(ani_env* env, ani_object regionObject, OHOS::Ace::NG::SnapshotOptions& snapShotOptions)
+static bool ParseRegion(ani_env* env, ani_object regionObject, ArkUIComponentSnapshotOptions& snapShotOptions)
 {
-    snapShotOptions.snapshotRegion = OHOS::Ace::NG::LocalizedSnapshotRegion {};
+    CHECK_NULL_RETURN(env, false);
+    snapShotOptions.snapshotRegion = ArkUILocalizedSnapshotRegion {};
     ani_boolean isUndefined;
     env->Reference_IsUndefined(regionObject, &isUndefined);
-    if (!isUndefined) {
+    if (isUndefined) {
         return false;
     }
     ani_double leftANIValue;
-    if (!ParseRegionProperty(env, regionObject, "left", leftANIValue)) {
+    if (ANI_OK != env->Object_GetPropertyByName_Double(regionObject, "left", &leftANIValue)) {
         HILOGE("AceComponentSnapshot, The \"left\" attribute cannot be obtained from the parameter.");
         return false;
     }
     snapShotOptions.snapshotRegion.start = static_cast<double>(leftANIValue);
 
     ani_double rightANIValue;
-    if (!ParseRegionProperty(env, regionObject, "right", rightANIValue)) {
+    if (ANI_OK != env->Object_GetPropertyByName_Double(regionObject, "right", &rightANIValue)) {
         HILOGE("AceComponentSnapshot, The \"right\" attribute cannot be obtained from the parameter.");
         return false;
     }
     snapShotOptions.snapshotRegion.end = static_cast<double>(rightANIValue);
 
     ani_double topANIValue;
-    if (!ParseRegionProperty(env, regionObject, "top", topANIValue)) {
+    if (ANI_OK != env->Object_GetPropertyByName_Double(regionObject, "top", &topANIValue)) {
         HILOGE("AceComponentSnapshot, The \"top\" attribute cannot be obtained from the parameter.");
         return false;
     }
     snapShotOptions.snapshotRegion.top = static_cast<double>(topANIValue);
 
     ani_double bottomANIValue;
-    if (!ParseRegionProperty(env, regionObject, "bottom", bottomANIValue)) {
+    if (ANI_OK != env->Object_GetPropertyByName_Double(regionObject, "bottom", &bottomANIValue)) {
         HILOGE("AceComponentSnapshot, The \"bottom\" attribute cannot be obtained from the parameter.");
         return false;
     }
@@ -259,29 +187,30 @@ static bool ParseRegion(ani_env* env, ani_object regionObject, OHOS::Ace::NG::Sn
     return true;
 }
 
-static bool GetOptionsRegion(ani_env* env, ani_object options, OHOS::Ace::NG::SnapshotOptions& snapShotOptions)
+static bool GetOptionsRegion(ani_env* env, ani_object options, ArkUIComponentSnapshotOptions& snapShotOptions)
 {
+    CHECK_NULL_RETURN(env, false);
     ani_boolean isUndefined;
     env->Reference_IsUndefined(options, &isUndefined);
-    if (!isUndefined) {
+    if (isUndefined) {
         return false;
     }
     ani_ref regionObject;
     if (ANI_OK != env->Object_GetPropertyByName_Ref(options, "region", &regionObject)) {
-        snapShotOptions.regionMode = OHOS::Ace::NG::SnapshotRegionMode::NO_REGION;
+        snapShotOptions.regionMode = ArkUISnapshotRegionMode::NO_REGION;
         return false;
     }
 
     ani_boolean isPropertyUndefined;
     env->Reference_IsUndefined(regionObject, &isPropertyUndefined);
-    if (!isPropertyUndefined) {
-        snapShotOptions.regionMode = OHOS::Ace::NG::SnapshotRegionMode::NO_REGION;
+    if (isPropertyUndefined) {
+        snapShotOptions.regionMode = ArkUISnapshotRegionMode::NO_REGION;
         return false;
     }
 
-    snapShotOptions.regionMode = OHOS::Ace::NG::SnapshotRegionMode::COMMON;
+    snapShotOptions.regionMode = ArkUISnapshotRegionMode::COMMON;
     if (ParseLocalizedRegion(env, static_cast<ani_object>(regionObject), snapShotOptions)) {
-        snapShotOptions.regionMode = OHOS::Ace::NG::SnapshotRegionMode::LOCALIZED;
+        snapShotOptions.regionMode = ArkUISnapshotRegionMode::LOCALIZED;
     } else {
         ParseRegion(env, static_cast<ani_object>(regionObject), snapShotOptions);
     }
@@ -290,9 +219,10 @@ static bool GetOptionsRegion(ani_env* env, ani_object options, OHOS::Ace::NG::Sn
 
 static bool GetAniIntValue(ani_env* env, ani_object object, int32_t& value)
 {
+    CHECK_NULL_RETURN(env, false);
     ani_boolean isUndefined;
     env->Reference_IsUndefined(object, &isUndefined);
-    if (!isUndefined) {
+    if (isUndefined) {
         return false;
     }
     ani_int aniValue;
@@ -305,9 +235,10 @@ static bool GetAniIntValue(ani_env* env, ani_object object, int32_t& value)
 
 static bool GetCheckImageStatus(ani_env* env, ani_object object, bool& value)
 {
+    CHECK_NULL_RETURN(env, false);
     ani_boolean isUndefined;
     env->Reference_IsUndefined(object, &isUndefined);
-    if (!isUndefined) {
+    if (isUndefined) {
         return false;
     }
     ani_boolean aniValue;
@@ -318,57 +249,51 @@ static bool GetCheckImageStatus(ani_env* env, ani_object object, bool& value)
     return true;
 }
 
-struct SnapshotAsyncCtx {
-    ani_env* env = nullptr;
-    ani_resolver deferred = nullptr;
-    ani_object callbackRef = nullptr;
-    ani_object destroyCallbackRef = nullptr;
-    std::shared_ptr<OHOS::Media::PixelMap> pixmap = nullptr;
-    int32_t errCode = -1;
-    int32_t instanceId = -1;
-};
-
-void TriggerJsCallback(SnapshotAsyncCtx* asyncCtx)
+void TriggerJsCallback(std::shared_ptr<ArkUIComponentSnapshotAsync> asyncCtx)
 {
-    std::unique_ptr<SnapshotAsyncCtx> ctx(asyncCtx);
-    ani_boolean errorExists;
-    ctx->env->ExistUnhandledError(&errorExists);
+    CHECK_NULL_VOID(asyncCtx);
+    CHECK_NULL_VOID(asyncCtx->env);
 
     // callback result format: [Error, PixelMap]
     std::vector<ani_ref> resultRef(CALLBACK_PARAM_LENGTH);
-    ctx->env->GetUndefined(&resultRef[0]);
-    ctx->env->GetUndefined(&resultRef[1]);
+    asyncCtx->env->GetUndefined(&resultRef[0]);
+    asyncCtx->env->GetUndefined(&resultRef[1]);
 
-    if (ctx->errCode == OHOS::Ace::ERROR_CODE_NO_ERROR) {
+    if (asyncCtx->errCode == OHOS::Ace::ERROR_CODE_NO_ERROR) {
 #ifdef PIXEL_MAP_SUPPORTED
-        // ani_object pixmapItem = OHOS::Media::PixelMapTaiheAni::CreateEtsPixelMap(ctx->env, ctx->pixmap);
-        // if (pixmapItem) {
-        //     resultRef[1] = pixmapItem;
-        // }
+        std::shared_ptr<OHOS::Media::PixelMap> pixmap =
+            std::static_pointer_cast<OHOS::Media::PixelMap>(asyncCtx->pixelMap);
+        ani_object pixmapItem = OHOS::Media::PixelMapTaiheAni::CreateEtsPixelMap(asyncCtx->env, pixmap);
+        if (pixmapItem) {
+            resultRef[1] = pixmapItem;
+        }
 #endif
     }
     ani_status status = ANI_OK;
-    resultRef[0] = CreateStsError(ctx->env, ctx->errCode, "");
-    if (ctx->deferred) {
+    ani_ref businessError = AniUtils::CreateBusinessError(asyncCtx->env, "", asyncCtx->errCode);
+    if (businessError) {
+        resultRef[0] = businessError;
+    }
+    if (asyncCtx->deferred) {
         // promise
-        if (ctx->errCode == OHOS::Ace::ERROR_CODE_NO_ERROR) {
-            if ((status = ctx->env->PromiseResolver_Resolve(ctx->deferred, resultRef[1])) != ANI_OK) {
+        if (asyncCtx->errCode == OHOS::Ace::ERROR_CODE_NO_ERROR) {
+            if ((status = asyncCtx->env->PromiseResolver_Resolve(asyncCtx->deferred, resultRef[1])) != ANI_OK) {
                 HILOGE("AceComponentSnapshot PromiseResolver_Resolve Failed!");
             }
         } else {
-            if ((status = ctx->env->PromiseResolver_Reject(ctx->deferred, static_cast<ani_error>(resultRef[0]))) !=
-                ANI_OK) {
+            if ((status = asyncCtx->env->PromiseResolver_Reject(
+                asyncCtx->deferred, static_cast<ani_error>(resultRef[0]))) != ANI_OK) {
                 HILOGE("AceComponentSnapshot PromiseResolver_Reject Failed!");
             }
         }
-    } else if (ctx->callbackRef) {
+    } else if (asyncCtx->callbackRef) {
         // callback
         ani_ref fnReturnVal;
-        if ((status = ctx->env->FunctionalObject_Call(static_cast<ani_fn_object>(ctx->callbackRef), resultRef.size(),
-                                                        resultRef.data(), &fnReturnVal)) != ANI_OK) {
+        if ((status = asyncCtx->env->FunctionalObject_Call(static_cast<ani_fn_object>(asyncCtx->callbackRef),
+            resultRef.size(), resultRef.data(), &fnReturnVal)) != ANI_OK) {
             HILOGE("ACE_COMPONENT_SNAPSHOT FunctionalObject_Call Failed!");
         };
-        ctx->env->GlobalReference_Delete(ctx->callbackRef);
+        asyncCtx->env->GlobalReference_Delete(asyncCtx->callbackRef);
     } else {
         HILOGE("AceComponentSnapshot Internal error!");
     }
@@ -377,69 +302,34 @@ void TriggerJsCallback(SnapshotAsyncCtx* asyncCtx)
         ani_ref fnReturnVal;
         ani_status status = ANI_OK;
         if ((status = asyncCtx->env->FunctionalObject_Call(static_cast<ani_fn_object>(asyncCtx->destroyCallbackRef),
-                 resultRef.size(), resultRef.data(), &fnReturnVal)) != ANI_OK) {
+                                                    resultRef.size(), resultRef.data(), &fnReturnVal)) != ANI_OK) {
             HILOGE("ACE_COMPONENT_SNAPSHOT FunctionalObject_Call Failed!");
         };
-        ctx->env->GlobalReference_Delete(ctx->destroyCallbackRef);
+        asyncCtx->env->GlobalReference_Delete(asyncCtx->destroyCallbackRef);
     }
 }
 
-void OnComplete(SnapshotAsyncCtx* asyncCtx, std::function<void()> finishCallback)
+void CreateCallbackFunc(ani_env* env, ArkUIComponentSnapshotAsync& asyncCtx, ani_object callback,
+    ani_object destroyCallback, ani_object& result)
 {
-    const auto* modifier = GetNodeAniModifier();
-    if (!modifier) {
-        HILOGE("AceComponentSnapshot get node ani modifier failed!");
-        return;
-    }
-    auto container = modifier->getComponentSnapshotAniModifier()->getContainer(asyncCtx->instanceId);
-    if (!container) {
-        HILOGE("AceComponentSnapshot container is null. %{public}d", asyncCtx->instanceId);
-        return;
-    }
-    auto taskExecutor = container->GetTaskExecutor();
-    if (!taskExecutor) {
-        HILOGE("AceComponentSnapshot taskExecutor is null.");
-        return;
-    }
-    taskExecutor->PostTask(
-        [asyncCtx, finishCallback]() {
-            TriggerJsCallback(asyncCtx);
-            if (finishCallback) {
-                finishCallback();
-            }
-        },
-        OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIComponentSnapshotComplete");
-}
-
-auto CreateCallbackFunc(ani_env* env, ani_object callback, ani_object destroyCallback, ani_object& result)
-{
-    auto* asyncCtx = new SnapshotAsyncCtx;
+    asyncCtx.env = env;
     if (callback) {
         ani_ref objectGRef;
         env->GlobalReference_Create(reinterpret_cast<ani_ref>(callback), &objectGRef);
-        asyncCtx->callbackRef = reinterpret_cast<ani_object>(objectGRef);
+        asyncCtx.callbackRef = reinterpret_cast<ani_object>(objectGRef);
     }
-    if (!asyncCtx->callbackRef) {
-        env->Promise_New(&asyncCtx->deferred, &result);
+    if (!asyncCtx.callbackRef) {
+        env->Promise_New(&asyncCtx.deferred, &result);
     }
     if (destroyCallback) {
         ani_ref objectGRef;
         env->GlobalReference_Create(reinterpret_cast<ani_ref>(destroyCallback), &objectGRef);
-        asyncCtx->destroyCallbackRef = reinterpret_cast<ani_object>(objectGRef);
+        asyncCtx.destroyCallbackRef = reinterpret_cast<ani_object>(objectGRef);
     }
-
-    asyncCtx->env = env;
-    const auto* modifier = GetNodeAniModifier();
-    if (modifier) {
-        asyncCtx->instanceId = modifier->getComponentSnapshotAniModifier()->getCurrentIdSafely();
-    }
-
-    return [asyncCtx](
-               std::shared_ptr<OHOS::Media::PixelMap> pixmap, int32_t errCode, std::function<void()> finishCallback) {
-        asyncCtx->pixmap = std::move(pixmap);
-        asyncCtx->errCode = errCode;
-        OnComplete(asyncCtx, finishCallback);
+    auto jsCallback = [=](std::shared_ptr<ArkUIComponentSnapshotAsync> snapShotAsyncCtx) {
+        TriggerJsCallback(snapShotAsyncCtx);
     };
+    asyncCtx.callBackJsFunction = jsCallback;
 }
 
 void CreateFromBuilderWithCallback(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long builderPtr,
@@ -450,18 +340,18 @@ void CreateFromBuilderWithCallback(ani_env* env, [[maybe_unused]] ani_object ani
     if (!modifier || !modifier->getComponentSnapshotAniModifier() || !env) {
         return;
     }
-    OHOS::Ace::NG::SnapshotParam param;
+    ArkUISnapshotParam param;
     GetAniIntValue(env, delay, param.delay);
     GetCheckImageStatus(env, checkImageStatus, param.checkImageStatus);
     GetOptionsScale(env, options, param.options.scale);
     GetOptionsWaitUntilRenderFinished(env, options, param.options.waitUntilRenderFinished);
     GetOptionsRegion(env, options, param.options);
-
+    
     ani_object result = {};
-    auto callback = CreateCallbackFunc(env, callbackObj, destroyCallbackObj, result);
-
+    ArkUIComponentSnapshotAsync asyncCtx;
+    CreateCallbackFunc(env, asyncCtx, callbackObj, destroyCallbackObj, result);
     auto* arkNode = reinterpret_cast<ArkUINodeHandle>(builderPtr);
-    modifier->getComponentSnapshotAniModifier()->createFromBuilder(arkNode, callback, param);
+    modifier->getComponentSnapshotAniModifier()->createFromBuilder(arkNode, asyncCtx, param);
 }
 
 ani_object CreateFromBuilderWithPromise(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long builderPtr,
@@ -471,7 +361,7 @@ ani_object CreateFromBuilderWithPromise(ani_env* env, [[maybe_unused]] ani_objec
     if (!modifier || !modifier->getComponentSnapshotAniModifier() || !env) {
         return nullptr;
     }
-    OHOS::Ace::NG::SnapshotParam param;
+    ArkUISnapshotParam param;
     GetAniIntValue(env, delay, param.delay);
     GetCheckImageStatus(env, checkImageStatus, param.checkImageStatus);
     GetOptionsScale(env, options, param.options.scale);
@@ -479,10 +369,10 @@ ani_object CreateFromBuilderWithPromise(ani_env* env, [[maybe_unused]] ani_objec
     GetOptionsRegion(env, options, param.options);
 
     ani_object result = {};
-    auto callback = CreateCallbackFunc(env, nullptr, destroyCallbackObj, result);
-
+    ArkUIComponentSnapshotAsync asyncCtx;
+    CreateCallbackFunc(env, asyncCtx, nullptr, destroyCallbackObj, result);
     auto* arkNode = reinterpret_cast<ArkUINodeHandle>(builderPtr);
-    modifier->getComponentSnapshotAniModifier()->createFromBuilder(arkNode, callback, param);
+    modifier->getComponentSnapshotAniModifier()->createFromBuilder(arkNode, asyncCtx, param);
     return result;
 }
 
@@ -493,18 +383,18 @@ ani_object CreateFromComponentWithPromise(ani_env* env, [[maybe_unused]] ani_obj
     if (!modifier || !modifier->getComponentSnapshotAniModifier() || !env) {
         return nullptr;
     }
-    OHOS::Ace::NG::SnapshotParam param;
+    ArkUISnapshotParam param;
     GetAniIntValue(env, delay, param.delay);
     GetCheckImageStatus(env, checkImageStatus, param.checkImageStatus);
     GetOptionsScale(env, options, param.options.scale);
     GetOptionsWaitUntilRenderFinished(env, options, param.options.waitUntilRenderFinished);
     GetOptionsRegion(env, options, param.options);
-    
-    ani_object result = {};
-    auto callback = CreateCallbackFunc(env, nullptr, destroyCallbackObj, result);
 
+    ani_object result = {};
+    ArkUIComponentSnapshotAsync asyncCtx;
+    CreateCallbackFunc(env, asyncCtx, nullptr, destroyCallbackObj, result);
     auto* arkNode = reinterpret_cast<ArkUINodeHandle>(builderPtr);
-    modifier->getComponentSnapshotAniModifier()->createFromComponent(arkNode, callback, param);
+    modifier->getComponentSnapshotAniModifier()->createFromComponent(arkNode, asyncCtx, param);
     return result;
 }
 } // namespace OHOS::Ace::Ani

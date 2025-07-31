@@ -112,10 +112,6 @@ if (is_ohos_standard_system) {
       "$ace_root/frameworks/bridge/declarative_frontend:x_node",
     ]
 
-    if (use_linux && (defined(arkoala_for_sdk) && arkoala_for_sdk)) {
-      deps += [ "$ace_root/frameworks/bridge/arkts_frontend/arkoala:run_arkoala_build" ]
-    }
-
     out_path = get_label_info(
             "$ace_root/frameworks/bridge/declarative_frontend:ark_modifier",
             "root_out_dir")
@@ -127,10 +123,6 @@ if (is_ohos_standard_system) {
       "${out_path}/arkui/ace_engine/theme.abc",
       "${out_path}/arkui/ace_engine/uicontext.abc",
     ]
-
-    if (use_linux && (defined(arkoala_for_sdk) && arkoala_for_sdk)) {
-      sources += [ "${out_path}/obj/foundation/arkui/ace_engine/frameworks/bridge/arkts_frontend/arkoala/arkoala.abc" ]
-    }
 
     outputs = [ target_out_dir +
                 "/previewer/common/bin/module/arkui/{{source_file_part}}" ]

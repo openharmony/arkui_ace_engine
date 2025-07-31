@@ -57,7 +57,7 @@ bool GetToastBottom(ani_env* env, ani_object object, std::string& result)
 bool GetToastShowMode(ani_env* env, ani_object object, OHOS::Ace::NG::ToastShowMode& result)
 {
     int32_t resultInt;
-    if (!GetEnumInt(env, object, "showMode", "L@ohos/promptAction/promptAction/ToastShowMode;", resultInt)) {
+    if (!GetEnumInt(env, object, "showMode", "@ohos.promptAction.promptAction.ToastShowMode", resultInt)) {
         return false;
     }
     result = static_cast<OHOS::Ace::NG::ToastShowMode>(resultInt);
@@ -67,7 +67,7 @@ bool GetToastShowMode(ani_env* env, ani_object object, OHOS::Ace::NG::ToastShowM
 bool GetToastAlignment(ani_env* env, ani_object object, int32_t& result)
 {
     std::string resultStr;
-    if (!GetEnumString(env, object, "alignment", "Larkui/component/enums/Alignment;", resultStr)) {
+    if (!GetEnumString(env, object, "alignment", "arkui.component.enums.Alignment", resultStr)) {
         return false;
     }
 
@@ -108,13 +108,13 @@ bool GetToastShadow(ani_env* env, ani_object object, std::optional<OHOS::Ace::Sh
     return false;
 }
 
-bool GetShowToastOptions(ani_env* env, ani_object object, OHOS::Ace::NG::ToastInfo result)
+bool GetShowToastOptions(ani_env* env, ani_object object, OHOS::Ace::NG::ToastInfo& result)
 {
     if (IsUndefinedObject(env, object)) {
         return false;
     }
 
-    if (!IsClassObject(env, object, "L@ohos/promptAction/promptAction/ShowToastOptions;")) {
+    if (!IsClassObject(env, object, "@ohos.promptAction.promptAction.ShowToastOptions")) {
         return false;
     }
 

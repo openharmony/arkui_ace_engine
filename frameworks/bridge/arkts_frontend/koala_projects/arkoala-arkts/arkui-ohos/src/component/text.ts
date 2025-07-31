@@ -1279,15 +1279,10 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements TextAt
     }
     public fontWeight(weight: number | FontWeight | string | undefined, options?: FontSettingOptions): this {
         if (this.checkPriority("fontWeight")) {
-            const weight_type = runtimeType(weight)
-            const options_type = runtimeType(options)
-            if ((RuntimeType.NUMBER == weight_type) || (RuntimeType.NUMBER == weight_type) || (RuntimeType.STRING == weight_type) || (RuntimeType.UNDEFINED == weight_type)) {
-                const weight_casted = weight as (number | FontWeight | string | undefined)
-                const options_casted = options as (FontSettingOptions | undefined)
-                this.getPeer()?.fontWeight1Attribute(weight_casted, options_casted)
-                return this
-            }
-            throw new Error("Can not select appropriate overload")
+            const weight_casted = weight as (number | FontWeight | string | undefined)
+            const options_casted = options as (FontSettingOptions | undefined)
+            this.getPeer()?.fontWeight1Attribute(weight_casted, options_casted)
+            return this
         }
         return this
     }

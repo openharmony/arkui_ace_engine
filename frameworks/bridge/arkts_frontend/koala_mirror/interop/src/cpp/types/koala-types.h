@@ -84,6 +84,9 @@ struct KStringPtrImpl {
         // Ignore old content.
         if (_value && _owned) free(_value);
         _value = reinterpret_cast<char*>(malloc(size + 1));
+        if (!_value) {
+          return;
+        }
         _value[size] = 0;
     }
 

@@ -624,7 +624,6 @@ bool NavigationStack::CreateNodeByIndex(int32_t index, const WeakPtr<NG::UINode>
     if (pattern) {
         pattern->SetName(name);
         pattern->SetIndex(index);
-        TAG_LOGD(AceLogTag::ACE_NAVIGATION, "create destination node, isEntry %{public}d", isEntry);
         auto pathInfoData = AceType::MakeRefPtr<NavPathInfo>(name, isEntry); // `param` and `onPop` data may be added
         pattern->SetNavPathInfo(pathInfoData);
         pattern->SetNavigationStack(WeakClaim(this));

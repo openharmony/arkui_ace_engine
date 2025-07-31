@@ -147,7 +147,8 @@ export {
     ValueTracker,
     createStateManager,
     StateManagerImpl,
-    StateImpl
+    StateImpl,
+    InternalScope,
 } from "./states/State"
 export {
     __context,

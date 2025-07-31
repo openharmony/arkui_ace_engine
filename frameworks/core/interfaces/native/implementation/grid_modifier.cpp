@@ -549,7 +549,7 @@ void OnReachStartImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    auto onReachStart = [arkCallback = CallbackHelper(*optValue), frameNode]() {
+    auto onReachStart = [arkCallback = CallbackHelper(*optValue)]() {
         arkCallback.Invoke();
     };
     GridModelStatic::SetOnReachStart(frameNode, std::move(onReachStart));
@@ -564,7 +564,7 @@ void OnReachEndImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    auto onReachEnd = [arkCallback = CallbackHelper(*optValue), frameNode]() {
+    auto onReachEnd = [arkCallback = CallbackHelper(*optValue)]() {
         arkCallback.Invoke();
     };
     GridModelStatic::SetOnReachEnd(frameNode, std::move(onReachEnd));
@@ -579,7 +579,7 @@ void OnScrollStartImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    auto onScrollStart = [arkCallback = CallbackHelper(*optValue), frameNode]() {
+    auto onScrollStart = [arkCallback = CallbackHelper(*optValue)]() {
         arkCallback.Invoke();
     };
     GridModelStatic::SetOnScrollStart(frameNode, std::move(onScrollStart));
@@ -594,7 +594,7 @@ void OnScrollStopImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    auto onScrollStop = [arkCallback = CallbackHelper(*optValue), frameNode]() {
+    auto onScrollStop = [arkCallback = CallbackHelper(*optValue)]() {
         arkCallback.Invoke();
     };
     GridModelStatic::SetOnScrollStop(frameNode, std::move(onScrollStop));

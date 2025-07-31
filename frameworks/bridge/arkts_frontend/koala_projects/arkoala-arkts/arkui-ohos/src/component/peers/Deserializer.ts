@@ -22,13 +22,14 @@ import { CallbackKind } from "./CallbackKind"
 import { Serializer } from "./Serializer"
 import { TypeChecker } from "#components"
 import { CallbackTransformer } from "./CallbackTransformer"
-import { AccessibilityCallback, AccessibilityFocusCallback, GestureRecognizerJudgeBeginCallback, HoverCallback, OnDragEventCallback, OnMoveHandler, OnScrollCallback, PopupStateChangeCallback, ReuseIdCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TransitionFinishCallback, VisibleAreaChangeCallback, AccessibilityHoverEvent, AccessibilityHoverEventInternal, AccessibilityRoleType, AccessibilitySamePageMode, AdaptiveColor, CommonMethod, BlurStyle, BlendApplyType, BlurStyleActivePolicy, PickerTextStyle, ChainStyle, ContentClipMode, DismissReason, DragBehavior, DragEvent, DragEventInternal, DragResult, Rectangle, DraggingSizeChangeEffect, DragPreviewMode, DrawModifier, EffectEdge, EffectType, FinishCallbackType, GestureModifier, GestureModifierInternal, UIGestureEvent, ScrollableCommonMethod, ItemDragInfo, CustomBuilder, NestedScrollOptions, EdgeEffectOptions, HapticFeedbackMode, HoverModeAreaType, ICurve, ICurveInternal, KeyboardAvoidMode, LayoutPolicy, LayoutSafeAreaEdge, LayoutSafeAreaType, ChildrenMainSize, ChildrenMainSizeInternal, RectResult, MenuPolicy, MenuPreviewMode, ModalTransition, OutlineStyle, PixelMapMock, PixelMapMockInternal, PopupStateChangeParam, PreDragStatus, ProgressMask, ProgressMaskInternal, RepeatMode, SelectionOptions, SafeAreaEdge, SafeAreaType, ScrollSizeMode, TextDecorationOptions, TextContentControllerBase, TextContentControllerBaseInternal, ShadowStyle, ShadowType, SheetKeyboardAvoidMode, SheetMode, SheetSize, SheetType, SourceTool, SourceType, BackgroundEffectOptions, BackgroundBlurStyleOptions, TranslateOptions, InputCounterOptions, ShadowOptions, CaretOffset, TextContentControllerOptions, ThemeColorMode, TouchTestInfo, TouchTestStrategy, TransitionEdge, TransitionEffect, TransitionEffectInternal, TransitionEffects, RotateOptions, ScaleOptions, AnimateParam, TransitionHierarchyStrategy, UICommonEvent, UICommonEventInternal, Callback_ClickEvent_Void, ClickEvent, ClickEventInternal, Callback_TouchEvent_Void, TouchEvent, TouchEventInternal, Callback_KeyEvent_Void, KeyEvent, KeyEventInternal, HoverEvent, HoverEventInternal, Callback_MouseEvent_Void, MouseEvent, MouseEventInternal, VisibleAreaEventOptions, SheetOptions, View, ViewInternal, Callback_KeyEvent_Boolean, Callback_Area_Area_Void, Callback_Array_TouchTestInfo_TouchResult, TouchResult, Callback_AxisEvent_Void, AxisEvent, AxisEventInternal, Callback_Boolean_HoverEvent_Void, Callback_CrownEvent_Void, CrownEvent, Callback_DismissContentCoverAction_Void, DismissContentCoverAction, Callback_DismissPopupAction_Void, DismissPopupAction, Callback_DismissSheetAction_Void, DismissSheetAction, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, DragItemInfo, Callback_DragEvent_String_Void, Callback_FocusAxisEvent_Void, FocusAxisEvent, FocusAxisEventInternal, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, Callback_HoverEvent_Void, Callback_Literal_Boolean_isVisible_Void, Literal_Boolean_isVisible, Callback_PreDragStatus_Void, Callback_SheetDismiss_Void, SheetDismiss, Callback_SheetType_Void, Callback_SpringBackAction_Void, SpringBackAction, Callback_TouchEvent_HitTestMode, BackgroundBrightnessOptions, BackgroundImageOptions, BlurOptions, ClickEffect, DateRange, DragInteractionOptions, DropOptions, ExpectedFrameRateRange, FocusMovement, ForegroundEffectOptions, GeometryTransitionOptions, InvertOptions, LinearGradient_common, Tuple_ResourceColor_Number, LinearGradientBlurOptions, FractionStop, LinearGradientOptions, LocalizedHorizontalAlignParam, LocalizedVerticalAlignParam, Measurable, MeasurableInternal, MeasureResult, SizeResult, MotionBlurAnchor, MotionBlurOptions, MotionPathOptions, OverlayOffset, PixelRoundPolicy, PixelStretchEffectOptions, PreviewConfiguration, RadialGradientOptions, Tuple_Length_Length, StateStyles, SweepGradientOptions, SystemAdaptiveOptions, TipsOptions, TouchObject, AlignRuleOption, HorizontalAlignOptions, VerticalAlignOptions, BlurStyleOptions, ContentCoverOptions, BindOptions, ContextMenuAnimationOptions, MultiShadowOptions, DragPreviewOptions, EventTarget, FadingEdgeOptions, BaseEvent, BaseEventInternal, ForegroundBlurStyleOptions, HistoricalPoint, LightSource, LocalizedAlignRuleOptions, MenuElement, OverlayOptions, PickerDialogButtonStyle, ReuseOptions, sharedTransitionOptions, SheetTitleOptions, TransitionOptions, BorderImageOption, CustomPopupOptions, Literal_ResourceColor_color, PointLightStyle, PopupMessageOptions, Type_SheetOptions_detents, ContextMenuOptions, BorderRadiusType, MenuOptions, PopupOptions, PopupButton, OnWillScrollCallback, ScrollResult, PopupMaskType, SelectedCallback, IndexCallback, IndexerSelectedCallback, RefreshingCallback, DividerStyle, BlendMode, PopupCommonOptions, DismissPopupActionInternal } from "./../common"
-import { ButtonTriggerClickCallback, ButtonRole, ButtonStyleMode, ButtonType, ControlSize, ButtonOptions } from "./../button"
+import { AccessibilityCallback, AccessibilityFocusCallback, GestureRecognizerJudgeBeginCallback, HoverCallback, OnDragEventCallback, OnMoveHandler, OnScrollCallback, PopupStateChangeCallback, ReuseIdCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TransitionFinishCallback, VisibleAreaChangeCallback, AccessibilityHoverEvent, AccessibilityHoverEventInternal, AccessibilityRoleType, AccessibilitySamePageMode, AdaptiveColor, CommonMethod, BlurStyle, BlendApplyType, BlurStyleActivePolicy, PickerTextStyle, ChainStyle, ContentClipMode, DismissReason, DragBehavior, DragEvent, DragEventInternal, DragResult, Rectangle, DraggingSizeChangeEffect, DragPreviewMode, DrawModifier, EffectEdge, EffectType, FinishCallbackType, GestureModifier, GestureModifierInternal, UIGestureEvent, ScrollableCommonMethod, ItemDragInfo, CustomBuilder, NestedScrollOptions, EdgeEffectOptions, HapticFeedbackMode, HoverModeAreaType, ICurve, ICurveInternal, KeyboardAvoidMode, LayoutPolicy, LayoutSafeAreaEdge, LayoutSafeAreaType, ChildrenMainSize, ChildrenMainSizeInternal, RectResult, MenuPolicy, MenuPreviewMode, ModalTransition, OutlineStyle, PixelMapMock, PixelMapMockInternal, PopupStateChangeParam, PreDragStatus, ProgressMask, ProgressMaskInternal, RepeatMode, SelectionOptions, SafeAreaEdge, SafeAreaType, ScrollSizeMode, TextDecorationOptions, TextContentControllerBase, TextContentControllerBaseInternal, ShadowStyle, ShadowType, SheetKeyboardAvoidMode, SheetMode, SheetSize, SheetType, SourceTool, SourceType, BackgroundEffectOptions, BackgroundBlurStyleOptions, TranslateOptions, InputCounterOptions, ShadowOptions, CaretOffset, TextContentControllerOptions, ThemeColorMode, TouchTestInfo, TouchTestStrategy, TransitionEdge, TransitionEffect, TransitionEffectInternal, TransitionEffects, RotateOptions, ScaleOptions, AnimateParam, TransitionHierarchyStrategy, UICommonEvent, UICommonEventInternal, Callback_ClickEvent_Void, ClickEvent, ClickEventInternal, Callback_TouchEvent_Void, TouchEvent, TouchEventInternal, Callback_KeyEvent_Void, KeyEvent, KeyEventInternal, HoverEvent, HoverEventInternal, Callback_MouseEvent_Void, MouseEvent, MouseEventInternal, VisibleAreaEventOptions, SheetOptions, View, ViewInternal, Callback_KeyEvent_Boolean, Callback_Area_Area_Void, Callback_Array_TouchTestInfo_TouchResult, TouchResult, Callback_AxisEvent_Void, AxisEvent, AxisEventInternal, Callback_Boolean_HoverEvent_Void, Callback_CrownEvent_Void, CrownEvent, Callback_DismissContentCoverAction_Void, DismissContentCoverAction, Callback_DismissPopupAction_Void, DismissPopupAction, Callback_DismissSheetAction_Void, DismissSheetAction, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, DragItemInfo, Callback_DragEvent_String_Void, Callback_FocusAxisEvent_Void, FocusAxisEvent, FocusAxisEventInternal, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, Callback_HoverEvent_Void, Callback_Literal_Boolean_isVisible_Void, Literal_Boolean_isVisible, Callback_PreDragStatus_Void, Callback_SheetDismiss_Void, SheetDismiss, Callback_SheetType_Void, Callback_SpringBackAction_Void, SpringBackAction, Callback_TouchEvent_HitTestMode, BackgroundBrightnessOptions, BackgroundImageOptions, BlurOptions, ClickEffect, DateRange, DragInteractionOptions, DropOptions, ExpectedFrameRateRange, FocusMovement, ForegroundEffectOptions, GeometryTransitionOptions, InvertOptions, LinearGradient_common, Tuple_ResourceColor_Number, LinearGradientBlurOptions, FractionStop, LinearGradientOptions, LocalizedHorizontalAlignParam, LocalizedVerticalAlignParam, Measurable, MeasurableInternal, MeasureResult, SizeResult, MotionBlurAnchor, MotionBlurOptions, MotionPathOptions, OverlayOffset, PixelRoundPolicy, PixelStretchEffectOptions, PreviewConfiguration, RadialGradientOptions, Tuple_Length_Length, StateStyles, SweepGradientOptions, SystemAdaptiveOptions, TipsOptions, TouchObject, AlignRuleOption, HorizontalAlignParam, VerticalAlignParam, BlurStyleOptions, ContentCoverOptions, BindOptions, ContextMenuAnimationOptions, MultiShadowOptions, DragPreviewOptions, EventTarget, FadingEdgeOptions, BaseEvent, BaseEventInternal, ForegroundBlurStyleOptions, HistoricalPoint, LightSource, LocalizedAlignRuleOptions, MenuElement, OverlayOptions, PickerDialogButtonStyle, ReuseOptions, sharedTransitionOptions, SheetTitleOptions, TransitionOptions, BorderImageOption, CustomPopupOptions, Literal_ResourceColor_color, PointLightStyle, PopupMessageOptions, Type_SheetOptions_detents, ContextMenuOptions, BorderRadiusType, MenuOptions, PopupOptions, PopupButton, OnWillScrollCallback, ScrollResult, PopupMaskType, SelectedCallback, IndexCallback, IndexerSelectedCallback, RefreshingCallback, DividerStyle, BlendMode, PopupCommonOptions, DismissPopupActionInternal, ContentModifier } from "./../common"
+import { ButtonTriggerClickCallback, ButtonRole, ButtonStyleMode, ButtonType, ControlSize, ButtonOptions, ButtonConfiguration } from "./../button"
 import { Callback_Extender_OnFinish, Callback_Extender_OnProgress, DoubleAnimationParam } from "./../animationExtender"
 import { Callback_RangeUpdate, Context_getGroupDir_Callback, RestrictedWorker_onerror_Callback, RestrictedWorker_onexit_Callback, RestrictedWorker_onmessage_Callback, BuilderNodeOps, BuilderNodeOpsInternal, BuilderNodeOptions, ComponentContent, ComponentContentInternal, UnifiedData, UnifiedDataInternal, SystemBarStyle, Scene, SceneInternal, Context, ContextInternal, WorkerEventListener, WorkerEventListenerInternal, Event, ErrorEvent, MessageEvents, BaseContext, BaseContextInternal, PostMessageOptions, WorkerOptions, CustomColors, RestrictedWorker, RestrictedWorkerInternal, CustomTheme, Callback_CreateItem, LengthMetricsCustom } from "./../arkui-custom"
 import { UIContext, TargetInfo } from "@ohos/arkui/UIContext"
 import { ContentDidScrollCallback, ContentWillScrollCallback, OnSwiperAnimationEndCallback, OnSwiperAnimationStartCallback, OnSwiperGestureSwipeCallback, SwiperAnimationEvent, SwiperAnimationMode, SwiperAttribute, DotIndicator, DigitIndicator, SwiperDisplayMode, SwiperNestedScrollMode, SwiperContentAnimatedTransition, SwiperContentWillScrollResult, AutoPlayOptions, ArrowStyle, SwiperAutoFill, SwiperContentTransitionProxy, SwiperContentTransitionProxyInternal, SwiperController, SwiperControllerInternal, Callback_SwiperContentTransitionProxy_Void, Indicator } from "./../swiper"
 import { CustomNodeBuilder } from "./../customBuilder"
+import { DatePickerSelectedCallback } from "./../datepickerselectedops"
 import { EditableTextOnChangeCallback, OnDidChangeCallback, AutoCapitalizationMode, KeyboardAppearance, LayoutManager, LayoutManagerInternal, PositionWithAffinity, TextRange, MenuType, TextDataDetectorConfig, EditMenuOptions, TextEditControllerEx, TextEditControllerExInternal, PreviewText, StyledStringController, StyledStringControllerInternal, StyledStringChangedListener, CaretStyle, TextChangeOptions, InsertValue, DeleteValue, EditableTextChangeValue, FontSettingOptions, TextBaseController, TextBaseControllerInternal, TextDataDetectorType, TextDeleteDirection, TextMenuItemId, TextMenuItemIdInternal, TextMenuShowMode, AsyncCallback_Array_TextMenuItem_Array_TextMenuItem, TextMenuItem, AsyncCallback_TextMenuItem_TextRange_Boolean, Callback_StyledStringChangeValue_Boolean, StyledStringChangeValue, TextMenuOptions, DecorationStyleResult } from "./../textCommon"
 import { ErrorCallback } from "./../ohos.base"
 import { GetItemMainSizeByIndex, WaterFlowAttribute, WaterFlowLayoutMode, WaterFlowSections, WaterFlowSectionsInternal, SectionOptions, WaterFlowOptions } from "./../waterFlow"
@@ -42,15 +43,15 @@ import { NavDestinationTransitionDelegate, NavDestinationActiveReason, NavDestin
 import { NavExtender_OnUpdateStack } from "./../navigationExtender"
 import { OnAdsBlockedCallback, OnContextMenuHideCallback, OnFirstMeaningfulPaintCallback, OnFullScreenEnterCallback, OnIntelligentTrackingPreventionCallback, OnLargestContentfulPaintCallback, OnNativeEmbedVisibilityChangeCallback, OnNavigationEntryCommittedCallback, OnOverrideUrlLoadingCallback, OnRenderProcessNotRespondingCallback, OnRenderProcessRespondingCallback, OnSafeBrowsingCheckResultCallback, OnSslErrorEventCallback, OnViewportFitChangedCallback, WebKeyboardCallback, BlurOnKeyboardHideMode, CacheMode, ClientAuthenticationHandler, ClientAuthenticationHandlerInternal, ConsoleMessage, ConsoleMessageInternal, MessageLevel, ContextMenuEditStateFlags, ContextMenuInputFieldType, ContextMenuMediaType, ContextMenuSourceType, ControllerHandler, ControllerHandlerInternal, DataResubmissionHandler, DataResubmissionHandlerInternal, EventResult, EventResultInternal, FileSelectorMode, FileSelectorParam, FileSelectorParamInternal, FileSelectorResult, FileSelectorResultInternal, FullScreenExitHandler, FullScreenExitHandlerInternal, HitTestType, HttpAuthHandler, HttpAuthHandlerInternal, JsGeolocation, JsGeolocationInternal, JsResult, JsResultInternal, MixedMode, NativeEmbedStatus, NativeMediaPlayerConfig, OnAudioStateChangedEvent, OnConsoleEvent, OnDataResubmittedEvent, OnFirstContentfulPaintEvent, OnOverScrollEvent, OnProgressChangeEvent, OnScaleChangeEvent, OnScrollEvent, OnSearchResultReceiveEvent, OnShowFileSelectorEvent, OverScrollMode, PermissionRequest, PermissionRequestInternal, ProtectedResourceType, RenderExitReason, RenderMode, RenderProcessNotRespondingReason, ScreenCaptureHandler, ScreenCaptureHandlerInternal, ScreenCaptureConfig, SslError, SslErrorHandler, SslErrorHandlerInternal, ThreatType, ViewportFit, WebAttribute, JavaScriptProxy, WebDarkMode, WebMediaOptions, Callback_OnPageEndEvent_Void, OnPageEndEvent, Callback_OnPageBeginEvent_Void, OnPageBeginEvent, Callback_OnProgressChangeEvent_Void, Callback_OnTitleReceiveEvent_Void, OnTitleReceiveEvent, Callback_OnGeolocationShowEvent_Void, OnGeolocationShowEvent, Callback_OnAlertEvent_Boolean, OnAlertEvent, Callback_OnBeforeUnloadEvent_Boolean, OnBeforeUnloadEvent, Callback_OnConfirmEvent_Boolean, OnConfirmEvent, Callback_OnPromptEvent_Boolean, OnPromptEvent, Callback_OnConsoleEvent_Boolean, Callback_OnErrorReceiveEvent_Void, OnErrorReceiveEvent, Callback_OnHttpErrorReceiveEvent_Void, OnHttpErrorReceiveEvent, Callback_OnDownloadStartEvent_Void, OnDownloadStartEvent, Callback_OnRefreshAccessedHistoryEvent_Void, OnRefreshAccessedHistoryEvent, Type_WebAttribute_onUrlLoadIntercept_callback, Literal_Union_String_WebResourceRequest_data, WebResourceRequest, WebResourceRequestInternal, Callback_Literal_Function_handler_Object_error_Void, Literal_Function_handler_Object_error, Callback_OnRenderExitedEvent_Void, OnRenderExitedEvent, Callback_OnShowFileSelectorEvent_Boolean, Callback_Literal_Object_detail_Boolean, Literal_Object_detail, Type_WebAttribute_onFileSelectorShow_callback, Literal_Function_callback__Object_fileSelector, Callback_OnResourceLoadEvent_Void, OnResourceLoadEvent, FullScreenEnterEvent, Callback_OnScaleChangeEvent_Void, Callback_OnHttpAuthRequestEvent_Boolean, OnHttpAuthRequestEvent, Callback_OnInterceptRequestEvent_WebResourceResponse, OnInterceptRequestEvent, WebResourceResponse, WebResourceResponseInternal, Callback_OnPermissionRequestEvent_Void, OnPermissionRequestEvent, Callback_OnScreenCaptureRequestEvent_Void, OnScreenCaptureRequestEvent, Callback_OnContextMenuShowEvent_Boolean, OnContextMenuShowEvent, Callback_OnSearchResultReceiveEvent_Void, Callback_OnScrollEvent_Void, Callback_OnSslErrorEventReceiveEvent_Void, OnSslErrorEventReceiveEvent, SslErrorEvent, Callback_OnClientAuthenticationEvent_Void, OnClientAuthenticationEvent, Callback_OnWindowNewEvent_Void, OnWindowNewEvent, Callback_OnTouchIconUrlReceivedEvent_Void, OnTouchIconUrlReceivedEvent, Callback_OnFaviconReceivedEvent_Void, OnFaviconReceivedEvent, Callback_OnPageVisibleEvent_Void, OnPageVisibleEvent, Callback_OnDataResubmittedEvent_Void, Callback_OnAudioStateChangedEvent_Void, Callback_OnFirstContentfulPaintEvent_Void, FirstMeaningfulPaint, LargestContentfulPaint, Callback_OnLoadInterceptEvent_Boolean, OnLoadInterceptEvent, Callback_OnOverScrollEvent_Void, LoadCommittedDetails, IntelligentTrackingPreventionDetails, ScriptItem, WebLayoutMode, NestedScrollOptionsExt, Callback_NativeEmbedDataInfo_Void, NativeEmbedDataInfo, NativeEmbedVisibilityInfo, Callback_NativeEmbedTouchInfo_Void, NativeEmbedTouchInfo, RenderProcessNotRespondingData, ExpandedMenuItemOptions, WebKeyboardCallbackInfo, AdsBlockedDetails, WebKeyboardAvoidMode, EmbedOptions, WebElementType, WebResponseType, SelectionMenuOptionsExt, WebCaptureMode, WebContextMenuParam, WebContextMenuParamInternal, WebContextMenuResult, WebContextMenuResultInternal, WebController, WebControllerInternal, Literal_String_script_Callback_String_Void_callback_, Literal_String_baseUrl_data_encoding_historyUrl_mimeType, Literal_Union_String_Resource_url_Array_Header_headers, Header, Literal_Object_object__String_name_Array_String_methodList, WebCookie, WebCookieInternal, WebKeyboardController, WebKeyboardControllerInternal, WebNavigationType, WebResourceError, WebResourceErrorInternal, Callback_Literal_String_plainText_Void, Literal_String_plainText, WebKeyboardOptions, WebOptionsSerializer, NativeEmbedInfo } from "./../web"
 import { OnAlphabetIndexerPopupSelectCallback, OnAlphabetIndexerRequestPopupDataCallback, OnAlphabetIndexerSelectCallback, AlphabetIndexerAttribute, Callback_Number_Void, IndexerAlign, Callback_Opt_Number_Void, AlphabetIndexerOptions } from "./../alphabetIndexer"
-import { OnCheckboxChangeCallback, Callback_Opt_Boolean_Void, CheckboxOptions } from "./../checkbox"
+import { OnCheckboxChangeCallback, Callback_Opt_Boolean_Void, CheckboxOptions, CheckBoxConfiguration } from "./../checkbox"
 import { OnCheckboxGroupChangeCallback, SelectStatus, CheckboxGroupResult, CheckboxGroupOptions } from "./../checkboxgroup"
 import { OnContentScrollCallback, OnPasteCallback, OnSubmitCallback, OnTextSelectionChangeCallback, ContentType, EnterKeyType, InputType, SubmitEvent, SubmitEventInternal, TextInputAttribute, TextInputStyle, PasswordIcon, UnderlineColor, TextInputController, TextInputControllerInternal, TextInputOptions } from "./../textInput"
 import { OnFoldStatusChangeCallback, OnHoverStatusChangeCallback, OnFoldStatusChangeInfo, HoverEventParam, FolderStackOptions } from "./../folderStack"
 import { OnHoverCallback } from "./../sdk-stubs"
 import { OnLinearIndicatorChangeCallback, LinearIndicatorController, LinearIndicatorControllerInternal, LinearIndicatorStartOptions, LinearIndicatorStyle } from "./../linearindicator"
 import { OnNativeLoadCallback, XComponentController, XComponentControllerInternal, Literal_Number_surfaceHeight_surfaceWidth, SurfaceRect, SurfaceRotationOptions, NativeXComponentParameters, XComponentOptions } from "./../xcomponent"
-import { OnRadioChangeCallback, RadioIndicatorType, RadioOptions, RadioStyle } from "./../radio"
-import { OnRatingChangeCallback, RatingOptions, StarStyleOptions } from "./../rating"
+import { OnRadioChangeCallback, RadioIndicatorType, RadioOptions, RadioStyle, RadioConfiguration } from "./../radio"
+import { OnRatingChangeCallback, RatingConfiguration, RatingOptions, StarStyleOptions } from "./../rating"
 import { OnScrollEdgeCallback, OnScrollFrameBeginCallback, ScrollOnScrollCallback, ScrollOnWillScrollCallback, Scroller, ScrollerInternal, ScrollAlign, OffsetResult, OnScrollFrameBeginHandlerResult, ScrollAttribute, ScrollDirection, ScrollSnapOptions, OffsetOptions, ScrollOptions, ScrollEdgeOptions, ScrollPageOptions, Literal_Boolean_next_Axis_direction, ScrollToIndexOptions, ScrollAnimationOptions } from "./../scroll"
 import { OnScrollVisibleContentChangeCallback, ChainEdgeEffect, ScrollState, ListAttribute, ListItemAlign, ListDividerOptions, ChainAnimationOptions, StickyStyle, ScrollSnapAlign, Callback_Number_Number_Number_Void, VisibleListContentInfo, Callback_Number_Boolean, Callback_Number_Number_Boolean, ListItemGroupArea, ListScroller, ListScrollerInternal, CloseSwipeActionOptions, ListOptions } from "./../list"
 import { OnSelectCallback, ArrowPosition, AvoidanceMode, MenuAlignType, SelectAttribute, Callback_Number_String_Void, MenuOutlineOptions, Callback_Opt_Union_Number_Resource_Void, Callback_Opt_ResourceStr_Void, MenuItemConfiguration, MenuItemConfigurationInternal, SelectOption } from "./../select"
@@ -61,7 +62,9 @@ import { PageTransitionCallback, RouteType, SlideEffect } from "./../pageTransit
 import { PasteButtonCallback, PasteButtonOnClickResult, PasteDescription, PasteIconStyle, PasteButtonOptions } from "./../pasteButton"
 import { PluginErrorCallback, PluginErrorData, PluginComponentTemplate, PluginComponentOptions } from "./../pluginComponent"
 import { IntentionCode } from '@ohos.multimodalInput.intentionCode'
-import { ReceiveCallback, BaseShape, BaseShapeInternal, CircleShape, CircleShapeInternal, ShapeSize, CommonShape, CommonShapeInternal, WebviewController, WebviewControllerInternal, Summary, EllipseShape, EllipseShapeInternal, ImageModifier, RectWidthStyle, RectHeightStyle, SymbolGlyphModifier, PathShape, PathShapeInternal, PathShapeOptions, PerfMonitorActionType, PerfMonitorSourceType, RectShape, RectShapeInternal, RectShapeOptions, RoundRectShapeOptions, ResolutionQuality, TextModifier, IndicatorStyle, WebHeader, WindowStatusType, AsyncCallback_image_PixelMap_Void, SnapshotOptions, LabelStyle } from "./../arkui-external"
+import { CircleShape, EllipseShape, PathShape, RectShape } from "@ohos/arkui/shape"
+import { ReceiveCallback, BaseShape, BaseShapeInternal, ShapeSize, CommonShape, CommonShapeInternal, WebviewController, WebviewControllerInternal, Summary, ImageModifier, RectWidthStyle, RectHeightStyle, PathShapeOptions, PerfMonitorActionType, PerfMonitorSourceType, RectShapeOptions, RoundRectShapeOptions, ResolutionQuality, TextModifier, IndicatorStyle, WebHeader, WindowStatusType, AsyncCallback_image_PixelMap_Void, SnapshotOptions, LabelStyle } from "./../arkui-external"
+import { SymbolGlyphModifier } from "../../SymbolGlyphModifier"
 import { SymbolEffect, SymbolEffectInternal, ReplaceSymbolEffect, ReplaceSymbolEffectInternal, ScaleSymbolEffect, ScaleSymbolEffectInternal } from "../symbolglyph"
 import { FontOptions, FontInfo, UIFontAdjustInfo, UIFontAliasInfo, UIFontFallbackInfo, UIFontConfig, UIFontGenericInfo, UIFontFallbackGroupInfo } from "@ohos/font"
 import { MeasureOptions } from "@ohos/measure"
@@ -78,11 +81,14 @@ import { SelectCallback } from "./../checkboxops"
 import { SelectSelectedCallback, SelectValueCallback } from "./../selectops"
 import { ValueCallback } from "./../sliderops"
 import { ShowSideBarCallback, SideBarWidthCallback } from "./../sidebarcontainerops"
-import { SliderTriggerChangeCallback, SliderAttribute, Callback_Number_SliderChangeMode_Void, SliderChangeMode, SliderBlockStyle, SliderInteraction, SlideRange, SliderBlockType, SliderStyle, SliderOptions } from "./../slider"
+import { SliderTriggerChangeCallback, SliderAttribute, Callback_Number_SliderChangeMode_Void, SliderChangeMode, SliderBlockStyle, SliderInteraction, SlideRange, SliderBlockType, SliderStyle, SliderOptions, SliderConfiguration } from "./../slider"
 import { StepperIndexCallback } from "./../stepperops"
 import { StyledStringMarshallCallback, StyledStringUnmarshallCallback, CustomSpan, CustomSpanInternal, CustomSpanMeasureInfo, CustomSpanMetrics, CustomSpanDrawInfo, GestureStyle, GestureStyleInternal, GestureStyleInterface, StyledString, StyledStringInternal, MutableStyledString, MutableStyledStringInternal, ImageAttachment, ImageAttachmentInternal, StyleOptions, StyledStringKey, SpanStyle, UserDataSpan, DecorationStyleInterface, UrlStyle, UrlStyleInternal, BaselineOffsetStyle, BaselineOffsetStyleInternal, LetterSpacingStyle, LetterSpacingStyleInternal, LineHeightStyle, LineHeightStyleInternal, TextShadowStyle, TextShadowStyleInternal, DecorationStyle, DecorationStyleInternal, ImageAttachmentLayoutStyle, ParagraphStyle, ParagraphStyleInternal, ParagraphStyleInterface, TextStyle, TextStyle_styled_stringInternal, TextStyleInterface, BackgroundColorStyle, BackgroundColorStyleInternal, ColorFilterType, ImageAttachmentInterface, AttachmentType, ResourceImageAttachmentOptions, StyledStringValue } from "./../styledString"
 import { TextAreaSubmitCallback, TextAreaAttribute, Callback_EnterKeyType_Void, Callback_String_PasteEvent_Void, TextAreaType, Callback_ResourceStr_Void, TextAreaController, TextAreaControllerInternal, TextAreaOptions } from "./../textArea"
 import { TextFieldValueCallback } from "./../textfieldops"
+import { TextPickerSelectedCallback } from "./../textpickerselectedops"
+import { TextPickerValueCallback } from "./../textpickervalueops"
+import { TimePickerSelectedCallback } from "./../timepickerselectedops"
 import { VoidCallback, ResourceColor, Font, Position, Length, SizeOptions, Offset, ColorFilter, ColorFilterInternal, ResourceStr, Dimension, PX, VP, FP, LPX, Percentage, LengthConstrain, DividerStyleOptions, ConstraintSizeOptions, Area, AccessibilityOptions, Bias, BorderRadiuses, ChainWeightOptions, DirectionalEdgesT, EdgeOutlineStyles, EdgeOutlineWidths, EdgeWidths, OutlineRadiuses, Padding, EdgeColors, LocalizedBorderRadiuses, LocalizedEdgeColors, LocalizedEdges, LocalizedEdgeWidths, LocalizedPadding, LocalizedPosition, MarkStyle, BorderOptions, OutlineOptions, EdgeStyles, Edges } from "./../units"
 import { WithThemeInterface, WithThemeAttribute, WithThemeOptions } from "./../withTheme"
 import { AccessibilityHoverType, Alignment, Color, AnimationStatus, AppRotation, ArrowPointPosition, Axis, AxisAction, AxisModel, BarState, BorderStyle, CheckBoxShape, ClickEffectLevel, ColoringStrategy, CopyOptions, CrownAction, CrownSensitivity, Curve, DialogButtonStyle, Direction, DividerMode, Edge, EdgeEffect, EllipsisMode, EmbeddedType, FillMode, FlexAlign, FlexDirection, FlexWrap, FocusDrawLevel, FoldStatus, FontStyle, FontWeight, FunctionKey, GradientDirection, HeightBreakpoint, HitTestMode, HorizontalAlign, HoverEffect, IlluminatedType, ImageFit, ImageRepeat, ImageSize, ImageSpanAlignment, InteractionHand, ItemAlign, KeySource, KeyType, LineBreakStrategy, LineCapStyle, LineJoinStyle, MarqueeUpdateStrategy, ModifierKey, MouseAction, MouseButton, NestedScrollMode, ObscuredReasons, OptionWidthMode, PageFlipMode, PixelRoundCalcPolicy, PixelRoundMode, Placement, PlayMode, RelateType, RenderFit, ResponseType, ScrollSource, TextAlign, SharedTransitionEffectType, TextOverflow, TextContentStyle, TextHeightAdaptivePolicy, WordBreak, TextCase, TextSelectableMode, TextDecorationStyle, TextDecorationType, TitleHeight, TouchType, TransitionType, VerticalAlign, Visibility, Week, WidthBreakpoint, XComponentType } from "./../enums"
@@ -95,7 +101,7 @@ import { DrawingCanvas, DrawingCanvasInternal, RectType } from "./../arkui-drawi
 import { BreakpointsReference, GridRowDirection, Callback_String_Void, BreakPoints, GridRowColumnOption, GridRowSizeOption, GutterOption, GridRowOptions } from "./../gridRow"
 import { CalendarAlign, CalendarPickerAttribute, Callback_Date_Void, CalendarOptions, CalendarDialogOptions } from "./../calendarPicker"
 import { CalendarController, CalendarControllerInternal, Literal_Number_day_month_year, Callback_CalendarRequestedData_Void, CalendarRequestedData, Callback_CalendarSelectedDate_Void, CalendarSelectedDate, CalendarDay, MonthData, CurrentDayStyle, NonCurrentDayStyle, TodayStyle, WeekStyle, WorkStateStyle } from "./../calendar"
-import { CanvasGradient, CanvasGradientInternal, CanvasPath, CanvasPathInternal, CanvasPattern, CanvasPatternInternal, OffscreenCanvas, OffscreenCanvasInternal, ImageBitmap, ImageBitmapInternal, RenderingContextSettings, RenderingContextSettingsInternal, OffscreenCanvasRenderingContext2D, OffscreenCanvasRenderingContext2DInternal, Path2D, Path2DInternal, TextMetrics, DrawingRenderingContext, DrawingRenderingContextInternal, ImageData, ImageDataInternal, CanvasRenderer, CanvasRendererInternal, ImageSmoothingQuality, CanvasLineCap, CanvasLineJoin, CanvasDirection, CanvasTextAlign, CanvasTextBaseline, CanvasFillRule, CanvasRenderingContext2D, CanvasRenderingContext2DInternal } from "./../canvas"
+import { CanvasGradient, CanvasGradientInternal, CanvasPath, CanvasPathInternal, CanvasPattern, CanvasPatternInternal, OffscreenCanvas, OffscreenCanvasInternal, ImageBitmap, ImageBitmapInternal, RenderingContextSettings, RenderingContextSettingsInternal, OffscreenCanvasRenderingContext2D, OffscreenCanvasRenderingContext2DInternal, Path2D, Path2DInternal, TextMetrics, DrawingRenderingContext, DrawingRenderingContextInternal, CanvasRenderer, CanvasRendererInternal, ImageSmoothingQuality, CanvasLineCap, CanvasLineJoin, CanvasDirection, CanvasTextAlign, CanvasTextBaseline, CanvasFillRule, CanvasRenderingContext2D, CanvasRenderingContext2DInternal } from "./../canvas"
 import { Matrix2D, Matrix2DInternal } from "./../matrix2d"
 import { ColorMode, LayoutDirection } from "./../stateManagement"
 import { Component3DAttribute, ModelType, SceneOptions } from "./../component3d"
@@ -104,7 +110,7 @@ import { DrawContext, Rect, LengthMetricsUnit, LengthUnit, ColorMetrics, ColorMe
 import { DataOperationType } from "./../lazyForEach"
 import { DataPanelType, LinearGradient, LinearGradientInternal, ColorStop, DataPanelOptions, DataPanelShadowOptions } from "./../dataPanel"
 import { DatePickerMode, Callback_DatePickerResult_Void, DatePickerResult, DatePickerOptions, LunarSwitchStyle, DatePickerDialogOptions } from "./../datePicker"
-import { DialogAlignment, DialogButtonDirection, TextStyle_alert_dialog, AlertDialogButtonBaseOptions, AlertDialogButtonOptions, AlertDialogParamWithButtons, AlertDialogParam, AlertDialogParamWithConfirm, AlertDialogParamWithOptions } from "./../alertDialog"
+import { DialogAlignment, DialogButtonDirection, AlertDialogTextStyleOptions, AlertDialogButtonBaseOptions, AlertDialogButtonOptions, AlertDialogParamWithButtons, AlertDialogParam, AlertDialogParamWithConfirm, AlertDialogParamWithOptions } from "./../alertDialog"
 import { DistributionType, DisturbanceFieldShape, ParticleEmitterShape, ParticleType, ParticleUpdater } from "./../particle"
 import { DpiFollowStrategy, UIExtensionProxy, UIExtensionProxyInternal, Callback_UIExtensionProxy_Void, WindowModeFollowStrategy, Callback_Literal_Number_code__want_Void, Literal_Number_code__want, Callback_Map_String_Object_Void, UIExtensionOptions } from "./../uiExtensionComponent"
 import { EditMode, ListItemStyle, Sticky, SwipeActionState, SwipeEdgeEffect, Callback_SwipeActionState_Void, ListItemOptions, SwipeActionItem, SwipeActionOptions } from "./../listItem"
@@ -141,18 +147,18 @@ import { RootSceneSession } from "./../rootScene"
 import { RRect, WindowAnimationTarget } from "./../remoteWindow"
 import { ScrollBarDirection, ScrollBarOptions } from "./../scrollBar"
 import { SecurityComponentLayoutDirection } from "./../securityComponent"
-import { ContentModifier, Callback_WrappedBuilder_Args_Void, CommonConfiguration, WrappedBuilder } from "./../arkui-wrapper-builder"
+import { Callback_WrappedBuilder_Args_Void, CommonConfiguration, WrappedBuilder } from "./../arkui-wrapper-builder"
 import { ShapeAttribute, ViewportRect } from "./../shape"
 import { SideBarContainerType, SideBarPosition, ButtonIconOptions, ButtonStyle } from "./../sidebar"
 import { SizeType, GridContainerOptions } from "./../gridContainer"
 import { SubMenuExpandingMode } from "./../menu"
 import { TextClockController, TextClockControllerInternal, TextClockOptions } from "./../textClock"
 import { TextTimerController, TextTimerControllerInternal, TextTimerOptions } from "./../textTimer"
-import { ToggleType, ToggleOptions, SwitchStyle } from "./../toggle"
+import { ToggleType, ToggleOptions, SwitchStyle, ToggleConfiguration } from "./../toggle"
 import { UniformDataType } from "./../arkui-uniformtypedescriptor"
 import { WindowSceneAttribute } from "./../windowScene"
 import { Callback_Array_String_Void, Callback_Array_TextMenuItem_Void, Callback_Buffer_Void, Callback_ComputedBarAttribute_Void, Callback_CustomBuilder_Void, Callback_GestureJudgeResult_Void, Callback_GestureRecognizer_Void, Callback_HitTestMode_Void, Callback_Literal_Number_offsetRemain_Void, Callback_OffsetResult_Void, Callback_OnScrollFrameBeginHandlerResult_Void, Callback_Opt_Array_NavDestinationTransition_Void, Callback_Opt_Array_String_Void, Callback_Opt_NavigationAnimatedTransition_Void, Callback_Opt_StyledString_Opt_Array_String_Void, Callback_Opt_TabContentAnimatedTransition_Void, Callback_Pointer_Void, Callback_StyledStringMarshallingValue_Void, Callback_TouchResult_Void, Callback_Tuple_Number_Number_Number_Number_Void, Callback_Tuple_Number_Number_Void, Callback_Union_CustomBuilder_DragItemInfo_Void, Callback_WebKeyboardOptions_Void, Callback_WebResourceResponse_Void, Callback_WithThemeAttribute_Void } from "./../generatorSynthetic"
-import { Callback_DismissDialogAction_Void, DismissDialogAction, ActionSheetButtonOptions, ActionSheetOffset, SheetInfo, ActionSheetOptions } from "./../actionSheet"
+import { Callback_DismissDialogAction_Void, DismissDialogAction, ActionSheetButtonOptions, ActionSheetOffset, SheetInfo, ActionSheetOptions, DismissDialogActionInternal } from "./../actionSheet"
 import { Want } from "./../ohos.app.ability"
 import { Callback_TerminationInfo_Void, TerminationInfo } from "./../embeddedComponent"
 import { BusinessError } from "#external"
@@ -161,7 +167,7 @@ import { ASTCResource } from "./../mediaCachedImage"
 import { CircleOptions } from "./../circle"
 import { ColumnOptions, ColumnOptionsV2 } from "./../column"
 import { ColumnSplitDividerStyle } from "./../columnSplit"
-import { DateTimeOptions } from "./../arkui-intl"
+import { DateTimeOptions } from "@ohos/intl"
 import { EllipseOptions } from "./../ellipse"
 import { FormLinkOptions } from "./../formLink"
 import { GaugeOptions, GaugeIndicatorOptions, GaugeShadowOptions } from "./../gauge"
@@ -175,7 +181,6 @@ import { DrawCallback, RenderNode, RenderNodeInternal } from "../../RenderNode"
 import { RoundedRectOptions, RectOptions, RadiusItem } from "./../rect"
 import { RowOptions, RowOptionsV2 } from "./../row"
 import { StackOptions } from "./../stack"
-import { TransformationMatrix } from "./../arkui-common"
 import { FlexSpaceOptions, FlexOptions } from "./../flex"
 import { ImageFrameInfo } from "./../imageAnimator"
 import { MenuItemGroupOptions } from "./../menuItemGroup"
@@ -259,8 +264,8 @@ export class Deserializer extends DeserializerBase {
     }
     readCircleShape(): CircleShape {
         let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return CircleShapeInternal.fromPtr(ptr)
+        let value = valueDeserializer.readInt64() as Object as CircleShape
+        return value
     }
     readClientAuthenticationHandler(): ClientAuthenticationHandler {
         let valueDeserializer : Deserializer = this
@@ -327,8 +332,8 @@ export class Deserializer extends DeserializerBase {
     }
     readEllipseShape(): EllipseShape {
         let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return EllipseShapeInternal.fromPtr(ptr)
+        let value = valueDeserializer.readInt64() as Object as EllipseShape
+        return value
     }
     readEventResult(): EventResult {
         let valueDeserializer : Deserializer = this
@@ -423,8 +428,7 @@ export class Deserializer extends DeserializerBase {
     }
     readICurve(): ICurve {
         let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return ICurveInternal.fromPtr(ptr)
+        return (valueDeserializer.readInt64() as Object as ICurve)
     }
     readImageAnalyzerController(): ImageAnalyzerController {
         let valueDeserializer : Deserializer = this
@@ -496,8 +500,8 @@ export class Deserializer extends DeserializerBase {
     }
     readMatrix4Transit(): Matrix4Transit {
         let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return Matrix4TransitInternal.fromPtr(ptr)
+        let value : Matrix4Transit = valueDeserializer.readInt64() as Object as Matrix4Transit
+        return value
     }
     readNativeMediaPlayerConfig(): NativeMediaPlayerConfig {
         let valueDeserializer : Deserializer = this
@@ -657,8 +661,8 @@ export class Deserializer extends DeserializerBase {
     }
     readPathShape(): PathShape {
         let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return PathShapeInternal.fromPtr(ptr)
+        let value = valueDeserializer.readInt64() as Object as PathShape
+        return value
     }
     readPatternLockController(): PatternLockController {
         let valueDeserializer : Deserializer = this
@@ -750,8 +754,8 @@ export class Deserializer extends DeserializerBase {
     }
     readRectShape(): RectShape {
         let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return RectShapeInternal.fromPtr(ptr)
+        let value = valueDeserializer.readInt64() as Object as RectShape
+        return value
     }
     readRichEditorAttribute(): RichEditorAttribute {
         throw new Error("Interface with functions is not supported")
@@ -4244,6 +4248,20 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.release();
     return (_continuationValue as KPointer); }
     }
+    readDatePickerSelectedCallback(isSync: boolean = false): DatePickerSelectedCallback {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (selected: Date):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeInt64((selected.getTime() as int64));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(459949440, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(459949440, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
     readDrawCallback(isSync: boolean = false): DrawCallback {
         const _resource: CallbackResource = this.readCallbackResource()
         const _call: KPointer = this.readPointer()
@@ -6105,6 +6123,64 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.release();
     return; }
     }
+    readTextPickerSelectedCallback(isSync: boolean = false): TextPickerSelectedCallback {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (selected: number | Array<number>):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    let selected_type : int32 = RuntimeType.UNDEFINED;
+    selected_type = runtimeType(selected);
+    if (RuntimeType.NUMBER == selected_type) {
+        _argsSerializer.writeInt8(0 as int32);
+        const selected_0  = selected as number;
+        _argsSerializer.writeNumber(selected_0);
+    }
+    else if (RuntimeType.OBJECT == selected_type) {
+        _argsSerializer.writeInt8(1 as int32);
+        const selected_1  = selected as Array<number>;
+        _argsSerializer.writeInt32(selected_1.length as int32);
+        for (let i = 0; i < selected_1.length; i++) {
+            const selected_1_element : number = selected_1[i];
+            _argsSerializer.writeNumber(selected_1_element);
+        }
+    }
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1206573193, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1206573193, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readTextPickerValueCallback(isSync: boolean = false): TextPickerValueCallback {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (value: string | Array<string>):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    let value_type : int32 = RuntimeType.UNDEFINED;
+    value_type = runtimeType(value);
+    if (RuntimeType.STRING == value_type) {
+        _argsSerializer.writeInt8(0 as int32);
+        const value_0  = value as string;
+        _argsSerializer.writeString(value_0);
+    }
+    else if (RuntimeType.OBJECT == value_type) {
+        _argsSerializer.writeInt8(1 as int32);
+        const value_1  = value as Array<string>;
+        _argsSerializer.writeInt32(value_1.length as int32);
+        for (let i = 0; i < value_1.length; i++) {
+            const value_1_element : string = value_1[i];
+            _argsSerializer.writeString(value_1_element);
+        }
+    }
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1499304299, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1499304299, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
     readTextTimerAttribute_onTimer_event_type(isSync: boolean = false): ((utc: int64,elapsedTime: int64) => void) {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
@@ -6117,6 +6193,20 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writeInt64(utc);
     _argsSerializer.writeInt64(elapsedTime);
     (isSync) ? (InteropNativeModule._CallCallbackSync(2057659801, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(2057659801, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readTimePickerSelectedCallback(isSync: boolean = false): TimePickerSelectedCallback {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (selected: Date):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeInt64((selected.getTime() as int64));
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1873725025, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1873725025, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -6885,7 +6975,7 @@ export class Deserializer extends DeserializerBase {
             stack_buf = (valueDeserializer.readString() as string)
         }
         const stack_result : string | undefined = stack_buf
-        const code_result : number = (valueDeserializer.readNumber() as number)
+        const code_result : int = (valueDeserializer.readInt32().toInt())
         let value : BusinessError = ({name: name_result, message: message_result, stack: stack_result, code: code_result} as BusinessError)
         return value
     }
@@ -7241,9 +7331,7 @@ export class Deserializer extends DeserializerBase {
     }
     readCommonConfiguration(): CommonConfiguration {
         let valueDeserializer : Deserializer = this
-        const enabled_result : boolean = valueDeserializer.readBoolean()
-        const contentModifier_result : ContentModifier = (valueDeserializer.readObject() as ContentModifier)
-        let value : CommonConfiguration = ({enabled: enabled_result, contentModifier: contentModifier_result} as CommonConfiguration)
+        let value : CommonConfiguration = {};
         return value
     }
     readCommonModifier(): CommonModifier {
@@ -7643,10 +7731,8 @@ export class Deserializer extends DeserializerBase {
     }
     readDismissDialogAction(): DismissDialogAction {
         let valueDeserializer : Deserializer = this
-        const dismiss_result : (() => void) = valueDeserializer.readCallback_Void()
-        const reason_result : DismissReason = TypeChecker.DismissReason_FromNumeric(valueDeserializer.readInt32())
-        let value : DismissDialogAction = ({dismiss: dismiss_result, reason: reason_result} as DismissDialogAction)
-        return value
+        let ptr: KPointer = valueDeserializer.readPointer()
+        return DismissDialogActionInternal.fromPtr(ptr)
     }
     readDismissPopupAction(): DismissPopupAction {
         let valueDeserializer : Deserializer = this
@@ -8723,11 +8809,6 @@ export class Deserializer extends DeserializerBase {
         let ptr : KPointer = valueDeserializer.readPointer()
         return ImageBitmapInternal.fromPtr(ptr)
     }
-    readImageData(): ImageData {
-        let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return ImageDataInternal.fromPtr(ptr)
-    }
     readImageError(): ImageError {
         let valueDeserializer : Deserializer = this
         const componentWidth_result : number = (valueDeserializer.readNumber() as number)
@@ -8872,11 +8953,10 @@ export class Deserializer extends DeserializerBase {
     }
     readLeadingMarginPlaceholder(): LeadingMarginPlaceholder {
         let valueDeserializer : Deserializer = this
-        const pixelMap_result : PixelMap = (valueDeserializer.readPixelMap() as PixelMap)
         const size_buf_value0 : Dimension = (valueDeserializer.readLength() as Dimension)
         const size_buf_value1 : Dimension = (valueDeserializer.readLength() as Dimension)
         const size_result : [ Dimension, Dimension ] = ([size_buf_value0, size_buf_value1] as [ Dimension, Dimension ])
-        let value : LeadingMarginPlaceholder = ({pixelMap: pixelMap_result, size: size_result} as LeadingMarginPlaceholder)
+        let value : LeadingMarginPlaceholder = ({size: size_result} as LeadingMarginPlaceholder)
         return value
     }
     readLengthMetrics(): LengthMetrics {
@@ -10330,41 +10410,7 @@ export class Deserializer extends DeserializerBase {
         return value
     }
     readPolyToPolyOptions(): PolyToPolyOptions {
-        let valueDeserializer : Deserializer = this
-        const src_buf_length : int32 = valueDeserializer.readInt32()
-        let src_buf : Array<Point> = new Array<Point>(src_buf_length)
-        for (let src_buf_i = 0; src_buf_i < src_buf_length; src_buf_i++) {
-            src_buf[src_buf_i] = valueDeserializer.readPoint()
-        }
-        const src_result : Array<Point> = src_buf
-        const srcIndex_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let srcIndex_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (srcIndex_buf_runtimeType))
-        {
-            srcIndex_buf = (valueDeserializer.readNumber() as number)
-        }
-        const srcIndex_result : number | undefined = srcIndex_buf
-        const dst_buf_length : int32 = valueDeserializer.readInt32()
-        let dst_buf : Array<Point> = new Array<Point>(dst_buf_length)
-        for (let dst_buf_i = 0; dst_buf_i < dst_buf_length; dst_buf_i++) {
-            dst_buf[dst_buf_i] = valueDeserializer.readPoint()
-        }
-        const dst_result : Array<Point> = dst_buf
-        const dstIndex_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let dstIndex_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (dstIndex_buf_runtimeType))
-        {
-            dstIndex_buf = (valueDeserializer.readNumber() as number)
-        }
-        const dstIndex_result : number | undefined = dstIndex_buf
-        const pointCount_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let pointCount_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (pointCount_buf_runtimeType))
-        {
-            pointCount_buf = (valueDeserializer.readNumber() as number)
-        }
-        const pointCount_result : number | undefined = pointCount_buf
-        let value : PolyToPolyOptions = ({src: src_result, srcIndex: srcIndex_result, dst: dst_result, dstIndex: dstIndex_result, pointCount: pointCount_result} as PolyToPolyOptions)
+        let value : PolyToPolyOptions = ({} as PolyToPolyOptions)
         return value
     }
     readPopInfo(): PopInfo {
@@ -10681,13 +10727,13 @@ export class Deserializer extends DeserializerBase {
         }
         const params_result : Array<Object | undefined> | undefined = params_buf
         const type_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let type_buf : number | undefined
+        let type_buf : int32 | undefined
         if ((RuntimeType.UNDEFINED) != (type_buf_runtimeType))
         {
-            type_buf = (valueDeserializer.readNumber() as number)
+            type_buf = (valueDeserializer.readNumber()! as int32)
         }
-        const type_result : number | undefined = type_buf
-        let value : Resource = ({bundleName: bundleName_result, moduleName: moduleName_result, id: id_result, params: params_result, type: type_result} as Resource)
+        const type_result : int32 | undefined = type_buf
+        let value : Resource = ({bundleName: bundleName_result, moduleName: moduleName_result, id: id_result as int32, params: params_result, type: type_result} as Resource)
         return value
     }
     readRichEditorDeleteValue(): RichEditorDeleteValue {
@@ -11747,6 +11793,139 @@ export class Deserializer extends DeserializerBase {
         let value : SurfaceRotationOptions = ({lock: lock_result} as SurfaceRotationOptions)
         return value
     }
+    readRadioConfiguration(): RadioConfiguration {
+        let valueDeserializer : Deserializer = this
+        const enabled_result : boolean = valueDeserializer.readBoolean()
+        const value_result : string = (valueDeserializer.readString() as string)
+        const checked_result : boolean = valueDeserializer.readBoolean()
+        const triggerChange_buf_resource : CallbackResource = valueDeserializer.readCallbackResource()
+        const triggerChange_buf_call : KPointer = valueDeserializer.readPointer()
+        const triggerChange_buf_callSync : KPointer = valueDeserializer.readPointer()
+        const triggerChange_result : ((value0: boolean) => void) = (value0: boolean):void => { 
+            const triggerChange_buf_argsSerializer : Serializer = Serializer.hold();
+            triggerChange_buf_argsSerializer.writeInt32(triggerChange_buf_resource.resourceId);
+            triggerChange_buf_argsSerializer.writePointer(triggerChange_buf_call);
+            triggerChange_buf_argsSerializer.writePointer(triggerChange_buf_callSync);
+            triggerChange_buf_argsSerializer.writeBoolean(value0);
+            InteropNativeModule._CallCallback(313269291, triggerChange_buf_argsSerializer.asBuffer(), triggerChange_buf_argsSerializer.length());
+            triggerChange_buf_argsSerializer.release();
+            return;
+        }
+        let value : RadioConfiguration = ({enabled: enabled_result, value: value_result, checked: checked_result, triggerChange: triggerChange_result} as RadioConfiguration)
+        return value
+    }
+    readButtonConfiguration(): ButtonConfiguration {
+        let valueDeserializer : Deserializer = this
+        const enabled_result: boolean = valueDeserializer.readBoolean()
+        const label_result: string = (valueDeserializer.readString() as string)
+        const pressed_result: boolean = valueDeserializer.readBoolean()
+        const triggerClick_buf_resource: CallbackResource = valueDeserializer.readCallbackResource()
+        const triggerClick_buf_call: KPointer = valueDeserializer.readPointer()
+        const triggerClick_buf_callSync: KPointer = valueDeserializer.readPointer()
+        const triggerClick_result: ButtonTriggerClickCallback = (xPos: number, yPos: number): void => {
+            const triggerClick_buf_argsSerializer: Serializer = Serializer.hold();
+            triggerClick_buf_argsSerializer.writeInt32(triggerClick_buf_resource.resourceId);
+            triggerClick_buf_argsSerializer.writePointer(triggerClick_buf_call);
+            triggerClick_buf_argsSerializer.writePointer(triggerClick_buf_callSync);
+            triggerClick_buf_argsSerializer.writeNumber(xPos);
+            triggerClick_buf_argsSerializer.writeNumber(yPos);
+            InteropNativeModule._CallCallback(-1964292933, triggerClick_buf_argsSerializer.asBuffer(), triggerClick_buf_argsSerializer.length());
+            triggerClick_buf_argsSerializer.release();
+            return;
+        }
+        let value: ButtonConfiguration = ({ enabled: enabled_result, label: label_result, pressed: pressed_result, triggerClick: triggerClick_result } as ButtonConfiguration)
+        return value
+    }
+    readCheckBoxConfiguration(): CheckBoxConfiguration {
+        let valueDeserializer : Deserializer = this
+        const enabled_result: boolean = valueDeserializer.readBoolean()
+        const name_result: string = (valueDeserializer.readString() as string)
+        const selected_result: boolean = valueDeserializer.readBoolean()
+        const triggerChange_buf_resource: CallbackResource = valueDeserializer.readCallbackResource()
+        const triggerChange_buf_call: KPointer = valueDeserializer.readPointer()
+        const triggerChange_buf_callSync: KPointer = valueDeserializer.readPointer()
+        const triggerChange_result: ((value0: boolean) => void) = (value0: boolean): void => {
+            const triggerChange_buf_argsSerializer: Serializer = Serializer.hold();
+            triggerChange_buf_argsSerializer.writeInt32(triggerChange_buf_resource.resourceId);
+            triggerChange_buf_argsSerializer.writePointer(triggerChange_buf_call);
+            triggerChange_buf_argsSerializer.writePointer(triggerChange_buf_callSync);
+            triggerChange_buf_argsSerializer.writeBoolean(value0);
+            InteropNativeModule._CallCallback(313269291, triggerChange_buf_argsSerializer.asBuffer(), triggerChange_buf_argsSerializer.length());
+            triggerChange_buf_argsSerializer.release();
+            return;
+        }
+        let value: CheckBoxConfiguration = ({ enabled: enabled_result, name: name_result, selected: selected_result, triggerChange: triggerChange_result } as CheckBoxConfiguration)
+        return value
+    }
+
+    readToggleConfiguration(): ToggleConfiguration {
+        let valueDeserializer : Deserializer = this
+        const enabled_result: boolean = valueDeserializer.readBoolean()
+        const isOn_result: boolean = valueDeserializer.readBoolean()
+        const triggerChange_buf_resource: CallbackResource = valueDeserializer.readCallbackResource()
+        const triggerChange_buf_call: KPointer = valueDeserializer.readPointer()
+        const triggerChange_buf_callSync: KPointer = valueDeserializer.readPointer()
+        const triggerChange_result: ((value0: boolean) => void) = (value0: boolean): void => {
+            const triggerChange_buf_argsSerializer: Serializer = Serializer.hold();
+            triggerChange_buf_argsSerializer.writeInt32(triggerChange_buf_resource.resourceId);
+            triggerChange_buf_argsSerializer.writePointer(triggerChange_buf_call);
+            triggerChange_buf_argsSerializer.writePointer(triggerChange_buf_callSync);
+            triggerChange_buf_argsSerializer.writeBoolean(value0);
+            InteropNativeModule._CallCallback(313269291, triggerChange_buf_argsSerializer.asBuffer(), triggerChange_buf_argsSerializer.length());
+            triggerChange_buf_argsSerializer.release();
+            return;
+        }
+        let value: ToggleConfiguration = ({ enabled: enabled_result, isOn: isOn_result, triggerChange: triggerChange_result } as ToggleConfiguration)
+        return value
+    }
+    readRatingConfiguration(): RatingConfiguration {
+        let valueDeserializer : Deserializer = this
+        const enabled_result: boolean = valueDeserializer.readBoolean()
+        const rating_result: number = (valueDeserializer.readNumber() as number)
+        const indicator_result: boolean = valueDeserializer.readBoolean()
+        const stars_result: number = (valueDeserializer.readNumber() as number)
+        const stepSize_result: number = (valueDeserializer.readNumber() as number)
+        const triggerChange_buf_resource: CallbackResource = valueDeserializer.readCallbackResource()
+        const triggerChange_buf_call: KPointer = valueDeserializer.readPointer()
+        const triggerChange_buf_callSync: KPointer = valueDeserializer.readPointer()
+        const triggerChange_result: ((value0: number) => void) = (value0: number): void => {
+            const triggerChange_buf_argsSerializer: Serializer = Serializer.hold();
+            triggerChange_buf_argsSerializer.writeInt32(triggerChange_buf_resource.resourceId);
+            triggerChange_buf_argsSerializer.writePointer(triggerChange_buf_call);
+            triggerChange_buf_argsSerializer.writePointer(triggerChange_buf_callSync);
+            triggerChange_buf_argsSerializer.writeNumber(value0);
+            InteropNativeModule._CallCallback(36519084, triggerChange_buf_argsSerializer.asBuffer(), triggerChange_buf_argsSerializer.length());
+            triggerChange_buf_argsSerializer.release();
+            return;
+        }
+        let value: RatingConfiguration = ({ enabled: enabled_result, rating: rating_result, indicator: indicator_result, stars: stars_result, stepSize: stepSize_result, triggerChange: triggerChange_result } as RatingConfiguration)
+        return value
+    }
+
+    readSliderConfiguration(): SliderConfiguration {
+        let valueDeserializer : Deserializer = this
+        const enabled_result: boolean = valueDeserializer.readBoolean()
+        const value_result: number = (valueDeserializer.readNumber() as number)
+        const min_result: number = (valueDeserializer.readNumber() as number)
+        const max_result: number = (valueDeserializer.readNumber() as number)
+        const step_result: number = (valueDeserializer.readNumber() as number)
+        const triggerChange_buf_resource: CallbackResource = valueDeserializer.readCallbackResource()
+        const triggerChange_buf_call: KPointer = valueDeserializer.readPointer()
+        const triggerChange_buf_callSync: KPointer = valueDeserializer.readPointer()
+        const triggerChange_result: SliderTriggerChangeCallback = (value: number, mode: SliderChangeMode): void => {
+            const triggerChange_buf_argsSerializer: Serializer = Serializer.hold();
+            triggerChange_buf_argsSerializer.writeInt32(triggerChange_buf_resource.resourceId);
+            triggerChange_buf_argsSerializer.writePointer(triggerChange_buf_call);
+            triggerChange_buf_argsSerializer.writePointer(triggerChange_buf_callSync);
+            triggerChange_buf_argsSerializer.writeNumber(value);
+            triggerChange_buf_argsSerializer.writeInt32(mode.valueOf());
+            InteropNativeModule._CallCallback(711649376, triggerChange_buf_argsSerializer.asBuffer(), triggerChange_buf_argsSerializer.length());
+            triggerChange_buf_argsSerializer.release();
+            return;
+        }
+        let value: SliderConfiguration = ({ enabled: enabled_result, value: value_result, min: min_result, max: max_result, step: step_result, triggerChange: triggerChange_result } as SliderConfiguration)
+        return value
+    }
     readSweepGradientOptions(): SweepGradientOptions {
         let valueDeserializer : Deserializer = this
         const center_buf_value0 : Length = (valueDeserializer.readLength() as Length)
@@ -12163,7 +12342,7 @@ export class Deserializer extends DeserializerBase {
         let ptr : KPointer = valueDeserializer.readPointer()
         return TextShadowStyleInternal.fromPtr(ptr)
     }
-    readTextStyle_alert_dialog(): TextStyle_alert_dialog {
+    readAlertDialogTextStyleOptions(): AlertDialogTextStyleOptions {
         let valueDeserializer : Deserializer = this
         const wordBreak_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
         let wordBreak_buf : WordBreak | undefined
@@ -12172,7 +12351,7 @@ export class Deserializer extends DeserializerBase {
             wordBreak_buf = TypeChecker.WordBreak_FromNumeric(valueDeserializer.readInt32())
         }
         const wordBreak_result : WordBreak | undefined = wordBreak_buf
-        let value : TextStyle_alert_dialog = ({wordBreak: wordBreak_result} as TextStyle_alert_dialog)
+        let value : AlertDialogTextStyleOptions = ({wordBreak: wordBreak_result} as AlertDialogTextStyleOptions)
         return value
     }
     readTextTimerOptions(): TextTimerOptions {
@@ -12371,15 +12550,9 @@ export class Deserializer extends DeserializerBase {
         let value : TouchResult = ({strategy: strategy_result, id: id_result} as TouchResult)
         return value
     }
-    readTransformationMatrix(): TransformationMatrix {
+    readTransformationMatrix(): Matrix4Transit {
         let valueDeserializer : Deserializer = this
-        const matrix4x4_buf_length : int32 = valueDeserializer.readInt32()
-        let matrix4x4_buf : Array<number> = new Array<number>(matrix4x4_buf_length)
-        for (let matrix4x4_buf_i = 0; matrix4x4_buf_i < matrix4x4_buf_length; matrix4x4_buf_i++) {
-            matrix4x4_buf[matrix4x4_buf_i] = (valueDeserializer.readNumber() as number)
-        }
-        const matrix4x4_result : Array<number> = matrix4x4_buf
-        let value : TransformationMatrix = ({matrix4x4: matrix4x4_result} as TransformationMatrix)
+        let value : Matrix4Transit = valueDeserializer.readInt64() as Object as Matrix4Transit
         return value
     }
     readTranslateOption(): TranslateOption {
@@ -13193,59 +13366,59 @@ export class Deserializer extends DeserializerBase {
     readAlignRuleOption(): AlignRuleOption {
         let valueDeserializer : Deserializer = this
         const left_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let left_buf : HorizontalAlignOptions | undefined
+        let left_buf : HorizontalAlignParam | undefined
         if ((RuntimeType.UNDEFINED) != (left_buf_runtimeType))
         {
             const left_buf__anchor : string = (valueDeserializer.readString() as string)
             const left_buf__align : HorizontalAlign = TypeChecker.HorizontalAlign_FromNumeric(valueDeserializer.readInt32())
-            left_buf = ({anchor: left_buf__anchor, align: left_buf__align} as HorizontalAlignOptions)
+            left_buf = ({anchor: left_buf__anchor, align: left_buf__align} as HorizontalAlignParam)
         }
-        const left_result : HorizontalAlignOptions | undefined = left_buf
+        const left_result : HorizontalAlignParam | undefined = left_buf
         const right_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let right_buf : HorizontalAlignOptions | undefined
+        let right_buf : HorizontalAlignParam | undefined
         if ((RuntimeType.UNDEFINED) != (right_buf_runtimeType))
         {
             const right_buf__anchor : string = (valueDeserializer.readString() as string)
             const right_buf__align : HorizontalAlign = TypeChecker.HorizontalAlign_FromNumeric(valueDeserializer.readInt32())
-            right_buf = ({anchor: right_buf__anchor, align: right_buf__align} as HorizontalAlignOptions)
+            right_buf = ({anchor: right_buf__anchor, align: right_buf__align} as HorizontalAlignParam)
         }
-        const right_result : HorizontalAlignOptions | undefined = right_buf
+        const right_result : HorizontalAlignParam | undefined = right_buf
         const middle_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let middle_buf : HorizontalAlignOptions | undefined
+        let middle_buf : HorizontalAlignParam | undefined
         if ((RuntimeType.UNDEFINED) != (middle_buf_runtimeType))
         {
             const middle_buf__anchor : string = (valueDeserializer.readString() as string)
             const middle_buf__align : HorizontalAlign = TypeChecker.HorizontalAlign_FromNumeric(valueDeserializer.readInt32())
-            middle_buf = ({anchor: middle_buf__anchor, align: middle_buf__align} as HorizontalAlignOptions)
+            middle_buf = ({anchor: middle_buf__anchor, align: middle_buf__align} as HorizontalAlignParam)
         }
-        const middle_result : HorizontalAlignOptions | undefined = middle_buf
+        const middle_result : HorizontalAlignParam | undefined = middle_buf
         const top_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let top_buf : VerticalAlignOptions | undefined
+        let top_buf : VerticalAlignParam | undefined
         if ((RuntimeType.UNDEFINED) != (top_buf_runtimeType))
         {
             const top_buf__anchor : string = (valueDeserializer.readString() as string)
             const top_buf__align : VerticalAlign = TypeChecker.VerticalAlign_FromNumeric(valueDeserializer.readInt32())
-            top_buf = ({anchor: top_buf__anchor, align: top_buf__align} as VerticalAlignOptions)
+            top_buf = ({anchor: top_buf__anchor, align: top_buf__align} as VerticalAlignParam)
         }
-        const top_result : VerticalAlignOptions | undefined = top_buf
+        const top_result : VerticalAlignParam | undefined = top_buf
         const bottom_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let bottom_buf : VerticalAlignOptions | undefined
+        let bottom_buf : VerticalAlignParam | undefined
         if ((RuntimeType.UNDEFINED) != (bottom_buf_runtimeType))
         {
             const bottom_buf__anchor : string = (valueDeserializer.readString() as string)
             const bottom_buf__align : VerticalAlign = TypeChecker.VerticalAlign_FromNumeric(valueDeserializer.readInt32())
-            bottom_buf = ({anchor: bottom_buf__anchor, align: bottom_buf__align} as VerticalAlignOptions)
+            bottom_buf = ({anchor: bottom_buf__anchor, align: bottom_buf__align} as VerticalAlignParam)
         }
-        const bottom_result : VerticalAlignOptions | undefined = bottom_buf
+        const bottom_result : VerticalAlignParam | undefined = bottom_buf
         const center_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let center_buf : VerticalAlignOptions | undefined
+        let center_buf : VerticalAlignParam | undefined
         if ((RuntimeType.UNDEFINED) != (center_buf_runtimeType))
         {
             const center_buf__anchor : string = (valueDeserializer.readString() as string)
             const center_buf__align : VerticalAlign = TypeChecker.VerticalAlign_FromNumeric(valueDeserializer.readInt32())
-            center_buf = ({anchor: center_buf__anchor, align: center_buf__align} as VerticalAlignOptions)
+            center_buf = ({anchor: center_buf__anchor, align: center_buf__align} as VerticalAlignParam)
         }
-        const center_result : VerticalAlignOptions | undefined = center_buf
+        const center_result : VerticalAlignParam | undefined = center_buf
         const bias_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
         let bias_buf : Bias | undefined
         if ((RuntimeType.UNDEFINED) != (bias_buf_runtimeType))
@@ -13285,7 +13458,7 @@ export class Deserializer extends DeserializerBase {
                 curve_buf_ = (valueDeserializer.readString() as string)
             }
             else if (curve_buf__selector == 2) {
-                curve_buf_ = (valueDeserializer.readICurve() as ICurve)
+                curve_buf_ = (valueDeserializer.readInt64() as Object as ICurve)
             }
             else {
                 throw new Error("One of the branches for curve_buf_ has to be chosen through deserialisation.")
@@ -22291,12 +22464,12 @@ export class Deserializer extends DeserializerBase {
         }
         const shadow_result : ShadowOptions | ShadowStyle | undefined = shadow_buf
         const textStyle_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let textStyle_buf : TextStyle_alert_dialog | undefined
+        let textStyle_buf : AlertDialogTextStyleOptions | undefined
         if ((RuntimeType.UNDEFINED) != (textStyle_buf_runtimeType))
         {
-            textStyle_buf = valueDeserializer.readTextStyle_alert_dialog()
+            textStyle_buf = valueDeserializer.readAlertDialogTextStyleOptions()
         }
-        const textStyle_result : TextStyle_alert_dialog | undefined = textStyle_buf
+        const textStyle_result : AlertDialogTextStyleOptions | undefined = textStyle_buf
         const enableHoverMode_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
         let enableHoverMode_buf : boolean | undefined
         if ((RuntimeType.UNDEFINED) != (enableHoverMode_buf_runtimeType))
@@ -22668,12 +22841,12 @@ export class Deserializer extends DeserializerBase {
         }
         const shadow_result : ShadowOptions | ShadowStyle | undefined = shadow_buf
         const textStyle_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let textStyle_buf : TextStyle_alert_dialog | undefined
+        let textStyle_buf : AlertDialogTextStyleOptions | undefined
         if ((RuntimeType.UNDEFINED) != (textStyle_buf_runtimeType))
         {
-            textStyle_buf = valueDeserializer.readTextStyle_alert_dialog()
+            textStyle_buf = valueDeserializer.readAlertDialogTextStyleOptions()
         }
-        const textStyle_result : TextStyle_alert_dialog | undefined = textStyle_buf
+        const textStyle_result : AlertDialogTextStyleOptions | undefined = textStyle_buf
         const enableHoverMode_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
         let enableHoverMode_buf : boolean | undefined
         if ((RuntimeType.UNDEFINED) != (enableHoverMode_buf_runtimeType))
@@ -23050,12 +23223,12 @@ export class Deserializer extends DeserializerBase {
         }
         const shadow_result : ShadowOptions | ShadowStyle | undefined = shadow_buf
         const textStyle_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let textStyle_buf : TextStyle_alert_dialog | undefined
+        let textStyle_buf : AlertDialogTextStyleOptions | undefined
         if ((RuntimeType.UNDEFINED) != (textStyle_buf_runtimeType))
         {
-            textStyle_buf = valueDeserializer.readTextStyle_alert_dialog()
+            textStyle_buf = valueDeserializer.readAlertDialogTextStyleOptions()
         }
-        const textStyle_result : TextStyle_alert_dialog | undefined = textStyle_buf
+        const textStyle_result : AlertDialogTextStyleOptions | undefined = textStyle_buf
         const enableHoverMode_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
         let enableHoverMode_buf : boolean | undefined
         if ((RuntimeType.UNDEFINED) != (enableHoverMode_buf_runtimeType))
@@ -24128,33 +24301,33 @@ export class Deserializer extends DeserializerBase {
         }
         const hoverModeArea_result : HoverModeAreaType | undefined = hoverModeArea_buf
         const onDidAppear_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let onDidAppear_buf : (() => void) | undefined
+        let onDidAppear_buf : ((data: undefined) => void) | undefined
         if ((RuntimeType.UNDEFINED) != (onDidAppear_buf_runtimeType))
         {
-            onDidAppear_buf = valueDeserializer.readCallback_Void()
+            onDidAppear_buf = CallbackTransformer.transfromFromCallbackVoid(valueDeserializer.readCallback_Void())
         }
-        const onDidAppear_result : (() => void) | undefined = onDidAppear_buf
+        const onDidAppear_result : ((data: undefined) => void) | undefined = onDidAppear_buf
         const onDidDisappear_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let onDidDisappear_buf : (() => void) | undefined
+        let onDidDisappear_buf : ((data: undefined) => void) | undefined
         if ((RuntimeType.UNDEFINED) != (onDidDisappear_buf_runtimeType))
         {
-            onDidDisappear_buf = valueDeserializer.readCallback_Void()
+            onDidDisappear_buf = CallbackTransformer.transfromFromCallbackVoid(valueDeserializer.readCallback_Void())
         }
-        const onDidDisappear_result : (() => void) | undefined = onDidDisappear_buf
+        const onDidDisappear_result : ((data: undefined) => void) | undefined = onDidDisappear_buf
         const onWillAppear_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let onWillAppear_buf : (() => void) | undefined
+        let onWillAppear_buf : ((data: undefined) => void) | undefined
         if ((RuntimeType.UNDEFINED) != (onWillAppear_buf_runtimeType))
         {
-            onWillAppear_buf = valueDeserializer.readCallback_Void()
+            onWillAppear_buf = CallbackTransformer.transfromFromCallbackVoid(valueDeserializer.readCallback_Void())
         }
-        const onWillAppear_result : (() => void) | undefined = onWillAppear_buf
+        const onWillAppear_result : ((data: undefined) => void) | undefined = onWillAppear_buf
         const onWillDisappear_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let onWillDisappear_buf : (() => void) | undefined
+        let onWillDisappear_buf : ((data: undefined) => void) | undefined
         if ((RuntimeType.UNDEFINED) != (onWillDisappear_buf_runtimeType))
         {
-            onWillDisappear_buf = valueDeserializer.readCallback_Void()
+            onWillDisappear_buf = CallbackTransformer.transfromFromCallbackVoid(valueDeserializer.readCallback_Void())
         }
-        const onWillDisappear_result : (() => void) | undefined = onWillDisappear_buf
+        const onWillDisappear_result : ((data: undefined) => void) | undefined = onWillDisappear_buf
         const keyboardAvoidDistance_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
         let keyboardAvoidDistance_buf : LengthMetrics | undefined
         if ((RuntimeType.UNDEFINED) != (keyboardAvoidDistance_buf_runtimeType))

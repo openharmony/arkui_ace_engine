@@ -23,12 +23,13 @@ import { LocalStorage } from '@ohos.arkui.stateManagement';
 import { DrawContext } from "arkui/Graphics"
 import { AnimatableArithmetic, DrawModifier, AsyncCallback, Callback, DragItemInfo, ResourceColor } from "arkui/component"
 import { ArkCustomComponent } from "arkui/ArkCustomComponent"
-import { WaterFlowOptions,WaterFlowSections, XComponentControllerCallbackInternal } from "arkui/component"
-import { ChildrenMainSize } from "arkui/component"
+import { WaterFlowOptions, WaterFlowSections, XComponentControllerCallbackInternal, OverlayOptions } from "arkui/component"
+import { ChildrenMainSize, PageTransitionOptions, PageTransitionCallback, SlideEffect, ScaleOptions, TranslateOptions } from "arkui/component"
 import { HookDragInfo } from "arkui/handwritten"
 import { dragController } from "@ohos/arkui/dragController"
 import { componentSnapshot } from "@ohos/arkui/componentSnapshot"
 import { DrawableDescriptor } from "@ohos.arkui.drawableDescriptor"
+import { uiObserver }  from "@ohos/arkui/observer"
 
 export class ArkUIAniModule {
     static {
@@ -43,13 +44,18 @@ export class ArkUIAniModule {
     native static _Web_SetWebController_ControllerHandler(ptr: KPointer, webviewController: webview.WebviewController): void
     native static _ConvertUtils_ConvertFromPixelMapAni(pixelmap: image.PixelMap): KPointer
     native static _ConvertUtils_ConvertToPixelMapAni(ptr: KPointer): image.PixelMap
-    native static _Common_GetHostContext(): common.Context
+    native static _Common_GetHostContext(key: KInt): common.Context
     native static _Common_Sync_InstanceId(id: KInt): void
     native static _Common_Restore_InstanceId(): void
     native static _Common_Get_Current_InstanceId(): KInt
     native static _Common_GetFocused_InstanceId(): KInt
     native static _Common_GetSharedLocalStorage(): LocalStorage
     native static _CustomNode_Construct(id: KInt, component: ArkCustomComponent): KPointer
+    native static _CustomNode_RequestFrame(): void
+    native static _CustomNode_QueryNavigationInfo(ptr: KPointer): uiObserver.NavigationInfo
+    native static _CustomNode_QueryNavDestinationInfo(ptr: KPointer): uiObserver.NavDestinationInfo
+    native static _CustomNode_QueryNavDestinationInfo0(ptr: KPointer, isInner: boolean): uiObserver.NavDestinationInfo
+    native static _CustomNode_QueryRouterPageInfo(ptr: KPointer): uiObserver.RouterPageInfo
     native static _BuilderProxyNode_Construct(id: KInt): KPointer
     native static _ContentSlot_construct(id: KInt): KPointer
     native static _ContentSlotInterface_setContentSlotOptions(slot: KPointer, content: KPointer): void
@@ -59,39 +65,55 @@ export class ArkUIAniModule {
     native static _SetWaterFlowOptions(ptr: KPointer, options: WaterFlowOptions): void
     native static _SetListChildrenMainSize(ptr: KPointer, value: ChildrenMainSize): void
     native static _LazyForEachNode_Construct(id: KInt): KPointer
+    native static _SetOverlay_ComponentContent(node: KPointer, buildNodePtr: KPointer, options?: OverlayOptions): void
+
+    native static _TransferKeyEventPointer(input: KPointer): KPointer
+    native static _CreateKeyEventAccessorWithPointer(input: KPointer): KPointer
+    native static _CreateEventTargetInfoAccessor(): KPointer
+    native static _EventTargetInfoAccessorWithId(input: KPointer, id: string): void
+    native static _CreateScrollableTargetInfoAccessor(): KPointer
+    native static _ScrollableTargetInfoAccessorWithId(input: KPointer, id: string): void
+    native static _ScrollableTargetInfoAccessorWithPointer(input: KPointer, pointer: KPointer): void
+    native static _TransferScrollableTargetInfoPointer(input: KPointer): KPointer
 
     // for web
-    native static _TransferScreenCaptureHandlerToStatic(ptr: KPointer, value: Object | undefined | null): boolean
-    native static _TransferJsGeolocationToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
-    native static _TransferJsResultToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
-    native static _TransferEventResultToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
-    native static _TransferFileSelectorResultToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
-    native static _TransferFileSelectorParamToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
-    native static _TransferWebContextMenuResultToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
-    native static _TransferWebContextMenuParamToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
-    native static _TransferHttpAuthHandlerToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
-    native static _TransferWebResourceReponseToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
-    native static _TransferWebResourceRequestToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
-    native static _TransferConsoleMessageToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
-    native static _TransferDataResubmissionHandlerToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
-    native static _TransferClientAuthenticationHandlerToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
-    native static _TransferSslErrorHandlerToStatic(ptr: KPointer, value: Object | undefined | null) : boolean
+    native static _TransferScreenCaptureHandlerToStatic(ptr: KPointer, value: ESValue): boolean
+    native static _TransferJsGeolocationToStatic(ptr: KPointer, value: ESValue) : boolean
+    native static _TransferJsResultToStatic(ptr: KPointer, value: ESValue) : boolean
+    native static _TransferEventResultToStatic(ptr: KPointer, value: ESValue) : boolean
+    native static _TransferFileSelectorResultToStatic(ptr: KPointer, value: ESValue) : boolean
+    native static _TransferFileSelectorParamToStatic(ptr: KPointer, value: ESValue) : boolean
+    native static _TransferWebContextMenuResultToStatic(ptr: KPointer, value: ESValue) : boolean
+    native static _TransferWebContextMenuParamToStatic(ptr: KPointer, value: ESValue) : boolean
+    native static _TransferHttpAuthHandlerToStatic(ptr: KPointer, value: ESValue) : boolean
+    native static _TransferWebResourceReponseToStatic(ptr: KPointer, value: ESValue) : boolean
+    native static _TransferWebResourceRequestToStatic(ptr: KPointer, value: ESValue) : boolean
+    native static _TransferConsoleMessageToStatic(ptr: KPointer, value: ESValue) : boolean
+    native static _TransferDataResubmissionHandlerToStatic(ptr: KPointer, value: ESValue) : boolean
+    native static _TransferClientAuthenticationHandlerToStatic(ptr: KPointer, value: ESValue) : boolean
+    native static _TransferSslErrorHandlerToStatic(ptr: KPointer, value: ESValue) : boolean
+    native static _TransferPermissionRequestToStatic(ptr: KPointer, value: ESValue): boolean
+    native static _TransferControllerHandlerToStatic(ptr: KPointer, value: ESValue): boolean
+    native static _TransferWebKeyboardControllerToStatic(ptr: KPointer, value: ESValue): boolean
 
-    native static _TransferScreenCaptureHandlerToDynamic(ptr: KPointer): Object | undefined | null
-    native static _TransferJsGeolocationToDynamic(ptr: KPointer) : Object | undefined | null
-    native static _TransferJsResultToDynamic(ptr: KPointer) : Object | undefined | null
-    native static _TransferEventResultToDynamic(ptr: KPointer) : Object | undefined | null
-    native static _TransferFileSelectorResultToDynamic(ptr: KPointer) : Object | undefined | null
-    native static _TransferFileSelectorParamToDynamic(ptr: KPointer) : Object | undefined | null
-    native static _TransferWebContextMenuResultToDynamic(ptr: KPointer) : Object | undefined | null
-    native static _TransferWebContextMenuParamToDynamic(ptr: KPointer) : Object | undefined | null
-    native static _TransferHttpAuthHandlerToDynamic(ptr: KPointer) : Object | undefined | null
-    native static _TransferWebResourceReponseToDynamic(ptr: KPointer) : Object | undefined | null
-    native static _TransferWebResourceRequestToDynamic(ptr: KPointer) : Object | undefined | null
-    native static _TransferConsoleMessageToDynamic(ptr: KPointer) : Object | undefined | null
-    native static _TransferDataResubmissionHandlerToDynamic(ptr: KPointer) : Object | undefined | null
-    native static _TransferClientAuthenticationHandlerToDynamic(ptr: KPointer) : Object | undefined | null
-    native static _TransferSslErrorHandlerToDynamic(ptr: KPointer) : Object | undefined | null
+    native static _TransferScreenCaptureHandlerToDynamic(ptr: KPointer): Any
+    native static _TransferJsGeolocationToDynamic(ptr: KPointer) : Any
+    native static _TransferJsResultToDynamic(ptr: KPointer) : Any
+    native static _TransferEventResultToDynamic(ptr: KPointer) : Any
+    native static _TransferFileSelectorResultToDynamic(ptr: KPointer) : Any
+    native static _TransferFileSelectorParamToDynamic(ptr: KPointer) : Any
+    native static _TransferWebContextMenuResultToDynamic(ptr: KPointer) : Any
+    native static _TransferWebContextMenuParamToDynamic(ptr: KPointer) : Any
+    native static _TransferHttpAuthHandlerToDynamic(ptr: KPointer) : Any
+    native static _TransferWebResourceReponseToDynamic(ptr: KPointer) : Any
+    native static _TransferWebResourceRequestToDynamic(ptr: KPointer) : Any
+    native static _TransferConsoleMessageToDynamic(ptr: KPointer) : Any
+    native static _TransferDataResubmissionHandlerToDynamic(ptr: KPointer) : Any
+    native static _TransferClientAuthenticationHandlerToDynamic(ptr: KPointer) : Any
+    native static _TransferSslErrorHandlerToDynamic(ptr: KPointer) : Any
+    native static _TransferPermissionRequestToDynamic(ptr: KPointer) : Any
+    native static _TransferControllerHandlerToDynamic(ptr: KPointer) : Any
+    native static _TransferWebKeyboardControllerToDynamic(ptr: KPointer) : Any
 
     // for Drag
     native static _DragEvent_Set_Data(ptr: KLong, data : unifiedDataChannel.UnifiedData) : void
@@ -104,6 +126,9 @@ export class ArkUIAniModule {
     native static _Drag_Set_AllowDrop_Null(ptr: KLong) : void
     native static _Drag_Set_AllowDrop(ptr: KPointer, thisArray: Array<string>, thisLength: KInt): void
     native static _Drag_Set_DragPreview(ptr: KPointer, dragInfo: HookDragInfo): void
+
+    native static _createDragEventAccessorWithPointer(input: KPointer) : KPointer
+    native static _getDragEventPointer(input: KPointer): KPointer
 
     // for componentSnapshot
     native static _ComponentSnapshot_createFromBuilderWithCallback(ptr: KPointer, destroyCallback: () => void,
@@ -142,14 +167,26 @@ export class ArkUIAniModule {
 
     native static _Animation_SetOrCreateAnimatableProperty<T>(ptr: KPointer, propertyName: string, property: number | AnimatableArithmetic<T>,
         callback: (value: number | AnimatableArithmetic<T>) => void): void
+    native static _Animation_CreatePageTransitionEnter(options: PageTransitionOptions): void
+    native static _Animation_CreatePageTransitionExit(options: PageTransitionOptions): void
+    native static _Animation_PageTransitionSetOnEnter(event: PageTransitionCallback): void
+    native static _Animation_PageTransitionSetOnExit(event: PageTransitionCallback): void
+    native static _Animation_PageTransitionSetSlide(value: SlideEffect): void
+    native static _Animation_PageTransitionSetTranslate(value: TranslateOptions): void
+    native static _Animation_PageTransitionSetScale(value: ScaleOptions): void
+    native static _Animation_PageTransitionSetOpacity(value: number): void
 
     native static _CreateViewStackProcessor(): KPointer
 
     native static _PopViewStackProcessor(): KPointer
 
     native static _DeleteViewStackProcessor(ptr: KPointer): void
-    
+
     native static _BackgroundImage_PixelMap(ptr: KPointer, pixelmap: image.PixelMap, repeat: KInt): void
+    // for StyledString
+    native static _StyledString_SetPixelMap(peerPtr: KPointer, pixelmap: image.PixelMap): void
+    native static _StyledString_GetPixelMap(peerPtr: KPointer): image.PixelMap
+
     // for ImageSpan
     native static _ImageSpan_Set_PixelMap(ptr: KPointer, pixelmap: image.PixelMap): void
     native static _ImageSpan_SetAlt_PixelMap(ptr: KPointer, pixelmap: image.PixelMap): void
@@ -166,6 +203,9 @@ export class ArkUIAniModule {
     // for Shape
     native static _Shape_Transfer_PixelMap(ptr: KPointer, pixelmap: image.PixelMap): void;
 
+    // for RichEditor
+    native static _RichEditor_Transfer_PixelMap(pixelmap: image.PixelMap): KPointer;
+
     // for  stateMgmt
     native static _PersistentStorage_Get(key: string): string
     native static _PersistentStorage_Set(key: string, value: string): void
@@ -178,13 +218,54 @@ export class ArkUIAniModule {
     native static _Env_GetAccessibilityEnabled(): boolean
     native static _Env_GetLayoutDirection(): string
     native static _Env_GetLanguageCode(): string
-    
+
     // for XComponent
     native static _XComponent_SetSurfaceCallback(ptr: KPointer, callback: XComponentControllerCallbackInternal): void;
+    // for ComponentContent
+    native static _RemoveComponent_FromFrameNode(ptr: KPointer, content: KPointer): void
+    native static _AddComponent_ToFrameNode(ptr: KPointer, content: KPointer): void
 
     native static _CheckIsUIThread(id: KInt): KBoolean
     native static _IsDebugMode(id: KInt): KBoolean
     native static _OnMeasure_InnerMeasure(ptr: KPointer): void
     native static _OnLayout_InnerLayout(ptr: KPointer): void
     native static _SetParallelScoped(parallel: boolean): void
+    native static _Common_SetCustomPropertyCallBack(ptr: KPointer, removeCallback: () => void,
+        getCallback: (name: string) => string | undefined): void
+    native static _Common_getCustomProperty<T>(ptr: KPointer, key: string): string | undefined
+    native static _ConditionScopeNode_Construct(id: KInt): KPointer;
+
+    native static _Common_vp2px(value:number, instanceId: KInt): number
+    native static _Common_px2vp(value:number, instanceId: KInt): number
+    native static _Common_fp2px(value:number, instanceId: KInt): number
+    native static _Common_px2fp(value:number, instanceId: KInt): number
+    native static _Common_lpx2px(value:number, instanceId: KInt): number
+    native static _Common_px2lpx(value:number, instanceId: KInt): number
+
+    // for transfer
+    native static _createTouchEventAccessorWithPointer(input: KPointer): KPointer
+    native static _createMouseEventAccessorWithPointer(input: KPointer): KPointer
+    native static _createAxisEventAccessorWithPointer(input: KPointer): KPointer
+    native static _createClickEventAccessorWithPointer(input: KPointer): KPointer
+    native static _createHoverEventAccessorWithPointer(input: KPointer): KPointer
+    native static _getTouchEventPointer(peer: KPointer): KPointer
+    native static _getMouseEventPointer(peer: KPointer): KPointer
+    native static _getAxisEventPointer(peer: KPointer): KPointer
+    native static _getClickEventPointer(peer: KPointer): KPointer
+    native static _getHoverEventPointer(peer: KPointer): KPointer
+    // for Canvas
+    native static _CanvasRenderer_SetPixelMap(peerPtr: KPointer, pixelmap: image.PixelMap): void
+    native static _CanvasRenderer_GetPixelMap(peerPtr: KPointer, sx: number, sy: number, sw: number, sh: number): image.PixelMap
+    native static _CanvasRenderer_DrawPixelMap0(peerPtr: KPointer, pixelmap: image.PixelMap, dx: number, dy: number): void
+    native static _CanvasRenderer_DrawPixelMap1(peerPtr: KPointer, pixelmap: image.PixelMap, dx: number, dy: number, dw: number, dh: number): void
+    native static _CanvasRenderer_DrawPixelMap2(peerPtr: KPointer, pixelmap: image.PixelMap, sx: number, sy: number, sw: number, sh: number, dx: number, dy: number, dw: number, dh: number): void
+    native static _ImageBitmap_Construct0(src: string, unit: KInt): KPointer
+    native static _ImageBitmap_Construct1(src: image.PixelMap, unit: KInt): KPointer
+    native static _CanvasRenderer_GetCanvasDensity(peerPtr: KPointer): number
+    native static _GetSystemDensity(): number
+    native static _CanvasRenderer_GetImageData(peerPtr: KPointer, sx: number, sy: number, sw: number, sh: number): Uint8ClampedArray
+    native static _CanvasRenderer_PutImageData0(peerPtr: KPointer, array: Uint8ClampedArray, dx: number, dy: number, width: KInt, height: KInt): void
+    native static _CanvasRenderer_PutImageData1(peerPtr: KPointer, array: Uint8ClampedArray, dx: number, dy: number, width: KInt, height: KInt,
+        dirtyX: number, dirtyY: number, dirtyWidth: number, dirtyHeight: number): void
+    native static _DrawingRenderingContext_GetCanvas(peerPtr: KPointer): drawing.Canvas
 }

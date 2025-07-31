@@ -18,6 +18,9 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
+#if !defined(PREVIEW)
+#include "core/components_ng/syntax/static/detached_free_root_proxy_node.h"
+#endif
 #include "core/interfaces/native/implementation/nav_path_info_peer_impl.h"
 #include "core/interfaces/native/implementation/nav_path_stack_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
@@ -28,9 +31,8 @@ namespace NavExtenderAccessor {
 void SetUpdateStackCallbackImpl(Ark_NavPathStack peer,
                                 const NavExtender_OnUpdateStack* callback)
 {
-    auto stack = peer;
-    CHECK_NULL_VOID(stack);
-    auto navigationStack = stack->GetNavPathStack();
+    CHECK_NULL_VOID(peer);
+    auto navigationStack = peer->GetNavPathStack();
     CHECK_NULL_VOID(navigationStack);
     auto updater = [callback = CallbackHelper(*callback)]() {
         callback.Invoke();
@@ -78,7 +80,17 @@ void SetNavDestinationNodeImpl(Ark_NavPathStack peer,
     auto stack = peer->GetNavPathStack();
     CHECK_NULL_VOID(stack);
     int32_t curIndex = Converter::Convert<int32_t>(index);
+#if !defined(PREVIEW)
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto instanceId = container->GetInstanceId();
+    auto proxyNode = AceType::MakeRefPtr<DetachedFreeRootProxyNode>(instanceId);
+    CHECK_NULL_VOID(proxyNode);
+    proxyNode->AddChild(Referenced::Claim(reinterpret_cast<UINode*>(node)));
+    stack->AddCustomNode(curIndex, proxyNode);
+#else
     stack->AddCustomNode(curIndex, Referenced::Claim(reinterpret_cast<UINode*>(node)));
+#endif
 }
 void SetNavigationModeImpl(Ark_NativePointer navigation,
                            Ark_NavigationMode mode)

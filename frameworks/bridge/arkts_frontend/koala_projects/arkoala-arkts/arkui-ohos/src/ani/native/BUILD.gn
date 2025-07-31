@@ -23,6 +23,7 @@ group("ace_ani_native_package") {
 }
 
 ohos_shared_library("arkoala_native_ani") {
+  shlib_type = "ani"
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
 
@@ -30,6 +31,7 @@ ohos_shared_library("arkoala_native_ani") {
 
   sources = [
     "animation/animation_ani_impl.cpp",
+    "canvas/canvas_module.cpp",
     "common/common_module.cpp",
     "componentSnapshot/componentSnapshot_module.cpp",
     "content_slot/content_slot_module.cpp",
@@ -42,26 +44,30 @@ ohos_shared_library("arkoala_native_ani") {
     "load.cpp",
     "module.cpp",
     "shape/shape_module_methods.cpp",
+    "styled_string/styled_string_module.cpp",
     "utils/ani_utils.cpp",
     "utils/convert_utils.cpp",
     "video/video_module_methods.cpp",
+    "rich_editor/rich_editor_module.cpp",
     "stateMgmt/stateMgmt_module.cpp",
     "water_flow/waterFlowSection_module.cpp",
     "list/list_children_main_size_module.cpp",
     "web/web_module_methods.cpp",
     "xcomponent/xcomponent_module_methods.cpp",
+    "condition_scope/condition_scope.cpp",
   ]
 
   external_deps = [
+    "graphic_2d:drawing_ani",
     "hilog:libhilog",
     "image_framework:image",
-    #"image_framework:image_taihe",
+    "image_framework:image_taihe",
     "napi:ace_napi",
     "runtime_core:ani",
     "runtime_core:ani_helpers",
     "udmf:libudmf",
     "udmf:udmf_client",
-    #"udmf:udmf_taihe_native",
+    "udmf:udmf_taihe_native",
   ]
 
   configs = [ "$ace_root:ace_config" ]
@@ -73,4 +79,46 @@ ohos_shared_library("arkoala_native_ani") {
     defines += [ "ENABLE_ROSEN_BACKEND" ]
   }
   output_extension = "so"
+}
+
+if (use_linux) {
+  ohos_shared_library("arkoala_native_ani_linux") {
+    subsystem_name = ace_engine_subsystem
+    part_name = ace_engine_part
+  
+    include_dirs = [ "./" ]
+  
+    sources = [
+      "animation/animation_ani_impl.cpp",
+      "common/common_module.cpp",
+      "condition_scope/condition_scope.cpp",
+      "content_slot/content_slot_module.cpp",
+      "custom_node/custom_node_module.cpp",
+      "interop/interop_module.cpp",
+      "list/list_children_main_size_module.cpp",
+      "load.cpp",
+      "module_linux.cpp",
+      "stateMgmt/stateMgmt_module.cpp",
+      "utils/ani_utils.cpp",
+      "water_flow/waterFlowSection_module.cpp",
+      "xcomponent/xcomponent_module_methods.cpp",
+    ]
+  
+    external_deps = [
+      "hilog:libhilog",
+      "napi:ace_napi",
+      "runtime_core:ani",
+    ]
+  
+    configs = [ "$ace_root:ace_config" ]
+    defines = []
+    if (pixel_map_support) {
+      defines += [ "PIXEL_MAP_SUPPORTED" ]
+    }
+    if (enable_rosen_backend) {
+      defines += [ "ENABLE_ROSEN_BACKEND" ]
+    }
+    output_name = "arkoala_native_ani"
+    output_extension = "so"
+  }
 }

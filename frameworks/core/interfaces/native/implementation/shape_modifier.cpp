@@ -23,9 +23,8 @@
 #include "core/interfaces/native/utility/validators.h"
 #include "core/interfaces/native/generated/interface/ui_node_api.h"
 #if defined(PIXEL_MAP_SUPPORTED)
-// #include "pixel_map_ani.h"
-// #include "pixel_map.h"
-// #include "base/image/pixel_map.h"
+#include "pixel_map.h"
+#include "base/image/pixel_map.h"
 #endif
 
 static const double STROKE_MITER_LIMIT_MIN_VALUE = 1.0;
@@ -71,15 +70,7 @@ void SetShapeOptions0Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     ViewAbstract::SetFocusable(frameNode, true);
-    RefPtr<PixelMap> pixelMap;
-#if !defined(PREVIEW) && defined(PIXEL_MAP_SUPPORTED)
-    // Media::PixelMapAni* pixelMapAni = reinterpret_cast<Media::PixelMapAni*>(value);
-    // CHECK_NULL_VOID(pixelMapAni);
-    // auto nativePixelMap = pixelMapAni->nativePixelMap_;
-    // CHECK_NULL_VOID(nativePixelMap);
-    // pixelMap = PixelMap::CreatePixelMap(&nativePixelMap);
-#endif
-    ShapeModelStatic::InitBox(frameNode, pixelMap);
+    ShapeModelStatic::InitBox(frameNode, nullptr);
 }
 void SetShapeOptions1Impl(Ark_NativePointer node)
 {
@@ -130,20 +121,28 @@ void StrokeDashArrayImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<std::vector<Dimension>>(value);
-    if (!convValue) {
-        ShapeModelNG::SetStrokeDashArray(frameNode, {});
+    CHECK_NULL_VOID(value);
+    std::vector<Dimension> dashArray;
+    if (value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+        ShapeModelNG::SetStrokeDashArray(frameNode, dashArray);
         return;
     }
-    auto dashArray = *convValue;
+    Array_Length arrayValue = value->value;
+    int32_t length = arrayValue.length;
+    for (int32_t i = 0; i < length; ++i) {
+        auto optLength = Converter::OptConvertFromArkLength(arrayValue.array[i], DimensionUnit::VP);
+        if (optLength.has_value()) {
+            dashArray.emplace_back(optLength.value());
+        }
+    }
     // if odd,add twice
-    auto length = dashArray.size();
-    if (length & 1) {
-        for (int32_t i = 0; i < length; i++) {
+    auto dashArraySize = dashArray.size();
+    if (dashArraySize & 1) {
+        for (size_t i = 0; i < dashArraySize; i++) {
             dashArray.emplace_back(dashArray[i]);
         }
     }
-    ShapeModelNG::SetStrokeDashArray(frameNode, std::move(dashArray));
+    ShapeModelNG::SetStrokeDashArray(frameNode, dashArray);
 }
 void StrokeLineCapImpl(Ark_NativePointer node,
                        const Opt_LineCapStyle* value)

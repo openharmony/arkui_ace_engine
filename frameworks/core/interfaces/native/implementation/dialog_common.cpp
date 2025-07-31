@@ -19,6 +19,7 @@
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+const GENERATED_ArkUIDismissDialogActionAccessor* GetDismissDialogActionAccessor();
 void AddOnWillDismiss(DialogProperties& properties, Opt_Callback_DismissDialogAction_Void onWillDismiss)
 {
     auto onWillDismissOpt = Converter::OptConvert<Callback_DismissDialogAction_Void>(onWillDismiss);
@@ -26,13 +27,12 @@ void AddOnWillDismiss(DialogProperties& properties, Opt_Callback_DismissDialogAc
     properties.onWillDismiss = [callback = CallbackHelper(onWillDismissOpt.value())](
         const int32_t& info, const int32_t& instanceId
     ) {
-        const auto dismissReason = static_cast<BindSheetDismissReason>(info);
-        const auto keeper = CallbackKeeper::Claim(std::move(ViewAbstract::DismissDialog));
-        Ark_DismissDialogAction action {
-            .dismiss = keeper.ArkValue(),
-            .reason = Converter::ArkValue<Ark_DismissReason>(dismissReason)
-        };
-        callback.InvokeSync(action);
+        Ark_DismissDialogAction parameter = GetDismissDialogActionAccessor()->construct();
+        auto reasonValue = Converter::ArkValue<Ark_DismissReason>(
+            static_cast<BindSheetDismissReason>(info));
+        GetDismissDialogActionAccessor()->setReason(parameter, reasonValue);
+        callback.InvokeSync(parameter);
+        GetDismissDialogActionAccessor()->destroyPeer(parameter);
     };
 }
 } // namespace OHOS::Ace::NG::GeneratedModifier

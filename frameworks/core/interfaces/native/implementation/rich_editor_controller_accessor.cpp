@@ -20,8 +20,8 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
-#include "rich_editor_controller_peer_impl.h"
 #include "pixel_map_peer.h"
+#include "rich_editor_controller_peer_impl.h"
 #include "styled_string_peer.h"
 
 namespace OHOS::Ace::NG::Converter {
@@ -145,12 +145,12 @@ LeadingMargin Convert(const Ark_LeadingMarginPlaceholder& src)
 {
     auto convSize = Converter::Convert<std::pair<Dimension, Dimension>>(src.size);
     LeadingMargin leadingMargin = {
+        .size = LeadingMarginSize(convSize.first, convSize.second),
 #if defined(PIXEL_MAP_SUPPORTED)
-        .pixmap = Converter::Convert<RefPtr<PixelMap>>(src.pixelMap),
+        .pixmap = Converter::Convert<RefPtr<PixelMap>>(src.pixelMap)
 #else
-        .pixmap = nullptr,
+        .pixmap = nullptr
 #endif
-        .size = LeadingMarginSize(convSize.first, convSize.second)
     };
     return leadingMargin;
 }
@@ -160,8 +160,8 @@ LeadingMargin Convert(const Ark_Length& src)
 {
     auto width = Converter::Convert<Dimension>(src);
     LeadingMargin leadingMargin = {
-        .pixmap = nullptr,
-        .size = NG::LeadingMarginSize(width, Dimension(0.0, width.Unit()))
+        .size = NG::LeadingMarginSize(width, Dimension(0.0, width.Unit())),
+        .pixmap = nullptr
     };
     return leadingMargin;
 }
@@ -253,19 +253,17 @@ UserGestureOptions Convert(const Ark_RichEditorGesture& src)
     return result;
 }
 
-#ifdef WRONG_GEN
 template<>
 UserMouseOptions Convert(const ::OnHoverCallback& src)
 {
     UserMouseOptions result;
     result.onHover = [callback = CallbackHelper(src)](bool isHover, HoverInfo& info) {
         Ark_Boolean arkIsHover = Converter::ArkValue<Ark_Boolean>(isHover);
-            const auto event = Converter::ArkHoverEventSync(info);
+        const auto event = Converter::ArkHoverEventSync(info);
         callback.InvokeSync(arkIsHover, event.ArkValue());
     };
     return result;
 }
-#endif
 
 template<>
 ImageSpanOptions Convert(const Ark_RichEditorImageSpanOptions& src)
@@ -275,9 +273,7 @@ ImageSpanOptions Convert(const Ark_RichEditorImageSpanOptions& src)
         ret.offset = imageOffset.value() >= 0 ? imageOffset.value() : 0;
     }
     ret.userGestureOption = Converter::OptConvert<UserGestureOptions>(src.gesture).value_or(UserGestureOptions {});
-#ifdef WRONG_GEN
     ret.userMouseOption = Converter::OptConvert<UserMouseOptions>(src.onHover).value_or(UserMouseOptions {});
-#endif
     ret.imageAttribute = Converter::OptConvert<ImageSpanAttribute>(src.imageStyle);
     return ret;
 }
@@ -456,8 +452,10 @@ void AssignArkValue(Ark_RichEditorParagraphStyle& dst, const ParagraphInfo& src)
         .pixmap = src.leadingMarginPixmap,
     };
     dst.textAlign = Converter::ArkValue<Opt_TextAlign>(static_cast<TextAlign>(src.textAlign));
+    // read pixel map is not supported
+    auto arkLength = Converter::ArkValue<Ark_Length>(leadingMargin.size.Width());
     dst.leadingMargin = Converter::ArkUnion<
-        Opt_Union_Dimension_LeadingMarginPlaceholder, Ark_LeadingMarginPlaceholder>(leadingMargin);
+        Opt_Union_Dimension_LeadingMarginPlaceholder, Ark_Length>(arkLength);
     dst.wordBreak = Converter::ArkValue<Opt_WordBreak>(static_cast<WordBreak>(src.wordBreak));
     dst.lineBreakStrategy = Converter::ArkValue<Opt_LineBreakStrategy>(
         static_cast<LineBreakStrategy>(src.lineBreakStrategy));
@@ -473,8 +471,10 @@ void AssignArkValue(Ark_RichEditorParagraphStyle& dst, const TextStyleResult& sr
         .pixmap = nullptr,
     };
     dst.textAlign = Converter::ArkValue<Opt_TextAlign>(static_cast<TextAlign>(src.textAlign));
+    // read pixel map is not supported
+    auto arkLength = Converter::ArkValue<Ark_Length>(leadingMargin.size.Width());
     dst.leadingMargin = Converter::ArkUnion<
-        Opt_Union_Dimension_LeadingMarginPlaceholder, Ark_LeadingMarginPlaceholder>(leadingMargin);
+        Opt_Union_Dimension_LeadingMarginPlaceholder, Ark_Length>(arkLength);
     dst.wordBreak = Converter::ArkValue<Opt_WordBreak>(static_cast<WordBreak>(src.wordBreak));
     dst.lineBreakStrategy = Converter::ArkValue<Opt_LineBreakStrategy>(
         static_cast<LineBreakStrategy>(src.lineBreakStrategy));
@@ -577,7 +577,8 @@ void AssignArkValue(Ark_RichEditorTextSpanResult& dst, const ResultObject& src, 
 void AssignArkValue(Ark_RichEditorImageSpanResult& dst, const ResultObject& src, ConvContext *ctx)
 {
     dst.spanPosition = ArkValue<Ark_RichEditorSpanPosition>(src.spanPosition);
-    dst.valuePixelMap = ArkValue<Opt_PixelMap>(PixelMapPeer::Create(src.valuePixelMap));
+    // read pixel map is not supported
+    dst.valuePixelMap = ArkValue<Opt_PixelMap>(Ark_Empty());
     dst.valueResourceStr = ArkUnion<Opt_ResourceStr, Ark_String>(src.valueString, ctx);
     dst.imageStyle = ArkValue<Ark_RichEditorImageSpanStyleResult>(src.imageStyle);
     dst.offsetInSpan.value0 = ArkValue<Ark_Number>(src.offsetInSpan[0]);
@@ -639,7 +640,20 @@ Ark_Number AddImageSpanImpl(Ark_RichEditorController peer,
     if (optionsOpt) {
         locOptions = optionsOpt.value();
     }
-    auto info = Converter::OptConvert<ImageSourceInfo>(*value);
+    std::optional<ImageSourceInfo> info;
+    Converter::VisitUnion(*value,
+        [&info](const Ark_NativePointer& val) {
+            auto pixelMap = reinterpret_cast<PixelMap*>(val);
+            CHECK_NULL_VOID(pixelMap);
+            RefPtr<PixelMap> PixelMapRef = AceType::Claim(pixelMap);
+            CHECK_NULL_VOID(PixelMapRef);
+            info = ImageSourceInfo(PixelMapRef);
+        },
+        [&info](const Ark_ResourceStr& val) {
+            info = Converter::OptConvert<ImageSourceInfo>(val);
+        },
+        []() {}
+    );
     if (info) {
         locOptions.image = info->GetSrc();
         locOptions.bundleName = info->GetBundleName();

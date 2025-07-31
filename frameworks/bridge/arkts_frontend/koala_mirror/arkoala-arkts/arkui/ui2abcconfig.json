@@ -2,14 +2,18 @@
     "compilerOptions": {
         "package": "@ohos.arkui",
         "outDir": "build-m3",
-        "baseUrl": "./ets",
+        "baseUrl": "src",
         "paths": {
             "#components": ["./generated/arkts"],
-            "@koalaui/interop": ["../../../interop/src/arkts"],
-            "@koalaui/common": ["../../../incremental/common/src"],
-            "@koalaui/compat": ["../../../incremental/compat/src/arkts"],
-            "@koalaui/runtime": ["../../../incremental/runtime/ets"],
-            "@koalaui/runtime/annotations": ["../../../incremental/runtime/annotations"]
+            "#stateMgmtTool": ["./stateManagement/tools/arkts"],
+            "arkui.ani": ["./ani/arkts/ArkUIAniModule"],
+            "@ohos.arkui.stateManagement": ["./stateManagement"],
+            "@koalaui/interop": ["../../../../interop/src/arkts"],
+            "@koalaui/common": ["../../../../incremental/common/src"],
+            "@koalaui/compat": ["../../../../incremental/compat/src/arkts"],
+            "@koalaui/runtime": ["../../../../incremental/runtime/ets"],
+            "@koalaui/runtime/annotations": ["../../../../incremental/runtime/annotations"],
+            "@koalaui/builderLambda": ["./annotations"]
         },
         "plugins": [
             {
@@ -20,10 +24,13 @@
         ]
     },
     "include": [
-        "ets/**/*.ts", "ets/*.ts"
+        "./src/ani/arkts/ArkUIAniModule.ts",
+        "./src/component/interop.ts",
+        "./src/stateManagement/**/*.ts",
+        "./src/**/*.ets"
     ],
     "exclude": [
-        "ets/generated/ts/*.ts"
+        "generated/ts/*.ts"
     ],
     "dependencies": {
         "@koalaui/runtime": ["../../incremental/runtime/ui2abcconfig.json"]

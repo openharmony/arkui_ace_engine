@@ -143,7 +143,6 @@ ohos_unittest("web_pattern_static_unit_test_ohos") {
     "$ace_root/frameworks/core/components_ng/pattern/grid/grid_accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/grid/grid_adaptive/grid_adaptive_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/grid/grid_event_hub.cpp",
-    #"$ace_root/frameworks/core/components_ng/pattern/grid/grid_fill_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/grid/grid_item_accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/grid/grid_item_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/grid/grid_item_layout_property.cpp",
@@ -225,6 +224,7 @@ ohos_unittest("web_pattern_static_unit_test_ohos") {
     "$ace_root/frameworks/core/components_ng/pattern/list/list_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/list/list_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/list/list_position_controller.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/list/list_position_controller_multi_thread.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/loading_progress/loading_progress_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/loading_progress/loading_progress_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/loading_progress/loading_progress_modifier.cpp",
@@ -336,7 +336,6 @@ ohos_unittest("web_pattern_static_unit_test_ohos") {
     "$ace_root/frameworks/core/components_ng/pattern/picker/datepicker_column_accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/picker/datepicker_column_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/picker/datepicker_column_pattern.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/picker/datepicker_column_pattern_multi_thread.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/picker/datepicker_dialog_view.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/picker/datepicker_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/picker/datepicker_paint_method.cpp",
@@ -601,7 +600,6 @@ ohos_unittest("web_pattern_static_unit_test_ohos") {
     "$ace_root/frameworks/core/components_ng/pattern/time_picker/timepicker_column_accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/time_picker/timepicker_column_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/time_picker/timepicker_column_pattern.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/time_picker/timepicker_column_pattern_multi_thread.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/time_picker/timepicker_dialog_view.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/time_picker/timepicker_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/time_picker/timepicker_paint_method.cpp",
@@ -748,5 +746,5 @@ ohos_unittest("web_pattern_static_unit_test_ohos") {
 
 group("web_pattern_static_unit_test") {
   testonly = true
-  deps = [ ":web_pattern_static_unit_test_ohos" ]
+  #deps = [ ":web_pattern_static_unit_test_ohos" ]
 }

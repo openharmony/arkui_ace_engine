@@ -52,7 +52,7 @@ Ark_Boolean GetModifierKeyStateImpl(Ark_VMContext vmContext,
     CHECK_NULL_RETURN(keys, DefaultValueBoolean);
     auto eventKeys = peer->GetBaseInfo()->GetPressedKeyCodes();
     auto keysStr = Converter::Convert<std::vector<std::string>>(*keys);
-    return Converter::ArkValue<Ark_Boolean>(AccessorUtils::CheckKeysPressed(keysStr, eventKeys));
+    return Converter::ArkValue<Ark_Boolean>(OHOS::Ace::NG::AccessorUtils::CheckKeysPressed(keysStr, eventKeys));
 }
 Ark_EventTarget GetTargetImpl(Ark_BaseEvent peer)
 {
@@ -108,7 +108,9 @@ Opt_Number GetAxisHorizontalImpl(Ark_BaseEvent peer)
 void SetAxisHorizontalImpl(Ark_BaseEvent peer,
                            const Ark_Number* axisHorizontal)
 {
-    LOGE("BaseEventAccessor.SetAxisHorizontalImpl does nothing");
+    CHECK_NULL_VOID(peer && peer->GetBaseInfo());
+    CHECK_NULL_VOID(axisHorizontal);
+    peer->GetBaseInfo()->SetHorizontalAxis(Converter::Convert<float>(*axisHorizontal));
 }
 Opt_Number GetAxisVerticalImpl(Ark_BaseEvent peer)
 {
@@ -120,7 +122,9 @@ Opt_Number GetAxisVerticalImpl(Ark_BaseEvent peer)
 void SetAxisVerticalImpl(Ark_BaseEvent peer,
                          const Ark_Number* axisVertical)
 {
-    LOGE("BaseEventAccessor.SetAxisVerticalImpl does nothing");
+    CHECK_NULL_VOID(peer && peer->GetBaseInfo());
+    CHECK_NULL_VOID(axisVertical);
+    peer->GetBaseInfo()->SetVerticalAxis(Converter::Convert<float>(*axisVertical));
 }
 Ark_Number GetPressureImpl(Ark_BaseEvent peer)
 {

@@ -191,67 +191,6 @@ export class PanGestureOptionsInternal {
         return obj
     }
 }
-export class PanGestureOptions implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
-    static ctor_pangestureoptions(value?: PanGestureHandlerOptions): KPointer {
-        const thisSerializer: Serializer = Serializer.hold()
-        let value_type: int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8(value_type)
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
-            const value_value = value!
-            thisSerializer.writePanGestureHandlerOptions(value_value)
-        }
-        const retval = ArkUIGeneratedNativeModule._PanGestureOptions_ctor(thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-        return retval
-    }
-    constructor(value?: PanGestureHandlerOptions) {
-        const ctorPtr: KPointer = PanGestureOptions.ctor_pangestureoptions(value)
-        this.peer = new Finalizable(ctorPtr, PanGestureOptions.getFinalizer())
-    }
-    static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._PanGestureOptions_getFinalizer()
-    }
-    public setDirection(value: PanDirection): void {
-        const value_casted = value as (PanDirection)
-        this.setDirection_serialize(value_casted)
-    }
-    public setDistance(value: number): void {
-        const value_casted = value as (number)
-        this.setDistance_serialize(value_casted)
-    }
-    public setFingers(value: number): void {
-        const value_casted = value as (number)
-        this.setFingers_serialize(value_casted)
-    }
-    public getDirection(): PanDirection {
-        return this.getDirection_serialize()
-    }
-    public getDistance(): number {
-        return this.getDistance_serialize()
-    }
-    private setDirection_serialize(value: PanDirection): void {
-        ArkUIGeneratedNativeModule._PanGestureOptions_setDirection(this.peer!.ptr, TypeChecker.PanDirection_ToNumeric(value))
-    }
-    private setDistance_serialize(value: number): void {
-        ArkUIGeneratedNativeModule._PanGestureOptions_setDistance(this.peer!.ptr, value)
-    }
-    private setFingers_serialize(value: number): void {
-        ArkUIGeneratedNativeModule._PanGestureOptions_setFingers(this.peer!.ptr, value)
-    }
-    private getDirection_serialize(): PanDirection {
-        const retval  = ArkUIGeneratedNativeModule._PanGestureOptions_getDirection(this.peer!.ptr)
-        return TypeChecker.PanDirection_FromNumeric(retval)
-    }
-    private getDistance_serialize(): number {
-        const retval  = ArkUIGeneratedNativeModule._PanGestureOptions_getDistance(this.peer!.ptr)
-        return retval
-    }
-}
 export interface PanGestureInterface {
     onActionStart(event: ((event: GestureEvent) => void)): PanGestureInterface
     onActionUpdate(event: ((event: GestureEvent) => void)): PanGestureInterface

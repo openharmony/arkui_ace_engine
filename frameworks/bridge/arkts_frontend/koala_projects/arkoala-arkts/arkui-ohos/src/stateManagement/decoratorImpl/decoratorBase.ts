@@ -12,12 +12,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { WatchFunc } from './decoratorWatch';
-import { IDecoratedV1Variable, IDecoratedV2Variable } from '../decorator';
-import { WatchFuncType, ISubscribedWatches, WatchIdType } from '../decorator';
+
 import { ExtendableComponent } from '../../component/extendableComponent';
-import { OBSERVE } from '../decorator';
+import {
+    IDecoratedV1Variable,
+    IDecoratedV2Variable,
+    IWatchSubscriberRegister,
+    OBSERVE,
+    WatchFuncType,
+    WatchIdType,
+} from '../decorator';
+import { StateMgmtConsole } from '../tools/stateMgmtDFX';
 import { StateMgmtTool } from '#stateMgmtTool';
+import { WatchFunc } from './decoratorWatch';
 
 /**
 It is useful to have separate class implement each variable decoratore,  e.g. for DFX, not use `MutableState` as currently done.
@@ -74,6 +81,7 @@ export abstract class DecoratedV1VariableBase<T> extends DecoratedVariableBase i
     /* compiler BUG: change to protcted */
     public readonly _watchFuncs: Map<WatchIdType, WatchFunc> = new Map<WatchIdType, WatchFunc>();
     protected myTriggerFromSourceWatchId_: WatchIdType = -1;
+    protected onObservedObjectChangeExecWatchFuncs_: WatchFunc;
 
     constructor(
         decorator: string,
@@ -86,6 +94,7 @@ export abstract class DecoratedV1VariableBase<T> extends DecoratedVariableBase i
             const w = new WatchFunc(watchFunc);
             this._watchFuncs.set(w.id(), w);
         }
+        this.onObservedObjectChangeExecWatchFuncs_ = new WatchFunc(this.execWatchFuncs);
     }
 
     public info(): string {
@@ -129,18 +138,14 @@ export abstract class DecoratedV1VariableBase<T> extends DecoratedVariableBase i
         if (!(value && typeof value === 'object')) {
             return;
         }
-        if (StateMgmtTool.isISubscribedWatches(value as Object)) {
-            const iSubscribedWatches = value as Object as ISubscribedWatches;
-            this._watchFuncs.forEach((watchFunc) => {
-                watchFunc.registerMeTo(iSubscribedWatches);
-            });
+        if (StateMgmtTool.isIWatchSubscriberRegister(value)) {
+            this.onObservedObjectChangeExecWatchFuncs_.registerMeTo(value as IWatchSubscriberRegister);
         } else {
             const handler = StateMgmtTool.tryGetHandler(value as Object);
-            if (handler && StateMgmtTool.isISubscribedWatches(handler as Object)) {
-                const iSubscribedWatches = handler as Object as ISubscribedWatches;
-                this._watchFuncs.forEach((watchFunc) => {
-                    watchFunc.registerMeTo(iSubscribedWatches);
-                });
+            if (handler && StateMgmtTool.isIWatchSubscriberRegister(handler)) {
+                this.onObservedObjectChangeExecWatchFuncs_.registerMeTo(handler as IWatchSubscriberRegister);
+            } else {
+                StateMgmtConsole.log('error: watch function register failed');
             }
         }
     }
@@ -150,47 +155,42 @@ export abstract class DecoratedV1VariableBase<T> extends DecoratedVariableBase i
         if (!(value && typeof value === 'object')) {
             return;
         }
-        if (StateMgmtTool.isISubscribedWatches(value as Object)) {
-            const iSubscribedWatches = value as Object as ISubscribedWatches;
-            this._watchFuncs.forEach((watchFunc) => {
-                watchFunc.unregisterMeFrom(iSubscribedWatches);
-            });
+        if (StateMgmtTool.isIWatchSubscriberRegister(value)) {
+            this.onObservedObjectChangeExecWatchFuncs_.unregisterMeFrom(value as IWatchSubscriberRegister);
         } else {
             // check if value is observed / proxied interface
             const handler = StateMgmtTool.tryGetHandler(value as Object);
-            if (handler && StateMgmtTool.isISubscribedWatches(handler as Object)) {
-                const iSubscribedWatches = handler as ISubscribedWatches;
-                this._watchFuncs.forEach((watchFunc) => {
-                    watchFunc.unregisterMeFrom(iSubscribedWatches);
-                });
+            if (handler && StateMgmtTool.isIWatchSubscriberRegister(handler)) {
+                this.onObservedObjectChangeExecWatchFuncs_.unregisterMeFrom(handler as IWatchSubscriberRegister);
             }
         }
     }
 
     /* compiler BUG: change to protcted */
-    public execWatchFuncs(): void {
+    public execWatchFuncs(_: string = ''): void {
         this._watchFuncs.forEach((watchFunc, id) => {
             watchFunc.execute(this.varName);
         });
     }
 
-    public registerWatchToSource(me: IDecoratedV1Variable<T>): void {
-        if (!StateMgmtTool.isDecoratedV1VariableBase(me)) {
+    public registerWatchToSource(watchOwner: IDecoratedV1Variable<T>): WatchIdType {
+        if (!StateMgmtTool.isDecoratedV1VariableBase(watchOwner)) {
             throw new SyntaxError('syntax error');
         }
-        const meBase = me as DecoratedV1VariableBase<T>;
-        const weakMe = new WeakRef<DecoratedV1VariableBase<T>>(meBase);
-        const watchThis = new WatchFunc((_: string) => {});
+        const watchOwnerBase = watchOwner as DecoratedV1VariableBase<T>;
+        const weakWatchOwner = new WeakRef<DecoratedV1VariableBase<T>>(watchOwnerBase);
+        const watchFuncObj = new WatchFunc((_: string) => {});
         const watchFunc: WatchFuncType = (_: string) => {
-            const me = weakMe.deref();
-            if (me) {
-                me.execWatchFuncs();
+            const watchOwner1 = weakWatchOwner.deref();
+            if (watchOwner1) {
+                watchOwner1.execWatchFuncs();
             } else {
-                this._watchFuncs.delete(watchThis.id());
+                this._watchFuncs.delete(watchFuncObj.id());
             }
         };
-        watchThis.setFunc(watchFunc);
-        this._watchFuncs.set(watchThis.id(), watchThis);
+        watchFuncObj.setFunc(watchFunc);
+        this._watchFuncs.set(watchFuncObj.id(), watchFuncObj);
+        return watchFuncObj.id();
     }
 }
 

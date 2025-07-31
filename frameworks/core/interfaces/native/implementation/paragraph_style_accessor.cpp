@@ -124,8 +124,13 @@ Opt_Union_Number_LeadingMarginPlaceholder GetLeadingMarginImpl(Ark_ParagraphStyl
     CHECK_NULL_RETURN(peer, invalid);
     CHECK_NULL_RETURN(peer->span, invalid);
     auto style = peer->span->GetParagraphStyle();
-    return Converter::ArkUnion<Opt_Union_Number_LeadingMarginPlaceholder,
-        Ark_Number>(style.leadingMargin);
+    if (style.leadingMargin.has_value() && style.leadingMargin->pixmap) {
+        return Converter::ArkUnion<Opt_Union_Number_LeadingMarginPlaceholder,
+            Ark_LeadingMarginPlaceholder>(style.leadingMargin);
+    } else {
+        return Converter::ArkUnion<Opt_Union_Number_LeadingMarginPlaceholder,
+            Ark_Number>(style.leadingMargin);
+    }
 }
 Opt_Number GetParagraphSpacingImpl(Ark_ParagraphStyle peer)
 {

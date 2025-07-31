@@ -148,6 +148,7 @@ public:
         bool isModifier = false);
     static void HandleBackgroundBlurStyleInactiveColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,
         bool isModifier = false);
+    static void HandleApplyAttributesFinish(FrameNode* frameNode);
 
 private:
     static void InitTabsNode(RefPtr<TabsNode> tabsNode, const RefPtr<SwiperController>& swiperController);

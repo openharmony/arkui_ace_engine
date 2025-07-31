@@ -22,17 +22,19 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonShapeMethodPeer, CommonShapeMethod, ArkCommonShapeMethodComponent, ArkCommonShapeMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod } from "./common"
+import { ArkCommonShapeMethodPeer, CommonShapeMethod, ArkCommonShapeMethodComponent, ArkCommonShapeMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod, AttributeModifier } from "./common"
 import { Length } from "./units"
 import { Resource } from "global.resource"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { LineModifier } from "../LineModifier"
 export type ShapePoint = [
     Length,
     Length
 ]
 export class ArkLinePeer extends ArkCommonShapeMethodPeer {
+    _attributeSet?: LineModifier
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -94,6 +96,7 @@ export type LineInterface = (options?: LineOptions) => LineAttribute;
 export interface LineAttribute extends CommonShapeMethod {
     startPoint(value: ShapePoint | undefined): this
     endPoint(value: ShapePoint | undefined): this
+    attributeModifier(value: AttributeModifier<LineAttribute> | AttributeModifier<CommonMethod> | undefined): this { return this; }
 }
 export class ArkLineStyle extends ArkCommonShapeMethodStyle implements LineAttribute {
     startPoint_value?: ShapePoint | undefined
@@ -137,6 +140,11 @@ export class ArkLineComponent extends ArkCommonShapeMethodComponent implements L
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+
+    public attributeModifier(modifier: AttributeModifier<LineAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        hookLineAttributeModifier(this, modifier);
+        return this
     }
 }
 /** @memo */

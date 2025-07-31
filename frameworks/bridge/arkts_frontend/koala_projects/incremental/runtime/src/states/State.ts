@@ -292,6 +292,7 @@ export class StateImpl<Value> implements Observable, ManagedState, MutableState<
     get value(): Value {
         this.onAccess()
         const manager = this.manager
+        this.checkUIThreadAccess()
         return manager === undefined || manager.frozen ? this.snapshot : this.current(manager.journal)
     }
 
@@ -382,6 +383,16 @@ export class StateImpl<Value> implements Observable, ManagedState, MutableState<
         if (this.myModified) str += ",modified"
         if (this.manager?.frozen == true) str += ",frozen"
         return str + "=" + this.value
+    }
+
+    checkUIThreadAccess(): void {
+        const manager = this.manager
+        if (manager && manager.isDebugMode) {
+            const local = GlobalStateManager.GetLocalManager();
+            if (manager !== local) {
+                throw new Error('prohibited to access state from non-UI thread');
+            }
+        }
     }
 }
 
@@ -511,8 +522,8 @@ class ParameterImpl<Value> implements MutableState<Value> {
     update(value: Value, equivalent?: Equivalent<Value>): void {
         const isModified = ObservableHandler.dropModified(this._value)
         if (!refEqual<Value>(this._value, value)) {
-            this._value = value
             this._modified = isModified || (equivalent?.(this._value, value) != true)
+            this._value = value
         } else {
             this._modified = isModified
         }
@@ -642,8 +653,10 @@ export class StateManagerImpl implements StateManager {
         scope.node = node
         scope.nodeRef = node
         scope.dependencies = new Dependencies()
+        this.current = scope // to attach named states to this scope
         scope.setNamedState(CONTEXT_ROOT_SCOPE, new StateImpl<ScopeImpl<Node>>(this, scope, false))
         scope.setNamedState(CONTEXT_ROOT_NODE, new StateImpl<Node>(this, node, false))
+        this.current = undefined
         return scope
     }
 

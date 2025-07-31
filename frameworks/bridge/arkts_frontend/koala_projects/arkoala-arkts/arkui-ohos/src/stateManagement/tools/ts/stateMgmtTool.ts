@@ -59,7 +59,10 @@ export class StateMgmtTool {
     static isDecoratedV1VariableBase(value: NullableObject): boolean {
         return true;
     }
-    static isISubscribedWatches(value: NullableObject): boolean {
+    static isISubscribedWatches<T>(value: T): boolean {
+        return true;
+    }
+    static isIWatchSubscriberRegister(value: NullableObject): boolean {
         return true;
     }
     static isInterfaceProxyHandler(value: NullableObject): boolean {

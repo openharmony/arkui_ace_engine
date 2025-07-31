@@ -62,8 +62,10 @@ DialogProperties BuildDialogProperties(const Ark_CalendarDialogOptions options)
     dialogProps.backgroundColor = Converter::OptConvert<Color>(options.backgroundColor);
     dialogProps.shadow = Converter::OptConvert<Shadow>(options.shadow);
     dialogProps.customStyle = false;
-    // dialogProps.enableHoverMode =
-    //     Converter::OptConvert<bool>(options.enableHoverMode).value_or(dialogProps.enableHoverMode);
+    auto enableHoverMode = Converter::OptConvert<bool>(options.enableHoverMode);
+    if (enableHoverMode.has_value()) {
+        dialogProps.enableHoverMode = enableHoverMode.value();
+    }
     dialogProps.hoverModeArea = Converter::OptConvert<HoverModeAreaType>(options.hoverModeArea);
     BuildDialogPropertiesCallbacks(options, dialogProps);
     return dialogProps;

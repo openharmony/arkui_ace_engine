@@ -15,7 +15,6 @@
 #ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_NODE_CONTENT_PEER_H
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_NODE_CONTENT_PEER_H
 
-#include "arkoala_api_generated.h"
 #include "core/components_ng/syntax/node_content.h"
 
 struct NodeContentPeer {

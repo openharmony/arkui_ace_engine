@@ -25,7 +25,7 @@ import { AccessibilityCallback, AccessibilityHoverEvent, AccessibilityFocusCallb
 import { AsyncCallback_Array_TextMenuItem_Array_TextMenuItem, TextMenuItem, AsyncCallback_TextMenuItem_TextRange_Boolean, TextRange, DeleteValue, EditableTextChangeValue, InsertValue, Callback_StyledStringChangeValue_Boolean, StyledStringChangeValue, EditableTextOnChangeCallback, PreviewText, TextChangeOptions, OnDidChangeCallback } from "./../textCommon"
 import { AsyncCallback_image_PixelMap_Void, ReceiveCallback } from "./../arkui-external"
 import { PixelMap } from "#external"
-import { ButtonTriggerClickCallback } from "./../button"
+import { ButtonConfiguration, ButtonTriggerClickCallback } from "./../button"
 import { Callback_Any_Void, Callback_FormCallbackInfo_Void, FormCallbackInfo, Callback_Literal_Number_errcode_String_msg_Void, Literal_Number_errcode_String_msg } from "./../formComponent"
 import { Area, Length, ResourceStr, SizeOptions, VoidCallback } from "./../units"
 import { Callback_Array_Number_Void } from "./../patternLock"
@@ -52,12 +52,12 @@ import { Want } from "./../ohos.app.ability"
 import { Callback_MarqueeState_Void, MarqueeState } from "./../text"
 import { Callback_Number_Boolean, Callback_Number_Number_Boolean, Callback_Number_Number_Number_Void, ScrollState, OnScrollVisibleContentChangeCallback, VisibleListContentInfo } from "./../list"
 import { Callback_Number_Number_PanelMode_Void, PanelMode, Callback_Opt_PanelMode_Void } from "./../panel"
-import { Callback_Number_SliderChangeMode_Void, SliderChangeMode, SliderTriggerChangeCallback } from "./../slider"
+import { Callback_Number_SliderChangeMode_Void, SliderChangeMode, SliderConfiguration, SliderTriggerChangeCallback } from "./../slider"
 import { Callback_Number_String_Void, Callback_Opt_ResourceStr_Void, Callback_Opt_Union_Number_Resource_Void, OnSelectCallback } from "./../select"
 import { Tuple_Number_Number } from "./../arkui-synthetics"
 import { Callback_Number_Void, Callback_Opt_Number_Void, OnAlphabetIndexerPopupSelectCallback, OnAlphabetIndexerRequestPopupDataCallback, OnAlphabetIndexerSelectCallback } from "./../alphabetIndexer"
 import { OffsetResult, OnScrollFrameBeginHandlerResult, OnScrollEdgeCallback, OnScrollFrameBeginCallback, ScrollOnScrollCallback, ScrollOnWillScrollCallback } from "./../scroll"
-import { Callback_Opt_Boolean_Void, OnCheckboxChangeCallback } from "./../checkbox"
+import { Callback_Opt_Boolean_Void, OnCheckboxChangeCallback, CheckBoxConfiguration } from "./../checkbox"
 import { Resource } from "global.resource"
 import { StyledString, UserDataSpan, StyledStringMarshallCallback, StyledStringUnmarshallCallback } from "./../styledString"
 import { TabContentAnimatedTransition, Callback_TabContentTransitionProxy_Void, TabContentTransitionProxy, OnTabsAnimationEndCallback, TabsAnimationEvent, OnTabsAnimationStartCallback, OnTabsContentWillChangeCallback, OnTabsGestureSwipeCallback, TabsCustomContentTransitionCallback } from "./../tabs"
@@ -74,6 +74,7 @@ import { WithThemeAttribute, WithThemeInterface, WithThemeOptions } from "./../w
 import { Callback_WrappedBuilder_Args_Void, CommonConfiguration } from "./../arkui-wrapper-builder"
 import { CheckedCallback } from "./../radioops"
 import { CustomNodeBuilder } from "./../customBuilder"
+import { DatePickerSelectedCallback } from "./../datepickerselectedops"
 import { ErrorCallback } from "./../ohos.base"
 import { BusinessError } from "#external"
 import { GetItemMainSizeByIndex } from "./../waterFlow"
@@ -88,8 +89,8 @@ import { OnFoldStatusChangeCallback, OnFoldStatusChangeInfo, OnHoverStatusChange
 import { OnHoverCallback } from "./../sdk-stubs"
 import { OnLinearIndicatorChangeCallback } from "./../linearindicator"
 import { SurfaceRect, Callback_String_SurfaceRect_Void, OnNativeLoadCallback } from "./../xcomponent"
-import { OnRadioChangeCallback } from "./../radio"
-import { OnRatingChangeCallback } from "./../rating"
+import { OnRadioChangeCallback, RadioConfiguration } from "./../radio"
+import { OnRatingChangeCallback, RatingConfiguration } from "./../rating"
 import { PageTransitionCallback, RouteType } from "./../pageTransition"
 import { PasteButtonCallback, PasteButtonOnClickResult } from "./../pasteButton"
 import { PluginErrorCallback, PluginErrorData } from "./../pluginComponent"
@@ -101,6 +102,9 @@ import { SelectAllCallback } from "./../checkboxgroupops"
 import { SelectCallback } from "./../checkboxops"
 import { SelectSelectedCallback, SelectValueCallback } from "./../selectops"
 import { ValueCallback } from "./../sliderops"
+import { TextPickerSelectedCallback } from "./../textpickerselectedops"
+import { TextPickerValueCallback } from "./../textpickervalueops"
+import { TimePickerSelectedCallback } from "./../timepickerselectedops"
 import { ShowSideBarCallback, SideBarWidthCallback } from "./../sidebarcontainerops"
 import { NavBarWidthCallback } from "./../navigationops"
 import { StepperIndexCallback } from "./../stepperops"
@@ -108,6 +112,7 @@ import { TypeChecker } from "#components"
 import { NodeContainer_AboutToResizeCallback } from "./../nodeContainer"
 import { Size, DrawContext } from "../../Graphics"
 import { DrawCallback } from "./../../RenderNode"
+import { ToggleConfiguration } from "../toggle"
 export function deserializeAndCallAccessibilityCallback(thisDeserializer: Deserializer): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as AccessibilityCallback)
@@ -1592,6 +1597,12 @@ export function deserializeAndCallCustomNodeBuilder(thisDeserializer: Deserializ
     const _callResult  = _call(parentNode)
     _continuation(_callResult)
 }
+export function deserializeAndCallDatePickerSelectedCallback(thisDeserializer: Deserializer): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as DatePickerSelectedCallback)
+    let selected : Date = new Date(thisDeserializer.readInt64())
+    _call(selected)
+}
 export function deserializeAndCallDrawCallback(thisDeserializer: Deserializer): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as DrawCallback)
@@ -1878,7 +1889,9 @@ export function deserializeAndCallOnFullScreenEnterCallback(thisDeserializer: De
 export function deserializeAndCallOnHoverCallback(thisDeserializer: Deserializer): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as OnHoverCallback)
-    _call()
+    let status : boolean = thisDeserializer.readBoolean()
+    let event : HoverEvent = (thisDeserializer.readHoverEvent() as HoverEvent)
+    _call(status, event)
 }
 export function deserializeAndCallOnHoverStatusChangeCallback(thisDeserializer: Deserializer): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
@@ -2557,12 +2570,62 @@ export function deserializeAndCallTextPickerScrollStopCallback(thisDeserializer:
     let index : number | Array<number> = (index_buf as number | Array<number>)
     _call(value, index)
 }
+export function deserializeAndCallTextPickerSelectedCallback(thisDeserializer: Deserializer): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as TextPickerSelectedCallback)
+    const selected_buf_selector : int32 = thisDeserializer.readInt8()
+    let selected_buf : number | Array<number> | undefined
+    if (selected_buf_selector == 0) {
+        selected_buf = (thisDeserializer.readNumber() as number)
+    }
+    else if (selected_buf_selector == 1) {
+        const selected_buf_u_length : int32 = thisDeserializer.readInt32()
+        let selected_buf_u : Array<number> = new Array<number>(selected_buf_u_length)
+        for (let selected_buf_u_i = 0; selected_buf_u_i < selected_buf_u_length; selected_buf_u_i++) {
+            selected_buf_u[selected_buf_u_i] = (thisDeserializer.readNumber() as number)
+        }
+        selected_buf = selected_buf_u
+    }
+    else {
+        throw new Error("One of the branches for selected_buf has to be chosen through deserialisation.")
+    }
+    let selected : number | Array<number> = (selected_buf as number | Array<number>)
+    _call(selected)
+}
+export function deserializeAndCallTextPickerValueCallback(thisDeserializer: Deserializer): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as TextPickerValueCallback)
+    const value_buf_selector : int32 = thisDeserializer.readInt8()
+    let value_buf : string | Array<string> | undefined
+    if (value_buf_selector == 0) {
+        value_buf = (thisDeserializer.readString() as string)
+    }
+    else if (value_buf_selector == 1) {
+        const value_buf_u_length : int32 = thisDeserializer.readInt32()
+        let value_buf_u : Array<string> = new Array<string>(value_buf_u_length)
+        for (let value_buf_u_i = 0; value_buf_u_i < value_buf_u_length; value_buf_u_i++) {
+            value_buf_u[value_buf_u_i] = (thisDeserializer.readString() as string)
+        }
+        value_buf = value_buf_u
+    }
+    else {
+        throw new Error("One of the branches for value_buf has to be chosen through deserialisation.")
+    }
+    let value : string | Array<string> = (value_buf as string | Array<string>)
+    _call(value)
+}
 export function deserializeAndCallTextTimerAttribute_onTimer_event_type(thisDeserializer: Deserializer): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((utc: number, elapsedTime: number) => void))
     let utc : number = (thisDeserializer.readInt64() as number)
     let elapsedTime : number = (thisDeserializer.readInt64() as number)
     _call(utc, elapsedTime)
+}
+export function deserializeAndCallTimePickerSelectedCallback(thisDeserializer: Deserializer): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as TimePickerSelectedCallback)
+    let selected : Date = new Date(thisDeserializer.readInt64())
+    _call(selected)
 }
 export function deserializeAndCallTransitionFinishCallback(thisDeserializer: Deserializer): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
@@ -2691,6 +2754,65 @@ export function deserializeAndCallCallback_String_SurfaceRect_Void(thisDeseriali
     let surfaceId : string = (thisDeserializer.readString() as string)
     let rect : SurfaceRect = thisDeserializer.readSurfaceRect()
     _call(surfaceId, rect)
+}
+export function deserializeAndCallRadioModifierBuilder(thisDeserializer: Deserializer): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((parentNode: KPointer,config: RadioConfiguration) => KPointer))
+    let parentNode : KPointer = thisDeserializer.readPointer()
+    let config : RadioConfiguration = thisDeserializer.readRadioConfiguration()
+    let _continuation : ((value: KPointer) => void) = thisDeserializer.readCallback_Pointer_Void()
+    const _callResult  = _call(parentNode, config)
+    _continuation(_callResult)
+}
+
+export function deserializeAndCallButtonModifierBuilder(thisDeserializer: Deserializer): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((parentNode: KPointer,config: ButtonConfiguration) => KPointer))
+    let parentNode : KPointer = thisDeserializer.readPointer()
+    let config : ButtonConfiguration = thisDeserializer.readButtonConfiguration()
+    let _continuation : ((value: KPointer) => void) = thisDeserializer.readCallback_Pointer_Void()
+    const _callResult  = _call(parentNode, config)
+    _continuation(_callResult)
+}
+
+export function deserializeAndCallCheckBoxModifierBuilder(thisDeserializer: Deserializer): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((parentNode: KPointer,config: CheckBoxConfiguration) => KPointer))
+    let parentNode : KPointer = thisDeserializer.readPointer()
+    let config : CheckBoxConfiguration = thisDeserializer.readCheckBoxConfiguration()
+    let _continuation : ((value: KPointer) => void) = thisDeserializer.readCallback_Pointer_Void()
+    const _callResult  = _call(parentNode, config)
+    _continuation(_callResult)
+}
+
+export function deserializeAndCallToggleModifierBuilder(thisDeserializer: Deserializer): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((parentNode: KPointer,config: ToggleConfiguration) => KPointer))
+    let parentNode : KPointer = thisDeserializer.readPointer()
+    let config : ToggleConfiguration = thisDeserializer.readToggleConfiguration()
+    let _continuation : ((value: KPointer) => void) = thisDeserializer.readCallback_Pointer_Void()
+    const _callResult  = _call(parentNode, config)
+    _continuation(_callResult)
+}
+
+export function deserializeAndCallRatingModifierBuilder(thisDeserializer: Deserializer): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((parentNode: KPointer,config: RatingConfiguration) => KPointer))
+    let parentNode : KPointer = thisDeserializer.readPointer()
+    let config : RatingConfiguration = thisDeserializer.readRatingConfiguration()
+    let _continuation : ((value: KPointer) => void) = thisDeserializer.readCallback_Pointer_Void()
+    const _callResult  = _call(parentNode, config)
+    _continuation(_callResult)
+}
+
+export function deserializeAndCallSliderModifierBuilder(thisDeserializer: Deserializer): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((parentNode: KPointer,config: SliderConfiguration) => KPointer))
+    let parentNode : KPointer = thisDeserializer.readPointer()
+    let config : SliderConfiguration = thisDeserializer.readSliderConfiguration()
+    let _continuation : ((value: KPointer) => void) = thisDeserializer.readCallback_Pointer_Void()
+    const _callResult  = _call(parentNode, config)
+    _continuation(_callResult)
 }
 export function deserializeAndCallCallback(thisDeserializer: Deserializer): void {
     const kind : int32 = thisDeserializer.readInt32()
@@ -2883,6 +3005,7 @@ export function deserializeAndCallCallback(thisDeserializer: Deserializer): void
         case -2146044511/*CallbackKind.Kind_ContentWillScrollCallback*/: return deserializeAndCallContentWillScrollCallback(thisDeserializer);
         case 260483890/*CallbackKind.Kind_Context_getGroupDir_Callback*/: return deserializeAndCallContext_getGroupDir_Callback(thisDeserializer);
         case 1766817632/*CallbackKind.Kind_CustomNodeBuilder*/: return deserializeAndCallCustomNodeBuilder(thisDeserializer);
+	case 459949440/*CallbackKind.Kind_DatePickerSelectedCallback*/: return deserializeAndCallDatePickerSelectedCallback(thisDeserializer);
         case -177744805/*CallbackKind.Kind_DrawCallback*/: return deserializeAndCallDrawCallback(thisDeserializer);
         case -1729563209/*CallbackKind.Kind_EditableTextOnChangeCallback*/: return deserializeAndCallEditableTextOnChangeCallback(thisDeserializer);
         case -1936519453/*CallbackKind.Kind_ErrorCallback*/: return deserializeAndCallErrorCallback(thisDeserializer);
@@ -2993,7 +3116,10 @@ export function deserializeAndCallCallback(thisDeserializer: Deserializer): void
         case 18061455/*CallbackKind.Kind_TextFieldValueCallback*/: return deserializeAndCallTextFieldValueCallback(thisDeserializer);
         case -202014218/*CallbackKind.Kind_TextPickerEnterSelectedAreaCallback*/: return deserializeAndCallTextPickerEnterSelectedAreaCallback(thisDeserializer);
         case -1928298699/*CallbackKind.Kind_TextPickerScrollStopCallback*/: return deserializeAndCallTextPickerScrollStopCallback(thisDeserializer);
+        case 1206573193/*CallbackKind.Kind_TextPickerSelectedCallback*/: return deserializeAndCallTextPickerSelectedCallback(thisDeserializer);
+        case 1499304299/*CallbackKind.Kind_TextPickerValueCallback*/: return deserializeAndCallTextPickerValueCallback(thisDeserializer);
         case 2057659801/*CallbackKind.Kind_TextTimerAttribute_onTimer_event_type*/: return deserializeAndCallTextTimerAttribute_onTimer_event_type(thisDeserializer);
+        case 1873725025/*CallbackKind.Kind_TimePickerSelectedCallback*/: return deserializeAndCallTimePickerSelectedCallback(thisDeserializer);
         case -1878458553/*CallbackKind.Kind_TransitionFinishCallback*/: return deserializeAndCallTransitionFinishCallback(thisDeserializer);
         case 1044833488/*CallbackKind.Kind_Type_NavigationAttribute_customNavContentTransition_delegate*/: return deserializeAndCallType_NavigationAttribute_customNavContentTransition_delegate(thisDeserializer);
         case -1078223620/*CallbackKind.Kind_Type_TextPickerAttribute_onChange_callback*/: return deserializeAndCallType_TextPickerAttribute_onChange_callback(thisDeserializer);
@@ -3004,6 +3130,12 @@ export function deserializeAndCallCallback(thisDeserializer: Deserializer): void
         case -1829763354/*CallbackKind.Kind_WebKeyboardCallback*/: return deserializeAndCallWebKeyboardCallback(thisDeserializer);
         case 219587748/*CallbackKind.Kind_WithThemeInterface*/: return deserializeAndCallWithThemeInterface(thisDeserializer);
         case -1736208400/*CallbackKind.Kind_Callback_String_SurfaceRect_Void*/: return deserializeAndCallCallback_String_SurfaceRect_Void(thisDeserializer);
+        case -327322091/*CallbackKind.Kind_RadioModifierBuilder*/: return deserializeAndCallRadioModifierBuilder(thisDeserializer);
+        case -2004118094/*Kind_ButtonModifierBuilder*/: return deserializeAndCallButtonModifierBuilder(thisDeserializer);
+        case 1317697111/*Kind_CheckBoxModifierBuilder*/: return deserializeAndCallCheckBoxModifierBuilder(thisDeserializer);
+        case -879751946/*Kind_ToggleModifierBuilder*/: return deserializeAndCallToggleModifierBuilder(thisDeserializer);
+        case 1013330403/*Kind_RatingModifierBuilder*/: return deserializeAndCallRatingModifierBuilder(thisDeserializer);
+        case 553138561/*Kind_SliderModifierBuilder*/: return deserializeAndCallSliderModifierBuilder(thisDeserializer);
     }
     console.log("Unknown callback kind")
 }

@@ -13,22 +13,20 @@
  * limitations under the License.
  */
 
-
-// WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
-
 import { UIContext } from "@ohos/arkui/UIContext"
 import { UIContextImpl } from "arkui/handwritten/UIContextImpl"
 import { Position, Edges, Size, LengthMetrics, SizeT } from "./Graphics"
-import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
+import { ArkUIGeneratedNativeModule } from "#components"
 import {
-    Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer,
-    MaterializedBase, NativeBuffer, nullptr, pointer, KSerializerBuffer, KUint8ArrayPtr
+    Finalizable, toPeerPtr, KPointer, MaterializedBase, nullptr, KSerializerBuffer, KUint8ArrayPtr, InteropNativeModule
 } from "@koalaui/interop"
-import { unsafeCast, int32, float32 } from "@koalaui/common"
+import { int32 } from "@koalaui/common"
 import { Serializer } from "./component"
 import { ArkUIAniModule } from "arkui.ani"
 import { RenderNode, RenderNodeInternal } from "./RenderNode"
-import { CommonAttribute, ArkCommonMethodPeer, CommonMethod, UIGestureEvent, UICommonEvent, UICommonEventInternal } from './component/common'
+import { CommonAttribute, ArkCommonMethodPeer, CommonMethod, UIGestureEvent, UICommonEvent, UICommonEventInternal,
+    CustomProperty
+} from './component/common'
 import { ArkBaseNode } from './handwritten/modifiers/ArkBaseNode'
 import { ArkListNode } from './handwritten/modifiers/ArkListNode'
 import { ArkColumnNode } from './handwritten/modifiers/ArkColumnNode'
@@ -69,6 +67,7 @@ import { DrawContext } from './Graphics';
 import { JSBuilderNode } from "./BuilderNode"
 import { BusinessError } from '#external';
 import { Resource } from 'global.resource';
+import { ElementIdToCustomProperties } from './handwritten/CommonHandWritten'
 
 export interface CrossLanguageOptions {
     attributeSetting?: boolean;
@@ -128,7 +127,8 @@ export class FrameNode implements MaterializedBase {
     public _nodeId: number = -1;
     protected _commonAttribute: CommonAttribute | undefined = undefined;
     protected _gestureEvent: UIGestureEvent | undefined = undefined;
-
+    nodeType_?: string | undefined = undefined;
+     
     getType(): string {
         return 'CustomFrameNode';
     }
@@ -161,6 +161,7 @@ export class FrameNode implements MaterializedBase {
         if ((uiContext) !== (undefined)) {
             this.uiContext = uiContext as UIContextImpl;
             this.instanceId_ = this.uiContext!.instanceId_;
+            this.nodeType_ = type;
             if (type === 'ProxyFrameNode') {
                 if (ptr) {
                     this.peer = new Finalizable(ptr, FrameNode.getFinalizer());
@@ -177,16 +178,15 @@ export class FrameNode implements MaterializedBase {
             ArkUIAniModule._Common_Sync_InstanceId(instanceId);
             if (this.getType() === undefined || this.getType() === "CustomFrameNode") {
                 this.renderNode_ = new RenderNode('CustomFrameNode')
-                const ctorPtr: KPointer = FrameNode.ctor_framenode()
+                const ctorPtr: KPointer = ptr ? ptr : FrameNode.ctor_framenode()
                 this.peer = new Finalizable(ctorPtr, FrameNode.getFinalizer())
                 this.nodePtr_ = this.peer?.ptr
             } else {
-                const retval = ArkUIGeneratedNativeModule._FrameNode_createTypedFrameNode(type as string);
+                const retval = ptr ? ptr : ArkUIGeneratedNativeModule._FrameNode_createTypedFrameNode(type as string);
                 this.peer = new Finalizable(retval, FrameNode.getFinalizer());
                 this.nodePtr_ = this.peer?.ptr
             }
             this.renderNode_?.setFrameNode(new WeakRef<FrameNode>(this))
-
             this._nodeId = this.getIdByFrameNode_serialize(this);
             ArkUIAniModule._Common_Restore_InstanceId();
             FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.set(this._nodeId, this);
@@ -226,20 +226,26 @@ export class FrameNode implements MaterializedBase {
         }
         const instanceId = this.instanceId_!.toInt();
         ArkUIAniModule._Common_Sync_InstanceId(instanceId);
-        this.appendChild(content.getFrameNode()!);
+        let node = content.getNodeWithoutProxy();
+        if (this.peer?.ptr && node) {
+            ArkUIAniModule._AddComponent_ToFrameNode(this.peer!.ptr, node!);
+            content.setAttachedParent(new WeakRef<FrameNode>(this));
+        }
         ArkUIAniModule._Common_Restore_InstanceId();
-        content.setAttachedParent(new WeakRef<FrameNode>(this));
     }
     public removeComponentContent<T = undefined>(content: ComponentContent<T>) {
-        if (content === undefined || content === null || content.getFrameNode() == undefined ||
-            content.getFrameNode() == null || content.getNodePtr() == undefined) {
+        if (content === undefined || content === null || content.getFrameNode() === undefined ||
+            content.getFrameNode() === null || content.getNodeWithoutProxy() === undefined || content.getNodeWithoutProxy() === nullptr) {
             return;
         }
         const instanceId = this.instanceId_!.toInt();
         ArkUIAniModule._Common_Sync_InstanceId(instanceId);
-        this.removeChild(content.getFrameNode()!);
+        let node = content.getNodeWithoutProxy();
+        if (this.peer?.ptr && node) {
+            ArkUIAniModule._RemoveComponent_FromFrameNode(this.peer!.ptr, node!);
+            content.setAttachedParent(undefined);
+        }
         ArkUIAniModule._Common_Restore_InstanceId();
-        content.setAttachedParent(undefined);
     }
     public insertChildAfter(child: FrameNode, sibling: FrameNode | null): void {
         if (child === undefined || child === null) {
@@ -526,6 +532,9 @@ export class FrameNode implements MaterializedBase {
             attributeSetting: option,
         };
         return crossLanguageOptions;
+    }
+    public isTransferred() :boolean {
+        return false;
     }
     private getCommonEvent(): UICommonEvent {
         return this.getCommonEvent_serialize()
@@ -836,6 +845,17 @@ export class FrameNode implements MaterializedBase {
     private getNodeType_serialize(): string {
         const retval = ArkUIGeneratedNativeModule._FrameNode_getNodeType(this.peer!.ptr)
         return retval
+    }
+    public getCustomProperty(name: string): CustomProperty {
+        const name_casted = name as (string);
+        const nodeId = this._nodeId;
+        if (ElementIdToCustomProperties._elementIdToCustomProperties.has(nodeId)) {
+            const customProperties = ElementIdToCustomProperties._elementIdToCustomProperties.get(nodeId);
+            if (customProperties) {
+                return customProperties.get(name_casted);
+            }
+        }
+        return ArkUIAniModule._Common_getCustomProperty(this!.peer!.ptr, name_casted);
     }
 }
 class ImmutableFrameNode extends FrameNode {

@@ -936,14 +936,6 @@ void NavDestinationModelNG::SetOnBackPressed(FrameNode* frameNode, std::function
     navDestinationEventHub->SetOnBackPressed(onBackPressed);
 }
 
-// void NavDestinationModelNG::SetOnBackPressed(FrameNode* frameNode, std::function<bool()>&& onBackPressed)
-// {
-//     CHECK_NULL_VOID(frameNode);
-//     auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
-//     CHECK_NULL_VOID(navDestinationEventHub);
-//     navDestinationEventHub->SetOnBackPressed(onBackPressed);
-// }
-
 void NavDestinationModelNG::SetOnReady(std::function<void(RefPtr<NavDestinationContext>)>&& onReady)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -962,15 +954,6 @@ void NavDestinationModelNG::SetOnReady(
     CHECK_NULL_VOID(navDestinationEventHub);
     navDestinationEventHub->SetOnReady(onReady);
 }
-
-// void NavDestinationModelNG::SetOnReady(FrameNode* frameNode,
-//                                        std::function<void(RefPtr<NavDestinationContext>)>&& onReady)
-// {
-//     CHECK_NULL_VOID(frameNode);
-//     auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
-//     CHECK_NULL_VOID(navDestinationEventHub);
-//     navDestinationEventHub->SetOnReady(onReady);
-// }
 
 RefPtr<AceType> NavDestinationModelNG::CreateEmpty()
 {
@@ -1261,14 +1244,6 @@ void NavDestinationModelNG::SetOnWillAppear(FrameNode* frameNode, std::function<
     CHECK_NULL_VOID(navDestinationEventHub);
     navDestinationEventHub->SetOnWillAppear(willAppear);
 }
-
-// void NavDestinationModelNG::SetOnWillAppear(FrameNode* frameNode, std::function<void()>&& willAppear)
-// {
-//     CHECK_NULL_VOID(frameNode);
-//     auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
-//     CHECK_NULL_VOID(navDestinationEventHub);
-//     navDestinationEventHub->SetOnWillAppear(willAppear);
-// }
 
 void NavDestinationModelNG::SetOnWillHide(std::function<void()>&& willHide)
 {

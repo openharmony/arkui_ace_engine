@@ -62,7 +62,7 @@ void SlidingPanelModelNG::Create(bool isShow)
 
     auto renderContext = columnNode->GetRenderContext();
     if (renderContext) {
-        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+        auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto dragBarTheme = pipeline->GetTheme<DragBarTheme>();
         CHECK_NULL_VOID(dragBarTheme);
@@ -255,67 +255,39 @@ RefPtr<FrameNode> SlidingPanelModelNG::CreateFrameNode(int32_t nodeId)
     return panelNode;
 }
 
-void SlidingPanelModelNG::SetPanelMode(FrameNode* frameNode, const std::optional<PanelMode>& mode)
+void SlidingPanelModelNG::SetPanelMode(FrameNode* frameNode, PanelMode mode)
 {
-    if (mode.has_value()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, PanelMode, mode.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, PanelMode, frameNode);
-    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, PanelMode, mode, frameNode);
 }
 
-void SlidingPanelModelNG::SetPanelFullHeight(FrameNode* frameNode, const std::optional<Dimension>& fullHeight)
+void SlidingPanelModelNG::SetPanelFullHeight(FrameNode* frameNode, const Dimension& fullHeight)
 {
-    if (fullHeight.has_value()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, FullHeight, fullHeight.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, FullHeight, frameNode);
-    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, FullHeight, fullHeight, frameNode);
 }
 
-void SlidingPanelModelNG::SetPanelHalfHeight(FrameNode* frameNode, const std::optional<Dimension>& halfHeight)
+void SlidingPanelModelNG::SetPanelHalfHeight(FrameNode* frameNode, const Dimension& halfHeight)
 {
-    if (halfHeight.has_value()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, HalfHeight, halfHeight.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, HalfHeight, frameNode);
-    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, HalfHeight, halfHeight, frameNode);
 }
 
-void SlidingPanelModelNG::SetPanelMiniHeight(FrameNode* frameNode, const std::optional<Dimension>& miniHeight)
+void SlidingPanelModelNG::SetPanelMiniHeight(FrameNode* frameNode, const Dimension& miniHeight)
 {
-    if (miniHeight.has_value()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, MiniHeight, miniHeight.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, MiniHeight, frameNode);
-    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, MiniHeight, miniHeight, frameNode);
 }
 
-void SlidingPanelModelNG::SetPanelBackgroundMask(FrameNode* frameNode, const std::optional<Color>& backgroundMask)
+void SlidingPanelModelNG::SetPanelBackgroundMask(FrameNode* frameNode, const Color& backgroundMask)
 {
-    if (backgroundMask.has_value()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, BackgroundMask, backgroundMask.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, BackgroundMask, frameNode);
-    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, BackgroundMask, backgroundMask, frameNode);
 }
 
-void SlidingPanelModelNG::SetPanelType(FrameNode* frameNode, const std::optional<PanelType>& type)
+void SlidingPanelModelNG::SetPanelType(FrameNode* frameNode, PanelType type)
 {
-    if (type.has_value()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, PanelType, type.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, PanelType, frameNode);
-    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, PanelType, type, frameNode);
 }
 
-void SlidingPanelModelNG::SetPanelCustomHeight(FrameNode* frameNode, const std::optional<CalcDimension>& customHeight)
+void SlidingPanelModelNG::SetPanelCustomHeight(FrameNode* frameNode, const CalcDimension& customHeight)
 {
-    if (customHeight.has_value()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, CustomHeight, customHeight.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, CustomHeight, frameNode);
-    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, CustomHeight, customHeight, frameNode);
 }
 
 void SlidingPanelModelNG::SetShowCloseIcon(FrameNode* frameNode, bool showCloseIcon)

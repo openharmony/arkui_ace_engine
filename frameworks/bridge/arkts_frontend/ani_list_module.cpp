@@ -55,7 +55,7 @@ bool ParseChange(ani_env* env, const ani_ref& change, const float defaultSize, i
         ani_boolean isUndefined = false;
         if (env->Array_Get_Ref(static_cast<ani_array_ref>(childrenSize), j, &itemSize) != ANI_OK ||
             env->Reference_IsUndefined(itemSize, &isUndefined) != ANI_OK || isUndefined || ANI_OK !=
-            env->Object_CallMethodByName_Double(static_cast<ani_object>(itemSize), "unboxed", ":D", &childSize) ||
+            env->Object_CallMethodByName_Double(static_cast<ani_object>(itemSize), "unboxed", ":d", &childSize) ||
             Negative(childSize)) {
             newChildrenSize.emplace_back(-1.0f);
         } else {
@@ -86,7 +86,7 @@ void SyncChildrenSize(ani_env* env, const ani_object& obj, RefPtr<NG::ListChildr
             childrenSize->SyncChildrenSize(-1.0f);
             continue;
         }
-        env->Object_CallMethodByName_Double(static_cast<ani_object>(itemSize), "unboxed", ":D", &childSize);
+        env->Object_CallMethodByName_Double(static_cast<ani_object>(itemSize), "unboxed", ":d", &childSize);
         if (Negative(childSize)) {
             childrenSize->SyncChildrenSize(-1.0f);
         } else {
@@ -106,7 +106,7 @@ void AniListModule::SetListChildrenMainSize(ani_env* env, ani_long ptr, ani_obje
         return;
     }
     ani_class listChildrenMainSize;
-    if (env->FindClass("Larkui/component/common/ChildrenMainSize;", &listChildrenMainSize) != ANI_OK) {
+    if (env->FindClass("arkui.component.common.ChildrenMainSize", &listChildrenMainSize) != ANI_OK) {
         TAG_LOGW(AceLogTag::ACE_LIST, "no class ListChildrenMainSize be found.");
         return;
     }
@@ -144,7 +144,7 @@ void AniListModule::SetChildrenMainSize(
             return;
         }
         ani_class childrenSizeInfo;
-        if (env->FindClass("Larkui/component/common/ChildrenSizeChangeInfo;", &childrenSizeInfo) != ANI_OK) {
+        if (env->FindClass("arkui.component.common.ChildrenSizeChangeInfo", &childrenSizeInfo) != ANI_OK) {
             return;
         }
         for (ani_size i = 0; i < length; ++i) {

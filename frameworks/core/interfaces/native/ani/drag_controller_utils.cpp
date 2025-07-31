@@ -37,12 +37,12 @@ ani_error GetErrorObject(ani_env* env, const std::string& errMsg, int32_t code)
 {
     CHECK_NULL_RETURN(env, nullptr);
     ani_class errClass;
-    if (ANI_OK != env->FindClass("L@ohos/base/BusinessError;", &errClass)) {
+    if (ANI_OK != env->FindClass("@ohos.base.BusinessError", &errClass)) {
         LOGE("AceDrag, find class failed");
         return nullptr;
     }
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(errClass, "<ctor>", ":V", &ctor)) {
+    if (ANI_OK != env->Class_FindMethod(errClass, "<ctor>", ":", &ctor)) {
         LOGE("AceDrag, Cannot find constructor for class.");
         return nullptr;
     }
@@ -110,7 +110,7 @@ bool IsFunctionObject(ani_env* env, ani_ref obj)
 {
     ani_class funcClass;
     ani_status status = ANI_OK;
-    if ((status = env->FindClass("Lstd/core/Function0;", &funcClass)) != ANI_OK) {
+    if ((status = env->FindClass("std.core.Function0", &funcClass)) != ANI_OK) {
         return false;
     }
     ani_boolean result;
@@ -124,7 +124,7 @@ bool IsBigIntObject(ani_env* env, ani_ref obj)
 {
     ani_class bigIntClass;
     ani_status status = ANI_OK;
-    if ((ANI_OK != env->FindClass("Lescompat/BigInt;", &bigIntClass)) != ANI_OK) {
+    if ((ANI_OK != env->FindClass("escompat.BigInt", &bigIntClass)) != ANI_OK) {
         return false;
     }
     ani_boolean result;
@@ -137,7 +137,7 @@ bool IsBigIntObject(ani_env* env, ani_ref obj)
 bool IsFunctionObjectWith2Param(ani_env* env, ani_ref obj)
 {
     ani_class funcClass;
-    env->FindClass("Lstd/core/Function2;", &funcClass);
+    env->FindClass("std.core.Function2", &funcClass);
     ani_boolean result;
     env->Object_InstanceOf(static_cast<ani_object>(obj), funcClass, &result);
     return static_cast<bool>(result);
@@ -146,7 +146,7 @@ bool IsFunctionObjectWith2Param(ani_env* env, ani_ref obj)
 bool IsNumberObject(ani_env* env, ani_ref obj)
 {
     ani_class numberClass;
-    env->FindClass("Lstd/core/Numeric;", &numberClass);
+    env->FindClass("std.core.Numeric", &numberClass);
     ani_boolean isNumber;
     env->Object_InstanceOf(static_cast<ani_object>(obj), numberClass, &isNumber);
     return static_cast<bool>(isNumber);
@@ -155,7 +155,7 @@ bool IsNumberObject(ani_env* env, ani_ref obj)
 bool IsInt32Object(ani_env* env, ani_ref obj)
 {
     ani_class numberClass;
-    env->FindClass("Lstd/core/Int;", &numberClass);
+    env->FindClass("std.core.Int", &numberClass);
     ani_boolean isNumber;
     env->Object_InstanceOf(static_cast<ani_object>(obj), numberClass, &isNumber);
     return static_cast<bool>(isNumber);
@@ -164,7 +164,7 @@ bool IsInt32Object(ani_env* env, ani_ref obj)
 bool IsStringObject(ani_env* env, ani_ref obj)
 {
     ani_class stringClass;
-    env->FindClass("Lstd/core/String;", &stringClass);
+    env->FindClass("std.core.String", &stringClass);
     ani_boolean isString;
     env->Object_InstanceOf(static_cast<ani_object>(obj), stringClass, &isString);
     return static_cast<bool>(isString);
@@ -173,7 +173,7 @@ bool IsStringObject(ani_env* env, ani_ref obj)
 bool IsArrayObject(ani_env* env, ani_ref obj)
 {
     ani_class arrayClass;
-    env->FindClass("Lescompat/Array;", &arrayClass);
+    env->FindClass("escompat.Array", &arrayClass);
     ani_boolean isArray;
     env->Object_InstanceOf(static_cast<ani_object>(obj), arrayClass, &isArray);
     return static_cast<bool>(isArray);
@@ -182,7 +182,7 @@ bool IsArrayObject(ani_env* env, ani_ref obj)
 bool IsBooleanObject(ani_env* env, ani_ref obj)
 {
     ani_class booleanClass;
-    env->FindClass("Lstd/core/Boolean;", &booleanClass);
+    env->FindClass("std.core.Boolean", &booleanClass);
     ani_boolean isBoolean;
     env->Object_InstanceOf(static_cast<ani_object>(obj), booleanClass, &isBoolean);
     return static_cast<bool>(isBoolean);
@@ -192,7 +192,7 @@ bool GetBigIntValue(ani_env* env, ani_object object, int64_t& longValue)
 {
     auto status = ANI_OK;
     ani_long value;
-    if ((status = env->Object_CallMethodByName_Long(object, "unboxed", ":J", &value)) != ANI_OK) {
+    if ((status = env->Object_CallMethodByName_Long(object, "unboxed", ":l", &value)) != ANI_OK) {
         return false;
     }
     longValue = value;
@@ -349,14 +349,14 @@ void processResourceType(ani_env *env, ani_object value, ani_ref params_ref, siz
     for (size_t i = 0; i < length; i++) {
         ani_ref stringEntryRef;
         if (ANI_OK != env->Object_CallMethodByName_Ref(static_cast<ani_object>(params_ref),
-            "$_get", "I:Lstd/core/Object;", &stringEntryRef, (ani_int)i)) {
+            "$_get", "i:C{std.core.Object}", &stringEntryRef, (ani_int)i)) {
             break;
         }
         auto stringContent = ANIUtils_ANIStringToStdString(env, static_cast<ani_string>(stringEntryRef));
         vectorStr.emplace_back(stringContent);
     }
     ani_class stringCls = nullptr;
-    if (ANI_OK != env->FindClass("Lstd/core/String;", &stringCls)) {
+    if (ANI_OK != env->FindClass("std.core.String", &stringCls)) {
         return;
     }
     ani_ref undefinedRef = nullptr;
@@ -369,7 +369,7 @@ void processResourceType(ani_env *env, ani_object value, ani_ref params_ref, siz
         return;
     } else {
         if (ANI_OK != env->Object_CallMethodByName_Void(static_cast<ani_object>(params_ref),
-            "$_set", "ILstd/core/Object;:V", index, ani_first_str)) {
+            "$_set", "iC{std.core.Object}:", index, ani_first_str)) {
             return;
         }
     }
@@ -380,7 +380,7 @@ void processResourceType(ani_env *env, ani_object value, ani_ref params_ref, siz
             break;
         }
         if (ANI_OK != env->Object_CallMethodByName_Void(static_cast<ani_object>(params_ref),
-            "$_set", "ILstd/core/Object;:V", index, ani_str)) {
+            "$_set", "iC{std.core.Object}:", index, ani_str)) {
             break;
         }
         index++;
@@ -587,7 +587,7 @@ bool ParseResourceParamName(ani_env *env, ani_object objects, ResourceInfo& info
     for (int i = 0; i < int(length); i++) {
         ani_ref stringEntryRef;
         if (ANI_OK != env->Object_CallMethodByName_Ref(static_cast<ani_object>(params_ref),
-            "$_get", "I:Lstd/core/Object;", &stringEntryRef, (ani_int)i)) {
+            "$_get", "i:C{std.core.Object}", &stringEntryRef, (ani_int)i)) {
             return false;
         }
         strings.emplace_back(ANIUtils_ANIStringToStdString(env, static_cast<ani_string>(stringEntryRef)));
@@ -624,7 +624,7 @@ bool IsColorEnum(ani_env *env, ani_ref objectRef)
 {
     ani_status status = ANI_OK;
     ani_enum enumType;
-    if ((status = env->FindEnum("Larkui/component/enums/Color;", &enumType)) != ANI_OK) {
+    if ((status = env->FindEnum("arkui.component.enums.Color", &enumType)) != ANI_OK) {
         LOGW("AceDrag, find Color enum failed, status:%{public}d", status);
         return false;
     }
@@ -685,7 +685,7 @@ bool ParseAniColor(ani_env *env, ani_ref resourceColorRef, OHOS::Ace::Color& res
     if (IsNumberObject(env, resourceColorRef)) {
         ani_double resourceColorValue;
         if (ANI_OK !=env->Object_CallMethodByName_Double(
-            static_cast<ani_object>(resourceColorRef), "unboxed", ":D", &resourceColorValue)) {
+            static_cast<ani_object>(resourceColorRef), "unboxed", ":d", &resourceColorValue)) {
             return false;
         }
         resourceColor = static_cast<OHOS::Ace::Color>(resourceColorValue);

@@ -20,6 +20,7 @@ import { BlurStyle, ShadowOptions, ShadowStyle, HoverModeAreaType, Rectangle, Tr
     DismissReason, BackgroundBlurStyleOptions, BackgroundEffectOptions } from 'arkui.component.common'
 import { CustomBuilder } from 'arkui.component.builder'
 import { DialogAlignment } from 'arkui.component.alertDialog'
+import { DismissDialogAction } from 'arkui.component.actionSheet'
 import { BorderStyle, Alignment } from 'arkui.component.enums'
 import { Resource } from 'global.resource'
 import { LengthMetrics } from 'arkui.Graphics'
@@ -34,36 +35,16 @@ export enum ImmersiveMode {
     EXTEND = 1,
 }
 
-export interface DismissDialogAction {
-    dismiss: (() => void);
-    reason: DismissReason;
-}
-
 class DismissDialogActionInner implements DismissDialogAction {
-    dismissDialogAction:long = 0;
-    constructor(action:long) {
-        if(this.dismissDialogAction == 0){
-            this.dismissDialogAction = action;
+    nativePtr: long = 0;
+    constructor(nativePtr: long) {
+        if (this.nativePtr == 0) {
+            this.nativePtr = nativePtr;
         }
     }
 
-    // set and get dismiss
-    private native setDismiss(value: () => void) : void;
-    set dismiss(value: () => void) {
-        this.setDismiss(value);
-    }
-    get dismiss(): () => void {
-        return this.dismiss;
-    }
-
-    // set and get reason
-    private native setReason(value: DismissReason) : void;
-    set reason(value: DismissReason) {
-        this.setReason(value);
-    }
-    get reason(): DismissReason {
-        return this.reason;
-    }
+    native dismiss(): void;
+    reason: DismissReason = DismissReason.PRESS_BACK;
 }
 
 export default namespace promptAction {
@@ -129,13 +110,17 @@ export default namespace promptAction {
         shadow?: ShadowOptions | ShadowStyle;
         enableHoverMode?: boolean;
         hoverModeArea?: HoverModeAreaType;
-        onDidAppear?: (() => void);
-        onDidDisappear?: (() => void);
-        onWillAppear?: (() => void);
-        onWillDisappear?: (() => void);
+        onDidAppear?: ((data: undefined) => void);
+        onDidDisappear?: ((data: undefined) => void);
+        onWillAppear?: ((data: undefined) => void);
+        onWillDisappear?: ((data: undefined) => void);
         levelMode?: LevelMode;
         levelUniqueId?: number;
         immersiveMode?: ImmersiveMode;
+    }
+
+    export interface ShowDialogOptionsInternal {
+        levelOrder?: number;
     }
 
     export interface ShowDialogSuccessResponse {
@@ -206,6 +191,7 @@ export default namespace promptAction {
         transition?: long;
         dialogTransition?: long;
         maskTransition?: long;
+        levelOrder?: number;
     }
 
     export interface CustomDialogOptions extends BaseDialogOptions {
@@ -287,9 +273,10 @@ export default namespace promptAction {
     export native function closeToast(toastId: number): void;
 
     export native function showDialog1(options: ShowDialogOptions,
-        callback: AsyncCallback<ShowDialogSuccessResponse>): void;
+        callback: AsyncCallback<ShowDialogSuccessResponse>, optionsInternal?: ShowDialogOptionsInternal): void;
 
-    export native function showDialog(options: ShowDialogOptions): Promise<ShowDialogSuccessResponse>;
+    export native function showDialog(options: ShowDialogOptions,
+        optionsInternal?: ShowDialogOptionsInternal): Promise<ShowDialogSuccessResponse>;
 
     export native function showActionMenu1(options: ActionMenuOptions,
         callback: AsyncCallback<ActionMenuSuccessResponse>): void;
@@ -314,6 +301,6 @@ export default namespace promptAction {
     export native function presentCustomDialog(builder: long, controller?: DialogController, options?: DialogOptions,
         optionsInternal?: DialogOptionsInternal): Promise<number>;
 
-    export native function getTopOrder(): number;
-    export native function getBottomOrder(): number;
+    export native function getTopOrder(): number | undefined;
+    export native function getBottomOrder(): number | undefined;
 }

@@ -26,6 +26,7 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT GridItemModelStatic {
 public:
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static RefPtr<FrameNode> CreateFrameNodeMultiThread(int32_t nodeId);
     static void SetForceRebuild(FrameNode* frameNode, bool value);
     static void SetSelectable(FrameNode* frameNode, bool selectable);
     static void SetSelected(FrameNode* frameNode, bool selected);

@@ -852,13 +852,8 @@ static napi_value SetOnRepeat(napi_env env, napi_callback_info info)
     return SetOnrepeat(env, info);
 }
 
-static napi_value JSCreate(napi_env env, napi_callback_info info)
+static napi_value CreateAnimator(napi_env env, AnimatorResult* animatorResult)
 {
-    auto option = std::make_shared<AnimatorOption>();
-    ParseAnimatorOption(env, info, option);
-    auto animator = CREATE_ANIMATOR("ohos.animator");
-    animator->AttachSchedulerOnContainer();
-    AnimatorResult* animatorResult = new AnimatorResult(animator, option);
     napi_value jsAnimator = nullptr;
     napi_create_object(env, &jsAnimator);
     napi_wrap(
@@ -891,6 +886,37 @@ static napi_value JSCreate(napi_env env, napi_callback_info info)
 
     NAPI_CALL(env, napi_define_properties(env, jsAnimator, sizeof(resultFuncs) / sizeof(resultFuncs[0]), resultFuncs));
     return jsAnimator;
+}
+
+static napi_value JSCreate(napi_env env, napi_callback_info info)
+{
+    auto option = std::make_shared<AnimatorOption>();
+    ParseAnimatorOption(env, info, option);
+    auto animator = CREATE_ANIMATOR("ohos.animator");
+    animator->AttachSchedulerOnContainer();
+    AnimatorResult* animatorResult = new AnimatorResult(animator, option);
+    return CreateAnimator(env, animatorResult);
+}
+
+static napi_value JSCreateAnimatorTransfer(napi_env env, napi_callback_info info)
+{
+    size_t argc = 1;
+    napi_value argv;
+    napi_get_cb_info(env, info, &argc, &argv, NULL, NULL);
+    if (argc != 1) {
+        NapiThrow(env, "The number of parameters must be equal to 1.", ERROR_CODE_PARAM_INVALID);
+        return nullptr;
+    }
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, argv, &valueType);
+    if (valueType != napi_number) {
+        return nullptr;
+    }
+
+    int64_t addr = 0;
+    napi_get_value_int64(env, argv, &addr);
+    AnimatorResult* animatorResult = reinterpret_cast<AnimatorResult*>(addr);
+    return CreateAnimator(env, animatorResult);
 }
 
 // since API 9 deprecated
@@ -1154,6 +1180,7 @@ static napi_value AnimatorExport(napi_env env, napi_value exports)
     napi_property_descriptor animatorDesc[] = {
         DECLARE_NAPI_FUNCTION("create", JSCreate),
         DECLARE_NAPI_FUNCTION("createAnimator", JSCreateAnimator),
+        DECLARE_NAPI_FUNCTION("__createTransfer__", JSCreateAnimatorTransfer),
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(animatorDesc) / sizeof(animatorDesc[0]), animatorDesc));
     InitSimpleAnimatorOptions(env, exports);

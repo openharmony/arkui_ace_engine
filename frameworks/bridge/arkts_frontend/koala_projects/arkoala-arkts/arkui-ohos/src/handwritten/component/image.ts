@@ -65,7 +65,10 @@ function fillColor1Attribute(peer: KPointer, value: ColorContent | undefined): v
     thisSerializer.release()
 }
 
-function hookSetImageFillColor(peer: KPointer, value: ResourceColor | undefined | ResourceColor | ColorContent | undefined): void {
+function hookSetImageFillColor(peer: KPointer, value: ResourceColor | ColorContent | ColorMetrics | undefined): void {
+    if (value instanceof ColorMetrics) {
+        throw new Error("ColorMetrics parameters not implemented")
+    }
     if (value instanceof ColorContent) {
         const value_casted = value as ColorContent
         fillColor1Attribute(peer, value_casted)

@@ -18,8 +18,6 @@
 #include <functional>
 
 #include "base/log/log.h"
-#include "base/memory/referenced.h"
-#include "core/pipeline/pipeline_base.h"
 
 #ifndef ENABLE_ROSEN_BACKEND
 #include "flutter/lib/ui/ui_dart_state.h"
@@ -145,32 +143,26 @@ void AceContainer::Destroy()
     if (!taskExecutor_) {
         return;
     }
-    // 1. Destroy Pipeline on UI thread.
-    RefPtr<PipelineBase> context;
-    {
-        context.Swap(pipelineContext_);
-    }
-    auto uiTask = [context]() { context->Destroy(); };
-    if (GetSettings().usePlatformAsUIThread) {
-        uiTask();
-    } else {
-        taskExecutor_->PostTask(uiTask, TaskExecutor::TaskType::UI, "ArkUIPipelineDestroy");
-    }
-
-    // 2. Destroy Frontend on JS thread.
+    auto weak = AceType::WeakClaim(AceType::RawPtr(pipelineContext_));
+    taskExecutor_->PostTask(
+        [weak]() {
+            auto context = weak.Upgrade();
+            if (context == nullptr) {
+                return;
+            }
+            context->Destroy();
+        },
+        TaskExecutor::TaskType::UI, "ArkUIPipelineDestroy");
+    
     RefPtr<Frontend> frontend;
-    {
-        frontend.Swap(frontend_);
-    }
-    auto jsTask = [frontend]() {
-        auto lock = frontend->GetLock();
-        frontend->Destroy();
-    };
-    frontend->UpdateState(Frontend::State::ON_DESTROY);
-    if (GetSettings().usePlatformAsUIThread && GetSettings().useUIAsJSThread) {
-        jsTask();
-    } else {
-        taskExecutor_->PostTask(jsTask, TaskExecutor::TaskType::JS, "ArkUIFrontendDestroy");
+    frontend_.Swap(frontend);
+    if (frontend && taskExecutor_) {
+        taskExecutor_->PostTask(
+            [frontend]() {
+                frontend->UpdateState(Frontend::State::ON_DESTROY);
+                frontend->Destroy();
+            },
+            TaskExecutor::TaskType::JS, "ArkUIFrontendDestroy");
     }
 
     messageBridge_.Reset();
@@ -543,16 +535,8 @@ void AceContainer::DestroyContainer(int32_t instanceId)
         taskExecutor->PostSyncTask([] { LOGI("Wait JS thread..."); }, TaskExecutor::TaskType::JS, "ArkUIWaitLog");
     }
     container->DestroyView(); // Stop all threads(ui,gpu,io) for current ability.
-    auto removeContainerTask = [instanceId] {
-        LOGI("Remove on Platform thread...");
-        EngineHelper::RemoveEngine(instanceId);
-        AceEngine::Get().RemoveContainer(instanceId);
-    };
-    if (container->GetSettings().usePlatformAsUIThread) {
-        removeContainerTask();
-    } else {
-        taskExecutor->PostTask(removeContainerTask, TaskExecutor::TaskType::PLATFORM, "ArkUIAceContainerRemove");
-    }
+    EngineHelper::RemoveEngine(instanceId);
+    AceEngine::Get().RemoveContainer(instanceId);
 }
 
 UIContentErrorCode AceContainer::RunPage(
@@ -979,53 +963,6 @@ void AceContainer::AttachView(
     AceEngine::Get().RegisterToWatchDog(instanceId, taskExecutor_, GetSettings().useUIAsJSThread);
 }
 #else
-void AceContainer::InitThemeManagerTask()
-{
-    // Only init global resource here, construct theme in UI thread
-    auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
-
-    if (SystemProperties::GetResourceDecoupling()) {
-        auto resourceAdapter = ResourceAdapter::Create();
-        resourceAdapter->Init(resourceInfo_);
-        SaveResourceAdapter(bundleName_, moduleName_, instanceId_, resourceAdapter);
-        themeManager = AceType::MakeRefPtr<ThemeManagerImpl>(resourceAdapter);
-    }
-
-    pipelineContext_->SetThemeManager(themeManager);
-    // Init resource, load theme map.
-    if (!SystemProperties::GetResourceDecoupling()) {
-        themeManager->InitResource(resourceInfo_);
-    }
-    themeManager->LoadSystemTheme(resourceInfo_.GetThemeId());
-    auto themeTask = [themeManager, assetManager = assetManager_, colorScheme = colorScheme_,
-                pipelineContext = pipelineContext_]() {
-        themeManager->ParseSystemTheme();
-        themeManager->SetColorScheme(colorScheme);
-        themeManager->LoadCustomTheme(assetManager);
-        // get background color from theme
-        pipelineContext->SetAppBgColor(themeManager->GetBackgroundColor());
-    };
-    if (GetSettings().usePlatformAsUIThread) {
-        themeTask();
-    } else {
-        taskExecutor_->PostTask(themeTask, TaskExecutor::TaskType::UI, "ArkUISetBackgroundColor");
-    }
-}
-
-void AceContainer::InitEnvCallbackTask(UIEnvCallback callback)
-{
-    if (!useNewPipeline_) {
-        auto envCallbackTask = [context = pipelineContext_, callback]() {
-            CHECK_NULL_VOID(callback);
-            callback(AceType::DynamicCast<PipelineContext>(context));
-        };
-        if (GetSettings().usePlatformAsUIThread) {
-            envCallbackTask();
-        } else {
-            taskExecutor_->PostTask(envCallbackTask, TaskExecutor::TaskType::UI, "ArkUIEnvCallback");
-        }
-    }
-}
 
 void AceContainer::AttachView(std::shared_ptr<Window> window, AceViewPreview* view, double density, int32_t width,
     int32_t height, UIEnvCallback callback)
@@ -1094,16 +1031,53 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, AceViewPreview* vi
     }
 
     ThemeConstants::InitDeviceType();
-    InitThemeManagerTask();
-    InitEnvCallbackTask(callback);
+    // Only init global resource here, construct theme in UI thread
+    auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
 
-    auto setupRootElementTask = [context = pipelineContext_]() { context->SetupRootElement(); };
-    if (GetSettings().usePlatformAsUIThread) {
-        setupRootElementTask();
-    } else {
-        taskExecutor_->PostTask(setupRootElementTask, TaskExecutor::TaskType::UI, "ArkUISetupRootElement");
+    if (SystemProperties::GetResourceDecoupling()) {
+        auto resourceAdapter = ResourceAdapter::Create();
+        resourceAdapter->Init(resourceInfo_);
+        SaveResourceAdapter(bundleName_, moduleName_, instanceId_, resourceAdapter);
+        themeManager = AceType::MakeRefPtr<ThemeManagerImpl>(resourceAdapter);
     }
 
+    if (themeManager) {
+        pipelineContext_->SetThemeManager(themeManager);
+        // Init resource, load theme map.
+        if (!SystemProperties::GetResourceDecoupling()) {
+            themeManager->InitResource(resourceInfo_);
+        }
+        themeManager->LoadSystemTheme(resourceInfo_.GetThemeId());
+        taskExecutor_->PostTask(
+            [themeManager, assetManager = assetManager_, colorScheme = colorScheme_,
+                pipelineContext = pipelineContext_]() {
+                themeManager->ParseSystemTheme();
+                themeManager->SetColorScheme(colorScheme);
+                themeManager->LoadCustomTheme(assetManager);
+                // get background color from theme
+                pipelineContext->SetAppBgColor(themeManager->GetBackgroundColor());
+            },
+            TaskExecutor::TaskType::UI, "ArkUISetBackgroundColor");
+    }
+    if (!useNewPipeline_) {
+        taskExecutor_->PostTask(
+            [context = pipelineContext_, callback]() {
+                CHECK_NULL_VOID(callback);
+                callback(AceType::DynamicCast<PipelineContext>(context));
+            },
+            TaskExecutor::TaskType::UI, "ArkUIEnvCallback");
+    }
+
+    auto weak = AceType::WeakClaim(AceType::RawPtr(pipelineContext_));
+    taskExecutor_->PostTask(
+        [weak]() {
+            auto context = weak.Upgrade();
+            if (context == nullptr) {
+                return;
+            }
+            context->SetupRootElement();
+        },
+        TaskExecutor::TaskType::UI, "ArkUISetupRootElement");
     aceView_->Launch();
 
     frontend_->AttachPipelineContext(pipelineContext_);
@@ -1111,7 +1085,7 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, AceViewPreview* vi
     if (cardFronted) {
         cardFronted->SetDensity(static_cast<double>(density));
         taskExecutor_->PostTask(
-            [weak = WeakPtr<PipelineBase>(pipelineContext_), width, height]() {
+            [weak, width, height]() {
                 auto context = weak.Upgrade();
                 if (context == nullptr) {
                     return;

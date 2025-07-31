@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -131,7 +131,7 @@ namespace OHOS::Ace::NG::Converter {
         T AllocateMap(std::size_t size)
         {
             T result;
-            result.size = size;
+            result.size = static_cast<int32_t>(size);
             result.keys = static_cast<decltype(T().keys)>(Allocate(size * sizeof(*result.keys)));
             result.values = static_cast<decltype(T().values)>(Allocate(size * sizeof(*result.values)));
             return result;

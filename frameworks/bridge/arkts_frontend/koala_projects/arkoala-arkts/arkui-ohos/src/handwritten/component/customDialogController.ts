@@ -52,12 +52,12 @@ export class CustomDialogController implements MaterializedBase {
         thisSerializer.release()
         return retval
     }
-    constructor(value?: CustomDialogControllerOptions, instance?: ExtendableComponent) {
-        if ((value) !== (undefined) && (instance) !== (undefined))
+    constructor(value?: CustomDialogControllerOptions) {
+        if ((value) !== (undefined) && (value.baseComponent) !== (undefined))
         {
             const ctorPtr : KPointer = CustomDialogController.ctor_customdialogcontroller((value)!)
             this.peer = new Finalizable(ctorPtr, CustomDialogController.getFinalizer())
-            this.customComponent = (instance)!
+            this.customComponent = (value.baseComponent)!
         }
     }
     static getFinalizer(): KPointer {
@@ -111,14 +111,15 @@ export interface CustomDialogControllerOptions {
     keyboardAvoidMode?: KeyboardAvoidMode;
     enableHoverMode?: boolean;
     hoverModeArea?: HoverModeAreaType;
-    onDidAppear?: (() => void);
-    onDidDisappear?: (() => void);
-    onWillAppear?: (() => void);
-    onWillDisappear?: (() => void);
+    onDidAppear?: ((data: undefined) => void);
+    onDidDisappear?: ((data: undefined) => void);
+    onWillAppear?: ((data: undefined) => void);
+    onWillDisappear?: ((data: undefined) => void);
     keyboardAvoidDistance?: LengthMetrics;
     levelMode?: LevelMode;
     levelUniqueId?: number;
     immersiveMode?: ImmersiveMode;
     levelOrder?: LevelOrder;
     focusable?: boolean;
+    baseComponent?: ExtendableComponent;
 }

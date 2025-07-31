@@ -22,15 +22,14 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, CustomBuilder, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, CustomBuilder, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable, ContentModifier, CommonConfiguration, CustomBuilderT } from "./common"
 import { Callback_Boolean_Void } from "./navigation"
-import { ContentModifier, CommonConfiguration } from "./arkui-wrapper-builder"
 import { Callback_Opt_Boolean_Void } from "./checkbox"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ResourceColor } from "./units"
-import { RadioOpsHandWritten } from "./../handwritten"
+import { RadioOpsHandWritten, hookRadioContentModifier } from "./../handwritten"
 
 export class ArkRadioPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -109,7 +108,7 @@ export class ArkRadioPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._RadioAttribute_radioStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    contentModifier0Attribute(value: ContentModifier | undefined): void {
+    contentModifier0Attribute(value: ContentModifier<RadioConfiguration> | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
@@ -121,7 +120,7 @@ export class ArkRadioPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._RadioAttribute_contentModifier0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    contentModifier1Attribute(value: ContentModifier | undefined): void {
+    contentModifier1Attribute(value: ContentModifier<RadioConfiguration> | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
@@ -162,14 +161,14 @@ export interface RadioAttribute extends CommonMethod {
     checked(value: boolean | Bindable<boolean> | undefined): this
     onChange(value: ((isVisible: boolean) => void) | undefined | OnRadioChangeCallback | undefined): this
     radioStyle(value: RadioStyle | undefined): this
-    contentModifier(value: ContentModifier | undefined): this
+    contentModifier(value: ContentModifier<RadioConfiguration> | undefined): this
     _onChangeEvent_checked(callback: ((select: boolean | undefined) => void)): void
 }
 export class ArkRadioStyle extends ArkCommonMethodStyle implements RadioAttribute {
     checked_value?: boolean | undefined
     onChange_value?: ((isVisible: boolean) => void) | undefined
     radioStyle_value?: RadioStyle
-    contentModifier_value?: ContentModifier | undefined
+    contentModifier_value?: ContentModifier<RadioConfiguration> | undefined
     public checked(value: boolean | Bindable<boolean> | undefined): this {
         return this
     }
@@ -179,14 +178,14 @@ export class ArkRadioStyle extends ArkCommonMethodStyle implements RadioAttribut
     public radioStyle(value: RadioStyle | undefined): this {
         return this
     }
-    public contentModifier(value: ContentModifier | undefined): this {
+    public contentModifier(value: ContentModifier<RadioConfiguration> | undefined): this {
         return this
     }
     public _onChangeEvent_checked(callback: ((select: boolean | undefined) => void)): void {
         throw new Error("Unimplmented")
         }
 }
-export interface RadioConfiguration extends CommonConfiguration {
+export interface RadioConfiguration extends CommonConfiguration<RadioConfiguration> {
     value: string;
     checked: boolean;
     triggerChange: ((isVisible: boolean) => void);
@@ -246,20 +245,9 @@ export class ArkRadioComponent extends ArkCommonMethodComponent implements Radio
         }
         return this
     }
-    public contentModifier(value: ContentModifier | undefined): this {
+    public contentModifier(value: ContentModifier<RadioConfiguration> | undefined): this {
         if (this.checkPriority("contentModifier")) {
-            const value_type = runtimeType(value)
-            if ((RuntimeType.BIGINT == value_type) || (RuntimeType.BOOLEAN == value_type) || (RuntimeType.FUNCTION == value_type) || (RuntimeType.MATERIALIZED == value_type) || (RuntimeType.NUMBER == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.STRING == value_type) || (RuntimeType.SYMBOL == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (ContentModifier | undefined)
-                this.getPeer()?.contentModifier0Attribute(value_casted)
-                return this
-            }
-            if ((RuntimeType.BIGINT == value_type) || (RuntimeType.BOOLEAN == value_type) || (RuntimeType.FUNCTION == value_type) || (RuntimeType.MATERIALIZED == value_type) || (RuntimeType.NUMBER == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.STRING == value_type) || (RuntimeType.SYMBOL == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (ContentModifier | undefined)
-                this.getPeer()?.contentModifier1Attribute(value_casted)
-                return this
-            }
-            throw new Error("Can not select appropriate overload")
+            hookRadioContentModifier(this, value)
         }
         return this
     }

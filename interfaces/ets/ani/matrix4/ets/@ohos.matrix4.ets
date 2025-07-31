@@ -38,6 +38,19 @@ export default namespace matrix4 {
         angle?: number;
     }
 
+    export interface Point {
+        x: number;
+        y: number;
+    }
+
+    export interface PolyToPolyOptions {
+        src: Array<Point>;
+        srcIndex?: number;
+        dst: Array<Point>;
+        dstIndex?: number;
+        pointCount?: number;
+    }
+
     export default interface Matrix4Transit {
         copy():Matrix4Transit;
         invert(): Matrix4Transit;
@@ -45,22 +58,74 @@ export default namespace matrix4 {
         scale(options: ScaleOption): Matrix4Transit;
         rotate(options: RotateOption): Matrix4Transit;
         translate(options: TranslateOption): Matrix4Transit;
+        skew(x: number, y: number): Matrix4Transit;
+        setPolyToPoly(options: PolyToPolyOptions): Matrix4Transit;
+        transformPoint(options: [
+            number,
+            number
+        ]): [
+            number,
+            number
+        ];
     }
 
     class Matrix4TransitInner implements Matrix4Transit {
         private matrix4Object:long = 0;
+
+        static {
+            loadLibrary("matrix4_ani");
+        }
 
         constructor(context:long) {
             if(this.matrix4Object == 0){
                 this.matrix4Object = context;
             }
         }
+
+        static matrixTransferStatic(input: Any): Any {
+            let inputVal = ESValue.wrap(input) as ESValue;
+            if (inputVal && inputVal.getProperty("matrix4x4")) {
+                let matrixTuple = inputVal.getProperty("matrix4x4");
+                let arrVal: number[] = new Array<number>
+                for (let i = 0; i < 16; i++) {
+                    arrVal.push(matrixTuple.getProperty(i).toNumber());
+                }
+                return Matrix4TransitInner.nativeTransferStatic(arrVal);
+            }
+            return undefined;
+        }
+
+        static matrixTransferDynamic(input: Any): Any {
+            let matrixObj = input as Matrix4TransitInner;
+            if (matrixObj) {
+                let addr = matrixObj.matrix4Object;
+                let module = ESValue.load("@ohos.matrix4");
+                let initFunc = module.getProperty("__InitTransfer__")
+                if (initFunc) {
+                    let initArr = initFunc.invoke(ESObject.wrap(addr));
+                    return initArr;
+                }
+            }
+            return undefined;
+        }
+
+        private static native nativeTransferStatic(input: Any): Any;
+
         public native copy():Matrix4Transit;
         public native invert():Matrix4Transit;
         public native combine(options: Matrix4Transit): Matrix4Transit;
         public native scale(options: ScaleOption): Matrix4Transit;
         public native rotate(options: RotateOption): Matrix4Transit;
         public native translate(options: TranslateOption): Matrix4Transit;
+        public native skew(x: number, y: number): Matrix4Transit;
+        public native setPolyToPoly(options: PolyToPolyOptions): Matrix4Transit;
+        public native transformPoint(options: [
+                            number,
+                            number
+                        ]): [
+                            number,
+                            number
+                        ]; 
     }
     export native function identity():Matrix4Transit;
     export native function init(options: [

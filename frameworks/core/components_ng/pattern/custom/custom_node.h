@@ -143,6 +143,67 @@ public:
 
     // called for DFX
     void DumpInfo() override;
+
+    void SetOnPageShowFunc(std::function<void()>&& onPageShow)
+    {
+        onPageShowFunc_ = std::move(onPageShow);
+    }
+
+    void FireOnPageShow()
+    {
+        auto callback = onPageShowFunc_;
+        if (callback) {
+            callback();
+        }
+    }
+
+    void SetOnPageHideFunc(std::function<void()>&& onPageHide)
+    {
+        onPageHideFunc_ = std::move(onPageHide);
+    }
+
+    void FireOnPageHide()
+    {
+        auto callback = onPageHideFunc_;
+        if (callback) {
+            callback();
+        }
+    }
+
+    void SetOnBackPressedFunc(std::function<bool()>&& onBackPress)
+    {
+        onBackPressFunc_ = std::move(onBackPress);
+    }
+
+    bool FireOnBackPressed()
+    {
+        auto callback = onBackPressFunc_;
+        if (callback) {
+            return callback();
+        }
+        return false;
+    }
+
+    void SetPageTransitionFunc(std::function<void()> pageTransition)
+    {
+        pageTransitionFunc_ = std::move(pageTransition);
+    }
+
+    void FirePageTransition()
+    {
+        auto callback = pageTransitionFunc_;
+        if (callback) {
+            callback();
+        }
+    }
+
+    // for ArkTs1.2
+    void SetOnCleanupFunc(std::function<void()>&& onCleanupFunc)
+    {
+        onCleanupFunc_ = onCleanupFunc;
+    }
+
+    bool FireOnCleanup();
 private:
     // for DFX
     void DumpComponentInfo(std::unique_ptr<JsonValue>& componentInfo);
@@ -157,6 +218,12 @@ private:
     WeakPtr<UINode> navigationNode_;
     std::unique_ptr<ViewStackProcessor> prebuildViewStackProcessor_;
     int32_t prebuildFrameRounds_ = 0;
+
+    std::function<void()> onPageShowFunc_ = nullptr;
+    std::function<void()> onPageHideFunc_ = nullptr;
+    std::function<bool()> onBackPressFunc_ = nullptr;
+    std::function<void()> pageTransitionFunc_ = nullptr;
+    std::function<void()> onCleanupFunc_ = nullptr;
 };
 } // namespace OHOS::Ace::NG
 

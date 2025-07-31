@@ -275,6 +275,7 @@ public:
     // create wrappingComponentsMap and the component to map and then Push
     // the map to the render component stack.
     ACE_FORCE_EXPORT void Push(const RefPtr<UINode>& element, bool isCustomView = false);
+    ACE_FORCE_EXPORT void PushPtr(int64_t elementPtr);
 
     // Wrap the components map for the stack top and then pop the stack.
     // Add the wrapped component has child of the new stack top's main component.

@@ -42,7 +42,7 @@ Ark_NativePointer GetFinalizerImpl()
 Ark_Boolean IsBeginImpl(Ark_ScrollableTargetInfo peer)
 {
     const auto pattern = peer ? peer->GetPattern() : nullptr;
-    Ark_Boolean result;
+    Ark_Boolean result = Converter::ArkValue<Ark_Boolean>(false);
     if (auto scrollablePattern = AceType::DynamicCast<ScrollablePattern>(pattern)) {
         result = Converter::ArkValue<Ark_Boolean>(scrollablePattern->IsAtTop());
     } else if (auto swiperPattern = AceType::DynamicCast<SwiperPattern>(pattern)) {

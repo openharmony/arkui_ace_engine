@@ -99,6 +99,21 @@ export class WrappedDate extends Date implements IObservedObject, ObserveWrapped
         return this.store_.toLocaleTimeString();
     }
 
+    public override toLocaleTimeString(locales?: Intl.LocalesArgument, options?: Intl.DateTimeFormatOptions): string {
+        this.conditionalAddRef();
+        return this.store_.toLocaleTimeString(locales, options);
+    }
+
+    public override toLocaleString(locales?: Intl.LocalesArgument, options?: Intl.DateTimeFormatOptions): string {
+        this.conditionalAddRef();
+        return this.store_.toLocaleString(locales, options);
+    }
+
+    public override toLocaleString(): string {
+        this.conditionalAddRef();
+        return this.store_.toLocaleString();
+    }
+
     /**
      * Gets a string with a language-sensitive representation
      * of the date portion of the specified date in the user agent's timezone.
@@ -109,6 +124,11 @@ export class WrappedDate extends Date implements IObservedObject, ObserveWrapped
     public override toLocaleDateString(): string {
         this.conditionalAddRef();
         return this.store_.toLocaleDateString();
+    }
+
+    public override toLocaleDateString(locales?: Intl.LocalesArgument, options?: Intl.DateTimeFormatOptions): string {
+        this.conditionalAddRef();
+        return this.store_.toLocaleDateString(locales, options);
     }
 
     /**

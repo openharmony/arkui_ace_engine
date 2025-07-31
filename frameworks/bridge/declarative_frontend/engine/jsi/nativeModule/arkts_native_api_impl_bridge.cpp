@@ -4395,10 +4395,14 @@ void ArkUINativeModule::RegisterFrameNodeAttributes(Local<panda::ObjectRef> obje
     auto frameNode = panda::ObjectRef::New(vm);
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "isModifiable"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::IsModifiable));
+    frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "createTransFrameNode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::CreateTransFrameNode));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "createFrameNode"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::CreateFrameNode));
-        frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "createTypedFrameNode"),
+    frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "createTypedFrameNode"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::CreateTypedFrameNode));
+    frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "createTransTypedFrameNode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::CreateTransTypedFrameNode));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "invalidate"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::Invalidate));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "addBuilderNode"),

@@ -1382,7 +1382,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void CurveImpl(Ark_NativePointer node,
-                   const Opt_Curve* value)
+                   const Opt_curves_Curve* value)
     {
         if (!needGroupedLog(1))
         {
@@ -1885,196 +1885,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     } // ButtonAttributeModifier
-    namespace CalendarModifier {
-    Ark_NativePointer ConstructImpl(Ark_Int32 id,
-                                    Ark_Int32 flags)
-    {
-        if (!needGroupedLog(1))
-        {
-            return new TreeNode("Calendar", id, flags);;
-        }
-        string out("construct(");
-        WriteToString(&out, id);
-        out.append(", ");
-        WriteToString(&out, flags);
-        out.append(") \n");
-        out.append("[return nullptr] \n");
-        appendGroupedLog(1, out);
-        return new TreeNode("Calendar", id, flags);;
-    }
-    } // CalendarModifier
-    namespace CalendarInterfaceModifier {
-    void SetCalendarOptionsImpl(Ark_NativePointer node,
-                                const Ark_CalendarRequestedMonths* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setCalendarOptions(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    } // CalendarInterfaceModifier
-    namespace CalendarAttributeModifier {
-    void ShowLunarImpl(Ark_NativePointer node,
-                       const Opt_Boolean* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setShowLunar(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void ShowHolidayImpl(Ark_NativePointer node,
-                         const Opt_Boolean* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setShowHoliday(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void NeedSlideImpl(Ark_NativePointer node,
-                       const Opt_Boolean* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setNeedSlide(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void StartOfWeekImpl(Ark_NativePointer node,
-                         const Opt_Number* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setStartOfWeek(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void OffDaysImpl(Ark_NativePointer node,
-                     const Opt_Number* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setOffDays(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void DirectionImpl(Ark_NativePointer node,
-                       const Opt_Axis* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setDirection(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void CurrentDayStyleImpl(Ark_NativePointer node,
-                             const Opt_CurrentDayStyle* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setCurrentDayStyle(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void NonCurrentDayStyleImpl(Ark_NativePointer node,
-                                const Opt_NonCurrentDayStyle* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setNonCurrentDayStyle(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void TodayStyleImpl(Ark_NativePointer node,
-                        const Opt_TodayStyle* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setTodayStyle(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void WeekStyleImpl(Ark_NativePointer node,
-                       const Opt_WeekStyle* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setWeekStyle(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void WorkStateStyleImpl(Ark_NativePointer node,
-                            const Opt_WorkStateStyle* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setWorkStateStyle(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void OnSelectChangeImpl(Ark_NativePointer node,
-                            const Opt_Callback_CalendarSelectedDate_Void* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setOnSelectChange(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void OnRequestDataImpl(Ark_NativePointer node,
-                           const Opt_Callback_CalendarRequestedData_Void* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setOnRequestData(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    } // CalendarAttributeModifier
     namespace CalendarPickerModifier {
     Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                     Ark_Int32 flags)
@@ -2692,18 +2502,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void DrawModifierImpl(Ark_NativePointer node,
-                          const Opt_DrawModifier* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setDrawModifier(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
     void ResponseRegionImpl(Ark_NativePointer node,
                             const Opt_Union_Array_Rectangle_Rectangle* value)
     {
@@ -3120,18 +2918,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             return;
         }
         string out("setForegroundColor(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void OnClick0Impl(Ark_NativePointer node,
-                      const Opt_Callback_ClickEvent_Void* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setOnClick0(");
         WriteToString(&out, value);
         out.append(") \n");
         appendGroupedLog(1, out);
@@ -4156,18 +3942,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void StateStylesImpl(Ark_NativePointer node,
-                         const Opt_StateStyles* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setStateStyles(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
     void RestoreIdImpl(Ark_NativePointer node,
                        const Opt_Number* value)
     {
@@ -4687,21 +4461,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         WriteToString(&out, options);
         out.append(", ");
         WriteToString(&out, sysOptions);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void OnClick1Impl(Ark_NativePointer node,
-                      const Opt_Callback_ClickEvent_Void* event,
-                      const Opt_Number* distanceThreshold)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setOnClick1(");
-        WriteToString(&out, event);
-        out.append(", ");
-        WriteToString(&out, distanceThreshold);
         out.append(") \n");
         appendGroupedLog(1, out);
     }
@@ -6337,6 +6096,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void OnUpdateImpl(Ark_NativePointer node,
+                      const Opt_Callback_FormCallbackInfo_Void* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setOnUpdate(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     } // FormComponentAttributeModifier
     namespace FormLinkModifier {
     Ark_NativePointer ConstructImpl(Ark_Int32 id,
@@ -7761,6 +7532,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             return;
         }
         string out("setVerticalAlign(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void ColorFilterImpl(Ark_NativePointer node,
+                         const Opt_Union_ColorFilter_DrawingColorFilter* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setColorFilter(");
         WriteToString(&out, value);
         out.append(") \n");
         appendGroupedLog(1, out);
@@ -9972,62 +9755,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     } // NodeContainerInterfaceModifier
-    namespace PasteButtonModifier {
-    Ark_NativePointer ConstructImpl(Ark_Int32 id,
-                                    Ark_Int32 flags)
-    {
-        if (!needGroupedLog(1))
-        {
-            return new TreeNode("PasteButton", id, flags);;
-        }
-        string out("construct(");
-        WriteToString(&out, id);
-        out.append(", ");
-        WriteToString(&out, flags);
-        out.append(") \n");
-        out.append("[return nullptr] \n");
-        appendGroupedLog(1, out);
-        return new TreeNode("PasteButton", id, flags);;
-    }
-    } // PasteButtonModifier
-    namespace PasteButtonInterfaceModifier {
-    void SetPasteButtonOptions0Impl(Ark_NativePointer node)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setPasteButtonOptions0(");
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void SetPasteButtonOptions1Impl(Ark_NativePointer node,
-                                    const Ark_PasteButtonOptions* options)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setPasteButtonOptions1(");
-        WriteToString(&out, options);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    } // PasteButtonInterfaceModifier
-    namespace PasteButtonAttributeModifier {
-    void OnClickImpl(Ark_NativePointer node,
-                     const Opt_PasteButtonCallback* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setOnClick(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    } // PasteButtonAttributeModifier
     namespace PathModifier {
     Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                     Ark_Int32 flags)
@@ -10060,20 +9787,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     } // PathInterfaceModifier
-    namespace PathAttributeModifier {
-    void CommandsImpl(Ark_NativePointer node,
-                      const Opt_String* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setCommands(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    } // PathAttributeModifier
     namespace PatternLockModifier {
     Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                     Ark_Int32 flags)
@@ -10811,30 +10524,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     } // RectInterfaceModifier
     namespace RectAttributeModifier {
-    void RadiusWidthImpl(Ark_NativePointer node,
-                         const Opt_Union_Number_String* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setRadiusWidth(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void RadiusHeightImpl(Ark_NativePointer node,
-                          const Opt_Union_Number_String* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setRadiusHeight(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
     void RadiusImpl(Ark_NativePointer node,
                     const Opt_Union_Number_String_Array_Union_Number_String* value)
     {
@@ -11745,62 +11434,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     } // RowSplitAttributeModifier
-    namespace SaveButtonModifier {
-    Ark_NativePointer ConstructImpl(Ark_Int32 id,
-                                    Ark_Int32 flags)
-    {
-        if (!needGroupedLog(1))
-        {
-            return new TreeNode("SaveButton", id, flags);;
-        }
-        string out("construct(");
-        WriteToString(&out, id);
-        out.append(", ");
-        WriteToString(&out, flags);
-        out.append(") \n");
-        out.append("[return nullptr] \n");
-        appendGroupedLog(1, out);
-        return new TreeNode("SaveButton", id, flags);;
-    }
-    } // SaveButtonModifier
-    namespace SaveButtonInterfaceModifier {
-    void SetSaveButtonOptions0Impl(Ark_NativePointer node)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setSaveButtonOptions0(");
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void SetSaveButtonOptions1Impl(Ark_NativePointer node,
-                                   const Ark_SaveButtonOptions* options)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setSaveButtonOptions1(");
-        WriteToString(&out, options);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    } // SaveButtonInterfaceModifier
-    namespace SaveButtonAttributeModifier {
-    void OnClickImpl(Ark_NativePointer node,
-                     const Opt_SaveButtonCallback* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setOnClick(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    } // SaveButtonAttributeModifier
     namespace ScreenModifier {
     Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                     Ark_Int32 flags)
@@ -12898,7 +12531,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SearchButtonImpl(Ark_NativePointer node,
-                          const Opt_String* value,
+                          const Opt_ResourceStr* value,
                           const Opt_SearchButtonOptions* option)
     {
         if (!needGroupedLog(1))
@@ -12955,447 +12588,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     } // SearchAttributeModifier
-    namespace SecurityComponentMethodModifier {
-    Ark_NativePointer ConstructImpl(Ark_Int32 id,
-                                    Ark_Int32 flags)
-    {
-        if (!needGroupedLog(1))
-        {
-            return new TreeNode("SecurityComponentMethod", id, flags);;
-        }
-        string out("construct(");
-        WriteToString(&out, id);
-        out.append(", ");
-        WriteToString(&out, flags);
-        out.append(") \n");
-        out.append("[return nullptr] \n");
-        appendGroupedLog(1, out);
-        return new TreeNode("SecurityComponentMethod", id, flags);;
-    }
-    void IconSizeImpl(Ark_NativePointer node,
-                      const Opt_Dimension* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setIconSize(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void LayoutDirectionImpl(Ark_NativePointer node,
-                             const Opt_SecurityComponentLayoutDirection* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setLayoutDirection(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void PositionImpl(Ark_NativePointer node,
-                      const Opt_Position* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setPosition(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void MarkAnchorImpl(Ark_NativePointer node,
-                        const Opt_Position* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setMarkAnchor(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void OffsetImpl(Ark_NativePointer node,
-                    const Opt_Union_Position_Edges_LocalizedEdges* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setOffset(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void FontSizeImpl(Ark_NativePointer node,
-                      const Opt_Dimension* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setFontSize(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void FontStyleImpl(Ark_NativePointer node,
-                       const Opt_FontStyle* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setFontStyle(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void FontWeightImpl(Ark_NativePointer node,
-                        const Opt_Union_I32_FontWeight_String* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setFontWeight(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void FontFamilyImpl(Ark_NativePointer node,
-                        const Opt_Union_String_Resource* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setFontFamily(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void FontColorImpl(Ark_NativePointer node,
-                       const Opt_ResourceColor* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setFontColor(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void IconColorImpl(Ark_NativePointer node,
-                       const Opt_ResourceColor* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setIconColor(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void BackgroundColorImpl(Ark_NativePointer node,
-                             const Opt_ResourceColor* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setBackgroundColor(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void BorderStyleImpl(Ark_NativePointer node,
-                         const Opt_BorderStyle* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setBorderStyle(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void BorderWidthImpl(Ark_NativePointer node,
-                         const Opt_Dimension* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setBorderWidth(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void BorderColorImpl(Ark_NativePointer node,
-                         const Opt_ResourceColor* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setBorderColor(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void BorderRadiusImpl(Ark_NativePointer node,
-                          const Opt_Union_Dimension_BorderRadiuses* radius)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setBorderRadius(");
-        WriteToString(&out, radius);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void PaddingImpl(Ark_NativePointer node,
-                     const Opt_Union_Padding_Dimension* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setPadding(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void TextIconSpaceImpl(Ark_NativePointer node,
-                           const Opt_Dimension* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setTextIconSpace(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void KeyImpl(Ark_NativePointer node,
-                 const Opt_String* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setKey(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void WidthImpl(Ark_NativePointer node,
-                   const Opt_Length* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setWidth(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void HeightImpl(Ark_NativePointer node,
-                    const Opt_Length* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setHeight(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void SizeImpl(Ark_NativePointer node,
-                  const Opt_SizeOptions* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setSize(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void ConstraintSizeImpl(Ark_NativePointer node,
-                            const Opt_ConstraintSizeOptions* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setConstraintSize(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void AlignImpl(Ark_NativePointer node,
-                   const Opt_Alignment* alignType)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setAlign(");
-        WriteToString(&out, alignType);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void AlignRules0Impl(Ark_NativePointer node,
-                         const Opt_AlignRuleOption* alignRule)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setAlignRules0(");
-        WriteToString(&out, alignRule);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void AlignRules1Impl(Ark_NativePointer node,
-                         const Opt_LocalizedAlignRuleOptions* alignRule)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setAlignRules1(");
-        WriteToString(&out, alignRule);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void IdImpl(Ark_NativePointer node,
-                const Opt_String* description)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setId(");
-        WriteToString(&out, description);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void ChainModeImpl(Ark_NativePointer node,
-                       const Opt_Axis* direction,
-                       const Opt_ChainStyle* style)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setChainMode(");
-        WriteToString(&out, direction);
-        out.append(", ");
-        WriteToString(&out, style);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void MinFontScaleImpl(Ark_NativePointer node,
-                          const Opt_Union_F64_Resource* scale)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setMinFontScale(");
-        WriteToString(&out, scale);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void MaxFontScaleImpl(Ark_NativePointer node,
-                          const Opt_Union_F64_Resource* scale)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setMaxFontScale(");
-        WriteToString(&out, scale);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void MaxLinesImpl(Ark_NativePointer node,
-                      const Opt_Int32* line)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setMaxLines(");
-        WriteToString(&out, line);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void MinFontSizeImpl(Ark_NativePointer node,
-                         const Opt_Union_F64_String_Resource* minSize)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setMinFontSize(");
-        WriteToString(&out, minSize);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void MaxFontSizeImpl(Ark_NativePointer node,
-                         const Opt_Union_F64_String_Resource* maxSize)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setMaxFontSize(");
-        WriteToString(&out, maxSize);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void HeightAdaptivePolicyImpl(Ark_NativePointer node,
-                                  const Opt_TextHeightAdaptivePolicy* policy)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setHeightAdaptivePolicy(");
-        WriteToString(&out, policy);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void EnabledImpl(Ark_NativePointer node,
-                     const Opt_Boolean* respond)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setEnabled(");
-        WriteToString(&out, respond);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    } // SecurityComponentMethodModifier
     namespace SelectModifier {
     Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                     Ark_Int32 flags)
@@ -13863,7 +13055,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void StrokeDashOffsetImpl(Ark_NativePointer node,
-                              const Opt_Union_Number_String* value)
+                              const Opt_Length* value)
     {
         if (!needGroupedLog(1))
         {
@@ -13911,7 +13103,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void StrokeMiterLimitImpl(Ark_NativePointer node,
-                              const Opt_Union_Number_String* value)
+                              const Opt_Length* value)
     {
         if (!needGroupedLog(1))
         {
@@ -13947,7 +13139,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void StrokeWidthImpl(Ark_NativePointer node,
-                         const Opt_Union_Number_String* value)
+                         const Opt_Length* value)
     {
         if (!needGroupedLog(1))
         {
@@ -14585,18 +13777,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void FontWeightImpl(Ark_NativePointer node,
-                        const Opt_Union_Number_FontWeight_String* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setFontWeight(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
     void FontFamilyImpl(Ark_NativePointer node,
                         const Opt_Union_String_Resource* value)
     {
@@ -14617,18 +13797,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             return;
         }
         string out("setDecoration(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void LetterSpacingImpl(Ark_NativePointer node,
-                           const Opt_Union_Number_String* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setLetterSpacing(");
         WriteToString(&out, value);
         out.append(") \n");
         appendGroupedLog(1, out);
@@ -15918,18 +15086,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void BarBackgroundEffectImpl(Ark_NativePointer node,
-                                 const Opt_BackgroundEffectOptions* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setBarBackgroundEffect(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
     void PageFlipModeImpl(Ark_NativePointer node,
                           const Opt_PageFlipMode* value)
     {
@@ -15938,6 +15094,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             return;
         }
         string out("setPageFlipMode(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void BarBackgroundEffectImpl(Ark_NativePointer node,
+                                 const Opt_BackgroundEffectOptions* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setBarBackgroundEffect(");
         WriteToString(&out, value);
         out.append(") \n");
         appendGroupedLog(1, out);
@@ -16713,7 +15881,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void FontWeightImpl(Ark_NativePointer node,
-                        const Opt_Union_Number_FontWeight_String* value)
+                        const Opt_Union_Number_FontWeight_ResourceStr* value)
     {
         if (!needGroupedLog(1))
         {
@@ -17762,7 +16930,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void FontWeightImpl(Ark_NativePointer node,
-                        const Opt_Union_Number_FontWeight_String* value)
+                        const Opt_Union_Number_FontWeight_ResourceStr* value)
     {
         if (!needGroupedLog(1))
         {
@@ -19861,7 +19029,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void TextZoomRatioImpl(Ark_NativePointer node,
-                           const Opt_Number* value)
+                           const Opt_Int32* value)
     {
         if (!needGroupedLog(1))
         {
@@ -19885,7 +19053,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void InitialScaleImpl(Ark_NativePointer node,
-                          const Opt_Number* value)
+                          const Opt_Float64* value)
     {
         if (!needGroupedLog(1))
         {
@@ -20437,7 +19605,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void DefaultFixedFontSizeImpl(Ark_NativePointer node,
-                                  const Opt_Number* value)
+                                  const Opt_Int32* value)
     {
         if (!needGroupedLog(1))
         {
@@ -20449,7 +19617,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void DefaultFontSizeImpl(Ark_NativePointer node,
-                             const Opt_Number* value)
+                             const Opt_Int32* value)
     {
         if (!needGroupedLog(1))
         {
@@ -20461,7 +19629,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void MinFontSizeImpl(Ark_NativePointer node,
-                         const Opt_Number* value)
+                         const Opt_Int32* value)
     {
         if (!needGroupedLog(1))
         {
@@ -20473,7 +19641,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void MinLogicalFontSizeImpl(Ark_NativePointer node,
-                                const Opt_Number* value)
+                                const Opt_Int32* value)
     {
         if (!needGroupedLog(1))
         {
@@ -21390,28 +20558,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return &ArkUIButtonModifierImpl;
     }
 
-    const GENERATED_ArkUICalendarModifier* GetCalendarModifier()
-    {
-        static const GENERATED_ArkUICalendarModifier ArkUICalendarModifierImpl {
-            CalendarModifier::ConstructImpl,
-            CalendarInterfaceModifier::SetCalendarOptionsImpl,
-            CalendarAttributeModifier::ShowLunarImpl,
-            CalendarAttributeModifier::ShowHolidayImpl,
-            CalendarAttributeModifier::NeedSlideImpl,
-            CalendarAttributeModifier::StartOfWeekImpl,
-            CalendarAttributeModifier::OffDaysImpl,
-            CalendarAttributeModifier::DirectionImpl,
-            CalendarAttributeModifier::CurrentDayStyleImpl,
-            CalendarAttributeModifier::NonCurrentDayStyleImpl,
-            CalendarAttributeModifier::TodayStyleImpl,
-            CalendarAttributeModifier::WeekStyleImpl,
-            CalendarAttributeModifier::WorkStateStyleImpl,
-            CalendarAttributeModifier::OnSelectChangeImpl,
-            CalendarAttributeModifier::OnRequestDataImpl,
-        };
-        return &ArkUICalendarModifierImpl;
-    }
-
     const GENERATED_ArkUICalendarPickerModifier* GetCalendarPickerModifier()
     {
         static const GENERATED_ArkUICalendarPickerModifier ArkUICalendarPickerModifierImpl {
@@ -21631,7 +20777,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::KeyImpl,
             CommonMethodModifier::IdImpl,
             CommonMethodModifier::GeometryTransition0Impl,
-            CommonMethodModifier::StateStylesImpl,
             CommonMethodModifier::RestoreIdImpl,
             CommonMethodModifier::SphericalEffectImpl,
             CommonMethodModifier::LightUpEffectImpl,
@@ -21894,6 +21039,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             FormComponentAttributeModifier::OnRouterImpl,
             FormComponentAttributeModifier::OnUninstallImpl,
             FormComponentAttributeModifier::OnLoadImpl,
+            FormComponentAttributeModifier::OnUpdateImpl,
         };
         return &ArkUIFormComponentModifierImpl;
     }
@@ -22074,6 +21220,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             ImageSpanModifier::ConstructImpl,
             ImageSpanInterfaceModifier::SetImageSpanOptionsImpl,
             ImageSpanAttributeModifier::VerticalAlignImpl,
+            ImageSpanAttributeModifier::ColorFilterImpl,
             ImageSpanAttributeModifier::ObjectFitImpl,
             ImageSpanAttributeModifier::OnCompleteImpl,
             ImageSpanAttributeModifier::OnErrorImpl,
@@ -22351,23 +21498,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return &ArkUINodeContainerModifierImpl;
     }
 
-    const GENERATED_ArkUIPasteButtonModifier* GetPasteButtonModifier()
-    {
-        static const GENERATED_ArkUIPasteButtonModifier ArkUIPasteButtonModifierImpl {
-            PasteButtonModifier::ConstructImpl,
-            PasteButtonInterfaceModifier::SetPasteButtonOptions0Impl,
-            PasteButtonInterfaceModifier::SetPasteButtonOptions1Impl,
-            PasteButtonAttributeModifier::OnClickImpl,
-        };
-        return &ArkUIPasteButtonModifierImpl;
-    }
-
     const GENERATED_ArkUIPathModifier* GetPathModifier()
     {
         static const GENERATED_ArkUIPathModifier ArkUIPathModifierImpl {
             PathModifier::ConstructImpl,
             PathInterfaceModifier::SetPathOptionsImpl,
-            PathAttributeModifier::CommandsImpl,
         };
         return &ArkUIPathModifierImpl;
     }
@@ -22485,8 +21620,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUIRectModifier ArkUIRectModifierImpl {
             RectModifier::ConstructImpl,
             RectInterfaceModifier::SetRectOptionsImpl,
-            RectAttributeModifier::RadiusWidthImpl,
-            RectAttributeModifier::RadiusHeightImpl,
             RectAttributeModifier::RadiusImpl,
         };
         return &ArkUIRectModifierImpl;
@@ -22622,17 +21755,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return &ArkUIRowSplitModifierImpl;
     }
 
-    const GENERATED_ArkUISaveButtonModifier* GetSaveButtonModifier()
-    {
-        static const GENERATED_ArkUISaveButtonModifier ArkUISaveButtonModifierImpl {
-            SaveButtonModifier::ConstructImpl,
-            SaveButtonInterfaceModifier::SetSaveButtonOptions0Impl,
-            SaveButtonInterfaceModifier::SetSaveButtonOptions1Impl,
-            SaveButtonAttributeModifier::OnClickImpl,
-        };
-        return &ArkUISaveButtonModifierImpl;
-    }
-
     const GENERATED_ArkUIScreenModifier* GetScreenModifier()
     {
         static const GENERATED_ArkUIScreenModifier ArkUIScreenModifierImpl {
@@ -22757,49 +21879,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             SearchAttributeModifier::_onChangeEvent_valueImpl,
         };
         return &ArkUISearchModifierImpl;
-    }
-
-    const GENERATED_ArkUISecurityComponentMethodModifier* GetSecurityComponentMethodModifier()
-    {
-        static const GENERATED_ArkUISecurityComponentMethodModifier ArkUISecurityComponentMethodModifierImpl {
-            SecurityComponentMethodModifier::ConstructImpl,
-            SecurityComponentMethodModifier::IconSizeImpl,
-            SecurityComponentMethodModifier::LayoutDirectionImpl,
-            SecurityComponentMethodModifier::PositionImpl,
-            SecurityComponentMethodModifier::MarkAnchorImpl,
-            SecurityComponentMethodModifier::OffsetImpl,
-            SecurityComponentMethodModifier::FontSizeImpl,
-            SecurityComponentMethodModifier::FontStyleImpl,
-            SecurityComponentMethodModifier::FontWeightImpl,
-            SecurityComponentMethodModifier::FontFamilyImpl,
-            SecurityComponentMethodModifier::FontColorImpl,
-            SecurityComponentMethodModifier::IconColorImpl,
-            SecurityComponentMethodModifier::BackgroundColorImpl,
-            SecurityComponentMethodModifier::BorderStyleImpl,
-            SecurityComponentMethodModifier::BorderWidthImpl,
-            SecurityComponentMethodModifier::BorderColorImpl,
-            SecurityComponentMethodModifier::BorderRadiusImpl,
-            SecurityComponentMethodModifier::PaddingImpl,
-            SecurityComponentMethodModifier::TextIconSpaceImpl,
-            SecurityComponentMethodModifier::KeyImpl,
-            SecurityComponentMethodModifier::WidthImpl,
-            SecurityComponentMethodModifier::HeightImpl,
-            SecurityComponentMethodModifier::SizeImpl,
-            SecurityComponentMethodModifier::ConstraintSizeImpl,
-            SecurityComponentMethodModifier::AlignImpl,
-            SecurityComponentMethodModifier::AlignRules0Impl,
-            SecurityComponentMethodModifier::AlignRules1Impl,
-            SecurityComponentMethodModifier::IdImpl,
-            SecurityComponentMethodModifier::ChainModeImpl,
-            SecurityComponentMethodModifier::MinFontScaleImpl,
-            SecurityComponentMethodModifier::MaxFontScaleImpl,
-            SecurityComponentMethodModifier::MaxLinesImpl,
-            SecurityComponentMethodModifier::MinFontSizeImpl,
-            SecurityComponentMethodModifier::MaxFontSizeImpl,
-            SecurityComponentMethodModifier::HeightAdaptivePolicyImpl,
-            SecurityComponentMethodModifier::EnabledImpl,
-        };
-        return &ArkUISecurityComponentMethodModifierImpl;
     }
 
     const GENERATED_ArkUISelectModifier* GetSelectModifier()
@@ -22927,10 +22006,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             SpanAttributeModifier::FontColorImpl,
             SpanAttributeModifier::FontSizeImpl,
             SpanAttributeModifier::FontStyleImpl,
-            SpanAttributeModifier::FontWeightImpl,
             SpanAttributeModifier::FontFamilyImpl,
             SpanAttributeModifier::DecorationImpl,
-            SpanAttributeModifier::LetterSpacingImpl,
             SpanAttributeModifier::TextCaseImpl,
             SpanAttributeModifier::LineHeightImpl,
             SpanAttributeModifier::TextShadowImpl,
@@ -23086,8 +22163,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TabsAttributeModifier::BarGridAlignImpl,
             TabsAttributeModifier::CustomContentTransitionImpl,
             TabsAttributeModifier::BarBackgroundBlurStyle0Impl,
-            TabsAttributeModifier::BarBackgroundEffectImpl,
             TabsAttributeModifier::PageFlipModeImpl,
+            TabsAttributeModifier::BarBackgroundEffectImpl,
             TabsAttributeModifier::OnContentWillChangeImpl,
             TabsAttributeModifier::BarModeImpl,
             TabsAttributeModifier::BarBackgroundBlurStyle1Impl,
@@ -23626,7 +22703,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetBaseSpanModifier,
             GetBlankModifier,
             GetButtonModifier,
-            GetCalendarModifier,
             GetCalendarPickerModifier,
             GetCanvasModifier,
             GetCheckboxModifier,
@@ -23675,7 +22751,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetNavDestinationModifier,
             GetNavigationModifier,
             GetNodeContainerModifier,
-            GetPasteButtonModifier,
             GetPathModifier,
             GetPatternLockModifier,
             GetPluginComponentModifier,
@@ -23695,13 +22770,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetRootSceneModifier,
             GetRowModifier,
             GetRowSplitModifier,
-            GetSaveButtonModifier,
             GetScreenModifier,
             GetScrollModifier,
             GetScrollableCommonMethodModifier,
             GetScrollBarModifier,
             GetSearchModifier,
-            GetSecurityComponentMethodModifier,
             GetSelectModifier,
             GetShapeModifier,
             GetSideBarContainerModifier,
@@ -25165,64 +24238,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return nullptr;
     }
     } // BuilderNodeOpsAccessor
-    namespace CalendarControllerAccessor {
-    void DestroyPeerImpl(Ark_CalendarController peer)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("destroyPeer(");
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    Ark_CalendarController ConstructImpl()
-    {
-        if (!needGroupedLog(1))
-        {
-            return reinterpret_cast<Ark_CalendarController>(100);
-        }
-        string out("new CalendarController(");
-        out.append(") \n");
-        out.append("[return reinterpret_cast<Ark_CalendarController>(100)] \n");
-        appendGroupedLog(1, out);
-        return reinterpret_cast<Ark_CalendarController>(100);
-    }
-    Ark_NativePointer GetFinalizerImpl()
-    {
-        if (!needGroupedLog(1))
-        {
-            return fnPtr<KNativePointer>(dummyClassFinalizer);
-        }
-        string out("getFinalizer(");
-        out.append(") \n");
-        out.append("[return fnPtr<KNativePointer>(dummyClassFinalizer)] \n");
-        appendGroupedLog(1, out);
-        return fnPtr<KNativePointer>(dummyClassFinalizer);
-    }
-    void BackToTodayImpl(Ark_CalendarController peer)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("backToToday(");
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void GoToImpl(Ark_CalendarController peer,
-                  const Ark_CalendarSelectedDate* date)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("goTo(");
-        WriteToString(&out, date);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    } // CalendarControllerAccessor
     namespace CalendarPickerDialogAccessor {
     void DestroyPeerImpl(Ark_CalendarPickerDialog peer)
     {
@@ -28720,6 +27735,56 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     } // ControllerHandlerAccessor
+    namespace curves_ICurveAccessor {
+    void DestroyPeerImpl(Ark_curves_ICurve peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("destroyPeer(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    Ark_curves_ICurve ConstructImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return reinterpret_cast<Ark_curves_ICurve>(100);
+        }
+        string out("new ICurve(");
+        out.append(") \n");
+        out.append("[return reinterpret_cast<Ark_ICurve>(100)] \n");
+        appendGroupedLog(1, out);
+        return reinterpret_cast<Ark_curves_ICurve>(100);
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return fnPtr<KNativePointer>(dummyClassFinalizer);
+        }
+        string out("getFinalizer(");
+        out.append(") \n");
+        out.append("[return fnPtr<KNativePointer>(dummyClassFinalizer)] \n");
+        appendGroupedLog(1, out);
+        return fnPtr<KNativePointer>(dummyClassFinalizer);
+    }
+    Ark_Number InterpolateImpl(Ark_curves_ICurve peer,
+                               const Ark_Number* fraction)
+    {
+        if (!needGroupedLog(1))
+        {
+            return {42};
+        }
+        string out("interpolate(");
+        WriteToString(&out, fraction);
+        out.append(") \n");
+        out.append("[return {42}] \n");
+        appendGroupedLog(1, out);
+        return {42};
+    }
+    } // curves_ICurveAccessor
     namespace CustomDialogControllerAccessor {
     void DestroyPeerImpl(Ark_CustomDialogController peer)
     {
@@ -29097,6 +28162,146 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     } // DisappearSymbolEffectAccessor
+    namespace DismissDialogActionAccessor {
+    void DestroyPeerImpl(Ark_DismissDialogAction peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("destroyPeer(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    Ark_DismissDialogAction ConstructImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return reinterpret_cast<Ark_DismissDialogAction>(100);
+        }
+        string out("new DismissDialogAction(");
+        out.append(") \n");
+        out.append("[return reinterpret_cast<Ark_DismissDialogAction>(100)] \n");
+        appendGroupedLog(1, out);
+        return reinterpret_cast<Ark_DismissDialogAction>(100);
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return fnPtr<KNativePointer>(dummyClassFinalizer);
+        }
+        string out("getFinalizer(");
+        out.append(") \n");
+        out.append("[return fnPtr<KNativePointer>(dummyClassFinalizer)] \n");
+        appendGroupedLog(1, out);
+        return fnPtr<KNativePointer>(dummyClassFinalizer);
+    }
+    void DismissImpl(Ark_DismissDialogAction peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("dismiss(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    Ark_DismissReason GetReasonImpl(Ark_DismissDialogAction peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return {};
+        }
+        string out("getReason(");
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
+    void SetReasonImpl(Ark_DismissDialogAction peer,
+                       Ark_DismissReason reason)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setReason(");
+        WriteToString(&out, reason);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    } // DismissDialogActionAccessor
+    namespace DismissPopupActionAccessor {
+    void DestroyPeerImpl(Ark_DismissPopupAction peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("destroyPeer(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    Ark_DismissPopupAction ConstructImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return reinterpret_cast<Ark_DismissPopupAction>(100);
+        }
+        string out("new DismissPopupAction(");
+        out.append(") \n");
+        out.append("[return reinterpret_cast<Ark_DismissPopupAction>(100)] \n");
+        appendGroupedLog(1, out);
+        return reinterpret_cast<Ark_DismissPopupAction>(100);
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return fnPtr<KNativePointer>(dummyClassFinalizer);
+        }
+        string out("getFinalizer(");
+        out.append(") \n");
+        out.append("[return fnPtr<KNativePointer>(dummyClassFinalizer)] \n");
+        appendGroupedLog(1, out);
+        return fnPtr<KNativePointer>(dummyClassFinalizer);
+    }
+    void DismissImpl(Ark_DismissPopupAction peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("dismiss(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    Ark_DismissReason GetReasonImpl(Ark_DismissPopupAction peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return {};
+        }
+        string out("getReason(");
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
+    void SetReasonImpl(Ark_DismissPopupAction peer,
+                       Ark_DismissReason reason)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setReason(");
+        WriteToString(&out, reason);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    } // DismissPopupActionAccessor
     namespace DragEventAccessor {
     void DestroyPeerImpl(Ark_DragEvent peer)
     {
@@ -29299,20 +28504,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         WriteToString(&out, customDropAnimation);
         out.append(") \n");
         appendGroupedLog(1, out);
-    }
-    Ark_String StartDataLoadingImpl(Ark_DragEvent peer,
-                                    const Ark_CustomObject* options)
-    {
-        if (!needGroupedLog(1))
-        {
-            return {};
-        }
-        string out("startDataLoading(");
-        WriteToString(&out, options);
-        out.append(") \n");
-        out.append("[return {}] \n");
-        appendGroupedLog(1, out);
-        return {};
     }
     Ark_DragBehavior GetDragBehaviorImpl(Ark_DragEvent peer)
     {
@@ -33659,18 +32850,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return {};
     }
-    Callback_DrawContext_Void GetDrawFront_callbackImpl(Ark_DrawModifier peer)
-    {
-        if (!needGroupedLog(1))
-        {
-            return {};
-        }
-        string out("getDrawFront_callback(");
-        out.append(") \n");
-        out.append("[return {}] \n");
-        appendGroupedLog(1, out);
-        return {};
-    }
     } // DrawModifierAccessor
     namespace EllipseShapeAccessor {
     void DestroyPeerImpl(Ark_EllipseShape peer)
@@ -36007,56 +35186,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return 0;
     }
     } // HttpAuthHandlerAccessor
-    namespace ICurveAccessor {
-    void DestroyPeerImpl(Ark_ICurve peer)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("destroyPeer(");
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    Ark_ICurve ConstructImpl()
-    {
-        if (!needGroupedLog(1))
-        {
-            return reinterpret_cast<Ark_ICurve>(100);
-        }
-        string out("new ICurve(");
-        out.append(") \n");
-        out.append("[return reinterpret_cast<Ark_ICurve>(100)] \n");
-        appendGroupedLog(1, out);
-        return reinterpret_cast<Ark_ICurve>(100);
-    }
-    Ark_NativePointer GetFinalizerImpl()
-    {
-        if (!needGroupedLog(1))
-        {
-            return fnPtr<KNativePointer>(dummyClassFinalizer);
-        }
-        string out("getFinalizer(");
-        out.append(") \n");
-        out.append("[return fnPtr<KNativePointer>(dummyClassFinalizer)] \n");
-        appendGroupedLog(1, out);
-        return fnPtr<KNativePointer>(dummyClassFinalizer);
-    }
-    Ark_Number InterpolateImpl(Ark_ICurve peer,
-                               const Ark_Number* fraction)
-    {
-        if (!needGroupedLog(1))
-        {
-            return {42};
-        }
-        string out("interpolate(");
-        WriteToString(&out, fraction);
-        out.append(") \n");
-        out.append("[return {42}] \n");
-        appendGroupedLog(1, out);
-        return {42};
-    }
-    } // ICurveAccessor
     namespace image_PixelMapAccessor {
     void DestroyPeerImpl(Ark_image_PixelMap peer)
     {
@@ -42413,42 +41542,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     } // PromptActionAccessor
-    namespace PulseSymbolEffectAccessor {
-    void DestroyPeerImpl(Ark_PulseSymbolEffect peer)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("destroyPeer(");
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    Ark_PulseSymbolEffect ConstructImpl()
-    {
-        if (!needGroupedLog(1))
-        {
-            return reinterpret_cast<Ark_PulseSymbolEffect>(100);
-        }
-        string out("new PulseSymbolEffect(");
-        out.append(") \n");
-        out.append("[return reinterpret_cast<Ark_PulseSymbolEffect>(100)] \n");
-        appendGroupedLog(1, out);
-        return reinterpret_cast<Ark_PulseSymbolEffect>(100);
-    }
-    Ark_NativePointer GetFinalizerImpl()
-    {
-        if (!needGroupedLog(1))
-        {
-            return fnPtr<KNativePointer>(dummyClassFinalizer);
-        }
-        string out("getFinalizer(");
-        out.append(") \n");
-        out.append("[return fnPtr<KNativePointer>(dummyClassFinalizer)] \n");
-        appendGroupedLog(1, out);
-        return fnPtr<KNativePointer>(dummyClassFinalizer);
-    }
-    } // PulseSymbolEffectAccessor
     namespace RectShapeAccessor {
     void DestroyPeerImpl(Ark_RectShape peer)
     {
@@ -44041,7 +43134,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return fnPtr<KNativePointer>(dummyClassFinalizer);
     }
     Ark_Number AddTextSpanImpl(Ark_RichEditorController peer,
-                               const Ark_String* value,
+                               const Ark_ResourceStr* content,
                                const Opt_RichEditorTextSpanOptions* options)
     {
         if (!needGroupedLog(1))
@@ -44049,7 +43142,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             return {42};
         }
         string out("addTextSpan(");
-        WriteToString(&out, value);
+        WriteToString(&out, content);
         out.append(", ");
         WriteToString(&out, options);
         out.append(") \n");
@@ -49708,6 +48801,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return reinterpret_cast<Ark_TransitionEffect>(300);
     }
+    void SetIDENTITYImpl(Ark_TransitionEffect IDENTITY)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setIDENTITY(");
+        WriteToString(&out, IDENTITY);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     Ark_TransitionEffect GetOPACITYImpl()
     {
         if (!needGroupedLog(1))
@@ -49719,6 +48823,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append("[return reinterpret_cast<Ark_TransitionEffect>(300)] \n");
         appendGroupedLog(1, out);
         return reinterpret_cast<Ark_TransitionEffect>(300);
+    }
+    void SetOPACITYImpl(Ark_TransitionEffect OPACITY)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setOPACITY(");
+        WriteToString(&out, OPACITY);
+        out.append(") \n");
+        appendGroupedLog(1, out);
     }
     Ark_TransitionEffect GetSLIDEImpl()
     {
@@ -49732,6 +48847,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return reinterpret_cast<Ark_TransitionEffect>(300);
     }
+    void SetSLIDEImpl(Ark_TransitionEffect SLIDE)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setSLIDE(");
+        WriteToString(&out, SLIDE);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     Ark_TransitionEffect GetSLIDE_SWITCHImpl()
     {
         if (!needGroupedLog(1))
@@ -49743,6 +48869,17 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append("[return reinterpret_cast<Ark_TransitionEffect>(300)] \n");
         appendGroupedLog(1, out);
         return reinterpret_cast<Ark_TransitionEffect>(300);
+    }
+    void SetSLIDE_SWITCHImpl(Ark_TransitionEffect SLIDE_SWITCH)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setSLIDE_SWITCH(");
+        WriteToString(&out, SLIDE_SWITCH);
+        out.append(") \n");
+        appendGroupedLog(1, out);
     }
     } // TransitionEffectAccessor
     namespace UICommonEventAccessor {
@@ -50933,29 +50070,29 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return fnPtr<KNativePointer>(dummyClassFinalizer);
     }
-    Ark_Number XImpl(Ark_WebContextMenuParam peer)
+    Ark_Int32 XImpl(Ark_WebContextMenuParam peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("x(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
-    Ark_Number YImpl(Ark_WebContextMenuParam peer)
+    Ark_Int32 YImpl(Ark_WebContextMenuParam peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("y(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     Ark_String GetLinkUrlImpl(Ark_WebContextMenuParam peer)
     {
@@ -51065,41 +50202,41 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return 0;
     }
-    Ark_Number GetEditStateFlagsImpl(Ark_WebContextMenuParam peer)
+    Ark_Int32 GetEditStateFlagsImpl(Ark_WebContextMenuParam peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getEditStateFlags(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
-    Ark_Number GetPreviewWidthImpl(Ark_WebContextMenuParam peer)
+    Ark_Int32 GetPreviewWidthImpl(Ark_WebContextMenuParam peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getPreviewWidth(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
-    Ark_Number GetPreviewHeightImpl(Ark_WebContextMenuParam peer)
+    Ark_Int32 GetPreviewHeightImpl(Ark_WebContextMenuParam peer)
     {
         if (!needGroupedLog(1))
         {
-            return {42};
+            return 0;
         }
         string out("getPreviewHeight(");
         out.append(") \n");
-        out.append("[return {42}] \n");
+        out.append("[return 0] \n");
         appendGroupedLog(1, out);
-        return {42};
+        return 0;
     }
     } // WebContextMenuParamAccessor
     namespace WebContextMenuResultAccessor {
@@ -51302,7 +50439,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void DeleteForwardImpl(Ark_WebKeyboardController peer,
-                           const Ark_Number* length)
+                           Ark_Int32 length)
     {
         if (!needGroupedLog(1))
         {
@@ -51314,7 +50451,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void DeleteBackwardImpl(Ark_WebKeyboardController peer,
-                            const Ark_Number* length)
+                            Ark_Int32 length)
     {
         if (!needGroupedLog(1))
         {
@@ -51326,7 +50463,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SendFunctionKeyImpl(Ark_WebKeyboardController peer,
-                             const Ark_Number* key)
+                             Ark_Int32 key)
     {
         if (!needGroupedLog(1))
         {
@@ -52058,22 +51195,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    Ark_CustomObject ApplyStylesImpl(const Ark_CustomObject* self,
-                                     const CustomStyles* customStyles)
-    {
-        if (!needGroupedLog(1))
-        {
-            return {};
-        }
-        string out("applyStyles(");
-        WriteToString(&out, self);
-        out.append(", ");
-        WriteToString(&out, customStyles);
-        out.append(") \n");
-        out.append("[return {}] \n");
-        appendGroupedLog(1, out);
-        return {};
-    }
     void BindCompatibleProvideCallbackImpl(Ark_ExtendableComponent component,
                                            const Ark_CustomObject* createCompatibleState,
                                            const Ark_CustomObject* setCallback,
@@ -52121,7 +51242,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     void CompatibleComponentImpl(const CompatibleInitCallback* init,
-                                 const CompatibleUpdateCallback* update)
+                                 const CompatibleUpdateCallback* update,
+                                 const Opt_ExtendableComponent* component)
     {
         if (!needGroupedLog(1))
         {
@@ -52131,6 +51253,22 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         WriteToString(&out, init);
         out.append(", ");
         WriteToString(&out, update);
+        out.append(", ");
+        WriteToString(&out, component);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void CompatibleWrappedBuilderImpl(const Ark_CustomObject* builder,
+                                      const Ark_CustomObject* args)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("compatibleWrappedBuilder(");
+        WriteToString(&out, builder);
+        out.append(", ");
+        WriteToString(&out, args);
         out.append(") \n");
         appendGroupedLog(1, out);
     }
@@ -52618,21 +51756,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct BuilderNodeOpsPeer {
         virtual ~BuilderNodeOpsPeer() = default;
     };
-    const GENERATED_ArkUICalendarControllerAccessor* GetCalendarControllerAccessor()
-    {
-        static const GENERATED_ArkUICalendarControllerAccessor CalendarControllerAccessorImpl {
-            CalendarControllerAccessor::DestroyPeerImpl,
-            CalendarControllerAccessor::ConstructImpl,
-            CalendarControllerAccessor::GetFinalizerImpl,
-            CalendarControllerAccessor::BackToTodayImpl,
-            CalendarControllerAccessor::GoToImpl,
-        };
-        return &CalendarControllerAccessorImpl;
-    }
-
-    struct CalendarControllerPeer {
-        virtual ~CalendarControllerPeer() = default;
-    };
     const GENERATED_ArkUICalendarPickerDialogAccessor* GetCalendarPickerDialogAccessor()
     {
         static const GENERATED_ArkUICalendarPickerDialogAccessor CalendarPickerDialogAccessorImpl {
@@ -53085,6 +52208,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct ControllerHandlerPeer {
         virtual ~ControllerHandlerPeer() = default;
     };
+    const GENERATED_ArkUICurves_ICurveAccessor* GetCurves_ICurveAccessor()
+    {
+        static const GENERATED_ArkUICurves_ICurveAccessor Curves_ICurveAccessorImpl {
+            curves_ICurveAccessor::DestroyPeerImpl,
+            curves_ICurveAccessor::ConstructImpl,
+            curves_ICurveAccessor::GetFinalizerImpl,
+            curves_ICurveAccessor::InterpolateImpl,
+        };
+        return &Curves_ICurveAccessorImpl;
+    }
+
+    struct Curves_ICurvePeer {
+        virtual ~Curves_ICurvePeer() = default;
+    };
     const GENERATED_ArkUICustomDialogControllerAccessor* GetCustomDialogControllerAccessor()
     {
         static const GENERATED_ArkUICustomDialogControllerAccessor CustomDialogControllerAccessorImpl {
@@ -53177,6 +52314,38 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct DisappearSymbolEffectPeer {
         virtual ~DisappearSymbolEffectPeer() = default;
     };
+    const GENERATED_ArkUIDismissDialogActionAccessor* GetDismissDialogActionAccessor()
+    {
+        static const GENERATED_ArkUIDismissDialogActionAccessor DismissDialogActionAccessorImpl {
+            DismissDialogActionAccessor::DestroyPeerImpl,
+            DismissDialogActionAccessor::ConstructImpl,
+            DismissDialogActionAccessor::GetFinalizerImpl,
+            DismissDialogActionAccessor::DismissImpl,
+            DismissDialogActionAccessor::GetReasonImpl,
+            DismissDialogActionAccessor::SetReasonImpl,
+        };
+        return &DismissDialogActionAccessorImpl;
+    }
+
+    struct DismissDialogActionPeer {
+        virtual ~DismissDialogActionPeer() = default;
+    };
+    const GENERATED_ArkUIDismissPopupActionAccessor* GetDismissPopupActionAccessor()
+    {
+        static const GENERATED_ArkUIDismissPopupActionAccessor DismissPopupActionAccessorImpl {
+            DismissPopupActionAccessor::DestroyPeerImpl,
+            DismissPopupActionAccessor::ConstructImpl,
+            DismissPopupActionAccessor::GetFinalizerImpl,
+            DismissPopupActionAccessor::DismissImpl,
+            DismissPopupActionAccessor::GetReasonImpl,
+            DismissPopupActionAccessor::SetReasonImpl,
+        };
+        return &DismissPopupActionAccessorImpl;
+    }
+
+    struct DismissPopupActionPeer {
+        virtual ~DismissPopupActionPeer() = default;
+    };
     const GENERATED_ArkUIDragEventAccessor* GetDragEventAccessor()
     {
         static const GENERATED_ArkUIDragEventAccessor DragEventAccessorImpl {
@@ -53197,7 +52366,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             DragEventAccessor::GetVelocityYImpl,
             DragEventAccessor::GetVelocityImpl,
             DragEventAccessor::ExecuteDropAnimationImpl,
-            DragEventAccessor::StartDataLoadingImpl,
             DragEventAccessor::GetDragBehaviorImpl,
             DragEventAccessor::SetDragBehaviorImpl,
             DragEventAccessor::GetUseCustomDropAnimationImpl,
@@ -53723,8 +52891,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             DrawModifierAccessor::SetDrawBehind_callbackImpl,
             DrawModifierAccessor::GetDrawContent_callbackImpl,
             DrawModifierAccessor::SetDrawContent_callbackImpl,
-            DrawModifierAccessor::GetDrawFront_callbackImpl,
-            DrawModifierAccessor::SetDrawFront_callbackImpl,
         };
         return &DrawModifierAccessorImpl;
     }
@@ -54153,20 +53319,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 
     struct HttpAuthHandlerPeer {
         virtual ~HttpAuthHandlerPeer() = default;
-    };
-    const GENERATED_ArkUIICurveAccessor* GetICurveAccessor()
-    {
-        static const GENERATED_ArkUIICurveAccessor ICurveAccessorImpl {
-            ICurveAccessor::DestroyPeerImpl,
-            ICurveAccessor::ConstructImpl,
-            ICurveAccessor::GetFinalizerImpl,
-            ICurveAccessor::InterpolateImpl,
-        };
-        return &ICurveAccessorImpl;
-    }
-
-    struct ICurvePeer {
-        virtual ~ICurvePeer() = default;
     };
     const GENERATED_ArkUIImage_PixelMapAccessor* GetImage_PixelMapAccessor()
     {
@@ -55209,19 +54361,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 
     struct PromptActionPeer {
         virtual ~PromptActionPeer() = default;
-    };
-    const GENERATED_ArkUIPulseSymbolEffectAccessor* GetPulseSymbolEffectAccessor()
-    {
-        static const GENERATED_ArkUIPulseSymbolEffectAccessor PulseSymbolEffectAccessorImpl {
-            PulseSymbolEffectAccessor::DestroyPeerImpl,
-            PulseSymbolEffectAccessor::ConstructImpl,
-            PulseSymbolEffectAccessor::GetFinalizerImpl,
-        };
-        return &PulseSymbolEffectAccessorImpl;
-    }
-
-    struct PulseSymbolEffectPeer {
-        virtual ~PulseSymbolEffectPeer() = default;
     };
     const GENERATED_ArkUIRectShapeAccessor* GetRectShapeAccessor()
     {
@@ -56443,9 +55582,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TransitionEffectAccessor::AnimationImpl,
             TransitionEffectAccessor::CombineImpl,
             TransitionEffectAccessor::GetIDENTITYImpl,
+            TransitionEffectAccessor::SetIDENTITYImpl,
             TransitionEffectAccessor::GetOPACITYImpl,
+            TransitionEffectAccessor::SetOPACITYImpl,
             TransitionEffectAccessor::GetSLIDEImpl,
+            TransitionEffectAccessor::SetSLIDEImpl,
             TransitionEffectAccessor::GetSLIDE_SWITCHImpl,
+            TransitionEffectAccessor::SetSLIDE_SWITCHImpl,
         };
         return &TransitionEffectAccessorImpl;
     }
@@ -56829,11 +55972,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GlobalScopeAccessor::$rawfileImpl,
             GlobalScopeAccessor::AnimateToImpl,
             GlobalScopeAccessor::AnimateToImmediatelyImpl,
-            GlobalScopeAccessor::ApplyStylesImpl,
             GlobalScopeAccessor::BindCompatibleProvideCallbackImpl,
             GlobalScopeAccessor::BorderRadiusesImpl,
             GlobalScopeAccessor::BorderStylesImpl,
             GlobalScopeAccessor::CompatibleComponentImpl,
+            GlobalScopeAccessor::CompatibleWrappedBuilderImpl,
             GlobalScopeAccessor::CursorControl_restoreDefaultImpl,
             GlobalScopeAccessor::CursorControl_setCursorImpl,
             GlobalScopeAccessor::EdgeColorsImpl,
@@ -56875,7 +56018,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetBaseShapeAccessor,
             GetBounceSymbolEffectAccessor,
             GetBuilderNodeOpsAccessor,
-            GetCalendarControllerAccessor,
             GetCalendarPickerDialogAccessor,
             GetCanvasGradientAccessor,
             GetCanvasPathAccessor,
@@ -56896,12 +56038,15 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetContentModifierHelperAccessor,
             GetContextAccessor,
             GetControllerHandlerAccessor,
+            GetCurves_ICurveAccessor,
             GetCustomDialogControllerAccessor,
             GetCustomSpanAccessor,
             GetDataResubmissionHandlerAccessor,
             GetDatePickerDialogAccessor,
             GetDecorationStyleAccessor,
             GetDisappearSymbolEffectAccessor,
+            GetDismissDialogActionAccessor,
+            GetDismissPopupActionAccessor,
             GetDragEventAccessor,
             GetDrawableDescriptorAccessor,
             GetDrawContextAccessor,
@@ -56950,7 +56095,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetHierarchicalSymbolEffectAccessor,
             GetHoverEventAccessor,
             GetHttpAuthHandlerAccessor,
-            GetICurveAccessor,
             GetImage_PixelMapAccessor,
             GetImageAnalyzerControllerAccessor,
             GetImageAttachmentAccessor,
@@ -57007,7 +56151,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetPixelMapMockAccessor,
             GetProgressMaskAccessor,
             GetPromptActionAccessor,
-            GetPulseSymbolEffectAccessor,
             GetRectShapeAccessor,
             GetRenderingContextSettingsAccessor,
             GetRenderNodeAccessor,

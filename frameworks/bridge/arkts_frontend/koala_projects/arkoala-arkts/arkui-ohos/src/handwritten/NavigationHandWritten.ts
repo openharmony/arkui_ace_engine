@@ -14,7 +14,8 @@
  */
 
 import { KPointer } from "@koalaui/interop"
-import { NavigationTitleOptions, NavigationMenuOptions, NavigationMenuItem, NavPathStack, ToolbarItem, CustomBuilder, ResourceStr, SymbolGlyphModifier, NavigationToolbarOptions, NavigationCommonTitle, NavigationCustomTitle } from "../component"
+import { NavigationTitleOptions, NavigationMenuOptions, NavigationMenuItem, NavPathStack, ToolbarItem, CustomBuilder, ResourceStr, NavigationToolbarOptions, NavigationCommonTitle, NavigationCustomTitle } from "../component"
+import { SymbolGlyphModifier } from "../SymbolGlyphModifier"
 import { Resource } from "global.resource"
 import { PixelMap } from "#external"
 import { NavigationHandWrittenImpl } from "./NavigationHandWrittenImpl"

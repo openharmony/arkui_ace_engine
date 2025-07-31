@@ -27,6 +27,7 @@
 
 #include "etsapi.h"
 #include "koala-types.h"
+#include "securec.h"
 
 template<class T>
 struct InteropTypeConverter {
@@ -103,16 +104,20 @@ template<>
 struct InteropTypeConverter<KInteropBuffer> {
     using InteropType = ets_byteArray;
     static KInteropBuffer convertFrom(EtsEnv* env, InteropType value) {
-      if (!value) return KInteropBuffer();
-      KInteropBuffer result;
-      result.data = (KByte*)env->PinByteArray(value);
-      result.length = env->GetArrayLength(value);
-      return result;
+        if (!value) {
+            return KInteropBuffer();
+        }
+        KInteropBuffer result;
+        result.data = (KByte*)env->PinByteArray(value);
+        result.length = env->GetArrayLength(value);
+        return result;
     }
     static InteropType convertTo(EtsEnv* env, KInteropBuffer value) {
       ets_byteArray array = env->NewByteArray(value.length);
       KByte* data = (KByte*)env->PinByteArray(array);
-      memcpy(data, (KByte*)value.data, value.length);
+      if (memcpy_s(data, value.length, value.data, value.length) != 0) {
+        return array;
+      }
       env->UnpinByteArray(array);
       value.dispose(value.resourceId);
       return array;
@@ -126,7 +131,9 @@ template<>
 struct InteropTypeConverter<KStringPtr> {
     using InteropType = ets_string;
     static KStringPtr convertFrom(EtsEnv* env, InteropType value) {
-        if (value == nullptr) return KStringPtr();
+        if (value == nullptr) {
+            return KStringPtr();
+        }
         KStringPtr result;
         // Notice that we use UTF length for buffer size, but counter is expressed in number of Unicode chars.
         result.resize(env->GetStringUTFLength(value));
@@ -180,12 +187,16 @@ template<>
 struct InteropTypeConverter<KInt*> {
     using InteropType = ets_intArray;
     static KInt* convertFrom(EtsEnv* env, InteropType value) {
-      if (!value) return nullptr;
-      return env->PinIntArray(value);
+        if (!value) {
+            return nullptr;
+        }
+        return env->PinIntArray(value);
     }
     static InteropType convertTo(EtsEnv* env, KInt* value) = delete;
     static void release(EtsEnv* env, InteropType value, KInt* converted) {
-      if (value) env->UnpinIntArray(value);
+        if (value) {
+            env->UnpinIntArray(value);
+        }
     }
 };
 
@@ -193,12 +204,16 @@ template<>
 struct InteropTypeConverter<KFloat*> {
     using InteropType = ets_floatArray;
     static KFloat* convertFrom(EtsEnv* env, InteropType value) {
-      if (!value) return nullptr;
-      return env->PinFloatArray(value);
+        if (!value) {
+            return nullptr;
+        }
+        return env->PinFloatArray(value);
     }
     static InteropType convertTo(EtsEnv* env, KFloat* value) = delete;
     static void release(EtsEnv* env, InteropType value, KFloat* converted) {
-      if (value) env->UnpinFloatArray(value);
+        if (value) {
+            env->UnpinFloatArray(value);
+        }
     }
 };
 
@@ -209,7 +224,9 @@ struct InteropTypeConverter<KInteropReturnBuffer> {
     static InteropType convertTo(EtsEnv* env, KInteropReturnBuffer value) {
       ets_byteArray array = env->NewByteArray(value.length);
       KByte* data = (KByte*)env->PinByteArray(array);
-      memcpy(data, (KByte*)value.data, value.length);
+      if (memcpy_s(data, value.length, value.data, value.length) != 0) {
+        return array;
+      }
       env->UnpinByteArray(array);
       value.dispose(value.data, value.length);
       return array;
@@ -221,12 +238,16 @@ template<>
 struct InteropTypeConverter<KByte*> {
     using InteropType = ets_byteArray;
     static KByte* convertFrom(EtsEnv* env, InteropType value) {
-     if (!value) return nullptr;
-      return (KByte*)env->PinByteArray(value);
+        if (!value) {
+            return nullptr;
+        }
+        return (KByte*)env->PinByteArray(value);
     }
     static InteropType convertTo(EtsEnv* env, KByte* value) = delete;
     static void release(EtsEnv* env, InteropType value, KByte* converted) {
-      if (value) env->UnpinByteArray((ets_byteArray)value);
+        if (value) {
+            env->UnpinByteArray((ets_byteArray)value);
+        }
     }
 };
 

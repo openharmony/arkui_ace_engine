@@ -31,7 +31,7 @@ import { EdgeEffect, PageFlipMode, Color } from "./enums"
 import { Callback_Number_Void } from "./alphabetIndexer"
 import { Resource } from "global.resource"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { TabsOpsHandWritten } from "./../handwritten"
+import { TabsOpsHandWritten, hookTabsApplyAttributesFinish } from "./../handwritten"
 
 export class TabsControllerInternal {
     public static fromPtr(ptr: KPointer): TabsController {
@@ -1083,7 +1083,7 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements TabsAt
     
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
-        super.applyAttributesFinish()
+        hookTabsApplyAttributesFinish(this)
     }
 }
 /** @memo */

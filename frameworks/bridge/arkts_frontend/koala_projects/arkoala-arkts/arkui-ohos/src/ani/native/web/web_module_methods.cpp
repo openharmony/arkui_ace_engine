@@ -23,30 +23,6 @@
 #include "interop_js/arkts_interop_js_api.h"
 
 namespace OHOS::Ace::Ani {
-namespace {
-ani_object ESValueWrap(ani_env* env, ani_object input)
-{
-    ani_class esValueClass = nullptr;
-    if (env->FindClass("Lstd/interop/ESValue;", &esValueClass) != ANI_OK) {
-        return nullptr;
-    }
-    ani_boolean isESValue = ANI_FALSE;
-    env->Object_InstanceOf(input, esValueClass, &isESValue);
-    if (isESValue == ANI_TRUE) {
-        return input;
-    }
-
-    ani_static_method wrap = nullptr;
-    if (env->Class_FindStaticMethod(esValueClass, "wrap", nullptr, &wrap) != ANI_OK) {
-        return nullptr;
-    }
-    ani_ref esValue;
-    if (env->Class_CallStaticMethod_Ref(esValueClass, wrap, &esValue, input) != ANI_OK) {
-        return nullptr;
-    }
-    return reinterpret_cast<ani_object>(esValue);
-}
-}
 
 static ani_env* GetAniEnv(ani_vm* vm)
 {
@@ -107,12 +83,12 @@ void SetWebOptions(ani_env* env, ani_class aniClass, ani_long node, ani_object o
     auto setHapPathFunc = [vm, object = savePtr](const std::string& hapPath) {
         ani_string aniHapPath = nullptr;
         ani_env* envTemp = GetAniEnv(vm);
-        if (!envTemp || envTemp->String_NewUTF8(hapPath.c_str(), hapPath.size(), &aniHapPath) != ANI_OK) {
-            envTemp->GlobalReference_Delete(object);
+        if (!envTemp) {
             return;
         }
-        if (envTemp->Object_CallMethodByName_Void(
-            reinterpret_cast<ani_object>(object), "_setHapPath", "Lstd/core/String;:V", aniHapPath) != ANI_OK) {
+        if (envTemp->String_NewUTF8(hapPath.c_str(), hapPath.size(), &aniHapPath) != ANI_OK ||
+            envTemp->Object_CallMethodByName_Void(
+                reinterpret_cast<ani_object>(object), "_setHapPath", "Lstd/core/String;:V", aniHapPath) != ANI_OK) {
             envTemp->GlobalReference_Delete(object);
             return;
         }
@@ -178,13 +154,8 @@ ani_boolean TransferScreenCaptureHandlerToStatic(ani_env* env, ani_class aniClas
     if (!modifier || !modifier->getWebAniModifier() || !env) {
         return ANI_FALSE;
     }
-    ani_object esValue = ESValueWrap(env, input);
-    if (!esValue) {
-        HILOGE("TransferScreenCaptureHandlerToStatic ESValueWrap failed");
-        return ANI_FALSE;
-    }
     void *nativePtr = nullptr;
-    if (!arkts_esvalue_unwrap(env, esValue, &nativePtr) || nativePtr == nullptr) {
+    if (!arkts_esvalue_unwrap(env, input, &nativePtr) || nativePtr == nullptr) {
         HILOGE("TransferScreenCaptureHandlerToStatic arkts_esvalue_unwrap failed");
         return ANI_FALSE;
     }
@@ -198,13 +169,8 @@ ani_boolean TransferJsGeolocationToStatic(ani_env* env, ani_class aniClass, ani_
     if (!modifier || !modifier->getWebAniModifier() || !env) {
         return ANI_FALSE;
     }
-    ani_object esValue = ESValueWrap(env, input);
-    if (!esValue) {
-        HILOGE("TransferJsGeolocationToStatic ESValueWrap failed");
-        return ANI_FALSE;
-    }
     void *nativePtr = nullptr;
-    if (!arkts_esvalue_unwrap(env, esValue, &nativePtr) || nativePtr == nullptr) {
+    if (!arkts_esvalue_unwrap(env, input, &nativePtr) || nativePtr == nullptr) {
         HILOGE("TransferJsGeolocationToStatic arkts_esvalue_unwrap failed");
         return ANI_FALSE;
     }
@@ -217,13 +183,8 @@ ani_boolean TransferJsResultToStatic(ani_env* env, ani_class aniClass, ani_long 
     if (!modifier || !modifier->getWebAniModifier() || !env) {
         return ANI_FALSE;
     }
-    ani_object esValue = ESValueWrap(env, input);
-    if (!esValue) {
-        HILOGE("TransferJsResultToStatic ESValueWrap failed");
-        return ANI_FALSE;
-    }
     void *nativePtr = nullptr;
-    if (!arkts_esvalue_unwrap(env, esValue, &nativePtr) || nativePtr == nullptr) {
+    if (!arkts_esvalue_unwrap(env, input, &nativePtr) || nativePtr == nullptr) {
         HILOGE("TransferJsResultToStatic arkts_esvalue_unwrap failed");
         return ANI_FALSE;
     }
@@ -236,13 +197,8 @@ ani_boolean TransferEventResultToStatic(ani_env* env, ani_class aniClass, ani_lo
     if (!modifier || !modifier->getWebAniModifier() || !env) {
         return ANI_FALSE;
     }
-    ani_object esValue = ESValueWrap(env, input);
-    if (!esValue) {
-        HILOGE("TransferEventResultToStatic ESValueWrap failed");
-        return ANI_FALSE;
-    }
     void *nativePtr = nullptr;
-    if (!arkts_esvalue_unwrap(env, esValue, &nativePtr) || nativePtr == nullptr) {
+    if (!arkts_esvalue_unwrap(env, input, &nativePtr) || nativePtr == nullptr) {
         HILOGE("TransferEventResultToStatic arkts_esvalue_unwrap failed");
         return ANI_FALSE;
     }
@@ -255,13 +211,8 @@ ani_boolean TransferFileSelectorResultToStatic(ani_env* env, ani_class aniClass,
     if (!modifier || !modifier->getWebAniModifier() || !env) {
         return ANI_FALSE;
     }
-    ani_object esValue = ESValueWrap(env, input);
-    if (!esValue) {
-        HILOGE("TransferFileSelectorResultToStatic ESValueWrap failed");
-        return ANI_FALSE;
-    }
     void *nativePtr = nullptr;
-    if (!arkts_esvalue_unwrap(env, esValue, &nativePtr) || nativePtr == nullptr) {
+    if (!arkts_esvalue_unwrap(env, input, &nativePtr) || nativePtr == nullptr) {
         HILOGE("TransferFileSelectorResultToStatic arkts_esvalue_unwrap failed");
         return ANI_FALSE;
     }
@@ -274,13 +225,8 @@ ani_boolean TransferFileSelectorParamToStatic(ani_env* env, ani_class aniClass, 
     if (!modifier || !modifier->getWebAniModifier() || !env) {
         return ANI_FALSE;
     }
-    ani_object esValue = ESValueWrap(env, input);
-    if (!esValue) {
-        HILOGE("TransferFileSelectorParamToStatic ESValueWrap failed");
-        return ANI_FALSE;
-    }
     void *nativePtr = nullptr;
-    if (!arkts_esvalue_unwrap(env, esValue, &nativePtr) || nativePtr == nullptr) {
+    if (!arkts_esvalue_unwrap(env, input, &nativePtr) || nativePtr == nullptr) {
         HILOGE("TransferFileSelectorParamToStatic arkts_esvalue_unwrap failed");
         return ANI_FALSE;
     }
@@ -293,13 +239,8 @@ ani_boolean TransferWebContextMenuResultToStatic(ani_env* env, ani_class aniClas
     if (!modifier || !modifier->getWebAniModifier() || !env) {
         return ANI_FALSE;
     }
-    ani_object esValue = ESValueWrap(env, input);
-    if (!esValue) {
-        HILOGE("TransferWebContextMenuResultToStatic ESValueWrap failed");
-        return ANI_FALSE;
-    }
     void *nativePtr = nullptr;
-    if (!arkts_esvalue_unwrap(env, esValue, &nativePtr) || nativePtr == nullptr) {
+    if (!arkts_esvalue_unwrap(env, input, &nativePtr) || nativePtr == nullptr) {
         HILOGE("TransferWebContextMenuResultToStatic arkts_esvalue_unwrap failed");
         return ANI_FALSE;
     }
@@ -313,13 +254,8 @@ ani_boolean TransferWebContextMenuParamToStatic(ani_env* env, ani_class aniClass
     if (!modifier || !modifier->getWebAniModifier() || !env) {
         return ANI_FALSE;
     }
-    ani_object esValue = ESValueWrap(env, input);
-    if (!esValue) {
-        HILOGE("TransferWebContextMenuParamToStatic ESValueWrap failed");
-        return ANI_FALSE;
-    }
     void *nativePtr = nullptr;
-    if (!arkts_esvalue_unwrap(env, esValue, &nativePtr) || nativePtr == nullptr) {
+    if (!arkts_esvalue_unwrap(env, input, &nativePtr) || nativePtr == nullptr) {
         HILOGE("TransferWebContextMenuParamToStatic arkts_esvalue_unwrap failed");
         return ANI_FALSE;
     }
@@ -355,13 +291,8 @@ ani_boolean TransferHttpAuthHandlerToStatic(ani_env* env, ani_class aniClass, an
     if (!modifier || !modifier->getWebAniModifier() || !env) {
         return ANI_FALSE;
     }
-    ani_object esValue = ESValueWrap(env, input);
-    if (!esValue) {
-        HILOGE("TransferHttpAuthHandlerToStatic ESValueWrap failed");
-        return ANI_FALSE;
-    }
     void *nativePtr = nullptr;
-    if (!arkts_esvalue_unwrap(env, esValue, &nativePtr) || nativePtr == nullptr) {
+    if (!arkts_esvalue_unwrap(env, input, &nativePtr) || nativePtr == nullptr) {
         HILOGE("TransferHttpAuthHandlerToStatic arkts_esvalue_unwrap failed");
         return ANI_FALSE;
     }
@@ -374,13 +305,8 @@ ani_boolean TransferWebResourceReponseToStatic(ani_env* env, ani_class aniClass,
     if (!modifier || !modifier->getWebAniModifier() || !env) {
         return ANI_FALSE;
     }
-    ani_object esValue = ESValueWrap(env, input);
-    if (!esValue) {
-        HILOGE("TransferWebResourceReponseToStatic ESValueWrap failed");
-        return ANI_FALSE;
-    }
     void *nativePtr = nullptr;
-    if (!arkts_esvalue_unwrap(env, esValue, &nativePtr) || nativePtr == nullptr) {
+    if (!arkts_esvalue_unwrap(env, input, &nativePtr) || nativePtr == nullptr) {
         HILOGE("TransferWebResourceReponseToStatic arkts_esvalue_unwrap failed");
         return ANI_FALSE;
     }
@@ -393,13 +319,8 @@ ani_boolean TransferWebResourceRequestToStatic(ani_env* env, ani_class aniClass,
     if (!modifier || !modifier->getWebAniModifier() || !env) {
         return ANI_FALSE;
     }
-    ani_object esValue = ESValueWrap(env, input);
-    if (!esValue) {
-        HILOGE("TransferWebResourceRequestToStatic ESValueWrap failed");
-        return ANI_FALSE;
-    }
     void *nativePtr = nullptr;
-    if (!arkts_esvalue_unwrap(env, esValue, &nativePtr) || nativePtr == nullptr) {
+    if (!arkts_esvalue_unwrap(env, input, &nativePtr) || nativePtr == nullptr) {
         HILOGE("TransferWebResourceRequestToStatic arkts_esvalue_unwrap failed");
         return ANI_FALSE;
     }
@@ -412,13 +333,8 @@ ani_boolean TransferConsoleMessageToStatic(ani_env* env, ani_class aniClass, ani
     if (!modifier || !modifier->getWebAniModifier() || !env) {
         return ANI_FALSE;
     }
-    ani_object esValue = ESValueWrap(env, input);
-    if (!esValue) {
-        HILOGE("TransferConsoleMessageToStatic ESValueWrap failed");
-        return ANI_FALSE;
-    }
     void *nativePtr = nullptr;
-    if (!arkts_esvalue_unwrap(env, esValue, &nativePtr) || nativePtr == nullptr) {
+    if (!arkts_esvalue_unwrap(env, input, &nativePtr) || nativePtr == nullptr) {
         HILOGE("TransferConsoleMessageToStatic arkts_esvalue_unwrap failed");
         return ANI_FALSE;
     }
@@ -431,13 +347,8 @@ ani_boolean TransferDataResubmissionHandlerToStatic(ani_env* env, ani_class aniC
     if (!modifier || !modifier->getWebAniModifier() || !env) {
         return ANI_FALSE;
     }
-    ani_object esValue = ESValueWrap(env, input);
-    if (!esValue) {
-        HILOGE("TransferDataResubmissionHandlerToStatic ESValueWrap failed");
-        return ANI_FALSE;
-    }
     void *nativePtr = nullptr;
-    if (!arkts_esvalue_unwrap(env, esValue, &nativePtr) || nativePtr == nullptr) {
+    if (!arkts_esvalue_unwrap(env, input, &nativePtr) || nativePtr == nullptr) {
         HILOGE("TransferDataResubmissionHandlerToStatic arkts_esvalue_unwrap failed");
         return ANI_FALSE;
     }
@@ -452,13 +363,8 @@ ani_boolean TransferClientAuthenticationHandlerToStatic(
     if (!modifier || !modifier->getWebAniModifier() || !env) {
         return ANI_FALSE;
     }
-    ani_object esValue = ESValueWrap(env, input);
-    if (!esValue) {
-        HILOGE("TransferClientAuthenticationHandlerToStatic ESValueWrap failed");
-        return ANI_FALSE;
-    }
     void *nativePtr = nullptr;
-    if (!arkts_esvalue_unwrap(env, esValue, &nativePtr) || nativePtr == nullptr) {
+    if (!arkts_esvalue_unwrap(env, input, &nativePtr) || nativePtr == nullptr) {
         HILOGE("TransferClientAuthenticationHandlerToStatic arkts_esvalue_unwrap failed");
         return ANI_FALSE;
     }
@@ -473,13 +379,8 @@ ani_boolean TransferSslErrorHandlerToStatic(ani_env* env, ani_class aniClass, an
     if (!modifier || !modifier->getWebAniModifier() || !env) {
         return ANI_FALSE;
     }
-    ani_object esValue = ESValueWrap(env, input);
-    if (!esValue) {
-        HILOGE("TransferSslErrorHandlerToStatic ESValueWrap failed");
-        return ANI_FALSE;
-    }
     void *nativePtr = nullptr;
-    if (!arkts_esvalue_unwrap(env, esValue, &nativePtr) || nativePtr == nullptr) {
+    if (!arkts_esvalue_unwrap(env, input, &nativePtr) || nativePtr == nullptr) {
         HILOGE("TransferSslErrorHandlerToStatic arkts_esvalue_unwrap failed");
         return ANI_FALSE;
     }
@@ -802,6 +703,116 @@ ani_object TransferSslErrorHandlerToDynamic(ani_env* env, ani_class aniClass, an
         CHECK_NULL_RETURN(success, reinterpret_cast<ani_object>(undefinedRef));
         napi_value dynamic =
             modifier->getWebAniModifier()->transferSslErrorHandlerToDynamic(jsenv, reinterpret_cast<void*>(node));
+        CHECK_NULL_RETURN(dynamic, reinterpret_cast<ani_object>(undefinedRef));
+        success = arkts_napi_scope_close_n(jsenv, 1, &dynamic, &result);
+        CHECK_NULL_RETURN(success, reinterpret_cast<ani_object>(undefinedRef));
+    }
+    return reinterpret_cast<ani_object>(result);
+}
+
+ani_boolean TransferPermissionRequestToStatic(ani_env* env, ani_class aniClass, ani_long node, ani_object input)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getWebAniModifier() || !env) {
+        return ANI_FALSE;
+    }
+    void *nativePtr = nullptr;
+    if (!arkts_esvalue_unwrap(env, input, &nativePtr) || nativePtr == nullptr) {
+        HILOGE("TransferPermissionRequestToStatic arkts_esvalue_unwrap failed");
+        return ANI_FALSE;
+    }
+    return modifier->getWebAniModifier()->transferPermissionRequestToStatic(reinterpret_cast<void*>(node), nativePtr);
+}
+
+ani_boolean TransferControllerHandlerToStatic(ani_env* env, ani_class aniClass, ani_long node, ani_object input)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getWebAniModifier() || !env) {
+        return ANI_FALSE;
+    }
+    void *nativePtr = nullptr;
+    if (!arkts_esvalue_unwrap(env, input, &nativePtr) || nativePtr == nullptr) {
+        HILOGE("TransferControllerHandlerToStatic arkts_esvalue_unwrap failed");
+        return ANI_FALSE;
+    }
+    return modifier->getWebAniModifier()->transferControllerHandlerToStatic(reinterpret_cast<void*>(node), nativePtr);
+}
+
+ani_boolean TransferWebKeyboardControllerToStatic(ani_env* env, ani_class aniClass, ani_long node, ani_object input)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getWebAniModifier() || !env) {
+        return ANI_FALSE;
+    }
+    void *nativePtr = nullptr;
+    if (!arkts_esvalue_unwrap(env, input, &nativePtr) || nativePtr == nullptr) {
+        HILOGE("arkweb_test TransferWebKeyboardControllerToStatic arkts_esvalue_unwrap failed");
+        return ANI_FALSE;
+    }
+    return modifier->getWebAniModifier()->transferWebKeyboardControllerToStatic(
+        reinterpret_cast<void*>(node), nativePtr);
+}
+
+ani_object TransferControllerHandlerToDynamic(ani_env* env, ani_class aniClass, ani_long node)
+{
+    CHECK_NULL_RETURN(env, nullptr);
+    ani_ref undefinedRef;
+    env->GetUndefined(&undefinedRef);
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getWebAniModifier()) {
+        return reinterpret_cast<ani_object>(undefinedRef);
+    }
+    ani_ref result = nullptr;
+    {
+        napi_env jsenv {};
+        bool success = arkts_napi_scope_open(env, &jsenv);
+        CHECK_NULL_RETURN(success, reinterpret_cast<ani_object>(undefinedRef));
+        napi_value dynamic =
+            modifier->getWebAniModifier()->transferControllerHandlerToDynamic(jsenv, reinterpret_cast<void*>(node));
+        CHECK_NULL_RETURN(dynamic, reinterpret_cast<ani_object>(undefinedRef));
+        success = arkts_napi_scope_close_n(jsenv, 1, &dynamic, &result);
+        CHECK_NULL_RETURN(success, reinterpret_cast<ani_object>(undefinedRef));
+    }
+    return reinterpret_cast<ani_object>(result);
+}
+ani_object TransferPermissionRequestToDynamic(ani_env* env, ani_class aniClass, ani_long node)
+{
+    CHECK_NULL_RETURN(env, nullptr);
+    ani_ref undefinedRef;
+    env->GetUndefined(&undefinedRef);
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getWebAniModifier()) {
+        return reinterpret_cast<ani_object>(undefinedRef);
+    }
+    ani_ref result = nullptr;
+    {
+        napi_env jsenv {};
+        bool success = arkts_napi_scope_open(env, &jsenv);
+        CHECK_NULL_RETURN(success, reinterpret_cast<ani_object>(undefinedRef));
+        napi_value dynamic =
+            modifier->getWebAniModifier()->transferPermissionRequestToDynamic(jsenv, reinterpret_cast<void*>(node));
+        CHECK_NULL_RETURN(dynamic, reinterpret_cast<ani_object>(undefinedRef));
+        success = arkts_napi_scope_close_n(jsenv, 1, &dynamic, &result);
+        CHECK_NULL_RETURN(success, reinterpret_cast<ani_object>(undefinedRef));
+    }
+    return reinterpret_cast<ani_object>(result);
+}
+ani_object TransferWebKeyboardControllerToDynamic(ani_env* env, ani_class aniClass, ani_long node)
+{
+    CHECK_NULL_RETURN(env, nullptr);
+    ani_ref undefinedRef;
+    env->GetUndefined(&undefinedRef);
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getWebAniModifier()) {
+        return reinterpret_cast<ani_object>(undefinedRef);
+    }
+    ani_ref result = nullptr;
+    {
+        napi_env jsenv {};
+        bool success = arkts_napi_scope_open(env, &jsenv);
+        CHECK_NULL_RETURN(success, reinterpret_cast<ani_object>(undefinedRef));
+        napi_value dynamic =
+            modifier->getWebAniModifier()->transferWebKeyboardControllerToDynamic(jsenv, reinterpret_cast<void*>(node));
         CHECK_NULL_RETURN(dynamic, reinterpret_cast<ani_object>(undefinedRef));
         success = arkts_napi_scope_close_n(jsenv, 1, &dynamic, &result);
         CHECK_NULL_RETURN(success, reinterpret_cast<ani_object>(undefinedRef));

@@ -841,7 +841,7 @@ HWTEST_F(DataPanelModifierTest, setValueColorsTestLinearGradientValidValues, Tes
 {
     auto colorArray = std::vector<Ark_Union_ResourceColor_LinearGradient>{};
     for (auto&& values : colorStopValues) {
-        Ark_LinearGradient gradient = new LinearGradientPeer {values};
+        Ark_LinearGradient gradient = PeerUtils::CreatePeer<LinearGradientPeer>(values);
         auto colorGradientUnion =
             Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_LinearGradient>(gradient);
         colorArray.push_back(colorGradientUnion);
@@ -878,7 +878,7 @@ HWTEST_F(DataPanelModifierTest, setValueColorsTestLinearGradientInvalidValues, T
 {
     auto colorArray = std::vector<Ark_Union_ResourceColor_LinearGradient>{};
     for (auto&& values : colorStopValuesInvalid) {
-        Ark_LinearGradient gradient = new LinearGradientPeer {values};
+        Ark_LinearGradient gradient = PeerUtils::CreatePeer<LinearGradientPeer>(values);
         auto colorGradientUnion =
             Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_LinearGradient>(gradient);
         colorArray.push_back(colorGradientUnion);
@@ -1563,7 +1563,7 @@ HWTEST_F(DataPanelModifierTest, setTrackShadowTestColorLinearGradientValidValues
 
     auto colorArray = std::vector<Ark_Union_ResourceColor_LinearGradient>{};
     for (auto&& values : colorStopValues) {
-        Ark_LinearGradient gradient = new LinearGradientPeer {values};
+        Ark_LinearGradient gradient = PeerUtils::CreatePeer<LinearGradientPeer>(values);
         auto colorGradientUnion =
             Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_LinearGradient>(gradient);
         colorArray.push_back(colorGradientUnion);
@@ -1615,7 +1615,7 @@ HWTEST_F(DataPanelModifierTest, setTrackShadowTestColorLinearGradientInvalidValu
 
     auto colorArray = std::vector<Ark_Union_ResourceColor_LinearGradient>{};
     for (auto&& values : colorStopValuesInvalid) {
-        Ark_LinearGradient gradient = new LinearGradientPeer {values};
+        Ark_LinearGradient gradient = PeerUtils::CreatePeer<LinearGradientPeer>(values);
         auto colorGradientUnion =
             Converter::ArkUnion<Ark_Union_ResourceColor_LinearGradient, Ark_LinearGradient>(gradient);
         colorArray.push_back(colorGradientUnion);

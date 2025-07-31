@@ -145,6 +145,7 @@ public:
     }
 
     void UpdateGridItemStyle(GridItemStyle gridItemStyle);
+    void UpdateGridItemStyleMultiThread(GridItemStyle gridItemStyle);
 
 protected:
     void OnModifyDone() override;

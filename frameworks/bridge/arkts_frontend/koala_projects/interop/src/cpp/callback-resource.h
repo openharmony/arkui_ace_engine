@@ -38,7 +38,7 @@ public:
 
 struct CallbackBuffer {
     InteropInt32 kind;
-    uint8_t buffer[60 * 4];
+    uint8_t buffer[4096];
     CallbackResourceHolder resourceHolder;
 };
 

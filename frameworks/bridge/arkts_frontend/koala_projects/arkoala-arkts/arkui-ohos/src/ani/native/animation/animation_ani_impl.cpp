@@ -42,4 +42,76 @@ void SetOrCreateAnimatableProperty(
     }
 }
 
+void CreatePageTransitionEnter(ani_env* env, ani_object aniClass, ani_object options)
+{
+    const auto* modifier = GetNodeAniModifier();
+    CHECK_NULL_VOID(modifier);
+    auto animationModifier = modifier->getAnimationAniModifier();
+    CHECK_NULL_VOID(animationModifier);
+    animationModifier->createPageTransitionEnter(env, options);
+}
+
+void PageTransitionSetOnEnter(ani_env* env, ani_object aniClass, ani_fn_object onEnter)
+{
+    const auto* modifier = GetNodeAniModifier();
+    CHECK_NULL_VOID(modifier);
+    auto animationModifier = modifier->getAnimationAniModifier();
+    CHECK_NULL_VOID(animationModifier);
+    animationModifier->pageTransitionSetOnEnter(env, onEnter);
+}
+
+void CreatePageTransitionExit(ani_env* env, ani_object aniClass, ani_object options)
+{
+    const auto* modifier = GetNodeAniModifier();
+    CHECK_NULL_VOID(modifier);
+    auto animationModifier = modifier->getAnimationAniModifier();
+    CHECK_NULL_VOID(animationModifier);
+    animationModifier->createPageTransitionExit(env, options);
+}
+
+void PageTransitionSetOnExit(ani_env* env, ani_object aniClass, ani_fn_object onExit)
+{
+    const auto* modifier = GetNodeAniModifier();
+    CHECK_NULL_VOID(modifier);
+    auto animationModifier = modifier->getAnimationAniModifier();
+    CHECK_NULL_VOID(animationModifier);
+    animationModifier->pageTransitionSetOnExit(env, onExit);
+}
+
+void PageTransitionSetSlide(ani_env* env, ani_object aniClass, ani_object slide)
+{
+    const auto* modifier = GetNodeAniModifier();
+    CHECK_NULL_VOID(modifier);
+    auto animationModifier = modifier->getAnimationAniModifier();
+    CHECK_NULL_VOID(animationModifier);
+    animationModifier->pageTransitionSetSlide(env, slide);
+}
+
+void PageTransitionSetTranslate(ani_env* env, ani_object aniClass, ani_object options)
+{
+    const auto* modifier = GetNodeAniModifier();
+    CHECK_NULL_VOID(modifier);
+    auto animationModifier = modifier->getAnimationAniModifier();
+    CHECK_NULL_VOID(animationModifier);
+    animationModifier->pageTransitionSetTranslate(env, options);
+}
+
+void PageTransitionSetScale(ani_env* env, ani_object aniClass, ani_object options)
+{
+    const auto* modifier = GetNodeAniModifier();
+    CHECK_NULL_VOID(modifier);
+    auto animationModifier = modifier->getAnimationAniModifier();
+    CHECK_NULL_VOID(animationModifier);
+    animationModifier->pageTransitionSetScale(env, options);
+}
+
+void PageTransitionSetOpacity(ani_env* env, ani_object aniClass, ani_double opacity)
+{
+    const auto* modifier = GetNodeAniModifier();
+    CHECK_NULL_VOID(modifier);
+    auto animationModifier = modifier->getAnimationAniModifier();
+    CHECK_NULL_VOID(animationModifier);
+    animationModifier->pageTransitionSetOpacity(env, opacity);
+}
+
 } // namespace OHOS::Ace::Ani

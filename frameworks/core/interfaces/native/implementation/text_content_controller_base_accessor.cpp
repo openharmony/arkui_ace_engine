@@ -104,7 +104,7 @@ Ark_String GetTextImpl(Ark_TextContentControllerBase peer,
         startIndex = startIndex < 0 ? 0 : startIndex;
         startIndex = std::clamp(startIndex, 0, static_cast<int32_t>(content.length()));
         endIndex = rangeConv->end;
-        endIndex = endIndex < 0 ? content.length() : endIndex;
+        endIndex = endIndex < 0 ? static_cast<int32_t>(content.length()) : endIndex;
         endIndex = std::clamp(endIndex, 0, static_cast<int32_t>(content.length()));
         if (startIndex > endIndex) {
             std::swap(startIndex, endIndex);

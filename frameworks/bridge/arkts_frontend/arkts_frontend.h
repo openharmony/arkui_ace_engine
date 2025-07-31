@@ -32,7 +32,6 @@
 #include "frameworks/bridge/declarative_frontend/ng/page_router_manager.h"
 #include "frameworks/bridge/declarative_frontend/ng/page_router_manager_factory.h"
 
-typedef struct __EtsEnv ets_env; // only include ets_napi.h in .cpp files
 typedef struct __ani_env ani_env;
 typedef class __ani_ref* ani_ref;
 typedef class __ani_object* ani_object;
@@ -114,12 +113,16 @@ public:
 
     void AddPage(const RefPtr<AcePage>& page) override {}
 
-    void* PushExtender(const std::string& url, const std::string& params) override;
-    void* ReplaceExtender(
-        const std::string& url, const std::string& params, std::function<void()>&& finishCallback) override;
-    void* RunPageExtender(const std::string& url, const std::string& params) override;
+    void* PushExtender(const std::string& url, const std::string& params, bool recoverable,
+        std::function<void()>&& finishCallback, void* jsNode) override;
+    void* ReplaceExtender(const std::string& url, const std::string& params, bool recoverable,
+        std::function<void()>&& enterFinishCallback, void* jsNode) override;
+    void* RunPageExtender(const std::string& url, const std::string& params, bool recoverable,
+        std::function<void()>&& finishCallback, void* jsNode) override;
     void BackExtender(const std::string& url, const std::string& params) override;
     void ClearExtender() override;
+    void ShowAlertBeforeBackPageExtender(const std::string& url) override;
+    void HideAlertBeforeBackPageExtender() override;
 
     RefPtr<AcePage> GetPage(int32_t /*pageId*/) const override
     {
@@ -155,12 +158,9 @@ public:
 
     void UpdateState(Frontend::State state) override {}
 
-    bool OnBackPressed() override
-    {
-        return false;
-    }
-    void OnShow() override {}
-    void OnHide() override {}
+    bool OnBackPressed() override;
+    void OnShow() override;
+    void OnHide() override;
     void OnConfigurationUpdated(const std::string& data) override {
         OnMediaQueryUpdate();
     }
@@ -366,8 +366,10 @@ public:
         return pageRouterManager_;
     }
 
+    void* GetEnv() override;
     static void PreloadAceModule(void* aniEnv);
     static void* preloadArkTSRuntime;
+    void OpenStateMgmtInterop();
 private:
     RefPtr<TaskExecutor> taskExecutor_;
     RefPtr<NG::PipelineContext> pipeline_;

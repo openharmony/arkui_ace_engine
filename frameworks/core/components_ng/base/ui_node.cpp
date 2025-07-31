@@ -32,9 +32,9 @@ const std::set<std::string> UINode::layoutTags_ = { "Flex", "Stack", "Row", "Col
 UINode::UINode(const std::string& tag, int32_t nodeId, bool isRoot)
     : tag_(tag), nodeId_(nodeId), accessibilityId_(currentAccessibilityId_++), isRoot_(isRoot)
 {
-    if (MultiThreadBuildManager::IsFreeNodeScope()) {
-        isFreeNode_ = true;
-        isFreeState_ = true;
+    if (MultiThreadBuildManager::IsThreadSafeNodeScope()) {
+        isThreadSafeNode_ = true;
+        isFree_ = true;
     }
     if (AceChecker::IsPerformanceCheckEnabled()) {
         auto pos = EngineHelper::GetPositionOnJsCode();
@@ -99,7 +99,7 @@ UINode::~UINode()
 
 bool UINode::MaybeRelease()
 {
-    if (!isFreeNode_ || MultiThreadBuildManager::IsOnUIThread()) {
+    if (!isThreadSafeNode_ || MultiThreadBuildManager::IsOnUIThread()) {
         return true;
     }
     auto pipeline = GetContext();
@@ -811,8 +811,8 @@ void UINode::AttachToMainTree(bool recursive, PipelineContext* context)
         nodeStatus_ = NodeStatus::BUILDER_NODE_ON_MAINTREE;
     }
     isRemoving_ = false;
-    if (isFreeNode_) {
-        isFreeState_ = false;
+    if (isThreadSafeNode_) {
+        isFree_ = false;
         ElementRegister::GetInstance()->AddUINode(Claim(this));
         ExecuteAfterAttachMainTreeTasks();
     }
@@ -861,7 +861,7 @@ bool UINode::CheckThreadSafeNodeTree(bool needCheck)
     return needCheckChild;
 }
 
-void UINode::DetachFromMainTree(bool recursive, bool isRoot)
+void UINode::DetachFromMainTree(bool recursive, bool needCheckThreadSafeNodeTree)
 {
     if (!onMainTree_) {
         return;
@@ -887,18 +887,13 @@ void UINode::DetachFromMainTree(bool recursive, bool isRoot)
     bool isRecursive = recursive || AceType::InstanceOf<FrameNode>(this);
     isTraversing_ = true;
     std::list<RefPtr<UINode>> children = GetChildren();
-    bool needCheckChild = CheckThreadSafeNodeTree(isRoot);
+    bool needCheckChild = CheckThreadSafeNodeTree(needCheckThreadSafeNodeTree);
     for (const auto& child : children) {
         child->DetachFromMainTree(isRecursive, needCheckChild);
     }
-    if (isFreeNode_) {
-        ElementRegister::GetInstance()->RemoveItemSilently(Claim(this));
-        isFreeState_ = true;
-        if (isRoot && !IsFreeNodeTree()) {
-            // Remind developers that it is unsafe to operate node trees containing not free nodes on non UI threads
-            TAG_LOGW(AceLogTag::ACE_NATIVE_NODE,
-                "CheckIsFreeNodeSubTree failed. free node: %{public}d contains not free node children", nodeId_);
-        }
+    if (isThreadSafeNode_) {
+        ElementRegister::GetInstance()->RemoveItemSilently(GetId());
+        isFree_ = true;
     }
     isTraversing_ = false;
 }

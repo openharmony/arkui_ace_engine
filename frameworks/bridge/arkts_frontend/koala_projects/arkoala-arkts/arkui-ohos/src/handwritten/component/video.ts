@@ -19,6 +19,11 @@ import { runtimeType, RuntimeType } from "@koalaui/interop"
 import { int32 } from "@koalaui/common"
 import { PixelMap } from "#external"
 import { ArkUIAniModule } from "arkui.ani"
+import { ArkCommonMethodComponent, AttributeModifier, CommonMethod } from './common';
+import { applyAttributeModifierBase, applyCommonModifier } from "../handwritten/modifiers/ArkCommonModifier";
+import { CommonModifier } from '../CommonModifier';
+import { VideoModifier } from '../VideoModifier';
+import { runtimeType, RuntimeType } from "@koalaui/interop"
 
 const PlayBackSpeedTable: number[] = [0.75, 1.0, 1.25, 1.75, 2.0];
 
@@ -27,8 +32,10 @@ function convertPlaybackSpeed(value: PlaybackSpeed): number {
     return PlayBackSpeedTable[index]
 }
 
-function hookSetVideoOptions(component: ArkVideoComponent, value: VideoOptions): void {
-    const peer = component.getPeer();
+function hookSetVideoOptionsWithPeer(peer: ArkVideoPeer, value: VideoOptions): void {
+    if (peer === undefined) {
+        return;
+    }
     let value_currentProgressRate_type : int32 = RuntimeType.UNDEFINED
     const value_currentProgressRate  = value.currentProgressRate
     value_currentProgressRate_type = runtimeType(value_currentProgressRate)
@@ -52,5 +59,51 @@ function hookSetVideoOptions(component: ArkVideoComponent, value: VideoOptions):
             return;
         }
     }
-    peer?.setVideoOptionsAttribute(value);
+    peer.setVideoOptionsAttribute(value);
+}
+
+function hookSetVideoOptions(component: ArkVideoComponent, value: VideoOptions): void {
+    const peer = component.getPeer();
+    hookSetVideoOptionsWithPeer(peer, value);
+}
+
+export function hookVideoAttributeModifier(component: ArkVideoComponent, modifier: AttributeModifier<VideoAttribute> | AttributeModifier<CommonMethod> | undefined): void {
+    if (modifier === undefined) {
+        return;
+    }
+    let isCommonModifier: boolean = modifier instanceof CommonModifier;
+    if (isCommonModifier) {
+        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
+        return;
+    }
+    let attributeSet = (): VideoModifier => {
+        let isVideoModifier: boolean = modifier instanceof VideoModifier;
+        let initModifier = component.getPeer()._attributeSet ? component.getPeer()._attributeSet! : new VideoModifier();
+        if (isVideoModifier) {
+            let videoModifier = modifier as object as VideoModifier;
+            initModifier.mergeModifier(videoModifier);
+            component.getPeer()._attributeSet = initModifier;
+            return initModifier;
+        } else {
+            component.getPeer()._attributeSet = initModifier;
+            return initModifier;
+        }
+    }
+    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+        if (params.length < 1) {
+            return;
+        }
+        let peer: ArkVideoPeer = component.getPeer() as Object as ArkVideoPeer;
+        const param1_type = runtimeType(params[0])
+        if ((RuntimeType.UNDEFINED) !== param1_type) {
+            const options_casted = params[0] as VideoOptions;
+            hookSetVideoOptionsWithPeer(peer, options_casted);
+        }
+    };
+    let updaterReceiver = (): ArkVideoComponent => {
+        let componentNew: ArkVideoComponent = new ArkVideoComponent();
+        componentNew.setPeer(component.getPeer());
+        return componentNew;
+    };
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<VideoAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
 }

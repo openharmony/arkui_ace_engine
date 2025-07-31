@@ -20,6 +20,13 @@
 
 struct MouseEventPeer
     : public OHOS::Ace::NG::GeneratedModifier::SomeEventPeer<OHOS::Ace::MouseInfo> {
+    static MouseEventPeer* Create(void* ptr)
+    {
+        auto* peer = OHOS::Ace::NG::PeerUtils::CreatePeer<MouseEventPeer>();
+        CHECK_NULL_RETURN(peer, nullptr);
+        peer->SetEventInfo(reinterpret_cast<OHOS::Ace::MouseInfo*>(ptr));
+        return peer;
+    }
 protected:
     MouseEventPeer() = default;
     ~MouseEventPeer() override = default;

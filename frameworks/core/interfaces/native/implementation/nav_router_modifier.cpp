@@ -43,8 +43,6 @@ void SetNavRouterOptions1Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //NavRouterModelNG::SetSetNavRouterOptions1(frameNode, convValue);
     LOGE("ARKOALA SetNavRouterOptions1 -> Method is not implemented.");
 }
 } // NavRouterInterfaceModifier

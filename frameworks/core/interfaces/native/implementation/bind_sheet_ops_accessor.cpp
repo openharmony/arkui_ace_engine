@@ -24,9 +24,6 @@ Ark_NativePointer RegisterBindSheetShowCallbackImpl(Ark_NativePointer node, Ark_
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_RETURN(frameNode, node);
     CHECK_NULL_RETURN(builder, node);
-    if (!value) {
-        return node;
-    }
     WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
     auto changeEvent = [arkCallback = CallbackHelper(*callback), weakNode](const std::string& param) {
         PipelineContext::SetCallBackNode(weakNode);

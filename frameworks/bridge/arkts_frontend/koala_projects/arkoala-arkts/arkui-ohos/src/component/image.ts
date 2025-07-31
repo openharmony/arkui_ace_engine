@@ -28,6 +28,7 @@ import { PixelMap, PixelMapDrawableDescriptor, AnimatedDrawableDescriptor, Layer
 import { ResourceColor, ColorFilter, ResourceStr, EdgeWidths } from "./units"
 import { ImageFit, ImageRepeat, CopyOptions, Color } from "./enums"
 import { Matrix4Transit } from "./arkui-matrix4"
+import { ColorMetrics } from "../Graphics"
 import { ImageAnalyzerConfig, ImageAIOptions } from "./imageCommon"
 import { ResolutionQuality } from "./arkui-external"
 import { DrawableDescriptor } from "#external"
@@ -605,7 +606,7 @@ export interface ImageAttribute extends CommonMethod {
     alt(value: string | Resource | PixelMap | undefined): this
     matchTextDirection(value: boolean | undefined): this
     fitOriginalSize(value: boolean | undefined): this
-    fillColor(value: ResourceColor | undefined | ResourceColor | ColorContent | undefined): this
+    fillColor(value: ResourceColor | undefined | ResourceColor | ColorContent | ColorMetrics | undefined): this
     objectFit(value: ImageFit | undefined): this
     imageMatrix(value: Matrix4Transit | undefined): this
     objectRepeat(value: ImageRepeat | undefined): this
@@ -667,7 +668,7 @@ export class ArkImageStyle extends ArkCommonMethodStyle implements ImageAttribut
     public fitOriginalSize(value: boolean | undefined): this {
         return this
     }
-    public fillColor(value: ResourceColor | undefined | ResourceColor | ColorContent | undefined): this {
+    public fillColor(value: ResourceColor | undefined | ResourceColor | ColorContent | ColorMetrics | undefined): this {
         return this
     }
     public objectFit(value: ImageFit | undefined): this {
@@ -794,7 +795,7 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements Image
         }
         return this
     }
-    public fillColor(value: ResourceColor | undefined | ResourceColor | ColorContent | undefined): this {
+    public fillColor(value: ResourceColor | undefined | ResourceColor | ColorContent | ColorMetrics | undefined): this {
         if (this.checkPriority("fillColor")) {
             hookSetImageFillColor(this.getPeer().getPeerPtr(), value)
         }

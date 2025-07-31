@@ -17,9 +17,9 @@
 
 #include <ani.h>
 
-// #if !defined(PREVIEW)
-// #include "canvas_ani/ani_canvas.h"
-// #endif
+#if !defined(PREVIEW)
+#include "canvas_ani/ani_canvas.h"
+#endif
 
 #include "bridge/arkts_frontend/arkts_ani_utils.h"
 #include "core/components_ng/base/extension_handler.h"
@@ -35,20 +35,20 @@
 namespace OHOS::Ace::Framework {
 namespace {
 namespace {
-const int32_t FLAG_DRAW_FRONT = 1;
-const int32_t FLAG_DRAW_CONTENT = 1 << 1;
-const int32_t FLAG_DRAW_BEHIND = 1 << 2;
+const uint32_t FLAG_DRAW_FRONT = 1;
+const uint32_t FLAG_DRAW_CONTENT = 1 << 1;
+const uint32_t FLAG_DRAW_BEHIND = 1 << 2;
 } // namespace
 ani_object CreateSizeObject(ani_env* env, const NG::DrawingContext& context)
 {
     ani_status status;
     ani_class sizeClass;
-    if ((status = env->FindClass("Larkui/Graphics/SizeInternal;", &sizeClass)) != ANI_OK) {
+    if ((status = env->FindClass("arkui.Graphics.SizeInternal", &sizeClass)) != ANI_OK) {
         LOGE("FindClass Size failed, %{public}d", status);
         return nullptr;
     }
     ani_method sizeCtor;
-    if ((status = env->Class_FindMethod(sizeClass, "<ctor>", "DD:V", &sizeCtor)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(sizeClass, "<ctor>", "dd:", &sizeCtor)) != ANI_OK) {
         LOGE("Class_FindMethod sizeClass ctor failed, %{public}d", status);
         return nullptr;
     }
@@ -66,12 +66,12 @@ ani_object CreateSizeInPixelObject(ani_env* env, const NG::DrawingContext& conte
 {
     ani_status status;
     ani_class sizeInPixelClass;
-    if ((status = env->FindClass("Larkui/Graphics/SizeInternal;", &sizeInPixelClass)) != ANI_OK) {
+    if ((status = env->FindClass("arkui.Graphics.SizeInternal", &sizeInPixelClass)) != ANI_OK) {
         LOGE("FindClass Size failed, %{public}d", status);
         return nullptr;
     }
     ani_method sizeInPixelCtor;
-    if ((status = env->Class_FindMethod(sizeInPixelClass, "<ctor>", "DD:V", &sizeInPixelCtor)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(sizeInPixelClass, "<ctor>", "dd:", &sizeInPixelCtor)) != ANI_OK) {
         LOGE("Class_FindMethod sizeInPixelClass ctor failed, %{public}d", status);
         return nullptr;
     }
@@ -94,12 +94,12 @@ ani_object AniGraphicsModule::CreateDrawingContext(ani_env* env, const NG::Drawi
 
     // DrawContext object
     ani_class drawContextClass;
-    if ((status = env->FindClass("Larkui/Graphics/DrawContext;", &drawContextClass)) != ANI_OK) {
+    if ((status = env->FindClass("arkui.Graphics.DrawContext", &drawContextClass)) != ANI_OK) {
         LOGE("FindClass DrawContext failed, %{public}d", status);
         return nullptr;
     }
     ani_method drawContextCtor;
-    if ((status = env->Class_FindMethod(drawContextClass, "<ctor>", ":V", &drawContextCtor)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(drawContextClass, "<ctor>", ":", &drawContextCtor)) != ANI_OK) {
         LOGE("Class_FindMethod drawContextClass ctor failed, %{public}d", status);
         return nullptr;
     }
@@ -118,11 +118,11 @@ ani_object AniGraphicsModule::CreateDrawingContext(ani_env* env, const NG::Drawi
 
     // canvas Object
 #if !defined(PREVIEW)
-    // ani_object aniCanvas = OHOS::Rosen::Drawing::AniCanvas::CreateAniCanvas(env, &context.canvas);
-    // if (!aniCanvas) {
-    //     LOGE("Create AniCanvas failed !");
-    // }
-    // env->Object_SetPropertyByName_Ref(result, "canvas_", (ani_ref)aniCanvas);
+    ani_object aniCanvas = OHOS::Rosen::Drawing::AniCanvas::CreateAniCanvas(env, &context.canvas);
+    if (!aniCanvas) {
+        LOGE("Create AniCanvas failed !");
+    }
+    env->Object_SetPropertyByName_Ref(result, "canvas_", (ani_ref)aniCanvas);
 #endif
 
     return result;
@@ -170,7 +170,7 @@ void AniGraphicsModule::Invalidate(ani_env* env, ani_long ptr)
     }
 }
 
-void AniGraphicsModule::SetDrawModifier(ani_env* env, ani_long ptr, ani_int flag, ani_object drawModifierObj)
+void AniGraphicsModule::SetDrawModifier(ani_env* env, ani_long ptr, uint32_t flag, ani_object drawModifierObj)
 {
     if (drawModifierObj == nullptr) {
         // drawModifierObj should not be nullptr;
@@ -188,7 +188,7 @@ void AniGraphicsModule::SetDrawModifier(ani_env* env, ani_long ptr, ani_int flag
                 return;
             }
             env->Object_CallMethodByName_Void(reinterpret_cast<ani_fn_object>(object), "drawBehind",
-                "Larkui/Graphics/DrawContext;:V", drawingContext);
+                "C{arkui.Graphics.DrawContext}:", drawingContext);
         };
         drawModifier->drawBehindFunc = drawBehindFunc;
     }
@@ -199,7 +199,7 @@ void AniGraphicsModule::SetDrawModifier(ani_env* env, ani_long ptr, ani_int flag
                 return;
             }
             env->Object_CallMethodByName_Void(reinterpret_cast<ani_fn_object>(object), "drawContent",
-                "Larkui/Graphics/DrawContext;:V", drawingContext);
+                "C{arkui.Graphics.DrawContext}:", drawingContext);
         };
         drawModifier->drawContentFunc = contentModifier;
     }
@@ -210,7 +210,7 @@ void AniGraphicsModule::SetDrawModifier(ani_env* env, ani_long ptr, ani_int flag
                 return;
             }
             env->Object_CallMethodByName_Void(
-                reinterpret_cast<ani_fn_object>(object), "drawFront", "Larkui/Graphics/DrawContext;:V", drawingContext);
+                reinterpret_cast<ani_fn_object>(object), "drawFront", "C{arkui.Graphics.DrawContext}:", drawingContext);
         };
         drawModifier->drawFrontFunc = frontModifier;
     }

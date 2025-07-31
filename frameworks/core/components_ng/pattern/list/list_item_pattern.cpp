@@ -304,6 +304,8 @@ void ListItemPattern::SetOffsetChangeCallBack(OnOffsetChangeFunc&& offsetChangeC
 
 void ListItemPattern::CloseSwipeAction(OnFinishFunc&& onFinishCallback)
 {
+    auto host = GetHost();
+    FREE_NODE_CHECK(host, CloseSwipeAction, std::move(onFinishCallback));
     onFinishEvent_ = onFinishCallback;
     ResetSwipeStatus(true);
 }
@@ -1049,6 +1051,8 @@ void ListItemPattern::InitListItemCardStyleForList()
 void ListItemPattern::SetListItemStyle(V2::ListItemStyle style)
 {
     auto host = GetHost();
+    // call SetListItemStyleMultiThread by multi thread
+    FREE_NODE_CHECK(host, SetListItemStyle, style);
     CHECK_NULL_VOID(host);
     if (listItemStyle_ == V2::ListItemStyle::NONE && style == V2::ListItemStyle::CARD) {
         listItemStyle_ = style;

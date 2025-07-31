@@ -28,6 +28,7 @@
 #include "callback-resource.h"
 #include "interop-types.h"
 #include "koala-types.h"
+#include "securec.h"
 
 #ifdef __arm__
 #define KOALA_NO_UNALIGNED_ACCESS 1
@@ -75,9 +76,16 @@ private:
         assert(ownData);
         assert(newLength > dataLength);
         auto* newData = reinterpret_cast<uint8_t*>(malloc(newLength));
-        memcpy(newData, data, position);
+        if (newData == NULL) {
+            return;
+        }
+        if (data == NULL || memcpy_s(newData, newLength, data, position) != 0) {
+            free(newData);
+            return;
+        }
         free(data);
         data = newData;
+        dataLength = newLength;
     }
 public:
     SerializerBase(CallbackResourceHolder* resourceHolder = nullptr):
@@ -172,7 +180,9 @@ public:
         check(8);
         int64_t value64 = static_cast<int64_t>(reinterpret_cast<uintptr_t>(value));
 #ifdef KOALA_NO_UNALIGNED_ACCESS
-        memcpy(data + position, &value64, 8);
+        if (memcpy_s(data + position, 8, &value64, 8) != 0) {
+            return;
+        }
 #else
         *((int64_t*)(data + position)) = value64;
 #endif

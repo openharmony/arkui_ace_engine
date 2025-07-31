@@ -4724,6 +4724,7 @@ void RosenRenderContext::MoveFrame(FrameNode* /*self*/, const RefPtr<FrameNode>&
 
 void RosenRenderContext::AnimateHoverEffectScale(bool isHovered)
 {
+    FREE_NODE_CHECK(GetHost(), AnimateHoverEffectScale, isHovered);
     if ((isHovered && isHoveredScale_) || (!isHovered && !isHoveredScale_)) {
         return;
     }
@@ -4750,6 +4751,7 @@ void RosenRenderContext::AnimateHoverEffectScale(bool isHovered)
 
 void RosenRenderContext::AnimateHoverEffectBoard(bool isHovered)
 {
+    FREE_NODE_CHECK(GetHost(), AnimateHoverEffectBoard, isHovered);
     if ((isHovered && isHoveredBoard_) || (!isHovered && !isHoveredBoard_)) {
         return;
     }

@@ -104,7 +104,7 @@ HWTEST_F(AccessibilityManagerNgTestNg, AccessibilityManagerNgTest001, TestSize.L
     mouseEvent.action = MouseAction::PULL_UP;
     accessibilityManagerNg.HandleAccessibilityHoverEvent(frameNode, mouseEvent);
     hoverState.idle = false;
-    accessibilityManagerNg.hoverState_.idle = false;
+    // accessibilityManagerNg.hoverState_.idle = false;
     mouseEvent.sourceType = SourceType::MOUSE;
     mouseEvent.action = MouseAction::MOVE;
     

@@ -20,8 +20,8 @@
 #include "utils/convert_utils.h"
 #include "core/gestures/drag_event.h"
 #include "load.h"
-// #include "pixel_map_taihe_ani.h"
-// #include "udmf_ani_converter_utils.h"
+#include "pixel_map_taihe_ani.h"
+#include "udmf_ani_converter_utils.h"
 #include "core/common/udmf/udmf_client.h"
 #include "udmf_async_client.h"
 
@@ -29,117 +29,116 @@ namespace OHOS::Ace::Ani {
 void DragEventSetData([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
     [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object data)
 {
-    // auto dragEvent = reinterpret_cast<ani_ref>(pointer);
-    // auto dataValue = OHOS::UDMF::AniConverter::UnwrapUnifiedData(env, data);
-    // auto unifiedData = reinterpret_cast<void*>(dataValue.get());
-    // if (!dragEvent || !unifiedData) {
-    //     return;
-    // }
-    // const auto* modifier = GetNodeAniModifier();
-    // if (!modifier || !modifier->getDragAniModifier() || !env) {
-    //     return;
-    // }
-    // modifier->getDragAniModifier()->setDragData(dragEvent, reinterpret_cast<ani_ref>(unifiedData));
+    auto dragEvent = reinterpret_cast<ani_ref>(pointer);
+    auto dataValue = OHOS::UDMF::AniConverter::UnwrapUnifiedData(env, data);
+    auto unifiedData = reinterpret_cast<void*>(&dataValue);
+    if (!dragEvent || !unifiedData) {
+        return;
+    }
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getDragAniModifier() || !env) {
+        return;
+    }
+    modifier->getDragAniModifier()->setDragData(dragEvent, reinterpret_cast<ani_ref>(unifiedData));
 }
 
 ani_object DragEventGetData([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
     [[maybe_unused]] ani_long pointer)
 {
-    // ani_object result_obj = {};
-    // auto dragEvent = reinterpret_cast<ani_ref>(pointer);
-    // if (!dragEvent) {
-    //     return result_obj;
-    // }
-    // const auto* modifier = GetNodeAniModifier();
-    // if (!modifier || !modifier->getDragAniModifier() || !env) {
-    //     return result_obj;
-    // }
-    // auto unifiedDataPtr = reinterpret_cast<OHOS::UDMF::UnifiedData*>(
-    //     modifier->getDragAniModifier()->getDragData(dragEvent));
-    // if (!unifiedDataPtr) {
-    //     return result_obj;
-    // }
-    // std::shared_ptr<OHOS::UDMF::UnifiedData> unifiedData(unifiedDataPtr);
-    // auto unifiedData_obj = OHOS::UDMF::AniConverter::WrapUnifiedData(env, unifiedData);
-    // ani_boolean isUnifiedData;
-    // ani_class dataClass;
-    // env->FindClass("L@ohos/data/unifiedDataChannel/unifiedDataChannel/UnifiedData;", &dataClass);
-    // env->Object_InstanceOf(unifiedData_obj, dataClass, &isUnifiedData);
-    // if (!isUnifiedData) {
-    //     return result_obj;
-    // }
-    // return unifiedData_obj;
+    ani_object result_obj = {};
+    auto dragEvent = reinterpret_cast<ani_ref>(pointer);
+    if (!dragEvent) {
+        return result_obj;
+    }
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getDragAniModifier() || !env) {
+        return result_obj;
+    }
+    auto unifiedDataPtr = reinterpret_cast<OHOS::UDMF::UnifiedData*>(
+        modifier->getDragAniModifier()->getDragData(dragEvent));
+    if (!unifiedDataPtr) {
+        return result_obj;
+    }
+    std::shared_ptr<OHOS::UDMF::UnifiedData> unifiedData(unifiedDataPtr);
+    auto unifiedData_obj = OHOS::UDMF::AniConverter::WrapUnifiedData(env, unifiedData);
+    ani_boolean isUnifiedData;
+    ani_class dataClass;
+    env->FindClass("L@ohos/data/unifiedDataChannel/unifiedDataChannel/UnifiedData;", &dataClass);
+    env->Object_InstanceOf(unifiedData_obj, dataClass, &isUnifiedData);
+    if (!isUnifiedData) {
+        return result_obj;
+    }
+    return unifiedData_obj;
     return {};
 }
 
 ani_object DragEventGetSummary([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
     [[maybe_unused]] ani_long pointer)
 {
-    // ani_object result_obj = {};
-    // auto dragEvent = reinterpret_cast<ani_ref>(pointer);
-    // if (!dragEvent) {
-    //     return result_obj;
-    // }
-    // const auto* modifier = GetNodeAniModifier();
-    // if (!modifier || !modifier->getDragAniModifier() || !env) {
-    //     return result_obj;
-    // }
-    // auto summary = std::make_shared<OHOS::UDMF::Summary>();
-    // modifier->getDragAniModifier()->getDragSummary(dragEvent, reinterpret_cast<ani_ref>(summary.get()));
+    ani_object result_obj = {};
+    auto dragEvent = reinterpret_cast<ani_ref>(pointer);
+    if (!dragEvent) {
+        return result_obj;
+    }
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getDragAniModifier() || !env) {
+        return result_obj;
+    }
+    auto summary = std::make_shared<OHOS::UDMF::Summary>();
+    modifier->getDragAniModifier()->getDragSummary(dragEvent, reinterpret_cast<ani_ref>(summary.get()));
 
-    // auto summary_obj = OHOS::UDMF::AniConverter::WrapSummary(env, summary);
-    // ani_boolean isSummary;
-    // ani_class summaryClass;
-    // env->FindClass("L@ohos/data/unifiedDataChannel/unifiedDataChannel/Summary;", &summaryClass);
-    // env->Object_InstanceOf(summary_obj, summaryClass, &isSummary);
-    // if (!isSummary) {
-    //     return result_obj;
-    // }
-    // return summary_obj;
+    auto summary_obj = OHOS::UDMF::AniConverter::WrapSummary(env, summary);
+    ani_boolean isSummary;
+    ani_class summaryClass;
+    env->FindClass("L@ohos/data/unifiedDataChannel/unifiedDataChannel/Summary;", &summaryClass);
+    env->Object_InstanceOf(summary_obj, summaryClass, &isSummary);
+    if (!isSummary) {
+        return result_obj;
+    }
+    return summary_obj;
     return {};
 }
 
 ani_string DragEveStartDataLoading([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
     [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object dataSyncOptions)
 {
-    // ani_string value = {};
-    // auto dragEvent = reinterpret_cast<ani_ref>(pointer);
-    // const auto* modifier = GetNodeAniModifier();
-    // if (!dragEvent || !modifier || !modifier->getDragAniModifier() || !env) {
-    //     return value;
-    // }
-    // const char* ptr = modifier->getDragAniModifier()->getUdKey(dragEvent);
-    // std::string key = ptr ? ptr : "";
-    // if (key.empty()) {
-    //     return value;
-    // }
-    // auto getDataParams = OHOS::UDMF::AniConverter::UnwrapGetDataParams(env, dataSyncOptions, key);
-    // getDataParams.query.key = key;
-    // getDataParams.query.intention = UDMF::Intention::UD_INTENTION_DRAG;
-    // int32_t status = OHOS::UDMF::UdmfAsyncClient::GetInstance().StartAsyncDataRetrieval(getDataParams);
-    // if (status != 0) {
-    //     return value;
-    // }
-    // auto result = AniUtils::StdStringToANIString(env, key);
-    // return result.value_or(value);
     ani_string value = {};
+    auto dragEvent = reinterpret_cast<ani_ref>(pointer);
+    const auto* modifier = GetNodeAniModifier();
+    if (!dragEvent || !modifier || !modifier->getDragAniModifier() || !env) {
+        return value;
+    }
+    const char* ptr = modifier->getDragAniModifier()->getUdKey(dragEvent);
+    std::string key = ptr ? ptr : "";
+    if (key.empty()) {
+        return value;
+    }
+    auto getDataParams = OHOS::UDMF::AniConverter::UnwrapGetDataParams(env, dataSyncOptions, key);
+    getDataParams.query.key = key;
+    getDataParams.query.intention = UDMF::Intention::UD_INTENTION_DRAG;
+    int32_t status = OHOS::UDMF::UdmfAsyncClient::GetInstance().StartAsyncDataRetrieval(getDataParams);
+    if (status != 0) {
+        return value;
+    }
+    auto result = AniUtils::StdStringToANIString(env, key);
+    return result.value_or(value);
     return value;
 }
 
 void DragEventSetPixelMap([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
     [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object pixelMap)
 {
-    // auto dragEvent = reinterpret_cast<ani_ref>(pointer);
-    // auto pixelMapValue = OHOS::Media::PixelMapTaiheAni::GetNativePixelMap(env, pixelMap);
-    // if (!dragEvent || !pixelMapValue) {
-    //     return;
-    // }
-    // auto pixelMapPtr = reinterpret_cast<void*>(&pixelMapValue);
-    // const auto* modifier = GetNodeAniModifier();
-    // if (!modifier || !modifier->getDragAniModifier() || !env) {
-    //     return;
-    // }
-    // modifier->getDragAniModifier()->setDragDropInfoPixelMap(dragEvent, reinterpret_cast<ani_ref>(pixelMapPtr));
+    auto dragEvent = reinterpret_cast<ani_ref>(pointer);
+    auto pixelMapValue = OHOS::Media::PixelMapTaiheAni::GetNativePixelMap(env, pixelMap);
+    if (!dragEvent || !pixelMapValue) {
+        return;
+    }
+    auto pixelMapPtr = reinterpret_cast<void*>(&pixelMapValue);
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getDragAniModifier() || !env) {
+        return;
+    }
+    modifier->getDragAniModifier()->setDragDropInfoPixelMap(dragEvent, reinterpret_cast<ani_ref>(pixelMapPtr));
 }
 
 void DragEventSetExtraInfo([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
@@ -231,11 +230,11 @@ void DragSetDragPreview([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_obje
     if (ANI_OK == env->Object_GetFieldByName_Ref(dragInfo, "pixelMap", &pixelMap)) {
         env->Reference_IsUndefined(pixelMap, &isUndef);
         if (isUndef != ANI_TRUE) {
-            // ani_object value = static_cast<ani_object>(pixelMap);
-            // pixelMapValue = OHOS::Media::PixelMapTaiheAni::GetNativePixelMap(env, value);
-            // if (pixelMapValue) {
-            //     info.pixelMap = reinterpret_cast<void*>(&pixelMapValue);
-            // }
+            ani_object value = static_cast<ani_object>(pixelMap);
+            pixelMapValue = OHOS::Media::PixelMapTaiheAni::GetNativePixelMap(env, value);
+            if (pixelMapValue) {
+                info.pixelMap = reinterpret_cast<void*>(&pixelMapValue);
+            }
         }
     }
 

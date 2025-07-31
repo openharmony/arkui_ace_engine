@@ -91,7 +91,7 @@ void OnShownImpl(Ark_NativePointer node,
         return;
     }
     auto onShownEvent = [arkCallback = CallbackHelper(*optValue)]() {
-        arkCallback.Invoke();
+        arkCallback.InvokeSync();
     };
     NavDestinationModelStatic::SetOnShown(frameNode, std::move(onShownEvent));
 }
@@ -105,7 +105,7 @@ void OnHiddenImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    auto onHiddenEvent = [arkCallback = CallbackHelper(*optValue)]() { arkCallback.Invoke(); };
+    auto onHiddenEvent = [arkCallback = CallbackHelper(*optValue)]() { arkCallback.InvokeSync(); };
     NavDestinationModelStatic::SetOnHidden(frameNode, std::move(onHiddenEvent));
 }
 void OnBackPressedImpl(Ark_NativePointer node,
@@ -128,8 +128,6 @@ void OnResultImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    // auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    // NavDestinationModelNG::SetOnResult(frameNode, convValue);
 }
 void ModeImpl(Ark_NativePointer node,
               const Opt_NavDestinationMode* value)
@@ -307,7 +305,7 @@ void OnReadyImpl(Ark_NativePointer node,
     }
     auto onReady = [readyCallback = CallbackHelper(value->value)](RefPtr<NG::NavDestinationContext> context) {
         Ark_NavDestinationContext arkContext = Converter::ArkValue<Ark_NavDestinationContext>(context);
-        readyCallback.Invoke(arkContext);
+        readyCallback.InvokeSync(arkContext);
     };
     NavDestinationModelStatic::SetOnReady(frameNode, std::move(onReady));
 }
@@ -322,7 +320,7 @@ void OnWillAppearImpl(Ark_NativePointer node,
         return;
     }
     auto onWillAppearEvent = [arkCallback = CallbackHelper(*optValue)]() {
-        arkCallback.Invoke();
+        arkCallback.InvokeSync();
     };
     NavDestinationModelStatic::SetOnWillAppear(frameNode, std::move(onWillAppearEvent));
 }
@@ -337,7 +335,7 @@ void OnWillDisappearImpl(Ark_NativePointer node,
         return;
     }
     auto onWillDisappearEvent = [arkCallback = CallbackHelper(*optValue)]() {
-        arkCallback.Invoke();
+        arkCallback.InvokeSync();
     };
     NavDestinationModelStatic::SetOnWillDisAppear(frameNode, std::move(onWillDisappearEvent));
 }
@@ -352,7 +350,7 @@ void OnWillShowImpl(Ark_NativePointer node,
         return;
     }
     auto onWillShowEvent = [arkCallback = CallbackHelper(*optValue)]() {
-        arkCallback.Invoke();
+        arkCallback.InvokeSync();
     };
     NavDestinationModelStatic::SetOnWillShow(frameNode, std::move(onWillShowEvent));
 }
@@ -367,7 +365,7 @@ void OnWillHideImpl(Ark_NativePointer node,
         return;
     }
     auto onWillHideEvent = [arkCallback = CallbackHelper(*optValue)]() {
-        arkCallback.Invoke();
+        arkCallback.InvokeSync();
     };
     NavDestinationModelStatic::SetOnWillHide(frameNode, std::move(onWillHideEvent));
 }
@@ -376,8 +374,6 @@ void SystemBarStyleImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    // auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    // NavDestinationModelNG::SetSystemBarStyle(frameNode, convValue);
     LOGE("ARKOALA NavDestination.SystemBarStyleImpl -> Method is not implemented, Opt_CustomObject is not supported!");
 }
 void RecoverableImpl(Ark_NativePointer node,
@@ -443,16 +439,12 @@ void BindToScrollableImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    // auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    // NavDestinationModelNG::SetBindToScrollable(frameNode, convValue);
 }
 void BindToNestedScrollableImpl(Ark_NativePointer node,
                                 const Opt_Array_NestedScrollInfo* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    // auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    // NavDestinationModelNG::SetBindToNestedScrollable(frameNode, convValue);
 }
 void OnActiveImpl(Ark_NativePointer node,
                   const Opt_Callback_NavDestinationActiveReason_Void* value)
@@ -466,7 +458,7 @@ void OnActiveImpl(Ark_NativePointer node,
     }
     auto onActiveEvent = [arkCallback = CallbackHelper(*optValue)](int32_t activeValue) {
         Ark_NavDestinationActiveReason arkValue = static_cast<Ark_NavDestinationActiveReason>(activeValue);
-        arkCallback.Invoke(arkValue);
+        arkCallback.InvokeSync(arkValue);
     };
     NavDestinationModelStatic::SetOnActive(frameNode, std::move(onActiveEvent));
 }
@@ -483,7 +475,7 @@ void OnInactiveImpl(Ark_NativePointer node,
     }
     auto onInactiveEvent = [arkCallback = CallbackHelper(*optValue)](int32_t inactiveValue) {
         Ark_NavDestinationActiveReason arkValue = static_cast<Ark_NavDestinationActiveReason>(inactiveValue);
-        arkCallback.Invoke(arkValue);
+        arkCallback.InvokeSync(arkValue);
     };
     NavDestinationModelStatic::SetOnInactive(frameNode, std::move(onInactiveEvent));
 }
@@ -493,32 +485,24 @@ void CustomTransitionImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    // auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    // NavDestinationModelNG::SetCustomTransition(frameNode, convValue);
 }
 void OnNewParamImpl(Ark_NativePointer node,
                     const Opt_Callback_Object_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    // auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    // NavDestinationModelNG::SetOnNewParam(frameNode, convValue);
 }
 void PreferredOrientationImpl(Ark_NativePointer node,
                               const Opt_Orientation* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    // auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    // NavDestinationModelNG::SetPreferredOrientation(frameNode, convValue);
 }
 void EnableNavigationIndicatorImpl(Ark_NativePointer node,
                                    const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    // auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    // NavDestinationModelNG::SetEnableNavigationIndicator(frameNode, convValue);
 }
 void TitleImpl(Ark_NativePointer node,
                const Opt_Type_NavDestinationAttribute_title_value* value,
@@ -670,7 +654,7 @@ void IgnoreLayoutSafeAreaImpl(
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
 
-    NG::SafeAreaExpandOpts opts { .type = NG::SAFE_AREA_TYPE_SYSTEM, .edges = NG::SAFE_AREA_EDGE_ALL };
+    NG::IgnoreLayoutSafeAreaOpts opts { .type = NG::SAFE_AREA_TYPE_SYSTEM, .edges = NG::SAFE_AREA_EDGE_ALL };
     auto typesOpt = types ? Converter::OptConvert<Array_LayoutSafeAreaType>(*types) : std::nullopt;
     uint32_t safeAreaType = NG::SAFE_AREA_TYPE_NONE;
     if (typesOpt) {

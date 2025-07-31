@@ -23,16 +23,21 @@ def load_config(config_file):
         config = json.load(f)
     return config
 
-def replace_out_root(value, out_root):
-    """Replace $out_root in the string with the actual value."""
-    return value.replace("$out_root", out_root)
+def get_compiler_type(os, cpu):
+    if (os == 'mingw' and cpu == 'x86_64'):
+        return 'mingw_x86_64'
+    return 'clang_x64'
 
-def copy_files(config, src_base, dist_base, out_root):
+def replace_out_root(value, out_root, compiler_type):
+    """Replace $out_root in the string with the actual value."""
+    return value.replace("$out_root", out_root).replace("$compiler_type", compiler_type)
+
+def copy_files(config, src_base, dist_base, out_root, compiler_type):
     """Copy files or directories based on the configuration."""
     for mapping in config['file_mappings']:
         # Replace $out_root
-        source = replace_out_root(mapping['source'], out_root)
-        destination = replace_out_root(mapping['destination'], out_root)
+        source = replace_out_root(mapping['source'], out_root, compiler_type)
+        destination = replace_out_root(mapping['destination'], out_root, compiler_type)
 
         # Build full paths
         source = os.path.join(src_base, source)
@@ -42,7 +47,7 @@ def copy_files(config, src_base, dist_base, out_root):
         if not os.path.exists(source):
             print(f"Source path does not exist (will try to fallback): {source}")
             if mapping['source_fallback']:
-                source_fallback = replace_out_root(mapping['source_fallback'], out_root)
+                source_fallback = replace_out_root(mapping['source_fallback'], out_root, compiler_type)
                 source = os.path.join(src_base, source_fallback)
                 if not os.path.exists(source):
                     print(f"Fallback source path does not exist: {source}")
@@ -76,13 +81,17 @@ def main():
     parser.add_argument("--src", required=True, help="Base source path.")
     parser.add_argument("--dist", required=True, help="Base destination path.")
     parser.add_argument("--out-root", required=True, help="Relative out directory to src, used to replace $out_root.")
+    parser.add_argument('--current-os', required=True, help='current OS')
+    parser.add_argument('--current-cpu', required=True, help='current CPU')
     args = parser.parse_args()
 
     # Load the configuration
     config = load_config(args.config)
 
+    compiler_type = get_compiler_type(args.current_os, args.current_cpu)
+
     # Copy files or directories
-    copy_files(config, args.src, args.dist, args.out_root)
+    copy_files(config, args.src, args.dist, args.out_root, compiler_type)
 
     # Create package.json to pass SDK validation
     content = """{

@@ -21,6 +21,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SearchControllerAccessor {
 void DestroyPeerImpl(Ark_SearchController peer)
 {
+    CHECK_NULL_VOID(peer);
     delete peer;
 }
 Ark_SearchController CtorImpl()

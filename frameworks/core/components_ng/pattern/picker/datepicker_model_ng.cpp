@@ -418,14 +418,6 @@ void DatePickerModelNG::SetOnDateChange(FrameNode* frameNode, DateChangeEvent&& 
     eventHub->SetOnDateChange(std::move(onChange));
 }
 
-void DatePickerModelNG::SetChangeEvent(FrameNode* frameNode, DateChangeEvent&& onChange)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<DatePickerEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetChangeEvent(std::move(onChange));
-}
-
 PickerTextStyle DatePickerModelNG::getDisappearTextStyle(FrameNode* frameNode)
 {
     PickerTextStyle pickerTextStyle;

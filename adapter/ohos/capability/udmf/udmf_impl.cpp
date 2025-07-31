@@ -134,10 +134,13 @@ RefPtr<DataLoadParams> UdmfClientImpl::TransformDataLoadParamsForNative(void* ra
 RefPtr<UnifiedData> UdmfClientImpl::TransformUnifiedDataFromANI(void* rawData)
 {
     CHECK_NULL_RETURN(rawData, nullptr);
-    auto unifiedDataPtr = reinterpret_cast<UDMF::UnifiedData*>(rawData);
-    std::shared_ptr<UDMF::UnifiedData> unifiedData(unifiedDataPtr);
+    auto unifiedDataPtr = reinterpret_cast<std::shared_ptr<UDMF::UnifiedData>*>(rawData);
+    if (unifiedDataPtr == nullptr || *unifiedDataPtr == nullptr) {
+        TAG_LOGW(AceLogTag::ACE_DRAG, "UnifiedData or UnifiedData pointer is null");
+        return nullptr;
+    }
     auto udData = AceType::MakeRefPtr<UnifiedDataImpl>();
-    udData->SetUnifiedData(unifiedData);
+    udData->SetUnifiedData(*unifiedDataPtr);
     return udData;
 }
 

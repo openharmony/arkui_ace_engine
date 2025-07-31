@@ -16,7 +16,6 @@ import("//foundation/arkui/ace_engine/frameworks/bridge/arkts_frontend/koala_mir
 
 node_version = "v16.20.2"
 host_arch = "${host_os}-${host_cpu}"
-ui2abc_root = ".."
 libarkts_root = "../libarkts"
 
 npm_cmd("ui_plugin_compile") {
@@ -27,7 +26,6 @@ npm_cmd("ui_plugin_compile") {
     run_tasks = [ "compile" ]
 
     deps = [
-        "$ui2abc_root:ui2abc_install",
         "$libarkts_root:es2panda"
     ]
 }

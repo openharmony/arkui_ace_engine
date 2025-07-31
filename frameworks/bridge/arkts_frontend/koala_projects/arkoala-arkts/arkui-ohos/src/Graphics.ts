@@ -16,7 +16,6 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-// import { LengthUnit } from "./component/ArkArkuiExternalInterfaces"
 import { Resource } from "global.resource"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, pointer } from "@koalaui/interop"
@@ -93,7 +92,7 @@ export class LengthMetrics implements MaterializedBase {
         const ctorPtr: KPointer = LengthMetrics.ctor_lengthmetrics()
         this.peer = new Finalizable(ctorPtr, LengthMetrics.getFinalizer())
         this.value = value;
-        if (!unit || unit < LengthUnit.PX || unit > LengthUnit.LPX) {
+        if (unit === undefined || unit === null || unit < LengthUnit.PX || unit > LengthUnit.LPX) {
             this.unit = LengthUnit.VP;
             this.value = !unit ? value : 0;
         } else {
@@ -249,16 +248,16 @@ export class ColorMetrics implements MaterializedBase {
         const rgbMatch = rgbPattern.exec(format);
         const rgbaMatch = rgbaPattern.exec(format);
         if (rgbMatch) {
-            const r = ColorMetrics.clamp(Number.parseInt(rgbMatch[1], 10));
-            const g = ColorMetrics.clamp(Number.parseInt(rgbMatch[2], 10));
-            const b = ColorMetrics.clamp(Number.parseInt(rgbMatch[3], 10));
+            const r = ColorMetrics.clamp(Number.parseInt(rgbMatch[1]!, 10));
+            const g = ColorMetrics.clamp(Number.parseInt(rgbMatch[2]!, 10));
+            const b = ColorMetrics.clamp(Number.parseInt(rgbMatch[3]!, 10));
             return ColorMetrics.rgba(r, g, b);
         }
         else if (rgbaMatch) {
-            const r = ColorMetrics.clamp(Number.parseInt(rgbaMatch[1], 10));
-            const g = ColorMetrics.clamp(Number.parseInt(rgbaMatch[2], 10));
-            const b = ColorMetrics.clamp(Number.parseInt(rgbaMatch[3], 10));
-            const a = ColorMetrics.clamp(Number.parseFloat(rgbaMatch[4]));
+            const r = ColorMetrics.clamp(Number.parseInt(rgbaMatch[1]!, 10));
+            const g = ColorMetrics.clamp(Number.parseInt(rgbaMatch[2]!, 10));
+            const b = ColorMetrics.clamp(Number.parseInt(rgbaMatch[3]!, 10));
+            const a = ColorMetrics.clamp(Number.parseFloat(rgbaMatch[4]!));
             return ColorMetrics.rgba(r, g, b, a);
         }
         else {
@@ -561,10 +560,11 @@ export class DrawContext {
         return this.canvas_
     }
 }
-export interface Vector2T {
-    x: number;
-    y: number;
+export interface Vector2T<T> {
+    x: T;
+    y: T;
 }
+export type PositionT<T> = Vector2T<T>;
 export interface Vector3 {
     x: number;
     y: number;

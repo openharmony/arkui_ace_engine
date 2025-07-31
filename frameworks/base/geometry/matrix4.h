@@ -171,6 +171,13 @@ private:
     int32_t columns_ = 0;
 };
 
+
+class ACE_EXPORT Matrix4_Obj {
+public:
+    explicit Matrix4_Obj(const Matrix4& matrix) : matrix4x4(matrix) {}
+    OHOS::Ace::Matrix4 matrix4x4;
+};
+
 class ACE_EXPORT MatrixN4 {
 public:
     // Matrix dimension is 4XN.

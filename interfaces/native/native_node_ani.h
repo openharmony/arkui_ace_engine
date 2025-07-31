@@ -48,6 +48,34 @@ int32_t OH_ArkUI_NativeModule_GetNodeHandleFromAniValue(ani_env* env, ani_object
  */
 int32_t OH_ArkUI_NativeModule_GetContextFromAniValue(ani_env* env, ani_object value, ArkUI_ContextHandle* context);
 
+/**
+ * @brief 获取ArkTS侧创建的NodeContent对象映射到native侧的ArkUI_NodeContentHandle。
+ *
+ * @param env ani的环境指针。
+ * @param nodeContent ArkTS侧创建的NodeContent对象。
+ * @param content ArkUI_NodeContentHandle指针。
+ * @return 0 - 成功。
+ *         401 - 函数参数异常。
+ * @since 20
+ */
+int32_t OH_ArkUI_NativeModule_GetNodeContentFromAniValue(
+    ani_env* env, ani_object nodeContent, ArkUI_NodeContentHandle* content);
+
+/**
+ * @brief Obtains the parameters of the NavDestination component where the node is located.
+ *
+ * @param node The node.
+ * @param env The ANI environment.
+ * @param param The parameter of NavDestination.
+ * @return Returns the error code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ *         Returns {@link ARKUI_ERROR_CODE_GET_INFO_FAILED} if query information failed,
+ *         this may be because the node is not in NavDestination.
+ * @since 20
+ */
+ArkUI_ErrorCode OH_ArkUI_NativeModule_GetNavDestinationAniParam(ArkUI_NodeHandle node, ani_env* env, ani_value* param);
+
 #ifdef __cplusplus
 };
 #endif

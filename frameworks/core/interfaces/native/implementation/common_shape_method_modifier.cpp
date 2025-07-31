@@ -111,7 +111,12 @@ void StrokeWidthImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto strokeWidth = Converter::OptConvert<Dimension>(*value);
+    CHECK_NULL_VOID(value);
+    if (value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+        ShapeModelStatic::SetStrokeWidth(frameNode, std::nullopt);
+        return;
+    }
+    auto strokeWidth = Converter::OptConvertFromArkLength(value->value, DimensionUnit::VP);
     Validator::ValidatePositive(strokeWidth);
     Validator::ValidateNonPercent(strokeWidth);
     ShapeModelStatic::SetStrokeWidth(frameNode, strokeWidth);
@@ -133,20 +138,28 @@ void StrokeDashArrayImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto dashArray = Converter::OptConvert<std::vector<Dimension>>(*value);
-    if (!dashArray) {
-        std::vector<Dimension> defaultDashArray;
-        ShapeModelNG::SetStrokeDashArray(frameNode, defaultDashArray);
+    CHECK_NULL_VOID(value);
+    std::vector<Dimension> dashArray;
+    if (value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+        ShapeModelNG::SetStrokeDashArray(frameNode, dashArray);
         return;
     }
-    // if odd,add twice
-    auto length = dashArray->size();
-    if (length & 1) {
-        for (int32_t i = 0; i < length; i++) {
-            dashArray->emplace_back((*dashArray)[i]);
+    Array_Length arrayValue = value->value;
+    int32_t length = arrayValue.length;
+    for (int32_t i = 0; i < length; ++i) {
+        auto optLength = Converter::OptConvertFromArkLength(arrayValue.array[i], DimensionUnit::VP);
+        if (optLength.has_value()) {
+            dashArray.emplace_back(optLength.value());
         }
     }
-    ShapeModelNG::SetStrokeDashArray(frameNode, std::move(*dashArray));
+    // if odd,add twice
+    auto dashArraySize = dashArray.size();
+    if (dashArraySize & 1) {
+        for (size_t i = 0; i < dashArraySize; ++i) {
+            dashArray.emplace_back(dashArray[i]);
+        }
+    }
+    ShapeModelNG::SetStrokeDashArray(frameNode, dashArray);
 }
 } // CommonShapeMethodModifier
 const GENERATED_ArkUICommonShapeMethodModifier* GetCommonShapeMethodModifier()

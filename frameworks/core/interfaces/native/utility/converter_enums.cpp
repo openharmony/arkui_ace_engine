@@ -2303,4 +2303,97 @@ void AssignCast(std::optional<DividerMode>& dst, const Ark_DividerMode& src)
         }
     }
 }
+
+template<>
+void AssignCast(std::optional<LevelMode>& dst, const Ark_LevelMode& src)
+{
+    switch (src) {
+        case ARK_LEVEL_MODE_OVERLAY: dst = LevelMode::OVERLAY; break;
+        case ARK_LEVEL_MODE_EMBEDDED: dst = LevelMode::EMBEDDED; break;
+        default: LOGE("Unexpected enum value in Ark_LevelMode: %{public}d", src);
+    }
+}
+template<>
+void AssignCast(std::optional<ImmersiveMode>& dst, const Ark_ImmersiveMode& src)
+{
+    switch (src) {
+        case ARK_IMMERSIVE_MODE_DEFAULT: dst = ImmersiveMode::DEFAULT; break;
+        case ARK_IMMERSIVE_MODE_EXTEND: dst = ImmersiveMode::EXTEND; break;
+        default: LOGE("Unexpected enum value in Ark_ImmersiveMode: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<ParticleType>& dst, const Ark_ParticleType& src)
+{
+    switch (src) {
+        case ARK_PARTICLE_TYPE_POINT: dst = ParticleType::POINT; break;
+        case ARK_PARTICLE_TYPE_IMAGE: dst = ParticleType::IMAGE; break;
+        default: {
+            LOGE("Unexpected enum value in Ark_ParticleType: %{public}d", src);
+        }
+    }
+}
+
+template<>
+void AssignCast(std::optional<ParticleEmitterShape>& dst, const Ark_ParticleEmitterShape& src)
+{
+    switch (src) {
+        case ARK_PARTICLE_EMITTER_SHAPE_RECTANGLE: dst = ParticleEmitterShape::RECTANGLE; break;
+        case ARK_PARTICLE_EMITTER_SHAPE_CIRCLE: dst = ParticleEmitterShape::CIRCLE; break;
+        case ARK_PARTICLE_EMITTER_SHAPE_ELLIPSE: dst = ParticleEmitterShape::ELLIPSE; break;
+        default: {
+            LOGE("Unexpected enum value in Ark_ParticleEmitterShape: %{public}d", src);
+        }
+    }
+}
+
+template<>
+void AssignCast(std::optional<DistributionType>& dst, const Ark_DistributionType& src)
+{
+    switch (src) {
+        case ARK_DISTRIBUTION_TYPE_UNIFORM: dst = DistributionType::UNIFORM; break;
+        case ARK_DISTRIBUTION_TYPE_GAUSSIAN: dst = DistributionType::GAUSSIAN; break;
+        default: {
+            LOGE("Unexpected enum value in Ark_DistributionType: %{public}d", src);
+        }
+    }
+}
+
+template<>
+void AssignCast(std::optional<UpdaterType>& dst, const Ark_ParticleUpdater& src)
+{
+    switch (src) {
+        case ARK_PARTICLE_UPDATER_NONE: dst = UpdaterType::NONE_UPDATER; break;
+        case ARK_PARTICLE_UPDATER_RANDOM: dst = UpdaterType::RANDOM; break;
+        case ARK_PARTICLE_UPDATER_CURVE: dst = UpdaterType::CURVE; break;
+        default: {
+            LOGE("Unexpected enum value in Ark_ParticleUpdater: %{public}d", src);
+        }
+    }
+}
+
+template<>
+void AssignCast(std::optional<ParticleDisturbanceShapeType>& dst, const Ark_DisturbanceFieldShape& src)
+{
+    switch (src) {
+        case ARK_DISTURBANCE_FIELD_SHAPE_RECT: dst = ParticleDisturbanceShapeType::RECT; break;
+        case ARK_DISTURBANCE_FIELD_SHAPE_CIRCLE: dst = ParticleDisturbanceShapeType::CIRCLE; break;
+        case ARK_DISTURBANCE_FIELD_SHAPE_ELLIPSE: dst = ParticleDisturbanceShapeType::ELLIPSE; break;
+        default: {
+            LOGE("Unexpected enum value in Ark_DisturbanceFieldShape: %{public}d", src);
+        }
+    }
+}
+
+template<>
+void AssignCast(std::optional<DatePickerMode>& dst, const Ark_DatePickerMode& src)
+{
+    switch (src) {
+        case ARK_DATE_PICKER_MODE_DATE: dst = DatePickerMode::DATE; break;
+        case ARK_DATE_PICKER_MODE_YEAR_AND_MONTH: dst = DatePickerMode::YEAR_AND_MONTH; break;
+        case ARK_DATE_PICKER_MODE_MONTH_AND_DAY: dst = DatePickerMode::MONTH_AND_DAY; break;
+        default: LOGE("Unexpected enum value in Ark_DatePickerMode: %{public}d", src);
+    }
+}
 } // namespace OHOS::Ace::NG::Converter

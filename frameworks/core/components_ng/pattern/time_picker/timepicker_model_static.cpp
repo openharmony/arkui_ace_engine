@@ -50,4 +50,32 @@ void TimePickerModelStatic::SetChangeEvent(FrameNode* frameNode, TimeChangeEvent
     CHECK_NULL_VOID(eventHub);
     eventHub->SetChangeEvent(std::move(onChange));
 }
+
+void TimePickerModelStatic::SetSelectedTime(FrameNode* frameNode, const int64_t& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    CHECK_NULL_VOID(timePickerRowPattern);
+
+    std::time_t time = static_cast<std::time_t>(value / 1000);
+    std::tm local_tm{};
+#ifdef WINDOWS_PLATFORM
+    errno_t err = localtime_s(&local_tm, &time);
+    if (err != 0) {
+        LOGE("Failed to convert time to local time, error code: %{public}d", err);
+        return;
+    }
+#else
+    localtime_r(&time, &local_tm);
+#endif
+
+    auto hour = local_tm.tm_hour;
+    const auto minute = local_tm.tm_min;
+    const auto second = local_tm.tm_sec;
+    if (!timePickerRowPattern->GetHour24()) {
+        hour = (hour % 12 == 0) ? 12 : hour % 12; // Convert to 12-hour format
+    }
+    PickerTime pickerTime(hour, minute, second);
+    timePickerRowPattern->SetSelectedTime(pickerTime);
+}
 } // namespace OHOS::Ace::NG

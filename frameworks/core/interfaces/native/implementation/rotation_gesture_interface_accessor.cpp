@@ -94,7 +94,7 @@ Ark_RotationGestureInterface OnActionCancel0Impl(Ark_RotationGestureInterface pe
 {
     CHECK_NULL_RETURN(peer && peer->gesture && event, peer);
     auto onActionCancel = [arkCallback = CallbackHelper(*event)](GestureEvent& info) {
-        arkCallback.Invoke();
+        arkCallback.InvokeSync();
     };
     peer->gesture->SetOnActionCancelId(std::move(onActionCancel));
     return peer;

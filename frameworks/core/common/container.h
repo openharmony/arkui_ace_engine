@@ -208,9 +208,7 @@ public:
     {
         return displayOrientation_;
     }
-    virtual bool IsPcOrPadFreeMultiWindowMode() const { return false; }
     virtual bool IsFullScreenWindow() const { return true; }
-    virtual bool SetSystemBarEnabled(SystemBarType type, bool enable, bool animation) { return true; }
 
     virtual RefPtr<DisplayInfo> GetDisplayInfo();
 
@@ -780,6 +778,10 @@ public:
     virtual void TriggerModuleSerializer() {};
     // Get the subFrontend of container
     virtual RefPtr<Frontend> GetSubFrontend() const { return nullptr; }
+
+    virtual FrontendType GetFrontendType() const { return FrontendType::JS; }
+
+    virtual bool IsArkTsFrontEnd() const { return false; }
 
 protected:
     bool IsFontFileExistInPath(const std::string& path);

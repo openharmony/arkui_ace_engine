@@ -37,11 +37,11 @@ import { LengthMetrics } from "../../Graphics"
 import {  PixelMap, UniformDataType } from "#external"
 import { ResizableOptions } from "../../component/image"
 import { Filter, VisualEffect, BrightnessBlender } from "#external"
-import { CircleShape, EllipseShape, PathShape, RectShape } from "../../component/arkui-external"
+import { CircleShape, EllipseShape, PathShape, RectShape } from "@ohos/arkui/shape"
 import { FocusBoxStyle, FocusPriority } from "../../component/focus"
 import { TransformationMatrix } from "../../component/arkui-common"
 import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureType, GestureMask } from "../../component/gesture"
-import { ComponentContent } from "../../component/arkui-custom"
+import { ComponentContent } from 'arkui/ComponentContent'
 import { BlendMode } from "../../component/common"
 import { InteropNativeModule } from '@koalaui/interop';
 
@@ -135,7 +135,10 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         return this
     }
     public opacity(value: number | Resource | undefined): this {
-        return this
+         if (value != null) {
+            this.getPeer().opacity0Attribute(value);
+        }
+        return this;
     }
     public border(value: BorderOptions | undefined): this {
         return this
@@ -144,7 +147,10 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         return this
     }
     public borderWidth(value: Length | EdgeWidths | LocalizedEdgeWidths | undefined): this {
-        return this
+        if (value != null) {
+            this.getPeer().borderWidthAttribute(value);
+        }
+        return this;
     }
     public borderColor(value: ResourceColor | EdgeColors | LocalizedEdgeColors | undefined): this {
         return this
@@ -668,14 +674,13 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
     public attributeModifier<T>(value: AttributeModifier<T>): this {
         return this
     }
-
-    width(value: Length | undefined | Length | LayoutPolicy | undefined | undefined): this {
+    width(value: Length | LayoutPolicy | undefined): this {
         if (value != null) {
             this.getPeer().width0Attribute(value as Length);
         }
         return this;
     }
-    height(value: Length | undefined | Length | LayoutPolicy | undefined | undefined): this {
+    height(value: Length | LayoutPolicy | undefined): this {
         if (value != null) {
             this.getPeer().height0Attribute(value as Length);
         }

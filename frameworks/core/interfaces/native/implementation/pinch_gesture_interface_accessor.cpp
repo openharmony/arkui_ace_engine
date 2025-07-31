@@ -94,7 +94,7 @@ Ark_PinchGestureInterface OnActionCancel0Impl(Ark_PinchGestureInterface peer,
 {
     CHECK_NULL_RETURN(peer && peer->gesture && event, peer);
     auto callback = [arkCallback = CallbackHelper(*event)](GestureEvent& info) {
-        arkCallback.Invoke();
+        arkCallback.InvokeSync();
     };
     peer->gesture->SetOnActionCancelId(std::move(callback));
     return peer;

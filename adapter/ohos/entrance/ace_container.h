@@ -917,6 +917,16 @@ public:
         return subFrontend_;
     }
 
+    FrontendType GetFrontendType() const override
+    {
+        return type_;
+    }
+
+    bool IsArkTsFrontEnd() const override
+    {
+        return type_ == FrontendType::ARK_TS;
+    }
+
     FrontendType GetSubFrontendType() const
     {
         CHECK_NE_RETURN(type_ == FrontendType::STATIC_HYBRID_DYNAMIC ||
@@ -971,13 +981,11 @@ private:
 
     void FlushReloadTask(bool needReloadTransition, const ConfigurationChange& configurationChange);
     void InitSystemBarConfig();
-    bool IsPcOrPadFreeMultiWindowMode() const override;
     bool IsFullScreenWindow() const override
     {
         CHECK_NULL_RETURN(uiWindow_, false);
         return uiWindow_->GetWindowMode() == Rosen::WindowMode::WINDOW_MODE_FULLSCREEN;
     }
-    bool SetSystemBarEnabled(SystemBarType type, bool enable, bool animation) override;
     void InitializeStaticHybridDynamic(std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility);
     void InitializeDynamicHybridStatic(std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility);
 

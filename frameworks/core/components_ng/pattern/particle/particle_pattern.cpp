@@ -484,8 +484,14 @@ void ParticlePattern::UpdateDisturbance(const std::vector<ParticleDisturbance>& 
 void ParticlePattern::updateEmitterPosition(std::vector<EmitterProperty>& props)
 {
     auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    uint32_t emitterCount = 0;
+    if (renderContext->HasParticleOptionArray()) {
+        emitterCount = static_cast<uint32_t>(renderContext->GetParticleOptionArrayValue().size());
+    }
     for (EmitterProperty& prop : props) {
-        prop.index = prop.index >= GetEmitterCount() ? 0 : prop.index;
+        prop.index = prop.index >= emitterCount ? 0 : prop.index;
     }
     SetEmitterProperty(props);
     RosenRenderParticle::updateEmitterPosition(frameNode, props);

@@ -80,7 +80,13 @@ void PointsImpl(Ark_NativePointer node,
     if (value->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
         std::vector<ShapePoint> shapePointArray;
         for (int32_t i = 0; i < value->value.length; ++i) {
-            shapePointArray.emplace_back(Converter::Convert<ShapePoint>(value->value.array[i]));
+            auto arkPoint = value->value.array[i];
+            ShapePoint point = {0.0_vp, 0.0_vp};
+            auto x = Converter::OptConvertFromArkLength(arkPoint.value0, DimensionUnit::VP);
+            auto y = Converter::OptConvertFromArkLength(arkPoint.value1, DimensionUnit::VP);
+            point.first = x.value_or(0.0_vp);
+            point.second = y.value_or(0.0_vp);
+            shapePointArray.emplace_back(point);
         }
         points = std::make_optional<ShapePoints>(shapePointArray);
     }

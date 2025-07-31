@@ -14,12 +14,13 @@
  */
 
 import { int32 } from '@koalaui/common';
-import { MutableState, StateImpl } from '@koalaui/runtime';
+import { ArkUIAniModule } from 'arkui.ani';
 import { IMutableStateMeta, IMutableKeyedStateMeta } from '../decorator';
-import { RenderIdType } from '../decorator';
+import { MutableState, StateImpl } from '@koalaui/runtime';
 import { ObserveSingleton } from './observeSingleton';
-import { StateMgmtConsole } from '../tools/stateMgmtDFX';
+import { RenderIdType } from '../decorator';
 import { StateMgmtTool } from '#stateMgmtTool';
+
 class MutableStateMetaBase {
     public readonly info_: string;
 
@@ -29,8 +30,17 @@ class MutableStateMetaBase {
 }
 
 export interface IBindingSource {
-    clearBinding(id: RenderIdType): void;
+    clearBindingRefs(listener: WeakRef<ITrackedDecoratorRef>): void;
+    weakThis: WeakRef<IBindingSource>;
 }
+
+export interface ITrackedDecoratorRef {
+    id: RenderIdType;
+    weakThis: WeakRef<ITrackedDecoratorRef>;
+    reverseBindings: Set<WeakRef<IBindingSource>>;
+    clearReverseBindings(): void;
+}
+
 /**
  * manage one meta MutableState
  * V2 equivalent: sym_ref entry for particular property called 'propName'
@@ -41,32 +51,47 @@ export class MutableStateMeta extends MutableStateMetaBase implements IMutableSt
     // meta MutableState to record dependencies in addRef
     // and mutate in fireChange
     protected __metaDependency: MutableState<int32>;
-    private bindings_?: Set<RenderIdType>;
+    private bindingRefs_: Set<WeakRef<ITrackedDecoratorRef>> = new Set<WeakRef<ITrackedDecoratorRef>>();
+    weakThis: WeakRef<IBindingSource>;
 
     constructor(info: string, metaDependency?: MutableState<int32>) {
         super(info);
         this.__metaDependency = metaDependency ?? StateMgmtTool.getGlobalStateManager().mutableState<int32>(0, true);
+        this.weakThis = new WeakRef<IBindingSource>(this);
     }
 
     public addRef(): void {
-        if (false) {
-            // for Monitor & Computed
+        if (
+            ObserveSingleton.instance.renderingComponent === ObserveSingleton.RenderingMonitor ||
+            ObserveSingleton.instance.renderingComponent === ObserveSingleton.RenderingComputed
+        ) {
+            this.bindingRefs_.add(ObserveSingleton.instance.renderingComponentRef!.weakThis);
+            ObserveSingleton.instance.renderingComponentRef!.reverseBindings.add(this.weakThis);
         } else {
             this.__metaDependency!.value;
         }
     }
 
     public fireChange(): void {
-        if (this.bindings_) {
-            // for Monitor & Computed
+        if (ObserveSingleton.instance.renderingComponent === ObserveSingleton.RenderingComputed) {
+            throw new Error('Attempt to modify state variables from @Computed function');
         }
+        this.bindingRefs_.forEach((listener: WeakRef<ITrackedDecoratorRef>) => {
+            let trackedObject = listener.deref();
+            if (trackedObject) {
+                ObserveSingleton.instance.addDirtyRef(trackedObject);
+            } else {
+                this.clearBindingRefs(listener);
+            }
+        });
         if (this.shouldFireChange()) {
             this.__metaDependency!.value += 1;
+            ArkUIAniModule._CustomNode_RequestFrame();
         }
     }
 
-    clearBinding(id: RenderIdType): void {
-        this.bindings_?.delete(id);
+    clearBindingRefs(listener: WeakRef<ITrackedDecoratorRef>): void {
+        this.bindingRefs_.delete(listener);
     }
 
     shouldFireChange(): boolean {

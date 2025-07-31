@@ -15,14 +15,17 @@
 
 #include "core/common/multi_thread_build_manager.h"
 
+#include <unordered_set>
+
 #ifdef FFRT_SUPPORT
 #include "ffrt_inner.h"
 #endif
-#include "base/log/log_wrapper.h"
 #include "base/log/ace_trace.h"
+#include "base/log/log_wrapper.h"
 #include "base/memory/referenced.h"
 #include "base/utils/system_properties.h"
 #include "core/common/container.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {
@@ -32,10 +35,10 @@ constexpr uint32_t MAX_THREAD_NUM = 3;
 constexpr uint32_t ASYNC_UITASK_QOS = 5;
 std::unique_ptr<ffrt::queue> asyncUITaskQueue = nullptr;
 #endif
-}
-thread_local bool MultiThreadBuildManager::isFreeNodeScope_ = false;
+} // namespace
 thread_local bool MultiThreadBuildManager::isThreadSafeNodeScope_ = false;
 thread_local bool MultiThreadBuildManager::isUIThread_ = false;
+thread_local bool MultiThreadBuildManager::isParallelizeUI_ = false;
 
 MultiThreadBuildManager& MultiThreadBuildManager::GetInstance()
 {
@@ -56,8 +59,8 @@ void MultiThreadBuildManager::InitOnUIThread()
 void MultiThreadBuildManager::InitAsyncUITaskQueue()
 {
 #ifdef FFRT_SUPPORT
-    asyncUITaskQueue = std::make_unique<ffrt::queue>(ffrt::queue_concurrent,
-        "ArkUIAsyncUITask", ffrt::queue_attr().max_concurrency(MAX_THREAD_NUM));
+    asyncUITaskQueue = std::make_unique<ffrt::queue>(
+        ffrt::queue_concurrent, "ArkUIAsyncUITask", ffrt::queue_attr().max_concurrency(MAX_THREAD_NUM));
 #endif
 }
 
@@ -81,39 +84,11 @@ bool MultiThreadBuildManager::CheckNodeOnValidThread(NG::UINode* node)
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "CheckNodeOnValidThread failed. node is nullptr");
         return false;
     }
-    if (!node->IsFreeState() && !MultiThreadBuildManager::IsOnUIThread()) {
+    if (!node->IsFree() && !MultiThreadBuildManager::IsOnUIThread()) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "CheckNodeOnValidThread failed. unfree node not run on main thread");
         return false;
     }
     return true;
-}
-
-void MultiThreadBuildManager::SetIsFreeNodeScope(bool isFreeNodeScope)
-{
-    isFreeNodeScope_ = isFreeNodeScope;
-}
-
-bool MultiThreadBuildManager::IsFreeNodeScope()
-{
-    return isFreeNodeScope_;
-}
-
-void MultiThreadBuildManager::TryExecuteUnSafeTask(NG::UINode* node, std::function<void()>&& task)
-{
-    if (node->IsFreeState()) {
-        node->PostAfterAttachMainTreeTask(std::move(task));
-    } else if (task) {
-        task();
-    }
-}
-
-bool MultiThreadBuildManager::TryPostUnSafeTask(NG::UINode* node, std::function<void()>&& task)
-{
-    if (node->IsFreeState()) {
-        node->PostAfterAttachMainTreeTask(std::move(task));
-        return true;
-    }
-    return false;
 }
 
 void MultiThreadBuildManager::SetIsThreadSafeNodeScope(bool isThreadSafeNodeScope)
@@ -126,8 +101,8 @@ bool MultiThreadBuildManager::IsThreadSafeNodeScope()
     return isThreadSafeNodeScope_ || SystemProperties::GetDebugThreadSafeNodeEnabled();
 }
 
-bool MultiThreadBuildManager::PostAsyncUITask(int32_t contextId, std::function<void()>&& asyncUITask,
-    std::function<void()>&& onFinishTask)
+bool MultiThreadBuildManager::PostAsyncUITask(
+    int32_t contextId, std::function<void()>&& asyncUITask, std::function<void()>&& onFinishTask)
 {
     ContainerScope scope(contextId);
     auto container = Container::Current();
@@ -138,34 +113,40 @@ bool MultiThreadBuildManager::PostAsyncUITask(int32_t contextId, std::function<v
     if (!asyncUITaskQueue) {
         return false;
     }
-    auto result = asyncUITaskQueue->submit_h([contextId,
-        asyncUITask = std::move(asyncUITask), onFinishTask = std::move(onFinishTask)]() {
-        ContainerScope scope(contextId);
-        asyncUITask();
-        auto container = Container::Current();
-        CHECK_NULL_VOID(container);
-        auto taskExecutor = container->GetTaskExecutor();
-        CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostTask([contextId, onFinishTask = std::move(onFinishTask)]() {
+    auto result = asyncUITaskQueue->submit_h(
+        [contextId, asyncUITask = std::move(asyncUITask), onFinishTask = std::move(onFinishTask)]() {
             ContainerScope scope(contextId);
-            onFinishTask();
-            }, TaskExecutor::TaskType::UI, "ArkUIAsyncUIOnFinishTask", PriorityType::IMMEDIATE);
-    }, ffrt::task_attr().qos(ASYNC_UITASK_QOS));
+            asyncUITask();
+            auto container = Container::Current();
+            CHECK_NULL_VOID(container);
+            auto taskExecutor = container->GetTaskExecutor();
+            CHECK_NULL_VOID(taskExecutor);
+            taskExecutor->PostTask(
+                [contextId, onFinishTask = std::move(onFinishTask)]() {
+                    ContainerScope scope(contextId);
+                    onFinishTask();
+                },
+                TaskExecutor::TaskType::UI, "ArkUIAsyncUIOnFinishTask", PriorityType::IMMEDIATE);
+        },
+        ffrt::task_attr().qos(ASYNC_UITASK_QOS));
     return result != nullptr;
 #else
-    return taskExecutor->PostTask([contextId,
-        asyncUITask = std::move(asyncUITask), onFinishTask = std::move(onFinishTask)]() {
-        ContainerScope scope(contextId);
-        asyncUITask();
-        auto container = Container::Current();
-        CHECK_NULL_VOID(container);
-        auto taskExecutor = container->GetTaskExecutor();
-        CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostTask([contextId, onFinishTask = std::move(onFinishTask)]() {
+    return taskExecutor->PostTask(
+        [contextId, asyncUITask = std::move(asyncUITask), onFinishTask = std::move(onFinishTask)]() {
             ContainerScope scope(contextId);
-            onFinishTask();
-            }, TaskExecutor::TaskType::UI, "ArkUIAsyncUIOnFinishTask", PriorityType::IMMEDIATE);
-        }, TaskExecutor::TaskType::BACKGROUND, "ArkUIAsyncUITask");
+            asyncUITask();
+            auto container = Container::Current();
+            CHECK_NULL_VOID(container);
+            auto taskExecutor = container->GetTaskExecutor();
+            CHECK_NULL_VOID(taskExecutor);
+            taskExecutor->PostTask(
+                [contextId, onFinishTask = std::move(onFinishTask)]() {
+                    ContainerScope scope(contextId);
+                    onFinishTask();
+                },
+                TaskExecutor::TaskType::UI, "ArkUIAsyncUIOnFinishTask", PriorityType::IMMEDIATE);
+        },
+        TaskExecutor::TaskType::BACKGROUND, "ArkUIAsyncUITask");
 #endif
 }
 
@@ -176,10 +157,12 @@ bool MultiThreadBuildManager::PostUITask(int32_t contextId, std::function<void()
     CHECK_NULL_RETURN(container, false);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_RETURN(taskExecutor, false);
-    return taskExecutor->PostTask([contextId, uiTask = std::move(uiTask)]() {
-        ContainerScope scope(contextId);
-        uiTask();
-        }, TaskExecutor::TaskType::UI, "ArkUISyncUITask", PriorityType::IMMEDIATE);
+    return taskExecutor->PostTask(
+        [contextId, uiTask = std::move(uiTask)]() {
+            ContainerScope scope(contextId);
+            uiTask();
+        },
+        TaskExecutor::TaskType::UI, "ArkUISyncUITask", PriorityType::IMMEDIATE);
 }
 
 bool MultiThreadBuildManager::PostUITaskAndWait(int32_t contextId, std::function<void()>&& uiTask)
@@ -189,9 +172,26 @@ bool MultiThreadBuildManager::PostUITaskAndWait(int32_t contextId, std::function
     CHECK_NULL_RETURN(container, false);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_RETURN(taskExecutor, false);
-    return taskExecutor->PostSyncTask([contextId, uiTask = std::move(uiTask)]() {
-        ContainerScope scope(contextId);
-        uiTask();
-        }, TaskExecutor::TaskType::UI, "ArkUISyncTaskAndWait", PriorityType::IMMEDIATE);
+    return taskExecutor->PostSyncTask(
+        [contextId, uiTask = std::move(uiTask)]() {
+            ContainerScope scope(contextId);
+            uiTask();
+        },
+        TaskExecutor::TaskType::UI, "ArkUISyncTaskAndWait", PriorityType::IMMEDIATE);
+}
+
+void MultiThreadBuildManager::CheckTag(const std::string& tag)
+{
+    if (!isParallelizeUI_) {
+        return;
+    }
+    static std::unordered_set<std::string> supportTags { V2::COLUMN_ETS_TAG, V2::IMAGE_ETS_TAG, V2::ROW_ETS_TAG,
+        V2::RELATIVE_CONTAINER_ETS_TAG, V2::TEXT_ETS_TAG, V2::STACK_ETS_TAG, V2::BUTTON_ETS_TAG, V2::TOGGLE_ETS_TAG,
+        V2::LIST_ETS_TAG, V2::LIST_ITEM_ETS_TAG, V2::GRID_ETS_TAG, V2::GRID_ITEM_ETS_TAG, V2::COMMON_VIEW_ETS_TAG };
+
+    if (auto search = supportTags.find(tag); search != supportTags.end()) {
+        return;
+    }
+    LOGF_ABORT("Unsupported UI components '%{public}s' used in ParallelizeUI", tag.c_str());
 }
 } // namespace OHOS::Ace

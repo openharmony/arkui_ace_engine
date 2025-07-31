@@ -22,11 +22,12 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonShapeMethodPeer, CommonShapeMethod, ArkCommonShapeMethodComponent, ArkCommonShapeMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod } from "./common"
+import { ArkCommonShapeMethodPeer, CommonShapeMethod, ArkCommonShapeMethodComponent, ArkCommonShapeMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod, AttributeModifier } from "./common"
 import { Length } from "./units"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { RectModifier } from "../RectModifier"
 
 export type RadiusItem = [
     Length,
@@ -34,6 +35,7 @@ export type RadiusItem = [
 ]
 
 export class ArkRectPeer extends ArkCommonShapeMethodPeer {
+    _attributeSet?: RectModifier
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -113,45 +115,30 @@ export class ArkRectPeer extends ArkCommonShapeMethodPeer {
         ArkUIGeneratedNativeModule._RectAttribute_radiusHeight(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    radiusAttribute(value: number | string | Array<number | string> | undefined): void {
+    radiusAttribute(value: Length | Array<RadiusItem> | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8(value_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
             const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (RuntimeType.NUMBER == value_value_type) {
-                thisSerializer.writeInt8(0 as int32)
-                const value_value_0  = value_value as number
-                thisSerializer.writeNumber(value_value_0)
+            if (value_value instanceof Length) {
+                thisSerializer.writeInt8((0).toChar())
+                const value_value_0  = value_value as Length
+                thisSerializer.writeLength(value_value_0)
             }
-            else if (RuntimeType.STRING == value_value_type) {
-                thisSerializer.writeInt8(1 as int32)
-                const value_value_1  = value_value as string
-                thisSerializer.writeString(value_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
-                thisSerializer.writeInt8(2 as int32)
-                const value_value_2  = value_value as Array<number | string>
-                thisSerializer.writeInt32(value_value_2.length as int32)
-                for (let i = 0; i < value_value_2.length; i++) {
-                    const value_value_2_element : number | string = value_value_2[i]
-                    let value_value_2_element_type : int32 = RuntimeType.UNDEFINED
-                    value_value_2_element_type = runtimeType(value_value_2_element)
-                    if (RuntimeType.NUMBER == value_value_2_element_type) {
-                        thisSerializer.writeInt8(0 as int32)
-                        const value_value_2_element_0  = value_value_2_element as number
-                        thisSerializer.writeNumber(value_value_2_element_0)
-                    }
-                    else if (RuntimeType.STRING == value_value_2_element_type) {
-                        thisSerializer.writeInt8(1 as int32)
-                        const value_value_2_element_1  = value_value_2_element as string
-                        thisSerializer.writeString(value_value_2_element_1)
-                    }
+            else if (Array.isArray(value_value)) {
+                thisSerializer.writeInt8((1).toChar())
+                const value_value_1  = value_value as Array<RadiusItem>
+                thisSerializer.writeInt32((value_value_1.length).toInt())
+                for (let value_value_1_counter_i = 0; value_value_1_counter_i < value_value_1.length; value_value_1_counter_i++) {
+                    const value_value_1_element : RadiusItem = value_value_1[value_value_1_counter_i]
+                    const value_value_1_element_0  = value_value_1_element[0]
+                    thisSerializer.writeLength(value_value_1_element_0)
+                    const value_value_1_element_1  = value_value_1_element[1]
+                    thisSerializer.writeLength(value_value_1_element_1)
                 }
             }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._RectAttribute_radius(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -172,19 +159,20 @@ export type RectInterface = (options?: RectOptions | RoundedRectOptions) => Rect
 export interface RectAttribute extends CommonShapeMethod {
     radiusWidth(value: number | string | undefined): this
     radiusHeight(value: number | string | undefined): this
-    radius(value: number | string | Array<number | string> | undefined): this
+    radius(value: Length | Array<RadiusItem> | undefined): this
+    attributeModifier(value: AttributeModifier<RectAttribute> | AttributeModifier<CommonMethod> | undefined): this { return this; }
 }
 export class ArkRectStyle extends ArkCommonShapeMethodStyle implements RectAttribute {
     radiusWidth_value?: number | string | undefined
     radiusHeight_value?: number | string | undefined
-    radius_value?: number | string | Array<number | string> | undefined
+    radius_value?: Length | Array<RadiusItem> | undefined
     public radiusWidth(value: number | string | undefined): this {
         return this
     }
     public radiusHeight(value: number | string | undefined): this {
         return this
     }
-    public radius(value: number | string | Array<number | string> | undefined): this {
+    public radius(value: Length | Array<RadiusItem> | undefined): this {
         return this
         }
 }
@@ -216,9 +204,9 @@ export class ArkRectComponent extends ArkCommonShapeMethodComponent implements R
         }
         return this
     }
-    public radius(value: number | string | Array<number | string> | undefined): this {
+    public radius(value: Length | Array<RadiusItem> | undefined): this {
         if (this.checkPriority("radius")) {
-            const value_casted = value as (number | string | Array<number | string> | undefined)
+            const value_casted = value as (Length | Array<RadiusItem> | undefined)
             this.getPeer()?.radiusAttribute(value_casted)
             return this
         }
@@ -228,6 +216,11 @@ export class ArkRectComponent extends ArkCommonShapeMethodComponent implements R
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+
+    public attributeModifier(modifier: AttributeModifier<RectAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        hookRectAttributeModifier(this, modifier);
+        return this
     }
 }
 /** @memo */

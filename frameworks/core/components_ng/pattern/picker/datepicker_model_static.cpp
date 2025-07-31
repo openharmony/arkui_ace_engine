@@ -16,7 +16,6 @@
 #include "core/components_ng/pattern/picker/datepicker_model_static.h"
 
 #include "core/components_ng/pattern/picker/datepicker_model_ng.h"
-#include "core/components_ng/pattern/picker/datepicker_pattern.h"
 
 namespace OHOS::Ace::NG {
 void DatePickerModelStatic::SetOnChange(FrameNode* frameNode, DateChangeEvent&& onChange)
@@ -33,6 +32,26 @@ void DatePickerModelStatic::SetChangeEvent(FrameNode* frameNode, DateChangeEvent
     auto eventHub = frameNode->GetEventHub<DatePickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetChangeEvent(std::move(onChange));
+}
+
+void DatePickerModelStatic::SetSelectedDate(FrameNode* frameNode, const int64_t& value)
+{
+    std::time_t time = static_cast<std::time_t>(value / 1000);
+    std::tm local_tm{};
+#ifdef WINDOWS_PLATFORM
+    errno_t err = localtime_s(&local_tm, &time);
+    if (err != 0) {
+        LOGE("Failed to convert time to local time, error code: %{public}d", err);
+        return;
+    }
+#else
+    localtime_r(&time, &local_tm);
+#endif
+
+    const auto year = local_tm.tm_year + 1900;
+    const auto month = local_tm.tm_mon + 1;
+    const auto day = local_tm.tm_mday;
+    DatePickerModelNG::SetSelectedDate(frameNode, PickerDate(year, month, day));
 }
 } // namespace OHOS::Ace::NG
  

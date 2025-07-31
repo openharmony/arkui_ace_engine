@@ -120,19 +120,17 @@
                 "egl",
                 "request",
                 "qrcodegen",
-                "sdk",
-                "glfw"
+                "sdk"
             ],
-            "third_party": [
-                "ffmpeg"
-            ]
+            "third_party": []
         },
         "build": {
             "group_type": {
                 "base_group": [],
                 "fwk_group": [
                     "//foundation/arkui/ace_engine/adapter/ohos/build:ace_packages",
-                    "//foundation/arkui/ace_engine/frameworks/bridge/cj_frontend:cj_frontend_ohos"
+                    "//foundation/arkui/ace_engine/frameworks/bridge/cj_frontend:cj_frontend_ohos",
+                    "//foundation/arkui/ace_engine/interfaces/ets:ace_ani_package"
                 ],
                 "service_group": [
                     "//foundation/arkui/ace_engine/adapter/ohos/services:services_target",
@@ -232,15 +230,6 @@
                         ]
                     },
                     "name": "//foundation/arkui/ace_engine/build:libace_compatible"
-                },
-                {
-                    "header": {
-                        "header_base": "//foundation/arkui/ace_engine/",
-                        "header_files": [
-                            "adapter/preview/entrance/sample/event_adapter.h"
-                        ]
-                    },
-                    "name": "//foundation/arkui/ace_engine/build:libevent_adapter"
                 },
                 {
                     "header": {

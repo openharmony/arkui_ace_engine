@@ -57,7 +57,7 @@ UpdateSpanStyle Convert(const Ark_RichEditorTextStyle& src)
     ret.updateFontWeight = Converter::OptConvert<FontWeight>(src.fontWeight);
     auto fontFamilyStr = Converter::OptConvert<std::string>(src.fontFamily);
     if (fontFamilyStr && fontFamilyStr->length() > 0) {
-        ret.updateFontFamily->push_back(fontFamilyStr.value());
+        ret.updateFontFamily = { fontFamilyStr.value() };
     }
     if (auto decorationValue = Converter::GetOpt(src.decoration)) {
         ret.isInitDecoration = true;

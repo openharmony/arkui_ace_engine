@@ -454,6 +454,11 @@ void PipelineContext::FlushPendingDeleteCustomNode()
         pendingStack.pop();
         if (AceType::InstanceOf<NG::CustomNode>(node)) {
             auto customNode = AceType::DynamicCast<NG::CustomNode>(node);
+            // for ArkTs1.2
+            if (customNode->FireOnCleanup()) {
+                continue;
+            }
+            // for ArkTs1.1
             if (!customNode->CheckFireOnAppear()) {
                 customNode->FireOnAppear();
                 customNode->FireDidBuild();

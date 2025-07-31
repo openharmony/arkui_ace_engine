@@ -23,6 +23,7 @@ template("ace_core_interfaces_native_node") {
     part_name = ace_engine_part
     defines += invoker.defines
     configs = [ "$ace_root:ace_config" ]
+    platform = invoker.platform
 
     if (ace_engine_feature_enable_point_light) {
       defines += [ "POINT_LIGHT_ENABLE" ]
@@ -145,7 +146,9 @@ template("ace_core_interfaces_native_node") {
     sources += [
       "ani/ani_utils.cpp",
       "ani/animation_ani_modifier.cpp",
+      "ani/canvas_ani_modifier.cpp",
       "ani/common_ani_modifier.cpp",
+      "ani/component_content_ani_modifier.cpp",
       "ani/component_snapshot_ani_modifier.cpp",
       "ani/content_slot_ani_modifier.cpp",
       "ani/custom_node_ani_modifier.cpp",
@@ -156,19 +159,23 @@ template("ace_core_interfaces_native_node") {
       "ani/image_ani_modifier.cpp",
       "ani/image_span_ani_modifier.cpp",
       "ani/node_ani_modifier.cpp",
-      #"ani/web_ani_modifier.cpp",
+      "ani/styled_string_ani_modifier.cpp",
+      "ani/web_ani_modifier.cpp",
       "ani/waterflow_ani_modifier.cpp",
       "ani/video_ani_modifier.cpp",
+      "ani/rich_editor_ani_modifier.cpp",
       "ani/shape_ani_modifier.cpp",
       "ani/stateMgmt_ani_modifier.cpp",
       "ani/xcomponent_ani_modifier.cpp",
       "ani/list_ani_modifier.cpp",
+      "ani/condition_scope_ani_modifier.cpp",
     ]
     if (build_ohos_sdk) {
       sources -= [
         "ani/ani_utils.cpp",
         "ani/animation_ani_modifier.cpp",
         "ani/common_ani_modifier.cpp",
+        "ani/custom_node_ani_modifier.cpp",
         "ani/node_ani_modifier.cpp",
         "ani/waterflow_ani_modifier.cpp",
         "ani/interop_ani_modifier.cpp",
@@ -178,7 +185,10 @@ template("ace_core_interfaces_native_node") {
       ]
     }
 
-    deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
+    deps = [
+      "$ace_root/frameworks/core/components/theme:build_theme_code",
+      "$ace_root/frameworks/core/interfaces/native/common:ace_core_interfaces_native_$platform",
+    ]
     if (defined(config.web_components_support) &&
         config.web_components_support) {
       sources += [ "node/web_modifier.cpp" ]
@@ -248,7 +258,6 @@ template("ace_core_interfaces_native_node") {
     if (defined(config.pixel_map_support)) {
       external_deps += [
         "image_framework:image",
-        "image_framework:image_taihe",
       ]
     }
     if (defined(config.enable_drag_framework) && config.enable_drag_framework) {
@@ -256,7 +265,6 @@ template("ace_core_interfaces_native_node") {
       if (defined(global_parts_info.distributeddatamgr_udmf)) {
         external_deps += [ "udmf:udmf_client" ]
         external_deps += [ "udmf:libudmf" ]
-        external_deps += [ "udmf:udmf_taihe_native" ]
       }
     }
     if (build_ohos_sdk) {
@@ -286,6 +294,7 @@ template("ace_core_interfaces_native_node") {
 }
 
 foreach(item, ace_platforms) {
+  platform = item.name
   ace_core_interfaces_native_node(
       "ace_core_interfaces_native_node_" + item.name) {
     if (defined(item.config)) {

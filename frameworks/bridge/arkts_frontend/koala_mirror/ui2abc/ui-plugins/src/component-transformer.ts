@@ -48,6 +48,7 @@ function computeOptionsName(clazz: arkts.ClassDeclaration): string {
 
 export class ComponentTransformer extends arkts.AbstractVisitor {
     private arkuiImport?: string
+    private entryCounter: number = 0
 
     constructor(private imports: Importer, options?: ComponentTransformerOptions) {
         super()
@@ -181,12 +182,34 @@ export class ComponentTransformer extends arkts.AbstractVisitor {
 
     private addInitializeStruct(clazz: arkts.ClassDeclaration, classBody: arkts.ClassElement[]) {
         const statements: arkts.Statement[] = []
+        // TODO: this is to workaround panda bug #27680
+        // It should be OptionsT, but the compiler has lost the bridge
+        statements.push(
+            arkts.factory.createVariableDeclaration(
+                    Es2pandaVariableDeclarationKind.VARIABLE_DECLARATION_KIND_CONST,
+                    [
+                         arkts.factory.createVariableDeclarator(
+                            arkts.Es2pandaVariableDeclaratorFlag.VARIABLE_DECLARATOR_FLAG_CONST,
+                            arkts.factory.createIdentifier(CustomComponentNames.COMPONENT_INITIALIZERS_NAME),
+                                arkts.factory.createTSAsExpression(
+                                    arkts.factory.createIdentifier(CustomComponentNames.COMPONENT_INITIALIZERS_NAME_0),
+                                        arkts.factory.createETSUnionType([
+                                            factory.createTypeReferenceFromString(this.optionsName(clazz.definition!).name),
+                                            arkts.factory.createETSUndefinedType()
+                                         ]),
+                                    false
+                                )
+                        )
+                    ]
+                )
+            )
+
         forEachProperty(clazz, property => {
             this.getPropertyTransformer(property).applyInitializeStruct(this.pageLocalStorage, property, statements)
         })
-        if (statements.length > 0) {
+        if (statements.length > 1) {
             classBody.push(createVoidMethod(CustomComponentNames.COMPONENT_INITIALIZE_STRUCT, [
-                factory.createInitializersOptionsParameter(computeOptionsName(clazz), false),
+                factory.createInitializersOptionsParameter(computeOptionsName(clazz), true),
                 factory.createContentParameter(),
             ], statements))
         }
@@ -375,9 +398,6 @@ export class ComponentTransformer extends arkts.AbstractVisitor {
 
     private rewriteBuildBody(clazz: arkts.ClassDeclaration, oldBody: arkts.BlockStatement, optionsName: string): arkts.BlockStatement {
         let result: arkts.Statement[] = []
-        forEachProperty(clazz, property => {
-            this.getPropertyTransformer(property).applyBuild(property, result)
-        })
         // Improve: this is to workaround panda bug #27680
         // It should be OptionsT, but the compiler has lost the bridge
         result.push(
@@ -399,6 +419,9 @@ export class ComponentTransformer extends arkts.AbstractVisitor {
                     ]
                 )
             )
+        forEachProperty(clazz, property => {
+            this.getPropertyTransformer(property).applyBuild(property, result)
+        })
         oldBody.statements.forEach((it) => {
             result.push(it)
         })
@@ -519,9 +542,10 @@ export class ComponentTransformer extends arkts.AbstractVisitor {
             }
         }
         */
+        this.imports.add("EntryPoint", getComponentPackage())
         const result = arkts.factory.createClassDeclaration(
             arkts.factory.createClassDefinition(
-                arkts.factory.createIdentifier("__EntryWrapper"),
+                arkts.factory.createIdentifier(`__EntryWrapper${ this.entryCounter ? this.entryCounter : "" }`),
                 undefined,
                 undefined,
                 [],
@@ -566,6 +590,7 @@ export class ComponentTransformer extends arkts.AbstractVisitor {
             ),
             arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_EXPORT,
         )
+        this.entryCounter++
         return result
     }
 

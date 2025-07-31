@@ -210,10 +210,12 @@ public:
     }
 
     void SetListItemStyle(V2::ListItemStyle style);
+    void SetListItemStyleMultiThread(V2::ListItemStyle style);
 
     void SetOffsetChangeCallBack(OnOffsetChangeFunc&& offsetChangeCallback);
 
     void CloseSwipeAction(OnFinishFunc&& onFinishCallback);
+    void CloseSwipeActionMultiThread(OnFinishFunc&& onFinishCallback);
 
     void FireOnFinishEvent() const
     {

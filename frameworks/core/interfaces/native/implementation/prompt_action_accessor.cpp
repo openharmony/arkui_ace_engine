@@ -29,10 +29,45 @@
 #include "frameworks/base/utils/utils.h"
 #include "frameworks/base/utils/system_properties.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
+#include "core/interfaces/native/utility/promise_helper.h"
 
 using namespace OHOS::Ace::NG::Converter;
 namespace OHOS::Ace::NG {
 constexpr int32_t INVALID_ID = -1;
+std::unordered_map<int32_t, std::string> UICONTEXT_ERROR_MAP = {
+    { ERROR_CODE_BIND_SHEET_CONTENT_ERROR, "The bindSheetContent is incorrect." },
+    { ERROR_CODE_BIND_SHEET_CONTENT_ALREADY_EXIST, "The bindSheetContent already exists." },
+    { ERROR_CODE_BIND_SHEET_CONTENT_NOT_FOUND, "The bindSheetContent cannot be found." },
+    { ERROR_CODE_TARGET_ID_NOT_EXIST, "The targetId does not exist." },
+    { ERROR_CODE_TARGET_NOT_ON_MAIN_TREE, "The node of targetId is not on the component tree." },
+    { ERROR_CODE_TARGET_NOT_PAGE_CHILD,
+        "The node of targetId is not a child of the page node or NavDestination node." },
+    { ERROR_CODE_INTERNAL_ERROR, "Internal error." },
+    { ERROR_CODE_PARAM_INVALID, "Parameter error. Possible causes: 1. Mandatory parameters are left unspecified;"
+        "2. Incorrect parameter types; 3. Parameter verification failed." },
+    { ERROR_CODE_DIALOG_CONTENT_ERROR, "The ComponentContent is incorrect." },
+    { ERROR_CODE_DIALOG_CONTENT_ALREADY_EXIST, "The ComponentContent already exists." },
+    { ERROR_CODE_DIALOG_CONTENT_NOT_FOUND, "The ComponentContent cannot be found." },
+    { ERROR_CODE_TARGET_INFO_NOT_EXIST, "The targetId does not exist." },
+    { ERROR_CODE_TARGET_NOT_ON_COMPONENT_TREE, "The node of targetId is not on the component tree." }
+};
+
+void ReturnPromise(const Callback_Opt_Array_String_Void* promiseValue, int32_t errorCode)
+{
+    auto promise = std::make_shared<PromiseHelper<Callback_Opt_Array_String_Void>>(promiseValue);
+    if (errorCode == ERROR_CODE_NO_ERROR) {
+        promise->Resolve();
+    } else {
+        auto codeValue = std::to_string(errorCode);
+        std::string codeInfo = "Default error info";
+        if (UICONTEXT_ERROR_MAP.find(errorCode) != UICONTEXT_ERROR_MAP.end()) {
+            codeInfo = UICONTEXT_ERROR_MAP[errorCode];
+        }
+        StringArray ErrorList = { codeValue, codeInfo };
+        promise->Reject(ErrorList);
+    }
+}
+
 int32_t ParseTargetInfo(const Ark_TargetInfo* targetInfo, int32_t& targetId)
 {
     auto targetInfoID = targetInfo->id;
@@ -77,6 +112,80 @@ int32_t ParseTargetInfo(const Ark_TargetInfo* targetInfo, int32_t& targetId)
     }
     return result;
 }
+
+auto g_bindMenuOptionsParamCallbacks = [](
+    const auto& menuOptions, MenuParam& menuParam, WeakPtr<FrameNode> weakNode) {
+    auto onAppearValue = OptConvert<Callback_Void>(menuOptions.onAppear);
+    if (onAppearValue) {
+        auto onAppear = [arkCallback = CallbackHelper(onAppearValue.value()), weakNode]() {
+            PipelineContext::SetCallBackNode(weakNode);
+            arkCallback.Invoke();
+        };
+        menuParam.onAppear = std::move(onAppear);
+    }
+    auto onDisappearValue = OptConvert<Callback_Void>(menuOptions.onDisappear);
+    if (onDisappearValue) {
+        auto onDisappear = [arkCallback = CallbackHelper(onDisappearValue.value()), weakNode]() {
+            PipelineContext::SetCallBackNode(weakNode);
+            arkCallback.Invoke();
+        };
+        menuParam.onDisappear = std::move(onDisappear);
+    }
+    auto aboutToAppearValue = OptConvert<Callback_Void>(menuOptions.aboutToAppear);
+    if (aboutToAppearValue) {
+        auto aboutToAppear = [arkCallback = CallbackHelper(aboutToAppearValue.value()), weakNode]() {
+            PipelineContext::SetCallBackNode(weakNode);
+            arkCallback.Invoke();
+        };
+        menuParam.aboutToAppear = std::move(aboutToAppear);
+    }
+    auto aboutToDisAppearValue = OptConvert<Callback_Void>(menuOptions.aboutToDisappear);
+    if (aboutToDisAppearValue) {
+        auto aboutToDisappear = [arkCallback = CallbackHelper(aboutToDisAppearValue.value()), weakNode]() {
+            PipelineContext::SetCallBackNode(weakNode);
+            arkCallback.Invoke();
+        };
+        menuParam.aboutToDisappear = std::move(aboutToDisappear);
+    }
+};
+
+auto g_bindMenuOptionsParam = [](const auto& menuOptions, MenuParam& menuParam) {
+    auto offsetVal =
+        OptConvert<std::pair<std::optional<Dimension>, std::optional<Dimension>>>(menuOptions.offset);
+    if (offsetVal) {
+        menuParam.positionOffset.SetX(offsetVal.value().first->ConvertToPx());
+        menuParam.positionOffset.SetY(offsetVal.value().second->ConvertToPx());
+    }
+    menuParam.enableHoverMode = OptConvert<bool>(menuOptions.enableHoverMode);
+    menuParam.backgroundColor = OptConvert<Color>(menuOptions.backgroundColor);
+    auto backgroundBlurStyle = OptConvert<BlurStyle>(menuOptions.backgroundBlurStyle);
+    menuParam.backgroundBlurStyle =
+        backgroundBlurStyle ? std::optional<int32_t>(static_cast<int32_t>(backgroundBlurStyle.value())) : std::nullopt;
+    auto transitionOpt = OptConvert<RefPtr<NG::ChainedTransitionEffect>>(menuOptions.transition);
+    menuParam.transition = transitionOpt.value_or(menuParam.transition);
+    menuParam.hasTransitionEffect = transitionOpt.has_value();
+    menuParam.enableArrow = OptConvert<bool>(menuOptions.enableArrow);
+    menuParam.arrowOffset = OptConvert<CalcDimension>(menuOptions.arrowOffset);
+    menuParam.placement = OptConvert<Placement>(menuOptions.placement);
+    // if enableArrow is true and placement not set, set placement default value to top.
+    if (menuParam.enableArrow.has_value() && !menuParam.placement.has_value() && menuParam.enableArrow.value()) {
+        menuParam.placement = Placement::TOP;
+    }
+    if (!menuParam.placement.has_value()) {
+        menuParam.placement = Placement::BOTTOM_LEFT;
+    }
+    menuParam.borderRadius = OptConvert<BorderRadiusProperty>(menuOptions.borderRadius);
+    menuParam.previewBorderRadius = OptConvert<BorderRadiusProperty>(menuOptions.previewBorderRadius);
+    menuParam.layoutRegionMargin = OptConvert<PaddingProperty>(menuOptions.layoutRegionMargin);
+    menuParam.layoutRegionMargin->start = menuParam.layoutRegionMargin->left;
+    menuParam.layoutRegionMargin->end = menuParam.layoutRegionMargin->right;
+    menuParam.hapticFeedbackMode =
+        OptConvert<HapticFeedbackMode>(menuOptions.hapticFeedbackMode).value_or(menuParam.hapticFeedbackMode);
+    menuParam.outlineColor = OptConvert<BorderColorProperty>(menuOptions.outlineColor);
+    menuParam.outlineWidth = OptConvert<BorderWidthProperty>(menuOptions.outlineWidth);
+    menuParam.effectOption = OptConvert<EffectOption>(menuOptions.backgroundEffect);
+    menuParam.blurStyleOption = OptConvert<BlurStyleOption>(menuOptions.backgroundBlurStyleOptions);
+};
 
 auto g_onWillDismissPopup = [](
     const Opt_Union_Boolean_Callback_DismissPopupAction_Void& param, RefPtr<PopupParam>& popupParam) {
@@ -266,6 +375,13 @@ RefPtr<PopupParam> Convert(const Ark_PopupCommonOptions& src)
     return popupParam;
 }
 
+template<>
+MenuParam Convert(const Ark_MenuOptions& src)
+{
+    MenuParam menuParam;
+    g_bindMenuOptionsParam(src, menuParam);
+    return menuParam;
+}
 } // OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -278,10 +394,12 @@ void OpenPopupImpl(Ark_VMContext vmContext,
     const Opt_PopupCommonOptions* options,
     const Callback_Opt_Array_String_Void* promiseValue)
 {
-    LOGW("OpenPopupImpl enter");
     Ark_FrameNode peerNode = (Ark_FrameNode)content;
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peerNode);
-    CHECK_NULL_VOID(frameNode);
+    if (!frameNode) {
+        ReturnPromise(promiseValue, ERROR_CODE_DIALOG_CONTENT_ERROR);
+        return;
+    }
     auto popupParam = AceType::MakeRefPtr<PopupParam>();
     CHECK_NULL_VOID(popupParam);
     popupParam = Converter::Convert<RefPtr<PopupParam>>(options->value);
@@ -292,9 +410,14 @@ void OpenPopupImpl(Ark_VMContext vmContext,
     if (result == ERROR_CODE_NO_ERROR) {
         popupParam->SetTargetId(std::to_string(targetId));
     } else {
+        ReturnPromise(promiseValue, result);
         return;
     }
     result = ViewAbstractModelStatic::OpenPopup(popupParam, frameNode);
+    if (result == ERROR_CODE_INTERNAL_ERROR) {
+        result = ERROR_CODE_NO_ERROR;
+    }
+    ReturnPromise(promiseValue, result);
 }
 void UpdatePopupImpl(Ark_VMContext vmContext,
     Ark_AsyncWorkerPtr asyncWorker,
@@ -304,10 +427,12 @@ void UpdatePopupImpl(Ark_VMContext vmContext,
     const Opt_Boolean* partialUpdate,
     const Callback_Opt_Array_String_Void* promiseValue)
 {
-    LOGW("UpdatePopupImpl enter");
     Ark_FrameNode peerNode = (Ark_FrameNode)content;
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peerNode);
-    CHECK_NULL_VOID(frameNode);
+    if (!frameNode) {
+        ReturnPromise(promiseValue, ERROR_CODE_DIALOG_CONTENT_ERROR);
+        return;
+    }
     auto popupParam = AceType::MakeRefPtr<PopupParam>();
     auto oldParam = AceType::MakeRefPtr<PopupParam>();
     auto result = ViewAbstractModelStatic::GetPopupParam(oldParam, frameNode);
@@ -321,6 +446,7 @@ void UpdatePopupImpl(Ark_VMContext vmContext,
             popupParam->SetIsPartialUpdate(false);
         }
     } else {
+        ReturnPromise(promiseValue, result);
         return;
     }
     auto isShowInSubWindow = oldParam->IsShowInSubWindow();
@@ -331,6 +457,10 @@ void UpdatePopupImpl(Ark_VMContext vmContext,
     popupParam->SetShowInSubWindow(isShowInSubWindow);
     popupParam->SetFocusable(focusable);
     result = ViewAbstractModelStatic::UpdatePopup(popupParam, frameNode);
+    if (result == ERROR_CODE_INTERNAL_ERROR) {
+        result = ERROR_CODE_NO_ERROR;
+    }
+    ReturnPromise(promiseValue, result);
 }
 void ClosePopupImpl(Ark_VMContext vmContext,
     Ark_AsyncWorkerPtr asyncWorker,
@@ -338,11 +468,75 @@ void ClosePopupImpl(Ark_VMContext vmContext,
     Ark_NativePointer content,
     const Callback_Opt_Array_String_Void* promiseValue)
 {
-    LOGW("ClosePopupImpl enter");
+    Ark_FrameNode peerNode = (Ark_FrameNode)content;
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peerNode);
+    if (!frameNode) {
+        ReturnPromise(promiseValue, ERROR_CODE_DIALOG_CONTENT_ERROR);
+        return;
+    }
+    auto result = ViewAbstractModelStatic::ClosePopup(frameNode);
+    if (result == ERROR_CODE_INTERNAL_ERROR) {
+        result = ERROR_CODE_NO_ERROR;
+    }
+    ReturnPromise(promiseValue, result);
+}
+void OpenMenuImpl(Ark_VMContext vmContext,
+    Ark_AsyncWorkerPtr asyncWorker,
+    Ark_PromptAction peer,
+    Ark_NativePointer content,
+    const Ark_TargetInfo* targetInfo,
+    const Opt_MenuOptions* options,
+    const Callback_Opt_Array_String_Void* promiseValue)
+{
     Ark_FrameNode peerNode = (Ark_FrameNode)content;
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peerNode);
     CHECK_NULL_VOID(frameNode);
-    auto result = ViewAbstractModelStatic::ClosePopup(frameNode);
+    MenuParam menuParam = Converter::Convert<MenuParam>(options->value);
+    g_bindMenuOptionsParamCallbacks(options->value, menuParam, AceType::WeakClaim(frameNode.GetRawPtr()));
+    auto pipelineContext = frameNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    menuParam.isShowInSubWindow =
+        Converter::OptConvert<bool>(options->value.showInSubWindow).value_or(theme->GetExpandDisplay());
+    int targetId = INVALID_ID;
+    auto result = ParseTargetInfo(targetInfo, targetId);
+    if (result == ERROR_CODE_NO_ERROR) {
+        result = ViewAbstractModelStatic::OpenMenu(menuParam, frameNode, targetId);
+    }
+}
+void UpdateMenuImpl(Ark_VMContext vmContext,
+    Ark_AsyncWorkerPtr asyncWorker,
+    Ark_PromptAction peer,
+    Ark_NativePointer content,
+    const Ark_MenuOptions* options,
+    const Opt_Boolean* partialUpdate,
+    const Callback_Opt_Array_String_Void* promiseValue)
+{
+    Ark_FrameNode peerNode = (Ark_FrameNode)content;
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peerNode);
+    CHECK_NULL_VOID(frameNode);
+    MenuParam menuParam;
+    auto isPartialUpdate = Converter::OptConvert<bool>(*partialUpdate);
+    if (isPartialUpdate) {
+        auto result = ViewAbstractModelStatic::GetMenuParam(menuParam, frameNode);
+        if (result != ERROR_CODE_NO_ERROR && result != ERROR_CODE_INTERNAL_ERROR) {
+            return;
+        }
+    }
+    g_bindMenuOptionsParam(*options, menuParam);
+    ViewAbstractModelStatic::UpdateMenu(menuParam, frameNode);
+}
+void CloseMenuImpl(Ark_VMContext vmContext,
+    Ark_AsyncWorkerPtr asyncWorker,
+    Ark_PromptAction peer,
+    Ark_NativePointer content,
+    const Callback_Opt_Array_String_Void* promiseValue)
+{
+    Ark_FrameNode peerNode = (Ark_FrameNode)content;
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peerNode);
+    CHECK_NULL_VOID(frameNode);
+    auto result = ViewAbstractModelStatic::CloseMenu(frameNode);
 }
 } // PromptActionAccessor
 
@@ -352,6 +546,9 @@ const GENERATED_ArkUIPromptActionAccessor* GetPromptActionAccessor()
         PromptActionAccessor::OpenPopupImpl,
         PromptActionAccessor::UpdatePopupImpl,
         PromptActionAccessor::ClosePopupImpl,
+        PromptActionAccessor::OpenMenuImpl,
+        PromptActionAccessor::UpdateMenuImpl,
+        PromptActionAccessor::CloseMenuImpl,
     };
     return &PromptActionAccessorImpl;
 }

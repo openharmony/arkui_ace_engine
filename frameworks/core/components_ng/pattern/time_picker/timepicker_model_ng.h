@@ -54,7 +54,6 @@ public:
     static void SetEndTime(FrameNode* frameNode, const PickerTime& value);
     void SetDigitalCrownSensitivity(int32_t crownSensitivity) override;
     static void SetSelectedTime(FrameNode* frameNode, const PickerTime& value);
-    static void SetHasSecond(FrameNode* frameNode, bool hasSecond);
     static void SetDisappearTextStyle(
         FrameNode* frameNode, const RefPtr<PickerTheme>& theme, const PickerTextStyle& value);
     static void SetNormalTextStyle(
@@ -79,9 +78,8 @@ public:
     static void SetDefaultAttributes(RefPtr<FrameNode>& frameNode, const RefPtr<PickerTheme>& pickerTheme);
     static void SetWheelModeEnabled(FrameNode* frameNode, bool wheelModeEnabled);
     static void SetEnableCascade(FrameNode* frameNode, bool isEnableCascade);
-    static void SetChangeEvent(FrameNode* frameNode, TimeChangeEvent&& onChange);
     static const Dimension ConvertFontScaleValue(const Dimension& fontSizeValue);
-    static void SetDigitalCrownSensitivity(FrameNode* frameNode, const std::optional<int32_t>& crownSensitivity);
+    static void SetDigitalCrownSensitivity(FrameNode* frameNode, int32_t crownSensitivity);
 
 private:
     static RefPtr<FrameNode> CreateStackNode();

@@ -469,8 +469,7 @@ HWTEST_F(GridScrollLayoutTestNg, GridLayout004, TestSize.Level1)
     int32_t curRow = 0;
     int32_t curCol = 0;
     auto pattern = frameNode_->GetPattern<GridPattern>();
-    GridLayoutInfo info {};
-    auto algorithm = AceType::MakeRefPtr<GridLayoutAlgorithm>(info, 2, 5);
+    auto algorithm = AceType::MakeRefPtr<GridLayoutAlgorithm>(GridLayoutInfo {}, 2, 5);
     EXPECT_EQ(algorithm->crossCount_, 2);
     EXPECT_EQ(algorithm->mainCount_, 5);
     algorithm->GetNextGrid(curRow, curCol);
@@ -1396,7 +1395,7 @@ HWTEST_F(GridScrollLayoutTestNg, SetEffectEdge002, TestSize.Level1)
     EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 0);
 
     UpdateCurrentOffset(-200);
-
+    
     EXPECT_LE(GetChildY(frameNode_, 0), 0);
 }
 
@@ -2101,7 +2100,7 @@ HWTEST_F(GridScrollLayoutTestNg, CachedCount004, TestSize.Level1)
     pattern_->info_.endMainLineIndex_ = 3;
     pattern_->info_.startIndex_ = 9;
     pattern_->info_.endIndex_ = 17;
-    pattern_->info_.gridMatrix_ = {
+    pattern_->info_.gridMatrix_  = {
         { 1, { { 0, 9 }, { 1, 10 }, { 2, 11 } } },
         { 2, { { 0, 12 }, { 1, 13 }, { 2, 14 } } },
         { 3, { { 0, 15 }, { 1, 16 }, { 2, 17 } } },
@@ -2115,8 +2114,7 @@ HWTEST_F(GridScrollLayoutTestNg, CachedCount004, TestSize.Level1)
     EXPECT_EQ(cacheEnd, 6);
 }
 
-HWTEST_F(GridScrollLayoutTestNg, isFadingBottomTest001, TestSize.Level1)
-{
+HWTEST_F(GridScrollLayoutTestNg, isFadingBottomTest001, TestSize.Level1) {
     // Arrange
     auto pattern = AceType::MakeRefPtr<GridPattern>();
     pattern->info_.lastMainSize_ = 100.0f;
@@ -2135,8 +2133,7 @@ HWTEST_F(GridScrollLayoutTestNg, isFadingBottomTest001, TestSize.Level1)
     EXPECT_TRUE(result);
 }
 
-HWTEST_F(GridScrollLayoutTestNg, isFadingBottomTest002, TestSize.Level1)
-{
+HWTEST_F(GridScrollLayoutTestNg, isFadingBottomTest002, TestSize.Level1) {
     // Arrange
     auto pattern = AceType::MakeRefPtr<GridPattern>();
     pattern->info_.lastMainSize_ = 100.0f;

@@ -27,12 +27,12 @@ int32_t ArktsAniUtils::CreateAniBoolean(ani_env* env, bool value, ani_object& re
 {
     ani_status state;
     ani_class booleanClass;
-    if ((state = env->FindClass("Lstd/core/Boolean;", &booleanClass)) != ANI_OK) {
-        LOGE("FindClass std/core/Boolean failed, %{public}d", state);
+    if ((state = env->FindClass("std.core.Boolean", &booleanClass)) != ANI_OK) {
+        LOGE("FindClass std.core.Boolean failed, %{public}d", state);
         return static_cast<int32_t>(state);
     }
     ani_method booleanClassCtor;
-    if ((state = env->Class_FindMethod(booleanClass, "<ctor>", "Z:V", &booleanClassCtor)) != ANI_OK) {
+    if ((state = env->Class_FindMethod(booleanClass, "<ctor>", "z:", &booleanClassCtor)) != ANI_OK) {
         LOGE("Class_FindMethod Boolean ctor failed, %{public}d", state);
         return static_cast<int32_t>(state);
     }
@@ -47,13 +47,14 @@ int32_t ArktsAniUtils::CreateAniBoolean(ani_env* env, bool value, ani_object& re
 int32_t ArktsAniUtils::GetNearestNonBootRuntimeLinker(ani_env* env, ani_ref& result)
 {
     ani_module stdCoreModule;
-    auto state = env->FindModule("Lstd/core;", &stdCoreModule);
+    auto state = env->FindModule("std.core", &stdCoreModule);
     if (state != ANI_OK) {
         LOGE("Find module core failed, %{public}d", state);
         return static_cast<int32_t>(state);
     }
     ani_function fn;
-    state = env->Module_FindFunction(stdCoreModule, "getNearestNonBootRuntimeLinker", ":Lstd/core/RuntimeLinker;", &fn);
+    const auto *signature = ":C{std.core.RuntimeLinker}";
+    state = env->Module_FindFunction(stdCoreModule, "getNearestNonBootRuntimeLinker", signature, &fn);
     if (state != ANI_OK) {
         LOGE("Find function getNearestNonBootRuntimeLinker failed, %{public}d", state);
         return static_cast<int32_t>(state);
@@ -104,14 +105,14 @@ ani_env* ArktsAniUtils::GetAniEnv(ani_vm* vm)
 ani_object ArktsAniUtils::CreateDoubleObject(ani_env* env, double value)
 {
     ani_status state;
-    static const char* className = "Lstd/core/Double;";
+    static const char* className = "std.core.Double";
     ani_class persion_cls;
     if ((state = env->FindClass(className, &persion_cls)) != ANI_OK) {
-        LOGE("FindClass std/core/Double failed, %{public}d", state);
+        LOGE("FindClass std.core.Double failed, %{public}d", state);
         return nullptr;
     }
     ani_method personInfoCtor;
-    if ((state = env->Class_FindMethod(persion_cls, "<ctor>", "D:V", &personInfoCtor)) != ANI_OK) {
+    if ((state = env->Class_FindMethod(persion_cls, "<ctor>", "d:", &personInfoCtor)) != ANI_OK) {
         LOGE("Class_FindMethod Double ctor failed, %{public}d", state);
         return nullptr;
     }

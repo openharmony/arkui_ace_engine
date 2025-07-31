@@ -16,12 +16,12 @@ import("//foundation/arkui/ace_engine/ace_config.gni")
 
 group("advanced_ui_component_static") {
   deps = []
-  deps += []
   if (!ace_engine_feature_wearable) {
     deps += [
       "swiperefresher:swipeRefresher",
       "splitlayout:splitLayout",
-       "composeListItem:composeListItem",
+      "composeListItem:composeListItem",
+      "subheader:subHeader",
     ]
   }
 }

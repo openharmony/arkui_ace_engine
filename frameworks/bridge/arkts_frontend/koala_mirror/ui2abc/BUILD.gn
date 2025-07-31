@@ -14,10 +14,11 @@
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/frameworks/bridge/arkts_frontend/koala_mirror/gn/npm_util.gni")
 
+koala_root = ".."
+
 node_version = "v16.20.2"
 host_arch = "${host_os}-${host_cpu}"
 
-incremental_root = "../incremental"
 libarkts_root = "./libarkts"
 
 build_root = "//build"
@@ -28,19 +29,19 @@ npm_cmd("fast_arktsc_build") {
         "$target_out_dir/fast_arktsc_build"
     ]
     deps = [
-        ":ui2abc_install"
+        ":ui2abc_install_all(${host_toolchain})"
     ]
     project_path = rebase_path("./fast-arktsc")
-    install = true
     run_tasks = [ "compile" ]
 }
 
-npm_cmd("ui2abc_install") {
-    outputs = [
-        "$target_out_dir/ui2abc_install"
-    ]
-    project_path = rebase_path(".")
-    install = true
+if (current_toolchain == host_toolchain) {
+    npm_install("ui2abc_install") {
+        outputs = [
+            "$target_out_dir/ui2abc_install"
+        ]
+        project_path = rebase_path(".")
+    }
 }
 
 npm_cmd("ui2abc_build") {
@@ -49,14 +50,12 @@ npm_cmd("ui2abc_build") {
     ]
 
     deps = [
-        "$incremental_root:incremental_install",
-        ":ui2abc_install",
         ":fast_arktsc_build",
         "$libarkts_root:es2panda"
     ]
 
     project_path = rebase_path(".")
-    run_tasks = [ "build:fast-arktsc:plugins" ]
+    run_tasks = [ "build:plugins" ]
 }
 
 action("ui2abc_panda_sdk") {
@@ -74,7 +73,17 @@ action("ui2abc_panda_sdk") {
         "--config", rebase_path("gn/sdk_config.json"),
         "--src", rebase_path("//"),
         "--dist", rebase_path("./build/sdk"),
-        "--out-root", rebase_path(root_out_dir)
+        "--out-root", rebase_path(root_out_dir),
+        "--current-os", current_os,
+        "--current-cpu", current_cpu
+    ]
+}
+
+group("ui2abc_install_all") {
+    deps = [
+        ":ui2abc_install(${host_toolchain})",
+        "$koala_root/incremental:incremental_install(${host_toolchain})",
+        "$koala_root/interop:interop_install(${host_toolchain})"
     ]
 }
 

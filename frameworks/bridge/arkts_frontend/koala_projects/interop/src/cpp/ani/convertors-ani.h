@@ -35,6 +35,16 @@ do {                                                                            
 }                                                                                          \
 while (0)
 
+std::string GetErrorProperty(ani_env* aniEnv, ani_error aniError, const char* property);
+void ErrorPrint(ani_env* env);
+inline void CheckAniFatalWithErrorMessage(ani_status result, ani_env* env)
+{
+    if (result != ANI_OK) {
+        ErrorPrint(env);
+        INTEROP_FATAL("ANI function failed (status: %d) at " __FILE__ " : %d", result, __LINE__);
+    }
+}
+
 template<class T>
 struct InteropTypeConverter {
     using InteropType = T;
@@ -140,7 +150,7 @@ struct InteropTypeConverter<KInteropBuffer> {
       CHECK_ANI_FATAL(env->FixedArray_GetRegion_Byte(value, 0, length, (ani_byte*)data));
       KInteropBuffer result = { 0 };
       result.data = data;
-      result.length = length;
+      result.length = static_cast<KLong>(length);
       return result;
     }
     static inline InteropType convertTo(ani_env* env, KInteropBuffer value) {
@@ -193,12 +203,16 @@ struct InteropTypeConverter<KStringPtr> {
         result.resize(lengthUtf8);
         ani_size count = 0;
         CHECK_ANI_FATAL(env->String_GetUTF8SubString(value, 0, lengthUtf8, result.data(), lengthUtf8 + 1, &count));
-        result.data()[lengthUtf8] = 0;
+        if (result.data()) {
+          result.data()[lengthUtf8] = 0;
+        }
         return result;
     }
     static InteropType convertTo(ani_env* env, const KStringPtr& value) {
       ani_string result = nullptr;
-      CHECK_ANI_FATAL(env->String_NewUTF8(value.c_str(), value.length() - 1 /* drop zero terminator */, &result));
+      int length = value.length();
+      CHECK_ANI_FATAL(
+          env->String_NewUTF8(value.c_str(), length > 0 ? length - 1 /* drop zero terminator */ : 0, &result));
       return result;
     }
     static void release(ani_env* env, InteropType value, const KStringPtr& converted) {}
@@ -1887,7 +1901,8 @@ void getKoalaANICallbackDispatcher(ani_class* clazz, ani_static_method* method);
   ani_env* env = reinterpret_cast<ani_env*>(venv);                                                      \
   ani_int result = 0;                                                                                   \
   long long args_casted = reinterpret_cast<long long>(args);                                            \
-  CHECK_ANI_FATAL(env->Class_CallStaticMethod_Int(clazz, method, &result, id, args_casted, length));    \
+  CheckAniFatalWithErrorMessage(                                                                        \
+      env->Class_CallStaticMethod_Int(clazz, method, &result, id, args_casted, length), env);           \
 }
 
 #define KOALA_INTEROP_CALL_INT(venv, id, length, args)                                                  \

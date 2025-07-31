@@ -15,12 +15,12 @@
 #include "bridge/arkts_frontend/arkts_frontend.h"
 
 #include <ani.h>
-#include "arkcompiler/runtime_core/static_core/plugins/ets/runtime/napi/ets_napi.h"
 #include "interfaces/inner_api/ace/constants.h"
 #include "ui/base/utils/utils.h"
 
 #include "bridge/arkts_frontend/arkts_ani_utils.h"
 #include "bridge/arkts_frontend/entry/arkts_entry_loader.h"
+#include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/base/subwindow/subwindow_manager.h"
 #include "bridge/arkts_frontend/ani_context_module.h"
@@ -48,32 +48,28 @@ struct AppInfo {
     const char* checkCallbackEventMethodSig;
     const char* handleMessageMethodName;
     const char* handleMessageMethodSig;
+    const char* registerNativeModule;
+    const char* registerNativeModuleSig;
 };
 /* copied from arkcompiler_ets_frontend vmloader.cc*/
 const AppInfo KOALA_APP_INFO = {
-    "Larkui/ArkUIEntry/Application;",
+    "arkui.ArkUIEntry.Application",
     "createApplication",
-    "Lstd/core/String;Lstd/core/String;ZLstd/core/String;Larkui/UserView/UserView;Larkui/UserView/EntryPoint;"
-    ":Larkui/ArkUIEntry/Application;",
+    "C{std.core.String}C{std.core.String}zC{std.core.String}C{arkui.UserView.UserView}C{arkui.UserView.EntryPoint}"
+    ":C{arkui.ArkUIEntry.Application}",
     "start",
-    ":J",
+    ":l",
     "enter",
-    "IIJ:Z",
+    "iil:z",
     "emitEvent",
-    "IIII:V",
+    "iiii:",
     "checkCallbacks",
-    ":V",
+    ":",
     "handleMessage",
-    "JILstd/core/String;:Z",
+    "liC{std.core.String}:z",
+    "registerNativeModulePreloader",
+    ":",
 };
-
-// void TryEmitError(EtsEnv& env)
-// {
-//     if (env.ErrorCheck()) {
-//         env.ErrorDescribe();
-//         env.ErrorClear();
-//     }
-// }
 
 std::string GetErrorProperty(ani_env* aniEnv, ani_error aniError, const char* property)
 {
@@ -146,11 +142,6 @@ void RunArkoalaEventLoop(ani_env* env, ani_ref app)
         LOGE("[%{public}s] Call enter method failed", __func__);
         return;
     }
-    // auto terminate = env.CallBooleanMethod((ets_object)(app), (ets_method)(enter), (ets_int)0, (ets_int)0);
-    // TryEmitError(env);
-    // if (terminate) {
-    //     exit(0);
-    // }
 }
 
 // fire all arkoala callbacks at the tail of vsync (PipelineContext::FlushVsync)
@@ -198,13 +189,13 @@ ani_object LegacyLoadPage(ani_env* env)
         ani_ref entryClassRef = nullptr;
 
         ani_class cls = nullptr;
-        if ((state = env->FindClass("Lstd/core/RuntimeLinker;", &cls)) != ANI_OK) {
+        if ((state = env->FindClass("std.core.RuntimeLinker", &cls)) != ANI_OK) {
             LOGE("FindClass RuntimeLinker failed, %{public}d", state);
             break;
         }
 
         ani_method loadClassMethod;
-        if ((state = env->Class_FindMethod(cls, "loadClass", "Lstd/core/String;Lstd/core/Boolean;:Lstd/core/Class;",
+        if ((state = env->Class_FindMethod(cls, "loadClass", "C{std.core.String}C{std.core.Boolean}:C{std.core.Class}",
                  &loadClassMethod)) != ANI_OK) {
             LOGE("Class_FindMethod loadClass failed, %{public}d", state);
             break;
@@ -227,7 +218,7 @@ ani_object LegacyLoadPage(ani_env* env)
         entryClass = static_cast<ani_class>(entryClassRef);
 
         ani_method entryMethod = nullptr;
-        if (env->Class_FindMethod(entryClass, "<ctor>", ":V", &entryMethod) != ANI_OK) {
+        if (env->Class_FindMethod(entryClass, "<ctor>", ":", &entryMethod) != ANI_OK) {
             LOGE("Class_FindMethod ctor failed");
             break;
         }
@@ -357,13 +348,13 @@ ani_object ArktsFrontend::CallGetUIContextFunc(int32_t instanceId)
     CHECK_NULL_RETURN(env, result);
 
     ani_class uiContextClass;
-    if ((status = env->FindClass("Larkui/handwritten/UIContextUtil/UIContextUtil;", &uiContextClass)) != ANI_OK) {
+    if ((status = env->FindClass("arkui.handwritten.UIContextUtil.UIContextUtil", &uiContextClass)) != ANI_OK) {
         LOGE("FindClass UIContext failed, %{public}d", status);
         return result;
     }
     ani_ref aniRef = nullptr;
     if ((status = env->Class_CallStaticMethodByName_Ref(uiContextClass, "getOrCreateUIContextById",
-        "I:L@ohos/arkui/UIContext/UIContext;", &aniRef, instanceId)) != ANI_OK) {
+        "i:C{@ohos.arkui.UIContext.UIContext}", &aniRef, instanceId)) != ANI_OK) {
         LOGE("Class_CallStaticMethodByName_Ref failed, %{public}d", status);
         return result;
     }
@@ -371,36 +362,44 @@ ani_object ArktsFrontend::CallGetUIContextFunc(int32_t instanceId)
     return result;
 }
 
-void* ArktsFrontend::PushExtender(const std::string& url, const std::string& params)
+void* ArktsFrontend::GetEnv()
+{
+    return ArktsAniUtils::GetAniEnv(vm_);
+}
+
+void* ArktsFrontend::PushExtender(const std::string& url, const std::string& params, bool recoverable,
+    std::function<void()>&& finishCallback, void* jsNode)
 {
     CHECK_NULL_RETURN(pageRouterManager_, nullptr);
     NG::RouterPageInfo routerPageInfo;
     routerPageInfo.url = url;
     routerPageInfo.params = params;
-    routerPageInfo.recoverable = true;
-    auto pageNode = pageRouterManager_->PushExtender(routerPageInfo);
+    routerPageInfo.recoverable = recoverable;
+    auto pageNode = pageRouterManager_->PushExtender(routerPageInfo, std::move(finishCallback), jsNode);
     return pageNode.GetRawPtr();
 }
 
-void* ArktsFrontend::ReplaceExtender(
-    const std::string& url, const std::string& params, std::function<void()>&& finishCallback)
+void* ArktsFrontend::ReplaceExtender(const std::string& url, const std::string& params, bool recoverable,
+    std::function<void()>&& enterFinishCallback, void* jsNode)
 {
     CHECK_NULL_RETURN(pageRouterManager_, nullptr);
     NG::RouterPageInfo routerPageInfo;
     routerPageInfo.url = url;
     routerPageInfo.params = params;
-    routerPageInfo.recoverable = true;
-    auto pageNode = pageRouterManager_->ReplaceExtender(routerPageInfo, std::move(finishCallback));
+    routerPageInfo.recoverable = recoverable;
+    auto pageNode = pageRouterManager_->ReplaceExtender(routerPageInfo, std::move(enterFinishCallback), jsNode);
     return pageNode.GetRawPtr();
 }
 
-void* ArktsFrontend::RunPageExtender(const std::string& url, const std::string& params)
+void* ArktsFrontend::RunPageExtender(const std::string& url, const std::string& params, bool recoverable,
+    std::function<void()>&& finishCallback, void* jsNode)
 {
     CHECK_NULL_RETURN(pageRouterManager_, nullptr);
     NG::RouterPageInfo routerPageInfo;
     routerPageInfo.url = url;
     routerPageInfo.params = params;
-    auto pageNode = pageRouterManager_->RunPageExtender(routerPageInfo);
+    routerPageInfo.recoverable = recoverable;
+    auto pageNode = pageRouterManager_->RunPageExtender(routerPageInfo, std::move(finishCallback), jsNode);
     return pageNode.GetRawPtr();
 }
 
@@ -417,6 +416,80 @@ void ArktsFrontend::ClearExtender()
 {
     CHECK_NULL_VOID(pageRouterManager_);
     pageRouterManager_->Clear();
+}
+
+void ArktsFrontend::ShowAlertBeforeBackPageExtender(const std::string& url)
+{
+    CHECK_NULL_VOID(pageRouterManager_);
+    auto dialogCallback = [](int32_t callbackType) {};
+    pageRouterManager_->EnableAlertBeforeBackPage(url, std::move(dialogCallback));
+}
+
+void ArktsFrontend::HideAlertBeforeBackPageExtender()
+{
+    CHECK_NULL_VOID(pageRouterManager_);
+    pageRouterManager_->DisableAlertBeforeBackPage();
+}
+
+bool ArktsFrontend::OnBackPressed()
+{
+    CHECK_NULL_RETURN(pageRouterManager_, false);
+    auto pageNode = pageRouterManager_->GetCurrentPageNode();
+    CHECK_NULL_RETURN(pageNode, false);
+    auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+    CHECK_NULL_RETURN(pagePattern, false);
+    if (pagePattern->OnBackPressed()) {
+        return true;
+    }
+    return pageRouterManager_->Pop();
+}
+
+void ArktsFrontend::OnShow()
+{
+    CHECK_NULL_VOID(pageRouterManager_);
+    auto pageNode = pageRouterManager_->GetCurrentPageNode();
+    CHECK_NULL_VOID(pageNode);
+    auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+    CHECK_NULL_VOID(pagePattern);
+    pagePattern->OnShow(true);
+}
+
+void ArktsFrontend::OnHide()
+{
+    CHECK_NULL_VOID(pageRouterManager_);
+    auto pageNode = pageRouterManager_->GetCurrentPageNode();
+    CHECK_NULL_VOID(pageNode);
+    auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+    CHECK_NULL_VOID(pagePattern);
+    pagePattern->OnHide(true);
+}
+
+void ArktsFrontend::OpenStateMgmtInterop()
+{
+    auto* env = ArktsAniUtils::GetAniEnv(vm_);
+    CHECK_NULL_VOID(env);
+
+    ani_status state;
+
+    static const char* moduleName = "arkui.component.interop";
+    ani_module interopModule;
+    state = env->FindModule(moduleName, &interopModule);
+    if (state != ANI_OK) {
+        LOGE("Cannot find module arkui.component.interop %{public}d", state);
+        return;
+    }
+
+    ani_function fn;
+    state = env->Module_FindFunction(interopModule, "openInterop", ":", &fn);
+    if (state != ANI_OK) {
+        LOGE("Cannot find function openInterop in module %{public}d", state);
+    }
+
+    state = env->Function_Call_Void(fn);
+    if (state != ANI_OK) {
+        LOGE("Function_Call openInterop failed %{public}d", state);
+    }
+    return;
 }
 
 bool ArktsFrontend::HandleMessage(void *frameNode, int32_t type, const std::string& param)
@@ -459,14 +532,30 @@ bool ArktsFrontend::HandleMessage(void *frameNode, int32_t type, const std::stri
 
 void ArktsFrontend::SetAniContext(int32_t instanceId, ani_ref* context)
 {
-    std::shared_ptr<ani_ref> shared_ptr(context);
-    Framework::AniContextModule::AddAniContext(instanceId, shared_ptr);
+    Framework::AniContextModule::AddAniContext(instanceId, context);
 }
 
 void* ArktsFrontend::preloadArkTSRuntime = nullptr;
 void ArktsFrontend::PreloadAceModule(void* aniEnv)
 {
     ArktsFrontend::preloadArkTSRuntime = aniEnv;
+
+    auto* env = reinterpret_cast<ani_env*>(aniEnv);
+    ani_class appClass;
+    if (env->FindClass(KOALA_APP_INFO.className, &appClass) != ANI_OK) {
+        LOGE("PreloadAceModule: Cannot load main class %{public}s", KOALA_APP_INFO.className);
+        return;
+    }
+
+    ani_static_method create;
+    if (env->Class_FindStaticMethod(
+        appClass, KOALA_APP_INFO.registerNativeModule, KOALA_APP_INFO.registerNativeModuleSig, &create) != ANI_OK) {
+        LOGE("PreloadAceModule: Cannot find method %{public}s", KOALA_APP_INFO.registerNativeModule);
+        return;
+    }
+
+    ani_ref appLocal;
+    env->Class_CallStaticMethod_Void(appClass, create, &appLocal);
 }
 
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_PreloadAceArkTSModule(void* aniEnv)

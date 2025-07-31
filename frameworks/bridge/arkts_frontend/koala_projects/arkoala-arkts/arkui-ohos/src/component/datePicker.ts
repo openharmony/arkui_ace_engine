@@ -25,13 +25,14 @@ import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { ArkCommonMethodPeer, CommonMethod, PickerTextStyle, PickerDialogButtonStyle, Rectangle, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, ShadowOptions, ShadowStyle, HoverModeAreaType, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, PickerTextStyle, PickerDialogButtonStyle, Rectangle, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, ShadowOptions, ShadowStyle, HoverModeAreaType, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable } from "./common"
 import { Callback_Date_Void } from "./calendarPicker"
 import { CrownSensitivity } from "./enums"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ResourceColor, Offset, VoidCallback } from "./units"
 import { DialogAlignment } from "./alertDialog"
-import { DateTimeOptions } from "./arkui-intl"
+import { DateTimeOptions } from "@ohos/intl"
+import { DatePickerOpsHandWritten } from "./../handwritten"
 
 export class DatePickerDialog {
     public static show(options?: DatePickerDialogOptions): undefined {
@@ -251,7 +252,7 @@ export enum DatePickerMode {
 export interface DatePickerOptions {
     start?: Date;
     end?: Date;
-    selected?: Date;
+    selected?: Date | Bindable<Date>;
     mode?: DatePickerMode;
 }
 export type DatePickerInterface = (options?: DatePickerOptions) => DatePickerAttribute;
@@ -346,11 +347,24 @@ export class ArkDatePickerComponent extends ArkCommonMethodComponent implements 
     getPeer(): ArkDatePickerPeer {
         return (this.peer as ArkDatePickerPeer)
     }
+    IsDatePickerOptionValueBindable(options?: DatePickerOptions): boolean {
+        if (RuntimeType.UNDEFINED != runtimeType(options)) {
+            const options_selected = options!.selected
+            if (RuntimeType.UNDEFINED != runtimeType(options_selected)) {
+                const options_selected_value = options_selected!
+                return TypeChecker.isBindableNumber(options_selected_value)
+            }
+        }
+        return false
+    }
     public setDatePickerOptions(options?: DatePickerOptions): this {
         if (this.checkPriority("setDatePickerOptions")) {
             const options_casted = options as (DatePickerOptions | undefined)
             this.getPeer()?.setDatePickerOptionsAttribute(options_casted)
-            return this
+
+            if (this.IsDatePickerOptionValueBindable(options)) {
+                DatePickerOpsHandWritten.hookDatePickerSelectedImpl(this.getPeer().peer.ptr, options!.selected as Bindable<Date>)
+            }
         }
         return this
     }

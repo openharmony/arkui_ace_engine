@@ -80,8 +80,7 @@ def copy_target():
     if not os.path.exists(args.built_file_path):
         print(f"Error: Built file not found at {args.built_file_path}")
         sys.exit(1)
-    out_dir = os.path.join(args.target_out_path, os.path.basename(args.built_file_path))
-    shutil.copy(args.built_file_path, out_dir)
+    shutil.copy(args.built_file_path, args.target_out_path)
 
 def main():
     if args.install:

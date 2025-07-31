@@ -205,7 +205,7 @@ HWTEST_F(PerformanceMonitorTest, ANI_ConstructorTest002, TestSize.Level0) {
     EXPECT_EQ(vm.GetEnv(ANI_VERSION_1, nullptr), ANI_OK);
 
     ani_env env;
-    ani_status sta = env.FindNamespace("L@ohos/arkui/performanceMonitor/performanceMonitor;", nullptr);
+    ani_status sta = env.FindNamespace("@ohos.arkui.performanceMonitor.performanceMonitor", nullptr);
     EXPECT_EQ(sta, ANI_OK);
 
     ani_status status = ANI_Constructor(&vm, &result);
@@ -240,7 +240,7 @@ HWTEST_F(PerformanceMonitorTest, ANI_ConstructorTest004, TestSize.Level0) {
     EXPECT_EQ(sta, ANI_OK);
 
     ani_env env;
-    sta = env.FindNamespace("L@ohos/arkui/performanceMonitor/performanceMonitor;", nullptr);
+    sta = env.FindNamespace("@ohos.arkui.performanceMonitor.performanceMonitor", nullptr);
     EXPECT_EQ(sta, ANI_OK);
 
     ani_status status = ANI_Constructor(&vm, &result);
@@ -259,7 +259,7 @@ HWTEST_F(PerformanceMonitorTest, ANI_ConstructorTest005, TestSize.Level0) {
     EXPECT_EQ(sta, ANI_OK);
 
     ani_env env;
-    sta = env.FindNamespace("L@ohos/arkui/performanceMonitor/performanceMonitor;", nullptr);
+    sta = env.FindNamespace("@ohos.arkui.performanceMonitor.performanceMonitor", nullptr);
     EXPECT_EQ(sta, ANI_OK);
 
     ani_namespace ns = 1;

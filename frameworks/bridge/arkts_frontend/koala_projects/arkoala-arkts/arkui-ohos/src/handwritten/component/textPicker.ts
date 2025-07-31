@@ -13,12 +13,14 @@
  * limitations under the License.
  */
 
-import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
+import { TypeChecker, ArkUIGeneratedNativeModule, Bindable } from "#components"
 import { runtimeType, RuntimeType } from "@koalaui/interop"
 import { int32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
 import { Resource } from "global.resource"
 import { LengthMetrics } from "../Graphics"
+import { TextPickerSelectedOps } from "./textpickerselectedops"
+import { TextPickerValueOps } from "./textpickervalueops"
 
 class CheckTextPickerOptions {
     static isArray_String(value: Object | string | number | undefined): boolean {
@@ -45,6 +47,19 @@ class CheckTextPickerOptions {
     static isArray_TextPickerRangeContent(value: Object | string | number | undefined): boolean {
         if (value instanceof Array<TextPickerRangeContent> && value.length) {
             return value[0] instanceof TextPickerRangeContent
+        }
+        return false
+    }
+
+    static IsTextPickerOptionBindable(optionIndex: number, options?: TextPickerOptions): boolean {
+        if (RuntimeType.UNDEFINED != runtimeType(options)) {
+            const options_value = (optionIndex == 0 ? options!.selected : options!.value)
+            if (RuntimeType.UNDEFINED != runtimeType(options_value)) {
+                const options_value_value = options_value!
+                const isBindable: boolean = (optionIndex == 0 ? (TypeChecker.isBindableNumber(options_value_value) | TypeChecker.isBindableArrayNumber(options_value_value))
+                    : (TypeChecker.isBindableString(options_value_value) | TypeChecker.isBindableArrayString(options_value_value)))
+                return isBindable
+            }
         }
         return false
     }
@@ -112,6 +127,9 @@ function writeTextPickerOptions(valueSerializer: Serializer, value: TextPickerOp
             const value_value_value_0  = value_value_value as string
             valueSerializer.writeString(value_value_value_0)
         }
+        else if (TypeChecker.isBindableString(value_value) || TypeChecker.isBindableArrayString(value_value)) {
+            valueSerializer.writeInt8(3 as int32)
+        }
         else if (RuntimeType.OBJECT == value_value_value_type) {
             valueSerializer.writeInt8(1 as int32)
             const value_value_value_1  = value_value_value as Array<string>
@@ -134,6 +152,9 @@ function writeTextPickerOptions(valueSerializer: Serializer, value: TextPickerOp
             valueSerializer.writeInt8(0 as int32)
             const value_selected_value_0  = value_selected_value as number
             valueSerializer.writeNumber(value_selected_value_0)
+        }
+        else if (TypeChecker.isBindableNumber(value_selected) || TypeChecker.isBindableArrayNumber(value_selected)) {
+            valueSerializer.writeInt8(3 as int32)
         }
         else if (RuntimeType.OBJECT == value_selected_value_type) {
             valueSerializer.writeInt8(1 as int32)
@@ -170,4 +191,29 @@ function hookSetTextPickerOptions(peer: ArkTextPickerPeer, options?: TextPickerO
     }
     ArkUIGeneratedNativeModule._TextPickerInterface_setTextPickerOptions(peer.getPeerPtr(), thisSerializer.asBuffer(), thisSerializer.length())
     thisSerializer.release()
+
+    if (CheckTextPickerOptions.IsTextPickerOptionBindable(0, options)) {
+        TextPickerOpsHandWritten.hookTextPickerSelectedImpl(peer, (options!.selected as Bindable<number | Array<number>>))
+    }
+
+    if (CheckTextPickerOptions.IsTextPickerOptionBindable(1, options)) {
+        TextPickerOpsHandWritten.hookTextPickerValueImpl(peer, (options!.value as Bindable<string | Array<string>>))
+    }
 }
+
+class TextPickerOpsHandWritten {
+    static hookTextPickerSelectedImpl(peer: ArkTextPickerPeer, value: Bindable<number | Array<number>>) {
+        TextPickerSelectedOps.registerTextPickerSelectedCallback(peer.getPeerPtr(), value.value, (v) => {
+	        value.onChange(v)
+	    });
+    }
+
+    static hookTextPickerValueImpl(peer: ArkTextPickerPeer, value: Bindable<string | Array<string>>) {
+        TextPickerValueOps.registerTextPickerValueCallback(peer.getPeerPtr(), value.value, (v) => {
+	        value.onChange(v)
+	    });
+    }
+}
+
+export type TextPickerValueCallback = (value: string | Array<string>) => void;
+export type TextPickerSelectedCallback = (selected: number | Array<number>) => void;

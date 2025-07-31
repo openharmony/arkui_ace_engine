@@ -23,6 +23,7 @@ const GENERATED_ArkUILayoutManagerAccessor* GetLayoutManagerAccessor();
 namespace TextBaseControllerAccessor {
 void DestroyPeerImpl(Ark_TextBaseController peer)
 {
+    CHECK_NULL_VOID(peer);
     delete peer;
 }
 Ark_TextBaseController CtorImpl()

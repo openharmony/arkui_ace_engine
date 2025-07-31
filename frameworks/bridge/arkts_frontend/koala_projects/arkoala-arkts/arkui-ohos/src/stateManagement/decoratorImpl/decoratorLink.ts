@@ -59,7 +59,6 @@ export class LinkDecoratedVariable<T> extends DecoratedV1VariableBase<T> impleme
         // @Watch
         // if initial value is object, register so that property changes trigger
         // @Watch function exec
-        this.registerWatchForObservedObjectChanges(initValue);
         // registerWatchtoSource is done in factory
     }
 

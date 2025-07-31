@@ -28,8 +28,6 @@ export * from "@ohos/router"
 export * from "./PeerNode"
 export * from "./component/Events"
 export * from "./component/peers/CallbacksChecker"
-// export * from "./peers/ArkTestComponentPeer"
-// export * from "./ArkTestComponent"
 // export * from "./component/peers/ArkButtonPeer"
 export * from './stateManagement'
 export { LengthMetrics } from './Graphics'

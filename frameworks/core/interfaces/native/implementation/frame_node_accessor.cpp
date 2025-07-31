@@ -205,7 +205,9 @@ Ark_FrameNode GetChildImpl(Ark_FrameNode peer,
     CHECK_NULL_RETURN(peerNode, nullptr);
     CHECK_NULL_RETURN(index, nullptr);
     auto indexInt = Converter::Convert<int32_t>(*index);
-    CHECK_NULL_RETURN(indexInt > -1, nullptr);
+    if (indexInt < 0) {
+        return nullptr;
+    }
     auto expandModeInt = Converter::Convert<int32_t>(*expandMode);
     auto child = GetChildNode(peerNode, indexInt, expandModeInt);
     CHECK_NULL_RETURN(child, nullptr);
@@ -282,7 +284,6 @@ void DisposeImpl(Ark_FrameNode peer)
     CHECK_NULL_VOID(peerNode);
     auto currentUINodeRef = AceType::DynamicCast<UINode>(peerNode);
     CHECK_NULL_VOID(currentUINodeRef);
-    LOGW("FrameNodeAccessor::DisposeImpl - behavior can be wrong. No specification to this API.");
     auto parent = GetParentNode(peerNode);
     CHECK_NULL_VOID(parent);
     parent->RemoveChild(currentUINodeRef);
@@ -576,6 +577,24 @@ Ark_Boolean GetCrossLanguageOptionsImpl(Ark_FrameNode peer)
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
     CHECK_NULL_RETURN(frameNode, false);
     return frameNode->isCrossLanguageAttributeSetting();
+}
+
+Ark_FrameNode CreateByRawPtrImpl(void* rawPtr)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(rawPtr);
+    auto peer = FrameNodePeer::Create(frameNode);
+    auto nodeId = frameNode->GetId();
+    peer->node->SetExclusiveEventForChild(true);
+    peer->node->SetIsArkTsFrameNode(true);
+    FrameNodePeer::peerMap_.emplace(nodeId, *peer);
+    return peer;
+}
+
+void* unWrapRawPtrImpl(Ark_FrameNode peerNode)
+{
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peerNode);
+    auto frameNodeRaw = Referenced::RawPtr(frameNode);
+    return reinterpret_cast<void*>(frameNodeRaw);
 }
 
 Ark_Number GetIdByFrameNodeImpl(Ark_FrameNode peer, Ark_FrameNode node)
@@ -952,6 +971,7 @@ const GENERATED_ArkUIFrameNodeAccessor* GetFrameNodeAccessor()
         FrameNodeAccessor::GetInspectorInfoImpl, FrameNodeAccessor::OnDrawImpl,
         FrameNodeAccessor::InvalidateImpl, FrameNodeAccessor::DisposeTreeImpl,
         FrameNodeAccessor::SetCrossLanguageOptionsImpl, FrameNodeAccessor::GetCrossLanguageOptionsImpl,
+        FrameNodeAccessor::CreateByRawPtrImpl, FrameNodeAccessor::unWrapRawPtrImpl
     };
     return &FrameNodeAccessorImpl;
 }

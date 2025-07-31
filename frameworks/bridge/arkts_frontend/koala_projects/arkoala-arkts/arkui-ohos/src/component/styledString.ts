@@ -789,15 +789,7 @@ export class ParagraphStyle implements MaterializedBase {
         return retval
     }
     constructor(value?: ParagraphStyleInterface) {
-        const ctorPtr : KPointer = ParagraphStyle.ctor_paragraphstyle(value)
-        this.peer = new Finalizable(ctorPtr, ParagraphStyle.getFinalizer())
-        this.textAlign = this.getTextAlign()
-        this.textIndent = this.getTextIndent()
-        this.maxLines = this.getMaxLines()
-        this.overflow = this.getOverflow()
-        this.wordBreak = this.getWordBreak()
-        this.leadingMargin = this.getLeadingMargin()
-        this.paragraphSpacing = this.getParagraphSpacing()
+        hookStyledStringConstructor(this, value)
     }
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._ParagraphStyle_getFinalizer()
@@ -818,7 +810,7 @@ export class ParagraphStyle implements MaterializedBase {
         return this.getWordBreak_serialize()
     }
     public getLeadingMargin(): number | LeadingMarginPlaceholder | undefined {
-        return this.getLeadingMargin_serialize()
+        return hookGetStyledStringLeadingMargin(this)
     }
     public getParagraphSpacing(): number | undefined {
         return this.getParagraphSpacing_serialize()
@@ -1067,14 +1059,42 @@ export class ImageAttachment implements MaterializedBase {
     objectFit: ImageFit | undefined = undefined
     layoutStyle: ImageAttachmentLayoutStyle | undefined = undefined
     colorFilter: ColorFilterType | undefined = undefined
-    static ctor_imageattachment(value: ImageAttachmentInterface): KPointer {
+    static ctor_imageattachment(value: ImageAttachmentInterface | AttachmentType | undefined): KPointer {
         const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeImageAttachmentInterface(value)
+        let value_type : int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        if (TypeChecker.isImageAttachmentInterface(value, false, false, false, false, false, false)) {
+            thisSerializer.writeInt8(0)
+            const value_0  = value as ImageAttachmentInterface
+            thisSerializer.writeImageAttachmentInterface(value_0)
+        }
+        else if ((RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
+            thisSerializer.writeInt8(1)
+            const value_1  = value as AttachmentType | undefined
+            let value_1_type : int32 = RuntimeType.UNDEFINED
+            value_1_type = runtimeType(value_1)
+            thisSerializer.writeInt8(value_1_type)
+            if ((RuntimeType.UNDEFINED) != (value_1_type)) {
+                const value_1_value  = value_1!
+                let value_1_value_type : int32 = RuntimeType.UNDEFINED
+                value_1_value_type = runtimeType(value_1_value)
+                if (TypeChecker.isImageAttachmentInterface(value_1_value, false, true, true, true, true, true)) {
+                    thisSerializer.writeInt8(0)
+                    const value_1_value_0  = value_1_value as ImageAttachmentInterface
+                    thisSerializer.writeImageAttachmentInterface(value_1_value_0)
+                }
+                else if (TypeChecker.isResourceImageAttachmentOptions(value_1_value, false, true, true, true, true, true, false)) {
+                    thisSerializer.writeInt8(1)
+                    const value_1_value_1  = value_1_value as ResourceImageAttachmentOptions
+                    thisSerializer.writeResourceImageAttachmentOptions(value_1_value_1)
+                }
+            }
+        }
         const retval  = ArkUIGeneratedNativeModule._ImageAttachment_ctor(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
-    constructor(value?: ImageAttachmentInterface) {
+    constructor(value?: ImageAttachmentInterface | AttachmentType | undefined) {
         if ((value) !== (undefined))
         {
             const ctorPtr : KPointer = ImageAttachment.ctor_imageattachment((value)!)

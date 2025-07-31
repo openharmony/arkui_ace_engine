@@ -3386,7 +3386,6 @@ void TextFieldPattern::UpdateSelectOverlay(const RefPtr<OHOS::Ace::TextFieldThem
 void TextFieldPattern::OnModifyDone()
 {
     auto host = GetHost();
-    FREE_NODE_CHECK(host, OnModifyDone);  // call OnModifyDoneMultiThread() by multi thread
     Pattern::OnModifyDone();
     CHECK_NULL_VOID(host);
     auto context = host->GetContext();
@@ -9470,7 +9469,7 @@ void TextFieldPattern::SetPreviewTextOperation(PreviewTextInfo info)
         static_cast<int32_t>(layoutProperty->GetMaxLengthValue(Infinity<uint32_t>()))) {
         isPreviewTextOverCount_ = true;
     }
-    // hasInsertValue = contentController_->ReplaceSelectedValue(start, end, info.text);
+    contentController_->ReplaceSelectedValue(start, end, info.text);
     int32_t caretMoveLength = abs(static_cast<int32_t>(contentController_->GetTextUtf16Value().length()) -
         originLength);
 

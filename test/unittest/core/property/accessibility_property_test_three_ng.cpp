@@ -471,21 +471,6 @@ HWTEST_F(AccessibilityPropertyTestThreeNg, AccessibilityPropertyTestThree015, Te
 }
 
 /**
- * @tc.name: AccessibilityPropertyTest015
- * @tc.desc: Test the method SetAccessibilityLevel001.
- * @tc.type: FUNC
- */
-HWTEST_F(AccessibilityPropertyTestThreeNg, AccessibilityPropertyTestThree015, TestSize.Level1)
-{
-    AccessibilityProperty accessibilityProperty;
-    EXPECT_FALSE(accessibilityProperty.accessibilityLevel_.has_value());
-    WeakPtr<FrameNode> hostBak = accessibilityProperty.host_;
-    std::string accessibilityLevel = "auto";
-    accessibilityProperty.SetAccessibilityLevel001(accessibilityLevel);
-    EXPECT_EQ(accessibilityProperty.accessibilityLevel_.value_or(""), accessibilityLevel);
-}
-
-/**
  * @tc.name: AccessibilityPropertyTestThree016
  * @tc.desc: SpecificSupportActionCallback
  * @tc.type: FUNC

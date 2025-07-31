@@ -67,7 +67,23 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
-} // ToggleModifier
+
+Ark_NativePointer buttonConstruct(Ark_Int32 id, Ark_Int32 flags)
+{
+    auto frameNode = ToggleModelNG::CreateFrameNode(id, NG::ToggleType::BUTTON, false);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+Ark_NativePointer checkboxConstruct(Ark_Int32 id, Ark_Int32 flags)
+{
+    auto frameNode = ToggleModelNG::CreateFrameNode(id, NG::ToggleType::CHECKBOX, false);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+} // namespace ToggleModifier
 namespace ToggleInterfaceModifier {
 void SetToggleOptionsImpl(Ark_NativePointer node,
                           const Ark_ToggleOptions* options)
@@ -157,6 +173,8 @@ const GENERATED_ArkUIToggleModifier* GetToggleModifier()
 {
     static const GENERATED_ArkUIToggleModifier ArkUIToggleModifierImpl {
         ToggleModifier::ConstructImpl,
+        ToggleModifier::buttonConstruct,
+        ToggleModifier::checkboxConstruct,
         ToggleInterfaceModifier::SetToggleOptionsImpl,
         ToggleAttributeModifier::OnChangeImpl,
         ToggleAttributeModifier::ContentModifierImpl,

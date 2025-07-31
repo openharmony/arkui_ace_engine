@@ -35,11 +35,6 @@ RefPtr<DrawingLattice> DrawingLattice::CreateDrawingLatticeFromNative(void* sptr
     return AceType::MakeRefPtr<DrawingLatticePreview>(*lattice);
 }
 
-RefPtr<DrawingLattice> DrawingLattice::CreateDrawingLatticeFromAni(void* aniAddr)
-{
-    return nullptr;
-}
-
 void* DrawingLatticePreview::GetDrawingLatticeSptrAddr()
 {
     return static_cast<void*>(&lattice_);

@@ -28,7 +28,7 @@ public:
         return from_;
     }
 
-    void SetFrom(T& from)
+    void SetFrom(const T& from)
     {
         from_ = from;
     }
@@ -38,7 +38,7 @@ public:
         return to_;
     }
 
-    void SetTo(T& to)
+    void SetTo(const T& to)
     {
         to_ = to;
     }

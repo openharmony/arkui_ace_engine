@@ -22,15 +22,13 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, AttributeModifier, StateStyles } from "./common"
-import { ResourceColor, Length, ResourceStr } from "./units"
-import { FontWeight, FontStyle, Color } from "./enums"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, AttributeModifier, StateStyles, ContentModifier, CommonConfiguration, CustomBuilderT } from "./common"
+import { ResourceColor, Length, ResourceStr, Font } from "./units"
+import { FontWeight, FontStyle, Color, TextOverflow, TextHeightAdaptivePolicy } from "./enums"
 import { Resource } from "global.resource"
-import { ContentModifier, CommonConfiguration } from "./arkui-wrapper-builder"
-import { LabelStyle } from "./arkui-external"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ButtonModifier } from "../ButtonModifier"
-import { hookButtonAttributeModifier } from "../handwritten"
+import { hookButtonAttributeModifier, hookButtonContentModifier } from "../handwritten"
 export class ArkButtonPeer extends ArkCommonMethodPeer {
     _attributeSet?: ButtonModifier;
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -244,7 +242,7 @@ export class ArkButtonPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._ButtonAttribute_fontFamily(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    contentModifierAttribute(value: ContentModifier | undefined): void {
+    contentModifierAttribute(value: ContentModifier<ButtonConfiguration> | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
@@ -256,7 +254,7 @@ export class ArkButtonPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._ButtonAttribute_contentModifier(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    labelStyleAttribute(value: LabelStyle | undefined): void {
+    labelStyleAttribute(value: ButtonLabelStyle | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
@@ -334,7 +332,7 @@ export enum ButtonRole {
     ERROR = 1
 }
 export type ButtonTriggerClickCallback = (xPos: number, yPos: number) => void;
-export interface ButtonConfiguration extends CommonConfiguration {
+export interface ButtonConfiguration extends CommonConfiguration<ButtonConfiguration> {
     label: string;
     pressed: boolean;
     triggerClick: ButtonTriggerClickCallback;
@@ -350,6 +348,16 @@ export interface ButtonOptions {
     controlSize?: ControlSize;
     role?: ButtonRole;
 }
+
+export interface ButtonLabelStyle {
+    overflow?: TextOverflow;
+    maxLines?: number;
+    minFontSize?: number | ResourceStr;
+    maxFontSize?: number | ResourceStr;
+    heightAdaptivePolicy?: TextHeightAdaptivePolicy;
+    font?: Font;
+}
+
 export interface ButtonAttribute extends CommonMethod {
     type(value: ButtonType | undefined): this {return this;}
     stateEffect(value: boolean | undefined): this { return this;}
@@ -361,8 +369,8 @@ export interface ButtonAttribute extends CommonMethod {
     fontWeight(value: number | FontWeight | string | undefined): this { return this;}
     fontStyle(value: FontStyle | undefined): this { return this;}
     fontFamily(value: string | Resource | undefined): this { return this;}
-    contentModifier(value: ContentModifier | undefined): this { return this;}
-    labelStyle(value: LabelStyle | undefined): this { return this;}
+    contentModifier(value: ContentModifier<ButtonConfiguration> | undefined): this { return this;}
+    labelStyle(value: ButtonLabelStyle | undefined): this { return this;}
     minFontScale(value: number | Resource | undefined): this { return this;}
     maxFontScale(value: number | Resource | undefined): this { return this;}
     attributeModifier(value: AttributeModifier<ButtonAttribute> | AttributeModifier<CommonMethod>| undefined): this { return this;}
@@ -379,8 +387,8 @@ export class ArkButtonStyle extends ArkCommonMethodStyle implements ButtonAttrib
     fontWeight_value?: number | FontWeight | string | undefined
     fontStyle_value?: FontStyle | undefined
     fontFamily_value?: string | Resource | undefined
-    contentModifier_value?: ContentModifier | undefined
-    labelStyle_value?: LabelStyle | undefined
+    contentModifier_value?: ContentModifier<ButtonConfiguration> | undefined
+    labelStyle_value?: ButtonLabelStyle | undefined
     minFontScale_value?: number | Resource | undefined
     maxFontScale_value?: number | Resource | undefined
     public type(value: ButtonType | undefined): this {
@@ -413,10 +421,10 @@ export class ArkButtonStyle extends ArkCommonMethodStyle implements ButtonAttrib
     public fontFamily(value: string | Resource | undefined): this {
         return this
     }
-    public contentModifier(value: ContentModifier | undefined): this {
+    public contentModifier(value: ContentModifier<ButtonConfiguration> | undefined): this {
         return this
     }
-    public labelStyle(value: LabelStyle | undefined): this {
+    public labelStyle(value: ButtonLabelStyle | undefined): this {
         return this
     }
     public minFontScale(value: number | Resource | undefined): this {
@@ -539,17 +547,15 @@ export class ArkButtonComponent extends ArkCommonMethodComponent implements Butt
         }
         return this
     }
-    public contentModifier(value: ContentModifier | undefined): this {
+    public contentModifier(value: ContentModifier<ButtonConfiguration> | undefined): this {
         if (this.checkPriority("contentModifier")) {
-            const value_casted = value as (ContentModifier | undefined)
-            this.getPeer()?.contentModifierAttribute(value_casted)
-            return this
+            hookButtonContentModifier(this, value)
         }
         return this
     }
-    public labelStyle(value: LabelStyle | undefined): this {
+    public labelStyle(value: ButtonLabelStyle | undefined): this {
         if (this.checkPriority("labelStyle")) {
-            const value_casted = value as (LabelStyle | undefined)
+            const value_casted = value as (ButtonLabelStyle | undefined)
             this.getPeer()?.labelStyleAttribute(value_casted)
             return this
         }

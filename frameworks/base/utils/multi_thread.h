@@ -18,19 +18,19 @@
 #include "core/common/multi_thread_build_manager.h"
 // All functions that are not thread safe operations need to add the FREE_NODE_CHECK macro at the entrance
 // and implement the corresponding thread safe function with the MultiThread suffix.
-#define FREE_NODE_CHECK(node, func, ...)
-    // if (node && node->IsFree()) {
-    //     return func##MultiThread(__VA_ARGS__);
-    // }
+#define FREE_NODE_CHECK(node, func, ...)                    \
+    if (node && node->IsFree()) {                           \
+        return func##MultiThread(__VA_ARGS__);              \
+    }                                                       \
 
-#define THREAD_SAFE_NODE_CHECK(node, func, ...)
-    // if (node && node->IsThreadSafeNode()) {
-    //     return func##MultiThread(__VA_ARGS__);
-    // }
+#define THREAD_SAFE_NODE_CHECK(node, func, ...)             \
+    if (node && node->IsThreadSafeNode()) {                 \
+        return func##MultiThread(__VA_ARGS__);              \
+    }                                                       \
 
-#define THREAD_SAFE_NODE_SCOPE_CHECK(func, ...)
-    // if (MultiThreadBuildManager::IsThreadSafeNodeScope()) {
-    //     return func##MultiThread(__VA_ARGS__);
-    // }
+#define THREAD_SAFE_NODE_SCOPE_CHECK(func, ...)             \
+    if (MultiThreadBuildManager::IsThreadSafeNodeScope()) {                 \
+        return func##MultiThread(__VA_ARGS__);              \
+    }                                                       \
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_MULTI_THREAD_H

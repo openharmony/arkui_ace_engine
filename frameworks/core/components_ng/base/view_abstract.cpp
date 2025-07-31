@@ -6494,6 +6494,7 @@ void ViewAbstract::UpdateBackgroundBlurStyle(
     FrameNode* frameNode, const BlurStyleOption& bgBlurStyle, const SysOptions& sysOptions)
 {
     FREE_NODE_CHECK(frameNode, SetBackgroundBlurStyle, frameNode, bgBlurStyle, sysOptions);
+    CHECK_NULL_VOID(frameNode);
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     if (bgBlurStyle.policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) {

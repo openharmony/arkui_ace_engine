@@ -73,7 +73,7 @@ export class SwiperController implements MaterializedBase {
             const useAnimation_casted = useAnimation as (boolean | undefined)
             return this.changeIndex0_serialize(index_casted, useAnimation_casted)
         }
-        if ((RuntimeType.NUMBER == useAnimation_type) || (RuntimeType.BOOLEAN == useAnimation_type) || (RuntimeType.UNDEFINED == useAnimation_type)) {
+        if ((RuntimeType.OBJECT == useAnimation_type) || (RuntimeType.NUMBER == useAnimation_type) || (RuntimeType.BOOLEAN == useAnimation_type) || (RuntimeType.UNDEFINED == useAnimation_type)) {
             const index_casted = index as (number)
             const animationMode_casted = useAnimation as (SwiperAnimationMode | boolean | undefined)
             return this.changeIndex1_serialize(index_casted, animationMode_casted)
@@ -1298,7 +1298,7 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements Swip
     public displayArrow(value: ArrowStyle | boolean | undefined, isHoverShow?: boolean): this {
         if (this.checkPriority("displayArrow")) {
             const value_casted = value as (ArrowStyle | boolean | undefined)
-            const isHoverShow_casted = isHoverShow as (boolean)
+            const isHoverShow_casted = isHoverShow as (boolean | undefined)
             this.getPeer()?.displayArrowAttribute(value_casted, isHoverShow_casted)
             return this
         }
@@ -1307,7 +1307,7 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements Swip
     public displayCount(value: number | string | SwiperAutoFill | undefined, swipeByGroup?: boolean): this {
         if (this.checkPriority("displayCount")) {
             const value_casted = value as (number | string | SwiperAutoFill | undefined)
-            const swipeByGroup_casted = swipeByGroup as (boolean)
+            const swipeByGroup_casted = swipeByGroup as (boolean | undefined)
             this.getPeer()?.displayCountAttribute(value_casted, swipeByGroup_casted)
             return this
         }
@@ -1316,7 +1316,7 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements Swip
     public prevMargin(value: Length | undefined, ignoreBlank?: boolean): this {
         if (this.checkPriority("prevMargin")) {
             const value_casted = value as (Length | undefined)
-            const ignoreBlank_casted = ignoreBlank as (boolean)
+            const ignoreBlank_casted = ignoreBlank as (boolean | undefined)
             this.getPeer()?.prevMarginAttribute(value_casted, ignoreBlank_casted)
             return this
         }
@@ -1325,7 +1325,7 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements Swip
     public nextMargin(value: Length | undefined, ignoreBlank?: boolean): this {
         if (this.checkPriority("nextMargin")) {
             const value_casted = value as (Length | undefined)
-            const ignoreBlank_casted = ignoreBlank as (boolean)
+            const ignoreBlank_casted = ignoreBlank as (boolean | undefined)
             this.getPeer()?.nextMarginAttribute(value_casted, ignoreBlank_casted)
             return this
         }

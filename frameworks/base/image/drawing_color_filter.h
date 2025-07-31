@@ -39,7 +39,6 @@ public:
     static RefPtr<DrawingColorFilter> CreateDrawingColorFilter(void* sptrAddr);
     static RefPtr<DrawingColorFilter> CreateDrawingColorFilter(const std::vector<float>& matrix);
     static RefPtr<DrawingColorFilter> CreateDrawingColorFilterFromNative(void* sptrAddr);
-    // static RefPtr<DrawingColorFilter> CreateDrawingColorFilterFromAni(void* sptrAddr);
     virtual void* GetDrawingColorFilterSptrAddr() = 0; //define the return value as void is for tdd compilation
     virtual napi_value GetDrawingColorFilterNapiValue(NativeEngine* nativeEngine) = 0;
 };

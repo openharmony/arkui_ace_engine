@@ -2,6 +2,10 @@ import { nullptr } from "@koalaui/interop"
 import { Callback } from "./common"
 import { GestureOps } from "./arkui-custom"
 import { PeerNode } from "../PeerNode"
+import { GlobalStateManager, MutableState } from '@koalaui/runtime'
+import { KeyEventInternal, TouchTestInfo } from "arkui/component/common"
+import { TypeChecker } from "#components"
+import { ArkUIAniModule } from "arkui.ani"
 
 export class GestureHandler {
     gestureTag: string | undefined;
@@ -558,6 +562,7 @@ export class PanGesture extends Gesture {
     }
     createAndSetPanGestureAttr(): void {
         if (this.panGestureOptions !== undefined) {
+            this.panGestureOptions!.getOptionState()
             this.pointer = GestureOps.createPanGestureWithPanGestureOptions(this.panGestureOptions!.getPeer()!.ptr);
         } else {
             this.pointer = GestureOps.createPanGesture(this.finger ?? 1, this.direction ?? PanDirection.ALL, this.distance ?? 5, this.isFingerCountLimited ?? false);
@@ -813,5 +818,156 @@ export class GestureGroup {
         if (node) {
             GestureOps.addGestureToNode(node.peer.ptr, priority, mask ?? GestureMask.NORMAL, this.pointer, false);
         }
+    }
+}
+
+export class PanGestureOptions implements MaterializedBase {
+    peer?: Finalizable | undefined = undefined
+    public optionState: MutableState<int32>
+    public getPeer(): Finalizable | undefined {
+        return this.peer
+    }
+    static ctor_pangestureoptions(value?: PanGestureHandlerOptions): KPointer {
+        const thisSerializer: Serializer = Serializer.hold()
+        let value_type: int32 = RuntimeType.UNDEFINED
+        value_type = runtimeType(value)
+        thisSerializer.writeInt8(value_type)
+        if ((RuntimeType.UNDEFINED) != (value_type)) {
+            const value_value = value!
+            thisSerializer.writePanGestureHandlerOptions(value_value)
+        }
+        const retval = ArkUIGeneratedNativeModule._PanGestureOptions_ctor(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    constructor(value?: PanGestureHandlerOptions) {
+        const ctorPtr: KPointer = PanGestureOptions.ctor_pangestureoptions(value)
+        const manager = GlobalStateManager.instance
+        this.optionState = manager.mutableState<int32>(0 as int32, true)
+        this.peer = new Finalizable(ctorPtr, PanGestureOptions.getFinalizer())
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._PanGestureOptions_getFinalizer()
+    }
+    public getOptionState(): number {
+        return this.optionState!.value
+    }
+    public setOptionState(): void {
+        this.optionState!.value = this.optionState!.value % 100 + 1
+    }
+    public setDirection(value: PanDirection): void {
+        const value_casted = value as (PanDirection)
+        this.setDirection_serialize(value_casted)
+        this.setOptionState()
+    }
+    public setDistance(value: number): void {
+        const value_casted = value as (number)
+        this.setDistance_serialize(value_casted)
+        this.setOptionState()
+    }
+    public setFingers(value: number): void {
+        const value_casted = value as (number)
+        this.setFingers_serialize(value_casted)
+        this.setOptionState()
+    }
+    public getDirection(): PanDirection {
+        return this.getDirection_serialize()
+    }
+    public getDistance(): number {
+        return this.getDistance_serialize()
+    }
+    private setDirection_serialize(value: PanDirection): void {
+        ArkUIGeneratedNativeModule._PanGestureOptions_setDirection(this.peer!.ptr, TypeChecker.PanDirection_ToNumeric(value))
+    }
+    private setDistance_serialize(value: number): void {
+        ArkUIGeneratedNativeModule._PanGestureOptions_setDistance(this.peer!.ptr, value)
+    }
+    private setFingers_serialize(value: number): void {
+        ArkUIGeneratedNativeModule._PanGestureOptions_setFingers(this.peer!.ptr, value)
+    }
+    private getDirection_serialize(): PanDirection {
+        const retval  = ArkUIGeneratedNativeModule._PanGestureOptions_getDirection(this.peer!.ptr)
+        return TypeChecker.PanDirection_FromNumeric(retval)
+    }
+    private getDistance_serialize(): number {
+        const retval  = ArkUIGeneratedNativeModule._PanGestureOptions_getDistance(this.peer!.ptr)
+        return retval
+    }
+}
+
+export class ScrollableTargetInfoTransfer {
+    static transferStatic(input: Any): Object {
+        if (typeof (input) !== 'object') {
+            return new Object();
+        }
+        if(input === null) {
+            return new Object();
+        }
+        let objectInternal : ScrollableTargetInfo = new ScrollableTargetInfo();
+        let peer: KPointer = ArkUIAniModule._CreateScrollableTargetInfoAccessor()
+        let esValue: ESValue = ESValue.wrap(input);
+        let id = esValue.invokeMethod("getId");
+        if (id.isString()) {
+            ArkUIAniModule._ScrollableTargetInfoAccessorWithId(peer, id.toString())
+        }
+        const global = ESValue.getGlobal();
+        const wrapFunc = global.getProperty('getScrollableTargetInfoPointer');
+        if (wrapFunc.isNull() || wrapFunc.isUndefined()) {
+            return new Object();
+        }
+        let pointer = wrapFunc.invoke(esValue);
+        if (pointer.isNumber()) {
+            ArkUIAniModule._ScrollableTargetInfoAccessorWithPointer(peer, pointer.toNumber() as long)
+        }
+        objectInternal.peer!.ptr = peer;
+        return objectInternal;
+    }
+    static transferDynamic(input: Object): Any { 
+        if (input == null) {
+           return new Object();
+        }
+        let objectInternal: EventTargetInfo = input as EventTargetInfo;
+        const nativePointer: KPointer = ArkUIAniModule._TransferScrollableTargetInfoPointer(objectInternal.peer!.ptr as long);
+        const global = ESValue.getGlobal();
+        const wrapFunc = global.getProperty('wrapScrollableTargetInfoPointer');
+        if (wrapFunc.isNull() || wrapFunc.isUndefined()) {
+            return new Object();
+        }
+        let retValue = wrapFunc.invoke(objectInternal.getId(), nativePointer);
+        return retValue;
+    }
+}
+
+export class EventTargetInfoTransfer {
+    static transferStatic(input: Any): Object {
+        if (typeof (input) !== 'object') {
+            return new Object();
+        }
+        if(input === null) {
+            return new Object();
+        }
+        let objectInternal : EventTargetInfo = new EventTargetInfo();
+        let esValue: ESValue = ESValue.wrap(input);
+        let peer: KPointer = ArkUIAniModule._CreateEventTargetInfoAccessor()
+        let id = esValue.invokeMethod("getId");
+        if (id.isString()) {
+            ArkUIAniModule._EventTargetInfoAccessorWithId(peer, id.toString())
+        }
+        objectInternal.peer!.ptr = peer;
+        return objectInternal;
+    }
+    static transferDynamic(input: Object): Any { 
+        if (input == null) {
+           return new Object();
+        }
+        
+        let objectInternal: EventTargetInfo = input as EventTargetInfo;
+        const global = ESValue.getGlobal();
+        const wrapFunc = global.getProperty('WrapEventTargetInfoPointer');
+        if (wrapFunc.isNull() || wrapFunc.isUndefined()) {
+            return new Object();
+        }
+        let retValue = wrapFunc.invoke(objectInternal.getId());
+        return retValue;
     }
 }

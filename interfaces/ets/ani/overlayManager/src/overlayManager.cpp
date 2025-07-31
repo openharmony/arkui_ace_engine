@@ -55,7 +55,7 @@ static bool IsUndefinedObject(ani_env *env, ani_ref object_ref)
 static bool IsOverlayManagerOptionsObject(ani_env *env, ani_object object)
 {
     ani_class optionsClass = nullptr;
-    if (ANI_OK != env->FindClass("L@ohos/arkui/UIContext/OverlayManagerOptions;", &optionsClass)) {
+    if (ANI_OK != env->FindClass("@ohos.arkui.UIContext.OverlayManagerOptions", &optionsClass)) {
         TAG_LOGE(AceLogTag::ACE_OVERLAY, "Cannot find class OverlayManagerOptions.");
         return false;
     }
@@ -142,12 +142,12 @@ static ani_status CreateAniBoolean(ani_env* env, bool value, ani_object& result)
 {
     ani_status state;
     ani_class booleanClass;
-    if ((state = env->FindClass("Lstd/core/Boolean;", &booleanClass)) != ANI_OK) {
-        TAG_LOGE(AceLogTag::ACE_OVERLAY, "FindClass std/core/Boolean failed, %{public}d", state);
+    if ((state = env->FindClass("std.core.Boolean", &booleanClass)) != ANI_OK) {
+        TAG_LOGE(AceLogTag::ACE_OVERLAY, "FindClass std.core.Boolean failed, %{public}d", state);
         return state;
     }
     ani_method booleanClassCtor;
-    if ((state = env->Class_FindMethod(booleanClass, "<ctor>", "Z:V", &booleanClassCtor)) != ANI_OK) {
+    if ((state = env->Class_FindMethod(booleanClass, "<ctor>", "z:", &booleanClassCtor)) != ANI_OK) {
         TAG_LOGE(AceLogTag::ACE_OVERLAY, "Class_FindMethod Boolean ctor failed, %{public}d", state);
         return state;
     }
@@ -171,7 +171,7 @@ static ani_object GetOverlayManagerOptions(ani_env* env)
     auto overlayInfo = overlayManager->GetOverlayManagerOptions();
     if (overlayInfo.has_value()) {
         ani_class cls;
-        if (ANI_OK != env->FindClass("L@ohos/arkui/UIContext/OverlayManagerOptionsInner;", &cls)) {
+        if (ANI_OK != env->FindClass("@ohos.arkui.UIContext.OverlayManagerOptionsInner", &cls)) {
             TAG_LOGE(AceLogTag::ACE_OVERLAY, "FindClass OverlayManagerOptionsInner failed");
             return options;
         }
@@ -225,7 +225,7 @@ static void AddComponentContentWithOrder(ani_env* env, ani_long aniNode, ani_obj
     std::optional<double> orderNumber = std::nullopt;
     if (aniLevelOrder != 0) {
         ani_class levelOrderCls;
-        ani_status status = env->FindClass("L@ohos/promptAction/LevelOrder;", &levelOrderCls);
+        ani_status status = env->FindClass("@ohos.promptAction.LevelOrder", &levelOrderCls);
         if (status != ANI_OK) {
             TAG_LOGE(AceLogTag::ACE_OVERLAY, "Find LevelOrder failed(%{public}d)", status);
             return;
@@ -344,7 +344,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     }
 
     ani_namespace ns;
-    if (ANI_OK != env->FindNamespace("L@ohos/overlayManager/overlayManager;", &ns)) {
+    if (ANI_OK != env->FindNamespace("@ohos.overlayManager.overlayManager", &ns)) {
         return ANI_ERROR;
     }
     std::array methods = {

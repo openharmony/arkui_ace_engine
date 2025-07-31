@@ -178,8 +178,7 @@ HWTEST_F(GridLayoutTestNg, GridLayout001, TestSize.Level1)
      * @tc.expected: The GetLayoutProperty is !nullptr
      */
     auto pattern = frameNode_->GetPattern<GridPattern>();
-    GridLayoutInfo info {};
-    auto algorithm = AceType::MakeRefPtr<GridLayoutAlgorithm>(info, 4, 4);
+    auto algorithm = AceType::MakeRefPtr<GridLayoutAlgorithm>(GridLayoutInfo {}, 4, 4);
     algorithm->InitGridCeils(AceType::RawPtr(frameNode_), { 0.0f, 0.0f });
     algorithm->crossCount_ = 5;
     algorithm->mainCount_ = 5;
@@ -205,8 +204,7 @@ HWTEST_F(GridLayoutTestNg, GridLayout002, TestSize.Level1)
      * @tc.expected: The GetLayoutProperty is correct
      */
     auto pattern = frameNode_->GetPattern<GridPattern>();
-    GridLayoutInfo info {};
-    auto algorithm = AceType::MakeRefPtr<GridLayoutAlgorithm>(info, 4, 4);
+    auto algorithm = AceType::MakeRefPtr<GridLayoutAlgorithm>(GridLayoutInfo {}, 4, 4);
     algorithm->InitGridCeils(AceType::RawPtr(frameNode_), { 0.0f, 0.0f });
     algorithm->crossCount_ = 5;
     algorithm->mainCount_ = 5;
@@ -233,8 +231,7 @@ HWTEST_F(GridLayoutTestNg, GridLayout003, TestSize.Level1)
      * @tc.expected: The GetLayoutProperty is correct
      */
     auto pattern = frameNode_->GetPattern<GridPattern>();
-    GridLayoutInfo info {};
-    auto algorithm = AceType::MakeRefPtr<GridLayoutAlgorithm>(info, 4, 4);
+    auto algorithm = AceType::MakeRefPtr<GridLayoutAlgorithm>(GridLayoutInfo {}, 4, 4);
     algorithm->info_.currentOffset_ = 0.0f;
     auto layoutProperty = pattern->CreateLayoutProperty();
     algorithm->InitGridCeils(AceType::RawPtr(frameNode_), { 0.0f, 0.0f });

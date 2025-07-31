@@ -29,6 +29,7 @@ const readdirSyncRecursive: (dir: string) => string[] = (dir: string) =>
 export const options = program
     .option('--config <path>', 'Path to configuration file')
     .option('--compiler <path>', 'Path to compiler')
+    .option('--compiler-flags <path>', 'Flags to compiler')
     .option('--link-name <path>', 'Path to final linked file', "all")
 
     .option('--group-by <size>', 'Group files by groups before passing them to compiler')
@@ -99,8 +100,9 @@ function produceNinjafile(
         options.cache ? `--cache` : ``,
         options.simultaneous ? `--simultaneous` : ``,
     ].join(` `)
+    let flags = options.compilerFlags ?? ''
     const buildCommand = (stage: number, _in: string, _out: string) => {
-        return `${tools_prefix}${compiler} --ets-module --arktsconfig ${path.resolve(config)} --output ${_out} ${stages > 1 ? `--stage ${stage}` : ``} ${passFlags} ${_in}`
+        return `${tools_prefix}${compiler} ${options.compilerFlags ?? ''} --ets-module --arktsconfig ${path.resolve(config)} --output ${_out} ${stages > 1 ? `--stage ${stage}` : ``} ${passFlags} ${_in}`
     }
 
     if (options.simultaneous) {
@@ -151,7 +153,7 @@ rule arkts_linker
     for (var i = 0; i < stages; i++) {
         targets.push(getTargets(i))
     }
-    
+
     for (var i = 0; i < stages; i++) {
         for (var j = 0; j < targets[i].length; j += groupBy) {
             const synthetic_rule = getFileGroupAsString(targets[i], groupBy, j, ':', 'synthetic_rule_').replaceAll('/', '_').replaceAll(':', '_')

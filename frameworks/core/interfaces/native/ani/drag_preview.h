@@ -177,7 +177,7 @@ private:
             animationInfo.duration = DEFAULT_DURATION_VALUE;
         } else {
             if ((status = env->Object_CallMethodByName_Double(
-                static_cast<ani_object>(durationAni), "unboxed", ":D", &duration)) != ANI_OK) {
+                static_cast<ani_object>(durationAni), "unboxed", ":d", &duration)) != ANI_OK) {
                 LOGE("AceDrag, Object_CallMethodByName_Double failed. status = %{public}d", status);
             } else {
                 if (GreatOrEqual(static_cast<size_t>(duration), INT32_MAX)) {
@@ -185,7 +185,7 @@ private:
                 } else if (LessOrEqual(static_cast<size_t>(duration), 0)) {
                     duration = 0;
                 }
-                animationInfo.duration = static_cast<size_t>(duration);
+                animationInfo.duration = static_cast<int32_t>(duration);
             }
         }
         TAG_LOGI(AceLogTag::ACE_DRAG, "animation duration is %{public}d", animationInfo.duration);

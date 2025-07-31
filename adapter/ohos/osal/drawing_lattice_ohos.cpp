@@ -14,7 +14,6 @@
  */
 
 #include "drawing_lattice_ohos.h"
-// #include "lattice_ani/ani_lattice.h"
 #include "lattice_napi/js_lattice.h"
 
 #include "base/utils/utils.h"
@@ -32,16 +31,6 @@ RefPtr<DrawingLattice> DrawingLattice::CreateDrawingLatticeFromNative(void* sptr
     CHECK_NULL_RETURN(sptrAddr, nullptr);
     auto* lattice = reinterpret_cast<std::shared_ptr<OHOS::Rosen::Drawing::Lattice>*>(sptrAddr);
     return AceType::MakeRefPtr<DrawingLatticeOhos>(*lattice);
-}
-
-RefPtr<DrawingLattice> DrawingLattice::CreateDrawingLatticeFromAni(void* aniAddr)
-{
-    return nullptr;
-    // CHECK_NULL_RETURN(aniAddr, nullptr);
-    // auto* aniLattice = reinterpret_cast<OHOS::Rosen::Drawing::AniLattice*>(aniAddr);
-    // CHECK_NULL_RETURN(aniLattice, nullptr);
-    // auto lattice = aniLattice->GetLattice();
-    // return AceType::MakeRefPtr<DrawingLatticeOhos>(lattice);
 }
 
 void* DrawingLatticeOhos::GetDrawingLatticeSptrAddr()

@@ -31,13 +31,14 @@
 #include "core/common/resource/resource_wrapper.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/theme/shadow_theme.h"
+#include "core/components_ng/pattern/toast/toast_layout_property.h"
 #include "frameworks/base/log/log_wrapper.h"
 
 bool GetToastBottom(ani_env* env, ani_object object, std::string& result);
 bool GetToastShowMode(ani_env* env, ani_object object, OHOS::Ace::NG::ToastShowMode& result);
 bool GetToastAlignment(ani_env* env, ani_object object, int32_t& result);
 bool GetToastShadow(ani_env* env, ani_object object, std::optional<OHOS::Ace::Shadow>& result, bool& isTypeStyleShadow);
-bool GetShowToastOptions(ani_env* env, ani_object object, OHOS::Ace::NG::ToastInfo result);
+bool GetShowToastOptions(ani_env* env, ani_object object, OHOS::Ace::NG::ToastInfo& result);
 std::function<void(int32_t)> GetToastPromise(std::shared_ptr<PromptActionAsyncContext>& asyncContext);
 
 #endif // INTERFACES_ETS_ANI_PROMPTACTION_SRC_TOAST_PARAMS_H

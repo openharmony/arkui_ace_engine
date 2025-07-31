@@ -17,9 +17,11 @@
 
 #include "core/event/key_event.h"
 
+namespace OHOS::Ace::NG {
 class AccessorUtils {
 public:
     static bool CheckKeysPressed(const std::vector<std::string>& keysStrs,
         const std::vector<OHOS::Ace::KeyCode>& keysCodes);
 };
+} // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_ACCESSOR_UTILS_H

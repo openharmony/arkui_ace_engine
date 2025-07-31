@@ -33,9 +33,7 @@
 #include "test/mock/interfaces/mock_ace_forward_compatibility.cpp"
 namespace {
 struct CurvesObj {
-    std::function<ani_double(ani_env*, ani_object, ani_double)> interpolate;
-    std::string curveString;
-    int32_t pageId;
+    OHOS::Ace::RefPtr<OHOS::Ace::Curve> curve;
 };
 
 typedef enum Curve {
@@ -54,20 +52,6 @@ typedef enum Curve {
     Friction = 12,
 } Curve;
 
-}
-
-OHOS::Ace::RefPtr<OHOS::Ace::Framework::JsAcePage> GetStagingPage(int32_t instanceId)
-{
-    auto engine = OHOS::Ace::EngineHelper::GetEngine(instanceId);
-    auto jsiEngine = OHOS::Ace::AceType::DynamicCast<OHOS::Ace::Framework::JsiDeclarativeEngine>(engine);
-    if (!jsiEngine) {
-        return nullptr;
-    }
-    auto engineInstance = jsiEngine->GetEngineInstance();
-    if (engineInstance == nullptr) {
-        return nullptr;
-    }
-    return engineInstance->GetStagingPage();
 }
 
 std::string GetCubicBezierCurveString(ani_double x1, ani_double y1, ani_double x2, ani_double y2)
@@ -179,14 +163,9 @@ static CurvesObj* unwrapp(ani_env *env, ani_object object)
 static ani_double Interpolate([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object, ani_double fraction)
 {
     auto curveObject = unwrapp(env, object);
-    auto curveString = curveObject->curveString;
-    float time = static_cast<float>(fraction);
-    time = std::clamp(time, 0.0f, 1.0f);
-    auto animationCurve = OHOS::Ace::Framework::CreateCurve(curveString, false);
-    if (!animationCurve) {
-        return 0.0;
-    }
-    ani_double curveValue = static_cast<ani_double>(animationCurve->Move(time));
+    auto curveInterpolate = curveObject->curve;
+    float time = std::clamp(static_cast<float>(fraction), 0.0f, 1.0f);
+    ani_double curveValue = static_cast<ani_double>(curveInterpolate->Move(time));
     return curveValue;
 }
 
@@ -202,7 +181,7 @@ static ani_string CubicBezier([[maybe_unused]] ani_env *env,
 static ani_object CubicBezierCurve([[maybe_unused]] ani_env *env,
     ani_double x1, ani_double y1, ani_double x2, ani_double y2)
 {
-    static const char *className = "L@ohos/curves/curves/Curves;";
+    static const char *className = "@ohos.curves.curves.Curves";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         return nullptr;
@@ -214,42 +193,20 @@ static ani_object CubicBezierCurve([[maybe_unused]] ani_env *env,
     }
 
     CurvesObj* cubicBezierCurve = new CurvesObj();
-    cubicBezierCurve->interpolate = Interpolate;
     std::string curveString = GetCubicBezierCurveString(x1, y1, x2, y2);
-
-    cubicBezierCurve->curveString = curveString;
-    std::string curveStr = curveString;
-    ani_string curveAniStr;
-    env->String_NewUTF8(curveStr.c_str(), curveStr.size(), &curveAniStr);
+    cubicBezierCurve->curve = OHOS::Ace::Framework::CreateCurve(curveString);
 
     ani_object curve_object;
-
     if (ANI_OK != env->Object_New(cls, ctor, &curve_object, reinterpret_cast<ani_object>(cubicBezierCurve))) {
         return nullptr;
     }
-
-    if (OHOS::Ace::Container::IsCurrentUseNewPipeline()) {
-        return curve_object;
-    }
-    auto page = GetStagingPage(OHOS::Ace::Container::CurrentId());
-    int32_t pageId = -1;
-    if (page) {
-        pageId = page->GetPageId();
-    }
-    cubicBezierCurve->pageId = pageId;
-
-    ani_object curveNew_object;
-    if (ANI_OK != env->Object_New(cls, ctor, &curveNew_object, reinterpret_cast<ani_object>(cubicBezierCurve))) {
-        return nullptr;
-    }
-
-    return curveNew_object;
+    return curve_object;
 }
 
 static ani_object SpringCurve([[maybe_unused]] ani_env* env,
     ani_double velocity, ani_double mass, ani_double stiffness, ani_double damping)
 {
-    static const char* className = "L@ohos/curves/curves/Curves;";
+    static const char* className = "@ohos.curves.curves.Curves";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         return nullptr;
@@ -260,8 +217,6 @@ static ani_object SpringCurve([[maybe_unused]] ani_env* env,
         return nullptr;
     }
 
-    CurvesObj* springCurve = new CurvesObj();
-    springCurve->interpolate = Interpolate;
     if (OHOS::Ace::LessOrEqual(mass, 0)) {
         mass = 1.0;
     }
@@ -271,35 +226,17 @@ static ani_object SpringCurve([[maybe_unused]] ani_env* env,
     if (OHOS::Ace::LessOrEqual(damping, 0)) {
         damping = 1.0;
     }
+
+    CurvesObj* springCurve = new CurvesObj();
     auto curve = OHOS::Ace::AceType::MakeRefPtr<OHOS::Ace::SpringCurve>(velocity, mass, stiffness, damping);
     std::string curveString = curve->ToString();
+    springCurve->curve = OHOS::Ace::Framework::CreateCurve(curveString);
 
-    springCurve->curveString = curveString;
-    ani_string curveAniStr {};
-    env->String_NewUTF8(curveString.c_str(), curveString.size(), &curveAniStr);
-
-    ani_object obj;
-
-    if (ANI_OK != env->Object_New(cls, ctor, &obj, reinterpret_cast<ani_object>(springCurve))) {
+    ani_object curve_object;
+    if (ANI_OK != env->Object_New(cls, ctor, &curve_object, reinterpret_cast<ani_object>(springCurve))) {
         return nullptr;
     }
-
-    if (OHOS::Ace::Container::IsCurrentUseNewPipeline()) {
-        return obj;
-    }
-    auto page = GetStagingPage(OHOS::Ace::Container::CurrentId());
-    int32_t pageId = -1;
-    if (page) {
-        pageId = page->GetPageId();
-    }
-    springCurve->pageId = pageId;
-
-    ani_object objNew;
-    if (ANI_OK != env->Object_New(cls, ctor, &objNew, reinterpret_cast<ani_object>(springCurve))) {
-        return nullptr;
-    }
-
-    return objNew;
+    return curve_object;
 }
 
 std::string GetSpringResponsiveMotionCurveString(ani_env *env,
@@ -356,8 +293,7 @@ static ani_object SpringResponsiveMotion([[maybe_unused]] ani_env *env,
     ani_object response, ani_object dampingFraction, ani_object overlapDuration)
 {
     CurvesObj* springResponsiveMotion = new CurvesObj();
-    springResponsiveMotion->interpolate = Interpolate;
-    static const char *className = "L@ohos/curves/curves/Curves;";
+    static const char *className = "@ohos.curves.curves.Curves";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         return nullptr;
@@ -367,73 +303,37 @@ static ani_object SpringResponsiveMotion([[maybe_unused]] ani_env *env,
         return nullptr;
     }
     std::string curveString = GetSpringResponsiveMotionCurveString(env, response, dampingFraction, overlapDuration);
-    springResponsiveMotion->curveString = curveString;
-    std::string curveStr = curveString;
-    ani_string curveAniStr;
-    env->String_NewUTF8(curveStr.c_str(), curveStr.size(), &curveAniStr);
-
+    springResponsiveMotion->curve = OHOS::Ace::Framework::CreateCurve(curveString);
     ani_object curve_object;
     if (ANI_OK != env->Object_New(cls, ctor, &curve_object, reinterpret_cast<ani_object>(springResponsiveMotion))) {
         return nullptr;
     }
 
-    if (OHOS::Ace::Container::IsCurrentUseNewPipeline()) {
-        return curve_object;
-    }
-    auto page = GetStagingPage(OHOS::Ace::Container::CurrentId());
-    int32_t pageId = -1;
-    if (page) {
-        pageId = page->GetPageId();
-    }
-    springResponsiveMotion->pageId = pageId;
-
-    ani_object curveNew_object;
-    if (ANI_OK != env->Object_New(cls, ctor, &curveNew_object, reinterpret_cast<ani_object>(springResponsiveMotion))) {
-        return nullptr;
-    }
-    return curveNew_object;
+    return curve_object;
 }
 
 static ani_object SpringMotion([[maybe_unused]] ani_env *env,
     ani_object response, ani_object dampingFraction, ani_object overlapDuration)
 {
-    CurvesObj* springMotion = new CurvesObj();
-    springMotion->interpolate = Interpolate;
-    static const char *className = "L@ohos/curves/curves/Curves;";
+    static const char *className = "@ohos.curves.curves.Curves";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         return nullptr;
     }
+
     ani_method ctor;
     if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
         return nullptr;
     }
-    std::string curveString = GetSpringMotionCurveString(env, response, dampingFraction, overlapDuration);
-    springMotion->curveString = curveString;
-    std::string curveStr = curveString;
-    ani_string curveAniStr;
-    env->String_NewUTF8(curveStr.c_str(), curveStr.size(), &curveAniStr);
 
+    CurvesObj* springMotion = new CurvesObj();
+    std::string curveString = GetSpringMotionCurveString(env, response, dampingFraction, overlapDuration);
+    springMotion->curve = OHOS::Ace::Framework::CreateCurve(curveString);
     ani_object curve_object;
     if (ANI_OK != env->Object_New(cls, ctor, &curve_object, reinterpret_cast<ani_object>(springMotion))) {
         return nullptr;
     }
-
-    if (OHOS::Ace::Container::IsCurrentUseNewPipeline()) {
-        return curve_object;
-    }
-    auto page = GetStagingPage(OHOS::Ace::Container::CurrentId());
-    int32_t pageId = -1;
-    if (page) {
-        pageId = page->GetPageId();
-    }
-    springMotion->pageId = pageId;
-
-    ani_object curveNew_object;
-    if (ANI_OK != env->Object_New(cls, ctor, &curveNew_object, reinterpret_cast<ani_object>(springMotion))) {
-        return nullptr;
-    }
-    return curveNew_object;
+    return curve_object;
 }
 
 static ani_object InitCurve([[maybe_unused]] ani_env* env, ani_enum_item enumItem)
@@ -445,56 +345,35 @@ static ani_object InitCurve([[maybe_unused]] ani_env* env, ani_enum_item enumIte
         curveType = Curve::Linear;
     } else {
         if (ANI_OK != env->EnumItem_GetValue_Int(enumItem, &curveType)) {
-            std::cerr << "Enum_GetEnumItemByIndex curveType FAILD" << std::endl;
         }
     }
     std::string curveString = GetCurvesInitInternalMap(curveType);
 
-    static const char* className = "L@ohos/curves/curves/Curves;";
+    static const char* className = "@ohos.curves.curve.Curves";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         std::cerr << "Not found '" << className << "'" << std::endl;
         return nullptr;
     }
-
     ani_method ctor;
     if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
         std::cerr << "get ctor Failed'" << className << "'" << std::endl;
         return nullptr;
     }
     CurvesObj* curvesInitInternal = new CurvesObj();
-    curvesInitInternal->interpolate = Interpolate;
-    curvesInitInternal->curveString = curveString;
-    ani_string curveAniStr {};
-    env->String_NewUTF8(curveString.c_str(), curveString.size(), &curveAniStr);
+    curvesInitInternal->curve = OHOS::Ace::Framework::CreateCurve(curveString);
 
-    ani_object obj;
-
-    if (ANI_OK != env->Object_New(cls, ctor, &obj, reinterpret_cast<ani_object>(curvesInitInternal))) {
+    ani_object curve_object;
+    if (ANI_OK != env->Object_New(cls, ctor, &curve_object, reinterpret_cast<ani_object>(curvesInitInternal))) {
         return nullptr;
     }
-
-    if (OHOS::Ace::Container::IsCurrentUseNewPipeline()) {
-        return obj;
-    }
-    auto page = GetStagingPage(OHOS::Ace::Container::CurrentId());
-    int32_t pageId = -1;
-    if (page) {
-        pageId = page->GetPageId();
-    }
-    curvesInitInternal->pageId = pageId;
-
-    ani_object newObj;
-    if (ANI_OK != env->Object_New(cls, ctor, &newObj, reinterpret_cast<ani_object>(curvesInitInternal))) {
-        return nullptr;
-    }
-    return newObj;
+    return curve_object;
 }
 
 static ani_object InterpolatingSpring([[maybe_unused]] ani_env* env,
     ani_double velocity, ani_double mass, ani_double stiffness, ani_double damping)
 {
-    static const char* className = "L@ohos/curves/curves/Curves;";
+    static const char* className = "@ohos.curves.curves.Curves";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         std::cerr << "Not found '" << className << "'" << std::endl;
@@ -507,8 +386,6 @@ static ani_object InterpolatingSpring([[maybe_unused]] ani_env* env,
         return nullptr;
     }
 
-    CurvesObj* interpolatingCurve = new CurvesObj();
-    interpolatingCurve->interpolate = Interpolate;
     if (OHOS::Ace::LessOrEqual(mass, 0)) {
         mass = 1.0;
     }
@@ -518,37 +395,117 @@ static ani_object InterpolatingSpring([[maybe_unused]] ani_env* env,
     if (OHOS::Ace::LessOrEqual(damping, 0)) {
         damping = 1.0;
     }
-    auto curve = OHOS::Ace::AceType::MakeRefPtr<OHOS::Ace::InterpolatingSpring>(velocity, mass, stiffness, damping);
+    auto InterpolatingSpringCurve =
+        OHOS::Ace::AceType::MakeRefPtr<OHOS::Ace::InterpolatingSpring>(velocity, mass, stiffness, damping);
+    std::string curveString = InterpolatingSpringCurve->ToString();
+    CurvesObj* interpolatingCurve = new CurvesObj();
+    interpolatingCurve->curve = OHOS::Ace::Framework::CreateCurve(curveString);
+
+    ani_object curve_object;
+    if (ANI_OK != env->Object_New(cls, ctor, &curve_object, reinterpret_cast<ani_object>(interpolatingCurve))) {
+        return nullptr;
+    }
+
+    return curve_object;
+}
+
+static ani_object StepsCurve([[maybe_unused]] ani_env* env, ani_double count, ani_boolean end)
+{
+    static const char* className = "@ohos.curves.curves.Curves";
+    ani_class cls;
+    if (ANI_OK != env->FindClass(className, &cls)) {
+        std::cerr << "Not found '" << className << "'" << std::endl;
+        return nullptr;
+    }
+
+    ani_method ctor;
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
+        std::cerr << "get ctor Failed'" << className << "'" << std::endl;
+        return nullptr;
+    }
+
+    if (OHOS::Ace::LessOrEqual(count, 1)) {
+        count = 1.0;
+    }
+    auto curve = OHOS::Ace::AceType::MakeRefPtr<OHOS::Ace::StepsCurve>(count);
+    if (end) {
+        curve = OHOS::Ace::AceType::MakeRefPtr<OHOS::Ace::StepsCurve>(count, OHOS::Ace::StepsCurvePosition::END);
+    } else {
+        curve = OHOS::Ace::AceType::MakeRefPtr<OHOS::Ace::StepsCurve>(count, OHOS::Ace::StepsCurvePosition::START);
+    }
+
     std::string curveString = curve->ToString();
+    CurvesObj* interpolatingCurve = new CurvesObj();
+    interpolatingCurve->curve = OHOS::Ace::Framework::CreateCurve(curveString);
 
-    interpolatingCurve->curveString = curveString;
-    ani_string curveAniStr {};
-    env->String_NewUTF8(curveString.c_str(), curveString.size(), &curveAniStr);
+    ani_object curve_object;
+    env->Object_New(cls, ctor, &curve_object, reinterpret_cast<ani_object>(interpolatingCurve));
+    return curve_object;
+}
 
-    ani_object obj;
+static ani_object createDouble(ani_env *env, double value)
+{
+    static const char *className = "std.core.Double";
+    ani_class persion_cls;
+    if (ANI_OK != env->FindClass(className, &persion_cls)) {
+        return nullptr;
+    }
+    ani_method personInfoCtor;
+    if (ANI_OK != env->Class_FindMethod(persion_cls, "<ctor>", "d:", &personInfoCtor)) {
+        return nullptr;
+    }
+    ani_object personInfoObj;
+    if (ANI_OK != env->Object_New(persion_cls, personInfoCtor, &personInfoObj, ani_double(value))) {
+        return nullptr;
+    }
+    return personInfoObj;
+}
 
-    if (ANI_OK != env->Object_New(cls, ctor, &obj, reinterpret_cast<ani_object>(interpolatingCurve))) {
-        std::cerr << "New curve object Fail" << std::endl;
+static ani_object CustomCurve([[maybe_unused]] ani_env* env, ani_object callbackObj)
+{
+    static const char* className = "@ohos.curves.curves.Curves";
+    ani_class cls;
+    if (ANI_OK != env->FindClass(className, &cls)) {
+        std::cerr << "Not found '" << className << "'" << std::endl;
         return nullptr;
     }
 
-    if (OHOS::Ace::Container::IsCurrentUseNewPipeline()) {
-        return obj;
-    }
-    auto page = GetStagingPage(OHOS::Ace::Container::CurrentId());
-    int32_t pageId = -1;
-    if (page) {
-        pageId = page->GetPageId();
-    }
-    interpolatingCurve->pageId = pageId;
-
-    ani_object objNew;
-    if (ANI_OK != env->Object_New(cls, ctor, &objNew, reinterpret_cast<ani_object>(interpolatingCurve))) {
-        std::cerr << "New curve object Fail" << std::endl;
+    ani_method ctor;
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
+        std::cerr << "get ctor Failed'" << className << "'" << std::endl;
         return nullptr;
     }
 
-    return objNew;
+    ani_ref onframeRef = reinterpret_cast<ani_ref>(callbackObj);
+    ani_ref onframeGlobalRef;
+    env->GlobalReference_Create(onframeRef, &onframeGlobalRef);
+    auto onFrameCallback = [env,
+                            onframeGlobalRef](
+                            double value) -> double {
+        auto fnObj = reinterpret_cast<ani_fn_object>(onframeGlobalRef);
+        auto args = createDouble(env, value);
+        if (args == nullptr) {
+            return 0.0f;
+        }
+        ani_ref result;
+        auto obj = reinterpret_cast<ani_ref>(args);
+        std::vector<ani_ref> tmp = {reinterpret_cast<ani_ref>(obj)};
+        env->FunctionalObject_Call(fnObj, tmp.size(), tmp.data(), &result);
+        auto aniObj = reinterpret_cast<ani_object>(result);
+        ani_double valueAniDouble = 0.0;
+        env->Object_CallMethodByName_Double(aniObj, "unboxed", ":d", &valueAniDouble);
+        return static_cast<float>(valueAniDouble);
+    };
+
+    auto customCurve = OHOS::Ace::AceType::MakeRefPtr<OHOS::Ace::CustomCurve>(onFrameCallback);
+    CurvesObj* interpolatingCurve = new CurvesObj();
+    interpolatingCurve->curve = customCurve;
+
+    ani_object curve_object;
+    if (ANI_OK != env->Object_New(cls, ctor, &curve_object, reinterpret_cast<ani_object>(interpolatingCurve))) {
+        return nullptr;
+    }
+    return curve_object;
 }
 
 ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
@@ -558,7 +515,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         return ANI_ERROR;
     }
     ani_namespace ns;
-    if (ANI_OK != env->FindNamespace("L@ohos/curves/curves;", &ns)) {
+    if (ANI_OK != env->FindNamespace("@ohos.curves.curves", &ns)) {
         return ANI_ERROR;
     }
     std::array methods = {
@@ -568,13 +525,15 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
         ani_native_function {"initCurve", nullptr, reinterpret_cast<void*>(InitCurve)},
         ani_native_function {"interpolatingSpring", nullptr, reinterpret_cast<void*>(InterpolatingSpring)},
         ani_native_function {"springCurve", nullptr, reinterpret_cast<void*>(SpringCurve)},
-        ani_native_function {"responsiveSpringMotion", nullptr, reinterpret_cast<void*>(SpringResponsiveMotion)}
+        ani_native_function {"responsiveSpringMotion", nullptr, reinterpret_cast<void*>(SpringResponsiveMotion)},
+        ani_native_function {"stepsCurve", nullptr, reinterpret_cast<void*>(StepsCurve)},
+        ani_native_function {"customCurve", nullptr, reinterpret_cast<void*>(CustomCurve)}
     };
     if (ANI_OK != env->Namespace_BindNativeFunctions(ns, methods.data(), methods.size())) {
         return ANI_ERROR;
     }
 
-    static const char *classNameCurves = "L@ohos/curves/curves/Curves;";
+    static const char *classNameCurves = "@ohos.curves.curves.Curves";
     ani_class clsCurves;
     if (ANI_OK != env->FindClass(classNameCurves, &clsCurves)) {
         return ANI_ERROR;

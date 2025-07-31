@@ -19,6 +19,7 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
+#include "frameworks/core/components_ng/render/adapter/matrix_util.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace Matrix4TransitAccessor {
@@ -172,7 +173,7 @@ Ark_Matrix4Transit SetPolyToPolyImpl(Ark_Matrix4Transit peer,
     for (int i = dstIndex; i < dstLastIndex; i++) {
         totalPoint.push_back(dstPoint[i]);
     }
-    result->matrix = SetMatrixPolyToPoly(peer->matrix, totalPoint);
+    result->matrix = OHOS::Ace::NG::MatrixUtil::SetMatrixPolyToPoly(peer->matrix, totalPoint);
 
     return result;
 }

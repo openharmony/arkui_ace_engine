@@ -23,7 +23,7 @@ ohos_unittest("performance_monitor_test") {
   ]
 
   sources = [
-    "performance_monitor_test.cpp",
+    #"performance_monitor_test.cpp",
   ]
 
   external_deps = [

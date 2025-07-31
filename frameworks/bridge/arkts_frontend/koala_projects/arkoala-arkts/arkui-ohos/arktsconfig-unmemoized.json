@@ -64,6 +64,9 @@
             "@ohos.arkui.node": [
                 "./ohos.arkui.node.ts"
             ],
+            "@ohos/arkui/shape": [
+                "../@ohos.arkui.shape.ts"
+            ],
             "@ohos/measure": [
                 "../@ohos.measure.ts"
             ],
@@ -84,6 +87,9 @@
             ],
             "@ohos/graphics/drawing": [
                 "../@ohos.graphics.drawing.ts"
+            ],
+            "@ohos/intl": [
+                "../@ohos.intl.ts"
             ],
             "@ohos/arkui/graphics": [
                 "../@ohos.arkui.graphics.ts"
@@ -112,11 +118,13 @@
         "build/unmemoized/@ohos.arkui.componentUtils.ts",
         "build/unmemoized/@ohos.arkui.focusController.ts",
         "src/ani/arkts/*.ts",
+        "build/unmemoized/@ohos.arkui.shape.ts",
         "build/unmemoized/@ohos.router.ts",
         "build/unmemoized/@ohos.arkui.observer.ts",
         "build/unmemoized/@ohos.mediaquery.ts",
         "build/unmemoized/@ohos.graphics.common2D.ts",
         "build/unmemoized/@ohos.graphics.drawing.ts",
+        "build/unmemoized/@ohos.intl.ts",
         "build/unmemoized/@ohos.arkui.graphics.ts",
         "build/unmemoized/@ohos.overlayManager.ts",
         "build/unmemoized/@ohos.promptAction.ts",

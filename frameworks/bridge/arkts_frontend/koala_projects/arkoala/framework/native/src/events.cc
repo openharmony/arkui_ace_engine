@@ -5,6 +5,7 @@
 #include "events.h"
 #include "common-interop.h"
 #include "interop-types.h"
+#include "securec.h"
 
 static std::deque<EventBuffer> eventQueue;
 
@@ -19,7 +20,10 @@ KInt impl_CheckArkoalaGeneratedEvents(KByte* result, KInt size) {
     if (!eventQueue.size())
         return 0;
 
-    memcpy(result, eventQueue.front().buffer, sizeof(EventBuffer::buffer));
+    if (memcpy_s(result, sizeof(EventBuffer::buffer), eventQueue.front().buffer,
+        sizeof(EventBuffer::buffer)) != 0) {
+        return 0;
+    }
     eventQueue.pop_front();
     return 1;
 }
@@ -30,7 +34,9 @@ KInt impl_InjectEvent(KByte* data, KInt size) {
         return 0;
 
     EventBuffer event;
-    memcpy(event.buffer, data, size);
+    if (memcpy_s(event.buffer, sizeof(EventBuffer::buffer), data, size) != 0) {
+        return 0;
+    }
 
     sendEvent(&event);
     return 1;
@@ -48,4 +54,3 @@ void impl_EmulateTextInputEvent(KInt nodeId, const KStringPtr& text) {
     GetFullImpl()->getEventsAPI()->getTextInputEventsReceiver()->onChange(nodeId, str, preview);
     */
 }
-// KOALA_INTEROP_V2(EmulateTextInputEvent, KInt, KStringPtr) // TODO Where to place it?

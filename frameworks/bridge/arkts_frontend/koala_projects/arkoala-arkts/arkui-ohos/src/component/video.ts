@@ -25,7 +25,7 @@ import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, AttributeModifier } from "./common"
 import { ImageFit } from "./enums"
 import { VoidCallback } from "./units"
 import { ImageAnalyzerConfig, ImageAIOptions } from "./imageCommon"
@@ -33,6 +33,7 @@ import { ColorMetrics } from "../Graphics"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Resource } from "global.resource"
 import { PixelMap } from "#external"
+import { VideoModifier } from "../VideoModifier"
 
 export class VideoControllerInternal {
     public static fromPtr(ptr: KPointer): VideoController {
@@ -66,19 +67,16 @@ export class VideoController implements MaterializedBase {
     public stop(): void {
         return this.stop_serialize()
     }
-    public setCurrentTime(value: number, seekMode?: SeekMode): void {
-        const value_type = runtimeType(value)
-        const seekMode_type = runtimeType(seekMode)
-        if (RuntimeType.UNDEFINED == seekMode_type) {
-            const value_casted = value as (number)
-            return this.setCurrentTime0_serialize(value_casted)
-        }
-        if (TypeChecker.isSeekMode(seekMode)) {
-            const value_casted = value as (number)
-            const seekMode_casted = seekMode as (SeekMode)
-            return this.setCurrentTime1_serialize(value_casted, seekMode_casted)
-        }
-        throw new Error("Can not select appropriate overload")
+    public setCurrentTime(value: number): void {
+        const value_casted = value as (number)
+        this.setCurrentTime0_serialize(value_casted)
+        return
+    }
+    public setCurrentTime(value: number, seekMode: SeekMode): void {
+        const value_casted = value as (number)
+        const seekMode_casted = seekMode as (SeekMode)
+        this.setCurrentTime1_serialize(value_casted, seekMode_casted)
+        return
     }
     public requestFullscreen(value: boolean): void {
         const value_casted = value as (boolean)
@@ -124,6 +122,7 @@ export class VideoController implements MaterializedBase {
     }
 }
 export class ArkVideoPeer extends ArkCommonMethodPeer {
+    _attributeSet?: VideoModifier
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -308,7 +307,7 @@ export class ArkVideoPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._VideoAttribute_onError(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    onStopAttribute(value: ((value: undefined) => void) | undefined): void {
+    onStopAttribute(value: (() => void) | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
@@ -430,11 +429,12 @@ export interface VideoAttribute extends CommonMethod {
     onSeeked(value: ((parameter: PlaybackInfo) => void) | undefined): this
     onUpdate(value: ((parameter: PlaybackInfo) => void) | undefined): this
     onError(value: (() => void) | undefined): this
-    onStop(value: ((value: undefined) => void) | undefined): this
+    onStop(value: (() => void) | undefined): this
     enableAnalyzer(value: boolean | undefined): this
     analyzerConfig(value: ImageAnalyzerConfig | undefined): this
     surfaceBackgroundColor(value: ColorMetrics | undefined): this
     enableShortcutKey(value: boolean | undefined): this
+    attributeModifier(value: AttributeModifier<VideoAttribute> | AttributeModifier<CommonMethod>| undefined): this {return this;}
 }
 export class ArkVideoStyle extends ArkCommonMethodStyle implements VideoAttribute {
     muted_value?: boolean | undefined
@@ -451,7 +451,7 @@ export class ArkVideoStyle extends ArkCommonMethodStyle implements VideoAttribut
     onSeeked_value?: ((parameter: PlaybackInfo) => void) | undefined
     onUpdate_value?: ((parameter: PlaybackInfo) => void) | undefined
     onError_value?: (() => void) | undefined
-    onStop_value?: ((value: undefined) => void) | undefined
+    onStop_value?: (() => void) | undefined
     enableAnalyzer_value?: boolean | undefined
     analyzerConfig_value?: ImageAnalyzerConfig | undefined
     surfaceBackgroundColor_value?: ColorMetrics | undefined
@@ -498,7 +498,7 @@ export class ArkVideoStyle extends ArkCommonMethodStyle implements VideoAttribut
     public onError(value: (() => void) | undefined): this {
         return this
     }
-    public onStop(value: ((value: undefined) => void) | undefined): this {
+    public onStop(value: (() => void) | undefined): this {
         return this
     }
     public enableAnalyzer(value: boolean | undefined): this {
@@ -636,7 +636,7 @@ export class ArkVideoComponent extends ArkCommonMethodComponent implements Video
         }
         return this
     }
-    public onStop(value: ((value: undefined) => void) | undefined): this {
+    public onStop(value: (() => void) | undefined): this {
         if (this.checkPriority("onStop")) {
             const value_casted = value as ((() => void) | undefined)
             this.getPeer()?.onStopAttribute(value_casted)
@@ -680,6 +680,11 @@ export class ArkVideoComponent extends ArkCommonMethodComponent implements Video
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
+    }
+
+    public attributeModifier(modifier: AttributeModifier<VideoAttribute> | AttributeModifier<CommonMethod> | undefined): this {
+        hookVideoAttributeModifier(this, modifier);
+        return this
     }
 }
 /** @memo */

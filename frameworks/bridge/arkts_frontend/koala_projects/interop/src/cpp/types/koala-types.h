@@ -63,7 +63,12 @@ struct KStringPtrImpl {
         this->_length = other._length;
     }
 
-    ~KStringPtrImpl() { if (_value && _owned) free(_value); }
+    ~KStringPtrImpl()
+    {
+        if (_value && _owned) {
+            free(_value);
+        }
+    }
 
     bool isNull() const { return _value == nullptr; }
     const char* c_str() const { return _value; }
@@ -72,10 +77,13 @@ struct KStringPtrImpl {
 
     void resize(int size) {
         _length = size;
-        if (!_owned) return;
+        if (!_owned) { return; }
         // Ignore old content.
         if (_value && _owned) free(_value);
         _value = reinterpret_cast<char*>(malloc(size + 1));
+        if (!_value) {
+          return;
+        }
         _value[size] = 0;
     }
 
@@ -84,7 +92,7 @@ struct KStringPtrImpl {
     }
 
     void assign(const char* data, int len) {
-        if (_value && _owned) free(_value);
+        if (_value && _owned) { free(_value); }
         if (data) {
           if (_owned) {
             _value = reinterpret_cast<char*>(malloc(len + 1));
@@ -152,16 +160,18 @@ struct KInteropNumber {
       return result;
     }
     inline double asDouble() {
-      if (tag == INTEROP_TAG_INT32)
-        return (double)i32;
-      else
-        return (double)f32;
+        if (tag == INTEROP_TAG_INT32) {
+            return (double)i32;
+        } else {
+            return (double)f32;
+        }
     }
     inline int32_t asInt32() {
-      if (tag == INTEROP_TAG_INT32)
-        return i32;
-      else
-        return (int32_t)f32;
+        if (tag == INTEROP_TAG_INT32) {
+            return i32;
+        } else {
+            return (int32_t)f32;
+        }
     }
 };
 

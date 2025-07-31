@@ -42,7 +42,7 @@ export interface BuildOptions {
     nestingBuilderSupported?: boolean;
 }
 
-const __uiNode_name_map__: Array<string> = ["ContentSlot", "CustomComponent"]
+const __uiNode_name_map__: Array<string> = ["ContentSlot", "CustomComponent", "LazyForEach", "ConditionScope"]
 
 class BuilderRootNode extends IncrementalNode {
     public __parent?: ArkBuilderProxyNodePeer;
@@ -143,7 +143,7 @@ export type voidBuilderFunc = /** @memo */ () => void;
 
 export type TBuilderFunc<T> = /** @memo */ (t: T) => void;
 
-export class BuilderNode<T = undefined>{
+export class BuilderNode<T = undefined> {
     public _JSBuilderNode: JSBuilderNode<T>;
     // the name of "nodePtr_" is used in ace_engine/interfaces/native/node/native_node_ani.cpp.
     private nodePtr_: KPointer | undefined;
@@ -194,6 +194,10 @@ export class BuilderNode<T = undefined>{
     }
     public updateConfiguration(): void {
         this._JSBuilderNode.updateConfiguration();
+    }
+
+    public getNodeWithoutProxy(): pointer | undefined {
+        return this._JSBuilderNode.getNodeWithoutProxy();
     }
 }
 
@@ -248,7 +252,7 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
     }
 
     public buildFunc(): void {
-        let instanceId : int32 = 0;
+        let instanceId: int32 = 0;
         if (this.__uiContext === undefined) {
             instanceId = UIContextUtil.getCurrentInstanceId();
         } else {
@@ -266,10 +270,8 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
                 setNeedCreate(result);
                 return;
             }
-            if (this.__params === undefined && this.__arg !== undefined) {
-                this.__params = rememberMutableState<T>(this.__arg!);
-            }
-            if (this.__params?.value) {
+            this.__params = rememberMutableState<T>(this.__arg as T);
+            if (this.__params) {
                 const result = setNeedCreate(true);
                 this.__builder?.builder(this.__params!.value);
                 setNeedCreate(result);
@@ -300,6 +302,11 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
             this.__frameNode?.setJsBuilderNode(this);
             this.setUpdateConfigurationCallback(this.updateConfiguration);
         }
+    }
+
+    public getNodeWithoutProxy(): pointer | undefined {
+        let pointer = this.__root?.getPeerPtr();
+        return pointer ? pointer : undefined;
     }
 
     public build0(builder: WrappedBuilder<voidBuilderFunc>): void {

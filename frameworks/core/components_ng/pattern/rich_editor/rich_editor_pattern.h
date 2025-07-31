@@ -540,6 +540,8 @@ public:
         caretChangeListener_ = listener;
     }
 
+    void RecreateUndoManager();
+
     void SetStyledString(const RefPtr<SpanString>& value);
 
     RefPtr<MutableSpanString> GetStyledString() const

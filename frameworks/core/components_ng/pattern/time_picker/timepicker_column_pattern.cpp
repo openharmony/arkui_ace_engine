@@ -22,7 +22,6 @@
 
 #include "adapter/ohos/entrance/picker/picker_haptic_factory.h"
 #include "base/utils/measure_util.h"
-#include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
 #include "core/common/font_manager.h"
@@ -52,55 +51,6 @@ const int32_t HALF_NUMBER = 2;
 const uint32_t NEXT_COLOUM_DIFF = 1;
 const std::string AMPM = "amPm";
 } // namespace
-
-void TimePickerColumnPattern::OnAttachToFrameNode()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode); // picker multi-thread security
-
-    auto context = host->GetContextRefPtr();
-    CHECK_NULL_VOID(context);
-    auto pickerTheme = context->GetTheme<PickerTheme>();
-    CHECK_NULL_VOID(pickerTheme);
-    auto hub = host->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(hub);
-    auto gestureHub = hub->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
-
-    tossAnimationController_->SetPipelineContext(context);
-    tossAnimationController_->SetColumn(AceType::WeakClaim(this));
-    jumpInterval_ = pickerTheme->GetJumpInterval().ConvertToPx();
-    CreateAnimation();
-    InitPanEvent(gestureHub);
-    host->GetRenderContext()->SetClipToFrame(true);
-    InitHapticController(host);
-    RegisterWindowStateChangedCallback();
-}
-
-void TimePickerColumnPattern::OnDetachFromFrameNode(FrameNode* frameNode)
-{
-    THREAD_SAFE_NODE_CHECK(frameNode, OnDetachFromFrameNode, frameNode); // picker multi-thread security
-
-    if (hapticController_) {
-        hapticController_->Stop();
-    }
-    UnregisterWindowStateChangedCallback(frameNode);
-}
-
-void TimePickerColumnPattern::OnAttachToMainTree()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree); // picker multi-thread security
-}
-
-void TimePickerColumnPattern::OnDetachFromMainTree()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree); // picker multi-thread security
-}
 
 void TimePickerColumnPattern::OnModifyDone()
 {
@@ -201,26 +151,6 @@ bool TimePickerColumnPattern::IsStartEndTimeDefined()
 bool TimePickerColumnPattern::IsTossNeedToStop()
 {
     return IsStartEndTimeDefined();
-}
-
-bool TimePickerColumnPattern::OnDirtyLayoutWrapperSwap(
-    const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
-{
-    bool isChange =
-        config.frameSizeChange || config.frameOffsetChange || config.contentSizeChange || config.contentOffsetChange;
-
-    CHECK_NULL_RETURN(isChange, false);
-    CHECK_NULL_RETURN(dirty, false);
-    auto geometryNode = dirty->GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, false);
-    auto offset = geometryNode->GetFrameOffset();
-    auto size = geometryNode->GetFrameSize();
-    if (!NearEqual(offset, offset_) || !NearEqual(size, size_)) {
-        offset_ = offset;
-        size_ = size;
-        AddHotZoneRectToText();
-    }
-    return true;
 }
 
 void TimePickerColumnPattern::InitTextFontFamily()
@@ -660,7 +590,7 @@ void TimePickerColumnPattern::GetAnimationColor(uint32_t index, uint32_t showCou
         if (!selectedMarkPaint_) {
             color = pickerTheme->GetOptionStyle(false, false).GetTextColor();
         } else if (selectedMark) {
-            color = pickerTheme->GetOptionStyle(true, false).GetTextColor();
+            color = pickerTheme->GetOptionStyle(true, true).GetTextColor();
         }
     } else if (selectedMark) {
         color = layoutProperty->GetSelectedColor().value_or(pickerTheme->GetOptionStyle(true, false).GetTextColor());

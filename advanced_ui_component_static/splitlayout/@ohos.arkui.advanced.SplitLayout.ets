@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,13 +14,12 @@
  */
 
 import {
-  Component, Resource, ResourceStr, Column, GridRow, BreakpointsReference, GridRowDirection, Row, GridCol, Stack,
-  Alignment, Image, Scroll, Text, FontWeight, TextAlign, HorizontalAlign, BarState, NestedScrollMode, Flex, FlexAlign,
-  ItemAlign, FlexDirection, Area, $r, Padding, LocalizedMargin, Margin, ClickEvent, BreakPoints, GridColColumnOption,
-  BuilderParam
+  Component, ResourceStr, Column, GridRow, BreakpointsReference, GridRowDirection, Row, GridCol, Stack, Alignment,
+  Image, Scroll, Text, FontWeight, TextAlign, HorizontalAlign, BarState, NestedScrollMode, Flex, FlexAlign, Area,
+  ItemAlign, FlexDirection, $r, Padding, LocalizedMargin, Margin, BreakPoints, GridColColumnOption, BuilderParam
 } from '@ohos.arkui.component';
+import { State, PropRef } from '@ohos.arkui.stateManagement';
 import { LengthMetrics } from '@ohos.arkui.node';
-import { State, Prop } from '@ohos.arkui.stateManagement';
 import hilog from '@ohos.hilog';
 
 const TEXT_MARGIN_TOP_4: number = 4;
@@ -36,9 +35,9 @@ export struct SplitLayout {
   @State areaWidth: number = 0;
   @State imageBackgroundColor: string = '#19000000';
   @State mainImage: ResourceStr = '';
-  @Prop primaryText: ResourceStr = '';
-  @Prop secondaryText?: ResourceStr = '';
-  @Prop tertiaryText?: ResourceStr = '';
+  @PropRef primaryText: ResourceStr = '';
+  @PropRef secondaryText?: ResourceStr = '';
+  @PropRef tertiaryText?: ResourceStr = '';
 
   build() {
     Column() {
@@ -213,7 +212,7 @@ export struct SplitLayout {
     }
     .onAreaChange((oldValue: Area, newValue: Area) => {
       console.info(`Ace: on area change, oldValue is ${JSON.stringify(oldValue)} value is ${JSON.stringify(newValue)}`);
-      this.sizeValue = JSON.stringify(newValue)
+      this.sizeValue = JSON.stringify(newValue);
       this.areaWidth = parseInt(newValue.width.toString(), 0);
       console.info(`pingAce: newWidth: ${this.areaWidth}, newHeight: ${parseInt(newValue.height.toString(), 0)}`);
     })

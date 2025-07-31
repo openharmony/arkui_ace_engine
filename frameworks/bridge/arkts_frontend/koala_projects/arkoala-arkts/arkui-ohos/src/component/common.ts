@@ -25,10 +25,13 @@ import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { DrawContext } from "./../Graphics"
 import { LengthMetrics } from "../Graphics"
-import { ComponentContent, Context, ContextInternal, StateStylesOps } from "./arkui-custom"
+import { Context, ContextInternal, StateStylesOps } from "./arkui-custom"
+import { ComponentContent } from 'arkui/ComponentContent'
 import { UIContext } from "@ohos/arkui/UIContext"
 import { IntentionCode } from '@ohos.multimodalInput.intentionCode'
-import { CircleShape, EllipseShape, PathShape, RectShape, SymbolGlyphModifier, ImageModifier } from "./arkui-external"
+import { ImageModifier } from "./arkui-external"
+import { SymbolGlyphModifier } from "../SymbolGlyphModifier"
+import { CircleShape, EllipseShape, PathShape, RectShape } from "@ohos/arkui/shape"
 import { KeyType, KeySource, Color, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, LineCapStyle, LineJoinStyle, BarState, CrownSensitivity, EdgeEffect, TextDecorationType, TextDecorationStyle, Curve, PlayMode, SharedTransitionEffectType, GradientDirection, HorizontalAlign, VerticalAlign, TransitionType, FontWeight, FontStyle, TouchType, InteractionHand, CrownAction, Placement, ArrowPointPosition, ClickEffectLevel, NestedScrollMode, PixelRoundCalcPolicy, IlluminatedType, MouseButton, MouseAction, AccessibilityHoverType, AxisAction, AxisModel, ScrollSource } from "./enums"
 import { ResourceColor, ConstraintSizeOptions, DirectionalEdgesT, SizeOptions, Length, ChainWeightOptions, Padding, LocalizedPadding, Position, BorderOptions, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, PX, VP, FP, LPX, Percentage, Bias, Font, EdgeStyles, Edges } from "./units"
 import { Resource } from "global.resource"
@@ -38,7 +41,6 @@ import { PeerNode } from "./../PeerNode"
 import { ResizableOptions } from "./image"
 import { Filter, VisualEffect, BrightnessBlender } from "#external"
 import { FocusBoxStyle, FocusPriority } from "./focus"
-import { TransformationMatrix } from "./arkui-common"
 import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureRecognizer, GestureType, GestureMask, TapGestureInterface, LongPressGestureInterface, PanGestureInterface, PinchGestureInterface, SwipeGestureInterface, RotationGestureInterface, GestureGroupInterface, GestureHandler, GesturePriority, Gesture, GestureGroup, GestureGroupHandler } from "./gesture"
 import { StyledString } from "./styledString"
 import { Callback_Number_Number_Void } from "./grid"
@@ -47,6 +49,7 @@ import { Tuple_Number_Number } from "./arkui-synthetics"
 import { ButtonType, ButtonStyleMode, ButtonRole } from "./button"
 import { Callback_Number_Void } from "./alphabetIndexer"
 import { AnimationRange_Number } from "./type-replacements"
+import { Matrix4Transit } from "#external"
 import { ScrollState } from "./list"
 import { _animateTo, _animationStart, _animationStop } from "./../handwritten/ArkAnimation"
 import { GlobalScope } from "./GlobalScope"
@@ -61,11 +64,14 @@ import { rememberMutableState } from '@koalaui/runtime'
 import { hookDragPreview, hookAllowDropAttribute, hookRegisterOnDragStartImpl, hookOnDrop, hookDragEventStartDataLoading } from "../handwritten/ArkDragDrop"
 import { ArkUIAniModule } from "arkui.ani"
 import { PointerStyle, UnifiedData, Summary, PixelMap, UniformDataType, DataSyncOptions } from "#external"
-import { hookCommonMethodGestureImpl, hookCommonMethodGestureModifierImpl, hookCommonMethodParallelGestureImpl, hookCommonMethodPriorityGestureImpl, hookCommonMethodVisualEffectImpl, hookCommonMethodBackgroundFilterImpl, hookCommonMethodForegroundFilterImpl, hookCommonMethodCompositingFilterImpl, hookCommonMethodAdvancedBlendModeImpl } from "../handwritten/CommonHandWritten"
+import { hookCommonMethodGestureImpl, hookCommonMethodGestureModifierImpl, hookCommonMethodParallelGestureImpl,
+    hookCommonMethodPriorityGestureImpl, hookCommonMethodVisualEffectImpl, hookCommonMethodBackgroundFilterImpl,
+    hookCommonMethodForegroundFilterImpl, hookCommonMethodCompositingFilterImpl, hookCommonMethodAdvancedBlendModeImpl,
+    hookCustomPropertyImpl
+} from "../handwritten/CommonHandWritten"
 import { CommonMethodModifier } from "../CommonMethodModifier"
-export interface ICurve {
-    interpolate(fraction: number): number
-}
+import { ICurve as ICurve_} from "#external"
+export type ICurve = ICurve_
 export class ICurveInternal implements MaterializedBase,ICurve {
     peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
@@ -1599,11 +1605,11 @@ export class TextContentControllerBase implements MaterializedBase {
 export interface UICommonEvent {
     setOnClick(callback_: ((event: ClickEvent) => void) | undefined): void
     setOnTouch(callback_: ((event: TouchEvent) => void) | undefined): void
-    setOnAppear(callback_: (() => void) | undefined): void
-    setOnDisappear(callback_: (() => void) | undefined): void
+    setOnAppear(callback_: ((data: undefined) => void) | undefined): void
+    setOnDisappear(callback_: ((data: undefined) => void) | undefined): void
     setOnKeyEvent(callback_: ((event: KeyEvent) => void) | undefined): void
-    setOnFocus(callback_: (() => void) | undefined): void
-    setOnBlur(callback_: (() => void) | undefined): void
+    setOnFocus(callback_: ((data: undefined) => void) | undefined): void
+    setOnBlur(callback_: ((data: undefined) => void) | undefined): void
     setOnHover(callback_: HoverCallback | undefined): void
     setOnMouse(callback_: ((event: MouseEvent) => void) | undefined): void
     setOnSizeChange(callback_: SizeChangeCallback | undefined): void
@@ -1635,13 +1641,13 @@ export class UICommonEventInternal implements MaterializedBase,UICommonEvent {
         this.setOnTouch_serialize(callback__casted)
         return
     }
-    public setOnAppear(callback_: (() => void) | undefined): void {
-        const callback__casted = callback_ as ((() => void) | undefined)
+    public setOnAppear(callback_: ((data: undefined) => void) | undefined): void {
+        const callback__casted = callback_ as (((data: undefined) => void) | undefined)
         this.setOnAppear_serialize(callback__casted)
         return
     }
-    public setOnDisappear(callback_: (() => void) | undefined): void {
-        const callback__casted = callback_ as ((() => void) | undefined)
+    public setOnDisappear(callback_: ((data: undefined) => void) | undefined): void {
+        const callback__casted = callback_ as (((data: undefined) => void) | undefined)
         this.setOnDisappear_serialize(callback__casted)
         return
     }
@@ -1650,13 +1656,13 @@ export class UICommonEventInternal implements MaterializedBase,UICommonEvent {
         this.setOnKeyEvent_serialize(callback__casted)
         return
     }
-    public setOnFocus(callback_: (() => void) | undefined): void {
-        const callback__casted = callback_ as ((() => void) | undefined)
+    public setOnFocus(callback_: ((data: undefined) => void) | undefined): void {
+        const callback__casted = callback_ as (((data: undefined) => void) | undefined)
         this.setOnFocus_serialize(callback__casted)
         return
     }
-    public setOnBlur(callback_: (() => void) | undefined): void {
-        const callback__casted = callback_ as ((() => void) | undefined)
+    public setOnBlur(callback_: ((data: undefined) => void) | undefined): void {
+        const callback__casted = callback_ as (((data: undefined) => void) | undefined)
         this.setOnBlur_serialize(callback__casted)
         return
     }
@@ -1705,7 +1711,7 @@ export class UICommonEventInternal implements MaterializedBase,UICommonEvent {
         ArkUIGeneratedNativeModule._UICommonEvent_setOnTouch(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private setOnAppear_serialize(callback_: (() => void) | undefined): void {
+    private setOnAppear_serialize(callback_: ((data: undefined) => void) | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let callback__type : int32 = RuntimeType.UNDEFINED
         callback__type = runtimeType(callback_)
@@ -1717,7 +1723,7 @@ export class UICommonEventInternal implements MaterializedBase,UICommonEvent {
         ArkUIGeneratedNativeModule._UICommonEvent_setOnAppear(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private setOnDisappear_serialize(callback_: (() => void) | undefined): void {
+    private setOnDisappear_serialize(callback_: ((data: undefined) => void) | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let callback__type : int32 = RuntimeType.UNDEFINED
         callback__type = runtimeType(callback_)
@@ -1741,7 +1747,7 @@ export class UICommonEventInternal implements MaterializedBase,UICommonEvent {
         ArkUIGeneratedNativeModule._UICommonEvent_setOnKeyEvent(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private setOnFocus_serialize(callback_: (() => void) | undefined): void {
+    private setOnFocus_serialize(callback_: ((data: undefined) => void) | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let callback__type : int32 = RuntimeType.UNDEFINED
         callback__type = runtimeType(callback_)
@@ -1753,7 +1759,7 @@ export class UICommonEventInternal implements MaterializedBase,UICommonEvent {
         ArkUIGeneratedNativeModule._UICommonEvent_setOnFocus(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private setOnBlur_serialize(callback_: (() => void) | undefined): void {
+    private setOnBlur_serialize(callback_: ((data: undefined) => void) | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let callback__type : int32 = RuntimeType.UNDEFINED
         callback__type = runtimeType(callback_)
@@ -1856,6 +1862,7 @@ export class GestureModifierInternal implements MaterializedBase,GestureModifier
         return obj
     }
 }
+export type CustomProperty = Object | undefined | Record<string, CustomProperty>;
 export class ArkCommonMethodPeer extends PeerNode {
     _attributeSet?: CommonMethodModifier;
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -3903,14 +3910,15 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_rotate1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    transform0Attribute(value: TransformationMatrix | undefined): void {
+    transform0Attribute(value: object | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8(value_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_type)) {
-            const value_value  = value!
-            thisSerializer.writeTransformationMatrix(value_value)
+            const value_curve_value  = value!
+            const value_curve_value_2  = value_curve_value as Matrix4Transit
+            thisSerializer.writeInt64(Object.values(value_curve_value_2)[0] as int64)
         }
         ArkUIGeneratedNativeModule._CommonMethod_transform0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
@@ -4643,15 +4651,14 @@ export class ArkCommonMethodPeer extends PeerNode {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
-            if (RuntimeType.OBJECT == value_value_type) {
-                thisSerializer.writeInt8(0 as int32)
-                const value_value_0  = value_value as ShadowOptions
-                thisSerializer.writeShadowOptions(value_value_0)
-            }
-            else if (TypeChecker.isShadowStyle(value_value)) {
+            if (TypeChecker.isShadowStyle(value_value)) {
                 thisSerializer.writeInt8(1 as int32)
                 const value_value_1  = value_value as ShadowStyle
                 thisSerializer.writeInt32(TypeChecker.ShadowStyle_ToNumeric(value_value_1))
+            } else if (RuntimeType.OBJECT == value_value_type) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0  = value_value as ShadowOptions
+                thisSerializer.writeShadowOptions(value_value_0)
             }
         }
         ArkUIGeneratedNativeModule._CommonMethod_shadow0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
@@ -5449,25 +5456,6 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_accessibilityFocusDrawLevel(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    customPropertyAttribute(name: string | undefined, value: Object | undefined): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        let name_type : int32 = RuntimeType.UNDEFINED
-        name_type = runtimeType(name)
-        thisSerializer.writeInt8(name_type as int32)
-        if ((RuntimeType.UNDEFINED) != (name_type)) {
-            const name_value  = name!
-            thisSerializer.writeString(name_value)
-        }
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8(value_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
-            const value_value  = value!
-            thisSerializer.holdAndWriteObject(value_value)
-        }
-        ArkUIGeneratedNativeModule._CommonMethod_customProperty(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
     expandSafeAreaAttribute(types?: Array<SafeAreaType>, edges?: Array<SafeAreaEdge>): void {
         const thisSerializer : Serializer = Serializer.hold()
         let types_type : int32 = RuntimeType.UNDEFINED
@@ -5943,41 +5931,6 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeDragInteractionOptions(options_value)
         }
         ArkUIGeneratedNativeModule._CommonMethod_dragPreviewOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    overlayAttribute(value: string | CustomBuilder | ComponentContent | undefined, options?: OverlayOptions): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        let value_type : int32 = RuntimeType.UNDEFINED
-        value_type = runtimeType(value)
-        thisSerializer.writeInt8(value_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
-            const value_value  = value!
-            let value_value_type : int32 = RuntimeType.UNDEFINED
-            value_value_type = runtimeType(value_value)
-            if (RuntimeType.STRING == value_value_type) {
-                thisSerializer.writeInt8(0 as int32)
-                const value_value_0  = value_value as string
-                thisSerializer.writeString(value_value_0)
-            }
-            else if (RuntimeType.FUNCTION == value_value_type) {
-                thisSerializer.writeInt8(1 as int32)
-                const value_value_1  = value_value as CustomBuilder
-                thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(value_value_1))
-            }
-            else if (RuntimeType.OBJECT == value_value_type) {
-                thisSerializer.writeInt8(2 as int32)
-                const value_value_2  = value_value as ComponentContent
-                thisSerializer.writeComponentContent(value_value_2)
-            }
-        }
-        let options_type : int32 = RuntimeType.UNDEFINED
-        options_type = runtimeType(options)
-        thisSerializer.writeInt8(options_type as int32)
-        if ((RuntimeType.UNDEFINED) != (options_type)) {
-            const options_value  = options!
-            thisSerializer.writeOverlayOptions(options_value)
-        }
-        ArkUIGeneratedNativeModule._CommonMethod_overlay(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     blendMode0Attribute(value: BlendMode | undefined, type?: BlendApplyType): void {
@@ -7200,21 +7153,21 @@ export interface ScaleOptions {
     centerX?: number | string;
     centerY?: number | string;
 }
-export interface HorizontalAlignOptions {
+export interface HorizontalAlignParam {
     anchor: string;
     align: HorizontalAlign;
 }
-export interface VerticalAlignOptions {
+export interface VerticalAlignParam {
     anchor: string;
     align: VerticalAlign;
 }
 export interface AlignRuleOption {
-    left?: HorizontalAlignOptions;
-    right?: HorizontalAlignOptions;
-    middle?: HorizontalAlignOptions;
-    top?: VerticalAlignOptions;
-    bottom?: VerticalAlignOptions;
-    center?: VerticalAlignOptions;
+    left?: HorizontalAlignParam;
+    right?: HorizontalAlignParam;
+    middle?: HorizontalAlignParam;
+    top?: VerticalAlignParam;
+    bottom?: VerticalAlignParam;
+    center?: VerticalAlignParam;
     bias?: Bias;
 }
 export interface LocalizedHorizontalAlignParam {
@@ -7602,11 +7555,23 @@ export type Callback_SheetDismiss_Void = (sheetDismiss: SheetDismiss) => void;
 export type Callback_DismissSheetAction_Void = (parameter: DismissSheetAction) => void;
 export type Callback_SpringBackAction_Void = (parameter: SpringBackAction) => void;
 export type Callback_SheetType_Void = (parameter: SheetType) => void;
+export type SingleLengthDetent = [
+    SheetSize | Length
+]
+export type DoubleLengthDetents = [
+    SheetSize | Length,
+    SheetSize | Length | undefined
+]
+export type TripleLengthDetents = [
+    SheetSize | Length,
+    SheetSize | Length | undefined,
+    SheetSize | Length | undefined
+]
 export interface SheetOptions extends BindOptions {
     height?: SheetSize | Length;
     dragBar?: boolean;
     maskColor?: ResourceColor;
-    detents?: [ SheetSize | Length, SheetSize | Length | undefined, SheetSize | Length | undefined ];
+    detents?: SingleLengthDetent | DoubleLengthDetents | TripleLengthDetents;
     blurStyle?: BlurStyle;
     showClose?: boolean | Resource;
     preferType?: SheetType;
@@ -8096,7 +8061,7 @@ export interface CommonMethod {
     animationStop(value: AnimateParam | undefined):this {return this;}
     __createOrSetAnimatableProperty<T>(functionName: string, value: number | AnimatableArithmetic<T>,
         callback: (value: number | AnimatableArithmetic<T>) => void): void {}
-    transition(effect: TransitionOptions | TransitionEffect | undefined | TransitionEffect | undefined, onFinish?: TransitionFinishCallback): this {return this;}
+    transition(effect: TransitionEffect | undefined, onFinish?: TransitionFinishCallback): this {return this;}
     motionBlur(value: MotionBlurOptions | undefined): this {return this;}
     brightness(value: number | undefined): this {return this;}
     contrast(value: number | undefined): this {return this;}
@@ -8115,7 +8080,7 @@ export interface CommonMethod {
     gridSpan(value: number | undefined): this {return this;}
     gridOffset(value: number | undefined): this {return this;}
     rotate(value: RotateOptions | undefined): this {return this;}
-    transform(value: TransformationMatrix | undefined | Object | undefined): this {return this;}
+    transform(value: object | undefined): this {return this;}
     onAppear(value: (() => void) | undefined): this {return this;}
     onDisAppear(value: (() => void) | undefined): this {return this;}
     onAttach(value: (() => void) | undefined): this {return this;}
@@ -8136,6 +8101,14 @@ export interface CommonMethod {
     enabled(value: boolean | undefined): this {return this;}
     useSizeType(value: Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs | undefined): this {return this;}
     alignRules(value: AlignRuleOption | undefined | LocalizedAlignRuleOptions | undefined): this {return this;}
+    alignRulesWithAlignRuleOptionTypedValue(value: AlignRuleOption | undefined): this {
+        this.alignRules(value);
+        return this;
+    }
+    alignRulesWithLocalizedAlignRuleOptionsTypedValue(value: LocalizedAlignRuleOptions | undefined): this {
+        this.alignRules(value);
+        return this;
+    }
     aspectRatio(value: number | undefined): this {return this;}
     clickEffect(value: ClickEffect | undefined): this {return this;}
     onDragStart(value: ((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) | undefined): this {return this;}
@@ -8192,7 +8165,7 @@ export interface CommonMethod {
     onTouchIntercept(value: ((parameter: TouchEvent) => HitTestMode) | undefined): this {return this;}
     onSizeChange(value: SizeChangeCallback | undefined): this {return this;}
     accessibilityFocusDrawLevel(value: FocusDrawLevel | undefined): this {return this;}
-    customProperty(name: string | undefined, value: Object | undefined): this {return this;}
+    customProperty(name: string, value: CustomProperty): this {return this;}
     expandSafeArea(types?: Array<SafeAreaType> | undefined, edges?: Array<SafeAreaEdge> | undefined): this {return this;}
     background(builder: CustomBuilder | undefined, options?: BackgroundOptions): this {return this;}
     backgroundImage(src: ResourceStr | PixelMap | undefined, repeat?: ImageRepeat | undefined): this {return this;}
@@ -8306,7 +8279,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     gridSpan_value?: number | undefined
     gridOffset_value?: number | undefined
     rotate_value?: RotateOptions | undefined
-    transform_value?: TransformationMatrix | undefined
+    transform_value?: Matrix4Transit | undefined
     onAppear_value?: (() => void) | undefined
     onDisAppear_value?: (() => void) | undefined
     onAttach_value?: (() => void) | undefined
@@ -8580,7 +8553,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     public animation(value: AnimateParam | undefined): this {
         return this
     }
-    public transition(effect: TransitionOptions | TransitionEffect | undefined | TransitionEffect | undefined, onFinish?: TransitionFinishCallback): this {
+    public transition(effect: TransitionEffect | undefined, onFinish?: TransitionFinishCallback): this {
         return this
     }
     public motionBlur(value: MotionBlurOptions | undefined): this {
@@ -8637,7 +8610,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     public rotate(value: RotateOptions | undefined): this {
         return this
     }
-    public transform(value: TransformationMatrix | undefined | Object | undefined): this {
+    public transform(value: object | undefined ): this {
         return this
     }
     public onAppear(value: (() => void) | undefined): this {
@@ -8868,7 +8841,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     public accessibilityFocusDrawLevel(value: FocusDrawLevel | undefined): this {
         return this
     }
-    public customProperty(name: string | undefined, value: Object | undefined): this {
+    public customProperty(name: string, value: CustomProperty): this {
         return this
     }
     public expandSafeArea(types?: Array<SafeAreaType> | undefined, edges?: Array<SafeAreaEdge> | undefined): this {
@@ -9934,7 +9907,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
             throw new Error('__createOrSetAnimatableProperty format error')
         }
     }
-    public transition(effect: TransitionOptions | TransitionEffect | undefined | TransitionEffect | undefined, onFinish?: TransitionFinishCallback): this {
+    public transition(effect: TransitionEffect | undefined, onFinish?: TransitionFinishCallback): this {
         if (this.checkPriority("transition")) {
             const effect_type = runtimeType(effect)
             const onFinish_type = runtimeType(onFinish)
@@ -10249,11 +10222,11 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public transform(value: TransformationMatrix | undefined | Object | undefined): this {
+    public transform(value: object | undefined): this {
         if (this.checkPriority("transform")) {
             const value_type = runtimeType(value)
             if ((RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (TransformationMatrix | undefined)
+                const value_casted = value as (object | undefined)
                 this.getPeer()?.transform0Attribute(value_casted)
                 return this
             }
@@ -10638,11 +10611,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
                 this.getPeer()?.clipShape0Attribute(value_casted)
                 return this
             }
-            if ((RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (CircleShape | EllipseShape | PathShape | RectShape | undefined)
-                this.getPeer()?.clipShape1Attribute(value_casted)
-                return this
-            }
             throw new Error("Can not select appropriate overload")
         }
         return this
@@ -10675,11 +10643,6 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
             if ((RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
                 const value_casted = value as (CircleShape | EllipseShape | PathShape | RectShape | undefined)
                 this.getPeer()?.maskShape0Attribute(value_casted)
-                return this
-            }
-            if ((RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (CircleShape | EllipseShape | PathShape | RectShape | undefined)
-                this.getPeer()?.maskShape1Attribute(value_casted)
                 return this
             }
             throw new Error("Can not select appropriate overload")
@@ -10723,9 +10686,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public stateStyles(value: StateStyles | undefined): this {
         if (this.checkPriority("stateStyles")) {
-            const value_casted = value as (StateStyles | undefined)
-            hookStateStyleImpl(this.getPeer(), value_casted)
-            return this
+            hookStateStyleImpl(this, value)
         }
         return this
     }
@@ -11060,14 +11021,11 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public customProperty(name: string | undefined, value: Object | undefined): this {
+    public customProperty(name: string, value: CustomProperty): this {
         if (this.checkPriority("customProperty")) {
-            const name_casted = name as (string | undefined)
-            const value_casted = value as (Object | undefined)
-            this.getPeer()?.customPropertyAttribute(name_casted, value_casted)
-            return this
+            hookCustomPropertyImpl(this, name, value);
         }
-        return this
+        return this;
     }
     public expandSafeArea(types?: Array<SafeAreaType> | undefined, edges?: Array<SafeAreaEdge> | undefined): this {
         if (this.checkPriority("expandSafeArea")) {
@@ -11089,9 +11047,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public backgroundImage(src: ResourceStr | PixelMap | undefined, repeat?: ImageRepeat | undefined): this {
         if (this.checkPriority("backgroundImage")) {
-            const src_casted = src as (ResourceStr | PixelMap | undefined)
-            const repeat_casted = repeat as (ImageRepeat | undefined)
-            hookBackgroundImageImpl(this.getPeer(), src_casted, repeat_casted)
+            hookBackgroundImageImpl(this, src, repeat)
         }
         return this
     }
@@ -11100,7 +11056,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
             const style_type = runtimeType(style)
             const options_type = runtimeType(options)
             const sysOptions_type = runtimeType(sysOptions)
-            if (((RuntimeType.NUMBER == style_type) || (RuntimeType.UNDEFINED == style_type))) {
+            if (((RuntimeType.NUMBER == style_type) || (RuntimeType.UNDEFINED == style_type) || (RuntimeType.OBJECT == options_type) || (RuntimeType.UNDEFINED == options_type))) {
                 const value_casted = style as (BlurStyle | undefined)
                 const options_casted = options as (BackgroundBlurStyleOptions | undefined)
                 this.getPeer()?.backgroundBlurStyle0Attribute(value_casted, options_casted)
@@ -11282,10 +11238,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public overlay(value: string | CustomBuilder | ComponentContent | undefined, options?: OverlayOptions): this {
         if (this.checkPriority("overlay")) {
-            const value_casted = value as (string | CustomBuilder | ComponentContent | undefined)
-            const options_casted = options as (OverlayOptions)
-            this.getPeer()?.overlayAttribute(value_casted, options_casted)
-            return this
+            hookOverlayImpl(this, value, options)
         }
         return this
     }
@@ -12233,7 +12186,7 @@ export class HoverEventInternal extends BaseEventInternal implements Materialize
         return obj
     }
 }
-export interface MouseEvent {
+export interface MouseEvent extends BaseEvent {
     button: MouseButton
     action: MouseAction
     displayX: number

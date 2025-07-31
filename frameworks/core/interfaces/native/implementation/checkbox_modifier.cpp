@@ -99,10 +99,10 @@ void SelectedColor1Impl(Ark_NativePointer node,
 }
 void Shape0Impl(Ark_NativePointer node, const Opt_CheckBoxShape* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode*>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // CheckBoxModelStatic::SetCheckboxStyle(
-    //     frameNode, value ? Converter::OptConvert<CheckBoxStyle>(*value) : std::nullopt);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CheckBoxModelStatic::SetCheckboxStyle(
+        frameNode, value ? Converter::OptConvert<CheckBoxStyle>(*value) : std::nullopt);
 }
 void Shape1Impl(Ark_NativePointer node, const Opt_CheckBoxShape* value)
 {

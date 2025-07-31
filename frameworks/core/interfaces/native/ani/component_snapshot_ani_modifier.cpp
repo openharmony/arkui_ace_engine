@@ -17,55 +17,130 @@
 
 #include "base/log/log.h"
 #include "core/common/ace_engine.h"
-#include "frameworks/core/components_ng/render/adapter/component_snapshot.h"
 #include "core/interfaces/native/implementation/frame_node_peer_impl.h"
+#include "frameworks/core/components_ng/render/adapter/component_snapshot.h"
 
 namespace OHOS::Ace::NG {
 
-int32_t GetCurrentIdSafely()
+struct SnapshotAsyncCtx {
+    ani_env* env = nullptr;
+    ani_resolver deferred = nullptr;
+    ani_object callbackRef = nullptr;
+    ani_object destroyCallbackRef = nullptr;
+    std::shared_ptr<void> pixelMap = nullptr;
+    int32_t errCode = -1;
+    std::function<void(std::shared_ptr<ArkUIComponentSnapshotAsync>)> callBackJsFunction;
+};
+
+void ConvertSnapshotParam(SnapshotParam& snapShotParam, const ArkUISnapshotParam& param)
 {
-    return Ace::Container::CurrentIdSafely();
+    snapShotParam.delay = param.delay;
+    snapShotParam.checkImageStatus = param.checkImageStatus;
+    snapShotParam.options.scale = param.options.scale;
+    snapShotParam.options.regionMode = static_cast<SnapshotRegionMode>(param.options.regionMode);
+    snapShotParam.options.waitUntilRenderFinished = param.options.waitUntilRenderFinished;
+    snapShotParam.options.snapshotRegion.bottom = param.options.snapshotRegion.bottom;
+    snapShotParam.options.snapshotRegion.top = param.options.snapshotRegion.top;
+    snapShotParam.options.snapshotRegion.end = param.options.snapshotRegion.end;
+    snapShotParam.options.snapshotRegion.start = param.options.snapshotRegion.start;
 }
 
-RefPtr<Container> GetContainer(int32_t instanceId)
+void ConvertSnapShotAsync(
+    std::shared_ptr<SnapshotAsyncCtx> asyncCtx, const ArkUIComponentSnapshotAsync& snapShotAsyncCtx)
 {
-    auto container = Ace::AceEngine::Get().GetContainer(instanceId);
-    return container;
+    asyncCtx->env = snapShotAsyncCtx.env;
+    asyncCtx->deferred = snapShotAsyncCtx.deferred;
+    asyncCtx->callbackRef = snapShotAsyncCtx.callbackRef;
+    asyncCtx->destroyCallbackRef = snapShotAsyncCtx.destroyCallbackRef;
+    asyncCtx->callBackJsFunction = snapShotAsyncCtx.callBackJsFunction;
 }
 
-void CreateFromBuilder(ArkUINodeHandle node,
-    std::function<void(std::shared_ptr<OHOS::Media::PixelMap>, int32_t, std::function<void()>)>&& callback,
-    SnapshotParam param)
+void prepareDataForCallback(
+    std::shared_ptr<SnapshotAsyncCtx> asyncCtx, std::shared_ptr<ArkUIComponentSnapshotAsync> snapShotAsyncCtx)
 {
-    if (!node || !callback) {
+    snapShotAsyncCtx->env = asyncCtx->env;
+    snapShotAsyncCtx->errCode = asyncCtx->errCode;
+    snapShotAsyncCtx->deferred = asyncCtx->deferred;
+    snapShotAsyncCtx->callbackRef = asyncCtx->callbackRef;
+    snapShotAsyncCtx->destroyCallbackRef = asyncCtx->destroyCallbackRef;
+    snapShotAsyncCtx->pixelMap = asyncCtx->pixelMap;
+}
+
+void OnComplete(std::shared_ptr<SnapshotAsyncCtx> asyncCtx, std::function<void()> finishCallback)
+{
+    CHECK_NULL_VOID(asyncCtx);
+    auto instanceId = OHOS::Ace::Container::CurrentIdSafely();
+    auto container = OHOS::Ace::AceEngine::Get().GetContainer(instanceId);
+    if (!container) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "container is null. %{public}d", instanceId);
         return;
     }
+    auto taskExecutor = container->GetTaskExecutor();
+    if (!taskExecutor) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "taskExecutor is null.");
+        return;
+    }
+    
+    auto callbackAsyncCtx = std::make_shared<ArkUIComponentSnapshotAsync>();
+    prepareDataForCallback(asyncCtx, callbackAsyncCtx);
+    taskExecutor->PostTask(
+        [asyncCtx, callbackAsyncCtx, finishCallback]() {
+            CHECK_NULL_VOID(asyncCtx);
+            asyncCtx->callBackJsFunction(callbackAsyncCtx);
+            if (finishCallback) {
+                finishCallback();
+            }
+        },
+        OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIComponentSnapshotComplete");
+}
+
+void CreateFromBuilder(
+    ArkUINodeHandle node, const ArkUIComponentSnapshotAsync& snapShotAsyncCtx, const ArkUISnapshotParam& param)
+{
+    SnapshotParam snapShotParam;
+    ConvertSnapshotParam(snapShotParam, param);
+    auto asyncCtx = std::make_shared<SnapshotAsyncCtx>();
+    ConvertSnapShotAsync(asyncCtx, snapShotAsyncCtx);
+    CHECK_NULL_VOID(node);
     auto uinode = AceType::Claim(reinterpret_cast<UINode*>(node));
     CHECK_NULL_VOID(uinode);
+    auto jsCallback = [asyncCtx](
+        std::shared_ptr<OHOS::Media::PixelMap> pixmap, int32_t errCode, std::function<void()> finishCallback) {
+        CHECK_NULL_VOID(asyncCtx);
+        asyncCtx->pixelMap = std::move(pixmap);
+        asyncCtx->errCode = errCode;
+        OnComplete(asyncCtx, finishCallback);
+    };
 #ifdef ENABLE_ROSEN_BACKEND
-    ComponentSnapshot::Create(uinode, std::move(callback), true, param);
+    ComponentSnapshot::Create(uinode, std::move(jsCallback), true, snapShotParam);
 #endif
 }
 
-void CreateFromComponent(ArkUINodeHandle node,
-    std::function<void(std::shared_ptr<OHOS::Media::PixelMap>, int32_t, std::function<void()>)>&& callback,
-    SnapshotParam param)
+void CreateFromComponent(
+    ArkUINodeHandle node, const ArkUIComponentSnapshotAsync& snapShotAsyncCtx, const ArkUISnapshotParam& param)
 {
-    if (!node || !callback) {
-        return;
-    }
+    SnapshotParam snapShotParam;
+    ConvertSnapshotParam(snapShotParam, param);
+    auto asyncCtx = std::make_shared<SnapshotAsyncCtx>();
+    ConvertSnapShotAsync(asyncCtx, snapShotAsyncCtx);
+    CHECK_NULL_VOID(node);
     auto uinode = FrameNodePeer::GetFrameNodeByPeer(reinterpret_cast<FrameNodePeer*>(node));
     CHECK_NULL_VOID(uinode);
+    auto jsCallback = [asyncCtx](
+        std::shared_ptr<OHOS::Media::PixelMap> pixmap, int32_t errCode, std::function<void()> finishCallback) {
+        CHECK_NULL_VOID(asyncCtx);
+        asyncCtx->pixelMap = std::move(pixmap);
+        asyncCtx->errCode = errCode;
+        OnComplete(asyncCtx, finishCallback);
+    };
 #ifdef ENABLE_ROSEN_BACKEND
-    ComponentSnapshot::Create(uinode, std::move(callback), true, param);
+    ComponentSnapshot::Create(uinode, std::move(jsCallback), true, snapShotParam);
 #endif
 }
 
 const ArkUIAniComponentSnapshotModifier* GetComponentSnapshotAniModifier()
 {
     static const ArkUIAniComponentSnapshotModifier impl = {
-        .getCurrentIdSafely = OHOS::Ace::NG::GetCurrentIdSafely,
-        .getContainer = OHOS::Ace::NG::GetContainer,
         .createFromBuilder = OHOS::Ace::NG::CreateFromBuilder,
         .createFromComponent = OHOS::Ace::NG::CreateFromComponent,
     };

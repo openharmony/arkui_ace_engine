@@ -21,15 +21,16 @@ koala_root = ".."
 node_version = "v16.20.2"
 host_arch = "${host_os}-${host_cpu}"
 
-npm_cmd("incremental_install") {
-    outputs = [
-        "$target_out_dir/incremental_install"
-    ]
-    project_path = rebase_path(".")
-    install = true
+if (current_toolchain == host_toolchain) {
+    npm_install("incremental_install") {
+        outputs = [
+            "$target_out_dir/incremental_install"
+        ]
+        project_path = rebase_path(".")
+    }
 }
 
-npm_cmd("incremental.abc") {
+npm_cmd("incremental_build") {
     outputs = [
         "$target_out_dir/incremental.abc"
     ]
@@ -37,20 +38,21 @@ npm_cmd("incremental.abc") {
     run_tasks = [ "build:incremental:inc:ui2abc" ]
 
     deps = [
-      ":incremental_install",        
       "$koala_root/ui2abc:ui2abc"
     ]
 
-    external_deps = ets2abc_build_deps
-    external_deps += static_linker_build_deps
-    external_deps += [
-        "ets_frontend:libes2panda_public(${host_toolchain})",
+    external_deps = [
+        ets2abc_build_deps,
+        static_linker_build_deps,
+        "ets_frontend:libes2panda_public(${host_toolchain})"
     ]
+    built_file_path = rebase_path("./runtime/build/incremental.abc")
+    target_out_path = rebase_path("$target_out_dir/incremental.abc")
 }
 
-group("incremental") {
+group("incremental_abc") {
     deps = [
       "../ui2abc:fast_arktsc_build",
-      ":incremental.abc"
+      ":incremental_build"
     ]
 }

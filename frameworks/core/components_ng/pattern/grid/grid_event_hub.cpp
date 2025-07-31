@@ -116,7 +116,7 @@ int32_t GridEventHub::GetGridItemIndex(const RefPtr<FrameNode>& frameNode)
     auto itemProperty = frameNode->GetLayoutProperty<GridItemLayoutProperty>();
     CHECK_NULL_RETURN(itemProperty, 0);
 
-    auto&& gridLayoutInfo = gridPattern->GetGridLayoutInfo();
+    auto gridLayoutInfo = gridPattern->GetGridLayoutInfo();
     auto mainIndex = itemProperty->GetMainIndex().value_or(-1);
     auto crossIndex = itemProperty->GetCrossIndex().value_or(-1);
     auto crossIndexIterator = gridLayoutInfo.gridMatrix_.find(mainIndex);

@@ -178,6 +178,7 @@ public:
     ~UIObserverHandler() = default;
     static UIObserverHandler& GetInstance();
     void NotifyNavigationStateChange(const WeakPtr<AceType>& weakPattern, NavDestinationState state);
+    void NotifyNavigationStateChangeForAni(const WeakPtr<AceType>& weakPattern, NavDestinationState state);
     void NotifyScrollEventStateChange(const WeakPtr<AceType>& weakPattern, ScrollEventType scrollEvent);
     void NotifyRouterPageStateChange(const RefPtr<PageInfo>& pageInfo, RouterPageState state);
     void NotifyDensityChange(double density);
@@ -215,8 +216,10 @@ public:
         const GestureEvent& gestureEventInfo, const RefPtr<NG::NGGestureRecognizer>& current,
         const RefPtr<NG::FrameNode>& frameNode, NG::GestureActionPhase phase);
     using TabContentStateHandleFunc = void (*)(const TabContentInfo&);
+    using NavigationHandleFuncForAni = std::function<void(const NG::NavDestinationInfo& info)>;
     NavDestinationSwitchHandleFunc GetHandleNavDestinationSwitchFunc();
     void SetHandleNavigationChangeFunc(NavigationHandleFunc func);
+    void SetHandleNavigationChangeFuncForAni(NavigationHandleFuncForAni func);
     void SetHandleScrollEventChangeFunc(ScrollEventHandleFunc func);
     void SetHandleRouterPageChangeFunc(RouterPageHandleFunc func);
     using DensityHandleFunc = void (*)(AbilityContextInfo&, double);
@@ -250,6 +253,7 @@ public:
     void SetDidClickHandleFuncForAni(DidClickHandleFuncForAni func);
 private:
     NavigationHandleFunc navigationHandleFunc_ = nullptr;
+    NavigationHandleFuncForAni navigationHandleFuncForAni_ = nullptr;
     ScrollEventHandleFunc scrollEventHandleFunc_ = nullptr;
     RouterPageHandleFunc routerPageHandleFunc_ = nullptr;
     LayoutDoneHandleFunc layoutDoneHandleFunc_ = nullptr;

@@ -53,6 +53,9 @@ napi_value CreateJSWebConsoleLogObject(napi_env env, const RefPtr<WebConsoleLog>
 napi_value CreateJSDataResubmittedObject(napi_env env, const RefPtr<DataResubmitted>& value);
 napi_value CreateJSWebSslSelectCertObject(napi_env env, const RefPtr<SslSelectCertResult>& value);
 napi_value CreateJSWebSslErrorObject(napi_env env, const RefPtr<SslErrorResult>& value);
+napi_value CreateJSWebWindowNewHandlerObject(napi_env env, const RefPtr<WebWindowNewHandler>& value);
+napi_value CreateJSWebPermissionRequestObject(napi_env env, const RefPtr<WebPermissionRequest>& value);
+napi_value CreateJSWebKeyboardControllerObject(napi_env env, const RefPtr<WebCustomKeyboardHandler>& value);
 }
 } // namespace OHOS::Ace
 

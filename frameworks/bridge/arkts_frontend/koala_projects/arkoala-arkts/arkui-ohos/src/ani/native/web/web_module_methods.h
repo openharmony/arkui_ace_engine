@@ -38,6 +38,9 @@ ani_boolean TransferDataResubmissionHandlerToStatic(ani_env* env, ani_class aniC
 ani_boolean TransferClientAuthenticationHandlerToStatic(
     ani_env* env, ani_class aniClass, ani_long node, ani_object input);
 ani_boolean TransferSslErrorHandlerToStatic(ani_env* env, ani_class aniClass, ani_long node, ani_object input);
+ani_boolean TransferPermissionRequestToStatic(ani_env* env, ani_class aniClass, ani_long node, ani_object input);
+ani_boolean TransferControllerHandlerToStatic(ani_env* env, ani_class aniClass, ani_long node, ani_object input);
+ani_boolean TransferWebKeyboardControllerToStatic(ani_env* env, ani_class aniClass, ani_long node, ani_object input);
 
 ani_object TransferScreenCaptureHandlerToDynamic(ani_env* env, ani_class aniClass, ani_long node);
 ani_object TransferJsGeolocationToDynamic(ani_env* env, ani_class aniClass, ani_long node);
@@ -54,6 +57,9 @@ ani_object TransferConsoleMessageToDynamic(ani_env* env, ani_class aniClass, ani
 ani_object TransferDataResubmissionHandlerToDynamic(ani_env* env, ani_class aniClass, ani_long node);
 ani_object TransferClientAuthenticationHandlerToDynamic(ani_env* env, ani_class aniClass, ani_long node);
 ani_object TransferSslErrorHandlerToDynamic(ani_env* env, ani_class aniClass, ani_long node);
+ani_object TransferPermissionRequestToDynamic(ani_env* env, ani_class aniClass, ani_long node);
+ani_object TransferControllerHandlerToDynamic(ani_env* env, ani_class aniClass, ani_long node);
+ani_object TransferWebKeyboardControllerToDynamic(ani_env* env, ani_class aniClass, ani_long node);
 } // namespace OHOS::Ace::Ani
 
 #endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_WEB_MODULE_METHODS_H

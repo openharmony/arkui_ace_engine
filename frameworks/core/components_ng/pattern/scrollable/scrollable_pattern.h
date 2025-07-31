@@ -339,6 +339,7 @@ public:
     }
 
     virtual void SetFriction(double friction);
+    void SetFrictionMultiThread(double friction);
 
     double GetFriction() const
     {

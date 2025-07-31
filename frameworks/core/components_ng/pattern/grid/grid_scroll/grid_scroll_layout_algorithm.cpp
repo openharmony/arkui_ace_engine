@@ -89,10 +89,6 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             frameSize_.SetWidth(round(frameSize_.Width()));
             frameSize_.SetHeight(round(frameSize_.Height()));
         }
-        if (pipeline && pipeline->GetFrontendType() == FrontendType::ARK_TS) {
-            currentItemRowSpan_ = 1;
-            currentItemColSpan_ = 1;
-        }
     }
 
     InitialItemsCrossSize(gridLayoutProperty, frameSize_, info_.GetChildrenCount());

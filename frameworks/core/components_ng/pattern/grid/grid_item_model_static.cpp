@@ -15,16 +15,25 @@
 
 #include "core/components_ng/pattern/grid/grid_item_model_static.h"
 
+#include "base/utils/multi_thread.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_item.h"
  
 namespace OHOS::Ace::NG {
 RefPtr<FrameNode> GridItemModelStatic::CreateFrameNode(int32_t nodeId)
 {
+    // call CreateFrameNodeMultiThread by multi thread
+    THREAD_SAFE_NODE_SCOPE_CHECK(CreateFrameNode, nodeId);
     auto frameNode = ScrollableItemPool::GetInstance().Allocate(V2::GRID_ITEM_ETS_TAG, nodeId,
         [itemStyle = GridItemStyle::NONE]() { return AceType::MakeRefPtr<GridItemPattern>(nullptr, itemStyle); });
 
     return frameNode;
+}
+
+RefPtr<FrameNode> GridItemModelStatic::CreateFrameNodeMultiThread(int32_t nodeId)
+{
+    return FrameNode::GetOrCreateFrameNode(V2::GRID_ITEM_ETS_TAG, nodeId,
+        [itemStyle = GridItemStyle::NONE]() { return AceType::MakeRefPtr<GridItemPattern>(nullptr, itemStyle); });
 }
 
 void GridItemModelStatic::SetForceRebuild(FrameNode* frameNode, bool value)

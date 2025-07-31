@@ -23,9 +23,20 @@
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 namespace OHOS::Ace::NG {
 
+struct NodeKoalaInfo {
+    std::function<void()> onPageShowFunc;
+    std::function<void()> onPageHideFunc;
+    std::function<bool()> onBackPressedFunc;
+    std::function<void()> pageTransitionFunc;
+    std::function<void()> onCleanupFunc;
+    std::function<std::string()> onDumpInspectorFunc;
+    std::string jsViewName;
+};
+
 class ACE_FORCE_EXPORT CustomNodeStatic : public AceType {
     DECLARE_ACE_TYPE(CustomNodeStatic, AceType);
 public:
+    static CustomNode* ConstructCustomNode(int32_t id, NodeKoalaInfo&& info);
     static CustomMeasureLayoutNode* ConstructCustomNode(int32_t id,
         std::function<void(NG::LayoutWrapper* layoutWrapper)>&& onMeasureSize,
         std::function<void(NG::LayoutWrapper* layoutWrapper)>&& onPlaceChildren);

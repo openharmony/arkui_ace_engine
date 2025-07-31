@@ -39,7 +39,7 @@ ani_object CreateDouble(ani_env* env, double value)
         return nullptr;
     }
     ani_method doubleCtor;
-    if (ANI_OK != env->Class_FindMethod(doubleCls, "<ctor>", "D:V", &doubleCtor)) {
+    if (ANI_OK != env->Class_FindMethod(doubleCls, "<ctor>", "d:", &doubleCtor)) {
         return nullptr;
     }
     ani_object doubleObj;
@@ -68,11 +68,11 @@ std::optional<Dimension> ParseDimension(ani_env* env, ani_ref dimensionRef)
 {
     std::optional<Dimension> res;
     ani_class doubleClass;
-    if (env->FindClass("Lstd/core/Double;", &doubleClass) != ANI_OK) {
+    if (env->FindClass("std.core.Double", &doubleClass) != ANI_OK) {
         return res;
     }
     ani_class stringClass;
-    if (env->FindClass("Lstd/core/String;", &stringClass) != ANI_OK) {
+    if (env->FindClass("std.core.String", &stringClass) != ANI_OK) {
         return res;
     }
 
@@ -80,7 +80,7 @@ std::optional<Dimension> ParseDimension(ani_env* env, ani_ref dimensionRef)
     env->Object_InstanceOf(static_cast<ani_object>(dimensionRef), doubleClass, &isDouble);
     if (isDouble) {
         ani_double dimension;
-        env->Object_CallMethodByName_Double(static_cast<ani_object>(dimensionRef), "unboxed", ":D", &dimension);
+        env->Object_CallMethodByName_Double(static_cast<ani_object>(dimensionRef), "unboxed", ":d", &dimension);
         if (dimension < 0) {
             dimension = 0;
         }
@@ -157,7 +157,7 @@ std::optional<NG::MarginProperty> ParseMargin(ani_env* env, ani_ref marginRef)
 {
     NG::MarginProperty res;
     ani_class paddingClass;
-    if (env->FindClass("Larkui/component/units/Padding;", &paddingClass) != ANI_OK) {
+    if (env->FindClass("arkui.component.units.Padding", &paddingClass) != ANI_OK) {
         return std::make_optional(res);
     }
 
@@ -198,7 +198,7 @@ NG::WaterFlowSections::Section AniWaterFlowModule::ParseSectionOptions(ani_env* 
     }
     if (!isUndefined) {
         ani_double crossCnt;
-        env->Object_CallMethodByName_Double(static_cast<ani_object>(crossCount), "unboxed", ":D", &crossCnt);
+        env->Object_CallMethodByName_Double(static_cast<ani_object>(crossCount), "unboxed", ":d", &crossCnt);
         if (crossCnt <= 0) {
             crossCnt = 1;
         }
@@ -233,7 +233,7 @@ NG::WaterFlowSections::Section AniWaterFlowModule::ParseSectionOptions(ani_env* 
     env->Object_GetPropertyByName_Ref(static_cast<ani_object>(section), "onGetItemMainSizeByIndex", &func);
 
     ani_class ClassGetItemMainSizeByIndex;
-    env->FindClass("Lstd/core/Function1;", &ClassGetItemMainSizeByIndex);
+    env->FindClass("std.core.Function1", &ClassGetItemMainSizeByIndex);
     ani_boolean isGetItemMainSizeByIndex;
     env->Object_InstanceOf(static_cast<ani_object>(func), ClassGetItemMainSizeByIndex, &isGetItemMainSizeByIndex);
 
@@ -249,7 +249,7 @@ NG::WaterFlowSections::Section AniWaterFlowModule::ParseSectionOptions(ani_env* 
 
             env->FunctionalObject_Call(static_cast<ani_fn_object>(fnObjGlobalRef), 1, &aniIdx, &aniRes);
             ani_double res;
-            env->Object_CallMethodByName_Double(static_cast<ani_object>(aniRes), "unboxed", ":D", &res);
+            env->Object_CallMethodByName_Double(static_cast<ani_object>(aniRes), "unboxed", ":d", &res);
             return static_cast<float>(res);
         };
         curSection.onGetItemMainSizeByIndex = std::move(onGetItemMainSizeByIndex);
@@ -272,16 +272,17 @@ void AniWaterFlowModule::ParseWaterFlowSections(ani_env* env, ani_ref sections, 
     }
 
     ani_class sectionChangeInfo;
-    if (env->FindClass("Larkui/component/waterFlow/SectionChangeInfo;", &sectionChangeInfo) != ANI_OK) {
+    if (env->FindClass("arkui.component.waterFlow.SectionChangeInfo", &sectionChangeInfo) != ANI_OK) {
         return;
     }
 
     ani_class sectionOptions;
-    if (env->FindClass("Larkui/component/waterFlow/SectionOptions;", &sectionOptions) != ANI_OK) {
+    if (env->FindClass("arkui.component.waterFlow.SectionOptions", &sectionOptions) != ANI_OK) {
         return;
     }
 
-    for (int32_t i = 0; i < changeArrayLength; i++) {
+    int32_t changeLength = static_cast<int32_t>(changeArrayLength);
+    for (int32_t i = 0; i < changeLength; i++) {
         ani_ref change;
         if (env->Array_Get_Ref(static_cast<ani_array_ref>(changeArray), i, &change) != ANI_OK) {
             continue;
@@ -344,7 +345,7 @@ void AniWaterFlowModule::SetWaterFlowSection(ani_env* env, ani_long ptr, ani_obj
     }
 
     ani_class waterflowSections;
-    if (env->FindClass("Larkui/component/waterFlow/WaterFlowSections;", &waterflowSections) != ANI_OK) {
+    if (env->FindClass("arkui.component.waterFlow.WaterFlowSections", &waterflowSections) != ANI_OK) {
         return;
     }
 

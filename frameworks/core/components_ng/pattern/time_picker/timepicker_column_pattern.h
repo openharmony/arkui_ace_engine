@@ -156,17 +156,6 @@ public:
 
 private:
     void OnModifyDone() override;
-    void OnAttachToFrameNode() override;
-    void OnDetachFromFrameNode(FrameNode* frameNode) override;
-    void OnAttachToMainTree() override;
-    void OnDetachFromMainTree() override;
-
-    void OnAttachToFrameNodeMultiThread() {}
-    void OnDetachFromFrameNodeMultiThread(FrameNode* frameNode) {}
-    void OnAttachToMainTreeMultiThread();
-    void OnDetachFromMainTreeMultiThread();
-
-    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void SetDividerHeight(uint32_t showOptionCount);
     void ChangeTextStyle(uint32_t index, uint32_t showOptionCount, const RefPtr<TextLayoutProperty>& textLayoutProperty,
         const RefPtr<TimePickerLayoutProperty>& timePickerLayoutProperty);

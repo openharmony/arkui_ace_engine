@@ -67,7 +67,6 @@ void* FindFunction(void* library, const char* name)
 #endif
 
 ArkUIFullNodeAPI* impl = nullptr;
-static bool g_isInitialImpl = InitialFullImpl();
 
 bool InitialFullNodeImpl(int version)
 {
@@ -126,43 +125,20 @@ struct ExtraData {
 };
 
 std::set<ArkUI_NodeHandle> g_nodeSet;
-std::mutex g_nodeSetMutex_;
-std::set<ArkUI_NodeHandle> g_nodeSetSafely;
 
 bool IsValidArkUINode(ArkUI_NodeHandle nodePtr)
 {
     if (!nodePtr) {
         return false;
     }
-    if (nodePtr->freeNode) {
-        std::lock_guard<std::mutex> lock(g_nodeSetMutex_);
-        return g_nodeSetSafely.count(nodePtr) > 0;
+    if (nodePtr->threadSafeNode) {
+        return IsValidArkUINodeMultiThread(nodePtr);
     } else {
         return g_nodeSet.count(nodePtr) > 0;
     }
 }
 
-void AddNodeSafely(ArkUI_NodeHandle nodePtr)
-{
-    if (nodePtr->freeNode) {
-        std::lock_guard<std::mutex> lock(g_nodeSetMutex_);
-        g_nodeSetSafely.emplace(nodePtr);
-    } else {
-        g_nodeSet.emplace(nodePtr);
-    }
-}
-
-void RemoveNodeSafely(ArkUI_NodeHandle nodePtr)
-{
-    if (nodePtr->freeNode) {
-        std::lock_guard<std::mutex> lock(g_nodeSetMutex_);
-        g_nodeSetSafely.erase(nodePtr);
-    } else {
-        g_nodeSet.erase(nodePtr);
-    }
-}
-
-ArkUI_NodeHandle CreateNodeInner(ArkUI_NodeType type, bool isFreeNode)
+ArkUI_NodeHandle CreateNode(ArkUI_NodeType type)
 {
     static const ArkUINodeType nodes[] = { ARKUI_CUSTOM, ARKUI_TEXT, ARKUI_SPAN, ARKUI_IMAGE_SPAN, ARKUI_IMAGE,
         ARKUI_TOGGLE, ARKUI_LOADING_PROGRESS, ARKUI_TEXT_INPUT, ARKUI_TEXTAREA, ARKUI_BUTTON, ARKUI_PROGRESS,
@@ -170,7 +146,7 @@ ArkUI_NodeHandle CreateNodeInner(ArkUI_NodeType type, bool isFreeNode)
         ARKUI_CALENDAR_PICKER, ARKUI_SLIDER, ARKUI_RADIO, ARKUI_IMAGE_ANIMATOR, ARKUI_XCOMPONENT_TEXTURE,
         ARKUI_CHECK_BOX_GROUP, ARKUI_STACK, ARKUI_SWIPER, ARKUI_SCROLL, ARKUI_LIST, ARKUI_LIST_ITEM,
         ARKUI_LIST_ITEM_GROUP, ARKUI_COLUMN, ARKUI_ROW, ARKUI_FLEX, ARKUI_REFRESH, ARKUI_WATER_FLOW, ARKUI_FLOW_ITEM,
-        ARKUI_RELATIVE_CONTAINER, ARKUI_GRID, ARKUI_GRID_ITEM, ARKUI_CUSTOM_SPAN, ARKUI_EMBEDDED_COMPONENT };
+        ARKUI_RELATIVE_CONTAINER, ARKUI_GRID, ARKUI_GRID_ITEM, ARKUI_CUSTOM_SPAN };
     // already check in entry point.
     uint32_t nodeType = type < MAX_NODE_SCOPE_NUM ? type : (type - MAX_NODE_SCOPE_NUM + BASIC_COMPONENT_NUM);
     const auto* impl = GetFullImpl();
@@ -186,15 +162,10 @@ ArkUI_NodeHandle CreateNodeInner(ArkUI_NodeType type, bool isFreeNode)
         return nullptr;
     }
     impl->getBasicAPI()->markDirty(uiNode, ARKUI_DIRTY_FLAG_ATTRIBUTE_DIFF);
-    ArkUI_Node* arkUINode = new ArkUI_Node({ type, uiNode, true, isFreeNode });
+    ArkUI_Node* arkUINode = new ArkUI_Node({ type, uiNode, true });
     impl->getExtendedAPI()->setAttachNodePtr(uiNode, reinterpret_cast<void*>(arkUINode));
-    AddNodeSafely(arkUINode);
+    g_nodeSet.emplace(arkUINode);
     return arkUINode;
-}
-
-ArkUI_NodeHandle CreateNode(ArkUI_NodeType type)
-{
-    return CreateNodeInner(type, false);
 }
 
 void DisposeNativeSource(ArkUI_NodeHandle nativePtr)
@@ -238,7 +209,7 @@ void DisposeNode(ArkUI_NodeHandle nativePtr)
     const auto* impl = GetFullImpl();
     impl->getBasicAPI()->disposeNode(nativePtr->uiNodeHandle);
     DisposeNativeSource(nativePtr);
-    RemoveNodeSafely(nativePtr);
+    g_nodeSet.erase(nativePtr);
     delete nativePtr;
     nativePtr = nullptr;
 }

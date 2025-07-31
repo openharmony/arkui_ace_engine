@@ -378,44 +378,70 @@ void callManagedCallback_Buffer_VoidSync(Ark_VMContext vmContext, Ark_Int32 reso
     argsSerializer.writeBuffer(value);
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(_buffer), _buffer);
 }
-void callManagedCallback_CalendarRequestedData_Void(Ark_Int32 resourceId, Ark_CalendarRequestedData event)
+void callManagedCallback_ClickEvent_LocationButtonOnClickResult_Void(Ark_Int32 resourceId, Ark_ClickEvent event, Ark_LocationButtonOnClickResult result)
 {
     CallbackBuffer _buffer = {{}, {}};
     const Ark_CallbackResource _callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
     _buffer.resourceHolder.holdCallbackResource(&_callbackResourceSelf);
     SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(_buffer.buffer), sizeof(_buffer.buffer), &(_buffer.resourceHolder));
-    argsSerializer.writeInt32(Kind_Callback_CalendarRequestedData_Void);
+    argsSerializer.writeInt32(Kind_Callback_ClickEvent_LocationButtonOnClickResult_Void);
     argsSerializer.writeInt32(resourceId);
-    CalendarRequestedData_serializer::write(argsSerializer, event);
+    ClickEvent_serializer::write(argsSerializer, event);
+    argsSerializer.writeInt32(static_cast<Ark_LocationButtonOnClickResult>(result));
     enqueueCallback(&_buffer);
 }
-void callManagedCallback_CalendarRequestedData_VoidSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_CalendarRequestedData event)
+void callManagedCallback_ClickEvent_LocationButtonOnClickResult_VoidSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_ClickEvent event, Ark_LocationButtonOnClickResult result)
 {
     uint8_t _buffer[4096];
     SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&_buffer, sizeof(_buffer), nullptr);
-    argsSerializer.writeInt32(Kind_Callback_CalendarRequestedData_Void);
+    argsSerializer.writeInt32(Kind_Callback_ClickEvent_LocationButtonOnClickResult_Void);
     argsSerializer.writeInt32(resourceId);
-    CalendarRequestedData_serializer::write(argsSerializer, event);
+    ClickEvent_serializer::write(argsSerializer, event);
+    argsSerializer.writeInt32(static_cast<Ark_LocationButtonOnClickResult>(result));
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(_buffer), _buffer);
 }
-void callManagedCallback_CalendarSelectedDate_Void(Ark_Int32 resourceId, Ark_CalendarSelectedDate event)
+void callManagedCallback_ClickEvent_PasteButtonOnClickResult_Void(Ark_Int32 resourceId, Ark_ClickEvent event, Ark_PasteButtonOnClickResult result)
 {
     CallbackBuffer _buffer = {{}, {}};
     const Ark_CallbackResource _callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
     _buffer.resourceHolder.holdCallbackResource(&_callbackResourceSelf);
     SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(_buffer.buffer), sizeof(_buffer.buffer), &(_buffer.resourceHolder));
-    argsSerializer.writeInt32(Kind_Callback_CalendarSelectedDate_Void);
+    argsSerializer.writeInt32(Kind_Callback_ClickEvent_PasteButtonOnClickResult_Void);
     argsSerializer.writeInt32(resourceId);
-    CalendarSelectedDate_serializer::write(argsSerializer, event);
+    ClickEvent_serializer::write(argsSerializer, event);
+    argsSerializer.writeInt32(static_cast<Ark_PasteButtonOnClickResult>(result));
     enqueueCallback(&_buffer);
 }
-void callManagedCallback_CalendarSelectedDate_VoidSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_CalendarSelectedDate event)
+void callManagedCallback_ClickEvent_PasteButtonOnClickResult_VoidSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_ClickEvent event, Ark_PasteButtonOnClickResult result)
 {
     uint8_t _buffer[4096];
     SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&_buffer, sizeof(_buffer), nullptr);
-    argsSerializer.writeInt32(Kind_Callback_CalendarSelectedDate_Void);
+    argsSerializer.writeInt32(Kind_Callback_ClickEvent_PasteButtonOnClickResult_Void);
     argsSerializer.writeInt32(resourceId);
-    CalendarSelectedDate_serializer::write(argsSerializer, event);
+    ClickEvent_serializer::write(argsSerializer, event);
+    argsSerializer.writeInt32(static_cast<Ark_PasteButtonOnClickResult>(result));
+    KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(_buffer), _buffer);
+}
+void callManagedCallback_ClickEvent_SaveButtonOnClickResult_Void(Ark_Int32 resourceId, Ark_ClickEvent event, Ark_SaveButtonOnClickResult result)
+{
+    CallbackBuffer _buffer = {{}, {}};
+    const Ark_CallbackResource _callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
+    _buffer.resourceHolder.holdCallbackResource(&_callbackResourceSelf);
+    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(_buffer.buffer), sizeof(_buffer.buffer), &(_buffer.resourceHolder));
+    argsSerializer.writeInt32(Kind_Callback_ClickEvent_SaveButtonOnClickResult_Void);
+    argsSerializer.writeInt32(resourceId);
+    ClickEvent_serializer::write(argsSerializer, event);
+    argsSerializer.writeInt32(static_cast<Ark_SaveButtonOnClickResult>(result));
+    enqueueCallback(&_buffer);
+}
+void callManagedCallback_ClickEvent_SaveButtonOnClickResult_VoidSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_ClickEvent event, Ark_SaveButtonOnClickResult result)
+{
+    uint8_t _buffer[4096];
+    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&_buffer, sizeof(_buffer), nullptr);
+    argsSerializer.writeInt32(Kind_Callback_ClickEvent_SaveButtonOnClickResult_Void);
+    argsSerializer.writeInt32(resourceId);
+    ClickEvent_serializer::write(argsSerializer, event);
+    argsSerializer.writeInt32(static_cast<Ark_SaveButtonOnClickResult>(result));
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(_buffer), _buffer);
 }
 void callManagedCallback_ClickEvent_Void(Ark_Int32 resourceId, Ark_ClickEvent event)
@@ -4814,26 +4840,6 @@ void callManagedCustomNodeBuilderSync(Ark_VMContext vmContext, Ark_Int32 resourc
     argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.callSync));
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(_buffer), _buffer);
 }
-void callManagedCustomStyles(Ark_Int32 resourceId, Ark_String instance)
-{
-    CallbackBuffer _buffer = {{}, {}};
-    const Ark_CallbackResource _callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
-    _buffer.resourceHolder.holdCallbackResource(&_callbackResourceSelf);
-    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(_buffer.buffer), sizeof(_buffer.buffer), &(_buffer.resourceHolder));
-    argsSerializer.writeInt32(Kind_CustomStyles);
-    argsSerializer.writeInt32(resourceId);
-    argsSerializer.writeString(instance);
-    enqueueCallback(&_buffer);
-}
-void callManagedCustomStylesSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_String instance)
-{
-    uint8_t _buffer[4096];
-    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&_buffer, sizeof(_buffer), nullptr);
-    argsSerializer.writeInt32(Kind_CustomStyles);
-    argsSerializer.writeInt32(resourceId);
-    argsSerializer.writeString(instance);
-    KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(_buffer), _buffer);
-}
 void callManagedDataPanelModifierBuilder(Ark_Int32 resourceId, Ark_NativePointer parentNode, Ark_DataPanelConfiguration config, Callback_Pointer_Void continuation)
 {
     CallbackBuffer _buffer = {{}, {}};
@@ -5812,26 +5818,6 @@ void callManagedOnLargestContentfulPaintCallbackSync(Ark_VMContext vmContext, Ar
     LargestContentfulPaint_serializer::write(argsSerializer, largestContentfulPaint);
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(_buffer), _buffer);
 }
-void callManagedOnLazyLoadingFunc(Ark_Int32 resourceId, Ark_Number index)
-{
-    CallbackBuffer _buffer = {{}, {}};
-    const Ark_CallbackResource _callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
-    _buffer.resourceHolder.holdCallbackResource(&_callbackResourceSelf);
-    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(_buffer.buffer), sizeof(_buffer.buffer), &(_buffer.resourceHolder));
-    argsSerializer.writeInt32(Kind_OnLazyLoadingFunc);
-    argsSerializer.writeInt32(resourceId);
-    argsSerializer.writeNumber(index);
-    enqueueCallback(&_buffer);
-}
-void callManagedOnLazyLoadingFuncSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Number index)
-{
-    uint8_t _buffer[4096];
-    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&_buffer, sizeof(_buffer), nullptr);
-    argsSerializer.writeInt32(Kind_OnLazyLoadingFunc);
-    argsSerializer.writeInt32(resourceId);
-    argsSerializer.writeNumber(index);
-    KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(_buffer), _buffer);
-}
 void callManagedOnLinearIndicatorChangeCallback(Ark_Int32 resourceId, Ark_Number index, Ark_Number progress)
 {
     CallbackBuffer _buffer = {{}, {}};
@@ -6566,30 +6552,6 @@ void callManagedOnTimePickerChangeCallbackSync(Ark_VMContext vmContext, Ark_Int3
     TimePickerResult_serializer::write(argsSerializer, result);
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(_buffer), _buffer);
 }
-void callManagedOnTotalCountFunc(Ark_Int32 resourceId, Callback_Number_Void continuation)
-{
-    CallbackBuffer _buffer = {{}, {}};
-    const Ark_CallbackResource _callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
-    _buffer.resourceHolder.holdCallbackResource(&_callbackResourceSelf);
-    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(_buffer.buffer), sizeof(_buffer.buffer), &(_buffer.resourceHolder));
-    argsSerializer.writeInt32(Kind_OnTotalCountFunc);
-    argsSerializer.writeInt32(resourceId);
-    argsSerializer.writeCallbackResource(continuation.resource);
-    argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.call));
-    argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.callSync));
-    enqueueCallback(&_buffer);
-}
-void callManagedOnTotalCountFuncSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Callback_Number_Void continuation)
-{
-    uint8_t _buffer[4096];
-    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&_buffer, sizeof(_buffer), nullptr);
-    argsSerializer.writeInt32(Kind_OnTotalCountFunc);
-    argsSerializer.writeInt32(resourceId);
-    argsSerializer.writeCallbackResource(continuation.resource);
-    argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.call));
-    argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.callSync));
-    KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(_buffer), _buffer);
-}
 void callManagedOnViewportFitChangedCallback(Ark_Int32 resourceId, Ark_ViewportFit viewportFit)
 {
     CallbackBuffer _buffer = {{}, {}};
@@ -6694,42 +6656,6 @@ void callManagedPageTransitionCallbackSync(Ark_VMContext vmContext, Ark_Int32 re
     argsSerializer.writeInt32(resourceId);
     argsSerializer.writeInt32(static_cast<Ark_RouteType>(type));
     argsSerializer.writeNumber(progress);
-    KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(_buffer), _buffer);
-}
-void callManagedPasteButtonCallback(Ark_Int32 resourceId, Ark_ClickEvent event, Ark_PasteButtonOnClickResult result, Opt_BusinessError error)
-{
-    CallbackBuffer _buffer = {{}, {}};
-    const Ark_CallbackResource _callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
-    _buffer.resourceHolder.holdCallbackResource(&_callbackResourceSelf);
-    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(_buffer.buffer), sizeof(_buffer.buffer), &(_buffer.resourceHolder));
-    argsSerializer.writeInt32(Kind_PasteButtonCallback);
-    argsSerializer.writeInt32(resourceId);
-    ClickEvent_serializer::write(argsSerializer, event);
-    argsSerializer.writeInt32(static_cast<Ark_PasteButtonOnClickResult>(result));
-    Ark_Int32 error_type = INTEROP_RUNTIME_UNDEFINED;
-    error_type = runtimeType(error);
-    argsSerializer.writeInt8(error_type);
-    if ((error_type) != (INTEROP_RUNTIME_UNDEFINED)) {
-        const auto error_value = error.value;
-        BusinessError_serializer::write(argsSerializer, error_value);
-    }
-    enqueueCallback(&_buffer);
-}
-void callManagedPasteButtonCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_ClickEvent event, Ark_PasteButtonOnClickResult result, Opt_BusinessError error)
-{
-    uint8_t _buffer[4096];
-    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&_buffer, sizeof(_buffer), nullptr);
-    argsSerializer.writeInt32(Kind_PasteButtonCallback);
-    argsSerializer.writeInt32(resourceId);
-    ClickEvent_serializer::write(argsSerializer, event);
-    argsSerializer.writeInt32(static_cast<Ark_PasteButtonOnClickResult>(result));
-    Ark_Int32 error_type = INTEROP_RUNTIME_UNDEFINED;
-    error_type = runtimeType(error);
-    argsSerializer.writeInt8(error_type);
-    if ((error_type) != (INTEROP_RUNTIME_UNDEFINED)) {
-        const auto error_value = error.value;
-        BusinessError_serializer::write(argsSerializer, error_value);
-    }
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(_buffer), _buffer);
 }
 void callManagedPasteEventCallback(Ark_Int32 resourceId, Opt_PasteEvent event)
@@ -6970,42 +6896,6 @@ void callManagedReuseIdCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceI
     argsSerializer.writeCallbackResource(continuation.resource);
     argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.call));
     argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.callSync));
-    KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(_buffer), _buffer);
-}
-void callManagedSaveButtonCallback(Ark_Int32 resourceId, Ark_ClickEvent event, Ark_SaveButtonOnClickResult result, Opt_BusinessError error)
-{
-    CallbackBuffer _buffer = {{}, {}};
-    const Ark_CallbackResource _callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
-    _buffer.resourceHolder.holdCallbackResource(&_callbackResourceSelf);
-    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(_buffer.buffer), sizeof(_buffer.buffer), &(_buffer.resourceHolder));
-    argsSerializer.writeInt32(Kind_SaveButtonCallback);
-    argsSerializer.writeInt32(resourceId);
-    ClickEvent_serializer::write(argsSerializer, event);
-    argsSerializer.writeInt32(static_cast<Ark_SaveButtonOnClickResult>(result));
-    Ark_Int32 error_type = INTEROP_RUNTIME_UNDEFINED;
-    error_type = runtimeType(error);
-    argsSerializer.writeInt8(error_type);
-    if ((error_type) != (INTEROP_RUNTIME_UNDEFINED)) {
-        const auto error_value = error.value;
-        BusinessError_serializer::write(argsSerializer, error_value);
-    }
-    enqueueCallback(&_buffer);
-}
-void callManagedSaveButtonCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_ClickEvent event, Ark_SaveButtonOnClickResult result, Opt_BusinessError error)
-{
-    uint8_t _buffer[4096];
-    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&_buffer, sizeof(_buffer), nullptr);
-    argsSerializer.writeInt32(Kind_SaveButtonCallback);
-    argsSerializer.writeInt32(resourceId);
-    ClickEvent_serializer::write(argsSerializer, event);
-    argsSerializer.writeInt32(static_cast<Ark_SaveButtonOnClickResult>(result));
-    Ark_Int32 error_type = INTEROP_RUNTIME_UNDEFINED;
-    error_type = runtimeType(error);
-    argsSerializer.writeInt8(error_type);
-    if ((error_type) != (INTEROP_RUNTIME_UNDEFINED)) {
-        const auto error_value = error.value;
-        BusinessError_serializer::write(argsSerializer, error_value);
-    }
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(_buffer), _buffer);
 }
 void callManagedScrollOnScrollCallback(Ark_Int32 resourceId, Ark_Number xOffset, Ark_Number yOffset, Ark_ScrollState scrollState)
@@ -7846,8 +7736,9 @@ Ark_NativePointer getManagedCallbackCaller(CallbackKind kind)
         case Kind_Callback_Boolean_HoverEvent_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Boolean_HoverEvent_Void);
         case Kind_Callback_Boolean_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Boolean_Void);
         case Kind_Callback_Buffer_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Buffer_Void);
-        case Kind_Callback_CalendarRequestedData_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_CalendarRequestedData_Void);
-        case Kind_Callback_CalendarSelectedDate_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_CalendarSelectedDate_Void);
+        case Kind_Callback_ClickEvent_LocationButtonOnClickResult_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_ClickEvent_LocationButtonOnClickResult_Void);
+        case Kind_Callback_ClickEvent_PasteButtonOnClickResult_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_ClickEvent_PasteButtonOnClickResult_Void);
+        case Kind_Callback_ClickEvent_SaveButtonOnClickResult_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_ClickEvent_SaveButtonOnClickResult_Void);
         case Kind_Callback_ClickEvent_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_ClickEvent_Void);
         case Kind_Callback_CompatibleComponentInfo_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_CompatibleComponentInfo_Void);
         case Kind_Callback_ComputedBarAttribute_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_ComputedBarAttribute_Void);
@@ -8020,7 +7911,6 @@ Ark_NativePointer getManagedCallbackCaller(CallbackKind kind)
         case Kind_ContentWillScrollCallback: return reinterpret_cast<Ark_NativePointer>(callManagedContentWillScrollCallback);
         case Kind_Context_getGroupDir_Callback: return reinterpret_cast<Ark_NativePointer>(callManagedContext_getGroupDir_Callback);
         case Kind_CustomNodeBuilder: return reinterpret_cast<Ark_NativePointer>(callManagedCustomNodeBuilder);
-        case Kind_CustomStyles: return reinterpret_cast<Ark_NativePointer>(callManagedCustomStyles);
         case Kind_DataPanelModifierBuilder: return reinterpret_cast<Ark_NativePointer>(callManagedDataPanelModifierBuilder);
         case Kind_EditableTextOnChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedEditableTextOnChangeCallback);
         case Kind_ErrorCallback: return reinterpret_cast<Ark_NativePointer>(callManagedErrorCallback);
@@ -8059,7 +7949,6 @@ Ark_NativePointer getManagedCallbackCaller(CallbackKind kind)
         case Kind_OnIntelligentTrackingPreventionCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnIntelligentTrackingPreventionCallback);
         case Kind_OnItemDragStartCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnItemDragStartCallback);
         case Kind_OnLargestContentfulPaintCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnLargestContentfulPaintCallback);
-        case Kind_OnLazyLoadingFunc: return reinterpret_cast<Ark_NativePointer>(callManagedOnLazyLoadingFunc);
         case Kind_OnLinearIndicatorChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnLinearIndicatorChangeCallback);
         case Kind_OnMenuItemClickCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnMenuItemClickCallback);
         case Kind_OnMoveHandler: return reinterpret_cast<Ark_NativePointer>(callManagedOnMoveHandler);
@@ -8090,12 +7979,10 @@ Ark_NativePointer getManagedCallbackCaller(CallbackKind kind)
         case Kind_OnTextPickerChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnTextPickerChangeCallback);
         case Kind_OnTextSelectionChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnTextSelectionChangeCallback);
         case Kind_OnTimePickerChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnTimePickerChangeCallback);
-        case Kind_OnTotalCountFunc: return reinterpret_cast<Ark_NativePointer>(callManagedOnTotalCountFunc);
         case Kind_OnViewportFitChangedCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnViewportFitChangedCallback);
         case Kind_OnWillScrollCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnWillScrollCallback);
         case Kind_PageMapBuilder: return reinterpret_cast<Ark_NativePointer>(callManagedPageMapBuilder);
         case Kind_PageTransitionCallback: return reinterpret_cast<Ark_NativePointer>(callManagedPageTransitionCallback);
-        case Kind_PasteButtonCallback: return reinterpret_cast<Ark_NativePointer>(callManagedPasteButtonCallback);
         case Kind_PasteEventCallback: return reinterpret_cast<Ark_NativePointer>(callManagedPasteEventCallback);
         case Kind_PluginErrorCallback: return reinterpret_cast<Ark_NativePointer>(callManagedPluginErrorCallback);
         case Kind_PopupStateChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedPopupStateChangeCallback);
@@ -8106,7 +7993,6 @@ Ark_NativePointer getManagedCallbackCaller(CallbackKind kind)
         case Kind_RestrictedWorker_onexit_Callback: return reinterpret_cast<Ark_NativePointer>(callManagedRestrictedWorker_onexit_Callback);
         case Kind_RestrictedWorker_onmessage_Callback: return reinterpret_cast<Ark_NativePointer>(callManagedRestrictedWorker_onmessage_Callback);
         case Kind_ReuseIdCallback: return reinterpret_cast<Ark_NativePointer>(callManagedReuseIdCallback);
-        case Kind_SaveButtonCallback: return reinterpret_cast<Ark_NativePointer>(callManagedSaveButtonCallback);
         case Kind_ScrollOnScrollCallback: return reinterpret_cast<Ark_NativePointer>(callManagedScrollOnScrollCallback);
         case Kind_ScrollOnWillScrollCallback: return reinterpret_cast<Ark_NativePointer>(callManagedScrollOnWillScrollCallback);
         case Kind_SearchSubmitCallback: return reinterpret_cast<Ark_NativePointer>(callManagedSearchSubmitCallback);
@@ -8154,8 +8040,9 @@ Ark_NativePointer getManagedCallbackCallerSync(CallbackKind kind)
         case Kind_Callback_Boolean_HoverEvent_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Boolean_HoverEvent_VoidSync);
         case Kind_Callback_Boolean_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Boolean_VoidSync);
         case Kind_Callback_Buffer_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Buffer_VoidSync);
-        case Kind_Callback_CalendarRequestedData_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_CalendarRequestedData_VoidSync);
-        case Kind_Callback_CalendarSelectedDate_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_CalendarSelectedDate_VoidSync);
+        case Kind_Callback_ClickEvent_LocationButtonOnClickResult_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_ClickEvent_LocationButtonOnClickResult_VoidSync);
+        case Kind_Callback_ClickEvent_PasteButtonOnClickResult_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_ClickEvent_PasteButtonOnClickResult_VoidSync);
+        case Kind_Callback_ClickEvent_SaveButtonOnClickResult_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_ClickEvent_SaveButtonOnClickResult_VoidSync);
         case Kind_Callback_ClickEvent_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_ClickEvent_VoidSync);
         case Kind_Callback_CompatibleComponentInfo_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_CompatibleComponentInfo_VoidSync);
         case Kind_Callback_ComputedBarAttribute_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_ComputedBarAttribute_VoidSync);
@@ -8328,7 +8215,6 @@ Ark_NativePointer getManagedCallbackCallerSync(CallbackKind kind)
         case Kind_ContentWillScrollCallback: return reinterpret_cast<Ark_NativePointer>(callManagedContentWillScrollCallbackSync);
         case Kind_Context_getGroupDir_Callback: return reinterpret_cast<Ark_NativePointer>(callManagedContext_getGroupDir_CallbackSync);
         case Kind_CustomNodeBuilder: return reinterpret_cast<Ark_NativePointer>(callManagedCustomNodeBuilderSync);
-        case Kind_CustomStyles: return reinterpret_cast<Ark_NativePointer>(callManagedCustomStylesSync);
         case Kind_DataPanelModifierBuilder: return reinterpret_cast<Ark_NativePointer>(callManagedDataPanelModifierBuilderSync);
         case Kind_EditableTextOnChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedEditableTextOnChangeCallbackSync);
         case Kind_ErrorCallback: return reinterpret_cast<Ark_NativePointer>(callManagedErrorCallbackSync);
@@ -8367,7 +8253,6 @@ Ark_NativePointer getManagedCallbackCallerSync(CallbackKind kind)
         case Kind_OnIntelligentTrackingPreventionCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnIntelligentTrackingPreventionCallbackSync);
         case Kind_OnItemDragStartCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnItemDragStartCallbackSync);
         case Kind_OnLargestContentfulPaintCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnLargestContentfulPaintCallbackSync);
-        case Kind_OnLazyLoadingFunc: return reinterpret_cast<Ark_NativePointer>(callManagedOnLazyLoadingFuncSync);
         case Kind_OnLinearIndicatorChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnLinearIndicatorChangeCallbackSync);
         case Kind_OnMenuItemClickCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnMenuItemClickCallbackSync);
         case Kind_OnMoveHandler: return reinterpret_cast<Ark_NativePointer>(callManagedOnMoveHandlerSync);
@@ -8398,12 +8283,10 @@ Ark_NativePointer getManagedCallbackCallerSync(CallbackKind kind)
         case Kind_OnTextPickerChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnTextPickerChangeCallbackSync);
         case Kind_OnTextSelectionChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnTextSelectionChangeCallbackSync);
         case Kind_OnTimePickerChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnTimePickerChangeCallbackSync);
-        case Kind_OnTotalCountFunc: return reinterpret_cast<Ark_NativePointer>(callManagedOnTotalCountFuncSync);
         case Kind_OnViewportFitChangedCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnViewportFitChangedCallbackSync);
         case Kind_OnWillScrollCallback: return reinterpret_cast<Ark_NativePointer>(callManagedOnWillScrollCallbackSync);
         case Kind_PageMapBuilder: return reinterpret_cast<Ark_NativePointer>(callManagedPageMapBuilderSync);
         case Kind_PageTransitionCallback: return reinterpret_cast<Ark_NativePointer>(callManagedPageTransitionCallbackSync);
-        case Kind_PasteButtonCallback: return reinterpret_cast<Ark_NativePointer>(callManagedPasteButtonCallbackSync);
         case Kind_PasteEventCallback: return reinterpret_cast<Ark_NativePointer>(callManagedPasteEventCallbackSync);
         case Kind_PluginErrorCallback: return reinterpret_cast<Ark_NativePointer>(callManagedPluginErrorCallbackSync);
         case Kind_PopupStateChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedPopupStateChangeCallbackSync);
@@ -8414,7 +8297,6 @@ Ark_NativePointer getManagedCallbackCallerSync(CallbackKind kind)
         case Kind_RestrictedWorker_onexit_Callback: return reinterpret_cast<Ark_NativePointer>(callManagedRestrictedWorker_onexit_CallbackSync);
         case Kind_RestrictedWorker_onmessage_Callback: return reinterpret_cast<Ark_NativePointer>(callManagedRestrictedWorker_onmessage_CallbackSync);
         case Kind_ReuseIdCallback: return reinterpret_cast<Ark_NativePointer>(callManagedReuseIdCallbackSync);
-        case Kind_SaveButtonCallback: return reinterpret_cast<Ark_NativePointer>(callManagedSaveButtonCallbackSync);
         case Kind_ScrollOnScrollCallback: return reinterpret_cast<Ark_NativePointer>(callManagedScrollOnScrollCallbackSync);
         case Kind_ScrollOnWillScrollCallback: return reinterpret_cast<Ark_NativePointer>(callManagedScrollOnWillScrollCallbackSync);
         case Kind_SearchSubmitCallback: return reinterpret_cast<Ark_NativePointer>(callManagedSearchSubmitCallbackSync);

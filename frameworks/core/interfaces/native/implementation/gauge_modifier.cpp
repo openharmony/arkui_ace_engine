@@ -25,6 +25,7 @@ namespace {
 constexpr double DEFAULT_GAUGE_VALUE = 0;
 constexpr double DEFAULT_GAUGE_MIN = 0;
 constexpr double DEFAULT_GAUGE_MAX = 100;
+constexpr Color ERROR_COLOR = Color(0xFFE84026);
 void SortColorStopOffset(std::vector<ColorStopArray>& colors)
 {
     for (auto& colorStopArray : colors) {
@@ -51,6 +52,8 @@ ColorStopArray Convert(const Ark_ResourceColor& src)
     const auto color = OptConvert<Color>(src);
     if (color) {
         colorStop.emplace_back(std::make_pair(*color, Dimension(0.0)));
+    } else {
+        colorStop.emplace_back(std::make_pair(ERROR_COLOR, Dimension(0.0)));
     }
     return colorStop;
 }
@@ -274,11 +277,13 @@ void DescriptionImpl(Ark_NativePointer node,
 void TrackShadowImpl(Ark_NativePointer node,
                      const Opt_GaugeShadowOptions* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // auto convValue = value ? Converter::OptConvert<GaugeShadowOptions>(*value) : std::nullopt;
-    // auto shadow = convValue.value_or(GaugeShadowOptions { .isShadowVisible = false });
-    // GaugeModelNG::SetShadowOptions(frameNode, shadow);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = value ? Converter::OptConvert<GaugeShadowOptions>(*value) : std::nullopt;
+    GaugeShadowOptions defaultOptions;
+    defaultOptions.isShadowVisible = false;
+    auto shadow = convValue.value_or(defaultOptions);
+    GaugeModelNG::SetShadowOptions(frameNode, shadow);
 }
 void IndicatorImpl(Ark_NativePointer node,
                    const Opt_GaugeIndicatorOptions* value)

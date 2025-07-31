@@ -102,14 +102,16 @@ Ark_Number GetWindowXImpl(Ark_DragEvent peer)
     const auto errValue = Converter::ArkValue<Ark_Number>(0);
     CHECK_NULL_RETURN(peer, errValue);
     CHECK_NULL_RETURN(peer->dragInfo, errValue);
-    return ArkValue<Ark_Number>(peer->dragInfo->GetX());
+    const auto value = PipelineBase::Px2VpWithCurrentDensity(peer->dragInfo->GetX());
+    return ArkValue<Ark_Number>(value);
 }
 Ark_Number GetWindowYImpl(Ark_DragEvent peer)
 {
     const auto errValue = Converter::ArkValue<Ark_Number>(0);
     CHECK_NULL_RETURN(peer, errValue);
     CHECK_NULL_RETURN(peer->dragInfo, errValue);
-    return ArkValue<Ark_Number>(peer->dragInfo->GetY());
+    const auto value = PipelineBase::Px2VpWithCurrentDensity(peer->dragInfo->GetY());
+    return ArkValue<Ark_Number>(value);
 }
 Ark_Number GetXImpl(Ark_DragEvent peer)
 {
@@ -212,7 +214,7 @@ Ark_Boolean GetModifierKeyStateImpl(Ark_VMContext vmContext,
     CHECK_NULL_RETURN(info, defaultValue);
     auto eventKeys = info->GetPressedKeyCodes();
     auto keysStr = Converter::Convert<std::vector<std::string>>(*keys);
-    return Converter::ArkValue<Ark_Boolean>(AccessorUtils::CheckKeysPressed(keysStr, eventKeys));
+    return Converter::ArkValue<Ark_Boolean>(OHOS::Ace::NG::AccessorUtils::CheckKeysPressed(keysStr, eventKeys));
 }
 void ExecuteDropAnimationImpl(Ark_DragEvent peer,
                               const Callback_Void* customDropAnimation)

@@ -18,18 +18,15 @@ koala_root = "../.."
 libarkts_root = "."
 ui2abc_root = ".."
 interop_root = "$koala_root/interop"
-incremental_root = "$koala_root/incremental"
-# build_root = "//build"
-# toolchain_linux = "$build_root/toolchain/linux:clang_x64"
 
 node_modules_dir = "../node_modules"
 
 node_version = "v16.20.2"
 host_arch = "${host_os}-${host_cpu}"
 
-# os_define = "KOALA_LINUX"
-
 shared_library("es2panda_lib") {
+    external_deps = [ "ets_frontend:ets2panda" ]
+
     sources = [
         "$libarkts_root/native/src/common.cc",
         "$libarkts_root/native/src/bridges.cc",
@@ -59,7 +56,6 @@ shared_library("es2panda_lib") {
     ]
 
     defines = [
-        #"$os_define",
         "KOALA_INTEROP_MODULE=NativeModule",
         "INTEROP_LIBRARY_NAME=es2panda",
         "KOALA_USE_NODE_VM",
@@ -67,7 +63,6 @@ shared_library("es2panda_lib") {
     ]
 
     deps = [
-        "$ui2abc_root:ui2abc_install",
         ":regenerate"
     ]
 
@@ -184,9 +179,15 @@ action("es2panda_copy_lib") {
     outputs = [
         "$target_out_dir/es2panda.node"
     ]
-    deps = [
-        ":es2panda_lib"
-    ]
+    if (build_ohos_sdk) {
+        deps = [
+            ":es2panda_lib"
+        ]
+    } else {
+        deps = [
+            ":es2panda_lib(${host_toolchain})"
+        ]
+    }
     args = [
         "--from-path", rebase_path(root_out_dir),
         "--to-path", rebase_path("."),
@@ -200,21 +201,23 @@ npm_cmd("regenerate") {
         "$target_out_dir/regenerate"
     ]
     deps = [
+        "$ui2abc_root:ui2abc_install_all(${host_toolchain})",
         "$ui2abc_root:ui2abc_panda_sdk"
     ]
     project_path = rebase_path(".")
     run_tasks = [ "regenerate:ohos" ]
 }
 
-npm_cmd("libarkts_install") {
-    outputs = [
-        "$target_out_dir/libarkts_install"
-    ]
-    deps = [
-        "$ui2abc_root:ui2abc_install"
-    ]
-    project_path = rebase_path(".")
-    install = true
+if (current_toolchain == host_toolchain) {
+    npm_install("libarkts_install") {
+        outputs = [
+            "$target_out_dir/libarkts_install"
+        ]
+        deps = [
+            "$ui2abc_root:ui2abc_install(${host_toolchain})"
+        ]
+        project_path = rebase_path(".")
+    }
 }
 
 npm_cmd("es2panda.js") {
@@ -223,10 +226,7 @@ npm_cmd("es2panda.js") {
     ]
     deps = [
         ":es2panda_copy_lib",
-        "$ui2abc_root:ui2abc_panda_sdk",
-        ":libarkts_install",
-        "$incremental_root:incremental_install",
-        "$interop_root:interop_install"
+        "$ui2abc_root:ui2abc_panda_sdk"
     ]
     project_path = rebase_path(".")
     run_tasks = [ "compile:koala:interop", "compile:js" ]
@@ -263,5 +263,26 @@ ohos_copy("libarkts-sdk") {
 group("es2panda") {
     deps = [
       ":es2panda.js"
+    ]
+}
+
+# for //developtools/ace_ets2bundle
+
+npm_cmd("libarkts.js") {
+    deps = [
+        "$ui2abc_root:ui2abc_install_all(${host_toolchain})",
+        ":regenerate"
+    ]
+    outputs = [
+        "$target_out_dir/libarkts.js"
+    ]
+    project_path = rebase_path(".")
+    run_tasks = [ "compile:koala:interop", "compile:js" ]
+}
+
+group("libarkts") {
+    deps = [
+        ":es2panda_lib",
+        ":libarkts.js(${host_toolchain})"
     ]
 }

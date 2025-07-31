@@ -99,16 +99,6 @@ common_bin = [
     subsystem_name = "graphic"
     part_name = "graphic_2d"
   },
-  # {
-  #   label = "//foundation/graphic/graphic_2d/rosen/modules/platform:impl_eventhandler"
-  #   subsystem_name = "graphic"
-  #   part_name = "graphic_2d"
-  # },
-  {
-    label = "//arkcompiler/runtime_core/static_core/plugins/ets/runtime/ani:ani"
-    subsystem_name = "arkcompiler"
-    part_name = "runtime_core"
-  },
   {
     label = "//third_party/glfw:glfw"
     subsystem_name = "thirdparty"
@@ -349,7 +339,7 @@ napi_modules = [
         ]
       },
     ]
-    if (use_linux && (defined(arkoala_for_sdk) && arkoala_for_sdk)) {
+    if (use_linux) {
       shard_libs += [
         {
           label = "//foundation/arkui/ace_engine/frameworks/bridge/arkts_frontend:ArkoalaNative_ark"
@@ -358,28 +348,10 @@ napi_modules = [
           lib_names = [ "ArkoalaNative_ark" ]
         },
         {
-          label = "//foundation/arkui/ace_engine/frameworks/bridge/arkts_frontend:ArkoalaLoader"
+          label = "//foundation/arkui/ace_engine/frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native:arkoala_native_ani_linux"
           subsystem_name = "arkui"
           part_name = "ace_engine"
-          lib_names = [ "ArkoalaLoader" ]
-        },
-        {
-          label = "//foundation/arkui/ace_engine/frameworks/bridge/arkts_frontend:vmloader"
-          subsystem_name = "arkui"
-          part_name = "ace_engine"
-          lib_names = [ "vmloader" ]
-        },
-        {
-          label = "//foundation/arkui/ace_engine/frameworks/bridge/arkts_frontend:ArkoalaNative_ani"
-          subsystem_name = "arkui"
-          part_name = "ace_engine"
-          lib_names = [ "ArkoalaNative_ani" ]
-        },
-        {
-          label = "//foundation/arkui/ace_engine/frameworks/bridge/arkts_frontend:ArkoalaNative_ets"
-          subsystem_name = "arkui"
-          part_name = "ace_engine"
-          lib_names = [ "ArkoalaNative_ets" ]
+          lib_names = [ "arkoala_native_ani" ]
         },
       ]
     }
@@ -673,50 +645,44 @@ if (defined(use_rosen_drawing) && use_rosen_drawing) {
   ]
 }
 
-#if (use_mac || use_mingw_win || use_linux) {
-#  common_bin += [
-#    {
-#      label = "//third_party/zlib:shared_libz"
-#      subsystem_name = "thirdparty"
-#      part_name = "zlib"
-#      lib_names = [ "shared_libz" ]
-#    },
-#    {
-#      label = "//foundation/arkui/ace_engine/build:libevent_adapter"
-#      subsystem_name = "arkui"
-#      part_name = "ace_engine"
-#    },
-#    {
-#      label = "//third_party/ffmpeg:libohosffmpeg"
-#      subsystem_name = "thirdparty"
-#      part_name = "ffmpeg"
-#      lib_names = [ "ohosffmpeg" ]
-#    },
-#  ]
-#}
-#
-#if (use_linux) {
-#  common_bin += [
-#    {
-#      label = "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog"
-#      subsystem_name = "hiviewdfx"
-#      part_name = "hilog"
-#      lib_names = [ "hilog" ]
-#    },
-#    {
-#      label = "//third_party/cares:c_ares"
-#      subsystem_name = "thirdparty"
-#      part_name = "cares"
-#      lib_names = [ "c_ares" ]
-#    },
-#    {
-#      label = "//third_party/brotli:brotli_shared"
-#      subsystem_name = "thirdparty"
-#      part_name = "brotli"
-#      lib_names = [ "brotli_shared" ]
-#    },
-#  ]
-#}
+if (use_mac || use_mingw_win || use_linux) {
+  common_bin += [
+    {
+      label = "//third_party/zlib:shared_libz"
+      subsystem_name = "thirdparty"
+      part_name = "zlib"
+      lib_names = [ "shared_libz" ]
+    },
+  ]
+}
+
+if (use_linux) {
+  common_bin += [
+    {
+      label = "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog"
+      subsystem_name = "hiviewdfx"
+      part_name = "hilog"
+      lib_names = [ "hilog" ]
+    },
+    {
+      label = "//third_party/cares:c_ares"
+      subsystem_name = "thirdparty"
+      part_name = "cares"
+      lib_names = [ "c_ares" ]
+    },
+    {
+      label = "//third_party/brotli:brotli_shared"
+      subsystem_name = "thirdparty"
+      part_name = "brotli"
+      lib_names = [ "brotli_shared" ]
+    },
+    {
+      label = "//arkcompiler/runtime_core/static_core/plugins/ets/runtime/ani:ani"
+      subsystem_name = "arkcompiler"
+      part_name = "runtime_core"
+    },
+  ]
+}
 
 if (use_mac || use_mingw_win) {
   common_bin += [

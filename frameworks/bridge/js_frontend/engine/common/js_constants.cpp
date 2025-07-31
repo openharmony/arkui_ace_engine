@@ -156,6 +156,7 @@ const char READ_KEY_LENGTH[] = "length";
 // for matrix
 const char MATRIX_INIT[] = "init";
 const char MATRIX_IDENTITY[] = "identity";
+const char MATRIX_TRANSFER[] = "__InitTransfer__";
 const char MATRIX_COPY[] = "copy";
 const char MATRIX_COMBINE[] = "combine";
 const char MATRIX_INVERT[] = "invert";

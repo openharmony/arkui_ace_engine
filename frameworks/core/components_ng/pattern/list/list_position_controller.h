@@ -31,6 +31,8 @@ public:
 
     void JumpToItemInGroup(int32_t index, int32_t indexInGroup, bool smooth,
         ScrollAlign align, int32_t source) override;
+    void JumpToItemInGroupMultiThread(int32_t index, int32_t indexInGroup, bool smooth,
+        ScrollAlign align, int32_t source);;
 
     void CloseAllSwipeActions(OnFinishFunc&& onFinishCallback) override;
 };

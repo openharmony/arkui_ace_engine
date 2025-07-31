@@ -196,8 +196,8 @@ void RadioModelNG::SetChecked(FrameNode* frameNode, bool isChecked)
 {
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetOrCreateEventHub<RadioEventHub>();
-    // TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT,
-    //     "radio frame node %{public}d set checked %{public}d", frameNode->GetId(), isChecked);
+    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT,
+        "radio frame node %{public}d set checked %{public}d", frameNode->GetId(), isChecked);
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCurrentUIState(UI_STATE_SELECTED, isChecked);
     ACE_UPDATE_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioCheck, isChecked, frameNode);

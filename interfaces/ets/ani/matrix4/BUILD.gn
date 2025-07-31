@@ -15,15 +15,26 @@ import("//build/config/components/ets_frontend/ets2abc_config.gni")
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
+config("ani_config") {
+  include_dirs = [
+    "${ace_root}/frameworks",
+    "${ace_root}/interfaces",
+    "${ace_root}",
+  ]
+}
+
 #构建ANI库
 ohos_shared_library("matrix4_ani") {
+  shlib_type = "ani"
   deps = [ "$ace_root/build:libace_compatible" ]
   include_dirs = [ "./include" ]
   sources = [ "./src/matrix4.cpp" ]
   external_deps = [
     #"runtime_core:libarkruntime",
     "napi:ace_napi",
+    "runtime_core:ani_helpers",
     "runtime_core:ani",
+    "graphic_2d:2d_graphics",
   ]
   configs = [ "$ace_root:ace_config" ]
   part_name = "ace_engine"

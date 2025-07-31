@@ -2928,6 +2928,21 @@ void AssignUnionTo(std::optional<T>& dst,
     }
 }
 
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_ImageAttachmentInterface_Opt_AttachmentType& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
 template<typename T, typename P>
 void AssignLiteralTo(std::optional<T>& dst, const P& src);
 
@@ -3066,14 +3081,14 @@ void AssignLiteralTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignLiteralTo(std::optional<T>& dst,
-                     const Ark_HorizontalAlignOptions& src)
+                     const Ark_HorizontalAlignParam& src)
 {
     AssignTo(dst, src.anchor);
 }
 
 template<typename T>
 void AssignLiteralTo(std::optional<T>& dst,
-                     const Ark_VerticalAlignOptions& src)
+                     const Ark_VerticalAlignParam& src)
 {
     AssignTo(dst, src.anchor);
 }
@@ -3505,6 +3520,8 @@ ASSIGN_OPT(Opt_PanelType)
 ASSIGN_OPT(Opt_PanGestureInterface)
 ASSIGN_OPT(Opt_PanGestureOptions)
 ASSIGN_OPT(Opt_PanRecognizer)
+ASSIGN_OPT(Opt_ParticleColorPropertyOptionsInner)
+ASSIGN_OPT(Opt_ParticleColorUpdaterOptionsInner)
 ASSIGN_OPT(Opt_ParticleEmitterShape)
 ASSIGN_OPT(Opt_ParticleType)
 ASSIGN_OPT(Opt_ParticleUpdater)
@@ -4060,6 +4077,7 @@ ASSIGN_OPT(Opt_ContentDidScrollCallback)
 ASSIGN_OPT(Opt_ContentWillScrollCallback)
 ASSIGN_OPT(Opt_Context_getGroupDir_Callback)
 ASSIGN_OPT(Opt_CustomNodeBuilder)
+ASSIGN_OPT(Opt_DatePickerSelectedCallback)
 ASSIGN_OPT(Opt_EditableTextOnChangeCallback)
 ASSIGN_OPT(Opt_ErrorCallback)
 ASSIGN_OPT(Opt_GestureRecognizerJudgeBeginCallback)
@@ -4158,7 +4176,10 @@ ASSIGN_OPT(Opt_TextAreaSubmitCallback)
 ASSIGN_OPT(Opt_TextFieldValueCallback)
 ASSIGN_OPT(Opt_TextPickerEnterSelectedAreaCallback)
 ASSIGN_OPT(Opt_TextPickerScrollStopCallback)
+ASSIGN_OPT(Opt_TextPickerSelectedCallback)
+ASSIGN_OPT(Opt_TextPickerValueCallback)
 ASSIGN_OPT(Opt_TextTimerAttribute_onTimer_event_type)
+ASSIGN_OPT(Opt_TimePickerSelectedCallback)
 ASSIGN_OPT(Opt_TransitionFinishCallback)
 ASSIGN_OPT(Opt_Type_NavigationAttribute_customNavContentTransition_delegate)
 ASSIGN_OPT(Opt_Type_TextPickerAttribute_onChange_callback)
@@ -4329,8 +4350,8 @@ ASSIGN_OPT(Opt_Literal_Number_offset_span)
 ASSIGN_OPT(Opt_Literal_Number_offsetRemain)
 ASSIGN_OPT(Opt_Literal_Number_surfaceHeight_surfaceWidth)
 ASSIGN_OPT(Opt_Literal_Object_object__String_name_Array_String_methodList)
-ASSIGN_OPT(Opt_HorizontalAlignOptions)
-ASSIGN_OPT(Opt_VerticalAlignOptions)
+ASSIGN_OPT(Opt_HorizontalAlignParam)
+ASSIGN_OPT(Opt_VerticalAlignParam)
 ASSIGN_OPT(Opt_Literal_String_baseUrl_data_encoding_historyUrl_mimeType)
 ASSIGN_OPT(Opt_Literal_String_plainText)
 ASSIGN_OPT(Opt_Literal_String_script_Callback_String_Void_callback_)
@@ -4407,6 +4428,7 @@ ASSIGN_OPT(Opt_PixelRoundPolicy)
 ASSIGN_OPT(Opt_PixelStretchEffectOptions)
 ASSIGN_OPT(Opt_PluginComponentTemplate)
 ASSIGN_OPT(Opt_PluginErrorData)
+ASSIGN_OPT(Opt_PointParticleParameters)
 ASSIGN_OPT(Opt_PolygonOptions)
 ASSIGN_OPT(Opt_PolylineOptions)
 ASSIGN_OPT(Opt_PolyToPolyOptions)
@@ -4491,7 +4513,7 @@ ASSIGN_OPT(Opt_TextMarqueeOptions)
 ASSIGN_OPT(Opt_TextMenuOptions)
 ASSIGN_OPT(Opt_TextRange)
 ASSIGN_OPT(Opt_TextShadowStyle)
-ASSIGN_OPT(Opt_TextStyle_alert_dialog)
+ASSIGN_OPT(Opt_AlertDialogTextStyleOptions)
 ASSIGN_OPT(Opt_TextTimerOptions)
 ASSIGN_OPT(Opt_TimePickerOptions)
 ASSIGN_OPT(Opt_TipsMessageType)
@@ -4506,6 +4528,7 @@ ASSIGN_OPT(Opt_Tuple_ResourceColor_Number)
 ASSIGN_OPT(Opt_Type_CalendarInterface_callable0_value)
 ASSIGN_OPT(Opt_Type_GaugeAttribute_colors_colors)
 ASSIGN_OPT(Opt_Type_PanGestureInterface_callable0_value)
+ASSIGN_OPT(Opt_Union_SingleLengthDetent_DoubleLengthDetents_TripleLengthDetents)
 ASSIGN_OPT(Opt_Type_SheetOptions_detents)
 ASSIGN_OPT(Opt_Type_TextPickerOptions_range)
 ASSIGN_OPT(Opt_Type_XComponentInterface_callable0_value)
@@ -4668,6 +4691,7 @@ ASSIGN_OPT(Opt_HoverEvent)
 ASSIGN_OPT(Opt_IconOptions)
 ASSIGN_OPT(Opt_ImageAttachmentLayoutStyle)
 ASSIGN_OPT(Opt_ImageFrameInfo)
+ASSIGN_OPT(Opt_ImageParticleParameters)
 ASSIGN_OPT(Opt_IndicatorStyle)
 ASSIGN_OPT(Opt_SubTabBarIndicatorStyle)
 ASSIGN_OPT(Opt_JavaScriptProxy)
@@ -4896,8 +4920,15 @@ ASSIGN_OPT(Opt_Union_RichEditorTextSpanResult_RichEditorImageSpanResult)
 ASSIGN_OPT(Opt_Union_SubTabBarStyle_BottomTabBarStyle)
 ASSIGN_OPT(Opt_WithThemeOptions)
 ASSIGN_OPT(Opt_RichEditorSpan)
+ASSIGN_OPT(Opt_Union_ImageAttachmentInterface_Opt_AttachmentType)
 ASSIGN_OPT(Opt_PopupButton)
 ASSIGN_OPT(Opt_PopupOptions)
+ASSIGN_OPT(Opt_RadioModifierBuilder)
+ASSIGN_OPT(Opt_ButtonModifierBuilder)
+ASSIGN_OPT(Opt_CheckBoxModifierBuilder)
+ASSIGN_OPT(Opt_RatingModifierBuilder)
+ASSIGN_OPT(Opt_ToggleModifierBuilder)
+ASSIGN_OPT(Opt_SliderModifierBuilder)
 #undef ASSIGN_OPT
 }
 

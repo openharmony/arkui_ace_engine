@@ -30,6 +30,8 @@ using OHOS::Ace::PanDirection;
 using OHOS::Ace::PanGestureOption;
 
 struct PanRecognizerPeer : public MultiFingerRecognizerPeer {
+    DECLARE_ACE_TYPE(PanRecognizerPeer, MultiFingerRecognizerPeer);
+public:
     void Update(const OHOS::Ace::RefPtr<OHOS::Ace::NG::PanRecognizer>& recognizer)
     {
         MultiFingerRecognizerPeer::Update(recognizer);

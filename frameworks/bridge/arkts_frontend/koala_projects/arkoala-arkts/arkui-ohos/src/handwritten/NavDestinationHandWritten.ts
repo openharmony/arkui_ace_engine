@@ -14,7 +14,8 @@
  */
 
 import { KPointer } from "@koalaui/interop"
-import { NavigationTitleOptions, NavDestinationContext, CustomBuilder, NavDestinationCommonTitle, NavDestinationCustomTitle, ResourceStr, SymbolGlyphModifier, Callback } from "../component"
+import { NavigationTitleOptions, NavDestinationContext, CustomBuilder, NavDestinationCommonTitle, NavDestinationCustomTitle, ResourceStr, Callback } from "../component"
+import { SymbolGlyphModifier } from "../SymbolGlyphModifier"
 import { Resource } from "global.resource"
 import { PixelMap } from "#external"
 import { NavDestinationHandWrittenImpl } from "./NavDestinationHandWrittenImpl"

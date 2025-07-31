@@ -322,6 +322,9 @@ void JSSymbol::SetShaderStyle(const JSCallbackInfo& info)
     gradients.reserve(jsArray->Length());
 
     for (size_t i = 0; i < jsArray->Length(); ++i) {
+        if (!jsArray->GetValueAt(i)->IsObject()) {
+            continue;
+        }
         JSRef<JSObject> jsGradientObj = JSRef<JSObject>::Cast(jsArray->GetValueAt(i));
         SymbolGradient gradient;
         if (ParseShaderStyle(jsGradientObj, gradient)) {

@@ -16,7 +16,7 @@
 import { DecoratedVariableBase } from '../decoratorImpl/decoratorBase';
 import { LocalStorage } from '../storage/localStorage';
 import { StorageBase } from '../storage/storageBase';
-import { AbstractProperty, IStorageProperties } from '../storage/storageProperty';
+import { SubscribedAbstractProperty, IStorageProperties } from '../storage/storageProperty';
 import { StorageProperty } from '../storage/storageBase';
 import { ExtendableComponent } from '../../component/extendableComponent';
 import { WatchFuncType } from '../decorator';
@@ -69,6 +69,21 @@ export class InteropStorageBase extends StorageBase {
     protected clearDynamicValue_: () => boolean = () => {
         throw new Error('not implement');
     };
+    protected checkClearDynamicValue_: () => boolean = () => {
+        throw new Error('not implement');
+    };
+    protected getStaticSize(): number {
+        return super.size();
+    }
+    protected removeStaticValue(key: string): boolean {
+        return super.delete(key);
+    }
+    protected staticClear(): boolean {
+        return super.clear();
+    }
+    protected checkStaticClear(): boolean {
+        return super.checkClear();
+    }
 
     public constructor() {
         super();
@@ -89,20 +104,25 @@ export class InteropStorageBase extends StorageBase {
         const removeKeyFunc = (key: string): void => {
             this.interopStorage_.delete(key);
         };
-        const clearKeyFunc = (): void => {
+        const clearKeyFunc = (): boolean => {
+            if(!this.staticClear()){
+                return false;
+            }
             this.interopStorage_.clear();
-            // need to clear ArkTS1.2 too
-            super.clear();
+            return true;
         };
+        const checkClearKeyFunc = (): boolean => {
+            return this.checkStaticClear();
+        }
         // used by ArkTS1.1 to interop with static storage map.
         const getValue = (key: string): Any => {
             return this.getStoragePropertyForDynamic(key);
         };
-        const removeValue = (key: string): void => {
-            super.delete(key);
+        const removeValue = (key: string): boolean => {
+            return this.removeStaticValue(key);
         };
         const getSize = (): number => {
-            return super.size();
+            return this.getStaticSize();
         };
         const getKeys = (): Set<String> => {
             const keys: Set<String> = this.keySet;
@@ -118,6 +138,9 @@ export class InteropStorageBase extends StorageBase {
         const setClearValueFunc = (event: () => boolean): void => {
             this.clearDynamicValue_ = event;
         };
+        const setCheckClearValueFunc = (event: () => boolean): void => {
+            this.checkClearDynamicValue_ = event;
+        }
         let proxyStorage = bindFunc.invoke(
             ESValue.wrap(getValue),
             ESValue.wrap(removeValue),
@@ -126,9 +149,11 @@ export class InteropStorageBase extends StorageBase {
             ESValue.wrap(addKeyFunc),
             ESValue.wrap(removeKeyFunc),
             ESValue.wrap(clearKeyFunc),
+            ESValue.wrap(checkClearKeyFunc),
             ESValue.wrap(setGetValueFunc),
             ESValue.wrap(setRemoveValueFunc),
-            ESValue.wrap(setClearValueFunc)
+            ESValue.wrap(setClearValueFunc),
+            ESValue.wrap(setCheckClearValueFunc)
         );
         this.setProxy(proxyStorage);
     }
@@ -146,19 +171,15 @@ export class InteropStorageBase extends StorageBase {
         }
         const state = storage! as StorageProperty<NullishType>;
         if (state.getProxy() === undefined) {
-            const setSource = ((value: NullishType): void => {
+            const setSource = (value: NullishType): void => {
                 state.set(value);
-            });
+            };
             const proxy = createState.invoke(ESValue.wrap(state!.get()), ESValue.wrap(setSource));
             state.setProxy(proxy);
-            const setProxyValue = ((value: NullishType): void => {
+            const setProxyValue = (value: NullishType): void => {
                 proxy.invokeMethod('set', ESValue.wrap(value));
-            });
+            };
             state.setProxyValue = setProxyValue;
-            const notifyCallback = ((propertyName: string): void => {
-                proxy.invokeMethod('notifyPropertyHasChangedPU');
-            });
-            state.setNotifyCallback(notifyCallback);
         }
         return state.getProxy()!.unwrap();
     }
@@ -238,17 +259,17 @@ export class InteropStorageBase extends StorageBase {
     }
 
     /**
-     *  Create an AbstractProperty if property with given name already exists in storage
+     *  Create an SubscribedAbstractProperty if property with given name already exists in storage
      * and if given ttype equals the type configured for this property in storage.
      *
      * @param { string } propName LocalStorage property name
      * @param {Type} ttype - data type
-     * @returns { AbstractProperty<T> | undefined } AbstractProperty object if aforementioned conditions are
+     * @returns { SubscribedAbstractProperty<T> | undefined } SubscribedAbstractProperty object if aforementioned conditions are
      * satisfied.
      * @syscap SystemCapability.ArkUI.ArkUI.Full
      * @since 20
      */
-    public ref<T>(key: string, ttype: Type): AbstractProperty<T> | undefined {
+    public ref<T>(key: string, ttype: Type): SubscribedAbstractProperty<T> | undefined {
         let value = super.ref<T>(key, ttype);
         if (value !== undefined) {
             return value;
@@ -264,7 +285,7 @@ export class InteropStorageBase extends StorageBase {
         }
         const state = interopValue.value as StorageProperty<T>;
         const reference = state.mkRef(key, ttype);
-        state.registerWatch<T>(reference);
+        state.registerWatchToSource(reference);
         return reference;
     }
     /**
@@ -340,14 +361,14 @@ export class InteropStorageBase extends StorageBase {
      * if given defaultValue is assignable to given type, then
      * - create new property with given name in storage
      * - configure its type to be the given ttype
-     * - create a AbstractProperty that refers to this storage property
+     * - create a SubscribedAbstractProperty that refers to this storage property
      *   and return it
      * otherwise create no new property in storage, and return undefined.
      *
      * case B: if property with given name already exists in storage
      * (defaultValue is not used):
      * if given type equals the type configured for this property in storage
-     * - create a AbstractProperty that refers to this storage property.
+     * - create a SubscribedAbstractProperty that refers to this storage property.
      *   and return it.
      * otherwise do not touch the storage property, return undefined.
      *
@@ -355,11 +376,11 @@ export class InteropStorageBase extends StorageBase {
      * @param { T } defaultValue If property does not exist in LocalStorage,
      *        create it with given default value.
      * @param {Type} ttype - data type
-     * @returns { AbstractProperty<T> } AbstractProperty object or undefined as defined above
+     * @returns { SubscribedAbstractProperty<T> } SubscribedAbstractProperty object or undefined as defined above
      * @syscap SystemCapability.ArkUI.ArkUI.Full
      * @since 20
      */
-    public setAndRef<T>(key: string, defaultValue: T, ttype: Type): AbstractProperty<T> | undefined {
+    public setAndRef<T>(key: string, defaultValue: T, ttype: Type): SubscribedAbstractProperty<T> | undefined {
         const ttypeOpt = super.getType(key);
         if (ttypeOpt === undefined) {
             // search ArkTS1.1 Storage.
@@ -379,7 +400,7 @@ export class InteropStorageBase extends StorageBase {
             }
             const state = interopValue.value as StorageProperty<T>;
             const reference = state.mkRef(key, ttype);
-            state.registerWatch<T>(reference);
+            state.registerWatchToSource(reference);
             return reference;
         }
         const link = super.ref<T>(key, ttype);
@@ -396,7 +417,7 @@ export class InteropStorageBase extends StorageBase {
      * Another reason for failing is unknown property.
      * Developer advise:
      * instance of @StorageLink / @LocalStorageLink decorated variable is a subscriber of storage property,
-     * AbstractProperty instance created by ref, setAndRef, link, or setAndLink is also a subscriber.
+     * SubscribedAbstractProperty instance created by ref, setAndRef, link, or setAndLink is also a subscriber.
      *
      * @param { string } propName
      * @returns { boolean } false if method failed
@@ -430,9 +451,13 @@ export class InteropStorageBase extends StorageBase {
      * @since 20
      */
     clear(): boolean {
-        let result1 = super.clear();
-        let result2 = this.clearDynamicValue_();
-        return result1 && result2;
+        if(!(this.checkStaticClear() && this.checkClearDynamicValue_())) {
+            return false;
+        }
+        this.staticClear();
+        this.interopStorage_.clear();
+        this.clearDynamicValue_();
+        return true;
     }
 
     /**
@@ -465,7 +490,7 @@ export class InteropStorageBase extends StorageBase {
         }
         const state = interopValue.value as StorageProperty<T>;
         const link = state.makeStorageLink(owner, key, varName, watchFunc);
-        state.registerWatch<T>(link);
+        state.registerWatchToSource(link);
         return link;
     }
 
@@ -509,40 +534,48 @@ export class InteropAppStorageBase extends InteropStorageBase {
             return;
         }
         // these function will call by ArkTS1.1 to speed up dynamic key search for ArkTS1.2.
-        const addKeyFunc = (key: string) => {
+        const addKeyFunc = (key: string): void => {
             this.interopStorage_.set(key, new InteropStorageValue());
         };
-        const removeKeyFunc = (key: string) => {
+        const removeKeyFunc = (key: string): void => {
             this.interopStorage_.delete(key);
         };
-        const clearKeyFunc = () => {
+        const clearKeyFunc = (): boolean => {
+            if(!this.staticClear()){
+                return false;
+            }
             this.interopStorage_.clear();
-            // need to clear ArkTS1.2 too
-            super.clear();
+            return true;
         };
+        const checkClearKeyFunc = (): boolean => {
+            return this.checkStaticClear();
+        }
         // used by ArkTS1.1 to interop with static storage map.
-        const getValue = (key: string) => {
+        const getValue = (key: string): Any => {
             return this.getStoragePropertyForDynamic(key);
         };
-        const removeValue = (key: string) => {
-            super.delete(key);
+        const removeValue = (key: string): boolean => {
+            return this.removeStaticValue(key);
         };
-        const getSize = () => {
-            return super.size();
+        const getSize = (): number => {
+            return this.getStaticSize();
         };
-        const getKeys = () => {
+        const getKeys = (): Set<String> => {
             const keys: Set<String> = this.keySet;
             return keys;
         };
         // used by ArkTS1.2 to interop with dynamic storage map.
-        const setGetValueFunc = (event: (value: string) => ESValue) => {
+        const setGetValueFunc = (event: (value: string) => ESValue): void => {
             this.getDynamicValue_ = event;
         };
-        const setRemoveValueFunc = (event: (value: string) => boolean) => {
+        const setRemoveValueFunc = (event: (value: string) => boolean): void => {
             this.removeDynamicValue_ = event;
         };
-        const setClearValueFunc = (event: () => boolean) => {
+        const setClearValueFunc = (event: () => boolean): void => {
             this.clearDynamicValue_ = event;
+        };
+        const setCheckClearValueFunc = (event: () => boolean): void => {
+            this.checkClearDynamicValue_ = event;
         };
         bindFunc.invoke(
             ESValue.wrap(getValue),
@@ -552,17 +585,18 @@ export class InteropAppStorageBase extends InteropStorageBase {
             ESValue.wrap(addKeyFunc),
             ESValue.wrap(removeKeyFunc),
             ESValue.wrap(clearKeyFunc),
+            ESValue.wrap(checkClearKeyFunc),
             ESValue.wrap(setGetValueFunc),
             ESValue.wrap(setRemoveValueFunc),
-            ESValue.wrap(setClearValueFunc)
+            ESValue.wrap(setClearValueFunc),
+            ESValue.wrap(setCheckClearValueFunc)
         );
     }
 }
 
 export class InteropAppStorage extends LocalStorage {
-    constructor(){
+    constructor() {
         super();
         this.store_ = new InteropAppStorageBase();
     }
 }
-

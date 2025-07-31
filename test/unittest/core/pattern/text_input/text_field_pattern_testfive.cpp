@@ -1306,7 +1306,7 @@ HWTEST_F(TextFieldPatternTestFive, TextFieldSelectControllerTest006, TestSize.Le
     controller->UpdateParagraph(nullptr);
     auto rect = controller->CalculateEmptyValueCaretRect();
     EXPECT_EQ(rect.Height(), 50);
-
+}
 /**
  * @tc.name: TextFieldMultiThreadTest01
  * @tc.desc: test textfield multi thread function
@@ -1330,7 +1330,6 @@ HWTEST_F(TextFieldPatternTestFive, TextFieldMultiThreadTest01, TestSize.Level0)
     pattern_->HandleSetSelectionMultiThread(0, 0, false);
     EXPECT_EQ(pattern_->updateCaretInfoToControllerMultiThread_, true);
 
-    pattern_->OnModifyDoneMultiThread();
     pattern_->InitSurfaceChangedCallbackMultiThread();
     EXPECT_EQ(pattern_->initSurfaceChangedCallbackMultiThread_, true);
     pattern_->InitSurfaceChangedCallbackMultiThreadAction();

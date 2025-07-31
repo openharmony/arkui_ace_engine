@@ -23,6 +23,7 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT RichEditorModelStatic : public OHOS::Ace::RichEditorModel {
 public:
     static RefPtr<NG::FrameNode> CreateFrameNode(int32_t nodeId);
+    static void InitRichEditorModel(RefPtr<FrameNode> frameNode);
     static RefPtr<RichEditorBaseControllerBase> GetRichEditorController(FrameNode* frameNode);
     static RefPtr<RichEditorBaseControllerBase> GetRichEditorStyledStringController(FrameNode* frameNode);
     static bool IsStyledStringMode(FrameNode* frameNode);
@@ -39,6 +40,7 @@ public:
         const std::optional<bool>& supportAvoidance);
     static void BindSelectionMenu(FrameNode* frameNode, TextSpanType& editorType, TextResponseType& type,
         std::function<void()>& buildFunc, SelectMenuParam& menuParam);
+    static void SetMaxLength(FrameNode* frameNode, std::optional<int32_t> value);
     void SetDraggable(bool draggable);
 };
 } // namespace OHOS::Ace::NG

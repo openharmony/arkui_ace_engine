@@ -2037,6 +2037,7 @@ void UIContentImpl::SetAceApplicationInfo(std::shared_ptr<OHOS::AbilityRuntime::
     AceApplicationInfo::GetInstance().SetApiTargetVersion(context->GetApplicationInfo()->apiTargetVersion);
     AceApplicationInfo::GetInstance().SetAppVersionName(context->GetApplicationInfo()->versionName);
     AceApplicationInfo::GetInstance().SetAppVersionCode(context->GetApplicationInfo()->versionCode);
+    AceApplicationInfo::GetInstance().SetDebugForParallel(context->GetApplicationInfo()->debug);
     AceApplicationInfo::GetInstance().SetUid(IPCSkeleton::GetCallingUid());
     AceApplicationInfo::GetInstance().SetPid(IPCSkeleton::GetCallingRealPid());
     CapabilityRegistry::Register();
@@ -2361,13 +2362,13 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     if (vmType_ == VMType::ARK_NATIVE) {
         frontendType = FrontendType::ARK_TS;
     }
-    // if (appInfo->codeLanguage == AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_HYBRID) {
-    //     if (vmType_ == VMType::ARK_NATIVE) {
-    //         frontendType = FrontendType::STATIC_HYBRID_DYNAMIC;
-    //     } else {
-    //         frontendType = FrontendType::DYNAMIC_HYBRID_STATIC;
-    //     }
-    // }
+    if (appInfo->arkTSMode == AbilityRuntime::CODE_LANGUAGE_ARKTS_HYBRID) {
+        if (vmType_ == VMType::ARK_NATIVE) {
+            frontendType = FrontendType::STATIC_HYBRID_DYNAMIC;
+        } else {
+            frontendType = FrontendType::DYNAMIC_HYBRID_STATIC;
+        }
+    }
     auto container = CreateContainer(info, frontendType, useNewPipe);
     CHECK_NULL_RETURN(container, UIContentErrorCode::NULL_POINTER);
     container->SetUIContentType(uIContentType_);
@@ -2395,7 +2396,6 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     }
     container->SetPageProfile(pageProfile);
     container->Initialize();
-     // wjh create and init container end
     ContainerScope scope(instanceId_);
     auto front = container->GetFrontend();
     if (front) {
@@ -2501,7 +2501,6 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         container->SetWindowModal(WindowModal::CONTAINER_MODAL);
     }
     container->InitFoldStatusFromListener();
-       // wjh set container rest info end
     dragWindowListener_ = new DragWindowListener(instanceId_);
     window_->RegisterDragListener(dragWindowListener_);
     if (!container->IsSceneBoardEnabled()) {
@@ -2660,10 +2659,10 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
             container->SetLocalStorage(reinterpret_cast<NativeReference*>(ref), context);
         }
     }
-    if (runtime_ && storageWrapper.aniStorage_.has_value()) {
+    if (runtime_ && storageWrapper.aniStorage_.has_value()) { // 1.2 SetAniLocalStorage
         auto storage = storageWrapper.aniStorage_.value();
         if (!storage) {
-            container->SetLocalStorage(nullptr, context);
+            container->SetAniLocalStorage(nullptr, context);
         } else {
             auto* env = reinterpret_cast<ani_env*>(runtime_);
             ani_ref ref;

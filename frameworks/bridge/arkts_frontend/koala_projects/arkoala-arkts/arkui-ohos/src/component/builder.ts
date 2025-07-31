@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+import { conditionScopeImpl, conditionBranchImpl } from './conditionScope'
+
 export class WrappedBuilder<T> {
     /** @memo */
     builder: T;
@@ -23,4 +25,20 @@ export class WrappedBuilder<T> {
 
 export function wrapBuilder<T>(builder: T): WrappedBuilder<T> {
     return new WrappedBuilder<T>(builder);
+}
+
+/** @memo */
+export function ConditionScope(
+    /** @memo */
+    content: () => void
+): void {
+    conditionScopeImpl(content);
+}
+
+/** @memo */
+export function ConditionBranch(
+    /** @memo */
+    content: () => void
+): void {
+    conditionBranchImpl(content);
 }

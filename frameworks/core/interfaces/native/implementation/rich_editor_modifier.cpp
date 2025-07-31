@@ -28,6 +28,7 @@
 #include "core/interfaces/native/generated/interface/ui_node_api.h"
 #include "rich_editor_controller_peer_impl.h"
 #include "rich_editor_styled_string_controller_peer_impl.h"
+#include "core/interfaces/native/utility/validators.h"
 
 namespace OHOS::Ace::NG::Converter {
 namespace {
@@ -135,13 +136,8 @@ void AssignArkValue(Ark_RichEditorTextSpanResult& dst, const RichEditorAbstractS
 void AssignArkValue(Ark_RichEditorImageSpanResult& dst, const RichEditorAbstractSpanResult& src, ConvContext *ctx)
 {
     dst.spanPosition = Converter::ArkValue<Ark_RichEditorSpanPosition>(src);
-    if (auto pixelMap = src.GetValuePixelMap()) {
-        Ark_PixelMap arkPixelMap = new PixelMapPeer();
-        arkPixelMap->pixelMap = pixelMap;
-        dst.valuePixelMap = Converter::ArkValue<Opt_PixelMap>(arkPixelMap);
-    } else {
-        dst.valuePixelMap = Converter::ArkValue<Opt_PixelMap>(Ark_Empty());
-    }
+    // read pixel map is not supported
+    dst.valuePixelMap = Converter::ArkValue<Opt_PixelMap>(Ark_Empty());
     auto valueResourceStr = src.GetValueResourceStr();
     dst.valueResourceStr = valueResourceStr.empty() ? Converter::ArkUnion<Opt_ResourceStr>(Ark_Empty())
         : Converter::ArkUnion<Opt_ResourceStr, Ark_String>(valueResourceStr, ctx);
@@ -638,9 +634,9 @@ void MaxLengthImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = value ? Converter::OptConvert<int32_t>(*value) : std::nullopt;
-    auto validValue = convValue && convValue.value() >= 0 ? convValue : std::nullopt;
-    RichEditorModelNG::SetMaxLength(frameNode, validValue);
+    auto convValue = Converter::OptConvertPtr<int32_t>(value);
+    Validator::ValidateNonNegative(convValue);
+    RichEditorModelStatic::SetMaxLength(frameNode, convValue);
 }
 void MaxLinesImpl(Ark_NativePointer node,
                   const Opt_Number* value)

@@ -20,6 +20,15 @@
 
 struct KeyEventPeer
     : public OHOS::Ace::NG::GeneratedModifier::SomeEventPeer<OHOS::Ace::KeyEventInfo> {
+public:
+    static KeyEventPeer* Create(void* ptr)
+    {
+        auto* peer = OHOS::Ace::NG::PeerUtils::CreatePeer<KeyEventPeer>();
+        CHECK_NULL_RETURN(peer, nullptr);
+        peer->SetEventInfo(reinterpret_cast<OHOS::Ace::KeyEventInfo*>(ptr));
+        return peer;
+    }
+
 protected:
     KeyEventPeer() = default;
     ~KeyEventPeer() override = default;

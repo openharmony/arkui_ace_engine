@@ -18,7 +18,7 @@
  
 ACEAsyncJSCallbackInfo* AceCreateAsyncJSCallbackInfo(ani_env* env)
 {
-    auto containerId = OHOS::Ace::Container::CurrentId();
+    auto containerId = OHOS::Ace::Container::CurrentIdSafelyWithCheck();
     ACEAsyncJSCallbackInfo* asyncCallbackInfo = new ACEAsyncJSCallbackInfo {
         .cbInfo = {
             .env = env,
@@ -67,9 +67,9 @@ bool AceIsSameFuncFromANI(ACECallbackInfo& left, ACECallbackInfo& right)
 ani_ref CreateInt(ani_env* env, ani_int value)
 {
     ani_class cls;
-    env->FindClass("Lstd/core/Int;", &cls);
+    env->FindClass("std.core.Int", &cls);
     ani_method ctor;
-    env->Class_FindMethod(cls, "<ctor>", "I:V", &ctor);
+    env->Class_FindMethod(cls, "<ctor>", "i:", &ctor);
     ani_object rs;
     env->Object_New(cls, ctor, &rs, value);
     return rs;
@@ -91,7 +91,7 @@ ani_ref AceWrapStringToObject(ani_env* env, const std::string str)
     ani_ref undefinedResult;
     env->GetUndefined(&undefinedResult);
     ani_class cls = nullptr;
-    if (ANI_OK != env->FindClass("L@ohos/app/ability/Want/RecordSerializeTool;", &cls)) {
+    if (ANI_OK != env->FindClass("@ohos.app.ability.Want.RecordSerializeTool", &cls)) {
         LOGE("plugin-ani FindClass RecordSerializeTool failed");
         return undefinedResult;
     }
@@ -147,7 +147,7 @@ ani_status GetAniKVObjectPropertyByName(ani_env* env, ani_object parameters, std
         return ANI_ERROR;
     }
     ani_class cls = nullptr;
-    if (ANI_OK != env->FindClass("L@ohos/app/ability/Want/RecordSerializeTool;", &cls)) {
+    if (ANI_OK != env->FindClass("@ohos.app.ability.Want.RecordSerializeTool", &cls)) {
         LOGE("plugin-ani FindClass RecordSerializeTool failed");
         return ANI_ERROR;
     }
