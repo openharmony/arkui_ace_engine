@@ -86,6 +86,9 @@ bool SystemProperties::imageFrameworkEnable_ = true;
 bool SystemProperties::debugAutoUIEnabled_ = false;
 float SystemProperties::dragStartDampingRatio_ = 0.2f;
 float SystemProperties::dragStartPanDisThreshold_ = 10.0f;
+int32_t SystemProperties::velocityTrackerPointNumber_ = 20;
+bool SystemProperties::isVelocityWithinTimeWindow_ = true;
+bool SystemProperties::isVelocityWithoutUpPoint_ = true;
 float SystemProperties::pageCount_ = 0.0f;
 std::pair<float, float> SystemProperties::brightUpPercent_ = {};
 int32_t SystemProperties::imageFileCacheConvertAstcThreshold_ = 3;
@@ -243,6 +246,21 @@ float SystemProperties::GetDragStartDampingRatio()
 float SystemProperties::GetDragStartPanDistanceThreshold()
 {
     return dragStartPanDisThreshold_;
+}
+
+int32_t SystemProperties::GetVelocityTrackerPointNumber()
+{
+    return velocityTrackerPointNumber_;
+}
+
+bool SystemProperties::IsVelocityWithinTimeWindow()
+{
+    return isVelocityWithinTimeWindow_;
+}
+
+bool SystemProperties::IsVelocityWithoutUpPoint()
+{
+    return isVelocityWithoutUpPoint_;
 }
 
 bool SystemProperties::GetAllowWindowOpenMethodEnabled()

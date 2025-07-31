@@ -29,6 +29,8 @@ constexpr char PROPERTY_DEVICE_TYPE_WEARABLE[] = "wearable";
 constexpr char PROPERTY_DEVICE_TYPE_CAR[] = "car";
 constexpr int32_t DEFAULT_FORM_SHARED_IMAGE_CACHE_THRESHOLD = 20;
 
+constexpr int32_t DEFAULT_VELOCITY_TRACKER_POINTNUMBER_VALUE = 20;
+
 static constexpr char UNDEFINED_PARAM[] = "undefined parameter";
 
 void Swap(int32_t& deviceWidth, int32_t& deviceHeight)
@@ -127,6 +129,9 @@ int32_t SystemProperties::formSharedImageCacheThreshold_ = DEFAULT_FORM_SHARED_I
 WidthLayoutBreakPoint SystemProperties::widthLayoutBreakpoints_ = WidthLayoutBreakPoint();
 HeightLayoutBreakPoint SystemProperties::heightLayoutBreakpoints_ = HeightLayoutBreakPoint();
 bool SystemProperties::syncLoadEnabled_ = true;
+int32_t SystemProperties::velocityTrackerPointNumber_ = DEFAULT_VELOCITY_TRACKER_POINTNUMBER_VALUE;
+bool SystemProperties::isVelocityWithinTimeWindow_ = true;
+bool SystemProperties::isVelocityWithoutUpPoint_ = true;
 
 bool SystemProperties::IsOpIncEnable()
 {
@@ -362,6 +367,21 @@ float SystemProperties::GetDragStartDampingRatio()
 float SystemProperties::GetDragStartPanDistanceThreshold()
 {
     return dragStartPanDisThreshold_;
+}
+
+int32_t SystemProperties::GetVelocityTrackerPointNumber()
+{
+    return velocityTrackerPointNumber_;
+}
+
+bool SystemProperties::IsVelocityWithinTimeWindow()
+{
+    return isVelocityWithinTimeWindow_;
+}
+
+bool SystemProperties::IsVelocityWithoutUpPoint()
+{
+    return isVelocityWithoutUpPoint_;
 }
 
 bool SystemProperties::IsSmallFoldProduct()

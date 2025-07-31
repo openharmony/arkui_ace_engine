@@ -742,6 +742,12 @@ public:
 
     static float GetDragStartPanDistanceThreshold();
 
+    static int32_t GetVelocityTrackerPointNumber();
+
+    static bool IsVelocityWithinTimeWindow();
+
+    static bool IsVelocityWithoutUpPoint();
+
     static bool IsSmallFoldProduct();
 
     static bool IsBigFoldProduct();
@@ -893,6 +899,9 @@ private:
     static std::pair<float, float> brightUpPercent_;
     static float dragStartDampingRatio_;
     static float dragStartPanDisThreshold_;
+    static int32_t velocityTrackerPointNumber_ ;
+    static bool isVelocityWithinTimeWindow_;
+    static bool isVelocityWithoutUpPoint_;
     static float fontScale_;
     static float fontWeightScale_;
     static bool windowRectResizeEnabled_;
