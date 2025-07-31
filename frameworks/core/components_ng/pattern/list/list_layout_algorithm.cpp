@@ -1279,8 +1279,8 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t st
     while (itemPosition_.size() > 1 && !targetIndex_) {
         auto pos = itemPosition_.rbegin();
         float chainDelta = GetChainOffset(pos->first);
-        if (GreatNotEqual(pos->second.endPos + chainDelta, endMainPos + endFixPos) &&
-            GreatOrEqual(pos->second.startPos + chainDelta, endMainPos + endFixPos)) {
+        if (GreatNotEqual(pos->second.endPos + chainDelta, endMainPos) &&
+            GreatOrEqual(pos->second.startPos + chainDelta, endMainPos)) {
             recycledItemPosition_.emplace(pos->first, pos->second);
             itemPosition_.erase(pos->first);
         } else {
