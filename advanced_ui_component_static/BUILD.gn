@@ -24,6 +24,7 @@ group("advanced_ui_component_static") {
       "composeListItem:composeListItem",
       "subheader:subHeader",
       "editabletitlebar:editableTitleBar",
+      "exceptionprompt:exceptionPrompt",
     ]
   }
 }
