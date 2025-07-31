@@ -256,6 +256,7 @@ struct MouseEvent final : public PointerEvent {
             .SetGlobalDisplayX(globalDisplayX).SetGlobalDisplayY(globalDisplayY)
             .SetType(type)
             .SetTime(time)
+            .SetPressedTime(pressedTime)
             .SetSize(0.0)
             .SetDeviceId(deviceId)
             .SetTargetDisplayId(targetDisplayId)
