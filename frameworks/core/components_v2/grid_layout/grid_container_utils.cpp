@@ -74,11 +74,13 @@ GridSizeType GridContainerUtils::ProcessGridSizeType(const V2::BreakPoints& brea
         windowWidth = pipeline->GetDisplayWindowRectInfo().GetSize().Width();
         if (mode == WindowMode::WINDOW_MODE_FLOATING &&
             Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
-            windowWidth -= 2 * (CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx();
+            windowWidth =
+                pipeline->CalcPageWidth(windowWidth - 2 * (CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx());
             int index = CalcBreakPoint(threshold, windowWidth);
             return static_cast<GridSizeType>(index);
         }
-        std::vector<double> breakPoint(BREAKPOINTSIZE);
+        windowWidth = pipeline->CalcPageWidth(windowWidth);
+        std::vector<double> breakPoint(BREAKPOINTSIZE, -1.0);
         std::transform(threshold->sizeInfo.begin(), threshold->sizeInfo.end(), breakPoint.begin(), [](Dimension x) {
             return x.ConvertToVp();
         });
@@ -123,7 +125,7 @@ WidthBreakpoint GridContainerUtils::GetWidthBreakpoint(
         finalBreakpoints = configBreakpoints;
     }
     double density = pipeline->GetCurrentDensity();
-    return GetCalcWidthBreakpoint(finalBreakpoints, density, pipeline->GetCurrentWindowRect().Width());
+    return GetCalcWidthBreakpoint(finalBreakpoints, density, pipeline->GetPageWidth());
 }
 
 GridSizeType GridContainerUtils::ProcessGridSizeType(
