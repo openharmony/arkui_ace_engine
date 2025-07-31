@@ -231,6 +231,10 @@ ani_string DrawableMaskClipPath(ani_env* env)
 {
     std::string data;
     std::shared_ptr<Global::Resource::ResourceManager> resMgr(Global::Resource::CreateResourceManager());
+    if (resMgr == nullptr) {
+        ani_string aniString {};
+        return aniString;
+    }
     resMgr->GetStringByName("ohos_drawable_descriptor_path", data);
     ani_string aniString {};
     env->String_NewUTF8(data.c_str(), data.size(), &aniString);
