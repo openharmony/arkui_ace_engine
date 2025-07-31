@@ -695,7 +695,7 @@ HWTEST_F(TextTestNg, TryLinkJump001, TestSize.Level1)
 
     /**
      * @tc.steps: step4. update spanNode content and call TryLinkJump funciton.
-     * jump link: "www.baidu.com"
+     * jump link: "www.baidu.com".
      */
     spanNode->UpdateContent(NORMAL_URL);
     EXPECT_FALSE(textPattern->TryLinkJump(spanItem));

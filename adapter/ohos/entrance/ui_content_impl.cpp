@@ -1244,7 +1244,6 @@ UIContentErrorCode UIContentImpl::Initialize(OHOS::Rosen::Window* window, const 
     auto errorCode = InitializeInner(window, url, storageWrapper, false);
     AddWatchSystemParameter();
     UpdateWindowBlur();
-    RegisterLinkJumpCallback();
     return errorCode;
 }
 
@@ -1286,7 +1285,6 @@ UIContentErrorCode UIContentImpl::InitializeByName(
     StorageWrapper storageWrapper { .napiStorage_ = storage };
     auto errorCode = InitializeInner(window, name, storageWrapper, true);
     AddWatchSystemParameter();
-    RegisterLinkJumpCallback();
     UpdateWindowBlur();
     return errorCode;
 }
