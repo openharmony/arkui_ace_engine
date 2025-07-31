@@ -24170,7 +24170,7 @@ typedef struct GENERATED_ArkUIXComponentModifier {
     void (*setXComponentOptions3)(Ark_NativePointer node,
                                   const Ark_NativeXComponentParameters* params);
     void (*setOnLoad)(Ark_NativePointer node,
-                      const Opt_OnNativeLoadCallback* value);
+                      const Opt_VoidCallback* value);
     void (*setOnDestroy)(Ark_NativePointer node,
                          const Opt_VoidCallback* value);
     void (*setEnableAnalyzer)(Ark_NativePointer node,

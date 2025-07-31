@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace::Ani {
 
-void SetVideoPixelMap(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_object node, ani_object pixelMap)
+void SetVideoPixelMap(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long node, ani_object pixelMap)
 {
     CHECK_NULL_VOID(env);
     auto* arkNode = reinterpret_cast<ArkUINodeHandle>(node);

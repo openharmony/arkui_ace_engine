@@ -695,7 +695,7 @@ export class Deserializer extends DeserializerBase {
     readPlaybackInfo(): PlaybackInfo {
         let valueDeserializer : Deserializer = this
         const time_result : number = (valueDeserializer.readNumber() as number)
-        let value : PlaybackInfo = ({time: time_result} as PlaybackInfo)
+        let value : PlaybackInfo = ({time: time_result as int32} as PlaybackInfo)
         return value
     }
     readPoint(): Point {
@@ -721,7 +721,7 @@ export class Deserializer extends DeserializerBase {
     readPreparedInfo(): PreparedInfo {
         let valueDeserializer : Deserializer = this
         const duration_result : number = (valueDeserializer.readNumber() as number)
-        let value : PreparedInfo = ({duration: duration_result} as PreparedInfo)
+        let value : PreparedInfo = ({duration: duration_result as int32} as PreparedInfo)
         return value
     }
     readProgressMask(): ProgressMask {
@@ -21641,7 +21641,7 @@ export class Deserializer extends DeserializerBase {
         {
             screenId_buf = (valueDeserializer.readNumber() as number)
         }
-        const screenId_result : number | undefined = screenId_buf
+        const screenId_result : int64 | undefined = screenId_buf as (int64 | undefined)
         let value : XComponentOptions = ({type: type_result, controller: controller_result, imageAIOptions: imageAIOptions_result, screenId: screenId_result} as XComponentOptions)
         return value
     }

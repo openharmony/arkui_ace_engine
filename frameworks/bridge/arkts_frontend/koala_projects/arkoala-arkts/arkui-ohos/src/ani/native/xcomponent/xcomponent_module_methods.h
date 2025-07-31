@@ -20,7 +20,7 @@
 
 namespace OHOS::Ace::Ani {
 void SetXComponentControllerCallback(
-    ani_env* env, [[maybe_unused]] ani_object aniClass, ani_object node, ani_object callbackAni);
+    ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long node, ani_object callbackAni);
 } // namespace OHOS::Ace::Ani
 
 #endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_XCOMPONENT_MODULE_METHODS_H
