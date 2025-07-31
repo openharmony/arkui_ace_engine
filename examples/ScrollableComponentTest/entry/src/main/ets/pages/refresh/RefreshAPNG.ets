@@ -31,23 +31,23 @@ class Params {
 
 @Builder
 function customRefreshComponent(params: Params) {
-    Stack() {
-      Row() {
-        Column() {
-          apng({
-            src: $r('app.media.startIcon'),
-            controller: params.controller
-          })
-            .margin({ top: 40 })
-        }
+  Stack() {
+    Row() {
+      Column() {
+        apng({
+          src: $r('app.media.startIcon'),
+          controller: params.controller
+        })
+          .margin({ top: 40 })
       }
-      .alignItems(VerticalAlign.Center)
     }
-    .align(Alignment.Center)
-    .clip(true)
-    .constraintSize({ minHeight: 32 })
-    .width('100%')
+    .alignItems(VerticalAlign.Center)
   }
+  .align(Alignment.Center)
+  .clip(true)
+  .constraintSize({ minHeight: 32 })
+  .width('100%')
+}
 
 @Entry
 @Component
@@ -55,7 +55,8 @@ struct RefreshAPNGExample {
   @State isRefreshing: boolean = false;
   @State isRunning: boolean = false;
   @State arr: string[] = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'];
-  controller: ApngController = new ApngController();
+  private controller: ApngController = new ApngController();
+  private refreshTimeOut: number | undefined = undefined;
   private contentNode?: ComponentContent<Object> = undefined;
   private params: Params = new Params(this.controller);
 
@@ -64,42 +65,63 @@ struct RefreshAPNGExample {
     this.contentNode = new ComponentContent(uiContext, wrapBuilder(customRefreshComponent), this.params);
   }
 
+  // 页面销毁时停止动画，释放自定义节点，清除定时器
+  aboutToDisappear(): void {
+    this.controller.stop();
+    this.contentNode = undefined;
+    if (this.refreshTimeOut) {
+      clearTimeout(this.refreshTimeOut);
+    }
+  }
+
   build() {
     Column() {
       Refresh({ refreshing: $$this.isRefreshing, refreshingContent: this.contentNode }) {
-        Scroll() {
-          Column() {
-            ForEach(this.arr, (item: string) => {
-              ListItem() {
-                Text('' + item)
-                  .height(80)
-                  .fontSize(16)
-                  .textAlign(TextAlign.Center)
-                  .fontColor(0xF1F3F5)
-              }
-            }, (item: string) => item)
-          }
+        List() {
+          ForEach(this.arr, (item: string) => {
+            ListItem() {
+              Text('' + item)
+                .width('70%')
+                .height(80)
+                .fontSize(16)
+                .margin(10)
+                .textAlign(TextAlign.Center)
+                .borderRadius(10)
+                .backgroundColor(0xFFFFFF)
+            }
+          }, (item: string) => item)
         }
+        .width('100%')
+        .height('100%')
+        .alignListItem(ListItemAlign.Center)
         .scrollBar(BarState.Off)
       }
-      .backgroundColor(0xF1F3F5)
+      .backgroundColor(0x89CFF0)
       .pullToRefresh(true)
       .refreshOffset(64)
       .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM])
       // Use onStateChange and apng controller to control play and stop
       .onStateChange((refreshStatus: RefreshStatus) => {
-        if (refreshStatus >= 1 && refreshStatus < 4) {
-          this.controller.play();
-        } else {
-          this.controller.stop();
+        switch (refreshStatus) {
+          case RefreshStatus.Drag:
+          case RefreshStatus.OverDrag:
+          case RefreshStatus.Refresh:
+            // 播放动画
+            this.controller.play();
+            break;
+          case RefreshStatus.Inactive:
+          case RefreshStatus.Done:
+            // 停止动画
+            this.controller.stop();
+            break;
         }
         hilog.info(0x0000, 'testTag', 'Refresh onStatueChange state is ' + refreshStatus);
       })
       .onRefreshing(() => {
-        setTimeout(() => {
+        this.refreshTimeOut = setTimeout(() => {
           this.isRefreshing = false;
-        }, 2000)
-        hilog.info(0x0000, 'testTag', 'onRefreshing test')
+        }, 2000);
+        hilog.info(0x0000, 'testTag', 'onRefreshing test');
       })
     }
   }
