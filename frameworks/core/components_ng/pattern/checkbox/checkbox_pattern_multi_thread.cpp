@@ -18,6 +18,17 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+void CheckBoxPattern::OnAttachToFrameNodeMultiThread(const RefPtr<FrameNode>& frameNode)
+{
+    frameNode->GetLayoutProperty()->UpdateAlignment(Alignment::CENTER);
+}
+
+void CheckBoxPattern::OnAttachToMainTreeMultiThread(const RefPtr<FrameNode>& frameNode)
+{
+    UpdateNavIdAndState(frameNode);
+    RegisterVisibleAreaChange();
+}
+
 void CheckBoxPattern::OnDetachFromFrameNodeMultiThread()
 {
 }

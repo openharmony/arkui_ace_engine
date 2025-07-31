@@ -127,6 +127,7 @@ void CheckBoxPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode, host);
     host->GetLayoutProperty()->UpdateAlignment(Alignment::CENTER);
     RegisterVisibleAreaChange();
 }
@@ -1152,10 +1153,8 @@ void CheckBoxPattern::SetPrePageIdToLastPageId()
     }
 }
 
-void CheckBoxPattern::OnAttachToMainTree()
+void CheckBoxPattern::UpdateNavIdAndState(const RefPtr<FrameNode>& host)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     auto groupManager = GetGroupManager();
     CHECK_NULL_VOID(groupManager);
     auto parent = host->GetParent();
@@ -1173,6 +1172,14 @@ void CheckBoxPattern::OnAttachToMainTree()
         groupManager->SetLastNavId(std::nullopt);
         UpdateState();
     }
+}
+
+void CheckBoxPattern::OnAttachToMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree, host);
+    UpdateNavIdAndState(host);
 }
 
 std::string CheckBoxPattern::GetGroupNameWithNavId()
