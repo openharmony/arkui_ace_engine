@@ -1461,6 +1461,7 @@ HWTEST_F(SwiperTestNg, SwiperSetFrameRateTest001, TestSize.Level1)
     CreateSwiperDone();
     int32_t expectedRate = 60;
     auto frameRateRange = AceType::MakeRefPtr<FrameRateRange>(0, 120, expectedRate);
+    EXPECT_NE(frameRateRange, nullptr);
     pattern_->SetFrameRateRange(frameRateRange, SwiperDynamicSyncSceneType::GESTURE);
     auto frameRateManager = MockPipelineContext::GetCurrentContext()->GetFrameRateManager();
     int32_t nodeId = frameNode_->GetId();

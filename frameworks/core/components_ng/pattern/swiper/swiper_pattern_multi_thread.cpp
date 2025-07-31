@@ -20,7 +20,6 @@
  
 namespace OHOS::Ace::NG {
 
-#if defined(ACE_STATIC)
 void SwiperPattern::OnAttachToFrameNodeMultiThread()
 {
     auto host = GetHost();
@@ -102,6 +101,5 @@ void SwiperPattern::SetCachedCountMultiThread(int32_t cachedCount)
     };
     host->PostAfterAttachMainTreeTask(std::move(setTask));
 }
-#endif
 } // namespace OHOS::Ace::NG
  

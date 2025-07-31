@@ -122,9 +122,7 @@ SwiperPattern::SwiperPattern()
 void SwiperPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
-#if defined(ACE_STATIC)
     THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode);
-#endif
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -140,9 +138,7 @@ void SwiperPattern::OnAttachToFrameNode()
 
 void SwiperPattern::OnDetachFromFrameNode(FrameNode* node)
 {
-#if defined(ACE_STATIC)
     THREAD_SAFE_NODE_CHECK(node, OnDetachFromFrameNode, node);
-#endif
     CHECK_NULL_VOID(node);
     auto pipeline = node->GetContext();
     CHECK_NULL_VOID(pipeline);
@@ -154,10 +150,8 @@ void SwiperPattern::OnDetachFromFrameNode(FrameNode* node)
 
 void SwiperPattern::OnAttachToMainTree()
 {
-#if defined(ACE_STATIC)
     auto host = GetHost();
     THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
-#endif
     if (!isInit_) {
         SetOnHiddenChangeForParent();
     }
@@ -165,10 +159,8 @@ void SwiperPattern::OnAttachToMainTree()
 
 void SwiperPattern::OnDetachFromMainTree()
 {
-#if defined(ACE_STATIC)
     auto host = GetHost();
     THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree);
-#endif
     RemoveOnHiddenChange();
 }
 
@@ -2220,10 +2212,8 @@ bool SwiperPattern::IsInFastAnimation() const
 
 void SwiperPattern::ChangeIndex(int32_t index, SwiperAnimationMode mode)
 {
-#if defined(ACE_STATIC)
     auto host = GetHost();
     FREE_NODE_CHECK(host, ChangeIndex, index, mode);
-#endif
     int32_t targetIndex = 0;
     if (!ComputeTargetIndex(index, targetIndex)) {
         return;
@@ -2271,10 +2261,8 @@ bool SwiperPattern::ComputeTargetIndex(int32_t index, int32_t& targetIndex) cons
 
 void SwiperPattern::SetCachedCount(int32_t cachedCount)
 {
-#if defined(ACE_STATIC)
     auto host = GetHost();
     FREE_NODE_CHECK(host, SetCachedCount, cachedCount);
-#endif
     if (cachedCount_.has_value() && cachedCount_.value() != cachedCount) {
         SetLazyLoadFeature(true);
     }
@@ -2283,10 +2271,8 @@ void SwiperPattern::SetCachedCount(int32_t cachedCount)
 
 void SwiperPattern::ChangeIndex(int32_t index, bool useAnimation)
 {
-#if defined(ACE_STATIC)
     auto host = GetHost();
     FREE_NODE_CHECK(host, ChangeIndex, index, useAnimation);
-#endif
     int32_t targetIndex = 0;
     if (!ComputeTargetIndex(index, targetIndex)) {
         return;
