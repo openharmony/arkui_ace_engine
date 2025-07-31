@@ -60,7 +60,8 @@ import { TextAreaOptions, TextAreaAttribute, ArkTextAreaPeer } from './component
 import { TextInputOptions, TextInputAttribute, ArkTextInputPeer } from './component/textInput'
 import { ArkTextNode } from './handwritten/modifiers/ArkTextNode'
 import { TextOptions, TextAttribute, ArkTextPeer } from './component/text'
-import { XComponentParameter, XComponentOptions, NativeXComponentParameters, XComponentAttribute, TypedXComponentPeerInternal } from "./component/xcomponent"
+import { XComponentParameters, XComponentOptions, NativeXComponentParameters, XComponentAttribute, TypedXComponentPeerInternal } from "./component/xcomponent"
+import { XComponentType } from './component/enums'
 import { Deserializer } from "./component/peers/Deserializer";
 import { ComponentContent } from './ComponentContent';
 import { DrawContext } from './Graphics';
@@ -1168,7 +1169,7 @@ export namespace typeNode {
         constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkXComponentNode) {
             super(uiContext, type, attrCreator);
         }
-        initialize(value: XComponentParameter): XComponentAttribute {
+        initialize(value: XComponentParameters): XComponentAttribute {
             let arkXComponentNode = this.attribute as ArkXComponentNode;
             return arkXComponentNode!.initialize(value);
         }
@@ -1354,13 +1355,15 @@ export namespace typeNode {
 
     // @ts-ignore
     function createXComponentNode(context: UIContext, type: string): XComponentFrameNode {
-        return new XComponentFrameNode(context, 'XComponent', (node: FrameNode, type: ModifierType): ArkXComponentNode => {
+        let xcFrameNode = new XComponentFrameNode(context, 'XComponent', (node: FrameNode, type: ModifierType): ArkXComponentNode => {
             let arknode = new ArkXComponentNode();
             const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
             const peer = new TypedXComponentPeerInternal(retval, node._nodeId as int32, "XComponent", 0);
             arknode.setPeer(peer);
             return arknode;
         });
+        xcFrameNode.initialize({type: XComponentType.SURFACE} as NativeXComponentParameters);
+        return xcFrameNode;
     }
 
     // @ts-ignore

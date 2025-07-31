@@ -218,7 +218,7 @@ void ConvertNativeXComponentHandler(ani_vm* vm, ani_env* env, ani_object value,
     };
 }
 
-void* GetControllerPeerPoiner(ani_env* env, ani_object params)
+void* GetControllerPeerPointer(ani_env* env, ani_object params)
 {
     CHECK_NULL_RETURN(env, nullptr);
     ani_ref controllerPtrRef;
@@ -309,7 +309,7 @@ void SetXComponentParameters(ani_env* env, [[maybe_unused]] ani_object aniClass,
     if (ANI_OK != env->Object_GetPropertyByName_Int(params, "type", &type)) {
         return;
     }
-    void* xcomponentControllerPtr = GetControllerPeerPoiner(env, params);
+    void* xcomponentControllerPtr = GetControllerPeerPointer(env, params);
     ArkUIXComponentParams xcParams = {
         .id = AniUtils::ANIStringToStdString(env, static_cast<ani_string>(idRef)),
         .type = static_cast<ArkUI_Int32>(type),

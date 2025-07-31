@@ -18,6 +18,7 @@ import { AttributeUpdaterFlag, CommonMethodModifier } from './CommonMethodModifi
 import { ViewportRect, ShapeAttribute, ArkShapePeer } from 'arkui/component/shape';
 import { Length, ResourceColor } from 'arkui/component/units';
 import { Resource } from 'global.resource';
+import { int32 } from "@koalaui/common"
 import { LineCapStyle, LineJoinStyle } from 'arkui/component/enums';
 import { PeerNode } from './PeerNode';
 
@@ -57,8 +58,8 @@ export class ShapeModifier extends CommonMethodModifier implements ShapeAttribut
     _antiAlias_0_0value?: boolean | undefined
     _mesh_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _mesh_0_0value?: Array<number> | undefined
-    _mesh_0_1value?: number | undefined
-    _mesh_0_2value?: number | undefined
+    _mesh_0_1value?: int32 | undefined
+    _mesh_0_2value?: int32 | undefined
     applyModifierPatch(peerNode: PeerNode): void {
         super.applyModifierPatch(peerNode)
         const peer = peerNode as ArkShapePeer
@@ -285,7 +286,7 @@ export class ShapeModifier extends CommonMethodModifier implements ShapeAttribut
                     if (this._mesh_0_0value === undefined || this._mesh_0_1value === undefined || this._mesh_0_2value === undefined) {
                         return;
                     }
-                    peer.meshAttribute((this._mesh_0_0value as Array<number>), (this._mesh_0_1value as number), (this._mesh_0_2value as number));
+                    peer.meshAttribute((this._mesh_0_0value as Array<number>), (this._mesh_0_1value! as int32), (this._mesh_0_2value! as int32));
                     this._mesh_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -620,7 +621,7 @@ export class ShapeModifier extends CommonMethodModifier implements ShapeAttribut
         }
         return this
     }
-    mesh(value: Array<number> | undefined, column: number | undefined, row: number | undefined): this {
+    mesh(value: Array<number> | undefined, column: int32 | undefined, row: int32 | undefined): this {
         if (((this._mesh_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._mesh_0_0value) !== (value)) || ((this._mesh_0_1value) !== (column)) || ((this._mesh_0_2value) !== (row)))
         {
             this._mesh_0_flag = AttributeUpdaterFlag.UPDATE
