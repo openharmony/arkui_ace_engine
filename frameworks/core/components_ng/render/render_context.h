@@ -247,6 +247,7 @@ public:
     virtual void ClearFocusState() {}
 
     virtual void CreateBackgroundPixelMap(const RefPtr<FrameNode>& value) {}
+    virtual uint32_t GetCurrentBackgroundTaskId() const { return 0; }
 
     virtual void UpdateBorderWidthF(const BorderWidthPropertyF& value) {}
 
