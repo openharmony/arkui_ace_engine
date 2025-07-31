@@ -828,8 +828,6 @@ typedef enum {
     ARKUI_BORDER_STYLE_DASHED,
     /** Dotted border. */
     ARKUI_BORDER_STYLE_DOTTED,
-    /** default border. */
-    ARKUI_BORDER_STYLE_NONE,
 } ArkUI_BorderStyle;
 
 /**

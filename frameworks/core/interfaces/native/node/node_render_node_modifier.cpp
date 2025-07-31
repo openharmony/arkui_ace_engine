@@ -806,29 +806,31 @@ int32_t GetBorderColor(ArkUIRenderNodeHandle handle, uint32_t* left, uint32_t* t
     return ERROR_CODE_NO_ERROR;
 }
 
-int32_t SetBorderRadius(ArkUIRenderNodeHandle handle, float left, float top, float right, float bottom)
+int32_t SetBorderRadius(ArkUIRenderNodeHandle handle,
+    float topLeft, float topRight, float bottomLeft, float bottomRight)
 {
     CheckMainThread();
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     OHOS::Rosen::Vector4f vector4f;
-    vector4f.x_ = left;
-    vector4f.y_ = top;
-    vector4f.z_ = right;
-    vector4f.w_ = bottom;
+    vector4f.x_ = topLeft;
+    vector4f.y_ = topRight;
+    vector4f.z_ = bottomRight;
+    vector4f.w_ = bottomLeft;
     rsNode->SetCornerRadius(vector4f);
     return ERROR_CODE_NO_ERROR;
 }
 
-int32_t GetBorderRadius(ArkUIRenderNodeHandle handle, float* left, float* top, float* right, float* bottom)
+int32_t GetBorderRadius(ArkUIRenderNodeHandle handle,
+   float* topLeft, float* topRight, float* bottomLeft, float* bottomRight)
 {
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     auto vector4 = rsNode->GetStagingProperties().GetCornerRadius();
-    *left = vector4.x_;
-    *top = vector4.y_;
-    *right = vector4.z_;
-    *bottom = vector4.w_;
+    *topLeft = vector4.x_;
+    *topRight = vector4.y_;
+    *bottomRight = vector4.z_;
+    *bottomLeft = vector4.w_;
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -847,6 +849,7 @@ int32_t SetBounds(ArkUIRenderNodeHandle handle, uint32_t x, uint32_t y, uint32_t
     auto rsNode = GetRsNodeFromStruct(handle);
     CHECK_NULL_RETURN(rsNode, ERROR_CODE_PARAM_INVALID);
     rsNode->SetBounds(x, y, width, height);
+    rsNode->SetFrame(x, y, width, height);
     return ERROR_CODE_NO_ERROR;
 }
 
