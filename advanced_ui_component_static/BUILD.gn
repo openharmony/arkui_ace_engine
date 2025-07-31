@@ -25,6 +25,7 @@ group("advanced_ui_component_static") {
       "subheader:subHeader",
       "editabletitlebar:editableTitleBar",
       "exceptionprompt:exceptionPrompt",
+      "tabtitlebar:tabTitleBar",
     ]
   }
 }
