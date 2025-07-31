@@ -133,12 +133,6 @@ void CheckBoxPattern::OnAttachToFrameNode()
     RegisterVisibleAreaChange();
 }
 
-void CheckBoxPattern::OnAttachToMainTree()
-{
-    auto host = GetHost();
-    THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
-}
-
 void CheckBoxPattern::SetBuilderNodeHidden()
 {
     CHECK_NULL_VOID(builderNode_);

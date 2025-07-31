@@ -186,8 +186,6 @@ public:
 private:
     void OnAttachToFrameNode() override;
     void OnAttachToFrameNodeMultiThread(const RefPtr<FrameNode>& frameNode);
-    void OnAttachToMainTree() override;
-    void OnAttachToMainTreeMultiThread();
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnDetachFromFrameNodeMultiThread();
     void OnDetachFromMainTree() override;
