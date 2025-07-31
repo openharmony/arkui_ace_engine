@@ -105,7 +105,7 @@ public:
         return currentOffset_;
     }
 
-    float GetTotalOffset() const override
+    double GetTotalOffset() const override
     {
         return -currentOffset_;
     }

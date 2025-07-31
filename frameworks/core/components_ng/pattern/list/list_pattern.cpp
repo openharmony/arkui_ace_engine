@@ -906,7 +906,7 @@ void ListPattern::GetListItemGroupEdge(bool& groupAtStart, bool& groupAtEnd) con
 
 float ListPattern::GetOffsetWithLimit(float offset) const
 {
-    auto currentOffset = GetTotalOffset() + contentStartOffset_;
+    float currentOffset = GetTotalOffset() + contentStartOffset_;
     if (Positive(offset)) {
         return std::min(currentOffset, offset);
     } else if (Negative(offset)) {
@@ -2297,7 +2297,7 @@ float ListPattern::UpdateTotalOffset(const RefPtr<ListLayoutAlgorithm>& listLayo
         return 0;
     }
     float relativeOffset = listLayoutAlgorithm->GetCurrentOffset();
-    float prevOffset = currentOffset_;
+    double prevOffset = currentOffset_;
     if (childrenSize_) {
         listTotalHeight_ = posMap_->GetTotalHeight();
         currentOffset_ = itemPosition_.empty() ? 0.0f :

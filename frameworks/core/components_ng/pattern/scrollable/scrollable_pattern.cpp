@@ -2117,13 +2117,13 @@ float ScrollablePattern::GetOutOfScrollableOffset() const
 float ScrollablePattern::GetOffsetWithLimit(float offset) const
 {
     if (Positive(offset)) {
-        auto totalOffset = GetTotalOffset();
+        float totalOffset = GetTotalOffset();
         return std::min(totalOffset, offset);
     } else if (Negative(offset)) {
         auto frameNode = GetHost();
         CHECK_NULL_RETURN(frameNode, true);
         auto hostSize = frameNode->GetGeometryNode()->GetFrameSize();
-        auto remainHeight = GetTotalHeight() - GetTotalOffset() - hostSize.MainSize(axis_);
+        float remainHeight = GetTotalHeight() - GetTotalOffset() - hostSize.MainSize(axis_);
         return std::max(offset, -remainHeight);
     }
     return 0;

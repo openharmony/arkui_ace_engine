@@ -180,7 +180,7 @@ public:
         return itemPosition_;
     }
 
-    float GetTotalOffset() const override
+    double GetTotalOffset() const override
     {
         return currentOffset_;
     }
@@ -636,7 +636,7 @@ private:
     std::optional<int32_t> focusGroupIndex_;
     float prevStartOffset_ = 0.f;
     float prevEndOffset_ = 0.f;
-    float currentOffset_ = 0.0f;
+    double currentOffset_ = 0.0f;
     bool maintainVisibleContentPosition_ = false;
     std::optional<int32_t> lastSnapTargetIndex_;
 
