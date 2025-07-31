@@ -43,7 +43,7 @@ namespace NG {
 HWTEST_F(PipelineContextTestNg, PipelineContextTestNg130, TestSize.Level1)
 {
     /**
-     * @tc.steps1: initialize parameters.
+     * @tc.steps1: initialize parameters and create MouseEvent.
      * @tc.expected: Create MouseEvent, then initialize pipeline.
      */
     ASSERT_NE(context_, nullptr);
