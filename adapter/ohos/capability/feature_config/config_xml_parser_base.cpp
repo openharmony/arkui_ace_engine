@@ -35,8 +35,8 @@ static std::vector<std::string> xmlNodeNameVec_ = {
     "feature",              // PARSE_XML_FEATURE
 };
 
-static std::vector<std::string> sysPaths_ = { "" };
-static std::string configPath_ = "etc/arkui/arkui_async_build_config.xml";
+static std::vector<std::string> sysPaths_ = { "/etc" };
+static std::string configPath_ = "/arkui/arkui_async_build_config.xml";
 } // namespace
 
 ConfigXMLParserBase::~ConfigXMLParserBase()

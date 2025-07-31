@@ -16,6 +16,7 @@
 #include "gtest/gtest.h"
 #define private public
 #define protected public
+#include "adapter/ohos/capability/feature_config/config_xml_parser_base.h"
 #include "adapter/ohos/capability/feature_config/feature_param_manager.h"
 #undef private
 #undef protected

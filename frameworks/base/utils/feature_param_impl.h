@@ -32,6 +32,6 @@ public:
     // UINodeGcParamParser
     static bool IsUINodeGcEnabled();
 };
-}  // namespace OHOS::Ace
+} // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_FEATURE_PARAM_IMPL_H

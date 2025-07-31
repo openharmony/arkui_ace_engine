@@ -29,6 +29,6 @@ private:
     // 0-999 is valid
     bool IsValidDigits(const std::string& str);
 };
-}  // namespace OHOS::Ace::NG
+} // namespace OHOS::Ace
 
-#endif  // FOUNDATION_ACE_ADAPTER_OHOS_CAPABILITY_FEATURE_CONFIG_FEATURES_SYNC_LOAD_PARSER_H
+#endif // FOUNDATION_ACE_ADAPTER_OHOS_CAPABILITY_FEATURE_CONFIG_FEATURES_SYNC_LOAD_PARSER_H

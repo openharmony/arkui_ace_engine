@@ -72,6 +72,7 @@
 
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
+#include "adapter/ohos/capability/feature_config/feature_param_manager.h"
 #include "adapter/ohos/entrance/ace_application_info.h"
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/ace_new_pipe_judgement.h"
@@ -88,7 +89,6 @@
 #include "adapter/ohos/entrance/plugin_utils_impl.h"
 #include "adapter/ohos/entrance/ui_event_impl.h"
 #include "adapter/ohos/entrance/utils.h"
-#include "adapter/ohos/capability/feature_config/feature_param_manager.h"
 #include "adapter/ohos/osal/navigation_route_ohos.h"
 #include "adapter/ohos/osal/page_url_checker_ohos.h"
 #include "adapter/ohos/osal/pixel_map_ohos.h"

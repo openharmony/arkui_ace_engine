@@ -27,6 +27,6 @@ public:
 
     ParseErrCode ParseFeatureParam(xmlNode& node) override;
 };
-}  // namespace OHOS::Ace
+} // namespace OHOS::Ace
 
-#endif  // FOUNDATION_ACE_ADAPTER_OHOS_CAPABILITY_FEATURE_CONFIG_FEATURES_UI_NODE_GC_PARAMS_PARSER_H
+#endif // FOUNDATION_ACE_ADAPTER_OHOS_CAPABILITY_FEATURE_CONFIG_FEATURES_UI_NODE_GC_PARAMS_PARSER_H

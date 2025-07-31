@@ -18,9 +18,8 @@
 
 #include <string>
 
-#include "adapter/ohos/capability/feature_config/config_xml_parser_base.h"
-
 namespace OHOS::Ace {
+class ConfigXMLParserBase;
 class FeatureParamManager {
 public:
     FeatureParamManager() = default;
@@ -49,7 +48,7 @@ private:
     static constexpr uint32_t DEFAULT_SYNCLOAD_DEADLINE = 50; // 50ms default time
     static constexpr uint32_t MS_TO_NS = 1000000; // 1000000 change time form ms to ns
 
-    std::unique_ptr<ConfigXMLParserBase> featureParser_;
+    std::shared_ptr<ConfigXMLParserBase> featureParser_;
     // SyncloadParser
     bool syncLoadEnabled_ = false;
     uint32_t syncloadResponseDeadline_ = DEFAULT_SYNCLOAD_DEADLINE * MS_TO_NS;
@@ -59,6 +58,6 @@ private:
     friend class ConfigXMLParserBase;
     friend class SyncloadParser;
 };
-}  // namespace OHOS::Ace
+} // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_ADAPTER_OHOS_CAPABILITY_FEATURE_CONFIG_FEATURE_PARAM_MANAGER_H

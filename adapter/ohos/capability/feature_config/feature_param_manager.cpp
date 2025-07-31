@@ -15,6 +15,7 @@
 
 #include "adapter/ohos/capability/feature_config/feature_param_manager.h"
 
+#include "adapter/ohos/capability/feature_config/config_xml_parser_base.h"
 #include "adapter/ohos/capability/feature_config/features/sync_load_parser.h"
 #include "adapter/ohos/capability/feature_config/features/ui_node_gc_params_parser.h"
 #include "base/log/log.h"
@@ -39,7 +40,7 @@ void FeatureParamManager::Init(const std::string& bundleName)
 void FeatureParamManager::FeatureParamParseEntry(const std::string& bundleName)
 {
     if (!featureParser_) {
-        featureParser_ = std::make_unique<ConfigXMLParserBase>();
+        featureParser_ = std::make_shared<ConfigXMLParserBase>();
     }
 
     if (featureParser_->LoadPerformanceConfigXML() != PARSE_EXEC_SUCCESS) {
