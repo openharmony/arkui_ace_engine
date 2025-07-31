@@ -1508,6 +1508,7 @@ HWTEST_F(SheetContentCoverObjectTestNG, ContentCoverSheetLayoutAlgorithm1, TestS
      * @tc.expected: targetNode != nullptr
      */
     SheetStyle style;
+    style.sheetType = SHEET_CONTENT_COVER;
     auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
     auto callback = [](const std::string&) {};
@@ -1519,7 +1520,9 @@ HWTEST_F(SheetContentCoverObjectTestNG, ContentCoverSheetLayoutAlgorithm1, TestS
     ASSERT_NE(layoutProperty, nullptr);
     LayoutConstraintF layoutConstraint;
     layoutConstraint.maxSize = { 1000, 1000 };
-    sheetNode->GetGeometryNode()->SetParentLayoutConstraint(layoutConstraint);
+    auto geometryNode = sheetNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetParentLayoutConstraint(layoutConstraint);
     layoutProperty->UpdateLayoutConstraint(layoutConstraint);
     layoutProperty->UpdateContentConstraint();
     /**
