@@ -44,10 +44,15 @@ void AccessibilityProperty::NotifyComponentChangeEventMultiThread(AccessibilityE
 {
     auto frameNode = host_.Upgrade();
     CHECK_NULL_VOID(frameNode);
-    frameNode->PostAfterAttachMainTreeTask([weak = WeakClaim(this), eventType]() {
-        auto host = weak.Upgrade();
-        CHECK_NULL_VOID(host);
-        host->NotifyComponentChangeEvent(eventType);
+    frameNode->PostAfterAttachMainTreeTask([weak = WeakPtr(frameNode)]() {
+        if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            auto pipeline = frameNode->GetContext();
+            CHECK_NULL_VOID(pipeline);
+            pipeline->AddAccessibilityCallbackEvent(AccessibilityCallbackEventId::ON_SEND_ELEMENT_INFO_CHANGE,
+                                                    frameNode->GetAccessibilityId());
+        }
     });
 }
 } // namespace OHOS::Ace::NG

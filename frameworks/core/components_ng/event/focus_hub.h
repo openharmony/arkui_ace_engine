@@ -883,6 +883,12 @@ public:
     }
 
     RefPtr<FocusHub> GetHeadOrTailChild(bool isHead);
+
+    // multi thread function start
+    void RemoveSelfMultiThread(BlurReason reason);
+    void RemoveSelfExecuteFunction(BlurReason reason);
+    // multi thread function end
+
 protected:
     bool RequestNextFocusOfKeyTab(const FocusEvent& event);
     bool RequestNextFocusOfKeyEnter();
