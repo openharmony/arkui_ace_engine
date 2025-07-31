@@ -228,6 +228,12 @@ declare namespace promptAction {
         shadow?: ShadowOptions | ShadowStyle;
     }
 
+    export interface DialogBuilderOptions {
+        builderFunc?: (() => KPointer);
+        builderWithIdFunc?: ((dialogId: number) => KPointer);
+        destroyFunc?: ((ptr: KPointer) => void);
+    }
+
     export class DialogController extends CommonController {}
 
     export type DialogOptionsCornerRadius = Dimension | BorderRadiuses;
@@ -280,7 +286,7 @@ declare namespace promptAction {
     export function openCustomDialogWithController(content: KPointer, controller: DialogController,
         options?: BaseDialogOptions, optionsInternal?: DialogOptionsInternal): Promise<void>;
 
-    export function presentCustomDialog(builder: KPointer, controller?: DialogController,
+    export function presentCustomDialog(builderOptions: DialogBuilderOptions, controller?: DialogController,
         options?: DialogOptions, optionsInternal?: DialogOptionsInternal): Promise<number>;
 
     export function getTopOrder(): number | undefined;

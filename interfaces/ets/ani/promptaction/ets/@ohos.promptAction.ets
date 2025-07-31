@@ -207,6 +207,12 @@ export default namespace promptAction {
         shadow?: ShadowOptions | ShadowStyle;
     }
 
+    export interface DialogBuilderOptions {
+        builderFunc?: (() => long);
+        builderWithIdFunc?: ((dialogId: number) => long);
+        destroyFunc?: ((ptr: long) => void);
+    }
+
     class Cleaner {
         private ptr: long = 0
         constructor(ptr: long) {
@@ -298,8 +304,8 @@ export default namespace promptAction {
     export native function openCustomDialogWithController(content: long, controller: DialogController,
         options?: BaseDialogOptions, optionsInternal?: DialogOptionsInternal): Promise<void>;
 
-    export native function presentCustomDialog(builder: long, controller?: DialogController, options?: DialogOptions,
-        optionsInternal?: DialogOptionsInternal): Promise<number>;
+    export native function presentCustomDialog(builderOptions: DialogBuilderOptions, controller?: DialogController,
+        options?: DialogOptions, optionsInternal?: DialogOptionsInternal): Promise<number>;
 
     export native function getTopOrder(): number | undefined;
     export native function getBottomOrder(): number | undefined;
