@@ -367,11 +367,9 @@ public:
     void ChangeIndex(int32_t index, bool useAnimation);
     void ChangeIndex(int32_t index, SwiperAnimationMode mode);
 
-#if defined(ACE_STATIC)
     void ChangeIndexMultiThread(int32_t index, bool useAnimation);
     void ChangeIndexMultiThread(int32_t index, SwiperAnimationMode mode);
     void SetCachedCountMultiThread(int32_t cachedCount);
-#endif
 
     void OnVisibleChange(bool isVisible) override;
 
@@ -951,12 +949,10 @@ private:
     void OnAttachToMainTree() override;
     void OnDetachFromMainTree() override;
 
-#if defined(ACE_STATIC)
     void OnAttachToFrameNodeMultiThread();
     void OnDetachFromFrameNodeMultiThread(FrameNode* node);
     void OnAttachToMainTreeMultiThread();
     void OnDetachFromMainTreeMultiThread();
-#endif
 
     void InitSurfaceChangedCallback();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
