@@ -458,14 +458,14 @@ HWTEST_F(EventManagerTestNg, EventManagerHandleOut001, TestSize.Level1)
 
     /**
      * @tc.steps: step3. Call HandleOutOfRectCallback with SourceType::TOUCH
-     * @tc.expected: rectCallbackList.size() is 1
+     * @tc.expected: rectCallbackList.size() is 3
      */
     eventManager->HandleOutOfRectCallback(point, rectCallbackList);
     EXPECT_EQ(rectCallbackList.size(), 3);
 
     /**
      * @tc.steps: step4. Call HandleOutOfRectCallback with SourceType::MOUSE
-     * @tc.expected: rectCallbackList.size() is 0
+     * @tc.expected: rectCallbackList.size() is not empty
      */
     point.SetSourceType(SourceType::MOUSE);
     eventManager->HandleOutOfRectCallback(point, rectCallbackList);
