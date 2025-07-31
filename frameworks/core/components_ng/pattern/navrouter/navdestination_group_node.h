@@ -256,7 +256,7 @@ public:
     {
         return isShowInPrimaryPartition_;
     }
-    RefPtr<NavDestinationGroupNode> GetOrCreatePlaceHolder();
+    RefPtr<NavDestinationGroupNode> GetOrCreateProxyNode();
     void SetPrimaryNode(const WeakPtr<NavDestinationGroupNode>& node)
     {
         primaryNode_ = node;
@@ -308,7 +308,7 @@ private:
     NavDestinationTransitionDelegate navDestinationTransitionDelegate_;
 
     bool isShowInPrimaryPartition_ = false;
-    RefPtr<NavDestinationGroupNode> placeHolderNode_;
+    RefPtr<NavDestinationGroupNode> proxyNode_;
     WeakPtr<NavDestinationGroupNode> primaryNode_;
 };
 

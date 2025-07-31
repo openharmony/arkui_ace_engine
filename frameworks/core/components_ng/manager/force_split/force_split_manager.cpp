@@ -68,9 +68,9 @@ void ForceSplitManager::UpdateIsInForceSplitMode(int32_t width)
         /**
          * The force split mode must meet the following conditions to take effect:
          *   1. Belonging to the main window of the application
-         *   3. The application is in landscape mode or ignore orientation
-         *   4. The application is not in split screen mode
-         *   5. width greater than 600vp
+         *   2. The application is in landscape mode or ignore orientation
+         *   3. The application is not in split screen mode
+         *   4. width greater than 600vp
          */
         bool isMainWindow = container->IsMainWindow();
         auto thresholdWidth = SPLIT_THRESHOLD_WIDTH.ConvertToPx();

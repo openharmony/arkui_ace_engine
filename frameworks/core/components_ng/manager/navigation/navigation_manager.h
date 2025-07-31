@@ -241,10 +241,8 @@ public:
     {
         return homePageName_;
     }
-    bool GetIgnoreOrientation() const
-    {
-        return ignoreOrientation_;
-    }
+    bool GetIgnoreOrientation() const;
+
     void AddForceSplitListener(int32_t nodeId, std::function<void()>&& listener);
     void RemoveForceSplitListener(int32_t nodeId);
     bool IsOuterMostNavigation(int32_t nodeId, int32_t depth);

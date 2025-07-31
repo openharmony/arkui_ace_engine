@@ -290,7 +290,7 @@ enum class NavigationSystemTransitionType {
 enum class NavDestinationType {
     DETAIL = 0,
     HOME = 1,
-    PLACE_HOLDER = 2,
+    PROXY = 2
 };
 
 inline NavigationSystemTransitionType operator& (NavigationSystemTransitionType lv, NavigationSystemTransitionType rv)
