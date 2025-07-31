@@ -1719,4 +1719,52 @@ HWTEST_F(CheckBoxPatternTestNG, CheckBoxPatternTest048, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     pattern->OnDetachFromMainTreeMultiThread(frameNode);
 }
+
+/**
+ * @tc.name: CheckBoxPatternTest049
+ * @tc.desc: Test CheckBox OnAttachToFrameNodeMultiThread.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxPatternTestNG, CheckBoxPatternTest049, TestSize.Level1)
+{
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnAttachToFrameNodeMultiThread(frameNode);
+}
+
+/**
+ * @tc.name: CheckBoxPatternTest050
+ * @tc.desc: Test CheckBox OnAttachToMainTree.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxPatternTestNG, CheckBoxPatternTest050, TestSize.Level1)
+{
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnAttachToMainTree();
+}
+
+/**
+ * @tc.name: CheckBoxPatternTest051
+ * @tc.desc: Test CheckBox OnAttachToMainTreeMultiThread.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxPatternTestNG, CheckBoxPatternTest051, TestSize.Level1)
+{
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnAttachToMainTreeMultiThread();
+}
 } // namespace OHOS::Ace::NG
