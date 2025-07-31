@@ -29,6 +29,13 @@ import { CommonAttribute, ArkCommonMethodPeer, CommonMethod, UIGestureEvent, UIC
 } from './component/common'
 import { ArkBaseNode } from './handwritten/modifiers/ArkBaseNode'
 import { ArkListNode } from './handwritten/modifiers/ArkListNode'
+import { ArkListItemNode } from './handwritten/modifiers/ArkListItemNode'
+import { ArkListItemGroupNode } from './handwritten/modifiers/ArkListItemGroupNode'
+import { ArkScrollNode } from './handwritten/modifiers/ArkScrollNode'
+import { ArkGridNode } from './handwritten/modifiers/ArkGridNode'
+import { ArkGridItemNode } from './handwritten/modifiers/ArkGridItemNode'
+import { ArkWaterFlowNode } from './handwritten/modifiers/ArkWaterFlowNode'
+import { ArkFlowItemNode } from './handwritten/modifiers/ArkFlowItemNode'
 import { ArkColumnNode } from './handwritten/modifiers/ArkColumnNode'
 import { ArkRowNode } from './handwritten/modifiers/ArkRowNode'
 import { ArkStackNode } from './handwritten/modifiers/ArkStackNode'
@@ -45,6 +52,13 @@ import { ArkTextInputNode } from './handwritten/modifiers/ArkTextInputNode'
 import { ArkXComponentNode } from "./handwritten/modifiers/ArkXComponentNode"
 import { ModifierType } from './handwritten/modifiers/ArkCommonModifier'
 import { ListOptions, ListAttribute, ArkListPeer } from './component/list'
+import { ListItemOptions, ListItemAttribute, ArkListItemPeer } from './component/listItem'
+import { ListItemGroupOptions, ListItemGroupAttribute, ArkListItemGroupPeer } from './component/listItemGroup'
+import { Scroller, ScrollAttribute, ArkScrollPeer } from './component/scroll'
+import { GridLayoutOptions, GridAttribute, ArkGridPeer } from './component/grid'
+import { GridItemOptions, GridItemAttribute, ArkGridItemPeer } from './component/gridItem'
+import { WaterFlowOptions, WaterFlowAttribute, ArkWaterFlowPeer } from './component/waterFlow'
+import { FlowItemAttribute, ArkFlowItemPeer } from './component/flowItem'
 import { ColumnOptions, ColumnAttribute, ArkColumnPeer } from './component/column'
 import { RowOptions, RowAttribute, ArkRowPeer } from './component/row'
 import { StackOptions, StackAttribute, ArkStackPeer } from './component/stack'
@@ -1114,6 +1128,76 @@ export namespace typeNode {
         }
     }
 
+    class ListItemFrameNode extends TypedFrameNode<ArkListItemNode> {
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkListItemNode) {
+            super(uiContext, type, attrCreator);
+        }
+        initialize(options: ListItemOptions): ListItemAttribute {
+            let arkListItemNode = this.attribute as ArkListItemNode;
+            return arkListItemNode!.initialize(options);
+        }
+    }
+
+    class ListItemGroupFrameNode extends TypedFrameNode<ArkListItemGroupNode> {
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkListItemGroupNode) {
+            super(uiContext, type, attrCreator);
+        }
+        initialize(options: ListItemGroupOptions): ListItemGroupAttribute {
+            let arkListItemGroupNode = this.attribute as ArkListItemGroupNode;
+            return arkListItemGroupNode!.initialize(options);
+        }
+    }
+
+    class ScrollFrameNode extends TypedFrameNode<ArkScrollNode> {
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkScrollNode) {
+            super(uiContext, type, attrCreator);
+        }
+        initialize(scroller: Scroller): ScrollAttribute {
+            let arkScrollNode = this.attribute as ArkScrollNode;
+            return arkScrollNode!.initialize(scroller);
+        }
+    }
+
+    class GridFrameNode extends TypedFrameNode<ArkGridNode> {
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkGridNode) {
+            super(uiContext, type, attrCreator);
+        }
+        initialize(scroller: Scroller, layoutOptions: GridLayoutOptions): GridAttribute {
+            let arkGridNode = this.attribute as ArkGridNode;
+            return arkGridNode!.initialize(scroller, layoutOptions);
+        }
+    }
+
+    class GridItemFrameNode extends TypedFrameNode<ArkGridItemNode> {
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkGridItemNode) {
+            super(uiContext, type, attrCreator);
+        }
+        initialize(options: GridItemOptions): GridItemAttribute {
+            let arkGridItemNode = this.attribute as ArkGridItemNode;
+            return arkGridItemNode!.initialize(options);
+        }
+    }
+
+    class WaterFlowFrameNode extends TypedFrameNode<ArkWaterFlowNode> {
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkWaterFlowNode) {
+            super(uiContext, type, attrCreator);
+        }
+        initialize(options: WaterFlowOptions): WaterFlowAttribute {
+            let arkWaterFlowNode = this.attribute as ArkWaterFlowNode;
+            return arkWaterFlowNode!.initialize(options);
+        }
+    }
+
+    class FlowItemFrameNode extends TypedFrameNode<ArkFlowItemNode> {
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkFlowItemNode) {
+            super(uiContext, type, attrCreator);
+        }
+        initialize(): FlowItemAttribute {
+            let arkFlowItemNode = this.attribute as ArkFlowItemNode;
+            return arkFlowItemNode!.initialize();
+        }
+    }
+
     class SearchFrameNode extends TypedFrameNode<ArkSearchNode> {
         constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkSearchNode) {
             super(uiContext, type, attrCreator);
@@ -1287,11 +1371,88 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    function createListNode(context: UIContext, type: string): ListFrameNode {
+    export function createListNode(context: UIContext, type: 'List'): ListFrameNode {
         return new ListFrameNode(context, 'List', (node: FrameNode, type: ModifierType): ArkListNode => {
             let arknode = new ArkListNode();
             const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
             const peer = new ArkListPeer(retval, node._nodeId!.toInt(), "List", 0);
+            arknode.setPeer(peer);
+            return arknode;
+        });
+    }
+
+    // @ts-ignore
+    export function createListItemNode(context: UIContext, type: 'ListItem'): ListItemFrameNode {
+        return new ListItemFrameNode(context, 'ListItem', (node: FrameNode, type: ModifierType): ArkListItemNode => {
+            let arknode = new ArkListItemNode();
+            const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
+            const peer = new ArkListItemPeer(retval, node._nodeId!.toInt(), "ListItem", 0);
+            arknode.setPeer(peer);
+            return arknode;
+        });
+    }
+
+    // @ts-ignore
+    export function createListItemGroupNode(context: UIContext, type: 'ListItemGroup'): ListItemGroupFrameNode {
+        return new ListItemGroupFrameNode(context, 'ListItemGroup', (node: FrameNode, type: ModifierType): ArkListItemGroupNode => {
+            let arknode = new ArkListItemGroupNode();
+            const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
+            const peer = new ArkListItemGroupPeer(retval, node._nodeId!.toInt(), "ListItemGroup", 0);
+            arknode.setPeer(peer);
+            return arknode;
+        });
+    }
+
+    // @ts-ignore
+    export function createScrollNode(context: UIContext, type: 'Scroll'): ScrollFrameNode {
+        return new ScrollFrameNode(context, 'Scroll', (node: FrameNode, type: ModifierType): ArkScrollNode => {
+            let arknode = new ArkScrollNode();
+            const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
+            const peer = new ArkScrollPeer(retval, node._nodeId!.toInt(), "Scroll", 0);
+            arknode.setPeer(peer);
+            return arknode;
+        });
+    }
+
+    // @ts-ignore
+    export function createGridNode(context: UIContext, type: 'Grid'): GridFrameNode {
+        return new GridFrameNode(context, 'Grid', (node: FrameNode, type: ModifierType): ArkGridNode => {
+            let arknode = new ArkGridNode();
+            const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
+            const peer = new ArkGridPeer(retval, node._nodeId!.toInt(), "Grid", 0);
+            arknode.setPeer(peer);
+            return arknode;
+        });
+    }
+
+    // @ts-ignore
+    export function createGridItemNode(context: UIContext, type: 'GridItem'): GridItemFrameNode {
+        return new GridItemFrameNode(context, 'GridItem', (node: FrameNode, type: ModifierType): ArkGridItemNode => {
+            let arknode = new ArkGridItemNode();
+            const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
+            const peer = new ArkGridItemPeer(retval, node._nodeId!.toInt(), "GridItem", 0);
+            arknode.setPeer(peer);
+            return arknode;
+        });
+    }
+
+    // @ts-ignore
+    export function createWaterFlowNode(context: UIContext, type: 'WaterFlow'): WaterFlowFrameNode {
+        return new WaterFlowFrameNode(context, 'WaterFlow', (node: FrameNode, type: ModifierType): ArkWaterFlowNode => {
+            let arknode = new ArkWaterFlowNode();
+            const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
+            const peer = new ArkWaterFlowPeer(retval, node._nodeId!.toInt(), "WaterFlow", 0);
+            arknode.setPeer(peer);
+            return arknode;
+        });
+    }
+
+    // @ts-ignore
+    export function createFlowItemNode(context: UIContext, type: 'FlowItem'): FlowItemFrameNode {
+        return new FlowItemFrameNode(context, 'FlowItem', (node: FrameNode, type: ModifierType): ArkFlowItemNode => {
+            let arknode = new ArkFlowItemNode();
+            const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
+            const peer = new ArkFlowItemPeer(retval, node._nodeId!.toInt(), "FlowItem", 0);
             arknode.setPeer(peer);
             return arknode;
         });
