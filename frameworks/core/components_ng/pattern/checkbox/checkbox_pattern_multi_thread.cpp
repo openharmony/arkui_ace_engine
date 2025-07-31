@@ -23,6 +23,12 @@ void CheckBoxPattern::OnAttachToFrameNodeMultiThread(const RefPtr<FrameNode>& fr
     frameNode->GetLayoutProperty()->UpdateAlignment(Alignment::CENTER);
 }
 
+void CheckBoxPattern::OnAttachToMainTreeMultiThread(const RefPtr<FrameNode>& frameNode)
+{
+    UpdateNavIdAndState(frameNode);
+    RegisterVisibleAreaChange();
+}
+
 void CheckBoxPattern::OnDetachFromFrameNodeMultiThread()
 {
 }
