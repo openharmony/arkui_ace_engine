@@ -3801,6 +3801,7 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     auto updateforceSplitTask = [context, width = config.Width()]() {
+        CHECK_NULL_VOID(context);
         auto forceSplitMgr = context->GetForceSplitManager();
         CHECK_NULL_VOID(forceSplitMgr);
         forceSplitMgr->UpdateIsInForceSplitMode(width);
