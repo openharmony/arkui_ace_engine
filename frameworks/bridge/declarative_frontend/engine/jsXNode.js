@@ -1588,8 +1588,8 @@ class TypedFrameNode extends FrameNode {
         this.attrCreator_ = attrCreator;
     }
     dispose(){
-        this._nativeRef?.dispose();
         super.dispose();
+        this._nativeRef?.dispose();
     }
     initialize(...args) {
         return this.attribute.initialize(args);
