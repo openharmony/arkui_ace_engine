@@ -15,6 +15,8 @@
 
 #include "adapter/ohos/capability/feature_config/config_xml_parser_base.h"
 
+#include <array>
+
 #include "adapter/ohos/capability/feature_config/feature_param_manager.h"
 #include "base/log/log.h"
 
@@ -25,18 +27,19 @@ enum ParseXmlNodeIndex : uint32_t {
     PARSE_XML_PERFORMANCE_OPT_CONFIG,
     PARSE_XML_BUNDLE_NAME,
     PARSE_XML_FEATURE,
+    PARSE_XML_MAX_SIZE,
 };
 
 namespace {
-static std::vector<std::string> xmlNodeNameVec_ = {
+static const std::array<std::string, PARSE_XML_MAX_SIZE> XML_NODE_NAME_ARRAY = {
     "undefine",             // PARSE_XML_UNDEFINED
     "PerformanceOptConfig", // PARSE_XML_PERFORMANCE_OPT_CONFIG
     "bundleName",           // PARSE_XML_BUNDLE_NAME
     "feature",              // PARSE_XML_FEATURE
 };
 
-static std::vector<std::string> sysPaths_ = { "/etc" };
-static std::string configPath_ = "/arkui/arkui_async_build_config.xml";
+static const std::array<std::string, 1> SYS_PATH = { "/etc" };
+static constexpr char CONFIG_PATH[] = "/arkui/arkui_async_build_config.xml";
 } // namespace
 
 ConfigXMLParserBase::~ConfigXMLParserBase()
@@ -54,8 +57,8 @@ void ConfigXMLParserBase::Destroy()
 
 ParseErrCode ConfigXMLParserBase::LoadPerformanceConfigXML()
 {
-    for (const std::string& configRootPath : sysPaths_) {
-        std::string graphicFilePath = configRootPath + configPath_;
+    for (const std::string& configRootPath : SYS_PATH) {
+        std::string graphicFilePath = configRootPath + CONFIG_PATH;
         xmlSysDocument_ = xmlReadFile(graphicFilePath.c_str(), nullptr, 0);
         if (xmlSysDocument_ != nullptr) {
             LOGD("ConfigXMLParserBase success to get sys graphic config: %{public}s", graphicFilePath.c_str());
@@ -72,7 +75,7 @@ ParseErrCode ConfigXMLParserBase::LoadPerformanceConfigXML()
 ParseErrCode ConfigXMLParserBase::ParsePerformanceConfigXMLWithBundleName(const std::string& bundleName)
 {
     if (!xmlSysDocument_) {
-        LOGE("ConfigXMLParserBase xmlSysDocument_ is empty, should do LoadGraphicConfiguration first");
+        LOGE("ConfigXMLParserBase xmlSysDocument is empty, LoadGraphicConfiguration first");
         return PARSE_SYS_FILE_LOAD_FAIL;
     }
     xmlNode* root = xmlDocGetRootElement(xmlSysDocument_);
@@ -156,11 +159,11 @@ std::string ConfigXMLParserBase::ExtractPropertyValue(const std::string& propNam
 
 ParseErrCode ConfigXMLParserBase::ParseXmlNodeNameWithIndex(xmlNode& node, uint32_t nodeNameIndex)
 {
-    if (nodeNameIndex >= xmlNodeNameVec_.size()) {
+    if (nodeNameIndex >= XML_NODE_NAME_ARRAY.size()) {
         return PARSE_SIZE_ERROR;
     }
 
-    if (xmlStrcasecmp(node.name, reinterpret_cast<const xmlChar*>(xmlNodeNameVec_[nodeNameIndex].c_str())) != 0) {
+    if (xmlStrcasecmp(node.name, reinterpret_cast<const xmlChar*>(XML_NODE_NAME_ARRAY[nodeNameIndex].c_str())) != 0) {
         return PARSE_XML_NAME_ERROR;
     }
 

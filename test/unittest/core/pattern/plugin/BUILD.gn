@@ -141,7 +141,7 @@ if (defined(enable_plugin_pattern_test_ng)) {
       "$ace_root/frameworks/core/pipeline/base/constants.cpp",
       "$ace_root/frameworks/core/pipeline/base/element_register_multi_thread.cpp",
       "$ace_root/frameworks/core/pipeline_ng/ui_task_scheduler.cpp",
-      "$ace_root/test/mock/base/mock_feature_param_impl.cpp",
+      "$ace_root/test/mock/base/mock_feature_param.cpp",
       "$ace_root/test/mock/base/mock_frame_report.cpp",
       "$ace_root/test/mock/base/mock_frame_trace_adapter.cpp",
       "$ace_root/test/mock/base/mock_lifecycle_checkable.cpp",

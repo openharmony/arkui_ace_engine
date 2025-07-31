@@ -20,7 +20,7 @@
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
 #include "base/memory/ace_type.h"
-#include "base/utils/feature_param_impl.h"
+#include "base/utils/feature_param.h"
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/layout_param.h"
@@ -1746,7 +1746,7 @@ int32_t ListLayoutAlgorithm::GetListItemGroupItemCount(const RefPtr<LayoutWrappe
 
 bool ListLayoutAlgorithm::IsNeedSyncLoad(const RefPtr<ListLayoutProperty>& property) const
 {
-    bool syncLoad = property->GetSyncLoad().value_or(!FeatureParamImpl::IsSyncLoadEnabled());
+    bool syncLoad = property->GetSyncLoad().value_or(!FeatureParam::IsSyncLoadEnabled());
     return !(!syncLoad && NearZero(currentDelta_) && !targetIndex_.has_value() && mainSizeIsDefined_);
 }
 

@@ -13,25 +13,25 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_FEATURE_PARAM_IMPL_H
-#define FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_FEATURE_PARAM_IMPL_H
+#include "base/utils/feature_param.h"
 
-#include <string>
-
-#include "ui/base/macros.h"
+#include "adapter/ohos/capability/feature_config/feature_param_manager.h"
 
 namespace OHOS::Ace {
-class ACE_FORCE_EXPORT FeatureParamImpl {
-public:
-    FeatureParamImpl() = default;
-    ~FeatureParamImpl() = default;
 
-    // SyncloadParser
-    static bool IsSyncLoadEnabled();
-    static uint32_t GetSyncloadResponseDeadline();
-    // UINodeGcParamParser
-    static bool IsUINodeGcEnabled();
-};
-} // namespace OHOS::Ace
+bool FeatureParam::IsSyncLoadEnabled()
+{
+    return FeatureParamManager::GetInstance().IsSyncLoadEnabled();
+}
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_FEATURE_PARAM_IMPL_H
+uint32_t FeatureParam::GetSyncloadResponseDeadline()
+{
+    return FeatureParamManager::GetInstance().GetSyncloadResponseDeadline();
+}
+
+bool FeatureParam::IsUINodeGcEnabled()
+{
+    return FeatureParamManager::GetInstance().IsUINodeGcEnabled();
+}
+
+} // OHOS::Ace

@@ -70,7 +70,7 @@ template("ace_osal_ohos_source_set") {
       "drawable_descriptor_ohos.cpp",
       "event_report.cpp",
       "exception_handler.cpp",
-      "feature_param_impl.cpp",
+      "feature_param.cpp",
       "frame_report.cpp",
       "image_analyzer_adapter_impl.cpp",
       "image_analyzer_loader.cpp",

@@ -27,10 +27,13 @@ namespace OHOS::Ace {
         #cls, std::make_shared<cls>() \
     }
 
-std::unordered_map<std::string, std::shared_ptr<ConfigXMLParserBase>> FeatureParamManager::featureParamMap_ = {
+const std::unordered_map<std::string, std::shared_ptr<ConfigXMLParserBase>> FeatureParamManager::featureParamMap_ = {
     ADD_PARSER_MODLE(UINodeGcParamParser),
     ADD_PARSER_MODLE(SyncloadParser),
 };
+
+FeatureParamManager::FeatureParamManager() = default;
+FeatureParamManager::~FeatureParamManager() = default;
 
 void FeatureParamManager::Init(const std::string& bundleName)
 {
@@ -59,12 +62,12 @@ void FeatureParamManager::SetSyncLoadEnableParam(bool enabled, uint32_t deadline
     syncloadResponseDeadline_ = deadline;
 }
 
-bool FeatureParamManager::IsSyncLoadEnabled()
+bool FeatureParamManager::IsSyncLoadEnabled() const
 {
     return syncLoadEnabled_ || SystemProperties::IsSyncLoadEnabled();
 }
 
-uint32_t FeatureParamManager::GetSyncloadResponseDeadline()
+uint32_t FeatureParamManager::GetSyncloadResponseDeadline() const
 {
     return syncloadResponseDeadline_;
 }
@@ -74,7 +77,7 @@ void FeatureParamManager::SetUINodeGcEnabled(bool enabled)
     uiNodeGcEnabled_ = enabled;
 }
 
-bool FeatureParamManager::IsUINodeGcEnabled()
+bool FeatureParamManager::IsUINodeGcEnabled() const
 {
     return uiNodeGcEnabled_;
 }

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "base/utils/feature_param_impl.h"
+#include "base/utils/feature_param.h"
 
 namespace {
 constexpr int32_t DEFAULT_RESPONSE_DELAY = 50000000; // default max response delay is 50ms.
@@ -21,17 +21,17 @@ constexpr int32_t DEFAULT_RESPONSE_DELAY = 50000000; // default max response del
 
 namespace OHOS::Ace {
 
-bool FeatureParamImpl::IsSyncLoadEnabled()
+bool FeatureParam::IsSyncLoadEnabled()
 {
     return false;
 }
 
-uint32_t FeatureParamImpl::GetSyncloadResponseDeadline()
+uint32_t FeatureParam::GetSyncloadResponseDeadline()
 {
     return DEFAULT_RESPONSE_DELAY;
 }
 
-bool FeatureParamImpl::IsUINodeGcEnabled()
+bool FeatureParam::IsUINodeGcEnabled()
 {
     return false;
 }

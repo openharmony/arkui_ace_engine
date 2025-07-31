@@ -18,32 +18,29 @@
 
 #include <string>
 
+#include "base/utils/singleton.h"
+#include "base/utils/noncopyable.h"
+
 namespace OHOS::Ace {
 class ConfigXMLParserBase;
-class FeatureParamManager {
+class FeatureParamManager final : public Singleton<FeatureParamManager> {
+    DECLARE_SINGLETON(FeatureParamManager);
+    ACE_DISALLOW_MOVE(FeatureParamManager);
+
 public:
-    FeatureParamManager() = default;
-    ~FeatureParamManager() = default;
-
-    static FeatureParamManager& GetInstance()
-    {
-        static FeatureParamManager instance;
-        return instance;
-    }
-
     void Init(const std::string& bundleName);
 
     // SyncloadParser
     void SetSyncLoadEnableParam(bool enabled, uint32_t deadline);
-    bool IsSyncLoadEnabled();
-    uint32_t GetSyncloadResponseDeadline();
+    bool IsSyncLoadEnabled() const;
+    uint32_t GetSyncloadResponseDeadline() const;
     // UINodeGcParamParser
     void SetUINodeGcEnabled(bool enabled);
-    bool IsUINodeGcEnabled();
+    bool IsUINodeGcEnabled() const;
 
 private:
     void FeatureParamParseEntry(const std::string& bundleName);
-    static std::unordered_map<std::string, std::shared_ptr<ConfigXMLParserBase>> featureParamMap_;
+    static const std::unordered_map<std::string, std::shared_ptr<ConfigXMLParserBase>> featureParamMap_;
     static constexpr uint32_t MAX_TIMER_SIZE = 3; // 3 is max size for responseDeadline
     static constexpr uint32_t DEFAULT_SYNCLOAD_DEADLINE = 50; // 50ms default time
     static constexpr uint32_t MS_TO_NS = 1000000; // 1000000 change time form ms to ns
