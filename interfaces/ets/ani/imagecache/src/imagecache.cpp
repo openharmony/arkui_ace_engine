@@ -56,9 +56,7 @@ static void setImageRawDataCacheSize([[maybe_unused]] ani_env *env, [[maybe_unus
         return;
     }
     auto pipelineContext = container->GetPipelineContext();
-    if (!pipelineContext) {
-        return;
-    }
+    CHECK_NULL_VOID(pipelineContext);
     auto taskExecutor = pipelineContext->GetTaskExecutor();
     if (!taskExecutor) {
         return;

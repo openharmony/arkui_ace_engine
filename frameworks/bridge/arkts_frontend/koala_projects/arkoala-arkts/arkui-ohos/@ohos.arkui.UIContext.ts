@@ -43,7 +43,7 @@ import { ComponentContent } from 'arkui/ComponentContent'
 import overlayManager from '@ohos/overlayManager'
 import promptAction, { LevelOrder } from '@ohos/promptAction'
 import { LocalStorage } from 'arkui/stateManagement/storage/localStorage';
-import { AsyncCallback, CustomBuilder, DragItemInfo, Callback, SheetOptions } from 'arkui/component'
+import { AsyncCallback, CustomBuilder, CustomBuilderT, DragItemInfo, Callback, SheetOptions } from 'arkui/component'
 import { Router as RouterExt } from 'arkui/handwritten';
 import { ComponentContent } from "arkui/ComponentContent"
 import { ComputableState, IncrementalNode } from '@koalaui/runtime'
@@ -369,7 +369,7 @@ export class PromptAction {
         throw Error("openCustomDialogWithController not implemented in PromptAction!")
     }
 
-    presentCustomDialog(builder: CustomBuilder | CustomBuilderWithId, controller?: promptAction.DialogController,
+    presentCustomDialog(builder: CustomBuilder | CustomBuilderT<number>, controller?: promptAction.DialogController,
         options?: promptAction.DialogOptions): Promise<number> {
         throw Error("presentCustomDialog not implemented in PromptAction!")
     }

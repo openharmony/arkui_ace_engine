@@ -1001,6 +1001,115 @@ std::function<void()> GetCustomBuilder(ani_env *env, ani_long builder)
     return result;
 }
 
+bool GetCustomBuilder(ani_env *env, ani_object object, std::function<void()>& builderResult,
+    std::function<void()>& destroyResult)
+{
+    ani_ref builderFuncRef;
+    ani_status status = env->Object_GetPropertyByName_Ref(object, "builderFunc", &builderFuncRef);
+    if (status != ANI_OK) {
+        return false;
+    }
+
+    ani_ref destroyFuncRef;
+    status = env->Object_GetPropertyByName_Ref(object, "destroyFunc", &destroyFuncRef);
+    if (status != ANI_OK) {
+        return false;
+    }
+
+    if (IsUndefinedObject(env, builderFuncRef) || IsUndefinedObject(env, destroyFuncRef)) {
+        return false;
+    }
+
+    ani_ref globalBuilderRef;
+    env->GlobalReference_Create(builderFuncRef, &globalBuilderRef);
+    ani_ref globalDestroyRef;
+    env->GlobalReference_Create(destroyFuncRef, &globalDestroyRef);
+    builderResult = [env, globalBuilderRef]() {
+        if (!globalBuilderRef) {
+            return;
+        }
+
+        ani_fn_object func = static_cast<ani_fn_object>(globalBuilderRef);
+        std::vector<ani_ref> args;
+        ani_ref fnReturnVal {};
+        ani_status status = env->FunctionalObject_Call(func, args.size(), args.data(), &fnReturnVal);
+        if (status != ANI_OK) {
+            TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY, "FunctionalObject_Call fail. status: %{public}d", status);
+            return;
+        }
+
+        ani_object builderObj = static_cast<ani_object>(fnReturnVal);
+        ani_long builder;
+        status = env->Object_CallMethodByName_Long(builderObj, "unboxed", nullptr, &builder);
+        if (status != ANI_OK) {
+            TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY, "CallMethodByName_Long fail. status: %{public}d", status);
+            return;
+        }
+
+        auto* builderNode = reinterpret_cast<ArkUINodeHandle>(builder);
+        CHECK_NULL_VOID(builderNode);
+        auto uiNode = OHOS::Ace::AceType::Claim(reinterpret_cast<OHOS::Ace::NG::UINode *>(builderNode));
+        CHECK_NULL_VOID(uiNode);
+        OHOS::Ace::NG::ViewStackProcessor::GetInstance()->Push(uiNode);
+    };
+    return true;
+}
+
+bool GetCustomBuilderWithId(ani_env *env, ani_object object,
+    std::function<void(const int32_t dialogId)>& builderResult, std::function<void()>& destroyResult)
+{
+    ani_ref builderFuncRef;
+    ani_status status = env->Object_GetPropertyByName_Ref(object, "builderWithIdFunc", &builderFuncRef);
+    if (status != ANI_OK) {
+        return false;
+    }
+
+    ani_ref destroyFuncRef;
+    status = env->Object_GetPropertyByName_Ref(object, "destroyFunc", &destroyFuncRef);
+    if (status != ANI_OK) {
+        return false;
+    }
+
+    if (IsUndefinedObject(env, builderFuncRef) || IsUndefinedObject(env, destroyFuncRef)) {
+        return false;
+    }
+
+    ani_ref globalBuilderRef;
+    env->GlobalReference_Create(builderFuncRef, &globalBuilderRef);
+    ani_ref globalDestroyRef;
+    env->GlobalReference_Create(destroyFuncRef, &globalDestroyRef);
+    builderResult = [env, globalBuilderRef](const int32_t dialogId) {
+        if (!globalBuilderRef) {
+            return;
+        }
+
+        ani_fn_object func = static_cast<ani_fn_object>(globalBuilderRef);
+        ani_object dialogIdObj = CreateANIDoubleObject(env, static_cast<double>(dialogId));
+        ani_ref dialogIdRef = static_cast<ani_ref>(dialogIdObj);
+        ani_ref fnReturnVal {};
+        ani_status status = env->FunctionalObject_Call(func, 1, &dialogIdRef, &fnReturnVal);
+        if (status != ANI_OK) {
+            TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY, "FunctionalObject_Call fail. status: %{public}d", status);
+            return;
+        }
+
+        ani_object builderObj = static_cast<ani_object>(fnReturnVal);
+        ani_long builder;
+        status = env->Object_CallMethodByName_Long(builderObj, "unboxed", nullptr, &builder);
+        if (status != ANI_OK) {
+            TAG_LOGE(OHOS::Ace::AceLogTag::ACE_OVERLAY, "CallMethodByName_Long fail. status: %{public}d", status);
+            return;
+        }
+
+        auto* builderNode = reinterpret_cast<ArkUINodeHandle>(builder);
+        CHECK_NULL_VOID(builderNode);
+        auto uiNode = OHOS::Ace::AceType::Claim(reinterpret_cast<OHOS::Ace::NG::UINode *>(builderNode));
+        CHECK_NULL_VOID(uiNode);
+        OHOS::Ace::NG::ViewStackProcessor::GetInstance()->Push(uiNode);
+    };
+    return true;
+}
+
 bool GetCornerRadius(ani_env *env, ani_object object, std::optional<OHOS::Ace::NG::BorderRadiusProperty>& result)
 {
     ani_ref resultRef;

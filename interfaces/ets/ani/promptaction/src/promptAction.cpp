@@ -450,14 +450,21 @@ static ani_object OpenCustomDialogWithController(ani_env* env, ani_long content,
     return result;
 }
 
-static ani_object PresentCustomDialog(ani_env* env, ani_long builder, ani_object controller, ani_object options,
-    ani_object optionsInternal)
+static ani_object PresentCustomDialog(ani_env* env, ani_object builderOptions, ani_object controller,
+    ani_object options, ani_object optionsInternal)
 {
     TAG_LOGD(OHOS::Ace::AceLogTag::ACE_OVERLAY, "[ANI] PresentCustomDialog enter.");
     OHOS::Ace::DialogProperties dialogProps;
+    std::function<void()> destroyCallback;
+    bool builderResult = GetCustomBuilder(env, builderOptions, dialogProps.customBuilder, destroyCallback);
+    bool builderWithIdResult = GetCustomBuilderWithId(
+        env, builderOptions, dialogProps.customBuilderWithId, destroyCallback);
+    if (!builderResult && !builderWithIdResult) {
+        return nullptr;
+    }
+
     GetDialogOptions(env, options, dialogProps);
     GetDialogOptionsInternal(env, optionsInternal, dialogProps);
-    dialogProps.customBuilder = GetCustomBuilder(env, builder);
     dialogProps.isUserCreatedDialog = true;
     OHOS::Ace::Ani::GetDialogController(env, controller, dialogProps.dialogCallback);
 

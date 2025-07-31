@@ -115,6 +115,17 @@ export function createUiDetachedRoot(
     return uicontext.getDetachedRootEntryManager().createUiDetachedRoot(peerFactory, builder);
 }
 
+export function createUiDetachedRootT<T>(
+    peerFactory: () => PeerNode,
+    /** @memo */
+    builder: (arg: T) => void,
+    arg: T,
+    instanceId: int32 = _undefinedInstanceId
+): PeerNode {
+    let uicontext = getUicontextByInstanceId(instanceId);
+    return uicontext.getDetachedRootEntryManager().createUiDetachedRootT(peerFactory, builder, arg);
+}
+
 export function destroyUiDetachedRoot(ptr: KPointer, instanceId: int32): boolean {
     if (instanceId < 0) {
         InteropNativeModule._NativeLog(

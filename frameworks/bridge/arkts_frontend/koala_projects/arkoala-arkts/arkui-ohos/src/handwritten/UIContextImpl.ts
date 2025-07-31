@@ -25,7 +25,8 @@ import { UIContext, MeasureUtils, Font, TextMenuController, FocusController, Con
     FrameCallback, UIInspector, UIObserver, OverlayManager, PromptAction, AtomicServiceBar, Router, CursorController,
     MediaQuery, ComponentSnapshot, OverlayManagerOptions, DragController, TargetInfo, CustomBuilderWithId }
     from "@ohos/arkui/UIContext"
-import { StateManager, ComputableState, GlobalStateManager, StateContext, memoEntry, IncrementalNode } from '@koalaui/runtime'
+import { StateManager, ComputableState, GlobalStateManager, StateContext, memoEntry, memoEntry1,
+    IncrementalNode } from '@koalaui/runtime'
 import { Context, PointerStyle, PixelMap } from "#external"
 import { Nullable,  WidthBreakpoint, HeightBreakpoint } from "arkui/component/enums"
 import { KeyEvent, PopupCommonOptions, MenuOptions, SheetOptions } from "arkui/component/common"
@@ -56,8 +57,9 @@ import { Serializer } from "arkui/component/peers/Serializer"
 import { GlobalScopeUicontextFontScale, GlobalScopeUicontextTextMenu } from "arkui/component/arkui-uicontext-text-utils"
 import { GlobalScope } from "arkui/component/GlobalScope"
 import { mediaquery } from '@ohos/mediaquery'
-import { AsyncCallback, CustomBuilder, ArkComponentRootPeer, DragItemInfo, Callback } from 'arkui/component'
-import { createUiDetachedRoot, destroyUiDetachedRoot } from "arkui/ArkUIEntry"
+import { AsyncCallback, CustomBuilder, CustomBuilderT, ArkComponentRootPeer, DragItemInfo,
+    Callback } from 'arkui/component'
+import { createUiDetachedRoot, createUiDetachedRootT, destroyUiDetachedRoot } from "arkui/ArkUIEntry"
 import { PeerNode, findPeerNode } from 'arkui/PeerNode'
 import { Deserializer } from "arkui/component/peers/Deserializer"
 import { Serializer } from "arkui/component/peers/Serializer"
@@ -910,16 +912,28 @@ export class PromptActionImpl extends PromptAction {
         return retval;
     }
 
-    presentCustomDialog(builder: CustomBuilder | CustomBuilderWithId, controller?: promptAction.DialogController,
+    presentCustomDialog(builder: CustomBuilder | CustomBuilderT<number>, controller?: promptAction.DialogController,
         options?: promptAction.DialogOptions): Promise<number> {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
-        let builderPtr: KPointer = 0;
+        let builderOptions: promptAction.DialogBuilderOptions = {};
         if (builder instanceof CustomBuilder) {
-            const peerNode = createUiDetachedRoot((): PeerNode => {
-                return ArkComponentRootPeer.create(undefined);
-            }, builder, this.instanceId_);
-            builderPtr = peerNode.peer.ptr;
+            builderOptions.builderFunc = (): KPointer => {
+                const peerNode = createUiDetachedRoot((): PeerNode => {
+                    return ArkComponentRootPeer.create(undefined);
+                }, builder as CustomBuilder, this.instanceId_);
+                return peerNode.peer.ptr;
+            };
+        } else {
+            builderOptions.builderWithIdFunc = (dialogId: number): KPointer => {
+                const peerNode = createUiDetachedRootT<number>((): PeerNode => {
+                    return ArkComponentRootPeer.create(undefined);
+                }, builder as CustomBuilderT<number>, dialogId, this.instanceId_);
+                return peerNode.peer.ptr;
+            };
         }
+        builderOptions.destroyFunc = (ptr: KPointer): void => {
+            destroyUiDetachedRoot(ptr, this.instanceId_);
+        };
 
         let optionsInternal: promptAction.DialogOptionsInternal = {};
         const transition = options?.transition?.getPeer?.();
@@ -938,7 +952,7 @@ export class PromptActionImpl extends PromptAction {
         if (levelOrder !== undefined) {
             optionsInternal.levelOrder = levelOrder as number;
         }
-        const retval = promptAction.presentCustomDialog(builderPtr, controller, options, optionsInternal);
+        const retval = promptAction.presentCustomDialog(builderOptions, controller, options, optionsInternal);
         ArkUIAniModule._Common_Restore_InstanceId();
         return retval;
     }
@@ -1170,6 +1184,28 @@ export class DetachedRootEntryManager {
             manager.frozen = true
             ArkUIAniModule._Common_Sync_InstanceId(this.uicontext_.getInstanceId())
             memoEntry<void>(context, 0, builder)
+            ArkUIAniModule._Common_Restore_InstanceId();
+            manager.frozen = frozen
+        })
+        this.detachedRoots_.set(node.value.peer.ptr, new DetachedRootEntryImpl<PeerNode>(node))
+        return node.value
+    }
+
+    public createUiDetachedRootT<T>(
+        peerFactory: () => PeerNode,
+        /** @memo */
+        builder: (arg: T) => void,
+        arg: T
+    ): PeerNode {
+        let manager = this.uicontext_.stateMgr;
+        if (manager === undefined) {
+            manager = GlobalStateManager.instance;
+        }
+        const node = manager.updatableNode<PeerNode>(peerFactory(), (context: StateContext) => {
+            const frozen = manager.frozen
+            manager.frozen = true
+            ArkUIAniModule._Common_Sync_InstanceId(this.uicontext_.getInstanceId())
+            memoEntry1<T, void>(context, 0, builder, arg)
             ArkUIAniModule._Common_Restore_InstanceId();
             manager.frozen = frozen
         })
