@@ -2512,7 +2512,7 @@ void TextFieldPattern::InitDragDropCallBack()
             "%{public}d TextField onDragEnter, dragStatus_ is %{public}d, dragRecipientStatus_ is %{public}d",
             host->GetId(), static_cast<int32_t>(pattern->dragStatus_),
             static_cast<int32_t>(pattern->dragRecipientStatus_));
-
+        CHECK_NULL_VOID(!pattern->IsDisabled());
         auto pipeline = pattern->GetContext();
         CHECK_NULL_VOID(pipeline);
         auto dragManager = pipeline->GetDragDropManager();
@@ -2543,6 +2543,7 @@ void TextFieldPattern::InitDragDropCallBack()
         CHECK_NULL_VOID(dragManager);
         auto host = pattern->GetHost();
         CHECK_NULL_VOID(host);
+        CHECK_NULL_VOID(!pattern->IsDisabled());
 
         if (pattern->IsNormalInlineState() || !dragManager->IsDropAllowed(host)) {
             return;
