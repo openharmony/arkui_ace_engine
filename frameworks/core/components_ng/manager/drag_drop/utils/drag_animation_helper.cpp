@@ -118,6 +118,8 @@ void DragAnimationHelper::PlayGatherNodeTranslateAnimation(const RefPtr<FrameNod
     bool isGrid = frameNode->GetTag() == V2::GRID_ITEM_ETS_TAG;
     CalcResult calcResult = { 0.0f, -1.0f, -1.0f };
     CalcDistanceBeforeLifting(isGrid, calcResult, gatherNodeCenter, gatherNodeChildrenInfo);
+    auto pipeline = frameNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
     AnimationUtils::Animate(
         option,
         [gatherNodeCenter, gatherNodeChildrenInfo, calcResult]() mutable {
@@ -128,7 +130,7 @@ void DragAnimationHelper::PlayGatherNodeTranslateAnimation(const RefPtr<FrameNod
                 offset += child.offset;
                 DragDropFuncWrapper::UpdateNodePositionToScreen(imageNode, offset);
             }
-        });
+        }, nullptr, nullptr, pipeline);
 }
 
 void DragAnimationHelper::PlayGatherNodeOpacityAnimation(const RefPtr<OverlayManager>& overlayManager)
@@ -268,6 +270,8 @@ void DragAnimationHelper::PlayGatherAnimation(const RefPtr<FrameNode>& frameNode
     auto scale = GetLiftingNodeScale(renderContext);
     GatherAnimationInfo gatherAnimationInfo = { scale, frameNodeSize.Width(),
         frameNodeSize.Height(), gatherNodeCenter, renderContext->GetBorderRadius() };
+    auto pipeline = frameNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
     AnimationUtils::Animate(
         option,
         [weakOverlayManager = AceType::WeakClaim(AceType::RawPtr(overlayManager)), gatherAnimationInfo,
@@ -277,7 +281,7 @@ void DragAnimationHelper::PlayGatherAnimation(const RefPtr<FrameNode>& frameNode
             DragDropManager::UpdateGatherNodeAttr(overlayManager, gatherAnimationInfo);
             DragDropManager::UpdateGatherNodePosition(overlayManager, frameNode);
         },
-        option.GetOnFinishEvent());
+        option.GetOnFinishEvent(), nullptr, pipeline);
 }
 
 void DragAnimationHelper::ShowMenuHideAnimation(const PreparedInfoForDrag& data)
