@@ -891,6 +891,7 @@ std::optional<SizeF> TextLayoutAlgorithm::BuildTextRaceParagraph(TextStyle& text
             return std::nullopt;
         }
     }
+    layoutProperty->OnPropertyChangeMeasure();
 
     textStyle_ = textStyle;
     auto paragraph = GetSingleParagraph();
