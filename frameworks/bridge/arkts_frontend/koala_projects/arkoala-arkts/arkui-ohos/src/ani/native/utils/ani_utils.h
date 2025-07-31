@@ -25,6 +25,7 @@ namespace OHOS::Ace::Ani {
 class AniUtils {
 public:
     static ani_object CreateDouble(ani_env *env, double value);
+    static ani_object CreateLong(ani_env *env, ani_long value);
     static bool CheckType(ani_env *env, ani_object obj, const std::string& type);
     static bool GetIntByName(ani_env *env, ani_object param, const char *name, int &value);
     static bool GetBoolOrUndefined(ani_env *env, ani_object param, const char *name);

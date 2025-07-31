@@ -343,8 +343,7 @@ void* createComponentRootNode(ArkUI_Int32 nodeId)
 void* createXComponentNode(ArkUI_Int32 nodeId)
 {
 #ifdef XCOMPONENT_SUPPORTED
-    auto frameNode = XComponentModelStatic::CreateFrameNode(
-        nodeId, std::nullopt, XComponentType::SURFACE, std::nullopt);
+    auto frameNode = XComponentModelStatic::CreateFrameNode(nodeId, true);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 #else

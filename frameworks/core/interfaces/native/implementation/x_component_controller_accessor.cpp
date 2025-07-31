@@ -53,6 +53,7 @@ Ark_String GetXComponentSurfaceIdImpl(Ark_XComponentController peer)
     CHECK_NULL_RETURN(peerImpl, {});
     CHECK_NULL_RETURN(peerImpl->controller, {});
     auto surfaceId = peerImpl->controller->GetSurfaceId();
+    surfaceId.push_back('\0');
     arkSurfaceId = Converter::ArkValue<Ark_String>(surfaceId, Converter::FC);
 #endif //XCOMPONENT_SUPPORTED
     return arkSurfaceId;
