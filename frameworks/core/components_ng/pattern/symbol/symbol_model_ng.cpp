@@ -146,7 +146,7 @@ void SymbolModelNG::RegisterSymbolFontColorResource(FrameNode* frameNode, const 
 
         pattern->AddResObj(storeKey, resObj, std::move(updateFunc));
     }
-    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolColorList, symbolColor);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolColorList, symbolColor, frameNode);
 }
 
 void SymbolModelNG::SetFontColor(FrameNode* frameNode, const std::vector<Color>& symbolColor)
