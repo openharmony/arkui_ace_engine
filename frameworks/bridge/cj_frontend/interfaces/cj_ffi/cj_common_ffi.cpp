@@ -112,6 +112,9 @@ void AssambleCJClickInfo(const OHOS::Ace::GestureEvent& event, CJClickInfo& clic
     Offset screenOffset = event.GetScreenLocation();
     Offset globalDisplayOffset = event.GetGlobalDisplayLocation();
     double currtDensity = PipelineBase::GetCurrentDensity();
+    if (NearZero(currtDensity)) {
+        currtDensity = 1.0;
+    }
     clickInfo.x = localOffset.GetX() / currtDensity;
     clickInfo.y = localOffset.GetY() / currtDensity;
     clickInfo.windowX = globalOffset.GetX() / currtDensity;
