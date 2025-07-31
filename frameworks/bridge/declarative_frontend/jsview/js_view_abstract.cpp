@@ -7199,23 +7199,21 @@ bool JSViewAbstract::ParseJsSymbolColor(const JSRef<JSVal>& jsValue, std::vector
         if (!value->IsNumber() && !value->IsString() && !value->IsObject()) {
             return false;
         }
+        RefPtr<ResourceObject> resObj;
+        Color color;
         if (value->IsNumber()) {
-            result.emplace_back(Color(ColorAlphaAdapt(value->ToNumber<uint32_t>())));
-            continue;
+            color = Color(ColorAlphaAdapt(value->ToNumber<uint32_t>()));
         } else if (value->IsString()) {
-            Color color;
             Color::ParseColorString(value->ToString(), color);
-            result.emplace_back(color);
-            continue;
         } else {
-            Color color;
-            RefPtr<ResourceObject> resObj;
             ParseJsColorFromResource(value, color, resObj);
-            result.emplace_back(color);
-            if (enableResourceUpdate && resObj) {
-                std::pair<int32_t, RefPtr<ResourceObject>> pair(i, resObj);
-                resObjArr.push_back(pair);
-            }
+        }
+
+        result.emplace_back(color);
+        CompleteResourceObjectFromColor(resObj, color, true);
+        if (enableResourceUpdate && resObj) {
+            std::pair<int32_t, RefPtr<ResourceObject>> pair(i, resObj);
+            resObjArr.push_back(pair);
         }
     }
     return true;
