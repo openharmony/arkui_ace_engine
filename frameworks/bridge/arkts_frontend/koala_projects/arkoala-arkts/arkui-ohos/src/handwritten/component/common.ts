@@ -385,7 +385,7 @@ export class ClickEventTransfer {
         const globalPositionValue = areaValue.getProperty("globalPosition");
         const globalPositionXValue = globalPositionValue.getProperty("x").toNumber();
         clickEvent.target.area.globalPosition.x = globalPositionXValue;
-        const globalPositionYValue = positionValue.getProperty("y").toNumber();
+        const globalPositionYValue = globalPositionValue.getProperty("y").toNumber();
         clickEvent.target.area.globalPosition.y = globalPositionYValue;
         const idValue = targetValue.getProperty("id");
         if (idValue.isUndefined()) {
@@ -511,7 +511,7 @@ export class HoverEventTransfer {
         const globalPositionValue = areaValue.getProperty("globalPosition");
         const globalPositionXValue = globalPositionValue.getProperty("x").toNumber();
         hoverEvent.target.area.globalPosition.x = globalPositionXValue;
-        const globalPositionYValue = positionValue.getProperty("y").toNumber();
+        const globalPositionYValue = globalPositionValue.getProperty("y").toNumber();
         hoverEvent.target.area.globalPosition.y = globalPositionYValue;
         const idValue = targetValue.getProperty("id");
         if (idValue.isUndefined()) {
@@ -674,7 +674,7 @@ export class MouseEventTransfer {
         const globalPositionValue = areaValue.getProperty("globalPosition");
         const globalPositionXValue = globalPositionValue.getProperty("x").toNumber();
         mouseEvent.target.area.globalPosition.x = globalPositionXValue;
-        const globalPositionYValue = positionValue.getProperty("y").toNumber();
+        const globalPositionYValue = globalPositionValue.getProperty("y").toNumber();
         mouseEvent.target.area.globalPosition.y = globalPositionYValue;
         const idValue = targetValue.getProperty("id");
         if (idValue.isUndefined()) {
@@ -778,7 +778,7 @@ export class TouchEventTransfer {
         const globalPositionValue = areaValue.getProperty("globalPosition");
         const globalPositionXValue = globalPositionValue.getProperty("x").toNumber();
         touchEvent.target.area.globalPosition.x = globalPositionXValue;
-        const globalPositionYValue = positionValue.getProperty("y").toNumber();
+        const globalPositionYValue = globalPositionValue.getProperty("y").toNumber();
         touchEvent.target.area.globalPosition.y = globalPositionYValue;
         const idValue = targetValue.getProperty("id");
         if (idValue.isUndefined()) {
@@ -974,7 +974,7 @@ export class AxisEventTransfer {
         const globalPositionValue = areaValue.getProperty("globalPosition");
         const globalPositionXValue = globalPositionValue.getProperty("x").toNumber();
         axisEvent.target.area.globalPosition.x = globalPositionXValue;
-        const globalPositionYValue = positionValue.getProperty("y").toNumber();
+        const globalPositionYValue = globalPositionValue.getProperty("y").toNumber();
         axisEvent.target.area.globalPosition.y = globalPositionYValue;
         const idValue = targetValue.getProperty("id");
         if (idValue.isUndefined()) {

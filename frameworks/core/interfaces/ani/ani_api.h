@@ -305,8 +305,8 @@ struct ArkUIAniCommonModifier {
     void (*scrollableTargetInfoAccessorWithId)(ani_env* env, ani_long input, ani_string id);
     void (*scrollableTargetInfoAccessorWithPointer)(ani_long input, ani_long nativePtr);
     void* (*transferScrollableTargetInfoPointer)(ani_long nativePtr);
-    ani_long (*transferDragEventPointer)(ani_long ptr);
-    ani_long (*getDragEventPointer)(ani_long ptr);
+    void* (*createDragEventAccessor)(ani_long ptr);
+    void* (*getDragEventPointer)(ani_long ptr);
     void* (*transferTouchEventPointer)(ani_long nativePtr);
     void* (*transferMouseEventPointer)(ani_long nativePtr);
     void* (*transferAxisEventPointer)(ani_long nativePtr);

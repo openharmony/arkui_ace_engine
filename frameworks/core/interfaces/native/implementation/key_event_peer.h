@@ -23,6 +23,7 @@ struct KeyEventPeer
 public:
     static KeyEventPeer* Create(void* ptr)
     {
+        CHECK_NULL_RETURN(ptr, nullptr);
         auto* peer = OHOS::Ace::NG::PeerUtils::CreatePeer<KeyEventPeer>();
         CHECK_NULL_RETURN(peer, nullptr);
         peer->SetEventInfo(reinterpret_cast<OHOS::Ace::KeyEventInfo*>(ptr));

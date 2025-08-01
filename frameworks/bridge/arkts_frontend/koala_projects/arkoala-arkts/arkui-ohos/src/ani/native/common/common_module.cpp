@@ -542,16 +542,16 @@ void* TransferScrollableTargetInfoPointer(ani_env* env, ani_object obj, ani_long
     }
     return modifier->getCommonAniModifier()->transferScrollableTargetInfoPointer(pointer);
 }
-ani_long CreateDragEventAccessorWithPointer(ani_env* env, ani_object obj, ani_long pointer)
+void* CreateDragEventAccessorWithPointer(ani_env* env, ani_object obj, ani_long pointer)
 {
     const auto* modifier = GetNodeAniModifier();
     if (!modifier || !modifier->getCommonAniModifier() || !env) {
         return 0;
     }
-    return modifier->getCommonAniModifier()->transferDragEventPointer(pointer);
+    return modifier->getCommonAniModifier()->createDragEventAccessor(pointer);
 }
 
-ani_long GetDragEventPointer(ani_env* env, ani_object obj, ani_long pointer)
+void* GetDragEventPointer(ani_env* env, ani_object obj, ani_long pointer)
 {
     const auto* modifier = GetNodeAniModifier();
     if (!modifier || !modifier->getCommonAniModifier() || !env) {
