@@ -18,6 +18,7 @@
 #include <cfloat>
 #include <queue>
 
+#include "base/utils/feature_param.h"
 #include "core/components/scroll/scroll_controller_base.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_wrapper.h"
@@ -37,7 +38,7 @@ void WaterFlowLayoutSW::Measure(LayoutWrapper* wrapper)
     GetExpandArea(props_, info_);
 
     auto [size, matchChildren] = WaterFlowLayoutUtils::PreMeasureSelf(wrapper_, axis_);
-    syncLoad_ = props_->GetSyncLoad().value_or(!SystemProperties::IsSyncLoadEnabled()) || matchChildren ||
+    syncLoad_ = props_->GetSyncLoad().value_or(!FeatureParam::IsSyncLoadEnabled()) || matchChildren ||
                 !NearZero(info_->delta_) || info_->targetIndex_.has_value() ;
     Init(size);
     if (!IsSectionValid(info_, itemCnt_) || !CheckData()) {
