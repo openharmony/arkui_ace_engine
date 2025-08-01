@@ -3325,7 +3325,7 @@ HWTEST_F(TextTestFiveNg, GetLineBreakStrategyInJson001, TestSize.Level1)
 
 /**
  * @tc.name: TxtParagraphUpdateColor001
- * @tc.desc: test txt_paragraph.cpp UpdateColor function
+ * @tc.desc: test txt_paragraph.cpp UpdateColor function.
  * @tc.type: FUNC
  */
 HWTEST_F(TextTestFiveNg, TxtParagraphUpdateColor001, TestSize.Level1)

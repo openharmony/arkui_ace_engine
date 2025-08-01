@@ -31,8 +31,9 @@ Ark_DecorationStyle CtorImpl(const Ark_DecorationStyleInterface* value)
         auto aceTypeOpt = Converter::OptConvert<TextDecoration>(value->type);
         auto aceColorOpt = Converter::OptConvert<Color>(value->color);
         auto aceStyleOpt = Converter::OptConvert<TextDecorationStyle>(value->style);
-        // span = AceType::MakeRefPtr<DecorationSpan>(aceTypeOpt.value_or(TextDecoration::NONE),
-        //     aceColorOpt, aceStyleOpt);
+        span = AceType::MakeRefPtr<DecorationSpan>(
+            std::vector<TextDecoration>({ aceTypeOpt.value_or(TextDecoration::NONE) }),
+            aceColorOpt, aceStyleOpt, std::optional<TextDecorationOptions>());
     } else {
         span = AceType::MakeRefPtr<DecorationSpan>();
     }
@@ -47,8 +48,8 @@ Ark_TextDecorationType GetTypeImpl(Ark_DecorationStyle peer)
     auto invalidValue = static_cast<Ark_TextDecorationType>(-1);
     CHECK_NULL_RETURN(peer, invalidValue);
     CHECK_NULL_RETURN(peer->span, invalidValue);
-    // auto value = Converter::ArkValue<Ark_TextDecorationType>(0);
-    return invalidValue;
+    auto value = Converter::ArkValue<Ark_TextDecorationType>(peer->span->GetTextDecorationFirst());
+    return value;
 }
 Opt_ResourceColor GetColorImpl(Ark_DecorationStyle peer)
 {
