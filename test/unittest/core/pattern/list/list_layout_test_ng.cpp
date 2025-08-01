@@ -3642,6 +3642,18 @@ HWTEST_F(ListLayoutTestNg, FadingEdge005, TestSize.Level1)
     EXPECT_TRUE(graphicProps);
     auto blendMode = graphicProps->GetBackBlendMode();
     EXPECT_EQ(blendMode, BlendMode::SRC_OVER);
+    auto paintWrapper = frameNode_->CreatePaintWrapper();
+    RefPtr<ListPaintMethod> paintMethod = AceType::DynamicCast<ListPaintMethod>(paintWrapper->nodePaintImpl_);
+    EXPECT_TRUE(paintMethod);
+    auto overlayRenderContext = paintMethod->overlayRenderContext_;
+    EXPECT_TRUE(overlayRenderContext);
+    auto& gradientProp = overlayRenderContext->GetOrCreateGradient();
+    EXPECT_TRUE(gradientProp);
+    NG::Gradient gradient;
+    if (gradientProp->HasLastGradientType() || gradientProp->HasLinearGradient()) {
+        gradient = gradientProp->GetLinearGradientValue();
+    }
+    EXPECT_EQ(gradient.GetColors().size(), 4); // 4: both top and bottom have gradient
 
     /**
      * @tc.steps: step2. user close fadingEdge
@@ -3652,6 +3664,10 @@ HWTEST_F(ListLayoutTestNg, FadingEdge005, TestSize.Level1)
     FlushUITasks();
     blendMode = graphicProps->GetBackBlendMode();
     EXPECT_EQ(blendMode, BlendMode::NONE);
+    if (gradientProp->HasLastGradientType() || gradientProp->HasLinearGradient()) {
+        gradient = gradientProp->GetLinearGradientValue();
+    }
+    EXPECT_EQ(gradient.GetColors().size(), 0); // 4: both top and bottom have gradient
 
     /**
      * @tc.steps: step3. user re-open fadingEdge
