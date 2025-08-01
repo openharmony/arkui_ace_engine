@@ -136,7 +136,7 @@ export class ArkRelativeContainerStyle extends ArkCommonMethodStyle implements R
     }
     public barrier(value: Array<BarrierStyle> | undefined | Array<LocalizedBarrierStyle> | undefined): this {
         return this
-        }
+    }
 }
 export class ArkRelativeContainerComponent extends ArkCommonMethodComponent implements RelativeContainerAttribute {
     getPeer(): ArkRelativeContainerPeer {

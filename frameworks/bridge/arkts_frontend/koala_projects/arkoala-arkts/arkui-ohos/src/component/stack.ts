@@ -94,7 +94,7 @@ export class ArkStackStyle extends ArkCommonMethodStyle implements StackAttribut
     }
     public pointLight(value: PointLightStyle | undefined): this {
         return this
-        }
+    }
 }
 export class ArkStackComponent extends ArkCommonMethodComponent implements StackAttribute {
     getPeer(): ArkStackPeer {

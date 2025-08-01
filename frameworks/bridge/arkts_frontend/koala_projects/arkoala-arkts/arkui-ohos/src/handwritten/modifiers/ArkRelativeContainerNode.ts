@@ -13,15 +13,20 @@
  * limitations under the License.
  */
 
-import { InteropNativeModule } from '@koalaui/interop';
+import { InteropNativeModule, runtimeType, RuntimeType } from '@koalaui/interop';
 import { ArkBaseNode } from './ArkBaseNode';
-import { RelativeContainerAttribute, ArkRelativeContainerPeer, GuideLineStyle, BarrierStyle, LocalizedBarrierStyle } from '../../component';
+import { TypeChecker } from "#components"
+import { RelativeContainerAttribute, ArkRelativeContainerPeer, GuideLineStyle, BarrierStyle,
+    LocalizedBarrierStyle } from '../../component';
 
 /** @memo:stable */
 export class ArkRelativeContainerNode extends ArkBaseNode implements RelativeContainerAttribute {
 
     constructParam(...param: Object[]): this {
-        InteropNativeModule._NativeLog('flex constructParam enter');
+        if (param.length > 0) {
+            throw new Error('more than 0 parameters');
+        }
+        this.getPeer()?.setRelativeContainerOptionsAttribute();
         return this;
     }
 
@@ -30,10 +35,23 @@ export class ArkRelativeContainerNode extends ArkBaseNode implements RelativeCon
     }
 
     guideLine(value: Array<GuideLineStyle> | undefined): this {
+        const value_casted = value as (Array<GuideLineStyle> | undefined);
+        this.getPeer()?.guideLineAttribute(value_casted);
         return this;
     }
 
     barrier(value: Array<BarrierStyle> | undefined | Array<LocalizedBarrierStyle> | undefined): this {
-        return this;
+        const value_type = runtimeType(value);
+        if ((RuntimeType.OBJECT == value_type && TypeChecker.isArray_BarrierStyle(value)) || (RuntimeType.UNDEFINED == value_type)) {
+            const value_casted = value as (Array<BarrierStyle> | undefined);
+            this.getPeer()?.barrier0Attribute(value_casted);
+            return this;
+        }
+        if ((RuntimeType.OBJECT == value_type && TypeChecker.isArray_LocalizedBarrierStyle(value)) || (RuntimeType.UNDEFINED == value_type)) {
+            const value_casted = value as (Array<LocalizedBarrierStyle> | undefined);
+            this.getPeer()?.barrier1Attribute(value_casted);
+            return this;
+        }
+        throw new Error("Can not select appropriate overload");
     }
 }

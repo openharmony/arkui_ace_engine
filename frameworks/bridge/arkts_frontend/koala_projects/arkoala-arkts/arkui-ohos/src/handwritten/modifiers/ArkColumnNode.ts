@@ -14,33 +14,49 @@
  */
 
 import { InteropNativeModule } from '@koalaui/interop';
-import { ColumnAttribute, HorizontalAlign, FlexAlign, PointLightStyle, ArkColumnPeer } from '../../component';
+import { ColumnAttribute, HorizontalAlign, FlexAlign, PointLightStyle, ArkColumnPeer, ColumnOptions,
+    ColumnOptionsV2 } from '../../component';
 import { ArkBaseNode } from './ArkBaseNode';
 
 export class ArkColumnNode extends ArkBaseNode implements ColumnAttribute {
 
     constructParam(...param: Object[]): this {
-        InteropNativeModule._NativeLog('column constructParam enter');
+        if (param.length > 1) {
+            throw new Error('more than 1 parameters');
+        }
+        let options_casted: ColumnOptions | ColumnOptionsV2 | undefined = undefined;
+        if (param.length === 1) {
+            options_casted = param[0] as (ColumnOptions | ColumnOptionsV2 | undefined);
+        }
+        this.getPeer()?.setColumnOptions1Attribute(options_casted);
         return this;
     }
 
     getPeer() : ArkColumnPeer {
-        return this.peer as ArkColumnPeer
+        return this.peer as ArkColumnPeer;
     }
 
     alignItems(value: HorizontalAlign | undefined): this {
+        const value_casted = value as (HorizontalAlign | undefined);
+        this.getPeer()?.alignItemsAttribute(value_casted);
         return this;
     }
 
     justifyContent(value: FlexAlign | undefined): this {
+        const value_casted = value as (FlexAlign | undefined);
+        this.getPeer()?.justifyContentAttribute(value_casted);
         return this;
     }
 
     pointLight(value: PointLightStyle | undefined): this {
+        const value_casted = value as (PointLightStyle | undefined);
+        this.getPeer()?.pointLightAttribute(value_casted);
         return this;
     }
 
     reverse(value: boolean | undefined): this {
+        const value_casted = value as (boolean | undefined);
+        this.getPeer()?.reverseAttribute(value_casted);
         return this;
     }
 }

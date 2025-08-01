@@ -153,7 +153,7 @@ export class ArkRowStyle extends ArkCommonMethodStyle implements RowAttribute {
     }
     public reverse(value: boolean | undefined): this {
         return this
-        }
+    }
 }
 export class ArkRowComponent extends ArkCommonMethodComponent implements RowAttribute {
     getPeer(): ArkRowPeer {

@@ -1272,7 +1272,7 @@ export namespace typeNode {
         createXComponentNodeWithOptions, createXComponentNodeWithParameters, createSwiperNode }
 
     // @ts-ignore
-    function createColumnNode(context: UIContext, type: string): ColumnFrameNode {
+    export function createColumnNode(context: UIContext, type: 'Column'): ColumnFrameNode {
         return new ColumnFrameNode(context, 'Column', (node: FrameNode, type: ModifierType): ArkColumnNode => {
             let arknode = new ArkColumnNode();
             const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
@@ -1283,7 +1283,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    function createRowNode(context: UIContext, type: string): RowFrameNode {
+    export function createRowNode(context: UIContext, type: 'Row'): RowFrameNode {
         return new RowFrameNode(context, 'Row', (node: FrameNode, type: ModifierType): ArkRowNode => {
             let arknode = new ArkRowNode();
             const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
@@ -1294,7 +1294,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    function createStackNode(context: UIContext, type: string): StackFrameNode {
+    export function createStackNode(context: UIContext, type: 'Stack'): StackFrameNode {
         return new StackFrameNode(context, 'Stack', (node: FrameNode, type: ModifierType): ArkStackNode => {
             let arknode = new ArkStackNode();
             const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
@@ -1305,7 +1305,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    function createFlexNode(context: UIContext, type: string): FlexFrameNode {
+    export function createFlexNode(context: UIContext, type: 'Flex'): FlexFrameNode {
         return new FlexFrameNode(context, 'Flex', (node: FrameNode, type: ModifierType): ArkFlexNode => {
             let arknode = new ArkFlexNode();
             const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
@@ -1316,7 +1316,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    function createGridRowNode(context: UIContext, type: string): GridRowFrameNode {
+    export function createGridRowNode(context: UIContext, type: 'GridRow'): GridRowFrameNode {
         return new GridRowFrameNode(context, 'GridRow', (node: FrameNode, type: ModifierType): ArkGridRowNode => {
             let arknode = new ArkGridRowNode();
             const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
@@ -1327,7 +1327,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    function createGridColNode(context: UIContext, type: string): GridColFrameNode {
+    export function createGridColNode(context: UIContext, type: 'GridCol'): GridColFrameNode {
         return new GridColFrameNode(context, 'GridCol', (node: FrameNode, type: ModifierType): ArkGridColNode => {
             let arknode = new ArkGridColNode();
             const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
@@ -1338,7 +1338,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    function createDividerNode(context: UIContext, type: string): DividerFrameNode {
+    export function createDividerNode(context: UIContext, type: 'Divider'): DividerFrameNode {
         return new DividerFrameNode(context, 'Divider', (node: FrameNode, type: ModifierType): ArkDividerNode => {
             let arknode = new ArkDividerNode();
             const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
@@ -1349,7 +1349,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    function createBlankNode(context: UIContext, type: string): BlankFrameNode {
+    export function createBlankNode(context: UIContext, type: 'Blank'): BlankFrameNode {
         return new BlankFrameNode(context, 'Blank', (node: FrameNode, type: ModifierType): ArkBlankNode => {
             let arknode = new ArkBlankNode();
             const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
@@ -1360,7 +1360,7 @@ export namespace typeNode {
     }
 
     // @ts-ignore
-    function createRelativeContainerNode(context: UIContext, type: string): RelativeContainerFrameNode {
+    export function createRelativeContainerNode(context: UIContext, type: 'RelativeContainer'): RelativeContainerFrameNode {
         return new RelativeContainerFrameNode(context, 'RelativeContainer', (node: FrameNode, type: ModifierType): ArkRelativeContainerNode => {
             let arknode = new ArkRelativeContainerNode();
             const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
