@@ -476,6 +476,7 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
             }
         }
         auto userOffset = FireOnWillScroll(-offset);
+        userOffset = FireObserverOnWillScroll(userOffset);
         info_.currentOffset_ -= userOffset;
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 
@@ -494,6 +495,7 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
             }
         }
         auto userOffset = FireOnWillScroll(-offset);
+        userOffset = FireObserverOnWillScroll(userOffset);
         info_.currentOffset_ -= userOffset;
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 
@@ -503,6 +505,7 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
         return true;
     }
     auto userOffset = FireOnWillScroll(-offset);
+    userOffset = FireObserverOnWillScroll(userOffset);
     info_.currentOffset_ -= userOffset;
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     ScrollablePattern::MarkScrollBarProxyDirty();

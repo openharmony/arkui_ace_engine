@@ -73,6 +73,7 @@ bool WaterFlowPattern::UpdateCurrentOffset(float delta, int32_t source)
         }
     }
     delta = -FireOnWillScroll(-delta);
+    delta = -FireObserverOnWillScroll(-delta);
     layoutInfo_->UpdateOffset(delta);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     MarkScrollBarProxyDirty();
