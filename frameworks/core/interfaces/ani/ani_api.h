@@ -64,6 +64,8 @@ typedef _ArkUIStyledString* ArkUIStyledString;
 typedef _ArkUICanvasRenderer* ArkUICanvasRenderer;
 typedef _ArkUIImageData* ArkUIImageData;
 typedef _ArkUIImageBitmap* ArkUIImageBitmap;
+struct Array_ResourceColor;
+struct Ark_ResourceColor;
 typedef struct WebviewControllerInfo {
     std::function<int32_t()> getWebIdFunc = nullptr;
     std::function<void(int32_t)> completeWindowNewFunc = nullptr;
@@ -310,7 +312,7 @@ struct ArkUIAniCommonModifier {
     ArkUI_Uint32 (*getColorValueByString)(const std::string& src);
     ArkUI_Uint32 (*getColorValueByNumber)(ArkUI_Uint32 src);
     void (*sendThemeToNative)(ani_env* env, const std::vector<ani_object>& colors, ani_int id);
-    void (*setDefaultTheme)(ani_env* env, ani_array colors, ani_boolean isDark);
+    void (*setDefaultTheme)(ani_env* env, const Array_ResourceColor& colors, ani_boolean isDark);
     void (*updateColorMode)(ani_int colorMode);
     void (*restoreColorMode)();
 };
