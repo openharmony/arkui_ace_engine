@@ -150,20 +150,20 @@ class RouterImpl implements Router {
         return className;
     }
 
-    private getFileInfo(url: string): string {
-        let index = url.lastIndexOf('/');
-        let result: string = '';
-        if (index !== -1) {
-            result = url.slice(0, index);
-        }
-        return result;
-    }
-
     private getPathInfo(url: string): string {
         let index = url.lastIndexOf('/');
         let result: string = '';
         if (index !== -1) {
-            result = url.slice(index);
+            result = url.slice(0, index + 1);
+        }
+        return result;
+    }
+
+    private getFileInfo(url: string): string {
+        let index = url.lastIndexOf('/');
+        let result: string = '';
+        if (index !== -1) {
+            result = url.slice(index + 1);
         }
         return result;
     }
@@ -374,7 +374,9 @@ class RouterImpl implements Router {
     getStateByUrl(url: string): Array<router.RouterState> {
         let retVal: Array<router.RouterState> = new Array<router.RouterState>()
         this.visiblePages.value.forEach((element, index) => {
-            if (element.url === url) {
+            let fileName = this.getFileInfo(url);
+            let pathName = this.getPathInfo(url);
+            if (element.url === fileName && element.path === pathName) {
                 // routerState index is started from 1. 
                 let state: router.RouterState = {
                     index: index + 1,
