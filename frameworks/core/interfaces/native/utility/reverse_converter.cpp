@@ -314,6 +314,15 @@ void AssignArkValue(Ark_Length& dst, const CalcLength& src)
     dst = ArkValue<Ark_Length>(src.GetDimension());
 }
 
+void AssignArkValue(Ark_Int32& dst, const Ark_Number& src)
+{
+    if (src.tag == INTEROP_TAG_INT32) {
+        dst = src.i32;
+    } else {
+        dst = static_cast<Ark_Int32>(src.f32);
+    }
+}
+
 void AssignArkValue(Ark_Number& dst, const int32_t& src)
 {
     dst.tag = INTEROP_TAG_INT32;

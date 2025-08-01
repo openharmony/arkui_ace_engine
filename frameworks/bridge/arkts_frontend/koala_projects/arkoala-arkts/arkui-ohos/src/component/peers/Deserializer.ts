@@ -26489,19 +26489,19 @@ export class Deserializer extends DeserializerBase {
     readStyleOptions(): StyleOptions {
         let valueDeserializer : Deserializer = this
         const start_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let start_buf : number | undefined
+        let start_buf : int32 | undefined
         if ((RuntimeType.UNDEFINED) != (start_buf_runtimeType))
         {
-            start_buf = (valueDeserializer.readNumber() as number)
+            start_buf = (valueDeserializer.readInt32())
         }
-        const start_result : number | undefined = start_buf
+        const start_result : int32 | undefined = start_buf
         const length_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let length_buf : number | undefined
+        let length_buf : int32 | undefined
         if ((RuntimeType.UNDEFINED) != (length_buf_runtimeType))
         {
-            length_buf = (valueDeserializer.readNumber() as number)
+            length_buf = (valueDeserializer.readInt32())
         }
-        const length_result : number | undefined = length_buf
+        const length_result : int32 | undefined = length_buf
         const styledKey_result : StyledStringKey = TypeChecker.StyledStringKey_FromNumeric(valueDeserializer.readInt32())
         const styledValue_buf_selector : int32 = valueDeserializer.readInt8()
         let styledValue_buf : TextStyle | DecorationStyle | BaselineOffsetStyle | LetterSpacingStyle | TextShadowStyle | GestureStyle | ImageAttachment | ParagraphStyle | LineHeightStyle | UrlStyle | CustomSpan | UserDataSpan | BackgroundColorStyle | undefined
