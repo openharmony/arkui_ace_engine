@@ -20,6 +20,7 @@ import { StorageLinkDecoratedVariable } from '../decoratorImpl/decoratorStorageL
 import { WatchFunc } from '../decoratorImpl/decoratorWatch';
 import { StateMgmtConsole } from '../tools/stateMgmtDFX';
 import { ExtendableComponent } from '../../component/extendableComponent';
+import { uiUtils } from '../base/uiUtilsImpl';
 
 export interface IStorageProperty {
     info_(): string;
@@ -116,7 +117,7 @@ export class StorageBase {
 
         this.key2Type.set(key, ttype);
         this.keySet.add(key); // Ensure key is added to keySet
-        const sp = new StorageProperty<T>(key, value);
+        const sp = new StorageProperty<T>(key, uiUtils.makeObserved(value));
         this.repoAllTypes.set(key, sp);
         return true;
     }
