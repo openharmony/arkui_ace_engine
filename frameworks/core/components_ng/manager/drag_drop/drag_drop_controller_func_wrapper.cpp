@@ -440,13 +440,6 @@ void DragControllerFuncWrapper::UpdateBadgeTextNodePosition(const RefPtr<FrameNo
     auto width = data.pixelMap->GetWidth();
     auto height = data.pixelMap->GetHeight();
 
-    auto container = AceEngine::Get().GetContainer(asyncCtxData.containerId);
-    CHECK_NULL_VOID(container);
-    auto windowScale = container->GetWindowScale();
-    if (NearZero(windowScale)) {
-        windowScale = 1.0f;
-    }
-
     auto originNodeOffset = GetOriginNodeOffset(data, asyncCtxData);
     originNodeOffset -= DragDropFuncWrapper::GetCurrentWindowOffset(textNode->GetContextRefPtr());
     RefPtr<FrameNode> parentNode = textNode->GetAncestorNodeOfFrame(true);
@@ -456,10 +449,9 @@ void DragControllerFuncWrapper::UpdateBadgeTextNodePosition(const RefPtr<FrameNo
     auto offset = previewOffset.NonOffset() ? originNodeOffset : previewOffset;
     
     auto badgeLength = std::to_string(data.badgeNumber).size();
-    double textOffsetX = offset.GetX() + width * (data.previewScale / windowScale + 1) / 2 -
+    double textOffsetX = offset.GetX() + width * (data.previewScale + 1) / 2 -
         BADGE_RELATIVE_OFFSET.ConvertToPx() - (BADGE_RELATIVE_OFFSET.ConvertToPx() * badgeLength);
-    double textOffsetY =
-        offset.GetY() - height * (data.previewScale / windowScale - 1) / 2 - BADGE_RELATIVE_OFFSET.ConvertToPx();
+    double textOffsetY = offset.GetY() - height * (data.previewScale - 1) / 2 - BADGE_RELATIVE_OFFSET.ConvertToPx();
     textRenderContext->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
     textRenderContext->UpdatePosition(OffsetT<Dimension>(Dimension(textOffsetX), Dimension(textOffsetY)));
 }
