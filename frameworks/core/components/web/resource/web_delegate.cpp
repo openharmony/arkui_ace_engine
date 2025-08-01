@@ -6146,7 +6146,7 @@ bool WebDelegate::OnHandleInterceptUrlLoading(const std::string& data)
 
 void WebDelegate::RemoveSnapshotFrameNode(int removeDelayTime)
 {
-    TAG_LOGD(AceLogTag::ACE_WEB, "WebDelegate::RemoveSnapshotFrameNode");
+    TAG_LOGD(AceLogTag::ACE_WEB, "blankless WebDelegate::RemoveSnapshotFrameNode");
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
     CHECK_NULL_VOID(context->GetTaskExecutor());
