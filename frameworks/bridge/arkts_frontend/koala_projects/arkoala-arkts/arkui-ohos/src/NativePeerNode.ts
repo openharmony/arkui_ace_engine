@@ -15,13 +15,13 @@
 
 import { int32 } from "@koalaui/common"
 import { pointer } from "@koalaui/interop"
-import { Finalizable } from "@koalaui/interop"
 import { ArkUINativeModule } from "#components"
 import { PeerNode } from "./PeerNode"
 
-export class NativePeerNode extends Finalizable {
+export class NativePeerNode {
+    ptr: pointer
     constructor(peer: PeerNode, ptr: pointer) {
-        super(ptr, ArkUINativeModule._GetNodeFinalizer())
+        this.ptr = ptr;
     }
 
     static create(peer: PeerNode, peerPtr: pointer, flags: int32): NativePeerNode {
@@ -45,5 +45,8 @@ export class NativePeerNode extends Finalizable {
     }
     dumpTree() {
         ArkUINativeModule._DumpTreeNode(this.ptr)
+    }
+    dispose() {
+        ArkUINativeModule._DisposeNode(this.ptr)
     }
 }
