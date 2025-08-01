@@ -1752,4 +1752,118 @@ HWTEST_F(MenuItemTestNg, CreateWithMediaResourceObj002, TestSize.Level1)
     pattern->resourceMgr_->ReloadResources();
     EXPECT_TRUE(layoutProperty->GetEndIcon().has_value());
 }
+
+/**
+ * @tc.name: UpdateMenuProperty001
+ * @tc.desc: Test UpdateMenuProperty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestNg, UpdateMenuProperty, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init env and create MenuItem.
+     * @tc.expected: step1. Item created, props set.
+     */
+    InitMenuItemTestNg();
+    MenuItemModelNG menuItemModelInstance;
+    MenuItemProperties itemOption;
+    itemOption.content = "content";
+    itemOption.labelInfo = "label";
+    menuItemModelInstance.Create(itemOption);
+
+    /**
+     * @tc.steps: step2. Get frame node.
+     * @tc.expected: step2. Node and layout non-null.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<MenuItemLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto pattern = frameNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step3. Reset icon, trigger config change, update props.
+     * @tc.expected: step3. Icon restored.
+     */
+    layoutProperty->ResetStartIcon();
+    g_isConfigChangePerform = true;
+    menuItemModelInstance.UpdateMenuProperty(frameNode, itemOption);
+    EXPECT_TRUE(layoutProperty->GetStartIcon().has_value());
+
+    /**
+     * @tc.steps: step4. Reset icon, no config change, update props.
+     * @tc.expected: step4. Icon restored.
+     */
+    g_isConfigChangePerform = false;
+    layoutProperty->ResetStartIcon();
+    menuItemModelInstance.UpdateMenuProperty(frameNode, itemOption);
+    EXPECT_TRUE(layoutProperty->GetStartIcon().has_value());
+}
+
+/**
+ * @tc.name: UpdateMenuProperty002
+ * @tc.desc: Test UpdateMenuProperty hasResources.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestNg, UpdateMenuProperty002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init env and create MenuItem.
+     * @tc.expected: step1. Item created.
+     */
+    InitMenuItemTestNg();
+    MenuItemModelNG menuItemModelInstance;
+    MenuItemProperties itemOption;
+    itemOption.content = "content";
+    itemOption.labelInfo = "label";
+    menuItemModelInstance.Create(itemOption);
+
+    /**
+     * @tc.steps: step2. Get frame node.
+     * @tc.expected: step2. Node non-null.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<MenuItemLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto pattern = frameNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step3. Add resource, config change, update props.
+     * @tc.expected: step3. Resource added to manager.
+     */
+    std::string key = "menuItem";
+    auto resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    itemOption.AddResource(key, resObj, [](const RefPtr<ResourceObject>&, MenuItemProperties&) {});
+    g_isConfigChangePerform = true;
+    menuItemModelInstance.UpdateMenuProperty(frameNode, itemOption);
+    pattern->OnColorModeChange(1);
+    auto resMgr = pattern->resourceMgr_;
+    ASSERT_NE(resMgr, nullptr);
+    EXPECT_EQ(resMgr->resMap_.count(key), 1);
+
+    /**
+     * @tc.steps: step4. Reset icon, no config change, update props.
+     * @tc.expected: step4. Icon restored.
+     */
+    g_isConfigChangePerform = false;
+    layoutProperty->ResetStartIcon();
+    menuItemModelInstance.UpdateMenuProperty(frameNode, itemOption);
+    EXPECT_TRUE(layoutProperty->GetStartIcon().has_value());
+
+    /**
+     * @tc.steps: step5. Reset icon, config change, update props, then release node.
+     * @tc.expected: step5. Icon restored, no crash.
+     */
+    g_isConfigChangePerform = true;
+    layoutProperty->ResetStartIcon();
+    menuItemModelInstance.UpdateMenuProperty(frameNode, itemOption);
+    frameNode.Reset();
+    pattern->OnColorModeChange(1);
+    EXPECT_TRUE(layoutProperty->GetStartIcon().has_value());
+
+    g_isConfigChangePerform = false;
+}
 } // namespace OHOS::Ace::NG
