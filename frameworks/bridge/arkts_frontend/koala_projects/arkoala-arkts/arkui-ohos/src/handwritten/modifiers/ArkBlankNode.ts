@@ -20,7 +20,14 @@ import { BlankAttribute, ArkBlankPeer, ResourceColor } from '../../component';
 export class ArkBlankNode extends ArkBaseNode implements BlankAttribute {
 
     constructParam(...param: Object[]): this {
-        InteropNativeModule._NativeLog('blank constructParam enter');
+        if (param.length > 1) {
+            throw new Error('more than 1 parameters');
+        }
+        let min_casted: number | string | undefined = undefined;
+        if (param.length === 1) {
+            min_casted = param[0] as (number | string | undefined);
+        }
+        this.getPeer()?.setBlankOptionsAttribute(min_casted);
         return this;
     }
 
@@ -29,6 +36,8 @@ export class ArkBlankNode extends ArkBaseNode implements BlankAttribute {
     }
 
     color(value: ResourceColor | undefined): this {
+        const value_casted = value as (ResourceColor | undefined);
+        this.getPeer()?.colorAttribute(value_casted);
         return this;
     }
 }
