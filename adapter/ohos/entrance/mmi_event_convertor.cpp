@@ -472,6 +472,7 @@ void ConvertMouseEvent(
         }
     }
     events.time = TimeStamp(std::chrono::microseconds(pointerEvent->GetActionTime()));
+    events.pressedTime = TimeStamp(std::chrono::microseconds(item.GetDownTime()));
     events.pointerEvent = pointerEvent;
     events.sourceTool = GetSourceTool(item.GetToolType());
     UpdateMouseEventForPen(item, events);
