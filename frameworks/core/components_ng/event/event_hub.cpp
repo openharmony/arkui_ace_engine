@@ -831,12 +831,12 @@ void EventHub::SetOnDragEnter(OnDragFunc&& onDragEnter)
     onDragEnter_ = std::move(onDragEnter);
 }
 
-void EventHub::SetCustomerOnDragSpringLoading(OnDrapDropSpringLoadingFunc&& onDragSpringLoading)
+void EventHub::SetCustomerOnDragSpringLoading(OnDragDropSpringLoadingFunc&& onDragSpringLoading)
 {
     customerOnDragSpringLoading_ = std::move(onDragSpringLoading);
 }
 
-const OnDrapDropSpringLoadingFunc& EventHub::GetCustomerOnDragSpringLoading() const
+const OnDragDropSpringLoadingFunc& EventHub::GetCustomerOnDragSpringLoading() const
 {
     return customerOnDragSpringLoading_;
 }
