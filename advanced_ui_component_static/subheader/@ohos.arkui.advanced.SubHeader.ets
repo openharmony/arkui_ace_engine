@@ -33,16 +33,16 @@ import common from '@ohos.app.ability.common';
 import HashMap from '@ohos.util.HashMap';
 import { KeyCode } from '@ohos.multimodalInput.keyCode';
 
-const INDEX_ZERO: number = 0;
-const INDEX_ONE: number = 1;
-const INDEX_TWO: number = 2;
+const INDEX_ZERO: int = 0;
+const INDEX_ONE: int = 1;
+const INDEX_TWO: int = 2;
 // 字体字重缩放等数值
 const DEFAULT_FONT_SCALE: number = 1;
 // 行数及整体高度
 const SINGLE_LINE_NUM: number = 1;
 const DOUBLE_LINE_NUM: number = 2;
 // 资源数值
-const RESOURCE_TYPE_SYMBOL: number = 40000;
+const RESOURCE_TYPE_SYMBOL: int = 40000;
 // 左边尺寸常量
 const LEFT_ICON_SIZE: ResourceStr = '16vp';
 const LEFT_ICON_SIZE_NUMBER: number = 16;

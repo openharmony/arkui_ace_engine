@@ -55,7 +55,7 @@ const TEXT_EDITABLE_DIALOG = '18.3fp';
 const IMAGE_SIZE = '64vp';
 const MAX_DIALOG = '256vp';
 const MIN_DIALOG = '216vp';
-const RESOURCE_TYPE_SYMBOL: number = 40000;
+const RESOURCE_TYPE_SYMBOL = 40000;
 class ButtonGestureModifier implements GestureModifier {
   public static readonly longPressTime: number = 500;
   public static readonly minFontSize: number = 1.75;
