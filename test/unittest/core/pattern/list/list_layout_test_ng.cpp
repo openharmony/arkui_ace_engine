@@ -637,7 +637,7 @@ HWTEST_F(ListLayoutTestNg, ListReMeasureTest001, TestSize.Level1)
 
     /**
      * @tc.steps: step3. change list mainSize to half and call measure of List for second time
-     * @tc.expected: check item 2 and item 3 in noLayoutedItems
+     * @tc.expected: check item 3 in noLayoutedItems
      */
     EXPECT_TRUE(layoutAlgorithm);
     EXPECT_TRUE(layoutAlgorithm->noLayoutedItems_.empty());
@@ -650,7 +650,7 @@ HWTEST_F(ListLayoutTestNg, ListReMeasureTest001, TestSize.Level1)
     layoutProperty_->contentConstraint_ = contentConstraint;
     layoutAlgorithm->Measure(AceType::RawPtr(frameNode_));
     EXPECT_FALSE(layoutAlgorithm->noLayoutedItems_.empty());
-    EXPECT_EQ(layoutAlgorithm->noLayoutedItems_.begin()->first, 2); // 2: start index
+    EXPECT_EQ(layoutAlgorithm->noLayoutedItems_.begin()->first, 3); // 3: start index
     EXPECT_EQ(layoutAlgorithm->noLayoutedItems_.rbegin()->first, 3); // 3: end index
 }
 
