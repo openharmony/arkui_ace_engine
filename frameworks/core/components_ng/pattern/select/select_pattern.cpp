@@ -1525,10 +1525,7 @@ void SelectPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
     json->PutExtAttr("selected", std::to_string(selected_).c_str(), filter);
     ToJsonArrowAndText(json, filter);
     json->PutExtAttr("selectedOptionBgColor", selectedBgColor_->ColorToString().c_str(), filter);
-    json->PutExtAttr("selectedOptionFont", InspectorGetSelectedFont().c_str(), filter);
-    json->PutExtAttr("selectedOptionFontColor",
-        selectedFont_.FontColor.value_or(Color::BLACK).ColorToString().c_str(), filter);
-
+    ToJsonSelectedOptionFontAndColor(json, filter);
     if (options_.empty()) {
         json->PutExtAttr("optionBgColor", "", filter);
         json->PutExtAttr("optionFont", "", filter);
@@ -1559,6 +1556,31 @@ void SelectPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
     json->PutExtAttr("optionHeight", optionHeight.c_str(), filter);
     ToJsonMenuBackgroundStyle(json, filter);
     ToJsonDivider(json, filter);
+}
+
+void SelectPattern::ToJsonSelectedOptionFontAndColor(std::unique_ptr<JsonValue>& json,
+    const InspectorFilter& filter) const
+{
+    if (filter.IsFastFilter()) {
+        return;
+    }
+    if (textSelectOptionApply_) {
+        if (options_.empty() || options_.size() <= static_cast<size_t>(selected_)) {
+            json->PutExtAttr("selectedOptionFont", InspectorGetSelectedFont().c_str(), filter);
+            json->PutExtAttr("selectedOptionFontColor",
+                selectedFont_.FontColor.value_or(Color::BLACK).ColorToString().c_str(), filter);
+            return;
+        }
+        CHECK_NULL_VOID(options_[selected_]);
+        auto optionPattern = options_[selected_]->GetPattern<MenuItemPattern>();
+        CHECK_NULL_VOID(optionPattern);
+        json->PutExtAttr("selectedOptionFont", optionPattern->InspectorGetFont().c_str(), filter);
+        json->PutExtAttr("selectedOptionFontColor", optionPattern->GetFontColor().ColorToString().c_str(), filter);
+        return;
+    }
+    json->PutExtAttr("selectedOptionFont", InspectorGetSelectedFont().c_str(), filter);
+    json->PutExtAttr(
+        "selectedOptionFontColor", selectedFont_.FontColor.value_or(Color::BLACK).ColorToString().c_str(), filter);
 }
 
 void SelectPattern::ToJsonArrowAndText(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const

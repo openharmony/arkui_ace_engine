@@ -1387,4 +1387,116 @@ HWTEST_F(SelectPatternTestControlSizeNg, SelectPatternUpdateComponentColorTest00
     EXPECT_EQ(renderContext->GetBackgroundColor().value(), testColor);
     AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
 }
+
+/**
+ * @tc.name: ToJsonSelectedOptionFontAndColor001
+ * @tc.desc: Test SelectPattern::ToJsonSelectedOptionFontAndColor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestControlSizeNg, ToJsonSelectedOptionFontAndColor001, TestSize.Level1)
+{
+    const std::string fontKey = "selectedOptionFont";
+    const std::string fontColorKey = "selectedOptionFontColor";
+
+    auto select = AceType::MakeRefPtr<FrameNode>(V2::SELECT_ETS_TAG, 1, AceType::MakeRefPtr<SelectPattern>());
+    ASSERT_NE(select, nullptr);
+    EXPECT_TRUE(select->GetTag() == V2::SELECT_ETS_TAG);
+    auto pattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetSelectedOptionFontFamily(FONT_FAMILY_VALUE);
+    pattern->frameNode_ = AceType::WeakClaim(AceType::RawPtr(select));
+    pattern->text_ = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_EQ(pattern->textSelectOptionApply_, nullptr);
+    EXPECT_TRUE(pattern->options_.empty());
+
+    /**
+     * @tc.steps: step1. Test pattern->textSelectOptionApply_ is nullptr.
+     * @tc.expected: set value.
+     */
+    InspectorFilter filter;
+    EXPECT_FALSE(filter.IsFastFilter());
+    auto jsonValue = JsonUtil::Create(true);
+    ASSERT_NE(jsonValue, nullptr);
+    pattern->ToJsonSelectedOptionFontAndColor(jsonValue, filter);
+    EXPECT_TRUE(jsonValue->Contains(fontKey));
+    EXPECT_TRUE(jsonValue->Contains(fontColorKey));
+
+    /**
+     * @tc.steps: step2. Test filter is IsFastFilter.
+     * @tc.expected: do not set value.
+     */
+    filter.filterExt.clear();
+    filter.filterFixed = 1;
+    EXPECT_TRUE(filter.IsFastFilter());
+    jsonValue = JsonUtil::Create(true);
+    ASSERT_NE(jsonValue, nullptr);
+    pattern->ToJsonSelectedOptionFontAndColor(jsonValue, filter);
+    EXPECT_FALSE(jsonValue->Contains(fontKey));
+    EXPECT_FALSE(jsonValue->Contains(fontColorKey));
+}
+
+/**
+ * @tc.name: ToJsonSelectedOptionFontAndColor002
+ * @tc.desc: Test SelectPattern::ToJsonSelectedOptionFontAndColor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectPatternTestControlSizeNg, ToJsonSelectedOptionFontAndColor002, TestSize.Level1)
+{
+    const std::string fontKey = "selectedOptionFont";
+    const std::string fontColorKey = "selectedOptionFontColor";
+
+    auto select = AceType::MakeRefPtr<FrameNode>(V2::SELECT_ETS_TAG, 1, AceType::MakeRefPtr<SelectPattern>());
+    ASSERT_NE(select, nullptr);
+    EXPECT_TRUE(select->GetTag() == V2::SELECT_ETS_TAG);
+    auto pattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetSelectedOptionFontFamily(FONT_FAMILY_VALUE);
+    pattern->frameNode_ = AceType::WeakClaim(AceType::RawPtr(select));
+    pattern->text_ = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_EQ(pattern->textSelectOptionApply_, nullptr);
+    EXPECT_TRUE(pattern->options_.empty());
+
+    /**
+     * @tc.steps: step1. Test pattern->options_ is empty.
+     * @tc.expected: set value.
+     */
+    InspectorFilter filter;
+    pattern->textSelectOptionApply_ = [](WeakPtr<FrameNode> weakNode) {};
+    auto jsonValue = JsonUtil::Create(true);
+    ASSERT_NE(jsonValue, nullptr);
+    pattern->ToJsonSelectedOptionFontAndColor(jsonValue, filter);
+    EXPECT_TRUE(jsonValue->Contains(fontKey));
+    EXPECT_TRUE(jsonValue->Contains(fontColorKey));
+
+    /**
+     * @tc.steps: step2. Test pattern->options_ is not empty.
+     * @tc.expected: set value.
+     */
+    auto option = FrameNode::GetOrCreateFrameNode(V2::OPTION_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<MenuItemPattern>(true, 0); });
+    ASSERT_NE(option, nullptr);
+    pattern->options_.push_back(option);
+    pattern->menuWrapper_ = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+
+    jsonValue = JsonUtil::Create(true);
+    ASSERT_NE(jsonValue, nullptr);
+    pattern->selected_ = pattern->options_.size() + 1; // large then pattern->options_.size
+    pattern->ToJsonSelectedOptionFontAndColor(jsonValue, filter);
+    EXPECT_TRUE(jsonValue->Contains(fontKey));
+    EXPECT_TRUE(jsonValue->Contains(fontColorKey));
+
+    /**
+     * @tc.steps: step3. Test pattern->options_ is not empty.
+     * @tc.expected: set value.
+     */
+    jsonValue = JsonUtil::Create(true);
+    ASSERT_NE(jsonValue, nullptr);
+    pattern->selected_ = 0;
+    pattern->ToJsonSelectedOptionFontAndColor(jsonValue, filter);
+    EXPECT_TRUE(jsonValue->Contains(fontKey));
+    EXPECT_TRUE(jsonValue->Contains(fontColorKey));
+}
 } // namespace OHOS::Ace::NG
