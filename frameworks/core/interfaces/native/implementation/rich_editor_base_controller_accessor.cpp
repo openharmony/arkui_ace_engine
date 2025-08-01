@@ -185,7 +185,7 @@ void SetSelectionImpl(Ark_RichEditorBaseController peer,
     int32_t start = Converter::Convert<int32_t>(*selectionStart);
     int32_t end = Converter::Convert<int32_t>(*selectionEnd);
     auto optOptions = Converter::OptConvert<SelectionOptions>(*options);
-    peer->SetSelection(start, end, optOptions, start < end);
+    peer->SetSelection(start, end, optOptions);
 }
 Ark_Boolean IsEditingImpl(Ark_RichEditorBaseController peer)
 {
