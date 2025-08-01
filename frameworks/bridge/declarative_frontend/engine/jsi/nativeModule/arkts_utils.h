@@ -332,6 +332,8 @@ public:
         const EcmaVM* vm, const std::vector<NG::MenuItemParam>& systemMenuItems);
     static Local<panda::ObjectRef> CreateJsTextMenuItem(const EcmaVM* vm, const NG::MenuItemParam& menuItemParam);
     static Local<panda::ObjectRef> CreateJsTextMenuId(const EcmaVM* vm, const std::string& id);
+    static void ParseMenuItemsSymbolId(
+        const EcmaVM* vm, const Local<JSValueRef>& jsStartIcon, NG::MenuOptionsParam& menuOptionsParam);
     static void WrapMenuParams(const EcmaVM* vm, std::vector<NG::MenuOptionsParam>& menuParams,
         const Local<JSValueRef>& menuItems, bool enableLabelInfo);
     static void ParseOnMenuItemClick(const EcmaVM* vm, FrameNode* frameNode,

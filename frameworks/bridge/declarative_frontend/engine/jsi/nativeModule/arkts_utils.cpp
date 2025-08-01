@@ -29,6 +29,7 @@
 #include "frameworks/core/common/card_scope.h"
 #include "frameworks/core/common/resource/resource_configuration.h"
 #include "frameworks/core/common/resource/resource_parse_utils.h"
+#include "frameworks/core/components/text_overlay/text_overlay_theme.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -44,6 +45,88 @@ std::string GetModuleNameFromContainer()
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, "");
     return container->GetModuleName();
+}
+
+enum class MenuItemType {
+    COPY,
+    PASTE,
+    CUT,
+    SELECT_ALL,
+    UNKNOWN,
+    CAMERA_INPUT,
+    AI_WRITER,
+    TRANSLATE,
+    SHARE,
+    SEARCH,
+    ASK_CELIA
+};
+
+MenuItemType StringToMenuItemType(std::string_view id)
+{
+    static const std::unordered_map<std::string_view, MenuItemType> keyMenuItemMap = {
+        { "OH_DEFAULT_COPY", MenuItemType::COPY },
+        { "OH_DEFAULT_PASTE", MenuItemType::PASTE },
+        { "OH_DEFAULT_CUT", MenuItemType::CUT },
+        { "OH_DEFAULT_SELECT_ALL", MenuItemType::SELECT_ALL },
+        { "OH_DEFAULT_CAMERA_INPUT", MenuItemType::CAMERA_INPUT },
+        { "OH_DEFAULT_AI_WRITE", MenuItemType::AI_WRITER },
+        { "OH_DEFAULT_TRANSLATE", MenuItemType::TRANSLATE },
+        { "OH_DEFAULT_SHARE", MenuItemType::SHARE },
+        { "OH_DEFAULT_SEARCH", MenuItemType::SEARCH },
+        { "OH_DEFAULT_ASK_CELIA", MenuItemType::ASK_CELIA },
+    };
+
+    auto item = keyMenuItemMap.find(id);
+    return item != keyMenuItemMap.end() ? item->second : MenuItemType::UNKNOWN;
+}
+
+void UpdateInfoById(NG::MenuOptionsParam& menuOptionsParam, std::string_view id)
+{
+    auto opType = StringToMenuItemType(id);
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<TextOverlayTheme>();
+    CHECK_NULL_VOID(theme);
+    switch (opType) {
+        case MenuItemType::COPY:
+            menuOptionsParam.labelInfo = theme->GetCopyLabelInfo();
+            menuOptionsParam.symbolId = theme->GetCopySymbolId();
+            break;
+        case MenuItemType::PASTE:
+            menuOptionsParam.labelInfo = theme->GetPasteLabelInfo();
+            menuOptionsParam.symbolId = theme->GetPasteSymbolId();
+            break;
+        case MenuItemType::CUT:
+            menuOptionsParam.labelInfo = theme->GetCutLabelInfo();
+            menuOptionsParam.symbolId = theme->GetCutSymbolId();
+            break;
+        case MenuItemType::SELECT_ALL:
+            menuOptionsParam.labelInfo = theme->GetSelectAllLabelInfo();
+            menuOptionsParam.symbolId = theme->GetCopyAllSymbolId();
+            break;
+        case MenuItemType::CAMERA_INPUT:
+            menuOptionsParam.symbolId = theme->GetCameraInputSymbolId();
+            break;
+        case MenuItemType::AI_WRITER:
+            menuOptionsParam.symbolId = theme->GetAIWriteSymbolId();
+            break;
+        case MenuItemType::TRANSLATE:
+            menuOptionsParam.symbolId = theme->GetTranslateSymbolId();
+            break;
+        case MenuItemType::SHARE:
+            menuOptionsParam.symbolId = theme->GetShareSymbolId();
+            break;
+        case MenuItemType::SEARCH:
+            menuOptionsParam.symbolId = theme->GetSearchSymbolId();
+            break;
+        case MenuItemType::ASK_CELIA:
+            menuOptionsParam.symbolId = theme->GetAskCeliaSymbolId();
+            break;
+        default:
+            menuOptionsParam.labelInfo = menuOptionsParam.labelInfo.value_or("");
+            menuOptionsParam.symbolId = menuOptionsParam.symbolId.value_or(0);
+            break;
+    }
 }
 }
 constexpr int NUM_0 = 0;
@@ -2658,7 +2741,7 @@ void ArkTSUtils::ParseOnCreateMenu(const EcmaVM* vm, FrameNode* frameNode, const
         if (!menuItems->IsArray(vm)) {
             return menuParams;
         }
-        WrapMenuParams(vm, menuParams, menuItems, false);
+        WrapMenuParams(vm, menuParams, menuItems, true);
         return menuParams;
     };
     onCreateMenuCallback = jsCallback;
@@ -2691,6 +2774,25 @@ void ArkTSUtils::ParseOnPrepareMenu(const EcmaVM* vm, FrameNode* frameNode,
     onPrepareMenuCallback = jsCallback;
 }
 
+void ArkTSUtils::ParseMenuItemsSymbolId(
+    const EcmaVM* vm, const Local<JSValueRef>& jsStartIcon, NG::MenuOptionsParam& menuOptionsParam)
+{
+    if (StringToMenuItemType(menuOptionsParam.id) == MenuItemType::UNKNOWN) {
+        uint32_t symbolId = 0;
+        RefPtr<ResourceObject> resourceObject;
+        if (jsStartIcon->IsNumber()) {
+            symbolId = jsStartIcon->ToNumber(vm)->Value();
+            menuOptionsParam.symbolId = symbolId;
+            return;
+        }
+        if (ParseJsSymbolId(vm, jsStartIcon, symbolId, resourceObject)) {
+            menuOptionsParam.symbolId = symbolId;
+        }
+    } else {
+        UpdateInfoById(menuOptionsParam, menuOptionsParam.id);
+    }
+}
+
 void ArkTSUtils::WrapMenuParams(const EcmaVM* vm, std::vector<NG::MenuOptionsParam>& menuParams,
     const Local<JSValueRef>& menuItems, bool enableLabelInfo)
 {
@@ -2711,6 +2813,7 @@ void ArkTSUtils::WrapMenuParams(const EcmaVM* vm, std::vector<NG::MenuOptionsPar
         std::string icon;
         ParseJsMedia(vm, jsStartIcon, icon);
         menuOptionsParam.icon = icon;
+        ParseMenuItemsSymbolId(vm, jsStartIcon, menuOptionsParam);
         auto jsTextMenuId = menuItemObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "id"));
         std::string id;
         if (jsTextMenuId->IsObject(vm)) {
@@ -2725,6 +2828,7 @@ void ArkTSUtils::WrapMenuParams(const EcmaVM* vm, std::vector<NG::MenuOptionsPar
             ParseJsString(vm, jsLabelInfo, labelInfo);
             menuOptionsParam.labelInfo = labelInfo;
         }
+        UpdateInfoById(menuOptionsParam, menuOptionsParam.id);
         menuParams.emplace_back(menuOptionsParam);
     }
 }
