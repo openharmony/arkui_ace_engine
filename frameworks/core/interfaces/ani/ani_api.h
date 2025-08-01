@@ -64,6 +64,9 @@ typedef _ArkUICanvasRenderer* ArkUICanvasRenderer;
 typedef _ArkUIImageData* ArkUIImageData;
 typedef _ArkUIImageBitmap* ArkUIImageBitmap;
 typedef _ArkUIDrawingRenderingContext* ArkUIDrawingRenderingContext;
+typedef void* ArkUIAniICurve;
+typedef int32_t ArkUIAniCurve;
+typedef const char* ArkUIAniString;
 typedef struct WebviewControllerInfo {
     std::function<int32_t()> getWebIdFunc = nullptr;
     std::function<void(int32_t)> completeWindowNewFunc = nullptr;
@@ -72,6 +75,12 @@ typedef struct WebviewControllerInfo {
     std::function<void(int32_t)> setWebIdFunc = nullptr;
     std::function<void(const std::string&)> setHapPathFunc = nullptr;
 } WebviewControllerInfo;
+typedef ani_object (*ArkUIAniArithmeticAddFunction)(ani_env*, ani_object, ani_object);
+typedef ani_object (*ArkUIAniArithmeticMinusFunction)(ani_env*, ani_object, ani_object);
+typedef ani_object (*ArkUIAniArithmeticMultiplyFunction)(ani_env*, ani_object, float);
+typedef bool (*ArkUIAniArithmeticEqualFunction)(ani_env*, ani_object, ani_object);
+typedef ani_object (*ArkUIAniCreateObjectFunction)(ani_env*, ani_object);
+typedef void (*ArkUIAniDeleteObjectFunction)(ani_env*, ani_object);
 
 class SharedPointerWrapper {
 public:
@@ -94,6 +103,7 @@ private:
 
 namespace OHOS::Ace::Ani {
 class DragAction;
+class AniGlobalReference;
 }
 enum class ArkUIDragStatus { STARTED, ENDED };
 enum class ArkUIDragResult { DRAG_SUCCESS, DRAG_FAIL, DRAG_CANCEL };
@@ -103,6 +113,16 @@ enum ArkUISnapshotRegionMode {
     LOCALIZED,
     NO_REGION
 };
+enum class ArkUIAniRouteType { NONE, PUSH, POP };
+enum class ArkUIAniSlideEffect { NONE, LEFT, RIGHT, TOP, BOTTOM, START, END };
+
+typedef struct ArkUIAniNumberString {
+    int32_t selector = -1;
+    union {
+        double value0;
+        const char* value1;
+    };
+} ArkUIAniNumberString;
 
 struct ArkUIDragInfo {
     void* pixelMap;
@@ -200,6 +220,50 @@ struct ArkUIComponentSnapshotAsync {
     std::shared_ptr<void> pixelMap;
     std::function<void(std::shared_ptr<ArkUIComponentSnapshotAsync>)> callBackJsFunction;
 };
+
+typedef struct ArkUIAniTranslateOptions {
+    ArkUIAniNumberString x;
+    ArkUIAniNumberString y;
+    ArkUIAniNumberString z;
+} ArkUIAniTranslateOptions;
+
+typedef struct ArkUIAniScaleOptions {
+    double x = 1.0;
+    double y = 1.0;
+    double z = 1.0;
+    ArkUIAniNumberString centerX;
+    ArkUIAniNumberString centerY;
+} ArkUIAniScaleOptions;
+
+typedef struct ArkUIAniAnimatableArithmeticObject {
+    ani_env* env = nullptr;
+    ani_object property = nullptr;
+} ArkUIAniAnimatableArithmeticObject;
+
+typedef struct ArkUIAniAnimatableArithmeticFuncs {
+    ArkUIAniArithmeticAddFunction addFunc;
+    ArkUIAniArithmeticMinusFunction minusFunc;
+    ArkUIAniArithmeticMultiplyFunction multiplyFunc;
+    ArkUIAniArithmeticEqualFunction equalFunc;
+    ArkUIAniCreateObjectFunction createFunc;
+    ArkUIAniDeleteObjectFunction deleteFunc;
+} ArkUIAniAnimatableArithmeticFuncs;
+
+typedef struct ArkUIAniUnionCurveStringICurve {
+    int32_t selector = -1;
+    union {
+        ArkUIAniCurve value0;
+        ArkUIAniString value1;
+        ArkUIAniICurve value2;
+    };
+} ArkUIAniUnionCurveStringICurve;
+
+typedef struct ArkUIAniPageTransitionOption {
+    ArkUIAniRouteType routeType = ArkUIAniRouteType::NONE;
+    int32_t duration = 0;
+    int32_t delay = 0;
+    ArkUIAniUnionCurveStringICurve curve;
+} ArkUIAniPageTransitionOption;
 
 struct ArkUIXComponentParams {
     std::string id;
@@ -352,19 +416,22 @@ struct ArkUIAniComponentSnapshotModifier {
         ArkUINodeHandle node, const ArkUIComponentSnapshotAsync& asyncCtx, const ArkUISnapshotParam& param);
 };
 struct ArkUIAniAnimationModifier {
-    bool (*hasAnimatableProperty)(ani_env* env, ArkUINodeHandle node, ani_string name);
-    void (*updateAnimatableProperty)(
-        ani_env* env, ArkUINodeHandle node, ani_string propertyName, ani_object property);
-    void (*createAnimatableProperty)(
-        ani_env* env, ArkUINodeHandle node, ani_string propertyName, ani_object property, ani_fn_object callback);
-    void (*createPageTransitionEnter)(ani_env* env, ani_object options);
-    void (*pageTransitionSetOnEnter)(ani_env* env, ani_fn_object callback);
-    void (*createPageTransitionExit)(ani_env* env, ani_object options);
-    void (*pageTransitionSetOnExit)(ani_env* env, ani_fn_object callback);
-    void (*pageTransitionSetSlide)(ani_env* env, ani_object slide);
-    void (*pageTransitionSetTranslate)(ani_env* env, ani_object options);
-    void (*pageTransitionSetScale)(ani_env* env, ani_object options);
-    void (*pageTransitionSetOpacity)(ani_env* env, ani_double opacity);
+    bool (*hasAnimatableProperty)(ArkUINodeHandle node, const char* name);
+    void (*updateAnimatableFloat)(ArkUINodeHandle node, const char* propertyName, float property);
+    void (*createAnimatableFloat)(ArkUINodeHandle node, const char* propertyName, float property, void* callback);
+    void (*updateAnimatableArithmetic)(
+        ArkUINodeHandle node, const char* propertyName, ArkUIAniAnimatableArithmeticObject property);
+    void (*createAnimatableArithmetic)(
+        ArkUINodeHandle node, const char* propertyName, ArkUIAniAnimatableArithmeticObject property, void* callback);
+    void (*initAnimatableArithmeticClass)(const ArkUIAniAnimatableArithmeticFuncs* funcs);
+    void (*createPageTransitionEnter)(const ArkUIAniPageTransitionOption* options);
+    void (*pageTransitionSetOnEnter)(void* callback);
+    void (*createPageTransitionExit)(const ArkUIAniPageTransitionOption* options);
+    void (*pageTransitionSetOnExit)(void* callback);
+    void (*pageTransitionSetSlide)(ArkUIAniSlideEffect slide);
+    void (*pageTransitionSetTranslate)(const ArkUIAniTranslateOptions* options);
+    void (*pageTransitionSetScale)(const ArkUIAniScaleOptions* options);
+    void (*pageTransitionSetOpacity)(float opacity);
 };
 struct ArkUIAniInteropModifier {
     ani_long (*createViewStackProcessor)();
