@@ -825,10 +825,10 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
     }
     if (SystemProperties::GetContainerDeleteFlag()) {
         if (isNeedCallbackAreaChange_) {
-            HandleOnAreaChangeEvent(nanoTimestamp);
-            HandleVisibleAreaChangeEvent(nanoTimestamp);
             isNeedCallbackAreaChange_ = false;
             RenderContext::SetNeedCallbackNodeChange(true);
+            HandleOnAreaChangeEvent(nanoTimestamp);
+            HandleVisibleAreaChangeEvent(nanoTimestamp);
         }
     } else {
         HandleOnAreaChangeEvent(nanoTimestamp);
