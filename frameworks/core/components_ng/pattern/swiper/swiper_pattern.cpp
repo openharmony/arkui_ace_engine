@@ -2075,7 +2075,6 @@ void SwiperPattern::ShowNext(bool needCheckWillScroll)
     StopAutoPlay();
     StopSpringAnimationAndFlushImmediately();
     StopFadeAnimation();
-    StopIndicatorAnimation();
     if (propertyAnimationIsRunning_ || translateAnimationIsRunning_) {
         isUserFinish_ = false;
         FinishAnimation();
@@ -2090,6 +2089,7 @@ void SwiperPattern::ShowNext(bool needCheckWillScroll)
             return;
         }
     }
+    StopIndicatorAnimation();
 
     moveDirection_ = true;
 
@@ -2134,8 +2134,6 @@ void SwiperPattern::ShowPrevious(bool needCheckWillScroll)
     StopAutoPlay();
     StopSpringAnimationAndFlushImmediately();
     StopFadeAnimation();
-    StopIndicatorAnimation();
-
     if (propertyAnimationIsRunning_ || translateAnimationIsRunning_) {
         isUserFinish_ = false;
         FinishAnimation();
@@ -2150,6 +2148,7 @@ void SwiperPattern::ShowPrevious(bool needCheckWillScroll)
             return;
         }
     }
+    StopIndicatorAnimation();
 
     moveDirection_ = false;
 
