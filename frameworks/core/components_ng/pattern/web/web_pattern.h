@@ -836,8 +836,9 @@ public:
 
     RefPtr<AccessibilitySessionAdapter> GetAccessibilitySessionAdapter() override;
 
-    void RegisterSurfaceDensityCallback();
     void SetSurfaceDensity(double density);
+    void InitSurfaceDensityCallback(const RefPtr<PipelineContext> &context);
+    void UnInitSurfaceDensityCallback(const RefPtr<PipelineContext> &context);
 
     void InitRotationEventCallback();
     void UninitRotationEventCallback();
