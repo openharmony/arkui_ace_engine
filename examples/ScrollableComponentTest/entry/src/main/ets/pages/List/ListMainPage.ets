@@ -51,6 +51,8 @@ struct IndexPage {
     new TextList(17, 'OnWillStopDragging', 'pages/List/ListOnWillStopDragging/OnWillStopDragging'),
     new TextList(18, 'Table', 'pages/List/Table/TableDemo'),
     new TextList(19, 'Graduator', 'pages/List/Graduator/Graduator'),
+    new TextList(20, 'simulateSwiper', 'pages/List/simulateSwiper'),
+    new TextList(21, 'scrollToControlParent', 'pages/List/scrollToControlParent'),
   ]
   @State fontSize: Resource | undefined = undefined
   build() {
