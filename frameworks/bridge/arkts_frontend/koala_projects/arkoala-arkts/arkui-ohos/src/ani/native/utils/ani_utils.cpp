@@ -294,4 +294,19 @@ bool AniUtils::GetEnumItem([[maybe_unused]] ani_env* env, ani_size index, const 
     }
     return true;
 }
+
+bool AniUtils::GetOptionalDouble(ani_env* env, ani_ref value, double& result)
+{
+    CHECK_NULL_RETURN(env, false);
+    ani_boolean isUndefined;
+    if (env->Reference_IsUndefined(value, &isUndefined) != ANI_OK) {
+        return false;
+    }
+    ani_double aniResult;
+    if (env->Object_CallMethodByName_Double(static_cast<ani_object>(value), "unboxed", ":d", &aniResult) != ANI_OK) {
+        return false;
+    }
+    result = static_cast<double>(aniResult);
+    return true;
+}
 }

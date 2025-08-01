@@ -13,20 +13,14 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_ANI_ANI_UTILS_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_ANI_ANI_UTILS_H
-
-#include <string>
-#include <vector>
-
-#include "ani.h"
+#include "ani_animatable_arithmetic.h"
 
 namespace OHOS::Ace::NG {
-class AniUtils {
-public:
-    static std::string ANIStringToStdString(ani_env* env, ani_string aniStr);
-    static ani_object CreateDouble(ani_env* env, double value);
-};
+ArkUIAniArithmeticAddFunction AniAnimatableArithmetic::ADD_FUNC = nullptr;
+ArkUIAniArithmeticMinusFunction AniAnimatableArithmetic::MINUS_FUNC = nullptr;
+ArkUIAniArithmeticMultiplyFunction AniAnimatableArithmetic::MULTIPLY_FUNC = nullptr;
+ArkUIAniArithmeticEqualFunction AniAnimatableArithmetic::EQUAL_FUNC = nullptr;
+ArkUIAniCreateObjectFunction AniAnimatableArithmetic::CREATE_GLOBAL_REFERENCE_FUNC = nullptr;
+ArkUIAniDeleteObjectFunction AniAnimatableArithmetic::DELETE_GLOBAL_REFERENCE_FUNC = nullptr;
+bool AniAnimatableArithmetic::initialized_ = false;
 } // namespace OHOS::Ace::NG
-
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_ANI_ANI_UTILS_H
