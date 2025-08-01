@@ -47,7 +47,7 @@ uint32_t ClampUint32(uint32_t value)
 {
     return std::min(std::max(value, MIN_VALUE_U), MAX_CHANNEL_VALUE_U);
 }
-int32_t ClampInt32(int32_t value)
+uint32_t ClampInt32(int32_t value)
 {
     return std::min(std::max(value, MIN_VALUE), MAX_CHANNEL_VALUE);
 }
