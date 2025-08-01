@@ -72,6 +72,7 @@ public:
     template <typename... Params>
     void InvokeSync(Params&&... args) const
     {
+        APP_LOGE("InvokeSync %{public}p", callback_.callSync);
         if (callback_.callSync) {
             (*callback_.callSync)(GetVMContext(), callback_.resource.resourceId, std::forward<Params>(args)...);
         }

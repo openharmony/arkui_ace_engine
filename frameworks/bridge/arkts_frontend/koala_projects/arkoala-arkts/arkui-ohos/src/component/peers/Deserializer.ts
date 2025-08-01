@@ -12495,46 +12495,44 @@ export class Deserializer extends DeserializerBase {
         const displayY_result : number = (valueDeserializer.readNumber() as number)
         const windowX_result : number = (valueDeserializer.readNumber() as number)
         const windowY_result : number = (valueDeserializer.readNumber() as number)
-        const screenX_result : number = (valueDeserializer.readNumber() as number)
-        const screenY_result : number = (valueDeserializer.readNumber() as number)
         const x_result : number = (valueDeserializer.readNumber() as number)
         const y_result : number = (valueDeserializer.readNumber() as number)
-        const hand_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        const hand_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let hand_buf : InteractionHand | undefined
         if ((RuntimeType.UNDEFINED) != (hand_buf_runtimeType))
         {
             hand_buf = TypeChecker.InteractionHand_FromNumeric(valueDeserializer.readInt32())
         }
         const hand_result : InteractionHand | undefined = hand_buf
-        const pressedTime_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        const pressedTime_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let pressedTime_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (pressedTime_buf_runtimeType))
+        if ((pressedTime_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             pressedTime_buf = (valueDeserializer.readNumber() as number)
         }
         const pressedTime_result : number | undefined = pressedTime_buf
-        const pressure_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        const pressure_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let pressure_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (pressure_buf_runtimeType))
+        if ((pressure_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             pressure_buf = (valueDeserializer.readNumber() as number)
         }
         const pressure_result : number | undefined = pressure_buf
-        const width_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        const width_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let width_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (width_buf_runtimeType))
+        if ((width_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             width_buf = (valueDeserializer.readNumber() as number)
         }
         const width_result : number | undefined = width_buf
-        const height_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        const height_buf_runtimeType  = valueDeserializer.readInt8().toInt()
         let height_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (height_buf_runtimeType))
+        if ((height_buf_runtimeType) != (RuntimeType.UNDEFINED))
         {
             height_buf = (valueDeserializer.readNumber() as number)
         }
         const height_result : number | undefined = height_buf
-        let value : TouchObject = ({type: type_result, id: id_result, displayX: displayX_result, displayY: displayY_result, windowX: windowX_result, windowY: windowY_result, screenX: screenX_result, screenY: screenY_result, x: x_result, y: y_result, hand: hand_result, pressedTime: pressedTime_result, pressure: pressure_result, width: width_result, height: height_result} as TouchObject)
+        let value : TouchObject = ({type: type_result, id: id_result, displayX: displayX_result, displayY: displayY_result, windowX: windowX_result, windowY: windowY_result, x: x_result, y: y_result, hand: hand_result, pressedTime: pressedTime_result, pressure: pressure_result, width: width_result, height: height_result} as TouchObject)
         return value
     }
     readTouchResult(): TouchResult {
@@ -16727,8 +16725,9 @@ export class Deserializer extends DeserializerBase {
         const touchObject_result : TouchObject = valueDeserializer.readTouchObject()
         const size_result : number = (valueDeserializer.readNumber() as number)
         const force_result : number = (valueDeserializer.readNumber() as number)
-        const timestamp_result : int64 = valueDeserializer.readInt64()
-        let value : HistoricalPoint = ({touchObject: touchObject_result, size: size_result, force: force_result, timestamp: timestamp_result} as HistoricalPoint)
+        const timestamp_result : int64 = (valueDeserializer.readInt64() as int64)
+        let value : HistoricalPoint = ({touchObject: touchObject_result, size: size_result, force: force_result, 
+        timestamp: timestamp_result} as HistoricalPoint)
         return value
     }
     readHoverEvent(): HoverEvent {

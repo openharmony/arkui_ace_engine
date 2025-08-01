@@ -671,61 +671,28 @@ void AssignArkValue(Ark_TouchObject& dst, const OHOS::Ace::TouchLocationInfo& sr
     Offset localOffset = src.GetLocalLocation();
     Offset screenOffset = src.GetScreenLocation();
 
-    dst.displayX.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
-    dst.displayX.f32 = static_cast<float>(
+    dst.displayX = ArkValue<Ark_Number>(
         PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetX()));
-    dst.displayY.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
-    dst.displayY.f32 = static_cast<float>(
+    dst.displayY = ArkValue<Ark_Number>(
         PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY()));
 
-    dst.id.tag = Ark_Tag::INTEROP_TAG_INT32;
-    dst.id.i32 = static_cast<int32_t>(src.GetFingerId());
+    dst.id = ArkValue<Ark_Number>(src.GetFingerId());
 
-    dst.screenX.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
-    dst.screenX.f32 = static_cast<float>(
-        PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
-    dst.screenY.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
-    dst.screenY.f32 = static_cast<float>(
-        PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY()));
+    dst.type = ArkValue<Ark_TouchType>(src.GetTouchType());
 
-    dst.type = static_cast<Ark_TouchType>(src.GetTouchType());
+    dst.windowX = ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
+    dst.windowY = ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY()));
 
-    dst.windowX.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
-    dst.windowX.f32 = static_cast<float>(
-        PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
-    dst.windowY.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
-    dst.windowY.f32 = static_cast<float>(
-        PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY()));
-
-    dst.x.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
-    dst.x.f32 = static_cast<float>(
-        PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX()));
-    dst.y.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
-    dst.y.f32 = static_cast<float>(
-        PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY()));
+    dst.x = ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX()));
+    dst.y = ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY()));
     
-    dst.pressedTime.tag = Ark_Tag::INTEROP_TAG_OBJECT;
-    dst.pressedTime.value.tag = Ark_Tag::INTEROP_TAG_INT32;
-    dst.pressedTime.value.i32 = static_cast<int32_t>(
-        src.GetPressedTime().time_since_epoch().count());
+    dst.pressedTime = ArkValue<Opt_Number>(src.GetPressedTime().time_since_epoch().count());
+    dst.pressure = ArkValue<Opt_Number>(PipelineBase::Px2VpWithCurrentDensity(src.GetForce()));
 
-    dst.pressure.tag = Ark_Tag::INTEROP_TAG_OBJECT;
-    dst.pressure.value.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
-    dst.pressure.value.f32 = static_cast<float>(
-        PipelineBase::Px2VpWithCurrentDensity(src.GetForce()));
+    dst.width = ArkValue<Opt_Number>(PipelineBase::Px2VpWithCurrentDensity(src.GetWidth()));
+    dst.height = ArkValue<Opt_Number>(PipelineBase::Px2VpWithCurrentDensity(src.GetHeight()));
 
-    dst.width.tag = Ark_Tag::INTEROP_TAG_OBJECT;
-    dst.width.value.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
-    dst.width.value.f32 = static_cast<float>(
-        PipelineBase::Px2VpWithCurrentDensity(src.GetWidth()));
-
-    dst.height.tag = Ark_Tag::INTEROP_TAG_OBJECT;
-    dst.height.value.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
-    dst.height.value.f32 = static_cast<float>(
-        PipelineBase::Px2VpWithCurrentDensity(src.GetHeight()));
-
-    dst.hand.tag = Ark_Tag::INTEROP_TAG_OBJECT;
-    dst.hand.value = static_cast<Ark_InteractionHand>(src.GetOperatingHand());
+    dst.hand = ArkValue<Opt_InteractionHand>(static_cast<ArkUI_InteractionHand>(src.GetOperatingHand()));
 }
 
 void AssignArkValue(Ark_HistoricalPoint& dst, const OHOS::Ace::TouchLocationInfo& src)

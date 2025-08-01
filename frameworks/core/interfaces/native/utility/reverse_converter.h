@@ -76,6 +76,7 @@
 #include "core/interfaces/native/implementation/touch_event_peer.h"
 #include "core/interfaces/native/utility/peer_utils.h"
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
+#include "interfaces/native/ui_input_event.h"
 
 #include "core/gestures/drag_event.h"
 #include "generated/converter_generated.h"
@@ -234,6 +235,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_ImageLoadResult& dst, const LoadImageSuccessEvent& src);
     void AssignArkValue(Ark_ImageSpanAlignment& dst, const VerticalAlign& src);
     void AssignArkValue(Ark_IntentionCode& dst, const KeyIntention& src);
+    void AssignArkValue(Ark_InteractionHand& dst, const ArkUI_InteractionHand& src);
     void AssignArkValue(Ark_ItemDragInfo& dst, const ItemDragInfo& src);
     void AssignArkValue(Ark_KeySource& dst, const SourceType& src);
     void AssignArkValue(Ark_KeyType& dst, const KeyAction& src);
