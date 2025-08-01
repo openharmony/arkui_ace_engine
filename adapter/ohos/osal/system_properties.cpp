@@ -310,6 +310,18 @@ bool IsForceSplitIgnoreOrientationEnabled()
     return (system::GetParameter("persist.ace.navigation.ignoreorientation.enabled", "0") == "1");
 }
 
+std::optional<bool> IsArkUIHookEnabled()
+{
+    auto enabledValue = system::GetParameter("persist.ace.arkuihook.enabled", "NA");
+    if (enabledValue == "true") {
+        return true;
+    } else if (enabledValue == "false") {
+        return false;
+    } else {
+        return std::nullopt;
+    }
+}
+
 bool IsGridCacheEnabled()
 {
     return (system::GetParameter("persist.ace.grid.cache.enabled", "1") == "1");
@@ -705,6 +717,7 @@ bool SystemProperties::resourceDecoupling_ = IsResourceDecoupling();
 bool SystemProperties::configChangePerform_ = IsConfigChangePerform();
 bool SystemProperties::navigationBlurEnabled_ = IsNavigationBlurEnabled();
 bool SystemProperties::forceSplitIgnoreOrientationEnabled_ = IsForceSplitIgnoreOrientationEnabled();
+std::optional<bool> SystemProperties::arkUIHookEnabled_ = IsArkUIHookEnabled();
 bool SystemProperties::gridCacheEnabled_ = IsGridCacheEnabled();
 bool SystemProperties::gridIrregularLayoutEnable_ = IsGridIrregularLayoutEnabled();
 std::pair<float, float> SystemProperties::brightUpPercent_ = GetPercent();
@@ -892,6 +905,7 @@ void SystemProperties::InitDeviceInfo(
     configChangePerform_ = IsConfigChangePerform();
     navigationBlurEnabled_ = IsNavigationBlurEnabled();
     forceSplitIgnoreOrientationEnabled_ = IsForceSplitIgnoreOrientationEnabled();
+    arkUIHookEnabled_ = IsArkUIHookEnabled();
     gridCacheEnabled_ = IsGridCacheEnabled();
     gridIrregularLayoutEnable_ = IsGridIrregularLayoutEnabled();
     sideBarContainerBlurEnable_ = IsSideBarContainerBlurEnable();
@@ -1090,6 +1104,11 @@ bool SystemProperties::GetNavigationBlurEnabled()
 bool SystemProperties::GetForceSplitIgnoreOrientationEnabled()
 {
     return forceSplitIgnoreOrientationEnabled_;
+}
+
+std::optional<bool> SystemProperties::GetArkUIHookEnabled()
+{
+    return arkUIHookEnabled_;
 }
 
 bool SystemProperties::GetCacheNavigationNodeEnable()

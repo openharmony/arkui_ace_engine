@@ -679,6 +679,8 @@ public:
 
     static bool GetForceSplitIgnoreOrientationEnabled();
 
+    static std::optional<bool> GetArkUIHookEnabled();
+
     static bool WaterFlowUseSegmentedLayout();
 
     static bool GetSideBarContainerBlurEnable();
@@ -886,6 +888,7 @@ private:
     static bool enableScrollableItemPool_;
     static bool navigationBlurEnabled_;
     static bool forceSplitIgnoreOrientationEnabled_;
+    static std::optional<bool> arkUIHookEnabled_;
     static bool gridCacheEnabled_;
     static bool gridIrregularLayoutEnable_;
     static bool sideBarContainerBlurEnable_;

@@ -54,6 +54,8 @@ public:
     void InitSoftTransitionPop();
     bool IsNodeInvisible(const RefPtr<FrameNode>& node) override;
     RefPtr<UINode> GetNavigationNode() override;
+
+    std::string ToDumpString();
 };
 
 } // namespace OHOS::Ace::NG

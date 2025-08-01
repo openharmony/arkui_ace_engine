@@ -1292,6 +1292,25 @@ void PipelineBase::HyperlinkStartAbility(const std::string& address) const {}
 
 void PipelineBase::StartAbilityOnQuery(const std::string& queryWord) const {}
 
+double PipelineBase::CalcPageWidth(double rootWidth) const
+{
+    return rootWidth;
+}
+
+double PipelineBase::GetPageWidth() const
+{
+    return 0;
+}
+
+bool PipelineBase::IsArkUIHookEnabled() const
+{
+    auto hookEnabled = SystemProperties::GetArkUIHookEnabled();
+    if (hookEnabled.has_value()) {
+        return hookEnabled.value();
+    }
+    return isArkUIHookEnabled_;
+}
+
 void PipelineBase::RequestFrame() {}
 
 Rect PipelineBase::GetCurrentWindowRect() const

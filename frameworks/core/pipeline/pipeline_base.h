@@ -871,10 +871,7 @@ public:
     {
         isArkUIHookEnabled_ = enable;
     }
-    bool IsArkUIHookEnabled() const
-    {
-        return isArkUIHookEnabled_;
-    }
+    bool IsArkUIHookEnabled() const;
 
     void SetRealHostWindowId(uint32_t realHostWindowId)
     {

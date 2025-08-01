@@ -189,7 +189,7 @@ void NavigationGroupNode::UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<
     if (pattern->IsForceSplitSupported(context)) {
         pattern->BackupPrimaryNodes();
         pattern->RecognizeHomePageIfNeeded();
-        pattern->SwapNavDestinationAndPlaceHolder(false);
+        pattern->SwapNavDestinationAndProxyNode(false);
         pattern->SetPrimaryNodesToBeRemoved(std::move(primaryNodesToBeRemoved_));
     }
 }
@@ -233,13 +233,13 @@ bool NavigationGroupNode::ReorderNavDestination(
             }
         }
         int32_t childIndex = navigationContentNode->GetChildIndex(navDestination);
-        bool needMovePlaceHolder = false;
-        RefPtr<NavDestinationGroupNode> placeHolderNode = nullptr;
+        bool needMoveProxyNode = false;
+        RefPtr<NavDestinationGroupNode> proxyNode = nullptr;
         if (pattern->IsForceSplitSupported(context) && childIndex < 0 &&
-            navDestination->IsShowInPrimaryPartition() && navDestination->GetOrCreatePlaceHolder()) {
-            placeHolderNode = navDestination->GetOrCreatePlaceHolder();
-            childIndex = navigationContentNode->GetChildIndex(placeHolderNode);
-            needMovePlaceHolder = placeHolderNode != nullptr && childIndex >= 0;
+            navDestination->IsShowInPrimaryPartition() && navDestination->GetOrCreateProxyNode()) {
+            proxyNode = navDestination->GetOrCreateProxyNode();
+            childIndex = navigationContentNode->GetChildIndex(proxyNode);
+            needMoveProxyNode = proxyNode != nullptr && childIndex >= 0;
         }
         if (childIndex < 0) {
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "mountToParent navdestinationId:%{public}d, slot:%{public}d",
@@ -247,8 +247,8 @@ bool NavigationGroupNode::ReorderNavDestination(
             navDestination->MountToParent(navigationContentNode, slot);
             hasChanged = true;
         } else if (childIndex != slot) {
-            if (needMovePlaceHolder) {
-                placeHolderNode->MovePosition(slot);
+            if (needMoveProxyNode) {
+                proxyNode->MovePosition(slot);
             } else {
                 navDestination->MovePosition(slot);
             }
@@ -329,7 +329,7 @@ void NavigationGroupNode::RemoveRedundantNavDestination(RefPtr<FrameNode>& navig
                 continue;
             }
             hideNodes_.emplace_back(std::make_pair(navDestination, true));
-            if (navDestination->GetNavDestinationType() == NavDestinationType::PLACE_HOLDER) {
+            if (navDestination->GetNavDestinationType() == NavDestinationType::PROXY) {
                 auto primaryNode = navDestination->GetPrimaryNode();
                 if (primaryNode) {
                     primaryNodesToBeRemoved_.push_back(primaryNode);
@@ -1662,7 +1662,7 @@ void NavigationGroupNode::DealRemoveDestination(const RefPtr<NavDestinationGroup
     // remove content child
     auto navDestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
     auto pattern = AceType::DynamicCast<NavigationPattern>(GetPattern());
-    if (navDestination->GetNavDestinationType() == NavDestinationType::PLACE_HOLDER) {
+    if (navDestination->GetNavDestinationType() == NavDestinationType::PROXY) {
         contentNode_->RemoveChild(navDestination, true);
         auto primaryNode = navDestination->GetPrimaryNode();
         CHECK_NULL_VOID(primaryNode);

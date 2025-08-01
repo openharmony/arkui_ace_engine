@@ -211,7 +211,7 @@ double PipelineBase::Vp2PxInner(double vpValue) const
 
 double PipelineBase::CalcPageWidth(double rootWidth) const
 {
-    if (!isCurrentInForceSplitMode_) {
+    if (!IsArkUIHookEnabled() || !isCurrentInForceSplitMode_) {
         return rootWidth;
     }
     // Divider Width equal to 1.0_vp
@@ -940,6 +940,15 @@ Rect PipelineBase::GetGlobalDisplayWindowRect() const
 {
     CHECK_NULL_RETURN(window_, {});
     return window_->GetGlobalDisplayWindowRect();
+}
+
+bool PipelineBase::IsArkUIHookEnabled() const
+{
+    auto hookEnabled = SystemProperties::GetArkUIHookEnabled();
+    if (hookEnabled.has_value()) {
+        return hookEnabled.value();
+    }
+    return isArkUIHookEnabled_;
 }
 
 bool PipelineBase::HasFloatTitle() const
