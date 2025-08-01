@@ -2390,4 +2390,76 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage080, TestSi
     EXPECT_EQ(dragDropManager->dragAnimationPointerEvent_.displayX, 0);
     EXPECT_EQ(dragDropManager->dragAnimationPointerEvent_.displayY, 0);
 }
+
+/**
+ * @tc.name: DragDropManagerTestNgCoverage081
+ * @tc.desc: Test OnDragStart when isSceneBoardWindow_ is false
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage081, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create DragDropManager.
+     * @tc.expected: dragDropManager is not null.
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+     * @tc.steps: step2. construct frameNode and update the properties.
+     * @tc.expected: frameNode is not null.
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    
+    /**
+     * @tc.steps: step3. set isSceneBoardWindow_ true.
+     * @tc.expected: container is not null.
+     */
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    container->isSceneBoardWindow_ = true;
+
+    /**
+     * @tc.steps: step4. call OnDragStart with frameNode and point.
+     * @tc.expected: rootNode_ is null.
+     */
+    dragDropManager->OnDragStart({ GLOBAL_X, GLOBAL_Y }, frameNode);
+    EXPECT_EQ(dragDropManager->rootNode_, nullptr);
+}
+
+/**
+ * @tc.name: DragDropManagerTestNgCoverage082
+ * @tc.desc: Test SetDragAnimationPointerEvent func
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage082, TestSize.Level1)
+{
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    dragDropManager->rootNode_ = frameNode;
+
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    container->isSceneBoardWindow_ = true;
+
+    DragPointerEvent pointerEvent;
+    dragDropManager->SetDragAnimationPointerEvent(pointerEvent, frameNode);
+    EXPECT_EQ(dragDropManager->dragAnimationPointerEvent_.windowX, 0);
+
+    auto node = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    pointerEvent.windowX = 1;
+    dragDropManager->SetDragAnimationPointerEvent(pointerEvent, node);
+    EXPECT_EQ(dragDropManager->dragAnimationPointerEvent_.windowX, 0);
+
+    container->isSceneBoardWindow_ = false;
+    pointerEvent.windowX = 2;
+    dragDropManager->SetDragAnimationPointerEvent(pointerEvent, frameNode);
+    EXPECT_EQ(dragDropManager->dragAnimationPointerEvent_.windowX, 2);
+}
 } // namespace OHOS::Ace::NG

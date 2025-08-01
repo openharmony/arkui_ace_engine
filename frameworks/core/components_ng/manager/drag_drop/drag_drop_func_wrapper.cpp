@@ -1560,4 +1560,21 @@ void DragDropFuncWrapper::ProcessDragDropData(const RefPtr<OHOS::Ace::DragEvent>
     CHECK_NULL_VOID(dragDropManager);
     dragDropManager->SetSummaryMap(dragSummaryInfo.summary);
 }
+
+RefPtr<UINode> DragDropFuncWrapper::FindWindowScene(RefPtr<FrameNode>& targetNode)
+{
+    CHECK_NULL_RETURN(targetNode, nullptr);
+    auto pipeline = targetNode->GetContextRefPtr();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto container = Container::GetContainer(pipeline->GetInstanceId());
+    CHECK_NULL_RETURN(container, nullptr);
+    if (!container->IsSceneBoardWindow()) {
+        return nullptr;
+    }
+    auto parent = targetNode->GetParent();
+    while (parent && parent->GetTag() != V2::WINDOW_SCENE_ETS_TAG) {
+        parent = parent->GetParent();
+    }
+    return parent;
+}
 } // namespace OHOS::Ace::NG
