@@ -15,6 +15,8 @@
 
 #include "frameworks/bridge/declarative_frontend/ng/page_router_manager.h"
 
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+
 #include "base/i18n/localization.h"
 #include "base/ressched/ressched_report.h"
 #include "base/perfmonitor/perf_monitor.h"
@@ -2076,6 +2078,7 @@ void PageRouterManager::CleanPageOverlay()
 
 void PageRouterManager::DealReplacePage(const RouterPageInfo& info)
 {
+    UiSessionManager::GetInstance()->OnRouterChange(info.url, "routerReplacePage");
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         ReplacePageInNewLifecycle(info);
         return;
