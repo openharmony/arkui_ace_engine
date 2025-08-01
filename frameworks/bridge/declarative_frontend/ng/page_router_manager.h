@@ -89,7 +89,7 @@ struct RouterPageInfo {
     bool isUseIntent = false;
 };
 
-class PageRouterManager : public AceType {
+class ACE_FORCE_EXPORT PageRouterManager : public AceType {
     DECLARE_ACE_TYPE(PageRouterManager, AceType)
 public:
     PageRouterManager() = default;

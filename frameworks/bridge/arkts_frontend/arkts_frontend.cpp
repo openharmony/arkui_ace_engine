@@ -315,7 +315,7 @@ void ArktsFrontend::AttachPipelineContext(const RefPtr<PipelineBase>& context)
     }
 }
 
-ani_ref  ArktsFrontend::GetShared(int32_t id)
+ani_ref ArktsFrontend::GetSharedStorage(int32_t id)
 {
     int32_t currentInstance = id;
     if (currentInstance >= MIN_SUBCONTAINER_ID && currentInstance < MIN_PLUGIN_SUBCONTAINER_ID) {
@@ -339,7 +339,7 @@ void ArktsFrontend::Destroy()
     handleMessageMethod_ = nullptr;
 }
 
-ani_object ArktsFrontend::CallGetUIContextFunc(int32_t instanceId)
+ani_object ArktsFrontend::GetUIContext(int32_t instanceId)
 {
     ani_object result = nullptr;
     ani_status status;
@@ -530,9 +530,14 @@ bool ArktsFrontend::HandleMessage(void *frameNode, int32_t type, const std::stri
     return result == ANI_TRUE;
 }
 
-void ArktsFrontend::SetAniContext(int32_t instanceId, ani_ref* context)
+void ArktsFrontend::SetHostContext(int32_t instanceId, ani_ref* context)
 {
     Framework::AniContextModule::AddAniContext(instanceId, context);
+}
+
+ani_ref* ArktsFrontend::GetHostContext(int32_t instanceId)
+{
+    return Framework::AniContextModule::GetAniContext(instanceId);
 }
 
 void* ArktsFrontend::preloadArkTSRuntime = nullptr;
@@ -561,5 +566,53 @@ void ArktsFrontend::PreloadAceModule(void* aniEnv)
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_PreloadAceArkTSModule(void* aniEnv)
 {
     ArktsFrontend::PreloadAceModule(aniEnv);
+}
+
+extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_GetArkTSRuntime()
+{
+    return ArktsFrontend::preloadArkTSRuntime;
+}
+
+ani_ref CreateStorageReference(void* runtime, void* storage)
+{
+    ani_ref ref = nullptr;
+    if (runtime && storage) {
+        auto* env = reinterpret_cast<ani_env*>(runtime);
+        env->GlobalReference_Create(reinterpret_cast<ani_ref>(storage), &ref);
+        if (!ref) {
+            return nullptr;
+        }
+    }
+    return ref;
+}
+
+void DeleteStorageReference(void* runtime, void* storage)
+{
+    if (runtime && storage) {
+        auto* env = reinterpret_cast<ani_env*>(runtime);
+        env->GlobalReference_Delete(reinterpret_cast<ani_object>(storage));
+    }
+}
+
+extern "C" ACE_FORCE_EXPORT Frontend* OHOS_ACE_CreateArktsFrontend(void* runtime) {
+    if (!runtime) {
+        LOGE("runtime is nullptr.");
+        return nullptr;
+    }
+    return static_cast<Frontend*>(new ArktsFrontend(runtime));
+}
+
+extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_CreateAniReference(void* runtime, void* storage) {
+    if (!runtime || !storage) {
+        return nullptr;
+    }
+    return static_cast<void*>(CreateStorageReference(runtime, storage));
+}
+
+extern "C" ACE_FORCE_EXPORT void OHOS_ACE_DeleteAniReference(void* runtime, void* storage) {
+    if (!runtime || !storage) {
+        return;
+    }
+    DeleteStorageReference(runtime, storage);
 }
 } // namespace OHOS::Ace

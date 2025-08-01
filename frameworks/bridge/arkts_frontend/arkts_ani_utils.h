@@ -19,6 +19,8 @@
 #include <cstdint>
 #include <type_traits>
 
+#include "ui/base/macros.h"
+
 #define ANI_CALL(env, call, onFail...)                                                                 \
     if (env) {                                                                                         \
         const char* aniErr[] = {                                                                       \
@@ -55,7 +57,7 @@ typedef class __ani_ref* ani_ref;
 typedef struct __ani_vm ani_vm;
 
 namespace OHOS::Ace {
-class ArktsAniUtils final {
+class ACE_FORCE_EXPORT ArktsAniUtils final {
 public:
     /**
      * Create std/core/Boolean.

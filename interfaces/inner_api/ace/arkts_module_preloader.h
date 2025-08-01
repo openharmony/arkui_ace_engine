@@ -28,6 +28,7 @@ class ACE_FORCE_EXPORT ArkTSModulePreloader {
 public:
 
     static void Preload(void* aniEnv);
+    static void* GetArkTSRuntime();
 
 };
 

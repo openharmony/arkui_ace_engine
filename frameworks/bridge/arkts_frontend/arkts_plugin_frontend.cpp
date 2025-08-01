@@ -188,4 +188,11 @@ void ArktsPluginFrontend::Destroy()
     app_ = nullptr;
 }
 
+extern "C" ACE_FORCE_EXPORT PluginFrontend* OHOS_ACE_CreateArktsPluginFrontend(void* runtime) {
+    if (!runtime) {
+        LOGE("runtime is nullptr.");
+        return nullptr;
+    }
+    return new ArktsPluginFrontend(runtime);
+}
 } // namespace OHOS::Ace

@@ -16,7 +16,10 @@ import("//foundation/arkui/ace_engine/ace_config.gni")
 import("./link_abc.gni")
 
 group("arkts_frontend_native_package") {
-  deps = [ "koala_projects/arkoala-arkts/arkui-ohos/src/ani/native:ace_ani_native_package" ]
+  deps = [
+    ":arkts_frontend",
+    "koala_projects/arkoala-arkts/arkui-ohos/src/ani/native:ace_ani_native_package"
+  ]
 }
 group("arkoala_ui2abc") {
   deps = [ "koala_projects/arkoala-arkts:arkoala" ]
@@ -45,21 +48,16 @@ ohos_prebuilt_etc("arkoala_abc_prebuild") {
 template("arkts_frontend") {
   forward_variables_from(invoker, "*")
 
-  ohos_source_set(target_name) {
-    subsystem_name = ace_engine_subsystem
-    part_name = ace_engine_part
+  ohos_shared_library("arkts_frontend") {
     defines += invoker.defines
     configs = [ "$ace_root:ace_config" ]
-    if (!build_ohos_sdk) {
-      deps = [ ":ArkoalaNative_ark" ]
-    }
+    deps = [
+      ":ArkoalaNative_ark",
+      "$ace_root/build:libace_compatible"
+    ]
 
     sources = [
       "ani_context_module.cpp",
-      "ani_graphics_module.cpp",
-      "ani_list_module.cpp",
-      "ani_water_flow_module.cpp",
-      "arkts_ani_utils.cpp",
       "arkts_frontend.cpp",
       "arkts_plugin_frontend.cpp",
       "entry/arkts_entry_loader.cpp",
@@ -69,14 +67,28 @@ template("arkts_frontend") {
       "runtime_core:ani",
     ]
 
-    if (current_os == "ohos") {
-      external_deps += [ "graphic_2d:drawing_ani" ]
-    }
+    subsystem_name = ace_engine_subsystem
+    part_name = ace_engine_part
+  }
+}
+
+template("arkts_frontend_loader") {
+  forward_variables_from(invoker, "*")
+
+  ohos_source_set(target_name) {
+    subsystem_name = ace_engine_subsystem
+    part_name = ace_engine_part
+    defines += invoker.defines
+    configs = [ "$ace_root:ace_config" ]
+
+    sources = [
+      "arkts_frontend_loader.cpp",
+    ]
   }
 }
 
 foreach(item, ace_platforms) {
-  arkts_frontend("arkts_frontend_" + item.name) {
+  arkts_frontend_loader("arkts_frontend_" + item.name) {
     defines = []
     config = {
     }
@@ -87,6 +99,22 @@ foreach(item, ace_platforms) {
 
     if (defined(config.defines)) {
       defines = config.defines
+    }
+  }
+
+  if (item.name == "ohos") {
+    arkts_frontend("arkts_frontend") {
+      defines = []
+      config = {
+      }
+
+      if (defined(item.config)) {
+        config = item.config
+      }
+
+      if (defined(config.defines)) {
+        defines = config.defines
+      }
     }
   }
 }
