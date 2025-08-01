@@ -194,13 +194,13 @@ void SheetWrapperLayoutAlgorithm::InitParameter(LayoutWrapper* layoutWrapper)
     auto layoutProperty = sheetPage->GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
-    auto needAvoidKeyboard = sheetStyle.sheetKeyboardAvoidMode == SheetKeyboardAvoidMode::POPUP_SHEET;
     placement_ = sheetStyle.placement.value_or(Placement::BOTTOM);
     sheetPopupInfo_.Reset();    // everytime sheetWrapper changed, we need to reset sheetPopupInfo to default value
     sheetPopupInfo_.finalPlacement = placement_;
     sheetPopupInfo_.placementOnTarget = sheetStyle.placementOnTarget.value_or(true);
     windowGlobalRect_ = pipeline->GetDisplayWindowRectInfo();
     windowEdgeWidth_ = WINDOW_EDGE_SPACE.ConvertToPx();
+#ifndef PREVIEW
     if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         // global rect need to reduce the top and bottom safe area
         windowGlobalRect_ = pipeline->GetCurrentWindowRect();
@@ -217,6 +217,7 @@ void SheetWrapperLayoutAlgorithm::InitParameter(LayoutWrapper* layoutWrapper)
         auto focusHub = sheetPage->GetFocusHub();
         CHECK_NULL_VOID(focusHub);
         auto isFocused = focusHub->IsCurrentFocus();
+        auto needAvoidKeyboard = sheetStyle.sheetKeyboardAvoidMode == SheetKeyboardAvoidMode::POPUP_SHEET;
         if (keyboardInset.Length() != 0 && isFocused && needAvoidKeyboard) {
             sheetPopupInfo_.keyboardShow = true;
             height -= keyboardInset.Length() - safeArea.bottom_.Length();
@@ -226,6 +227,7 @@ void SheetWrapperLayoutAlgorithm::InitParameter(LayoutWrapper* layoutWrapper)
         // windowRect neet to set as origin point, because sheet offset is relative to window rect
         windowGlobalRect_ = Rect(0.f, offsetY, windowGlobalRect_.Width(), height);
     }
+#endif
 }
 
 void SheetWrapperLayoutAlgorithm::GetSheetPageSize(LayoutWrapper* layoutWrapper)

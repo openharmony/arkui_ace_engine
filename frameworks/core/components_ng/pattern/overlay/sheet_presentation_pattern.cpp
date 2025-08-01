@@ -1884,6 +1884,9 @@ SheetType SheetPresentationPattern::GetSheetTypeFromSheetManager() const
     if (!host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN)) {
         return SHEET_BOTTOM;
     }
+#ifdef PREVIEW
+    sheetType = GetSheetType();
+#else
     auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_RETURN(layoutProperty, sheetType);
     auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
@@ -1908,6 +1911,7 @@ SheetType SheetPresentationPattern::GetSheetTypeFromSheetManager() const
     if (sheetType == SheetType::SHEET_POPUP && !sheetKey_.hasValidTargetNode) {
         sheetType = SheetType::SHEET_CENTER;
     }
+#endif
     return sheetType;
 }
 
