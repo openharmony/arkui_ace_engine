@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { Array_from_set, className, int32, KoalaCallsiteKey, KoalaCallsiteKeys, KoalaProfiler, markableQueue, Observable, ObservableHandler, refEqual, uint32, Utils } from "@koalaui/common"
+import { Array_from_set, className, int32, KoalaCallsiteKey, KoalaCallsiteKeys, KoalaProfiler, markableQueue, Observable, ObservableHandler, refEqual, uint32 } from "@koalaui/common"
 import { Dependencies, Dependency } from "./Dependency"
 import { Disposable, disposeContent, disposeContentBackward } from "./Disposable"
 import { Changes, Journal } from "./Journal"
@@ -858,7 +858,7 @@ export class StateManagerImpl implements StateManager {
         context.parentManager = this
         context.contextData = this.contextData
         const task = () => {
-            Utils.traceBegin(`Do parallel task`);
+            KoalaProfiler.startTrace(`Do parallel task`);
             const old = GlobalStateManager.GetLocalManager();
             GlobalStateManager.SetLocalManager(context);
             builder(context);
@@ -867,7 +867,7 @@ export class StateManagerImpl implements StateManager {
             if (complete) {
                 complete();
             }
-            Utils.traceEnd();
+            KoalaProfiler.endTrace();
             return undefined
         }
         //@ts-ignore
@@ -880,7 +880,7 @@ export class StateManagerImpl implements StateManager {
 
     merge<Value>(main: StateContext, rootScope: ComputableState<Value>, compute: () => void): void {
         const mainContext = main as StateManagerImpl
-        Utils.traceBegin(`merge`)
+        KoalaProfiler.startTrace(`merge`)
         mainContext.childManager.push(this)
         const current = rootScope as ScopeImpl<Value>
         const scope = main!.scope<void>(0, 1, () => {
@@ -889,16 +889,16 @@ export class StateManagerImpl implements StateManager {
         compute()
         if (scope.unchanged) {
             scope.cached
-            Utils.traceEnd()
+            KoalaProfiler.endTrace()
             return
         }
         current.cascadeParent = scope
         scope.recache()
-        Utils.traceEnd()
+        KoalaProfiler.endTrace()
     }
 
     terminate<Value>(rootScope: ComputableState<Value>): void {
-        Utils.traceBegin(`sub manager terminate`)
+        KoalaProfiler.startTrace(`sub manager terminate`)
         const root = rootScope as ScopeImpl<Value>
         const cascadeScope = root.cascadeParent as ScopeImpl<void>
         cascadeScope.node = undefined
@@ -906,7 +906,7 @@ export class StateManagerImpl implements StateManager {
         root.dispose();
         this.parentManager?.removeChild(this);
         this.parentManager = undefined;
-        Utils.traceEnd()
+        KoalaProfiler.endTrace()
     }
 }
 

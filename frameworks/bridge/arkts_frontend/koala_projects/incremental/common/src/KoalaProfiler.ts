@@ -43,6 +43,21 @@ export class KoalaProfiler {
         if (!set.delete(node)) console.log("node is already disposed")
     }
 
+    static startTrace = (s: string) => {}
+
+    static endTrace = () => {}
+
+    static initTrace(start: (s: string) => void, end: () => void) {
+        KoalaProfiler.startTrace = start
+        KoalaProfiler.endTrace = end
+    }
+
+    static nativeLog = (s: string) => {}
+    
+    static initNativeLog(cb: (s: string) => void) {
+        KoalaProfiler.nativeLog = cb
+    }
+
     public static counters: KoalaProfiler | undefined = undefined
 
     private invalidations = 0
@@ -131,7 +146,7 @@ export class KoalaProfiler {
             `layouts: ${this.layouts}`,
             `FPS: ${this.lastFPS}`,
         )
-        KoalaProfiler.map?.forEach((set:Set<Object>, kind:int32) => {
+        KoalaProfiler.map?.forEach((set: Set<Object>, kind: int32) => {
             if (set.size > 0) array.push(kind + ":" + set.size)
         })
         return array.join("\n")
@@ -143,7 +158,7 @@ export class KoalaProfiler {
     node() { this.nodes++ }
     realDraw() { this.realDraws++ }
     cachedDraw() { this.cachedDraws++ }
-    layout() {  this.layouts++ }
+    layout() { this.layouts++ }
     measure() { this.measures++ }
     frame(ms: number) {
         if (ms - this.lastTime <= 1000) {

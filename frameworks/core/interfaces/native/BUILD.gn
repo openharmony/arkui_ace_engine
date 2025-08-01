@@ -161,6 +161,7 @@ template("ace_core_interfaces_native_node") {
       "ani/image_span_ani_modifier.cpp",
       "ani/node_ani_modifier.cpp",
       "ani/styled_string_ani_modifier.cpp",
+      "ani/trace_ani_modifier.cpp",
       "ani/web_ani_modifier.cpp",
       "ani/waterflow_ani_modifier.cpp",
       "ani/video_ani_modifier.cpp",
