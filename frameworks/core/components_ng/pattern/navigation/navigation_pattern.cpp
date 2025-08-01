@@ -5705,7 +5705,6 @@ void NavigationPattern::ClearNavigationCustomTransition()
     ClearRecoveryList();
 }
 
-#if defined(ACE_STATIC)
 bool NavigationPattern::CheckNeedCreate(int32_t index)
 {
     CHECK_NULL_RETURN(navigationStack_, false);
@@ -5725,5 +5724,4 @@ bool NavigationPattern::CheckNeedCreate(int32_t index)
     }
     return uiNode == nullptr;
 }
-#endif
 } // namespace OHOS::Ace::NG
