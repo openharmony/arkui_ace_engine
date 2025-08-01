@@ -75,7 +75,7 @@ public:
     }
 
     void SetSelection(int32_t selectionStart, int32_t selectionEnd,
-        const std::optional<SelectionOptions>& options, bool isForward) override
+        const std::optional<SelectionOptions>& options) override
     {
         if (auto controller = handler_.Upgrade(); controller) {
             controller->SetSelection(selectionStart, selectionEnd, options);
