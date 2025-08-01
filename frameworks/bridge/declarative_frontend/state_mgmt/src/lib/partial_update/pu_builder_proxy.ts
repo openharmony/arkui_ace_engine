@@ -58,7 +58,7 @@ function makeBuilderParameterProxy(builderName: string, source: Object): Object 
                 return value;
             }
             const funcRet = value();
-            if ((typeof funcRet === 'object') && ('get' in funcRet)) {
+            if (funcRet && (typeof funcRet === 'object') && ('get' in funcRet)) {
                 if (prop1 !== prop) {
                     stateMgmtConsole.debug(`      - func - is ObservedPropertybstract - ret ObservedPropertyObject`);
                     return funcRet;
