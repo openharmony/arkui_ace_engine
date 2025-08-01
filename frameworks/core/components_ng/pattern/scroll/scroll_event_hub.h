@@ -45,7 +45,7 @@ using ScrollEdgeEvent = std::function<void(ScrollEdge)>;
 using ScrollEndEvent = std::function<void()>;
 
 class ScrollEventHub : public ScrollableEventHub {
-    DECLARE_ACE_TYPE(ScrollEventHub, ScrollableEventHub)
+    DECLARE_ACE_TYPE(ScrollEventHub, ScrollableEventHub);
 
 public:
     ScrollEventHub() = default;
