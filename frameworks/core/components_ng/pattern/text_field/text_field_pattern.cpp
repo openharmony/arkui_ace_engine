@@ -662,6 +662,13 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     return true;
 }
 
+void TextFieldPattern::OnSyncGeometryNode(const DirtySwapConfig& config)
+{
+    CHECK_NULL_VOID(HasFocus());
+    parentGlobalOffset_ = GetPaintRectGlobalOffset();
+    UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height());
+}
+
 void TextFieldPattern::UpdateSelectionAndHandleVisibility()
 {
     TextFieldRequestFocus(RequestFocusReason::DRAG_SELECT);
