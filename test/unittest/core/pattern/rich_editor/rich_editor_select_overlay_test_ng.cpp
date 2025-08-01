@@ -258,6 +258,7 @@ HWTEST_F(RichEditorSelectOverlayTestNg, OnAncestorNodeChanged, TestSize.Level1)
     richEditorNode_->parent_ = frameNode;
     FrameNodeChangeInfoFlag flag = FRAME_NODE_CHANGE_GEOMETRY_CHANGE;
     richEditorNode_->changeInfoFlag_ = FRAME_NODE_CHANGE_END_SCROLL;
+    EXPECT_NE(richEditorPattern->selectOverlay_->GetPattern<RichEditorPattern>(), nullptr);
     richEditorPattern->selectOverlay_->OnAncestorNodeChanged(flag);
     EXPECT_NE(richEditorNode_->changeInfoFlag_, FRAME_NODE_CHANGE_INFO_NONE);
 }
