@@ -516,7 +516,8 @@ constexpr float TOOLTIP_DELAY_MS = 700;
 constexpr uint32_t ADJUST_WEB_DRAW_LENGTH = 3000;
 constexpr int32_t FIT_CONTENT_LIMIT_LENGTH = 8000;
 const std::string PATTERN_TYPE_WEB = "WEBPATTERN";
-const std::string BUFFER_USAGE_WEB = "web";
+const std::string BUFFER_USAGE_SURFACE = "web-surface-";
+const std::string BUFFER_USAGE_TEXTURE = "web-texture-";
 const std::string DEFAULT_WEB_TEXT_ENCODING_FORMAT = "UTF-8";
 constexpr int32_t SYNC_SURFACE_QUEUE_SIZE = 8;
 constexpr int32_t ASYNC_SURFACE_QUEUE_SIZE_FOR_PHONE_AND_PC = 5;
@@ -3728,12 +3729,13 @@ void WebPattern::OnModifyDone()
             renderSurface_->SetRenderContext(host->GetRenderContext());
             if (renderMode_ == RenderMode::SYNC_RENDER) {
                 renderSurface_->SetIsTexture(true);
+                renderSurface_->SetBufferUsage(BUFFER_USAGE_TEXTURE + std::to_string(host->GetId()));
                 renderSurface_->SetPatternType(PATTERN_TYPE_WEB);
                 renderSurface_->SetSurfaceQueueSize(SYNC_SURFACE_QUEUE_SIZE);
                 renderContextForSurface_->SetOpacity(0.0f);
             } else {
                 renderSurface_->SetIsTexture(false);
-                renderSurface_->SetBufferUsage(BUFFER_USAGE_WEB);
+                renderSurface_->SetBufferUsage(BUFFER_USAGE_SURFACE + std::to_string(host->GetId()));
                 renderSurface_->SetSurfaceQueueSize(GetBufferSizeByDeviceType());
                 renderSurface_->SetRenderContext(renderContextForSurface_);
             }
