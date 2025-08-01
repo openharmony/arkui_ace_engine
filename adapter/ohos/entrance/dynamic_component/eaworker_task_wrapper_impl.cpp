@@ -185,7 +185,8 @@ void EaWorkerTaskWrapperImpl::DumpWorker()
     }
 
     auto worker_id = arkts::concurrency_helpers::GetWorkerId(envCurr);
-    TAG_LOGI(AceLogTag::ACE_DYNAMIC_COMPONENT, "DumpWorker end, worker_id: %{public}d", worker_id);
+    TAG_LOGI(AceLogTag::ACE_DYNAMIC_COMPONENT, "DumpWorker end, worker_id: %{public}d, vmInThread: %{public}p",
+        worker_id, vmInThread);
 }
 
 void EaWorkerTaskWrapperImpl::Call(const TaskExecutor::Task& task, uint32_t delayTime)

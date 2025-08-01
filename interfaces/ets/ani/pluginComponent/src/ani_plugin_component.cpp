@@ -152,13 +152,11 @@ static void Request([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object r
     bool ret = ParsePushAndRequestParameters(env, asyncCallbackInfo, requestParameters);
     if (!ret) {
         LOGE("plugin-ani parse request params fail");
-        AceFreeAsyncJSCallbackInfo(&asyncCallbackInfo);
         return;
     }
     ani_ref fnObjGlobalRef = nullptr;
     if (ANI_OK != env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef)) {
         LOGE("plugin-ani get request call back failed");
-        AceFreeAsyncJSCallbackInfo(&asyncCallbackInfo);
         return;
     }
     asyncCallbackInfo->cbInfo.callback = fnObjGlobalRef;
@@ -178,7 +176,6 @@ static void On([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_string eventT
     ani_ref fnObjGlobalRef = nullptr;
     if (ANI_OK != env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef)) {
         LOGE("plugin-ani get %{public}s call back failed", eventType.c_str());
-        AceFreeAsyncJSCallbackInfo(&asyncCallbackInfo);
         return;
     }
     asyncCallbackInfo->cbInfo.callback = fnObjGlobalRef;

@@ -96,7 +96,7 @@ EntryLoader::EntryLoader(ani_env* env, const std::string& abcModulePath): env_(e
     ANI_CALL(env, GetUndefined(&undefined), return);
 
     ani_string abcModulePathStr;
-    ANI_CALL(env, String_NewUTF8(abcModulePath.c_str(), abcModulePath.length(), &abcModulePathStr), return);
+    env->String_NewUTF8(abcModulePath.c_str(), abcModulePath.length(), &abcModulePathStr);
 
     ani_type stringCls;
     ANI_CALL(env, Object_GetType(abcModulePathStr, &stringCls), return);
