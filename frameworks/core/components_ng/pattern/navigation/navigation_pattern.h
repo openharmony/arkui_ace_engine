@@ -566,9 +566,7 @@ public:
     void FireHomeDestinationLifeCycleIfNeeded(NavDestinationLifecycle lifecycle, bool isModeChange = false,
         NavDestinationActiveReason reason = NavDestinationActiveReason::TRANSITION);
 
-#if defined(ACE_STATIC)
     bool CheckNeedCreate(int32_t index);
-#endif
 private:
     void ClearNavigationCustomTransition();
     bool IsDestinationNeedHideInPush(

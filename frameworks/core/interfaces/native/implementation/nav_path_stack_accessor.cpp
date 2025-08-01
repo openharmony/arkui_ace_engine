@@ -215,7 +215,7 @@ Ark_Number RemoveByIndexesImpl(Ark_NavPathStack peer,
     auto removeIndexes = Converter::Convert<std::vector<int>>(*indexes);
     auto navStack = peer->GetNavPathStack();
     CHECK_NULL_RETURN(navStack, invalidVal);
-    // auto size = navStack->RemoveByIndexes(removeIndexes);
+    auto size = navStack->RemoveInfoByIndexes(removeIndexes);
     return Converter::ArkValue<Ark_Number>(1);
 }
 Ark_Number RemoveByNameImpl(Ark_NavPathStack peer,

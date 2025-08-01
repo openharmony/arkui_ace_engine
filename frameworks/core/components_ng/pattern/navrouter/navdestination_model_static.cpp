@@ -174,7 +174,7 @@ void NavDestinationModelStatic::SetMenuOptions(FrameNode* frameNode, NavigationM
     CHECK_NULL_VOID(navDestinationNode);
     auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
     CHECK_NULL_VOID(navDestinationPattern);
-    // navDestinationPattern->SetMenuOptions(std::move(opt));
+    navDestinationPattern->SetMenuOptions(opt);
 }
 
 void NavDestinationModelStatic::CreateBackButton(const RefPtr<NavDestinationGroupNode>& navDestinationNode)
@@ -427,7 +427,7 @@ void NavDestinationModelStatic::SetTitlebarOptions(FrameNode* frameNode, Navigat
     CHECK_NULL_VOID(titleBarNode);
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
     CHECK_NULL_VOID(titleBarPattern);
-    // titleBarPattern->SetTitlebarOptions(std::move(opt));
+    titleBarPattern->SetTitlebarOptions(opt);
 }
 
 void NavDestinationModelStatic::ParseCommonTitle(FrameNode* frameNode, const NG::NavigationTitleInfo& titleInfo)
@@ -475,13 +475,13 @@ void NavDestinationModelStatic::SetHideToolBar(FrameNode* frameNode, bool hideTo
     navDestinationLayoutProperty->UpdateIsAnimatedToolBar(animated);
 }
 
-void NavDestinationModelStatic::SetIgnoreLayoutSafeArea(FrameNode* frameNode, const SafeAreaExpandOpts& opts)
+void NavDestinationModelStatic::SetIgnoreLayoutSafeArea(FrameNode* frameNode, const NG::IgnoreLayoutSafeAreaOpts& opts)
 {
     auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
     CHECK_NULL_VOID(navDestination);
     auto navdestinationLayoutProperty = navDestination->GetLayoutProperty<NavDestinationLayoutProperty>();
     CHECK_NULL_VOID(navdestinationLayoutProperty);
-    // navdestinationLayoutProperty->UpdateIgnoreLayoutSafeArea(opts);
+    navdestinationLayoutProperty->UpdateIgnoreLayoutSafeAreaOpts(opts);
 }
 
 void NavDestinationModelStatic::SetToolbarConfiguration(FrameNode* frameNode, 

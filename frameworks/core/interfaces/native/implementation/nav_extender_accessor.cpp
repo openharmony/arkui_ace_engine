@@ -53,13 +53,13 @@ void SyncStackImpl(Ark_NavPathStack peer)
 Ark_Boolean CheckNeedCreateImpl(Ark_NativePointer navigation,
                                 Ark_Int32 index)
 {
-    // auto invalidVal = Converter::ArkValue<Ark_Boolean>(false);
-    // auto navigationNode = reinterpret_cast<FrameNode*>(navigation);
-    // CHECK_NULL_RETURN(navigationNode, invalidVal);
-    // auto pattern = navigationNode->GetPattern<NavigationPattern>();
-    // CHECK_NULL_RETURN(pattern, invalidVal);
-    // auto isCreated = pattern->CheckNeedCreate(index);
-    return Converter::ArkValue<Ark_Boolean>(false);
+    auto invalidVal = Converter::ArkValue<Ark_Boolean>(false);
+    auto navigationNode = reinterpret_cast<FrameNode*>(navigation);
+    CHECK_NULL_RETURN(navigationNode, invalidVal);
+    auto pattern = navigationNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_RETURN(pattern, invalidVal);
+    auto isCreated = pattern->CheckNeedCreate(index);
+    return Converter::ArkValue<Ark_Boolean>(isCreated);
 }
 Ark_NativePointer NavigationCreateImpl(Ark_Int32 peer,
                                        Ark_Int32 flag)

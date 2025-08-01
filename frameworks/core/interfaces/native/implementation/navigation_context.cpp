@@ -113,22 +113,22 @@ std::pair<LaunchMode, bool> PathStack::ParseNavigationOptions(const std::optiona
 
 bool PathStack::PushWithLaunchModeAndAnimated(PathInfo info, LaunchMode launchMode, bool animated)
 {
-    // if (launchMode != LaunchMode::MOVE_TO_TOP_SINGLETON && launchMode != LaunchMode::POP_TO_SINGLETON) {
-    //     return false;
-    // }
-    // auto it = FindNameInternal(info.name_);
-    // if (it == pathArray_.end()) {
-    //     return false;
-    // }
-    // it->param_ = info.param_;
-    // it->onPop_ = info.onPop_;
-    // it->needUpdate_ = true;
-    // it->isEntry_ = info.isEntry_;
-    // if (launchMode == LaunchMode::MOVE_TO_TOP_SINGLETON) {
-    //     MoveToTopInternal(it, animated);
-    // } else {
-    //     PopToInternal(it, animated);
-    // }
+    if (launchMode != LaunchMode::MOVE_TO_TOP_SINGLETON && launchMode != LaunchMode::POP_TO_TOP_SINGLETON) {
+        return false;
+    }
+    auto it = FindNameInternal(info.name_);
+    if (it == pathArray_.end()) {
+        return false;
+    }
+    it->param_ = info.param_;
+    it->onPop_ = info.onPop_;
+    it->needUpdate_ = true;
+    it->isEntry_ = info.isEntry_;
+    if (launchMode == LaunchMode::MOVE_TO_TOP_SINGLETON) {
+        MoveToTopInternal(it, animated);
+    } else {
+        PopToInternal(it, animated);
+    }
     return true;
 }
 
@@ -182,35 +182,35 @@ PushDestinationResultType PathStack::PushDestination(PathInfo info,
 
 void PathStack::ReplacePath(PathInfo info, const std::optional<NavigationOptions>& optionParam)
 {
-    // auto [launchMode, animated] = ParseNavigationOptions(optionParam);
-    // auto it = pathArray_.end();
-    // if (launchMode == LaunchMode::MOVE_TO_TOP_SINGLETON || launchMode == LaunchMode::POP_TO_SINGLETON) {
-    //     it = FindNameInternal(info.name_);
-    // }
-    // if (it != pathArray_.end()) { // is it singleton ?
-    //     it->param_ = info.param_;
-    //     it->onPop_ = info.onPop_;
-    //     it->index_ = -1;
-    //     if (it == (pathArray_.end() - 1)) {
-    //         auto targetInfo = *it;
-    //         it = pathArray_.erase(it);
-    //         if (launchMode == LaunchMode::MOVE_TO_TOP_SINGLETON) {
-    //             pathArray_.pop_back();
-    //         } else {
-    //             pathArray_.erase(it, pathArray_.end());
-    //         }
-    //         pathArray_.push_back(targetInfo);
-    //     }
-    // } else {
-    //     if (!pathArray_.empty()) {
-    //         pathArray_.pop_back();
-    //     }
-    //     pathArray_.push_back(info);
-    //     pathArray_.back().index_ = -1;
-    // }
-    // isReplace_ = BOTH_ANIM_AND_REPLACE;
-    // animated_ = animated;
-    // InvokeOnStateChanged();
+    auto [launchMode, animated] = ParseNavigationOptions(optionParam);
+    auto it = pathArray_.end();
+    if (launchMode == LaunchMode::MOVE_TO_TOP_SINGLETON || launchMode == LaunchMode::POP_TO_TOP_SINGLETON) {
+        it = FindNameInternal(info.name_);
+    }
+    if (it != pathArray_.end()) { // is it singleton ?
+        it->param_ = info.param_;
+        it->onPop_ = info.onPop_;
+        it->index_ = -1;
+        if (it == (pathArray_.end() - 1)) {
+            auto targetInfo = *it;
+            it = pathArray_.erase(it);
+            if (launchMode == LaunchMode::MOVE_TO_TOP_SINGLETON) {
+                pathArray_.pop_back();
+            } else {
+                pathArray_.erase(it, pathArray_.end());
+            }
+            pathArray_.push_back(targetInfo);
+        }
+    } else {
+        if (!pathArray_.empty()) {
+            pathArray_.pop_back();
+        }
+        pathArray_.push_back(info);
+        pathArray_.back().index_ = -1;
+    }
+    isReplace_ = BOTH_ANIM_AND_REPLACE;
+    animated_ = animated;
+    InvokeOnStateChanged();
 }
 
 void PathStack::ReplacePathByName(std::string name, const ParamType&  param, const std::optional<bool>& animated)
@@ -333,7 +333,7 @@ void PathStack::Clear(const std::optional<bool>& animated)
     InvokeOnStateChanged();
 }
 
-int PathStack::RemoveByIndexes(const std::vector<int>& indexes)
+int PathStack::RemoveInfoByIndexes(const std::vector<int>& indexes)
 {
     if (indexes.empty()) {
         return 0;
