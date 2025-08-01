@@ -68,7 +68,7 @@
         "build:arkoala:components": "npm run build:incremental && npm run build:interop && npm run build:arkui-common && npm run build:arkui",
         "build:arkoala:components:inc": "npm run build:incremental:inc && npm run build:interop:inc && npm run build:arkui-common:inc && npm run build:arkui",
         "build:arkoala": "npm run panda:sdk:check-install && npm run build:arkoala:components && npm run link:arkoala",
-        "build:arkoala:m3": "npm run build:all -C ../ui2abc && npm run build:incremental:inc:ui2abc && npm run build:interop:inc -C ../interop && npm run -C arkui build:m3:cached && npm run -C arkui build:sdk-m3:cached",
+        "build:arkoala:m3": "npm run build:all -C ../ui2abc && npm run build:incremental:inc:ui2abc && npm run build:interop:inc -C ../interop && npm run -C arkui build:m3",
         "build:arkoala:inc": "npm run build:arkoala:components:inc && npm run link:arkoala",
         "link:arkoala": "mkdir -p build && ../incremental/tools/panda/arkts/arklink --output build/arkoala.abc -- ./arkui/build/arkui.abc ./arkui-common/build/arkui-common.abc  ../incremental/runtime/build/incremental.abc ../interop/build/interop.abc",
         "link:arkoala:m3": "mkdir -p build/bootPandaFiles && ../incremental/tools/panda/arkts/arklink --output build/bootPandaFiles/arkoala.abc -- ../incremental/runtime/build/incremental.abc ../interop/build/interop.abc ./arkui/build-m3-impl/arkui-m3.abc",
@@ -156,4 +156,3 @@
         "previewer:set-active": "node scripts/previewer-cli.mjs set-active"
     }
 }
-

@@ -18,15 +18,16 @@ import { global } from '../static/global';
 import { KNativePointer } from '@koalaui/interop';
 import { DiagnosticKind } from './DiagnosticKind';
 import { passStringArray } from '../utilities/private';
+import { SourceRange } from './SourceRange';
 
 export class SuggestionInfo extends ArktsObject {
   constructor(peer: KNativePointer) {
     super(peer);
   }
 
-  static create(kind: DiagnosticKind, substitutionCode: string, ...args: string[]): SuggestionInfo {
+  static create(kind: DiagnosticKind, substitutionCode: string, range: SourceRange, ...args: string[]): SuggestionInfo {
     return new SuggestionInfo(
-      global.es2panda._CreateSuggestionInfo(global.context, kind.peer, passStringArray(args), args.length, substitutionCode)
+      global.es2panda._CreateSuggestionInfo(global.context, kind.peer, passStringArray(args), args.length, substitutionCode, range.peer)
     );
   }
 

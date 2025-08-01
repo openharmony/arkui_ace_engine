@@ -2,7 +2,7 @@
     "name": "panda-installer",
     "private": true,
     "dependencies": {
-        "@panda/sdk": "file:../../../../../../../../data/downloads/sdk-1.5.0-dev.37899.tgz"
+        "@panda/sdk": "^1.5.0-dev.39026"
     },
     "devDependencies": {
         "rimraf": "^6.0.1"

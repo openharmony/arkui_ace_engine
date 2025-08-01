@@ -263,8 +263,24 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      *
      * @returns new length
      */
-    public override push(...val: T[]): number {
+    public override pushArray(...val: T[]): number {
         const ret = this.store_.push(...val);
+        this.meta_.fireChange(CONSTANT.OB_LENGTH);
+        this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
+
+        // exec all subscribing @Watch
+        this.executeOnSubscribingWatches('push');
+
+        return ret;
+    }
+
+    /**
+     * Adds the specified element to the end of an array and returns the new length of the array.
+     *
+     * @returns new length
+     */
+    override pushOne(value: T): number {
+        const ret = this.store_.push(value);
         this.meta_.fireChange(CONSTANT.OB_LENGTH);
         this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
 

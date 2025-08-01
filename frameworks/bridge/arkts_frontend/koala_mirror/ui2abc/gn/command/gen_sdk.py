@@ -32,28 +32,32 @@ def replace_out_root(value, out_root, compiler_type):
     """Replace $out_root in the string with the actual value."""
     return value.replace("$out_root", out_root).replace("$compiler_type", compiler_type)
 
-def copy_files(config, src_base, dist_base, out_root, compiler_type):
+def validate_out_root(out_root, compiler_type):
+    head_out_root, tail_out_root = os.path.split(out_root)
+    if (tail_out_root == compiler_type):
+        return head_out_root
+    return out_root
+
+
+def copy_files(config, src_base, dist_base, out_root, compiler_type, substitutions):
     """Copy files or directories based on the configuration."""
     for mapping in config['file_mappings']:
         # Replace $out_root
         source = replace_out_root(mapping['source'], out_root, compiler_type)
         destination = replace_out_root(mapping['destination'], out_root, compiler_type)
 
+        if substitutions:
+            for key, val in substitutions.items():
+                source = source.replace(key, val)
+                destination = destination.replace(key, val)
+
         # Build full paths
         source = os.path.join(src_base, source)
         destination = os.path.join(dist_base, destination)
 
-        # Check if the source path exists, otherwise try fallback
         if not os.path.exists(source):
-            print(f"Source path does not exist (will try to fallback): {source}")
-            if mapping['source_fallback']:
-                source_fallback = replace_out_root(mapping['source_fallback'], out_root, compiler_type)
-                source = os.path.join(src_base, source_fallback)
-                if not os.path.exists(source):
-                    print(f"Fallback source path does not exist: {source}")
-                    continue
-            else:
-                continue
+            print(f"Source path does not exist: {source}")
+            continue
 
         # Create the destination directory if it doesn't exist
         dest_dir = os.path.dirname(destination) if os.path.isfile(source) else destination
@@ -85,13 +89,24 @@ def main():
     parser.add_argument('--current-cpu', required=True, help='current CPU')
     args = parser.parse_args()
 
+    print(f"gen_sdk: current-cpu={args.current_cpu} current-os={args.current_os} out-root={args.out_root}")
+
     # Load the configuration
     config = load_config(args.config)
 
     compiler_type = get_compiler_type(args.current_os, args.current_cpu)
 
+    out_root = validate_out_root(args.out_root, compiler_type)
+
+    substitutions = config.get('substitutions')
+
+    if substitutions:
+        substitutions = substitutions.get(args.current_os)
+        if not substitutions:
+            raise Exception(f'Substitutions not found for current_os "{args.current_os}".')
+
     # Copy files or directories
-    copy_files(config, args.src, args.dist, args.out_root, compiler_type)
+    copy_files(config, args.src, args.dist, out_root, compiler_type, substitutions)
 
     # Create package.json to pass SDK validation
     content = """{

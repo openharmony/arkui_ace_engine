@@ -26619,3 +26619,5 @@ export namespace focusControl {
         return GlobalScope.focusControl_requestFocus(value)
     }
 }
+
+export type Callback<T> = (data: T) => void;
