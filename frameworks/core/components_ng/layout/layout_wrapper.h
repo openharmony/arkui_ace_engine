@@ -287,6 +287,21 @@ public:
         return std::exchange(hasPreMeasured_, false);
     }
 
+    bool CheckHasPreMeasured() const
+    {
+        return hasPreMeasured_;
+    }
+
+    void SetEscapeDelayForIgnore(bool noDelay)
+    {
+        escapeDelayForIgnore_ = noDelay;
+    }
+
+    bool GetEscapeDelayForIgnore() const
+    {
+        return escapeDelayForIgnore_;
+    }
+
     bool PredictMeasureResult(LayoutWrapper* childWrapper, const std::optional<LayoutConstraintF>& parentConstraint);
 
     // Paired with GetDelaySelfLayoutForIgnore. Once a node being collected as a layout-delayed child, set true.
@@ -355,6 +370,7 @@ protected:
     bool ignoreLayoutProcess_ = false;
     bool hasPreMeasured_ = false;
     bool delaySelfLayoutForIgnore_ = false;
+    bool escapeDelayForIgnore_ = false;
     bool isScrollableAxis_ = false;
 private:
     void AdjustChildren(const OffsetF& offset, bool parentScrollable);

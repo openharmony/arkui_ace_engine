@@ -1156,6 +1156,7 @@ void PipelineContext::FlushUITaskWithSingleDirtyNode(const RefPtr<FrameNode>& no
             node->Layout();
         }
     }
+    node->SetEscapeDelayForIgnore(false);
     SetIsLayouting(originLayoutingFlag);
 }
 

@@ -233,6 +233,8 @@ public:
 
     void CalcToString(const CalcSize& calcSize, std::pair<std::vector<std::string>, std::vector<std::string>>& result);
 
+    IgnoreLayoutSafeAreaOpts GenIgnoreOpts() const;
+
     virtual void ExpandConstraintWithSafeArea();
 
     void UpdateLayoutConstraint(const LayoutConstraintF& parentConstraint);
@@ -455,6 +457,7 @@ public:
     void CheckIgnoreLayoutSafeArea(const TextDirection& direction);
     void CheckBackgroundLayoutSafeAreaEdges(const TextDirection& direction);
     void CheckLocalizedAlignment(const TextDirection& direction);
+    bool DecideMirror();
 
     virtual void OnPropertyChangeMeasure() {}
 
@@ -479,7 +482,6 @@ private:
     void ConstraintContentByBorder();
     void ConstraintContentBySafeAreaPadding();
     PaddingPropertyF CreateSafeAreaPadding(bool adjustingRound = false);
-    bool DecideMirror();
 
     const std::string PixelRoundToJsonValue() const;
 

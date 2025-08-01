@@ -976,6 +976,56 @@ HWTEST_F(LayoutWrapperTestTwoNg, IgnoreLayoutProcessTagFuncs, TestSize.Level0)
     layoutWrapper->ResetIgnoreLayoutProcess();
     EXPECT_EQ(layoutWrapper->GetIgnoreLayoutProcess(), false);
 }
+
+/**
+ * @tc.name: HasPreMeasuredTest
+ * @tc.desc: Test SetHasPreMeasured, GetHasPreMeasured and CheckHasPreMeasured
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutWrapperTestTwoNg, HasPreMeasuredTest, TestSize.Level1)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto [node, layoutWrapper] = CreateNodeAndWrapper2(OHOS::Ace::V2::FLEX_ETS_TAG, NODE_ID_0);
+    EXPECT_EQ(layoutWrapper->CheckHasPreMeasured(), false);
+    EXPECT_EQ(layoutWrapper->GetHasPreMeasured(), false);
+    layoutWrapper->SetHasPreMeasured();
+    EXPECT_EQ(layoutWrapper->CheckHasPreMeasured(), true);
+    EXPECT_EQ(layoutWrapper->GetHasPreMeasured(), true);
+    EXPECT_EQ(layoutWrapper->CheckHasPreMeasured(), false);
+    EXPECT_EQ(layoutWrapper->GetHasPreMeasured(), false);
+}
+
+/**
+ * @tc.name: DelaySelfLayoutForIgnoreTest
+ * @tc.desc: Test SetDelaySelfLayoutForIgnore and GetDelaySelfLayoutForIgnore
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutWrapperTestTwoNg, DelaySelfLayoutForIgnoreTest, TestSize.Level1)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto [node, layoutWrapper] = CreateNodeAndWrapper2(OHOS::Ace::V2::FLEX_ETS_TAG, NODE_ID_0);
+    EXPECT_EQ(layoutWrapper->GetDelaySelfLayoutForIgnore(), false);
+    layoutWrapper->SetDelaySelfLayoutForIgnore();
+    EXPECT_EQ(layoutWrapper->GetDelaySelfLayoutForIgnore(), true);
+    EXPECT_EQ(layoutWrapper->GetDelaySelfLayoutForIgnore(), false);
+}
+
+/**
+ * @tc.name: EscapeDelayForIgnoreTest
+ * @tc.desc: Test SetEscapeDelayForIgnore and GetEscapeDelayForIgnore
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutWrapperTestTwoNg, EscapeDelayForIgnoreTest, TestSize.Level1)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto [node, layoutWrapper] = CreateNodeAndWrapper2(OHOS::Ace::V2::FLEX_ETS_TAG, NODE_ID_0);
+    EXPECT_EQ(layoutWrapper->GetEscapeDelayForIgnore(), false);
+    layoutWrapper->SetEscapeDelayForIgnore(true);
+    EXPECT_EQ(layoutWrapper->GetEscapeDelayForIgnore(), true);
+    layoutWrapper->SetEscapeDelayForIgnore(false);
+    EXPECT_EQ(layoutWrapper->GetEscapeDelayForIgnore(), false);
+}
+
 /**
  * @tc.name: EdgeControlOnGetAccumulatedSafeAreaExpand
  * @tc.desc: Test GetAccumulatedSafeAreaExpand with edges options
