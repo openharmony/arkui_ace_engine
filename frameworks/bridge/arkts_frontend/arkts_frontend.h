@@ -265,7 +265,7 @@ public:
     void SetColorMode(ColorMode colorMode) override {}
     void RebuildAllPages() override {}
     void NotifyAppStorage(const std::string& key, const std::string& value) override {}
-    bool HandleMessage(void *frameNode, int32_t type, const std::string& param);
+    bool HandleMessage(void* frameNode, int32_t type, const std::string& param) override;
 
     RefPtr<AceEventHandler> GetEventHandler() override
     {
@@ -306,17 +306,7 @@ public:
     void FlushReload() override {}
     void HotReload() override {}
 
-    void RegisterLocalStorage(int32_t id, void* storage)
-    {
-        storageMap_.emplace(id, storage);
-    }
-
-    void UnRegisterLocalStorage(int32_t id)
-    {
-        storageMap_.erase(id);
-    }
-
-    ani_ref GetShared(int32_t id);
+    ani_ref GetSharedStorage(int32_t id) override;
     
     void RegisterLayoutInspectorCallback(const RefPtr<InspectorEvent>& layoutFunc, const std::string& componentId)
     {
@@ -357,9 +347,11 @@ public:
         mediaUpdateCallback_ = nullptr;
     }
 
-    ani_object CallGetUIContextFunc(int32_t instanceId);
+    ani_object GetUIContext(int32_t instanceId) override;
 
-    void SetAniContext(int32_t instanceId, ani_ref* context);
+    void SetHostContext(int32_t instanceId, ani_ref* context) override;
+
+    ani_ref* GetHostContext() override;
 
     RefPtr<NG::PageRouterManager> GetPageRouterManager()
     {
@@ -369,7 +361,7 @@ public:
     void* GetEnv() override;
     static void PreloadAceModule(void* aniEnv);
     static void* preloadArkTSRuntime;
-    void OpenStateMgmtInterop();
+    void OpenStateMgmtInterop() override;
 private:
     RefPtr<TaskExecutor> taskExecutor_;
     RefPtr<NG::PipelineContext> pipeline_;
@@ -379,7 +371,6 @@ private:
     bool foregroundFrontend_ = false;
     RefPtr<NG::PageRouterManager> pageRouterManager_ = nullptr;
 
-    std::unordered_map<int32_t, void*> storageMap_;
     RefPtr<Framework::AccessibilityNodeManager> accessibilityManager_
         = Framework::AccessibilityNodeManager::Create();
 

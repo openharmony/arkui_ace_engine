@@ -61,11 +61,17 @@ static thread_local std::vector<int32_t> restoreInstanceIds_;
 
 ani_ref* GetHostContext()
 {
-    auto contextValue = OHOS::Ace::Framework::AniContextModule::GetAniContext();
-    if (contextValue) {
-        return contextValue.get();
+    auto context = NG::PipelineContext::GetCurrentContextSafely();
+    if (context == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "GetHostContext-ani can not get current context.");
+        return nullptr;
     }
-    return nullptr;
+    auto frontend = context->GetFrontend();
+    if (frontend == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "GetHostContext-ani can not get current frontend.");
+        return nullptr;
+    }
+    return frontend->GetHostContext();
 }
 
 void SyncInstanceId(ArkUI_Int32 instanceId)
@@ -129,13 +135,8 @@ ani_ref GetSharedLocalStorage()
         TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "GetSharedLocalStorage-ani can not get current frontend.");
         return nullptr;
     }
-    auto arkTsFrontend = AceType::DynamicCast<ArktsFrontend>(frontend);
-    if (arkTsFrontend == nullptr) {
-        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "GetSharedLocalStorage-ani can not convert to arkts frontend.");
-        return nullptr;
-    }
     int32_t currentInstance = Container::CurrentIdSafely();
-    auto storage = arkTsFrontend->GetShared(currentInstance);
+    auto storage = frontend->GetSharedStorage(currentInstance);
     if (storage) {
         return storage;
     }

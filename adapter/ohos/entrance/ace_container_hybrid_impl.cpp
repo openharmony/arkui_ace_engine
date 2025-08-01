@@ -15,8 +15,6 @@
 
 #include "adapter/ohos/entrance/ace_container.h"
 
-#include <ani.h>
-
 #include "adapter/ohos/entrance/ace_view_ohos.h"
 #include "adapter/ohos/entrance/data_ability_helper_standard.h"
 #include "adapter/ohos/entrance/file_asset_provider_impl.h"
@@ -38,7 +36,8 @@
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 #include "bridge/js_frontend/js_frontend.h"
-#include "bridge/arkts_frontend/arkts_frontend.h"
+#include "bridge/arkts_frontend/arkts_frontend_loader.h"
+#include "interfaces/inner_api/ace/arkts_module_preloader.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_engine.h"
 #include "core/common/plugin_manager.h"
@@ -62,9 +61,14 @@ const char* GetDeclarativeSharedLibrary()
 void AceContainer::InitializeStaticHybridDynamic(std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility)
 {
     // 1.2 initialization
-    frontend_ = MakeRefPtr<ArktsFrontend>(sharedRuntime_);
+    auto arktsFrontend = ArktsFrontendLoader::GetInstance().CreatArkTsFrontend(sharedRuntime_);
+    if (arktsFrontend == nullptr) {
+        LOGE("Create arktsFrontend failed.");
+        return;
+    }
+    frontend_ = arktsFrontend;
     // open statemanagement interop
-    DynamicCast<ArktsFrontend>(frontend_)->OpenStateMgmtInterop();
+    frontend_->OpenStateMgmtInterop();
 
     // 1.1 initialization
 #ifdef NG_BUILD
@@ -106,10 +110,16 @@ void AceContainer::InitializeStaticHybridDynamic(std::shared_ptr<OHOS::AppExecFw
 void AceContainer::InitializeDynamicHybridStatic(std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility)
 {
     // 1.2 initialization
-    if (!ArktsFrontend::preloadArkTSRuntime) {
+    auto preloadArkTSRuntime = ArkTSModulePreloader::GetArkTSRuntime();
+    if (!preloadArkTSRuntime) {
         LOGE("AceContainer::InitializeDynamicHybridStatic: ArktsFrontend::preloadArkTSRuntime is null, preload Fail");
     }
-    subFrontend_ = MakeRefPtr<ArktsFrontend>(ArktsFrontend::preloadArkTSRuntime);
+    auto arktsFrontend = ArktsFrontendLoader::GetInstance().CreatArkTsFrontend(preloadArkTSRuntime);
+    if (arktsFrontend == nullptr) {
+        LOGE("Create arktsFrontend failed.");
+        return;
+    }
+    subFrontend_ = arktsFrontend;
     // 1.1 initialization
     if (isFormRender_) {
 #ifdef FORM_SUPPORTED
