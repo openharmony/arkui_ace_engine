@@ -63,6 +63,28 @@ void CustomNode::SetOnWindowUnfocusedCallback(const NodeHandle node, void (*onWi
     NG::CustomNodeExtModelNG::SetOnWindowUnfocusedCallback(frameNode, std::move(onWindowUnfocusedCallback));
 }
 
+void CustomNode::SetOnWindowActivatedCallback(const NodeHandle node, void (*onWindowActivated)(NodeHandle node))
+{
+    auto* frameNode = reinterpret_cast<AceNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    
+    auto onWindowActivatedCallback = [node, onWindowActivated]() {
+        onWindowActivated(node);
+    };
+    NG::CustomNodeExtModelNG::SetOnWindowActivatedCallback(frameNode, std::move(onWindowActivatedCallback));
+}
+
+void CustomNode::SetOnWindowDeactivatedCallback(const NodeHandle node, void (*onWindowDeactivated)(NodeHandle node))
+{
+    auto* frameNode = reinterpret_cast<AceNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    
+    auto onWindowDeactivatedCallback = [node, onWindowDeactivated]() {
+        onWindowDeactivated(node);
+    };
+    NG::CustomNodeExtModelNG::SetOnWindowDeactivatedCallback(frameNode, std::move(onWindowDeactivatedCallback));
+}
+
 void CustomNode::SetOnAttachToMainTreeCallback(const NodeHandle node, void (*onAttachToMainTree)(NodeHandle node))
 {
     auto* frameNode = reinterpret_cast<AceNode*>(node);
