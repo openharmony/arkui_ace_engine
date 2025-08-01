@@ -122,6 +122,8 @@ export interface Router {
 
     getEntryRootValue(): ComputableState<IncrementalNode>
 
+    getPreState(): ComputableState<IncrementalNode> | undefined;
+
     runStartPage(options: router.RouterOptions, builder: UserViewBuilder): void
 
     showAlertBeforeBackPage(options: router.EnableAlertOptions): void
@@ -390,6 +392,13 @@ class RouterImpl implements Router {
 
     getEntryRootValue(): ComputableState<IncrementalNode> {
         return this.rootState.at(this.rootState.length - 1)!
+    }
+
+    getPreState(): ComputableState<IncrementalNode> | undefined {
+        if (this.rootState.length < 2) {
+            return undefined;
+        }
+        return this.rootState.at(this.rootState.length - 2)!
     }
 
     runStartPage(options: router.RouterOptions, builder: UserViewBuilder): void {

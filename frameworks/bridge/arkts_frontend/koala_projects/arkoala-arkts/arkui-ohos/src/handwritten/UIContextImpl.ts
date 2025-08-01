@@ -595,6 +595,16 @@ export class RouterImpl extends Router {
         return result;
     }
 
+    public getPreState(): ComputableState<IncrementalNode> | undefined {
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let result = this.router_!.getPreState();
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return result;
+    }
+
     public showAlertBeforeBackPage(options: router.EnableAlertOptions): void {
         if (this.router_ === undefined) {
             throw Error("router set in uiContext is empty");
