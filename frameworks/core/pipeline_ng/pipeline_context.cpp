@@ -3155,7 +3155,7 @@ void PipelineContext::OnTouchEvent(
             formEventMgr->HandleEtsCardTouchEvent(mockPoint, etsSerializedGesture);
             formEventMgr->RemoveEtsCardTouchEventCallback(mockPoint.id);
         }
-        NotifyDragTouchEvent(scalePoint);
+        NotifyDragTouchEvent(scalePoint, node);
         touchEvents_.emplace_back(point);
         hasIdleTasks_ = true;
         RequestFrame();
@@ -3191,7 +3191,7 @@ void PipelineContext::OnTouchEvent(
         if (scalePoint.type == TouchType::CANCEL) {
             dragEvents_.clear();
         }
-        NotifyDragTouchEvent(scalePoint);
+        NotifyDragTouchEvent(scalePoint, node);
     }
     if (scalePoint.type != TouchType::MOVE) {
         auto lastDispatchTime = eventManager_->GetLastDispatchTime();
@@ -5064,7 +5064,7 @@ void PipelineContext::OnDragEvent(const DragPointerEvent& pointerEvent, DragEven
     }
     manager->HandleDragEvent(pointerEvent, action, node);
     if (action == DragEventAction::DRAG_EVENT_MOVE) {
-        manager->SetDragAnimationPointerEvent(pointerEvent);
+        manager->SetDragAnimationPointerEvent(pointerEvent, node);
         dragEvents_[node].emplace_back(pointerEvent);
         RequestFrame();
     }
@@ -5074,11 +5074,11 @@ void PipelineContext::OnDragEvent(const DragPointerEvent& pointerEvent, DragEven
     }
 }
 
-void PipelineContext::NotifyDragTouchEvent(const TouchEvent& event)
+void PipelineContext::NotifyDragTouchEvent(const TouchEvent& event, const RefPtr<NG::FrameNode>& node)
 {
     auto manager = GetDragDropManager();
     CHECK_NULL_VOID(manager);
-    manager->HandleTouchEvent(event);
+    manager->HandleTouchEvent(event, node);
 }
 
 void PipelineContext::NotifyDragMouseEvent(const MouseEvent& event)

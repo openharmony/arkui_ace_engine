@@ -136,6 +136,7 @@ public:
         DragSummaryInfo& dragSummaryInfo, int32_t& ret);
     static void EnvelopedData(std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction, std::string& udKey,
         DragSummaryInfo& dragSummaryInfo, int32_t& dataSize);
+    static RefPtr<UINode> FindWindowScene(RefPtr<FrameNode>& targetNode);
 
 private:
     static void GetPointerEventAction(const TouchEvent& touchPoint, DragPointerEvent& event);

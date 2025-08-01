@@ -496,10 +496,8 @@ public:
         return dragAnimationPointerEvent_;
     }
 
-    void SetDragAnimationPointerEvent(const DragPointerEvent& pointerEvent)
-    {
-        dragAnimationPointerEvent_ = pointerEvent;
-    }
+    void SetDragAnimationPointerEvent(
+        const DragPointerEvent& pointerEvent, const RefPtr<NG::FrameNode>& node = nullptr);
 
     bool IsDragFwkShow() const
     {
@@ -670,13 +668,18 @@ public:
 
     void UpdatePointInfoForFinger(int32_t pointerId, Point point);
 
-    void HandleTouchEvent(const TouchEvent& event);
+    void HandleTouchEvent(const TouchEvent& event, const RefPtr<NG::FrameNode>& node = nullptr);
     void HandleMouseEvent(const MouseEvent& event);
     void HandlePipelineOnHide();
 
     void ResetBundleInfo();
 
     void RequireBundleInfo();
+
+    void SetRootNode(RefPtr<FrameNode>& rootNode)
+    {
+        rootNode_ = rootNode;
+    }
 
 private:
     double CalcDragPreviewDistanceWithPoint(
@@ -751,6 +754,7 @@ private:
     RefPtr<FrameNode> draggedGridFrameNode_;
     RefPtr<FrameNode> preGridTargetFrameNode_;
     RefPtr<FrameNode> itemDragOverlayNode_;
+    RefPtr<FrameNode> rootNode_ = nullptr;
     RefPtr<Clipboard> clipboard_;
     Point preMovePoint_ = Point(0, 0);
     DragPointerEvent preDragPointerEvent_;

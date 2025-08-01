@@ -1524,4 +1524,45 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage042
     DragDropFuncWrapper::EnvelopedData(dragAction, udKey, dragSummaryInfo, dataSize);
     EXPECT_EQ(dataSize, 1);
 }
+
+/**
+ * @tc.name: Test DragDropFuncWrapperTestNgCoverage043
+ * @tc.desc: Test FindWindowScene func
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage043, TestSize.Level1)
+{
+    auto rootNode = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(rootNode, nullptr);
+    auto frameNode1 = FrameNode::CreateFrameNode("framenode", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<Pattern>(), false);
+    rootNode->AddChild(frameNode1);
+    ASSERT_NE(frameNode1, nullptr);
+
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    container->isSceneBoardWindow_ = true;
+
+    auto windowScene = DragDropFuncWrapper::FindWindowScene(frameNode1);
+    EXPECT_EQ(windowScene, rootNode);
+
+    auto frameNode2 = FrameNode::CreateFrameNode("framenode", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<Pattern>(), false);
+    frameNode1->AddChild(frameNode2);
+    ASSERT_NE(frameNode2, nullptr);
+    windowScene = DragDropFuncWrapper::FindWindowScene(frameNode2);
+    EXPECT_EQ(windowScene, rootNode);
+
+    auto frameNode3 = FrameNode::CreateFrameNode("framenode", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode3, nullptr);
+    windowScene = DragDropFuncWrapper::FindWindowScene(frameNode3);
+    EXPECT_EQ(windowScene, nullptr);
+
+    container->isSceneBoardWindow_ = false;
+    windowScene = DragDropFuncWrapper::FindWindowScene(frameNode3);
+    EXPECT_EQ(windowScene, nullptr);
+}
 } // namespace OHOS::Ace::NG
