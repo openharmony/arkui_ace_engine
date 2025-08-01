@@ -2539,6 +2539,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg405, TestSize.Level1)
     ASSERT_NE(context_, nullptr);
     context_->OnShow();
     EXPECT_TRUE(context_->isNeedCallbackAreaChange_);
+
     context_->OnHide();
     EXPECT_TRUE(context_->isNeedCallbackAreaChange_);
 }
