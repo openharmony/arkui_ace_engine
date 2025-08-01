@@ -1762,6 +1762,7 @@ protected:
     RefPtr<TextFieldSelectOverlay> selectOverlay_;
 
 private:
+    void OnSyncGeometryNode(const DirtySwapConfig& config) override;
     Offset ConvertTouchOffsetToTextOffset(const Offset& touchOffset);
     void GetTextSelectRectsInRangeAndWillChange();
     bool BeforeIMEInsertValue(const std::u16string& insertValue, int32_t offset);
