@@ -452,4 +452,55 @@ HWTEST_F(DatePickerTestToss, GetDisappearTextStyle001, TestSize.Level1)
     EXPECT_EQ(curTextStyle.fontStyle.value(), Ace::FontStyle::ITALIC);
     EXPECT_EQ(curTextStyle.textColor.value(), Color::WHITE);
 }
+
+/**
+ * @tc.name: OnAttachToFrameNode001
+ * @tc.desc: Test OnAttachToFrameNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestToss, OnAttachToFrameNode001, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    frameNode->MarkModifyDone();
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild()->GetLastChild());
+    ASSERT_NE(columnNode, nullptr);
+    auto columnPattern = columnNode->GetPattern<PickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+
+    columnPattern->OnAttachToFrameNode();
+    EXPECT_TRUE(columnPattern->tossAnimationController_);
+    EXPECT_NE(columnPattern->jumpInterval_, 0.f);
+}
+
+/**
+ * @tc.name: OnDetachFromFrameNode001
+ * @tc.desc: Test OnDetachFromFrameNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestToss, OnDetachFromFrameNode001, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    frameNode->MarkModifyDone();
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild()->GetLastChild());
+    ASSERT_NE(columnNode, nullptr);
+    auto columnPattern = columnNode->GetPattern<PickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+    auto pipeline = columnNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+
+    auto onWindowStateChangedCallbacks = pipeline->onWindowStateChangedCallbacks_.size();
+    columnPattern->OnDetachFromFrameNode(frameNode);
+
+    EXPECT_EQ(pipeline->onWindowStateChangedCallbacks_.size(), onWindowStateChangedCallbacks);
+}
 } // namespace OHOS::Ace::NG
