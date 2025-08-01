@@ -27,8 +27,8 @@ import { ResourceColor, Length, ResourceStr, Font } from "./units"
 import { FontWeight, FontStyle, Color, TextOverflow, TextHeightAdaptivePolicy } from "./enums"
 import { Resource } from "global.resource"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { ButtonModifier } from "../ButtonModifier"
 import { hookButtonAttributeModifier, hookButtonContentModifier } from "../handwritten"
+import { ButtonModifier } from "../ButtonModifier"
 export class ArkButtonPeer extends ArkCommonMethodPeer {
     _attributeSet?: ButtonModifier;
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
