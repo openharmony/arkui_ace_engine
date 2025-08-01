@@ -476,7 +476,7 @@ export struct OperateItemStruct {
   @State iconColor: ResourceColor = $r('sys.color.composeListItem_right_icon_normal_color');
   @Link @Watch('onPropChange') isChecked: boolean;
   private controller: OperateItemStructController = new OperateItemStructController();
-  @State @Watch('onPropChange') contentItem: ContentItem | null = null;
+  @State @Watch('onPropChange') contentItem?: ContentItem;
   @Link containerDirection: FlexDirection
   @State flexTextWidth: number = 0
   @State rowTextWidth: number = 0
@@ -1053,8 +1053,8 @@ function getAccessibilityLevelOnAction(accessibilityLevel?: string, onAction?: (
 
 @Component
 export struct ComposeListItem {
-  @PropRef @Watch('onPropChange') contentItem: ContentItem | null = null;
-  @PropRef @Watch('onPropChange') operateItem: OperateItem | null = null;
+  @PropRef @Watch('onPropChange') contentItem?: ContentItem;
+  @PropRef @Watch('onPropChange') operateItem?: OperateItem;
   @State frontColor: ResourceColor | undefined = $r('sys.color.composeListItem_container_normal_color');
   @State borderSize: number = 0;
   @State canFocus: boolean = false;
