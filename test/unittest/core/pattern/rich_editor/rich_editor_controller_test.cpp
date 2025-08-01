@@ -1143,5 +1143,8 @@ HWTEST_F(RichEditorControllerTest, RichEditorController23, TestSize.Level1)
     richEditorController->SetSelection(0, 2);
     EXPECT_EQ(richEditorPattern->textSelector_.GetTextStart(), 0);
     EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 2);
+    richEditorController->SetSelection(-1, -1);
+    EXPECT_EQ(richEditorPattern->textSelector_.GetTextStart(), 0);
+    EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 6);
 }
 }
