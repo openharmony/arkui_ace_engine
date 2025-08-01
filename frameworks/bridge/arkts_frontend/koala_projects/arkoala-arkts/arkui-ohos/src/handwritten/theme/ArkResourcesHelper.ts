@@ -14,6 +14,7 @@
  */
 
 import { Resource } from 'global.resource';
+import { _r } from 'arkui.component.resources';
 
 export class ArkResourcesHelper {
     static COLOR: int = 10001;
@@ -26,6 +27,9 @@ export class ArkResourcesHelper {
         if (strType === 'float') {
             type = ArkResourcesHelper.FLOAT;
         }
-        return { 'id': id ?? -1, 'type': type, 'params': [name], 'bundleName': '', 'moduleName': '' } as Resource;
+        if (!id || id === -1) {
+            return _r("", "", name);
+        }
+        return _r(id, type, "", "");
     }
 }

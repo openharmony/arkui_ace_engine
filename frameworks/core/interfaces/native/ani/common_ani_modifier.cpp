@@ -14,6 +14,7 @@
  */
 #include "common_ani_modifier.h"
 #include "ani_utils.h"
+#include "ui/properties/color.h"
 #include "base/log/log.h"
 #include "base/memory/ace_type.h"
 #include "core/common/container.h"
@@ -631,36 +632,11 @@ void SendThemeToNative(ani_env* env, const std::vector<ani_object>& colorArray, 
     }
 }
 
-void SetDefaultTheme(ani_env* env, ani_array colorArray, ani_boolean isDark)
+void SetDefaultTheme(ani_env* env, const Array_ResourceColor& colorArray, ani_boolean isDark)
 {
     auto isDarkValue = static_cast<bool>(isDark);
-    ani_size length;
-    env->Array_GetLength(colorArray, &length);
-    if (length < TokenColors::TOTAL_NUMBER) {
-        LOGW("colorArray incorrect in SetDefaultTheme");
-    }
     std::vector<uint32_t> colors;
-    auto basisTheme = TokenThemeStorage::GetInstance()->ObtainSystemTheme();
-    for (size_t i = 0; i < TokenColors::TOTAL_NUMBER; i++) {
-        // type ResourceColor = number | string | Resource
-        ani_ref value;
-        auto status = env->Array_Get(colorArray, i, &value);
-        if (status != ANI_OK) {
-            LOGW("SetDefaultTheme colorArray get index: %{public}d failed", i);
-            continue;
-        }
-        Color color;
-        bool isColorAvailable = false;
-        if (!ResourceAniModifier::ParseAniColor(env, static_cast<ani_object>(value), color)) {
-            if (basisTheme) {
-                color = basisTheme->Colors()->GetByIndex(i);
-                isColorAvailable = true;
-            }
-        } else {
-            isColorAvailable = true;
-        }
-        colors.push_back(color.GetValue());
-    }
+    AniThemeModule::ConvertToColorArray(colorArray, colors);
     NodeModifier::GetThemeModifier()->setDefaultTheme(colors.data(), isDarkValue);
 }
 

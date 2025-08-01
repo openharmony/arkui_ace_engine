@@ -29,6 +29,11 @@ ohos_shared_library("arkoala_native_ani") {
 
   include_dirs = [ "./" ]
 
+  deps = []
+  if (!build_ohos_sdk) {
+    deps += ["$ace_root/frameworks/bridge/arkts_frontend:ArkoalaNative_ark"]
+  }
+
   sources = [
     "animation/animation_ani_impl.cpp",
     "canvas/canvas_module.cpp",
@@ -43,6 +48,7 @@ ohos_shared_library("arkoala_native_ani") {
     "interop/interop_module.cpp",
     "load.cpp",
     "module.cpp",
+    # "resource/resource_module.cpp",
     "shape/shape_module_methods.cpp",
     "styled_string/styled_string_module.cpp",
     "utils/ani_trace.cpp",

@@ -15,6 +15,7 @@
 
 #include "common_module.h"
 
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <vector>
@@ -23,6 +24,7 @@
 #include "load.h"
 
 #include "base/utils/utils.h"
+#include "bridge/arkts_frontend/koala_projects/arkoala/framework/native/src/color.h"
 #ifndef __linux__
 #include "pixel_map_taihe_ani.h"
 #endif
@@ -698,12 +700,13 @@ void SendThemeToNative(ani_env* env, ani_object aniClass, ani_array colorArray, 
     modifier->getCommonAniModifier()->sendThemeToNative(env, colors, id);
 }
 
-void SetDefaultTheme(ani_env* env, ani_object aniClass, ani_array colorArray, ani_boolean isDark)
+void SetDefaultTheme(ani_env* env, ani_object aniClass, ani_long thisArray, ani_double thisLength, ani_boolean isDark)
 {
     const auto* modifier = GetNodeAniModifier();
     if (!modifier) {
         return;
     }
+    Array_ResourceColor colorArray = GetResourceColorArray(thisArray, thisLength);
     modifier->getCommonAniModifier()->setDefaultTheme(env, colorArray, isDark);
 }
 

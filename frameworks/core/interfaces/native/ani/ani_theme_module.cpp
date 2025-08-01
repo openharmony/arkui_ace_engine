@@ -15,7 +15,12 @@
 
 #include "core/interfaces/native/ani/ani_theme_module.h"
 
+#include <cstdint>
+
+#include "bridge/arkts_frontend/arkts_ani_utils.h"
 #include "core/common/resource/resource_manager.h"
+#include "core/components_ng/token_theme/token_theme_storage.h"
+#include "core/interfaces/native/utility/converter.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -74,5 +79,28 @@ ColorMode AniThemeModule::MapAniColorModeToColorMode(int32_t aniColorMode)
             return ColorMode::COLOR_MODE_UNDEFINED;
     }
     return ColorMode::COLOR_MODE_UNDEFINED;
+}
+
+void AniThemeModule::ConvertToColorArray(
+    const Array_ResourceColor& colorArray, std::vector<uint32_t>& colors)
+{
+    auto basisTheme = TokenThemeStorage::GetInstance()->ObtainSystemTheme();
+    for (int i = 0; i < colorArray.length; i++) {
+        // type ResourceColor = number | string | Resource
+        auto value = colorArray.array[i];
+        Color color;
+        bool isColorAvailable = false;
+        const auto convColor = Converter::OptConvert<Color>(value);
+        if (!convColor.has_value()) {
+            if (basisTheme) {
+                color = basisTheme->Colors()->GetByIndex(i);
+                isColorAvailable = true;
+            }
+        } else {
+            color = convColor.value();
+            isColorAvailable = true;
+        }
+        colors.push_back(color.GetValue());
+    }
 }
 } // namespace OHOS::Ace::NG
