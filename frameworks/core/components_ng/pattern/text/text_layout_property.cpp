@@ -186,6 +186,7 @@ void TextLayoutProperty::ToJsonValueForOption(std::unique_ptr<JsonValue>& json, 
     json->PutExtAttr("maxFontScale", std::to_string(GetMaxFontScale().value_or(MAXFONTSCALE)).c_str(), filter);
     json->PutExtAttr("lineSpacing", GetLineSpacing().value_or(0.0_vp).ToString().c_str(), filter);
     json->PutExtAttr("onlyBetweenLines", GetIsOnlyBetweenLines().value_or(false) ? "true" : "false", filter);
+    json->PutExtAttr("optimizeTrailingSpace", GetOptimizeTrailingSpace().value_or(false) ? "true" : "false", filter);
 
     if (GetTextEffectStrategyValue(TextEffectStrategy::NONE) != TextEffectStrategy::NONE) {
         auto jsonNumericTransiton = JsonUtil::Create(true);
