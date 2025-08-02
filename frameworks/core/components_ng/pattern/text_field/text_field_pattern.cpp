@@ -9653,6 +9653,7 @@ PreviewTextStyle TextFieldPattern::GetPreviewTextStyle() const
     CHECK_NULL_RETURN(paintProperty, defaultStyle);
     if (paintProperty->HasPreviewTextStyle()) {
         auto style = paintProperty->GetPreviewTextStyle();
+        CHECK_NULL_RETURN(style, defaultStyle);
         if (style.value() == PREVIEW_STYLE_NORMAL) {
             return PreviewTextStyle::NORMAL;
         } else if (style.value() == PREVIEW_STYLE_UNDERLINE) {

@@ -3717,7 +3717,8 @@ HWTEST_F(SearchTestTwoNg, searchMeasureTest01, TestSize.Level1)
     ASSERT_NE(pipeline, nullptr);
 
     /**
-    * @tc.steps: case
+    * @tc.steps: test TextFieldMeasure with different LayoutCalPolicy.
+    * @tc.expected: GetLayoutCalPolicy is right LayoutCalPolicy.
     */
     auto layoutWrapperPtr = AccessibilityManager::RawPtr(layoutWrapper);
     layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);

@@ -378,6 +378,7 @@ void PasswordResponseArea::Refresh()
     if (!IsShowSymbol() && !IsSymbolIcon()) {
         auto imageLayoutProperty = iconNode->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(imageLayoutProperty);
+        CHECK_NULL_VOID(imageLayoutProperty->HasImageSourceInfo());
         auto currentSrc = imageLayoutProperty->GetImageSourceInfoValue().GetSrc();
         LoadImageSourceInfo();
         auto src = isObscured_ ? hideIcon_->GetSrc() : showIcon_->GetSrc();

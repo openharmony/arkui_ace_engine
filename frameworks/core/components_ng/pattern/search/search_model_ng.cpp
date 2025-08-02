@@ -143,6 +143,7 @@ RefPtr<SearchNode> SearchModelNG::CreateSearchNode(int32_t nodeId, const std::op
     CHECK_NULL_RETURN(frameNode, nullptr);
     ViewStackProcessor::GetInstance()->ApplyParentThemeScopeId(frameNode);
     auto pattern = frameNode->GetPattern<SearchPattern>();
+    CHECK_NULL_RETURN(pattern, frameNode);
     pattern->SetSearchNode(frameNode);
 
     bool hasTextFieldNode = frameNode->HasTextFieldNode();

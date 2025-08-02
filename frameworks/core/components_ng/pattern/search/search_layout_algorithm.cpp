@@ -165,6 +165,7 @@ void SearchLayoutAlgorithm::TextFieldMeasure(LayoutWrapper* layoutWrapper)
 
     UpdateFontFeature(layoutWrapper);
     auto constraint = layoutProperty->GetLayoutConstraint();
+    CHECK_NULL_VOID(constraint);
     auto searchWidthMax = CalcSearchWidth(constraint.value(), layoutWrapper);
 
     auto textFieldWidth = CalculateTextFieldWidth(layoutWrapper, searchWidthMax, searchTheme);
@@ -373,6 +374,7 @@ void SearchLayoutAlgorithm::SearchButtonMeasure(LayoutWrapper* layoutWrapper)
     buttonLayoutProperty->UpdatePixelRound(pixelRound);
 
     // compute searchButton width
+    CHECK_NULL_VOID(layoutProperty->GetLayoutConstraint());
     auto searchWidthMax = CalcSearchWidth(layoutProperty->GetLayoutConstraint().value(), layoutWrapper);
     double searchButtonWidth = searchWidthMax * MAX_SEARCH_BUTTON_RATE;
     double curSearchButtonWidth = buttonGeometryNode->GetFrameSize().Width();
@@ -475,6 +477,7 @@ void SearchLayoutAlgorithm::SelfMeasure(LayoutWrapper* layoutWrapper)
     auto layoutProperty = AceType::DynamicCast<SearchLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     auto constraint = layoutProperty->GetLayoutConstraint();
+    CHECK_NULL_VOID(constraint);
     auto searchHeight = CalcSearchHeight(constraint.value(), layoutWrapper);
     UpdateClipBounds(layoutWrapper, searchHeight);
     // update search height
