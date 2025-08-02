@@ -400,6 +400,9 @@ private:
     bool CheckNeedUpdateParentNode(const RefPtr<UINode>& node);
     void RemoveJsChildImmediately(const RefPtr<FrameNode>& preNode, bool preUseCustomTransition,
         int32_t preAnimationId);
+    bool CheckEnableCustomNodeDel() const {
+        return false;
+    }
 
     void StartSoftOpacityAnimationPush(const RefPtr<FrameNode>& curNode);
     void StartSoftOpacityAnimationPop(const RefPtr<FrameNode>& preNode);
