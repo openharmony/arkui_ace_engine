@@ -1700,4 +1700,12 @@ export class UIContextImpl extends UIContext {
     public checkThread(id: int32) : boolean {
         return ArkUIAniModule._CheckIsUIThread(id) !== 0;
     }
+    
+    public getFilteredInspectorTree(filters?: Array<string>): string {
+        return inspector.getFilteredInspectorTree(filters);
+    }
+ 
+    public getFilteredInspectorTreeById(id: string, depth: number, filters?: Array<string>): string {
+        return inspector.getFilteredInspectorTreeById(id, depth, filters);
+    }
 }
