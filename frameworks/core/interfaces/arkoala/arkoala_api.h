@@ -7133,10 +7133,10 @@ struct ArkUINDKRenderNodeModifier {
         ArkUI_Uint32 right, ArkUI_Uint32 bottom);
     ArkUI_Int32 (*getBorderColor)(ArkUIRenderNodeHandle node, ArkUI_Uint32* left, ArkUI_Uint32* top,
         ArkUI_Uint32* right, ArkUI_Uint32* bottom);
-    ArkUI_Int32 (*setBorderRadius)(ArkUIRenderNodeHandle node, ArkUI_Float32 left, ArkUI_Float32 top,
-        ArkUI_Float32 right, ArkUI_Float32 bottom);
-    ArkUI_Int32 (*getBorderRadius)(ArkUIRenderNodeHandle node, ArkUI_Float32* left, ArkUI_Float32* top,
-        ArkUI_Float32* right, ArkUI_Float32* bottom);
+    ArkUI_Int32 (*setBorderRadius)(ArkUIRenderNodeHandle node, ArkUI_Float32 topLeft, ArkUI_Float32 topRight,
+        ArkUI_Float32 bottomLeft, ArkUI_Float32 bottomRight);
+    ArkUI_Int32 (*getBorderRadius)(ArkUIRenderNodeHandle node, ArkUI_Float32* topLeft, ArkUI_Float32* topRight,
+        ArkUI_Float32* bottomLeft, ArkUI_Float32* bottomRight);
     ArkUI_Int32 (*setMarkNodeGroup)(ArkUIRenderNodeHandle node, ArkUI_Bool markNodeGroup);
     ArkUI_Int32 (*setBounds)(ArkUIRenderNodeHandle node, ArkUI_Uint32 x, ArkUI_Uint32 y,
         ArkUI_Uint32 width, ArkUI_Uint32 height);

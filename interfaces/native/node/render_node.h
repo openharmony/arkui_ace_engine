@@ -113,11 +113,11 @@ struct ArkUI_NodeBorderColor {
  *
  * @since 20
  */
-struct ArkUI_NodeBorderRadius{
-    float leftRadius;
-    float rightRadius;
-    float topRadius;
-    float bottomRadius;
+struct ArkUI_NodeBorderRadius {
+    float topLeftRadius;
+    float topRightRadius;
+    float bottomLeftRadius;
+    float bottomRightRadius;
 };
 
 /**
@@ -160,10 +160,19 @@ struct ArkUI_CommandPath {
     const char* commands;
 };
 
-struct ArkUI_RenderNodeOption {
+struct ArkUI_RenderNodeMaskOption {
     uint32_t fillColor;
     uint32_t strokeColor;
     float strokeWidth;
+    ArkUIRectShape rect;
+    ArkUICircleShape circle;
+    ArkUIRoundRectShape roundRect;
+    ArkUIRectShape oval;
+    const char* commands;
+    int32_t type;
+};
+
+struct ArkUI_RenderNodeClipOption {
     ArkUIRectShape rect;
     ArkUICircleShape circle;
     ArkUIRoundRectShape roundRect;

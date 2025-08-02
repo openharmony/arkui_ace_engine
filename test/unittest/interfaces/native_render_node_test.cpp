@@ -650,8 +650,8 @@ HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest121, TestSize.Level1)
 {
     auto borderRadius = OH_ArkUI_RenderNodeUtils_CreateNodeBorderRadiusOption();
     ASSERT_NE(borderRadius, nullptr);
-    OH_ArkUI_RenderNodeUtils_SetNodeBorderRadiusOptionEdgeRadius(borderRadius, 10, ARKUI_EDGE_DIRECTION_TOP);
-    OH_ArkUI_RenderNodeUtils_SetNodeBorderRadiusOptionEdgeRadius(borderRadius, 15, ARKUI_EDGE_DIRECTION_BOTTOM);
+    OH_ArkUI_RenderNodeUtils_SetNodeBorderRadiusOptionCornerRadius(borderRadius, 10, ARKUI_CORNER_DIRECTION_TOP_LEFT);
+    OH_ArkUI_RenderNodeUtils_SetNodeBorderRadiusOptionCornerRadius(borderRadius, 15, ARKUI_CORNER_DIRECTION_TOP_RIGHT);
     OH_ArkUI_RenderNodeUtils_DisposeNodeBorderRadiusOption(borderRadius);
 }
 
@@ -994,10 +994,10 @@ HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest201, TestSize.Level1)
     ASSERT_NE(borderStyle1, nullptr);
     result = OH_ArkUI_RenderNodeUtils_GetBorderStyle(rootRenderNode, &borderStyle1);
     ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
-    ASSERT_EQ(borderStyle1->leftStyle, ArkUI_BorderStyle::ARKUI_BORDER_STYLE_NONE);
-    ASSERT_EQ(borderStyle1->rightStyle, ArkUI_BorderStyle::ARKUI_BORDER_STYLE_NONE);
-    ASSERT_EQ(borderStyle1->topStyle, ArkUI_BorderStyle::ARKUI_BORDER_STYLE_NONE);
-    ASSERT_EQ(borderStyle1->bottomStyle, ArkUI_BorderStyle::ARKUI_BORDER_STYLE_NONE);
+    ASSERT_EQ(borderStyle1->leftStyle, ArkUI_BorderStyle::ARKUI_BORDER_STYLE_SOLID);
+    ASSERT_EQ(borderStyle1->rightStyle, ArkUI_BorderStyle::ARKUI_BORDER_STYLE_SOLID);
+    ASSERT_EQ(borderStyle1->topStyle, ArkUI_BorderStyle::ARKUI_BORDER_STYLE_SOLID);
+    ASSERT_EQ(borderStyle1->bottomStyle, ArkUI_BorderStyle::ARKUI_BORDER_STYLE_SOLID);
     OH_ArkUI_RenderNodeUtils_DisposeNodeBorderStyleOption(borderStyle1);
 }
  
@@ -1093,10 +1093,10 @@ HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest204, TestSize.Level1)
     ASSERT_NE(borderRadius1, nullptr);
     result = OH_ArkUI_RenderNodeUtils_GetBorderRadius(rootRenderNode, &borderRadius1);
     ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
-    ASSERT_EQ(borderRadius1->leftRadius, 0.0f);
-    ASSERT_EQ(borderRadius1->rightRadius, 0.0f);
-    ASSERT_EQ(borderRadius1->topRadius, 0.0f);
-    ASSERT_EQ(borderRadius1->bottomRadius, 0.0f);
+    ASSERT_EQ(borderRadius1->topLeftRadius, 0.0f);
+    ASSERT_EQ(borderRadius1->topRightRadius, 0.0f);
+    ASSERT_EQ(borderRadius1->bottomLeftRadius, 0.0f);
+    ASSERT_EQ(borderRadius1->bottomRightRadius, 0.0f);
     OH_ArkUI_RenderNodeUtils_DisposeNodeBorderRadiusOption(borderRadius1);
 }
  
