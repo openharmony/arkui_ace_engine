@@ -31,6 +31,12 @@ export class ArkGridColNode extends ArkBaseNode implements GridColAttribute {
         return this;
     }
 
+    initialize(option?: GridColOptions): this {
+        const option_casted = option as (GridColOptions | undefined);
+        this.getPeer()?.setGridColOptionsAttribute(option_casted);
+        return this;
+    }
+
     getPeer(): ArkGridColPeer {
         return this.peer as ArkGridColPeer;
     }

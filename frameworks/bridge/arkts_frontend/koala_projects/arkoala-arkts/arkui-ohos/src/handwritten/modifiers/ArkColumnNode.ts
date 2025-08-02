@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { InteropNativeModule } from '@koalaui/interop';
+import { InteropNativeModule, runtimeType, RuntimeType } from '@koalaui/interop';
 import { ColumnAttribute, HorizontalAlign, FlexAlign, PointLightStyle, ArkColumnPeer, ColumnOptions,
     ColumnOptionsV2 } from '../../component';
 import { ArkBaseNode } from './ArkBaseNode';
@@ -34,6 +34,16 @@ export class ArkColumnNode extends ArkBaseNode implements ColumnAttribute {
 
     getPeer() : ArkColumnPeer {
         return this.peer as ArkColumnPeer;
+    }
+
+    initialize(options?: ColumnOptions | ColumnOptionsV2): this {
+        const options_type = runtimeType(options)
+        if ((RuntimeType.OBJECT == options_type) || (RuntimeType.UNDEFINED == options_type)) {
+            const options_casted = options as (ColumnOptions | ColumnOptionsV2 | undefined);
+            this.getPeer()?.setColumnOptions1Attribute(options_casted);
+            return this;
+        }
+        throw new Error("Can not select appropriate overload");
     }
 
     alignItems(value: HorizontalAlign | undefined): this {

@@ -164,15 +164,10 @@ export class ArkColumnComponent extends ArkCommonMethodComponent implements Colu
     getPeer(): ArkColumnPeer {
         return (this.peer as ArkColumnPeer)
     }
-    public setColumnOptions(options?: ColumnOptions | ColumnOptions | ColumnOptionsV2): this {
+    public setColumnOptions(options?: ColumnOptions | ColumnOptionsV2): this {
         if (this.checkPriority("setColumnOptions")) {
             const options_type = runtimeType(options)
             if ((RuntimeType.OBJECT == options_type) || (RuntimeType.UNDEFINED == options_type)) {
-                const options_casted = options as (ColumnOptions | undefined)
-                this.getPeer()?.setColumnOptions0Attribute(options_casted)
-                return this
-            }
-            if ((RuntimeType.OBJECT == options_type) || (RuntimeType.OBJECT == options_type) || (RuntimeType.UNDEFINED == options_type)) {
                 const options_casted = options as (ColumnOptions | ColumnOptionsV2 | undefined)
                 this.getPeer()?.setColumnOptions1Attribute(options_casted)
                 return this

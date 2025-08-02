@@ -27,6 +27,11 @@ export class ArkDividerNode extends ArkBaseNode implements DividerAttribute {
         return this;
     }
 
+    initialize(): this {
+        this.getPeer()?.setDividerOptionsAttribute();
+        return this;
+    }
+
     getPeer(): ArkDividerPeer {
         return this.peer as ArkDividerPeer;
     }

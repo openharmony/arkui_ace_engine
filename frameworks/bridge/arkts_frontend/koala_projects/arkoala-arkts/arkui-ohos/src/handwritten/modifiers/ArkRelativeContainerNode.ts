@@ -34,6 +34,11 @@ export class ArkRelativeContainerNode extends ArkBaseNode implements RelativeCon
         return this.peer as ArkRelativeContainerPeer;
     }
 
+    initialize(): this {
+        this.getPeer()?.setRelativeContainerOptionsAttribute();
+        return this;
+    }
+
     guideLine(value: Array<GuideLineStyle> | undefined): this {
         const value_casted = value as (Array<GuideLineStyle> | undefined);
         this.getPeer()?.guideLineAttribute(value_casted);
