@@ -754,8 +754,16 @@ private:
     RefPtr<NavDestinationContext> GetHomeDestinationContext();
     bool GetHomeDestinationName(const RefPtr<FrameNode>& hostNode, std::string& name);
 
-    bool IsNavBarHasContent();
+    //-------for force split------- begin------
+    bool IsNavBarValid();
     bool IsHideNavBarInForceSplitModeNeeded();
+    void ReplaceNodeWithProxyNodeIfNeeded(
+        const RefPtr<FrameNode>& navContentNode, const RefPtr<NavDestinationGroupNode>& node);
+    void RestoreNodeFromProxyNodeIfNeeded(const RefPtr<FrameNode>& primaryContentNode,
+        const RefPtr<FrameNode>& navContentNode, const RefPtr<NavDestinationGroupNode>& node);
+    void ReorderPrimaryNodes(const RefPtr<FrameNode>& primaryContentNode,
+        const std::vector<WeakPtr<NavDestinationGroupNode>>& nodes);
+    //-------for force split------- end  ------
 
     NavigationMode navigationMode_ = NavigationMode::AUTO;
     std::function<void(std::string)> builder_;
