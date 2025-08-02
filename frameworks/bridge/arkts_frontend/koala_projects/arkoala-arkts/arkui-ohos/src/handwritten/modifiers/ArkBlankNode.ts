@@ -31,6 +31,12 @@ export class ArkBlankNode extends ArkBaseNode implements BlankAttribute {
         return this;
     }
 
+    initialize(min?: number | string): this {
+        const min_casted = min as (number | string | undefined);
+        this.getPeer()?.setBlankOptionsAttribute(min_casted);
+        return this;
+    }
+
     getPeer(): ArkBlankPeer {
         return this.peer as ArkBlankPeer;
     }

@@ -34,6 +34,12 @@ export class ArkGridRowNode extends ArkBaseNode implements GridRowAttribute {
     getPeer(): ArkGridRowPeer {
         return this.peer as ArkGridRowPeer;
     }
+    
+    initialize(option?: GridRowOptions): this {
+        const option_casted = option as (GridRowOptions | undefined);
+        this.getPeer()?.setGridRowOptionsAttribute(option_casted);
+        return this;
+    }
 
     onBreakpointChange(value: ((breakpoints: string) => void) | undefined): this {
         const value_casted = value as (((breakpoints: string) => void) | undefined);

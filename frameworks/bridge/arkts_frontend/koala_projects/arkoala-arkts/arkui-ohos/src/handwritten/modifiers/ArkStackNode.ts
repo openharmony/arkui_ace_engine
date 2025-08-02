@@ -35,6 +35,12 @@ export class ArkStackNode extends ArkBaseNode implements StackAttribute {
         return this.peer as ArkStackPeer;
     }
 
+    initialize(options?: StackOptions): this {
+        const options_casted = options as (StackOptions | undefined);
+        this.getPeer()?.setStackOptionsAttribute(options_casted);
+        return this;
+    }
+
     alignContent(value: Alignment | undefined): this {
         const value_casted = value as (Alignment | undefined);
         this.getPeer()?.alignContentAttribute(value_casted);

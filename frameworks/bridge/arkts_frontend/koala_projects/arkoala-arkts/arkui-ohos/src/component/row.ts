@@ -159,15 +159,10 @@ export class ArkRowComponent extends ArkCommonMethodComponent implements RowAttr
     getPeer(): ArkRowPeer {
         return (this.peer as ArkRowPeer)
     }
-    public setRowOptions(options?: RowOptions | RowOptions | RowOptionsV2): this {
+    public setRowOptions(options?: RowOptions | RowOptionsV2): this {
         if (this.checkPriority("setRowOptions")) {
             const options_type = runtimeType(options)
             if ((RuntimeType.OBJECT == options_type) || (RuntimeType.UNDEFINED == options_type)) {
-                const options_casted = options as (RowOptions | undefined)
-                this.getPeer()?.setRowOptions0Attribute(options_casted)
-                return this
-            }
-            if ((RuntimeType.OBJECT == options_type) || (RuntimeType.OBJECT == options_type) || (RuntimeType.UNDEFINED == options_type)) {
                 const options_casted = options as (RowOptions | RowOptionsV2 | undefined)
                 this.getPeer()?.setRowOptions1Attribute(options_casted)
                 return this

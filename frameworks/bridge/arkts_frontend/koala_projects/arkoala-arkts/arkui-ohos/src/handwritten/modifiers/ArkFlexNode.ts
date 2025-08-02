@@ -32,6 +32,12 @@ export class ArkFlexNode extends ArkBaseNode implements FlexAttribute {
         return this;
     }
 
+    initialize(value?: FlexOptions): this {
+        const value_casted = value as (FlexOptions | undefined);
+        this.getPeer()?.setFlexOptionsAttribute(value_casted);
+        return this;
+    }
+
     getPeer(): ArkFlexPeer {
         return this.peer as ArkFlexPeer;
     }
