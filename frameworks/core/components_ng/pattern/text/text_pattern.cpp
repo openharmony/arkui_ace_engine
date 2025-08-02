@@ -3892,8 +3892,28 @@ void TextPattern::DumpSimplifyInfo(std::unique_ptr<JsonValue>& json)
 {
     auto textLayoutProp = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProp);
-    if (!IsSetObscured()) {
-        json->Put("content", UtfUtils::Str16DebugToStr8(textLayoutProp->GetContent().value_or(u" ")).c_str());
+    if (IsSetObscured()) {
+        json->Put("content", "");
+        return;
+    }
+    auto textValue = UtfUtils::Str16DebugToStr8(textLayoutProp->GetContent().value_or(u""));
+    if (!textValue.empty()) {
+        json->Put("content", textValue.c_str());
+    } else {
+        CHECK_NULL_VOID(pManager_);
+        auto paragraphs = pManager_->GetParagraphs();
+        if (paragraphs.empty()) {
+            return;
+        }
+       
+        std::string text;
+        for (auto&& info : paragraphs) {
+            auto paragraph = info.paragraph;
+            if (paragraph) {
+                text +=  StringUtils::Str16ToStr8(paragraph->GetParagraphText());
+            }
+        }
+        json->Put("content", text.c_str());
     }
 }
 
