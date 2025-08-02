@@ -1139,6 +1139,7 @@ void GridPattern::SyncLayoutBeforeSpring()
     host->SetActive();
     auto* context = host->GetContext();
     if (context) {
+        host->SetEscapeDelayForIgnore(true);
         context->FlushUITaskWithSingleDirtyNode(host);
     }
     preSpring_ = false;

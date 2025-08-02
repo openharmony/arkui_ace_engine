@@ -2327,10 +2327,10 @@ int32_t ListLayoutAlgorithm::LayoutCachedForward(LayoutWrapper* layoutWrapper,
         }
         bool isGroup = wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
         bool isDirty = wrapper->CheckNeedForceMeasureAndLayout() || !IsListLanesEqual(wrapper);
-        if (!isGroup && (isDirty || CheckLayoutConstraintChanged(wrapper))) {
+        if (!isGroup && (isDirty || CheckLayoutConstraintChanged(wrapper)) && !wrapper->CheckHasPreMeasured()) {
             predictList.emplace_back(PredictLayoutItem { curIndex, cachedCount, -1 });
         }
-        if (!isGroup && isDirty && !wrapper->GetHostNode()->IsLayoutComplete()) {
+        if (!isGroup && isDirty && !wrapper->GetHostNode()->IsLayoutComplete() && !wrapper->CheckHasPreMeasured()) {
             return curIndex - 1;
         }
         auto childSize = wrapper->GetGeometryNode()->GetMarginFrameSize();
@@ -2352,6 +2352,7 @@ int32_t ListLayoutAlgorithm::LayoutCachedForward(LayoutWrapper* layoutWrapper,
         } else {
             cachedCount++;
         }
+        ExpandWithSafeAreaPadding(wrapper);
         SyncGeometry(wrapper, isDirty);
         wrapper->SetActive(false);
         curIndex++;
@@ -2373,10 +2374,10 @@ int32_t ListLayoutAlgorithm::LayoutCachedBackward(LayoutWrapper* layoutWrapper,
         }
         bool isGroup = wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
         bool isDirty = wrapper->CheckNeedForceMeasureAndLayout() || !IsListLanesEqual(wrapper);
-        if (!isGroup && (isDirty || CheckLayoutConstraintChanged(wrapper))) {
+        if (!isGroup && (isDirty || CheckLayoutConstraintChanged(wrapper)) && !wrapper->CheckHasPreMeasured()) {
             predictList.emplace_back(PredictLayoutItem { curIndex, -1, cachedCount });
         }
-        if (!isGroup && isDirty && !wrapper->GetHostNode()->IsLayoutComplete()) {
+        if (!isGroup && isDirty && !wrapper->GetHostNode()->IsLayoutComplete() && !wrapper->CheckHasPreMeasured()) {
             return curIndex + 1;
         }
         auto childSize = wrapper->GetGeometryNode()->GetMarginFrameSize();
@@ -2398,11 +2399,33 @@ int32_t ListLayoutAlgorithm::LayoutCachedBackward(LayoutWrapper* layoutWrapper,
         } else {
             cachedCount++;
         }
+        ExpandWithSafeAreaPadding(wrapper);
         SyncGeometry(wrapper, isDirty);
         wrapper->SetActive(false);
         curIndex--;
     }
     return curIndex + 1;
+}
+
+void ListLayoutAlgorithm::ExpandWithSafeAreaPadding(const RefPtr<LayoutWrapper>& layoutWrapper)
+{
+    IgnoreLayoutSafeAreaOpts options = { .type = NG::LAYOUT_SAFE_AREA_TYPE_NONE,
+        .edges = NG::LAYOUT_SAFE_AREA_EDGE_NONE };
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    if (layoutProperty) {
+        auto&& nodeOpts = layoutWrapper->GetLayoutProperty()->GetIgnoreLayoutSafeAreaOpts();
+        if (nodeOpts) {
+            options = *nodeOpts;
+        }
+    }
+
+    auto geometryNode = layoutWrapper->GetGeometryNode();
+    if (geometryNode) {
+        auto offset = geometryNode->GetMarginFrameOffset();
+        auto ignoreAdjust = geometryNode->GetIgnoreAdjust();
+        offset -= ignoreAdjust;
+        geometryNode->SetMarginFrameOffset(offset);
+    }
 }
 
 std::tuple<int32_t, int32_t, int32_t, int32_t> ListLayoutAlgorithm::LayoutCachedItemInEdgeGroup(
