@@ -109,6 +109,7 @@ HWTEST_F(WebModelStaticTest, CreateFrameNode001, TestSize.Level1)
     WebModelStatic::NotifyPopupWindowResultStatic(1, true);
     WebModelStatic::SetBlurOnKeyboardHideMode(AccessibilityManager::RawPtr(frameNode), keyBoardMode);
     WebModelStatic::SetPopup(AccessibilityManager::RawPtr(frameNode), true, 0);
+    WebModelStatic::SetPopup(nullptr, false, 0);
     keyBoardMode = BlurOnKeyboardHideMode::BLUR;
     WebModelStatic::SetBlurOnKeyboardHideMode(AccessibilityManager::RawPtr(frameNode), keyBoardMode);
     auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
