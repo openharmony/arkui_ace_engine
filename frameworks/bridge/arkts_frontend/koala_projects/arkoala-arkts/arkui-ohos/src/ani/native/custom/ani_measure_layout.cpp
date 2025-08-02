@@ -67,7 +67,7 @@ ani_object SetConstraintNG(ani_env* env, double minWidth, double minHeight, doub
     }
 
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "C{std.core.Double}C{std.core.Double}C{std.core.Double}C{std.core.Double}:C{arkui.ani.arkts.ArkUIAniCustomNodeModule.ConstraintSizeOptionsInner}", &ctor)) {
         return nullptr;
     }
     ani_object minWidth_;
