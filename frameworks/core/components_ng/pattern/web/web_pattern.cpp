@@ -5221,10 +5221,10 @@ void WebPattern::UpdateCustomCursor(int32_t windowId, std::shared_ptr<OHOS::NWeb
     }
     std::shared_ptr<Media::PixelMap> cursorPixelMap(pixelMap.release());
     CHECK_NULL_VOID(cursorPixelMap);
-    uint32_t res = cursorPixelMap->SetMemoryName(GetPixelMapName(cursorPixelMap, "cursor"));
-    TAG_LOGI(AceLogTag::ACE_WEB, "SetMemoryName result is %{public}d", res);
     auto mouseStyle = MouseStyle::CreateMouseStyle();
     CHECK_NULL_VOID(mouseStyle);
+    uint32_t res = cursorPixelMap->SetMemoryName(GetPixelMapName(cursorPixelMap, "cursor"));
+    TAG_LOGI(AceLogTag::ACE_WEB, "SetMemoryName result is %{public}d", res);
     mouseStyle->SetCustomCursor(windowId, x, y, cursorPixelMap);
 }
 
