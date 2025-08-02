@@ -71,7 +71,7 @@ public:
     }
 
 private:
-    Ark_AsyncWork work_ {};
+    Ark_AsyncWork work_ { nullptr, nullptr, nullptr };
     CallbackHelper<PromiseCallback> callback_ {};
 };
 } // namespace OHOS::Ace::NG

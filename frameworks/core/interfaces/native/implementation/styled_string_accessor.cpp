@@ -78,7 +78,7 @@ static bool CheckKeyAndValueTypeEqual(int32_t styledKey, int32_t valueTypeId)
         ARK_STYLED_STRING_KEY_URL, ARK_STYLED_STRING_KEY_CUSTOM_SPAN, ARK_STYLED_STRING_KEY_USER_DATA,
         ARK_STYLED_STRING_KEY_BACKGROUND_COLOR
     };
-    if ((valueTypeId >= sizeof(KeyAndValueTypeMap) / sizeof(int32_t)) || (valueTypeId < 0) ||
+    if ((valueTypeId < 0) || (static_cast<uint32_t>(valueTypeId) >= sizeof(KeyAndValueTypeMap) / sizeof(int32_t)) ||
         KeyAndValueTypeMap[valueTypeId] != styledKey) {
         return false;
     }
