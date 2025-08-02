@@ -282,6 +282,12 @@ public:
         return IsTextArea() ? textAreaBlurOnSubmit_ : textInputBlurOnSubmit_;
     }
 
+    void ClearOperationRecords()
+    {
+        operationRecords_.clear();
+        redoOperationRecords_.clear();
+    }
+
     void SetKeyboardAppearance(KeyboardAppearance value)
     {
         keyboardAppearance_ = value;
