@@ -17,11 +17,11 @@
 
 #include "base/subwindow/subwindow_manager.h"
 #include "core/components/common/layout/grid_system_manager.h"
-#include "core/components_ng/pattern/menu/menu_theme.h"
-#include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_layout_property.h"
-#include "core/components_ng/pattern/select_overlay/select_overlay_node.h"
+#include "core/components_ng/pattern/menu/menu_pattern.h"
+#include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
+#include "core/components_ng/pattern/select_overlay/select_overlay_node.h"
 #include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
@@ -168,6 +168,8 @@ void MultiMenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (!pattern->IsEmbedded()) {
         MinusPaddingToSize(padding, childConstraint.maxSize);
     } else {
+        const auto& safeAreaPadding = layoutProperty->GetOrCreateSafeAreaPadding();
+        MinusPaddingToSize(safeAreaPadding, childConstraint.maxSize);
         UpdateEmbeddedPercentReference(layoutWrapper, childConstraint, layoutConstraint);
     }
     if (layoutConstraint->selfIdealSize.Width().has_value()) {
@@ -286,26 +288,14 @@ void MultiMenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pattern);
     OffsetF translate(0.0f, 0.0f);
     const auto& padding = layoutProperty->CreatePaddingAndBorder();
-    const auto& safeAreaPadding = layoutProperty->GetOrCreateSafeAreaPadding();
     auto outPadding = static_cast<float>(theme->GetMenuPadding().ConvertToPx());
     if (!pattern->IsEmbedded()) {
         translate.AddX(padding.left.value_or(outPadding));
         translate.AddY(padding.top.value_or(outPadding));
-    } else {
-        translate.AddX(safeAreaPadding.left.value_or(0.0f));
-        translate.AddY(safeAreaPadding.top.value_or(0.0f));
     }
     // translate each option by the height of previous options
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
         child->GetGeometryNode()->SetMarginFrameOffset(translate);
-        OffsetF embedCorrect(0.0f, 0.0f);
-        bool isEmbed = pattern->IsEmbedded();
-        if (isEmbed) {
-            embedCorrect.AddX(padding.left.value_or(0.0f) - safeAreaPadding.left.value_or(0.0f));
-            embedCorrect.AddY(padding.top.value_or(0.0f) - safeAreaPadding.top.value_or(0.0f));
-        }
-        UpdateChildPositionWidthIgnoreLayoutSafeArea(child, translate, isEmbed, embedCorrect);
-
         child->Layout();
         translate.AddY(child->GetGeometryNode()->GetMarginFrameSize().Height());
     }
@@ -349,8 +339,60 @@ void MultiMenuLayoutAlgorithm::UpdateEmbeddedPercentReference(LayoutWrapper* lay
     }
 }
 
-void MultiMenuLayoutAlgorithm::UpdateSelfSize(LayoutWrapper* layoutWrapper,
-    LayoutConstraintF& childConstraint, std::optional<LayoutConstraintF>& layoutConstraint)
+void MultiMenuLayoutAlgorithm::MarkChildForDelayedMeasurement(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    layoutPolicyChildren_.clear();
+    for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
+        auto childLayoutProperty = child->GetLayoutProperty();
+        CHECK_NULL_CONTINUE(childLayoutProperty);
+        auto layoutPolicy = childLayoutProperty->GetLayoutPolicyProperty();
+        if (layoutPolicy.has_value()) {
+            auto widthLayoutPolicy = layoutPolicy.value().widthLayoutPolicy_;
+            auto heightLayoutPolicy = layoutPolicy.value().heightLayoutPolicy_;
+            if (widthLayoutPolicy.value_or(LayoutCalPolicy::NO_MATCH) != LayoutCalPolicy::NO_MATCH ||
+                heightLayoutPolicy.value_or(LayoutCalPolicy::NO_MATCH) != LayoutCalPolicy::NO_MATCH) {
+                layoutPolicyChildren_.emplace_back(child);
+            }
+        }
+    }
+}
+
+void MultiMenuLayoutAlgorithm::MeasureAdaptiveLayoutChildren(
+    LayoutWrapper* layoutWrapper, const LayoutConstraintF& childConstraint)
+{
+    MarkChildForDelayedMeasurement(layoutWrapper);
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto frameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
+    auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto safeAreaPadding = layoutProperty->GetOrCreateSafeAreaPadding();
+    if (!pattern->IsEmbedded()) {
+        MinusPaddingToNonNegativeSize(padding, frameSize);
+    } else {
+        MinusPaddingToNonNegativeSize(safeAreaPadding, frameSize);
+    }
+
+    for (const auto& child : layoutPolicyChildren_) {
+        auto childNode = child->GetHostNode();
+        auto resetLayoutConstraint = ResetLayoutConstraintMinWidth(child, childConstraint);
+        SelectOverlayRightClickMenuLayoutHelper::AdjustLayoutConstraints(resetLayoutConstraint, child, layoutWrapper);
+        if (pattern->IsEmbedded() && (resetLayoutConstraint.minSize.Width() > resetLayoutConstraint.maxSize.Width())) {
+            resetLayoutConstraint.minSize.SetWidth(resetLayoutConstraint.maxSize.Width());
+        }
+        resetLayoutConstraint.parentIdealSize.SetSize(frameSize);
+        if (childNode && childNode->GetLayoutProperty() && childNode->GetLayoutProperty()->IsExpandConstraintNeeded()) {
+            child->GetGeometryNode()->SetParentLayoutConstraint(resetLayoutConstraint);
+        }
+    }
+}
+
+void MultiMenuLayoutAlgorithm::UpdateSelfSize(LayoutWrapper* layoutWrapper, LayoutConstraintF& childConstraint,
+    std::optional<LayoutConstraintF>& layoutConstraint)
 {
     auto node = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(node);
@@ -381,7 +423,7 @@ void MultiMenuLayoutAlgorithm::UpdateSelfSize(LayoutWrapper* layoutWrapper,
     }
     layoutWrapper->GetGeometryNode()->SetContentSize(SizeF(contentWidth, contentHeight));
     BoxLayoutAlgorithm::PerformMeasureSelf(layoutWrapper);
-    
+
     // Stack or Embedded submenu must follow parent width
     if (pattern->IsStackSubmenu() || pattern->IsEmbedded()) {
         auto idealSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
@@ -398,6 +440,9 @@ void MultiMenuLayoutAlgorithm::UpdateSelfSize(LayoutWrapper* layoutWrapper,
         auto idealSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
         idealSize.SetWidth(idealWidth);
         layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
+    }
+    if (pattern->IsEnableChildrenMatchParent()) {
+        MeasureAdaptiveLayoutChildren(layoutWrapper, childConstraint);
     }
 }
 
@@ -423,6 +468,13 @@ float MultiMenuLayoutAlgorithm::GetChildrenMaxWidth(
             childConstraint.minSize.SetWidth(childConstraint.maxSize.Width());
         }
         SelectOverlayRightClickMenuLayoutHelper::AdjustLayoutConstraintsAutoWidth(child, layoutWrapper);
+        auto childLayoutProperty = child->GetLayoutProperty();
+        if (childLayoutProperty) {
+            auto layoutPolicy = childLayoutProperty->GetLayoutPolicyProperty();
+            if (layoutPolicy->IsMatch()) {
+                continue;
+            }
+        }
         child->Measure(childConstraint);
         auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
         maxWidth = std::max(maxWidth, childSize.Width());
