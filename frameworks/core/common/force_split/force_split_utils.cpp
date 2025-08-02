@@ -33,10 +33,11 @@ namespace OHOS::Ace::NG {
 
 namespace {
 constexpr Dimension APP_ICON_SIZE = 64.0_vp;
+constexpr Dimension APP_ICON_BORDER_RADIUS = 18.0_vp;
 constexpr char BG_COLOR_SYS_RES_NAME[] = "sys.color.ohos_id_color_sub_background";
 const std::vector<std::string> HOME_NAME_KEYWORDS = {"main", "home", "index", "root"};
 const std::vector<std::string> EXCLUDE_NAME_KEYWORDS = {"guide", "load", "splash", "login", "privacy"};
-constexpr int32_t HOME_PAGE_CHILD_NODE_DEPTH_THRESHOLD = 50;
+constexpr int32_t HOME_PAGE_CHILD_NODE_DEPTH_THRESHOLD = 30;
 constexpr int32_t HOME_PAGE_CHILD_NODE_COUNT_THRESHOLD = 100;
 constexpr char ENABLE_HOOK_KEY[] = "enableHook";
 constexpr char NAVIGATION_OPTIONS_KEY[] = "navigationOptions";
@@ -72,6 +73,20 @@ RefPtr<FrameNode> ForceSplitUtils::CreatePlaceHolderContent(const RefPtr<Pipelin
     CalcSize imageCalcSize((CalcLength(APP_ICON_SIZE)), CalcLength(APP_ICON_SIZE));
     imageLayoutProperty->UpdateUserDefinedIdealSize(imageCalcSize);
     imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(PixelMap::CreatePixelMap(&pixelMap)));
+    auto imageRenderContext = imageNode->GetRenderContext();
+    CHECK_NULL_RETURN(imageRenderContext, nullptr);
+    BorderRadiusProperty borderRadius;
+    borderRadius.SetRadius(APP_ICON_BORDER_RADIUS);
+    borderRadius.multiValued = false;
+    imageRenderContext->UpdateBorderRadius(borderRadius);
+    auto paintProperty = imageNode->GetPaintPropertyPtr<ImageRenderProperty>();
+    CHECK_NULL_RETURN(paintProperty, nullptr);
+    paintProperty->UpdateNeedBorderRadius(true);
+    paintProperty->UpdateBorderRadius(borderRadius);
+    auto imagePattern = imageNode->GetPattern<ImagePattern>();
+    CHECK_NULL_RETURN(imagePattern, nullptr);
+    imagePattern->SetNeedBorderRadius(true);
+
     imageNode->MountToParent(stackNode);
     imageNode->MarkModifyDone();
 
