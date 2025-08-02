@@ -791,4 +791,12 @@ void ApplyParentThemeScopeId(ani_env* env, ani_object aniClass, ani_long self, a
     }
     modifier->getCommonAniModifier()->applyParentThemeScopeId(env, self, parent);
 }
+void FrameNodeMarkDirtyNode(ani_env* env, ani_object obj, ani_long ptr)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return;
+    }
+    modifier->getCommonAniModifier()->frameNodeMarkDirtyNode(env, ptr);
+}
 } // namespace OHOS::Ace::Ani

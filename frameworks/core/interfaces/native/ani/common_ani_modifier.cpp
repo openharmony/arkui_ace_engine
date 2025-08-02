@@ -755,6 +755,12 @@ void ApplyParentThemeScopeId(ani_env* env, ani_long self, ani_long parent)
         }
     }
 }
+void FrameNodeMarkDirtyNode(ani_env* env, ani_long ptr)
+{
+    auto* frameNode = reinterpret_cast<NG::FrameNode*>(ptr);
+    CHECK_NULL_VOID(frameNode);
+    frameNode->MarkDirtyNode(NG::PROPERTY_UPDATE_DIFF);
+}
 
 const ArkUIAniCommonModifier* GetCommonAniModifier()
 {
@@ -816,7 +822,8 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .restoreColorMode = OHOS::Ace::NG::RestoreColorMode,
         .setThemeScopeId = OHOS::Ace::NG::SetThemeScopeId,
         .createAndBindTheme = OHOS::Ace::NG::CreateAndBindTheme,
-        .applyParentThemeScopeId = OHOS::Ace::NG::ApplyParentThemeScopeId
+        .applyParentThemeScopeId = OHOS::Ace::NG::ApplyParentThemeScopeId,
+        .frameNodeMarkDirtyNode = OHOS::Ace::NG::FrameNodeMarkDirtyNode
     };
     return &impl;
 }

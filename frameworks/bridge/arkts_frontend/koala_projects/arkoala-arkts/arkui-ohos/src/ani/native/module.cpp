@@ -1012,6 +1012,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::ApplyParentThemeScopeId)
         },
+        ani_native_function {
+            "_FrameNode_MarkDirtyNode",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::FrameNodeMarkDirtyNode)
+        },
     };
 
     auto bindRst = env->Class_BindNativeMethods(cls, methods.data(), methods.size());

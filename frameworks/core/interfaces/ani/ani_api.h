@@ -324,6 +324,7 @@ struct ArkUIAniCommonModifier {
     void (*createAndBindTheme)(ani_env* env, ani_int themeScopeId, ani_int themeId,
         const std::vector<Ark_ResourceColor>& colors, ani_int colorMode, ani_fn_object onThemeScopeDestroy);
     void (*applyParentThemeScopeId)(ani_env* env, ani_long self, ani_long parent);
+    void (*frameNodeMarkDirtyNode)(ani_env* env, ani_long ptr);
 };
 struct ArkUIAniCustomNodeModifier {
     ani_long (*constructCustomNode)(ani_int, std::function<void()>&& onPageShow, std::function<void()>&& onPageHide,

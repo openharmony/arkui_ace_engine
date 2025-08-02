@@ -70,7 +70,6 @@ import { hookCommonMethodGestureImpl, hookCommonMethodGestureModifierImpl, hookC
     hookCustomPropertyImpl
 } from "../handwritten/CommonHandWritten"
 import { CommonMethodModifier, AttributeUpdaterFlag } from "../CommonMethodModifier"
-import { ScrollableCommonMethodModifier } from '../ScrollableCommonMethodModifier'
 import { ICurve as ICurve_} from "#external"
 export type ICurve = ICurve_
 export class ICurveInternal implements MaterializedBase,ICurve {
