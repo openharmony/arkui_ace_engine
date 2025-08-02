@@ -648,4 +648,13 @@ void* GetHoverEventPointer(ani_env* env, [[maybe_unused]] ani_object obj, ani_lo
     }
     return modifier->getCommonAniModifier()->getMouseEventPointer(hoverEventPeer);
 }
+
+void FrameNodeMarkDirtyNode(ani_env* env, ani_object obj, ani_long ptr)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return;
+    }
+    modifier->getCommonAniModifier()->frameNodeMarkDirtyNode(env, ptr);
+}
 } // namespace OHOS::Ace::Ani
