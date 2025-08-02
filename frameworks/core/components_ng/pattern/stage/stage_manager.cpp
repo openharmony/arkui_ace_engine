@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/stage/stage_manager.h"
 
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
+
 #include "base/log/ace_checker.h"
 #include "base/perfmonitor/perf_constants.h"
 #include "base/perfmonitor/perf_monitor.h"
@@ -98,6 +99,18 @@ void StageManager::StartTransition(const RefPtr<FrameNode>& srcPage, const RefPt
     }
     if (destPage) {
         destPage->SetNodeFreeze(false);
+        auto pagePattern = destPage->GetPattern<NG::PagePattern>();
+        CHECK_NULL_VOID(pagePattern);
+        auto pageInfo = pagePattern->GetPageInfo();
+        CHECK_NULL_VOID(pageInfo);
+        auto pagePath = pageInfo->GetFullPath();
+        std::string routeType("routerPageChange");
+        if (type == RouteType::PUSH) {
+            routeType = "routerPushPage";
+        } else if (type == RouteType::POP) {
+            routeType = "routerPopPage";
+        }
+        UiSessionManager::GetInstance()->OnRouterChange(pagePath, routeType);
     }
     animationId_++;
     if (type == RouteType::PUSH) {
@@ -186,7 +199,7 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
         if (!isNewLifecycle) {
             FirePageHide(hidePageNode, needTransition ? PageTransitionType::EXIT_PUSH : PageTransitionType::NONE);
         }
-        
+
     }
     auto rect = stageNode_->GetGeometryNode()->GetFrameRect();
     rect.SetOffset({});

@@ -15,9 +15,10 @@
 
 #include "interfaces/inner_api/ui_session/ui_report_proxy.h"
 
-#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#include "pixel_map.h"
 
 #include "adapter/ohos/entrance/ui_session/include/ui_service_hilog.h"
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 namespace OHOS::Ace {
 void UiReportProxy::ReportClickEvent(const std::string& data)
