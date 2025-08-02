@@ -14,5 +14,7 @@ declare namespace inspector {
         offDraw(type: 'draw', callback?: Callback<void>): void;
     }
     export function createComponentObserver(id: string): ComponentObserver | undefined;
+    export function getFilteredInspectorTree(filters?: Array<string>): string;
+    export function getFilteredInspectorTreeById(id: string, depth: number, filters?: Array<string>): string;
 }
 export default inspector;
