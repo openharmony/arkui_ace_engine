@@ -609,6 +609,14 @@ export class UIContext {
     public setUIStates(callback: () => void): void {
         throw Error("setUIStates not implemented in UIContext!")
     }
+    
+    public getFilteredInspectorTree(filters?: Array<string>): string {
+        throw Error("getFilteredInspectorTree not implemented in UIContext!")
+    }
+ 
+    public getFilteredInspectorTreeById(id: string, depth: number, filters?: Array<string>): string {
+        throw Error("getFilteredInspectorTreeById not implemented in UIContext!")
+    }
 }
 export abstract class FrameCallback {
     onFrame(frameTimeInNano: number): void {}
