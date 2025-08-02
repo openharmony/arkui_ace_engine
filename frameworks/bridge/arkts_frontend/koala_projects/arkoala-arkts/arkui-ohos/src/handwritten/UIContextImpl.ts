@@ -838,10 +838,14 @@ export class PromptActionImpl extends PromptAction {
     //@ts-ignore
     openCustomDialog(options: promptAction.CustomDialogOptions): Promise<number> {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let builderOptions: promptAction.DialogBuilderOptions = {};
         const peerNode = createUiDetachedRoot((): PeerNode => {
             return ArkComponentRootPeer.create(undefined);
         }, options.builder, this.instanceId_);
-        let builderPtr = peerNode.peer.ptr;
+        builderOptions.builder = peerNode.peer.ptr;
+        builderOptions.destroyFunc = (ptr: KPointer): void => {
+            destroyUiDetachedRoot(ptr, this.instanceId_);
+        };
 
         let optionsInternal: promptAction.DialogOptionsInternal = {};
         const transition = options?.transition?.getPeer?.();
@@ -860,7 +864,7 @@ export class PromptActionImpl extends PromptAction {
         if (levelOrder !== undefined) {
             optionsInternal.levelOrder = levelOrder as number;
         }
-        const retval = promptAction.openCustomDialog(builderPtr, options, optionsInternal);
+        const retval = promptAction.openCustomDialog(builderOptions, options, optionsInternal);
         ArkUIAniModule._Common_Restore_InstanceId();
         return retval;
     }
@@ -930,14 +934,12 @@ export class PromptActionImpl extends PromptAction {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         let builderOptions: promptAction.DialogBuilderOptions = {};
         if (builder instanceof CustomBuilder) {
-            builderOptions.builderFunc = (): KPointer => {
-                const peerNode = createUiDetachedRoot((): PeerNode => {
-                    return ArkComponentRootPeer.create(undefined);
-                }, builder as CustomBuilder, this.instanceId_);
-                return peerNode.peer.ptr;
-            };
+            const peerNode = createUiDetachedRoot((): PeerNode => {
+                return ArkComponentRootPeer.create(undefined);
+            }, builder as CustomBuilder, this.instanceId_);
+            builderOptions.builder = peerNode.peer.ptr;
         } else {
-            builderOptions.builderWithIdFunc = (dialogId: number): KPointer => {
+            builderOptions.builderWithId = (dialogId: number): KPointer => {
                 const peerNode = createUiDetachedRootT<number>((): PeerNode => {
                     return ArkComponentRootPeer.create(undefined);
                 }, builder as CustomBuilderT<number>, dialogId, this.instanceId_);
