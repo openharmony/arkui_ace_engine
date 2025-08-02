@@ -571,6 +571,45 @@ HWTEST_F(TextTestSevenNg, InheritParentTextStyle001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ConstructTextStyles001
+ * @tc.desc: test ConstructTextStyles of multiple paragraph.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSevenNg, ConstructTextStyles001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct a minimal version 10.
+     */
+    /**
+     * @tc.steps: step1. init
+     */
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::SYMBOL_SPAN_ETS_TAG, 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    pattern->AttachToFrameNode(frameNode);
+    auto multipleAlgorithm = AceType::MakeRefPtr<TextLayoutAlgorithm>();
+    SymbolShadow symbolShadow;
+    symbolShadow.radius = 10.0f;
+    layoutProperty->UpdateSymbolShadow(symbolShadow);
+    /**
+     * @tc.steps: step3. set theme.
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto theme = AceType::MakeRefPtr<MockThemeManager>();
+    pipeline->SetThemeManager(theme);
+    EXPECT_CALL(*theme, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<TextTheme>()));
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, layoutProperty);
+    TextStyle textStyle;
+    LayoutConstraintF contentConstraint;
+    multipleAlgorithm->ConstructTextStyles(contentConstraint, AccessibilityManager::RawPtr(layoutWrapper), textStyle);
+    EXPECT_EQ(textStyle.symbolTextStyle_, nullptr);
+}
+
+/**
  * @tc.name: ToJsonValue
  * @tc.desc: Test TextLayoutProperty ToJsonValue.
  * @tc.type: FUNC
