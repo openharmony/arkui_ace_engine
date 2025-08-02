@@ -855,6 +855,10 @@ void PagePattern::ResetPageTransitionEffect()
 
 void PagePattern::RemoveJsChildImmediately(const RefPtr<FrameNode>& page, PageTransitionType transactionType)
 {
+    if (!CheckEnableCustomNodeDel()) {
+        return;
+    }
+
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         return;
     }
