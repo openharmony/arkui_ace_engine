@@ -436,6 +436,10 @@ HWTEST_F(SecuritySessionWrapperImplTestNg, SecuritySessionWrapperImplTestNg006, 
     type = OHOS::Ace::WindowSizeChangeReason::ROTATION;
     sessionWrapper->NotifySizeChangeReason(type, rsTransaction);
     EXPECT_FALSE(sessionWrapper->transaction_.expired());
+
+    type = OHOS::Ace::WindowSizeChangeReason::SNAPSHOT_ROTATION;
+    sessionWrapper->NotifySizeChangeReason(type, rsTransaction);
+    EXPECT_FALSE(sessionWrapper->transaction_.expired());
 #endif
 }
 
@@ -581,6 +585,9 @@ HWTEST_F(SecuritySessionWrapperImplTestNg, SecuritySessionWrapperImplTestNg010, 
     sessionWrapper->NotifyDisplayArea(paintRect);
 
     sessionWrapper->session_->Rosen::Session::UpdateSizeChangeReason(Rosen::SizeChangeReason::ROTATION);
+    sessionWrapper->NotifyDisplayArea(paintRect);
+
+    sessionWrapper->session_->Rosen::Session::UpdateSizeChangeReason(Rosen::SizeChangeReason::SNAPSHOT_ROTATION);
     sessionWrapper->NotifyDisplayArea(paintRect);
 #endif
 }

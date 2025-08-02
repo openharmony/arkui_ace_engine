@@ -425,6 +425,8 @@ HWTEST_F(PreviewSessionWrapperImplTestNg, PreviewSessionWrapperImplTestNg006, Te
     sessionWrapper->NotifySizeChangeReason(type, rsTransaction);
     type = OHOS::Ace::WindowSizeChangeReason::ROTATION;
     sessionWrapper->NotifySizeChangeReason(type, rsTransaction);
+    type = OHOS::Ace::WindowSizeChangeReason::SNAPSHOT_ROTATION;
+    sessionWrapper->NotifySizeChangeReason(type, rsTransaction);
 #endif
 }
 
@@ -572,6 +574,9 @@ HWTEST_F(PreviewSessionWrapperImplTestNg, PreviewSessionWrapperImplTestNg010, Te
     sessionWrapper->NotifyDisplayArea(paintRect);
 
     sessionWrapper->session_->Rosen::Session::UpdateSizeChangeReason(Rosen::SizeChangeReason::ROTATION);
+    sessionWrapper->NotifyDisplayArea(paintRect);
+
+    sessionWrapper->session_->Rosen::Session::UpdateSizeChangeReason(Rosen::SizeChangeReason::SNAPSHOT_ROTATION);
     sessionWrapper->NotifyDisplayArea(paintRect);
 #endif
 }

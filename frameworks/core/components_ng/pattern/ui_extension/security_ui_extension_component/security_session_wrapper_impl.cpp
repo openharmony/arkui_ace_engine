@@ -716,8 +716,10 @@ void SecuritySessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
     if (window) {
         rsUIDirector = window->GetRSUIDirector();
     }
+    bool isRotation = reason == Rosen::SizeChangeReason::ROTATION ||
+        reason == Rosen::SizeChangeReason::SNAPSHOT_ROTATION;
     if (!rsUIDirector) {
-        if (reason == Rosen::SizeChangeReason::ROTATION) {
+        if (isRotation) {
             if (auto temp = transaction_.lock()) {
                 transaction = temp;
                 transaction_.reset();
@@ -733,7 +735,7 @@ void SecuritySessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
             reason, "NotifyDisplayArea", transaction);
     } else {
         auto rsUIContext = rsUIDirector->GetRSUIContext();
-        if (reason == Rosen::SizeChangeReason::ROTATION) {
+        if (isRotation) {
             if (auto temp = transaction_.lock()) {
                 transaction = temp;
                 transaction_.reset();
@@ -764,7 +766,8 @@ void SecuritySessionWrapperImpl::NotifySizeChangeReason(
     CHECK_NULL_VOID(session_);
     auto reason = static_cast<Rosen::SizeChangeReason>(type);
     session_->UpdateSizeChangeReason(reason);
-    if (rsTransaction && (type == WindowSizeChangeReason::ROTATION)) {
+    if (rsTransaction && (type == WindowSizeChangeReason::ROTATION ||
+        type == WindowSizeChangeReason::SNAPSHOT_ROTATION)) {
         transaction_ = rsTransaction;
     }
 }

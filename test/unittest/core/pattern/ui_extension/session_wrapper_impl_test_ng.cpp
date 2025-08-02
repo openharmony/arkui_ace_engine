@@ -213,6 +213,9 @@ HWTEST_F(SessionWrapperImplTestNg, SessionWrapperImplTestNg003, TestSize.Level1)
 
     sessionWrapper->NotifySizeChangeReason(WindowSizeChangeReason::ROTATION, rsTransaction);
     ASSERT_EQ(sessionWrapper->transaction_.lock(), nullptr);
+
+    sessionWrapper->NotifySizeChangeReason(WindowSizeChangeReason::SNAPSHOT_ROTATION, rsTransaction);
+    ASSERT_EQ(sessionWrapper->transaction_.lock(), nullptr);
 #endif
 }
 
