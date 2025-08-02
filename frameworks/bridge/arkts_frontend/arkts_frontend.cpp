@@ -492,6 +492,19 @@ void ArktsFrontend::OpenStateMgmtInterop()
     return;
 }
 
+napi_value ArktsFrontend::GetContextValue()
+{
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, nullptr);
+    auto type = container->GetFrontendType();
+    if (type == FrontendType::STATIC_HYBRID_DYNAMIC && container->GetSubFrontend()) {
+        // support 1.1 call getUIContext when STATIC_HYBRID_DYNAMIC
+        return container->GetSubFrontend()->GetContextValue();
+    } else {
+        return nullptr; // Default behavior
+    }
+}
+
 bool ArktsFrontend::HandleMessage(void *frameNode, int32_t type, const std::string& param)
 {
     auto* env = ArktsAniUtils::GetAniEnv(vm_);
