@@ -115,7 +115,14 @@ public:
     virtual void SaveBaseInfo(const std::string& info) {};
     virtual void SendBaseInfo(int32_t processId) {};
     virtual void SaveGetPixelMapFunction(GetPixelMapFunction&& function) {};
-    virtual void SaveTranslateManager(std::shared_ptr<UiTranslateManager> uiTranslateManager) {};
+    virtual void SaveTranslateManager(std::shared_ptr<UiTranslateManager> uiTranslateManager,
+        int32_t instanceId) {};
+    virtual void SaveGetCurrentInstanceIdCallback(std::function<int32_t()>&& callback) {};
+    virtual void RemoveSaveGetCurrentInstanceId(int32_t instanceId) {};
+    virtual std::shared_ptr<UiTranslateManager> GetCurrentTranslateManager() {
+        std::shared_ptr<UiTranslateManager> currentTranslateManager = nullptr;
+        return currentTranslateManager;
+    };
     virtual void GetWebViewLanguage() {};
     virtual void RegisterPipeLineGetCurrentPageName(const std::function<std::string()>&& callback) {};
     virtual void GetCurrentPageName() {};
@@ -151,7 +158,9 @@ protected:
     std::shared_ptr<InspectorJsonValue> jsonValue_ = nullptr;
     std::atomic<int32_t> webTaskNums_ = 0;
     std::string baseInfo_;
+    std::map<int32_t, std::shared_ptr<UiTranslateManager>> translateManagerMap_;
     std::shared_ptr<UiTranslateManager> translateManager_ = nullptr;
+    std::function<int32_t()> getInstanceIdCallback_;
     static std::shared_mutex translateManagerMutex_;
     std::function<std::string()> pipelineContextPageNameCallback_;
 };

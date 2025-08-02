@@ -348,7 +348,7 @@ void AceContainer::Destroy()
     LOGI("AceContainer Destroy begin");
     ContainerScope scope(instanceId_);
     RemoveWatchSystemParameter();
-
+    RemoveUISessionCallbacks();
     ReleaseResourceAdapter();
     if (pipelineContext_ && taskExecutor_) {
         // 1. Destroy Pipeline on UI thread.
@@ -2264,7 +2264,7 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
             window, taskExecutor_, assetManager_, resRegister_, frontend_, instanceId);
         pipelineContext_->SetTextFieldManager(AceType::MakeRefPtr<NG::TextFieldManagerNG>());
         auto pipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
-        UiSessionManager::GetInstance()->SaveTranslateManager(uiTranslateManager);
+        UiSessionManager::GetInstance()->SaveTranslateManager(uiTranslateManager, instanceId_);
         if (pipeline) {
             pipeline->SaveTranslateManager(uiTranslateManager);
         } else {
@@ -2281,7 +2281,7 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
         window, taskExecutor_, assetManager_, resRegister_, frontend_, instanceId);
     pipelineContext_->SetTextFieldManager(AceType::MakeRefPtr<NG::TextFieldManagerNG>());
     auto pipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
-    UiSessionManager::GetInstance()->SaveTranslateManager(uiTranslateManager);
+    UiSessionManager::GetInstance()->SaveTranslateManager(uiTranslateManager, instanceId_);
     if (pipeline) {
         pipeline->SaveTranslateManager(uiTranslateManager);
     } else {
@@ -3773,6 +3773,11 @@ void AceContainer::AddWatchSystemParameter()
             IS_FOCUS_ACTIVE_KEY, rawPtr, SystemProperties::OnFocusActiveChanged);
     };
     BackgroundTaskExecutor::GetInstance().PostTask(task);
+}
+
+void AceContainer::RemoveUISessionCallbacks()
+{
+    UiSessionManager::GetInstance()->RemoveSaveGetCurrentInstanceId(instanceId_);
 }
 
 void AceContainer::RemoveWatchSystemParameter()

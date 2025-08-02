@@ -51,7 +51,11 @@ public:
     void SaveBaseInfo(const std::string& info) override;
     void SendBaseInfo(int32_t processId) override;
     void SaveGetPixelMapFunction(GetPixelMapFunction&& function) override;
-    void SaveTranslateManager(std::shared_ptr<UiTranslateManager> uiTranslateManager) override;
+    void SaveTranslateManager(std::shared_ptr<UiTranslateManager> uiTranslateManager,
+        int32_t instanceId) override;
+    void SaveGetCurrentInstanceIdCallback(std::function<int32_t()>&& callback) override;
+    void RemoveSaveGetCurrentInstanceId(int32_t instanceId) override;
+    std::shared_ptr<UiTranslateManager> GetCurrentTranslateManager() override;
     void GetWebViewLanguage() override;
     void RegisterPipeLineGetCurrentPageName(const std::function<std::string()>&& callback) override;
     void GetCurrentPageName() override;
