@@ -387,6 +387,11 @@ public:
         return mouseStyleManager_->GetCurrentMouseStyle();
     }
 
+    bool IsDragCancelPending() const
+    {
+        return isDragCancelPending_;
+    }
+
 #if defined(SUPPORT_TOUCH_TARGET_TEST)
     bool TouchTargetHitTest(const TouchEvent& touchPoint, const RefPtr<NG::FrameNode>& frameNode,
         TouchRestrict& touchRestrict, const Offset& offset = Offset(), float viewScale = 1.0f,
@@ -490,6 +495,7 @@ private:
     std::vector<WeakPtr<NG::NGGestureRecognizer>> mousePendingRecognizers_;
     std::vector<WeakPtr<NG::FrameNode>> onTouchTestDoneFrameNodeList_;
     bool passThroughResult_ = false;
+    bool isDragCancelPending_ = false;
 };
 
 } // namespace OHOS::Ace

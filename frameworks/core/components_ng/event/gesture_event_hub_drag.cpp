@@ -71,6 +71,7 @@ const std::unordered_set<std::string> VALID_TAG = {
     V2::WEB_ETS_TAG,
 };
 constexpr int32_t HALF_PIXELMAP = 2;
+constexpr int32_t PASS_THROUGH_EVENT_ID = 100000;
 } // namespace
 const std::string DEFAULT_MOUSE_DRAG_IMAGE { "/system/etc/device_status/drag_icon/Copy_Drag.svg" };
 
@@ -994,9 +995,10 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         dragMoveLastPoint.GetScreenX() : info.GetScreenLocation().GetX();
     auto screenY = DragDropGlobalController::GetInstance().GetAsyncDragCallback() ?
         dragMoveLastPoint.GetScreenY() : info.GetScreenLocation().GetY();
-    
+
+    const int32_t pointerId = info.GetPassThrough() ? info.GetPointerId() % PASS_THROUGH_EVENT_ID : info.GetPointerId();
     DragDataCore dragData { { shadowInfo }, {}, udKey, extraInfoLimited, arkExtraInfoJson->ToString(),
-        static_cast<int32_t>(info.GetSourceDevice()), recordsSize, info.GetPointerId(), screenX, screenY,
+        static_cast<int32_t>(info.GetSourceDevice()), recordsSize, pointerId, screenX, screenY,
         info.GetTargetDisplayId(), windowId, true, false, dragSummaryInfo.summary, false,
         dragSummaryInfo.detailedSummary, dragSummaryInfo.summaryFormat, dragSummaryInfo.version,
         dragSummaryInfo.totalSize };
@@ -1013,7 +1015,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         "pointerId %{public}d, displayId %{public}d, windowId %{public}d, summary %{public}s, "
         "eventId %{public}d, detailedSummary %{public}s.",
         frameNode->GetTag().c_str(), width, height, scale, DragDropFuncWrapper::GetAnonyString(udKey).c_str(),
-        recordsSize, static_cast<int32_t>(extraInfoLimited.length()), info.GetPointerId(),
+        recordsSize, static_cast<int32_t>(extraInfoLimited.length()), pointerId,
         info.GetTargetDisplayId(), windowId, summarys.c_str(), info.GetPointerEventId(), detailedSummarys.c_str());
     dragDropManager->GetGatherPixelMap(dragData, scale, width, height);
     {
