@@ -504,6 +504,10 @@ template("ace_core_source_set") {
       "$ace_root/frameworks/core/components_ng/pattern/text_field:ace_core_components_text_field_pattern_ng_$platform",
     ]
 
+    deps += [
+      "$ace_root/frameworks/core/accessibility:ace_core_accessibility_ng_$platform",
+    ]
+
     if (qrcodegen_support) {
       deps += [
         "$ace_root/frameworks/core/components/qrcode:ace_core_components_qrcode_$platform",
@@ -1046,6 +1050,10 @@ template("ace_core_ng_source_set") {
       "$ace_root/frameworks/core/components_ng/token_theme:ace_core_components_token_theme_ng_$platform",
     ]
 
+    deps += [
+      "$ace_root/frameworks/core/accessibility:ace_core_accessibility_ng_$platform",
+    ]
+
     if (defined(config.use_components_lib) && config.use_components_lib) {
       deps += [ "$ace_root/frameworks/core/components_ng/common_napi_utils:ace_core_components_common_napi_utils_$platform" ]
     } else {
@@ -1086,6 +1094,7 @@ template("ace_core_ng_source_set") {
           "napi:ace_napi",
           "webview:libnweb",
           "webview:cj_webview_ffi",
+          "webview:ohos_base_glue_source",
           "window_manager:libwm",
         ]
       } else {

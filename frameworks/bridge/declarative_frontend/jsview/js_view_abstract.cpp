@@ -7199,23 +7199,21 @@ bool JSViewAbstract::ParseJsSymbolColor(const JSRef<JSVal>& jsValue, std::vector
         if (!value->IsNumber() && !value->IsString() && !value->IsObject()) {
             return false;
         }
+        RefPtr<ResourceObject> resObj;
+        Color color;
         if (value->IsNumber()) {
-            result.emplace_back(Color(ColorAlphaAdapt(value->ToNumber<uint32_t>())));
-            continue;
+            color = Color(ColorAlphaAdapt(value->ToNumber<uint32_t>()));
         } else if (value->IsString()) {
-            Color color;
             Color::ParseColorString(value->ToString(), color);
-            result.emplace_back(color);
-            continue;
         } else {
-            Color color;
-            RefPtr<ResourceObject> resObj;
             ParseJsColorFromResource(value, color, resObj);
-            result.emplace_back(color);
-            if (enableResourceUpdate && resObj) {
-                std::pair<int32_t, RefPtr<ResourceObject>> pair(i, resObj);
-                resObjArr.push_back(pair);
-            }
+        }
+
+        result.emplace_back(color);
+        CompleteResourceObjectFromColor(resObj, color, true);
+        if (enableResourceUpdate && resObj) {
+            std::pair<int32_t, RefPtr<ResourceObject>> pair(i, resObj);
+            resObjArr.push_back(pair);
         }
     }
     return true;
@@ -8131,7 +8129,7 @@ void JSViewAbstract::JsOnDragSpringLoading(const JSCallbackInfo& info)
         if (!CheckJSCallbackInfo("JsOnDragSpringLoading", jsVal, checkList)) {
             return;
         }
-        NG::OnDrapDropSpringLoadingFunc onDragSpringLoading = nullptr;
+        NG::OnDragDropSpringLoadingFunc onDragSpringLoading = nullptr;
         WeakPtr<NG::FrameNode> frameNode =
             AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
         if (jsVal->IsFunction()) {
@@ -13301,10 +13299,13 @@ void JSViewAbstract::ParseDragSpringLoadingConfiguration(
     auto setConfigurationPropertyIfValid =
         [&configuration, &config](const char* propName,
             std::function<void(const RefPtr<NG::DragSpringLoadingConfiguration>&, int32_t)> setter) {
+            CHECK_NULL_VOID(propName);
+            CHECK_NULL_VOID(config);
+            CHECK_NULL_VOID(setter);
             auto propObj = configuration->GetProperty(propName);
             if (propObj->IsNumber()) {
                 auto value = propObj->ToNumber<int32_t>();
-                if (value >= 0) {
+                if (value > 0) {
                     setter(config, value);
                 }
             }

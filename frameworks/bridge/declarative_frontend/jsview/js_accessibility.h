@@ -21,7 +21,7 @@
 namespace OHOS::Ace::Framework {
     class JSAccessibilityAbstract {
         public:
-            // static std::string GetRoleByType(AccessibilityRoleType roleType);
+            static std::string GetRoleByType(AccessibilityRoleType roleType);
     };
 } // namespace OHOS::Ace::Framework
 

@@ -725,5 +725,9 @@ HWTEST_F(DragAnimationHelperTestNg, CreateTextNode001, TestSize.Level1)
     DragAnimationHelper::CreateTextNode(data);
     data.deviceType = SourceType::MOUSE;
     EXPECT_NE(data.textRowNode, nullptr);
+    data.textRowNode = nullptr;
+    data.badgeNumber = 1;
+    DragAnimationHelper::CreateTextNode(data);
+    EXPECT_EQ(data.textRowNode, nullptr);
 }
 } // namespace OHOS::Ace::NG

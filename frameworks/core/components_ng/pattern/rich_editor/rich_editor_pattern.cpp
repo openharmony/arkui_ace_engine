@@ -5607,6 +5607,11 @@ bool RichEditorPattern::RequestCustomKeyboard()
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_RETURN(overlayManager, false);
     overlayManager->SetCustomKeyboardOption(keyboardAvoidance_);
+    auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
+    CHECK_NULL_RETURN(textFieldManager, false);
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        textFieldManager->SetUsingCustomKeyboardAvoid(keyboardAvoidance_);
+    }
     overlayManager->BindKeyboard(customKeyboardBuilder_, frameNode->GetId());
     isCustomKeyboardAttached_ = true;
     contentChange_ = false;
@@ -8540,15 +8545,17 @@ void RichEditorPattern::AsyncHandleOnCopyStyledStringHtml(RefPtr<SpanString>& su
     CHECK_NULL_VOID(pipeline);
     auto taskExecutor = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
+    auto multiTypeRecordImpl = AceType::MakeRefPtr<MultiTypeRecordImpl>();
+    subSpanString->EncodeTlv(multiTypeRecordImpl->GetSpanStringBuffer());
+    multiTypeRecordImpl->SetPlainText(subSpanString->GetString());
+    std::list<RefPtr<SpanItem>> copySpans = CopySpansForClipboard(subSpanString->GetSpanItems());
     taskExecutor->PostTask(
-        [subSpanString, weak = WeakClaim(this), task = WeakClaim(RawPtr(taskExecutor))]() {
+        [copySpans, multiTypeRecordImpl, weak = WeakClaim(this), task = WeakClaim(RawPtr(taskExecutor))]() {
             auto richEditor = weak.Upgrade();
             CHECK_NULL_VOID(richEditor);
             RefPtr<PasteDataMix> pasteData = richEditor->clipboard_->CreatePasteDataMix();
-            auto multiTypeRecordImpl = AceType::MakeRefPtr<MultiTypeRecordImpl>();
-            subSpanString->EncodeTlv(multiTypeRecordImpl->GetSpanStringBuffer());
-            multiTypeRecordImpl->SetPlainText(subSpanString->GetString());
-            std::string htmlStr = HtmlUtils::ToHtml(Referenced::RawPtr(subSpanString));
+            CHECK_NULL_VOID(multiTypeRecordImpl);
+            std::string htmlStr = HtmlUtils::ToHtml(copySpans);
             multiTypeRecordImpl->SetHtmlText(htmlStr);
 
             auto uiTaskExecutor = task.Upgrade();
@@ -8584,10 +8591,10 @@ void RichEditorPattern::HandleOnCopyStyledString()
 #endif
 }
 
-std::list<RefPtr<SpanItem>> RichEditorPattern::CopySpansForClipboard()
+std::list<RefPtr<SpanItem>> RichEditorPattern::CopySpansForClipboard(const std::list<RefPtr<SpanItem>>& spans)
 {
     std::list<RefPtr<SpanItem>> copySpans;
-    for (const auto& spanItem : spans_) {
+    for (const auto& spanItem : spans) {
         // only make normal/image spanItem, because copy or cut only for normal/image spanItem
         auto newSpanItem = GetSameSpanItem(spanItem);
         CHECK_NULL_CONTINUE(newSpanItem);
@@ -8617,7 +8624,7 @@ void RichEditorPattern::OnCopyOperation(bool isUsingExternalKeyboard)
     auto textSelectInfo = GetSpansInfo(selectStart, selectEnd, GetSpansMethod::ONSELECT);
     auto copyResultObjects = textSelectInfo.GetSelection().resultObjects;
     CHECK_NULL_VOID(!copyResultObjects.empty());
-    std::list<RefPtr<SpanItem>> copySpans = CopySpansForClipboard();
+    std::list<RefPtr<SpanItem>> copySpans = CopySpansForClipboard(spans_);
     ACE_SCOPED_TRACE("RichEditorOnCopyOperation");
     taskExecutor->PostTask(
         [weak = WeakClaim(this), task = WeakClaim(RawPtr(taskExecutor)), copyResultObjects, copySpans]() {
@@ -9102,7 +9109,6 @@ void RichEditorPattern::OnAreaChangedInner()
     IF_TRUE(parentGlobalOffset_ != prevParentGlobalOffset,
         UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height()));
     IF_TRUE(parentGlobalOffset_ != prevParentGlobalOffset, UpdateCaretInfoToController());
-    IF_TRUE(parentGlobalOffset_ != prevParentGlobalOffset, CloseAIMenu());
 }
 
 void RichEditorPattern::UpdateParentOffsetAndOverlay()
@@ -9111,8 +9117,8 @@ void RichEditorPattern::UpdateParentOffsetAndOverlay()
     CHECK_NULL_VOID(parentGlobalOffset != parentGlobalOffset_);
     parentGlobalOffset_ = parentGlobalOffset;
     selectOverlay_->UpdateSelectOverlayOnAreaChanged();
+    CloseAIMenu();
 }
-
 
 void RichEditorPattern::CloseAIMenu()
 {

@@ -1061,4 +1061,30 @@ HWTEST_F(TextTestNg, GetSpanItemAttributeUseForHtml, TestSize.Level1)
     EXPECT_EQ(textLineStyle.GetLineHeight(), Dimension(2.2));
 }
 
+/**
+ * @tc.name: AsyncHandleOnCopySpanStringHtml
+ * @tc.desc: Test AsyncHandleOnCopySpanStringHtml.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, AsyncHandleOnCopySpanStringHtml, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create the TextPattern.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. set AsyncHandleOnCopySpanStringHtml func param.
+     */
+    auto spanString = AceType::MakeRefPtr<SpanString>(u"0123456789");
+    /**
+     * @tc.steps: step3. Excute function for AsyncHandleOnCopySpanStringHtml.
+     */
+    pattern->AsyncHandleOnCopySpanStringHtml(spanString);
+    EXPECT_EQ(spanString->GetString(), "0123456789");
+    EXPECT_EQ(spanString->GetLength(), 10);
+}
+
 } // namespace OHOS::Ace::NG

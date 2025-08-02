@@ -205,7 +205,7 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+        auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_RETURN(pipeline, FocusPattern());
         auto pickerTheme = pipeline->GetTheme<PickerTheme>();
         CHECK_NULL_RETURN(pickerTheme, FocusPattern());
@@ -515,16 +515,6 @@ public:
         curOpacity_ = opacity;
     }
 
-    static std::string GetSelectedObjectStr(const std::string value,
-        const uint32_t index, int32_t status = 0)
-    {
-        return std::string("{\"value\":") + "\"" + value + "\"" + ",\"index\":" + std::to_string(index) +
-               ",\"status\":" + std::to_string(status) + "}";
-    }
-
-    static std::string GetSelectedObjectMulti(const std::vector<std::string>& values,
-        const std::vector<uint32_t>& indexs, int32_t status);
-
     void SetDisableTextStyleAnimation(bool isDisableTextStyleAnimation);
 
     bool GetDisableTextStyleAnimation() const
@@ -622,6 +612,8 @@ private:
         uint32_t value, uint32_t curColumn, uint32_t replaceColumn);
     void OnColumnsBuildingUnCascade();
     void OnColumnsBuildingCascade();
+    std::string GetSelectedObjectMulti(const std::vector<std::string>& values,
+        const std::vector<uint32_t>& indexs, int32_t status) const;
     void SupplementOption(const std::vector<NG::TextCascadePickerOptions>& reOptions,
         std::vector<NG::RangeContent>& rangeContents, uint32_t patterIndex);
     void ProcessCascadeOptionsValues(const std::vector<std::string>& rangeResultValue, uint32_t index);

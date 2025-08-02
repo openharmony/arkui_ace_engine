@@ -613,6 +613,14 @@ public:
         delegate->HandleAutoFillEvent(result);
     }
 
+    void OnReceiveValueV2(std::shared_ptr<NWeb::NWebHapValue> value) override
+    {
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called");
+        auto delegate = delegate_.Upgrade();
+        CHECK_NULL_VOID(delegate);
+        delegate->HandleAutoFillEvent(value);
+    }
+
 private:
     WeakPtr<WebDelegate> delegate_;
 };
@@ -1235,6 +1243,18 @@ void WebDelegate::ScaleGestureChangeV2(int type, double scale, double originScal
 std::string WebDelegate::GetSelectInfo() const
 {
     return "";
+}
+std::string WebDelegate::GetAllTextInfo() const
+{
+    return "";
+}
+int WebDelegate::GetSelectStartIndex() const
+{
+    return 0;
+}
+int WebDelegate::GetSelectEndIndex() const
+{
+    return 0;
 }
 Offset WebDelegate::GetPosition(const std::string& embedId)
 {

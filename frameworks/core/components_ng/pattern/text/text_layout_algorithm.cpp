@@ -891,6 +891,7 @@ std::optional<SizeF> TextLayoutAlgorithm::BuildTextRaceParagraph(TextStyle& text
             return std::nullopt;
         }
     }
+    layoutProperty->OnPropertyChangeMeasure();
 
     textStyle_ = textStyle;
     auto paragraph = GetSingleParagraph();
@@ -984,12 +985,14 @@ bool TextLayoutAlgorithm::IsParentSizeNearZero(const LayoutConstraintF& contentC
 {
     auto widthPolicy = TextBase::GetLayoutCalPolicy(layoutWrapper, true);
     if (widthPolicy == LayoutCalPolicy::MATCH_PARENT &&
-        (!contentConstraint.parentIdealSize.Width() || NearZero(contentConstraint.parentIdealSize.Width().value()))) {
+        (contentConstraint.parentIdealSize.Width().has_value() &&
+            NearZero(contentConstraint.parentIdealSize.Width().value()))) {
         return true;
     }
     auto heightPolicy = TextBase::GetLayoutCalPolicy(layoutWrapper, false);
     if (heightPolicy == LayoutCalPolicy::MATCH_PARENT &&
-        (!contentConstraint.parentIdealSize.Height() || NearZero(contentConstraint.parentIdealSize.Height().value()))) {
+        (contentConstraint.parentIdealSize.Height().has_value() &&
+            NearZero(contentConstraint.parentIdealSize.Height().value()))) {
         return true;
     }
     return false;
@@ -1024,9 +1027,8 @@ LayoutConstraintF TextLayoutAlgorithm::CalcContentConstraint(
         } else {
             contentConstraint.maxSize.SetWidth(std::numeric_limits<double>::infinity());
         }
-    } else if (widthPolicy == LayoutCalPolicy::MATCH_PARENT) {
-        contentConstraint.selfIdealSize.SetWidth(
-            constraint.parentIdealSize.Width().value_or(constraint.maxSize.Width()));
+    } else if (widthPolicy == LayoutCalPolicy::MATCH_PARENT && constraint.parentIdealSize.Width().has_value()) {
+        contentConstraint.selfIdealSize.SetWidth(constraint.parentIdealSize.Width().value());
     }
     auto heightPolicy = TextBase::GetLayoutCalPolicy(layoutWrapper, false);
     if (heightPolicy == LayoutCalPolicy::FIX_AT_IDEAL_SIZE) {
@@ -1036,9 +1038,8 @@ LayoutConstraintF TextLayoutAlgorithm::CalcContentConstraint(
         } else {
             contentConstraint.maxSize.SetHeight(std::numeric_limits<double>::infinity());
         }
-    } else if (heightPolicy == LayoutCalPolicy::MATCH_PARENT) {
-        contentConstraint.selfIdealSize.SetHeight(
-            constraint.parentIdealSize.Height().value_or(constraint.maxSize.Height()));
+    } else if (heightPolicy == LayoutCalPolicy::MATCH_PARENT && constraint.parentIdealSize.Height().has_value()) {
+        contentConstraint.selfIdealSize.SetHeight(constraint.parentIdealSize.Height().value());
     }
     cachedCalcContentConstraint_ = contentConstraint;
     return contentConstraint;
@@ -1108,29 +1109,8 @@ void TextLayoutAlgorithm::MeasureWithFixAtIdealSize(LayoutWrapper* layoutWrapper
     geometryNode->SetFrameSize(measureSize);
 }
 
-void TextLayoutAlgorithm::MeasureWithMatchParent(LayoutWrapper* layoutWrapper)
-{
-    CHECK_NULL_VOID(layoutWrapper);
-    auto layoutProperty = layoutWrapper->GetLayoutProperty();
-    CHECK_NULL_VOID(layoutProperty);
-    auto layoutPolicyProperty = layoutProperty->GetLayoutPolicyProperty();
-    CHECK_NULL_VOID(layoutPolicyProperty);
-    auto heightLayoutPolicy = layoutPolicyProperty.value().heightLayoutPolicy_;
-    if (heightLayoutPolicy != LayoutCalPolicy::MATCH_PARENT) {
-        return;
-    }
-    const auto& contentConstraint = layoutProperty->GetContentLayoutConstraint();
-    CHECK_NULL_VOID(contentConstraint);
-    auto padding = layoutProperty->CreatePaddingAndBorder();
-    auto geometryNode = layoutWrapper->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    auto contentHeight = contentConstraint->parentIdealSize.Height().value_or(contentConstraint->maxSize.Height());
-    geometryNode->SetFrameHeight(contentHeight + padding.top.value_or(0.0f) + padding.bottom.value_or(0.0f));
-}
-
 void TextLayoutAlgorithm::MeasureWidthLayoutCalPolicy(LayoutWrapper* layoutWrapper)
 {
     MeasureWithFixAtIdealSize(layoutWrapper);
-    MeasureWithMatchParent(layoutWrapper);
 }
 } // namespace OHOS::Ace::NG

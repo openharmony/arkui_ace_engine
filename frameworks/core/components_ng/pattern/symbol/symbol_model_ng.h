@@ -59,6 +59,8 @@ public:
         const std::int16_t isTxtActiveSource);
     static void SetSymbolShadow(FrameNode* frameNode, const SymbolShadow& symbolShadow);
     static void SetShaderStyle(FrameNode* frameNode, const std::vector<SymbolGradient>& style);
+    static void RegisterSymbolFontColorResource(FrameNode* frameNode, const std::string& key,
+        std::vector<Color>& symbolColor, const std::vector<std::pair<int32_t, RefPtr<ResourceObject>>>& resObjArr);
 };
 } // namespace OHOS::Ace::NG
 

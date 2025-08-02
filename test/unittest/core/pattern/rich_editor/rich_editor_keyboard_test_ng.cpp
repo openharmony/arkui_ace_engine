@@ -22,6 +22,7 @@
 #include "test/mock/base/mock_task_executor.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
+#include "core/components_ng/pattern/text_field/text_field_manager.h"
  
 using namespace testing;
 using namespace testing::ext;
@@ -174,6 +175,8 @@ HWTEST_F(RichEditorKeyboardTestNg, RichEditorPatternTestRequestKeyboard001, Test
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
+    auto textFieldManager = AceType::MakeRefPtr<TextFieldManagerNG>();
+    MockPipelineContext::GetCurrent()->SetTextFieldManager(textFieldManager);
     auto func = [] {};
 
     auto customKeyboardBuilder = richEditorPattern->customKeyboardBuilder_;
@@ -194,6 +197,8 @@ HWTEST_F(RichEditorKeyboardTestNg, RichEditorPatternTestCloseCustomKeyboard001, 
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CloseCustomKeyboard();
 
+    auto textFieldManager = AceType::MakeRefPtr<TextFieldManagerNG>();
+    MockPipelineContext::GetCurrent()->SetTextFieldManager(textFieldManager);
     auto func = []() {};
     auto oldFunc = richEditorPattern->customKeyboardBuilder_;
 
@@ -207,6 +212,33 @@ HWTEST_F(RichEditorKeyboardTestNg, RichEditorPatternTestCloseCustomKeyboard001, 
     ASSERT_EQ(richEditorPattern->CloseCustomKeyboard(), true);
 
     richEditorPattern->customKeyboardBuilder_ = oldFunc;
+}
+
+/**
+ * @tc.name: RequestCustomKeyboard
+ * @tc.desc: test RequestCustomKeyboard
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorKeyboardTestNg, RequestCustomKeyboard, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto textFieldManager = AceType::MakeRefPtr<TextFieldManagerNG>();
+    MockPipelineContext::GetCurrent()->SetTextFieldManager(textFieldManager);
+    int32_t apiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY));
+
+    richEditorPattern->SetCustomKeyboardOption(true);
+    auto func = []() {};
+    richEditorPattern->customKeyboardBuilder_ = func;
+
+    EXPECT_EQ(richEditorPattern->isCustomKeyboardAttached_, false);
+    EXPECT_EQ(richEditorPattern->RequestCustomKeyboard(), true);
+    EXPECT_EQ(textFieldManager->UsingCustomKeyboardAvoid(), true);
+    EXPECT_EQ(richEditorPattern->isCustomKeyboardAttached_, true);
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(apiVersion);
 }
 
 /**

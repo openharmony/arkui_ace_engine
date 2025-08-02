@@ -86,9 +86,40 @@ struct WidthLayoutBreakPoint {
     double widthVPSM_ = 600.0;
     double widthVPMD_ = 840.0;
     double widthVPLG_ = 1440.0;
+    double widthVPXL_ = -1.0;  // 默认不生效
     WidthLayoutBreakPoint() = default;
-    WidthLayoutBreakPoint(double widthVPXS, double widthVPSM, double widthVPMD, double widthVPLG)
-        : widthVPXS_(widthVPXS), widthVPSM_(widthVPSM), widthVPMD_(widthVPMD), widthVPLG_(widthVPLG) {}
+    WidthLayoutBreakPoint(
+        double widthVPXS, double widthVPSM, double widthVPMD, double widthVPLG, double widthVPXL = -1.0)
+        : widthVPXS_(widthVPXS), widthVPSM_(widthVPSM), widthVPMD_(widthVPMD), widthVPLG_(widthVPLG),
+          widthVPXL_(widthVPXL)
+    {}
+    WidthLayoutBreakPoint(std::vector<double> breakPoints)
+        : widthVPXS_(breakPoints.size() > 0 ? breakPoints[0] : -1.0), // XS与SM临界值
+          widthVPSM_(breakPoints.size() > 1 ? breakPoints[1] : -1.0), // SM与MD临界值
+          widthVPMD_(breakPoints.size() > 2 ? breakPoints[2] : -1.0), // MD与LG临界值
+          widthVPLG_(breakPoints.size() > 3 ? breakPoints[3] : -1.0), // LG与XL临界值
+          widthVPXL_(breakPoints.size() > 4 ? breakPoints[4] : -1.0) // XL与XXL临界值
+    {}
+    bool operator==(WidthLayoutBreakPoint &v)
+    {
+        return widthVPXS_ == v.widthVPXS_ && widthVPSM_ == v.widthVPSM_ && widthVPMD_ == v.widthVPMD_ &&
+               widthVPLG_ == v.widthVPLG_ && widthVPXL_ == v.widthVPXL_;
+    }
+    bool operator==(const WidthLayoutBreakPoint &v)
+    {
+        return widthVPXS_ == v.widthVPXS_ && widthVPSM_ == v.widthVPSM_ && widthVPMD_ == v.widthVPMD_ &&
+               widthVPLG_ == v.widthVPLG_ && widthVPXL_ == v.widthVPXL_;
+    }
+    bool operator!=(WidthLayoutBreakPoint &v)
+    {
+        return widthVPXS_ != v.widthVPXS_ || widthVPSM_ != v.widthVPSM_ || widthVPMD_ != v.widthVPMD_ ||
+               widthVPLG_ != v.widthVPLG_ || widthVPXL_ != v.widthVPXL_;
+    }
+    bool operator!=(const WidthLayoutBreakPoint &v)
+    {
+        return widthVPXS_ != v.widthVPXS_ || widthVPSM_ != v.widthVPSM_ || widthVPMD_ != v.widthVPMD_ ||
+               widthVPLG_ != v.widthVPLG_ || widthVPXL_ != v.widthVPXL_;
+    }
 };
 
 struct HeightLayoutBreakPoint {
@@ -646,6 +677,10 @@ public:
 
     static bool GetGridIrregularLayoutEnabled();
 
+    static bool GetForceSplitIgnoreOrientationEnabled();
+
+    static std::optional<bool> GetArkUIHookEnabled();
+
     static bool WaterFlowUseSegmentedLayout();
 
     static bool GetSideBarContainerBlurEnable();
@@ -708,6 +743,12 @@ public:
     static float GetDragStartDampingRatio();
 
     static float GetDragStartPanDistanceThreshold();
+
+    static int32_t GetVelocityTrackerPointNumber();
+
+    static bool IsVelocityWithinTimeWindow();
+
+    static bool IsVelocityWithoutUpPoint();
 
     static bool IsSmallFoldProduct();
 
@@ -846,6 +887,8 @@ private:
     static bool configChangePerform_;
     static bool enableScrollableItemPool_;
     static bool navigationBlurEnabled_;
+    static bool forceSplitIgnoreOrientationEnabled_;
+    static std::optional<bool> arkUIHookEnabled_;
     static bool gridCacheEnabled_;
     static bool gridIrregularLayoutEnable_;
     static bool sideBarContainerBlurEnable_;
@@ -859,6 +902,9 @@ private:
     static std::pair<float, float> brightUpPercent_;
     static float dragStartDampingRatio_;
     static float dragStartPanDisThreshold_;
+    static int32_t velocityTrackerPointNumber_ ;
+    static bool isVelocityWithinTimeWindow_;
+    static bool isVelocityWithoutUpPoint_;
     static float fontScale_;
     static float fontWeightScale_;
     static bool windowRectResizeEnabled_;

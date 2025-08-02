@@ -80,6 +80,14 @@ public:
     {
         pattern_ = pattern;
     }
+    
+    // use for ArkTs1.2 interop
+    int64_t GetPatternPointer()
+    {
+        auto pattern = pattern_.Upgrade();
+        CHECK_NULL_RETURN(pattern, 0);
+        return reinterpret_cast<int64_t>(AceType::RawPtr(pattern));
+    }
 
     void IsBegin(const JSCallbackInfo& args);
     

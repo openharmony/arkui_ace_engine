@@ -118,6 +118,7 @@ struct MouseEvent final : public PointerEvent {
     bool isInjected = false;
     bool isPrivacyMode = false;
     bool isMockWindowTransFlag = false;
+    TimeStamp pressedTime;
 
     int32_t GetEventIdentity() const
     {
@@ -203,6 +204,7 @@ struct MouseEvent final : public PointerEvent {
         mouseEvent.rawDeltaY = rawDeltaY;
         mouseEvent.pressedButtonsArray = pressedButtonsArray;
         mouseEvent.passThrough = passThrough;
+        mouseEvent.pressedTime = pressedTime;
         // Only set postEventNodeId when the event supports passThrough
         if (passThrough) {
             mouseEvent.postEventNodeId = postEventNodeId;
@@ -244,7 +246,7 @@ struct MouseEvent final : public PointerEvent {
             .screenY = screenY,
             .globalDisplayX = globalDisplayX,
             .globalDisplayY = globalDisplayY,
-            .downTime = time,
+            .downTime = pressedTime,
             .size = 0.0,
             .isPressed = (type == TouchType::DOWN),
             .originalId = pointOriginalId };
@@ -254,6 +256,7 @@ struct MouseEvent final : public PointerEvent {
             .SetGlobalDisplayX(globalDisplayX).SetGlobalDisplayY(globalDisplayY)
             .SetType(type)
             .SetTime(time)
+            .SetPressedTime(pressedTime)
             .SetSize(0.0)
             .SetDeviceId(deviceId)
             .SetTargetDisplayId(targetDisplayId)

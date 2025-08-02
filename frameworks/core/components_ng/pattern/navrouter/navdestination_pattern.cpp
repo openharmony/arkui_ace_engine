@@ -239,7 +239,7 @@ void NavDestinationPattern::UpdateBackgroundColorIfNeeded(RefPtr<NavDestinationG
         renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
         return;
     }
-    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
     if (!pipelineContext) {
         return;
     }

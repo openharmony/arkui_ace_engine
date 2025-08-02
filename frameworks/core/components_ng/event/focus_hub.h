@@ -35,12 +35,6 @@ constexpr int32_t NONE_TAB_FOCUSED_INDEX = -1;
 constexpr int32_t MASK_FOCUS_STEP_VERTICAL = 0x01;
 constexpr int32_t MASK_FOCUS_STEP_FORWARD = 0x10;
 constexpr int32_t MASK_FOCUS_STEP_TAB = 0x5;
-constexpr auto DEFAULT_FOCUS_IS_GROUP = false;
-constexpr auto DEFAULT_FOCUS_ON_TOUCH = false;
-constexpr auto DEFAULT_FOCUS_IS_GROUP_DEFAULT = false;
-constexpr auto DEFAULT_FOCUS_DEFAULT_FOCUS = false;
-constexpr auto DEFAULT_FOCUS_ARROW_KEY_STEP_OUT = true;
-constexpr auto DEFAULT_FOCUS_TAB_INDEX = 0;
 
 enum class FocusNodeType : int32_t {
     DEFAULT = 0,
@@ -649,7 +643,7 @@ public:
 
     int32_t GetTabIndex() const
     {
-        return focusCallbackEvents_ ? focusCallbackEvents_->tabIndex_ : DEFAULT_FOCUS_TAB_INDEX;
+        return focusCallbackEvents_ ? focusCallbackEvents_->tabIndex_ : 0;
     }
     void SetTabIndex(int32_t tabIndex)
     {
@@ -828,11 +822,6 @@ public:
         return isGroup_;
     }
 
-    bool GetArrowKeyStepOut() const
-    {
-        return arrowKeyStepOut_;
-    }
-
     bool GetIsFocusScope() const
     {
         return isFocusScope_;
@@ -894,6 +883,12 @@ public:
     }
 
     RefPtr<FocusHub> GetHeadOrTailChild(bool isHead);
+
+    // multi thread function start
+    void RemoveSelfMultiThread(BlurReason reason);
+    void RemoveSelfExecuteFunction(BlurReason reason);
+    // multi thread function end
+
 protected:
     bool RequestNextFocusOfKeyTab(const FocusEvent& event);
     bool RequestNextFocusOfKeyEnter();
@@ -975,7 +970,6 @@ private:
     void DumpFocusScopeTreeInJson(int32_t depth);
 
     bool SkipFocusMoveBeforeRemove();
-    static std::string FocusPriorityToString(FocusPriority src);
 
     bool IsArrowKeyStepOut(FocusStep moveStep);
 
@@ -1018,7 +1012,7 @@ private:
 
     std::string focusScopeId_;
     bool isFocusScope_ { false };
-    bool isGroup_ { DEFAULT_FOCUS_IS_GROUP };
+    bool isGroup_ { false };
     FocusPriority focusPriority_ = FocusPriority::AUTO;
     bool arrowKeyStepOut_ { true };
     bool isSwitchByEnter_ { false };

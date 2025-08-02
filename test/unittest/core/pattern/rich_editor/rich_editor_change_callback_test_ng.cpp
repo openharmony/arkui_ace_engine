@@ -19,6 +19,7 @@
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
+#include "core/components_ng/pattern/text_field/text_field_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1680,6 +1681,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, OnAreaChangedInner001, TestSize.Level1)
     richEditorPattern->OnAreaChangedInner();
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, -1);
     EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, -1);
+    EXPECT_NE(richEditorPattern->parentGlobalOffset_, OffsetF(0, 1));
 }
 
 /**
@@ -1726,6 +1728,8 @@ HWTEST_F(RichEditorChangeCallbackTestNg, OnBackPressed001, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    auto textFieldManager = AceType::MakeRefPtr<TextFieldManagerNG>();
+    MockPipelineContext::GetCurrent()->SetTextFieldManager(textFieldManager);
 
     EXPECT_EQ(richEditorPattern->OnBackPressed(), false);
 

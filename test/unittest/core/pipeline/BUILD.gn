@@ -50,6 +50,7 @@ ace_unittest("pipeline_context_test_ng") {
     "$ace_root/test/mock/base/mock_engine_helper.cpp",
     "$ace_root/test/mock/base/mock_event_report.cpp",
     "$ace_root/test/mock/base/mock_foldable_window.cpp",
+    "$ace_root/test/mock/base/mock_feature_param.cpp",
     "$ace_root/test/mock/base/mock_frame_report.cpp",
     "$ace_root/test/mock/base/mock_frame_trace_adapter.cpp",
     "$ace_root/test/mock/base/mock_image_perf.cpp",
@@ -125,6 +126,7 @@ ace_unittest("pipeline_context_test_ng") {
     "pipeline_context_test_ng_new.cpp",
     "pipeline_context_test_ng_two.cpp",
     "resample_and_velocity_test_ng.cpp",
+    "velocity_tracker_test.cpp",
   ]
   extra_deps = []
   extra_deps += [ "$ace_root/test/unittest:ace_unittest_log" ]

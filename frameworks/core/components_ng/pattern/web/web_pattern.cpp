@@ -516,7 +516,8 @@ constexpr float TOOLTIP_DELAY_MS = 700;
 constexpr uint32_t ADJUST_WEB_DRAW_LENGTH = 3000;
 constexpr int32_t FIT_CONTENT_LIMIT_LENGTH = 8000;
 const std::string PATTERN_TYPE_WEB = "WEBPATTERN";
-const std::string BUFFER_USAGE_WEB = "web";
+const std::string BUFFER_USAGE_SURFACE = "web-surface-";
+const std::string BUFFER_USAGE_TEXTURE = "web-texture-";
 const std::string DEFAULT_WEB_TEXT_ENCODING_FORMAT = "UTF-8";
 constexpr int32_t SYNC_SURFACE_QUEUE_SIZE = 8;
 constexpr int32_t ASYNC_SURFACE_QUEUE_SIZE_FOR_PHONE_AND_PC = 5;
@@ -576,7 +577,6 @@ WebPattern::WebPattern()
     renderMode_ = RenderMode::ASYNC_RENDER;
     cursorType_ = OHOS::NWeb::CursorType::CT_NONE;
     viewDataCommon_ = std::make_shared<ViewDataCommon>();
-    RegisterSurfaceDensityCallback();
     InitRotationEventCallback();
 }
 
@@ -588,7 +588,6 @@ WebPattern::WebPattern(const std::string& webSrc, const RefPtr<WebController>& w
     InitMagnifier();
     cursorType_ = OHOS::NWeb::CursorType::CT_NONE;
     viewDataCommon_ = std::make_shared<ViewDataCommon>();
-    RegisterSurfaceDensityCallback();
     InitRotationEventCallback();
 }
 
@@ -600,7 +599,6 @@ WebPattern::WebPattern(const std::string& webSrc, const SetWebIdCallback& setWeb
     InitMagnifier();
     cursorType_ = OHOS::NWeb::CursorType::CT_NONE;
     viewDataCommon_ = std::make_shared<ViewDataCommon>();
-    RegisterSurfaceDensityCallback();
     InitRotationEventCallback();
 }
 
@@ -645,10 +643,6 @@ WebPattern::~WebPattern()
             pipCallbackMap_.erase(it);
         }
         pipController_.clear();
-    }
-    auto pipeline = PipelineBase::GetCurrentContextSafely();
-    if (pipeline) {
-        pipeline->UnregisterDensityChangedCallback(densityCallbackId_);
     }
     UninitRotationEventCallback();
 }
@@ -3594,6 +3588,7 @@ void WebPattern::OnAttachContext(PipelineContext *context)
     RegistVirtualKeyBoardListener(pipelineContext);
     InitConfigChangeCallback(pipelineContext);
     InitializeAccessibility();
+    InitSurfaceDensityCallback(pipelineContext);
 }
 
 void WebPattern::OnDetachContext(PipelineContext *contextPtr)
@@ -3605,6 +3600,7 @@ void WebPattern::OnDetachContext(PipelineContext *contextPtr)
     auto host = GetHost();
     int32_t nodeId = host->GetId();
     UninitializeAccessibility();
+    UnInitSurfaceDensityCallback(context);
     context->RemoveWindowStateChangedCallback(nodeId);
     context->RemoveWindowSizeChangeCallback(nodeId);
     context->RemoveOnAreaChangeNode(nodeId);
@@ -3733,12 +3729,13 @@ void WebPattern::OnModifyDone()
             renderSurface_->SetRenderContext(host->GetRenderContext());
             if (renderMode_ == RenderMode::SYNC_RENDER) {
                 renderSurface_->SetIsTexture(true);
+                renderSurface_->SetBufferUsage(BUFFER_USAGE_TEXTURE + std::to_string(host->GetId()));
                 renderSurface_->SetPatternType(PATTERN_TYPE_WEB);
                 renderSurface_->SetSurfaceQueueSize(SYNC_SURFACE_QUEUE_SIZE);
                 renderContextForSurface_->SetOpacity(0.0f);
             } else {
                 renderSurface_->SetIsTexture(false);
-                renderSurface_->SetBufferUsage(BUFFER_USAGE_WEB);
+                renderSurface_->SetBufferUsage(BUFFER_USAGE_SURFACE + std::to_string(host->GetId()));
                 renderSurface_->SetSurfaceQueueSize(GetBufferSizeByDeviceType());
                 renderSurface_->SetRenderContext(renderContextForSurface_);
             }
@@ -4904,11 +4901,11 @@ void WebPattern::ParseNWebViewDataCommonField(std::unique_ptr<JsonValue> child,
     }
 }
 
-void WebPattern::ParseNWebViewDataJson(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson,
+void WebPattern::ParseNWebViewDataJson(const std::string& viewDataJson,
     std::vector<RefPtr<PageNodeInfoWrap>>& nodeInfos, const std::shared_ptr<ViewDataCommon>& viewDataCommon)
 {
     nodeInfos.clear();
-    auto sourceJson = JsonUtil::ParseJsonString(viewDataJson->GetString());
+    auto sourceJson = JsonUtil::ParseJsonString(viewDataJson);
     if (sourceJson == nullptr || sourceJson->IsNull()) {
         return;
     }
@@ -4949,13 +4946,8 @@ AceAutoFillType WebPattern::GetFocusedType()
     return type;
 }
 
-bool WebPattern::HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson)
+bool WebPattern::HandleAutoFillEvent()
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "AutoFillEvent");
-    viewDataCommon_ = std::make_shared<ViewDataCommon>();
-    isPasswordFill_ = false;
-    ParseNWebViewDataJson(viewDataJson, pageNodeInfo_, viewDataCommon_);
-
     if (isPasswordFill_ && viewDataCommon_->GetSource() != OHOS::NWeb::NWEB_AUTOFILL_FOR_LOGIN) {
         TAG_LOGI(AceLogTag::ACE_WEB,
             "Handle autofill event failed! The form contains a login node, but the soruce is incorrect.");
@@ -4994,6 +4986,24 @@ bool WebPattern::HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessa
     return false;
 }
 
+bool WebPattern::HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "AutoFillEvent");
+    viewDataCommon_ = std::make_shared<ViewDataCommon>();
+    isPasswordFill_ = false;
+    ParseNWebViewDataJson(viewDataJson->GetString(), pageNodeInfo_, viewDataCommon_);
+    return HandleAutoFillEvent();
+}
+
+bool WebPattern::HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebHapValue>& viewDataJson)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "AutoFillEvent");
+    viewDataCommon_ = std::make_shared<ViewDataCommon>();
+    isPasswordFill_ = false;
+    ParseNWebViewDataJson(viewDataJson->GetString(), pageNodeInfo_, viewDataCommon_);
+    return HandleAutoFillEvent();
+}
+
 bool WebPattern::RequestAutoFill(AceAutoFillType autoFillType)
 {
     return RequestAutoFill(autoFillType, pageNodeInfo_);
@@ -5029,6 +5039,154 @@ bool WebPattern::RequestAutoFill(AceAutoFillType autoFillType, const std::vector
     bool isPopup = false;
     return container->RequestAutoFill(host, autoFillType, false, isPopup, autoFillSessionId_, false) ==
            AceAutoFillError::ACE_AUTO_FILL_SUCCESS;
+}
+
+std::string WebPattern::GetAllTextInfo() const
+{
+    CHECK_NULL_RETURN(delegate_, std::string());
+    return delegate_->GetAllTextInfo();
+}
+
+int WebPattern::GetSelectStartIndex() const
+{
+    CHECK_NULL_RETURN(delegate_, 0);
+    return delegate_->GetSelectStartIndex();
+}
+
+int WebPattern::GetSelectEndIndex() const
+{
+    CHECK_NULL_RETURN(delegate_, 0);
+    return delegate_->GetSelectEndIndex();
+}
+
+void WebPattern::GetHandleInfo(SelectOverlayInfo& infoHandle)
+{
+    firstInfoHandle_ = infoHandle.firstHandle.paintRect;
+    secondInfoHandle_ = infoHandle.secondHandle.paintRect;
+}
+
+RefPtr<TextFieldTheme> WebPattern::GetTheme() const
+{
+    auto tmpHost = GetHost();
+    CHECK_NULL_RETURN(tmpHost, nullptr);
+    auto context = tmpHost->GetContext();
+    CHECK_NULL_RETURN(context, nullptr);
+    return context->GetTheme<TextFieldTheme>(tmpHost->GetThemeScopeId());
+}
+
+bool WebPattern::IsShowAIWrite()
+{
+    auto container = Container::Current();
+    if (container && container->IsSceneBoardWindow()) {
+        return false;
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto textFieldTheme = GetTheme();
+    CHECK_NULL_RETURN(textFieldTheme, false);
+    auto bundleName = textFieldTheme->GetAIWriteBundleName();
+    auto abilityName = textFieldTheme->GetAIWriteAbilityName();
+    if (bundleName.empty() || abilityName.empty()) {
+        TAG_LOGW(AceLogTag::ACE_WEB, "Failed to obtain AI write package name!");
+        return false;
+    }
+    aiWriteAdapter_->SetBundleName(bundleName);
+    aiWriteAdapter_->SetAbilityName(abilityName);
+    auto isAISupport = textFieldTheme->GetAIWriteIsSupport() == "true";
+    TAG_LOGI(AceLogTag::ACE_WEB, "Whether the device supports AI write: %{public}d, nodeId: %{public}d", isAISupport,
+        host->GetId());
+    return isAISupport;
+}
+
+void WebPattern::HandleOnAIWrite()
+{
+    AIWriteInfo info;
+    GetAIWriteInfo(info);
+    CloseSelectOverlay();
+    CloseKeyboard();
+    auto callback = [weak = WeakClaim(this), info](std::vector<uint8_t>& buffer) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleAIWriteResult(info.selectStart, info.selectEnd, buffer);
+        auto aiWriteAdapter = pattern->aiWriteAdapter_;
+        CHECK_NULL_VOID(aiWriteAdapter);
+        aiWriteAdapter->CloseModalUIExtension();
+    };
+
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    aiWriteAdapter_->SetPipelineContext(pipeline);
+    aiWriteAdapter_->ShowModalUIExtension(info, callback);
+}
+
+void WebPattern::FormatIndex(int32_t& startIndex, int32_t& endIndex)
+{
+    startIndex = std::min(startIndex, endIndex);
+    endIndex = std::max(startIndex, endIndex);
+    startIndex = std::clamp(startIndex, 0, static_cast<int32_t>(content_.length()));
+    endIndex = std::clamp(endIndex, 0, static_cast<int32_t>(content_.length()));
+}
+
+std::u16string WebPattern::GetSelectedValue(int32_t startIndex, int32_t endIndex)
+{
+    auto allText = GetAllTextInfo();
+    content_ = UtfUtils::Str8ToStr16(allText);
+    FormatIndex(startIndex, endIndex);
+    startIndex = std::clamp(startIndex, 0, static_cast<int32_t>(content_.length()));
+    auto selectedValue = content_.substr(startIndex, endIndex - startIndex);
+    if (selectedValue.empty()) {
+        selectedValue = TextEmojiProcessor::SubU16string(startIndex, endIndex - startIndex, content_);
+    }
+    return selectedValue;
+}
+
+void WebPattern::GetAIWriteInfo(AIWriteInfo& info)
+{
+    info.firstHandle = firstInfoHandle_.ToString();
+    info.secondHandle = secondInfoHandle_.ToString();
+    info.selectStart = GetSelectStartIndex();
+    info.selectEnd = GetSelectEndIndex();
+
+    // serialize the selected text
+    auto selectContent = GetSelectInfo();
+    std::u16string selectContentAllValue = UtfUtils::Str8ToStr16(selectContent);
+    RefPtr<SpanString> spanString = AceType::MakeRefPtr<SpanString>(selectContentAllValue);
+    spanString->EncodeTlv(info.selectBuffer);
+    info.selectLength = static_cast<int32_t>(aiWriteAdapter_->GetSelectLengthOnlyText(spanString->GetU16string()));
+
+    // serialize the sentenced-level text
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto contentAll = UtfUtils::Str8ToStr16(GetAllTextInfo());
+    auto sentenceStart = 0;
+    auto sentenceEnd = static_cast<int32_t>(contentAll.length());
+    TAG_LOGD(AceLogTag::ACE_WEB, "Selected range=[%{public}d--%{public}d], content size=%{public}zu", info.selectStart,
+        info.selectEnd, spanString->GetString().size());
+    for (int32_t i = info.selectStart; i >= 0; --i) {
+        if (aiWriteAdapter_->IsSentenceBoundary(contentAll[i])) {
+            sentenceStart = i + 1;
+            break;
+        }
+    }
+    for (int32_t i = info.selectEnd; i < info.selectLength; i++) {
+        if (aiWriteAdapter_->IsSentenceBoundary(contentAll[i])) {
+            sentenceEnd = i;
+            break;
+        }
+    }
+    info.start = info.selectStart - sentenceStart;
+    info.end = info.selectEnd - sentenceStart;
+    auto sentenceContent = GetSelectedValue(sentenceStart, sentenceEnd);
+    spanString = AceType::MakeRefPtr<SpanString>(sentenceContent);
+    spanString->EncodeTlv(info.sentenceBuffer);
+    TAG_LOGD(AceLogTag::ACE_WEB, "Sentence range=[%{public}d--%{public}d], content size=%{public}zu", sentenceStart,
+        sentenceEnd, spanString->GetString().size());
+    info.componentType = host->GetTag();
+}
+
+void WebPattern::HandleAIWriteResult(int32_t start, int32_t end, std::vector<uint8_t>& buffer)
+{
+    return;
 }
 
 bool WebPattern::RequestAutoSave()
@@ -5179,6 +5337,20 @@ void WebPattern::UpdateLocalCursorStyle(int32_t windowId, const OHOS::NWeb::Curs
     }
 }
 
+std::string WebPattern::GetPixelMapName(std::shared_ptr<Media::PixelMap> pixelMap, std::string featureName)
+{
+    if (!pixelMap) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "GetPixelMapName error, PixelMap is null");
+        return "undefined_";
+    }
+    auto frameNode = GetHost();
+    CHECK_NULL_RETURN(frameNode, "undefined_");
+    std::string memNameStr = "web-" + std::to_string(pixelMap->GetWidth()) + "x" +
+                             std::to_string(pixelMap->GetHeight()) + "-" + featureName + "-" +
+                             std::to_string(frameNode->GetId());
+    return memNameStr;
+}
+
 void WebPattern::UpdateCustomCursor(int32_t windowId, std::shared_ptr<OHOS::NWeb::NWebCursorInfo> info)
 {
     int32_t x = 0;
@@ -5207,6 +5379,8 @@ void WebPattern::UpdateCustomCursor(int32_t windowId, std::shared_ptr<OHOS::NWeb
     }
     std::shared_ptr<Media::PixelMap> cursorPixelMap(pixelMap.release());
     CHECK_NULL_VOID(cursorPixelMap);
+    uint32_t res = cursorPixelMap->SetMemoryName(GetPixelMapName(cursorPixelMap, "cursor"));
+    TAG_LOGI(AceLogTag::ACE_WEB, "SetMemoryName result is %{public}d", res);
     auto mouseStyle = MouseStyle::CreateMouseStyle();
     CHECK_NULL_VOID(mouseStyle);
     mouseStyle->SetCustomCursor(windowId, x, y, cursorPixelMap);
@@ -8037,19 +8211,6 @@ void WebPattern::EndTranslate()
         }, TaskExecutor::TaskType::UI, "ArkUIWebEndTranslate");
 }
 
-void WebPattern::RegisterSurfaceDensityCallback()
-{
-    auto pipeline = PipelineBase::GetCurrentContextSafely();
-    if (pipeline) {
-        density_ = pipeline->GetDensity();
-        densityCallbackId_ = pipeline->RegisterDensityChangedCallback([weak = WeakClaim(this)](double density) {
-            auto webPattern = weak.Upgrade();
-            CHECK_NULL_VOID(webPattern);
-            webPattern->SetSurfaceDensity(density);
-        });
-    }
-}
-
 void WebPattern::InitRotationEventCallback()
 {
     if (rotationEndCallbackId_ != 0) {
@@ -8556,5 +8717,28 @@ void WebPattern::SetTouchHandleExistState(bool touchHandleExist)
 bool WebPattern::IsShowHandle()
 {
     return webSelectOverlay_ && webSelectOverlay_->IsShowHandle();
+}
+
+void WebPattern::InitSurfaceDensityCallback(const RefPtr<PipelineContext> &context)
+{
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::InitSurfaceDensityCallback");
+    CHECK_NULL_VOID(context);
+    density_ = context->GetDensity();
+    if (delegate_) {
+        delegate_->SetSurfaceDensity(density_);
+    }
+    densityCallbackId_ = context->RegisterDensityChangedCallback([weak = WeakClaim(this)](double density) {
+        auto webPattern = weak.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        webPattern->SetSurfaceDensity(density);
+    });
+}
+
+void WebPattern::UnInitSurfaceDensityCallback(const RefPtr<PipelineContext> &context)
+{
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebPattern::UnInitSurfaceDensityCallback");
+    CHECK_NULL_VOID(context);
+    context->UnregisterDensityChangedCallback(densityCallbackId_);
+    densityCallbackId_ = 0;
 }
 } // namespace OHOS::Ace::NG

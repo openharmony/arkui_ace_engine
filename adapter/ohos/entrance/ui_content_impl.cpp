@@ -50,6 +50,7 @@
 #include "base/subwindow/subwindow_manager.h"
 #include "base/thread/background_task_executor.h"
 #include "base/utils/utils.h"
+#include "core/common/force_split/force_split_utils.h"
 #include "core/common/multi_thread_build_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
@@ -72,6 +73,7 @@
 
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
+#include "adapter/ohos/capability/feature_config/feature_param_manager.h"
 #include "adapter/ohos/entrance/ace_application_info.h"
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/ace_new_pipe_judgement.h"
@@ -1243,7 +1245,6 @@ UIContentErrorCode UIContentImpl::Initialize(OHOS::Rosen::Window* window, const 
     auto errorCode = InitializeInner(window, url, storageWrapper, false);
     AddWatchSystemParameter();
     UpdateWindowBlur();
-    RegisterLinkJumpCallback();
     return errorCode;
 }
 
@@ -1285,7 +1286,6 @@ UIContentErrorCode UIContentImpl::InitializeByName(
     StorageWrapper storageWrapper { .napiStorage_ = storage };
     auto errorCode = InitializeInner(window, name, storageWrapper, true);
     AddWatchSystemParameter();
-    RegisterLinkJumpCallback();
     UpdateWindowBlur();
     return errorCode;
 }
@@ -2209,6 +2209,8 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
 #endif
 #endif
     SetDeviceProperties();
+    // init xml config for performance feature
+    FeatureParamManager::GetInstance().Init(bundleName_);
     bool configChangePerform = std::any_of(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
         return metaDataItem.name == "configColorModeChangePerformanceInArkUI" && metaDataItem.value == "true";
     });
@@ -3799,6 +3801,12 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     }
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
+    auto updateforceSplitTask = [context, width = config.Width()]() {
+        CHECK_NULL_VOID(context);
+        auto forceSplitMgr = context->GetForceSplitManager();
+        CHECK_NULL_VOID(forceSplitMgr);
+        forceSplitMgr->UpdateIsInForceSplitMode(width);
+    };
     auto updateDensityTask = [container, modifyConfig]() {
         auto aceView = AceType::DynamicCast<Platform::AceViewOhos>(container->GetAceView());
         CHECK_NULL_VOID(aceView);
@@ -3830,10 +3838,13 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
         UICONTENT_IMPL_PTR(content)->ChangeDisplayAvailableAreaListener(displayId);
     };
     if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
+        updateforceSplitTask();
         updateDensityTask(); // ensure density has been updated before load first page
         updateDeviceOrientationTask();
         updateDisplayIdAndAreaTask();
     } else {
+        taskExecutor->PostTask(
+            std::move(updateforceSplitTask), TaskExecutor::TaskType::UI, "ArkUIUpdateForceSplit");
         taskExecutor->PostTask(std::move(updateDensityTask), TaskExecutor::TaskType::UI, "ArkUIUpdateDensity");
         taskExecutor->PostTask(
             std::move(updateDeviceOrientationTask), TaskExecutor::TaskType::UI, "ArkUIDeviceOrientation");
@@ -3890,8 +3901,14 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
         auto pipelineContext = container->GetPipelineContext();
         if (pipelineContext) {
             UpdateSafeArea(pipelineContext, avoidAreas, config, container);
-            pipelineContext->SetDisplayWindowRectInfo(
-                Rect(Offset(config.Left(), config.Top()), Size(config.Width(), config.Height())));
+            if (reason != OHOS::Rosen::WindowSizeChangeReason::ROOT_SCENE_CHANGE) {
+                pipelineContext->SetDisplayWindowRectInfo(
+                    Rect(Offset(config.Left(), config.Top()), Size(config.Width(), config.Height())));
+            } else {
+                // when the reason is ROOT_SCENE_CHANGE, the offset of the window should be (0, 0).
+                pipelineContext->SetDisplayWindowRectInfo(
+                    Rect(Offset(0, 0), Size(config.Width(), config.Height())));
+            }
             pipelineContext->SetWindowSizeChangeReason(static_cast<OHOS::Ace::WindowSizeChangeReason>(reason));
             TAG_LOGD(AceLogTag::ACE_WINDOW, "Update displayWindowRect in UpdateViewportConfig to : %{public}s",
                 pipelineContext->GetDisplayWindowRectInfo().ToString().c_str());
@@ -5455,6 +5472,9 @@ void UIContentImpl::SetForceSplitEnable(
     auto forceSplitTask = [weakContext = WeakPtr(context), isForceSplit, homePage, isRouter, ignoreOrientation]() {
         auto context = weakContext.Upgrade();
         CHECK_NULL_VOID(context);
+        auto forceSplitMgr = context->GetForceSplitManager();
+        CHECK_NULL_VOID(forceSplitMgr);
+        forceSplitMgr->SetForceSplitEnable(isForceSplit, ignoreOrientation);
         if (isRouter) {
             auto stageManager = context->GetStageManager();
             CHECK_NULL_VOID(stageManager);
@@ -5471,6 +5491,29 @@ void UIContentImpl::SetForceSplitEnable(
     }
     taskExecutor->PostTask(std::move(forceSplitTask), TaskExecutor::TaskType::UI,
         isRouter ? "ArkUISetForceSplitEnable" : "ArkUISetNavigationForceSplitEnable");
+}
+
+void UIContentImpl::SetForceSplitConfig(const std::string& configJsonStr)
+{
+    ContainerScope scope(instanceId_);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_VOID(context);
+    NG::ForceSplitConfig config;
+    if (!NG::ForceSplitUtils::ParseForceSplitConfig(configJsonStr, config)) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "Failed to parse forceSplit config!");
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "ForceSplitConfig: enableHook:%{public}d, navId:%{public}s,"
+        "navDepth:%{public}s", config.isArkUIHookEnabled,
+        (config.navigationId.has_value() ? config.navigationId.value().c_str() : "NA"),
+        (config.navigationDepth.has_value() ? std::to_string(config.navigationDepth.value()).c_str() : "NA"));
+    context->SetIsArkUIHookEnabled(config.isArkUIHookEnabled);
+    auto navManager = context->GetNavigationManager();
+    CHECK_NULL_VOID(navManager);
+    navManager->SetForceSplitNavigationId(config.navigationId);
+    navManager->SetForceSplitNavigationDepth(config.navigationDepth);
 }
 
 void UIContentImpl::ProcessDestructCallbacks()

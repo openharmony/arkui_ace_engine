@@ -16,6 +16,7 @@
 #include "core/components_ng/event/focus_hub.h"
 
 #include "base/log/dump_log.h"
+#include "base/utils/multi_thread.h"
 #include "core/components/theme/app_theme.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
@@ -34,7 +35,6 @@
 
 namespace OHOS::Ace::NG {
 constexpr uint32_t DELAY_TIME_FOR_RESET_UEC = 50;
-constexpr auto DEFAULT_FOCUS_PRIORITY = FocusPriority::AUTO;
 namespace {
 template <bool isReverse>
 bool AnyOfUINode(const RefPtr<UINode>& node, const std::function<bool(const RefPtr<FocusHub>&)>& operation)
@@ -505,11 +505,14 @@ void FocusHub::LostSelfFocus()
 
 void FocusHub::RemoveSelf(BlurReason reason)
 {
+    auto frameNode = GetFrameNode();
+#ifdef ACE_STATIC
+    FREE_NODE_CHECK(frameNode, RemoveSelf, reason);
+#endif
     if (SystemProperties::GetDebugEnabled()) {
         TAG_LOGD(AceLogTag::ACE_FOCUS, "%{public}s/" SEC_PLD(%{public}d) " remove self focus.",
             GetFrameName().c_str(), SEC_PARAM(GetFrameId()));
     }
-    auto frameNode = GetFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto focusView = frameNode->GetPattern<FocusView>();
     auto* pipeline = frameNode->GetContext();
@@ -2697,15 +2700,6 @@ bool FocusHub::IsNestingFocusGroup()
     return false;
 }
 
-std::string FocusHub::FocusPriorityToString(FocusPriority src)
-{
-    switch (src) {
-        case FocusPriority::PREVIOUS : return "FocusPriority.PREVIOUS";
-        case FocusPriority::PRIOR : return "FocusPriority.PRIOR";
-        default: return "FocusPriority.AUTO";
-    }
-}
-
 void FocusHub::ToJsonValue(
     const RefPtr<FocusHub>& hub, std::unique_ptr<JsonValue>& json, const InspectorFilter& filter)
 {
@@ -2724,14 +2718,10 @@ void FocusHub::ToJsonValue(
     }
 
     bool enabled = true;
-    bool defaultFocus = DEFAULT_FOCUS_DEFAULT_FOCUS;
-    bool groupDefaultFocus = DEFAULT_FOCUS_IS_GROUP_DEFAULT;
-    bool focusOnTouch = DEFAULT_FOCUS_ON_TOUCH;
-    int32_t tabIndex = DEFAULT_FOCUS_TAB_INDEX;
-    std::string focusScopeId = "";
-    bool isGroup = DEFAULT_FOCUS_IS_GROUP;
-    bool arrowKeyStepOut = DEFAULT_FOCUS_ARROW_KEY_STEP_OUT;
-    std::string focusPriority = FocusPriorityToString(DEFAULT_FOCUS_PRIORITY);
+    bool defaultFocus = false;
+    bool groupDefaultFocus = false;
+    bool focusOnTouch = false;
+    int32_t tabIndex = 0;
     std::unique_ptr<JsonValue> focusBox = nullptr;
     bool tabStop = false;
     if (hub) {
@@ -2741,10 +2731,6 @@ void FocusHub::ToJsonValue(
         focusOnTouch = hub->IsFocusOnTouch().value_or(false);
         tabIndex = hub->GetTabIndex();
         focusBox = FocusBox::ToJsonValue(hub->box_);
-        focusScopeId = hub->GetFocusScopeId();
-        isGroup = hub->GetIsFocusGroup();
-        arrowKeyStepOut = hub->GetArrowKeyStepOut();
-        focusPriority = FocusPriorityToString(hub->GetFocusPriority());
         tabStop = hub->IsTabStop();
     }
     json->PutExtAttr("enabled", enabled, filter);
@@ -2753,10 +2739,6 @@ void FocusHub::ToJsonValue(
     json->PutExtAttr("focusOnTouch", focusOnTouch, filter);
     json->PutExtAttr("tabIndex", tabIndex, filter);
     json->PutExtAttr("focusBox", focusBox, filter);
-    json->PutExtAttr("focusScopeId", focusScopeId.c_str(), filter);
-    json->PutExtAttr("isGroup", isGroup, filter);
-    json->PutExtAttr("arrowStepOut", arrowKeyStepOut, filter);
-    json->PutExtAttr("focusScopePriority", focusPriority.c_str(), filter);
     json->PutExtAttr("tabStop", tabStop, filter);
 }
 

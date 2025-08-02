@@ -249,7 +249,7 @@ void JSBaseNode::PostTouchEvent(const JSCallbackInfo& info)
         return;
     }
     TouchEvent touchEvent;
-    if (InitTouchEvent(info, touchEvent, true)) {
+    if (!InitTouchEvent(info, touchEvent, true)) {
         TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW, "PostTouchEvent params invalid");
         info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
         return;

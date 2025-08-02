@@ -57,7 +57,7 @@ public:
     static void SetToolbarMorebuttonOptions(FrameNode* frameNode, MoreButtonOptions&& opt);
     static void ParseCommonTitle(
         FrameNode* frameNode, const NG::NavigationTitleInfo& titleInfo, bool ignoreMainTitle = false);
-    static void SetIgnoreLayoutSafeArea(FrameNode* frameNode, const NG::SafeAreaExpandOpts& opts);
+    static void SetIgnoreLayoutSafeArea(FrameNode* frameNode, const NG::IgnoreLayoutSafeAreaOpts& opts);
     static bool CreateBackButtonNode(RefPtr<FrameNode>& backButtonNode);
     static bool UpdateBackButtonProperty(const RefPtr<FrameNode>& backButtonNode);
     static void SetCustomMenu(FrameNode* frameNode, const RefPtr<UINode>& customNode);

@@ -112,7 +112,6 @@ public:
         std::function<void(WeakPtr<NG::FrameNode>)>&& symbol, uint32_t index);
     void SetSystemTransitionType(NG::NavigationSystemTransitionType type) override;
     static void SetSystemTransitionType(FrameNode* frameNode, NG::NavigationSystemTransitionType type);
-    static RefPtr<NG::FrameNode> CreateFrameNode(int32_t nodeId);
     void SetScrollableProcessor(
         const std::function<RefPtr<NG::NavDestinationScrollableProcessor>()>& creator) override;
     void UpdateBindingWithScrollable(

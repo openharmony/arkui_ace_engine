@@ -49,6 +49,11 @@ public:
     MenuItemPattern(bool isOptionPattern = false, int index = -1) : index_(index), isOptionPattern_(isOptionPattern) {}
     ~MenuItemPattern() override = default;
 
+    bool HasHideTask()
+    {
+        return hideTask_;
+    }
+
     inline bool IsAtomicNode() const override
     {
         return false;

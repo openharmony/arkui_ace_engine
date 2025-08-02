@@ -1587,9 +1587,16 @@ class TypedFrameNode extends FrameNode {
         super(uiContext, type, options);
         this.attrCreator_ = attrCreator;
     }
-    dispose(){
+    dispose() {
+        this.isDisposed_ = true;
+        if (this.nodePtr_) {
+            getUINativeModule().frameNode.fireArkUIObjectLifecycleCallback(new WeakRef(this), 'FrameNode', this.getNodeType() || 'FrameNode', this.nodePtr_);
+        }
+        FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.delete(this._nodeId);
+        this._nodeId = -1;
         this._nativeRef?.dispose();
-        super.dispose();
+        this._nativeRef = null;
+        this.nodePtr_ = null;
     }
     initialize(...args) {
         return this.attribute.initialize(args);

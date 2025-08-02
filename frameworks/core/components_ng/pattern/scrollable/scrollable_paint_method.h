@@ -34,15 +34,24 @@ public:
         overlayRenderContext_ = overlayRenderContext;
     }
 
-    void SetFadingInfo(bool isFadingTop, bool isFadingBottom, bool hasFadingEdge, float percentFading = 0.0f,
+    void SetFadingInfo(bool isFadingTop, bool isFadingBottom, float percentFading = 0.0f,
         float startPercent = 0.0f, float endPercent = 1.0f)
     {
         isFadingTop_ = isFadingTop;
         isFadingBottom_ = isFadingBottom;
-        hasFadingEdge_ = hasFadingEdge;
         percentFading_ = percentFading;
         startPercent_ = startPercent;
         endPercent_ = endPercent;
+    }
+
+    void SetHasFadingEdge(bool hasFadingEdge)
+    {
+        hasFadingEdge_ = hasFadingEdge;
+    }
+
+    void SetNeedUpdateFadingEdge(bool needUpdate)
+    {
+        needUpdateFadingEdge_ = needUpdate;
     }
 
 protected:
@@ -63,6 +72,7 @@ private:
     RefPtr<RenderContext> overlayRenderContext_;
     bool isFadingTop_ = false;
     bool isFadingBottom_ = false;
+    bool needUpdateFadingEdge_ = false;
     bool hasFadingEdge_ = false;
     float percentFading_ = 0.0f;
     float startPercent_ = 0.0f;

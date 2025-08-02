@@ -70,6 +70,7 @@ template("ace_osal_ohos_source_set") {
       "drawable_descriptor_ohos.cpp",
       "event_report.cpp",
       "exception_handler.cpp",
+      "feature_param.cpp",
       "frame_report.cpp",
       "image_analyzer_adapter_impl.cpp",
       "image_analyzer_loader.cpp",
@@ -158,6 +159,7 @@ template("ace_osal_ohos_source_set") {
       if (defined(config.accessibility_support) &&
           config.accessibility_support) {
         sources += [
+          "accessibility/accessibility_hidumper_osal.cpp",
           "js_accessibility_manager.cpp",
           "js_third_accessibility_hover_ng.cpp",
           "js_third_provider_interaction_operation.cpp",

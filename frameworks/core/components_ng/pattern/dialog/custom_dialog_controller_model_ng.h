@@ -38,7 +38,7 @@ public:
     static PromptActionCommonState GetStateWithNode(FrameNode* dialogNode);
 
 private:
-    static TaskExecutor::Task ParseOpenDialogTask(int32_t currentId, const WeakPtr<AceType>& controller,
+    TaskExecutor::Task ParseOpenDialogTask(int32_t currentId, const WeakPtr<AceType>& controller,
         DialogProperties& dialogProperties, std::vector<WeakPtr<AceType>>& dialogs, std::function<void()>&& buildFunc,
         bool& hasBind, bool& isShown);
     static void SetOpenDialogInTask(const RefPtr<OverlayManager>& overlayManager, const RefPtr<Container>& container,

@@ -33,6 +33,7 @@ constexpr Dimension DEFAULT_FONT_SIZE_VAL = 12.0_fp;
 const std::string DEFAULT_POPUP_ITEM_FONT_WEIGHT = "medium";
 constexpr Dimension DEFAULT_POPUP_POSITION_X = 60.0_vp;
 constexpr Dimension DEFAULT_POPUP_POSITION_Y = 48.0_vp;
+constexpr double RADIUS_OFFSET = 4.0;
 } // namespace
 
 ArkUINativeModuleValue AlphabetIndexerBridge::SetPopupItemFont(ArkUIRuntimeCallInfo* runtimeCallInfo)

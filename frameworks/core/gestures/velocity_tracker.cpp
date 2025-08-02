@@ -16,6 +16,8 @@
 #include "core/gestures/velocity_tracker.h"
 
 namespace OHOS::Ace {
+int32_t VelocityTracker::POINT_NUMBER = SystemProperties::GetVelocityTrackerPointNumber();
+
 namespace {
 static constexpr int32_t MAX_INDEX = 4;
 
@@ -123,6 +125,9 @@ double UpdateAxisVelocity(LeastSquareImpl& axis)
 
 void VelocityTracker::UpdateTouchPoint(const TouchEvent& event, bool end, float range)
 {
+    if (end && SystemProperties::IsVelocityWithoutUpPoint()) {
+        return;
+    }
     if (isFirstPoint_) {
         firstTrackPoint_ = event;
         isFirstPoint_ = false;
@@ -150,8 +155,15 @@ void VelocityTracker::UpdateTouchPoint(const TouchEvent& event, bool end, float 
         }
     }
     // nanoseconds duration to seconds.
-    std::chrono::duration<double> duration = event.time - firstTrackPoint_.time;
+    touchEventTime_.push_back(event.time);
+    std::chrono::duration<double> duration = event.time - touchEventTime_[mIndex_];
     auto seconds = duration.count();
+    auto timeWindowEnabled = SystemProperties::IsVelocityWithinTimeWindow();
+    if (timeWindowEnabled && seconds > DURATION_LONGEST_THRESHOLD) {
+        xAxis_.PopFrontPoint();
+        yAxis_.PopFrontPoint();
+        mIndex_++;
+    }
     xAxis_.UpdatePoint(seconds, event.x);
     yAxis_.UpdatePoint(seconds, event.y);
 }
@@ -204,11 +216,19 @@ void VelocityTracker::DumpVelocityPoints() const
         const auto& yVal = axis.GetYVals();
         int32_t i = static_cast<int32_t>(xVal.size());
         auto baseVal = yVal[0];
+        std::stringstream oss;
+        oss << std::string(str);
         for (int32_t cnt = VelocityTracker::POINT_NUMBER; i > 0 && cnt > 0; --cnt) {
             --i;
-            TAG_LOGI(AceLogTag::ACE_GESTURE, "%{public}s last tracker points[%{public}d] x=%{public}f y=%{public}f",
-                str, cnt, xVal[i], yVal[i] - baseVal);
+            if (SystemProperties::GetDebugEnabled()) {
+                TAG_LOGI(AceLogTag::ACE_GESTURE, "%{public}s last tracker point[%{public}d] x=%{public}f y=%{public}f",
+                    str, cnt, xVal[i], yVal[i] - baseVal);
+            } else {
+                oss << " [" << std::to_string(cnt) << "] x " << std::to_string(xVal[i]) <<
+                    " y " << std::to_string(yVal[i] - baseVal);
+            }
         }
+        TAG_LOGI(AceLogTag::ACE_GESTURE, "%{public}s", oss.str().c_str());
     };
     func(xAxis_, "xAxis");
     func(yAxis_, "yAxis");

@@ -1030,44 +1030,6 @@ HWTEST_F(TextTestNineNg, IsFixIdealSizeAndNoMaxSize, TestSize.Level1)
 }
 
 /**
- * @tc.name: MeasureWithMatchParent
- * @tc.desc: Test MeasureWithMatchParent.
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestNineNg, MeasureWithMatchParent, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. init and Create function
-     */
-    auto pattern = AceType::MakeRefPtr<TextPattern>();
-    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
-    ASSERT_NE(frameNode, nullptr);
-    pattern->AttachToFrameNode(frameNode);
-    auto textLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
-    ASSERT_NE(textLayoutAlgorithm, nullptr);
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    ASSERT_NE(geometryNode, nullptr);
-    geometryNode->SetFrameSize(SizeF(0.0f, 0.0f));
-    auto layoutProperty = frameNode->GetLayoutProperty();
-    ASSERT_NE(layoutProperty, nullptr);
-    RefPtr<LayoutWrapperNode> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, layoutProperty);
-    /**
-     * @tc.steps: step2. call MeasureWithMatchParent.
-     */
-    textLayoutAlgorithm->MeasureWithMatchParent(AceType::RawPtr(layoutWrapper));
-    auto frameSize = geometryNode->GetFrameSize();
-    EXPECT_EQ(frameSize, SizeF(0.0f, 0.0f));
-    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
-    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
-    layoutProperty->contentConstraint_ = LayoutConstraintF();
-    layoutProperty->contentConstraint_->parentIdealSize = OptionalSizeF(SizeF(100.0f, 100.0f));
-    textLayoutAlgorithm->MeasureWithMatchParent(AceType::RawPtr(layoutWrapper));
-    frameSize = geometryNode->GetFrameSize();
-    EXPECT_EQ(frameSize.Height(), 100.0f);
-}
-
-/**
  * @tc.name: CalcContentConstraint
  * @tc.desc: Test CalcContentConstraint.
  * @tc.type: FUNC
@@ -1120,8 +1082,8 @@ HWTEST_F(TextTestNineNg, CalcContentConstraint, TestSize.Level1)
     constraint.maxSize = SizeF(500.0f, 500.0f);
     constraint.parentIdealSize = OptionalSizeF();
     newContentConstraint = textLayoutAlgorithm->CalcContentConstraint(constraint, AceType::RawPtr(layoutWrapper));
-    EXPECT_EQ(newContentConstraint.selfIdealSize.Width(), 500.0f);
-    EXPECT_EQ(newContentConstraint.selfIdealSize.Height(), 500.0f);
+    EXPECT_EQ(newContentConstraint.selfIdealSize.Width(), std::nullopt);
+    EXPECT_EQ(newContentConstraint.selfIdealSize.Height(), std::nullopt);
 }
 
 /**

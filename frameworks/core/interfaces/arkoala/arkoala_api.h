@@ -4563,6 +4563,7 @@ struct ArkUITextAreaModifier {
     ArkUI_Float32 (*getTextAreaAdaptMinFontSize)(ArkUINodeHandle node);
     ArkUI_Float32 (*getTextAreaAdaptMaxFontSize)(ArkUINodeHandle node);
     ArkUI_Float32 (*getTextAreaLineHeight)(ArkUINodeHandle node);
+    ArkUI_Bool (*getTextAreaHalfLeading)(ArkUINodeHandle node);
     ArkUI_Int32 (*getTextAreaMaxLines)(ArkUINodeHandle node);
     void (*setTextAreaPadding)(ArkUINodeHandle node, const struct ArkUISizeType* top, const struct ArkUISizeType* right,
         const struct ArkUISizeType* bottom, const struct ArkUISizeType* left, ArkUIPaddingRes* paddingRes);
@@ -4837,6 +4838,7 @@ struct ArkUITextInputModifier {
     ArkUI_Float32 (*getTextInputAdaptMinFontSize)(ArkUINodeHandle node);
     ArkUI_Float32 (*getTextInputAdaptMaxFontSize)(ArkUINodeHandle node);
     ArkUI_Float32 (*getTextInputLineHeight)(ArkUINodeHandle node);
+    ArkUI_Bool (*getTextInputHalfLeading)(ArkUINodeHandle node);
     ArkUI_Int32 (*getTextInputMaxLines)(ArkUINodeHandle node);
     ArkUI_CharPtr (*getTextInputFontFeature)(ArkUINodeHandle node);
     void (*setTextInputCustomKeyboard)(ArkUINodeHandle node, ArkUINodeHandle customKeyboard, bool supportAvoidance);
@@ -7078,8 +7080,8 @@ struct ArkUINDKRenderNodeModifier {
     ArkUI_Int32 (*removeRenderNode)(ArkUINodeHandle node, ArkUIRenderNodeHandle child);
     ArkUI_Int32 (*clearRenderNodeChildren)(ArkUINodeHandle node);
     ArkUIRenderNodeHandle (*createNode)(ArkUI_Int32* nodeId);
-    ArkUI_Int32 (*getId)(ArkUIRenderNodeHandle node);
     ArkUI_Int32 (*addChild)(ArkUIRenderNodeHandle node, ArkUIRenderNodeHandle child);
+    ArkUI_Int32 (*getId)(ArkUIRenderNodeHandle node);
     ArkUI_Int32 (*insertChildAfter)(ArkUIRenderNodeHandle node, ArkUIRenderNodeHandle child,
         ArkUIRenderNodeHandle sibling);
     ArkUI_Int32 (*removeChild)(ArkUIRenderNodeHandle node, ArkUIRenderNodeHandle child);
@@ -7108,9 +7110,9 @@ struct ArkUINDKRenderNodeModifier {
     ArkUI_Int32 (*getTranslation)(ArkUIRenderNodeHandle node, ArkUI_Float32* x, ArkUI_Float32* y);
     ArkUI_Int32 (*setRotation)(ArkUIRenderNodeHandle node, ArkUI_Float32 x, ArkUI_Float32 y, ArkUI_Float32 z);
     ArkUI_Int32 (*getRotation)(ArkUIRenderNodeHandle node, ArkUI_Float32* x, ArkUI_Float32* y, ArkUI_Float32* z);
+    ArkUI_Int32 (*setTransform)(ArkUIRenderNodeHandle node, ArkUI_Float32* matrix);
     ArkUI_Int32 (*setShadowColor)(ArkUIRenderNodeHandle node, ArkUI_Uint32 color);
     ArkUI_Int32 (*getShadowColor)(ArkUIRenderNodeHandle node, ArkUI_Uint32* color);
-    ArkUI_Int32 (*setTransform)(ArkUIRenderNodeHandle node, ArkUI_Float32* matrix);
     ArkUI_Int32 (*setShadowOffset)(ArkUIRenderNodeHandle node, ArkUI_Int32 x, ArkUI_Int32 y);
     ArkUI_Int32 (*getShadowOffset)(ArkUIRenderNodeHandle node, ArkUI_Int32* x, ArkUI_Int32* y);
     ArkUI_Int32 (*setShadowAlpha)(ArkUIRenderNodeHandle node, ArkUI_Float32 alpha);
@@ -7135,10 +7137,6 @@ struct ArkUINDKRenderNodeModifier {
         ArkUI_Float32 right, ArkUI_Float32 bottom);
     ArkUI_Int32 (*getBorderRadius)(ArkUIRenderNodeHandle node, ArkUI_Float32* left, ArkUI_Float32* top,
         ArkUI_Float32* right, ArkUI_Float32* bottom);
-    ArkUI_Int32 (*setClipToFrame)(ArkUIRenderNodeHandle node, ArkUI_Int32 clipToFrame);
-    ArkUI_Int32 (*getClipToFrame)(ArkUIRenderNodeHandle node, ArkUI_Int32* clipToFrame);
-    ArkUI_Int32 (*setClipToBounds)(ArkUIRenderNodeHandle node, ArkUI_Int32 clipToBounds);
-    ArkUI_Int32 (*getClipToBounds)(ArkUIRenderNodeHandle node, ArkUI_Int32* clipToBounds);
     ArkUI_Int32 (*setMarkNodeGroup)(ArkUIRenderNodeHandle node, ArkUI_Bool markNodeGroup);
     ArkUI_Int32 (*setBounds)(ArkUIRenderNodeHandle node, ArkUI_Uint32 x, ArkUI_Uint32 y,
         ArkUI_Uint32 width, ArkUI_Uint32 height);
@@ -7146,6 +7144,10 @@ struct ArkUINDKRenderNodeModifier {
         ArkUI_Uint32* width, ArkUI_Uint32* height);
     ArkUI_Int32 (*setDrawRegion)(ArkUIRenderNodeHandle node, ArkUI_Float32 x, ArkUI_Float32 y,
         ArkUI_Float32 w, ArkUI_Float32 h);
+    ArkUI_Int32 (*setClipToFrame)(ArkUIRenderNodeHandle node, ArkUI_Int32 clipToFrame);
+    ArkUI_Int32 (*getClipToFrame)(ArkUIRenderNodeHandle node, ArkUI_Int32* clipToFrame);
+    ArkUI_Int32 (*setClipToBounds)(ArkUIRenderNodeHandle node, ArkUI_Int32 clipToBounds);
+    ArkUI_Int32 (*getClipToBounds)(ArkUIRenderNodeHandle node, ArkUI_Int32* clipToBounds);
     ArkUI_Int32 (*attachModifier)(ArkUIRenderNodeHandle node, ArkUIRenderModifierHandle modifier);
     ArkUIRenderModifierHandle (*createModifier)();
     ArkUI_Int32 (*attachProperty)(ArkUIRenderModifierHandle modifier, ArkUIPropertyHandle property);

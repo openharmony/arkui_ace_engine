@@ -35,6 +35,9 @@ void InputMethodManager::OnFocusNodeChange(const RefPtr<NG::FrameNode>& curFocus
     isLastFocusUIExtension_ = false;
 }
 
+void InputMethodManager::ManageFocusNode(const RefPtr<NG::FrameNode>& curFocusNode, FocusReason focusReason,
+    bool saveKeyboard) {}
+
 void InputMethodManager::ProcessKeyboardInWindowScene(const RefPtr<NG::FrameNode>& curFocusNode) {}
 
 void InputMethodManager::ProcessKeyboard(const RefPtr<NG::FrameNode>& curFocusNode) {}

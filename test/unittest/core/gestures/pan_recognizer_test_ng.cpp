@@ -2465,4 +2465,38 @@ HWTEST_F(PanRecognizerTestNg, OnResetStatus001, TestSize.Level1)
     EXPECT_EQ(panRecognizer.touchPoints_.size(), 0);
     EXPECT_EQ(panRecognizer.isStartTriggered_, false);
 }
+
+/**
+ * @tc.name: HandlePanExtAccept001
+ * @tc.desc: Test HandlePanExtAccept function
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerTestNg, HandlePanExtAccept001, TestSize.Level1)
+{
+    /**
+      * @tc.steps: step1. create PanRecognizer.
+      */
+    RefPtr<PanGestureOption> panGestureOption = AceType::MakeRefPtr<PanGestureOption>();
+    PanRecognizer panRecognizer = PanRecognizer(panGestureOption);
+
+    /**
+      * @tc.steps: step2. call HandlePanExtAccept function.
+      * @tc.describe: set onActionExtUpdate_ to null.
+      * @tc.expected: result equals.
+      */
+    uint32_t tag = 0;
+    panRecognizer.onActionExtUpdate_ = nullptr;
+    panRecognizer.HandlePanExtAccept();
+
+    /**
+      * @tc.steps: step3. call HandlePanExtAccept function.
+      * @tc.describe: set onActionExtUpdate_ to custom callback.
+      * @tc.expected: result equals.
+      */
+    panRecognizer.onActionExtUpdate_ = std::make_unique<GestureEventFunc>([&tag](GestureEvent& info) {
+        tag = 1;
+    });
+    panRecognizer.HandlePanExtAccept();
+    EXPECT_NE(tag, 0);
+}
 } // namespace OHOS::Ace::NG

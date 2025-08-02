@@ -329,6 +329,15 @@ void JSViewAbstract::JsAccessibilityUseSamePage(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetAccessibilityUseSamePage("");
 }
 
+std::string JSAccessibilityAbstract::GetRoleByType(AccessibilityRoleType roleType)
+{
+    auto it = accessibilityRoleMap.find(roleType);
+    if (it != accessibilityRoleMap.end()) {
+        return it->second;
+    }
+    return "";
+}
+
 void JSViewAbstract::JsAccessibilityFocusDrawLevel(const JSCallbackInfo& info)
 {
     int32_t drawLevel = 0;

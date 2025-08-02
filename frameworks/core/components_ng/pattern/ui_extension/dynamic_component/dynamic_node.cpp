@@ -77,6 +77,11 @@ HitTestResult DynamicNode::TouchTest(const PointF& globalPoint, const PointF& pa
         return HitTestResult::OUT_OF_REGION;
     }
 
+    if (touchRestrict.hitTestType == SourceType::MOUSE ||
+        touchRestrict.touchEvent.sourceType == SourceType::MOUSE) {
+        return testResult;
+    }
+
     auto pattern = GetPattern<DynamicPattern>();
     CHECK_NULL_RETURN(pattern, testResult);
     auto context = GetContext();

@@ -28,7 +28,7 @@ namespace OHOS::Ace::NG {
 
 inline RefPtr<NavigationBarTheme> NavigationGetTheme()
 {
-    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     return pipeline->GetTheme<NavigationBarTheme>();
 }
@@ -290,7 +290,7 @@ enum class NavigationSystemTransitionType {
 enum class NavDestinationType {
     DETAIL = 0,
     HOME = 1,
-    PLACE_HOLDER = 2,
+    PROXY = 2
 };
 
 inline NavigationSystemTransitionType operator& (NavigationSystemTransitionType lv, NavigationSystemTransitionType rv)

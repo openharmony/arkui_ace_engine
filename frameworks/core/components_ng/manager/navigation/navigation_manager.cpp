@@ -23,6 +23,7 @@
 
 namespace OHOS::Ace::NG {
 constexpr int32_t INDENT_SIZE = 2;
+constexpr int32_t INVALID_NODE_ID = -1;
 constexpr char INTENT_PARAM_KEY[] = "ohos.insightIntent.executeParam.param";
 constexpr char INTENT_NAVIGATION_ID_KEY[] = "ohos.insightIntent.pageParam.navigationId";
 constexpr char INTENT_NAVDESTINATION_NAME_KEY[] = "ohos.insightIntent.pageParam.navDestinationName";
@@ -36,10 +37,83 @@ bool NavigationManager::IsOuterMostNavigation(int32_t nodeId, int32_t depth)
     return outerMostKey == DumpMapKey(nodeId, depth);
 }
 
-void NavigationManager::AddNavigationDumpCallback(int32_t nodeId, int32_t depth, const DumpCallback& callback)
+void NavigationManager::SetForceSplitNavState(bool isTargetForceSplitNav, const RefPtr<FrameNode>& navigationNode)
+{
+    auto pattern = navigationNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(pattern);
+    // Notification target navigation can attempt to force split.
+    pattern->SetIsTargetForceSplitNav(isTargetForceSplitNav);
+    // Record that the force split has been done in navigation manager
+    SetExistForceSplitNav(isTargetForceSplitNav, isTargetForceSplitNav ? navigationNode->GetId() : INVALID_NODE_ID);
+}
+
+void NavigationManager::RemoveForceSplitNavStateIfNeed(int32_t nodeId)
+{
+    auto existForceSplitNav = GetExistForceSplitNav();
+    if (existForceSplitNav.first && existForceSplitNav.second == nodeId) {
+        SetExistForceSplitNav(false, INVALID_NODE_ID);
+    }
+}
+
+void NavigationManager::IsTargetForceSplitNav(const RefPtr<FrameNode>& navigationNode)
+{
+    /**
+     * If it does not support force split,
+     * or if there is already a force split navigation,
+     * return directly.
+     */
+    auto existForceSplitNav = GetExistForceSplitNav();
+    if (!IsForceSplitSupported() || existForceSplitNav.first) {
+        return;
+    }
+
+    /**
+     * If id and depth are not configured, the target force split navigation is the outermost navigation.
+     * It is necessary to determine whether the current navigation is the outermost navigation.
+     * Current navigation determines whether to force split before dumpMap information is stored,
+     * if the map is empty, the current navigation is the outermost navigation.
+     */
+    if (!TargetIdOrDepthExists()) {
+        bool isOuterMostNavigation = dumpMap_.begin() == dumpMap_.end();
+        SetForceSplitNavState(isOuterMostNavigation, navigationNode);
+        return;
+    }
+
+    // Prioritize whether the configured id matches the id of the current navigation, when configuring id.
+    auto targetInspectorId = GetTargetNavigationId();
+    if (targetInspectorId.has_value()) {
+        auto currInspectorId = navigationNode->GetInspectorId().value_or("");
+        bool isTargetForceSplitNav = currInspectorId == targetInspectorId.value();
+        SetForceSplitNavState(isTargetForceSplitNav, navigationNode);
+        return;
+    }
+    auto targetNestedDepth = GetTargetNavigationDepth();
+    if (!targetNestedDepth.has_value()) {
+        return;
+    }
+
+    /**
+     * If the current navigation depth is greater than the maximum depth stored in the dumpMap_,
+     * this means that there are no nodes at the same level in the current navigation node,
+     * and nested depth increased by one.
+     * After get the nested depth of the current navigation,
+     * compare whether it is the target nested depth navigation.
+     */
+    auto currDeepest = dumpMap_.rbegin();
+    auto currNodeDepth = navigationNode->GetDepth();
+    currNestedDepth_ =
+        currDeepest != dumpMap_.rend() && currNodeDepth > currDeepest->first.depth
+        ? ++currNestedDepth_
+        : currNestedDepth_;
+    bool isTargetForceSplitNav = currNestedDepth_ == targetNestedDepth.value();
+    SetForceSplitNavState(isTargetForceSplitNav, navigationNode);
+}
+
+void NavigationManager::AddNavigationDumpCallback(const RefPtr<FrameNode>& navigationNode, const DumpCallback& callback)
 {
     CHECK_RUN_ON(UI);
-    dumpMap_.emplace(DumpMapKey(nodeId, depth), callback);
+    IsTargetForceSplitNav(navigationNode);
+    dumpMap_.emplace(DumpMapKey(navigationNode->GetId(), navigationNode->GetDepth()), callback);
 }
 
 void NavigationManager::RemoveNavigationDumpCallback(int32_t nodeId, int32_t depth)
@@ -49,6 +123,7 @@ void NavigationManager::RemoveNavigationDumpCallback(int32_t nodeId, int32_t dep
     if (it != dumpMap_.end()) {
         dumpMap_.erase(it);
     }
+    RemoveForceSplitNavStateIfNeed(nodeId);
 }
 
 void NavigationManager::OnDumpInfo()
@@ -85,7 +160,9 @@ void NavigationManager::OnDumpInfo()
                 DumpLog::GetInstance().Print("----------------------------------------------------------");
             }
         } else if (curNode->GetTag() == V2::NAVBAR_ETS_TAG) {
-            DumpLog::GetInstance().Print(space + "| [/]{ NavBar }");
+            auto navBar = AceType::DynamicCast<NavBarNode>(curNode);
+            CHECK_NULL_VOID(navBar);
+            DumpLog::GetInstance().Print(space + navBar->ToDumpString());
             DumpLog::GetInstance().Print("----------------------------------------------------------");
         }
         const auto& children = curNode->GetChildren();
@@ -257,6 +334,15 @@ void NavigationManager::SetForceSplitEnable(bool isForceSplit, const std::string
             listener.second();
         }
     }
+}
+
+bool NavigationManager::GetIgnoreOrientation() const
+{
+    if (SystemProperties::GetForceSplitIgnoreOrientationEnabled()) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Navigation forceSplit ignore Orientation");
+        return true;
+    }
+    return ignoreOrientation_;
 }
 
 void NavigationManager::AddForceSplitListener(int32_t nodeId, std::function<void()>&& listener)

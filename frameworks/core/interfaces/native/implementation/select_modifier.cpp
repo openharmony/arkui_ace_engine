@@ -142,12 +142,12 @@ void Selected0Impl(Ark_NativePointer node,
 void Selected1Impl(Ark_NativePointer node,
                    const Opt_Union_Number_Resource* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // auto arkVal = value ? Converter::GetOpt(*value) : std::nullopt;
-    // auto convVal = arkVal.has_value() ? Converter::OptConvert<int32_t>(arkVal.value()) : std::nullopt;
-    // Validator::ValidateNonNegative(convVal);
-    // SelectModelStatic::SetSelected(frameNode, convVal);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto arkVal = value ? Converter::GetOpt(*value) : std::nullopt;
+    auto convVal = arkVal.has_value() ? Converter::OptConvert<int32_t>(arkVal.value()) : std::nullopt;
+    Validator::ValidateNonNegative(convVal);
+    SelectModelStatic::SetSelected(frameNode, convVal);
 }
 void Value0Impl(Ark_NativePointer node,
                 const Opt_ResourceStr* value)

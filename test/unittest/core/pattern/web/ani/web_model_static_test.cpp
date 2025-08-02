@@ -1211,6 +1211,7 @@ HWTEST_F(WebModelStaticTest, SetOnPageStartedEvent001, TestSize.Level1)
     webEventHub->FireOnPageFinishedEvent(mockEventInfo);
     EXPECT_TRUE(callbackCalled);
     auto onProgressChangeImpl = [](const BaseEventInfo* info) {};
+    WebModelStatic::SetOnProgressChange(nullptr, onProgressChangeImpl);
     WebModelStatic::SetOnProgressChange(AccessibilityManager::RawPtr(frameNode), onProgressChangeImpl);
     auto titleReceiveEventId = [](const BaseEventInfo* info) {};
     WebModelStatic::SetOnTitleReceive(AccessibilityManager::RawPtr(frameNode), titleReceiveEventId);

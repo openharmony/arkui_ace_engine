@@ -778,4 +778,28 @@ HWTEST_F(FrameNodeTest, FrameNodeTestTest115, TestSize.Level1)
      */
     EXPECT_EQ(frameNodeImpl->frameNode_->CallAIFunction("OTHERFunction", "params1: 1"), 2);
 }
+
+/**
+ * @tc.name: FrameNodeTestTest116
+ * @tc.desc: test GetParentGlobalOffsetDuringLayout
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTest, FrameNodeTestTest116, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     */
+    constexpr char tag[] = "TEST116";
+    const int32_t id = 116;
+    auto mockPattern = AceType::MakeRefPtr<MockAceKitPattern>();
+    auto frameNode = AbstractViewFactory::CreateFrameNode(tag, id, mockPattern);
+    EXPECT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps2: test GetParentGlobalOffsetDuringLayout.
+     */
+    auto offset = frameNode->GetParentGlobalOffsetDuringLayout();
+    EXPECT_TRUE(NearEqual(offset.GetX(), 0.0f));
+    EXPECT_TRUE(NearEqual(offset.GetY(), 0.0f));
+}
 } // namespace OHOS::Ace

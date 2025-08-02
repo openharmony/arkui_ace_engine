@@ -135,4 +135,26 @@ HWTEST_F(ListItemManagerTestNg, HandleOnItemDragUpdate001, TestSize.Level1)
     listItemDragManager->HandleOnItemDragUpdate(info);
     EXPECT_EQ(listItemDragManager->realOffset_.GetY(), 10.0f);
 }
+
+/**
+ * @tc.name: ScaleAxisNearItem001
+ * @tc.desc: Test ListItemDragManager ScaleAxisNearItem001
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemManagerTestNg, ScaleAxisNearItem001, TestSize.Level1)
+{
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+    auto node = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 1, listPattern);
+    ASSERT_NE(node, nullptr);
+    auto host = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 1, listPattern);
+    ASSERT_NE(host, nullptr);
+    auto lazyForEachNode = LazyForEachNode::CreateLazyForEachNode(2, nullptr);
+    ASSERT_NE(lazyForEachNode, nullptr);
+    auto listItemDragManager = AceType::MakeRefPtr<ListItemDragManager>(host, lazyForEachNode);
+    listItemDragManager->listNode_ = node;
+    RectF rect(0.0f, 25.0f, 20.0f, 10.0f);
+    auto res = listItemDragManager->ScaleAxisNearItem(1, rect, OffsetF(20.0f, 20.0f), Axis::VERTICAL);
+    EXPECT_FALSE(res.needMove);
+}
+
 } // namespace OHOS::Ace::NG

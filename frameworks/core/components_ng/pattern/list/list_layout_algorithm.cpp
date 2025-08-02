@@ -20,6 +20,7 @@
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
 #include "base/memory/ace_type.h"
+#include "base/utils/feature_param.h"
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/layout_param.h"
@@ -1293,8 +1294,8 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t st
     while (itemPosition_.size() > 1 && !targetIndex_) {
         auto pos = itemPosition_.rbegin();
         float chainDelta = GetChainOffset(pos->first);
-        if (GreatNotEqual(pos->second.endPos + chainDelta, endMainPos + endFixPos) &&
-            GreatOrEqual(pos->second.startPos + chainDelta, endMainPos + endFixPos)) {
+        if (GreatNotEqual(pos->second.endPos + chainDelta, endMainPos) &&
+            GreatOrEqual(pos->second.startPos + chainDelta, endMainPos)) {
             recycledItemPosition_.emplace(pos->first, pos->second);
             itemPosition_.erase(pos->first);
         } else {
@@ -1745,7 +1746,7 @@ int32_t ListLayoutAlgorithm::GetListItemGroupItemCount(const RefPtr<LayoutWrappe
 
 bool ListLayoutAlgorithm::IsNeedSyncLoad(const RefPtr<ListLayoutProperty>& property) const
 {
-    bool syncLoad = property->GetSyncLoad().value_or(!SystemProperties::IsSyncLoadEnabled());
+    bool syncLoad = property->GetSyncLoad().value_or(!FeatureParam::IsSyncLoadEnabled());
     return !(!syncLoad && NearZero(currentDelta_) && !targetIndex_.has_value() && mainSizeIsDefined_);
 }
 

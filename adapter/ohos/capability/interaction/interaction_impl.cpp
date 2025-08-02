@@ -71,7 +71,8 @@ int32_t InteractionImpl::StartDrag(const DragDataCore& dragData,
     Msdp::DeviceStatus::DragData msdpDragData { {}, dragData.buffer, dragData.udKey, dragData.extraInfo,
     dragData.filterInfo, dragData.sourceType, dragData.dragNum, dragData.pointerId, dragData.displayX,
     dragData.displayY, dragData.displayId, dragData.mainWindow, dragData.hasCanceledAnimation,
-    dragData.hasCoordinateCorrected, dragData.summarys, dragData.isDragDelay, dragData.detailedSummarys };
+    dragData.hasCoordinateCorrected, dragData.summarys, dragData.isDragDelay, dragData.detailedSummarys,
+    dragData.summaryFormat, dragData.version, dragData.totalSize };
     for (auto& shadowInfo: dragData.shadowInfos) {
         if (shadowInfo.pixelMap) {
             msdpDragData.shadowInfos.push_back({ shadowInfo.pixelMap->GetPixelMapSharedPtr(),
@@ -134,9 +135,21 @@ int32_t InteractionImpl::GetShadowOffset(ShadowOffsetData& shadowOffsetData)
         shadowOffsetData.offsetX, shadowOffsetData.offsetY, shadowOffsetData.width, shadowOffsetData.height);
 }
 
-int32_t InteractionImpl::GetDragSummary(std::map<std::string, int64_t>& summary)
+int32_t InteractionImpl::GetDragSummary(std::map<std::string, int64_t>& summary,
+    std::map<std::string, int64_t>& detailedSummary, std::map<std::string, std::vector<int32_t>>& summaryFormat,
+    int32_t& version, int64_t& totalSize)
 {
-    return InteractionManager::GetInstance()->GetDragSummary(summary);
+    Msdp::DeviceStatus::DragSummaryInfo dragSummary;
+    auto ret = InteractionManager::GetInstance()->GetDragSummaryInfo(dragSummary);
+    if (ret != 0) {
+        return ret;
+    }
+    summary = dragSummary.summarys;
+    detailedSummary = dragSummary.detailedSummarys;
+    summaryFormat = dragSummary.summaryFormat;
+    version = dragSummary.version;
+    totalSize = dragSummary.totalSize;
+    return ret;
 }
 
 int32_t InteractionImpl::GetDragExtraInfo(std::string& extraInfo)

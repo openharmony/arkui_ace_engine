@@ -5,6 +5,34 @@
       "value": "#FFFFFF"
     },
     {
+      "name": "textColor",
+      "value": "#FF0000"
+    },
+    {
+      "name": "TextColor",
+      "value": "#FF0000"
+    },
+    {
+      "name": "TextShadowColor",
+      "value": "#FF0000"
+    },
+    {
+      "name": "TextdataDetectorConfigColor",
+      "value": "#FF0000"
+    },
+    {
+      "name": "TextdataDetectorConfigDecorationColor",
+      "value": "#FFFF00"
+    },
+    {
+      "name": "ModeColor",
+      "value": "#FF0000"
+    },
+    {
+      "name": "ModeColorYellow_Pink",
+      "value": "#FFFF00"
+    },
+    {
       "name": "green",
       "value": "#00FF00"
     }

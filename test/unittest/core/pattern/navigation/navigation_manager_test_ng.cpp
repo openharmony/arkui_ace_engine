@@ -88,60 +88,6 @@ void NavigationManagerTestNg::TearDownTestSuite()
 }
 
 /**
- * @tc.name: RemoveNavigationDumpCallback001
- * @tc.desc: Branch: if (it != dumpMap_.end()) = true
- * @tc.type: FUNC
- */
-HWTEST_F(NavigationManagerTestNg, RemoveNavigationDumpCallback001, TestSize.Level1)
-{
-    NavigationManagerTestNg::SetUpTestSuite();
-    auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
-    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
-    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
-    ASSERT_NE(navigationPattern, nullptr);
-    navigationPattern->SetNavigationStack(std::move(navigationStack));
-    auto pipelineContext = navigationGroupNode->GetContext();
-    ASSERT_NE(pipelineContext, nullptr);
-    auto navigationManager = pipelineContext->GetNavigationManager();
-    ASSERT_NE(navigationManager, nullptr);
-    int32_t nodeId = 101;
-    int32_t depth = 1;
-    navigationManager->AddNavigationDumpCallback(nodeId, depth, [](int depth) {});
-
-    navigationManager->RemoveNavigationDumpCallback(nodeId, depth);
-    EXPECT_EQ(navigationManager->dumpMap_.size(), 0);
-    NavigationManagerTestNg::TearDownTestSuite();
-}
-
-/**
- * @tc.name: RemoveNavigationDumpCallback002
- * @tc.desc: Branch: if (it != dumpMap_.end()) = false
- * @tc.type: FUNC
- */
-HWTEST_F(NavigationManagerTestNg, RemoveNavigationDumpCallback002, TestSize.Level1)
-{
-    NavigationManagerTestNg::SetUpTestSuite();
-    auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
-    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
-    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
-    ASSERT_NE(navigationPattern, nullptr);
-    navigationPattern->SetNavigationStack(std::move(navigationStack));
-    auto pipelineContext = navigationGroupNode->GetContext();
-    ASSERT_NE(pipelineContext, nullptr);
-    auto navigationManager = pipelineContext->GetNavigationManager();
-    ASSERT_NE(navigationManager, nullptr);
-    int32_t nodeId = 101;
-    int32_t depth = 1;
-    navigationManager->AddNavigationDumpCallback(nodeId, depth, [](int depth) {});
-
-    navigationManager->RemoveNavigationDumpCallback(nodeId + 1, depth + 1);
-    EXPECT_EQ(navigationManager->dumpMap_.size(), 1);
-    NavigationManagerTestNg::TearDownTestSuite();
-}
-
-/**
  * @tc.name: GetNavigationInfo001
  * @tc.desc: Branch: if (customNode) = true
  *           Branch: if (!current) = false

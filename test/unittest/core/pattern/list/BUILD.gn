@@ -34,6 +34,7 @@ ace_unittest("list_test_ng") {
     "list_item_group_model_test_ng.cpp",
     "list_item_group_pattern_test_ng.cpp",
     "list_item_manager_test_ng.cpp",
+    "list_item_model_test_ng.cpp",
     "list_item_pattern_test_ng.cpp",
     "list_lanes_layout_test_ng.cpp",
     "list_layout_test_ng.cpp",

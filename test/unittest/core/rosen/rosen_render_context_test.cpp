@@ -1857,6 +1857,32 @@ HWTEST_F(RosenRenderContextTest, GetRangeIDStr003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CreateBackgroundPixelMap001
+ * @tc.desc: Test CreateBackgroundPixelMap Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, CreateBackgroundPixelMap001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<RosenRenderContext> rosenRenderContext = InitRosenRenderContext(frameNode);
+    ASSERT_NE(rosenRenderContext, nullptr);
+    ASSERT_NE(rosenRenderContext->rsNode_, nullptr);
+
+    /**
+     * @tc.steps: step1. Call CreateBackgroundPixelMap function.
+     * @tc.expected: step1. The backgroundTaskId_ can be set correctly.
+     */
+    auto backgroundNode =
+        FrameNode::GetOrCreateFrameNode("background", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(backgroundNode, nullptr);
+    uint32_t backgroundTaskId = 1;
+    rosenRenderContext->backgroundTaskId_ = backgroundTaskId;
+    rosenRenderContext->CreateBackgroundPixelMap(backgroundNode);
+    EXPECT_EQ(rosenRenderContext->backgroundTaskId_, backgroundTaskId + 1);
+}
+
+/**
  * @tc.name: OnCustomBackgroundColorUpdate001
  * @tc.desc: Test OnCustomBackgroundColorUpdate Func.
  * @tc.type: FUNC
@@ -2276,5 +2302,21 @@ HWTEST_F(RosenRenderContextTest, ShouldSkipAffineTransformation001, TestSize.Lev
     ASSERT_EQ(res, false);
     rosenRenderContext->rsNode_ = nullptr;
     ASSERT_EQ(rosenRenderContext->rsNode_, nullptr);
+}
+
+/**
+ * @tc.name: RSUIContext001
+ * @tc.desc: Test RSUIContext001 Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, RSUIContext001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    ComponentSnapshot snapshot;
+    snapshot.SetRSUIContext(frameNode, nullptr);
+    auto pipeline = MockPipelineContext::GetCurrentContext();
+    auto rsUIContext = snapshot.GetRSUIContext(pipeline);
+    EXPECT_EQ(rsUIContext, nullptr);
 }
 } // namespace OHOS::Ace::NG

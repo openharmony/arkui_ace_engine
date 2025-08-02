@@ -75,6 +75,7 @@ public:
     void SetCompositingFilter(const OHOS::Rosen::Filter* compositingFilter) override;
     void ResetCompositingFilter() override;
     bool NeedAvoidContainerModal() override;
+    NG::OffsetF GetParentGlobalOffsetDuringLayout() override;
 
     void SetMeasureCallback(const std::function<void(RefPtr<FrameNode>)>& callback) override;
     int32_t GetMeasureWidth() override;

@@ -19,6 +19,7 @@
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
 #include "base/subwindow/subwindow_manager.h"
+#include "base/utils/feature_param.h"
 #include "core/common/ace_engine.h"
 #include "core/common/font_manager.h"
 #include "core/common/manager_interface.h"
@@ -36,7 +37,6 @@
 namespace OHOS::Ace {
 
 constexpr int32_t DEFAULT_VIEW_SCALE = 1;
-constexpr int32_t DEFAULT_RESPONSE_DELAY = 70000000; // default max response delay is 70ms.
 
 PipelineBase::PipelineBase(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
     RefPtr<AssetManager> assetManager, const RefPtr<Frontend>& frontend, int32_t instanceId)
@@ -198,6 +198,34 @@ uint64_t PipelineBase::GetTimeFromExternalTimer()
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
     return (ts.tv_sec * secToNanosec + ts.tv_nsec);
+}
+
+double PipelineBase::Vp2PxInner(double vpValue) const
+{
+    double density = GetWindowDensity();
+    if (LessOrEqual(density, 1.0)) {
+        density = GetDensity();
+    }
+    return vpValue * density;
+}
+
+double PipelineBase::CalcPageWidth(double rootWidth) const
+{
+    if (!IsArkUIHookEnabled() || !isCurrentInForceSplitMode_) {
+        return rootWidth;
+    }
+    // Divider Width equal to 1.0_vp
+    constexpr double HALF = 2.0;
+    return (rootWidth - Vp2PxInner(1.0)) / HALF;
+}
+
+double PipelineBase::GetPageWidth() const
+{
+    auto pageWidth = rootWidth_;
+    if (IsContainerModalVisible()) {
+        pageWidth -= 2 * Vp2PxInner((CONTAINER_BORDER_WIDTH + CONTENT_PADDING).Value());
+    }
+    return CalcPageWidth(pageWidth);
 }
 
 void PipelineBase::RequestFrame()
@@ -512,6 +540,7 @@ void PipelineBase::UpdateRootSizeAndScale(int32_t width, int32_t height)
         if (IsContainerModalVisible()) {
             pageWidth -= 2 * (CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx();
         }
+        pageWidth = CalcPageWidth(pageWidth);
         designWidthScale_ =
             windowConfig.autoDesignWidth ? density_ : pageWidth / windowConfig.designWidth;
         windowConfig.designWidthScale = designWidthScale_;
@@ -775,7 +804,8 @@ void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint64_t frameCount)
 bool PipelineBase::ReachResponseDeadline() const
 {
     if (currRecvTime_ >= 0) {
-        return currRecvTime_ + DEFAULT_RESPONSE_DELAY < GetSysTimestamp();
+        auto deadline = FeatureParam::GetSyncloadResponseDeadline();
+        return currRecvTime_ + deadline < GetSysTimestamp();
     }
     return false;
 }
@@ -910,6 +940,15 @@ Rect PipelineBase::GetGlobalDisplayWindowRect() const
 {
     CHECK_NULL_RETURN(window_, {});
     return window_->GetGlobalDisplayWindowRect();
+}
+
+bool PipelineBase::IsArkUIHookEnabled() const
+{
+    auto hookEnabled = SystemProperties::GetArkUIHookEnabled();
+    if (hookEnabled.has_value()) {
+        return hookEnabled.value();
+    }
+    return isArkUIHookEnabled_;
 }
 
 bool PipelineBase::HasFloatTitle() const
@@ -1140,5 +1179,6 @@ void PipelineBase::SetUiDVSyncCommandTime(uint64_t vsyncTime)
     DVSyncChangeTime_ = vsyncTime;
     commandTimeUpdate_ = true;
     dvsyncTimeUpdate_ = true;
+    dvsyncTimeUseCount_ = 0;
 }
 } // namespace OHOS::Ace

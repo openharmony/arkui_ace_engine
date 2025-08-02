@@ -280,10 +280,12 @@ void ImageAnimatorPattern::RunAnimatorByStatus(int32_t index)
         case ControlledAnimator::ControlStatus::PAUSED:
             controlledAnimator_->Pause();
             ResetFormAnimationFlag();
+            ShowIndex(index);
             break;
         case ControlledAnimator::ControlStatus::STOPPED:
             controlledAnimator_->Finish();
             ResetFormAnimationFlag();
+            ShowIndex(index);
             break;
         default:
             ResetFormAnimationStartTime();
@@ -292,6 +294,14 @@ void ImageAnimatorPattern::RunAnimatorByStatus(int32_t index)
                 return;
             }
             isReverse_ ? controlledAnimator_->Backward() : controlledAnimator_->Forward();
+    }
+}
+
+void ImageAnimatorPattern::ShowIndex(int32_t index)
+{
+    if (showingIndexByStoppedOrPaused_) {
+        SetShowingIndex(index);
+        showingIndexByStoppedOrPaused_ = false;
     }
 }
 
@@ -345,6 +355,8 @@ void ImageAnimatorPattern::OnModifyDone()
     if (firstUpdateEvent_) {
         UpdateEventCallback();
         firstUpdateEvent_ = false;
+        showingIndexByStoppedOrPaused_ = status_ == ControlledAnimator::ControlStatus::PAUSED ||
+                                         status_ == ControlledAnimator::ControlStatus::STOPPED;
         auto imageFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildren().front());
         AddImageLoadSuccessEvent(imageFrameNode);
     }

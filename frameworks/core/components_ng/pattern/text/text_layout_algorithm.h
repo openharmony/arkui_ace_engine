@@ -139,7 +139,6 @@ private:
     LayoutConstraintF CalcContentConstraint(const LayoutConstraintF& constraint, LayoutWrapper* layoutWrapper);
     std::optional<float> GetCalcLayoutConstraintLength(LayoutWrapper* layoutWrapper, bool isMax, bool isWidth);
     void MeasureWithFixAtIdealSize(LayoutWrapper* layoutWrapper);
-    void MeasureWithMatchParent(LayoutWrapper* layoutWrapper);
     RefPtr<PropertyBool> showSelect_;
     std::optional<LayoutConstraintF> cachedCalcContentConstraint_;
     bool isFixIdealSizeAndNoMaxWidth_ = false;

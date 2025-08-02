@@ -1268,4 +1268,45 @@ HWTEST_F(TextPickerColumnExtendTestNg, ColumnPatternInitHapticController001, Tes
     textPickerPattern->ColumnPatternInitHapticController();
     EXPECT_FALSE(textPickerPattern->isHapticChanged_);
 }
+
+/**
+ * @tc.name: OnAttachToMainTreeMultiThread001
+ * @tc.desc: Test TextPickerColumnPattern OnAttachToMainTreeMultiThread
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnExtendTestNg, OnAttachToMainTreeMultiThread001, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    frameNode->MarkModifyDone();
+    auto columnNode = AceType::DynamicCast<FrameNode>(frameNode->GetLastChild()->GetLastChild()->GetLastChild());
+    ASSERT_NE(columnNode, nullptr);
+    auto columnPattern = AceType::DynamicCast<FrameNode>(columnNode)->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+
+    columnPattern->OnAttachToMainTreeMultiThread();
+    EXPECT_TRUE(columnPattern->tossAnimationController_);
+    EXPECT_FALSE(columnPattern->overscroller_.isFirstStart_);
+    EXPECT_NE(columnPattern->jumpInterval_, 0.f);
+}
+
+/**
+ * @tc.name: OnDetachFromMainTreeMultiThread001
+ * @tc.desc: Test TextPickerColumnPattern OnDetachFromMainTreeMultiThread
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnExtendTestNg, OnDetachFromMainTreeMultiThread001, TestSize.Level1)
+{
+    auto columnPattern = GetTextPickerColumnPatternFromNodeTree();
+    ASSERT_NE(columnPattern, nullptr);
+    auto columnNode = columnPattern->GetHost();
+    ASSERT_NE(columnNode, nullptr);
+    auto pipeline = columnNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+
+    auto onWindowStateChangedCallbacks = pipeline->onWindowStateChangedCallbacks_.size();
+    columnPattern->OnDetachFromMainTreeMultiThread();
+    EXPECT_EQ(pipeline->onWindowStateChangedCallbacks_.size(), onWindowStateChangedCallbacks - 1);
+}
 } // namespace OHOS::Ace::NG

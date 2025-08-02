@@ -662,6 +662,13 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     return true;
 }
 
+void TextFieldPattern::OnSyncGeometryNode(const DirtySwapConfig& config)
+{
+    CHECK_NULL_VOID(HasFocus());
+    parentGlobalOffset_ = GetPaintRectGlobalOffset();
+    UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height());
+}
+
 void TextFieldPattern::UpdateSelectionAndHandleVisibility()
 {
     TextFieldRequestFocus(RequestFocusReason::DRAG_SELECT);
@@ -2512,7 +2519,7 @@ void TextFieldPattern::InitDragDropCallBack()
             "%{public}d TextField onDragEnter, dragStatus_ is %{public}d, dragRecipientStatus_ is %{public}d",
             host->GetId(), static_cast<int32_t>(pattern->dragStatus_),
             static_cast<int32_t>(pattern->dragRecipientStatus_));
-
+        CHECK_NULL_VOID(!pattern->IsDisabled());
         auto pipeline = pattern->GetContext();
         CHECK_NULL_VOID(pipeline);
         auto dragManager = pipeline->GetDragDropManager();
@@ -2543,6 +2550,7 @@ void TextFieldPattern::InitDragDropCallBack()
         CHECK_NULL_VOID(dragManager);
         auto host = pattern->GetHost();
         CHECK_NULL_VOID(host);
+        CHECK_NULL_VOID(!pattern->IsDisabled());
 
         if (pattern->IsNormalInlineState() || !dragManager->IsDropAllowed(host)) {
             return;
@@ -3446,8 +3454,7 @@ void TextFieldPattern::OnModifyDone()
     isTextChangedAtCreation_ = false;
     if (layoutProperty->GetTypeChangedValue(false)) {
         layoutProperty->ResetTypeChanged();
-        operationRecords_.clear();
-        redoOperationRecords_.clear();
+        ClearOperationRecords();
     }
     ProcessScroll();
     ProcessCounter();
@@ -9645,6 +9652,7 @@ PreviewTextStyle TextFieldPattern::GetPreviewTextStyle() const
     CHECK_NULL_RETURN(paintProperty, defaultStyle);
     if (paintProperty->HasPreviewTextStyle()) {
         auto style = paintProperty->GetPreviewTextStyle();
+        CHECK_NULL_RETURN(style, defaultStyle);
         if (style.value() == PREVIEW_STYLE_NORMAL) {
             return PreviewTextStyle::NORMAL;
         } else if (style.value() == PREVIEW_STYLE_UNDERLINE) {

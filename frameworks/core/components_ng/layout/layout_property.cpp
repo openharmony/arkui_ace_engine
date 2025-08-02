@@ -479,19 +479,31 @@ void LayoutProperty::CalcToString(const CalcSize& calcSize, std::pair<std::vecto
     }
 }
 
-void LayoutProperty::ExpandConstraintWithSafeArea()
+IgnoreLayoutSafeAreaOpts LayoutProperty::GenIgnoreOpts() const
 {
-    auto host = GetHost();
-    if (!host || !IsExpandConstraintNeeded() || (!host->GetIgnoreLayoutProcess() && !host->IsRootMeasureNode())) {
-        return;
-    }
-    RefPtr<FrameNode> parent = host->GetAncestorNodeOfFrame(false);
-    CHECK_NULL_VOID(parent);
     IgnoreLayoutSafeAreaOpts options = { .type = NG::LAYOUT_SAFE_AREA_TYPE_NONE,
         .edges = NG::LAYOUT_SAFE_AREA_TYPE_NONE };
     if (ignoreLayoutSafeAreaOpts_) {
         options = *ignoreLayoutSafeAreaOpts_;
     }
+    return options;
+}
+
+void LayoutProperty::ExpandConstraintWithSafeArea()
+{
+    auto host = GetHost();
+    bool isExpandNode = host && IsExpandConstraintNeeded();
+    if (!isExpandNode) {
+        return;
+    }
+    bool dependencySatisfied =
+        host->GetIgnoreLayoutProcess() || host->IsRootMeasureNode() || host->GetEscapeDelayForIgnore();
+    if (!dependencySatisfied) {
+        return;
+    }
+    RefPtr<FrameNode> parent = host->GetAncestorNodeOfFrame(false);
+    CHECK_NULL_VOID(parent);
+    IgnoreLayoutSafeAreaOpts options = GenIgnoreOpts();
     auto pattern = parent->GetPattern();
     ExpandEdges sae = pattern && pattern->ChildTentativelyLayouted()
                           ? host->GetAccumulatedSafeAreaExpand(false, options)

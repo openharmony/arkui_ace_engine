@@ -20,11 +20,6 @@
 #include "core/components_ng/base/common_configuration.h"
 
 namespace OHOS::Ace::NG {
-enum class DataPanelType {
-    CIRCLE = 0,
-    LINE = 1
-};
-
 class DataPanelConfiguration : public CommonConfiguration {
     public:
         DataPanelConfiguration(std::vector<double>& values, double maxValue, bool enabled)
@@ -46,10 +41,6 @@ public:
     void CreateWithResourceObj(DataPanelResourceType colorType, const RefPtr<ResourceObject>& resObj) override;
     void SetValueColorsSetByUser(bool value) override;
 
-    static RefPtr<FrameNode>CreateFrameNode(int32_t nodeId);
-    static void SetValues(FrameNode* frameNode, const std::optional<std::vector<double>>& values);
-    static void SetMax(FrameNode* frameNode, const std::optional<double>& max);
-    static void SetType(FrameNode* frameNode, const std::optional<int32_t>& type);
     static void SetCloseEffect(FrameNode* frameNode, bool isClose);
     static void SetTrackBackground(FrameNode* frameNode, const Color& trackBackgroundColor);
     static void SetStrokeWidth(FrameNode* frameNode, const Dimension& strokeWidth);

@@ -22,7 +22,7 @@ void DynamicComponentManager::TriggerOnAreaChangeCallback(FrameNode* frameNode,
     uint64_t nanoTimestamp, int32_t areaChangeMinDepth)
 {
     ACE_SCOPED_TRACE("DynamicComponent TriggerOnAreaChangeCallback");
-    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto stageManager = context->GetStageManager();
     CHECK_NULL_VOID(stageManager);

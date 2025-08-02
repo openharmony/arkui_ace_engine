@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "grid_row_base_test_ng.h"
+#include "core/components_v2/grid_layout/grid_container_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -1635,5 +1636,39 @@ HWTEST_F(GridRowMeasureTestNG, MeasureSelfByLayoutPolicyTest01, TestSize.Level1)
     selfSize = algorithm.MeasureSelfByLayoutPolicy(Referenced::RawPtr(frameNode), 90,
         LayoutCalPolicy::FIX_AT_IDEAL_SIZE, LayoutCalPolicy::FIX_AT_IDEAL_SIZE);
     EXPECT_EQ(selfSize, OptionalSizeF(std::nullopt, 50));
+}
+
+/**
+* @tc.name  : ProcessGridSizeType_ShouldReturnUndefined_WhenPipelineIsNull
+* @tc.number: ProcessGridSizeType_Test_001
+* @tc.desc  : Test case to verify that ProcessGridSizeType returns UNDEFINED when pipeline is null
+*/
+HWTEST_F(GridRowMeasureTestNG, ProcessGridSizeType_ShouldReturnUndefined_WhenPipelineIsNull, TestSize.Level1) {
+    V2::BreakPoints breakpoints;
+    breakpoints.reference = V2::BreakPointsReference::WindowSize;
+    Size size;
+    WindowMode mode = WindowMode::WINDOW_MODE_FLOATING;
+    RefPtr<PipelineBase> pipeline = nullptr;
+    V2::GridSizeType result = V2::GridContainerUtils::ProcessGridSizeType(breakpoints, size, mode, pipeline);
+
+    EXPECT_EQ(result, V2::GridSizeType::UNDEFINED);
+}
+
+/**
+* @tc.name  : ProcessGridSizeType_ShouldReturnCorrectType_WhenReferenceIsNotWindowSize
+* @tc.number: ProcessGridSizeType_Test_004
+* @tc.desc  : Test ProcessGridSizeType returns the correct GridSizeType when reference is not WindowSize
+*/
+HWTEST_F(GridRowMeasureTestNG, ProcessGridSizeType_WhenReferenceIsNotWindowSize, TestSize.Level1) {
+    V2::BreakPoints breakpoints;
+    breakpoints.reference = V2::BreakPointsReference::ComponentSize;
+    Size size(1000, 1000);
+    WindowMode mode = WindowMode::WINDOW_MODE_FULLSCREEN;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+
+    V2::GridSizeType result = V2::GridContainerUtils::ProcessGridSizeType(breakpoints, size, mode, pipeline);
+    // Assuming CalcBreakPoint returns 3 for windowWidth = 1000
+    EXPECT_EQ(result, V2::GridSizeType::LG);
 }
 } // namespace OHOS::Ace::NG

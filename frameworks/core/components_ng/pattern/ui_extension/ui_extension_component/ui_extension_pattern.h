@@ -111,7 +111,6 @@ public:
     }
     void UpdateWant(const RefPtr<OHOS::Ace::WantWrap>& wantWrap);
     void UpdateWant(const AAFwk::Want& want);
-    void UpdateSessionWraper(bool isTransferringCaller);
 
     void OnWindowShow() override;
     void OnWindowHide() override;
@@ -235,12 +234,6 @@ public:
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpOthers();
-    void UpdateSessionType(SessionType type)
-    {
-        sessionType_ = type;
-        UpdateSessionWraper(isTransferringCaller_);
-    }
-
     int32_t GetInstanceIdFromHost() const;
     bool SendBusinessDataSyncReply(UIContentBusinessCode code, const AAFwk::Want& data, AAFwk::Want& reply,
         RSSubsystemId subSystemId = RSSubsystemId::ARKUI_UIEXT);

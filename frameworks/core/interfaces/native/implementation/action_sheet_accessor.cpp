@@ -115,35 +115,35 @@ void UpdateDynamicDialogProperties(DialogProperties& dialogProps, const Ark_Acti
 }
 void ShowImpl(const Ark_ActionSheetOptions* value)
 {
-    DialogProperties dialogProps {
-        .type = DialogType::ACTION_SHEET
-    };
-    UpdateDynamicDialogProperties(dialogProps, *value);
-    dialogProps.backgroundBlurStyle = static_cast<int32_t>(Converter::OptConvert<BlurStyle>(
-        value->backgroundBlurStyle).value_or(BlurStyle::COMPONENT_REGULAR));
-    dialogProps.backgroundColor = Converter::OptConvert<Color>(value->backgroundColor);
-    dialogProps.enableHoverMode =
-        Converter::OptConvert<bool>(value->enableHoverMode);
-    dialogProps.hoverModeArea = Converter::OptConvert<HoverModeAreaType>(value->hoverModeArea);
-    dialogProps.autoCancel = Converter::OptConvert<bool>(value->autoCancel).value_or(dialogProps.autoCancel);
-    dialogProps.isModal = Converter::OptConvert<bool>(value->isModal).value_or(dialogProps.isModal);
-    dialogProps.isShowInSubWindow =
-        Converter::OptConvert<bool>(value->showInSubWindow).value_or(dialogProps.isShowInSubWindow);
-    dialogProps.width = Converter::OptConvert<CalcDimension>(value->width);
-    dialogProps.height = Converter::OptConvert<CalcDimension>(value->height);
+    // DialogProperties dialogProps {
+    //     .type = DialogType::ACTION_SHEET
+    // };
+    // UpdateDynamicDialogProperties(dialogProps, *value);
+    // dialogProps.backgroundBlurStyle = static_cast<int32_t>(Converter::OptConvert<BlurStyle>(
+    //     value->backgroundBlurStyle).value_or(BlurStyle::COMPONENT_REGULAR));
+    // dialogProps.backgroundColor = Converter::OptConvert<Color>(value->backgroundColor);
+    // dialogProps.enableHoverMode =
+    //     Converter::OptConvert<bool>(value->enableHoverMode).value_or(dialogProps.enableHoverMode);
+    // dialogProps.hoverModeArea = Converter::OptConvert<HoverModeAreaType>(value->hoverModeArea);
+    // dialogProps.autoCancel = Converter::OptConvert<bool>(value->autoCancel).value_or(dialogProps.autoCancel);
+    // dialogProps.isModal = Converter::OptConvert<bool>(value->isModal).value_or(dialogProps.isModal);
+    // dialogProps.isShowInSubWindow =
+    //     Converter::OptConvert<bool>(value->showInSubWindow).value_or(dialogProps.isShowInSubWindow);
+    // dialogProps.width = Converter::OptConvert<CalcDimension>(value->width);
+    // dialogProps.height = Converter::OptConvert<CalcDimension>(value->height);
 
-    AddOnWillDismiss(dialogProps, value->onWillDismiss);
-    auto cancelCallbackOpt = Converter::OptConvert<VoidCallback>(value->cancel);
-    if (cancelCallbackOpt) {
-        auto cancelFunc = [arkCallback = CallbackHelper(*cancelCallbackOpt)]() -> void { arkCallback.Invoke(); };
-        dialogProps.onCancel = cancelFunc;
-    }
-    dialogProps.onLanguageChange = [actionSheetValue = *value, updateDialogProperties = UpdateDynamicDialogProperties](
-        DialogProperties& dialogProps) {
-        updateDialogProperties(dialogProps, actionSheetValue);
-    };
-    OHOS::Ace::NG::ActionSheetModelNG sheetModel;
-    sheetModel.ShowActionSheet(dialogProps);
+    // AddOnWillDismiss(dialogProps, value->onWillDismiss);
+    // auto cancelCallbackOpt = Converter::OptConvert<VoidCallback>(value->cancel);
+    // if (cancelCallbackOpt) {
+    //     auto cancelFunc = [arkCallback = CallbackHelper(*cancelCallbackOpt)]() -> void { arkCallback.Invoke(); };
+    //     dialogProps.onCancel = cancelFunc;
+    // }
+    // dialogProps.onLanguageChange = [actionSheetValue = *value, updateDialogProperties = UpdateDynamicDialogProperties](
+    //     DialogProperties& dialogProps) {
+    //     updateDialogProperties(dialogProps, actionSheetValue);
+    // };
+    // OHOS::Ace::NG::ActionSheetModelNG sheetModel;
+    // sheetModel.ShowActionSheet(dialogProps);
 }
 } // ActionSheetAccessor
 const GENERATED_ArkUIActionSheetAccessor* GetActionSheetAccessor()

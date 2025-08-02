@@ -278,16 +278,16 @@ DialogProperties CustomDialogControllerPeerImpl::GetDialogProperties() const
 
 void CustomDialogControllerPeerImpl::OpenDialog()
 {
-    ContainerScope scope(instanceId_);
-    if (dialogProperties_.windowScene.Invalid()) {
-        const auto windowScene = GetWindowScene();
-        if (windowScene) {
-            dialogProperties_.isSceneBoardDialog = true;
-            dialogProperties_.windowScene = windowScene;
-        }
-    }
-    dialogProperties_.isSysBlurStyle = true;
-    CustomDialogControllerModelStatic::SetOpenDialog(dialogProperties_, dialogs_, WeakClaim(this), std::move(builder_));
+    // ContainerScope scope(instanceId_);
+    // if (dialogProperties_.windowScene.Invalid()) {
+    //     const auto windowScene = GetWindowScene();
+    //     if (windowScene) {
+    //         dialogProperties_.isScenceBoardDialog = true;
+    //         dialogProperties_.windowScene = windowScene;
+    //     }
+    // }
+    // dialogProperties_.isSysBlurStyle = true;
+    // CustomDialogControllerModelStatic::SetOpenDialog(dialogProperties_, dialogs_, WeakClaim(this), std::move(builder_));
 }
 
 void CustomDialogControllerPeerImpl::CloseDialog()

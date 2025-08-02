@@ -59,8 +59,8 @@ void ContextSetOptionsHelper(FrameNode *frameNode, const T* context)
             peerImplPtr->SetInstanceId(Container::CurrentId());
             peerImplPtr->SetCanvasPattern(pattern);
         },
-        [frameNode]() {
-            CanvasModelNG::DetachRenderContext(frameNode);
+        []() {
+            // CanvasModelNG::DetachRenderContext(frameNode);
         });
 }
 

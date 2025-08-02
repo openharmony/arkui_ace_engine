@@ -40,6 +40,7 @@ LineOptions Convert(const Ark_LineOptions& src)
     options.height = Converter::OptConvert<Dimension>(src.height);
     return options;
 }
+
 }
 
 namespace OHOS::Ace::NG::GeneratedModifier {

@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_STAGE_PAGE_TRANSITION_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_STAGE_PAGE_TRANSITION_MODEL_NG_H
 
-#include "frameworks/core/components_ng/pattern/stage/page_transition_effect.h"
 #include "frameworks/core/components_ng/pattern/stage/page_transition_model.h"
 
 namespace OHOS::Ace::NG {
@@ -34,11 +33,6 @@ public:
     void CreateTransition(PageTransitionType type, const PageTransitionOption& option) override;
     void Create() override;
     void Pop() override;
-
-    static void SetSlideEffect(PageTransitionEffect* transition, const std::optional<SlideEffect>& effect);
-    static void SetTranslateEffect(PageTransitionEffect* transition, const NG::TranslateOptions& option);
-    static void SetScaleEffect(PageTransitionEffect* transition, const NG::ScaleOptions& option);
-    static void SetOpacityEffect(PageTransitionEffect* transition, float opacity);
 };
 } // namespace OHOS::Ace::NG
 

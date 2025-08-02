@@ -206,6 +206,35 @@ bool ArkJSRuntime::IsExecuteModuleInAbcFile(
     return ret;
 }
 
+bool ArkJSRuntime::IsStaticOrInvalidFile(const uint8_t *data, int32_t size)
+{
+    JSExecutionScope executionScope(vm_);
+    LocalScope scope(vm_);
+    panda::TryCatch trycatch(vm_);
+    JSNApi::PandaFileType fileType = JSNApi::GetFileType(data, size);
+    bool ret;
+    switch (fileType) {
+        case JSNApi::PandaFileType::FILE_DYNAMIC:
+            ret = false;
+            LOGI("ArkJSRuntime::IsStaticOrInvalidFile, file is dynamic");
+            break;
+        case JSNApi::PandaFileType::FILE_STATIC:
+            ret = true;
+            LOGI("ArkJSRuntime::IsStaticOrInvalidFile, file is static");
+            break;
+        case JSNApi::PandaFileType::FILE_FORMAT_INVALID:
+            ret = true;
+            LOGE("ArkJSRuntime::IsStaticOrInvalidFile, file is invalid. reason is param invalid");
+            break;
+        default:
+            ret = true;
+            LOGE("ArkJSRuntime::IsStaticOrInvalidFile, file is invalid");
+    }
+
+    HandleUncaughtException(trycatch);
+    return ret;
+}
+
 bool ArkJSRuntime::ExecuteModuleBuffer(const uint8_t* data, int32_t size, const std::string& filename, bool needUpdate)
 {
     JSExecutionScope executionScope(vm_);

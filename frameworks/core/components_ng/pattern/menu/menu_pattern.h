@@ -106,6 +106,16 @@ public:
         return IsMultiMenu();
     }
 
+    bool ChildPreMeasureHelperEnabled() override
+    {
+        return true;
+    }
+
+    bool PostponedTaskForIgnoreEnabled() override
+    {
+        return true;
+    }
+
     bool IsEnabledContentForFixIdeal()
     {
         return IsMultiMenu();

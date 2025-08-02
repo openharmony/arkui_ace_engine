@@ -273,7 +273,7 @@ void GeometryTransition::DidLayout(const RefPtr<LayoutWrapper>& layoutWrapper)
         direction = false;
     }
     if (direction.has_value()) {
-        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+        auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         pipeline->AddAfterLayoutTask([weak = WeakClaim(this), isNodeIn = direction.value()]() {
             auto geometryTransition = weak.Upgrade();
@@ -342,7 +342,7 @@ void GeometryTransition::SyncGeometry(bool isNodeIn)
     auto renderContext = self->GetRenderContext();
     auto targetRenderContext = target->GetRenderContext();
     auto geometryNode = self->GetGeometryNode();
-    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(renderContext && targetRenderContext && geometryNode && pipeline);
     // get own parent's global position, parent's transform is not taken into account other than translate
     auto parentPos = self->IsRemoving() ? outNodeParentPos_ :
@@ -451,7 +451,7 @@ RefPtr<FrameNode> CreateHolderNode(const RefPtr<FrameNode>& node)
 void GeometryTransition::SyncGeometryPropertiesAfterLayout(const RefPtr<FrameNode>& syncNode)
 {
     CHECK_NULL_VOID(syncNode);
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddAfterLayoutTask(
         [nodeWeak = WeakClaim(RawPtr(syncNode))]() {
@@ -546,7 +546,7 @@ void GeometryTransition::RecordAnimationOption(const WeakPtr<FrameNode>& trigger
             animationOption_ = NG::ViewStackProcessor::GetInstance()->GetImplicitAnimationOption();
         }
     } else {
-        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+        auto pipeline = PipelineBase::GetCurrentContext();
         if (pipeline && pipeline->GetSyncAnimationOption().IsValid() && IsParent(trigger, inNode_)) {
             animationOption_ = pipeline->GetSyncAnimationOption();
         }

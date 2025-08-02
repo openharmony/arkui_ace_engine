@@ -33,6 +33,7 @@ build_component_ng("base_ng") {
     "view_abstract.cpp",
     "view_abstract_model_ng.cpp",
     "view_abstract_model_static.cpp",
+    "view_abstract_multithread.cpp",
     "view_full_update_model_ng.cpp",
     "view_partial_update_model_ng.cpp",
     "view_stack_processor.cpp",

@@ -114,7 +114,6 @@ public:
     }
 
     void ResetExportTextureInfo();
-    void AddBaseNode(const RefPtr<UINode>& newNode);
 
     bool IsEnableChildrenMatchParent() override
     {

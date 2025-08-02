@@ -25,7 +25,6 @@
 #include "core/common/container_scope.h"
 #include "core/common/interaction/interaction_data.h"
 #include "core/common/interaction/interaction_interface.h"
-#include "core/common/udmf/udmf_client.h"
 #include "core/components/common/layout/grid_column_info.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components_ng/base/frame_node.h"
@@ -745,6 +744,17 @@ void DragDropManager::OnDragStart(const Point& point, const RefPtr<FrameNode>& f
     auto eventManager = pipeline->GetEventManager();
     CHECK_NULL_VOID(eventManager);
     eventManager->CleanHoverStatusForDragBegin();
+    
+    auto container = Container::GetContainer(pipeline->GetInstanceId());
+    CHECK_NULL_VOID(container);
+    if (container->IsSceneBoardWindow()) {
+        auto overlayManager = pipeline->GetOverlayManager();
+        CHECK_NULL_VOID(overlayManager);
+        rootNode_ = AceType::DynamicCast<FrameNode>(DragDropFuncWrapper::FindWindowScene(draggedFrameNode_));
+        auto dragDropManager = pipeline->GetDragDropManager();
+        CHECK_NULL_VOID(dragDropManager);
+        dragDropManager->SetRootNode(rootNode_);
+    }
 }
 
 void DragDropManager::OnDragStart(const Point& point)
@@ -1052,7 +1062,8 @@ void DragDropManager::OnDragMove(const DragPointerEvent& pointerEvent, const std
     if (isDragFwkShow_) {
         auto menuWrapper = GetMenuWrapperNodeFromDrag();
         if (menuWrapper) {
-            auto menuPosition = DragDropFuncWrapper::GetPointRelativeToMainWindow(point);
+            OffsetF menuPosition(
+                static_cast<float>(pointerEvent.GetDisplayX()), static_cast<float>(pointerEvent.GetDisplayY()));
             SubwindowManager::GetInstance()->UpdateHideMenuOffsetNG(
                 menuPosition, 1.0, false, menuWrapper ? menuWrapper->GetId() : -1);
         }
@@ -1126,6 +1137,7 @@ void DragDropManager::DoDragReset()
     dragDropState_ = DragDropMgrState::IDLE;
     preTargetFrameNode_ = nullptr;
     draggedFrameNode_ = nullptr;
+    rootNode_ = nullptr;
     menuWrapperNode_ = nullptr;
     preMovePoint_ = Point(0, 0);
     hasNotifiedTransformation_ = false;
@@ -1283,15 +1295,8 @@ bool DragDropManager::IsDropAllowed(const RefPtr<FrameNode>& dragFrameNode)
         return true;
     }
     DragDropBehaviorReporter::GetInstance().UpdateAllowDropType(dragFrameNodeAllowDrop);
-    for (const auto& it : summaryMap_) {
-        // if one matched found, allow drop
-        for (const auto& element : dragFrameNodeAllowDrop) {
-            if (element == it.first || UdmfClient::GetInstance()->IsBelongsTo(it.first, element)) {
-                return true;
-            }
-        }
-    }
-    return false;
+    dragSummaryInfo_.summary = summaryMap_;
+    return UdmfClient::GetInstance()->IsAppropriateType(dragSummaryInfo_, dragFrameNodeAllowDrop);
 }
 
 void DragDropManager::RequestDragSummaryInfoAndPrivilege()
@@ -1619,17 +1624,17 @@ void DragDropManager::ExecuteCustomDropAnimation(const RefPtr<OHOS::Ace::DragEve
 
 void DragDropManager::RequireSummary()
 {
-    std::map<std::string, int64_t> summary;
-    int32_t ret = InteractionInterface::GetInstance()->GetDragSummary(summary);
+    DragSummaryInfo dragSummaryInfo;
+    int32_t ret =
+        InteractionInterface::GetInstance()->GetDragSummary(dragSummaryInfo.summary, dragSummaryInfo.detailedSummary,
+            dragSummaryInfo.summaryFormat, dragSummaryInfo.version, dragSummaryInfo.totalSize);
     if (ret != 0) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "RequireSummary: Interaction GetSummary failed: %{public}d", ret);
     } else {
-        std::string summarys;
-        for (const auto& [udkey, recordSize] : summary) {
-            std::string str = udkey + "-" + std::to_string(recordSize) + ";";
-            summarys += str;
-        }
-        TAG_LOGI(AceLogTag::ACE_DRAG, "require summary: %{public}s", summarys.c_str());
+        std::string summarys = DragDropFuncWrapper::GetSummaryString(dragSummaryInfo.summary);
+        std::string detailedSummarys = DragDropFuncWrapper::GetSummaryString(dragSummaryInfo.detailedSummary);
+        TAG_LOGI(AceLogTag::ACE_DRAG, "require summary: %{public}s, detailedSummary:%{public}s", summarys.c_str(),
+            detailedSummarys.c_str());
         DragDropBehaviorReporter::GetInstance().UpdateSummaryType(summarys);
     }
     std::string extraInfo;
@@ -1639,7 +1644,8 @@ void DragDropManager::RequireSummary()
     }
     previewRect_ = Rect(-1, -1, -1, -1);
     extraInfo_ = extraInfo;
-    summaryMap_ = summary;
+    summaryMap_ = dragSummaryInfo.summary;
+    dragSummaryInfo_ = dragSummaryInfo;
 }
 
 void DragDropManager::ResetRecordSize(uint32_t recordSize)
@@ -3321,15 +3327,25 @@ void DragDropManager::ReportOnItemDropEvent(
         dragFrameNode->GetId(), type.c_str(), windowX, windowY, dropPositionX, dropPositionY);
 }
 
-void DragDropManager::HandleTouchEvent(const TouchEvent& event)
+void DragDropManager::SetDragAnimationPointerEvent(
+    const DragPointerEvent& pointerEvent, const RefPtr<NG::FrameNode>& node)
+{
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    if (!container->IsSceneBoardWindow() || node == rootNode_) {
+        dragAnimationPointerEvent_ = pointerEvent;
+    }
+}
+
+void DragDropManager::HandleTouchEvent(const TouchEvent& event, const RefPtr<NG::FrameNode>& node)
 {
     if (event.type == TouchType::MOVE && event.pullType != TouchType::PULL_MOVE) {
         if (!IsDragging() || !IsSameDraggingPointer(event.id)) {
             return;
         }
-        auto pointerEvent = DragPointerEvent(
-            event.x, event.y, event.screenX, event.screenY, event.globalDisplayX, event.globalDisplayY);
-        SetDragAnimationPointerEvent(pointerEvent);
+        DragPointerEvent dragPointerEvent;
+        DragDropFuncWrapper::ConvertPointerEvent(event, dragPointerEvent);
+        SetDragAnimationPointerEvent(dragPointerEvent);
     } else if ((event.type == TouchType::UP) || (event.type == TouchType::CANCEL)) {
         ResetDraggingStatus(event);
     }

@@ -28,7 +28,7 @@ std::optional<SizeF> DividerLayoutAlgorithm::MeasureContent(
     auto dividerLayoutProperty = DynamicCast<DividerLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(dividerLayoutProperty, std::nullopt);
 
-    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, std::nullopt);
     auto theme = pipeline->GetTheme<DividerTheme>();
     CHECK_NULL_RETURN(theme, std::nullopt);

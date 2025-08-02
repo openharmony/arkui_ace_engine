@@ -520,15 +520,6 @@ RefPtr<FrameNode> FrameNode::CreateFrameNodeWithTree(
     return newChild;
 }
 
-// int32_t FrameNode::GetTotalChildCount() const
-// {
-//     auto overrideCount = pattern_->GetTotalChildCount();
-//     if (overrideCount < 0) {
-//         return UINode::TotalChildCount();
-//     }
-//     return overrideCount;
-// }
-
 RefPtr<FrameNode> FrameNode::GetOrCreateFrameNode(
     const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
 {
@@ -1774,7 +1765,7 @@ void FrameNode::TriggerOnAreaChangeCallback(uint64_t nanoTimestamp, int32_t area
         eventHub_->HandleOnAreaChange(
             lastFrameRect_, lastParentOffsetToWindow_, currFrameRect, currParentOffsetToWindow);
     } else {
-        //if in this branch, next time cache is not trusted
+        // if in this branch, next time cache is not trusted
         ClearCachedGlobalOffset();
     }
     pattern_->OnAreaChangedInner();
@@ -1911,7 +1902,7 @@ bool FrameNode::IsFrameDisappear(uint64_t timestamp, int32_t isVisibleChangeMinD
     }
     bool isFrameDisappear = !isOnShow || !isOnMainTree || !isSelfVisible;
     if (isFrameDisappear) {
-        //if in this branch, next time cache is not trusted
+        // if in this branch, next time cache is not trusted
         ClearCachedIsFrameDisappear();
         return true;
     }
@@ -1929,7 +1920,7 @@ bool FrameNode::IsFrameAncestorDisappear(uint64_t timestamp, int32_t isVisibleCh
     bool result = !curIsVisible || !curFrameIsActive;
     RefPtr<FrameNode> parentUi = GetAncestorNodeOfFrame(false);
     if (!parentUi || result) {
-        //if in this branch, next time cache is not trusted
+        // if in this branch, next time cache is not trusted
         ClearCachedIsFrameDisappear();
         return result;
     }
@@ -2554,7 +2545,7 @@ void FrameNode::MarkModifyDone()
     renderContext_->OnModifyDone();
 #if (defined(__aarch64__) || defined(__x86_64__))
     if (Recorder::IsCacheAvaliable()) {
-        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+        auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         pipeline->AddAfterRenderTask([weak = WeakPtr(pattern_)]() {
             auto pattern = weak.Upgrade();
@@ -4617,7 +4608,7 @@ void FrameNode::UpdatePercentSensitive()
 
 bool FrameNode::PreMeasure(const std::optional<LayoutConstraintF>& parentConstraint)
 {
-    if (GetHasPreMeasured()) {
+    if (GetEscapeDelayForIgnore() || (GetIgnoreLayoutProcess() && GetHasPreMeasured())) {
         return false;
     }
     auto parent = GetAncestorNodeOfFrame(true);
@@ -4682,7 +4673,6 @@ void FrameNode::PostTaskForIgnore(PipelineContext* pipeline)
 bool FrameNode::PostponedTaskForIgnore()
 {
     auto pattern = GetPattern();
-    RefPtr<FrameNode> parent = GetAncestorNodeOfFrame(false);
     if (!pattern->PostponedTaskForIgnoreEnabled()) {
         delayLayoutChildren_.clear();
         return false;
@@ -4694,17 +4684,23 @@ bool FrameNode::PostponedTaskForIgnore()
             IgnoreLayoutSafeAreaOpts options = { .type = NG::LAYOUT_SAFE_AREA_TYPE_NONE,
                 .edges = NG::LAYOUT_SAFE_AREA_EDGE_NONE };
             auto property = node->GetLayoutProperty();
-            if (!property) {
-                continue;
-            }
-            auto&& nodeOpts = property->GetIgnoreLayoutSafeAreaOpts();
-            if (nodeOpts) {
-                options = *nodeOpts;
+            if (property) {
+                options = property->GenIgnoreOpts();
             }
             ExpandEdges sae = node->GetAccumulatedSafeAreaExpand(false, options);
-            auto offset = node->GetGeometryNode()->GetMarginFrameOffset();
-            offset -= sae.Offset();
-            node->GetGeometryNode()->SetMarginFrameOffset(offset);
+            bool isRtl = false;
+            auto containerProperty = GetLayoutProperty();
+            if (containerProperty) {
+                isRtl = containerProperty->DecideMirror();
+            }
+            auto selfIgnoreAdjust = isRtl ? sae.MirrorOffset() : sae.Offset();
+            auto geometryNode = node->GetGeometryNode();
+            if (geometryNode) {
+                geometryNode->SetIgnoreAdjust(selfIgnoreAdjust);
+                auto offset = geometryNode->GetMarginFrameOffset();
+                offset -= selfIgnoreAdjust;
+                geometryNode->SetMarginFrameOffset(offset);
+            }
             node->Layout();
         }
     }
@@ -4712,9 +4708,24 @@ bool FrameNode::PostponedTaskForIgnore()
     return true;
 }
 
+bool FrameNode::EnsureDelayedMeasureBeingOnlyOnce()
+{
+    auto parent = GetAncestorNodeOfFrame(true);
+    CHECK_NULL_RETURN(parent, false);
+    auto pattern = parent->GetPattern();
+    CHECK_NULL_RETURN(pattern, false);
+    if (pattern->ChildPreMeasureHelperEnabled() && !CheckHasPreMeasured()) {
+        return true;
+    }
+    return false;
+}
+
 // This will call child and self measure process.
 void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint)
 {
+    if (GetIgnoreLayoutProcess() && EnsureDelayedMeasureBeingOnlyOnce()) {
+        return;
+    }
     ACE_LAYOUT_TRACE_BEGIN("Measure[%s][self:%d][parent:%d][key:%s]", tag_.c_str(), nodeId_,
         GetAncestorNodeOfFrame(true) ? GetAncestorNodeOfFrame(true)->GetId() : 0, GetInspectorIdValue("").c_str());
     if (SystemProperties::GetMeasureDebugTraceEnabled()) {
@@ -5374,7 +5385,7 @@ bool FrameNode::ReachResponseDeadline() const
 OffsetF FrameNode::GetOffsetInScreen()
 {
     auto frameOffset = GetPaintRectOffset(false, true);
-    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, OffsetF(0.0f, 0.0f));
     auto window = pipelineContext->GetWindow();
     CHECK_NULL_RETURN(window, OffsetF(0.0f, 0.0f));

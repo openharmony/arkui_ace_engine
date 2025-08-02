@@ -5280,6 +5280,8 @@ void JSWeb::MediaOptions(const JSCallbackInfo& args)
         bool audioExclusive = audioExclusiveObj->ToBoolean();
         WebModel::GetInstance()->SetAudioExclusive(audioExclusive);
     }
+
+    RETURN_IF_CALLING_FROM_M114();
     auto audioSessionTypeObj = paramObject->GetProperty("audioSessionType");
     auto audioSessionType = WebAudioSessionType::AUTO;
     if (audioSessionTypeObj->IsNumber()) {
@@ -6438,6 +6440,7 @@ void JSWeb::DataDetectorConfig(const JSCallbackInfo& args)
 
 void JSWeb::BypassVsyncCondition(int32_t webBypassVsyncCondition)
 {
+    RETURN_IF_CALLING_FROM_M114();
     auto condition = WebBypassVsyncCondition::NONE;
     switch (webBypassVsyncCondition) {
         case 0:

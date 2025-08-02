@@ -390,7 +390,7 @@ public:
     void PlaySpringAnimation(
         float position, float velocity, float mass, float stiffness, float damping, bool useTotalOffset = true);
     void PlayCurveAnimation(float position, float duration, const RefPtr<Curve>& curve, bool canOverScroll);
-    virtual float GetTotalOffset() const
+    virtual double GetTotalOffset() const
     {
         return 0.0f;
     }
@@ -913,7 +913,6 @@ public:
         return scrollBar_;
     }
 protected:
-    void OnAttachToFrameNode() override;
     void SuggestOpIncGroup(bool flag);
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void UpdateScrollBarRegion(float offset, float estimatedHeight, Size viewPort, Offset viewOffset);
@@ -1038,6 +1037,7 @@ private:
     void InitOption(AnimationOption &option, float duration, const RefPtr<Curve>& curve);
     float GetScrollDelta(float offset, bool& stopAnimation);
 
+    void OnAttachToFrameNode() override;
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void RegisterWindowStateChangedCallback();
     void OnTouchTestDone(const std::shared_ptr<BaseGestureEvent>& baseGestureEvent,
@@ -1067,7 +1067,7 @@ private:
     /******************************************************************************
      * NestableScrollContainer implementations
      */
-    ScrollResult HandleExtScroll(float velocity = 0.f);
+    void HandleExtScroll(float velocity = 0.f);
     ScrollResult HandleScroll(
         float offset, int32_t source, NestedState state = NestedState::GESTURE, float velocity = 0.f) override;
     bool HandleScrollVelocity(float velocity, const RefPtr<NestableScrollContainer>& child = nullptr) override;
@@ -1242,7 +1242,7 @@ private:
     WeakPtr<NestableScrollContainer> scrollOriginChild_;
     float nestedScrollVelocity_ = 0.0f;
     uint64_t nestedScrollTimestamp_ = 0;
-    bool prevHasFadingEdge_ = false;
+    bool preHasFadingEdge_ = false;
     float scrollStartOffset_ = 0.0f;
 
     bool isRoundScroll_ = false;

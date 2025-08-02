@@ -882,10 +882,9 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         return;
     }
     std::string udKey;
-    std::map<std::string, int64_t> summary;
-    std::map<std::string, int64_t> detailedSummary;
     int32_t ret = -1;
-    DragDropFuncWrapper::ProcessDragDropData(dragEvent, udKey, summary, detailedSummary, ret);
+    DragSummaryInfo dragSummaryInfo;
+    DragDropFuncWrapper::ProcessDragDropData(dragEvent, udKey, dragSummaryInfo, ret);
     int32_t recordsSize = GetBadgeNumber(dragEvent);
     RefPtr<PixelMap> pixelMap = dragDropInfo.pixelMap;
     if (pixelMap) {
@@ -986,14 +985,16 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         dragMoveLastPoint.GetScreenY() : info.GetScreenLocation().GetY();
     
     DragDataCore dragData { { shadowInfo }, {}, udKey, extraInfoLimited, arkExtraInfoJson->ToString(),
-        static_cast<int32_t>(info.GetSourceDevice()), recordsSize, info.GetPointerId(),
-        screenX, screenY, info.GetTargetDisplayId(), windowId, true, false, summary, false, detailedSummary };
+        static_cast<int32_t>(info.GetSourceDevice()), recordsSize, info.GetPointerId(), screenX, screenY,
+        info.GetTargetDisplayId(), windowId, true, false, dragSummaryInfo.summary, false,
+        dragSummaryInfo.detailedSummary, dragSummaryInfo.summaryFormat, dragSummaryInfo.version,
+        dragSummaryInfo.totalSize };
     if (AceApplicationInfo::GetInstance().IsMouseTransformEnable() && (info.GetSourceTool() == SourceTool::MOUSE) &&
         (info.GetSourceDevice() == SourceType::TOUCH)) {
         dragData.sourceType = static_cast<int32_t>(SourceType::MOUSE);
     }
-    std::string summarys = DragDropFuncWrapper::GetSummaryString(summary);
-    std::string detailedSummarys = DragDropFuncWrapper::GetSummaryString(detailedSummary);
+    std::string summarys = DragDropFuncWrapper::GetSummaryString(dragSummaryInfo.summary);
+    std::string detailedSummarys = DragDropFuncWrapper::GetSummaryString(dragSummaryInfo.detailedSummary);
     DragDropBehaviorReporter::GetInstance().UpdateSummaryType(summarys);
     TAG_LOGI(AceLogTag::ACE_DRAG,
         "Start drag, frameNode is %{public}s, pixelMap width %{public}d height %{public}d, "
@@ -1629,12 +1630,18 @@ void GestureEventHub::UpdateMenuNode(
     CHECK_NULL_VOID(menuWrapperNode);
     auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
-    if (frameNode->GetDragPreviewOption().sizeChangeEffect == DraggingSizeChangeEffect::DEFAULT ||
-        menuWrapperPattern->HasTransitionEffect() || menuWrapperPattern->IsHide()) {
-        return;
-    }
+    auto animationInfo = menuWrapperPattern->GetPreviewMenuAnimationInfo();
+    auto rate = animationInfo.clipRate;
     auto menuNode = menuWrapperPattern->GetMenu();
     CHECK_NULL_VOID(menuNode);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    bool isMenuNotShow =
+        menuWrapperPattern->GetMenuStatus() == MenuStatus::SHOW && rate == -1.0f && menuPattern->GetIsShowHoverImage();
+    if (frameNode->GetDragPreviewOption().sizeChangeEffect == DraggingSizeChangeEffect::DEFAULT ||
+        menuWrapperPattern->HasTransitionEffect() || menuWrapperPattern->IsHide() || isMenuNotShow) {
+        return;
+    }
     auto scrollNode = AceType::DynamicCast<FrameNode>(menuNode->GetChildByIndex(0));
     CHECK_NULL_VOID(scrollNode);
     data.scrollNode = scrollNode;
@@ -1663,10 +1670,7 @@ void GestureEventHub::UpdateMenuNode(
     data.menuPositionBottom =
         imageNodeOffset.GetY() + imageNodeSize.Height() - menuNodeOffset.GetY() - menuNodeSize.Height();
     auto menuParam = menuWrapperPattern->GetMenuParam();
-    auto menuPattern = menuNode->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(menuPattern);
-    auto placement = menuPattern->GetLastPlacement().value_or(Placement::NONE);
-    data.menuPosition = placement;
+    data.menuPosition = menuPattern->GetLastPlacement().value_or(Placement::NONE);
     auto newMenuNode = menuPattern->DuplicateMenuNode(menuNode, menuParam);
     CHECK_NULL_VOID(newMenuNode);
     data.menuNode = newMenuNode;

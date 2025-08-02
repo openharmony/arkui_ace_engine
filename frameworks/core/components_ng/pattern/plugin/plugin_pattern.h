@@ -36,8 +36,6 @@ public:
     PluginPattern() = default;
     ~PluginPattern() override;
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
-
     void OnActionEvent(const std::string& action) const;
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -56,9 +54,8 @@ public:
     void ReplaceAll(std::string& str, const std::string& pattern, const std::string& newPattern);
 
     std::unique_ptr<DrawDelegate> GetDrawDelegate();
-#ifndef ARKUI_CAPI_UNITTEST
+
     const RefPtr<PluginSubContainer>& GetPluginSubContainer() const;
-#endif
 
     const std::string& GetData() const
     {
@@ -93,10 +90,8 @@ private:
     std::string GetPackagePathByBms(const WeakPtr<PluginPattern>& weak, RequestPluginInfo& info,
         const std::vector<std::string>& strList, const std::vector<int32_t>& userIds) const;
 
-#ifndef ARKUI_CAPI_UNITTEST
     RefPtr<PluginSubContainer> pluginSubContainer_;
     RefPtr<PluginManagerDelegate> pluginManagerBridge_;
-#endif
 
     std::string data_;
     RequestPluginInfo pluginInfo_;

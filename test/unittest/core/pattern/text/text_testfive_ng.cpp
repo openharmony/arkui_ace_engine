@@ -3325,7 +3325,7 @@ HWTEST_F(TextTestFiveNg, GetLineBreakStrategyInJson001, TestSize.Level1)
 
 /**
  * @tc.name: TxtParagraphUpdateColor001
- * @tc.desc: test txt_paragraph.cpp UpdateColor function
+ * @tc.desc: test txt_paragraph.cpp UpdateColor function.
  * @tc.type: FUNC
  */
 HWTEST_F(TextTestFiveNg, TxtParagraphUpdateColor001, TestSize.Level1)
@@ -3345,7 +3345,7 @@ HWTEST_F(TextTestFiveNg, TxtParagraphUpdateColor001, TestSize.Level1)
 
 /**
  * @tc.name: UnRegisterAfterLayoutCallback001
- * @tc.desc: test text_pattern.cpp UnRegisterAfterLayoutCallback function
+ * @tc.desc: test text_pattern.cpp UnRegisterAfterLayoutCallback function.
  * @tc.type: FUNC
  */
 HWTEST_F(TextTestFiveNg, UnRegisterAfterLayoutCallback001, TestSize.Level1)
@@ -3416,7 +3416,7 @@ HWTEST_F(TextTestFiveNg, TextEnableAutoSpacing, TestSize.Level1)
      */
     TextModelNG::SetEnableAutoSpacing(frameNode, false);
     /**
-     * @tc.expected: Get EnableAutoSpacing Value
+     * @tc.expected: Get EnableAutoSpacing Value.
      */
     EXPECT_EQ(textLayoutProperty->GetEnableAutoSpacing(), false);
     EXPECT_EQ(TextModelNG::GetEnableAutoSpacing(frameNode), false);

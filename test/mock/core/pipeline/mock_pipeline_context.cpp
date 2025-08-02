@@ -171,6 +171,16 @@ void MockPipelineContext::TearDown()
     predictTasks_.clear();
 }
 
+std::string PipelineContext::GetBundleName()
+{
+    return "";
+}
+
+std::string PipelineContext::GetModuleName()
+{
+    return "";
+}
+
 RefPtr<MockPipelineContext> MockPipelineContext::GetCurrent()
 {
     return pipeline_;
@@ -223,6 +233,9 @@ PipelineContext::PipelineContext()
 {
     if (navigationMgr_) {
         navigationMgr_->SetPipelineContext(WeakClaim(this));
+    }
+    if (forceSplitMgr_) {
+        forceSplitMgr_->SetPipelineContext(WeakClaim(this));
     }
 }
 
@@ -1046,7 +1059,7 @@ void PipelineContext::RegisterOverlayNodePositionsUpdateCallback(
 
 void PipelineContext::TriggerOverlayNodePositionsUpdateCallback(std::vector<Ace::RectF> rects) {}
 
-bool PipelineContext::IsContainerModalVisible()
+bool PipelineContext::IsContainerModalVisible() const
 {
     return false;
 }
@@ -1288,6 +1301,25 @@ double PipelineBase::ConvertPxToVp(const Dimension& dimension) const
 void PipelineBase::HyperlinkStartAbility(const std::string& address) const {}
 
 void PipelineBase::StartAbilityOnQuery(const std::string& queryWord) const {}
+
+double PipelineBase::CalcPageWidth(double rootWidth) const
+{
+    return rootWidth;
+}
+
+double PipelineBase::GetPageWidth() const
+{
+    return 0;
+}
+
+bool PipelineBase::IsArkUIHookEnabled() const
+{
+    auto hookEnabled = SystemProperties::GetArkUIHookEnabled();
+    if (hookEnabled.has_value()) {
+        return hookEnabled.value();
+    }
+    return isArkUIHookEnabled_;
+}
 
 void PipelineBase::RequestFrame() {}
 

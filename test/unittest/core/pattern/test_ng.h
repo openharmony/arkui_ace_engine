@@ -71,6 +71,22 @@ public:
         }
         return AssertionFailure() << "Actual: " << actual << " Expected: " << expected;
     }
+    
+    AssertionResult IsEqual(const float& actual, const double& expected)
+    {
+        if (NearEqual(actual, expected)) {
+            return AssertionSuccess();
+        }
+        return AssertionFailure() << "Actual: " << actual << " Expected: " << expected;
+    }
+
+    AssertionResult IsEqual(const double& actual, const float& expected)
+    {
+        if (NearEqual(actual, expected)) {
+            return AssertionSuccess();
+        }
+        return AssertionFailure() << "Actual: " << actual << " Expected: " << expected;
+    }
 
     AssertionResult IsEqual(const float& actual, const float& expected)
     {

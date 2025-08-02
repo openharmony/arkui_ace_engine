@@ -3247,26 +3247,27 @@ void RosenRenderContext::OnBuilderBackgroundFlagUpdate(bool isBuilderBackground)
 
 void RosenRenderContext::CreateBackgroundPixelMap(const RefPtr<FrameNode>& customNode)
 {
-    NG::ComponentSnapshot::JsCallback callback = [weak = WeakPtr(GetHost()), containerId = Container::CurrentId()](
-                                                     std::shared_ptr<Media::PixelMap> pixmap, int32_t errCode,
-                                                     std::function<void()> finishCallback) {
-        CHECK_NULL_VOID(pixmap);
-        auto frameNode = weak.Upgrade();
-        CHECK_NULL_VOID(frameNode);
-        ContainerScope scope(containerId);
-        std::shared_ptr<Media::PixelMap> pmap = std::move(pixmap);
-        auto pixelmap = PixelMap::CreatePixelMap(&pmap);
-        auto task = [pixelmap, frameNode]() {
-            auto context = frameNode->GetRenderContext();
-            if (context) {
-                context->UpdateBackgroundPixelMap(pixelmap);
-                context->RequestNextFrame();
-            }
+    NG::ComponentSnapshot::JsCallback callback =
+        [weak = WeakPtr(GetHost()), containerId = Container::CurrentId(), backgroundTaskId = ++backgroundTaskId_](
+            std::shared_ptr<Media::PixelMap> pixmap, int32_t errCode, std::function<void()> finishCallback) {
+            CHECK_NULL_VOID(pixmap);
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            ContainerScope scope(containerId);
+            std::shared_ptr<Media::PixelMap> pmap = std::move(pixmap);
+            auto pixelmap = PixelMap::CreatePixelMap(&pmap);
+            auto task = [pixelmap, frameNode, containerId, backgroundTaskId]() {
+                ContainerScope scope(containerId);
+                auto context = frameNode->GetRenderContext();
+                if (context && (context->GetCurrentBackgroundTaskId() == backgroundTaskId)) {
+                    context->UpdateBackgroundPixelMap(pixelmap);
+                    context->RequestNextFrame();
+                }
+            };
+            auto taskExecutor = Container::CurrentTaskExecutor();
+            CHECK_NULL_VOID(taskExecutor);
+            taskExecutor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUICreateBackgroundPixelMap");
         };
-        auto taskExecutor = Container::CurrentTaskExecutor();
-        CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUICreateBackgroundPixelMap");
-    };
     auto firstCallback = callback;
     SnapshotParam firstParam;
     firstParam.delay = 0;
@@ -4577,6 +4578,9 @@ void RosenRenderContext::MoveFrame(FrameNode* /*self*/, const RefPtr<FrameNode>&
 
 void RosenRenderContext::AnimateHoverEffectScale(bool isHovered)
 {
+#ifdef ACE_STATIC
+    FREE_NODE_CHECK(GetHost(), AnimateHoverEffectScale, isHovered);
+#endif
     if ((isHovered && isHoveredScale_) || (!isHovered && !isHoveredScale_)) {
         return;
     }
@@ -4603,6 +4607,9 @@ void RosenRenderContext::AnimateHoverEffectScale(bool isHovered)
 
 void RosenRenderContext::AnimateHoverEffectBoard(bool isHovered)
 {
+#ifdef ACE_STATIC
+    FREE_NODE_CHECK(GetHost(), AnimateHoverEffectBoard, isHovered);
+#endif
     if ((isHovered && isHoveredBoard_) || (!isHovered && !isHoveredBoard_)) {
         return;
     }

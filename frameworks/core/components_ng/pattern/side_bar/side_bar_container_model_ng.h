@@ -66,12 +66,10 @@ public:
     void SetMinContentWidth(const Dimension& minContentWidth) override;
     void SetMinContentWidth(const RefPtr<ResourceObject>& resObj) override;
     void ResetControlButton() override;
-    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
-    static void SetSideBarContainerType(FrameNode* frameNode, const std::optional<SideBarContainerType>& type);
-    static void SetSideBarWidth(FrameNode* frameNode, const std::optional<Dimension>& sideBarWidth);
-    static void SetMinSideBarWidth(FrameNode* frameNode, const std::optional<Dimension>& minSideBarWidth);
+    static void SetSideBarWidth(FrameNode* frameNode, const Dimension& sideBarWidth);
+    static void SetMinSideBarWidth(FrameNode* frameNode, const Dimension& minSideBarWidth);
     static void SetControlButtonWidth(FrameNode* frameNode, const Dimension& width);
-    static void SetControlButtonHeight(FrameNode* frameNode, const std::optional<Dimension>& height);
+    static void SetControlButtonHeight(FrameNode* frameNode, const Dimension& height);
     static void SetControlButtonLeft(FrameNode* frameNode, const Dimension& left);
     static void SetControlButtonTop(FrameNode* frameNode, const Dimension& top);
     static void SetControlButtonShowIconInfo(
@@ -82,9 +80,9 @@ public:
         FrameNode* frameNode, const std::string& switchingIconStr, bool isPixelMap, RefPtr<PixelMap> pixMap);
     static void SetShowControlButton(FrameNode* frameNode, bool showControlButton);
     static void SetAutoHide(FrameNode* frameNode, bool autoHide);
-    static void SetMaxSideBarWidth(FrameNode* frameNode, const std::optional<Dimension>& maxSideBarWidth);
-    static void SetMinContentWidth(FrameNode* frameNode, const std::optional<Dimension>& minContentWidth);
-    static void SetSideBarPosition(FrameNode* frameNode, const std::optional<SideBarPosition>& sideBarPosition);
+    static void SetMaxSideBarWidth(FrameNode* frameNode, const Dimension& maxSideBarWidth);
+    static void SetMinContentWidth(FrameNode* frameNode, const Dimension& minContentWidth);
+    static void SetSideBarPosition(FrameNode* frameNode, SideBarPosition sideBarPosition);
     static void SetShowSideBar(FrameNode* frameNode, bool isShow);
 
     static void SetDividerStrokeWidth(FrameNode* frameNode, const Dimension& strokeWidth);
@@ -110,7 +108,6 @@ public:
     static bool IsDoubleBindBlock(const RefPtr<SideBarContainerPattern>& sideBarContainerPattern);
     static void SetOnChange(FrameNode* frameNode, std::function<void(const bool)>&& onChange);
     static void ResetResObj(FrameNode* frameNode, const std::string& key);
-    static void SetOnChangeEvent(FrameNode* frameNode, std::function<void(const bool)>&& onChangeEvent);
 private:
     void MarkNeedInitRealSideBarWidth() override;
     void SetSideBarWidth(const RefPtr<ResourceObject>& sideBarWidth);

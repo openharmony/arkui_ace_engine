@@ -197,11 +197,10 @@ void* createLoadingProgressNode(ArkUI_Int32 nodeId)
 
 void* createTextInputNode(ArkUI_Int32 nodeId)
 {
-    // auto frameNode = TextFieldModelNG::CreateFrameNode(nodeId, u"", u"", false);
-    // CHECK_NULL_RETURN(frameNode, nullptr);
-    // frameNode->IncRefCount();
-    // return AceType::RawPtr(frameNode);
-    return nullptr;
+    auto frameNode = TextFieldModelNG::CreateTextInputNode(nodeId, u"", u"");
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 
 void* createStackNode(ArkUI_Int32 nodeId)
@@ -238,11 +237,10 @@ void* createSwiperNode(ArkUI_Int32 nodeId)
 
 void* createTextAreaNode(ArkUI_Int32 nodeId)
 {
-    // auto frameNode = TextFieldModelNG::CreateFrameNode(nodeId, u"", u"", true);
-    // CHECK_NULL_RETURN(frameNode, nullptr);
-    // frameNode->IncRefCount();
-    // return AceType::RawPtr(frameNode);
-    return nullptr;
+    auto frameNode = TextFieldModelNG::CreateTextAreaNode(nodeId, u"", u"");
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 
 void* createButtonNode(ArkUI_Int32 nodeId)
@@ -390,10 +388,11 @@ void* createTextPickerNode(ArkUI_Int32 nodeId)
 
 void* createCalendarPickerNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = CalendarPickerModelNG::CreateEmptyFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    // auto frameNode = CalendarPickerModelNG::CreateEmptyFrameNode(nodeId);
+    // CHECK_NULL_RETURN(frameNode, nullptr);
+    // frameNode->IncRefCount();
+    // return AceType::RawPtr(frameNode);
+    return nullptr;
 }
 
 void* createCustomNode(ArkUI_Int32 nodeId)
@@ -653,10 +652,7 @@ void* createScrollableCommonMethodNode(ArkUI_Int32 nodeId)
 void* createComponent3DNode(ArkUI_Int32 nodeId)
 {
 #ifdef MODEL_COMPONENT_SUPPORTED
-    auto frameNode = ModelViewNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    return nullptr;
 #else
     return nullptr;
 #endif // MODEL_COMPONENT_SUPPORTED
@@ -677,10 +673,11 @@ void* createCounterNode(ArkUI_Int32 nodeId)
 
 void* createDataPanelNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = DataPanelModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    // auto frameNode = DataPanelModelNG::CreateFrameNode(nodeId);
+    // CHECK_NULL_RETURN(frameNode, nullptr);
+    // frameNode->IncRefCount();
+    // return AceType::RawPtr(frameNode);
+    return nullptr;
 }
 
 void* createEffectComponentNode(ArkUI_Int32 nodeId)
@@ -700,10 +697,7 @@ void* createEllipseNode(ArkUI_Int32 nodeId)
 void* createEmbeddedComponentNode(ArkUI_Int32 nodeId)
 {
 #ifdef WINDOW_SCENE_SUPPORTED
-    auto frameNode = UIExtensionModelNG::CreateEmbeddedFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    return nullptr;
 #else
     return nullptr;
 #endif // WINDOW_SCENE_SUPPORTED
@@ -717,10 +711,7 @@ void* createFolderStackNode(ArkUI_Int32 nodeId)
 void* createFormComponentNode(ArkUI_Int32 nodeId)
 {
 #ifdef FORM_SUPPORTED
-    auto frameNode = FormModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    return nullptr;
 #else
     return nullptr;
 #endif
@@ -733,10 +724,11 @@ void* createFormLinkNode(ArkUI_Int32 nodeId)
 
 void* createGaugeNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = GaugeModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    // auto frameNode = GaugeModelNG::CreateFrameNode(nodeId);
+    // CHECK_NULL_RETURN(frameNode, nullptr);
+    // frameNode->IncRefCount();
+    // return AceType::RawPtr(frameNode);
+    return nullptr;
 }
 
 void* createGridContainerNode(ArkUI_Int32 nodeId)
@@ -796,10 +788,11 @@ void* createMenuItemGroupNode(ArkUI_Int32 nodeId)
 
 void* createNavDestinationNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = NavDestinationModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    // auto frameNode = NavDestinationModelNG::CreateFrameNode(nodeId);
+    // CHECK_NULL_RETURN(frameNode, nullptr);
+    // frameNode->IncRefCount();
+    // return AceType::RawPtr(frameNode);
+    return nullptr;
 }
 
 void* createNavRouterNode(ArkUI_Int32 nodeId)
@@ -813,10 +806,11 @@ void* createNavRouterNode(ArkUI_Int32 nodeId)
 
 void* createNavigatorNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = NavigatorModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    // auto frameNode = NavigatorModelNG::CreateFrameNode(nodeId);
+    // CHECK_NULL_RETURN(frameNode, nullptr);
+    // frameNode->IncRefCount();
+    // return AceType::RawPtr(frameNode);
+    return nullptr;
 }
 
 void* createNodeContainerNode(ArkUI_Int32 nodeId)
@@ -895,13 +889,14 @@ void* createRichTextNode(ArkUI_Int32 nodeId)
 
 void* createRootSceneNode(ArkUI_Int32 nodeId)
 {
-#ifdef WINDOW_SCENE_SUPPORTED
-    auto rootSceneNode = RootSceneModel::CreateRootSceneNode(nodeId);
-    rootSceneNode->IncRefCount();
-    return AceType::RawPtr(rootSceneNode);
-#else
+// #ifdef WINDOW_SCENE_SUPPORTED
+//     auto rootSceneNode = RootSceneModel::CreateRootSceneNode(nodeId);
+//     rootSceneNode->IncRefCount();
+//     return AceType::RawPtr(rootSceneNode);
+// #else
+//     return nullptr;
+// #endif // WINDOW_SCENE_SUPPORTED
     return nullptr;
-#endif // WINDOW_SCENE_SUPPORTED
 }
 
 void* createSaveButtonNode(ArkUI_Int32 nodeId)
@@ -914,14 +909,15 @@ void* createSaveButtonNode(ArkUI_Int32 nodeId)
 
 void* createScreenNode(ArkUI_Int32 nodeId)
 {
-#ifdef WINDOW_SCENE_SUPPORTED
-    auto frameNode = ScreenModel::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
-#else
+// #ifdef WINDOW_SCENE_SUPPORTED
+//     auto frameNode = ScreenModel::CreateFrameNode(nodeId);
+//     CHECK_NULL_RETURN(frameNode, nullptr);
+//     frameNode->IncRefCount();
+//     return AceType::RawPtr(frameNode);
+// #else
+//     return nullptr;
+// #endif // WINDOW_SCENE_SUPPORTED
     return nullptr;
-#endif // WINDOW_SCENE_SUPPORTED
 }
 
 void* createScrollBarNode(ArkUI_Int32 nodeId)
@@ -961,10 +957,11 @@ void* createStepperNode(ArkUI_Int32 nodeId)
 
 void* createStepperItemNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = StepperItemModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    // auto frameNode = StepperItemModelNG::CreateFrameNode(nodeId);
+    // CHECK_NULL_RETURN(frameNode, nullptr);
+    // frameNode->IncRefCount();
+    // return AceType::RawPtr(frameNode);
+    return nullptr;
 }
 
 void* createSymbolGlyphNode(ArkUI_Int32 nodeId)
@@ -1017,13 +1014,14 @@ void* createRemoteWindowNode(ArkUI_Int32 nodeId)
 
 void* createUIExtensionComponentNode(ArkUI_Int32 nodeId)
 {
-#ifdef WINDOW_SCENE_SUPPORTED
-    auto frameNode = UIExtensionModelNG::CreateFrameNode(nodeId);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
-#else
+// #ifdef WINDOW_SCENE_SUPPORTED
+//     auto frameNode = UIExtensionModelNG::CreateFrameNode(nodeId);
+//     frameNode->IncRefCount();
+//     return AceType::RawPtr(frameNode);
+// #else
+//     return nullptr;
+// #endif //WINDOW_SCENE_SUPPORTED
     return nullptr;
-#endif //WINDOW_SCENE_SUPPORTED
 }
 
 void* createLinearIndicatorNode(ArkUI_Int32 nodeId)

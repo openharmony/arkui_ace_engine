@@ -1084,19 +1084,19 @@ public:
 
     void OnVirtualKeyboardAreaChanged() override;
 
-    void SetCaretColor(const std::optional<Color>& caretColor)
+    void SetCaretColor(const Color& caretColor)
     {
-        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "setCaretColor=%{public}s", caretColor->ToString().c_str());
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "setCaretColor=%{public}s", caretColor.ToString().c_str());
         caretColor_ = caretColor;
         IF_TRUE(SelectOverlayIsOn(), selectOverlay_->UpdateHandleColor());
     }
 
     Color GetCaretColor() const;
 
-    void SetSelectedBackgroundColor(const std::optional<Color>& selectedBackgroundColor)
+    void SetSelectedBackgroundColor(const Color& selectedBackgroundColor)
     {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetSelectedBackgroundColor=%{public}s",
-            selectedBackgroundColor->ToString().c_str());
+            selectedBackgroundColor.ToString().c_str());
         selectedBackgroundColor_ = selectedBackgroundColor;
     }
 
@@ -1752,7 +1752,7 @@ private:
     bool NeedShowPlaceholder() const;
     bool IsSelectAll() override;
     std::pair<int32_t, int32_t> GetSpanRangeByResultObject(const ResultObject& result);
-    std::list<RefPtr<SpanItem>> CopySpansForClipboard();
+    std::list<RefPtr<SpanItem>> CopySpansForClipboard(const std::list<RefPtr<SpanItem>>& spans);
 #ifdef CROSS_PLATFORM
     bool UnableStandardInputCrossPlatform(TextInputConfiguration& config, bool isFocusViewChanged);
 #endif

@@ -32,7 +32,7 @@ class ACE_EXPORT GridLayoutAlgorithm : public GridLayoutBaseAlgorithm {
 
 public:
     GridLayoutAlgorithm(GridLayoutInfo gridLayoutInfo, int32_t crossCount, int32_t mainCount)
-        : GridLayoutBaseAlgorithm(gridLayoutInfo), crossCount_(crossCount), mainCount_(mainCount) {};
+        : GridLayoutBaseAlgorithm(std::move(gridLayoutInfo)), crossCount_(crossCount), mainCount_(mainCount) {};
     ~GridLayoutAlgorithm() override = default;
 
     void Measure(LayoutWrapper* layoutWrapper) override;

@@ -68,7 +68,7 @@ struct ListMainSizeValues {
     bool backward = false;
 };
 
-class ACE_FORCE_EXPORT ListItemGroupPattern : public Pattern {
+class ACE_EXPORT ListItemGroupPattern : public Pattern {
     DECLARE_ACE_TYPE(ListItemGroupPattern, Pattern);
 
 public:
@@ -290,7 +290,7 @@ public:
         lanes_ = num;
     }
 
-    V2::ListItemGroupStyle GetListItemGroupStyle() const
+    V2::ListItemGroupStyle GetListItemGroupStyle()
     {
         return listItemGroupStyle_;
     }
@@ -358,7 +358,6 @@ public:
     }
     void LayoutCache(const LayoutConstraintF& constraint, int64_t deadline, int32_t forwardCached,
         int32_t backwardCached, ListMainSizeValues listSizeValues);
-    // void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     RefPtr<UINode> GetHeader() const
     {
@@ -387,15 +386,10 @@ public:
         return true;
     }
 
-    PaddingPropertyF CustomizeSafeAreaPadding(PaddingPropertyF safeAreaPadding, bool needRotate) override;
-
     bool ChildTentativelyLayouted() override
     {
         return true;
     }
-
-    bool AccumulatingTerminateHelper(RectF& adjustingRect, ExpandEdges& totalExpand, bool fromSelf = false,
-        LayoutSafeAreaType ignoreType = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM) override;
 
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;

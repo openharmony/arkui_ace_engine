@@ -38,7 +38,6 @@ inline constexpr UIState UI_STATE_FOCUSED = 1 << 1;
 inline constexpr UIState UI_STATE_DISABLED = 1 << 2;
 // used for radio, checkbox, switch.
 inline constexpr UIState UI_STATE_SELECTED = 1 << 3;
-
 inline constexpr UIState UI_STATE_UNKNOWN = 1 << 9;
 
 inline constexpr uint64_t EXCLUDE_INNER_FLAG_NONE = 0;
@@ -127,7 +126,7 @@ public:
         if (!HasStateStyle(state)) {
             return;
         }
-                if ((currentState_ & state) != state) {
+        if ((currentState_ & state) != state) {
             return;
         }
         auto temp = currentState_ ^ state;

@@ -64,11 +64,6 @@ float ScreenPattern::screenMaxHeight_;
 
 ScreenPattern::ScreenPattern(const sptr<Rosen::ScreenSession>& screenSession)
 {
-    SetScreenSession(screenSession);
-}
-
-void ScreenPattern::SetScreenSession(const sptr<Rosen::ScreenSession>& screenSession)
-{
     screenSession_ = screenSession;
     if (screenSession_ != nullptr) {
         screenSession_->SetUpdateToInputManagerCallback(std::bind(&ScreenPattern::UpdateToInputManager,
@@ -87,7 +82,7 @@ void ScreenPattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
 
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->SetScreenNode(host);
 
@@ -235,7 +230,7 @@ bool ScreenPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         rootScene->SetDisplayDensity(density);
         int32_t orientation = static_cast<int32_t>(screenSession_->GetScreenProperty().GetDisplayOrientation());
         rootScene->SetDisplayOrientation(orientation);
-        rootScene->UpdateViewportConfig(rect, Rosen::WindowSizeChangeReason::UNDEFINED);
+        rootScene->UpdateViewportConfig(rect, Rosen::WindowSizeChangeReason::ROOT_SCENE_CHANGE);
     } else if (rsWindow->GetClassType() == "ScreenScene") {
         auto screenScene = static_cast<Rosen::ScreenScene*>(rsWindow.GetRefPtr());
         CHECK_NULL_RETURN(screenScene, false);

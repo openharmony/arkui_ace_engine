@@ -239,10 +239,10 @@ void BorderRadius0Impl(Ark_NativePointer node,
 void BorderRadius1Impl(Ark_NativePointer node,
                        const Opt_Union_Dimension_BorderRadiuses* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<BorderRadiusProperty>(*value);
-    SecurityComponentModelNG::SetBackgroundBorderRadius(frameNode, convValue);
+    // auto frameNode = reinterpret_cast<FrameNode *>(node);
+    // CHECK_NULL_VOID(frameNode);
+    // auto convValue = Converter::OptConvert<BorderRadiusProperty>(*value);
+    // SecurityComponentModelNG::SetBackgroundBorderRadius(frameNode, convValue);
 }
 void PaddingImpl(Ark_NativePointer node,
                  const Opt_Union_Padding_Dimension* value)
@@ -301,10 +301,10 @@ void ConstraintSizeImpl(Ark_NativePointer node,
 void AlignImpl(Ark_NativePointer node,
                const Opt_Alignment* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<Alignment>(*value);
-    SecurityComponentModelNG::SetAlign(frameNode, convValue);
+    // auto frameNode = reinterpret_cast<FrameNode *>(node);
+    // CHECK_NULL_VOID(frameNode);
+    // auto convValue = Converter::OptConvert<Alignment>(*value);
+    // SecurityComponentModelNG::SetAlign(frameNode, convValue);
 }
 void AlignRules0Impl(Ark_NativePointer node,
                      const Opt_AlignRuleOption* value)
@@ -324,60 +324,60 @@ void IdImpl(Ark_NativePointer node,
 void MinFontScaleImpl(Ark_NativePointer node,
                       const Opt_Union_Number_Resource* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto minFontScale = Converter::OptConvert<float>(*value);
-    Validator::ValidatePositive(minFontScale);
-    const auto maxValue = 1.f;
-    Validator::ValidateLessOrEqual(minFontScale, maxValue);
-    SecurityComponentModelNG::SetMinFontScale(frameNode, minFontScale);
+    // auto frameNode = reinterpret_cast<FrameNode *>(node);
+    // CHECK_NULL_VOID(frameNode);
+    // auto minFontScale = Converter::OptConvert<float>(*value);
+    // Validator::ValidatePositive(minFontScale);
+    // const auto maxValue = 1.f;
+    // Validator::ValidateLessOrEqual(minFontScale, maxValue);
+    // SecurityComponentModelNG::SetMinFontScale(frameNode, minFontScale);
 }
 void MaxFontScaleImpl(Ark_NativePointer node,
                       const Opt_Union_Number_Resource* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto maxFontScale = Converter::OptConvert<float>(*value);
-    const auto minValue = 1.f;
-    Validator::ValidateGreatOrEqual(maxFontScale, minValue);
-    SecurityComponentModelNG::SetMaxFontScale(frameNode, maxFontScale);
+    // auto frameNode = reinterpret_cast<FrameNode *>(node);
+    // CHECK_NULL_VOID(frameNode);
+    // auto maxFontScale = Converter::OptConvert<float>(*value);
+    // const auto minValue = 1.f;
+    // Validator::ValidateGreatOrEqual(maxFontScale, minValue);
+    // SecurityComponentModelNG::SetMaxFontScale(frameNode, maxFontScale);
 }
 void MaxLinesImpl(Ark_NativePointer node,
                   const Opt_Number* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto maxLines = Converter::OptConvert<int32_t>(*value);
-    Validator::ValidateNonNegative(maxLines);
-    SecurityComponentModelNG::SetMaxLines(frameNode, maxLines);
+    // auto frameNode = reinterpret_cast<FrameNode *>(node);
+    // CHECK_NULL_VOID(frameNode);
+    // auto maxLines = Converter::OptConvert<int32_t>(*value);
+    // Validator::ValidateNonNegative(maxLines);
+    // SecurityComponentModelNG::SetMaxLines(frameNode, maxLines);
 }
 void MinFontSizeImpl(Ark_NativePointer node,
                      const Opt_Union_Number_String_Resource* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto fontSize = Converter::OptConvert<Dimension>(*value);
-    Validator::ValidateNonNegative(fontSize);
-    Validator::ValidateNonPercent(fontSize);
-    SecurityComponentModelNG::SetAdaptMinFontSize(frameNode, fontSize);
+    // auto frameNode = reinterpret_cast<FrameNode *>(node);
+    // CHECK_NULL_VOID(frameNode);
+    // auto fontSize = Converter::OptConvert<Dimension>(*value);
+    // Validator::ValidateNonNegative(fontSize);
+    // Validator::ValidateNonPercent(fontSize);
+    // SecurityComponentModelNG::SetAdaptMinFontSize(frameNode, fontSize);
 }
 void MaxFontSizeImpl(Ark_NativePointer node,
                      const Opt_Union_Number_String_Resource* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto fontSize = Converter::OptConvert<Dimension>(*value);
-    Validator::ValidateNonNegative(fontSize);
-    Validator::ValidateNonPercent(fontSize);
-    SecurityComponentModelNG::SetAdaptMaxFontSize(frameNode, fontSize);
+    // auto frameNode = reinterpret_cast<FrameNode *>(node);
+    // CHECK_NULL_VOID(frameNode);
+    // auto fontSize = Converter::OptConvert<Dimension>(*value);
+    // Validator::ValidateNonNegative(fontSize);
+    // Validator::ValidateNonPercent(fontSize);
+    // SecurityComponentModelNG::SetAdaptMaxFontSize(frameNode, fontSize);
 }
 void HeightAdaptivePolicyImpl(Ark_NativePointer node,
                               const Opt_TextHeightAdaptivePolicy* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<TextHeightAdaptivePolicy>(*value);
-    SecurityComponentModelNG::SetHeightAdaptivePolicy(frameNode, convValue);
+    // auto frameNode = reinterpret_cast<FrameNode *>(node);
+    // CHECK_NULL_VOID(frameNode);
+    // auto convValue = Converter::OptConvert<TextHeightAdaptivePolicy>(*value);
+    // SecurityComponentModelNG::SetHeightAdaptivePolicy(frameNode, convValue);
 }
 void EnabledImpl(Ark_NativePointer node,
                  const Opt_Boolean* value)

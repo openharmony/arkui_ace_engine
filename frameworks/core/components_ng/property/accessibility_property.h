@@ -157,7 +157,6 @@ public:
         json->PutExtAttr("accessibilityText", GetAccessibilityText().c_str(), filter);
         json->PutExtAttr("accessibilityTextHint", GetTextType().c_str(), filter);
         json->PutExtAttr("accessibilityDescription", GetAccessibilityDescription().c_str(), filter);
-        json->PutExtAttr("propText", GetText().c_str(), filter);
     }
 
     virtual void FromJson(const std::unique_ptr<JsonValue>& json) {}

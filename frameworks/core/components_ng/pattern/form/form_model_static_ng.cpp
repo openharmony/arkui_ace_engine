@@ -20,12 +20,12 @@
 #include "core/components_ng/pattern/form/form_pattern.h"
 
 namespace OHOS::Ace::NG {
-RefPtr<FrameNode> FormModelNG::CreateFrameNode(int32_t nodeId)
-{
-    auto frameNode = FormNode::GetOrCreateFormNode(
-        V2::FORM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<FormPattern>(); });
-    return frameNode;
-}
+// RefPtr<FrameNode> FormModelNG::CreateFrameNode(int32_t nodeId)
+// {
+//     auto frameNode = FormNode::GetOrCreateFormNode(
+//         V2::FORM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<FormPattern>(); });
+//     return frameNode;
+// }
 
 // void FormModelNG::AllowUpdate(FrameNode* frameNode, bool allowUpdate)
 // {
@@ -84,39 +84,39 @@ RefPtr<FrameNode> FormModelNG::CreateFrameNode(int32_t nodeId)
 
 // void FormModelNG::SetSize(FrameNode* frameNode, const Dimension& width, const Dimension& height) {}
 
-void FormModelNG::SetOnAcquired(FrameNode* frameNode, std::function<void(const std::string&)>&& onAcquired)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<FormEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnAcquired(std::move(onAcquired));
-}
-void FormModelNG::SetOnError(FrameNode* frameNode, std::function<void(const std::string&)>&& onError)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<FormEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnError(std::move(onError));
-}
-void FormModelNG::SetOnUninstall(FrameNode* frameNode, std::function<void(const std::string&)>&& onUninstall)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<FormEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnUninstall(std::move(onUninstall));
-}
-void FormModelNG::SetOnLoad(FrameNode* frameNode, std::function<void(const std::string&)>&& onLoad)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<FormEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnLoad(std::move(onLoad));
-}
-void FormModelNG::SetOnRouter(FrameNode* frameNode, std::function<void(const std::string&)>&& onRouter)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<FormEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnRouter(std::move(onRouter));
-}
+// void FormModelNG::SetOnAcquired(FrameNode* frameNode, std::function<void(const std::string&)>&& onAcquired)
+// {
+//     CHECK_NULL_VOID(frameNode);
+//     auto eventHub = frameNode->GetEventHub<FormEventHub>();
+//     CHECK_NULL_VOID(eventHub);
+//     eventHub->SetOnAcquired(std::move(onAcquired));
+// }
+// void FormModelNG::SetOnError(FrameNode* frameNode, std::function<void(const std::string&)>&& onError)
+// {
+//     CHECK_NULL_VOID(frameNode);
+//     auto eventHub = frameNode->GetEventHub<FormEventHub>();
+//     CHECK_NULL_VOID(eventHub);
+//     eventHub->SetOnError(std::move(onError));
+// }
+// void FormModelNG::SetOnUninstall(FrameNode* frameNode, std::function<void(const std::string&)>&& onUninstall)
+// {
+//     CHECK_NULL_VOID(frameNode);
+//     auto eventHub = frameNode->GetEventHub<FormEventHub>();
+//     CHECK_NULL_VOID(eventHub);
+//     eventHub->SetOnUninstall(std::move(onUninstall));
+// }
+// void FormModelNG::SetOnLoad(FrameNode* frameNode, std::function<void(const std::string&)>&& onLoad)
+// {
+//     CHECK_NULL_VOID(frameNode);
+//     auto eventHub = frameNode->GetEventHub<FormEventHub>();
+//     CHECK_NULL_VOID(eventHub);
+//     eventHub->SetOnLoad(std::move(onLoad));
+// }
+// void FormModelNG::SetOnRouter(FrameNode* frameNode, std::function<void(const std::string&)>&& onRouter)
+// {
+//     CHECK_NULL_VOID(frameNode);
+//     auto eventHub = frameNode->GetEventHub<FormEventHub>();
+//     CHECK_NULL_VOID(eventHub);
+//     eventHub->SetOnRouter(std::move(onRouter));
+// }
 } // namespace OHOS::Ace::NG

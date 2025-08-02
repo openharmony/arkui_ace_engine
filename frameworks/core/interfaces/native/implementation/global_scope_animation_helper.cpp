@@ -236,51 +236,51 @@ void AnimateToInner(const Ark_AnimateParam* value,
                     const Callback_Void* event,
                     bool immediately)
 {
-    CHECK_NULL_VOID(value);
-    auto currentId = Container::CurrentIdSafelyWithCheck();
-    if (!CheckRunOnThreadByThreadId(currentId, true)) {
-        auto localContainerId = ContainerScope::CurrentLocalId();
-        if (localContainerId > 0 && CheckRunOnThreadByThreadId(localContainerId, false)) {
-            currentId = localContainerId;
-        }
-    }
-    ContainerScope scope(currentId);
-    auto scopedDelegate = EngineHelper::GetCurrentDelegateSafely();
-    CHECK_NULL_VOID(scopedDelegate);
-    auto container = Container::CurrentSafely();
-    CHECK_NULL_VOID(container);
-    auto pipelineContext = container->GetPipelineContext();
-    if (pipelineContext == nullptr || (pipelineContext->IsFormAnimationFinishCallback() &&
-        pipelineContext->IsFormRender() && GetFormAnimationTimeInterval(pipelineContext) > DEFAULT_DURATION)) {
-        return;
-    }
-    std::function<void()> onFinishEvent;
-    std::optional<int32_t> count;
-    auto traceStreamPtr = std::make_shared<std::stringstream>();
-    auto onFinish = Converter::OptConvert<Callback_Void>(value->onFinish);
-    if (onFinish.has_value()) {
-        count = GetAnimationFinishCount();
-        onFinishEvent = [arkCallback = CallbackHelper(*onFinish),
-                            id = Container::CurrentIdSafely(), traceStreamPtr, count]() mutable {
-            RecordAnimationFinished(count.value_or(1));
-            ContainerScope scope(id);
-            arkCallback.Invoke();
-            AceAsyncTraceEnd(0, traceStreamPtr->str().c_str(), true);
-        };
-    } else {
-        onFinishEvent = [traceStreamPtr, count]() {
-            RecordAnimationFinished(count.value_or(1));
-            AceAsyncTraceEnd(0, traceStreamPtr->str().c_str(), true);
-        };
-    }
-    AnimationOption option = Converter::Convert<AnimationOption>(*value);
-    Validator::ValidateAnimationOption(option, pipelineContext->IsFormRender());
-    option.SetOnFinishEvent(onFinishEvent);
-    FillTraceStream(traceStreamPtr, option);
-    AceAsyncTraceBegin(0, traceStreamPtr->str().c_str(), true);
-    if (CheckIfSetFormAnimationDuration(pipelineContext, option)) {
-        option.SetDuration(DEFAULT_DURATION - GetFormAnimationTimeInterval(pipelineContext));
-    }
-    StartAnimateTo(option, event, count, immediately, onFinishEvent);
+    // CHECK_NULL_VOID(value);
+    // auto currentId = Container::CurrentIdSafelyWithCheck();
+    // if (!CheckRunOnThreadByThreadId(currentId, true)) {
+    //     auto localContainerId = ContainerScope::CurrentLocalId();
+    //     if (localContainerId > 0 && CheckRunOnThreadByThreadId(localContainerId, false)) {
+    //         currentId = localContainerId;
+    //     }
+    // }
+    // ContainerScope scope(currentId);
+    // auto scopedDelegate = EngineHelper::GetCurrentDelegateSafely();
+    // CHECK_NULL_VOID(scopedDelegate);
+    // auto container = Container::CurrentSafely();
+    // CHECK_NULL_VOID(container);
+    // auto pipelineContext = container->GetPipelineContext();
+    // if (pipelineContext == nullptr || (pipelineContext->IsFormAnimationFinishCallback() &&
+    //     pipelineContext->IsFormRender() && GetFormAnimationTimeInterval(pipelineContext) > DEFAULT_DURATION)) {
+    //     return;
+    // }
+    // std::function<void()> onFinishEvent;
+    // std::optional<int32_t> count;
+    // auto traceStreamPtr = std::make_shared<std::stringstream>();
+    // auto onFinish = Converter::OptConvert<Callback_Void>(value->onFinish);
+    // if (onFinish.has_value()) {
+    //     count = GetAnimationFinshCount();
+    //     onFinishEvent = [arkCallback = CallbackHelper(*onFinish),
+    //                         id = Container::CurrentIdSafely(), traceStreamPtr, count]() mutable {
+    //         RecordAnimationFinished(count.value_or(1));
+    //         ContainerScope scope(id);
+    //         arkCallback.Invoke();
+    //         AceAsyncTraceEnd(0, traceStreamPtr->str().c_str(), true);
+    //     };
+    // } else {
+    //     onFinishEvent = [traceStreamPtr, count]() {
+    //         RecordAnimationFinished(count.value_or(1));
+    //         AceAsyncTraceEnd(0, traceStreamPtr->str().c_str(), true);
+    //     };
+    // }
+    // AnimationOption option = Converter::Convert<AnimationOption>(*value);
+    // Validator::ValidateAnimationOption(option, pipelineContext->IsFormRender());
+    // option.SetOnFinishEvent(onFinishEvent);
+    // FillTraceStream(traceStreamPtr, option);
+    // AceAsyncTraceBegin(0, traceStreamPtr->str().c_str(), true);
+    // if (CheckIfSetFormAnimationDuration(pipelineContext, option)) {
+    //     option.SetDuration(DEFAULT_DURATION - GetFormAnimationTimeInterval(pipelineContext));
+    // }
+    // StartAnimateTo(option, event, count, immediately, onFinishEvent);
 }
 }

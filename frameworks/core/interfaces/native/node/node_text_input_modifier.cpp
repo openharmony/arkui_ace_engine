@@ -1862,6 +1862,13 @@ ArkUI_Float32 GetTextInputLineHeight(ArkUINodeHandle node)
     return TextFieldModelNG::GetLineHeight(frameNode).Value();
 }
 
+ArkUI_Bool GetTextInputHalfLeading(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return static_cast<ArkUI_Bool>(TextFieldModelNG::GetHalfLeading(frameNode));
+}
+
 ArkUI_Int32 GetTextInputMaxLines(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -2674,6 +2681,7 @@ const ArkUITextInputModifier* GetTextInputModifier()
         .getTextInputAdaptMinFontSize = GetTextInputAdaptMinFontSize,
         .getTextInputAdaptMaxFontSize = GetTextInputAdaptMaxFontSize,
         .getTextInputLineHeight = GetTextInputLineHeight,
+        .getTextInputHalfLeading = GetTextInputHalfLeading,
         .getTextInputMaxLines = GetTextInputMaxLines,
         .getTextInputFontFeature = GetTextInputFontFeature,
         .setTextInputCustomKeyboard = SetTextInputCustomKeyboard,

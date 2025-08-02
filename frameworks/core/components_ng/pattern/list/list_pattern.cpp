@@ -303,71 +303,9 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     SetScrollSource(SCROLL_FROM_NONE);
     MarkSelectedItems();
     UpdateListDirectionInCardStyle();
-    CheckListItemRange(listLayoutAlgorithm->GetItemAdapterRange());
     snapTrigByScrollBar_ = false;
     ChangeCanStayOverScroll();
     return true;
-}
-
-void ListPattern::CheckListItemRange(const std::pair<int32_t, int32_t>& range)
-{
-    if (!adapter_) {
-        return;
-    }
-    adapter_->requestFeature.first = false;
-    adapter_->requestFeature.second = false;
-    if (adapter_->range.first != range.first || adapter_->range.second != range.second) {
-        if (adapter_->range.first > range.first) {
-            adapter_->requestFeature.first = true;
-        }
-        if (adapter_->range.second < range.second) {
-            adapter_->requestFeature.second = true;
-        }
-        if (adapter_->requestItemFunc) {
-            LOGI("request more items, range: %{public}d, %{public}d.", range.first, range.second);
-            adapter_->requestItemFunc(range.first, range.second);
-        }
-    }
-}
-
-void ListPattern::CheckScrollItemRange()
-{
-    if (itemPosition_.empty() && !adapter_) {
-        return;
-    }
-    auto startPos = startMainPos_ - currentDelta_;
-    auto endPos = endMainPos_ - currentDelta_;
-    if (startIndex_ == 0) {
-        startPos += GetChainDelta(0);
-    }
-    if (endIndex_ == maxListItemIndex_) {
-        endPos += GetChainDelta(endIndex_);
-    }
-    if (Positive(startPos)) {
-        // request more items.
-        float requestItemNum = startPos /
-                               (itemPosition_.rbegin()->second.endPos - itemPosition_.begin()->second.startPos) *
-                               itemPosition_.size();
-        if (adapter_->requestItemFunc) {
-            LOGI("request more items, range: %{public}d, %{public}d.",
-                static_cast<int32_t>(adapter_->range.first - std::ceil(requestItemNum)), adapter_->range.second);
-            adapter_->requestItemFunc(adapter_->range.first - std::ceil(requestItemNum), adapter_->range.second);
-        }
-        return;
-    }
-
-    if (LessNotEqual(endPos, contentMainSize_)) {
-        // request more items.
-        float requestItemNum = (contentMainSize_ - endPos) /
-                               (itemPosition_.rbegin()->second.endPos - itemPosition_.begin()->second.startPos) *
-                               itemPosition_.size();
-        if (adapter_->requestItemFunc) {
-            LOGI("request more items, range: %{public}d, %{public}d.", adapter_->range.first,
-                static_cast<int32_t>(adapter_->range.second + std::ceil(requestItemNum)));
-            adapter_->requestItemFunc(adapter_->range.first, adapter_->range.second + std::ceil(requestItemNum));
-        }
-        adapter_->requestFeature.second = true;
-    }
 }
 
 void ListPattern::UpdateListDirectionInCardStyle()
@@ -781,14 +719,39 @@ void ListPattern::SetLayoutAlgorithmParams(
         listLayoutAlgorithm->SetOverScrollFeature();
     }
     listLayoutAlgorithm->SetIsSpringEffect(IsScrollableSpringEffect());
-    listLayoutAlgorithm->SetCanOverScrollStart(CanOverScrollStart(GetScrollSource()) && IsAtTop());
-    listLayoutAlgorithm->SetCanOverScrollEnd(CanOverScrollEnd(GetScrollSource()) && IsAtBottom(true));
+    listLayoutAlgorithm->SetCanOverScrollStart(JudgeCanOverScrollStart());
+    listLayoutAlgorithm->SetCanOverScrollEnd(JudgeCanOverScrollEnd());
     if (chainAnimation_ && GetEffectEdge() == EffectEdge::ALL) {
         SetChainAnimationLayoutAlgorithm(listLayoutAlgorithm, listLayoutProperty);
         SetChainAnimationToPosMap();
     }
     listLayoutAlgorithm->SetPrevMeasureBreak(prevMeasureBreak_);
     listLayoutAlgorithm->SetDraggingIndex(draggingIndex_);
+}
+
+bool ListPattern::JudgeCanOverScrollStart()
+{
+    auto source = GetScrollSource();
+    if (!CanOverScrollStart(source)) {
+        return false;
+    }
+    if (IsAtTop()) {
+        return true;
+    }
+    
+    return source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_ANIMATION || source == SCROLL_FROM_ANIMATION_SPRING;
+}
+
+bool ListPattern::JudgeCanOverScrollEnd()
+{
+    auto source = GetScrollSource();
+    if (!CanOverScrollEnd(source)) {
+        return false;
+    }
+    if (IsAtBottom(true)) {
+        return true;
+    }
+    return source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_ANIMATION || source == SCROLL_FROM_ANIMATION_SPRING;
 }
 
 void ListPattern::SetChainAnimationToPosMap()
@@ -943,7 +906,7 @@ void ListPattern::GetListItemGroupEdge(bool& groupAtStart, bool& groupAtEnd) con
 
 float ListPattern::GetOffsetWithLimit(float offset) const
 {
-    auto currentOffset = GetTotalOffset() + contentStartOffset_;
+    float currentOffset = GetTotalOffset() + contentStartOffset_;
     if (Positive(offset)) {
         return std::min(currentOffset, offset);
     } else if (Negative(offset)) {
@@ -1051,12 +1014,6 @@ OverScrollOffset ListPattern::GetOutBoundaryOffset(float delta, bool useChainDel
         offset.end = std::max(offset.end, 0.0);
     }
     return offset;
-}
-
-void ListPattern::UpdateOffsetHelper(float lastDelta)
-{
-    auto userOffset = FireOnWillScroll(currentDelta_ - lastDelta);
-    currentDelta_ = lastDelta + userOffset;
 }
 
 bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
@@ -2340,7 +2297,7 @@ float ListPattern::UpdateTotalOffset(const RefPtr<ListLayoutAlgorithm>& listLayo
         return 0;
     }
     float relativeOffset = listLayoutAlgorithm->GetCurrentOffset();
-    float prevOffset = currentOffset_;
+    double prevOffset = currentOffset_;
     if (childrenSize_) {
         listTotalHeight_ = posMap_->GetTotalHeight();
         currentOffset_ = itemPosition_.empty() ? 0.0f :

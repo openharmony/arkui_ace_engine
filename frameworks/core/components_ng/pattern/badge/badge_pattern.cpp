@@ -77,7 +77,7 @@ void BadgePattern::OnModifyDone()
         badgeVisible = true;
     }
     auto circleSize = layoutProperty->GetBadgeCircleSize();
-    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
     CHECK_NULL_VOID(badgeTheme);
@@ -115,10 +115,6 @@ void BadgePattern::OnModifyDone()
 
 void BadgePattern::DumpInfo()
 {
-    auto pipeline = PipelineBase::GetCurrentContextSafely();
-    CHECK_NULL_VOID(pipeline);
-    auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
-    CHECK_NULL_VOID(badgeTheme);
     auto layoutProperty = GetLayoutProperty<BadgeLayoutProperty>();
     auto badgeCount = layoutProperty->GetBadgeCount();
     auto badgeValue = layoutProperty->GetBadgeValue();
@@ -173,18 +169,13 @@ void BadgePattern::DumpInfo()
 
 void BadgePattern::DumpInfo(std::unique_ptr<JsonValue>& json)
 {
-    auto pipeline = PipelineBase::GetCurrentContextSafely();
-    CHECK_NULL_VOID(pipeline);
-    auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
-    CHECK_NULL_VOID(badgeTheme);
     auto layoutProperty = GetLayoutProperty<BadgeLayoutProperty>();
     auto badgeCount = layoutProperty->GetBadgeCount();
     auto badgeValue = layoutProperty->GetBadgeValue();
     auto circleSize = layoutProperty->GetBadgeCircleSize();
     auto badgeTextColor = layoutProperty->GetBadgeTextColor();
     auto badgeFontSize = layoutProperty->GetBadgeFontSize();
-    auto badgePosition = layoutProperty->GetBadgePositionString(
-        layoutProperty->GetBadgePositionValue(badgeTheme->GetBadgePosition()));
+    auto badgePosition = layoutProperty->GetBadgePositionString(layoutProperty->GetBadgePositionValue());
     auto badgeColor = layoutProperty->GetBadgeColor();
     auto badgeFontWeight = layoutProperty->GetBadgeFontWeight();
     auto badgeBorderColor = layoutProperty->GetBadgeBorderColor();

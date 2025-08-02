@@ -56,7 +56,7 @@ public:
     void HandleDragUpdate(const GestureEvent& info) override {};
     void HandleDragEnd(float dragVelocity) override {};
 
-    void BeforeCreateLayoutWrapper() override {};
+    void BeforeCreateLayoutWrapper() override;
     SheetKeyboardAvoidMode GetAvoidKeyboardModeByDefault() const override
     {
         return SheetKeyboardAvoidMode::NONE;

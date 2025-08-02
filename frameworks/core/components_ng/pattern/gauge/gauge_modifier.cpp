@@ -51,12 +51,12 @@ void GaugeModifier::UpdateValue()
     auto paintProperty = pattern->GetPaintProperty<GaugePaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     UpdateProperty(paintProperty);
-    float value = paintProperty->GetValueValue(DEFAULT_MIN_VALUE);
+    float value = paintProperty->GetValueValue();
     if (paintProperty->GetIsSensitiveValue(false)) {
         value = 0.0f;
     }
-    float max = paintProperty->GetMaxValue(DEFAULT_MAX_VALUE);
-    float min = paintProperty->GetMinValue(DEFAULT_MIN_VALUE);
+    float max = paintProperty->GetMaxValue();
+    float min = paintProperty->GetMinValue();
     value = std::clamp(value, min, max);
     float ratio = 0.0f;
     if (Positive(max - min)) {
@@ -89,8 +89,8 @@ void GaugeModifier::InitProperty()
     float endAngle = paintProperty->GetEndAngleValue(DEFAULT_END_DEGREE);
     startAngle_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(startAngle);
     endAngle_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(endAngle);
-    max_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(paintProperty->GetMaxValue(DEFAULT_MAX_VALUE));
-    min_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(paintProperty->GetMinValue(DEFAULT_MIN_VALUE));
+    max_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(paintProperty->GetMaxValue());
+    min_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(paintProperty->GetMinValue());
 
     float strokeWidth = DEFAULT_VALUE;
     if (paintProperty->GetStrokeWidth().has_value()) {
@@ -103,6 +103,7 @@ void GaugeModifier::InitProperty()
     gaugeTypeValue_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(static_cast<int>(gaugeType));
     isShowIndicator_ = AceType::MakeRefPtr<PropertyBool>(paintProperty->GetIsShowIndicatorValue(true));
     indicatorChange_ = AceType::MakeRefPtr<PropertyBool>(paintProperty->GetIndicatorChangeValue(false));
+    gaugeUpdate_ = AceType::MakeRefPtr<PropertyBool>(false);
 
     if (paintProperty->HasShadowOptions()) {
         GaugeShadowOptions shadowOptions = paintProperty->GetShadowOptionsValue();
@@ -145,8 +146,8 @@ void GaugeModifier::UpdateProperty(RefPtr<GaugePaintProperty>& paintProperty)
 {
     startAngle_->Set(paintProperty->GetStartAngleValue(DEFAULT_START_DEGREE));
     endAngle_->Set(paintProperty->GetEndAngleValue(DEFAULT_END_DEGREE));
-    max_->Set(paintProperty->GetMaxValue(DEFAULT_MAX_VALUE));
-    min_->Set(paintProperty->GetMinValue(DEFAULT_MIN_VALUE));
+    max_->Set(paintProperty->GetMaxValue());
+    min_->Set(paintProperty->GetMinValue());
 
     if (paintProperty->GetStrokeWidth().has_value()) {
         float strokeWidth = paintProperty->GetStrokeWidth()->ConvertToPx();
@@ -188,6 +189,8 @@ void GaugeModifier::UpdateProperty(RefPtr<GaugePaintProperty>& paintProperty)
         auto indicatorChange = indicatorChange_->Get();
         indicatorChange_->Set(!indicatorChange);
     }
+
+    gaugeUpdate_->Set(!gaugeUpdate_->Get());
 }
 
 
@@ -197,7 +200,7 @@ void GaugeModifier::PaintCircularAndIndicator(RSCanvas& canvas)
     CHECK_NULL_VOID(pattern);
     auto paintProperty = pattern->GetPaintProperty<GaugePaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
+    auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto host = pattern->GetHost();
     auto geometryNode = host->GetGeometryNode();
@@ -361,7 +364,7 @@ void GaugeModifier::NewPaintCircularAndIndicator(RSCanvas& canvas)
     CHECK_NULL_VOID(paintProperty);
     auto host = pattern->GetHost();
     auto geometryNode = host->GetGeometryNode();
-    auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
+    auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto offset = geometryNode->GetContentOffset();
 
@@ -917,7 +920,7 @@ void GaugeModifier::NewDrawIndicator(
         return;
     }
 
-    auto pipelineContext = PipelineBase::GetCurrentContextSafelyWithCheck();
+    auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<GaugeTheme>();
 

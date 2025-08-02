@@ -165,13 +165,14 @@ void ScrollablePattern::UpdateFadingEdge(const RefPtr<ScrollablePaintMethod>& pa
     CHECK_NULL_VOID(paintProperty);
     bool defaultFadingEdge = paintProperty->GetDefaultFadingEdge().value_or(false);
     bool hasFadingEdge = paintProperty->GetFadingEdge().value_or(defaultFadingEdge);
+    paint->SetHasFadingEdge(hasFadingEdge);
+    paint->SetNeedUpdateFadingEdge(hasFadingEdge || preHasFadingEdge_);
+    preHasFadingEdge_ = hasFadingEdge;
     if (!hasFadingEdge) {
         paint->SetOverlayRenderContext(overlayRenderContext);
-        paint->SetFadingInfo(false, false, prevHasFadingEdge_);
-        prevHasFadingEdge_ = hasFadingEdge;
+        paint->SetFadingInfo(false, false);
         return;
     }
-    prevHasFadingEdge_ = hasFadingEdge;
     auto isFadingTop = !IsAtTop();
     auto isFadingBottom = IsFadingBottom();
     float paddingBeforeContent = 0.0f;
@@ -202,7 +203,7 @@ void ScrollablePattern::UpdateFadeInfo(
     } else {
         percentFading = fadingEdgeLength.ConvertToPx() / fadeFrameSize;
     }
-    paint->SetFadingInfo(isFadingTop, isFadingBottom, true, (percentFading > 0.5f ? 0.5f : percentFading),
+    paint->SetFadingInfo(isFadingTop, isFadingBottom, (percentFading > 0.5f ? 0.5f : percentFading),
         startPercent_, endPercent_); // 0.5: Half
 }
 
@@ -244,11 +245,6 @@ void ScrollablePattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
     } else {
         json->PutExtAttr("friction", GetFriction(), filter);
     }
-#ifdef SUPPORT_DIGITAL_CROWN
-    json->PutExtAttr("digitCrownSensitivity",
-        (std::to_string(static_cast<int32_t>(crownSensitivity_))).c_str(), filter);
-#endif
-    json->PutExtAttr("backToTop", backToTop_, filter);
 }
 
 void ScrollablePattern::SetAxis(Axis axis)
@@ -645,12 +641,11 @@ void ScrollablePattern::SetHandleExtScrollCallback(const RefPtr<Scrollable>& scr
 {
     // move HandleScroll and HandleOverScroll to ScrollablePattern by setting callbacks to scrollable
     CHECK_NULL_VOID(scrollable);
-    auto handleScroll = [weak = AceType::WeakClaim(this)]() -> ScrollResult {
+    auto handleScroll = [weak = AceType::WeakClaim(this)]() -> void {
         auto pattern = weak.Upgrade();
         if (pattern) {
-            return pattern->HandleExtScroll(pattern->GetVelocity());
+            pattern->HandleExtScroll(pattern->GetVelocity());
         }
-        return {};
     };
     scrollable->SetHandleExtScrollCallback(std::move(handleScroll));
 }
@@ -2122,13 +2117,13 @@ float ScrollablePattern::GetOutOfScrollableOffset() const
 float ScrollablePattern::GetOffsetWithLimit(float offset) const
 {
     if (Positive(offset)) {
-        auto totalOffset = GetTotalOffset();
+        float totalOffset = GetTotalOffset();
         return std::min(totalOffset, offset);
     } else if (Negative(offset)) {
         auto frameNode = GetHost();
         CHECK_NULL_RETURN(frameNode, true);
         auto hostSize = frameNode->GetGeometryNode()->GetFrameSize();
-        auto remainHeight = GetTotalHeight() - GetTotalOffset() - hostSize.MainSize(axis_);
+        float remainHeight = GetTotalHeight() - GetTotalOffset() - hostSize.MainSize(axis_);
         return std::max(offset, -remainHeight);
     }
     return 0;
@@ -2190,12 +2185,12 @@ bool ScrollablePattern::HandleScrollImpl(float offset, int32_t source)
 
     // Now: HandleScroll moved to ScrollablePattern, directly call HandleScrollImpl in
     // ScrollablePattern::HandleScroll
-    auto context = GetContext();
     double overOffset = offset;
     if (!OnScrollPosition(overOffset, source)) {
         return false;
     }
     if (isNeedCollectOffset_) {
+        auto context = GetContext();
         uint64_t currentVsync = 0;
         if (context != nullptr) {
             currentVsync = context->GetVsyncTime();
@@ -2566,7 +2561,7 @@ float ScrollablePattern::GetDVSyncOffset()
         return 0;
     }
     uint64_t currentVsync = context->GetVsyncTime();
-    uint64_t currentTime = GetSysTimestamp();
+    uint64_t currentTime = static_cast<uint64_t>(GetSysTimestamp());
     bool needUpdateCommandTime = false;
     if (currentVsync >= offsets_.back().first && currentVsync - currentTime > DVSYNC_DELAY_TIME_BASE) {
         currentTime += DVSYNC_OFFSET_TIME;
@@ -2599,7 +2594,7 @@ float ScrollablePattern::GetDVSyncOffset()
     return dvsyncOffset;
 }
 
-ScrollResult ScrollablePattern::HandleExtScroll(float velocity)
+void ScrollablePattern::HandleExtScroll(float velocity)
 {
     float dvsyncOffset = GetDVSyncOffset();
     if (dvsyncOffset != 0) {
@@ -2607,8 +2602,6 @@ ScrollResult ScrollablePattern::HandleExtScroll(float velocity)
         HandleScroll(dvsyncOffset, SCROLL_FROM_ANIMATION, NestedState::CHILD_SCROLL, velocity);
         isExtScroll_ = false;
     }
-    ScrollResult result = { 0, true };
-    return result;
 }
 
 ScrollResult ScrollablePattern::HandleScroll(float offset, int32_t source, NestedState state, float velocity)

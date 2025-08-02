@@ -200,7 +200,7 @@ HWTEST_F(RatingTestNg, RatingRenderPropertyTest004, TestSize.Level1)
     ASSERT_NE(ratingRenderProperty, nullptr);
 
     // Test ratingScore and stepSize default value.
-    EXPECT_EQ(ratingRenderProperty->GetRatingScore().value_or(0.0), DEFAULT_RATING_SCORE);
+    EXPECT_EQ(ratingRenderProperty->GetRatingScore().value_or(DEFAULT_RATING_SCORE), DEFAULT_RATING_SCORE);
     EXPECT_EQ(ratingRenderProperty->GetStepSize().value_or(DEFAULT_STEP_SIZE), DEFAULT_STEP_SIZE);
 }
 
@@ -222,7 +222,7 @@ HWTEST_F(RatingTestNg, RatingRenderPropertyTest005, TestSize.Level1)
 
     // Test ratingScore and stepSize value.
     EXPECT_EQ(ratingRenderProperty->GetStepSize().value_or(0.0), RATING_STEP_SIZE);
-    EXPECT_EQ(ratingRenderProperty->GetRatingScore().value_or(0.0), RATING_SCORE);
+    EXPECT_EQ(ratingRenderProperty->GetRatingScore().value_or(DEFAULT_RATING_SCORE), RATING_SCORE);
     ViewStackProcessor::GetInstance()->Finish();
 }
 

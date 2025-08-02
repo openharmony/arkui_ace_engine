@@ -209,7 +209,14 @@ void ReplacePathByNameImpl(Ark_NavPathStack peer,
 Ark_Number RemoveByIndexesImpl(Ark_NavPathStack peer,
                                const Array_Number* indexes)
 {
-    return {};
+    auto invalidVal = Converter::ArkValue<Ark_Number>(0);
+    CHECK_NULL_RETURN(peer, invalidVal);
+    CHECK_NULL_RETURN(indexes, invalidVal);
+    auto removeIndexes = Converter::Convert<std::vector<int>>(*indexes);
+    auto navStack = peer->GetNavPathStack();
+    CHECK_NULL_RETURN(navStack, invalidVal);
+    auto size = navStack->RemoveInfoByIndexes(removeIndexes);
+    return Converter::ArkValue<Ark_Number>(1);
 }
 Ark_Number RemoveByNameImpl(Ark_NavPathStack peer,
                             const Ark_String* name)

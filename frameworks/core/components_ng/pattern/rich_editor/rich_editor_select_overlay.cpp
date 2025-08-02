@@ -560,10 +560,11 @@ bool RichEditorSelectOverlay::IsHandleShow()
 
 void RichEditorSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag)
 {
+    auto pattern = GetPattern<RichEditorPattern>();
     if (IsAncestorNodeGeometryChange(flag)) {
+        IF_PRESENT(pattern, CalculateHandleOffsetAndShowOverlay());
         UpdateAllHandlesOffset();
     }
-    auto pattern = GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
     auto host = pattern->GetHost();
     CHECK_NULL_VOID(host);

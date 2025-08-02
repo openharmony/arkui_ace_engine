@@ -825,9 +825,9 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager016, TestSize.Level1)
     int64_t elementId = 0;
     int64_t rootId = 0;
     EXPECT_FALSE(
-        jsAccessibilityManager->CheckIsChildElement(elementId, params, info, Framework::DumpMode::TREE, rootId));
+        jsAccessibilityManager->CheckIsChildElement(elementId, params, info, DumpMode::TREE, rootId));
     EXPECT_FALSE(
-        jsAccessibilityManager->CheckIsChildElement(elementId, params, info, Framework::DumpMode::NODE, rootId));
+        jsAccessibilityManager->CheckIsChildElement(elementId, params, info, DumpMode::NODE, rootId));
 }
 
 /**
@@ -2620,7 +2620,7 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager041, TestSize.Level1)
     params = { "-inspector", "-accessibility", "-simplify", "--set-whitelist", "1"};
     auto ret = jsAccessibilityManager->CheckDumpInfoParams(params);
     EXPECT_EQ(ret, true);
-    Framework::DumpInfoArgument argument;
+    DumpInfoArgument argument;
     auto isSetList = jsAccessibilityManager->GetDumpInfoArgument(params, argument);
     EXPECT_EQ(isSetList, true);
     jsAccessibilityManager->OnDumpInfoNG(params, 1, false);
@@ -2642,7 +2642,7 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager042, TestSize.Level1)
     params = { "-inspector", "-accessibility", "-simplify", "--get-whitelist", "1"};
     auto ret = jsAccessibilityManager->CheckDumpInfoParams(params);
     EXPECT_EQ(ret, true);
-    Framework::DumpInfoArgument argument;
+    DumpInfoArgument argument;
     auto isGetList = jsAccessibilityManager->GetDumpInfoArgument(params, argument);
     EXPECT_EQ(isGetList, true);
     jsAccessibilityManager->OnDumpInfoNG(params, 1, false);

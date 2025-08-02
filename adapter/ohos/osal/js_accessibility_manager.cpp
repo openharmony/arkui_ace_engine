@@ -19,10 +19,12 @@
 #include "js_third_provider_interaction_operation.h"
 #include "perf_monitor_adapter.h"
 
+#include "adapter/ohos/osal/accessibility/accessibility_hidumper_osal.h"
 #include "adapter/ohos/entrance/ace_container.h"
 #include "base/log/event_report.h"
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 #include "core/components_ng/base/frame_node.h"
+#include "frameworks/core/accessibility/hidumper/accessibility_hidumper.h"
 #include "frameworks/core/accessibility/utils/accessibility_action_function_utils.h"
 #include "frameworks/core/components_ng/pattern/ui_extension/platform_container_handler.h"
 #include "frameworks/core/components_ng/pattern/overlay/accessibility_focus_paint_node_pattern.h"
@@ -2188,7 +2190,7 @@ void JsAccessibilityManager::WebSetScreenRect(const std::shared_ptr<NG::Transiti
             node->GetRectWidth(),
             node->GetRectHeight()
         };
-        if (!NearZero(commonProperty.scaleX, 1.0f) || !NearZero(commonProperty.scaleY, 1.0f)) {
+        if (!NearZero(commonProperty.scaleX) || !NearZero(commonProperty.scaleY)) {
             rectInt.SetRect(static_cast<int32_t>(std::floor(rectInt.GetX() * commonProperty.scaleX)),
                 static_cast<int32_t>(std::floor(rectInt.GetY() * commonProperty.scaleY)),
                 static_cast<int32_t>(std::floor(rectInt.Width() * commonProperty.scaleX)),
@@ -2910,32 +2912,6 @@ inline void DumpSpanListNG(const AccessibilityElementInfo& nodeInfo)
     DumpLog::GetInstance().AddDesc("span list: ", spans);
 }
 
-inline std::string ChildrenToString(const std::vector<int64_t>& children, int32_t treeId)
-{
-    std::string ids;
-    for (auto child : children) {
-        if (!ids.empty()) {
-            ids.append(",");
-        }
-        int64_t childId = child;
-        AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(treeId, childId);
-        ids.append(std::to_string(childId));
-    }
-    return ids;
-}
-
-inline void DumpRectNG(const Accessibility::Rect& rect)
-{
-    DumpLog::GetInstance().AddDesc(
-        "width: ", std::to_string(rect.GetRightBottomXScreenPostion() - rect.GetLeftTopXScreenPostion()));
-    DumpLog::GetInstance().AddDesc(
-        "height: ", std::to_string(rect.GetRightBottomYScreenPostion() - rect.GetLeftTopYScreenPostion()));
-    DumpLog::GetInstance().AddDesc("left: ", std::to_string(rect.GetLeftTopXScreenPostion()));
-    DumpLog::GetInstance().AddDesc("top: ", std::to_string(rect.GetLeftTopYScreenPostion()));
-    DumpLog::GetInstance().AddDesc("right: ", std::to_string(rect.GetRightBottomXScreenPostion()));
-    DumpLog::GetInstance().AddDesc("bottom: ", std::to_string(rect.GetRightBottomYScreenPostion()));
-}
-
 void GenerateAccessibilityEventInfo(const AccessibilityEvent& accessibilityEvent, AccessibilityEventInfo& eventInfo)
 {
     Accessibility::EventType type = Accessibility::EventType::TYPE_VIEW_INVALID;
@@ -3028,43 +3004,7 @@ void JsAccessibilityManager::DumpAccessibilityPropertyNG(const AccessibilityElem
 
 void JsAccessibilityManager::DumpCommonPropertyNG(const AccessibilityElementInfo& nodeInfo, int32_t treeId)
 {
-    int64_t elementId = nodeInfo.GetAccessibilityId();
-    AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(treeId, elementId);
-    DumpLog::GetInstance().AddDesc("ID: ", elementId);
-    DumpLog::GetInstance().AddDesc("UniqueID: ", nodeInfo.GetUniqueId());
-    int64_t parentId = nodeInfo.GetParentNodeId();
-    AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(treeId, parentId);
-    DumpLog::GetInstance().AddDesc("parent ID: ", parentId);
-    DumpLog::GetInstance().AddDesc("child IDs: ", ChildrenToString(nodeInfo.GetChildIds(), treeId));
-    DumpLog::GetInstance().AddDesc("component type: ", nodeInfo.GetComponentType());
-    DumpLog::GetInstance().AddDesc("accessibilityCustomRole: " + nodeInfo.GetCustomComponentType());
-    DumpLog::GetInstance().AddDesc("text: ", nodeInfo.GetContent());
-    DumpLog::GetInstance().AddDesc("originText: ", nodeInfo.GetOriginalText());
-    DumpLog::GetInstance().AddDesc("window id: " + std::to_string(nodeInfo.GetWindowId()));
-    DumpRectNG(nodeInfo.GetRectInScreen());
-
-    DumpLog::GetInstance().AddDesc("enabled: ", BoolToString(nodeInfo.IsEnabled()));
-    DumpLog::GetInstance().AddDesc("focusable: ", BoolToString(nodeInfo.IsFocusable()));
-    DumpLog::GetInstance().AddDesc("focused: ", BoolToString(nodeInfo.IsFocused()));
-    DumpLog::GetInstance().AddDesc("visible: ", BoolToString(nodeInfo.IsVisible()));
-    DumpLog::GetInstance().AddDesc("accessibility focused: ", BoolToString(nodeInfo.HasAccessibilityFocus()));
-    DumpLog::GetInstance().AddDesc("accessibilityText: " + nodeInfo.GetAccessibilityText());
-    DumpLog::GetInstance().AddDesc("accessibilityGroup: " + BoolToString(nodeInfo.GetAccessibilityGroup()));
-    DumpLog::GetInstance().AddDesc("accessibilityLevel: " + nodeInfo.GetAccessibilityLevel());
-    DumpLog::GetInstance().AddDesc("accessibilityDescription: " + nodeInfo.GetDescriptionInfo());
-    DumpLog::GetInstance().AddDesc("hitTestBehavior: " + nodeInfo.GetHitTestBehavior());
-
-    DumpLog::GetInstance().AddDesc("inspector key: ", nodeInfo.GetInspectorKey());
-    DumpLog::GetInstance().AddDesc("bundle name: ", nodeInfo.GetBundleName());
-    DumpLog::GetInstance().AddDesc("page id: " + std::to_string(nodeInfo.GetPageId()));
-    DumpLog::GetInstance().AddDesc("page path: ", nodeInfo.GetPagePath());
-    DumpLog::GetInstance().AddDesc("is valid element: ", BoolToString(nodeInfo.IsValidElement()));
-    DumpLog::GetInstance().AddDesc("resource name: ", nodeInfo.GetComponentResourceId());
-
-    DumpLog::GetInstance().AddDesc("clickable: ", BoolToString(nodeInfo.IsClickable()));
-    DumpLog::GetInstance().AddDesc("long clickable: ", BoolToString(nodeInfo.IsLongClickable()));
-    DumpLog::GetInstance().AddDesc("popup supported: ", BoolToString(nodeInfo.IsPopupSupported()));
-    DumpLog::GetInstance().AddDesc("zindex: ", std::to_string(nodeInfo.GetZIndex()));
+    AccessibilityElementInfoUtils::ToCommonInfo(nodeInfo, treeId_);
 }
 
 void JsAccessibilityManager::UpdateVirtualNodeFocus()
@@ -4304,11 +4244,6 @@ RefPtr<NG::PipelineContext> JsAccessibilityManager::GetPipelineByWindowId(uint32
 
 // DFX related
 namespace {
-enum class InjectActionType : uint32_t {
-    UNDEFINED_ACTION = 0,
-    NOTIFY_CHILD_ACTION = 1,
-    SECURITY_CLICK_ACTION = 2,
-};
 
 bool CheckAndGetEventTestArgument(std::vector<std::string>::const_iterator start,
     const std::vector<std::string>& params, DumpInfoArgument& argument)
@@ -4344,42 +4279,6 @@ bool CheckAndGetHoverTestArgument(std::vector<std::string>::const_iterator start
     ++arg;
     argument.pointY = StringUtils::StringToInt(*arg);
     return true;
-}
-
-bool DumpProcessInjectActionParameters(
-    const std::vector<std::string>& params,
-    int64_t& nodeId,
-    int32_t& result,
-    InjectActionType& actionType)
-{
-    constexpr int32_t NUM_PARAMETERS_DIMENSION = 1;
-    if (params.size() < 1) {
-        return false;
-    }
-
-    for (auto arg = params.begin() + 1; arg != params.end(); ++arg) {
-        if (*arg == "--inject-action") {
-            if (std::distance(arg, params.end()) <= NUM_PARAMETERS_DIMENSION) {
-                DumpLog::GetInstance().Print(std::string("Error: parameters need with data"));
-                return false;
-            }
-            ++arg;
-            nodeId = StringUtils::StringToLongInt(*arg);
-        } else if (*arg == "--NotifyChildAction") {
-            if (std::distance(arg, params.end()) <= NUM_PARAMETERS_DIMENSION) {
-                DumpLog::GetInstance().Print(std::string("Error: parameters need with data"));
-                return false;
-            }
-            ++arg;
-            result = StringUtils::StringToInt(*arg);
-            actionType = InjectActionType::NOTIFY_CHILD_ACTION;
-            return true;
-        }  else if (*arg == "--SecurityClickAction") {
-            actionType = InjectActionType::SECURITY_CLICK_ACTION;
-            return true;
-        }
-    }
-    return false;
 }
 
 bool DumpProcessEmbedSearchParameters(
@@ -4504,8 +4403,8 @@ void JsAccessibilityManager::DumpInjectActionTest(const std::vector<std::string>
     int64_t nodeId = 0;
     int32_t result = 0;
     InjectActionType actionType = InjectActionType::UNDEFINED_ACTION;
- 
-    if (!DumpProcessInjectActionParameters(params, nodeId, result, actionType)) {
+
+    if (!AccessibilityHidumper::DumpProcessInjectActionParameters(params, nodeId, result, actionType)) {
         return;
     }
 

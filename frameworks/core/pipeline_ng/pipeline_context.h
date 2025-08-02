@@ -40,6 +40,7 @@
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
+#include "core/components_ng/manager/force_split/force_split_manager.h"
 #include "core/components_ng/manager/form_event/form_event_manager.h"
 #include "core/components_ng/manager/form_gesture/form_gesture_manager.h"
 #include "core/components_ng/manager/form_visible/form_visible_manager.h"
@@ -953,6 +954,11 @@ public:
         return navigationMgr_;
     }
 
+    const RefPtr<ForceSplitManager>& GetForceSplitManager() const
+    {
+        return forceSplitMgr_;
+    }
+
     const RefPtr<FormVisibleManager>& GetFormVisibleManager() const
     {
         return formVisibleMgr_;
@@ -1045,7 +1051,7 @@ public:
     {
         return isFreezeFlushMessage_;
     }
-    bool IsContainerModalVisible() override;
+    bool IsContainerModalVisible() const override;
     void SetDoKeyboardAvoidAnimate(bool isDoKeyboardAvoidAnimate)
     {
         isDoKeyboardAvoidAnimate_ = isDoKeyboardAvoidAnimate;
@@ -1249,7 +1255,7 @@ public:
     }
 
     void SetNeedRenderForDrawChildrenNode(const WeakPtr<NG::UINode>& node);
-    void NotifyDragTouchEvent(const TouchEvent& event);
+    void NotifyDragTouchEvent(const TouchEvent& event, const RefPtr<NG::FrameNode>& node = nullptr);
     void NotifyDragMouseEvent(const MouseEvent& event);
     void NotifyDragOnHide();
 
@@ -1328,6 +1334,10 @@ private:
 
     uint64_t GetResampleStamp() const;
     void ConsumeTouchEvents(std::list<TouchEvent>& touchEvents, std::unordered_map<int, TouchEvent>& idToTouchPoints);
+    void ConsumeTouchEventsInterpolation(
+        const std::unordered_set<int32_t>& ids, const std::map<int32_t, int32_t>& timestampToIds,
+        std::unordered_map<int32_t, TouchEvent>& newIdTouchPoints,
+        const std::unordered_map<int, TouchEvent>& idToTouchPoints);
     void AccelerateConsumeTouchEvents(
         std::list<TouchEvent>& touchEvents, std::unordered_map<int, TouchEvent>& idToTouchPoints);
     void SetTouchAccelarate(bool isEnable) override
@@ -1578,6 +1588,7 @@ private:
     RefPtr<AvoidInfoManager> avoidInfoMgr_ = MakeRefPtr<AvoidInfoManager>();
     RefPtr<MemoryManager> memoryMgr_ = MakeRefPtr<MemoryManager>();
     RefPtr<NavigationManager> navigationMgr_ = MakeRefPtr<NavigationManager>();
+    RefPtr<ForceSplitManager> forceSplitMgr_ = MakeRefPtr<ForceSplitManager>();
     RefPtr<FormVisibleManager> formVisibleMgr_ = MakeRefPtr<FormVisibleManager>();
     RefPtr<FormEventManager> formEventMgr_ = MakeRefPtr<FormEventManager>();
     RefPtr<FormGestureManager> formGestureMgr_ = MakeRefPtr<FormGestureManager>();

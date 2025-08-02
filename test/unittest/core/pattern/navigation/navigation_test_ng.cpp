@@ -347,7 +347,9 @@ HWTEST_F(NavigationTestNg, NavigationModelNG0013, TestSize.Level1)
      */
     auto navigation = NavigationGroupNode::GetOrCreateGroupNode(
         "navigation", 120, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    ASSERT_NE(navigation, nullptr);
     auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    ASSERT_NE(navigationStack, nullptr);
     navigation->GetPattern<NavigationPattern>()->SetNavigationStack(std::move(navigationStack));
     auto layoutWrapper = navigation->CreateLayoutWrapper();
 

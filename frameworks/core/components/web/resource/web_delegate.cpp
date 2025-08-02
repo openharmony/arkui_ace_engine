@@ -54,6 +54,7 @@
 #include "system_ability_definition.h"
 #include "unicode/ucnv.h"
 #include "transaction/rs_interfaces.h"
+#include "webview_value.h"
 #include "web_configuration_observer.h"
 #include "web_javascript_execute_callback.h"
 #include "web_javascript_result_callback.h"
@@ -63,6 +64,7 @@
 #endif
 
 #include "core/common/container.h"
+#include "base/include/ark_web_errno.h"
 
 namespace OHOS::Ace {
 
@@ -1602,10 +1604,16 @@ void WebDelegate::ClosePort(std::string& port)
 void WebDelegate::PostPortMessage(std::string& port, std::string& data)
 {
     if (nweb_) {
-        auto webMsg = std::make_shared<OHOS::NWeb::NWebMessage>(NWebValue::Type::NONE);
-        webMsg->SetType(NWebValue::Type::STRING);
-        webMsg->SetString(data);
-        nweb_->PostPortMessage(port, webMsg);
+        auto romMsg = std::make_shared<OHOS::NWeb::WebViewValue>(NWebRomValue::Type::NONE);
+        romMsg->SetType(NWebRomValue::Type::STRING);
+        romMsg->SetString(data);
+        nweb_->PostPortMessageV2(port, romMsg);
+        if (ArkWebGetErrno() != RESULT_OK) {
+            auto webMsg = std::make_shared<OHOS::NWeb::NWebMessage>(NWebValue::Type::NONE);
+            webMsg->SetType(NWebValue::Type::STRING);
+            webMsg->SetString(data);
+            nweb_->PostPortMessage(port, webMsg);
+        }
     }
 }
 
@@ -2341,7 +2349,6 @@ bool WebDelegate::InitWebSurfaceDelegate(const WeakPtr<PipelineBase>& context)
 void WebDelegate::InitOHOSWeb(const WeakPtr<PipelineBase>& context)
 {
     if (!PrepareInitOHOSWeb(context)) {
-        TAG_LOGE(AceLogTag::ACE_WEB, "PrepareInitOHOSWeb failed.");
         return;
     }
     if (!isCreateWebView_) {
@@ -3280,6 +3287,16 @@ public:
         result->SetBoolean(ret);
     }
 
+    void OnReceiveValueV2(std::shared_ptr<NWebHapValue> value) override
+    {
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called");
+        auto delegate = delegate_.Upgrade();
+        CHECK_NULL_VOID(delegate);
+        bool ret = delegate->HandleAutoFillEvent(value);
+        value->SetType(NWebHapValue::Type::BOOLEAN);
+        value->SetBool(ret);
+    }
+
 private:
     WeakPtr<WebDelegate> delegate_;
 };
@@ -3506,6 +3523,10 @@ void WebDelegate::UpdateLayoutMode(WebLayoutMode mode)
 
 void WebDelegate::SetSurfaceDensity(const double& density)
 {
+    if (density_ == density || density == 0.0) {
+        return;
+    }
+    density_ = density;
     auto context = context_.Upgrade();
     if (!context) {
         return;
@@ -6275,6 +6296,10 @@ bool WebDelegate::OnDragAndDropData(const void* data, size_t len, int width, int
     if (!webPattern) {
         return false;
     }
+
+    uint32_t res = pixelMap_->GetPixelMapSharedPtr()->SetMemoryName(
+        webPattern->GetPixelMapName(pixelMap_->GetPixelMapSharedPtr(), "drag"));
+    TAG_LOGI(AceLogTag::ACE_WEB, "SetMemoryName result is %{public}d", res);
     return webPattern->NotifyStartDragTask();
 }
 
@@ -6292,6 +6317,10 @@ bool WebDelegate::OnDragAndDropDataUdmf(std::shared_ptr<OHOS::NWeb::NWebDragData
     dragData_ = dragData;
     auto webPattern = webPattern_.Upgrade();
     CHECK_NULL_RETURN(webPattern, false);
+
+    uint32_t res = pixelMap_->GetPixelMapSharedPtr()->SetMemoryName(
+        webPattern->GetPixelMapName(pixelMap_->GetPixelMapSharedPtr(), "drag"));
+    TAG_LOGI(AceLogTag::ACE_WEB, "SetMemoryName result is %{public}d", res);
 
     if (webPattern->IsRootNeedExportTexture()) {
         return false;
@@ -6936,10 +6965,16 @@ void WebDelegate::NotifyAutoFillViewData(const std::string& jsonStr)
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
             CHECK_NULL_VOID(delegate->nweb_);
-            auto webMessage = std::make_shared<OHOS::NWeb::NWebMessage>(NWebValue::Type::NONE);
-            webMessage->SetType(NWebValue::Type::STRING);
-            webMessage->SetString(jsonStr);
-            delegate->nweb_->FillAutofillData(webMessage);
+            auto romMessage = std::make_shared<OHOS::NWeb::WebViewValue>(NWebRomValue::Type::NONE);
+            romMessage->SetType(NWebRomValue::Type::STRING);
+            romMessage->SetString(jsonStr);
+            delegate->nweb_->FillAutofillDataV2(romMessage);
+            if (ArkWebGetErrno() != RESULT_OK) {
+                auto webMessage = std::make_shared<OHOS::NWeb::NWebMessage>(NWebValue::Type::NONE);
+                webMessage->SetType(NWebValue::Type::STRING);
+                webMessage->SetString(jsonStr);
+                delegate->nweb_->FillAutofillData(webMessage);
+            }
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebNotifyAutoFillViewData");
 }
@@ -6959,6 +6994,13 @@ void WebDelegate::AutofillCancel(const std::string& fillContent)
 }
 
 bool WebDelegate::HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson)
+{
+    auto pattern = webPattern_.Upgrade();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->HandleAutoFillEvent(viewDataJson);
+}
+
+bool WebDelegate::HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebHapValue>& viewDataJson)
 {
     auto pattern = webPattern_.Upgrade();
     CHECK_NULL_RETURN(pattern, false);
@@ -8310,6 +8352,24 @@ std::string WebDelegate::GetSelectInfo() const
     return nweb_->GetSelectInfo();
 }
 
+std::string WebDelegate::GetAllTextInfo() const
+{
+    CHECK_NULL_RETURN(nweb_, std::string());
+    return nweb_->GetAllTextInfo();
+}
+
+int WebDelegate::GetSelectStartIndex() const
+{
+    CHECK_NULL_RETURN(nweb_, 0);
+    return nweb_->GetSelectStartIndex();
+}
+
+int WebDelegate::GetSelectEndIndex() const
+{
+    CHECK_NULL_RETURN(nweb_, 0);
+    return nweb_->GetSelectEndIndex();
+}
+
 Offset WebDelegate::GetPosition(const std::string& embedId)
 {
     std::shared_lock<std::shared_mutex> readLock(embedDataInfoMutex_);
@@ -8537,8 +8597,14 @@ void WebDelegate::CreateOverlay(void* data, size_t len, int width, int height, i
 {
     auto webPattern = webPattern_.Upgrade();
     CHECK_NULL_VOID(webPattern);
-    webPattern->CreateOverlay(PixelMap::ConvertSkImageToPixmap(static_cast<const uint32_t*>(data), len, width, height),
-        offsetX, offsetY, rectWidth, rectHeight, pointX, pointY);
+
+    RefPtr<OHOS::Ace::PixelMap> pixelMap =
+        PixelMap::ConvertSkImageToPixmap(static_cast<const uint32_t*>(data), len, width, height);
+    uint32_t res = pixelMap->GetPixelMapSharedPtr()->SetMemoryName(
+        webPattern->GetPixelMapName(pixelMap->GetPixelMapSharedPtr(), "AI"));
+    TAG_LOGI(AceLogTag::ACE_WEB, "SetMemoryName result is %{public}d", res);
+
+    webPattern->CreateOverlay(pixelMap, offsetX, offsetY, rectWidth, rectHeight, pointX, pointY);
 }
 
 void WebDelegate::OnOverlayStateChanged(int offsetX, int offsetY, int rectWidth, int rectHeight)

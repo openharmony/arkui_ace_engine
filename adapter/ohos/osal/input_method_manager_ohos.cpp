@@ -46,9 +46,41 @@ void InputMethodManager::OnFocusNodeChange(const RefPtr<NG::FrameNode>& curFocus
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "focus in input method.");
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "current focus node: (%{public}s/%{public}d).",
-        curFocusNode->GetTag().c_str(), curFocusNode->GetId());
+    bool isDynamicComponent = container && container->GetUIContentType() == UIContentType::DYNAMIC_COMPONENT;
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "current focus node: (%{public}s/%{public}d). isDynamic: %{public}d",
+        curFocusNode->GetTag().c_str(), curFocusNode->GetId(), isDynamicComponent);
+    if (!isDynamicComponent) {
+        ManageFocusNode(curFocusNode, focusReason);
+        return;
+    }
+    auto containerHandler = container->GetContainerHandler();
+    if (!containerHandler) {
+        return;
+    }
+    auto callback = [weakNode = WeakPtr<NG::FrameNode>(curFocusNode), focusReason,
+        instanceId = curFocusNode->GetInstanceId()](bool saveKeyboard) {
+        auto context = NG::PipelineContext::GetContextByContainerId(instanceId);
+        CHECK_NULL_VOID(context);
+        auto taskExecutor = context->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [weakNode, focusReason, saveKeyboard]() {
+                auto curFocusNode = weakNode.Upgrade();
+                CHECK_NULL_VOID(curFocusNode);
+                InputMethodManager::GetInstance()->ManageFocusNode(curFocusNode, focusReason, saveKeyboard);
+            },
+            TaskExecutor::TaskType::UI, "ArkUIInputMethodManagerManageFocusNode");
+    };
+    containerHandler->GetHostFocusWindowSceneCloseKeyboard(callback);
+}
 
+void InputMethodManager::ManageFocusNode(const RefPtr<NG::FrameNode>& curFocusNode, FocusReason focusReason,
+    bool saveKeyboard)
+{
+    if (!curFocusNode) {
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "CurFocusNode Not Exist");
+        return;
+    }
     bool lastFocusNodeExist = curFocusNode_.Upgrade() ? true : false;
     if (lastFocusNodeExist && isLastFocusUIExtension_ && lastFocusNodeId_ != curFocusNode->GetId()) {
         curFocusNode_ = curFocusNode;
@@ -72,6 +104,12 @@ void InputMethodManager::OnFocusNodeChange(const RefPtr<NG::FrameNode>& curFocus
     if (pattern) {
         pattern->OnFocusNodeChange(focusReason);
     }
+
+    if (saveKeyboard) {
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "No Need To Close Keyboard");
+        return;
+    }
+
 #ifdef WINDOW_SCENE_SUPPORTED
     auto isWindowScene = NG::WindowSceneHelper::IsWindowScene(curFocusNode);
     if (isWindowScene) {

@@ -44,6 +44,8 @@ private:
     void UpdateMenuDefaultConstraintByDevice(const RefPtr<MenuPattern>& pattern,
         LayoutConstraintF& childConstraint, float paddingWidth, std::optional<LayoutConstraintF>& layoutConstraint,
         bool idealSizeHasVal);
+    void MarkChildForDelayedMeasurement(LayoutWrapper* layoutWrapper);
+    void MeasureAdaptiveLayoutChildren(LayoutWrapper* layoutWrapper, const LayoutConstraintF& childConstraint);
     bool UpdateSelectOverlayMenuMinWidth(const RefPtr<MenuPattern>& pattern, const RefPtr<GridColumnInfo>& columnInfo);
     void UpdateChildPositionWidthIgnoreLayoutSafeArea(
         const RefPtr<LayoutWrapper>& childLayoutWrapper, OffsetF& originOffset, bool isEmbed, OffsetF& embedCorrect);

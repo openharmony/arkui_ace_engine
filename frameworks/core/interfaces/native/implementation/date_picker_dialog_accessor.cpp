@@ -61,6 +61,7 @@ DialogProperties BuildDialogProperties(const Ark_DatePickerDialogOptions options
     CHECK_NULL_RETURN(pipeline, dialogProps);
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     CHECK_NULL_RETURN(dialogTheme, dialogProps);
+
     dialogProps.alignment = dialogTheme->GetAlignment();
     if (dialogProps.alignment == DialogAlignment::BOTTOM) {
         dialogProps.offset = DimensionOffset(Offset(0, -dialogTheme->GetMarginBottom().ConvertToPx()));
@@ -71,8 +72,8 @@ DialogProperties BuildDialogProperties(const Ark_DatePickerDialogOptions options
     dialogProps.backgroundColor = Converter::OptConvert<Color>(options.backgroundColor);
     dialogProps.shadow = Converter::OptConvert<Shadow>(options.shadow);
     dialogProps.maskRect = Converter::OptConvert<DimensionRect>(options.maskRect);
-    dialogProps.enableHoverMode =
-        Converter::OptConvert<bool>(options.enableHoverMode);
+    // dialogProps.enableHoverMode =
+    //     Converter::OptConvert<bool>(options.enableHoverMode).value_or(dialogProps.enableHoverMode);
     dialogProps.hoverModeArea = Converter::OptConvert<HoverModeAreaType>(options.hoverModeArea);
     BuildDialogPropertiesCallbacks(options, dialogProps);
     return dialogProps;

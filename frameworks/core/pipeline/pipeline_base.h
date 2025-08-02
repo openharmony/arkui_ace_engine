@@ -867,6 +867,12 @@ public:
         return focusWindowId_.has_value();
     }
 
+    void SetIsArkUIHookEnabled(bool enable)
+    {
+        isArkUIHookEnabled_ = enable;
+    }
+    bool IsArkUIHookEnabled() const;
+
     void SetRealHostWindowId(uint32_t realHostWindowId)
     {
         realHostWindowId_ = realHostWindowId;
@@ -886,6 +892,20 @@ public:
     {
         return viewScale_;
     }
+
+    void SetIsCurrentInForceSplitMode(bool split)
+    {
+        isCurrentInForceSplitMode_ = split;
+    }
+
+    bool IsCurrentInForceSplitMode() const
+    {
+        return isCurrentInForceSplitMode_;
+    }
+
+    double CalcPageWidth(double rootWidth) const;
+
+    double GetPageWidth() const;
 
     double GetRootWidth() const
     {
@@ -1394,7 +1414,7 @@ public:
 
     virtual void ChangeSensitiveNodes(bool flag) {}
 
-    virtual bool IsContainerModalVisible()
+    virtual bool IsContainerModalVisible() const
     {
         return false;
     }
@@ -1638,6 +1658,8 @@ protected:
 
     bool MarkUpdateSubwindowKeyboardInsert(int32_t instanceId, double keyboardHeight, int32_t type);
 
+    double Vp2PxInner(double vpValue) const;
+
     std::map<int32_t, configChangedCallback> configChangedCallback_;
     std::map<int32_t, virtualKeyBoardCallback> virtualKeyBoardCallback_;
     std::list<foldStatusChangedCallback> foldStatusChangedCallback_;
@@ -1674,10 +1696,12 @@ protected:
     float viewScale_ = 1.0f;
     double density_ = 1.0;
     double dipScale_ = 1.0;
+    bool isCurrentInForceSplitMode_ = false;
     double rootHeight_ = 0.0;
     double rootWidth_ = 0.0;
     int32_t width_ = 0;
     int32_t height_ = 0;
+    bool isArkUIHookEnabled_ = false;
     FrontendType frontendType_;
     WindowModal windowModal_ = WindowModal::NORMAL;
 
@@ -1756,6 +1780,7 @@ protected:
     uint64_t DVSyncChangeTime_ = 0;
     bool commandTimeUpdate_ = false;
     bool dvsyncTimeUpdate_ = false;
+    int32_t dvsyncTimeUseCount_ = 0;
 private:
     void DumpFrontend() const;
     double ModifyKeyboardHeight(double keyboardHeight) const;

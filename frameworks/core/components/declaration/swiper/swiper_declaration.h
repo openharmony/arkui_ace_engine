@@ -24,9 +24,9 @@
 namespace OHOS::Ace {
 
 inline constexpr uint32_t DEFAULT_SWIPER_CURRENT_INDEX = 0;
-inline constexpr double DEFAULT_SWIPER_ANIMATION_DURATION = 400.0;
+inline constexpr double DEFAULT_SWIPER_ANIMATION_DURATION = 500.0;
 inline constexpr double DEFAULT_SWIPER_AUTOPLAY_INTERVAL = 3000.0;
-inline constexpr int32_t DEFAULT_SWIPER_CACHED_SIZE = 1;
+inline constexpr int32_t DEFAULT_SWIPER_CACHED_SIZE = -1;
 inline constexpr int32_t DEFAULT_SWIPER_DISPLAY_COUNT = 1;
 
 enum class SwiperDisplayMode {

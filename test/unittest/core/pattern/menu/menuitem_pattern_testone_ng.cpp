@@ -1929,9 +1929,78 @@ HWTEST_F(MenuItemPatternTestOneNg, OnHover002, TestSize.Level1)
     auto subMenuPattern = subMenu->GetPattern<MenuPattern>();
     ASSERT_NE(subMenuPattern, nullptr);
     subMenuPattern->SetSubMenuDepth(1);
+    subMenuPattern->SetParentMenuItem(menuItemNode);
     
     auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
     ASSERT_NE(menuItemPattern, nullptr);
+    menuItemPattern->OnHover(true);
+
+    auto menuWrapper = menuItemPattern->GetMenuWrapper();
+    ASSERT_NE(menuWrapper, nullptr);
+    ASSERT_EQ(menuWrapper->GetChildren().size(), 3);
+}
+
+/**
+ * @tc.name: OnHover003
+ * @tc.desc: Verify OnHover.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestOneNg, OnHover003, TestSize.Level1)
+{
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto mainMenu =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    auto subMenu = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, 3, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::SUB_MENU));
+    auto dummySubMenu = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, 3, AceType::MakeRefPtr<TextPattern>());
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    menuItemNode->MountToParent(mainMenu);
+    mainMenu->MountToParent(wrapperNode);
+    dummySubMenu->MountToParent(wrapperNode);
+    subMenu->MountToParent(wrapperNode);
+    auto subMenuPattern = subMenu->GetPattern<MenuPattern>();
+    ASSERT_NE(subMenuPattern, nullptr);
+    subMenuPattern->SetSubMenuDepth(1);
+    auto tmpItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 5, AceType::MakeRefPtr<MenuItemPattern>());
+    subMenuPattern->SetParentMenuItem(tmpItemNode);
+    
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    menuItemPattern->OnHover(true);
+
+    auto menuWrapper = menuItemPattern->GetMenuWrapper();
+    ASSERT_NE(menuWrapper, nullptr);
+    ASSERT_EQ(menuWrapper->GetChildren().size(), 2);
+}
+
+/**
+ * @tc.name: OnHover004
+ * @tc.desc: Verify OnHover.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestOneNg, OnHover004, TestSize.Level1)
+{
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto mainMenu =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    auto subMenu = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, 3, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::SUB_MENU));
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    menuItemNode->MountToParent(mainMenu);
+    mainMenu->MountToParent(wrapperNode);
+    subMenu->MountToParent(wrapperNode);
+    auto subMenuPattern = subMenu->GetPattern<MenuPattern>();
+    ASSERT_NE(subMenuPattern, nullptr);
+    subMenuPattern->SetSubMenuDepth(1);
+    subMenuPattern->SetParentMenuItem(menuItemNode);
+    
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    menuItemPattern->hideTask_.Reset([] {
+    });
     menuItemPattern->OnHover(true);
 
     auto menuWrapper = menuItemPattern->GetMenuWrapper();

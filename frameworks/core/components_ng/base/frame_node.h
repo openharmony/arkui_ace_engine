@@ -48,7 +48,6 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/base/lazy_compose_adapter.h"
 #include "core/components_ng/property/accessibility_property.h"
-#include "core/components_ng/base/lazy_compose_adapter.h"
 #include "core/components_ng/property/flex_property.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/property.h"
@@ -325,7 +324,7 @@ public:
             LOGF_ABORT("bad type conversion: from [%{public}s] to [%{public}s]",
                 GetPatternTypeName(), T::TypeName());
         }
-        return static_cast<T*>(RawPtr(pattern_));
+        return reinterpret_cast<T*>(RawPtr(pattern_));
     }
 
     template<typename T>
@@ -349,7 +348,7 @@ public:
             LOGF_ABORT("bad type conversion: from [%{public}s] to [%{public}s]",
                 GetLayoutPropertyTypeName(), T::TypeName());
         }
-        return static_cast<T*>(RawPtr(layoutProperty_));
+        return reinterpret_cast<T*>(RawPtr(layoutProperty_));
     }
 
     template<typename T>
@@ -367,7 +366,7 @@ public:
             LOGF_ABORT("bad type conversion: from [%{public}s] to [%{public}s]",
                 GetPaintPropertyTypeName(), T::TypeName());
         }
-        return static_cast<T*>(RawPtr(paintProperty_));
+        return reinterpret_cast<T*>(RawPtr(paintProperty_));
     }
 
     template<typename T>
@@ -558,6 +557,7 @@ public:
     // deprecated, please use GetPaintRectOffsetNG.
     // this function only consider transform of itself when calculate transform,
     // do not consider the transform of its ansestors
+    // checkScreen takes effect only when checkBoundary is false.
     OffsetF GetPaintRectOffset(bool excludeSelf = false, bool checkBoundary = false, bool checkScreen = false) const;
 
     // returns a node's offset relative to root.
@@ -857,6 +857,8 @@ public:
 
     // layout wrapper function override
     const RefPtr<LayoutAlgorithmWrapper>& GetLayoutAlgorithm(bool needReset = false) override;
+
+    bool EnsureDelayedMeasureBeingOnlyOnce();
 
     bool PreMeasure(const std::optional<LayoutConstraintF>& parentConstraint);
 

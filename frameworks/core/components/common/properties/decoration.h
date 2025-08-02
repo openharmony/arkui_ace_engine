@@ -1139,15 +1139,15 @@ public:
     ~CanvasPath2D() = default;
     explicit CanvasPath2D(const std::string& cmds);
     explicit CanvasPath2D(const RefPtr<CanvasPath2D>& path);
-    virtual void AddPath(const RefPtr<CanvasPath2D>& path);
-    virtual void SetTransform(double a, double b, double c, double d, double e, double f);
-    virtual void MoveTo(double x, double y);
-    virtual void LineTo(double x, double y);
-    virtual void Arc(double x, double y, double radius, double startAngle, double endAngle, double ccw);
-    virtual void ArcTo(double x1, double y1, double x2, double y2, double radius);
-    virtual void QuadraticCurveTo(double cpx, double cpy, double x, double y);
-    virtual void BezierCurveTo(double cp1x, double cp1y, double cp2x, double cp2y, double x, double y);
-    virtual void Ellipse(double x, double y, double radiusX, double radiusY, double rotation, double startAngle,
+    void AddPath(const RefPtr<CanvasPath2D>& path);
+    void SetTransform(double a, double b, double c, double d, double e, double f);
+    void MoveTo(double x, double y);
+    void LineTo(double x, double y);
+    void Arc(double x, double y, double radius, double startAngle, double endAngle, double ccw);
+    void ArcTo(double x1, double y1, double x2, double y2, double radius);
+    void QuadraticCurveTo(double cpx, double cpy, double x, double y);
+    void BezierCurveTo(double cp1x, double cp1y, double cp2x, double cp2y, double x, double y);
+    void Ellipse(double x, double y, double radiusX, double radiusY, double rotation, double startAngle,
         double endAngle, double ccw);
     void Rect(double x, double y, double width, double height);
     void RoundRect(const class Rect& rect, const std::vector<double>& radii);

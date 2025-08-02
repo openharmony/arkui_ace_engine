@@ -171,8 +171,8 @@ HWTEST_F(NavigationPatternTestFourNg, TryForceSplitIfNeeded002, TestSize.Level1)
     manager->isForceSplitEnable_ = false;
     navigationPattern->TryForceSplitIfNeeded(SizeF(400.0f, 300.0f));
 
-    EXPECT_FALSE(navigationPattern->forceSplitSuccess_);
-    EXPECT_FALSE(navigationPattern->forceSplitUseNavBar_);
+    EXPECT_TRUE(navigationPattern->forceSplitSuccess_);
+    EXPECT_TRUE(navigationPattern->forceSplitUseNavBar_);
     NavigationPatternTestFourNg::TearDownTestSuite();
 }
 
@@ -211,7 +211,6 @@ HWTEST_F(NavigationPatternTestFourNg, TryForceSplitIfNeeded003, TestSize.Level1)
     manager->isForceSplitSupported_ = true;
     manager->isForceSplitEnable_ = true;
 
-    EXPECT_CALL(*container, IsMainWindow).Times(::testing::AtLeast(1)).WillRepeatedly(Return(true));
     navigationPattern->pageNode_ = WeakPtr(pageNode);
     SystemProperties::orientation_ = DeviceOrientation::LANDSCAPE;
     auto backupCallback = std::move(windowManager->windowGetModeCallback_);
@@ -222,8 +221,8 @@ HWTEST_F(NavigationPatternTestFourNg, TryForceSplitIfNeeded003, TestSize.Level1)
 
     const Dimension NAVIGAITON_WIDTH = 605.0_vp;
     navigationPattern->TryForceSplitIfNeeded(SizeF(NAVIGAITON_WIDTH.ConvertToPx(), 300.0f));
-    EXPECT_TRUE(navigationPattern->forceSplitSuccess_);
-    EXPECT_FALSE(navigationPattern->forceSplitUseNavBar_);
+    EXPECT_FALSE(navigationPattern->forceSplitSuccess_);
+    EXPECT_TRUE(navigationPattern->forceSplitUseNavBar_);
 
     windowManager->windowGetModeCallback_ = std::move(backupCallback);
     NavigationPatternTestFourNg::TearDownTestSuite();
@@ -266,7 +265,6 @@ HWTEST_F(NavigationPatternTestFourNg, TryForceSplitIfNeeded004, TestSize.Level1)
     manager->isForceSplitEnable_ = true;
     manager->ignoreOrientation_ = true;
 
-    EXPECT_CALL(*container, IsMainWindow).Times(::testing::AtLeast(1)).WillRepeatedly(Return(true));
     navigationPattern->pageNode_ = WeakPtr(pageNode);
     SystemProperties::orientation_ = DeviceOrientation::PORTRAIT;
     auto backupCallback = std::move(windowManager->windowGetModeCallback_);
@@ -277,8 +275,8 @@ HWTEST_F(NavigationPatternTestFourNg, TryForceSplitIfNeeded004, TestSize.Level1)
 
     const Dimension NAVIGAITON_WIDTH = 605.0_vp;
     navigationPattern->TryForceSplitIfNeeded(SizeF(NAVIGAITON_WIDTH.ConvertToPx(), 300.0f));
-    EXPECT_TRUE(navigationPattern->forceSplitSuccess_);
-    EXPECT_FALSE(navigationPattern->forceSplitUseNavBar_);
+    EXPECT_FALSE(navigationPattern->forceSplitSuccess_);
+    EXPECT_TRUE(navigationPattern->forceSplitUseNavBar_);
 
     windowManager->windowGetModeCallback_ = std::move(backupCallback);
     NavigationPatternTestFourNg::TearDownTestSuite();

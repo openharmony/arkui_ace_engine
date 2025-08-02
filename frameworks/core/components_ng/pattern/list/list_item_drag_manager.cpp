@@ -223,6 +223,9 @@ ListItemDragManager::ScaleResult ListItemDragManager::ScaleAxisNearItem(
 
     auto node = forEach->GetFrameNode(index);
     CHECK_NULL_RETURN(node, res);
+    if (!node->IsActive()) {
+        return res;
+    }
     auto geometry = node->GetGeometryNode();
     CHECK_NULL_RETURN(geometry, res);
     auto nearRect = geometry->GetMarginFrameRect();

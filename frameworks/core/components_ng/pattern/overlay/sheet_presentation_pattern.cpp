@@ -1104,6 +1104,7 @@ void SheetPresentationPattern::SheetTransitionForOverlay(bool isTransitionIn, bo
     AnimationOption option = sheetObject_->GetAnimationOptionForOverlay(isTransitionIn, isFirstTransition);
     // Init other animation information, includes the starting point of the animation.
     sheetObject_->InitAnimationForOverlay(isTransitionIn, isFirstTransition);
+    StopModifySheetTransition();
     AnimationUtils::Animate(
         option,
         sheetObject_->GetAnimationPropertyCallForOverlay(isTransitionIn), // Moving effect end point
@@ -1905,6 +1906,9 @@ SheetType SheetPresentationPattern::GetSheetTypeFromSheetManager() const
     if (!host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN)) {
         return SHEET_BOTTOM;
     }
+#ifdef PREVIEW
+    sheetType = GetSheetType();
+#else
     auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_RETURN(layoutProperty, sheetType);
     auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
@@ -1932,6 +1936,7 @@ SheetType SheetPresentationPattern::GetSheetTypeFromSheetManager() const
     if (sheetType == SheetType::SHEET_POPUP && !sheetKey_.hasValidTargetNode) {
         sheetType = SheetType::SHEET_CENTER;
     }
+#endif
     return sheetType;
 }
 

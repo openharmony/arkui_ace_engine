@@ -1247,6 +1247,13 @@ ArkUI_Float32 GetTextAreaLineHeight(ArkUINodeHandle node)
     return TextFieldModelNG::GetLineHeight(frameNode).Value();
 }
 
+ArkUI_Bool GetTextAreaHalfLeading(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return static_cast<ArkUI_Bool>(TextFieldModelNG::GetHalfLeading(frameNode));
+}
+
 ArkUI_Int32 GetTextAreaMaxLines(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -2400,6 +2407,7 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         .getTextAreaAdaptMinFontSize = GetTextAreaAdaptMinFontSize,
         .getTextAreaAdaptMaxFontSize = GetTextAreaAdaptMaxFontSize,
         .getTextAreaLineHeight = GetTextAreaLineHeight,
+        .getTextAreaHalfLeading = GetTextAreaHalfLeading,
         .getTextAreaMaxLines = GetTextAreaMaxLines,
         .getTextAreaMinLines = GetTextAreaMinLines,
         .setTextAreaPadding = SetTextAreaPadding,

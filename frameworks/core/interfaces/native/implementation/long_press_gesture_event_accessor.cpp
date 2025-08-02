@@ -60,4 +60,5 @@ const GENERATED_ArkUILongPressGestureEventAccessor* GetLongPressGestureEventAcce
     };
     return &LongPressGestureEventAccessorImpl;
 }
+
 }

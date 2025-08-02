@@ -904,6 +904,10 @@ public:
     {
         textSelector_.secondHandle = rect;
     }
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
 
 protected:
     int32_t GetClickedSpanPosition()

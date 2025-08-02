@@ -17,6 +17,7 @@
 #include "test/mock/core/animation/mock_animation_manager.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "ui/base/geometry/dimension.h"
 
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/list/list_theme.h"
@@ -2849,6 +2850,36 @@ HWTEST_F(ListCommonTestNg, GetCurrentOffset001, TestSize.Level1)
     FlushUITasks();
     ScrollTo(ITEM_MAIN_SIZE);
     EXPECT_TRUE(IsEqual(pattern_->GetCurrentOffset(), Offset(ITEM_MAIN_SIZE, 0.0)));
+}
+
+/**
+ * @tc.name: GetTotalOffset001
+ * @tc.desc: Test GetTotalOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, GetTotalOffset001, TestSize.Level1)
+{
+    constexpr double contentMainSize = 1000000000.0;
+    constexpr double itemMainSize = 50000000.0;
+    constexpr int32_t totalItemCount = contentMainSize / itemMainSize;
+
+    CreateList();
+    CreateItemWithSize(totalItemCount, SizeT<Dimension>(FILL_LENGTH, Dimension(itemMainSize)));
+    CreateDone();
+
+    ScrollToIndex(totalItemCount - 1, false, ScrollAlign::AUTO);
+
+    double prevOffset = pattern_->GetTotalOffset();
+    float delta = 1.0f;
+    UpdateCurrentOffset(delta);
+    double currentOffset = pattern_->GetTotalOffset();
+    EXPECT_TRUE(IsEqual(currentOffset, prevOffset - delta));
+
+    prevOffset = pattern_->GetTotalOffset();
+    delta = -1.0f;
+    UpdateCurrentOffset(delta);
+    currentOffset = pattern_->GetTotalOffset();
+    EXPECT_TRUE(IsEqual(currentOffset, prevOffset - delta));
 }
 
 /**

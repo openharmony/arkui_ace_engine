@@ -400,4 +400,29 @@ HWTEST_F(FocusEventHandlerTestNg, HandleCrownEventTest001, TestSize.Level1)
     EXPECT_EQ(consume, false);
     EXPECT_EQ(consume2, result);
 }
+
+/**
+ * @tc.name: HandleCrownEventTest001
+ * @tc.desc: test OnClick function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusEventHandlerTestNg, FocusEventHubOnClickTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set onClickCallback
+     * expected: ret is equal to expect;
+     */
+    KeyEvent event;
+    auto consume = false;
+    auto onClickCallback = [&consume](const GestureEvent&) {
+        consume = true;
+    };
+    auto buttonNode = CreateTestTreeWithDefaultFocus();
+    EXPECT_NE(buttonNode, nullptr);
+    auto buttonFocusHub = buttonNode->GetOrCreateFocusHub();
+    EXPECT_NE(buttonFocusHub, nullptr);
+    buttonFocusHub->SetOnClickCallback(std::move(onClickCallback));
+    buttonFocusHub->OnClick(event);
+    EXPECT_EQ(consume, true);
+}
 } // namespace OHOS::Ace::NG

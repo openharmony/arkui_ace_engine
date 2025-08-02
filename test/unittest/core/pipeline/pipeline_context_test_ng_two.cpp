@@ -43,7 +43,7 @@ namespace NG {
 HWTEST_F(PipelineContextTestNg, PipelineContextTestNg130, TestSize.Level1)
 {
     /**
-     * @tc.steps1: initialize parameters.
+     * @tc.steps1: initialize parameters and create MouseEvent.
      * @tc.expected: Create MouseEvent, then initialize pipeline.
      */
     ASSERT_NE(context_, nullptr);
@@ -2536,9 +2536,17 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg404, TestSize.Level1)
  */
 HWTEST_F(PipelineContextTestNg, PipelineContextTestNg405, TestSize.Level1)
 {
+    /**
+     * @tc.steps1: Call function OnShow;
+     * @tc.expected: isNeedCallbackAreaChange_ is true
+     */
     ASSERT_NE(context_, nullptr);
     context_->OnShow();
     EXPECT_TRUE(context_->isNeedCallbackAreaChange_);
+    /**
+     * @tc.steps2: Call function OnHide;
+     * @tc.expected: isNeedCallbackAreaChange_ is false
+     */
     context_->OnHide();
     EXPECT_TRUE(context_->isNeedCallbackAreaChange_);
 }
@@ -2558,6 +2566,26 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg406, TestSize.Level1)
     context_->windowModal_ = WindowModal::DIALOG_MODAL;
     context_->ContainerModalUnFocus();
     EXPECT_TRUE(context_->windowModal_ != WindowModal::CONTAINER_MODAL);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg407
+ * @tc.desc: Test OnDumpInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg407, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Call the function OnDumpInfo.
+     * @tc.expected: Test that the member window_ is empty.
+     */
+    ASSERT_NE(context_, nullptr);
+    std::vector<std::string> params;
+    params.push_back("-simplify");
+    params.push_back("-compname");
+    params.push_back("test");
+    auto ret = context_->OnDumpInfo(params);
+    EXPECT_TRUE(ret);
 }
 
 /**
@@ -2584,6 +2612,31 @@ HWTEST_F(PipelineContextTestNg, FlushMouseEventForHover001, TestSize.Level1)
     context_->lastMouseEvent_->button = MouseButton::LEFT_BUTTON;
     context_->FlushMouseEventForHover();
     EXPECT_EQ(context_->lastMouseEvent_->button, MouseButton::LEFT_BUTTON);
+}
+
+/**
+ * @tc.name: ConsumeTouchEventsInterpolationTest001
+ * @tc.desc: Test ConsumeTouchEventsInterpolation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, ConsumeTouchEventsInterpolationTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Create consumeTouchEventsInterpolation testcase.
+     */
+    std::unordered_set<int32_t> ids = { 1, 2, 3 };
+    std::map<int32_t, int32_t> timestampToIds = { { 1, 0 }, { 2, 1 }, { 3, 2 }, { 4, 3 } };
+    std::unordered_map<int32_t, TouchEvent> newIdTouchPoints;
+    TouchEvent touchEventBefore = TouchEvent();
+    touchEventBefore.time = TimeStamp(std::chrono::nanoseconds(BEFORE_VSYNC_TIME));
+    TouchEvent touchEventAfter = TouchEvent();
+    touchEventAfter.time = TimeStamp(std::chrono::nanoseconds(AFTER_VSYNC_TIME));
+    std::unordered_map<int, TouchEvent> idToTouchPoints = { { 2, touchEventBefore }, { 3, touchEventAfter } };
+    ASSERT_NE(context_, nullptr);
+    context_->resampleTimeStamp_ = DEFAULT_VSYNC_TIME;
+    context_->historyPointsById_.clear();
+    context_->ConsumeTouchEventsInterpolation(ids, timestampToIds, newIdTouchPoints, idToTouchPoints);
+    EXPECT_EQ(context_->historyPointsById_.size(), 1);
 }
 } // namespace NG
 } // namespace OHOS::Ace
