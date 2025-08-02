@@ -1303,4 +1303,18 @@ void DragAnimationHelper::CreateTextNode(PreparedInfoForDrag& data)
         DragAnimationHelper::SetNodeVisible(data.textNode, false);
     }
 }
+
+float DragAnimationHelper::GetPreviewMenuAnimationRate()
+{
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(pipeline, 1.0f);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_RETURN(dragDropManager, 1.0f);
+    auto menuWrapperNode = dragDropManager->GetMenuWrapperNode();
+    CHECK_NULL_RETURN(menuWrapperNode, 1.0f);
+    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_RETURN(menuWrapperPattern, 1.0f);
+    auto animationInfo = menuWrapperPattern->GetPreviewMenuAnimationInfo();
+    return animationInfo.clipRate;
+}
 } // namespace OHOS::Ace::NG
