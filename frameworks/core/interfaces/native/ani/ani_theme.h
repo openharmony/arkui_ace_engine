@@ -22,298 +22,288 @@
 #include <map>
 
 #include "ui/properties/color.h"
-
-#define COLORS_NUMBER (51)
-
-#define BRAND (0)
-#define WARNING (1)
-#define ALERT (2)
-#define CONFIRM (3)
-
-#define FONT_PRIMARY (4)
-#define FONT_SECONDARY (5)
-#define FONT_TERTIARY (6)
-#define FONT_FOURTH (7)
-#define FONT_EMPHASIZE (8)
-
-#define FONT_ON_PRIMARY (9)
-#define FONT_ON_SECONDARY (10)
-#define FONT_ON_TERTIARY (11)
-#define FONT_ON_FOURTH (12)
-
-#define ICON_PRIMARY (13)
-#define ICON_SECONDARY (14)
-#define ICON_TERTIARY (15)
-#define ICON_FOURTH (16)
-#define ICON_EMPHASIZE (17)
-#define ICON_SUB_EMPHASIZE (18)
-
-#define ICON_ON_PRIMARY (19)
-#define ICON_ON_SECONDARY (20)
-#define ICON_ON_TERTIARY (21)
-#define ICON_ON_FOURTH (22)
-
-#define BACKGROUND_PRIMARY (23)
-#define BACKGROUND_SECONDARY (24)
-#define BACKGROUND_TERTIARY (25)
-#define BACKGROUND_FOURTH (26)
-#define BACKGROUND_EMPHASIZE (27)
-
-#define COMP_FOREGROUND_PRIMARY (28)
-#define COMP_BACKGROUND_PRIMARY (29)
-#define COMP_BACKGROUND_PRIMARY_TRAN (30)
-#define COMP_BACKGROUND_PRIMARY_CONTRARY (31)
-#define COMP_BACKGROUND_GRAY (32)
-#define COMP_BACKGROUND_SECONDARY (33)
-#define COMP_BACKGROUND_TERTIARY (34)
-#define COMP_BACKGROUND_EMPHASIZE (35)
-#define COMP_BACKGROUND_NEUTRAL (36)
-#define COMP_EMPHASIZE_SECONDARY (37)
-#define COMP_EMPHASIZE_TERTIARY (38)
-#define COMP_DIVIDER (39)
-#define COMP_COMMON_CONTRARY (40)
-#define COMP_BACKGROUND_FOCUS (41)
-#define COMP_FOCUSED_PRIMARY (42)
-#define COMP_FOCUSED_SECONDARY (43)
-#define COMP_FOCUSED_TERTIARY (44)
-
-#define INTERACTIVE_HOVER (45)
-#define INTERACTIVE_PRESSED (46)
-#define INTERACTIVE_FOCUS (47)
-#define INTERACTIVE_ACTIVE (48)
-#define INTERACTIVE_SELECT (49)
-#define INTERACTIVE_CLICK (50)
-
-typedef class __ani_array* ani_array;
-typedef class __ani_object* ani_object;
-typedef struct __ani_env ani_env;
-typedef struct __ani_vm ani_vm;
+#include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG {
+enum class AniThemeColorIdentifier : int32_t {
+    BRAND = 0,
+    WARNING = 1,
+    ALERT = 2,
+    CONFIRM = 3,
+    FONT_PRIMARY = 4,
+    FONT_SECONDARY = 5,
+    FONT_TERTIARY = 6,
+    FONT_FOURTH = 7,
+    FONT_EMPHASIZE = 8,
+    FONT_ON_PRIMARY = 9,
+    FONT_ON_SECONDARY = 10,
+    FONT_ON_TERTIARY = 11,
+    FONT_ON_FOURTH = 12,
+    ICON_PRIMARY = 13,
+    ICON_SECONDARY = 14,
+    ICON_TERTIARY = 15,
+    ICON_FOURTH = 16,
+    ICON_EMPHASIZE = 17,
+    ICON_SUB_EMPHASIZE = 18,
+    ICON_ON_PRIMARY = 19,
+    ICON_ON_SECONDARY = 20,
+    ICON_ON_TERTIARY = 21,
+    ICON_ON_FOURTH = 22,
+    BACKGROUND_PRIMARY = 23,
+    BACKGROUND_SECONDARY = 24,
+    BACKGROUND_TERTIARY = 25,
+    BACKGROUND_FOURTH = 26,
+    BACKGROUND_EMPHASIZE = 27,
+    COMP_FOREGROUND_PRIMARY = 28,
+    COMP_BACKGROUND_PRIMARY = 29,
+    COMP_BACKGROUND_PRIMARY_TRAN = 30,
+    COMP_BACKGROUND_PRIMARY_CONTRARY = 31,
+    COMP_BACKGROUND_GRAY = 32,
+    COMP_BACKGROUND_SECONDARY = 33,
+    COMP_BACKGROUND_TERTIARY = 34,
+    COMP_BACKGROUND_EMPHASIZE = 35,
+    COMP_BACKGROUND_NEUTRAL = 36,
+    COMP_EMPHASIZE_SECONDARY = 37,
+    COMP_EMPHASIZE_TERTIARY = 38,
+    COMP_DIVIDER = 39,
+    COMP_COMMON_CONTRARY = 40,
+    COMP_BACKGROUND_FOCUS = 41,
+    COMP_FOCUSED_PRIMARY = 42,
+    COMP_FOCUSED_SECONDARY = 43,
+    COMP_FOCUSED_TERTIARY = 44,
+    INTERACTIVE_HOVER = 45,
+    INTERACTIVE_PRESSED = 46,
+    INTERACTIVE_FOCUS = 47,
+    INTERACTIVE_ACTIVE = 48,
+    INTERACTIVE_SELECT = 49,
+    INTERACTIVE_CLICK = 50,
+};
 class AniThemeColors {
 public:
     AniThemeColors() = default;
     virtual ~AniThemeColors() = default;
 
-    void SetColors(ani_env* env, const std::vector<ani_object>& colors);
+    void SetColors(const Array_ResourceColor& colors)
+    {
+        colors_ = colors;
+    }
 
     Color Brand() const
     {
-        return ConvertAniValueToColor(colors_[BRAND]);
+        return ConvertAniValueToColor(AniThemeColorIdentifier::BRAND);
     }
     Color Warning() const
     {
-        return ConvertAniValueToColor(colors_[WARNING]);
+        return ConvertAniValueToColor(AniThemeColorIdentifier::WARNING);
     }
     Color Alert() const
     {
-        return ConvertAniValueToColor(colors_[ALERT]);
+        return ConvertAniValueToColor(AniThemeColorIdentifier::ALERT);
     }
     Color Confirm() const
     {
-        return ConvertAniValueToColor(colors_[CONFIRM]);
+        return ConvertAniValueToColor(AniThemeColorIdentifier::CONFIRM);
     }
 
     Color FontPrimary() const
     {
-        return ConvertAniValueToColor(colors_[FONT_PRIMARY]);
+        return ConvertAniValueToColor(AniThemeColorIdentifier::FONT_PRIMARY);
     }
     Color FontSecondary() const
     {
-        return ConvertAniValueToColor(colors_[FONT_SECONDARY]);
+        return ConvertAniValueToColor(AniThemeColorIdentifier::FONT_SECONDARY);
     }
     Color FontTertiary() const
     {
-        return ConvertAniValueToColor(colors_[FONT_TERTIARY]);
+        return ConvertAniValueToColor(AniThemeColorIdentifier::FONT_TERTIARY);
     }
     Color FontFourth() const
     {
-        return ConvertAniValueToColor(colors_[FONT_FOURTH]);
+        return ConvertAniValueToColor(AniThemeColorIdentifier::FONT_FOURTH);
     }
     Color FontEmphasize() const
     {
-        return ConvertAniValueToColor(colors_[FONT_EMPHASIZE]);
+        return ConvertAniValueToColor(AniThemeColorIdentifier::FONT_EMPHASIZE);
     }
 
     Color FontOnPrimary() const
     {
-        return ConvertAniValueToColor(colors_[FONT_ON_PRIMARY]);
+        return ConvertAniValueToColor(AniThemeColorIdentifier::FONT_ON_PRIMARY);
     }
     Color FontOnSecondary() const
     {
-        return ConvertAniValueToColor(colors_[FONT_ON_SECONDARY]);
+        return ConvertAniValueToColor(AniThemeColorIdentifier::FONT_ON_SECONDARY);
     }
     Color FontOnTertiary() const
     {
-        return ConvertAniValueToColor(colors_[FONT_ON_TERTIARY]);
+        return ConvertAniValueToColor(AniThemeColorIdentifier::FONT_ON_TERTIARY);
     }
     Color FontOnFourth() const
     {
-        return ConvertAniValueToColor(colors_[FONT_ON_FOURTH]);
+        return ConvertAniValueToColor(AniThemeColorIdentifier::FONT_ON_FOURTH);
     }
 
     Color IconPrimary() const
     {
-        return ConvertAniValueToColor(colors_[ICON_PRIMARY]);
+        return ConvertAniValueToColor(AniThemeColorIdentifier::ICON_PRIMARY);
     }
     Color IconSecondary() const
     {
-        return ConvertAniValueToColor(colors_[ICON_SECONDARY]);
+        return ConvertAniValueToColor(AniThemeColorIdentifier::ICON_SECONDARY);
     }
     Color IconTertiary() const
     {
-        return ConvertAniValueToColor(colors_[ICON_TERTIARY]);
+        return ConvertAniValueToColor(AniThemeColorIdentifier::ICON_TERTIARY);
     }
     Color IconFourth() const
     {
-        return ConvertAniValueToColor(colors_[ICON_FOURTH]);
+        return ConvertAniValueToColor(AniThemeColorIdentifier::ICON_FOURTH);
     }
     Color IconEmphasize() const
     {
-        return ConvertAniValueToColor(colors_[ICON_EMPHASIZE]);
+        return ConvertAniValueToColor(AniThemeColorIdentifier::ICON_EMPHASIZE);
     }
     Color IconSubEmphasize() const
     {
-        return ConvertAniValueToColor(colors_[ICON_SUB_EMPHASIZE]);
+        return ConvertAniValueToColor(AniThemeColorIdentifier::ICON_SUB_EMPHASIZE);
     }
 
     Color IconOnPrimary() const
     {
-        return ConvertAniValueToColor(colors_[ICON_ON_PRIMARY]);
+        return ConvertAniValueToColor(AniThemeColorIdentifier::ICON_ON_PRIMARY);
     }
     Color IconOnSecondary() const
     {
-        return ConvertAniValueToColor(colors_[ICON_ON_SECONDARY]);
+        return ConvertAniValueToColor(AniThemeColorIdentifier::ICON_ON_SECONDARY);
     }
     Color IconOnTertiary() const
     {
-        return ConvertAniValueToColor(colors_[ICON_ON_TERTIARY]);
+        return ConvertAniValueToColor(AniThemeColorIdentifier::ICON_ON_TERTIARY);
     }
     Color IconOnFourth() const
     {
-        return ConvertAniValueToColor(colors_[ICON_ON_FOURTH]);
+        return ConvertAniValueToColor(AniThemeColorIdentifier::ICON_ON_FOURTH);
     }
 
     Color BackgroundPrimary() const
     {
-        return ConvertAniValueToColor(colors_[BACKGROUND_PRIMARY]);
+        return ConvertAniValueToColor(AniThemeColorIdentifier::BACKGROUND_PRIMARY);
     }
     Color BackgroundSecondary() const
     {
-        return ConvertAniValueToColor(colors_[BACKGROUND_SECONDARY]);
+        return ConvertAniValueToColor(AniThemeColorIdentifier::BACKGROUND_SECONDARY);
     }
     Color BackgroundTertiary() const
     {
-        return ConvertAniValueToColor(colors_[BACKGROUND_TERTIARY]);
+        return ConvertAniValueToColor(AniThemeColorIdentifier::BACKGROUND_TERTIARY);
     }
     Color BackgroundFourth() const
     {
-        return ConvertAniValueToColor(colors_[BACKGROUND_FOURTH]);
+        return ConvertAniValueToColor(AniThemeColorIdentifier::BACKGROUND_FOURTH);
     }
     Color BackgroundEmphasize() const
     {
-        return ConvertAniValueToColor(colors_[BACKGROUND_EMPHASIZE]);
+        return ConvertAniValueToColor(AniThemeColorIdentifier::BACKGROUND_EMPHASIZE);
     }
 
     Color CompForegroundPrimary() const
     {
-        return ConvertAniValueToColor(colors_[COMP_FOREGROUND_PRIMARY]);
+        return ConvertAniValueToColor(AniThemeColorIdentifier::COMP_FOREGROUND_PRIMARY);
     }
     Color CompBackgroundPrimary() const
     {
-        return ConvertAniValueToColor(colors_[COMP_BACKGROUND_PRIMARY]);
+        return ConvertAniValueToColor(AniThemeColorIdentifier::COMP_BACKGROUND_PRIMARY);
     }
     Color CompBackgroundPrimaryTran() const
     {
-        return ConvertAniValueToColor(colors_[COMP_BACKGROUND_PRIMARY_TRAN]);
+        return ConvertAniValueToColor(AniThemeColorIdentifier::COMP_BACKGROUND_PRIMARY_TRAN);
     }
     Color CompBackgroundPrimaryContrary() const
     {
-        return ConvertAniValueToColor(colors_[COMP_BACKGROUND_PRIMARY_CONTRARY]);
+        return ConvertAniValueToColor(AniThemeColorIdentifier::COMP_BACKGROUND_PRIMARY_CONTRARY);
     }
     Color CompBackgroundGray() const
     {
-        return ConvertAniValueToColor(colors_[COMP_BACKGROUND_GRAY]);
+        return ConvertAniValueToColor(AniThemeColorIdentifier::COMP_BACKGROUND_GRAY);
     }
     Color CompBackgroundSecondary() const
     {
-        return ConvertAniValueToColor(colors_[COMP_BACKGROUND_SECONDARY]);
+        return ConvertAniValueToColor(AniThemeColorIdentifier::COMP_BACKGROUND_SECONDARY);
     }
     Color CompBackgroundTertiary() const
     {
-        return ConvertAniValueToColor(colors_[COMP_BACKGROUND_TERTIARY]);
+        return ConvertAniValueToColor(AniThemeColorIdentifier::COMP_BACKGROUND_TERTIARY);
     }
     Color CompBackgroundEmphasize() const
     {
-        return ConvertAniValueToColor(colors_[COMP_BACKGROUND_EMPHASIZE]);
+        return ConvertAniValueToColor(AniThemeColorIdentifier::COMP_BACKGROUND_EMPHASIZE);
     }
     Color CompBackgroundNeutral() const
     {
-        return ConvertAniValueToColor(colors_[COMP_BACKGROUND_NEUTRAL]);
+        return ConvertAniValueToColor(AniThemeColorIdentifier::COMP_BACKGROUND_NEUTRAL);
     }
     Color CompEmphasizeSecondary() const
     {
-        return ConvertAniValueToColor(colors_[COMP_EMPHASIZE_SECONDARY]);
+        return ConvertAniValueToColor(AniThemeColorIdentifier::COMP_EMPHASIZE_SECONDARY);
     }
     Color CompEmphasizeTertiary() const
     {
-        return ConvertAniValueToColor(colors_[COMP_EMPHASIZE_TERTIARY]);
+        return ConvertAniValueToColor(AniThemeColorIdentifier::COMP_EMPHASIZE_TERTIARY);
     }
     Color CompDivider() const
     {
-        return ConvertAniValueToColor(colors_[COMP_DIVIDER]);
+        return ConvertAniValueToColor(AniThemeColorIdentifier::COMP_DIVIDER);
     }
     Color CompCommonContrary() const
     {
-        return ConvertAniValueToColor(colors_[COMP_COMMON_CONTRARY]);
+        return ConvertAniValueToColor(AniThemeColorIdentifier::COMP_COMMON_CONTRARY);
     }
     Color CompBackgroundFocus() const
     {
-        return ConvertAniValueToColor(colors_[COMP_BACKGROUND_FOCUS]);
+        return ConvertAniValueToColor(AniThemeColorIdentifier::COMP_BACKGROUND_FOCUS);
     }
     Color CompFocusedPrimary() const
     {
-        return ConvertAniValueToColor(colors_[COMP_FOCUSED_PRIMARY]);
+        return ConvertAniValueToColor(AniThemeColorIdentifier::COMP_FOCUSED_PRIMARY);
     }
     Color CompFocusedSecondary() const
     {
-        return ConvertAniValueToColor(colors_[COMP_FOCUSED_SECONDARY]);
+        return ConvertAniValueToColor(AniThemeColorIdentifier::COMP_FOCUSED_SECONDARY);
     }
     Color CompFocusedTertiary() const
     {
-        return ConvertAniValueToColor(colors_[COMP_FOCUSED_TERTIARY]);
+        return ConvertAniValueToColor(AniThemeColorIdentifier::COMP_FOCUSED_TERTIARY);
     }
 
     Color InteractiveHover() const
     {
-        return ConvertAniValueToColor(colors_[INTERACTIVE_HOVER]);
+        return ConvertAniValueToColor(AniThemeColorIdentifier::INTERACTIVE_HOVER);
     }
     Color InteractivePressed() const
     {
-        return ConvertAniValueToColor(colors_[INTERACTIVE_PRESSED]);
+        return ConvertAniValueToColor(AniThemeColorIdentifier::INTERACTIVE_PRESSED);
     }
     Color InteractiveFocus() const
     {
-        return ConvertAniValueToColor(colors_[INTERACTIVE_FOCUS]);
+        return ConvertAniValueToColor(AniThemeColorIdentifier::INTERACTIVE_FOCUS);
     }
     Color InteractiveActive() const
     {
-        return ConvertAniValueToColor(colors_[INTERACTIVE_ACTIVE]);
+        return ConvertAniValueToColor(AniThemeColorIdentifier::INTERACTIVE_ACTIVE);
     }
     Color InteractiveSelect() const
     {
-        return ConvertAniValueToColor(colors_[INTERACTIVE_SELECT]);
+        return ConvertAniValueToColor(AniThemeColorIdentifier::INTERACTIVE_SELECT);
     }
     Color InteractiveClick() const
     {
-        return ConvertAniValueToColor(colors_[INTERACTIVE_CLICK]);
+        return ConvertAniValueToColor(AniThemeColorIdentifier::INTERACTIVE_CLICK);
     }
 
 private:
-    Color ConvertAniValueToColor(ani_object aniValue) const;
+    Color ConvertAniValueToColor(AniThemeColorIdentifier identifier) const;
 
-    std::vector<ani_object> colors_;
-    ani_vm* vm_ = nullptr;
+    Array_ResourceColor colors_;
 };
 
 class AniTheme {

@@ -48,7 +48,6 @@ ohos_shared_library("arkoala_native_ani") {
     "interop/interop_module.cpp",
     "load.cpp",
     "module.cpp",
-    # "resource/resource_module.cpp",
     "shape/shape_module_methods.cpp",
     "styled_string/styled_string_module.cpp",
     "utils/ani_utils.cpp",

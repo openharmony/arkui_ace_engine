@@ -669,21 +669,13 @@ ani_int GetNumberColorValue(ani_env* env, ani_object aniClass, ani_double src)
     return modifier->getCommonAniModifier()->getColorValueByNumber(static_cast<uint32_t>(src));
 }
 
-void SendThemeToNative(ani_env* env, ani_object aniClass, ani_array colorArray, ani_int id)
+void SendThemeToNative(ani_env* env, ani_object aniClass, ani_long thisArray, ani_double thisLength, ani_int id)
 {
     const auto* modifier = GetNodeAniModifier();
     if (!modifier) {
         return;
     }
-    std::vector<ani_object> colors;
-    ani_size length;
-    env->Array_GetLength(colorArray, &length);
-    for (int i = 0; i < length; i++) {
-        // type ResourceColor = number | string | Resource
-        ani_ref value;
-        env->Array_Get_Ref((ani_array_ref)colorArray, i, &value);
-        colors.push_back((ani_object)value);
-    }
+    Array_ResourceColor colors = GetResourceColorArray(thisArray, thisLength);
     modifier->getCommonAniModifier()->sendThemeToNative(env, colors, id);
 }
 

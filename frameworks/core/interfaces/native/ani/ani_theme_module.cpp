@@ -33,14 +33,14 @@ void AniThemeModule::UpdateColorMode(int32_t colorMode)
 #else
         ResourceManager::GetInstance().UpdateColorMode(colorModeValue);
 #endif
-        auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+        auto pipelineContext = NG::PipelineContext::GetCurrentContextSafely();
         pipelineContext->SetLocalColorMode(colorModeValue);
     }
 }
 
 void AniThemeModule::RestoreColorMode()
 {
-    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+    auto pipelineContext = NG::PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->SetLocalColorMode(ColorMode::COLOR_MODE_UNDEFINED);
 

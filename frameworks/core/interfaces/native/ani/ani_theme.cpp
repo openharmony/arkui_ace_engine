@@ -18,36 +18,22 @@
 #include <cstdint>
 #include <vector>
 
-#include "ani.h"
+#include "ui/properties/color.h"
 
 #include "base/log/log_wrapper.h"
-#include "bridge/arkts_frontend/arkts_ani_utils.h"
-#include "core/interfaces/native/ani/resource_ani_modifier.h"
+#include "core/interfaces/native/utility/converter.h"
 
 namespace OHOS::Ace::NG {
 std::map<int32_t, AniTheme> AniThemeScope::aniThemes = {};
 
-void AniThemeColors::SetColors(ani_env* env, const std::vector<ani_object>& colors)
+Color AniThemeColors::ConvertAniValueToColor(AniThemeColorIdentifier identifier) const
 {
-    for (auto& color : colors) {
-        colors_.push_back(color);
-    }
-    env->GetVM(&vm_);
-}
-
-Color AniThemeColors::ConvertAniValueToColor(ani_object aniValue) const
-{
-    if (!vm_) {
-        LOGW("Invalid vm when ConvertAniValueToColor");
+    auto value = colors_.array[static_cast<int32_t>(identifier)];
+    const auto color = Converter::OptConvert<Color>(value);
+    if (!color.has_value()) {
+        LOGW("Invalid ani value when convert to color");
         return Color();
     }
-    auto* env = ArktsAniUtils::GetAniEnv(vm_);
-    if (!env) {
-        LOGW("Invalid env when ConvertAniValueToColor");
-        return Color();
-    }
-    Color color;
-    ResourceAniModifier::ParseAniColor(env, aniValue, color);
-    return color;
+    return color.value();
 }
 } // namespace OHOS::Ace::NG
