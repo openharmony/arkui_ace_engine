@@ -22,8 +22,8 @@
 #include "ui/base/referenced.h"
 #include "ui/base/utils/utils.h"
 
-#include "bridge/arkts_frontend/arkts_frontend.h"
 #include "core/common/container.h"
+#include "core/common/frontend.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/pipeline/base/element_register.h"
 
@@ -38,7 +38,7 @@ public:
     {
         const auto& container = Container::GetContainer(instanceId);
         CHECK_NULL_VOID(container);
-        frontend_ = AceType::DynamicCast<ArktsFrontend>(container->GetFrontend());
+        frontend_ = container->GetFrontend();
     }
 
     ~DetachedFreeRootProxyNode() override
@@ -57,7 +57,7 @@ public:
     }
 
 private:
-    WeakPtr<ArktsFrontend> frontend_;
+    WeakPtr<Frontend> frontend_;
 };
 
 } // namespace OHOS::Ace::NG

@@ -170,6 +170,10 @@ template("ace_core_interfaces_native_node") {
       "ani/xcomponent_ani_modifier.cpp",
       "ani/list_ani_modifier.cpp",
       "ani/condition_scope_ani_modifier.cpp",
+      "${ace_root}/frameworks/bridge/arkts_frontend/ani_graphics_module.cpp",
+      "${ace_root}/frameworks/bridge/arkts_frontend/ani_water_flow_module.cpp",
+      "${ace_root}/frameworks/bridge/arkts_frontend/ani_list_module.cpp",
+      "${ace_root}/frameworks/bridge/arkts_frontend/arkts_ani_utils.cpp",
     ]
     if (build_ohos_sdk) {
       sources -= [
@@ -182,6 +186,10 @@ template("ace_core_interfaces_native_node") {
         "ani/list_ani_modifier.cpp",
         "ani/drag_controller_ani_modifier.cpp",
         "ani/drag_controller_utils.cpp",
+        "${ace_root}/frameworks/bridge/arkts_frontend/ani_graphics_module.cpp",
+        "${ace_root}/frameworks/bridge/arkts_frontend/ani_water_flow_module.cpp",
+        "${ace_root}/frameworks/bridge/arkts_frontend/ani_list_module.cpp",
+        "${ace_root}/frameworks/bridge/arkts_frontend/arkts_ani_utils.cpp",
       ]
     }
 
@@ -255,6 +263,11 @@ template("ace_core_interfaces_native_node") {
       "napi:ace_napi",
       "runtime_core:ani",
     ]
+
+    if (current_os == "ohos") {
+      external_deps += [ "graphic_2d:drawing_ani" ]
+    }
+    
     if (defined(config.pixel_map_support)) {
       external_deps += [
         "image_framework:image",
@@ -268,9 +281,7 @@ template("ace_core_interfaces_native_node") {
       }
     }
     if (build_ohos_sdk) {
-      external_deps -= [
-        "runtime_core:ani",
-      ]
+      external_deps -= [ "runtime_core:ani" ]
     }
 
     if (defined(config.model_component_support) &&
