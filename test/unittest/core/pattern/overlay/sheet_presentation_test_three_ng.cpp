@@ -1974,59 +1974,6 @@ HWTEST_F(SheetPresentationTestThreeNg, GetSheetTypeFromSheetManager001, TestSize
 }
 
 /**
- * @tc.name: GetSheetTypeFromSheetManager002
- * @tc.desc: Test SheetPresentationPattern::GetSheetTypeFromSheetManager.
- *           Condition: The default is Bottom Type
- * @tc.type: FUNC
- */
-HWTEST_F(SheetPresentationTestThreeNg, GetSheetTypeFromSheetManager002, TestSize.Level1)
-{
-    SheetPresentationTestThreeNg::SetUpTestCase();
-    SheetPresentationTestThreeNg::SetApiVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
-    /**
-     * @tc.steps: step1. create sheet page, get sheet pattern.
-     */
-    auto callback = [](const std::string&) {};
-    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
-    ASSERT_NE(sheetNode, nullptr);
-    auto pattern = sheetNode->GetPattern<SheetPresentationPattern>();
-    ASSERT_NE(pattern, nullptr);
-    auto sheeLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
-    ASSERT_NE(sheeLayoutProperty, nullptr);
-    sheeLayoutProperty->UpdateSheetStyle(SheetStyle());
-    /**
-     * @tc.steps: step2. sheetThemeType_ = "auto".
-     */
-    pattern->sheetThemeType_ = "auto";
-    auto pipelineContext = MockPipelineContext::GetCurrentContext();
-    ASSERT_NE(pipelineContext, nullptr);
-    pipelineContext->SetDisplayWindowRectInfo({ 0, 0, 780, 800 });
-    /**
-     * @tc.steps: step2. Set preferType is Bottom.
-     * @tc.expected: the sheetType is Bottom.
-     */
-    SheetStyle sheetStyle;
-    sheetStyle.sheetType = SheetType::SHEET_BOTTOM;
-    sheeLayoutProperty->UpdateSheetStyle(sheetStyle);
-    EXPECT_EQ(pattern->GetSheetTypeFromSheetManager(), SheetType::SHEET_BOTTOM);
-    /**
-     * @tc.steps: step3. Set preferType is Bottom, and Set Offset property.
-     * @tc.expected: the sheetType is SHEET_BOTTOM_OFFSET.
-     */
-    auto windowManager = pipelineContext->GetWindowManager();
-    ASSERT_NE(windowManager, nullptr);
-    auto isPcOrPadFreeMultiWindowCallback = []() {
-        return true;
-    };
-    windowManager->SetIsPcOrPadFreeMultiWindowModeCallback(std::move(isPcOrPadFreeMultiWindowCallback));
-    sheetStyle.bottomOffset = OffsetF(0, -15);
-    sheeLayoutProperty->UpdateSheetStyle(sheetStyle);
-    EXPECT_EQ(pattern->GetSheetTypeFromSheetManager(), SheetType::SHEET_BOTTOM_OFFSET);
-    SheetPresentationTestThreeNg::TearDownTestCase();
-}
-
-/**
  * @tc.name: HandleMultiDetentKeyboardAvoid001
  * @tc.desc: Test HandleMultiDetentKeyboardAvoid function.
  * @tc.type: FUNC
