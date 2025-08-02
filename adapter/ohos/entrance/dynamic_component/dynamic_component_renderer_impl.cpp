@@ -634,7 +634,7 @@ bool DynamicComponentRendererImpl::TransferKeyEvent(const KeyEvent& keyEvent)
             CHECK_NULL_VOID(uiContent);
             auto subInstanceId = uiContent->GetInstanceId();
             ContainerScope scope(subInstanceId);
-            result = uiContent->ProcessKeyEvent(keyEvent.rawKeyEvent);
+            result = uiContent->ProcessKeyEvent(keyEvent.rawKeyEvent, keyEvent.isPreIme);
             TAG_LOGI(aceLogTag, "send key event: %{public}s, result = %{public}d",
                 keyEvent.ToString().c_str(), result);
         },
