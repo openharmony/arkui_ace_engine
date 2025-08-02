@@ -411,7 +411,7 @@ struct ArkUIAniCommonModifier {
     void (*frameNodeMarkDirtyNode)(ani_env* env, ani_long ptr);
     ArkUI_Uint32 (*getColorValueByString)(const std::string& src);
     ArkUI_Uint32 (*getColorValueByNumber)(ArkUI_Uint32 src);
-    void (*sendThemeToNative)(ani_env* env, const std::vector<ani_object>& colors, ani_int id);
+    void (*sendThemeToNative)(ani_env* env, const Array_ResourceColor& colors, ani_int id);
     void (*setDefaultTheme)(ani_env* env, const Array_ResourceColor& colors, ani_boolean isDark);
     void (*updateColorMode)(ani_int colorMode);
     void (*restoreColorMode)();

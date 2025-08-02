@@ -34,7 +34,6 @@
 #include "core/components_ng/token_theme/token_theme_storage.h"
 #include "core/interfaces/native/ani/ani_theme.h"
 #include "core/interfaces/native/ani/ani_theme_module.h"
-#include "core/interfaces/native/ani/resource_ani_modifier.h"
 #include "core/interfaces/native/implementation/frame_node_peer_impl.h"
 #include "core/interfaces/native/node/theme_modifier.h"
 #include "core/pipeline/base/element_register.h"
@@ -618,10 +617,10 @@ ArkUI_Uint32 GetColorValueByNumber(ArkUI_Uint32 src)
     return color.GetValue();
 }
 
-void SendThemeToNative(ani_env* env, const std::vector<ani_object>& colorArray, ani_int id)
+void SendThemeToNative(ani_env* env, const Array_ResourceColor& colorArray, ani_int id)
 {
     auto colors = AniThemeColors();
-    colors.SetColors(env, colorArray);
+    colors.SetColors(colorArray);
 
     auto themeScopeId = static_cast<int32_t>(id);
     AniThemeScope::aniThemes[themeScopeId].SetColors(colors);

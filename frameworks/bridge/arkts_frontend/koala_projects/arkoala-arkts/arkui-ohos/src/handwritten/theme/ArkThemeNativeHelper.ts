@@ -27,11 +27,7 @@ import { TypeChecker } from '#components';
 import { Resource } from 'global.resource';
 
 export class ArkThemeNativeHelper {
-    static sendThemeToNative(theme: Theme, elmtId: int32): void {
-        ArkUIAniModule._SendThemeToNative(ArkThemeNativeHelper.convertThemeToColorArray(theme), elmtId);
-    }
-    static parseColorArray(colorArray: ResourceColor[], isDark: boolean): void {
-        const thisSerializer : Serializer = Serializer.hold();
+    static writeColorArray(thisSerializer: Serializer, colorArray: ResourceColor[]) {
         thisSerializer.writeInt32(colorArray.length as int32);
         for (let i = 0; i < colorArray.length; i++) {
             let color_type : int32 = runtimeType(colorArray[i]);
@@ -56,17 +52,28 @@ export class ArkThemeNativeHelper {
                 thisSerializer.writeResource(color_3)
             }
         }
-        ArkUIAniModule._SetDefaultTheme(thisSerializer.asBuffer(), thisSerializer.length(), isDark);
+    }
+    static sendThemeToNative(theme: Theme, elmtId: int32): void {
+        const thisSerializer : Serializer = Serializer.hold();
+        const colorArray = ArkThemeNativeHelper.convertThemeToColorArray(theme);
+        ArkThemeNativeHelper.writeColorArray(thisSerializer, colorArray);
+        ArkUIAniModule._SendThemeToNative(thisSerializer.asBuffer(), thisSerializer.length(), elmtId);
+        thisSerializer.release();
     }
     static setDefaultTheme(theme: CustomTheme): void {
         const colorArray = ArkThemeNativeHelper.convertColorsToArray(theme?.colors);
         ArkThemeScopeManager.getInstance().onEnterLocalColorMode(ThemeColorMode.LIGHT);
-        ArkThemeNativeHelper.parseColorArray(colorArray, false);
-        // ArkUIAniModule._SetDefaultTheme(colorArray, false);
+        ArkThemeNativeHelper.setDefaultTheme_serialize(colorArray, false);
+
         ArkThemeScopeManager.getInstance().onEnterLocalColorMode(ThemeColorMode.DARK);
-        ArkThemeNativeHelper.parseColorArray(colorArray, true);
-        // ArkUIAniModule._SetDefaultTheme(colorArray, true);
+        ArkThemeNativeHelper.setDefaultTheme_serialize(colorArray, true);
         ArkThemeScopeManager.getInstance().onExitLocalColorMode();
+    }
+    static setDefaultTheme_serialize(colorArray: ResourceColor[], isDark: boolean): void {
+        const thisSerializer : Serializer = Serializer.hold();
+        ArkThemeNativeHelper.writeColorArray(thisSerializer, colorArray);
+        ArkUIAniModule._SetDefaultTheme(thisSerializer.asBuffer(), thisSerializer.length(), isDark);
+        thisSerializer.release();
     }
     private static convertThemeToColorArray(theme: Theme): ResourceColor[] {
         return [

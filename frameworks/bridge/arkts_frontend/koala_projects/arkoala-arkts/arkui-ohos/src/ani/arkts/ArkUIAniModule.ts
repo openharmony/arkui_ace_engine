@@ -282,7 +282,7 @@ export class ArkUIAniModule {
     native static _GetColorValue(color: number | string): KUInt
     native static _GetStringColorValue(color: string): KUInt
     native static _GetNumberColorValue(color: number): KUInt
-    native static _SendThemeToNative(colorArray: ResourceColor[], elmtId: KInt): void
+    native static _SendThemeToNative(thisArray: KSerializerBuffer, thisLength: number, elmtId: KInt): void
     native static _SetDefaultTheme(thisArray: KSerializerBuffer, thisLength: number, isDark: boolean): void
     native static _UpdateColorMode(colorMode: KInt): void
     native static _RestoreColorMode(): void
