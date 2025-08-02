@@ -27,7 +27,9 @@ import { ArkBuilderProxyNodePeer } from "./handwritten/BuilderProxyNode"
 import { setNeedCreate } from "./ArkComponentRoot"
 import { UIContextUtil } from 'arkui/handwritten/UIContextUtil'
 import { ArkUIAniModule } from 'arkui.ani'
-import { UIContextImpl } from "./handwritten/UIContextImpl"
+import { UIContextImpl, ContextRecord } from "./handwritten/UIContextImpl"
+import { ParallelizeUI } from "../@ohos.arkui.Parallelize"
+import { memorizeUpdatedState } from "./stateManagement/remember"
 
 export enum NodeRenderType {
     RENDER_TYPE_DISPLAY = 0,
@@ -40,6 +42,7 @@ export interface RenderOptions {
 }
 export interface BuildOptions {
     nestingBuilderSupported?: boolean;
+    useParallel?: boolean;
 }
 
 const __uiNode_name_map__: Array<string> = ["ContentSlot", "CustomComponent", "LazyForEach", "ConditionScope"]
@@ -93,8 +96,9 @@ export function flushBuilderRootNode(): void {
         let stateMgt = mgt[0]?.deref()
         let peerNode = mgt[1]?.deref()
         if (stateMgt !== undefined && peerNode !== undefined) {
-            const old = GlobalStateManager.GetLocalManager();
+            const old = GlobalStateManager.instance;
             GlobalStateManager.SetLocalManager(stateMgt);
+            stateMgt.callCallbacks()
             stateMgt.syncChanges()
             stateMgt.updateSnapshot()
             peerNode!.value;
@@ -215,6 +219,7 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
     private __frameNode: BuilderRootFrameNode<T> | null;
     private __uiContext?: UIContextImpl;
     private _instanceId: int32 = -1;
+    private __buildOptions: BuildOptions | undefined = undefined
 
     private reset(): void {
         this.__root = undefined;
@@ -266,23 +271,47 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
         }, () => {
             if (this.__builder0) {
                 const result = setNeedCreate(true);
-                this.__builder0?.builder();
+                if (this.__buildOptions?.useParallel) {
+                    const builder = this.__builder0?.builder;
+                    ParallelizeUI(undefined, {
+                        completed: () => {
+                            this.__builderProxyNode?.peer?.addChild(this.__root!.getPeerPtr());
+                        }
+                    }, builder);
+                }
+                else {
+                    this.__builder0?.builder();
+                }
                 setNeedCreate(result);
                 return;
             }
             this.__params = rememberMutableState<T>(this.__arg as T);
             if (this.__params) {
                 const result = setNeedCreate(true);
-                this.__builder?.builder(this.__params!.value);
+                if (this.__buildOptions?.useParallel) {
+                    const params = memorizeUpdatedState<T>(() => { return this.__params!.value })
+                    /** @memo */
+                    const builder = () => {
+                        this.__builder?.builder(params!.value);
+                    }
+                    ParallelizeUI(undefined, {
+                        completed: () => {
+                            const ptr = this.__root!.getPeerPtr()
+                            this.__builderProxyNode?.peer?.addChild(this.__root!.getPeerPtr());
+                        }
+                    }, builder);
+                } else {
+                    this.__builder?.builder(this.__params!.value);
+                }
                 setNeedCreate(result);
             }
         }, this.__manager!, instanceId)
         this.__rootStage?.value;
-        if (!this.__root?.firstChild || !findPeerNode(this.__root!)?.getPeerPtr()) {
+        if (!this.__root?.firstChild || !findPeerNode(this.__root!)?.getPeerPtr() && !this.__buildOptions?.useParallel) {
             this.reset();
             return;
         }
-        if (this.__root?.isFirstUINode()) {
+        if (this.__root?.isFirstUINode()|| this.__buildOptions?.useParallel) {
             this.__builderProxyNode = ArkBuilderProxyNodePeer.create(undefined);
             this.__root!.__parent = this.__builderProxyNode;
             this.__builderProxyNode!.hasChild = true;
@@ -314,7 +343,7 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
         this.__arg = undefined;
         this.__builder = undefined;
         ArkUIAniModule._Common_Sync_InstanceId(this._instanceId);
-        const old = GlobalStateManager.GetLocalManager();
+        const old = GlobalStateManager.instance;
         GlobalStateManager.SetLocalManager(this.__manager);
         this.create(this.buildFunc);
         GlobalStateManager.SetLocalManager(old);
@@ -339,7 +368,7 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
             return;
         }
         ArkUIAniModule._Common_Sync_InstanceId(this._instanceId);
-        const old = GlobalStateManager.GetLocalManager();
+        const old = GlobalStateManager.instance;
         GlobalStateManager.SetLocalManager(this.__manager);
         this.__params!.value = arg!;
         this.__manager!.syncChanges();
@@ -369,7 +398,7 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
 
     public updateConfiguration(): void {
         ArkUIAniModule._Common_Sync_InstanceId(this._instanceId);
-        const old = GlobalStateManager.GetLocalManager();
+        const old = GlobalStateManager.instance;
         GlobalStateManager.SetLocalManager(this.__manager);
         this.__rootStage?.forceCompleteRerender();
         this.__manager?.syncChanges();
