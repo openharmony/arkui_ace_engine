@@ -131,9 +131,9 @@ public:
 
     void DumpVelocityPoints() const;
 
-    double UpdateAxisVelocity(LeastSquareImpl& axis);
-
 private:
+    double UpdateAxisVelocity(LeastSquareImpl& axis);
+    
     void UpdateVelocity();
 
     Axis mainAxis_ { Axis::FREE };
