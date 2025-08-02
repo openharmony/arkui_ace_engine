@@ -197,11 +197,10 @@ void* createLoadingProgressNode(ArkUI_Int32 nodeId)
 
 void* createTextInputNode(ArkUI_Int32 nodeId)
 {
-    // auto frameNode = TextFieldModelNG::CreateFrameNode(nodeId, u"", u"", false);
-    // CHECK_NULL_RETURN(frameNode, nullptr);
-    // frameNode->IncRefCount();
-    // return AceType::RawPtr(frameNode);
-    return nullptr;
+    auto frameNode = TextFieldModelNG::CreateTextInputNode(nodeId, u"", u"");
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 
 void* createStackNode(ArkUI_Int32 nodeId)
@@ -238,11 +237,10 @@ void* createSwiperNode(ArkUI_Int32 nodeId)
 
 void* createTextAreaNode(ArkUI_Int32 nodeId)
 {
-    // auto frameNode = TextFieldModelNG::CreateFrameNode(nodeId, u"", u"", true);
-    // CHECK_NULL_RETURN(frameNode, nullptr);
-    // frameNode->IncRefCount();
-    // return AceType::RawPtr(frameNode);
-    return nullptr;
+    auto frameNode = TextFieldModelNG::CreateTextAreaNode(nodeId, u"", u"");
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 
 void* createButtonNode(ArkUI_Int32 nodeId)
