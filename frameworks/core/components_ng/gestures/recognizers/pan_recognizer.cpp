@@ -823,6 +823,7 @@ GestureEvent PanRecognizer::GetGestureEventInfo()
         info.SetPressedKeyCodes(lastAxisEvent_.pressedCodes);
         info.SetPointerEventId(lastAxisEvent_.touchEventId);
         info.CopyConvertInfoFrom(lastAxisEvent_.convertInfo);
+        info.SetPassThrough(lastAxisEvent_.passThrough);
     } else {
         info.SetScreenLocation(lastTouchEvent_.GetScreenOffset());
         info.SetGlobalDisplayLocation(lastTouchEvent_.GetGlobalDisplayOffset());
@@ -830,6 +831,7 @@ GestureEvent PanRecognizer::GetGestureEventInfo()
         info.SetPressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
         info.SetPointerEventId(lastTouchEvent_.touchEventId);
         info.CopyConvertInfoFrom(lastTouchEvent_.convertInfo);
+        info.SetPassThrough(lastTouchEvent_.passThrough);
     }
     info.SetGlobalPoint(globalPoint_).SetLocalLocation(Offset(localPoint.GetX(), localPoint.GetY()));
     info.SetTarget(GetEventTarget().value_or(EventTarget()));

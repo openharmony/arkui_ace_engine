@@ -1027,6 +1027,7 @@ void EventManager::ClearTouchTestTargetForPenStylus(TouchEvent& touchEvent)
 void EventManager::CleanRecognizersForDragBegin(TouchEvent& touchEvent)
 {
     TAG_LOGD(AceLogTag::ACE_DRAG, "Clean recognizers for drag begin.");
+    isDragCancelPending_ = true;
     // send cancel to all recognizer
     for (const auto& iter : touchTestResults_) {
         touchEvent.id = iter.first;
@@ -1041,6 +1042,7 @@ void EventManager::CleanRecognizersForDragBegin(TouchEvent& touchEvent)
     downFingerIds_.erase(touchEvent.id);
     touchTestResults_.clear();
     refereeNG_->CleanRedundanceScope();
+    isDragCancelPending_ = false;
 }
 
 void EventManager::CleanHoverStatusForDragBegin()
@@ -1060,7 +1062,7 @@ void EventManager::CleanHoverStatusForDragBegin()
         DispatchMouseHoverAnimationNG(falsifyEvent);
     }
     mouseTestResults_.clear();
-    pressMouseTestResultsMap_.clear();
+    pressMouseTestResultsMap_[{ lastMouseEvent_.id, lastMouseEvent_.button }].clear();
 }
 
 void EventManager::RegisterDragTouchEventListener(
