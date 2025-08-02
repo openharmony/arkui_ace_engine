@@ -37,6 +37,9 @@ import { mediaquery } from '@ohos/mediaquery'
 import { AlertDialog, AlertDialogParamWithConfirm, AlertDialogParamWithButtons,
     AlertDialogParamWithOptions }from "arkui/component/alertDialog"
 import { ActionSheet, ActionSheetOptions} from "arkui/component/actionSheet"
+import {TimePickerDialog, TimePickerDialogOptions} from "arkui/component/timePicker"
+import {DatePickerDialog, DatePickerDialogOptions} from "arkui/component/datePicker"
+import {TextPickerDialog, TextPickerDialogOptions} from "arkui/component/textPicker"
 import inspector from "@ohos/arkui/inspector"
 import router from '@ohos/router'
 import { ComponentContent } from 'arkui/ComponentContent'
@@ -567,6 +570,18 @@ export class UIContext {
 
     public showActionSheet(options: ActionSheetOptions): void {
         throw Error("showActionSheet not implemented in UIContext!")
+    }
+
+    public showTimePickerDialog(options: TimePickerDialogOptions): void {
+        throw Error("showTimePickerDialog not implemented in UIContext!")
+    }
+
+    public showDatePickerDialog(options: DatePickerDialogOptions): void {
+        throw Error("showDatePickerDialog not implemented in UIContext!")
+    }
+
+    public showTextPickerDialog(options: TextPickerDialogOptions): void {
+        throw Error("showTextPickerDialog not implemented in UIContext!")
     }
     // @ts-ignore
     public freezeUINode(id: number, isFrozen: boolean): void {

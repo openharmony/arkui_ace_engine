@@ -28,6 +28,14 @@ using DialogTextEvent = std::function<void(const std::string&)>;
 using DialogCancelEvent = std::function<void()>;
 using DialogGestureEvent = std::function<void(const GestureEvent& info)>;
 
+struct TextPickerInteractiveEvent {
+    DialogCancelEvent cancelEvent;
+    DialogTextEvent acceptEvent;
+    DialogTextEvent changeEvent;
+    DialogTextEvent scrollStopEvent;
+    DialogTextEvent enterSelectedAreaEvent;
+};
+
 class TextPickerEventHub : public EventHub {
     DECLARE_ACE_TYPE(TextPickerEventHub, EventHub)
 

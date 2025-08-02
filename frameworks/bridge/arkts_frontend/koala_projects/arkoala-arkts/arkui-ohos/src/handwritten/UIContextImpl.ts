@@ -35,6 +35,9 @@ import router from '@ohos/router'
 import { AlertDialog, AlertDialogParamWithConfirm, AlertDialogParamWithButtons,
     AlertDialogParamWithOptions }from "arkui/component/alertDialog"
 import { ActionSheet, ActionSheetOptions } from "arkui/component/actionSheet"
+import {TimePickerDialog, TimePickerDialogOptions} from "arkui/component/timePicker"
+import {DatePickerDialog, DatePickerDialogOptions} from "arkui/component/datePicker"
+import {TextPickerDialog, TextPickerDialogOptions} from "arkui/component/textPicker"
 import inspector from "@ohos/arkui/inspector"
 import { ComponentContent } from 'arkui/ComponentContent'
 import overlayManager from '@ohos/overlayManager'
@@ -1651,6 +1654,24 @@ export class UIContextImpl extends UIContext {
     public showActionSheet(options: ActionSheetOptions): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         ActionSheet.show(options);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
+    public showTimePickerDialog(options: TimePickerDialogOptions): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        TimePickerDialog.show(options);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
+    public showDatePickerDialog(options: DatePickerDialogOptions): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        DatePickerDialog.show(options);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
+    public showTextPickerDialog(options: TextPickerDialogOptions): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        TextPickerDialog.show(options);
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 

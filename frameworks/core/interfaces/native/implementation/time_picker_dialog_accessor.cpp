@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <functional>
+#include <utility>
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -57,6 +59,7 @@ void BuildDialogPropertiesCallbacks(const Ark_TimePickerDialogOptions options, D
         dialogProps.onWillDisappear = onWillDisappear;
     }
 }
+
 DialogProperties BuildDialogProperties(const Ark_TimePickerDialogOptions options)
 {
     DialogProperties dialogProps;
@@ -84,6 +87,34 @@ DialogProperties BuildDialogProperties(const Ark_TimePickerDialogOptions options
     BuildDialogPropertiesCallbacks(options, dialogProps);
     return dialogProps;
 }
+
+PickerDialogInfo BuildTimePickerDialogInfo(const Ark_TimePickerDialogOptions options)
+{
+    PickerDialogInfo dialogInfo;
+    auto alignment = Converter::OptConvert<DialogAlignment>(options.alignment);
+    if (alignment) {
+        dialogInfo.alignment = alignment.value();
+    }
+    auto offset = Converter::OptConvert<DimensionOffset>(options.offset);
+    if (offset) {
+        dialogInfo.offset = offset.value();
+    }
+    dialogInfo.backgroundBlurStyle = static_cast<int32_t>(Converter::OptConvert<BlurStyle>(
+        options.backgroundBlurStyle).value_or(BlurStyle::COMPONENT_REGULAR));
+    dialogInfo.backgroundColor = Converter::OptConvert<Color>(options.backgroundColor);
+    dialogInfo.shadow = Converter::OptConvert<Shadow>(options.shadow);
+    auto enableHoverMode = Converter::OptConvert<bool>(options.enableHoverMode);
+    if (enableHoverMode) {
+        dialogInfo.enableHoverMode = enableHoverMode.value();
+    }
+    auto hoverModeArea = Converter::OptConvert<HoverModeAreaType>(options.hoverModeArea);
+    if (hoverModeArea) {
+        dialogInfo.hoverModeArea = hoverModeArea.value();
+    }
+    dialogInfo.maskRect = Converter::OptConvert<DimensionRect>(options.maskRect);
+    return dialogInfo;
+}
+
 TimePickerSettingData BuildPickerSettingData(const Ark_TimePickerDialogOptions options)
 {
     TimePickerSettingData settingData;
@@ -94,6 +125,15 @@ TimePickerSettingData BuildPickerSettingData(const Ark_TimePickerDialogOptions o
     if (useMilitaryTime) {
         settingData.isUseMilitaryTime = useMilitaryTime.value();
     }
+    auto enableCascade = Converter::OptConvert<bool>(options.enableCascade);
+    if (enableCascade) {
+        settingData.isEnableCascade = enableCascade.value();
+    }
+    auto enableHapticFeedback = Converter::OptConvert<bool>(options.enableHapticFeedback);
+    if (enableHapticFeedback) {
+        settingData.isEnableHapticFeedback = enableHapticFeedback.value();
+    }
+
     auto disappearTextStyle = Converter::OptConvert<PickerTextStyle>(options.disappearTextStyle);
     if (disappearTextStyle) {
         settingData.properties.disappearTextStyle_ = disappearTextStyle.value();
@@ -108,6 +148,41 @@ TimePickerSettingData BuildPickerSettingData(const Ark_TimePickerDialogOptions o
     }
     return settingData;
 }
+
+TimePickerDialogEvent BuildTimePickerDialogEvents(const Ark_TimePickerDialogOptions options)
+{
+    TimePickerDialogEvent dialogEvent;
+    auto didAppearCallbackOpt = Converter::OptConvert<Callback_Void>(options.onDidAppear);
+    if (didAppearCallbackOpt) {
+        auto onDidAppear = [arkCallback = CallbackHelper(*didAppearCallbackOpt)]() -> void {
+            arkCallback.Invoke();
+        };
+        dialogEvent.onDidAppear = onDidAppear;
+    }
+    auto didDisappearCallbackOpt = Converter::OptConvert<Callback_Void>(options.onDidDisappear);
+    if (didDisappearCallbackOpt) {
+        auto onDidDisappear = [arkCallback = CallbackHelper(*didDisappearCallbackOpt)]() -> void {
+            arkCallback.Invoke();
+        };
+        dialogEvent.onDidDisappear = onDidDisappear;
+    }
+    auto willAppearCallbackOpt = Converter::OptConvert<Callback_Void>(options.onWillAppear);
+    if (willAppearCallbackOpt) {
+        auto onWillAppear = [arkCallback = CallbackHelper(*willAppearCallbackOpt)]() -> void {
+            arkCallback.Invoke();
+        };
+        dialogEvent.onWillAppear = onWillAppear;
+    }
+    auto willDisappearCallbackOpt = Converter::OptConvert<Callback_Void>(options.onWillDisappear);
+    if (willDisappearCallbackOpt) {
+        auto onWillDisappear = [arkCallback = CallbackHelper(*willDisappearCallbackOpt)]() -> void {
+            arkCallback.Invoke();
+        };
+        dialogEvent.onWillDisappear = onWillDisappear;
+    }
+    return dialogEvent;
+}
+
 std::vector<ButtonInfo> BuildButtonInfos(const Ark_TimePickerDialogOptions options)
 {
     std::vector<ButtonInfo> buttonInfos;
@@ -121,6 +196,7 @@ std::vector<ButtonInfo> BuildButtonInfos(const Ark_TimePickerDialogOptions optio
     }
     return buttonInfos;
 }
+
 void ShowImpl(const Opt_TimePickerDialogOptions* options)
 {
     CHECK_NULL_VOID(options);
@@ -128,51 +204,56 @@ void ShowImpl(const Opt_TimePickerDialogOptions* options)
     if (!arkOptionsOpt.has_value()) { return; }
 
     Ark_TimePickerDialogOptions arkOptions = arkOptionsOpt.value();
-    DialogProperties dialogProps = BuildDialogProperties(arkOptions);
+    // PickerDialogInfo & TimePickerSettingData
+    PickerDialogInfo dialogInfo = BuildTimePickerDialogInfo(arkOptions);
     TimePickerSettingData settingData = BuildPickerSettingData(arkOptions);
-    std::vector<ButtonInfo> buttonInfos = BuildButtonInfos(arkOptions);
-
-    std::map<std::string, PickerTime> timePickerProp;
-    auto time = Converter::OptConvert<PickerTime>(arkOptions.selected);
-    if (time) {
-        timePickerProp.insert({"selected", time.value()});
-    }
-
-    std::map<std::string, DialogEvent> dialogEvent;
-    auto acceptCallbackOpt = Converter::OptConvert<Callback_TimePickerResult_Void>(arkOptions.onAccept);
-    if (acceptCallbackOpt) {
-        auto onAcceptFunc = [arkCallback = CallbackHelper(*acceptCallbackOpt)](const std::string& info) -> void {
-            auto timePickerRes = Converter::ArkValue<Ark_TimePickerResult>(info);
-            arkCallback.Invoke(timePickerRes);
-        };
-        dialogEvent["acceptId"] = onAcceptFunc;
-    }
-    auto changeCallbackOpt = Converter::OptConvert<Callback_TimePickerResult_Void>(arkOptions.onChange);
-    if (changeCallbackOpt) {
-        auto onChangeFunc = [arkCallback = CallbackHelper(*changeCallbackOpt)](const std::string& info) -> void {
-            auto timePickerRes = Converter::ArkValue<Ark_TimePickerResult>(info);
-            arkCallback.Invoke(timePickerRes);
-        };
-        dialogEvent["changeId"] = onChangeFunc;
-    }
-
-    std::map<std::string, DialogGestureEvent> dialogCancelEvent;
+    dialogInfo.isUseMilitaryTime = settingData.isUseMilitaryTime;
+    // onCancel
+    std::function<void()> cancelEvent;
     auto cancelCallbackOpt = Converter::OptConvert<Callback_Void>(arkOptions.onCancel);
     if (cancelCallbackOpt) {
-        auto onCancelFunc = [arkCallback = CallbackHelper(*cancelCallbackOpt)](const GestureEvent& info) -> void {
+        cancelEvent = [arkCallback = CallbackHelper(*cancelCallbackOpt)]() -> void {
             arkCallback.Invoke();
         };
-        dialogCancelEvent["cancelId"] = onCancelFunc;
     }
-#ifndef ARKUI_CAPI_UNITTEST
-    TimePickerDialogView::Show(dialogProps, settingData, buttonInfos,
-        timePickerProp, dialogEvent, dialogCancelEvent);
-#else
-    MockTimePickerDialogView::SetData(dialogProps, settingData, buttonInfos, timePickerProp);
-    MockTimePickerDialogView::SetCallbacks(dialogEvent, dialogCancelEvent);
-#endif
+    // onAccept
+    std::function<void(const std::string &)> acceptEvent;
+    auto acceptCallbackOpt = Converter::OptConvert<Callback_TimePickerResult_Void>(arkOptions.onAccept);
+    if (acceptCallbackOpt) {
+        acceptEvent = [arkCallback = CallbackHelper(*acceptCallbackOpt)](const std::string& info) -> void {
+            auto result = Converter::ArkValue<Ark_TimePickerResult>(info);
+            arkCallback.Invoke(result);
+        };
+    }
+    // onChange
+    std::function<void(const std::string &)> changeEvent;
+    auto changeCallbackOpt = Converter::OptConvert<Callback_TimePickerResult_Void>(arkOptions.onChange);
+    if (changeCallbackOpt) {
+        changeEvent = [arkCallback = CallbackHelper(*changeCallbackOpt)](const std::string& info) -> void {
+            auto result = Converter::ArkValue<Ark_TimePickerResult>(info);
+            arkCallback.Invoke(result);
+        };
+    }
+    // onEnterSelectedAreaEvent
+    std::function<void(const std::string &)> enterSelectedAreaEvent;
+    auto enterSelectedAreaCallbackOpt =
+        Converter::OptConvert<Callback_TimePickerResult_Void>(arkOptions.onEnterSelectedArea);
+    if (enterSelectedAreaCallbackOpt) {
+        enterSelectedAreaEvent =
+            [arkCallback = CallbackHelper(*enterSelectedAreaCallbackOpt)](const std::string& info) -> void {
+            auto result = Converter::ArkValue<Ark_TimePickerResult>(info);
+            arkCallback.Invoke(result);
+        };
+    }
+    // window lifecycle callback event
+    TimePickerDialogEvent timePickerDialogEvent = BuildTimePickerDialogEvents(arkOptions);
+    std::vector<ButtonInfo> buttonInfos = BuildButtonInfos(arkOptions);
+    TimePickerDialogModel::GetInstance()->SetTimePickerDialogShow(dialogInfo, settingData, std::move(cancelEvent),
+        std::move(acceptEvent), std::move(changeEvent), std::move(enterSelectedAreaEvent),
+        timePickerDialogEvent, buttonInfos);
 }
 } // TimePickerDialogAccessor
+
 const GENERATED_ArkUITimePickerDialogAccessor* GetTimePickerDialogAccessor()
 {
     static const GENERATED_ArkUITimePickerDialogAccessor TimePickerDialogAccessorImpl {
@@ -180,5 +261,4 @@ const GENERATED_ArkUITimePickerDialogAccessor* GetTimePickerDialogAccessor()
     };
     return &TimePickerDialogAccessorImpl;
 }
-
 }

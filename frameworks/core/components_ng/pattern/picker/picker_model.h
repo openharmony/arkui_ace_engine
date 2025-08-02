@@ -56,6 +56,14 @@ struct PickerDialogEvent {
     std::function<void()> onWillAppear;
     std::function<void()> onWillDisappear;
 };
+struct PickerDialogInteractiveEvent {
+    std::function<void()> cancelEvent;
+    std::function<void(const std::string &)> acceptEvent;
+    std::function<void(const std::string &)> changeEvent;
+    std::function<void(const std::string &)> dateAcceptEvent;
+    std::function<void(const std::string &)> dateChangeEvent;
+};
+
 class ACE_FORCE_EXPORT DatePickerModel {
 public:
     static DatePickerModel* GetInstance();
