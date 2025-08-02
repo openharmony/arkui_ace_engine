@@ -57,6 +57,9 @@ void TextFieldModelNG::CreateNode(
     if (value.has_value() && value.value() != textValue) {
         auto changed = pattern->InitValueText(value.value());
         pattern->SetTextChangedAtCreation(changed);
+        if (changed) {
+            pattern->ClearOperationRecords();
+        }
     }
     if (!pattern->HasOperationRecords()) {
         pattern->UpdateEditingValueToRecord(); // record initial status
@@ -142,6 +145,7 @@ void TextFieldModelNG::UpdateTextFieldPattern(
     auto textValue = pattern->GetTextUtf16Value();
     if (value.has_value() && value.value() != textValue) {
         pattern->InitEditingValueText(value.value());
+        pattern->ClearOperationRecords();
     }
     if (!pattern->HasOperationRecords()) {
         pattern->UpdateEditingValueToRecord(); // record initial status

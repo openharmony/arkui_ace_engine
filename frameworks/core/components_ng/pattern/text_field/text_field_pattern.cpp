@@ -3454,8 +3454,7 @@ void TextFieldPattern::OnModifyDone()
     isTextChangedAtCreation_ = false;
     if (layoutProperty->GetTypeChangedValue(false)) {
         layoutProperty->ResetTypeChanged();
-        operationRecords_.clear();
-        redoOperationRecords_.clear();
+        ClearOperationRecords();
     }
     ProcessScroll();
     ProcessCounter();
